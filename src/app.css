@@ -1,0 +1,113 @@
+/* ==========================================================================
+   Base & Reset
+   ========================================================================== */
+@font-face {
+  font-family: "04B08";
+  src: url(/fonts/04B_08__.ttf);
+}
+@font-face {
+  font-family: "04B03B";
+  src: url(/fonts/04B_03B_.ttf);
+}
+
+/* html, body, #root, main をウィンドウ全体に */
+html,
+body,
+#root,
+main {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
+#root {
+  display: flex;
+  flex-direction: row;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* body / main の背景・フォント */
+body,
+main {
+  background-color: #fdfdfd;
+  font-family: "04B08";
+}
+
+/* ==========================================================================
+     Typography & Basic Elements
+     ========================================================================== */
+p {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.it {
+  font-style: italic;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* 便利な変数 */
+:root {
+  --window-top-padding: 20px;
+}
+
+/* ==========================================================================
+     Sidebar Styles
+     ========================================================================== */
+#sidebar {
+  display: flex;
+  flex-direction: row;
+}
+
+#sidebar > #edge {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0 20px 14px;
+  gap: 20px;
+}
+
+#sidebar > #edge > p {
+  font-size: 0.5rem;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg) scaleX(0.8);
+  white-space: nowrap;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+#sidebar > #content {
+  border-right: 1px solid black;
+  width: 250px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--window-top-padding) 50px 10px 60px;
+}
+
+.white {
+  background-color: #ffffff;
+  border: 1px solid #00000029;
+  margin: -1px;
+}
+
+#misc_container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#sledge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}

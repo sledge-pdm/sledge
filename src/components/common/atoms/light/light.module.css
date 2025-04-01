@@ -1,0 +1,11 @@
+.light-inner {
+  opacity: 0;
+  transition: none;
+  filter: drop-shadow(0 0 0px red);
+}
+
+.light-inner.on {
+  transition: opacity 01s ease;
+  opacity: 1;
+  filter: drop-shadow(0 0 1px red);
+}

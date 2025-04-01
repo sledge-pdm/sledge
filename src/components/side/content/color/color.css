@@ -1,0 +1,16 @@
+/* ==========================================================================
+     Color Picker & Pen Config
+     ========================================================================== */
+#color_picker {
+  width: 200px;
+  height: 200px;
+  margin: 15px 0 10px 0;
+  background: linear-gradient(to right, #fff, red),
+    linear-gradient(to top, black, transparent);
+  background-blend-mode: multiply;
+}
+
+#hist_colors {
+  width: 15px;
+  height: 15px;
+}

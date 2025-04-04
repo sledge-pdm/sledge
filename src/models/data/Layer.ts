@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { initImageForLayer } from "./LayerImage";
 
 export enum LayerType {
   Dot,
@@ -20,14 +21,18 @@ export const createLayer = (
   type: LayerType,
   enabled = true,
   dotMagnification = 1
-): Layer => ({
-  id: uuidv4(),
-  name,
-  type,
-  typeDescription: getTypeString(type),
-  enabled,
-  dotMagnification,
-});
+): Layer => {
+  const id = uuidv4();
+  initImageForLayer(id, dotMagnification);
+  return {
+    id,
+    name,
+    type,
+    typeDescription: getTypeString(type),
+    enabled,
+    dotMagnification,
+  };
+};
 
 const magnificationList: number[] = [1, 2, 4];
 export const getNextMagnification = (dotMagnification: number) => {

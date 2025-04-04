@@ -1,0 +1,5 @@
+.undo_redo {
+  font-size: 1rem;
+  pointer-events: all;
+  cursor: pointer;
+}

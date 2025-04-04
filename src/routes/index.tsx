@@ -7,13 +7,14 @@ export default function Home() {
   return (
     <main>
       <div id="root">
+
         <Side />
         <CanvasArea />
-
         <div id="misc_container">
           <p id="sledge">sledge.</p>
-          <Companion />
         </div>
+        <Companion />
+
       </div>
     </main>
   );

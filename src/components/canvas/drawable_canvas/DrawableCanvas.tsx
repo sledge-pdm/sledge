@@ -1,8 +1,11 @@
-import { Component, onMount, onCleanup } from "solid-js";
-import { penStore, layerStore, canvasStore, setMetricStore } from "~/models/Store";
+import { Component, onMount, onCleanup, createEffect } from "solid-js";
+import { penStore, layerStore, canvasStore, setMetricStore, imageStore, hexToRGB } from "~/models/Store";
 import styles from "./drawable_canvas.module.css";
 import { Layer } from "~/models/data/Layer";
-import { smartSay as companionSay } from "~/components/common/companion/Companion";
+import { cloneImageData, redo, undo, updateImageData } from "~/models/data/LayerImage";
+import { drawLine, roundPosition } from "~/utils/MetricUtils";
+import { drawBrush } from "~/utils/BrushUtils";
+import { setPixel } from "~/utils/ImageUtils";
 
 type Props = {
     layer: Layer;
@@ -20,6 +23,12 @@ export const DrawableCanvas: Component<Props> = (props) => {
     const currentPen = () => penStore.pens[penStore.usingIndex];
     const isActiveLayer = () => props.layer.id === layerStore.activeLayerId;
 
+    const internalWidth = () => canvasStore.canvas.width / props.layer.dotMagnification;
+    const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
+
+    const styleWidth = () => internalWidth() * totalMag();
+    const styleHeight = () => internalHeight() * totalMag();
+
     function getOffset() {
         const rect = canvasRef!.getBoundingClientRect();
         return { x: rect.left, y: rect.top };
@@ -34,13 +43,28 @@ export const DrawableCanvas: Component<Props> = (props) => {
         return true;
     }
 
+    function isMouseOnCanvas(e: MouseEvent) {
+        const offset = getOffset();
+        const mouseCanvasPos = roundPosition({
+            x: e.clientX - offset.x,
+            y: e.clientY - offset.y
+        });
+        // check if mouse on canvas
+        if (mouseCanvasPos.x < 0 || styleWidth() < mouseCanvasPos.x || mouseCanvasPos.y < 0 || styleHeight() < mouseCanvasPos.y) return false;
+        else return true;
+    }
+
+    let drawingBuffer: ImageData | null = null;
+
     function handlePointerDown(e: PointerEvent) {
-        if (!shouldDraw()) return;
+        if (!shouldDraw() || !isMouseOnCanvas(e)) return;
         const offset = getOffset();
         lastPos = roundPosition({
             x: (e.clientX - offset.x) / totalMag(),
             y: (e.clientY - offset.y) / totalMag()
         });
+        console.log("pointer down. stroke started");
+        drawingBuffer = cloneImageData(imageStore[props.layer.id].current);
     }
 
     function handlePointerMove(e: PointerEvent) {
@@ -57,30 +81,52 @@ export const DrawableCanvas: Component<Props> = (props) => {
         setMetricStore("lastMouseCanvas", mouseCanvasPos);
         setMetricStore("lastMouseLayer", mouseLayerPos);
 
-        if (!lastPos) return;
-        if (!shouldDraw()) return;
+        if (!lastPos || !lastPos.x || !lastPos.y) return;
 
-        const pen = currentPen();
-        if (pen.name === "eraser") {
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.strokeStyle = "rgba(0,0,0,1)";
-        } else {
-            ctx.globalCompositeOperation = "source-over";
-            ctx.strokeStyle = pen.color;
+        if (!shouldDraw()) return;
+        if (!drawingBuffer) return;
+
+        if (!isMouseOnCanvas(e)) {
+            endStroke();
         }
 
-        ctx.lineWidth = pen.size;
-        ctx.lineCap = "square";
+        // draw into drawingBuffer instead of imageStore
+        const imageData = drawingBuffer;
+        const pen = currentPen();
+        const [r, g, b] = hexToRGB(pen.color);
 
-        ctx.beginPath();
-        ctx.moveTo(lastPos.x, lastPos.y);
-        ctx.lineTo(mouseLayerPos.x, mouseLayerPos.y);
-        ctx.stroke();
+        drawBrush(mouseLayerPos.x, mouseLayerPos.y, pen.size, (x, y) => {
+            if (pen.name === "eraser") {
+                setPixel(imageData, x, y, 0, 0, 0, 0);
+            } else {
+                setPixel(imageData, x, y, r, g, b, 255);
+            }
+        });
 
+        drawLine(lastPos.x, lastPos.y, mouseLayerPos.x, mouseLayerPos.y, (x, y) => {
+            drawBrush(x, y, pen.size, (px, py) => {
+                if (pen.name === "eraser") {
+                    setPixel(imageData, x, y, 0, 0, 0, 0);
+                } else {
+                    setPixel(imageData, px, py, r, g, b, 255);
+                }
+            });
+        });
+        ctx.putImageData(imageData, 0, 0);
         lastPos = mouseLayerPos;
     }
 
-    function handlePointerUp() {
+    function handlePointerUp(e: MouseEvent) {
+        if (!isMouseOnCanvas(e)) return;
+        console.log("pointer up. stroke end");
+        endStroke();
+    }
+
+    function endStroke() {
+        if (drawingBuffer) {
+            updateImageData(props.layer.id, drawingBuffer);
+            drawingBuffer = null;
+        }
         lastPos = null;
     }
 
@@ -90,19 +136,33 @@ export const DrawableCanvas: Component<Props> = (props) => {
         window.addEventListener("pointerdown", handlePointerDown);
         window.addEventListener("pointermove", handlePointerMove);
         window.addEventListener("pointerup", handlePointerUp);
+
+        window.addEventListener("keydown", handleKeydown);
     });
+
+    function handleKeydown(e: KeyboardEvent) {
+        if (e.ctrlKey && e.key === "z") {
+            undo(layerStore.activeLayerId);
+        } else if (e.ctrlKey && e.key === "y") {
+            redo(layerStore.activeLayerId);
+        }
+    }
 
     onCleanup(() => {
         window.removeEventListener("pointerdown", handlePointerDown);
         window.removeEventListener("pointermove", handlePointerMove);
         window.removeEventListener("pointerup", handlePointerUp);
+        window.removeEventListener("keydown", handleKeydown);
     });
 
-    const internalWidth = () => canvasStore.canvas.width / props.layer.dotMagnification;
-    const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
+    createEffect(() => {
+        const current = imageStore[props.layer.id].current;
+        if (ctx && current) {
+            ctx.putImageData(current, 0, 0);
+        }
+    });
 
-    const styleWidth = () => internalWidth() * totalMag();
-    const styleHeight = () => internalHeight() * totalMag();
+
 
     return (
         <canvas
@@ -124,10 +184,3 @@ export const DrawableCanvas: Component<Props> = (props) => {
         />
     );
 };
-
-function roundPosition(position: { x: number, y: number }): { x: number, y: number } {
-    return {
-        x: Math.round(position.x),
-        y: Math.round(position.y)
-    }
-}

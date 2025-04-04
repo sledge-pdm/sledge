@@ -50,7 +50,14 @@ const LayerList: Component<{}> = (props) => {
                     </For>
                 </ul>
             </div>
-        </div></div>;
+        </div>
+        <br />
+        <p style={{ opacity: 0.45 }}>
+            click item &gt; change active layer.<br />
+            click left box &gt; hide/show layer.<br /><br />
+            click x button &gt; change layer dotmult.<br />
+            (! This will erase content.)
+        </p></div>;
 };
 
 export default LayerList;

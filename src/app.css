@@ -90,7 +90,7 @@ ul {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: var(--window-top-padding) 50px 10px 60px;
+  padding: var(--window-top-padding) 50px 10px 40px;
 }
 
 .white {

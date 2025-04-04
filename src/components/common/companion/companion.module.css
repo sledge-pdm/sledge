@@ -2,6 +2,7 @@
   position: absolute;
   bottom: 000px;
   left: 500px;
+  z-index: 999;
 }
 
 .wrapper {

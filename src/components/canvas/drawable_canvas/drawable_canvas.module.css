@@ -1,0 +1,26 @@
+.layer-canvas {
+  position: absolute;
+  image-rendering: pixelated; /* ドット絵に重要 */
+  pointer-events: none; /* マウスイベントは通さない（必要に応じて） */
+}
+
+.layer-canvas.dev-hint[data-layer-id="dot1"] {
+  background-color: rgba(255, 0, 0, var(--layer-opacity)); /* 赤系 */
+}
+.layer-canvas.dev-hint[data-layer-id="dot2"] {
+  background-color: rgba(0, 255, 0, var(--layer-opacity)); /* 緑系 */
+}
+.layer-canvas.dev-hint[data-layer-id="dot3"] {
+  background-color: rgba(0, 0, 255, var(--layer-opacity)); /* 青系 */
+}
+.layer-canvas.dev-hint[data-layer-id="auto1"] {
+  background-color: rgba(255, 255, 0, var(--layer-opacity)); /* 黄系 */
+}
+.layer-canvas.dev-hint[data-layer-id="image1"] {
+  background-color: rgba(255, 0, 255, var(--layer-opacity)); /* ピンク系 */
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: auto; /* display:none ではなくイベントを通す */
+}

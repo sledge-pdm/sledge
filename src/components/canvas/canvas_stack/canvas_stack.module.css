@@ -1,35 +1,11 @@
+:root {
+  --layer-opacity: 0.15;
+}
+
 .canvas_stack {
   position: relative;
-  width: 400px;
-  height: 600px;
   border: 1px solid black;
-}
-
-.layer-canvas {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  image-rendering: pixelated; /* ドット絵に重要 */
-  pointer-events: none; /* マウスイベントは通さない（必要に応じて） */
-}
-
-.layer-canvas.dev-hint[data-layer-id="dot1"] {
-  background-color: rgba(255, 0, 0, 0.15); /* 赤系 */
-}
-.layer-canvas.dev-hint[data-layer-id="dot2"] {
-  background-color: rgba(0, 255, 0, 0.15); /* 緑系 */
-}
-.layer-canvas.dev-hint[data-layer-id="dot3"] {
-  background-color: rgba(0, 0, 255, 0.15); /* 青系 */
-}
-.layer-canvas.dev-hint[data-layer-id="auto1"] {
-  background-color: rgba(255, 255, 0, 0.15); /* 黄系 */
-}
-.layer-canvas.dev-hint[data-layer-id="image1"] {
-  background-color: rgba(255, 0, 255, 0.15); /* ピンク系 */
-}
-.hidden {
-  display: none;
+  align-items: center;
+  justify-content: center;
+  display: flex;
 }

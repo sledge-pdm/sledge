@@ -2,6 +2,7 @@ import { Component, Show } from "solid-js";
 import styles from "./light.module.css";
 
 interface LightProps {
+    class?: string;
     on?: boolean;
 }
 
@@ -12,7 +13,7 @@ const Light: Component<LightProps> = (props: LightProps) => {
 
     return (
         <svg
-            class={styles.light}
+            class={props.class}
             style={{
                 width: `${width}px`,
                 height: `${height}px`,
@@ -22,7 +23,7 @@ const Light: Component<LightProps> = (props: LightProps) => {
             xmlns="http://www.w3.org/2000/svg"
         >
             <Show when={true}>
-                <g class={`${styles["light-inner"]} ${styles[props.on ? "on" : ""]}`}>
+                <g class={`${styles["light-inner"]} ${props.on && styles["on"]}`}>
                     <circle
                         cx={width / 2}
                         cy={height / 2}

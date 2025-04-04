@@ -1,10 +1,11 @@
 import { Component, For } from "solid-js";
-import "./layer_list.css";
 import LayerItem from "./layer_item/LayerItem";
 import { layerStore } from "~/models/Store";
 
+import styles from "./layer_list.module.css";
+
 const Arrow = <svg
-    class="image_insert_arrow"
+    class={styles.image_insert_arrow}
     xmlns="http://www.w3.org/2000/svg"
 >
     <defs>
@@ -37,11 +38,11 @@ const LayerList: Component<{}> = (props) => {
         <div style={{ display: "flex" }}>
             {Arrow}
             <div style={{ width: "100%" }}>
-                <ul id="layer_list">
+                <ul class={styles.layer_list}>
                     <LayerItem index={1} layer={layerStore.imageLayer} />
                     <p>+ IN</p>
                 </ul>
-                <ul id="layer_list">
+                <ul class={styles.layer_list}>
                     <For each={layerStore.layers}>
                         {(layer, i) => (
                             <LayerItem index={i()} layer={layer} />

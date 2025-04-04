@@ -1,8 +1,8 @@
 import { Component, For, JSX } from "solid-js";
 import ColorBox from "~/components/common/atoms/color_box/ColorBox";
-import { colorStore, penStore, setColorStore, setPenStore } from "~/models/Store";
+import { colorStore, penStore, setPenStore } from "~/models/Store";
 
-import "./color.css"
+import styles from "./color.module.css"
 
 const Color: Component<{}> = (props) => {
     const colorBoxContainerStyle: JSX.CSSProperties = {
@@ -33,7 +33,7 @@ const Color: Component<{}> = (props) => {
         <p>color.</p>
         <div style={colorBoxContainerStyle}>
             <p style={colorBoxSpoilStyle}>[ spoil ]</p>
-            <div id="color_picker" />
+            <div class={styles.color_picker} />
             <div style={colorRowStyle}>
                 <For each={colorStore.swatches}>
                     {(item, index) => <ColorBox

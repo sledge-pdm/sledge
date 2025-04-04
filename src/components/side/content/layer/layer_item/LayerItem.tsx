@@ -1,6 +1,9 @@
 import { Component } from "solid-js";
-import { Layer, LayerType } from "~/models/data/Layer";
+import { getNextMagnification, Layer, LayerType } from "~/models/data/Layer";
 import { layerStore, setLayerStore } from "~/models/Store";
+
+import styles from "../layer_list.module.css";
+import Light from "~/components/common/atoms/light/Light";
 
 interface LayerItemProps {
     index: number;
@@ -8,7 +11,7 @@ interface LayerItemProps {
 }
 
 const LayerItem: Component<LayerItemProps> = (props: LayerItemProps) => {
-    let detClass;
+    let detClass: "dot" | "image" | "automate" | undefined;
     switch (props.layer.type) {
         case LayerType.Dot:
             detClass = "dot";
@@ -20,11 +23,15 @@ const LayerItem: Component<LayerItemProps> = (props: LayerItemProps) => {
             detClass = "automate";
             break;
         default:
-            detClass = "";
+            detClass = undefined;
             break;
     }
 
     const onDetClicked = () => {
+        setLayerStore("activeLayerId", props.layer.id);
+    };
+
+    const onPreviewClicked = () => {
         if (props.layer.type === LayerType.Image) {
             setLayerStore("imageLayer", "enabled", v => !v);
         } else {
@@ -35,17 +42,49 @@ const LayerItem: Component<LayerItemProps> = (props: LayerItemProps) => {
                 setLayerStore("layers", indexInLayers, "enabled", v => !v);
             }
         }
-    };
+    }
 
-    return <li id="layer">
-        <p id="type">{props.layer.typeDescription}</p>
+    const onMagnifClicked = () => {
+
+        let nextMagnification = getNextMagnification(props.layer.dotMagnification);
+        if (props.layer.type === LayerType.Image) {
+            setLayerStore("imageLayer", "dotMagnification", nextMagnification);
+        } else {
+            const indexInLayers = layerStore.layers.findIndex(
+                l => l.id === props.layer.id
+            );
+            if (indexInLayers !== -1) {
+                setLayerStore("layers", indexInLayers, "dotMagnification", nextMagnification);
+            }
+        }
+    }
+
+    const isActive = () => layerStore.activeLayerId === props.layer.id;
+
+    return <li class={styles.layer}>
+        <p class={styles.type}>{props.layer.typeDescription}</p>
         <p>{props.index}.</p>
-        <div class={`layer_det ${detClass} ${props.layer.enabled ? "" : "disabled"}`} /** .disabled = opacity: 0.4 */
+        <div class={[
+            styles.layer_det,
+            detClass && styles[detClass],
+            !props.layer.enabled && styles.disabled
+        ]
+            .filter(Boolean)
+            .join(" ")}
             onClick={onDetClicked}>
-            <div id="layer_preview" />
-            <p id="name">{props.layer.name}</p>
+            <div class={styles.layer_preview}
+                onClick={onPreviewClicked} />
+            <p class={styles.name}> {props.layer.name}</p>
+            <div class={styles.dot_magnif_container}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onMagnifClicked();
+                }}>
+                <p class={styles.dot_magnif}>x{props.layer.dotMagnification}</p>
+            </div>
+            <Light class={styles.active_light} on={isActive()} />
         </div>
-    </li>;
+    </li >;
 };
 
 export default LayerItem;

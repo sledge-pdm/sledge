@@ -8,10 +8,10 @@ const Companion: Component = () => {
 
     const say = (text: string) => {
         window.speak?.(text, {
-            amplitude: 100,
-            pitch: 30,
-            speed: 205,
-            wordgap: 0
+            amplitude: 5,
+            pitch: 10,
+            speed: 200,
+            wordgap: 0.
         });
     };
 
@@ -43,7 +43,7 @@ const Companion: Component = () => {
                 {quote() && (
                     <div class={styles.quote_box_container}>
                         <div class={styles.quote_box}>
-                            <p>{quote()}</p>
+                            <p class={styles.quote}>{quote()}</p>
                         </div>
                     </div>
                 )}

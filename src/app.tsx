@@ -1,17 +1,18 @@
 // @refresh reload
 import { MetaProvider } from "@solidjs/meta";
-import { Router } from "@solidjs/router";
-import { FileRoutes } from "@solidjs/start/router";
-import { Suspense } from "solid-js";
+import { Route, Router } from "@solidjs/router";
+import { onMount, Suspense } from "solid-js";
 import "./app.css";
-import { createScriptLoader } from "@solid-primitives/script-loader";
+import Home from "./routes";
+import { safeInvoke } from "./utils/tauri";
 
 export default function App() {
-  createScriptLoader({
-    src: "/libs/speakjs/speakClient.js",
-    async onLoad() {
-      console.log(window.print);
-    }
+  onMount(async () => {
+    safeInvoke<string>("hello_from_rust", { name: "Sledge" }).then((msg) => {
+      if (msg) {
+        console.log("[Rustからの返答]:", msg);
+      }
+    });
   });
 
   return (
@@ -25,7 +26,7 @@ export default function App() {
         </ MetaProvider>
       )}
     >
-      <FileRoutes />
+      <Route path="/" component={Home} />
     </Router>
   );
 }

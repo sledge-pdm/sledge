@@ -136,7 +136,6 @@ export const DrawableCanvas: Component<Props> = (props) => {
         window.addEventListener("pointerdown", handlePointerDown);
         window.addEventListener("pointermove", handlePointerMove);
         window.addEventListener("pointerup", handlePointerUp);
-
         window.addEventListener("keydown", handleKeydown);
     });
 

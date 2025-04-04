@@ -21,6 +21,7 @@ export const [metricStore, setMetricStore] = createStore({
 export const [imageStore, setImageStore] = createStore<
   Record<string, LayerImageState>
 >({});
+export const activeImage = () => imageStore[layerStore.activeLayerId];
 
 // layer
 const DEFAULT_IMAGE_LAYER = createLayer("image1", LayerType.Image);

@@ -1,12 +1,14 @@
 import { Component, createSignal, For } from "solid-js";
 import { JSX } from "solid-js/h/jsx-runtime";
 import { cloneImageData, redo, undo, updateImageData } from "~/models/data/LayerImage";
-import { activeLayer, canvasStore, imageStore, layerStore, metricStore, setImageStore } from "~/models/Store";
+import { activeImage, activeLayer, canvasStore, imageStore, layerStore, metricStore, setImageStore } from "~/models/Store";
 
 import styles from "./controls.module.css"
 import { safeInvoke } from "~/utils/tauri";
 import { encodeImageData } from "~/utils/ImageUtils";
 import { invertImageInRust } from "~/utils/EffectUtils";
+import { ImageCommands, runAndApplyActive } from "~/models/Commands";
+import CommandsList from "~/components/common/atoms/commands_list/CommandsList";
 
 const Controls: Component<{}> = (props) => {
     const zoom = () => metricStore.zoom;
@@ -59,8 +61,8 @@ const Controls: Component<{}> = (props) => {
     const [responseFromRust, setResponseFromRust] = createSignal("");
 
     const callEffect = async () => {
-        console.log(cloneImageData(imageStore[layerStore.activeLayerId].current));
-        const invertedImage = await invertImageInRust(cloneImageData(imageStore[layerStore.activeLayerId].current));
+        console.log(cloneImageData(activeImage().current));
+        const invertedImage = await invertImageInRust(cloneImageData(activeImage().current));
         console.log(invertedImage);
         if (invertedImage !== undefined) {
             updateImageData(layerStore.activeLayerId, invertedImage)
@@ -71,11 +73,12 @@ const Controls: Component<{}> = (props) => {
 
     return <>
         <p>canvas.</p>
+
         <p>({lastMouseCanvas().x}, {lastMouseCanvas().y}) IN CANVAS.</p>
         <p>({lastMouseLayer().x}, {lastMouseLayer().y}) IN LAYER.</p>
         <p>x{zoom().toFixed(2)}</p>
         <p>UNDO STACKS.</p>
-        <For each={imageStore[layerStore.activeLayerId].undoStack}>
+        <For each={activeImage().undoStack}>
             {item =>
                 <p>{item.toString()}</p>
             }
@@ -95,14 +98,16 @@ const Controls: Component<{}> = (props) => {
                 redo(layerStore.activeLayerId)
             }}>&gt;&gt;</p>
 
-            <div>
-                <p class={styles.undo_redo} onClick={(e) => {
+            {/* <div>
+                <p class={styles.undo_redo} onClick={async (e) => {
                     e.preventDefault()
                     e.stopPropagation()
-                    callEffect();
+                    await runAndApplyActive(ImageCommands.INVERT, activeImage().current);
                 }}>INVERT!!</p>
                 <p style={{ "font-size": "1rem" }}>{responseFromRust()}</p>
-            </div>
+            </div> */}
+
+            <CommandsList />
 
         </div >
         <div style={bottomHistoryStyle}>

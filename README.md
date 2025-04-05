@@ -65,14 +65,13 @@ merged > out(layer_1)                               # merge split images and thr
 
 ## build
 
+if you don't have tauri, install first (https://v2.tauri.app/ja/)
+
 ```bash
 git clone https://gitlab.com/Innsbluck/sledge.git
 cd sledge
-pnpm install # install solidjs dependencies
-cd src-tauri
-cargo install # install rust dependencies
-cd ..
-pnpm tauri dev # launch
+npm install # install solidjs dependencies
+npm tauri dev # launch
 ```
 
 ## tech

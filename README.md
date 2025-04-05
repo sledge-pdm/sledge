@@ -21,13 +21,13 @@
 
 - built-in stuff:
 
-  - standard effect (brightness, contrast, invert, etc.)
+  - **standard effects** (brightness, contrast, invert, etc.)
 
-  - filter and split functions - _w/ multiple node outputs_ (splitV, colorRange, rect, etc.)
+  - **filter and split functions** - _w/ multiple node outputs_ (splitV, colorRange, rect, etc.)
 
-  - **...and some REALLY destructive effects** (JPEG glitches, etc.)
+  - **some REALLY destructive effects** (JPEG glitches, etc.)
 
-- all effects written in Rust.
+- all effects are written in Rust.
 
   <!-- some introduction picture for the effects -->
 

@@ -1,11 +1,12 @@
 import { Component, onMount, onCleanup, createEffect } from "solid-js";
-import { penStore, layerStore, canvasStore, setMetricStore, imageStore, hexToRGB } from "~/models/Store";
+import { penStore, layerStore, canvasStore, setMetricStore, imageStore, hexToRGB, updateDSL } from "~/stores/Store";
 import styles from "./drawable_canvas.module.css";
-import { Layer } from "~/models/data/Layer";
-import { cloneImageData, redo, undo, updateImageData } from "~/models/data/LayerImage";
+import { Layer } from "~/models/Layer";
+import { cloneImageData, redo, undo, updateImageData } from "~/models/LayerImage";
 import { drawLine, roundPosition } from "~/utils/MetricUtils";
 import { drawBrush } from "~/utils/BrushUtils";
 import { setPixel } from "~/utils/ImageUtils";
+import { DSL } from "~/dsl/DSL";
 
 type Props = {
     layer: Layer;
@@ -55,6 +56,7 @@ export const DrawableCanvas: Component<Props> = (props) => {
     }
 
     let drawingBuffer: ImageData | null = null;
+    //let tempDSL: string | undefined = undefined;
 
     function handlePointerDown(e: PointerEvent) {
         if (!shouldDraw() || !isMouseOnCanvas(e)) return;
@@ -63,6 +65,7 @@ export const DrawableCanvas: Component<Props> = (props) => {
             x: (e.clientX - offset.x) / totalMag(),
             y: (e.clientY - offset.y) / totalMag()
         });
+        //tempDSL = props.layer.dsl.build(true);
         console.log("pointer down. stroke started");
         drawingBuffer = cloneImageData(imageStore[props.layer.id].current);
     }
@@ -150,8 +153,10 @@ export const DrawableCanvas: Component<Props> = (props) => {
     function endStroke() {
         if (drawingBuffer) {
             updateImageData(props.layer.id, drawingBuffer);
+            updateDSL(props.layer.id)
             drawingBuffer = null;
         }
+        // tempDSL = undefined;
         lastPos = null;
     }
 
@@ -178,11 +183,11 @@ export const DrawableCanvas: Component<Props> = (props) => {
         window.removeEventListener("pointerup", handlePointerUp);
         window.removeEventListener("keydown", handleKeydown);
     });
-
     createEffect(() => {
-        const current = imageStore[props.layer.id].current;
-        if (ctx && current) {
-            ctx.putImageData(current, 0, 0);
+        const DSLcurrent = imageStore[props.layer.id]?.DSLcurrent;
+        const current = imageStore[props.layer.id]?.current;
+        if (ctx && (DSLcurrent || current)) {
+            ctx.putImageData(DSLcurrent || current, 0, 0);
         }
     });
 

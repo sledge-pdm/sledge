@@ -1,6 +1,6 @@
 import { Component, For } from "solid-js";
 import LayerItem from "./layer_item/LayerItem";
-import { layerStore } from "~/models/Store";
+import { layerStore } from "~/stores/Store";
 
 import styles from "./layer_list.module.css";
 

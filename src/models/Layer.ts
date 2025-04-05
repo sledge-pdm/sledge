@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { DSL } from "~/dsl/DSL";
 import { initImageForLayer } from "./LayerImage";
 
 export enum LayerType {
@@ -14,13 +15,15 @@ export type Layer = {
   typeDescription: string; // 各タイプの説明
   enabled: boolean;
   dotMagnification: number;
+  dsl: DSL;
 };
 
 export const createLayer = (
   name: string,
   type: LayerType,
   enabled = true,
-  dotMagnification = 1
+  dotMagnification = 1,
+  dsl?: DSL,
 ): Layer => {
   const id = uuidv4();
   initImageForLayer(id, dotMagnification);
@@ -31,6 +34,7 @@ export const createLayer = (
     typeDescription: getTypeString(type),
     enabled,
     dotMagnification,
+    dsl: dsl || new DSL(id, id),
   };
 };
 

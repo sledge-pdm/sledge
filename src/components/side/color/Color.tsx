@@ -1,6 +1,6 @@
 import { Component, For, JSX } from "solid-js";
-import ColorBox from "~/components/common/atoms/color_box/ColorBox";
-import { colorStore, penStore, setPenStore } from "~/models/Store";
+import ColorBox from "~/components/common/color_box/ColorBox";
+import { colorStore, penStore, setPenStore } from "~/stores/Store";
 
 import styles from "./color.module.css"
 

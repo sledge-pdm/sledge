@@ -1,9 +1,9 @@
 import { Component } from "solid-js";
-import { getNextMagnification, Layer, LayerType } from "~/models/data/Layer";
-import { layerStore, setLayerStore } from "~/models/Store";
+import { getNextMagnification, Layer, LayerType } from "~/models/Layer";
+import { layerStore, setLayerStore } from "~/stores/Store";
 
 import styles from "../layer_list.module.css";
-import Light from "~/components/common/atoms/light/Light";
+import Light from "~/components/common/light/Light";
 
 interface LayerItemProps {
     index: number;

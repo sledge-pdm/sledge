@@ -2,7 +2,7 @@ import { Component, For } from "solid-js";
 import ConfigRow from "./config_row/ConfigRow";
 
 import styles from "./pen_config.module.css";
-import { penStore } from "~/models/Store";
+import { penStore } from "~/stores/Store";
 
 const PenConfig: Component<{}> = (props) => {
 

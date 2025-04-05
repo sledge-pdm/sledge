@@ -1,8 +1,10 @@
-import { createPen } from "./data/Pen";
-import { createLayer, LayerType } from "./data/Layer";
+import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
-import { createCanvas } from "./data/Canvas";
-import { LayerImageState } from "./data/LayerImage";
+import { runDSL } from "~/dsl/DSLRunner";
+import { createCanvas } from "../models/Canvas";
+import { createLayer, LayerType } from "../models/Layer";
+import { LayerImageState } from "../models/LayerImage";
+import { createPen } from "../models/Pen";
 
 // canvas
 export const [canvasStore, setCanvasStore] = createStore({
@@ -21,8 +23,8 @@ export const [metricStore, setMetricStore] = createStore({
 export const [imageStore, setImageStore] = createStore<
   Record<string, LayerImageState>
 >({});
-export const activeImage = () => imageStore[layerStore.activeLayerId];
-
+export const activeImage = (): LayerImageState | undefined =>
+  imageStore[layerStore.activeLayerId];
 // layer
 const DEFAULT_IMAGE_LAYER = createLayer("image1", LayerType.Image);
 const DEFAULT_LAYERS = [
@@ -39,8 +41,11 @@ export const [layerStore, setLayerStore] = createStore({
 });
 
 export const allLayers = () => [layerStore.imageLayer, ...layerStore.layers];
-export const activeLayer = () =>
-  allLayers().find((layer) => layer.id === layerStore.activeLayerId);
+export const findLayerById = (id: string) =>
+  allLayers().find((layer) => layer.id === id);
+export const activeLayer = () => findLayerById(layerStore.activeLayerId);
+export const activeIndex = () =>
+  allLayers().findIndex((layer) => layer.id === layerStore.activeLayerId);
 
 // color
 export const [colorStore, setColorStore] = createStore({
@@ -70,4 +75,32 @@ export function hexToRGB(hex: string): [number, number, number] {
 export const [penStore, setPenStore] = createStore({
   usingIndex: 0,
   pens: [createPen("pen", 1, "#000000"), createPen("eraser", 4, "none")],
+});
+
+export const updateDSL = (layerId: string) => {
+  const dsl = findLayerById(layerId)?.dsl;
+  const image = imageStore[layerId].current;
+  if (dsl === undefined) return;
+  runDSL(dsl, image).then((result) => {
+    if (result) {
+      setImageStore(layerId, "DSLcurrent", result);
+    }
+  });
+};
+
+createEffect(() => {
+  for (const layer of allLayers()) {
+    const dsl = layer.dsl;
+    const id = layer.id;
+    const image = imageStore[id]?.current;
+    if (!image) continue;
+
+    // DSL文字列の変更をトリガーとして扱う
+    dsl.toString(); // ← tracking
+    runDSL(dsl, image).then((result) => {
+      if (result) {
+        setImageStore(id, "DSLcurrent", result);
+      }
+    });
+  }
 });

@@ -1,6 +1,6 @@
 import { Component } from "solid-js";
-import { penStore } from "~/models/Store";
-import { sayRandomQuote } from "../../companion/QuotePool";
+import { penStore } from "~/stores/Store";
+import { sayRandomQuote } from "../companion/QuotePool";
 
 interface ColorBoxProps {
     enableUsingSelection?: boolean;

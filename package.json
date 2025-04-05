@@ -3,8 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "tauri:dev": "vite build && tauri dev",
-    "tauri:build": "vite build && tauri build",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
     "watch:css": "tcm --watch"
   },
   "dependencies": {
@@ -22,10 +22,16 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.1",
     "npm-run-all2": "6.1.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
     "stylelint": "^16.17.0",
     "typed-css-modules": "^0.9.1",
     "vite": "^6.2.4",
     "vite-plugin-solid": "^2.11.6",
     "vite-tsconfig-paths": "^5.1.4"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ]
   }
 }

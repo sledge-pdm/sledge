@@ -1,11 +1,21 @@
 import { safeInvoke } from "~/utils/tauri";
-import { layerStore } from "./Store";
-import { updateImageData } from "./data/LayerImage";
+import { updateImageData } from "../../../models/LayerImage";
+import { layerStore } from "../../../stores/Store";
+import { FractureNode } from "./FractureNode";
+
+export class JpegGlitch extends FractureNode {
+  name: string = "jpeg_glitch";
+  description: string = "jpeg_glitch";
+
+  getNodeString(): string {
+    return `${this.name}()`;
+  }
+}
 
 export async function runJpegGlitchAndApply(
   canvas: HTMLCanvasElement,
   image: ImageData,
-  seed: number
+  seed: number,
 ) {
   const encoded = base64EncodeBytes(new Uint8Array(image.data.buffer));
 
@@ -28,7 +38,7 @@ export async function runJpegGlitchAndApply(
     img.onload = resolve;
     img.onerror = () => {
       console.error(
-        "Image failed to load. Data URI might be invalid or corrupted."
+        "Image failed to load. Data URI might be invalid or corrupted.",
       );
       console.log("Data URI preview:", result.slice(0, 300) + "...");
     };

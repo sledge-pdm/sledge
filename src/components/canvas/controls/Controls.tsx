@@ -1,9 +1,10 @@
 import { Component, createSignal, For } from "solid-js";
-import { initImageForLayer, redo, undo, } from "~/models/data/LayerImage";
-import { activeImage, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, } from "~/models/Store";
+import { initImageForLayer, redo, undo, } from "~/models/LayerImage";
+import { activeImage, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, setLayerStore, updateDSL, } from "~/stores/Store";
 
 import styles from "./controls.module.css"
-import CommandsList from "~/components/common/atoms/commands_list/CommandsList";
+import DSLEditor from "~/components/common/dsl/DSLEditor";
+import { DSL } from "~/dsl/DSL";
 
 const Controls: Component<{}> = (props) => {
     const zoom = () => metricStore.zoom;
@@ -20,8 +21,15 @@ const Controls: Component<{}> = (props) => {
     }
 
     const resetAllLayers = (e: any) => {
-        allLayers().forEach(layer => {
+
+        setLayerStore("imageLayer", "dsl", new DSL(layerStore.imageLayer.id, layerStore.imageLayer.id))
+        initImageForLayer(layerStore.imageLayer.id, layerStore.imageLayer.dotMagnification);
+        updateDSL(layerStore.imageLayer.id)
+
+        allLayers().forEach((layer, i) => {
+            setLayerStore("layers", i, "dsl", new DSL(layer.id, layer.id))
             initImageForLayer(layer.id, layer.dotMagnification);
+            updateDSL(layer.id)
         });
     }
 
@@ -32,7 +40,7 @@ const Controls: Component<{}> = (props) => {
         <p>({lastMouseLayer().x}, {lastMouseLayer().y}) IN LAYER.</p>
         <p>x{zoom().toFixed(2)}</p>
         <p>UNDO STACKS.</p>
-        <For each={activeImage().undoStack}>
+        <For each={activeImage()?.undoStack}>
             {item =>
                 <p>{item.toString()}</p>
             }
@@ -61,7 +69,7 @@ const Controls: Component<{}> = (props) => {
                 <p style={{ "font-size": "1rem" }}>{responseFromRust()}</p>
             </div> */}
 
-            <CommandsList />
+            <DSLEditor />
 
         </div >
         <div class={styles["bottom-history"]}>

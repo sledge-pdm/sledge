@@ -1,7 +1,8 @@
-import { canvasStore, setImageStore } from "../Store";
+import { canvasStore, setImageStore, updateDSL } from "../stores/Store";
 
 export type LayerImageState = {
   current: ImageData;
+  DSLcurrent?: ImageData;
   undoStack: ImageData[];
   redoStack: ImageData[];
 };
@@ -9,10 +10,15 @@ export type LayerImageState = {
 export function initImageForLayer(layerId: string, dotMagnification: number) {
   const blank = new ImageData(
     Math.round(canvasStore.canvas.width / dotMagnification),
-    Math.round(canvasStore.canvas.height / dotMagnification)
+    Math.round(canvasStore.canvas.height / dotMagnification),
+  );
+  const dslBlank = new ImageData(
+    Math.round(canvasStore.canvas.width / dotMagnification),
+    Math.round(canvasStore.canvas.height / dotMagnification),
   );
   setImageStore(layerId, {
     current: blank,
+    DSLcurrent: dslBlank,
     undoStack: [],
     redoStack: [],
   });
@@ -38,6 +44,7 @@ export function undo(layerId: string) {
     const newRedo = [state.current, ...state.redoStack];
     return { current: prev, undoStack: newUndo, redoStack: newRedo };
   });
+  updateDSL(layerId);
 }
 
 export function redo(layerId: string) {
@@ -48,12 +55,13 @@ export function redo(layerId: string) {
     const newUndo = [...state.undoStack, state.current];
     return { current: next, undoStack: newUndo, redoStack: newRedo };
   });
+  updateDSL(layerId);
 }
 
 export function cloneImageData(src: ImageData): ImageData {
   return new ImageData(
     new Uint8ClampedArray(src.data), // ← 必ず新しい配列
     src.width,
-    src.height
+    src.height,
   );
 }

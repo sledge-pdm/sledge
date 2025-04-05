@@ -1,10 +1,10 @@
 import { Component, createEffect, For, onMount } from "solid-js";
-import { allLayers, canvasStore, setMetricStore } from "~/models/Store";
+import { allLayers, canvasStore, setMetricStore } from "~/stores/Store";
 
 import styles from "./canvas_stack.module.css"
 import { DrawableCanvas } from "../drawable_canvas/DrawableCanvas";
 
-import { metricStore } from "~/models/Store";
+import { metricStore } from "~/stores/Store";
 
 const CanvasStack: Component<{}> = (props) => {
     const zoom = () => metricStore.zoom;

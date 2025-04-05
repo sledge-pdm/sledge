@@ -10,10 +10,10 @@
 ### ■&ensp;&nbsp;pixel-perfect drawing experience
 
 - **no alpha channels**. \
-  _erasing just works — nothing left behind._
+  erasing just works. nothing left behind.
 
 - **dot magnification** factor, such as "x1" or "x4". \
-  it enables you to put some _out-of-place_ pixel art on a high-definition background — all on the same canvas.
+  it enables you to put some _out-of-place_ pixel art on a high-definition background.
 
   <!-- some introduction picture for layers -->
 
@@ -31,9 +31,9 @@
 
   <!-- some introduction picture for the effects -->
 
-### :)&emsp;companion
+### :)&ensp;companion
 
-- the pretty companion that improves your drawing experiment.
+- pretty companion improves your drawing experiment.
 
 ## pipeline DSL
 

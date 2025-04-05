@@ -33,8 +33,7 @@
 
 ### :)&emsp;companion
 
-- the pretty companion that improves your drawing experiment.\
-  _everyone loves a good "AI assistant", right?_
+- the pretty companion that improves your drawing experiment.
 
 ## pipeline DSL
 
@@ -69,13 +68,16 @@ merged > out(layer_1)                               # merge split images and thr
 ```bash
 git clone https://gitlab.com/Innsbluck/sledge.git
 cd sledge
-pnpm install
-pnpm tauri dev
+pnpm install # install solidjs dependencies
+cd src-tauri
+cargo install # install rust dependencies
+cd ..
+pnpm tauri dev # launch
 ```
 
 ## tech
 
 - [SolidJS](https://www.solidjs.com/) (UI)
-- [Tauri](https://tauri.app/) (Desktop wrapper)
-- [Rust](https://www.rust-lang.org/) (Image engine)
-- [eSpeak NG](https://github.com/espeak-ng/espeak-ng) (TTS engine)
+- [Tauri](https://tauri.app/) (desktop wrapper)
+- [Rust](https://www.rust-lang.org/) (effect processing)
+- [speak.js](https://github.com/kripken/speak.js/) (TTS engine)

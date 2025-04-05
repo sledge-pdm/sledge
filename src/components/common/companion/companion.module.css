@@ -1,7 +1,8 @@
 .root {
   position: absolute;
-  bottom: 000px;
+  bottom: 0px;
   left: 500px;
+  pointer-events: none;
   z-index: 999;
 }
 

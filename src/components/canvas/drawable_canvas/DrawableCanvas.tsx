@@ -117,6 +117,31 @@ export const DrawableCanvas: Component<Props> = (props) => {
     }
 
     function handlePointerUp(e: MouseEvent) {
+        const offset = getOffset();
+        const mouseLayerPos = roundPosition({
+            x: (e.clientX - offset.x) / totalMag(),
+            y: (e.clientY - offset.y) / totalMag()
+        });
+
+        // 移動なし
+        if (lastPos && lastPos.x === mouseLayerPos.x && lastPos.y === mouseLayerPos.y) {
+            if (!ctx) return;
+            if (!drawingBuffer) return;
+            console.log("okay pix");
+            const imageData = drawingBuffer;
+            const pen = currentPen();
+            const [r, g, b] = hexToRGB(pen.color);
+
+            drawBrush(mouseLayerPos.x, mouseLayerPos.y, pen.size, (x, y) => {
+                if (pen.name === "eraser") {
+                    setPixel(imageData, x, y, 0, 0, 0, 0);
+                } else {
+                    setPixel(imageData, x, y, r, g, b, 255);
+                }
+            });
+            ctx.putImageData(imageData, 0, 0);
+        }
+
         if (!isMouseOnCanvas(e)) return;
         console.log("pointer up. stroke end");
         endStroke();
@@ -160,8 +185,6 @@ export const DrawableCanvas: Component<Props> = (props) => {
             ctx.putImageData(current, 0, 0);
         }
     });
-
-
 
     return (
         <canvas

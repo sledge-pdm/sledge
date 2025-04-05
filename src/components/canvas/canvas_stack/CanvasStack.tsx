@@ -1,4 +1,4 @@
-import { Component, For, onMount } from "solid-js";
+import { Component, createEffect, For, onMount } from "solid-js";
 import { allLayers, canvasStore, setMetricStore } from "~/models/Store";
 
 import styles from "./canvas_stack.module.css"
@@ -11,6 +11,14 @@ const CanvasStack: Component<{}> = (props) => {
     onMount(() => {
         if (metricStore.adjustZoomOnCanvasChange) {
             let adjustedZoom = 600 / canvasStore.canvas.height;
+            setMetricStore("zoom", adjustedZoom);
+        }
+    })
+
+    createEffect(() => {
+        let canvasHeight = canvasStore.canvas.height
+        if (metricStore.adjustZoomOnCanvasChange) {
+            let adjustedZoom = 600 / canvasHeight;
             setMetricStore("zoom", adjustedZoom);
         }
     })
@@ -33,7 +41,7 @@ const CanvasStack: Component<{}> = (props) => {
                     <DrawableCanvas
                         layer={layer}
                         zoom={zoom()}
-                        zIndex={index()} />
+                        zIndex={allLayers().length - index()} />
                 )}
             </For>
         </div>

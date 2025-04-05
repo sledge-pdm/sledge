@@ -1,74 +1,28 @@
 import { Component, createSignal, For } from "solid-js";
-import { JSX } from "solid-js/h/jsx-runtime";
-import { cloneImageData, redo, undo, updateImageData } from "~/models/data/LayerImage";
-import { activeImage, activeLayer, canvasStore, imageStore, layerStore, metricStore, setImageStore } from "~/models/Store";
+import { initImageForLayer, redo, undo, } from "~/models/data/LayerImage";
+import { activeImage, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, } from "~/models/Store";
 
 import styles from "./controls.module.css"
-import { safeInvoke } from "~/utils/tauri";
-import { encodeImageData } from "~/utils/ImageUtils";
-import { invertImageInRust } from "~/utils/EffectUtils";
-import { ImageCommands, runAndApplyActive } from "~/models/Commands";
 import CommandsList from "~/components/common/atoms/commands_list/CommandsList";
 
 const Controls: Component<{}> = (props) => {
     const zoom = () => metricStore.zoom;
-
-    const cursorStyle: JSX.CSSProperties = {
-        "position": "absolute",
-        "width": "4px",
-        "height": "4px",
-        "top": "170px",
-        "left": "220px",
-        "background-color": "black",
-    };
-    const topRightButtonContainerStyle: JSX.CSSProperties = {
-        "position": "absolute",
-        "top": "20px",
-        "right": "30px",
-        "display": "flex",
-        "gap": "55px",
-        "flex-direction": "row",
-    };
-    const buttonStyle: JSX.CSSProperties = {
-        "font-size": "1rem",
-        "background-color": "deepskyblue",
-        "color": "white",
-        "padding": "4px",
-        "cursor": "pointer",
-    };
-    const topRightNavStyle: JSX.CSSProperties = {
-        "position": "absolute",
-        "top": "60px",
-        "right": "30px",
-        "display": "flex",
-        "gap": "55px",
-        "flex-direction": "row",
-    };
-    const bottomHistoryStyle: JSX.CSSProperties = {
-        "position": "absolute",
-        "bottom": "50px",
-        "display": "flex",
-        "opacity": 0.2,
-        "gap": "5px",
-        "flex-direction": "column",
-    };
-    const historyRowStyle: JSX.CSSProperties = { "display": "flex", "width": "60%", "gap": "20px" };
-    const historyTextStyle: JSX.CSSProperties = { "white-space": "nowrap" };
-
     const lastMouseCanvas = () => metricStore.lastMouseCanvas;
     const lastMouseLayer = () => metricStore.lastMouseLayer;
 
-    const [responseFromRust, setResponseFromRust] = createSignal("");
+    const [width, setWidth] = createSignal(0);
+    const [height, setHeight] = createSignal(0);
 
-    const callEffect = async () => {
-        console.log(cloneImageData(activeImage().current));
-        const invertedImage = await invertImageInRust(cloneImageData(activeImage().current));
-        console.log(invertedImage);
-        if (invertedImage !== undefined) {
-            updateImageData(layerStore.activeLayerId, invertedImage)
-        } else {
-            console.log("invert failed.");
-        }
+    const changeCanvasSize = (e: any) => {
+        e.preventDefault();
+        setCanvasStore("canvas", "width", width);
+        setCanvasStore("canvas", "height", height);
+    }
+
+    const resetAllLayers = (e: any) => {
+        allLayers().forEach(layer => {
+            initImageForLayer(layer.id, layer.dotMagnification);
+        });
     }
 
     return <>
@@ -83,10 +37,10 @@ const Controls: Component<{}> = (props) => {
                 <p>{item.toString()}</p>
             }
         </For>
-        <div style={topRightButtonContainerStyle}>
-            <p style={buttonStyle}>out</p>
+        <div class={styles["top-right-button-container"]}>
+            <p class={styles.button}>out</p>
         </div>
-        <div style={topRightNavStyle}>
+        <div class={styles["top-right-nav"]}>
             <p class={styles.undo_redo} onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -110,22 +64,31 @@ const Controls: Component<{}> = (props) => {
             <CommandsList />
 
         </div >
-        <div style={bottomHistoryStyle}>
-            <div style={historyRowStyle}>
-                <p style={historyTextStyle}>stroke. &gt;</p>
-                <p style={historyTextStyle}>stroke. &gt;</p>
-                <p style={historyTextStyle}>erase. &gt;</p>
-                <p style={historyTextStyle}>stroke. &gt;</p>
-                <p style={historyTextStyle}>undo. &gt;</p>
-                <p style={historyTextStyle}>redo. &gt;</p>
-                <p style={historyTextStyle}>stroke. &gt;</p>
-                <p style={historyTextStyle}>erase. &gt;</p>
-                <p style={historyTextStyle}>stroke. &gt;</p>
-                <p style={historyTextStyle}>erase. &gt;</p>
-                <p style={historyTextStyle}>erase. &gt;</p>
-                <p style={historyTextStyle}>stroke. &gt;</p>
-                <p style={historyTextStyle}>stroke. &gt;</p>
-                <p style={historyTextStyle}>stroke. &gt;</p>
+        <div class={styles["bottom-history"]}>
+
+            <form onSubmit={(e) => changeCanvasSize(e)}>
+                <input type="number" name="width" onChange={(e) => setWidth(Number(e.target.value))} value={canvasStore.canvas.width} min={0} max={1200} required />
+                <input type="number" name="height" onChange={(e) => setHeight(Number(e.target.value))} value={canvasStore.canvas.height} min={0} max={1200} required />
+                <button type="submit">change canvas size</button>
+            </form>
+
+            <button onClick={resetAllLayers}>RESET ALL LAYERS</button>
+
+            <div class={styles["history-row"]}>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>undo. &gt;</p>
+                <p class={styles["history-text"]}>redo. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
             </div>
         </div>
     </>;

@@ -3,8 +3,8 @@ export function roundPosition(position: { x: number; y: number }): {
   y: number;
 } {
   return {
-    x: Math.round(position.x),
-    y: Math.round(position.y),
+    x: Math.round(position.x - 0.5),
+    y: Math.round(position.y - 0.5),
   };
 }
 

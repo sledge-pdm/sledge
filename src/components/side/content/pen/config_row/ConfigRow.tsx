@@ -23,7 +23,7 @@ const ConfigRow: Component<ConfigRowProps> = (props: ConfigRowProps) => {
         <ColorBox color={props.pen.color} />
 
         <div style={{ "flex-grow": 1 }}>
-            <Slider min={1} max={5} default={props.pen.size} onValueChanged={(newValue) => {
+            <Slider min={1} max={30} default={props.pen.size} onValueChanged={(newValue) => {
                 sayRandomQuote("pen-resize");
                 console.log("size set to " + newValue);
                 const penIndex = penStore.pens.findIndex(p => p.id === props.pen.id);

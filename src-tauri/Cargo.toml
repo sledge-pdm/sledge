@@ -24,3 +24,5 @@ log = "0.4"
 tauri = { version = "2.4.1", features = [] }
 tauri-plugin-log = "2.0.0-rc"
 base64 = "0.22.1"
+rand = "0.9.0"
+image = "0.25.6"

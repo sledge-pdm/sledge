@@ -1,3 +1,57 @@
+.cursor {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  top: 170px;
+  left: 220px;
+  background-color: black;
+}
+
+.top-right-button-container {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  display: flex;
+  gap: 55px;
+  flex-direction: row;
+}
+
+.button {
+  font-size: 1rem;
+  background-color: deepskyblue;
+  color: white;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.top-right-nav {
+  position: absolute;
+  top: 60px;
+  right: 30px;
+  display: flex;
+  gap: 55px;
+  flex-direction: row;
+}
+
+.bottom-history {
+  position: absolute;
+  bottom: 50px;
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+}
+
+.history-row {
+  display: flex;
+  opacity: 0.2;
+  width: 60%;
+  gap: 20px;
+}
+
+.history-text {
+  white-space: nowrap;
+}
+
 .undo_redo {
   font-size: 1rem;
   pointer-events: all;

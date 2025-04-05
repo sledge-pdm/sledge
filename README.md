@@ -5,6 +5,17 @@
 > this project is pre-alpha.  
 > feel free to DM me: [@alphendp](https://x.com/alphendp)
 
+## build
+
+if you don't have tauri, install first (https://v2.tauri.app/ja/)
+
+```bash
+git clone https://gitlab.com/Innsbluck/sledge.git
+cd sledge
+npm install # install solidjs dependencies
+npm tauri dev # launch
+```
+
 ## what you'll get
 
 ### ■&ensp;&nbsp;pixel-perfect drawing experience
@@ -60,17 +71,6 @@ merged > out(layer_1)                               # merge split images and thr
 - supports the GUI node editor to add / swap / mutate effects.
 - of course, raw command-line input is also available.\
   either way, pipelined effects are applied to the image immediately and reactively.
-
-## build
-
-if you don't have tauri, install first (https://v2.tauri.app/ja/)
-
-```bash
-git clone https://gitlab.com/Innsbluck/sledge.git
-cd sledge
-npm install # install solidjs dependencies
-npm tauri dev # launch
-```
 
 ## tech
 

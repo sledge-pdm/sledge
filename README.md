@@ -46,9 +46,9 @@ npm tauri dev # launch
 
 - pretty companion improves your drawing experiment.
 
-## dsl DSL
+## DSL(Data Shaping Line)
 
-sledge dsl DSL (wip title) is a flexible and powerful way to mess w/ your own pixels.
+sledge's DSL(Data Shaping Line) is a flexible and powerful effect pipelines.
 
 ```shell
 # layer_N: unique id for layerN
@@ -70,7 +70,7 @@ merged > out(layer_1)                               # merge split images and thr
 
 - supports the GUI node editor to add / swap / mutate effects.
 - of course, raw command-line input is also available.\
-  either way, dsld effects are applied to the image immediately and reactively.
+  either way, dsl effects are applied to the image immediately and reactively.
 
 ## tech
 

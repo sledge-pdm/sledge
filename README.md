@@ -12,7 +12,7 @@
 - **no alpha channels**. \
   erasing just works. nothing left behind.
 
-- **dot magnification** factor, such as "x1" or "x4". \
+- **dot magnification** factor, such as `x1` or `x4`. \
   it enables you to put some _out-of-place_ pixel art on a high-definition background.
 
   <!-- some introduction picture for layers -->

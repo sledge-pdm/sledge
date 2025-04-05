@@ -21,11 +21,11 @@
 
 - built-in stuff:
 
-  - **standard effects** — `brightness`, `contrast`, `invert`, etc.
+  - **standard effects** — `brightness`, `contrast`, `invert`
 
-  - **filter and split functions** — `splitV`, `colorRange`, `rect`, etc.
+  - **filter and split functions** — `splitV`, `colorRange`, `rect`
 
-  - **destructive effects** — `JPEG glitches`, etc.
+  - **destructive effects** — `JPEG glitches`
 
 - all effects are written in Rust.
 
@@ -57,11 +57,9 @@ merged > out(layer_1)                               # merge split images and thr
 # note 2: subout nodes automatically merge/override multiple inputs.
 ```
 
-### too lazy to remember commands?
-
-- no prob! — just add / swap / mutate effects in the GUI node editor.
-- of course, you can also run raw command-line from the console input.\
-  either way, effects are applied immediately — and reactively.
+- supports the GUI node editor to add / swap / mutate effects.
+- of course, raw command-line input is also available.\
+  either way, pipelined effects are applied to the image immediately and reactively.
 
 ## build
 

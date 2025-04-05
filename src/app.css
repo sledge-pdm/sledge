@@ -1,6 +1,7 @@
 /* ==========================================================================
    Base & Reset
    ========================================================================== */
+
 @font-face {
   font-family: "04B08";
   src: url(/fonts/04B_08__.ttf);
@@ -40,6 +41,7 @@ main {
 /* ==========================================================================
      Typography & Basic Elements
      ========================================================================== */
+
 p {
   font-size: 0.5rem;
   letter-spacing: 2px;
@@ -53,6 +55,40 @@ p {
 ul {
   list-style: none;
   padding-left: 0;
+}
+
+button,
+a,
+input {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  font-family: "04B08";
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+button {
+  background: white;
+  padding: 2px 6px;
+  border: 1px black solid;
+  border-radius: 2px;
+
+  pointer-events: all;
+  cursor: pointer;
+}
+button:hover {
+  background: #f0f0f0;
+  transform: translateY(1px);
 }
 
 /* 便利な変数 */

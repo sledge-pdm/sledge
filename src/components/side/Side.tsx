@@ -1,7 +1,7 @@
 
-import Color from "./content/color/Color";
-import PenConfig from "./content/pen/PenConfig";
-import LayerList from "./content/layer/LayerList";
+import Color from "./color/Color";
+import PenConfig from "./pen/PenConfig";
+import LayerList from "./layer/LayerList";
 import Edge from "./edge/Edge";
 
 export default () => {

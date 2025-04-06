@@ -59,9 +59,9 @@ in(layer_0) > out(layer_0)  # do nothing.
 
 in(layer_0) > contrast(20%) > invert() > out(layer_0)  # apply contrast+20%, then invert it.
 
-in(layer_1) > splitV(50%) > *multi(*upper, *lower)  # apply grayscale, split vertically in half.
+in(layer_1) > splitV(50%) > multiout(*upper, *lower)  # apply grayscale, split vertically in half.
 upper > jpeg_glitch(9, 72) > *merged                # apply jpeg_glitch for the upper half of layer1.
-lower > invert() > *merged                          # invert the lower half of layer1.
+lower > invert() > merged                          # invert the lower half of layer1.
 merged > out(layer_1)                               # merge split images and throw back to layer1.
 
 # note 1: *upper, *lower, and *merged are called "subout nodes" (basically like named pipes.)

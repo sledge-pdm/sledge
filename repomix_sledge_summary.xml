@@ -1,0 +1,916 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: src/components/common/dsl/DSLEditor.tsx, src/dsl/DSL.ts, src/dsl/nodes/AvailableNodes.ts, src/dsl/DSLRunner.ts, src-tauri/src/pipeline/parser.rs, src-tauri/src/pipeline/runner.rs, src/components/canvas/drawable_canvas/DrawableCanvas.tsx, README.md, tsconfig.json, src/components/canvas/controls/Controls.tsx, src/models/LayerImage.ts, src/models/Layer.ts
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+README.md
+src-tauri/src/pipeline/parser.rs
+src-tauri/src/pipeline/runner.rs
+src/components/canvas/controls/Controls.tsx
+src/components/canvas/drawable_canvas/DrawableCanvas.tsx
+src/components/common/dsl/DSLEditor.tsx
+src/dsl/DSL.ts
+src/dsl/DSLRunner.ts
+src/dsl/nodes/AvailableNodes.ts
+src/models/Layer.ts
+src/models/LayerImage.ts
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src-tauri/src/pipeline/runner.rs">
+use super::parser::{parse_pipeline, PipelineNode};
+use crate::commands::{brightness, glitch, grayscale, invert, jpeg_glitch, sepia};
+use crate::commands::{decode_image_base64, encode_image_base64};
+
+#[tauri::command]
+pub fn run_pipeline(
+    dsl: String,
+    encoded: String,
+    width: usize,
+    height: usize,
+) -> Result<String, String> {
+    // DSL文字列をパースしてASTにする
+    let nodes = parse_pipeline(&dsl)?;
+
+    // 画像をデコードしてRGBAのバッファを作る
+    let mut buffer = decode_image_base64(&encoded)?;
+
+    // パイプラインノードを順に処理
+    for node in nodes {
+        match node {
+            PipelineNode::Command { name, args } => {
+                // matchで対応コマンドを呼び分け（必要なら引数あり）
+                buffer = match name.as_str() {
+                    "grayscale" => {
+                        let encoded = encode_image_base64(&buffer)?;
+                        decode_image_base64(&grayscale(encoded, width, height)?)?
+                    }
+                    "glitch" => {
+                        if args.len() != 1 {
+                            return Err("glitch requires 1 argument (seed)".to_string());
+                        }
+                        let seed: u64 = args[0]
+                            .parse()
+                            .map_err(|_| "Invalid seed value".to_string())?;
+
+                        let encoded = encode_image_base64(&buffer)?;
+                        decode_image_base64(&glitch(encoded, seed)?)?
+                    }
+                    "jpeg_glitch" => {
+                        if args.len() != 1 {
+                            return Err("jpeg_glitch requires 1 argument (seed)".to_string());
+                        }
+                        let seed: u64 = args[0]
+                            .parse()
+                            .map_err(|_| "Invalid seed value".to_string())?;
+
+                        let encoded = encode_image_base64(&buffer)?;
+                        return jpeg_glitch(encoded, width, height, seed);
+                    }
+                    "invert" => {
+                        let encoded = encode_image_base64(&buffer)?;
+                        decode_image_base64(&invert(encoded, width, height)?)?
+                    }
+                    "sepia" => {
+                        let encoded = encode_image_base64(&buffer)?;
+                        decode_image_base64(&sepia(encoded, width, height)?)?
+                    }
+                    "brightness" => {
+                        if args.len() != 1 {
+                            return Err("brightness requires 1 argument".to_string());
+                        }
+                        let delta: i8 = args[0]
+                            .parse()
+                            .map_err(|_| "Invalid number for brightness".to_string())?;
+                        let encoded = encode_image_base64(&buffer)?;
+                        decode_image_base64(&brightness(encoded, width, height, delta)?)?
+                    }
+                    _ => return Err(format!("Unknown command: {name}")),
+                };
+            }
+
+            PipelineNode::Output { target: _ } => {
+                // 今のところ *out(layerX) は文字列だけ保持 → JSに返すだけ
+                // ここで base64 して return
+                return encode_image_base64(&buffer);
+            }
+        }
+    }
+
+    Err("No *out(...) specified in pipeline.".to_string())
+}
+</file>
+
+<file path="src/components/common/dsl/DSLEditor.tsx">
+import { Component, createSignal, For, onMount } from "solid-js";
+import { ALL_NODES } from "~/dsl/nodes/AvailableNodes";
+import { activeIndex, activeLayer, setLayerStore } from "~/stores/Store";
+
+const DSLEditor: Component<{}> = (props) => {
+    let [activeDSLStr, setDSLStr] = createSignal("");
+
+    onMount(() => {
+        setDSLStr(activeLayer()?.dsl.toString() || "");
+    })
+
+    return (
+        <div style={{ display: "flex", position: "relative" }}>
+            <p style={{ "white-space": "pre-wrap" }}>{activeDSLStr()}</p>
+            <div style={{ display: "flex", "flex-direction": "column", gap: "10px", "z-index": 10 }}>
+                <p>select command.</p>
+                <For each={ALL_NODES}>
+                    {(node) => {
+                        return (
+                            <a onClick={async () => {
+                                const dsl = activeLayer()?.dsl;
+                                if (dsl === undefined) return;
+                                dsl.addNode(node);
+                                setLayerStore("layers", activeIndex(), "dsl", dsl)
+                                setDSLStr(dsl.toString())
+                            }} style={{ cursor: "pointer" }}>
+                                &lt; {node.name}
+                            </a>
+                        );
+                    }}
+                </For></div>;
+        </div>
+    );
+};
+
+export default DSLEditor;
+</file>
+
+<file path="src/dsl/DSL.ts">
+import { SledgeNode } from "~/dsl/nodes/SledgeNodes";
+import { findLayerById } from "~/stores/Store";
+import { LayerIn } from "./nodes/pass/LayerIn";
+import { LayerOut } from "./nodes/pass/LayerOut";
+
+export class DSL {
+  layerIn: LayerIn;
+  readonly nodes: SledgeNode[];
+  layerOut: LayerOut;
+
+  constructor(inLayerId: string, outLayerId: string) {
+    this.layerIn = new LayerIn(inLayerId);
+    this.nodes = [];
+    this.layerOut = new LayerOut(outLayerId);
+  }
+
+  public addNode(node: SledgeNode) {
+    this?.nodes.push(node);
+  }
+
+  public build(exceptIn: boolean = false): string | undefined {
+    const nodes = exceptIn
+      ? [...this.nodes, this.layerOut]
+      : [this.layerIn, ...this.nodes, this.layerOut];
+
+    let nodeStrings: string[] = [];
+    let isAllNodeParseSuccessful = true;
+    nodes.forEach((node, i) => {
+      const nodeStr = node.getNodeString();
+      if (nodeStr !== undefined) nodeStrings.push(nodeStr);
+      else {
+        isAllNodeParseSuccessful = false;
+        throw `DSL parse failed in: ${node.name} [${i}]`;
+      }
+    });
+
+    if (isAllNodeParseSuccessful) {
+      // if all nodes parsed successfully
+      return nodeStrings.join(" > "); // in(inLayerId) > out(outLayerId) by default
+    } else {
+      // if some nodes failed to parse
+      return undefined;
+    }
+  }
+
+  public toString(): string {
+    let str = this.build();
+    if (str === undefined) throw "DSL parse failed.";
+    else {
+      // 読みやすくする
+      const inId = this.layerIn.layerId;
+      const outId = this.layerOut.layerId;
+      if (inId !== undefined)
+        str = str.replaceAll(inId, `${findLayerById(inId)?.name || "N/A"} ID`);
+      if (outId !== undefined)
+        str = str.replaceAll(
+          outId,
+          `${findLayerById(outId)?.name || "N/A"} ID`,
+        );
+      str = str.replaceAll(" > ", "\n> ");
+      return str;
+    }
+  }
+}
+</file>
+
+<file path="src/dsl/DSLRunner.ts">
+import { cloneImageData } from "~/models/LayerImage";
+import { decodeImageData, encodeImageData } from "~/utils/ImageUtils";
+import { safeInvoke } from "~/utils/tauri";
+import { DSL } from "./DSL";
+
+export async function runDSL(
+  dsl: DSL,
+  image: ImageData,
+): Promise<ImageData | undefined> {
+  const encoded = encodeImageData(cloneImageData(image));
+
+  const dslStr = dsl.build(true);
+  if (dslStr === undefined) return;
+
+  const result = await safeInvoke<string>("run_pipeline", {
+    dsl: dslStr,
+    encoded,
+    width: image.width,
+    height: image.height,
+  });
+
+  if (!result) return;
+  return decodeImageData(result, image.width, image.height);
+}
+</file>
+
+<file path="src/dsl/nodes/AvailableNodes.ts">
+import { Brightness } from "./effect/Brightness";
+import { GrayScale } from "./effect/GrayScale";
+import { Invert } from "./effect/Invert";
+import { Sepia } from "./effect/Sepia";
+import { JpegGlitch } from "./fracture/JpegGlitch";
+import { SledgeNode } from "./SledgeNodes";
+
+export const ALL_NODES: SledgeNode[] = [
+  // effect
+  new Brightness(),
+  new GrayScale(),
+  new Invert(),
+  new Sepia(),
+  // pass
+  // new LayerIn(""),
+  // new LayerOut(""),
+  // fracture
+  new JpegGlitch(),
+];
+</file>
+
+<file path="src/models/Layer.ts">
+import { v4 as uuidv4 } from "uuid";
+import { DSL } from "~/dsl/DSL";
+import { initImageForLayer } from "./LayerImage";
+
+export enum LayerType {
+  Dot,
+  Image,
+  Automate,
+}
+
+export type Layer = {
+  id: string;
+  name: string;
+  type: LayerType;
+  typeDescription: string; // 各タイプの説明
+  enabled: boolean;
+  dotMagnification: number;
+  dsl: DSL;
+};
+
+export const createLayer = (
+  name: string,
+  type: LayerType,
+  enabled = true,
+  dotMagnification = 1,
+  dsl?: DSL,
+): Layer => {
+  const id = uuidv4();
+  initImageForLayer(id, dotMagnification);
+  return {
+    id,
+    name,
+    type,
+    typeDescription: getTypeString(type),
+    enabled,
+    dotMagnification,
+    dsl: dsl || new DSL(id, id),
+  };
+};
+
+const magnificationList: number[] = [1, 2, 4];
+export const getNextMagnification = (dotMagnification: number) => {
+  let index = magnificationList.findIndex((m) => m === dotMagnification);
+  if (index != -1) {
+    // 循環
+    let nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0;
+    return magnificationList[nextIndex];
+  } else return 1;
+};
+
+function getTypeString(type: LayerType): string {
+  switch (type) {
+    case LayerType.Dot:
+      return "dot layer.";
+    case LayerType.Image:
+      return "image layer.";
+    case LayerType.Automate:
+      return "automate layer.";
+    default:
+      return "N/A.";
+  }
+}
+</file>
+
+<file path="src/models/LayerImage.ts">
+import { canvasStore, setImageStore, updateDSL } from "../stores/Store";
+
+export type LayerImageState = {
+  current: ImageData;
+  DSLcurrent?: ImageData;
+  undoStack: ImageData[];
+  redoStack: ImageData[];
+};
+
+export function initImageForLayer(layerId: string, dotMagnification: number) {
+  const blank = new ImageData(
+    Math.round(canvasStore.canvas.width / dotMagnification),
+    Math.round(canvasStore.canvas.height / dotMagnification),
+  );
+  const dslBlank = new ImageData(
+    Math.round(canvasStore.canvas.width / dotMagnification),
+    Math.round(canvasStore.canvas.height / dotMagnification),
+  );
+  setImageStore(layerId, {
+    current: blank,
+    DSLcurrent: dslBlank,
+    undoStack: [],
+    redoStack: [],
+  });
+}
+
+export function updateImageData(layerId: string, newData: ImageData) {
+  setImageStore(layerId, (state: LayerImageState) => {
+    const prev = state.current;
+    return {
+      current: newData,
+      undoStack: [...state.undoStack, prev],
+      redoStack: [],
+    };
+  });
+}
+
+export function undo(layerId: string) {
+  console.log("undo");
+  setImageStore(layerId, (state) => {
+    if (state.undoStack.length === 0) return state;
+    const prev = state.undoStack[state.undoStack.length - 1];
+    const newUndo = state.undoStack.slice(0, -1);
+    const newRedo = [state.current, ...state.redoStack];
+    return { current: prev, undoStack: newUndo, redoStack: newRedo };
+  });
+  updateDSL(layerId);
+}
+
+export function redo(layerId: string) {
+  setImageStore(layerId, (state) => {
+    if (state.redoStack.length === 0) return state;
+    const next = state.redoStack[0];
+    const newRedo = state.redoStack.slice(1);
+    const newUndo = [...state.undoStack, state.current];
+    return { current: next, undoStack: newUndo, redoStack: newRedo };
+  });
+  updateDSL(layerId);
+}
+
+export function cloneImageData(src: ImageData): ImageData {
+  return new ImageData(
+    new Uint8ClampedArray(src.data), // ← 必ず新しい配列
+    src.width,
+    src.height,
+  );
+}
+</file>
+
+<file path="src-tauri/src/pipeline/parser.rs">
+#[derive(Debug)]
+pub enum PipelineNode {
+    // コマンド（名前と引数）
+    Command { name: String, args: Vec<String> },
+    // 出力指定ノード（*out(layerX) 形式）
+    Output { target: String },
+}
+
+/// パイプライン文字列をパースし、PipelineNodeのベクタを返す
+pub fn parse_pipeline(input: &str) -> Result<Vec<PipelineNode>, String> {
+    input
+        .split('>')
+        .map(|part| {
+            let trimmed = part.trim();
+            // 出力指定ノード： out(layerX)
+            if let Some(captures) = trimmed
+                .strip_prefix("out(")
+                .and_then(|s| s.strip_suffix(")"))
+            {
+                Ok(PipelineNode::Output {
+                    target: captures.to_string(),
+                })
+            }
+            // コマンド＋引数：command(arg1,arg2)
+            else if let Some(idx) = trimmed.find('(') {
+                if trimmed.ends_with(')') {
+                    let name = &trimmed[..idx];
+                    let args_str = &trimmed[idx + 1..trimmed.len() - 1];
+                    let args = args_str.split(',').map(|s| s.trim().to_string()).collect();
+                    Ok(PipelineNode::Command {
+                        name: name.to_string(),
+                        args,
+                    })
+                } else {
+                    Err(format!("Malformed command: {trimmed}"))
+                }
+            }
+            // 引数なしの単純なコマンド
+            else {
+                Ok(PipelineNode::Command {
+                    name: trimmed.to_string(),
+                    args: vec![],
+                })
+            }
+        })
+        .collect()
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "paths": {
+      "~/*": ["./src/*"]
+    }
+  }
+}
+</file>
+
+<file path="src/components/canvas/controls/Controls.tsx">
+import { Component, createSignal, For } from "solid-js";
+import { initImageForLayer, redo, undo, } from "~/models/LayerImage";
+import { activeImage, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, setLayerStore, updateDSL, } from "~/stores/Store";
+
+import styles from "./controls.module.css"
+import DSLEditor from "~/components/common/dsl/DSLEditor";
+import { DSL } from "~/dsl/DSL";
+
+const Controls: Component<{}> = (props) => {
+    const zoom = () => metricStore.zoom;
+    const lastMouseCanvas = () => metricStore.lastMouseCanvas;
+    const lastMouseLayer = () => metricStore.lastMouseLayer;
+
+    const [width, setWidth] = createSignal(0);
+    const [height, setHeight] = createSignal(0);
+
+    const changeCanvasSize = (e: any) => {
+        e.preventDefault();
+        setCanvasStore("canvas", "width", width);
+        setCanvasStore("canvas", "height", height);
+    }
+
+    const resetAllLayers = (e: any) => {
+
+        setLayerStore("imageLayer", "dsl", new DSL(layerStore.imageLayer.id, layerStore.imageLayer.id))
+        initImageForLayer(layerStore.imageLayer.id, layerStore.imageLayer.dotMagnification);
+        updateDSL(layerStore.imageLayer.id)
+
+        allLayers().forEach((layer, i) => {
+            setLayerStore("layers", i, "dsl", new DSL(layer.id, layer.id))
+            initImageForLayer(layer.id, layer.dotMagnification);
+            updateDSL(layer.id)
+        });
+    }
+
+    return <>
+        <p>canvas.</p>
+
+        <p>({lastMouseCanvas().x}, {lastMouseCanvas().y}) IN CANVAS.</p>
+        <p>({lastMouseLayer().x}, {lastMouseLayer().y}) IN LAYER.</p>
+        <p>x{zoom().toFixed(2)}</p>
+        <p>UNDO STACKS.</p>
+        <For each={activeImage()?.undoStack}>
+            {item =>
+                <p>{item.toString()}</p>
+            }
+        </For>
+        <div class={styles["top-right-button-container"]}>
+            <p class={styles.button}>out</p>
+        </div>
+        <div class={styles["top-right-nav"]}>
+            <p class={styles.undo_redo} onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                undo(layerStore.activeLayerId)
+            }}>&lt;&lt;</p>
+            <p class={styles.undo_redo} onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                redo(layerStore.activeLayerId)
+            }}>&gt;&gt;</p>
+
+            {/* <div>
+                <p class={styles.undo_redo} onClick={async (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    await runAndApplyActive(ImageCommands.INVERT, activeImage().current);
+                }}>INVERT!!</p>
+                <p style={{ "font-size": "1rem" }}>{responseFromRust()}</p>
+            </div> */}
+
+            <DSLEditor />
+
+        </div >
+        <div class={styles["bottom-history"]}>
+
+            <form onSubmit={(e) => changeCanvasSize(e)}>
+                <input type="number" name="width" onChange={(e) => setWidth(Number(e.target.value))} value={canvasStore.canvas.width} min={0} max={1200} required />
+                <input type="number" name="height" onChange={(e) => setHeight(Number(e.target.value))} value={canvasStore.canvas.height} min={0} max={1200} required />
+                <button type="submit">change canvas size</button>
+            </form>
+
+            <button onClick={resetAllLayers}>RESET ALL LAYERS</button>
+
+            <div class={styles["history-row"]}>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>undo. &gt;</p>
+                <p class={styles["history-text"]}>redo. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>erase. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+                <p class={styles["history-text"]}>stroke. &gt;</p>
+            </div>
+        </div>
+    </>;
+};
+
+export default Controls;
+</file>
+
+<file path="src/components/canvas/drawable_canvas/DrawableCanvas.tsx">
+import { Component, onMount, onCleanup, createEffect } from "solid-js";
+import { penStore, layerStore, canvasStore, setMetricStore, imageStore, hexToRGB, updateDSL } from "~/stores/Store";
+import styles from "./drawable_canvas.module.css";
+import { Layer } from "~/models/Layer";
+import { cloneImageData, redo, undo, updateImageData } from "~/models/LayerImage";
+import { drawLine, roundPosition } from "~/utils/MetricUtils";
+import { drawBrush } from "~/utils/BrushUtils";
+import { setPixel } from "~/utils/ImageUtils";
+import { DSL } from "~/dsl/DSL";
+
+type Props = {
+    layer: Layer;
+    zoom: number;
+    zIndex: number;
+};
+
+export const DrawableCanvas: Component<Props> = (props) => {
+    let canvasRef: HTMLCanvasElement | undefined;
+    let ctx: CanvasRenderingContext2D | null = null;
+    let lastPos: { x: number; y: number } | null = null;
+
+    const totalMag = () => props.layer.dotMagnification * props.zoom;
+
+    const currentPen = () => penStore.pens[penStore.usingIndex];
+    const isActiveLayer = () => props.layer.id === layerStore.activeLayerId;
+
+    const internalWidth = () => canvasStore.canvas.width / props.layer.dotMagnification;
+    const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
+
+    const styleWidth = () => internalWidth() * totalMag();
+    const styleHeight = () => internalHeight() * totalMag();
+
+    function getOffset() {
+        const rect = canvasRef!.getBoundingClientRect();
+        return { x: rect.left, y: rect.top };
+    }
+
+    function shouldDraw(): boolean {
+        if (!props.layer || !isActiveLayer()) return false;
+        if (!props.layer.enabled) {
+            // companionSay("it's disabled layer.");
+            return false;
+        }
+        return true;
+    }
+
+    function isMouseOnCanvas(e: MouseEvent) {
+        const offset = getOffset();
+        const mouseCanvasPos = roundPosition({
+            x: e.clientX - offset.x,
+            y: e.clientY - offset.y
+        });
+        // check if mouse on canvas
+        if (mouseCanvasPos.x < 0 || styleWidth() < mouseCanvasPos.x || mouseCanvasPos.y < 0 || styleHeight() < mouseCanvasPos.y) return false;
+        else return true;
+    }
+
+    let drawingBuffer: ImageData | null = null;
+    //let tempDSL: string | undefined = undefined;
+
+    function handlePointerDown(e: PointerEvent) {
+        if (!shouldDraw() || !isMouseOnCanvas(e)) return;
+        const offset = getOffset();
+        lastPos = roundPosition({
+            x: (e.clientX - offset.x) / totalMag(),
+            y: (e.clientY - offset.y) / totalMag()
+        });
+        //tempDSL = props.layer.dsl.build(true);
+        console.log("pointer down. stroke started");
+        drawingBuffer = cloneImageData(imageStore[props.layer.id].current);
+    }
+
+    function handlePointerMove(e: PointerEvent) {
+        if (!ctx) return;
+        const offset = getOffset();
+        const mouseCanvasPos = roundPosition({
+            x: e.clientX - offset.x,
+            y: e.clientY - offset.y
+        });
+        const mouseLayerPos = roundPosition({
+            x: (e.clientX - offset.x) / totalMag(),
+            y: (e.clientY - offset.y) / totalMag()
+        });
+        setMetricStore("lastMouseCanvas", mouseCanvasPos);
+        setMetricStore("lastMouseLayer", mouseLayerPos);
+
+        if (!lastPos || !lastPos.x || !lastPos.y) return;
+
+        if (!shouldDraw()) return;
+        if (!drawingBuffer) return;
+
+        if (!isMouseOnCanvas(e)) {
+            endStroke();
+        }
+
+        // draw into drawingBuffer instead of imageStore
+        const imageData = drawingBuffer;
+        const pen = currentPen();
+        const [r, g, b] = hexToRGB(pen.color);
+
+        drawBrush(mouseLayerPos.x, mouseLayerPos.y, pen.size, (x, y) => {
+            if (pen.name === "eraser") {
+                setPixel(imageData, x, y, 0, 0, 0, 0);
+            } else {
+                setPixel(imageData, x, y, r, g, b, 255);
+            }
+        });
+
+        drawLine(lastPos.x, lastPos.y, mouseLayerPos.x, mouseLayerPos.y, (x, y) => {
+            drawBrush(x, y, pen.size, (px, py) => {
+                if (pen.name === "eraser") {
+                    setPixel(imageData, x, y, 0, 0, 0, 0);
+                } else {
+                    setPixel(imageData, px, py, r, g, b, 255);
+                }
+            });
+        });
+        ctx.putImageData(imageData, 0, 0);
+        lastPos = mouseLayerPos;
+    }
+
+    function handlePointerUp(e: MouseEvent) {
+        const offset = getOffset();
+        const mouseLayerPos = roundPosition({
+            x: (e.clientX - offset.x) / totalMag(),
+            y: (e.clientY - offset.y) / totalMag()
+        });
+
+        // 移動なし
+        if (lastPos && lastPos.x === mouseLayerPos.x && lastPos.y === mouseLayerPos.y) {
+            if (!ctx) return;
+            if (!drawingBuffer) return;
+            console.log("okay pix");
+            const imageData = drawingBuffer;
+            const pen = currentPen();
+            const [r, g, b] = hexToRGB(pen.color);
+
+            drawBrush(mouseLayerPos.x, mouseLayerPos.y, pen.size, (x, y) => {
+                if (pen.name === "eraser") {
+                    setPixel(imageData, x, y, 0, 0, 0, 0);
+                } else {
+                    setPixel(imageData, x, y, r, g, b, 255);
+                }
+            });
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        if (!isMouseOnCanvas(e)) return;
+        console.log("pointer up. stroke end");
+        endStroke();
+    }
+
+    function endStroke() {
+        if (drawingBuffer) {
+            updateImageData(props.layer.id, drawingBuffer);
+            updateDSL(props.layer.id)
+            drawingBuffer = null;
+        }
+        // tempDSL = undefined;
+        lastPos = null;
+    }
+
+    onMount(() => {
+        ctx = canvasRef?.getContext("2d") ?? null;
+
+        window.addEventListener("pointerdown", handlePointerDown);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
+        window.addEventListener("keydown", handleKeydown);
+    });
+
+    function handleKeydown(e: KeyboardEvent) {
+        if (e.ctrlKey && e.key === "z") {
+            undo(layerStore.activeLayerId);
+        } else if (e.ctrlKey && e.key === "y") {
+            redo(layerStore.activeLayerId);
+        }
+    }
+
+    onCleanup(() => {
+        window.removeEventListener("pointerdown", handlePointerDown);
+        window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("pointerup", handlePointerUp);
+        window.removeEventListener("keydown", handleKeydown);
+    });
+    createEffect(() => {
+        const DSLcurrent = imageStore[props.layer.id]?.DSLcurrent;
+        const current = imageStore[props.layer.id]?.current;
+        if (ctx && (DSLcurrent || current)) {
+            ctx.putImageData(DSLcurrent || current, 0, 0);
+        }
+    });
+
+    return (
+        <canvas
+            ref={canvasRef}
+            id={`canvas-${props.layer.id}`}
+            data-layer-id={props.layer.name}
+            classList={{
+                [styles["layer-canvas"]]: true,
+                [styles["dev-hint"]]: false,
+                [styles["hidden"]]: !props.layer.enabled,
+            }}
+            width={internalWidth()}
+            height={internalHeight()}
+            style={{
+                width: `${styleWidth()}px`,
+                height: `${styleHeight()}px`,
+                "z-index": props.zIndex,
+            }}
+        />
+    );
+};
+</file>
+
+<file path="README.md">
+# Sledge
+
+<img src="./public/readme_intro.png" alt="the picture of a well-drawn sledgehammer." width="500px"/>\
+
+> this project is pre-alpha.  
+> feel free to DM me: [@alphendp](https://x.com/alphendp)
+
+## build
+
+if you don't have tauri, install first (https://v2.tauri.app/ja/)
+
+```bash
+git clone https://gitlab.com/Innsbluck/sledge.git
+cd sledge
+npm install # install solidjs dependencies
+npm tauri dev # launch
+```
+
+## what you'll get
+
+### ■&ensp;&nbsp;pixel-perfect drawing experience
+
+- **no alpha channels**. \
+  erasing just works. nothing left behind.
+
+- **dot magnification** factor, such as `x1` or `x4`. \
+  it enables you to put some _out-of-place_ pixel art on a high-definition background.
+
+  <!-- some introduction picture for layers -->
+
+### \>\_ &nbsp;useful (or _unstable_) effects
+
+- built-in stuff:
+
+  - **standard effects** — `brightness`, `contrast`, `invert`
+
+  - **filter and split functions** — `splitV`, `colorRange`, `rect`
+
+  - **destructive effects** — `JPEG glitches`
+
+- all effects are written in Rust.
+
+  <!-- some introduction picture for the effects -->
+
+### :)&ensp;companion
+
+- pretty companion improves your drawing experiment.
+
+## DSL(Data Shaping Line)
+
+sledge's DSL(Data Shaping Line) is a flexible and powerful effect pipelines.
+
+```shell
+# layer_N: unique id for layerN
+# in(layer_N): read the image data from layer.
+# out(layer_N): output the image data to layer.
+
+in(layer_0) > out(layer_0)  # do nothing.
+
+in(layer_0) > contrast(20%) > invert() > out(layer_0)  # apply contrast+20%, then invert it.
+
+in(layer_1) > splitV(50%) > multiout(*upper, *lower)  # apply grayscale, split vertically in half.
+upper > jpeg_glitch(9, 72) > *merged                # apply jpeg_glitch for the upper half of layer1.
+lower > invert() > *merged                          # invert the lower half of layer1.
+merged > out(layer_1)                               # merge split images and throw back to layer1.
+
+# note 1: *upper, *lower, and *merged are called "subout nodes" (basically like named pipes.)
+# note 2: subout nodes automatically merge/override multiple inputs.
+```
+
+- supports the GUI node editor to add / swap / mutate effects.
+- of course, raw command-line input is also available.\
+  either way, dsl effects are applied to the image immediately and reactively.
+
+## tech
+
+- [SolidJS](https://www.solidjs.com/) (UI)
+- [Tauri](https://tauri.app/) (desktop wrapper)
+- [Rust](https://www.rust-lang.org/) (effect processing)
+- [speak.js](https://github.com/kripken/speak.js/) (TTS engine)
+</file>
+
+</files>

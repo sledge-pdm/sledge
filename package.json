@@ -13,6 +13,7 @@
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@tauri-apps/api": "^2.4.1",
+    "@thisbeyond/solid-dnd": "^0.7.5",
     "modern-normalize": "^3.0.1",
     "solid-js": "^1.9.5",
     "solidjs-use": "^2.3.0",

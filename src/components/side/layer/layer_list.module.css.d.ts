@@ -5,6 +5,7 @@ declare const styles: {
   readonly "dot": string;
   readonly "dot_magnif": string;
   readonly "dot_magnif_container": string;
+  readonly "drop_placeholder": string;
   readonly "image": string;
   readonly "image_insert_arrow": string;
   readonly "layer": string;

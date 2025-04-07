@@ -6,7 +6,8 @@
     "build": "vite build",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "watch:css": "tcm --watch"
+    "watch:css": "tcm --watch",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@jaames/iro": "^5.5.2",
@@ -25,6 +26,8 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.1",
     "npm-run-all2": "6.1.2",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "prettier-plugin-organize-imports": "^4.1.0",
     "stylelint": "^16.17.0",
     "typed-css-modules": "^0.9.1",

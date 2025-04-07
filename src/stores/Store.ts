@@ -25,22 +25,21 @@ export const [imageStore, setImageStore] = createStore<
 >({});
 export const activeImage = (): LayerImageState | undefined =>
   imageStore[layerStore.activeLayerId];
-// layer
-const DEFAULT_IMAGE_LAYER = createLayer("image1", LayerType.Image);
+// layerc
 const DEFAULT_LAYERS = [
+  // createLayer("image1", LayerType.Image),
   createLayer("dot1", LayerType.Dot, true, 1),
-  createLayer("auto1", LayerType.Automate, false),
+  // createLayer("auto1", LayerType.Automate, false),
   createLayer("dot2", LayerType.Dot, true, 2),
   createLayer("dot3", LayerType.Dot, true, 4),
 ];
 
 export const [layerStore, setLayerStore] = createStore({
-  imageLayer: DEFAULT_IMAGE_LAYER,
   layers: DEFAULT_LAYERS,
   activeLayerId: DEFAULT_LAYERS[0].id,
 });
 
-export const allLayers = () => [layerStore.imageLayer, ...layerStore.layers];
+export const allLayers = () => layerStore.layers;
 export const findLayerById = (id: string) =>
   allLayers().find((layer) => layer.id === id);
 export const activeLayer = () => findLayerById(layerStore.activeLayerId);

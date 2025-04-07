@@ -1,90 +1,86 @@
-import { Component } from "solid-js";
+import { Component, createSignal } from "solid-js";
 import { getNextMagnification, Layer, LayerType } from "~/models/Layer";
-import { layerStore, setLayerStore } from "~/stores/Store";
-
+import { allLayers, layerStore, setLayerStore } from "~/stores/Store";
 import styles from "../layer_list.module.css";
 import Light from "~/components/common/light/Light";
+import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
 
 interface LayerItemProps {
-    index: number;
     layer: Layer;
+    draggingId?: string | null;
 }
 
-const LayerItem: Component<LayerItemProps> = (props: LayerItemProps) => {
+const LayerItem: Component<LayerItemProps> = (props) => {
+    const {
+        layer, draggingId
+    } = props
+
+    const sortable = createSortable(layer.id);
+    const context = useDragDropContext();
+    const state = context?.[0];
+
+    const index = () => allLayers().indexOf(layer);
+
     let detClass: "dot" | "image" | "automate" | undefined;
-    switch (props.layer.type) {
-        case LayerType.Dot:
-            detClass = "dot";
-            break;
-        case LayerType.Image:
-            detClass = "image";
-            break;
-        case LayerType.Automate:
-            detClass = "automate";
-            break;
-        default:
-            detClass = undefined;
-            break;
+    switch (layer.type) {
+        case LayerType.Dot: detClass = "dot"; break;
+        case LayerType.Image: detClass = "image"; break;
+        case LayerType.Automate: detClass = "automate"; break;
     }
 
     const onDetClicked = () => {
-        setLayerStore("activeLayerId", props.layer.id);
+        setLayerStore("activeLayerId", layer.id);
     };
 
     const onPreviewClicked = () => {
-        if (props.layer.type === LayerType.Image) {
-            setLayerStore("imageLayer", "enabled", v => !v);
-        } else {
-            const indexInLayers = layerStore.layers.findIndex(
-                l => l.id === props.layer.id
-            );
-            if (indexInLayers !== -1) {
-                setLayerStore("layers", indexInLayers, "enabled", v => !v);
-            }
+        if (index() !== -1) {
+            setLayerStore("layers", index(), "enabled", v => !v);
         }
-    }
+    };
 
     const onMagnifClicked = () => {
-
-        let nextMagnification = getNextMagnification(props.layer.dotMagnification);
-        if (props.layer.type === LayerType.Image) {
-            setLayerStore("imageLayer", "dotMagnification", nextMagnification);
-        } else {
-            const indexInLayers = layerStore.layers.findIndex(
-                l => l.id === props.layer.id
-            );
-            if (indexInLayers !== -1) {
-                setLayerStore("layers", indexInLayers, "dotMagnification", nextMagnification);
-            }
+        const next = getNextMagnification(layer.dotMagnification);
+        if (index() !== -1) {
+            setLayerStore("layers", index(), "dotMagnification", next);
         }
-    }
+    };
 
-    const isActive = () => layerStore.activeLayerId === props.layer.id;
+    const isActive = () => layerStore.activeLayerId === layer.id;
 
-    return <li class={styles.layer}>
-        <p class={styles.type}>{props.layer.typeDescription}</p>
-        <p>{props.index}.</p>
-        <div class={[
-            styles.layer_det,
-            detClass && styles[detClass],
-            !props.layer.enabled && styles.disabled
-        ]
-            .filter(Boolean)
-            .join(" ")}
-            onClick={onDetClicked}>
-            <div class={styles.layer_preview}
-                onClick={onPreviewClicked} />
-            <p class={styles.name}> {props.layer.name}</p>
-            <div class={styles.dot_magnif_container}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onMagnifClicked();
-                }}>
-                <p class={styles.dot_magnif}>x{props.layer.dotMagnification}</p>
+    return (
+        <div
+            class={styles.layer}
+            classList={{
+                "opacity-50": sortable.isActiveDraggable,
+                "transition-transform": state && !!state.active.draggable
+            }}
+            style={{ opacity: draggingId === layer.id ? 0.4 : 1 }}
+            ref={sortable}>
+            <p class={styles.type}>{layer.typeDescription}</p>
+            <p>{index()}.</p>
+            <div
+                class={[
+                    styles.layer_det,
+                    detClass && styles[detClass],
+                    !layer.enabled && styles.disabled,
+                ].filter(Boolean).join(" ")}
+                onClick={onDetClicked}
+            >
+                <div class={styles.layer_preview} onClick={onPreviewClicked} />
+                <p class={styles.name}> {layer.name}</p>
+                <div
+                    class={styles.dot_magnif_container}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onMagnifClicked();
+                    }}
+                >
+                    <p class={styles.dot_magnif}>x{layer.dotMagnification}</p>
+                </div>
+                <Light class={styles.active_light} on={isActive()} />
             </div>
-            <Light class={styles.active_light} on={isActive()} />
         </div>
-    </li >;
+    );
 };
 
 export default LayerItem;

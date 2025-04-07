@@ -99,3 +99,10 @@
   margin-right: 8px;
   align-self: center;
 }
+
+.drop_placeholder {
+  height: 32px;
+  margin: 4px 0;
+  border: 2px dashed #aaa;
+  border-radius: 4px;
+}

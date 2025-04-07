@@ -3,38 +3,20 @@ import ColorBox from "~/components/common/color_box/ColorBox";
 import { colorStore, penStore, setPenStore } from "~/stores/Store";
 
 import styles from "./color.module.css"
+import ColorPicker from "~/components/common/color_picker/ColorPicker";
+import { setCurrentPenColor } from "~/models/Pen";
 
 const Color: Component<{}> = (props) => {
-    const colorBoxContainerStyle: JSX.CSSProperties = {
-        "position": "relative",
-        "display": "flex",
-        "width": "fit-content",
-        "flex-direction": "column",
-        "margin-left": "10px",
-    };
-    const colorBoxSpoilStyle: JSX.CSSProperties = {
-        "position": "absolute",
-        "top": 0,
-        "right": 0,
-        "font-size": "0.5rem",
-    };
-    const colorRowStyle: JSX.CSSProperties = {
-        "display": "flex",
-        "flex-direction": "row",
-        "gap": "5px",
-        "margin": "10px 0 30px 0",
-    };
 
     const onColorClicked = (color: string, index: number) => {
-        setPenStore("pens", penStore.usingIndex, "color", color);
+        setCurrentPenColor(color);
     }
 
     return <div>
         <p>color.</p>
-        <div style={colorBoxContainerStyle}>
-            <p style={colorBoxSpoilStyle}>[ spoil ]</p>
-            <div class={styles.color_picker} />
-            <div style={colorRowStyle}>
+        <div class={styles.color_content}>
+            <div class={styles.color_picker}><ColorPicker /></div>
+            <div class={styles.swatch_container}>
                 <For each={colorStore.swatches}>
                     {(item, index) => <ColorBox
                         color={item}

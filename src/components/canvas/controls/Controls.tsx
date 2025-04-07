@@ -11,26 +11,22 @@ const Controls: Component<{}> = (props) => {
     const lastMouseCanvas = () => metricStore.lastMouseCanvas;
     const lastMouseLayer = () => metricStore.lastMouseLayer;
 
-    const [width, setWidth] = createSignal(0);
-    const [height, setHeight] = createSignal(0);
+    const [width, setWidth] = createSignal(canvasStore.canvas.width);
+    const [height, setHeight] = createSignal(canvasStore.canvas.height);
 
     const changeCanvasSize = (e: any) => {
         e.preventDefault();
         setCanvasStore("canvas", "width", width);
         setCanvasStore("canvas", "height", height);
+
+        allLayers().forEach((layer, i) => {
+            initImageForLayer(layer.id, layer.dotMagnification);
+            updateDSL(layer.id);
+        });
     }
 
     const resetAllLayers = (e: any) => {
-
-        setLayerStore("imageLayer", "dsl", new DSL(layerStore.imageLayer.id, layerStore.imageLayer.id))
-        initImageForLayer(layerStore.imageLayer.id, layerStore.imageLayer.dotMagnification);
-        updateDSL(layerStore.imageLayer.id)
-
-        allLayers().forEach((layer, i) => {
-            setLayerStore("layers", i, "dsl", new DSL(layer.id, layer.id))
-            initImageForLayer(layer.id, layer.dotMagnification);
-            updateDSL(layer.id)
-        });
+        window.location.reload();
     }
 
     return <>
@@ -75,8 +71,8 @@ const Controls: Component<{}> = (props) => {
         <div class={styles["bottom-history"]}>
 
             <form onSubmit={(e) => changeCanvasSize(e)}>
-                <input type="number" name="width" onChange={(e) => setWidth(Number(e.target.value))} value={canvasStore.canvas.width} min={0} max={1200} required />
-                <input type="number" name="height" onChange={(e) => setHeight(Number(e.target.value))} value={canvasStore.canvas.height} min={0} max={1200} required />
+                <input type="number" name="width" onChange={(e) => setWidth(Number(e.target.value))} value={width()} min={0} max={1200} required />
+                <input type="number" name="height" onChange={(e) => setHeight(Number(e.target.value))} value={height()} min={0} max={1200} required />
                 <button type="submit">change canvas size</button>
             </form>
 

@@ -1,10 +1,10 @@
 import { Component, For, JSX } from "solid-js";
-import ColorBox from "~/components/common/color_box/ColorBox";
 import { colorStore, penStore, setPenStore } from "~/stores/Store";
 
 import styles from "./color.module.css"
-import ColorPicker from "~/components/common/color_picker/ColorPicker";
-import { setCurrentPenColor } from "~/models/Pen";
+import ColorPicker from "~/components/color/color_picker/ColorPicker";
+import { setCurrentPenColor } from "~/models/types/Pen";
+import ColorBox from "../common/atoms/ColorBox";
 
 const Color: Component<{}> = (props) => {
 

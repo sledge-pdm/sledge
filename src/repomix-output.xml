@@ -363,11 +363,43 @@ export = styles;
   justify-content: center;
   display: flex;
 }
+
+.resize-drag-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  padding: 0;
+  font-family: sans-serif;
+  z-index: 100;
+
+  touch-action: none;
+
+  /* This makes things *much* easier */
+  box-sizing: border-box;
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+}
+.image-container:focus-within {
+  border: 2px black solid;
+}
+
+.resize-image {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
 </file>
 
 <file path="components/canvas/canvas_stack/canvas_stack.module.css.d.ts">
 declare const styles: {
   readonly "canvas_stack": string;
+  readonly "image-container": string;
+  readonly "resize-drag-container": string;
+  readonly "resize-image": string;
 };
 export = styles;
 </file>
@@ -380,9 +412,69 @@ import styles from "./canvas_stack.module.css"
 import { DrawableCanvas } from "../drawable_canvas/DrawableCanvas";
 
 import { metricStore } from "~/stores/Store";
+import interact from "interactjs";
 
 const CanvasStack: Component<{}> = (props) => {
+
     const zoom = () => metricStore.zoom;
+    let ref: HTMLDivElement;
+
+    onMount(() => {
+        interact(ref)
+            .resizable({
+                // resize from all edges and corners
+                edges: { left: true, right: true, bottom: true, top: true },
+
+                listeners: {
+                    move(event) {
+                        var target = event.target
+                        var x = (parseFloat(target.getAttribute('data-x')) || 0)
+                        var y = (parseFloat(target.getAttribute('data-y')) || 0)
+
+                        // update the element's style
+                        target.style.width = event.rect.width + 'px'
+                        target.style.height = event.rect.height + 'px'
+
+                        // translate when resizing from top or left edges
+                        x += event.deltaRect.left
+                        y += event.deltaRect.top
+
+                        target.style.transform = 'translate(' + x + 'px,' + y + 'px)'
+
+                        target.setAttribute('data-x', x)
+                        target.setAttribute('data-y', y)
+                    }
+                },
+                modifiers: [
+                    // keep the edges inside the parent
+                    interact.modifiers.restrictEdges({
+                        outer: 'parent'
+                    }),
+
+                    // minimum size
+                    interact.modifiers.restrictSize({
+                        min: { width: 100, height: 50 }
+                    })
+                ],
+
+                inertia: true
+            })
+            .draggable({
+                listeners: {
+                    move(event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const target = event.target;
+                        const x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
+
+                        target.style.transform = `translate(${x}px, ${y}px)`;
+                        target.setAttribute("data-x", x);
+                        target.setAttribute("data-y", y);
+                    },
+                },
+            })
+    });
     onMount(() => {
         if (metricStore.adjustZoomOnCanvasChange) {
             let adjustedZoom = 600 / canvasStore.canvas.height;
@@ -399,26 +491,33 @@ const CanvasStack: Component<{}> = (props) => {
     })
 
     return (
-        <div class={styles.canvas_stack}
-            style={{
-                width: `${canvasStore.canvas.width * zoom()}px`,
-                height: `${canvasStore.canvas.height * zoom()}px`,
-            }}
-            onWheel={(e) => {
-                e.preventDefault();
-                const delta = e.deltaY > 0 ? -0.1 : 0.1;
-                const nextZoom = Math.max(0.1, Math.min(8, metricStore.zoom + delta));
-                setMetricStore("zoom", nextZoom);
-            }}
-        >
-            <For each={allLayers()}>
-                {(layer, index) => (
-                    <DrawableCanvas
-                        layer={layer}
-                        zoom={zoom()}
-                        zIndex={allLayers().length - index()} />
-                )}
-            </For>
+        <div style={{ position: "relative" }}>
+            <div class={styles.canvas_stack}
+                style={{
+                    width: `${canvasStore.canvas.width * zoom()}px`,
+                    height: `${canvasStore.canvas.height * zoom()}px`,
+                }}
+                onWheel={(e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    const nextZoom = Math.max(0.1, Math.min(8, metricStore.zoom + delta));
+                    setMetricStore("zoom", nextZoom);
+                }}
+            >
+
+                <For each={allLayers()}>
+                    {(layer, index) => (
+                        <DrawableCanvas
+                            layer={layer}
+                            zoom={zoom()}
+                            zIndex={allLayers().length - index()} />
+                    )}
+                </For>
+            </div>
+            <div class={styles["resize-drag-container"]} ref={(r) => ref = r} onMouseDown={(e) => e.preventDefault()}>
+                <div class={styles["image-container"]} onMouseDown={(e) => e.preventDefault()}>
+                    <img class={styles["resize-image"]} src="/333121.jpg" /></div>
+            </div>
         </div>
     );
 };
@@ -432,10 +531,14 @@ import CanvasStack from "./canvas_stack/CanvasStack";
 import styles from "./canvas_area.module.css"
 import Controls from "./controls/Controls";
 
+import interact from "interactjs";
+import { onMount } from "solid-js";
+
 export default () => {
 
     return (
         <div class={styles.canvas_area}>
+
             <div class={styles.canvas_stack_container}>
                 <CanvasStack />
             </div>
@@ -2557,11 +2660,11 @@ export const [imageStore, setImageStore] = createStore<
 >({});
 export const activeImage = (): LayerImageState | undefined =>
   imageStore[layerStore.activeLayerId];
-// layerc
+// layer
 const DEFAULT_LAYERS = [
-  // createLayer("image1", LayerType.Image),
+  // createLayer("image1", LayerType.Image), ←　廃止
   createLayer("dot1", LayerType.Dot, true, 1),
-  // createLayer("auto1", LayerType.Automate, false),
+  createLayer("auto1", LayerType.Automate, false),
   createLayer("dot2", LayerType.Dot, true, 2),
   createLayer("dot3", LayerType.Dot, true, 4),
 ];

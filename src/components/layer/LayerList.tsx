@@ -1,5 +1,5 @@
 import { Component, For, createSignal } from "solid-js";
-import LayerItem from "./layer_item/LayerItem";
+import LayerItem from "./LayerItem";
 import { allLayers, layerStore, setLayerStore } from "~/stores/Store";
 import styles from "./layer_list.module.css";
 import { Arrow } from "./Arrow";

@@ -1,9 +1,9 @@
 import { Component, createSignal } from "solid-js";
-import ColorBox from "~/components/common/color_box/ColorBox";
+import ColorBox from "~/components/common/atoms/ColorBox";
 import Light from "~/components/common/light/Light";
 import Slider from "~/components/common/slider/Slider";
 import { sayRandomQuote } from "~/components/common/companion/QuotePool";
-import { Pen } from "~/models/Pen";
+import { Pen } from "~/models/types/Pen";
 import { penStore, setPenStore } from "~/stores/Store";
 
 import styles from "../pen_config.module.css"

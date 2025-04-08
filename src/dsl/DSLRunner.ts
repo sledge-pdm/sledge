@@ -1,4 +1,4 @@
-import { cloneImageData } from "~/models/LayerImage";
+import { cloneImageData } from "~/models/factories/utils";
 import { decodeImageData, encodeImageData } from "~/utils/ImageUtils";
 import { safeInvoke } from "~/utils/tauri";
 import { DSL } from "./DSL";

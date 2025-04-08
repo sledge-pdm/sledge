@@ -1,10 +1,12 @@
 import { Component, createSignal, For } from "solid-js";
-import { initImageForLayer, redo, undo, } from "~/models/LayerImage";
-import { activeImage, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, setLayerStore, updateDSL, } from "~/stores/Store";
+import { activeImage, activeLayer, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, setLayerStore, updateDSL, } from "~/stores/Store";
 
 import styles from "./controls.module.css"
 import DSLEditor from "~/components/common/dsl/DSLEditor";
-import { DSL } from "~/dsl/DSL";
+import ImportImageButton from "~/components/common/atoms/ImportImageButton";
+import { exportActiveLayerUpscaled } from "~/utils/export";
+import { initLayer } from "~/models/layer/layerImage";
+import { redo, undo } from "~/models/layer/history";
 
 const Controls: Component<{}> = (props) => {
     const zoom = () => metricStore.zoom;
@@ -20,7 +22,7 @@ const Controls: Component<{}> = (props) => {
         setCanvasStore("canvas", "height", height);
 
         allLayers().forEach((layer, i) => {
-            initImageForLayer(layer.id, layer.dotMagnification);
+            initLayer(layer.id, layer.dotMagnification);
             updateDSL(layer.id);
         });
     }
@@ -35,6 +37,7 @@ const Controls: Component<{}> = (props) => {
         <p>({lastMouseCanvas().x}, {lastMouseCanvas().y}) IN CANVAS.</p>
         <p>({lastMouseLayer().x}, {lastMouseLayer().y}) IN LAYER.</p>
         <p>x{zoom().toFixed(2)}</p>
+        <p>active: {activeLayer()?.name}</p>
         <p>UNDO STACKS.</p>
         <For each={activeImage()?.undoStack}>
             {item =>
@@ -42,7 +45,8 @@ const Controls: Component<{}> = (props) => {
             }
         </For>
         <div class={styles["top-right-button-container"]}>
-            <p class={styles.button}>out</p>
+            <ImportImageButton />
+            <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>export</p>
         </div>
         <div class={styles["top-right-nav"]}>
             <p class={styles.undo_redo} onClick={(e) => {

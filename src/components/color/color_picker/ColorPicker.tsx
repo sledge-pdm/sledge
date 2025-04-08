@@ -1,7 +1,7 @@
 import iro from "@jaames/iro";
 import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
 import { Component } from "solid-js";
-import { setCurrentPenColor } from "~/models/Pen";
+import { setCurrentPenColor } from "~/models/types/Pen";
 
 const ColorPicker: Component<{}> = (props) => {
     return <div ref={el => {

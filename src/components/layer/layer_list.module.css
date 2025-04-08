@@ -30,19 +30,20 @@
   border-left: 1px solid black;
   display: flex;
   flex-direction: row;
-  width: 100%;
+  flex-grow: 1;
   background-color: #f0f0f0;
   padding: 8px;
   cursor: pointer;
 }
-.layer_det:hover:not(:has(.dot_magnif_container:hover)):not(.disabled) {
+
+.layer_det:hover {
   filter: brightness(0.94);
   transform: translate(0, 1px);
 }
-/* det classes */
+
 .dot {
-  /* same as default */
 }
+
 .image {
   border-left: 1px solid red;
   background-color: #ffe0e0;

@@ -1,10 +1,11 @@
 import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 import { runDSL } from "~/dsl/DSLRunner";
-import { createCanvas } from "../models/Canvas";
-import { createLayer, LayerType } from "../models/Layer";
-import { LayerImageState } from "../models/LayerImage";
-import { createPen } from "../models/Pen";
+import { createLayer } from "~/models/factories/createLayer";
+import { createPen } from "~/models/factories/createPen";
+import { createCanvas } from "../models/types/Canvas";
+import { LayerType } from "../models/types/Layer";
+import { LayerImageState } from "../models/types/LayerImageState";
 
 // canvas
 export const [canvasStore, setCanvasStore] = createStore({
@@ -23,13 +24,13 @@ export const [metricStore, setMetricStore] = createStore({
 export const [imageStore, setImageStore] = createStore<
   Record<string, LayerImageState>
 >({});
-export const activeImage = (): LayerImageState | undefined =>
+export const activeImage = (): LayerImageState =>
   imageStore[layerStore.activeLayerId];
-// layerc
+// layer
 const DEFAULT_LAYERS = [
-  // createLayer("image1", LayerType.Image),
+  // createLayer("image1", LayerType.Image), ←　廃止
   createLayer("dot1", LayerType.Dot, true, 1),
-  // createLayer("auto1", LayerType.Automate, false),
+  createLayer("auto1", LayerType.Automate, false),
   createLayer("dot2", LayerType.Dot, true, 2),
   createLayer("dot3", LayerType.Dot, true, 4),
 ];
@@ -75,6 +76,7 @@ export const [penStore, setPenStore] = createStore({
   usingIndex: 0,
   pens: [createPen("pen", 1, "#000000"), createPen("eraser", 4, "none")],
 });
+export const currentPen = () => penStore.pens[penStore.usingIndex];
 
 export const updateDSL = (layerId: string) => {
   const dsl = findLayerById(layerId)?.dsl;

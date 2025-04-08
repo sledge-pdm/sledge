@@ -1,7 +1,7 @@
 import { Component } from "solid-js";
 import { JSX } from "solid-js/h/jsx-runtime";
 
-const Edge: Component<{}> = (props) => {
+const EdgeInfo: Component<{}> = (props) => {
     const edgeFlexStyle: JSX.CSSProperties = { "flex-grow": 1 };
 
     return <div id="edge">
@@ -11,4 +11,4 @@ const Edge: Component<{}> = (props) => {
     </div>;
 };
 
-export default Edge;
+export default EdgeInfo;

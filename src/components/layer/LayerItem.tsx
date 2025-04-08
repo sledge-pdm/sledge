@@ -1,9 +1,11 @@
 import { Component, createSignal } from "solid-js";
-import { getNextMagnification, Layer, LayerType } from "~/models/Layer";
+import { Layer, LayerType } from "~/models/types/Layer";
 import { allLayers, layerStore, setLayerStore } from "~/stores/Store";
-import styles from "../layer_list.module.css";
+import styles from "./layer_list.module.css";
 import Light from "~/components/common/light/Light";
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
+import DSLButton from "../common/atoms/DSLButton";
+import { getNextMagnification } from "~/models/factories/utils";
 
 interface LayerItemProps {
     layer: Layer;
@@ -34,7 +36,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
     const onPreviewClicked = () => {
         if (index() !== -1) {
-            setLayerStore("layers", index(), "enabled", v => !v);
+            setLayerStore("layers", index(), "enabled", (v: boolean) => !v);
         }
     };
 
@@ -58,24 +60,29 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             ref={sortable}>
             <p class={styles.type}>{layer.typeDescription}</p>
             <p>{index()}.</p>
-            <div
-                class={[
-                    styles.layer_det,
-                    detClass && styles[detClass],
-                    !layer.enabled && styles.disabled,
-                ].filter(Boolean).join(" ")}
-                onClick={onDetClicked}
-            >
-                <div class={styles.layer_preview} onClick={onPreviewClicked} />
-                <p class={styles.name}> {layer.name}</p>
+            <div style={{ display: "flex", "align-items": "center" }}>
+                <DSLButton />
                 <div
-                    class={styles.dot_magnif_container}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onMagnifClicked();
-                    }}
+                    class={[
+                        styles.layer_det,
+                        detClass && styles[detClass],
+                        !layer.enabled && styles.disabled,
+                    ].filter(Boolean).join(" ")}
+                    onClick={onDetClicked}
                 >
-                    <p class={styles.dot_magnif}>x{layer.dotMagnification}</p>
+                    <div class={styles.layer_preview} onClick={onPreviewClicked} />
+                    <p class={styles.name}> {layer.name}</p>
+                    <div
+                        class={styles.dot_magnif_container}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onMagnifClicked();
+                        }}
+                        onMouseOver={(e) => e.stopPropagation()}
+                    >
+                        <p class={styles.dot_magnif}>x{layer.dotMagnification}</p>
+                    </div>
+
                 </div>
                 <Light class={styles.active_light} on={isActive()} />
             </div>

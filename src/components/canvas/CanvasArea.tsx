@@ -7,6 +7,7 @@ export default () => {
 
     return (
         <div class={styles.canvas_area}>
+
             <div class={styles.canvas_stack_container}>
                 <CanvasStack />
             </div>

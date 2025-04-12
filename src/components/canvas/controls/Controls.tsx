@@ -1,28 +1,34 @@
 import { Component, createSignal, For } from "solid-js";
-import { initImageForLayer, redo, undo, } from "~/models/data/LayerImage";
-import { activeImage, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, } from "~/models/Store";
+import { activeImage, activeLayer, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, setLayerStore, updateDSL, } from "~/stores/Store";
 
 import styles from "./controls.module.css"
-import CommandsList from "~/components/common/atoms/commands_list/CommandsList";
+import DSLEditor from "~/components/common/dsl/DSLEditor";
+import ImportImageButton from "~/components/common/atoms/ImportImageButton";
+import { exportActiveLayerUpscaled } from "~/utils/export";
+import { initLayer } from "~/models/layer/layerImage";
+import { redo, undo } from "~/models/layer/history";
 
 const Controls: Component<{}> = (props) => {
     const zoom = () => metricStore.zoom;
     const lastMouseCanvas = () => metricStore.lastMouseCanvas;
     const lastMouseLayer = () => metricStore.lastMouseLayer;
 
-    const [width, setWidth] = createSignal(0);
-    const [height, setHeight] = createSignal(0);
+    const [width, setWidth] = createSignal(canvasStore.canvas.width);
+    const [height, setHeight] = createSignal(canvasStore.canvas.height);
 
     const changeCanvasSize = (e: any) => {
         e.preventDefault();
         setCanvasStore("canvas", "width", width);
         setCanvasStore("canvas", "height", height);
+
+        allLayers().forEach((layer, i) => {
+            initLayer(layer.id, layer.dotMagnification);
+            updateDSL(layer.id);
+        });
     }
 
     const resetAllLayers = (e: any) => {
-        allLayers().forEach(layer => {
-            initImageForLayer(layer.id, layer.dotMagnification);
-        });
+        window.location.reload();
     }
 
     return <>
@@ -31,14 +37,16 @@ const Controls: Component<{}> = (props) => {
         <p>({lastMouseCanvas().x}, {lastMouseCanvas().y}) IN CANVAS.</p>
         <p>({lastMouseLayer().x}, {lastMouseLayer().y}) IN LAYER.</p>
         <p>x{zoom().toFixed(2)}</p>
+        <p>active: {activeLayer()?.name}</p>
         <p>UNDO STACKS.</p>
-        <For each={activeImage().undoStack}>
+        <For each={activeImage()?.undoStack}>
             {item =>
                 <p>{item.toString()}</p>
             }
         </For>
         <div class={styles["top-right-button-container"]}>
-            <p class={styles.button}>out</p>
+            <ImportImageButton />
+            <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>export</p>
         </div>
         <div class={styles["top-right-nav"]}>
             <p class={styles.undo_redo} onClick={(e) => {
@@ -61,14 +69,14 @@ const Controls: Component<{}> = (props) => {
                 <p style={{ "font-size": "1rem" }}>{responseFromRust()}</p>
             </div> */}
 
-            <CommandsList />
+            <DSLEditor />
 
         </div >
         <div class={styles["bottom-history"]}>
 
             <form onSubmit={(e) => changeCanvasSize(e)}>
-                <input type="number" name="width" onChange={(e) => setWidth(Number(e.target.value))} value={canvasStore.canvas.width} min={0} max={1200} required />
-                <input type="number" name="height" onChange={(e) => setHeight(Number(e.target.value))} value={canvasStore.canvas.height} min={0} max={1200} required />
+                <input type="number" name="width" onChange={(e) => setWidth(Number(e.target.value))} value={width()} min={0} max={1200} required />
+                <input type="number" name="height" onChange={(e) => setHeight(Number(e.target.value))} value={height()} min={0} max={1200} required />
                 <button type="submit">change canvas size</button>
             </form>
 

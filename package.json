@@ -3,14 +3,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "tauri:dev": "vite build && tauri dev",
-    "tauri:build": "vite build && tauri build",
-    "watch:css": "tcm --watch"
+    "build": "vite build",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "watch:css": "tcm --watch",
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@jaames/iro": "^5.5.2",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@tauri-apps/api": "^2.4.1",
+    "@thisbeyond/solid-dnd": "^0.7.5",
+    "interactjs": "^1.10.27",
     "modern-normalize": "^3.0.1",
     "solid-js": "^1.9.5",
     "solidjs-use": "^2.3.0",
@@ -22,10 +27,18 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.1",
     "npm-run-all2": "6.1.2",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
+    "prettier-plugin-organize-imports": "^4.1.0",
     "stylelint": "^16.17.0",
     "typed-css-modules": "^0.9.1",
     "vite": "^6.2.4",
     "vite-plugin-solid": "^2.11.6",
     "vite-tsconfig-paths": "^5.1.4"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ]
   }
 }

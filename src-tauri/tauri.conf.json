@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "sledge",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.innsbluck",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -26,6 +26,6 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": ["icons_light/icon.ico"]
+    "icon": ["icons_light/icon.ico", "icons_light/32x32.png", "icons_light/128x128.png", "icons_light/256x256.png"]
   }
 }

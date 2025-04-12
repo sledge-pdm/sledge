@@ -46,9 +46,9 @@ npm tauri dev # launch
 
 - pretty companion improves your drawing experiment.
 
-## pipeline DSL
+## DSL(Data Shaping Line)
 
-sledge pipeline DSL (wip title) is a flexible and powerful way to mess w/ your own pixels.
+sledge's DSL(Data Shaping Line) is a flexible and powerful effect pipelines.
 
 ```shell
 # layer_N: unique id for layerN
@@ -59,9 +59,9 @@ in(layer_0) > out(layer_0)  # do nothing.
 
 in(layer_0) > contrast(20%) > invert() > out(layer_0)  # apply contrast+20%, then invert it.
 
-in(layer_1) > splitV(50%) > *multi(*upper, *lower)  # apply grayscale, split vertically in half.
+in(layer_1) > splitV(50%) > multiout(*upper, *lower)  # apply grayscale, split vertically in half.
 upper > jpeg_glitch(9, 72) > *merged                # apply jpeg_glitch for the upper half of layer1.
-lower > invert() > *merged                          # invert the lower half of layer1.
+lower > invert() > merged                          # invert the lower half of layer1.
 merged > out(layer_1)                               # merge split images and throw back to layer1.
 
 # note 1: *upper, *lower, and *merged are called "subout nodes" (basically like named pipes.)
@@ -70,7 +70,7 @@ merged > out(layer_1)                               # merge split images and thr
 
 - supports the GUI node editor to add / swap / mutate effects.
 - of course, raw command-line input is also available.\
-  either way, pipelined effects are applied to the image immediately and reactively.
+  either way, dsl effects are applied to the image immediately and reactively.
 
 ## tech
 

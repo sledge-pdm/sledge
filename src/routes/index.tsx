@@ -1,17 +1,15 @@
 import CanvasArea from "~/components/canvas/CanvasArea";
-import Companion from "~/components/common/companion/Companion";
+import CanvasSettings from "~/components/canvas_settings/CanvasSettings";
 import Color from "~/components/color/Color";
+import Companion from "~/components/common/companion/Companion";
 import EdgeInfo from "~/components/edge_info/EdgeInfo";
 import LayerList from "~/components/layer/LayerList";
 import PenConfig from "~/components/pen/PenConfig";
-import CanvasSettings from "~/components/canvas_settings/CanvasSettings";
 
 export default function Home() {
-
   return (
     <main>
       <div id="root">
-
         <div id="sidebar">
           <EdgeInfo />
 
@@ -28,7 +26,6 @@ export default function Home() {
           <p id="sledge">sledge.</p>
         </div>
         <Companion />
-
       </div>
     </main>
   );

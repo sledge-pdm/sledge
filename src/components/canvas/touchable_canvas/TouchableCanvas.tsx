@@ -1,174 +1,190 @@
-import { Component, onMount, onCleanup, createSignal, } from "solid-js";
-import { layerStore, canvasStore, setMetricStore, metricStore, } from "~/stores/Store";
-import { redo, undo, } from "~/models/layer/history";
+import { Component, createSignal, onCleanup, onMount } from "solid-js";
+import { redo, undo } from "~/models/layer/history";
+import {
+  canvasStore,
+  layerStore,
+  metricStore,
+  setMetricStore,
+} from "~/stores/Store";
 import { roundPosition } from "~/utils/MetricUtils";
 
 interface Props {
-    onStrokeStart?: (position: { x: number, y: number }, lastPos?: { x: number, y: number }) => void;
-    onStrokeMove?: (position: { x: number, y: number }, lastPos?: { x: number, y: number }) => void;
-    onStrokeEnd?: (position: { x: number, y: number }, lastPos?: { x: number, y: number }) => void;
+  onStrokeStart?: (
+    position: { x: number; y: number },
+    lastPos?: { x: number; y: number },
+  ) => void;
+  onStrokeMove?: (
+    position: { x: number; y: number },
+    lastPos?: { x: number; y: number },
+  ) => void;
+  onStrokeEnd?: (
+    position: { x: number; y: number },
+    lastPos?: { x: number; y: number },
+  ) => void;
 }
 
 // レイヤーごとのキャンバスの上でタッチイベントを受けるだけのキャンバス
 export const TouchableCanvas: Component<Props> = (props) => {
-    let canvasRef: HTMLCanvasElement | undefined;
+  let canvasRef: HTMLCanvasElement | undefined;
 
-    const styleWidth = () => canvasStore.canvas.width;
-    const styleHeight = () => canvasStore.canvas.height;
+  const styleWidth = () => canvasStore.canvas.width;
+  const styleHeight = () => canvasStore.canvas.height;
 
-    const [lastPos, setLastPos] = createSignal<{ x: number, y: number } | undefined>(undefined);
-    const [temporaryOut, setTemporaryOut] = createSignal(false);
+  const [lastPos, setLastPos] = createSignal<
+    { x: number; y: number } | undefined
+  >(undefined);
+  const [temporaryOut, setTemporaryOut] = createSignal(false);
 
-    function getOffset() {
-        const rect = canvasRef!.getBoundingClientRect();
+  function getOffset() {
+    const rect = canvasRef!.getBoundingClientRect();
 
-        return { x: rect.left, y: rect.top };
+    return { x: rect.left, y: rect.top };
+  }
+
+  function getWindowMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
+    let x = 0;
+    let y = 0;
+
+    if ("clientX" in e && "clientY" in e) {
+      x = e.clientX;
+      y = e.clientY;
+    } else if ("touches" in e && e.touches.length > 0) {
+      console.log("touch");
+      x = e.touches[0].clientX;
+      y = e.touches[0].clientY;
     }
 
-    function getWindowMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
-        let x = 0;
-        let y = 0;
+    return {
+      x,
+      y,
+    };
+  }
 
-        if ("clientX" in e && "clientY" in e) {
-            x = e.clientX;
-            y = e.clientY;
-        } else if ("touches" in e && e.touches.length > 0) {
-            console.log("touch");
-            x = e.touches[0].clientX;
-            y = e.touches[0].clientY;
-        }
+  function getCanvasMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
+    const offset = getOffset();
 
-        return {
-            x,
-            y,
-        };
+    let x = 0;
+    let y = 0;
+
+    if ("clientX" in e && "clientY" in e) {
+      x = e.clientX;
+      y = e.clientY;
+    } else if ("touches" in e && e.touches.length > 0) {
+      console.log("touch");
+      x = e.touches[0].clientX;
+      y = e.touches[0].clientY;
     }
 
-    function getCanvasMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
-        const offset = getOffset();
+    const zoom = metricStore.zoom;
 
-        let x = 0;
-        let y = 0;
+    return {
+      x: (x - offset.x) / zoom,
+      y: (y - offset.y) / zoom,
+    };
+  }
 
-        if ("clientX" in e && "clientY" in e) {
-            x = e.clientX;
-            y = e.clientY;
-        } else if ("touches" in e && e.touches.length > 0) {
-            console.log("touch");
-            x = e.touches[0].clientX;
-            y = e.touches[0].clientY;
-        }
+  function handlePointerDown(e: PointerEvent) {
+    if (e.pointerType === "touch") return;
 
-        const zoom = metricStore.zoom;
-
-        return {
-            x: (x - offset.x) / zoom,
-            y: (y - offset.y) / zoom,
-        };
+    const position = getCanvasMousePosition(e);
+    if (props.onStrokeStart) {
+      props.onStrokeStart(position, lastPos());
     }
+    setMetricStore("isInStroke", true);
+    setLastPos(position);
+  }
 
-    function handlePointerDown(e: PointerEvent) {
-        if (e.pointerType === "touch") return;
+  function handlePointerCancel(e: PointerEvent) {
+    console.warn("pointercancel", e);
+    endStroke(getCanvasMousePosition(e));
+  }
 
-        const position = getCanvasMousePosition(e);
-        if (props.onStrokeStart) {
-            props.onStrokeStart(position, lastPos());
-        }
-        setMetricStore("isInStroke", true);
-        setLastPos(position);
+  function handlePointerMove(e: PointerEvent) {
+    const windowPosition = getWindowMousePosition(e);
+    const position = getCanvasMousePosition(e);
+    setMetricStore("lastMouseWindow", roundPosition(windowPosition));
+    setMetricStore("lastMouseOnCanvas", roundPosition(position));
+    if (e.pointerType === "touch") return;
+    // 押したまま外に出てから戻ってきたときはそこから再開
+    if (temporaryOut()) {
+      setTemporaryOut(false);
+      setMetricStore("isInStroke", true);
+      setLastPos(position);
     }
+    if (!metricStore.isInStroke || !lastPos()) return;
 
-    function handlePointerCancel(e: PointerEvent) {
-        console.warn("pointercancel", e);
-        endStroke(getCanvasMousePosition(e));
+    if (props.onStrokeMove) {
+      props.onStrokeMove(position, lastPos());
     }
+    setLastPos(position);
+  }
 
-    function handlePointerMove(e: PointerEvent) {
-        const windowPosition = getWindowMousePosition(e);
-        const position = getCanvasMousePosition(e);
-        setMetricStore("lastMouseWindow", roundPosition(windowPosition));
-        setMetricStore("lastMouseOnCanvas", roundPosition(position));
-        if (e.pointerType === "touch") return;
-        // 押したまま外に出てから戻ってきたときはそこから再開
-        if (temporaryOut()) {
-            setTemporaryOut(false);
-            setMetricStore("isInStroke", true);
-            setLastPos(position);
-        }
-        if (!metricStore.isInStroke || !lastPos()) return;
+  function handlePointerUp(e: MouseEvent) {
+    const position = getCanvasMousePosition(e);
+    if (metricStore.isInStroke) endStroke(position);
+  }
 
-        if (props.onStrokeMove) {
-            props.onStrokeMove(position, lastPos());
-        }
-        setLastPos(position);
+  function handlePointerOut(e: MouseEvent) {
+    // 出た時点でストロークを切る場合
+    // const position = getCanvasMousePosition(e);
+    // if (metricStore.isInStroke) endStroke(position);
+
+    // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
+    const position = getCanvasMousePosition(e);
+    if (props.onStrokeMove) {
+      // 最後の位置を通知
+      props.onStrokeMove(position, lastPos());
     }
+    setTemporaryOut(true);
+  }
 
-    function handlePointerUp(e: MouseEvent) {
-        const position = getCanvasMousePosition(e);
-        if (metricStore.isInStroke) endStroke(position);
+  function endStroke(position: { x: number; y: number }) {
+    if (props.onStrokeEnd) {
+      props.onStrokeEnd(position, lastPos());
     }
+    setMetricStore("isInStroke", false);
+    setLastPos(undefined);
+    setTemporaryOut(false);
+  }
 
-    function handlePointerOut(e: MouseEvent) {
-        // 出た時点でストロークを切る場合
-        // const position = getCanvasMousePosition(e);
-        // if (metricStore.isInStroke) endStroke(position);
-
-        // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
-        const position = getCanvasMousePosition(e);
-        if (props.onStrokeMove) {
-            // 最後の位置を通知
-            props.onStrokeMove(position, lastPos());
-        }
-        setTemporaryOut(true);
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.ctrlKey && e.key === "z") {
+      undo(layerStore.activeLayerId);
+    } else if (e.ctrlKey && e.key === "y") {
+      redo(layerStore.activeLayerId);
     }
+  }
 
-    function endStroke(position: { x: number, y: number }) {
-        if (props.onStrokeEnd) {
-            props.onStrokeEnd(position, lastPos());
-        }
-        setMetricStore("isInStroke", false);
-        setLastPos(undefined);
-        setTemporaryOut(false);
-    }
+  onMount(() => {
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointercancel", handlePointerCancel);
+    window.addEventListener("keydown", handleKeydown);
+  });
 
-    function handleKeydown(e: KeyboardEvent) {
-        if (e.ctrlKey && e.key === "z") {
-            undo(layerStore.activeLayerId);
-        } else if (e.ctrlKey && e.key === "y") {
-            redo(layerStore.activeLayerId);
-        }
-    }
+  onCleanup(() => {
+    window.removeEventListener("pointerup", handlePointerUp);
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointercancel", handlePointerCancel);
+    window.removeEventListener("keydown", handleKeydown);
+  });
 
-    onMount(() => {
-        window.addEventListener("pointerup", handlePointerUp)
-        window.addEventListener("pointermove", handlePointerMove)
-        window.addEventListener("pointercancel", handlePointerCancel)
-        window.addEventListener("keydown", handleKeydown);
-    });
-
-    onCleanup(() => {
-        window.removeEventListener("pointerup", handlePointerUp);
-        window.removeEventListener("pointermove", handlePointerMove)
-        window.removeEventListener("pointercancel", handlePointerCancel)
-        window.removeEventListener("keydown", handleKeydown);
-    });
-
-    return (
-        <canvas
-            ref={(el) => {
-                canvasRef = el;
-            }}
-            width={canvasStore.canvas.width}
-            height={canvasStore.canvas.height}
-            onPointerDown={handlePointerDown}
-            onPointerOut={handlePointerOut}
-            style={{
-                "touch-action": "none",
-                width: `${styleWidth()}px`,
-                height: `${styleHeight()}px`,
-                "pointer-events": "all",
-                "z-index": "100" // どのレイヤーよりも上だが、image poolよりも下
-            }}
-        />
-    );
+  return (
+    <canvas
+      ref={(el) => {
+        canvasRef = el;
+      }}
+      width={canvasStore.canvas.width}
+      height={canvasStore.canvas.height}
+      onPointerDown={handlePointerDown}
+      onPointerOut={handlePointerOut}
+      style={{
+        "touch-action": "none",
+        width: `${styleWidth()}px`,
+        height: `${styleHeight()}px`,
+        "pointer-events": "all",
+        "z-index": "100", // どのレイヤーよりも上だが、image poolよりも下
+      }}
+    />
+  );
 };

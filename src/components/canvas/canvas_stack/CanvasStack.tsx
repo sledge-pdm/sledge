@@ -4,16 +4,14 @@ import { activeLayer, allLayers, canvasStore, setMetricStore } from "~/stores/St
 import styles from "./canvas_stack.module.css"
 import { TouchableCanvas } from "../touchable_canvas/TouchableCanvas";
 
-import { metricStore } from "~/stores/Store";
 import interact from "interactjs";
 import { LayerCanvas, LayerCanvasRef } from "../layer_canvas/LayerCanvas";
 import { DrawState, getDrawnImageData } from "~/models/layer/getDrawnImageData";
 import { registerNewHistory } from "~/models/layer/layerImage";
 import { cloneImageData } from "~/models/factories/utils";
 
-const CanvasStack: Component<{}> = (props) => {
 
-    const zoom = () => metricStore.zoom;
+const CanvasStack: Component<{}> = (props) => {
     let ref: HTMLDivElement;
 
     onMount(() => {
@@ -73,19 +71,19 @@ const CanvasStack: Component<{}> = (props) => {
             })
     });
 
-    onMount(() => {
-        if (metricStore.adjustZoomOnCanvasChange) {
-            let adjustedZoom = 600 / canvasStore.canvas.height;
-            setMetricStore("zoom", adjustedZoom);
-        }
-    })
+    // onMount(() => {
+    //     if (metricStore.adjustZoomOnCanvasChange) {
+    //         let adjustedZoom = 600 / canvasStore.canvas.height;
+    //         setMetricStore("zoom", adjustedZoom);
+    //     }
+    // })
 
-    createEffect(() => {
-        if (metricStore.adjustZoomOnCanvasChange) {
-            let adjustedZoom = 600 / canvasStore.canvas.height;
-            setMetricStore("zoom", adjustedZoom);
-        }
-    })
+    // createEffect(() => {
+    //     if (metricStore.adjustZoomOnCanvasChange) {
+    //         let adjustedZoom = 600 / canvasStore.canvas.height;
+    //         setMetricStore("zoom", adjustedZoom);
+    //     }
+    // })
 
     const layerCanvasRefs: {
         [id: string]: LayerCanvasRef;
@@ -120,18 +118,11 @@ const CanvasStack: Component<{}> = (props) => {
         <div style={{ position: "relative" }}>
             <div class={styles.canvas_stack}
                 style={{
-                    width: `${canvasStore.canvas.width * zoom()}px`,
-                    height: `${canvasStore.canvas.height * zoom()}px`,
-                }}
-                onWheel={(e) => {
-                    e.preventDefault();
-                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-                    const nextZoom = Math.max(0.1, Math.min(8, metricStore.zoom + delta));
-                    setMetricStore("zoom", nextZoom);
+                    width: `${canvasStore.canvas.width}px`,
+                    height: `${canvasStore.canvas.height}px`,
                 }}
             >
                 <TouchableCanvas
-                    zoom={zoom()}
                     onStrokeStart={(p, lp) => handleDraw(DrawState.start, p, lp)}
                     onStrokeMove={(p, lp) => handleDraw(DrawState.move, p, lp)}
                     onStrokeEnd={(p, lp) => handleDraw(DrawState.end, p, lp)} />
@@ -141,7 +132,6 @@ const CanvasStack: Component<{}> = (props) => {
                         <LayerCanvas
                             ref={layerCanvasRefs[layer.id]}
                             layer={layer}
-                            zoom={zoom()}
                             zIndex={allLayers().length - index()} />
                     )}
                 </For>

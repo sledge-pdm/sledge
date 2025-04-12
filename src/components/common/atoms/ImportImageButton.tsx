@@ -19,7 +19,7 @@ const ImportImageButton = () => {
     return (
         <>
             <button onClick={handleClick}>
-                Import Image to Active Layer
+                Import
             </button>
 
             <input

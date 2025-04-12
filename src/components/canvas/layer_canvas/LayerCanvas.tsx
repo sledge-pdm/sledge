@@ -9,7 +9,6 @@ import { downloadImageData } from "~/utils/export";
 type Props = {
     ref?: LayerCanvasRef,
     layer: Layer;
-    zoom: number;
     zIndex: number;
 };
 
@@ -47,26 +46,11 @@ export const LayerCanvas: Component<Props> = (props) => {
         }),
     );
 
-    const totalMag = () => props.layer.dotMagnification * props.zoom;
-
+    const styleWidth = () => canvasStore.canvas.width;
+    const styleHeight = () => canvasStore.canvas.height;
     const internalWidth = () => canvasStore.canvas.width / props.layer.dotMagnification;
     const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
 
-    const styleWidth = () => internalWidth() * totalMag();
-    const styleHeight = () => internalHeight() * totalMag();
-
-    const testCurrentDSLTime = () => {
-        const imageData = imageStore[props.layer.id].current;
-
-        const start = new Date().getTime();
-        console.log(`DSL run started.\n${props.layer.dsl.build()}`)
-        runDSL(props.layer.dsl, imageData).then((im) => {
-            const end = new Date().getTime();
-            console.log(`DSL run end.`);
-            console.log(`result: ${im ? "success" : "failed"}. TOTAL TIME IS ${end - start}ms.`)
-            if (im) downloadImageData(im, "test-" + end + ".png")
-        })
-    }
 
     onMount(() => {
         ctx = canvasRef?.getContext("2d") ?? null;
@@ -79,27 +63,22 @@ export const LayerCanvas: Component<Props> = (props) => {
         }
     });
 
-    return (<>
-        <canvas
-            ref={canvasRef}
-            id={`canvas-${props.layer.id}`}
-            data-layer-id={props.layer.name}
-            classList={{
-                [styles["layer-canvas"]]: true,
-                [styles["hidden"]]: !props.layer.enabled,
-            }}
-            width={internalWidth()}
-            height={internalHeight()}
-            style={{
-                width: `${styleWidth()}px`,
-                height: `${styleHeight()}px`,
-                "z-index": props.zIndex,
-            }} />
-        {props.layer.id === layerStore.activeLayerId && <button onClick={testCurrentDSLTime}>test dsl</button>}
-    </>
-    );
+    return <canvas
+        ref={canvasRef}
+        id={`canvas-${props.layer.id}`}
+        data-layer-id={props.layer.name}
+        classList={{
+            [styles["layer-canvas"]]: true,
+            [styles["hidden"]]: !props.layer.enabled,
+        }}
+        width={internalWidth()}
+        height={internalHeight()}
+        style={{
+            width: `${styleWidth()}px`,
+            height: `${styleHeight()}px`,
+            "z-index": props.zIndex,
+        }} />
 };
-
 
 function createRefContent<T extends Exclude<unknown, Function>>(
     getRef: () => Ref<T>,

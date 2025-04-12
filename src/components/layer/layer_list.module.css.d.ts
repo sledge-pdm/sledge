@@ -1,6 +1,7 @@
 declare const styles: {
   readonly "active_light": string;
   readonly "automate": string;
+  readonly "caption": string;
   readonly "disabled": string;
   readonly "dot": string;
   readonly "dot_magnif": string;

@@ -61,7 +61,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             <p class={styles.type}>{layer.typeDescription}</p>
             <p>{index()}.</p>
             <div style={{ display: "flex", "align-items": "center" }}>
-                <DSLButton />
+                {/* <DSLButton /> */}
                 <div
                     class={[
                         styles.layer_det,

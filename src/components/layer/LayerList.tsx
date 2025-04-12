@@ -48,7 +48,7 @@ const LayerList: Component<{}> = () => {
             collisionDetector={closestCenter}>
             <DragDropSensors>
                 <div>
-                    <p>layers.</p>
+                    <p class={styles.caption}>layers.</p>
                     <div style={{ display: "flex" }}>
                         {/* {Arrow} */}
                         <div style={{ width: "100%" }}>
@@ -69,12 +69,13 @@ const LayerList: Component<{}> = () => {
                         </div>
                     </div>
                     <br />
-                    <p style={{ opacity: 0.45 }}>
+                    {/* <p style={{ opacity: 0.45 }}>
                         click item &gt; change active layer.<br />
                         click left box &gt; hide/show layer.<br /><br />
                         click x button &gt; change layer dotmult.<br />
                         (! This will erase content.)
-                    </p></div>
+                    </p> */}
+                </div>
             </DragDropSensors>
         </DragDropProvider>
     );

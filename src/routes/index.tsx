@@ -4,6 +4,7 @@ import Color from "~/components/color/Color";
 import EdgeInfo from "~/components/edge_info/EdgeInfo";
 import LayerList from "~/components/layer/LayerList";
 import PenConfig from "~/components/pen/PenConfig";
+import CanvasSettings from "~/components/canvas_settings/CanvasSettings";
 
 export default function Home() {
 
@@ -18,6 +19,7 @@ export default function Home() {
             <Color />
             <PenConfig />
             <LayerList />
+            <CanvasSettings />
           </div>
         </div>
 

@@ -8,15 +8,19 @@ import { LayerImageState } from "../models/types/LayerImageState";
 
 // canvas
 export const [canvasStore, setCanvasStore] = createStore({
-  canvas: createCanvas(600, 800),
+  canvas: createCanvas(400, 400),
 });
 
 // metric
 export const [metricStore, setMetricStore] = createStore({
-  zoom: 1.0,
-  adjustZoomOnCanvasChange: true,
-  lastMouseCanvas: { x: 0, y: 0 },
-  lastMouseLayer: { x: 0, y: 0 },
+  lastMouseWindow: { x: 0, y: 0 },
+  lastMouseOnCanvas: { x: 0, y: 0 },
+  isInStroke: false,
+  zoom: 1,
+  zoomSensitivity: 0.5,
+  // オフセットの初期値
+  offsetOrigin: { x: 0, y: 0 },
+  offset: { x: 0, y: 0 },
 });
 
 // image
@@ -26,13 +30,7 @@ export const [imageStore, setImageStore] = createStore<
 export const activeImage = (): LayerImageState =>
   imageStore[layerStore.activeLayerId];
 // layer
-const DEFAULT_LAYERS = [
-  // createLayer("image1", LayerType.Image), ←　廃止
-  createLayer("dot1", LayerType.Dot, true, 1),
-  createLayer("auto1", LayerType.Automate, false),
-  createLayer("dot2", LayerType.Dot, true, 2),
-  createLayer("dot3", LayerType.Dot, true, 4),
-];
+const DEFAULT_LAYERS = [createLayer("dot1", LayerType.Dot, true, 1)];
 
 export const [layerStore, setLayerStore] = createStore({
   layers: DEFAULT_LAYERS,

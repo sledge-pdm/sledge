@@ -13,6 +13,10 @@
   gap: 4px;
 }
 
+.caption {
+  margin: 1rem 0;
+}
+
 #layer {
   width: 100%;
   /* 高さはコンテンツに合わせる */

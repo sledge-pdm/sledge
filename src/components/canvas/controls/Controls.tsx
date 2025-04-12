@@ -1,49 +1,33 @@
-import { Component, createSignal, For } from "solid-js";
-import { activeImage, activeLayer, allLayers, canvasStore, layerStore, metricStore, setCanvasStore, setLayerStore, updateDSL, } from "~/stores/Store";
+import { Component, For } from "solid-js";
+import { activeImage, activeLayer, layerStore, metricStore, } from "~/stores/Store";
 
 import styles from "./controls.module.css"
 import DSLEditor from "~/components/common/dsl/DSLEditor";
 import ImportImageButton from "~/components/common/atoms/ImportImageButton";
 import { exportActiveLayerUpscaled } from "~/utils/export";
-import { initLayer } from "~/models/layer/layerImage";
 import { redo, undo } from "~/models/layer/history";
 
 const Controls: Component<{}> = (props) => {
-    const zoom = () => metricStore.zoom;
-    const lastMouseCanvas = () => metricStore.lastMouseCanvas;
-    const lastMouseLayer = () => metricStore.lastMouseLayer;
-
-    const [width, setWidth] = createSignal(canvasStore.canvas.width);
-    const [height, setHeight] = createSignal(canvasStore.canvas.height);
-
-    const changeCanvasSize = (e: any) => {
-        e.preventDefault();
-        setCanvasStore("canvas", "width", width);
-        setCanvasStore("canvas", "height", height);
-
-        allLayers().forEach((layer, i) => {
-            initLayer(layer.id, layer.dotMagnification);
-            updateDSL(layer.id);
-        });
-    }
-
-    const resetAllLayers = (e: any) => {
-        window.location.reload();
-    }
+    // const zoom = () => metricStore.zoom;
+    const lastMouseWindow = () => metricStore.lastMouseWindow;
+    const lastMouseOnCanvas = () => metricStore.lastMouseOnCanvas;
 
     return <>
         <p>canvas.</p>
 
-        <p>({lastMouseCanvas().x}, {lastMouseCanvas().y}) IN CANVAS.</p>
-        <p>({lastMouseLayer().x}, {lastMouseLayer().y}) IN LAYER.</p>
-        <p>x{zoom().toFixed(2)}</p>
+        <p>({lastMouseWindow().x}, {lastMouseWindow().y}) ON WINDOW.</p>
+        <p>({lastMouseOnCanvas().x}, {lastMouseOnCanvas().y}) ON CANVAS.</p>
+        {/* <p>x{zoom().toFixed(2)}</p> */}
         <p>active: {activeLayer()?.name}</p>
-        <p>UNDO STACKS.</p>
+        <p>
+            offset:({metricStore.offset.x}, {metricStore.offset.y})
+        </p>
+        {/* <p>UNDO STACKS.</p>
         <For each={activeImage()?.undoStack}>
             {item =>
                 <p>{item.toString()}</p>
             }
-        </For>
+        </For> */}
         <div class={styles["top-right-button-container"]}>
             <ImportImageButton />
             <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>export</p>
@@ -60,45 +44,9 @@ const Controls: Component<{}> = (props) => {
                 redo(layerStore.activeLayerId)
             }}>&gt;&gt;</p>
 
-            {/* <div>
-                <p class={styles.undo_redo} onClick={async (e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    await runAndApplyActive(ImageCommands.INVERT, activeImage().current);
-                }}>INVERT!!</p>
-                <p style={{ "font-size": "1rem" }}>{responseFromRust()}</p>
-            </div> */}
-
-            <DSLEditor />
+            {/* <DSLEditor /> */}
 
         </div >
-        <div class={styles["bottom-history"]}>
-
-            <form onSubmit={(e) => changeCanvasSize(e)}>
-                <input type="number" name="width" onChange={(e) => setWidth(Number(e.target.value))} value={width()} min={0} max={1200} required />
-                <input type="number" name="height" onChange={(e) => setHeight(Number(e.target.value))} value={height()} min={0} max={1200} required />
-                <button type="submit">change canvas size</button>
-            </form>
-
-            <button onClick={resetAllLayers}>RESET ALL LAYERS</button>
-
-            <div class={styles["history-row"]}>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-                <p class={styles["history-text"]}>erase. &gt;</p>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-                <p class={styles["history-text"]}>undo. &gt;</p>
-                <p class={styles["history-text"]}>redo. &gt;</p>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-                <p class={styles["history-text"]}>erase. &gt;</p>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-                <p class={styles["history-text"]}>erase. &gt;</p>
-                <p class={styles["history-text"]}>erase. &gt;</p>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-                <p class={styles["history-text"]}>stroke. &gt;</p>
-            </div>
-        </div>
     </>;
 };
 

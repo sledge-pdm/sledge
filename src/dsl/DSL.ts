@@ -1,4 +1,4 @@
-import { SledgeNode } from "~/dsl/nodes/SledgeNodes";
+import { SledgeNode } from "~/dsl/nodes/DSLNodes";
 import { findLayerById } from "~/stores/Store";
 import { LayerIn } from "./nodes/pass/LayerIn";
 import { LayerOut } from "./nodes/pass/LayerOut";

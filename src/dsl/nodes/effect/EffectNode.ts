@@ -1,4 +1,4 @@
-import { NodeType, SledgeNode } from "../SledgeNodes";
+import { NodeType, SledgeNode } from "../DSLNodes";
 
 export abstract class EffectNode extends SledgeNode {
   type: NodeType = "effect";

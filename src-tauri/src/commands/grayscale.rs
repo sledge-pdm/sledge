@@ -1,9 +1,4 @@
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-
-#[tauri::command]
-pub fn grayscale(encoded: String, width: usize, height: usize) -> Result<String, String> {
-    let mut data = decode_image_base64(&encoded)?;
-
+pub fn grayscale(mut data: Vec<u8>) -> Result<Vec<u8>, String> {
     for i in (0..data.len()).step_by(4) {
         let r = data[i] as u16;
         let g = data[i + 1] as u16;
@@ -14,6 +9,5 @@ pub fn grayscale(encoded: String, width: usize, height: usize) -> Result<String,
         data[i + 1] = gray;
         data[i + 2] = gray;
     }
-
-    encode_image_base64(&data)
+    Ok(data)
 }

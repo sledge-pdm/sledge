@@ -1,9 +1,4 @@
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-
-#[tauri::command]
-pub fn sepia(encoded: String, width: usize, height: usize) -> Result<String, String> {
-    let mut data = decode_image_base64(&encoded)?;
-
+pub fn sepia(mut data: Vec<u8>) -> Result<Vec<u8>, String> {
     for i in (0..data.len()).step_by(4) {
         let r = data[i] as f32;
         let g = data[i + 1] as f32;
@@ -17,6 +12,5 @@ pub fn sepia(encoded: String, width: usize, height: usize) -> Result<String, Str
         data[i + 1] = tg;
         data[i + 2] = tb;
     }
-
-    encode_image_base64(&data)
+    Ok(data)
 }

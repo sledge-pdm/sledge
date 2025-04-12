@@ -3,7 +3,7 @@ export type Canvas = {
   height: number;
 };
 
-export const createCanvas = (width = 200, height = 300): Canvas => ({
+export const createCanvas = (width = 800, height = 1200): Canvas => ({
   width,
   height,
 });

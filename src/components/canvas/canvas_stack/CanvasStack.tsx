@@ -93,6 +93,7 @@ const CanvasStack: Component<{}> = (props) => {
 
     const handleDraw = (type: DrawState, position: { x: number, y: number }, lastPos?: { x: number, y: number }) => {
         const active = activeLayer();
+
         if (active) {
             const activeRef = layerCanvasRefs[active.id]
             if (type === DrawState.start) {
@@ -101,11 +102,12 @@ const CanvasStack: Component<{}> = (props) => {
                 const drawingBuffer = activeRef.getDrawingBuffer();
                 if (drawingBuffer) {
                     const newImageData = getDrawnImageData(active.id, type, drawingBuffer, position, lastPos)
+
                     if (newImageData) {
                         activeRef.setImageData(newImageData);
                         if (type === DrawState.end) {
-                            registerNewHistory(active.id, cloneImageData(newImageData))
                             activeRef.resetDrawingBuffer();
+                            registerNewHistory(active.id, cloneImageData(newImageData))
                         }
                     }
                 }

@@ -1,4 +1,3 @@
-import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 import { runDSL } from "~/dsl/DSLRunner";
 import { createLayer } from "~/models/factories/createLayer";
@@ -9,7 +8,7 @@ import { LayerImageState } from "../models/types/LayerImageState";
 
 // canvas
 export const [canvasStore, setCanvasStore] = createStore({
-  canvas: createCanvas(200, 200),
+  canvas: createCanvas(600, 800),
 });
 
 // metric
@@ -89,19 +88,19 @@ export const updateDSL = (layerId: string) => {
   });
 };
 
-createEffect(() => {
-  for (const layer of allLayers()) {
-    const dsl = layer.dsl;
-    const id = layer.id;
-    const image = imageStore[id]?.current;
-    if (!image) continue;
+// createEffect(() => {
+//   for (const layer of allLayers()) {
+//     const dsl = layer.dsl;
+//     const id = layer.id;
+//     const image = imageStore[id]?.current;
+//     if (!image) continue;
 
-    // DSL文字列の変更をトリガーとして扱う
-    dsl.toString(); // ← tracking
-    runDSL(dsl, image).then((result) => {
-      if (result) {
-        setImageStore(id, "DSLcurrent", result);
-      }
-    });
-  }
-});
+//     // DSL文字列の変更をトリガーとして扱う
+//     dsl.toString(); // ← tracking
+//     runDSL(dsl, image).then((result) => {
+//       if (result) {
+//         setImageStore(id, "DSLcurrent", result);
+//       }
+//     });
+//   }
+// });

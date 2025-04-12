@@ -31,7 +31,6 @@
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
     "typed-css-modules": "^0.9.1",
-    "unocss": "^66.1.0-beta.11",
     "vite": "^6.2.4",
     "vite-plugin-solid": "^2.11.6",
     "vite-tsconfig-paths": "^5.1.4"

@@ -1,5 +1,5 @@
 import { createEffect, Component, createSignal, Ref, onMount } from "solid-js";
-import { CompanionEvents } from "~/models/EventHub";
+import { CompanionEvents } from "~/utils/EventHub";
 
 import styles from "./companion.module.css";
 

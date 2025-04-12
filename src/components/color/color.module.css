@@ -1,0 +1,20 @@
+/* ==========================================================================
+     Color Picker & Pen Config
+     ========================================================================== */
+.color_picker {
+  margin: 15px 0 10px 0;
+}
+
+.swatch_container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  margin: 0 0 30px 0;
+}
+
+.color_content {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}

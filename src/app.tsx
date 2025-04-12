@@ -7,13 +7,13 @@ import Home from "./routes";
 import { safeInvoke } from "./utils/tauri";
 
 export default function App() {
-  onMount(async () => {
-    safeInvoke<string>("hello_from_rust", { name: "Sledge" }).then((msg) => {
-      if (msg) {
-        console.log("[Rustからの返答]:", msg);
-      }
-    });
-  });
+  // onMount(async () => {
+  //   safeInvoke<string>("hello_from_rust", { name: "Sledge" }).then((msg) => {
+  //     if (msg) {
+  //       console.log("[Rustからの返答]:", msg);
+  //     }
+  //   });
+  // });
 
   return (
     <Router

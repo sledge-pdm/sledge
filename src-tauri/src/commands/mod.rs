@@ -13,9 +13,6 @@ pub use invert::invert;
 pub mod jpeg_glitch;
 pub use jpeg_glitch::jpeg_glitch;
 
-pub mod glitch;
-pub use glitch::glitch;
-
 pub mod sepia;
 pub use sepia::sepia;
 

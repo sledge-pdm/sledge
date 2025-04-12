@@ -1,6 +1,9 @@
 import CanvasArea from "~/components/canvas/CanvasArea";
 import Companion from "~/components/common/companion/Companion";
-import Side from "~/components/side/Side";
+import Color from "~/components/color/Color";
+import EdgeInfo from "~/components/edge_info/EdgeInfo";
+import LayerList from "~/components/layer/LayerList";
+import PenConfig from "~/components/pen/PenConfig";
 
 export default function Home() {
 
@@ -8,7 +11,16 @@ export default function Home() {
     <main>
       <div id="root">
 
-        <Side />
+        <div id="sidebar">
+          <EdgeInfo />
+
+          <div id="content">
+            <Color />
+            <PenConfig />
+            <LayerList />
+          </div>
+        </div>
+
         <CanvasArea />
         <div id="misc_container">
           <p id="sledge">sledge.</p>

@@ -67,7 +67,7 @@ function getMagnificationPosition(
   dotMagnification: number,
 ) {
   return {
-    x: Math.round(position.x / dotMagnification),
-    y: Math.round(position.y / dotMagnification),
+    x: Math.floor(position.x / dotMagnification),
+    y: Math.floor(position.y / dotMagnification),
   };
 }

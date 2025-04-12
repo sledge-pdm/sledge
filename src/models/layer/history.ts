@@ -1,4 +1,4 @@
-import { setImageStore, updateDSL } from "~/stores/Store";
+import { setImageStore } from "~/stores/Store";
 
 export function undo(layerId: string) {
   console.log("undo");
@@ -9,7 +9,7 @@ export function undo(layerId: string) {
     const newRedo = [state.current, ...state.redoStack];
     return { current: prev, undoStack: newUndo, redoStack: newRedo };
   });
-  updateDSL(layerId);
+  // updateDSL(layerId);
 }
 
 export function redo(layerId: string) {
@@ -20,5 +20,5 @@ export function redo(layerId: string) {
     const newUndo = [...state.undoStack, state.current];
     return { current: next, undoStack: newUndo, redoStack: newRedo };
   });
-  updateDSL(layerId);
+  // updateDSL(layerId);
 }

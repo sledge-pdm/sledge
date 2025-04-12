@@ -1,25 +1,21 @@
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-use image::{DynamicImage, RgbImage, Rgba, RgbaImage};
+use image::{RgbImage, Rgba, RgbaImage};
 use jpeg_decoder::Decoder;
 use jpeg_encoder::{ColorType, Encoder};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use std::io::Cursor;
 
-#[tauri::command]
 pub fn jpeg_glitch(
-    encoded: String,
+    mut data: Vec<u8>,
     width: usize,
     height: usize,
     seed: u64,
     quality: u8,
     amount: f32, // 0.0〜1.0
-) -> Result<String, String> {
-    let decoded = decode_image_base64(&encoded)?;
-
+) -> Result<Vec<u8>, String> {
     // RGBA → RGB
     let mut rgb = RgbImage::new(width as u32, height as u32);
-    for (i, pixel) in decoded.chunks(4).enumerate() {
+    for (i, pixel) in data.chunks(4).enumerate() {
         let x = (i % width) as u32;
         let y = (i / width) as u32;
         rgb.put_pixel(x, y, image::Rgb([pixel[0], pixel[1], pixel[2]]));
@@ -60,5 +56,5 @@ pub fn jpeg_glitch(
         rgba.put_pixel(x, y, Rgba([pixel[0], pixel[1], pixel[2], 255]));
     }
 
-    encode_image_base64(&rgba.into_raw())
+    Ok(rgba.into_raw())
 }

@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import UnoCSS from 'unocss/vite'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [solidPlugin(), tsconfigPaths(), UnoCSS()],
+  plugins: [solidPlugin(), tsconfigPaths()],
   build: {
     target: 'esnext',
     outDir: 'dist',

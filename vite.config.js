@@ -1,3 +1,4 @@
+import UnoCSS from "unocss/vite";
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -12,4 +13,5 @@ export default defineConfig({
     host: true,
     port: 5173,
   },
+  plugins: [UnoCSS()],
 });

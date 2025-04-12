@@ -25,13 +25,14 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.1",
+    "modern-normalize": "^3.0.1",
     "npm-run-all2": "6.1.2",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier-plugin-organize-imports": "^4.1.0",
     "stylelint": "^16.17.0",
-    "modern-normalize": "^3.0.1",
     "typed-css-modules": "^0.9.1",
+    "unocss": "^66.1.0-beta.11",
     "vite": "^6.2.4",
     "vite-plugin-solid": "^2.11.6",
     "vite-tsconfig-paths": "^5.1.4"

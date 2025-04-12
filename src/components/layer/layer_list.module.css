@@ -1,0 +1,109 @@
+.image_insert_arrow {
+  width: 10px;
+  height: 100%;
+  overflow: visible;
+}
+
+.layer_list {
+  display: flex;
+  flex-grow: 1;
+  position: relative;
+  flex-direction: column;
+  width: 100%;
+  gap: 4px;
+}
+
+#layer {
+  width: 100%;
+  /* 高さはコンテンツに合わせる */
+}
+
+.disabled {
+  opacity: 0.2;
+}
+.disabled > * > * > p {
+  text-decoration: line-through;
+}
+
+/* base det */
+.layer_det {
+  border-left: 1px solid black;
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  background-color: #f0f0f0;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.layer_det:hover {
+  filter: brightness(0.94);
+  transform: translate(0, 1px);
+}
+
+.dot {
+}
+
+.image {
+  border-left: 1px solid red;
+  background-color: #ffe0e0;
+}
+.automate {
+  border-left: 1px solid blue;
+  background-color: aliceblue;
+}
+
+.type {
+  position: absolute;
+  right: 0;
+  width: 100%;
+  font-size: 0.5rem;
+  margin-right: -20px;
+  text-align: end;
+  opacity: 0.4;
+}
+
+.layer_preview {
+  width: 14px;
+  height: 20px;
+  border: 1px solid black;
+}
+
+.name {
+  font-size: 1rem;
+  margin: 8px 0 0 24px;
+  font-family: "04B03B";
+}
+
+.dot_magnif_container {
+  margin-left: auto;
+  margin-right: 0px;
+  padding: 2px 6px;
+  align-self: center;
+  border: 1px black solid;
+  border-radius: 6px;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.dot_magnif_container:hover {
+  background-color: #ffffff40;
+}
+
+.dot_magnif {
+  font-size: 0.8rem;
+  font-family: "04B03B";
+}
+
+.active_light {
+  margin-left: 8px;
+  margin-right: 8px;
+  align-self: center;
+}
+
+.drop_placeholder {
+  height: 32px;
+  margin: 4px 0;
+  border: 2px dashed #aaa;
+  border-radius: 4px;
+}

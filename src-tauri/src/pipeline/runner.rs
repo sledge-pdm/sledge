@@ -1,5 +1,5 @@
 use super::parser::{parse_pipeline, PipelineNode};
-use crate::commands::{brightness, glitch, grayscale, invert, jpeg_glitch, sepia};
+use crate::commands::{brightness, grayscale, invert, jpeg_glitch, sepia};
 use crate::commands::{decode_image_base64, encode_image_base64};
 
 #[tauri::command]
@@ -25,28 +25,19 @@ pub fn run_pipeline(
                         let encoded = encode_image_base64(&buffer)?;
                         decode_image_base64(&grayscale(encoded, width, height)?)?
                     }
-                    "glitch" => {
-                        if args.len() != 1 {
-                            return Err("glitch requires 1 argument (seed)".to_string());
-                        }
-                        let seed: u64 = args[0]
-                            .parse()
-                            .map_err(|_| "Invalid seed value".to_string())?;
-
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&glitch(encoded, seed)?)?
-                    }
                     "jpeg_glitch" => {
-                        if args.len() != 1 {
-                            return Err("jpeg_glitch requires 1 argument (seed)".to_string());
+                        if args.len() < 2 {
+                            return Err("jpeg_glitch requires 2 arguments: seed, quality".into());
                         }
-                        let seed: u64 = args[0]
-                            .parse()
-                            .map_err(|_| "Invalid seed value".to_string())?;
-
+                        let seed = args[0].parse().map_err(|_| "Invalid seed")?;
+                        let quality = args[1].parse().map_err(|_| "Invalid quality")?;
+                        let amount = args[2].parse().map_err(|_| "Invalid amount")?;
                         let encoded = encode_image_base64(&buffer)?;
-                        return jpeg_glitch(encoded, width, height, seed);
+                        decode_image_base64(&jpeg_glitch(
+                            encoded, width, height, seed, quality, amount,
+                        )?)?
                     }
+
                     "invert" => {
                         let encoded = encode_image_base64(&buffer)?;
                         decode_image_base64(&invert(encoded, width, height)?)?

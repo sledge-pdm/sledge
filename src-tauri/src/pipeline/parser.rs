@@ -12,10 +12,9 @@ pub fn parse_pipeline(input: &str) -> Result<Vec<PipelineNode>, String> {
         .split('>')
         .map(|part| {
             let trimmed = part.trim();
-
-            // 出力指定ノード：*out(layerX)
+            // 出力指定ノード： out(layerX)
             if let Some(captures) = trimmed
-                .strip_prefix("*out(")
+                .strip_prefix("out(")
                 .and_then(|s| s.strip_suffix(")"))
             {
                 Ok(PipelineNode::Output {

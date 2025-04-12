@@ -1,0 +1,56 @@
+diff --git a/node_modules/@thisbeyond/solid-dnd/dist/dev.js b/node_modules/@thisbeyond/solid-dnd/dist/dev.js
+index c4cce69..0578068 100644
+--- a/node_modules/@thisbeyond/solid-dnd/dist/dev.js
++++ b/node_modules/@thisbeyond/solid-dnd/dist/dev.js
+@@ -1084,7 +1084,8 @@ var combineRefs = (setRefA, setRefB) => {
+ // src/create-sortable.ts
+ var createSortable = (id, data = {}) => {
+   const [dndState, { addTransformer, removeTransformer }] = useDragDropContext();
+-  const [sortableState] = useSortableContext();
++  const context = useSortableContext();
++const sortableState = context?.[0];;
+   const draggable = createDraggable(id, data);
+   const droppable = createDroppable(id, data);
+   const setNode = combineRefs(draggable.ref, droppable.ref);
+diff --git a/node_modules/@thisbeyond/solid-dnd/dist/dev.jsx b/node_modules/@thisbeyond/solid-dnd/dist/dev.jsx
+index b06d7fc..81d48fb 100644
+--- a/node_modules/@thisbeyond/solid-dnd/dist/dev.jsx
++++ b/node_modules/@thisbeyond/solid-dnd/dist/dev.jsx
+@@ -1083,7 +1083,8 @@ var combineRefs = (setRefA, setRefB) => {
+ // src/create-sortable.ts
+ var createSortable = (id, data = {}) => {
+   const [dndState, { addTransformer, removeTransformer }] = useDragDropContext();
+-  const [sortableState] = useSortableContext();
++  const context = useSortableContext();
++const sortableState = context?.[0];;
+   const draggable = createDraggable(id, data);
+   const droppable = createDroppable(id, data);
+   const setNode = combineRefs(draggable.ref, droppable.ref);
+diff --git a/node_modules/@thisbeyond/solid-dnd/dist/index.js b/node_modules/@thisbeyond/solid-dnd/dist/index.js
+index ccc5acb..3938d5c 100644
+--- a/node_modules/@thisbeyond/solid-dnd/dist/index.js
++++ b/node_modules/@thisbeyond/solid-dnd/dist/index.js
+@@ -1077,7 +1077,8 @@ var combineRefs = (setRefA, setRefB) => {
+ // src/create-sortable.ts
+ var createSortable = (id, data = {}) => {
+   const [dndState, { addTransformer, removeTransformer }] = useDragDropContext();
+-  const [sortableState] = useSortableContext();
++  const context = useSortableContext();
++const sortableState = context?.[0];;
+   const draggable = createDraggable(id, data);
+   const droppable = createDroppable(id, data);
+   const setNode = combineRefs(draggable.ref, droppable.ref);
+diff --git a/node_modules/@thisbeyond/solid-dnd/dist/index.jsx b/node_modules/@thisbeyond/solid-dnd/dist/index.jsx
+index 54348fe..ec85440 100644
+--- a/node_modules/@thisbeyond/solid-dnd/dist/index.jsx
++++ b/node_modules/@thisbeyond/solid-dnd/dist/index.jsx
+@@ -1070,7 +1070,8 @@ var combineRefs = (setRefA, setRefB) => {
+ // src/create-sortable.ts
+ var createSortable = (id, data = {}) => {
+   const [dndState, { addTransformer, removeTransformer }] = useDragDropContext();
+-  const [sortableState] = useSortableContext();
++  const context = useSortableContext();
++const sortableState = context?.[0];;
+   const draggable = createDraggable(id, data);
+   const droppable = createDroppable(id, data);
+   const setNode = combineRefs(draggable.ref, droppable.ref);

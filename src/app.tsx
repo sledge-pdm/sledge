@@ -1,10 +1,9 @@
 // @refresh reload
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
-import { onMount, Suspense } from "solid-js";
+import { Suspense } from "solid-js";
 import "./app.css";
 import Home from "./routes";
-import { safeInvoke } from "./utils/tauri";
 
 export default function App() {
   // onMount(async () => {
@@ -17,13 +16,11 @@ export default function App() {
 
   return (
     <Router
-      root={props => (
+      root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <Suspense>
-            {props.children}
-          </Suspense>
-        </ MetaProvider>
+          <Suspense>{props.children}</Suspense>
+        </MetaProvider>
       )}
     >
       <Route path="/" component={Home} />

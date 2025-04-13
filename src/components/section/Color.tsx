@@ -1,10 +1,10 @@
 import { Component, For } from "solid-js";
-import { colorStore } from '~/stores/colorStore';
+import { colorStore } from "~/stores/colorStore";
 
+import styles from "@styles/components/section/color.module.css";
 import ColorPicker from "~/components/common/ColorPicker";
 import { setCurrentPenColor } from "~/models/types/Pen";
 import ColorBox from "../common/ColorBox";
-import styles from "@styles/components/section/color.module.css";
 
 const Color: Component<{}> = (props) => {
   const onColorClicked = (color: string, index: number) => {

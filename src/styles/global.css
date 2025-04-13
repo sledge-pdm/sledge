@@ -1,7 +1,7 @@
-@import url('font.css');
-@import url('reset.css');
-@import url('utils.css');
-@import url('section.css');
+@import url("font.css");
+@import url("reset.css");
+@import url("utils.css");
+@import url("section.css");
 
 #sidebar {
   display: flex;

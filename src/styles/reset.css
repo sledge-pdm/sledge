@@ -22,7 +22,7 @@ main {
 body,
 main {
   background-color: #fdfdfd;
-  font-family: '04B08';
+  font-family: "04B08";
 }
 
 /* ==========================================================================
@@ -47,7 +47,7 @@ ul {
 button,
 a,
 input {
-  font-family: '04B08';
+  font-family: "04B08";
   font-size: 0.8rem;
   letter-spacing: 2px;
 }
@@ -60,7 +60,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type='number'] {
+input[type="number"] {
   appearance: textfield;
 }
 

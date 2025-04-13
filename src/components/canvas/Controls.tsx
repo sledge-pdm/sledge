@@ -1,6 +1,6 @@
 import { Component } from "solid-js";
-import { metricStore } from '~/stores/metricStore';
-import { activeLayer, layerStore } from '~/stores/layerStore';
+import { activeLayer, layerStore } from "~/stores/layerStore";
+import { metricStore } from "~/stores/metricStore";
 
 import ImportImageButton from "~/components/common/ImportImageButton";
 import { redo, undo } from "~/models/layer/history";

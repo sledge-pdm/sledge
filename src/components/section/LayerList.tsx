@@ -1,3 +1,4 @@
+import styles from "@styles/components/section/layer.module.css";
 import {
   closestCenter,
   DragDropProvider,
@@ -5,11 +6,15 @@ import {
   SortableProvider,
 } from "@thisbeyond/solid-dnd";
 import { Component, createSignal, For } from "solid-js";
-import { activeLayer, allLayers, layerStore, setLayerStore } from '~/stores/layerStore';
-import styles from "@styles/components/section/layer.module.css";
-import LayerItem from "./item/LayerItem";
 import { addLayer } from "~/models/factories/addLayer";
 import { removeLayer } from "~/models/factories/removeLayer";
+import {
+  activeLayer,
+  allLayers,
+  layerStore,
+  setLayerStore,
+} from "~/stores/layerStore";
+import LayerItem from "./item/LayerItem";
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
@@ -59,25 +64,37 @@ const LayerList: Component<{}> = () => {
       <DragDropSensors>
         <div class="section_root">
           <div class="fl-row" style={{ "margin-bottom": "6px" }}>
-            <p class="section_caption" style={{ "flex-grow": 1 }}>layers.</p>
+            <p class="section_caption" style={{ "flex-grow": 1 }}>
+              layers.
+            </p>
 
             <div class="fl-row" style={{ gap: "4px" }}>
-              <button onClick={() => {
-                addLayer("new")
-                setItems(allLayers())
-              }}>+ add.</button>
+              <button
+                onClick={() => {
+                  addLayer("new");
+                  setItems(allLayers());
+                }}
+              >
+                + add.
+              </button>
 
-              <button onClick={() => {
-                removeLayer(activeLayer()?.id)
-                setItems(allLayers())
-              }}>- remove.</button>
+              <button
+                onClick={() => {
+                  removeLayer(activeLayer()?.id);
+                  setItems(allLayers());
+                }}
+              >
+                - remove.
+              </button>
             </div>
           </div>
           <div class="section_content">
             <div class={styles.layer_list}>
               <SortableProvider ids={ids()}>
                 <For each={items()}>
-                  {(layer, index) => <LayerItem layer={layer} index={index()} />}
+                  {(layer, index) => (
+                    <LayerItem layer={layer} index={index()} />
+                  )}
                 </For>
               </SortableProvider>
             </div>
@@ -87,7 +104,7 @@ const LayerList: Component<{}> = () => {
           </div>
         </div>
       </DragDropSensors>
-    </DragDropProvider >
+    </DragDropProvider>
   );
 };
 

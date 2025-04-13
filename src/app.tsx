@@ -2,8 +2,8 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import "./styles/global.css";
 import Home from "./routes";
+import "./styles/global.css";
 
 export default function App() {
   // onMount(async () => {

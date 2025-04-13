@@ -1,18 +1,17 @@
 import { Component, For, onMount } from "solid-js";
-import { canvasStore } from '~/stores/canvasStore';
-import { activeLayer, allLayers, layerStore } from '~/stores/layerStore';
+import { canvasStore } from "~/stores/canvasStore";
+import { activeLayer, allLayers, layerStore } from "~/stores/layerStore";
 
 import styles from "@styles/components/canvas/canvas_stack.module.css";
 
 import { cloneImageData } from "~/models/factories/utils";
 import { DrawState, getDrawnImageData } from "~/models/layer/getDrawnImageData";
+import { redo, undo } from "~/models/layer/history";
 import { registerNewHistory } from "~/models/layer/layerImage";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
-import { redo, undo } from "~/models/layer/history";
 
 const CanvasStack: Component<{}> = (props) => {
-
   const layerCanvasRefs: {
     [id: string]: LayerCanvasRef;
   } = {};
@@ -21,8 +20,8 @@ const CanvasStack: Component<{}> = (props) => {
     const active = activeLayer();
 
     if (active) return layerCanvasRefs[active.id];
-    else return
-  }
+    else return;
+  };
 
   onMount(() => {
     window.addEventListener("keydown", (e) => {
@@ -43,13 +42,13 @@ const CanvasStack: Component<{}> = (props) => {
   ) => {
     switch (type) {
       case DrawState.start:
-        console.log("stroke start.")
+        console.log("stroke start.");
         break;
       case DrawState.move:
-        console.log("stroke move.")
+        console.log("stroke move.");
         break;
       case DrawState.end:
-        console.log("stroke end.")
+        console.log("stroke end.");
         break;
     }
 

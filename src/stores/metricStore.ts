@@ -1,4 +1,4 @@
-import { createStore } from 'solid-js/store'
+import { createStore } from "solid-js/store";
 
 // metric
 export const [metricStore, setMetricStore] = createStore({
@@ -14,4 +14,4 @@ export const [metricStore, setMetricStore] = createStore({
 
   isCtrlPressed: false,
   isDragging: false,
-})
+});

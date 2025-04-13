@@ -1,8 +1,8 @@
 import CanvasArea from "~/components/canvas/CanvasArea";
-import CanvasSettings from "~/components/section/CanvasSettings";
-import Color from "~/components/section/Color";
 import Companion from "~/components/common/companion/Companion";
 import EdgeInfo from "~/components/common/EdgeInfo";
+import CanvasSettings from "~/components/section/CanvasSettings";
+import Color from "~/components/section/Color";
 import LayerList from "~/components/section/LayerList";
 import PenConfig from "~/components/section/PenConfig";
 

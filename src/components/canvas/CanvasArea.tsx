@@ -1,9 +1,9 @@
 import CanvasStack from "./stacks/CanvasStack";
 
-import { metricStore, setMetricStore } from '~/stores/metricStore';
-import { canvasStore } from '~/stores/canvasStore';
+import { canvasStore } from "~/stores/canvasStore";
+import { metricStore, setMetricStore } from "~/stores/metricStore";
 
-import { createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
+import { createMemo, onCleanup, onMount } from "solid-js";
 import Controls from "./Controls";
 
 import styles from "@styles/components/canvas/canvas_area.module.css";
@@ -13,7 +13,7 @@ export default () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
-  let interact: CanvasAreaInteract = new CanvasAreaInteract();;
+  let interact: CanvasAreaInteract = new CanvasAreaInteract();
 
   onMount(() => {
     // set Canvas to center
@@ -22,14 +22,13 @@ export default () => {
       y: wrapper.scrollHeight / 2 - canvasStore.canvas.height / 2,
     });
     interact.setInteractListeners(wrapper, canvasStack);
-  })
+  });
 
   onCleanup(() => {
     if (interact !== undefined) {
       interact.removeInteractListeners(wrapper, canvasStack);
     }
-  })
-
+  });
 
   const transform = createMemo(() => {
     return `translate(${metricStore.offsetOrigin.x + metricStore.offset.x}px, ${metricStore.offsetOrigin.y + metricStore.offset.y}px) scale(${metricStore.zoom})`;
@@ -57,7 +56,7 @@ export default () => {
         }}
       >
         <div
-          ref={(el) => canvasStack = el}
+          ref={(el) => (canvasStack = el)}
           style={{
             padding: 0,
             margin: 0,
@@ -70,6 +69,6 @@ export default () => {
       </div>
 
       <Controls />
-    </div >
+    </div>
   );
 };

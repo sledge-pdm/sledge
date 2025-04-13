@@ -1,4 +1,4 @@
-import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 
 class CanvasAreaInteract {
   private dragPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -7,7 +7,7 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() {}
+  constructor() { }
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0

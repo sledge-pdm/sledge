@@ -1,5 +1,5 @@
 import { Component, createSignal, onCleanup, onMount } from "solid-js";
-import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 import { roundPosition } from "~/utils/MetricUtils";
 
 interface Props {

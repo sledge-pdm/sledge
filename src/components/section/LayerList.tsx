@@ -5,7 +5,7 @@ import {
   DragDropSensors,
   SortableProvider,
 } from "@thisbeyond/solid-dnd";
-import { Component, createSignal, For } from "solid-js";
+import { Component, createEffect, createSignal, For } from "solid-js";
 import { addLayer } from "~/models/factories/addLayer";
 import { removeLayer } from "~/models/factories/removeLayer";
 import {
@@ -13,7 +13,7 @@ import {
   allLayers,
   layerStore,
   setLayerStore,
-} from "~/stores/layerStore";
+} from "~/stores/project/layerStore";
 import LayerItem from "./item/LayerItem";
 // 並べ替え用ユーティリティ関数
 
@@ -52,6 +52,13 @@ const LayerList: Component<{}> = () => {
       }
     }
   };
+
+  createEffect(() => {
+    const layers = layerStore.layers;
+    if (JSON.stringify(layers) != JSON.stringify(items)) {
+      setItems(layers);
+    }
+  })
 
   return (
     <DragDropProvider

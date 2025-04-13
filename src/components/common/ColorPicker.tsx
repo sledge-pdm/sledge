@@ -2,7 +2,7 @@ import iro from "@jaames/iro";
 import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
 import { Component, createEffect } from "solid-js";
 import { setCurrentPenColor } from "~/models/types/Pen";
-import { currentPen } from "~/stores/penStore";
+import { currentPen } from "~/stores/internal/penStore";
 
 const ColorPicker: Component<{}> = (props) => {
   let colorPicker: IroColorPicker;

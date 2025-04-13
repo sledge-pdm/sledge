@@ -1,0 +1,29 @@
+.project_name_input {
+  border: none;
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+  outline: none;
+
+  &::placeholder {
+    opacity: 0.5;
+  }
+}
+
+.project_file_path {
+  color: #00000040;
+  font-family: '04B11';
+  font-size: 6px;
+  margin-bottom: 12px;
+  margin-left: 3px;
+}
+
+.loadsave_button {
+  font-family: '04B11';
+  font-size: 8px;
+  margin: 4px;
+}
+
+.save_log {
+  color: limegreen;
+  margin-left: 8px;
+}

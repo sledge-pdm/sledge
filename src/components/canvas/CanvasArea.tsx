@@ -5,7 +5,7 @@ import {
   canvasStore,
   centeringCanvas,
   setCanvasStore,
-} from "~/stores/canvasStore";
+} from "~/stores/project/canvasStore";
 
 import { createMemo, onCleanup, onMount } from "solid-js";
 import Controls from "./Controls";

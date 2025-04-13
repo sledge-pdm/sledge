@@ -1,0 +1,9 @@
+@import url('./section.css');
+
+.row {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+}

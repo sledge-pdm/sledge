@@ -14,7 +14,6 @@ const Controls: Component<{}> = (props) => {
   return (
     <>
       <p>canvas.</p>
-
       <p>
         ({lastMouseWindow().x}, {lastMouseWindow().y}) ON WINDOW.
       </p>

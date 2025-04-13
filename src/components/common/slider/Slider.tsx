@@ -12,30 +12,35 @@ interface SliderProps {
 
 const Slider: Component<SliderProps> = (props) => {
   let sliderRef: HTMLDivElement | undefined;
+  const [isDrag, setDrag] = createSignal(false);
   const [value, setValue] = createSignal(props.default);
 
   const percent = () => ((value() - props.min) / (props.max - props.min)) * 100;
 
-  const startDrag = (e: MouseEvent) => {
-    e.preventDefault();
-    const onMove = (e: MouseEvent) => {
-      if (!sliderRef) return;
-      const rect = sliderRef.getBoundingClientRect();
-      let pos = e.clientX - rect.left;
-      pos = Math.max(0, Math.min(pos, rect.width)); // clamp
+  const handlePointerDown = (e: PointerEvent) => {
+    setDrag(true);
 
-      const newValueRaw =
-        props.min + (pos / rect.width) * (props.max - props.min);
-      const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
-      setValue(newValue);
-      if (props.onValueChanged) props.onValueChanged(newValue);
-    };
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
+    window.addEventListener("pointermove", handlePointerMove)
+    window.addEventListener("pointerup", handlePointerUp)
+  };
+
+  const handlePointerMove = (e: PointerEvent) => {
+    if (!sliderRef || !isDrag()) return;
+    const rect = sliderRef.getBoundingClientRect();
+    let pos = e.clientX - rect.left;
+    pos = Math.max(0, Math.min(pos, rect.width)); // clamp
+
+    const newValueRaw =
+      props.min + (pos / rect.width) * (props.max - props.min);
+    const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
+    setValue(newValue);
+    if (props.onValueChanged) props.onValueChanged(newValue);
+  };
+
+  const handlePointerUp = (e: PointerEvent) => {
+    setDrag(false);
+    window.removeEventListener("pointermove", handlePointerMove)
+    window.removeEventListener("pointerup", handlePointerUp)
   };
 
   const onLineClick = (e: MouseEvent) => {
@@ -54,16 +59,12 @@ const Slider: Component<SliderProps> = (props) => {
   return (
     <div class={styles.root}>
       <div class={styles.slider} ref={sliderRef}>
-        <div class={styles["line-hitbox"]} onClick={onLineClick}>
+        <div class={styles["line-hitbox"]}
+          onPointerDown={handlePointerDown}>
           <div class={styles.line} />
         </div>
         <div
-          class={styles["handle-hitbox"]}
-          style={{ left: `${percent()}%` }}
-          onMouseDown={startDrag}
-        >
-          <div class={styles.handle} />
-        </div>
+          style={{ left: `${percent()}%` }} class={styles.handle} />
       </div>
     </div>
   );

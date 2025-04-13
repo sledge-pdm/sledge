@@ -1,0 +1,27 @@
+.root {
+  margin: 1rem 0;
+}
+
+.caption {
+  margin-bottom: 1rem;
+}
+
+.size_form {
+  display: flex;
+  flex-direction: row;
+}
+
+.size_label {
+  font-size: 0.5rem;
+}
+
+.size_input {
+  font-size: 10px;
+  margin: 4px;
+  min-width: 100px;
+}
+
+.button {
+  margin: 4px;
+  padding: 4px;
+}

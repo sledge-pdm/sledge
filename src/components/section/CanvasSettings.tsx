@@ -1,10 +1,7 @@
 import { Component, createSignal } from "solid-js";
 import { initLayer } from "~/models/layer/layerImage";
-import {
-  canvasStore,
-  setCanvasStore
-} from '~/stores/canvasStore';
-import { allLayers, layerStore } from '~/stores/layerStore';
+import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
+import { allLayers, layerStore } from "~/stores/layerStore";
 
 import styles from "@styles/components/section/canvas.module.css";
 import { updateDSL } from "~/stores/imageStore";

@@ -4,9 +4,9 @@ import { sayRandomQuote } from "~/components/common/companion/QuotePool";
 import Light from "~/components/common/Light";
 import Slider from "~/components/common/Slider";
 import { Pen } from "~/models/types/Pen";
-import { penStore, setPenStore } from '~/stores/penStore';
+import { penStore, setPenStore } from "~/stores/penStore";
 
-import styles from "@styles/components/section/pen.module.css"
+import styles from "@styles/components/section/pen.module.css";
 
 interface Props {
   pen: Pen;

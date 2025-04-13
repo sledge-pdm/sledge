@@ -1,5 +1,5 @@
-import { Component, Show } from "solid-js";
 import styles from "@styles/components/light.module.css";
+import { Component, Show } from "solid-js";
 
 interface LightProps {
   class?: string;

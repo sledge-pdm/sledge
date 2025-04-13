@@ -1,10 +1,10 @@
+import styles from "@styles/components/section/layer.module.css";
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
 import { Component } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
-import { allLayers, layerStore, setLayerStore } from '~/stores/layerStore';
-import styles from "@styles/components/section/layer.module.css";
+import { layerStore, setLayerStore } from "~/stores/layerStore";
 
 interface LayerItemProps {
   index: number;
@@ -66,10 +66,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       <div style={{ display: "flex", "align-items": "center" }}>
         {/* <DSLButton /> */}
         <div
-          class={[
-            styles.layer_det,
-            !layer.enabled && styles.disabled,
-          ]
+          class={[styles.layer_det, !layer.enabled && styles.disabled]
             .filter(Boolean)
             .join(" ")}
           onClick={onDetClicked}

@@ -1,11 +1,6 @@
 import { Component, createSignal, onCleanup, onMount } from "solid-js";
-import { redo, undo } from "~/models/layer/history";
-import {
-  metricStore,
-  setMetricStore
-} from '~/stores/metricStore';
-import { canvasStore } from '~/stores/canvasStore';
-import { layerStore } from '~/stores/layerStore';
+import { canvasStore } from "~/stores/canvasStore";
+import { metricStore, setMetricStore } from "~/stores/metricStore";
 import { roundPosition } from "~/utils/MetricUtils";
 
 interface Props {

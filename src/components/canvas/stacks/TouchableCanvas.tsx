@@ -1,11 +1,11 @@
 import { Component, createSignal, onCleanup, onMount } from "solid-js";
 import { redo, undo } from "~/models/layer/history";
 import {
-  canvasStore,
-  layerStore,
   metricStore,
-  setMetricStore,
-} from "~/stores/Store";
+  setMetricStore
+} from '~/stores/metricStore';
+import { canvasStore } from '~/stores/canvasStore';
+import { layerStore } from '~/stores/layerStore';
 import { roundPosition } from "~/utils/MetricUtils";
 
 interface Props {
@@ -83,8 +83,18 @@ export const TouchableCanvas: Component<Props> = (props) => {
     };
   }
 
+  function isDrawableClick(e: PointerEvent): boolean {
+    if (e.pointerType === "touch" || metricStore.isDragging) return false;
+
+    // right=1, left=2, middle=4
+    // console.log(e.buttons)
+    if (e.pointerType === "mouse" && e.buttons !== 1) return false;
+
+    return true;
+  }
+
   function handlePointerDown(e: PointerEvent) {
-    if (e.pointerType === "touch") return;
+    if (!isDrawableClick(e)) return;
 
     const position = getCanvasMousePosition(e);
     if (props.onStrokeStart) {
@@ -104,7 +114,9 @@ export const TouchableCanvas: Component<Props> = (props) => {
     const position = getCanvasMousePosition(e);
     setMetricStore("lastMouseWindow", roundPosition(windowPosition));
     setMetricStore("lastMouseOnCanvas", roundPosition(position));
-    if (e.pointerType === "touch") return;
+
+    if (!isDrawableClick(e)) return;
+
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
       setTemporaryOut(false);

@@ -1,9 +1,5 @@
-import {
-  allLayers,
-  imageStore,
-  setImageStore,
-  setLayerStore,
-} from '~/stores/Store'
+import { allLayers, setLayerStore } from '~/stores/layerStore'
+import { imageStore, setImageStore } from '~/stores/imageStore'
 
 export const removeLayer = (layerId?: string) => {
   if (layerId === undefined) return

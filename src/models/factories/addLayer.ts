@@ -1,7 +1,7 @@
 import { DSL } from '~/dsl/DSL'
 import { LayerType } from '../types/Layer'
 import { createLayer } from './createLayer'
-import { allLayers, layerStore, setLayerStore } from '~/stores/Store'
+import { allLayers, layerStore, setLayerStore } from '~/stores/layerStore'
 
 export const addLayer = (
   name: string,

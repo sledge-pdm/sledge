@@ -1,6 +1,6 @@
 import { Component, For } from "solid-js";
 import PenItem from "./item/PenItem";
-import { penStore } from "~/stores/Store";
+import { penStore } from '~/stores/penStore';
 
 const PenConfig: Component<{}> = (props) => {
   return (

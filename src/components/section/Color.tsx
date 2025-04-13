@@ -1,5 +1,5 @@
 import { Component, For } from "solid-js";
-import { colorStore } from "~/stores/Store";
+import { colorStore } from '~/stores/colorStore';
 
 import ColorPicker from "~/components/common/ColorPicker";
 import { setCurrentPenColor } from "~/models/types/Pen";

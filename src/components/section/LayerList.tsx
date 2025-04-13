@@ -5,7 +5,7 @@ import {
   SortableProvider,
 } from "@thisbeyond/solid-dnd";
 import { Component, createSignal, For } from "solid-js";
-import { activeLayer, allLayers, layerStore, setLayerStore } from "~/stores/Store";
+import { activeLayer, allLayers, layerStore, setLayerStore } from '~/stores/layerStore';
 import styles from "@styles/components/section/layer.module.css";
 import LayerItem from "./item/LayerItem";
 import { addLayer } from "~/models/factories/addLayer";

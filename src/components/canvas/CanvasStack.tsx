@@ -1,5 +1,6 @@
 import { Component, For, onMount } from "solid-js";
-import { activeLayer, allLayers, canvasStore } from "~/stores/Store";
+import { canvasStore } from '~/stores/canvasStore';
+import { activeLayer, allLayers } from '~/stores/layerStore';
 
 import styles from "@styles/components/canvas/canvas_stack.module.css";
 

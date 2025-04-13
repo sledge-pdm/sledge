@@ -1,6 +1,7 @@
 import CanvasStack from "./CanvasStack";
 
-import { canvasStore, metricStore, setMetricStore } from "~/stores/Store";
+import { metricStore, setMetricStore } from '~/stores/metricStore';
+import { canvasStore } from '~/stores/canvasStore';
 
 import { createSignal, onMount } from "solid-js";
 import Controls from "./Controls";
@@ -109,7 +110,6 @@ export default () => {
       });
     });
 
-    const [isDrag, setIsDrag] = createSignal(false);
     const [dragPosition, setDragPosition] = createSignal({ x: 0, y: 0 });
     const [isCtrlPressed, setCtrlPressed] = createSignal(false);
 
@@ -122,33 +122,35 @@ export default () => {
     });
 
     wrapper.addEventListener("mousedown", (e) => {
-      if (isCtrlPressed()) {
+      if (e.buttons === 4 || e.buttons === 1 && isCtrlPressed()) {
         e.preventDefault();
         e.stopPropagation();
-        setIsDrag(true);
+        setMetricStore("isDragging", true);
         setDragPosition({ x: e.clientX, y: e.clientY });
       }
     });
 
     wrapper.addEventListener("mousemove", (e) => {
-      if (isCtrlPressed() && isDrag()) {
+      if (e.buttons === 4 || e.buttons === 1 && isCtrlPressed()) {
         e.preventDefault();
         e.stopPropagation();
-        const dx = e.clientX - dragPosition().x;
-        const dy = e.clientY - dragPosition().y;
-        addOffset(dx, dy);
-        setDragPosition({ x: e.clientX, y: e.clientY });
+        if (metricStore.isDragging) {
+          const dx = e.clientX - dragPosition().x;
+          const dy = e.clientY - dragPosition().y;
+          addOffset(dx, dy);
+          setDragPosition({ x: e.clientX, y: e.clientY });
+        }
       }
     });
 
     wrapper.addEventListener("mouseup", (e) => {
-      setIsDrag(false);
+      setMetricStore("isDragging", false);
     });
     wrapper.addEventListener("mouseleave", (e) => {
-      setIsDrag(false);
+      setMetricStore("isDragging", false);
     });
     wrapper.addEventListener("mouseout", (e) => {
-      setIsDrag(false);
+      setMetricStore("isDragging", false);
     });
   }
 

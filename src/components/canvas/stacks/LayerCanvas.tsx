@@ -7,7 +7,8 @@ import {
 } from "solid-js";
 import { cloneImageData } from "~/models/factories/utils";
 import { Layer } from "~/models/types/Layer";
-import { activeImage, canvasStore, imageStore } from "~/stores/Store";
+import { canvasStore } from '~/stores/canvasStore';
+import { activeImage, imageStore } from '~/stores/imageStore';
 
 import styles from "@styles/components/canvas/layer_canvas.module.css";
 

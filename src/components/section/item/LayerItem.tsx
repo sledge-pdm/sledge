@@ -3,7 +3,7 @@ import { Component } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
-import { allLayers, layerStore, setLayerStore } from "~/stores/Store";
+import { allLayers, layerStore, setLayerStore } from '~/stores/layerStore';
 import styles from "@styles/components/section/layer.module.css";
 
 interface LayerItemProps {

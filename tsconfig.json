@@ -12,8 +12,9 @@
     "noEmit": true,
     "isolatedModules": true,
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*", "./dist-tcm/*"],
+      "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"]
     },
-    "rootDirs": ["src", "tcm"]
+    "rootDirs": ["src", "dist-tcm"]
   }
 }

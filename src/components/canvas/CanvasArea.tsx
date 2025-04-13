@@ -1,10 +1,11 @@
-import CanvasStack from "./canvas_stack/CanvasStack";
+import CanvasStack from "./CanvasStack";
 
 import { canvasStore, metricStore, setMetricStore } from "~/stores/Store";
 
 import { createSignal, onMount } from "solid-js";
-import styles from "./canvas_area.module.css";
-import Controls from "./controls/Controls";
+import Controls from "./Controls";
+
+import styles from "@styles/components/canvas/canvas_area.module.css";
 
 export default () => {
   let canvasStackRef: HTMLDivElement;

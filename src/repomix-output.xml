@@ -43,55 +43,29 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
-app.css
 app.css.d.ts
 app.tsx
-components/canvas_settings/canvas_settings.module.css
-components/canvas_settings/canvas_settings.module.css.d.ts
-components/canvas_settings/CanvasSettings.tsx
-components/canvas/canvas_area.module.css
-components/canvas/canvas_area.module.css.d.ts
-components/canvas/canvas_stack/canvas_stack.module.css
-components/canvas/canvas_stack/canvas_stack.module.css.d.ts
-components/canvas/canvas_stack/CanvasStack.tsx
 components/canvas/CanvasArea.tsx
-components/canvas/controls/controls.module.css
-components/canvas/controls/controls.module.css.d.ts
-components/canvas/controls/Controls.tsx
-components/canvas/layer_canvas/layer_canvas.module.css
-components/canvas/layer_canvas/layer_canvas.module.css.d.ts
-components/canvas/layer_canvas/LayerCanvas.tsx
-components/canvas/touchable_canvas/TouchableCanvas.tsx
-components/color/color_picker/ColorPicker.tsx
-components/color/color.module.css
-components/color/color.module.css.d.ts
-components/color/Color.tsx
-components/common/atoms/ColorBox.tsx
-components/common/atoms/dsl_button.module.css
-components/common/atoms/dsl_button.module.css.d.ts
-components/common/atoms/DSLButton.tsx
-components/common/atoms/ImportImageButton.tsx
-components/common/companion/companion.module.css
-components/common/companion/companion.module.css.d.ts
+components/canvas/CanvasStack.tsx
+components/canvas/Controls.tsx
+components/canvas/stacks/LayerCanvas.tsx
+components/canvas/stacks/TouchableCanvas.tsx
+components/common/ColorBox.tsx
+components/common/ColorPicker.tsx
 components/common/companion/Companion.tsx
 components/common/companion/QuotePool.ts
-components/common/dsl/DSLEditor.tsx
-components/common/light/light.module.css
-components/common/light/light.module.css.d.ts
-components/common/light/Light.tsx
-components/common/slider/slider.module.css
-components/common/slider/slider.module.css.d.ts
-components/common/slider/Slider.tsx
-components/edge_info/EdgeInfo.tsx
-components/layer/Arrow.tsx
-components/layer/layer_list.module.css
-components/layer/layer_list.module.css.d.ts
-components/layer/LayerItem.tsx
-components/layer/LayerList.tsx
-components/pen/config_row/ConfigRow.tsx
-components/pen/pen_config.module.css
-components/pen/pen_config.module.css.d.ts
-components/pen/PenConfig.tsx
+components/common/DSLButton.tsx
+components/common/DSLEditor.tsx
+components/common/EdgeInfo.tsx
+components/common/ImportImageButton.tsx
+components/common/Light.tsx
+components/common/Slider.tsx
+components/section/CanvasSettings.tsx
+components/section/Color.tsx
+components/section/item/LayerItem.tsx
+components/section/item/PenItem.tsx
+components/section/LayerList.tsx
+components/section/PenConfig.tsx
 dsl/DSL.ts
 dsl/DSLRunner.ts
 dsl/nodes/AvailableNodes.ts
@@ -122,6 +96,23 @@ models/types/Pen.ts
 routes/[...404].tsx
 routes/index.tsx
 stores/Store.ts
+styles/components/canvas/canvas_area.module.css
+styles/components/canvas/canvas_stack.module.css
+styles/components/canvas/controls.module.css
+styles/components/canvas/layer_canvas.module.css
+styles/components/companion.module.css
+styles/components/dsl_button.module.css
+styles/components/light.module.css
+styles/components/section/canvas.module.css
+styles/components/section/color.module.css
+styles/components/section/layer.module.css
+styles/components/section/pen.module.css
+styles/components/slider.module.css
+styles/font.css
+styles/global.css
+styles/reset.css
+styles/section.css
+styles/utils.css
 utils/BrushUtils.ts
 utils/DSLUtils.ts
 utils/EffectUtils.ts
@@ -135,187 +126,6 @@ utils/tauri.ts
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="app.css">
-/* ==========================================================================
-   Base & Reset
-   ========================================================================== */
-
-@font-face {
-  font-family: '04B08';
-  src: url(/fonts/04B_08__.ttf);
-}
-@font-face {
-  font-family: '04B03B';
-  src: url(/fonts/04B_03B_.ttf);
-}
-
-/* html, body, #root, main をウィンドウ全体に */
-html,
-body,
-#root,
-main {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  touch-action: none;
-}
-
-/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
-#root {
-  display: flex;
-  flex-direction: row;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* body / main の背景・フォント */
-body,
-main {
-  background-color: #fdfdfd;
-  font-family: '04B08';
-}
-
-/* ==========================================================================
-     Typography & Basic Elements
-     ========================================================================== */
-
-p {
-  font-size: 0.5rem;
-  letter-spacing: 2px;
-  margin: 0;
-}
-
-.it {
-  font-style: italic;
-}
-
-ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-button,
-a,
-input {
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  font-family: '04B08';
-}
-
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type='number'] {
-  -moz-appearance: textfield;
-}
-
-button {
-  background: white;
-  height: fit-content;
-  padding: 2px 6px;
-  border: 1px black solid;
-  border-radius: 2px;
-  font-size: 0.5rem;
-
-  pointer-events: all;
-  cursor: pointer;
-}
-button:any-hover {
-  background: #f0f0f0;
-  transform: translateY(1px);
-}
-
-/* 便利な変数 */
-:root {
-  --window-top-padding: 20px;
-}
-
-/* ==========================================================================
-     Sidebar Styles
-     ========================================================================== */
-#sidebar {
-  display: flex;
-  flex-direction: row;
-}
-
-#sidebar > #edge {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 0 20px 14px;
-  gap: 20px;
-}
-
-#sidebar > #edge > p {
-  font-size: 0.5rem;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg) scaleX(0.8);
-  white-space: nowrap;
-  letter-spacing: 2px;
-  margin: 0;
-}
-
-#sidebar > #content {
-  border-right: 1px solid black;
-  width: 300px;
-  height: 100%;
-  gap: 2rem;
-  display: flex;
-  flex-direction: column;
-  padding: var(--window-top-padding) 50px 10px 40px;
-}
-
-.fl-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.fl-row {
-  display: flex;
-  flex-direction: row;
-}
-
-.section_root {
-  display: flex;
-  flex-direction: column;
-}
-
-.section_caption {
-  margin-bottom: 8px;
-}
-
-.section_content {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.white {
-  background-color: #ffffff;
-  border: 1px solid #00000029;
-  margin: -1px;
-}
-
-#misc_container {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-#sledge {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-}
-</file>
 
 <file path="app.css.d.ts">
 declare const styles: {
@@ -336,7 +146,7 @@ export = styles;
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import "./app.css";
+import "./styles/global.css";
 import Home from "./routes";
 
 export default function App() {
@@ -363,387 +173,15 @@ export default function App() {
 }
 </file>
 
-<file path="components/canvas_settings/canvas_settings.module.css">
-.root {
-  margin: 1rem 0;
-}
-
-.caption {
-  margin-bottom: 1rem;
-}
-
-.size_form {
-  display: flex;
-  flex-direction: row;
-}
-
-.size_label {
-  font-size: 0.5rem;
-}
-
-.size_input {
-  min-width: 100px;
-  margin: 4px;
-  font-size: 10px;
-}
-
-.button {
-  padding: 4px;
-  margin: 4px;
-}
-</file>
-
-<file path="components/canvas_settings/canvas_settings.module.css.d.ts">
-declare const styles: {
-  readonly button: string;
-  readonly caption: string;
-  readonly root: string;
-  readonly size_form: string;
-  readonly size_input: string;
-  readonly size_label: string;
-};
-export = styles;
-</file>
-
-<file path="components/canvas_settings/CanvasSettings.tsx">
-import { Component, createSignal } from "solid-js";
-import { initLayer } from "~/models/layer/layerImage";
-import {
-  allLayers,
-  canvasStore,
-  layerStore,
-  setCanvasStore,
-  updateDSL,
-} from "~/stores/Store";
-
-import styles from "./canvas_settings.module.css";
-
-const CanvasSettings: Component<{}> = (props) => {
-  const [width, setWidth] = createSignal(canvasStore.canvas.width);
-  const [height, setHeight] = createSignal(canvasStore.canvas.height);
-
-  const changeCanvasSize = (e: any) => {
-    e.preventDefault();
-    setCanvasStore("canvas", "width", width);
-    setCanvasStore("canvas", "height", height);
-
-    allLayers().forEach((layer, i) => {
-      initLayer(layer.id, layer.dotMagnification);
-      updateDSL(layer.id);
-    });
-  };
-
-  const resetAllLayers = (e: any) => {
-    layerStore.layers.forEach((l) => {
-      initLayer(l.id, l.dotMagnification);
-    });
-  };
-
-  return (
-    <div class="section_root">
-      <p class="section_caption">canvas.</p>
-
-      <form class="section_content" onSubmit={(e) => changeCanvasSize(e)}>
-        <div class="fl-row">
-          <div>
-            <p>width</p>
-            <input
-              class={styles.size_input}
-              type="number"
-              name="width"
-              onChange={(e) => setWidth(Number(e.target.value))}
-              value={width()}
-              min={0}
-              max={1200}
-              required
-            />
-          </div>
-          <div>
-            <p>height</p>
-            <input
-              class={styles.size_input}
-              type="number"
-              name="height"
-              onChange={(e) => setHeight(Number(e.target.value))}
-              value={height()}
-              min={0}
-              max={1200}
-              required
-            />
-          </div>
-          <button class={styles.button} type="submit">
-            change
-          </button>
-        </div>
-      </form>
-
-      <button class={styles.button} onClick={resetAllLayers}>
-        RESET ALL LAYERS
-      </button>
-    </div>
-  );
-};
-
-export default CanvasSettings;
-</file>
-
-<file path="components/canvas/canvas_area.module.css">
-.canvas_area {
-  background-color: #fcfcfc;
-  padding: 20px;
-  width: 100%;
-  height: 100%;
-  /* 上部パディング（オプション） */
-  padding-top: var(--window-top-padding);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  position: relative;
-
-  overflow: hidden;
-}
-</file>
-
-<file path="components/canvas/canvas_area.module.css.d.ts">
-declare const styles: {
-  readonly canvas_area: string;
-  readonly canvas_stack_container: string;
-};
-export = styles;
-</file>
-
-<file path="components/canvas/canvas_stack/canvas_stack.module.css">
-:root {
-  --layer-opacity: 0.15;
-}
-
-.canvas_stack {
-  position: relative;
-  border: 1px solid black;
-  align-items: center;
-  justify-content: center;
-  display: flex;
-}
-
-.resize-drag-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 120px;
-  padding: 0;
-  font-family: sans-serif;
-  z-index: 100;
-
-  touch-action: none;
-
-  /* This makes things *much* easier */
-  box-sizing: border-box;
-}
-
-.image-container {
-  width: 100%;
-  height: 100%;
-}
-.image-container:focus-within {
-  border: 2px black solid;
-}
-
-.resize-image {
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-}
-</file>
-
-<file path="components/canvas/canvas_stack/canvas_stack.module.css.d.ts">
-declare const styles: {
-  readonly canvas_stack: string;
-  readonly "image-container": string;
-  readonly "resize-drag-container": string;
-  readonly "resize-image": string;
-};
-export = styles;
-</file>
-
-<file path="components/canvas/canvas_stack/CanvasStack.tsx">
-import { Component, For, onMount } from "solid-js";
-import { activeLayer, allLayers, canvasStore } from "~/stores/Store";
-
-import { TouchableCanvas } from "../touchable_canvas/TouchableCanvas";
-import styles from "./canvas_stack.module.css";
-
-import interact from "interactjs";
-import { cloneImageData } from "~/models/factories/utils";
-import { DrawState, getDrawnImageData } from "~/models/layer/getDrawnImageData";
-import { registerNewHistory } from "~/models/layer/layerImage";
-import { LayerCanvas, LayerCanvasRef } from "../layer_canvas/LayerCanvas";
-
-const CanvasStack: Component<{}> = (props) => {
-  let ref: HTMLDivElement;
-
-  onMount(() => {
-    interact(ref)
-      .resizable({
-        // resize from all edges and corners
-        edges: { left: true, right: true, bottom: true, top: true },
-
-        listeners: {
-          move(event) {
-            var target = event.target;
-            var x = parseFloat(target.getAttribute("data-x")) || 0;
-            var y = parseFloat(target.getAttribute("data-y")) || 0;
-
-            // update the element's style
-            target.style.width = event.rect.width + "px";
-            target.style.height = event.rect.height + "px";
-
-            // translate when resizing from top or left edges
-            x += event.deltaRect.left;
-            y += event.deltaRect.top;
-
-            target.style.transform = "translate(" + x + "px," + y + "px)";
-
-            target.setAttribute("data-x", x);
-            target.setAttribute("data-y", y);
-          },
-        },
-        modifiers: [
-          // keep the edges inside the parent
-          interact.modifiers.restrictEdges({
-            outer: "parent",
-          }),
-
-          // minimum size
-          interact.modifiers.restrictSize({
-            min: { width: 100, height: 50 },
-          }),
-        ],
-
-        inertia: true,
-      })
-      .draggable({
-        listeners: {
-          move(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const target = event.target;
-            const x =
-              (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
-            const y =
-              (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
-
-            target.style.transform = `translate(${x}px, ${y}px)`;
-            target.setAttribute("data-x", x);
-            target.setAttribute("data-y", y);
-          },
-        },
-      });
-  });
-
-  // onMount(() => {
-  //     if (metricStore.adjustZoomOnCanvasChange) {
-  //         let adjustedZoom = 600 / canvasStore.canvas.height;
-  //         setMetricStore("zoom", adjustedZoom);
-  //     }
-  // })
-
-  // createEffect(() => {
-  //     if (metricStore.adjustZoomOnCanvasChange) {
-  //         let adjustedZoom = 600 / canvasStore.canvas.height;
-  //         setMetricStore("zoom", adjustedZoom);
-  //     }
-  // })
-
-  const layerCanvasRefs: {
-    [id: string]: LayerCanvasRef;
-  } = {};
-
-  const handleDraw = (
-    type: DrawState,
-    position: { x: number; y: number },
-    lastPos?: { x: number; y: number },
-  ) => {
-    const active = activeLayer();
-
-    if (active) {
-      const activeRef = layerCanvasRefs[active.id];
-      if (type === DrawState.start) {
-        activeRef.initDrawingBuffer();
-      } else {
-        const drawingBuffer = activeRef.getDrawingBuffer();
-        if (drawingBuffer) {
-          const newImageData = getDrawnImageData(
-            active.id,
-            type,
-            drawingBuffer,
-            position,
-            lastPos,
-          );
-
-          if (newImageData) {
-            activeRef.setImageData(newImageData);
-            if (type === DrawState.end) {
-              activeRef.resetDrawingBuffer();
-              registerNewHistory(active.id, cloneImageData(newImageData));
-            }
-          }
-        }
-      }
-    }
-  };
-
-  return (
-    <div style={{ position: "relative" }}>
-      <div
-        class={styles.canvas_stack}
-        style={{
-          width: `${canvasStore.canvas.width}px`,
-          height: `${canvasStore.canvas.height}px`,
-        }}
-      >
-        <TouchableCanvas
-          onStrokeStart={(p, lp) => handleDraw(DrawState.start, p, lp)}
-          onStrokeMove={(p, lp) => handleDraw(DrawState.move, p, lp)}
-          onStrokeEnd={(p, lp) => handleDraw(DrawState.end, p, lp)}
-        />
-
-        <For each={allLayers()}>
-          {(layer, index) => (
-            <LayerCanvas
-              ref={layerCanvasRefs[layer.id]}
-              layer={layer}
-              zIndex={allLayers().length - index()}
-            />
-          )}
-        </For>
-      </div>
-      <div
-        class={styles["resize-drag-container"]}
-        ref={(r) => (ref = r)}
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        <div
-          class={styles["image-container"]}
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {/* <img class={styles["resize-image"]} src="/333121.jpg" /> */}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default CanvasStack;
-</file>
-
 <file path="components/canvas/CanvasArea.tsx">
-import CanvasStack from "./canvas_stack/CanvasStack";
+import CanvasStack from "./CanvasStack";
 
 import { canvasStore, metricStore, setMetricStore } from "~/stores/Store";
 
 import { createSignal, onMount } from "solid-js";
-import styles from "./canvas_area.module.css";
-import Controls from "./controls/Controls";
+import Controls from "./Controls";
+
+import styles from "@styles/components/canvas/canvas_area.module.css";
 
 export default () => {
   let canvasStackRef: HTMLDivElement;
@@ -941,95 +379,186 @@ const getMutualMove = (move0: number, move1: number) => {
 };
 </file>
 
-<file path="components/canvas/controls/controls.module.css">
-* {
-  z-index: 1000;
-}
+<file path="components/canvas/CanvasStack.tsx">
+import { Component, For, onMount } from "solid-js";
+import { activeLayer, allLayers, canvasStore } from "~/stores/Store";
 
-.cursor {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  top: 170px;
-  left: 220px;
-  background-color: black;
-}
+import styles from "@styles/components/canvas/canvas_stack.module.css";
 
-.top-right-button-container {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  display: flex;
-  gap: 10px;
-  flex-direction: row;
-}
+import interact from "interactjs";
+import { cloneImageData } from "~/models/factories/utils";
+import { DrawState, getDrawnImageData } from "~/models/layer/getDrawnImageData";
+import { registerNewHistory } from "~/models/layer/layerImage";
+import { LayerCanvas, LayerCanvasRef } from "./stacks/LayerCanvas";
+import { TouchableCanvas } from "./stacks/TouchableCanvas";
 
-.button {
-  font-size: 1rem;
-  background-color: deepskyblue;
-  color: white;
-  padding: 4px;
-  cursor: pointer;
-}
+const CanvasStack: Component<{}> = (props) => {
+  let ref: HTMLDivElement;
 
-.top-right-nav {
-  position: absolute;
-  top: 60px;
-  right: 30px;
-  display: flex;
-  gap: 55px;
-  flex-direction: row;
-}
+  onMount(() => {
+    interact(ref)
+      .resizable({
+        // resize from all edges and corners
+        edges: { left: true, right: true, bottom: true, top: true },
 
-.bottom-history {
-  position: absolute;
-  bottom: 50px;
-  display: flex;
-  gap: 5px;
-  flex-direction: column;
-}
+        listeners: {
+          move(event) {
+            var target = event.target;
+            var x = parseFloat(target.getAttribute("data-x")) || 0;
+            var y = parseFloat(target.getAttribute("data-y")) || 0;
 
-.history-row {
-  display: flex;
-  opacity: 0.2;
-  width: 60%;
-  gap: 20px;
-}
+            // update the element's style
+            target.style.width = event.rect.width + "px";
+            target.style.height = event.rect.height + "px";
 
-.history-text {
-  white-space: nowrap;
-}
+            // translate when resizing from top or left edges
+            x += event.deltaRect.left;
+            y += event.deltaRect.top;
 
-.undo_redo {
-  font-size: 1rem;
-  height: fit-content;
-  pointer-events: all;
-  cursor: pointer;
-}
-</file>
+            target.style.transform = "translate(" + x + "px," + y + "px)";
 
-<file path="components/canvas/controls/controls.module.css.d.ts">
-declare const styles: {
-  readonly "bottom-history": string;
-  readonly button: string;
-  readonly cursor: string;
-  readonly "history-row": string;
-  readonly "history-text": string;
-  readonly "top-right-button-container": string;
-  readonly "top-right-nav": string;
-  readonly undo_redo: string;
+            target.setAttribute("data-x", x);
+            target.setAttribute("data-y", y);
+          },
+        },
+        modifiers: [
+          // keep the edges inside the parent
+          interact.modifiers.restrictEdges({
+            outer: "parent",
+          }),
+
+          // minimum size
+          interact.modifiers.restrictSize({
+            min: { width: 100, height: 50 },
+          }),
+        ],
+
+        inertia: true,
+      })
+      .draggable({
+        listeners: {
+          move(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const target = event.target;
+            const x =
+              (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
+            const y =
+              (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
+
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.setAttribute("data-x", x);
+            target.setAttribute("data-y", y);
+          },
+        },
+      });
+  });
+
+  // onMount(() => {
+  //     if (metricStore.adjustZoomOnCanvasChange) {
+  //         let adjustedZoom = 600 / canvasStore.canvas.height;
+  //         setMetricStore("zoom", adjustedZoom);
+  //     }
+  // })
+
+  // createEffect(() => {
+  //     if (metricStore.adjustZoomOnCanvasChange) {
+  //         let adjustedZoom = 600 / canvasStore.canvas.height;
+  //         setMetricStore("zoom", adjustedZoom);
+  //     }
+  // })
+
+  const layerCanvasRefs: {
+    [id: string]: LayerCanvasRef;
+  } = {};
+
+  const handleDraw = (
+    type: DrawState,
+    position: { x: number; y: number },
+    lastPos?: { x: number; y: number },
+  ) => {
+    const active = activeLayer();
+
+    if (active) {
+      const activeRef = layerCanvasRefs[active.id];
+      if (type === DrawState.start) {
+        activeRef.initDrawingBuffer();
+      } else {
+        const drawingBuffer = activeRef.getDrawingBuffer();
+        if (drawingBuffer) {
+          const newImageData = getDrawnImageData(
+            active.id,
+            type,
+            drawingBuffer,
+            position,
+            lastPos,
+          );
+
+          if (newImageData) {
+            activeRef.setImageData(newImageData);
+            if (type === DrawState.end) {
+              activeRef.resetDrawingBuffer();
+              registerNewHistory(active.id, cloneImageData(newImageData));
+            }
+          }
+        }
+      }
+    }
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <div
+        class={styles.canvas_stack}
+        style={{
+          width: `${canvasStore.canvas.width}px`,
+          height: `${canvasStore.canvas.height}px`,
+        }}
+      >
+        <TouchableCanvas
+          onStrokeStart={(p, lp) => handleDraw(DrawState.start, p, lp)}
+          onStrokeMove={(p, lp) => handleDraw(DrawState.move, p, lp)}
+          onStrokeEnd={(p, lp) => handleDraw(DrawState.end, p, lp)}
+        />
+
+        <For each={allLayers()}>
+          {(layer, index) => (
+            <LayerCanvas
+              ref={layerCanvasRefs[layer.id]}
+              layer={layer}
+              zIndex={allLayers().length - index()}
+            />
+          )}
+        </For>
+      </div>
+      <div
+        class={styles["resize-drag-container"]}
+        ref={(r) => (ref = r)}
+        onMouseDown={(e) => e.preventDefault()}
+      >
+        <div
+          class={styles["image-container"]}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {/* <img class={styles["resize-image"]} src="/333121.jpg" /> */}
+        </div>
+      </div>
+    </div>
+  );
 };
-export = styles;
+
+export default CanvasStack;
 </file>
 
-<file path="components/canvas/controls/Controls.tsx">
+<file path="components/canvas/Controls.tsx">
 import { Component } from "solid-js";
 import { activeLayer, layerStore, metricStore } from "~/stores/Store";
 
-import ImportImageButton from "~/components/common/atoms/ImportImageButton";
+import ImportImageButton from "~/components/common/ImportImageButton";
 import { redo, undo } from "~/models/layer/history";
 import { exportActiveLayerUpscaled } from "~/utils/export";
-import styles from "./controls.module.css";
+
+import styles from "@styles/components/canvas/controls.module.css";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => metricStore.zoom;
@@ -1093,45 +622,7 @@ const Controls: Component<{}> = (props) => {
 export default Controls;
 </file>
 
-<file path="components/canvas/layer_canvas/layer_canvas.module.css">
-.layer-canvas {
-  position: absolute;
-  image-rendering: pixelated; /* ドット絵に重要 */
-  pointer-events: none; /* マウスイベントは通さない（必要に応じて） */
-}
-
-.layer-canvas.dev-hint[data-layer-id="dot1"] {
-  background-color: rgba(255, 0, 0, var(--layer-opacity)); /* 赤系 */
-}
-.layer-canvas.dev-hint[data-layer-id="dot2"] {
-  background-color: rgba(0, 255, 0, var(--layer-opacity)); /* 緑系 */
-}
-.layer-canvas.dev-hint[data-layer-id="dot3"] {
-  background-color: rgba(0, 0, 255, var(--layer-opacity)); /* 青系 */
-}
-.layer-canvas.dev-hint[data-layer-id="auto1"] {
-  background-color: rgba(255, 255, 0, var(--layer-opacity)); /* 黄系 */
-}
-.layer-canvas.dev-hint[data-layer-id="image1"] {
-  background-color: rgba(255, 0, 255, var(--layer-opacity)); /* ピンク系 */
-}
-
-.hidden {
-  opacity: 0;
-  pointer-events: auto; /* display:none ではなくイベントを通す */
-}
-</file>
-
-<file path="components/canvas/layer_canvas/layer_canvas.module.css.d.ts">
-declare const styles: {
-  readonly "dev-hint": string;
-  readonly hidden: string;
-  readonly "layer-canvas": string;
-};
-export = styles;
-</file>
-
-<file path="components/canvas/layer_canvas/LayerCanvas.tsx">
+<file path="components/canvas/stacks/LayerCanvas.tsx">
 import {
   Component,
   createEffect,
@@ -1142,7 +633,8 @@ import {
 import { cloneImageData } from "~/models/factories/utils";
 import { Layer } from "~/models/types/Layer";
 import { activeImage, canvasStore, imageStore } from "~/stores/Store";
-import styles from "./layer_canvas.module.css";
+
+import styles from "@styles/components/canvas/layer_canvas.module.css";
 
 type Props = {
   ref?: LayerCanvasRef;
@@ -1240,7 +732,7 @@ function createRefContent<T extends Exclude<unknown, Function>>(
 }
 </file>
 
-<file path="components/canvas/touchable_canvas/TouchableCanvas.tsx">
+<file path="components/canvas/stacks/TouchableCanvas.tsx">
 import { Component, createSignal, onCleanup, onMount } from "solid-js";
 import { redo, undo } from "~/models/layer/history";
 import {
@@ -1433,130 +925,10 @@ export const TouchableCanvas: Component<Props> = (props) => {
 };
 </file>
 
-<file path="components/color/color_picker/ColorPicker.tsx">
-import iro from "@jaames/iro";
-import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
-import { Component, createEffect } from "solid-js";
-import { setCurrentPenColor } from "~/models/types/Pen";
-import { currentPen } from "~/stores/Store";
-
-const ColorPicker: Component<{}> = (props) => {
-  let colorPicker: IroColorPicker;
-
-  createEffect(() => {
-    colorPicker.setColors([currentPen().color])
-  })
-
-  return (
-    <div
-      ref={(el) => {
-        colorPicker = iro.ColorPicker(el, {
-          width: 200,
-          padding: 0,
-          color: currentPen().color,
-          handleRadius: 4,
-          layoutDirection: "horizontal",
-          layout: [
-            {
-              component: iro.ui.Box,
-              options: {},
-            },
-            {
-              component: iro.ui.Slider,
-              options: {
-                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
-                sliderType: "hue",
-              },
-            },
-          ],
-        });
-        colorPicker.on("color:change", function (color: any) {
-          setCurrentPenColor(color.hexString);
-        });
-      }}
-    ></div>
-  );
-};
-
-export default ColorPicker;
-</file>
-
-<file path="components/color/color.module.css">
-/* ==========================================================================
-     Color Picker & Pen Config
-     ========================================================================== */
-.color_picker {
-  margin: 8px 0 12px 0;
-}
-
-.swatch_container {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-}
-
-.color_content {
-  display: flex;
-  flex-direction: column;
-  margin-left: 10px;
-}
-</file>
-
-<file path="components/color/color.module.css.d.ts">
-declare const styles: {
-  readonly color_content: string;
-  readonly color_picker: string;
-  readonly swatch_container: string;
-};
-export = styles;
-</file>
-
-<file path="components/color/Color.tsx">
-import { Component, For } from "solid-js";
-import { colorStore } from "~/stores/Store";
-
-import ColorPicker from "~/components/color/color_picker/ColorPicker";
-import { setCurrentPenColor } from "~/models/types/Pen";
-import ColorBox from "../common/atoms/ColorBox";
-import styles from "./color.module.css";
-
-const Color: Component<{}> = (props) => {
-  const onColorClicked = (color: string, index: number) => {
-    setCurrentPenColor(color);
-  };
-
-  return (
-    <div class="section_root">
-      <p class="section_caption">color.</p>
-      <div class="section_content">
-        <div class={styles.color_picker}>
-          <ColorPicker />
-        </div>
-        <div class={styles.swatch_container}>
-          <For each={colorStore.swatches}>
-            {(item, index) => (
-              <ColorBox
-                color={item}
-                sizePx={14}
-                onClick={(color) => onColorClicked(color, index())}
-                enableUsingSelection={true}
-              />
-            )}
-          </For>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Color;
-</file>
-
-<file path="components/common/atoms/ColorBox.tsx">
+<file path="components/common/ColorBox.tsx">
 import { Component } from "solid-js";
 import { penStore } from "~/stores/Store";
-import { sayRandomQuote } from "../companion/QuotePool";
+import { sayRandomQuote } from "./companion/QuotePool";
 
 interface ColorBoxProps {
   enableUsingSelection?: boolean;
@@ -1620,222 +992,59 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
 export default ColorBox;
 </file>
 
-<file path="components/common/atoms/dsl_button.module.css">
-.root {
-  width: 20px;
-  height: 20px;
-  margin: 4px;
-  pointer-events: all;
-  image-rendering: pixelated;
-  cursor: pointer;
-  opacity: 0.7;
-}
+<file path="components/common/ColorPicker.tsx">
+import iro from "@jaames/iro";
+import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
+import { Component, createEffect } from "solid-js";
+import { setCurrentPenColor } from "~/models/types/Pen";
+import { currentPen } from "~/stores/Store";
 
-.root:any-hover {
-  opacity: 0.3;
-  transform: translate(0, 1px);
-}
-</file>
+const ColorPicker: Component<{}> = (props) => {
+  let colorPicker: IroColorPicker;
 
-<file path="components/common/atoms/dsl_button.module.css.d.ts">
-declare const styles: {
-  readonly root: string;
-};
-export = styles;
-</file>
+  createEffect(() => {
+    colorPicker.setColors([currentPen().color])
+  })
 
-<file path="components/common/atoms/DSLButton.tsx">
-import { Component } from "solid-js";
-import styles from "./dsl_button.module.css";
-
-interface Props {
-  onClick?: (e: MouseEvent) => {};
-}
-
-const DSLButton: Component<Props> = (props: Props) => {
   return (
     <div
-      class={styles.root}
-      onMouseOver={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      ref={(el) => {
+        colorPicker = iro.ColorPicker(el, {
+          width: 200,
+          padding: 0,
+          color: currentPen().color,
+          handleRadius: 4,
+          layoutDirection: "horizontal",
+          layout: [
+            {
+              component: iro.ui.Box,
+              options: {},
+            },
+            {
+              component: iro.ui.Slider,
+              options: {
+                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
+                sliderType: "hue",
+              },
+            },
+          ],
+        });
+        colorPicker.on("color:change", function (color: any) {
+          setCurrentPenColor(color.hexString);
+        });
       }}
-      onClick={props.onClick}
-    >
-      <img src="/DSL.png" />
-    </div>
+    ></div>
   );
 };
 
-export default DSLButton;
-</file>
-
-<file path="components/common/atoms/ImportImageButton.tsx">
-import { importImageToActiveLayer } from "~/utils/import"; // 上で作った関数
-
-const ImportImageButton = () => {
-  let fileInputRef: HTMLInputElement | undefined;
-
-  const handleClick = () => {
-    fileInputRef?.click(); // hidden input を手動でクリック
-  };
-
-  const handleFileChange = (e: Event) => {
-    const target = e.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (file) {
-      importImageToActiveLayer(file);
-      target.value = ""; // 同じファイルを再選択可能にする
-    }
-  };
-
-  return (
-    <>
-      <button onClick={handleClick}>Import</button>
-
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        onChange={handleFileChange}
-      />
-    </>
-  );
-};
-
-export default ImportImageButton;
-</file>
-
-<file path="components/common/companion/companion.module.css">
-.root {
-  position: absolute;
-  bottom: 0px;
-  left: 500px;
-  pointer-events: none;
-  z-index: 999;
-}
-
-.wrapper {
-  width: 300px;
-  height: 300px;
-  transform-origin: center center;
-  animation: fluffy 2s ease-in-out infinite;
-}
-
-.companion {
-  width: 50px;
-  height: 50px;
-  image-rendering: pixelated;
-  margin: 80px auto;
-
-  margin-left: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  anchor-name: --companion;
-}
-
-.giggle {
-  animation: giggle 0.5s;
-  animation-iteration-count: 10;
-}
-
-.quote_box_container {
-  width: fit-content;
-  position: absolute;
-  position-anchor: --companion;
-  bottom: calc(anchor(top) + 17px);
-  justify-self: anchor-center;
-
-  background-color: #dddddd;
-}
-
-.quote_box {
-  width: fit-content;
-  max-width: 200px;
-  overflow-wrap: break-word;
-  border-radius: 3px;
-  background: #fff;
-  border: solid 1px #555;
-  padding: 12px;
-
-  anchor-name: --box;
-}
-
-.quote_box:before {
-  position: absolute;
-  content: "";
-  position-anchor: --companion;
-  top: calc(anchor(--box bottom) - 2px);
-  border: 7px solid transparent;
-  border-top: 7px solid #fff;
-  padding-left: 1px;
-  z-index: 2;
-}
-
-.quote_box:after {
-  position: absolute;
-  content: "";
-  position-anchor: --companion;
-  top: calc(anchor(--box bottom) - 1px);
-  border: 8px solid transparent;
-  border-top: 8px solid #555;
-}
-
-.quote {
-  text-rendering: pixelated;
-}
-
-@keyframes fluffy {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes giggle {
-  0% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(2deg);
-  }
-  50% {
-    transform: rotate(0deg);
-  }
-  75% {
-    transform: rotate(-2deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-</file>
-
-<file path="components/common/companion/companion.module.css.d.ts">
-declare const styles: {
-  readonly companion: string;
-  readonly fluffy: string;
-  readonly giggle: string;
-  readonly quote: string;
-  readonly quote_box: string;
-  readonly quote_box_container: string;
-  readonly root: string;
-  readonly wrapper: string;
-};
-export = styles;
+export default ColorPicker;
 </file>
 
 <file path="components/common/companion/Companion.tsx">
 import { Component, createEffect, createSignal } from "solid-js";
 import { CompanionEvents } from "~/utils/EventHub";
 
-import styles from "./companion.module.css";
+import styles from "@styles/components/companion.module.css";
 
 const Companion: Component = () => {
   const [quote, setQuote] = createSignal("");
@@ -1977,7 +1186,33 @@ export const sayRandomQuote = (category: QuoteCategory, context?: any) => {
 };
 </file>
 
-<file path="components/common/dsl/DSLEditor.tsx">
+<file path="components/common/DSLButton.tsx">
+import { Component } from "solid-js";
+import styles from "@styles/components/dsl_button.module.css";
+
+interface Props {
+  onClick?: (e: MouseEvent) => {};
+}
+
+const DSLButton: Component<Props> = (props: Props) => {
+  return (
+    <div
+      class={styles.root}
+      onMouseOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onClick={props.onClick}
+    >
+      <img src="/DSL.png" />
+    </div>
+  );
+};
+
+export default DSLButton;
+</file>
+
+<file path="components/common/DSLEditor.tsx">
 import { Component, createSignal, For, onMount } from "solid-js";
 import { ALL_NODES } from "~/dsl/nodes/AvailableNodes";
 import { activeIndex, activeLayer, setLayerStore } from "~/stores/Store";
@@ -2028,31 +1263,65 @@ const DSLEditor: Component<{}> = (props) => {
 export default DSLEditor;
 </file>
 
-<file path="components/common/light/light.module.css">
-.light-inner {
-  opacity: 0;
-  transition: none;
-  filter: drop-shadow(0 0 0px red);
-}
+<file path="components/common/EdgeInfo.tsx">
+import { Component } from "solid-js";
+import { JSX } from "solid-js/h/jsx-runtime";
 
-.light-inner.on {
-  transition: opacity 01s ease;
-  opacity: 1;
-  filter: drop-shadow(0 0 1px red);
-}
-</file>
+const EdgeInfo: Component<{}> = (props) => {
+  const edgeFlexStyle: JSX.CSSProperties = { "flex-grow": 1 };
 
-<file path="components/common/light/light.module.css.d.ts">
-declare const styles: {
-  readonly "light-inner": string;
-  readonly on: string;
+  return (
+    <div id="edge">
+      <p>autosaved. (4s ago)</p>
+      <div style={edgeFlexStyle}></div>
+      <p>config.</p>
+    </div>
+  );
 };
-export = styles;
+
+export default EdgeInfo;
 </file>
 
-<file path="components/common/light/Light.tsx">
+<file path="components/common/ImportImageButton.tsx">
+import { importImageToActiveLayer } from "~/utils/import"; // 上で作った関数
+
+const ImportImageButton = () => {
+  let fileInputRef: HTMLInputElement | undefined;
+
+  const handleClick = () => {
+    fileInputRef?.click(); // hidden input を手動でクリック
+  };
+
+  const handleFileChange = (e: Event) => {
+    const target = e.currentTarget as HTMLInputElement;
+    const file = target.files?.[0];
+    if (file) {
+      importImageToActiveLayer(file);
+      target.value = ""; // 同じファイルを再選択可能にする
+    }
+  };
+
+  return (
+    <>
+      <button onClick={handleClick}>Import</button>
+
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+    </>
+  );
+};
+
+export default ImportImageButton;
+</file>
+
+<file path="components/common/Light.tsx">
 import { Component, Show } from "solid-js";
-import styles from "./light.module.css";
+import styles from "@styles/components/light.module.css";
 
 interface LightProps {
   class?: string;
@@ -2087,76 +1356,9 @@ const Light: Component<LightProps> = (props: LightProps) => {
 export default Light;
 </file>
 
-<file path="components/common/slider/slider.module.css">
-.root {
-  width: 100%;
-}
-
-.slider {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: auto;
-  align-items: center;
-  overflow: visible;
-}
-
-.line-hitbox {
-  position: absolute;
-  display: flex;
-  width: 100%;
-  height: 16px;
-  background-color: transparent;
-  align-items: center;
-  cursor: pointer;
-}
-
-.line {
-  display: flex;
-  width: 100%;
-  height: 1px;
-  background-color: black;
-  pointer-events: none; /* イベントは親に任せる */
-}
-
-.handle-hitbox {
-  position: absolute;
-  width: 20px;
-  height: 24px;
-  transform: translateX(-50%);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  /* ユーザーには見えないけどクリックできる */
-  background-color: transparent;
-}
-
-.handle {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 8px;
-  background-color: black;
-  pointer-events: none; /* イベントは親に任せる */
-}
-</file>
-
-<file path="components/common/slider/slider.module.css.d.ts">
-declare const styles: {
-  readonly handle: string;
-  readonly "handle-hitbox": string;
-  readonly line: string;
-  readonly "line-hitbox": string;
-  readonly root: string;
-  readonly slider: string;
-};
-export = styles;
-</file>
-
-<file path="components/common/slider/Slider.tsx">
+<file path="components/common/Slider.tsx">
 import { Component, createSignal } from "solid-js";
-import styles from "./slider.module.css";
+import styles from "@styles/components/slider.module.css";
 
 interface SliderProps {
   min: number;
@@ -2230,197 +1432,137 @@ const Slider: Component<SliderProps> = (props) => {
 export default Slider;
 </file>
 
-<file path="components/edge_info/EdgeInfo.tsx">
-import { Component } from "solid-js";
-import { JSX } from "solid-js/h/jsx-runtime";
+<file path="components/section/CanvasSettings.tsx">
+import { Component, createSignal } from "solid-js";
+import { initLayer } from "~/models/layer/layerImage";
+import {
+  allLayers,
+  canvasStore,
+  layerStore,
+  setCanvasStore,
+  updateDSL,
+} from "~/stores/Store";
 
-const EdgeInfo: Component<{}> = (props) => {
-  const edgeFlexStyle: JSX.CSSProperties = { "flex-grow": 1 };
+import styles from "@styles/components/section/canvas.module.css";
+
+const CanvasSettings: Component<{}> = (props) => {
+  const [width, setWidth] = createSignal(canvasStore.canvas.width);
+  const [height, setHeight] = createSignal(canvasStore.canvas.height);
+
+  const changeCanvasSize = (e: any) => {
+    e.preventDefault();
+    setCanvasStore("canvas", "width", width);
+    setCanvasStore("canvas", "height", height);
+
+    allLayers().forEach((layer, i) => {
+      initLayer(layer.id, layer.dotMagnification);
+      updateDSL(layer.id);
+    });
+  };
+
+  const resetAllLayers = (e: any) => {
+    layerStore.layers.forEach((l) => {
+      initLayer(l.id, l.dotMagnification);
+    });
+  };
 
   return (
-    <div id="edge">
-      <p>autosaved. (4s ago)</p>
-      <div style={edgeFlexStyle}></div>
-      <p>config.</p>
+    <div class="section_root">
+      <p class="section_caption">canvas.</p>
+
+      <form class="section_content" onSubmit={(e) => changeCanvasSize(e)}>
+        <div class="fl-row">
+          <div>
+            <p>width</p>
+            <input
+              class={styles.size_input}
+              type="number"
+              name="width"
+              onChange={(e) => setWidth(Number(e.target.value))}
+              value={width()}
+              min={0}
+              max={1200}
+              required
+            />
+          </div>
+          <div>
+            <p>height</p>
+            <input
+              class={styles.size_input}
+              type="number"
+              name="height"
+              onChange={(e) => setHeight(Number(e.target.value))}
+              value={height()}
+              min={0}
+              max={1200}
+              required
+            />
+          </div>
+          <button class={styles.button} type="submit">
+            change
+          </button>
+        </div>
+      </form>
+
+      <button class={styles.button} onClick={resetAllLayers}>
+        RESET ALL LAYERS
+      </button>
     </div>
   );
 };
 
-export default EdgeInfo;
+export default CanvasSettings;
 </file>
 
-<file path="components/layer/Arrow.tsx">
-import styles from "./layer_list.module.css";
+<file path="components/section/Color.tsx">
+import { Component, For } from "solid-js";
+import { colorStore } from "~/stores/Store";
 
-export const Arrow = (
-  <svg xmlns="http://www.w3.org/2000/svg" class={styles.image_insert_arrow}>
-    <defs>
-      <marker
-        id="arrow"
-        viewBox="0 0 10 5"
-        refX="5"
-        refY="5"
-        markerWidth="8"
-        markerHeight="8"
-        orient="auto-start-reverse"
-      >
-        <path d="M 0 0 L 10 5 L 0 5 z" />
-      </marker>
-    </defs>
-    <path
-      d="M 10 45 h -17 v 194 h 8"
-      fill="none"
-      stroke-width="1px"
-      shape-rendering="optimizeSpeed"
-      stroke="black"
-      marker-end="url(#arrow)"
-    />
-  </svg>
-);
-</file>
+import ColorPicker from "~/components/common/ColorPicker";
+import { setCurrentPenColor } from "~/models/types/Pen";
+import ColorBox from "../common/ColorBox";
+import styles from "@styles/components/section/color.module.css";
 
-<file path="components/layer/layer_list.module.css">
-.image_insert_arrow {
-  width: 10px;
-  height: 100%;
-  overflow: visible;
-}
+const Color: Component<{}> = (props) => {
+  const onColorClicked = (color: string, index: number) => {
+    setCurrentPenColor(color);
+  };
 
-.layer_list {
-  display: flex;
-  flex-grow: 1;
-  position: relative;
-  flex-direction: column;
-  width: 100%;
-  gap: 4px;
-}
-
-#layer {
-  width: 100%;
-  /* 高さはコンテンツに合わせる */
-}
-
-.disabled {
-  opacity: 0.2;
-}
-.disabled > * > * > p {
-  text-decoration: line-through;
-}
-
-/* base det */
-.layer_det {
-  border-left: 1px solid black;
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  background-color: #f0f0f0;
-  padding: 8px;
-  cursor: pointer;
-}
-
-.layer_det:any-hover {
-  filter: brightness(0.94);
-  transform: translate(0, 1px);
-}
-
-.dot {
-}
-
-.image {
-  border-left: 1px solid red;
-  background-color: #ffe0e0;
-}
-.automate {
-  border-left: 1px solid blue;
-  background-color: aliceblue;
-}
-
-.type {
-  position: absolute;
-  right: 0;
-  width: 100%;
-  font-size: 0.5rem;
-  margin-right: 20px;
-  text-align: end;
-  opacity: 0.4;
-}
-
-.layer_preview {
-  width: 14px;
-  height: 20px;
-  border: 1px solid black;
-}
-
-.name {
-  font-size: 1rem;
-  margin: 8px 0 0 24px;
-  font-family: '04B03B';
-}
-
-.dot_magnif_container {
-  margin-left: auto;
-  margin-right: 0px;
-  padding: 2px 6px;
-  align-self: center;
-  border: 1px black solid;
-  border-radius: 6px;
-  pointer-events: all;
-  cursor: pointer;
-}
-
-.dot_magnif_container:any-hover {
-  background-color: #ffffff40;
-}
-
-.dot_magnif {
-  font-size: 0.8rem;
-  font-family: '04B03B';
-}
-
-.active_light {
-  margin-left: 8px;
-  margin-right: 8px;
-  align-self: center;
-}
-
-.drop_placeholder {
-  height: 32px;
-  margin: 4px 0;
-  border: 2px dashed #aaa;
-  border-radius: 4px;
-}
-</file>
-
-<file path="components/layer/layer_list.module.css.d.ts">
-declare const styles: {
-  readonly active_light: string;
-  readonly automate: string;
-  readonly caption: string;
-  readonly disabled: string;
-  readonly dot: string;
-  readonly dot_magnif: string;
-  readonly dot_magnif_container: string;
-  readonly drop_placeholder: string;
-  readonly image: string;
-  readonly image_insert_arrow: string;
-  readonly layer: string;
-  readonly layer_det: string;
-  readonly layer_list: string;
-  readonly layer_preview: string;
-  readonly name: string;
-  readonly type: string;
+  return (
+    <div class="section_root">
+      <p class="section_caption">color.</p>
+      <div class="section_content">
+        <div class={styles.color_picker}>
+          <ColorPicker />
+        </div>
+        <div class={styles.swatch_container}>
+          <For each={colorStore.swatches}>
+            {(item, index) => (
+              <ColorBox
+                color={item}
+                sizePx={14}
+                onClick={(color) => onColorClicked(color, index())}
+                enableUsingSelection={true}
+              />
+            )}
+          </For>
+        </div>
+      </div>
+    </div>
+  );
 };
-export = styles;
+
+export default Color;
 </file>
 
-<file path="components/layer/LayerItem.tsx">
+<file path="components/section/item/LayerItem.tsx">
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
 import { Component } from "solid-js";
-import Light from "~/components/common/light/Light";
+import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
 import { allLayers, layerStore, setLayerStore } from "~/stores/Store";
-import styles from "./layer_list.module.css";
+import styles from "@styles/components/section/layer.module.css";
 
 interface LayerItemProps {
   index: number;
@@ -2484,7 +1626,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         <div
           class={[
             styles.layer_det,
-            detClass && styles[detClass],
             !layer.enabled && styles.disabled,
           ]
             .filter(Boolean)
@@ -2513,7 +1654,69 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 export default LayerItem;
 </file>
 
-<file path="components/layer/LayerList.tsx">
+<file path="components/section/item/PenItem.tsx">
+import { Component } from "solid-js";
+import ColorBox from "~/components/common/ColorBox";
+import { sayRandomQuote } from "~/components/common/companion/QuotePool";
+import Light from "~/components/common/Light";
+import Slider from "~/components/common/Slider";
+import { Pen } from "~/models/types/Pen";
+import { penStore, setPenStore } from "~/stores/Store";
+
+import styles from "@styles/components/section/pen.module.css"
+
+interface Props {
+  pen: Pen;
+  isInUse: boolean;
+}
+
+const PenItem: Component<Props> = (props: Props) => {
+  return (
+    <div class={styles.row}>
+      <Light on={props.isInUse} />
+
+      <p
+        style={{
+          width: "20%",
+          padding: "10px 0",
+          color: props.isInUse ? "red" : "unset",
+          cursor: "pointer",
+          "pointer-events": "all",
+        }}
+        onClick={() => {
+          setPenStore({ usingIndex: penStore.pens.indexOf(props.pen) });
+        }}
+      >
+        {props.pen.name}.
+      </p>
+
+      <ColorBox color={props.pen.color} />
+
+      <div style={{ "flex-grow": 1 }}>
+        <Slider
+          min={1}
+          max={30}
+          default={props.pen.size}
+          onValueChanged={(newValue) => {
+            sayRandomQuote("pen-resize");
+            console.log("size set to " + newValue);
+            const penIndex = penStore.pens.findIndex(
+              (p) => p.id === props.pen.id,
+            );
+            setPenStore("pens", penIndex, "size", newValue);
+          }}
+        />
+      </div>
+
+      <p style={{ width: "auto" }}>{props.pen.size}.</p>
+    </div>
+  );
+};
+
+export default PenItem;
+</file>
+
+<file path="components/section/LayerList.tsx">
 import {
   closestCenter,
   DragDropProvider,
@@ -2522,11 +1725,10 @@ import {
 } from "@thisbeyond/solid-dnd";
 import { Component, createSignal, For } from "solid-js";
 import { activeLayer, allLayers, layerStore, setLayerStore } from "~/stores/Store";
-import styles from "./layer_list.module.css";
-import LayerItem from "./LayerItem";
+import styles from "@styles/components/section/layer.module.css";
+import LayerItem from "./item/LayerItem";
 import { addLayer } from "~/models/factories/addLayer";
 import { removeLayer } from "~/models/factories/removeLayer";
-
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
@@ -2611,90 +1813,9 @@ const LayerList: Component<{}> = () => {
 export default LayerList;
 </file>
 
-<file path="components/pen/config_row/ConfigRow.tsx">
-import { Component } from "solid-js";
-import ColorBox from "~/components/common/atoms/ColorBox";
-import { sayRandomQuote } from "~/components/common/companion/QuotePool";
-import Light from "~/components/common/light/Light";
-import Slider from "~/components/common/slider/Slider";
-import { Pen } from "~/models/types/Pen";
-import { penStore, setPenStore } from "~/stores/Store";
-
-import styles from "../pen_config.module.css";
-
-interface ConfigRowProps {
-  pen: Pen;
-  isInUse: boolean;
-}
-
-const ConfigRow: Component<ConfigRowProps> = (props: ConfigRowProps) => {
-  return (
-    <div class={styles.config_row}>
-      <Light on={props.isInUse} />
-
-      <p
-        style={{
-          width: "20%",
-          padding: "10px 0",
-          color: props.isInUse ? "red" : "unset",
-          cursor: "pointer",
-          "pointer-events": "all",
-        }}
-        onClick={() => {
-          setPenStore({ usingIndex: penStore.pens.indexOf(props.pen) });
-        }}
-      >
-        {props.pen.name}.
-      </p>
-
-      <ColorBox color={props.pen.color} />
-
-      <div style={{ "flex-grow": 1 }}>
-        <Slider
-          min={1}
-          max={30}
-          default={props.pen.size}
-          onValueChanged={(newValue) => {
-            sayRandomQuote("pen-resize");
-            console.log("size set to " + newValue);
-            const penIndex = penStore.pens.findIndex(
-              (p) => p.id === props.pen.id,
-            );
-            setPenStore("pens", penIndex, "size", newValue);
-          }}
-        />
-      </div>
-
-      <p style={{ width: "auto" }}>{props.pen.size}.</p>
-    </div>
-  );
-};
-
-export default ConfigRow;
-</file>
-
-<file path="components/pen/pen_config.module.css">
-.config_row {
-  display: flex;
-  width: 100%;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-</file>
-
-<file path="components/pen/pen_config.module.css.d.ts">
-declare const styles: {
-  readonly config_row: string;
-  readonly pen_config: string;
-};
-export = styles;
-</file>
-
-<file path="components/pen/PenConfig.tsx">
+<file path="components/section/PenConfig.tsx">
 import { Component, For } from "solid-js";
-import ConfigRow from "./config_row/ConfigRow";
-
+import PenItem from "./item/PenItem";
 import { penStore } from "~/stores/Store";
 
 const PenConfig: Component<{}> = (props) => {
@@ -2704,7 +1825,7 @@ const PenConfig: Component<{}> = (props) => {
       <div class="section_content">
         <For each={penStore.pens}>
           {(item, index) => (
-            <ConfigRow pen={item} isInUse={index() === penStore.usingIndex} />
+            <PenItem pen={item} isInUse={index() === penStore.usingIndex} />
           )}
         </For>
       </div>
@@ -3345,12 +2466,12 @@ export default function NotFound() {
 
 <file path="routes/index.tsx">
 import CanvasArea from "~/components/canvas/CanvasArea";
-import CanvasSettings from "~/components/canvas_settings/CanvasSettings";
-import Color from "~/components/color/Color";
+import CanvasSettings from "~/components/section/CanvasSettings";
+import Color from "~/components/section/Color";
 import Companion from "~/components/common/companion/Companion";
-import EdgeInfo from "~/components/edge_info/EdgeInfo";
-import LayerList from "~/components/layer/LayerList";
-import PenConfig from "~/components/pen/PenConfig";
+import EdgeInfo from "~/components/common/EdgeInfo";
+import LayerList from "~/components/section/LayerList";
+import PenConfig from "~/components/section/PenConfig";
 
 export default function Home() {
   return (
@@ -3484,6 +2605,706 @@ export const updateDSL = (layerId: string) => {
 //     });
 //   }
 // });
+</file>
+
+<file path="styles/components/canvas/canvas_area.module.css">
+.canvas_area {
+  background-color: #fcfcfc;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  padding: 20px;
+
+  /* 上部パディング（オプション） */
+  padding-top: var(--window-top-padding);
+  position: relative;
+  width: 100%;
+}
+</file>
+
+<file path="styles/components/canvas/canvas_stack.module.css">
+:root {
+  --layer-opacity: 0.15;
+}
+
+.canvas_stack {
+  align-items: center;
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.resize-drag-container {
+  /* This makes things *much* easier */
+  box-sizing: border-box;
+  font-family: sans-serif;
+  left: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  touch-action: none;
+  width: 120px;
+  z-index: 100;
+}
+
+.image-container {
+  height: 100%;
+  width: 100%;
+}
+
+.image-container:focus-within {
+  border: 2px black solid;
+}
+
+.resize-image {
+  height: 100%;
+  object-fit: fill;
+  width: 100%;
+}
+</file>
+
+<file path="styles/components/canvas/controls.module.css">
+* {
+  z-index: 1000;
+}
+
+.cursor {
+  background-color: black;
+  height: 4px;
+  left: 220px;
+  position: absolute;
+  top: 170px;
+  width: 4px;
+}
+
+.top-right-button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  position: absolute;
+  right: 30px;
+  top: 20px;
+}
+
+.button {
+  background-color: deepskyblue;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+}
+
+.top-right-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 55px;
+  position: absolute;
+  right: 30px;
+  top: 60px;
+}
+
+.bottom-history {
+  bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: absolute;
+}
+
+.history-row {
+  display: flex;
+  gap: 20px;
+  opacity: 0.2;
+  width: 60%;
+}
+
+.history-text {
+  white-space: nowrap;
+}
+
+.undo_redo {
+  cursor: pointer;
+  font-size: 1rem;
+  height: fit-content;
+  pointer-events: all;
+}
+</file>
+
+<file path="styles/components/canvas/layer_canvas.module.css">
+.layer-canvas {
+  image-rendering: pixelated; /* ドット絵に重要 */
+  pointer-events: none; /* マウスイベントは通さない（必要に応じて） */
+  position: absolute;
+}
+
+.layer-canvas.dev-hint[data-layer-id="dot1"] {
+  background-color: rgb(255 0 0 / var(--layer-opacity)); /* 赤系 */
+}
+
+.layer-canvas.dev-hint[data-layer-id="dot2"] {
+  background-color: rgb(0 255 0 / var(--layer-opacity)); /* 緑系 */
+}
+
+.layer-canvas.dev-hint[data-layer-id="dot3"] {
+  background-color: rgb(0 0 255 / var(--layer-opacity)); /* 青系 */
+}
+
+.layer-canvas.dev-hint[data-layer-id="auto1"] {
+  background-color: rgb(255 255 0 / var(--layer-opacity)); /* 黄系 */
+}
+
+.layer-canvas.dev-hint[data-layer-id="image1"] {
+  background-color: rgb(255 0 255 / var(--layer-opacity)); /* ピンク系 */
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: auto; /* display:none ではなくイベントを通す */
+}
+</file>
+
+<file path="styles/components/companion.module.css">
+.root {
+  bottom: 0;
+  left: 500px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 999;
+}
+
+.wrapper {
+  animation: fluffy 2s ease-in-out infinite;
+  height: 300px;
+  transform-origin: center center;
+  width: 300px;
+}
+
+.companion {
+  anchor-name: --companion;
+  display: flex;
+  flex-direction: column;
+  height: 50px;
+  image-rendering: pixelated;
+  margin: 80px auto;
+  margin-left: 0;
+  width: 50px;
+}
+
+.giggle {
+  animation: giggle 0.5s;
+  animation-iteration-count: 10;
+}
+
+.quote_box_container {
+  background-color: #ddd;
+  bottom: calc(anchor(top) + 17px);
+  justify-self: anchor-center;
+  position: absolute;
+  position-anchor: --companion;
+  width: fit-content;
+}
+
+.quote_box {
+  anchor-name: --box;
+  background: #fff;
+  border: solid 1px #555;
+  border-radius: 3px;
+  max-width: 200px;
+  overflow-wrap: break-word;
+  padding: 12px;
+  width: fit-content;
+}
+
+.quote_box::before {
+  border: 7px solid transparent;
+  border-top: 7px solid #fff;
+  content: '';
+  padding-left: 1px;
+  position: absolute;
+  position-anchor: --companion;
+  top: calc(anchor(--box bottom) - 2px);
+  z-index: 2;
+}
+
+.quote_box::after {
+  border: 8px solid transparent;
+  border-top: 8px solid #555;
+  content: '';
+  position: absolute;
+  position-anchor: --companion;
+  top: calc(anchor(--box bottom) - 1px);
+}
+
+.quote {
+  image-rendering: pixelated;
+}
+
+@keyframes fluffy {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes giggle {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(2deg);
+  }
+
+  50% {
+    transform: rotate(0deg);
+  }
+
+  75% {
+    transform: rotate(-2deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+</file>
+
+<file path="styles/components/dsl_button.module.css">
+.root {
+  cursor: pointer;
+  height: 20px;
+  image-rendering: pixelated;
+  margin: 4px;
+  opacity: 0.7;
+  pointer-events: all;
+  width: 20px;
+}
+
+.root:any-hover {
+  opacity: 0.3;
+  transform: translate(0, 1px);
+}
+</file>
+
+<file path="styles/components/light.module.css">
+.light-inner {
+  filter: drop-shadow(0 0 0 red);
+  opacity: 0;
+  transition: none;
+}
+
+.light-inner.on {
+  filter: drop-shadow(0 0 1px red);
+  opacity: 1;
+  transition: opacity 01s ease;
+}
+</file>
+
+<file path="styles/components/section/canvas.module.css">
+.root {
+  margin: 1rem 0;
+}
+
+.caption {
+  margin-bottom: 1rem;
+}
+
+.size_form {
+  display: flex;
+  flex-direction: row;
+}
+
+.size_label {
+  font-size: 0.5rem;
+}
+
+.size_input {
+  font-size: 10px;
+  margin: 4px;
+  min-width: 100px;
+}
+
+.button {
+  margin: 4px;
+  padding: 4px;
+}
+</file>
+
+<file path="styles/components/section/color.module.css">
+.color_picker {
+  margin: 8px 0 12px;
+}
+
+.swatch_container {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  position: relative;
+}
+
+.color_content {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+</file>
+
+<file path="styles/components/section/layer.module.css">
+.image_insert_arrow {
+  height: 100%;
+  overflow: visible;
+  width: 10px;
+}
+
+.layer_list {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 4px;
+  position: relative;
+  width: 100%;
+}
+
+#layer {
+  width: 100%;
+
+  /* 高さはコンテンツに合わせる */
+}
+
+.disabled {
+  opacity: 0.2;
+}
+
+.disabled > * > * > p {
+  text-decoration: line-through;
+}
+
+/* base det */
+.layer_det {
+  background-color: #f0f0f0;
+  border-left: 1px solid black;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  padding: 8px;
+}
+
+.layer_det:any-hover {
+  filter: brightness(0.94);
+  transform: translate(0, 1px);
+}
+
+.image {
+  background-color: #ffe0e0;
+  border-left: 1px solid red;
+}
+
+.automate {
+  background-color: aliceblue;
+  border-left: 1px solid blue;
+}
+
+.type {
+  font-size: 0.5rem;
+  margin-right: 20px;
+  opacity: 0.4;
+  position: absolute;
+  right: 0;
+  text-align: end;
+  width: 100%;
+}
+
+.layer_preview {
+  border: 1px solid black;
+  height: 20px;
+  width: 14px;
+}
+
+.name {
+  font-family: '04B03B';
+  font-size: 1rem;
+  margin: 8px 0 0 24px;
+}
+
+.dot_magnif_container {
+  align-self: center;
+  border: 1px black solid;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 0;
+  padding: 2px 6px;
+  pointer-events: all;
+}
+
+.dot_magnif_container:any-hover {
+  background-color: #ffffff40;
+}
+
+.dot_magnif {
+  font-family: '04B03B';
+  font-size: 0.8rem;
+}
+
+.active_light {
+  align-self: center;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.drop_placeholder {
+  border: 2px dashed #aaa;
+  border-radius: 4px;
+  height: 32px;
+  margin: 4px 0;
+}
+</file>
+
+<file path="styles/components/section/pen.module.css">
+.row {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+}
+</file>
+
+<file path="styles/components/slider.module.css">
+.root {
+  width: 100%;
+}
+
+.slider {
+  align-items: center;
+  display: flex;
+  height: auto;
+  overflow: visible;
+  position: relative;
+  width: 100%;
+}
+
+.line-hitbox {
+  align-items: center;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  height: 16px;
+  position: absolute;
+  width: 100%;
+}
+
+.line {
+  background-color: black;
+  display: flex;
+  height: 1px;
+  pointer-events: none; /* イベントは親に任せる */
+  width: 100%;
+}
+
+.handle-hitbox {
+  align-items: center;
+
+  /* ユーザーには見えないけどクリックできる */
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  height: 24px;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 20px;
+}
+
+.handle {
+  background-color: black;
+  height: 8px;
+  left: 50%;
+  pointer-events: none; /* イベントは親に任せる */
+  position: absolute;
+  transform: translateX(-50%);
+  width: 2px;
+}
+</file>
+
+<file path="styles/font.css">
+@font-face {
+  font-family: '04B08';
+  src: url('/fonts/04B_08__.ttf');
+}
+
+@font-face {
+  font-family: '04B03B';
+  src: url('/fonts/04B_03B_.ttf');
+}
+</file>
+
+<file path="styles/global.css">
+@import url('font.css');
+@import url('reset.css');
+@import url('utils.css');
+@import url('section.css');
+
+#sidebar {
+  display: flex;
+  flex-direction: row;
+}
+
+#sidebar > #edge {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0 20px 14px;
+}
+
+#sidebar > #edge > p {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  margin: 0;
+  transform: rotate(180deg) scaleX(0.8);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+#sidebar > #content {
+  border-right: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100%;
+  padding: var(--window-top-padding) 50px 10px 40px;
+  width: 300px;
+}
+
+#sledge {
+  bottom: 10px;
+  position: absolute;
+  right: 10px;
+}
+</file>
+
+<file path="styles/reset.css">
+/* html, body, #root, main をウィンドウ全体に */
+html,
+body,
+#root,
+main {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  touch-action: none;
+  width: 100vw;
+}
+
+/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
+#root {
+  display: flex;
+  flex-direction: row;
+  user-select: none;
+}
+
+/* body / main の背景・フォント */
+body,
+main {
+  background-color: #fdfdfd;
+  font-family: '04B08';
+}
+
+/* ==========================================================================
+     Typography & Basic Elements
+     ========================================================================== */
+
+p {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.it {
+  font-style: italic;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+button,
+a,
+input {
+  font-family: '04B08';
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  appearance: textfield;
+}
+
+button {
+  background: white;
+  border: 1px black solid;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.5rem;
+  height: fit-content;
+  padding: 2px 6px;
+  pointer-events: all;
+}
+
+button:any-hover {
+  background: #f0f0f0;
+  transform: translateY(1px);
+}
+</file>
+
+<file path="styles/section.css">
+.section_root {
+  display: flex;
+  flex-direction: column;
+}
+
+.section_caption {
+  margin-bottom: 8px;
+}
+
+.section_content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+</file>
+
+<file path="styles/utils.css">
+:root {
+  --window-top-padding: 20px;
+}
+
+.fl-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.fl-row {
+  display: flex;
+  flex-direction: row;
+}
 </file>
 
 <file path="utils/BrushUtils.ts">

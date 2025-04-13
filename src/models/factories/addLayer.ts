@@ -1,4 +1,4 @@
-import { DSL } from '~/dsl/DSL'
+import { DSL } from '../dsl/DSL'
 import { LayerType } from '../types/Layer'
 import { createLayer } from './createLayer'
 import { allLayers, layerStore, setLayerStore } from '~/stores/layerStore'

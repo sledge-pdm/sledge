@@ -1,7 +1,13 @@
 import { Component, createEffect, createSignal } from "solid-js";
-import { CompanionEvents } from "~/utils/EventHub";
 
 import styles from "@styles/components/companion.module.css";
+
+const [sayRequest, setSayRequest] = createSignal<string | null>(null);
+
+export const CompanionEvents = {
+  sayRequest,
+  setSayRequest,
+};
 
 const Companion: Component = () => {
   const [quote, setQuote] = createSignal("");

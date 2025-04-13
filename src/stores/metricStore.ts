@@ -12,5 +12,6 @@ export const [metricStore, setMetricStore] = createStore({
   offsetOrigin: { x: 0, y: 0 },
   offset: { x: 0, y: 0 },
 
+  isCtrlPressed: false,
   isDragging: false,
 })

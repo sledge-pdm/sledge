@@ -4,6 +4,7 @@ import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
 import { allLayers, layerStore } from "~/stores/layerStore";
 
 import styles from "@styles/components/section/canvas.module.css";
+import { adjustZoomToFit } from "~/stores/canvasStore";
 import { updateDSL } from "~/stores/imageStore";
 
 const CanvasSettings: Component<{}> = (props) => {
@@ -12,8 +13,9 @@ const CanvasSettings: Component<{}> = (props) => {
 
   const changeCanvasSize = (e: any) => {
     e.preventDefault();
-    setCanvasStore("canvas", "width", width);
-    setCanvasStore("canvas", "height", height);
+    setCanvasStore("canvas", "width", width());
+    setCanvasStore("canvas", "height", height());
+    adjustZoomToFit(width(), height());
 
     allLayers().forEach((layer, i) => {
       initLayer(layer.id, layer.dotMagnification);

@@ -16,6 +16,8 @@
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@tauri-apps/api": "^2.4.1",
+    "@tauri-apps/plugin-dialog": "^2.2.1",
+    "@tauri-apps/plugin-fs": "^2.2.1",
     "@thisbeyond/solid-dnd": "^0.7.5",
     "interactjs": "^1.10.27",
     "solid-js": "^1.9.5",

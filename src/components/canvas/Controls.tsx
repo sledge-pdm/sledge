@@ -1,17 +1,18 @@
 import { Component } from "solid-js";
+import { canvasStore } from "~/stores/canvasStore";
 import { activeLayer, layerStore } from "~/stores/layerStore";
-import { metricStore } from "~/stores/metricStore";
 
 import ImportImageButton from "~/components/common/ImportImageButton";
+import { exportActiveLayerUpscaled } from "~/io/export";
 import { redo, undo } from "~/models/layer/history";
-import { exportActiveLayerUpscaled } from "~/utils/export";
 
 import styles from "@styles/components/canvas/controls.module.css";
+import { exportProjectJson } from "~/io/project";
 
 const Controls: Component<{}> = (props) => {
-  // const zoom = () => metricStore.zoom;
-  const lastMouseWindow = () => metricStore.lastMouseWindow;
-  const lastMouseOnCanvas = () => metricStore.lastMouseOnCanvas;
+  // const zoom = () => canvasStore.zoom;
+  const lastMouseWindow = () => canvasStore.lastMouseWindow;
+  const lastMouseOnCanvas = () => canvasStore.lastMouseOnCanvas;
 
   return (
     <>
@@ -25,7 +26,7 @@ const Controls: Component<{}> = (props) => {
       {/* <p>x{zoom().toFixed(2)}</p> */}
       <p>active: {activeLayer()?.name}</p>
       <p>
-        offset:({metricStore.offset.x}, {metricStore.offset.y})
+        offset:({canvasStore.offset.x}, {canvasStore.offset.y})
       </p>
       {/* <p>UNDO STACKS.</p>
         <For each={activeImage()?.undoStack}>
@@ -37,6 +38,9 @@ const Controls: Component<{}> = (props) => {
         <ImportImageButton />
         <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>
           export
+        </p>
+        <p class={styles.button} onClick={() => exportProjectJson()}>
+          save
         </p>
       </div>
       <div class={styles["top-right-nav"]}>

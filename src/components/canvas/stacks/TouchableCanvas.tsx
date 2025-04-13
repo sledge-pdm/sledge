@@ -1,6 +1,5 @@
 import { Component, createSignal, onCleanup, onMount } from "solid-js";
-import { canvasStore } from "~/stores/canvasStore";
-import { metricStore, setMetricStore } from "~/stores/metricStore";
+import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
 import { roundPosition } from "~/utils/MetricUtils";
 
 interface Props {
@@ -65,7 +64,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
       y = e.touches[0].clientY;
     }
 
-    const zoom = metricStore.zoom;
+    const zoom = canvasStore.zoom;
 
     return {
       x: (x - offset.x) / zoom,
@@ -74,7 +73,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === "touch" || metricStore.isCtrlPressed) return false;
+    if (e.pointerType === "touch" || canvasStore.isCtrlPressed) return false;
     // right=1, left=2, middle=4
     // console.log(e.buttons)
     if (e.pointerType === "mouse" && e.buttons !== 1) return false;
@@ -89,7 +88,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
     if (props.onStrokeStart) {
       props.onStrokeStart(position, lastPos());
     }
-    setMetricStore("isInStroke", true);
+    setCanvasStore("isInStroke", true);
     setLastPos(position);
   }
 
@@ -101,18 +100,18 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handlePointerMove(e: PointerEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setMetricStore("lastMouseWindow", roundPosition(windowPosition));
-    setMetricStore("lastMouseOnCanvas", roundPosition(position));
+    setCanvasStore("lastMouseWindow", roundPosition(windowPosition));
+    setCanvasStore("lastMouseOnCanvas", roundPosition(position));
 
     if (!isDrawableClick(e)) return;
 
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
       setTemporaryOut(false);
-      setMetricStore("isInStroke", true);
+      setCanvasStore("isInStroke", true);
       setLastPos(position);
     }
-    if (!metricStore.isInStroke || !lastPos()) return;
+    if (!canvasStore.isInStroke || !lastPos()) return;
 
     if (props.onStrokeMove) {
       props.onStrokeMove(position, lastPos());
@@ -122,13 +121,13 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
   function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
-    if (metricStore.isInStroke) endStroke(position);
+    if (canvasStore.isInStroke) endStroke(position);
   }
 
   function handlePointerOut(e: PointerEvent) {
     // 出た時点でストロークを切る場合
     // const position = getCanvasMousePosition(e);
-    // if (metricStore.isInStroke) endStroke(position);
+    // if (canvasStore.isInStroke) endStroke(position);
 
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     const position = getCanvasMousePosition(e);
@@ -143,7 +142,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
     if (props.onStrokeEnd) {
       props.onStrokeEnd(position, lastPos());
     }
-    setMetricStore("isInStroke", false);
+    setCanvasStore("isInStroke", false);
     setLastPos(undefined);
     setTemporaryOut(false);
   }

@@ -1,7 +1,11 @@
 import CanvasStack from "./stacks/CanvasStack";
 
-import { canvasStore } from "~/stores/canvasStore";
-import { metricStore, setMetricStore } from "~/stores/metricStore";
+import {
+  adjustZoomToFit,
+  canvasStore,
+  centeringCanvas,
+  setCanvasStore,
+} from "~/stores/canvasStore";
 
 import { createMemo, onCleanup, onMount } from "solid-js";
 import Controls from "./Controls";
@@ -17,10 +21,13 @@ export default () => {
 
   onMount(() => {
     // set Canvas to center
-    setMetricStore("offsetOrigin", {
-      x: wrapper.scrollWidth / 2 - canvasStore.canvas.width / 2,
-      y: wrapper.scrollHeight / 2 - canvasStore.canvas.height / 2,
+    setCanvasStore("canvasAreaSize", {
+      width: wrapper.scrollWidth,
+      height: wrapper.scrollHeight,
     });
+    adjustZoomToFit();
+    centeringCanvas();
+
     interact.setInteractListeners(wrapper, canvasStack);
   });
 
@@ -30,8 +37,11 @@ export default () => {
     }
   });
 
+  const offsetX = () => canvasStore.offsetOrigin.x + canvasStore.offset.x;
+  const offsetY = () => canvasStore.offsetOrigin.y + canvasStore.offset.y;
+
   const transform = createMemo(() => {
-    return `translate(${metricStore.offsetOrigin.x + metricStore.offset.x}px, ${metricStore.offsetOrigin.y + metricStore.offset.y}px) scale(${metricStore.zoom})`;
+    return `translate(${offsetX()}px, ${offsetY()}px) scale(${canvasStore.zoom})`;
   });
 
   return (

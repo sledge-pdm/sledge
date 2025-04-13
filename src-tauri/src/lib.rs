@@ -7,6 +7,8 @@ use pipeline::run_pipeline;
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![run_pipeline,])
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

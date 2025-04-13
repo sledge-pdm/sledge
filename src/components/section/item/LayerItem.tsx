@@ -4,7 +4,7 @@ import { Component } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
-import { layerStore, setLayerStore } from "~/stores/layerStore";
+import { layerStore, setLayerStore } from "~/stores/project/layerStore";
 
 interface LayerItemProps {
   index: number;

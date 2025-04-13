@@ -1,11 +1,11 @@
-import { Component, createSignal } from "solid-js";
+import { Component, createEffect, createSignal } from "solid-js";
 import { initLayer } from "~/models/layer/layerImage";
-import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
-import { allLayers, layerStore } from "~/stores/layerStore";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
+import { allLayers, layerStore } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/section/canvas.module.css";
-import { adjustZoomToFit } from "~/stores/canvasStore";
-import { updateDSL } from "~/stores/imageStore";
+import { adjustZoomToFit } from "~/stores/project/canvasStore";
+import { updateDSL } from "~/stores/project/imageStore";
 
 const CanvasSettings: Component<{}> = (props) => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -28,6 +28,13 @@ const CanvasSettings: Component<{}> = (props) => {
       initLayer(l.id, l.dotMagnification);
     });
   };
+
+
+  createEffect(() => {
+    const canvas = canvasStore.canvas;
+    setWidth(canvas.width)
+    setHeight(canvas.height)
+  })
 
   return (
     <div class="section_root">

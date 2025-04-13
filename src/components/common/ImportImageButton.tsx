@@ -1,4 +1,4 @@
-import { importImageToActiveLayer } from "~/io/import"; // 上で作った関数
+import { importImageToActiveLayer } from "~/io/internal/import"; // 上で作った関数
 
 const ImportImageButton = () => {
   let fileInputRef: HTMLInputElement | undefined;

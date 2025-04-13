@@ -68,6 +68,10 @@ components/section/item/LayerItem.tsx
 components/section/item/PenItem.tsx
 components/section/LayerList.tsx
 components/section/PenConfig.tsx
+components/section/Project.tsx
+io/internal/export.ts
+io/internal/import.ts
+io/project/project.ts
 main.tsx
 models/dsl/DSL.ts
 models/dsl/DSLRunner.ts
@@ -96,12 +100,15 @@ models/types/Layer.ts
 models/types/LayerImageState.ts
 models/types/Pen.ts
 routes/[...404].tsx
+routes/editor/index.tsx
 routes/index.tsx
-stores/canvasStore.ts
-stores/colorStore.ts
-stores/imageStore.ts
-stores/layerStore.ts
-stores/penStore.ts
+stores/global/globalStore.ts
+stores/internal/colorStore.ts
+stores/internal/penStore.ts
+stores/project/canvasStore.ts
+stores/project/imageStore.ts
+stores/project/layerStore.ts
+stores/project/projectStore.ts
 styles/components/canvas/canvas_area.module.css
 styles/components/canvas/canvas_stack.module.css
 styles/components/canvas/controls.module.css
@@ -114,6 +121,7 @@ styles/components/section/canvas.module.css
 styles/components/section/color.module.css
 styles/components/section/layer.module.css
 styles/components/section/pen.module.css
+styles/components/section/project.module.css
 styles/components/slider.module.css
 styles/font.css
 styles/global.css
@@ -123,10 +131,8 @@ styles/utils.css
 utils/BrushUtils.ts
 utils/DSLUtils.ts
 utils/EffectUtils.ts
-utils/export.ts
 utils/hexToRGB.ts
 utils/ImageUtils.ts
-utils/import.ts
 utils/MetricUtils.ts
 utils/tauri.ts
 </directory_structure>
@@ -155,6 +161,7 @@ import { Route, Router } from "@solidjs/router";
 import { Suspense } from "solid-js";
 import Home from "./routes";
 import "./styles/global.css";
+import Editor from "./routes/editor";
 
 export default function App() {
   // onMount(async () => {
@@ -175,6 +182,7 @@ export default function App() {
       )}
     >
       <Route path="/" component={Home} />
+      <Route path="/editor" component={Editor} />
     </Router>
   );
 }
@@ -183,7 +191,12 @@ export default function App() {
 <file path="components/canvas/CanvasArea.tsx">
 import CanvasStack from "./stacks/CanvasStack";
 
-import { adjustZoomToFit, canvasStore, centeringCanvas, setCanvasStore } from "~/stores/canvasStore";
+import {
+  adjustZoomToFit,
+  canvasStore,
+  centeringCanvas,
+  setCanvasStore,
+} from "~/stores/project/canvasStore";
 
 import { createMemo, onCleanup, onMount } from "solid-js";
 import Controls from "./Controls";
@@ -203,7 +216,7 @@ export default () => {
       width: wrapper.scrollWidth,
       height: wrapper.scrollHeight,
     });
-    adjustZoomToFit(canvasStack, canvasStack)
+    adjustZoomToFit();
     centeringCanvas();
 
     interact.setInteractListeners(wrapper, canvasStack);
@@ -263,7 +276,7 @@ export default () => {
 </file>
 
 <file path="components/canvas/CanvasAreaInteract.tsx">
-import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 
 class CanvasAreaInteract {
   private dragPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -272,7 +285,7 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() {}
+  constructor() { }
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
@@ -459,14 +472,15 @@ export default CanvasAreaInteract;
 
 <file path="components/canvas/Controls.tsx">
 import { Component } from "solid-js";
-import { canvasStore } from "~/stores/canvasStore";
-import { activeLayer, layerStore } from "~/stores/layerStore";
+import { canvasStore } from "~/stores/project/canvasStore";
+import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
 import ImportImageButton from "~/components/common/ImportImageButton";
+import { exportActiveLayerUpscaled } from "~/io/internal/export";
 import { redo, undo } from "~/models/layer/history";
-import { exportActiveLayerUpscaled } from "~/utils/export";
 
 import styles from "@styles/components/canvas/controls.module.css";
+import { saveProject, importProjectJson } from "~/io/project/project";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => canvasStore.zoom;
@@ -494,10 +508,10 @@ const Controls: Component<{}> = (props) => {
             }
         </For> */}
       <div class={styles["top-right-button-container"]}>
-        <ImportImageButton />
+        {/* <ImportImageButton />
         <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>
           export
-        </p>
+        </p> */}
       </div>
       <div class={styles["top-right-nav"]}>
         <p
@@ -532,8 +546,8 @@ export default Controls;
 
 <file path="components/canvas/stacks/CanvasStack.tsx">
 import { Component, For, onMount } from "solid-js";
-import { canvasStore } from "~/stores/canvasStore";
-import { activeLayer, allLayers, layerStore } from "~/stores/layerStore";
+import { canvasStore } from "~/stores/project/canvasStore";
+import { activeLayer, allLayers, layerStore } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/canvas_stack.module.css";
 
@@ -743,8 +757,8 @@ import {
 } from "solid-js";
 import { cloneImageData } from "~/models/factories/utils";
 import { Layer } from "~/models/types/Layer";
-import { canvasStore } from "~/stores/canvasStore";
-import { activeImage, imageStore } from "~/stores/imageStore";
+import { canvasStore } from "~/stores/project/canvasStore";
+import { activeImage, imageStore } from "~/stores/project/imageStore";
 
 import styles from "@styles/components/canvas/layer_canvas.module.css";
 
@@ -851,7 +865,7 @@ function createRefContent<T extends Exclude<unknown, Function>>(
 
 <file path="components/canvas/stacks/TouchableCanvas.tsx">
 import { Component, createSignal, onCleanup, onMount } from "solid-js";
-import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 import { roundPosition } from "~/utils/MetricUtils";
 
 interface Props {
@@ -1034,7 +1048,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
 <file path="components/common/ColorBox.tsx">
 import { Component } from "solid-js";
-import { penStore } from "~/stores/penStore";
+import { penStore } from "~/stores/internal/penStore";
 import { sayRandomQuote } from "./companion/QuotePool";
 
 interface ColorBoxProps {
@@ -1104,7 +1118,7 @@ import iro from "@jaames/iro";
 import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
 import { Component, createEffect } from "solid-js";
 import { setCurrentPenColor } from "~/models/types/Pen";
-import { currentPen } from "~/stores/penStore";
+import { currentPen } from "~/stores/internal/penStore";
 
 const ColorPicker: Component<{}> = (props) => {
   let colorPicker: IroColorPicker;
@@ -1328,7 +1342,7 @@ export default DSLButton;
 <file path="components/common/DSLEditor.tsx">
 import { Component, createSignal, For, onMount } from "solid-js";
 import { ALL_NODES } from "~/dsl/nodes/AvailableNodes";
-import { activeIndex, activeLayer, setLayerStore } from "~/stores/layerStore";
+import { activeIndex, activeLayer, setLayerStore } from "~/stores/project/layerStore";
 
 const DSLEditor: Component<{}> = (props) => {
   let [activeDSLStr, setDSLStr] = createSignal("");
@@ -1396,7 +1410,7 @@ export default EdgeInfo;
 </file>
 
 <file path="components/common/ImportImageButton.tsx">
-import { importImageToActiveLayer } from "~/utils/import"; // 上で作った関数
+import { importImageToActiveLayer } from "~/io/internal/import"; // 上で作った関数
 
 const ImportImageButton = () => {
   let fileInputRef: HTMLInputElement | undefined;
@@ -1531,7 +1545,7 @@ const Slider: Component<SliderProps> = (props) => {
   return (
     <div class={styles.root}>
       <div class={styles.slider} ref={sliderRef}>
-        <div class={styles["line-hitbox"]} onPointerDown={handlePointerDown}>
+        <div class={styles["line-hitbox"]} onPointerDown={handlePointerDown} onClick={onLineClick}>
           <div class={styles.line} />
         </div>
         <div style={{ left: `${percent()}%` }} class={styles.handle} />
@@ -1544,14 +1558,14 @@ export default Slider;
 </file>
 
 <file path="components/section/CanvasSettings.tsx">
-import { Component, createSignal } from "solid-js";
+import { Component, createEffect, createSignal } from "solid-js";
 import { initLayer } from "~/models/layer/layerImage";
-import { canvasStore, centeringCanvas, setCanvasStore } from "~/stores/canvasStore";
-import { allLayers, layerStore } from "~/stores/layerStore";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
+import { allLayers, layerStore } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/section/canvas.module.css";
-import { adjustZoomToFit } from "~/stores/canvasStore";
-import { updateDSL } from "~/stores/imageStore";
+import { adjustZoomToFit } from "~/stores/project/canvasStore";
+import { updateDSL } from "~/stores/project/imageStore";
 
 const CanvasSettings: Component<{}> = (props) => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -1574,6 +1588,13 @@ const CanvasSettings: Component<{}> = (props) => {
       initLayer(l.id, l.dotMagnification);
     });
   };
+
+
+  createEffect(() => {
+    const canvas = canvasStore.canvas;
+    setWidth(canvas.width)
+    setHeight(canvas.height)
+  })
 
   return (
     <div class="section_root">
@@ -1625,7 +1646,7 @@ export default CanvasSettings;
 
 <file path="components/section/Color.tsx">
 import { Component, For } from "solid-js";
-import { colorStore } from "~/stores/colorStore";
+import { colorStore } from "~/stores/internal/colorStore";
 
 import styles from "@styles/components/section/color.module.css";
 import ColorPicker from "~/components/common/ColorPicker";
@@ -1671,7 +1692,7 @@ import { Component } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
-import { layerStore, setLayerStore } from "~/stores/layerStore";
+import { layerStore, setLayerStore } from "~/stores/project/layerStore";
 
 interface LayerItemProps {
   index: number;
@@ -1767,7 +1788,7 @@ import { sayRandomQuote } from "~/components/common/companion/QuotePool";
 import Light from "~/components/common/Light";
 import Slider from "~/components/common/Slider";
 import { Pen } from "~/models/types/Pen";
-import { penStore, setPenStore } from "~/stores/penStore";
+import { penStore, setPenStore } from "~/stores/internal/penStore";
 
 import styles from "@styles/components/section/pen.module.css";
 
@@ -1830,7 +1851,7 @@ import {
   DragDropSensors,
   SortableProvider,
 } from "@thisbeyond/solid-dnd";
-import { Component, createSignal, For } from "solid-js";
+import { Component, createEffect, createSignal, For } from "solid-js";
 import { addLayer } from "~/models/factories/addLayer";
 import { removeLayer } from "~/models/factories/removeLayer";
 import {
@@ -1838,7 +1859,7 @@ import {
   allLayers,
   layerStore,
   setLayerStore,
-} from "~/stores/layerStore";
+} from "~/stores/project/layerStore";
 import LayerItem from "./item/LayerItem";
 // 並べ替え用ユーティリティ関数
 
@@ -1877,6 +1898,13 @@ const LayerList: Component<{}> = () => {
       }
     }
   };
+
+  createEffect(() => {
+    const layers = layerStore.layers;
+    if (JSON.stringify(layers) != JSON.stringify(items)) {
+      setItems(layers);
+    }
+  })
 
   return (
     <DragDropProvider
@@ -1938,7 +1966,7 @@ export default LayerList;
 
 <file path="components/section/PenConfig.tsx">
 import { Component, For } from "solid-js";
-import { penStore } from "~/stores/penStore";
+import { penStore } from "~/stores/internal/penStore";
 import PenItem from "./item/PenItem";
 
 const PenConfig: Component<{}> = (props) => {
@@ -1959,6 +1987,429 @@ const PenConfig: Component<{}> = (props) => {
 export default PenConfig;
 </file>
 
+<file path="components/section/Project.tsx">
+import { Component, createSignal } from "solid-js";
+import { saveProject } from "~/io/project/project";
+
+import styles from "@styles/components/section/project.module.css"
+import { projectStore, setProjectStore } from "~/stores/project/projectStore";
+
+const Project: Component<{}> = (props) => {
+    const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
+
+    const save = () => {
+        if (projectStore.name && projectStore.path) {
+            // 上書き保存
+            saveProject(`${projectStore.path}`).then(() => {
+                setSaveLog("saved!")
+                setProjectStore("isProjectChangedAfterSave", false)
+            })
+        } else {
+            saveProject().then(() => {
+                setSaveLog("saved!")
+                setProjectStore("isProjectChangedAfterSave", false)
+            })
+        }
+    }
+
+    return (
+        <div class="section_root">
+            <p class="section_caption">project.</p>
+            <div class="section_content">
+
+                <div class="fl-col">
+                    <input
+                        class={styles.project_name_input}
+                        type="text"
+                        name="height"
+                        onChange={(e) => {
+                            setProjectStore("name", e.target.value)
+                        }}
+                        value={projectStore.name}
+                        placeholder="project name"
+                        autocomplete="off"
+                        required
+                    />
+
+                    <p class={styles.project_file_path}>{projectStore.path}</p>
+                </div>
+
+                <div class="fl-row" style={{ "align-items": "center" }}>
+                    {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
+                        load.
+                    </button> */}
+                    <button class={styles.loadsave_button} onClick={() => save()}>
+                        save.
+                    </button>
+
+                    {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>}
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+export default Project;
+</file>
+
+<file path="io/internal/export.ts">
+import { layerStore } from '~/stores/project/layerStore'
+
+export function exportActiveLayerUpscaled(scale = 10) {
+  const layerId = layerStore.activeLayerId
+  if (!layerId) return
+
+  const originalCanvas = document.getElementById(
+    `canvas-${layerId}`
+  ) as HTMLCanvasElement
+  if (!originalCanvas) {
+    alert('対象のレイヤーが見つかりません。')
+    return
+  }
+
+  const w = originalCanvas.width
+  const h = originalCanvas.height
+
+  // オフスクリーンキャンバスを作る
+  const exportCanvas = document.createElement('canvas')
+  exportCanvas.width = w * scale
+  exportCanvas.height = h * scale
+
+  const ctx = exportCanvas.getContext('2d')
+  if (!ctx) {
+    alert('Canvasコンテキスト取得に失敗しました。')
+    return
+  }
+
+  // ピクセル補間を無効化
+  ctx.imageSmoothingEnabled = false
+
+  // 元のキャンバスをscale倍に引き伸ばして描画（補完なし）
+  ctx.drawImage(originalCanvas, 0, 0, exportCanvas.width, exportCanvas.height)
+
+  // エクスポート処理
+  exportCanvas.toBlob((blob) => {
+    if (!blob) {
+      alert('エクスポートに失敗しました。')
+      return
+    }
+
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${layerId}_x${scale}.png`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }, 'image/png')
+}
+
+export function downloadImageData(
+  imageData: ImageData,
+  filename: string = 'image',
+  scale: number = 10
+) {
+  // 一時的な canvas を作成
+  const canvas = document.createElement('canvas')
+  canvas.width = imageData.width
+  canvas.height = imageData.height
+
+  // ImageData を描画
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    console.error('2D context not available')
+    return
+  }
+  ctx.putImageData(imageData, 0, 0)
+
+  const w = canvas.width
+  const h = canvas.height
+
+  // オフスクリーンキャンバスを作る
+  const exportCanvas = document.createElement('canvas')
+  exportCanvas.width = w * scale
+  exportCanvas.height = h * scale
+
+  const ctxEx = exportCanvas.getContext('2d')
+  if (!ctxEx) {
+    alert('Canvasコンテキスト取得に失敗しました。')
+    return
+  }
+
+  // ピクセル補間を無効化
+  ctxEx.imageSmoothingEnabled = false
+  // 元のキャンバスをscale倍に引き伸ばして描画（補完なし）
+  ctxEx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height)
+
+  // エクスポート処理
+  exportCanvas.toBlob((blob) => {
+    if (!blob) {
+      alert('エクスポートに失敗しました。')
+      return
+    }
+
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${filename}_x${scale}.png`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }, 'image/png')
+}
+</file>
+
+<file path="io/internal/import.ts">
+import { registerNewHistory } from '~/models/layer/layerImage'
+import { imageStore } from '~/stores/project/imageStore'
+import { layerStore } from '~/stores/project/layerStore'
+
+// 画像ファイルをキャンバスに焼き込む（補完なし・左上合わせ・切り捨て）
+export function importImageToActiveLayer(file: File) {
+  const layerId = layerStore.activeLayerId
+  if (!layerId) return
+
+  const imageData = imageStore[layerId]?.current
+  if (!imageData) {
+    alert('現在のレイヤーに描画できません。')
+    return
+  }
+
+  const img = new Image()
+  const reader = new FileReader()
+
+  reader.onload = (e) => {
+    img.onload = () => {
+      const w = imageData.width
+      const h = imageData.height
+
+      // オフスクリーンCanvasで描画 → ImageData取得
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      ctx.imageSmoothingEnabled = false
+      ctx.clearRect(0, 0, w, h)
+      ctx.drawImage(img, 0, 0, w, h) // 左上にそのまま描く（拡大/縮小なし）
+
+      const importedData = ctx.getImageData(0, 0, w, h)
+      registerNewHistory(layerId, importedData)
+    }
+    img.src = e.target?.result as string
+  }
+
+  reader.readAsDataURL(file)
+}
+</file>
+
+<file path="io/project/project.ts">
+// src/io/project.ts
+import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog'
+import {
+  BaseDirectory,
+  exists,
+  mkdir,
+  open,
+  readTextFile,
+  writeTextFile,
+} from '@tauri-apps/plugin-fs'
+import { reconcile } from 'solid-js/store'
+import { initLayer } from '~/models/layer/layerImage'
+import { Layer } from '~/models/types/Layer'
+import {
+  globalStore,
+  RecentFile,
+  setGlobalStore,
+} from '~/stores/global/globalStore'
+import {
+  adjustZoomToFit,
+  canvasStore,
+  centeringCanvas,
+  setCanvasStore,
+} from '~/stores/project/canvasStore'
+import { imageStore, setImageStore } from '~/stores/project/imageStore'
+import {
+  findLayerById,
+  layerStore,
+  setLayerStore,
+} from '~/stores/project/layerStore'
+import { projectStore, setProjectStore } from '~/stores/project/projectStore'
+import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
+
+export async function importProjectJsonFromFileSelection() {
+  const file = await dialogOpen({
+    multiple: false,
+    directory: false,
+    filters: [
+      {
+        name: 'sledge files',
+        extensions: ['sledge'],
+      },
+    ],
+  })
+  if (!file) {
+    console.log('ファイルが選択されていません')
+    return
+  }
+  console.log(file)
+  const jsonText = await readTextFile(file)
+  const projectJson = JSON.parse(jsonText)
+
+  importProjectJson(projectJson)
+}
+
+export async function importProjectJsonFromPath(filePath: string) {
+  if (!filePath) {
+    console.log('ファイルが選択されていません')
+    return
+  }
+  const jsonText = await readTextFile(filePath)
+  const projectJson = JSON.parse(jsonText)
+
+  importProjectJson(projectJson)
+}
+
+export async function importProjectJson(projectJson: any) {
+  if (projectJson.project) {
+    console.log(projectJson.project)
+    setProjectStore('name', projectJson.project.name)
+    setProjectStore('path', projectJson.project.path)
+  }
+
+  if (projectJson.canvas) {
+    const { width, height } = projectJson.canvas
+    setCanvasStore('canvas', 'width', width)
+    setCanvasStore('canvas', 'height', height)
+  }
+
+  if (projectJson.images) {
+    setImageStore({})
+    Object.keys(projectJson.images).forEach((id) => {
+      console.log(`read ${id}`)
+      const imageData = projectJson.images[id]
+      console.log(imageData)
+      initLayer(id, Number(imageData.dotMagnification || 1))
+      setImageStore(
+        id,
+        'current',
+        decodeImageData(
+          imageData.current,
+          Number(imageData.width),
+          Number(imageData.height)
+        )
+      )
+    })
+  }
+
+  if (
+    projectJson.layer &&
+    projectJson.layer.layers &&
+    Array.isArray(projectJson.layer.layers)
+  ) {
+    const layers: Layer[] = []
+    projectJson.layer.layers.map((l: any) => {
+      layers.push({
+        ...l,
+        dsl: undefined,
+      } as Layer)
+    })
+
+    setLayerStore('layers', layers)
+    setLayerStore('activeLayerId', projectJson.layer.activeLayerId)
+  }
+
+  adjustZoomToFit()
+  centeringCanvas()
+}
+
+export const parseCurrentProject = (): string => {
+  return JSON.stringify({
+    project: projectStore,
+    canvas: canvasStore.canvas,
+    images: Object.fromEntries(
+      Object.entries(imageStore).map(([id, state]) => [
+        id,
+        {
+          current: encodeImageData(state.current),
+          width: state.current.width,
+          height: state.current.height,
+          dotMagnification: findLayerById(id)?.dotMagnification,
+        },
+      ])
+    ),
+    layer: {
+      layers: layerStore.layers.map((layer) => ({
+        ...layer,
+        dsl: undefined, // TODO: save dsl
+      })),
+      activeLayerId: layerStore.activeLayerId,
+    },
+  })
+}
+
+export async function saveProject(existingPath?: string) {
+  let selectedPath: String | null
+  if (existingPath) {
+    selectedPath = existingPath
+  } else {
+    try {
+      await mkdir('sledge', {
+        baseDir: BaseDirectory.Document,
+        recursive: true,
+      })
+    } catch (e) {
+      console.warn('ディレクトリ作成スキップまたは失敗:', e)
+    }
+
+    selectedPath = await save({
+      title: 'Sledge プロジェクトを保存',
+      defaultPath: 'sledge/project.sledge',
+      filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
+    })
+  }
+
+  if (typeof selectedPath === 'string') {
+    setProjectStore('path', selectedPath)
+    const data = parseCurrentProject()
+    await writeTextFile(selectedPath, data)
+    console.log('プロジェクト保存:', selectedPath)
+
+    // add to recent
+    setGlobalStore((store) => {
+      var filePath = selectedPath.substring(0, selectedPath.lastIndexOf('\\'))
+      var fileName = selectedPath.split('\\').pop()?.split('/').pop()
+      console.log('path: ' + filePath)
+      console.log('name: ' + fileName)
+      if (fileName && filePath && store.recentOpenedFiles) {
+        const isNew = store.recentOpenedFiles.every((f) => {
+          return f.name !== fileName || f.path !== filePath?.toString()
+        })
+        console.log(isNew)
+
+        if (isNew) {
+          const newRecentFiles: RecentFile[] = [
+            {
+              name: fileName,
+              path: filePath,
+            },
+            ...store.recentOpenedFiles,
+          ]
+          setGlobalStore('recentOpenedFiles', reconcile(newRecentFiles))
+        }
+      }
+      return store
+    })
+  } else {
+    console.log('保存キャンセルされました')
+  }
+}
+</file>
+
 <file path="main.tsx">
 import { render } from "solid-js/web";
 import App from "./app";
@@ -1967,67 +2418,65 @@ render(() => <App />, document.getElementById("root")!);
 </file>
 
 <file path="models/dsl/DSL.ts">
-import { SledgeNode } from "~/dsl/nodes/DSLNodes";
-import { findLayerById } from "~/stores/layerStore";
-import { LayerIn } from "./nodes/pass/LayerIn";
-import { LayerOut } from "./nodes/pass/LayerOut";
+import { SledgeNode } from '~/models/dsl/nodes/DSLNodes'
+import { findLayerById } from '~/stores/project/layerStore'
+import { LayerIn } from './nodes/pass/LayerIn'
+import { LayerOut } from './nodes/pass/LayerOut'
 
 export class DSL {
-  layerIn: LayerIn;
-  readonly nodes: SledgeNode[];
-  layerOut: LayerOut;
+  layerIn: LayerIn
+  readonly nodes: SledgeNode[]
+  layerOut: LayerOut
 
   constructor(inLayerId: string, outLayerId: string) {
-    this.layerIn = new LayerIn(inLayerId);
-    this.nodes = [];
-    this.layerOut = new LayerOut(outLayerId);
+    this.layerIn = new LayerIn(inLayerId)
+    this.nodes = []
+    this.layerOut = new LayerOut(outLayerId)
   }
 
   public addNode(node: SledgeNode) {
-    this?.nodes.push(node);
+    this?.nodes.push(node)
   }
 
   public build(exceptIn: boolean = false): string | undefined {
-    const nodes = exceptIn
-      ? [...this.nodes, this.layerOut]
-      : [this.layerIn, ...this.nodes, this.layerOut];
+    const nodes =
+      exceptIn ?
+        [...this.nodes, this.layerOut]
+      : [this.layerIn, ...this.nodes, this.layerOut]
 
-    let nodeStrings: string[] = [];
-    let isAllNodeParseSuccessful = true;
+    let nodeStrings: string[] = []
+    let isAllNodeParseSuccessful = true
     nodes.forEach((node, i) => {
-      const nodeStr = node.getNodeString();
-      if (nodeStr !== undefined) nodeStrings.push(nodeStr);
+      const nodeStr = node.getNodeString()
+      if (nodeStr !== undefined) nodeStrings.push(nodeStr)
       else {
-        isAllNodeParseSuccessful = false;
-        throw `DSL parse failed in: ${node.name} [${i}]`;
+        isAllNodeParseSuccessful = false
+        throw `DSL parse failed in: ${node.name} [${i}]`
       }
-    });
+    })
 
     if (isAllNodeParseSuccessful) {
       // if all nodes parsed successfully
-      return nodeStrings.join(" > "); // in(inLayerId) > out(outLayerId) by default
+      return nodeStrings.join(' > ') // in(inLayerId) > out(outLayerId) by default
     } else {
       // if some nodes failed to parse
-      return undefined;
+      return undefined
     }
   }
 
   public toString(): string {
-    let str = this.build();
-    if (str === undefined) throw "DSL parse failed.";
+    let str = this.build()
+    if (str === undefined) throw 'DSL parse failed.'
     else {
       // 読みやすくする
-      const inId = this.layerIn.layerId;
-      const outId = this.layerOut.layerId;
+      const inId = this.layerIn.layerId
+      const outId = this.layerOut.layerId
       if (inId !== undefined)
-        str = str.replaceAll(inId, `${findLayerById(inId)?.name || "N/A"} ID`);
+        str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`)
       if (outId !== undefined)
-        str = str.replaceAll(
-          outId,
-          `${findLayerById(outId)?.name || "N/A"} ID`,
-        );
-      str = str.replaceAll(" > ", "\n> ");
-      return str;
+        str = str.replaceAll(outId, `${findLayerById(outId)?.name || 'N/A'} ID`)
+      str = str.replaceAll(' > ', '\n> ')
+      return str
     }
   }
 }
@@ -2253,27 +2702,27 @@ export abstract class PassNode extends SledgeNode {
 </file>
 
 <file path="models/factories/addLayer.ts">
-import { allLayers, setLayerStore } from "~/stores/layerStore";
-import { DSL } from "../dsl/DSL";
-import { LayerType } from "../types/Layer";
-import { createLayer } from "./createLayer";
+import { allLayers, setLayerStore } from '~/stores/project/layerStore'
+import { DSL } from '../dsl/DSL'
+import { LayerType } from '../types/Layer'
+import { createLayer } from './createLayer'
 
 export const addLayer = (
   name: string,
   type: LayerType = LayerType.Dot,
   enabled = true,
   dotMagnification = 1,
-  dsl?: DSL,
+  dsl?: DSL
 ) => {
-  const newLayer = createLayer(name, type, enabled, dotMagnification, dsl);
+  const newLayer = createLayer(name, type, enabled, dotMagnification, dsl)
 
-  const layers = [...allLayers()];
-  layers.push(newLayer);
+  const layers = [...allLayers()]
+  layers.push(newLayer)
 
-  setLayerStore("layers", layers);
+  setLayerStore('layers', layers)
 
-  return layers;
-};
+  return layers
+}
 </file>
 
 <file path="models/factories/createLayer.ts">
@@ -2329,24 +2778,24 @@ export const createPen = (name: string, size: number, color: string): Pen => ({
 </file>
 
 <file path="models/factories/removeLayer.ts">
-import { imageStore, setImageStore } from "~/stores/imageStore";
-import { allLayers, setLayerStore } from "~/stores/layerStore";
+import { imageStore, setImageStore } from '~/stores/project/imageStore'
+import { allLayers, setLayerStore } from '~/stores/project/layerStore'
 
 export const removeLayer = (layerId?: string) => {
-  if (layerId === undefined) return;
-  const layers = [...allLayers()];
-  const index = layers.findIndex((l) => l.id === layerId);
-  let newActiveIndex = 0;
-  if (index !== 0) newActiveIndex = index - 1;
+  if (layerId === undefined) return
+  const layers = [...allLayers()]
+  const index = layers.findIndex((l) => l.id === layerId)
+  let newActiveIndex = 0
+  if (index !== 0) newActiveIndex = index - 1
 
-  layers.splice(index, 1);
-  const images = Object.assign({}, imageStore);
-  delete images[layerId];
+  layers.splice(index, 1)
+  const images = Object.assign({}, imageStore)
+  delete images[layerId]
 
-  setLayerStore("layers", layers);
-  setLayerStore("activeLayerId", layers[newActiveIndex].id);
-  setImageStore(images);
-};
+  setLayerStore('layers', layers)
+  setLayerStore('activeLayerId', layers[newActiveIndex].id)
+  setImageStore(images)
+}
 </file>
 
 <file path="models/factories/utils.ts">
@@ -2370,13 +2819,13 @@ export function cloneImageData(src: ImageData): ImageData {
 </file>
 
 <file path="models/layer/getDrawnImageData.ts">
-import { findLayerById } from "~/stores/layerStore";
-import { currentPen } from "~/stores/penStore";
-import { drawBrush } from "~/utils/BrushUtils";
-import { hexToRGB } from "~/utils/hexToRGB";
-import { setPixel } from "~/utils/ImageUtils";
-import { drawLine } from "~/utils/MetricUtils";
-import { cloneImageData } from "../factories/utils";
+import { findLayerById } from '~/stores/project/layerStore'
+import { currentPen } from '~/stores/internal/penStore'
+import { drawBrush } from '~/utils/BrushUtils'
+import { hexToRGB } from '~/utils/hexToRGB'
+import { setPixel } from '~/utils/ImageUtils'
+import { drawLine } from '~/utils/MetricUtils'
+import { cloneImageData } from '../factories/utils'
 
 export enum DrawState {
   start,
@@ -2389,32 +2838,32 @@ export const getDrawnImageData = (
   state: DrawState,
   currentImage: ImageData,
   canvasPosition: { x: number; y: number },
-  lastPosition?: { x: number; y: number }, // 移動中などの補完用
+  lastPosition?: { x: number; y: number } // 移動中などの補完用
 ): ImageData | undefined => {
-  const layer = findLayerById(layerId);
-  if (layer === undefined) return undefined;
+  const layer = findLayerById(layerId)
+  if (layer === undefined) return undefined
   canvasPosition = getMagnificationPosition(
     canvasPosition,
-    layer.dotMagnification,
-  );
+    layer.dotMagnification
+  )
   if (lastPosition)
     lastPosition = getMagnificationPosition(
       lastPosition,
-      layer.dotMagnification,
-    );
+      layer.dotMagnification
+    )
 
-  const pen = currentPen();
-  const [r, g, b] = hexToRGB(pen.color);
+  const pen = currentPen()
+  const [r, g, b] = hexToRGB(pen.color)
 
-  const imageData = cloneImageData(currentImage);
+  const imageData = cloneImageData(currentImage)
 
   drawBrush(canvasPosition.x, canvasPosition.y, pen.size, (x, y) => {
-    if (pen.name === "eraser") {
-      setPixel(imageData, x, y, 0, 0, 0, 0);
+    if (pen.name === 'eraser') {
+      setPixel(imageData, x, y, 0, 0, 0, 0)
     } else {
-      setPixel(imageData, x, y, r, g, b, 255);
+      setPixel(imageData, x, y, r, g, b, 255)
     }
-  });
+  })
 
   if (state === DrawState.move && lastPosition !== undefined)
     drawLine(
@@ -2424,108 +2873,106 @@ export const getDrawnImageData = (
       canvasPosition.y,
       (x, y) => {
         drawBrush(x, y, pen.size, (px, py) => {
-          if (pen.name === "eraser") {
-            setPixel(imageData, x, y, 0, 0, 0, 0);
+          if (pen.name === 'eraser') {
+            setPixel(imageData, x, y, 0, 0, 0, 0)
           } else {
-            setPixel(imageData, px, py, r, g, b, 255);
+            setPixel(imageData, px, py, r, g, b, 255)
           }
-        });
-      },
-    );
+        })
+      }
+    )
 
-  return imageData;
-};
+  return imageData
+}
 
 function getMagnificationPosition(
   position: { x: number; y: number },
-  dotMagnification: number,
+  dotMagnification: number
 ) {
   return {
     x: Math.floor(position.x / dotMagnification),
     y: Math.floor(position.y / dotMagnification),
-  };
+  }
 }
 </file>
 
 <file path="models/layer/history.ts">
-import { setImageStore } from "~/stores/imageStore";
+import { setImageStore } from '~/stores/project/imageStore'
 
 export function undo(layerId: string) {
-  console.log("undo");
+  console.log('undo')
   setImageStore(layerId, (state) => {
-    if (state.undoStack.length === 0) return state;
-    const prev = state.undoStack[state.undoStack.length - 1];
-    const newUndo = state.undoStack.slice(0, -1);
-    const newRedo = [state.current, ...state.redoStack];
-    return { current: prev, undoStack: newUndo, redoStack: newRedo };
-  });
+    if (state.undoStack.length === 0) return state
+    const prev = state.undoStack[state.undoStack.length - 1]
+    const newUndo = state.undoStack.slice(0, -1)
+    const newRedo = [state.current, ...state.redoStack]
+    return { current: prev, undoStack: newUndo, redoStack: newRedo }
+  })
   // updateDSL(layerId);
 }
 
 export function redo(layerId: string) {
   setImageStore(layerId, (state) => {
-    if (state.redoStack.length === 0) return state;
-    const next = state.redoStack[0];
-    const newRedo = state.redoStack.slice(1);
-    const newUndo = [...state.undoStack, state.current];
-    return { current: next, undoStack: newUndo, redoStack: newRedo };
-  });
+    if (state.redoStack.length === 0) return state
+    const next = state.redoStack[0]
+    const newRedo = state.redoStack.slice(1)
+    const newUndo = [...state.undoStack, state.current]
+    return { current: next, undoStack: newUndo, redoStack: newRedo }
+  })
   // updateDSL(layerId);
 }
 </file>
 
 <file path="models/layer/layerImage.ts">
-import { canvasStore } from "~/stores/canvasStore";
-import { setImageStore } from "~/stores/imageStore";
-import { LayerImageState } from "../types/LayerImageState";
+import { canvasStore } from '~/stores/project/canvasStore'
+import { setImageStore } from '~/stores/project/imageStore'
+import { LayerImageState } from '../types/LayerImageState'
 
 export function initLayer(layerId: string, dotMagnification: number) {
   const blank = new ImageData(
     Math.round(canvasStore.canvas.width / dotMagnification),
-    Math.round(canvasStore.canvas.height / dotMagnification),
-  );
+    Math.round(canvasStore.canvas.height / dotMagnification)
+  )
   const dslBlank = new ImageData(
     Math.round(canvasStore.canvas.width / dotMagnification),
-    Math.round(canvasStore.canvas.height / dotMagnification),
-  );
+    Math.round(canvasStore.canvas.height / dotMagnification)
+  )
   setImageStore(layerId, {
     current: blank,
     DSLcurrent: dslBlank,
     undoStack: [],
     redoStack: [],
-  });
+  })
 }
 
 export function registerNewHistory(layerId: string, newData: ImageData) {
   setImageStore(layerId, (state: LayerImageState) => {
-    const prev = state.current;
+    const prev = state.current
     return {
       current: newData,
       undoStack: [...state.undoStack, prev],
       redoStack: [],
-    };
-  });
+    }
+  })
 }
 </file>
 
 <file path="models/types/Canvas.ts">
-import { adjustZoomToFit } from '~/stores/canvasStore'
-
 export type Canvas = {
-  width: number
-  height: number
-}
+  width: number;
+  height: number;
+};
 
 export const createCanvas = (width = 800, height = 1200): Canvas => {
   return {
     width,
     height,
-  }
-}
+  };
+};
 </file>
 
 <file path="models/types/Layer.ts">
-import { DSL } from "~/dsl/DSL";
+import { DSL } from '~/models/dsl/DSL'
 
 export enum LayerType {
   Dot,
@@ -2534,14 +2981,14 @@ export enum LayerType {
 }
 
 export type Layer = {
-  id: string;
-  name: string;
-  type: LayerType;
-  typeDescription: string; // 各タイプの説明
-  enabled: boolean;
-  dotMagnification: number;
-  dsl: DSL;
-};
+  id: string
+  name: string
+  type: LayerType
+  typeDescription: string // 各タイプの説明
+  enabled: boolean
+  dotMagnification: number
+  dsl: DSL
+}
 </file>
 
 <file path="models/types/LayerImageState.ts">
@@ -2554,18 +3001,18 @@ export type LayerImageState = {
 </file>
 
 <file path="models/types/Pen.ts">
-import { penStore, setPenStore } from "~/stores/penStore";
+import { penStore, setPenStore } from '~/stores/internal/penStore'
 
 export type Pen = {
-  id: string;
-  name: string;
-  size: number;
-  color: string;
-};
+  id: string
+  name: string
+  size: number
+  color: string
+}
 
 export const setCurrentPenColor = (colorHexString: string) => {
-  return setPenStore("pens", penStore.usingIndex, "color", colorHexString);
-};
+  return setPenStore('pens', penStore.usingIndex, 'color', colorHexString)
+}
 </file>
 
 <file path="routes/[...404].tsx">
@@ -2588,7 +3035,9 @@ export default function NotFound() {
 }
 </file>
 
-<file path="routes/index.tsx">
+<file path="routes/editor/index.tsx">
+import { useLocation, useNavigate } from "@solidjs/router";
+import { createSignal } from "solid-js";
 import CanvasArea from "~/components/canvas/CanvasArea";
 import Companion from "~/components/common/companion/Companion";
 import EdgeInfo from "~/components/common/EdgeInfo";
@@ -2596,99 +3045,146 @@ import CanvasSettings from "~/components/section/CanvasSettings";
 import Color from "~/components/section/Color";
 import LayerList from "~/components/section/LayerList";
 import PenConfig from "~/components/section/PenConfig";
+import Project from "~/components/section/Project";
+import { importProjectJsonFromPath } from "~/io/project/project";
+
+export default function Editor() {
+    const location = useLocation();
+
+    const [isImporting, setIsImporting] = createSignal(false)
+
+    if (location.search) {
+        setIsImporting(true);
+        const sp = new URLSearchParams(location.search)
+        const fileName = sp.get("name")
+        const filePath = sp.get("path")
+        const path = `${filePath}\\${fileName}`;
+        console.log(path)
+        importProjectJsonFromPath(path).then(() => {
+            setIsImporting(false);
+        })
+    }
+
+
+    return (
+        <main>
+            {isImporting() &&
+                <div id="root">
+                    <div class="welcome_root">
+                        <p style={{ "font-size": "3rem" }}>please wait.</p>
+                    </div>
+                </div>
+            }
+
+            {
+                !isImporting() &&
+                <div id="root">
+                    <div id="sidebar">
+                        <EdgeInfo />
+
+                        <div id="content">
+                            <a onClick={() => window.location.href = "/"}>&lt; back</a>
+                            <Project />
+                            <Color />
+                            <PenConfig />
+                            <LayerList />
+                            <CanvasSettings />
+                        </div>
+                    </div>
+
+                    <CanvasArea />
+                    <div id="misc_container">
+                        <p id="sledge">sledge.</p>
+                    </div>
+                    <Companion />
+                </div>
+            }
+        </main >
+    );
+}
+</file>
+
+<file path="routes/index.tsx">
+import { useNavigate } from "@solidjs/router";
+import { For } from "solid-js";
+import EdgeInfo from "~/components/common/EdgeInfo";
+import { globalStore, RecentFile } from "~/stores/global/globalStore";
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const moveToEditor = async (recentFile: RecentFile) => {
+    const params = new URLSearchParams();
+    params.append("name", recentFile.name)
+    params.append("path", recentFile.path)
+    navigate(`/editor?${params.toString()}`, { replace: false });
+  }
+
+  const createNew = () => {
+    navigate(`/editor`, { replace: false });
+  }
+
   return (
     <main>
       <div id="root">
         <div id="sidebar">
           <EdgeInfo />
 
-          <div id="content">
-            <Color />
-            <PenConfig />
-            <LayerList />
-            <CanvasSettings />
+        </div>
+        <div class="welcome_root">
+          <div class="fl-row" style={{ width: "50%" }}>
+
+            <div class="welcome_container">
+              <p class="welcome_headline">hello.</p>
+
+              <div class="section_root">
+                <p class="section_caption">recent files.</p>
+                <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
+                  <For each={globalStore.recentOpenedFiles}>
+                    {(item, i) => {
+                      return <div class="recent_files">
+                        <p>■</p>
+                        <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
+                        <p class="path">{item.path}</p>
+                      </div>
+                    }}
+                  </For>
+                </div>
+              </div>
+            </div>
+
+            <div class="side_section">
+              <a class="side_item" onClick={() => createNew()}>+ new.</a>
+              <a class="side_item" style={{ "margin-left": "2px" }}>&gt; open.</a>
+            </div>
           </div>
         </div>
-
-        <CanvasArea />
-        <div id="misc_container">
-          <p id="sledge">sledge.</p>
-        </div>
-        <Companion />
       </div>
-    </main>
+    </main >
   );
 }
 </file>
 
-<file path="stores/canvasStore.ts">
+<file path="stores/global/globalStore.ts">
 import { createStore } from 'solid-js/store'
-import { createCanvas } from '~/models/types/Canvas'
 
-// canvas
-
-export const adjustZoomToFit = (
-  width?: number,
-  height?: number,
-  reference: number = 600
-) => {
-  if (width === undefined) width = canvasStore.canvas.width
-  if (height === undefined) height = canvasStore.canvas.height
-
-  let isWide = width > height
-  let longerLength = isWide ? width : height
-
-  console.log(
-    `this is ${isWide ? 'wide' : 'tall'}.
-    ${reference} / ${longerLength} = ${reference / longerLength}. set zoom.`
-  )
-  setCanvasStore('zoom', reference / longerLength)
-  centeringCanvas()
+// project
+export type RecentFile = {
+  name: string
+  path: string
 }
 
-export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas
-  const canvasArea = canvasStore.canvasAreaSize
-  const zoom = canvasStore.zoom
-
-  console.log(
-    `area size is ${canvasArea.width} x ${canvasArea.height}.
-    canvas size is ${canvasSize.width} x ${canvasSize.height}.
-    current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
-    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
-  )
-
-  setCanvasStore('offsetOrigin', {
-    x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
-    y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
-  })
-  setCanvasStore('offset', {
-    x: 0,
-    y: 0,
-  })
-}
-
-export const [canvasStore, setCanvasStore] = createStore({
-  canvas: createCanvas(400, 400),
-  canvasAreaSize: { width: 0, height: 0 },
-  lastMouseWindow: { x: 0, y: 0 },
-  lastMouseOnCanvas: { x: 0, y: 0 },
-  isInStroke: false,
-  zoom: 1,
-  touchZoomSensitivity: 0.5,
-  wheelZoomStep: 0.1,
-  // オフセットの初期値
-  offsetOrigin: { x: 0, y: 0 },
-  offset: { x: 0, y: 0 },
-
-  isCtrlPressed: false,
-  isDragging: false,
+export const [globalStore, setGlobalStore] = createStore({
+  recentOpenedFiles: [
+    {
+      name: 'project.sledge',
+      path: 'C:\\Users\\innsb\\Documents',
+    },
+  ],
 })
 </file>
 
-<file path="stores/colorStore.ts">
+<file path="stores/internal/colorStore.ts">
 import { createStore } from "solid-js/store";
 
 // color
@@ -2709,33 +3205,112 @@ export const [colorStore, setColorStore] = createStore({
 });
 </file>
 
-<file path="stores/imageStore.ts">
+<file path="stores/internal/penStore.ts">
 import { createStore } from "solid-js/store";
-import { runDSL } from "~/models/dsl/DSLRunner";
-import { LayerImageState } from "~/models/types/LayerImageState";
-import { findLayerById, layerStore } from "./layerStore";
+import { createPen } from "~/models/factories/createPen";
+
+// pen
+
+export const [penStore, setPenStore] = createStore({
+  usingIndex: 0,
+  pens: [createPen("pen", 1, "#000000"), createPen("eraser", 4, "none")],
+});
+export const currentPen = () => penStore.pens[penStore.usingIndex];
+</file>
+
+<file path="stores/project/canvasStore.ts">
+import { createStore } from "solid-js/store";
+import { createCanvas } from "~/models/types/Canvas";
+
+// canvas
+
+export const adjustZoomToFit = (
+  width?: number,
+  height?: number,
+  reference: number = 600,
+) => {
+  if (width === undefined) width = canvasStore.canvas.width;
+  if (height === undefined) height = canvasStore.canvas.height;
+
+  let isWide = width > height;
+  let longerLength = isWide ? width : height;
+
+  console.log(
+    `this is ${isWide ? "wide" : "tall"}.
+    ${reference} / ${longerLength} = ${reference / longerLength}. set zoom.`,
+  );
+  setCanvasStore("zoom", reference / longerLength);
+  centeringCanvas();
+};
+
+export const centeringCanvas = () => {
+  const canvasSize = canvasStore.canvas;
+  const canvasArea = canvasStore.canvasAreaSize;
+  const zoom = canvasStore.zoom;
+
+  console.log(
+    `area size is ${canvasArea.width} x ${canvasArea.height}.
+    canvas size is ${canvasSize.width} x ${canvasSize.height}.
+    current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
+    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`,
+  );
+
+  setCanvasStore("offsetOrigin", {
+    x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
+    y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
+  });
+  setCanvasStore("offset", {
+    x: 0,
+    y: 0,
+  });
+};
+
+export const [canvasStore, setCanvasStore] = createStore({
+  canvas: createCanvas(400, 400),
+  canvasAreaSize: { width: 0, height: 0 },
+  lastMouseWindow: { x: 0, y: 0 },
+  lastMouseOnCanvas: { x: 0, y: 0 },
+  isInStroke: false,
+  zoom: 1,
+  touchZoomSensitivity: 0.5,
+  wheelZoomStep: 0.1,
+  // オフセットの初期値
+  offsetOrigin: { x: 0, y: 0 },
+  offset: { x: 0, y: 0 },
+
+  isCtrlPressed: false,
+  isDragging: false,
+});
+</file>
+
+<file path="stores/project/imageStore.ts">
+import { createStore } from 'solid-js/store'
+import { runDSL } from '~/models/dsl/DSLRunner'
+import { LayerImageState } from '~/models/types/LayerImageState'
+import { findLayerById, layerStore } from './layerStore'
 
 // image
 
 export const [imageStore, setImageStore] = createStore<
   Record<string, LayerImageState>
->({});
+>({})
+
 export const activeImage = (): LayerImageState =>
-  imageStore[layerStore.activeLayerId];
+  imageStore[layerStore.activeLayerId]
 
 export const updateDSL = (layerId: string) => {
-  const dsl = findLayerById(layerId)?.dsl;
-  const image = imageStore[layerId].current;
-  if (dsl === undefined) return;
+  const dsl = findLayerById(layerId)?.dsl
+  const image = imageStore[layerId].current
+  if (dsl === undefined) return
   runDSL(dsl, image).then((result) => {
     if (result) {
-      setImageStore(layerId, "DSLcurrent", result);
+      setImageStore(layerId, 'DSLcurrent', result)
     }
-  });
-};
+  })
+}
 </file>
 
-<file path="stores/layerStore.ts">
+<file path="stores/project/layerStore.ts">
 import { createStore } from "solid-js/store";
 import { createLayer } from "~/models/factories/createLayer";
 import { LayerType } from "~/models/types/Layer";
@@ -2756,17 +3331,27 @@ export const activeIndex = () =>
   allLayers().findIndex((layer) => layer.id === layerStore.activeLayerId);
 </file>
 
-<file path="stores/penStore.ts">
-import { createStore } from "solid-js/store";
-import { createPen } from "~/models/factories/createPen";
+<file path="stores/project/projectStore.ts">
+import { createEffect } from 'solid-js'
+import { createStore } from 'solid-js/store'
+import { canvasStore } from './canvasStore'
+import { imageStore } from './imageStore'
+import { layerStore } from './layerStore'
+import { trackStore } from '@solid-primitives/deep'
 
-// pen
+// project
+export const [projectStore, setProjectStore] = createStore({
+  name: '',
+  path: '',
+  isProjectChangedAfterSave: false,
+})
 
-export const [penStore, setPenStore] = createStore({
-  usingIndex: 0,
-  pens: [createPen("pen", 1, "#000000"), createPen("eraser", 4, "none")],
-});
-export const currentPen = () => penStore.pens[penStore.usingIndex];
+createEffect(() => {
+  trackStore(canvasStore.canvas)
+  trackStore(imageStore)
+  trackStore(layerStore)
+  setProjectStore('isProjectChangedAfterSave', true)
+})
 </file>
 
 <file path="styles/components/canvas/canvas_area.module.css">
@@ -3242,6 +3827,38 @@ export const currentPen = () => penStore.pens[penStore.usingIndex];
 }
 </file>
 
+<file path="styles/components/section/project.module.css">
+.project_name_input {
+  border: none;
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+  outline: none;
+
+  &::placeholder {
+    opacity: 0.5;
+  }
+}
+
+.project_file_path {
+  color: #00000040;
+  font-family: '04B11';
+  font-size: 6px;
+  margin-bottom: 12px;
+  margin-left: 3px;
+}
+
+.loadsave_button {
+  font-family: '04B11';
+  font-size: 8px;
+  margin: 4px;
+}
+
+.save_log {
+  color: limegreen;
+  margin-left: 8px;
+}
+</file>
+
 <file path="styles/components/slider.module.css">
 .root {
   width: 100%;
@@ -3300,21 +3917,41 @@ export const currentPen = () => penStore.pens[penStore.usingIndex];
 
 <file path="styles/font.css">
 @font-face {
-  font-family: "04B08";
-  src: url("/fonts/04B_08__.ttf");
+  font-family: '04B03';
+  src: url('/fonts/04B_03__.ttf');
 }
 
 @font-face {
-  font-family: "04B03B";
-  src: url("/fonts/04B_03B_.ttf");
+  font-family: '04B08';
+  src: url('/fonts/04B_08__.ttf');
+}
+
+@font-face {
+  font-family: '04B03B';
+  src: url('/fonts/04B_03B_.ttf');
+}
+
+@font-face {
+  font-family: '04B09';
+  src: url('/fonts/04B_09__.ttf');
+}
+
+@font-face {
+  font-family: '04B11';
+  src: url('/fonts/04B_11__.ttf');
+}
+
+@font-face {
+  font-family: '04B31';
+  src: url('/fonts/04B_31__.ttf');
 }
 </file>
 
 <file path="styles/global.css">
-@import url("font.css");
-@import url("reset.css");
-@import url("utils.css");
-@import url("section.css");
+@import url('font.css');
+@import url('reset.css');
+@import url('utils.css');
+@import url('section.css');
 
 #sidebar {
   display: flex;
@@ -3352,6 +3989,68 @@ export const currentPen = () => penStore.pens[penStore.usingIndex];
   position: absolute;
   right: 10px;
 }
+
+.welcome_root {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
+.welcome_container {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+}
+
+.welcome_headline {
+  font-family: '04B09';
+  font-size: 5rem;
+  letter-spacing: 8px;
+  margin-bottom: 12px;
+}
+
+.recent_files {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+
+  .name {
+    cursor: pointer;
+    font-family: '04B03B';
+    font-size: 1rem;
+
+    &:hover {
+      color: red;
+    }
+  }
+
+  .path {
+    color: grey;
+    font-family: '04B03B';
+    font-size: 0.5rem;
+  }
+}
+
+.side_section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  width: 40%;
+
+  .side_item {
+    cursor: pointer;
+    font-size: 1rem;
+
+    &:hover {
+      color: red;
+    }
+  }
+}
 </file>
 
 <file path="styles/reset.css">
@@ -3379,17 +4078,22 @@ main {
 body,
 main {
   background-color: #fdfdfd;
-  font-family: "04B08";
+  font-family: '04B08';
 }
 
 /* ==========================================================================
      Typography & Basic Elements
      ========================================================================== */
 
-p {
+p,
+a {
   font-size: 0.5rem;
   letter-spacing: 2px;
   margin: 0;
+}
+
+a {
+  cursor: pointer;
 }
 
 .it {
@@ -3404,7 +4108,7 @@ ul {
 button,
 a,
 input {
-  font-family: "04B08";
+  font-family: '04B08';
   font-size: 0.8rem;
   letter-spacing: 2px;
 }
@@ -3417,7 +4121,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type="number"] {
+input[type='number'] {
   appearance: textfield;
 }
 
@@ -3445,6 +4149,7 @@ button:any-hover {
 }
 
 .section_caption {
+  font-family: '04B11';
   margin-bottom: 8px;
 }
 
@@ -3488,31 +4193,31 @@ export function drawBrush(
 </file>
 
 <file path="utils/DSLUtils.ts">
-import { runDSL } from "~/models/dsl/DSLRunner";
-import { imageStore } from "~/stores/imageStore";
-import { findLayerById } from "~/stores/layerStore";
-import { downloadImageData } from "./export";
+import { runDSL } from '~/models/dsl/DSLRunner'
+import { imageStore } from '~/stores/project/imageStore'
+import { findLayerById } from '~/stores/project/layerStore'
+import { downloadImageData } from '../io/internal/export'
 
 export const testDSLTime = (layerId: string) => {
-  const layer = findLayerById(layerId);
+  const layer = findLayerById(layerId)
   if (layer === undefined) {
-    throw "layer not found.";
-    return;
+    throw 'layer not found.'
+    return
   }
-  const imageData = imageStore[layerId].current;
+  const imageData = imageStore[layerId].current
 
-  const start = new Date().getTime();
-  console.log(`DSL run started.\n${layer.dsl.build()}`);
+  const start = new Date().getTime()
+  console.log(`DSL run started.\n${layer.dsl.build()}`)
   runDSL(layer.dsl, imageData).then((im) => {
-    const end = new Date().getTime();
-    console.log(`DSL run end.`);
+    const end = new Date().getTime()
+    console.log(`DSL run end.`)
     console.log(
-      `result: ${im ? "success" : "failed"}. TOTAL TIME IS ${end - start}ms.`,
-    );
+      `result: ${im ? 'success' : 'failed'}. TOTAL TIME IS ${end - start}ms.`
+    )
 
-    if (im) downloadImageData(im, "test-" + end + ".png");
-  });
-};
+    if (im) downloadImageData(im, 'test-' + end + '.png')
+  })
+}
 </file>
 
 <file path="utils/EffectUtils.ts">
@@ -3532,115 +4237,6 @@ export async function invertImageInRust(
   if (!result) return;
 
   return decodeImageData(result, image.width, image.height);
-}
-</file>
-
-<file path="utils/export.ts">
-import { layerStore } from "~/stores/layerStore";
-
-export function exportActiveLayerUpscaled(scale = 10) {
-  const layerId = layerStore.activeLayerId;
-  if (!layerId) return;
-
-  const originalCanvas = document.getElementById(
-    `canvas-${layerId}`,
-  ) as HTMLCanvasElement;
-  if (!originalCanvas) {
-    alert("対象のレイヤーが見つかりません。");
-    return;
-  }
-
-  const w = originalCanvas.width;
-  const h = originalCanvas.height;
-
-  // オフスクリーンキャンバスを作る
-  const exportCanvas = document.createElement("canvas");
-  exportCanvas.width = w * scale;
-  exportCanvas.height = h * scale;
-
-  const ctx = exportCanvas.getContext("2d");
-  if (!ctx) {
-    alert("Canvasコンテキスト取得に失敗しました。");
-    return;
-  }
-
-  // ピクセル補間を無効化
-  ctx.imageSmoothingEnabled = false;
-
-  // 元のキャンバスをscale倍に引き伸ばして描画（補完なし）
-  ctx.drawImage(originalCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
-
-  // エクスポート処理
-  exportCanvas.toBlob((blob) => {
-    if (!blob) {
-      alert("エクスポートに失敗しました。");
-      return;
-    }
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${layerId}_x${scale}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }, "image/png");
-}
-
-export function downloadImageData(
-  imageData: ImageData,
-  filename: string = "image",
-  scale: number = 10,
-) {
-  // 一時的な canvas を作成
-  const canvas = document.createElement("canvas");
-  canvas.width = imageData.width;
-  canvas.height = imageData.height;
-
-  // ImageData を描画
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    console.error("2D context not available");
-    return;
-  }
-  ctx.putImageData(imageData, 0, 0);
-
-  const w = canvas.width;
-  const h = canvas.height;
-
-  // オフスクリーンキャンバスを作る
-  const exportCanvas = document.createElement("canvas");
-  exportCanvas.width = w * scale;
-  exportCanvas.height = h * scale;
-
-  const ctxEx = exportCanvas.getContext("2d");
-  if (!ctxEx) {
-    alert("Canvasコンテキスト取得に失敗しました。");
-    return;
-  }
-
-  // ピクセル補間を無効化
-  ctxEx.imageSmoothingEnabled = false;
-  // 元のキャンバスをscale倍に引き伸ばして描画（補完なし）
-  ctxEx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height);
-
-  // エクスポート処理
-  exportCanvas.toBlob((blob) => {
-    if (!blob) {
-      alert("エクスポートに失敗しました。");
-      return;
-    }
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${filename}_x${scale}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }, "image/png");
 }
 </file>
 
@@ -3692,51 +4288,6 @@ export function decodeImageData(
     buffer[i] = binary.charCodeAt(i);
   }
   return new ImageData(buffer, width, height);
-}
-</file>
-
-<file path="utils/import.ts">
-import { registerNewHistory } from "~/models/layer/layerImage";
-import { imageStore } from "~/stores/imageStore";
-import { layerStore } from "~/stores/layerStore";
-
-// 画像ファイルをキャンバスに焼き込む（補完なし・左上合わせ・切り捨て）
-export function importImageToActiveLayer(file: File) {
-  const layerId = layerStore.activeLayerId;
-  if (!layerId) return;
-
-  const imageData = imageStore[layerId]?.current;
-  if (!imageData) {
-    alert("現在のレイヤーに描画できません。");
-    return;
-  }
-
-  const img = new Image();
-  const reader = new FileReader();
-
-  reader.onload = (e) => {
-    img.onload = () => {
-      const w = imageData.width;
-      const h = imageData.height;
-
-      // オフスクリーンCanvasで描画 → ImageData取得
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      ctx.imageSmoothingEnabled = false;
-      ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(img, 0, 0, w, h); // 左上にそのまま描く（拡大/縮小なし）
-
-      const importedData = ctx.getImageData(0, 0, w, h);
-      registerNewHistory(layerId, importedData);
-    };
-    img.src = e.target?.result as string;
-  };
-
-  reader.readAsDataURL(file);
 }
 </file>
 

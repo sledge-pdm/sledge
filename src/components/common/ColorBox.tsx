@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { penStore } from "~/stores/penStore";
+import { penStore } from "~/stores/internal/penStore";
 import { sayRandomQuote } from "./companion/QuotePool";
 
 interface ColorBoxProps {

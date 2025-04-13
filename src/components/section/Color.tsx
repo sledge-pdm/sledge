@@ -1,5 +1,5 @@
 import { Component, For } from "solid-js";
-import { colorStore } from "~/stores/colorStore";
+import { colorStore } from "~/stores/internal/colorStore";
 
 import styles from "@styles/components/section/color.module.css";
 import ColorPicker from "~/components/common/ColorPicker";

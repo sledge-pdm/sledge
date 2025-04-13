@@ -1,10 +1,10 @@
-import { findLayerById } from "~/stores/layerStore";
-import { currentPen } from "~/stores/penStore";
-import { drawBrush } from "~/utils/BrushUtils";
-import { hexToRGB } from "~/utils/hexToRGB";
-import { setPixel } from "~/utils/ImageUtils";
-import { drawLine } from "~/utils/MetricUtils";
-import { cloneImageData } from "../factories/utils";
+import { findLayerById } from '~/stores/project/layerStore'
+import { currentPen } from '~/stores/internal/penStore'
+import { drawBrush } from '~/utils/BrushUtils'
+import { hexToRGB } from '~/utils/hexToRGB'
+import { setPixel } from '~/utils/ImageUtils'
+import { drawLine } from '~/utils/MetricUtils'
+import { cloneImageData } from '../factories/utils'
 
 export enum DrawState {
   start,
@@ -17,32 +17,32 @@ export const getDrawnImageData = (
   state: DrawState,
   currentImage: ImageData,
   canvasPosition: { x: number; y: number },
-  lastPosition?: { x: number; y: number }, // 移動中などの補完用
+  lastPosition?: { x: number; y: number } // 移動中などの補完用
 ): ImageData | undefined => {
-  const layer = findLayerById(layerId);
-  if (layer === undefined) return undefined;
+  const layer = findLayerById(layerId)
+  if (layer === undefined) return undefined
   canvasPosition = getMagnificationPosition(
     canvasPosition,
-    layer.dotMagnification,
-  );
+    layer.dotMagnification
+  )
   if (lastPosition)
     lastPosition = getMagnificationPosition(
       lastPosition,
-      layer.dotMagnification,
-    );
+      layer.dotMagnification
+    )
 
-  const pen = currentPen();
-  const [r, g, b] = hexToRGB(pen.color);
+  const pen = currentPen()
+  const [r, g, b] = hexToRGB(pen.color)
 
-  const imageData = cloneImageData(currentImage);
+  const imageData = cloneImageData(currentImage)
 
   drawBrush(canvasPosition.x, canvasPosition.y, pen.size, (x, y) => {
-    if (pen.name === "eraser") {
-      setPixel(imageData, x, y, 0, 0, 0, 0);
+    if (pen.name === 'eraser') {
+      setPixel(imageData, x, y, 0, 0, 0, 0)
     } else {
-      setPixel(imageData, x, y, r, g, b, 255);
+      setPixel(imageData, x, y, r, g, b, 255)
     }
-  });
+  })
 
   if (state === DrawState.move && lastPosition !== undefined)
     drawLine(
@@ -52,24 +52,24 @@ export const getDrawnImageData = (
       canvasPosition.y,
       (x, y) => {
         drawBrush(x, y, pen.size, (px, py) => {
-          if (pen.name === "eraser") {
-            setPixel(imageData, x, y, 0, 0, 0, 0);
+          if (pen.name === 'eraser') {
+            setPixel(imageData, x, y, 0, 0, 0, 0)
           } else {
-            setPixel(imageData, px, py, r, g, b, 255);
+            setPixel(imageData, px, py, r, g, b, 255)
           }
-        });
-      },
-    );
+        })
+      }
+    )
 
-  return imageData;
-};
+  return imageData
+}
 
 function getMagnificationPosition(
   position: { x: number; y: number },
-  dotMagnification: number,
+  dotMagnification: number
 ) {
   return {
     x: Math.floor(position.x / dotMagnification),
     y: Math.floor(position.y / dotMagnification),
-  };
+  }
 }

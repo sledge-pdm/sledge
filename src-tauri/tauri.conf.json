@@ -24,20 +24,6 @@
     }
   },
   "bundle": {
-    "windows": {
-      "allowDowngrades": true,
-      "certificateThumbprint": null,
-      "digestAlgorithm": null,
-      "nsis": null,
-      "signCommand": null,
-      "timestampUrl": null,
-      "tsp": false,
-      "webviewInstallMode": {
-        "silent": true,
-        "type": "downloadBootstrapper"
-      },
-      "wix": null
-    },
     "fileAssociations": [
       {
         "ext": ["sledge"],

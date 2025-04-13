@@ -1,13 +1,13 @@
 import { Component } from "solid-js";
-import { canvasStore } from "~/stores/canvasStore";
-import { activeLayer, layerStore } from "~/stores/layerStore";
+import { canvasStore } from "~/stores/project/canvasStore";
+import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
 import ImportImageButton from "~/components/common/ImportImageButton";
-import { exportActiveLayerUpscaled } from "~/io/export";
+import { exportActiveLayerUpscaled } from "~/io/internal/export";
 import { redo, undo } from "~/models/layer/history";
 
 import styles from "@styles/components/canvas/controls.module.css";
-import { exportProjectJson } from "~/io/project";
+import { saveProject, importProjectJson } from "~/io/project/project";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => canvasStore.zoom;
@@ -35,13 +35,10 @@ const Controls: Component<{}> = (props) => {
             }
         </For> */}
       <div class={styles["top-right-button-container"]}>
-        <ImportImageButton />
+        {/* <ImportImageButton />
         <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>
           export
-        </p>
-        <p class={styles.button} onClick={() => exportProjectJson()}>
-          save
-        </p>
+        </p> */}
       </div>
       <div class={styles["top-right-nav"]}>
         <p

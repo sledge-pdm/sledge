@@ -23,6 +23,7 @@ export type LayerCanvasRef = {
   getDrawingBuffer: () => ImageData | undefined;
   resetDrawingBuffer: () => void;
   setImageData: (imageData: ImageData) => void;
+  update: () => void;
 };
 
 export const LayerCanvas: Component<Props> = (props) => {
@@ -48,6 +49,10 @@ export const LayerCanvas: Component<Props> = (props) => {
           ctx.putImageData(imageData, 0, 0);
         }
       },
+      update() {
+        const imageData = imageStore[props.layer.id].current;
+        this.setImageData(imageData);
+      }
     }),
   );
 

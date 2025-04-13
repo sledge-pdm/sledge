@@ -37,7 +37,6 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
   function getOffset() {
     const rect = canvasRef!.getBoundingClientRect();
-
     return { x: rect.left, y: rect.top };
   }
 
@@ -53,11 +52,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
       x = e.touches[0].clientX;
       y = e.touches[0].clientY;
     }
-
-    return {
-      x,
-      y,
-    };
+    return { x, y };
   }
 
   function getCanvasMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
@@ -84,8 +79,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === "touch" || metricStore.isDragging) return false;
-
+    if (e.pointerType === "touch" || metricStore.isCtrlPressed) return false;
     // right=1, left=2, middle=4
     // console.log(e.buttons)
     if (e.pointerType === "mouse" && e.buttons !== 1) return false;
@@ -131,12 +125,12 @@ export const TouchableCanvas: Component<Props> = (props) => {
     setLastPos(position);
   }
 
-  function handlePointerUp(e: MouseEvent) {
+  function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
     if (metricStore.isInStroke) endStroke(position);
   }
 
-  function handlePointerOut(e: MouseEvent) {
+  function handlePointerOut(e: PointerEvent) {
     // 出た時点でストロークを切る場合
     // const position = getCanvasMousePosition(e);
     // if (metricStore.isInStroke) endStroke(position);
@@ -159,26 +153,16 @@ export const TouchableCanvas: Component<Props> = (props) => {
     setTemporaryOut(false);
   }
 
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.ctrlKey && e.key === "z") {
-      undo(layerStore.activeLayerId);
-    } else if (e.ctrlKey && e.key === "y") {
-      redo(layerStore.activeLayerId);
-    }
-  }
-
   onMount(() => {
     window.addEventListener("pointerup", handlePointerUp);
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointercancel", handlePointerCancel);
-    window.addEventListener("keydown", handleKeydown);
   });
 
   onCleanup(() => {
     window.removeEventListener("pointerup", handlePointerUp);
     window.removeEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointercancel", handlePointerCancel);
-    window.removeEventListener("keydown", handleKeydown);
   });
 
   return (

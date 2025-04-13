@@ -10,24 +10,6 @@
   position: relative;
 }
 
-.resize-drag-container {
-  /* This makes things *much* easier */
-  box-sizing: border-box;
-  font-family: sans-serif;
-  left: 0;
-  padding: 0;
-  position: absolute;
-  top: 0;
-  touch-action: none;
-  width: 120px;
-  z-index: 100;
-}
-
-.image-container {
-  height: 100%;
-  width: 100%;
-}
-
 .image-container:focus-within {
   border: 2px black solid;
 }

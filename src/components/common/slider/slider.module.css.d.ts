@@ -1,9 +1,10 @@
-declare const styles: {
-  readonly handle: string;
-  readonly "handle-hitbox": string;
-  readonly line: string;
-  readonly "line-hitbox": string;
-  readonly root: string;
-  readonly slider: string;
-};
-export = styles;
+declare const styles:
+  & Readonly<{ "root": string }>
+  & Readonly<{ "slider": string }>
+  & Readonly<{ "line-hitbox": string }>
+  & Readonly<{ "line": string }>
+  & Readonly<{ "handle-hitbox": string }>
+  & Readonly<{ "handle": string }>
+;
+export default styles;
+//# sourceMappingURL=./slider.module.css.d.ts.map

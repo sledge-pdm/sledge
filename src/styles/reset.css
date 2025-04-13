@@ -1,0 +1,81 @@
+/* html, body, #root, main をウィンドウ全体に */
+html,
+body,
+#root,
+main {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  touch-action: none;
+  width: 100vw;
+}
+
+/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
+#root {
+  display: flex;
+  flex-direction: row;
+  user-select: none;
+}
+
+/* body / main の背景・フォント */
+body,
+main {
+  background-color: #fdfdfd;
+  font-family: '04B08';
+}
+
+/* ==========================================================================
+     Typography & Basic Elements
+     ========================================================================== */
+
+p {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.it {
+  font-style: italic;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+button,
+a,
+input {
+  font-family: '04B08';
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  appearance: textfield;
+}
+
+button {
+  background: white;
+  border: 1px black solid;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.5rem;
+  height: fit-content;
+  padding: 2px 6px;
+  pointer-events: all;
+}
+
+button:any-hover {
+  background: #f0f0f0;
+  transform: translateY(1px);
+}

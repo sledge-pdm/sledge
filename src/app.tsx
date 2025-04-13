@@ -2,7 +2,7 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import "./app.css";
+import "./styles/global.css";
 import Home from "./routes";
 
 export default function App() {

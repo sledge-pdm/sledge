@@ -1,14 +1,14 @@
 .canvas_area {
   background-color: #fcfcfc;
-  padding: 20px;
-  width: 100%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   height: 100%;
+  overflow: hidden;
+  padding: 20px;
+
   /* 上部パディング（オプション） */
   padding-top: var(--window-top-padding);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
   position: relative;
-
-  overflow: hidden;
+  width: 100%;
 }

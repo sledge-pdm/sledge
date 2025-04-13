@@ -6,9 +6,10 @@
     "build": "vite build",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "watch:css": "tcm --watch",
+    "tcm-watch": "tcm -o tcm src --watch",
     "postinstall": "patch-package",
-    "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .vscode/.prettierrc"
+    "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .vscode/.prettierrc",
+    "stylelint": "stylelint -c .\\.stylelintrc.json \"src/**/*.css\" --fix"
   },
   "dependencies": {
     "@jaames/iro": "^5.5.2",
@@ -26,10 +27,18 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.1",
-    "modern-normalize": "^3.0.1",
     "patch-package": "^8.0.0",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "postcss-custom-properties": "^14.0.4",
+    "postcss-import": "^16.1.0",
+    "postcss-nested": "^7.0.2",
+    "postcss-preset-env": "^10.1.5",
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "stylelint": "^16.18.0",
+    "stylelint-config-standard": "^38.0.0",
+    "stylelint-order": "^6.0.4",
     "typed-css-modules": "^0.9.1",
     "vite": "^6.2.4",
     "vite-plugin-solid": "^2.11.6",

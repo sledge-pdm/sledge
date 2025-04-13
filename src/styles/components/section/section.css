@@ -1,0 +1,14 @@
+.section_root {
+  display: flex;
+  flex-direction: column;
+}
+
+.section_caption {
+  margin-bottom: 8px;
+}
+
+.section_content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

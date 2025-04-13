@@ -14,8 +14,6 @@ export default defineConfig({
     port: 5173,
   },
   alias: {
-    // alias a path to a fs directory
-    // the key must start and end with a slash
-    '/@components/': path.join(__dirname, 'src/components'),
+    '~': path.resolve(__dirname, 'src'),
   },
 })

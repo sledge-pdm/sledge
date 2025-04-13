@@ -1,0 +1,40 @@
+@import url('font.css');
+@import url('reset.css');
+@import url('utils.css');
+
+#sidebar {
+  display: flex;
+  flex-direction: row;
+}
+
+#sidebar > #edge {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0 20px 14px;
+}
+
+#sidebar > #edge > p {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  margin: 0;
+  transform: rotate(180deg) scaleX(0.8);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+#sidebar > #content {
+  border-right: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100%;
+  padding: var(--window-top-padding) 50px 10px 40px;
+  width: 300px;
+}
+
+#sledge {
+  bottom: 10px;
+  position: absolute;
+  right: 10px;
+}

@@ -1,4 +1,4 @@
-import { metricStore, setMetricStore } from "~/stores/metricStore";
+import { canvasStore, setCanvasStore } from "~/stores/canvasStore";
 
 class CanvasAreaInteract {
   private dragPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -16,21 +16,21 @@ class CanvasAreaInteract {
   };
 
   private handleTouchMove(e: TouchEvent, canvasStack: HTMLDivElement) {
-    if (metricStore.isInStroke) return;
+    if (canvasStore.isInStroke) return;
 
     if (e.touches.length === 1) {
       const xMove0 = e.touches[0].clientX - this.lastX[0];
       if (xMove0 !== 0 && this.lastX[0] !== 0) {
-        setMetricStore("offset", {
-          x: metricStore.offset.x + xMove0,
-          y: metricStore.offset.y,
+        setCanvasStore("offset", {
+          x: canvasStore.offset.x + xMove0,
+          y: canvasStore.offset.y,
         });
       }
       const yMove0 = e.touches[0].clientY - this.lastY[0];
       if (yMove0 !== 0 && this.lastY[0] !== 0) {
-        setMetricStore("offset", {
-          x: metricStore.offset.x,
-          y: metricStore.offset.y + yMove0,
+        setCanvasStore("offset", {
+          x: canvasStore.offset.x,
+          y: canvasStore.offset.y + yMove0,
         });
       }
       this.lastX[0] = e.touches[0].clientX;
@@ -40,38 +40,38 @@ class CanvasAreaInteract {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist =
-        Math.sqrt(dx * dx + dy * dy) * metricStore.touchZoomSensitivity;
+        Math.sqrt(dx * dx + dy * dy) * canvasStore.touchZoomSensitivity;
       if (this.lastDist !== 0) {
         const scaleFactor = dist / this.lastDist;
-        const zoomOld = metricStore.zoom;
+        const zoomOld = canvasStore.zoom;
         const zoomNew = zoomOld * scaleFactor;
         const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         const rect = canvasStack.getBoundingClientRect();
         const canvasX = (midX - rect.left) / zoomOld;
         const canvasY = (midY - rect.top) / zoomOld;
-        setMetricStore("zoom", zoomNew);
-        setMetricStore("offset", {
-          x: metricStore.offset.x + canvasX * (zoomOld - zoomNew),
-          y: metricStore.offset.y + canvasY * (zoomOld - zoomNew),
+        setCanvasStore("zoom", zoomNew);
+        setCanvasStore("offset", {
+          x: canvasStore.offset.x + canvasX * (zoomOld - zoomNew),
+          y: canvasStore.offset.y + canvasY * (zoomOld - zoomNew),
         });
       }
       const xMove0 = e.touches[0].clientX - this.lastX[0];
       const xMove1 = e.touches[1].clientX - this.lastX[1];
       const mutualMoveX = this.getMutualMove(xMove0, xMove1);
       if (mutualMoveX !== 0 && this.lastX[0] !== 0 && this.lastX[1] !== 0) {
-        setMetricStore("offset", {
-          x: metricStore.offset.x + mutualMoveX,
-          y: metricStore.offset.y,
+        setCanvasStore("offset", {
+          x: canvasStore.offset.x + mutualMoveX,
+          y: canvasStore.offset.y,
         });
       }
       const yMove0 = e.touches[0].clientY - this.lastY[0];
       const yMove1 = e.touches[1].clientY - this.lastY[1];
       const mutualMoveY = this.getMutualMove(yMove0, yMove1);
       if (mutualMoveY !== 0 && this.lastY[0] !== 0 && this.lastY[1] !== 0) {
-        setMetricStore("offset", {
-          x: metricStore.offset.x,
-          y: metricStore.offset.y + mutualMoveY,
+        setCanvasStore("offset", {
+          x: canvasStore.offset.x,
+          y: canvasStore.offset.y + mutualMoveY,
         });
       }
       this.lastX[0] = e.touches[0].clientX;
@@ -91,39 +91,39 @@ class CanvasAreaInteract {
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
     const delta =
-      e.deltaY > 0 ? -metricStore.wheelZoomStep : metricStore.wheelZoomStep;
+      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
 
-    const zoomOld = metricStore.zoom;
-    const zoomNew = Math.max(0.1, Math.min(8, metricStore.zoom + delta));
+    const zoomOld = canvasStore.zoom;
+    const zoomNew = Math.max(0.1, Math.min(8, canvasStore.zoom + delta));
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;
-    setMetricStore("zoom", zoomNew);
-    setMetricStore("offset", {
-      x: metricStore.offset.x + canvasX * (zoomOld - zoomNew),
-      y: metricStore.offset.y + canvasY * (zoomOld - zoomNew),
+    setCanvasStore("zoom", zoomNew);
+    setCanvasStore("offset", {
+      x: canvasStore.offset.x + canvasX * (zoomOld - zoomNew),
+      y: canvasStore.offset.y + canvasY * (zoomOld - zoomNew),
     });
   }
 
   private handleMouseDown(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && metricStore.isCtrlPressed)) {
+    if (e.buttons === 4 || (e.buttons === 1 && canvasStore.isCtrlPressed)) {
       e.preventDefault();
       e.stopPropagation();
-      setMetricStore("isDragging", true);
+      setCanvasStore("isDragging", true);
       this.dragPosition = { x: e.clientX, y: e.clientY };
     }
   }
 
   private handleMouseMove(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && metricStore.isCtrlPressed)) {
+    if (e.buttons === 4 || (e.buttons === 1 && canvasStore.isCtrlPressed)) {
       e.preventDefault();
       e.stopPropagation();
-      if (metricStore.isDragging) {
+      if (canvasStore.isDragging) {
         const dx = e.clientX - this.dragPosition.x;
         const dy = e.clientY - this.dragPosition.y;
-        setMetricStore("offset", {
-          x: metricStore.offset.x + dx,
-          y: metricStore.offset.y + dy,
+        setCanvasStore("offset", {
+          x: canvasStore.offset.x + dx,
+          y: canvasStore.offset.y + dy,
         });
         this.dragPosition = { x: e.clientX, y: e.clientY };
       }
@@ -131,15 +131,15 @@ class CanvasAreaInteract {
   }
 
   private handleMouseOff(e: MouseEvent) {
-    setMetricStore("isDragging", false);
+    setCanvasStore("isDragging", false);
   }
 
   private handleKeyDown(e: KeyboardEvent) {
-    if (e.ctrlKey) setMetricStore("isCtrlPressed", true);
+    if (e.ctrlKey) setCanvasStore("isCtrlPressed", true);
   }
 
   private handleKeyUp(e: KeyboardEvent) {
-    if (e.key === "Control") setMetricStore("isCtrlPressed", false);
+    if (e.key === "Control") setCanvasStore("isCtrlPressed", false);
   }
 
   public setInteractListeners(

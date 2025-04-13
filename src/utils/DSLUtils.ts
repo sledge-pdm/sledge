@@ -1,7 +1,7 @@
 import { runDSL } from "~/models/dsl/DSLRunner";
 import { imageStore } from "~/stores/imageStore";
 import { findLayerById } from "~/stores/layerStore";
-import { downloadImageData } from "./export";
+import { downloadImageData } from "../io/export";
 
 export const testDSLTime = (layerId: string) => {
   const layer = findLayerById(layerId);

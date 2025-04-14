@@ -69,6 +69,7 @@ components/section/item/PenItem.tsx
 components/section/LayerList.tsx
 components/section/PenConfig.tsx
 components/section/Project.tsx
+io/global/globalIO.ts
 io/internal/export.ts
 io/internal/import.ts
 io/project/project.ts
@@ -158,10 +159,11 @@ export = styles;
 // @refresh reload
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
-import { Suspense } from "solid-js";
+import { onMount, Suspense } from "solid-js";
 import Home from "./routes";
 import "./styles/global.css";
 import Editor from "./routes/editor";
+import { loadGlobalSettings } from "./io/global/globalIO";
 
 export default function App() {
   // onMount(async () => {
@@ -171,7 +173,9 @@ export default function App() {
   //     }
   //   });
   // });
-
+  onMount(() => {
+    loadGlobalSettings()
+  })
   return (
     <Router
       root={(props) => (
@@ -2053,6 +2057,46 @@ const Project: Component<{}> = (props) => {
 export default Project;
 </file>
 
+<file path="io/global/globalIO.ts">
+import {
+  BaseDirectory,
+  mkdir,
+  readTextFile,
+  writeTextFile,
+} from '@tauri-apps/plugin-fs'
+import { globalStore, setGlobalStore } from '~/stores/global/globalStore'
+
+const FILE_NAME = 'global.sledgeconfig'
+
+export async function saveGlobalSettings() {
+  try {
+    const json = JSON.stringify(globalStore)
+    await mkdir('', { baseDir: BaseDirectory.AppConfig, recursive: true })
+    await writeTextFile(FILE_NAME, json, { baseDir: BaseDirectory.AppConfig })
+    console.log('[globalIO] 設定保存完了')
+  } catch (e) {
+    console.error('[globalIO] 設定保存失敗', e)
+  }
+}
+
+export async function loadGlobalSettings() {
+  try {
+    const json = await readTextFile(FILE_NAME, {
+      baseDir: BaseDirectory.AppConfig,
+    })
+    const data = JSON.parse(json)
+
+    if (data.recentOpenedFiles) {
+      setGlobalStore('recentOpenedFiles', data.recentOpenedFiles)
+    }
+
+    console.log('[globalIO] 設定読み込み完了')
+  } catch (e) {
+    console.warn('[globalIO] 設定ファイルが存在しないか、読み込み失敗:', e)
+  }
+}
+</file>
+
 <file path="io/internal/export.ts">
 import { layerStore } from '~/stores/project/layerStore'
 
@@ -2240,6 +2284,7 @@ import {
 } from '~/stores/project/layerStore'
 import { projectStore, setProjectStore } from '~/stores/project/projectStore'
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
+import { saveGlobalSettings } from '../global/globalIO'
 
 export async function importProjectJsonFromFileSelection() {
   const file = await dialogOpen({
@@ -2399,7 +2444,8 @@ export async function saveProject(existingPath?: string) {
             },
             ...store.recentOpenedFiles,
           ]
-          setGlobalStore('recentOpenedFiles', reconcile(newRecentFiles))
+          setGlobalStore('recentOpenedFiles', newRecentFiles)
+          saveGlobalSettings()
         }
       }
       return store
@@ -3108,7 +3154,11 @@ export default function Editor() {
 import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
 import EdgeInfo from "~/components/common/EdgeInfo";
+import { importProjectJsonFromFileSelection } from "~/io/project/project";
+import { createLayer } from "~/models/factories/createLayer";
+import { LayerType } from "~/models/types/Layer";
 import { globalStore, RecentFile } from "~/stores/global/globalStore";
+import { setLayerStore } from "~/stores/project/layerStore";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -3121,6 +3171,9 @@ export default function Home() {
   }
 
   const createNew = () => {
+    const DEFAULT_LAYERS = [createLayer('dot1', LayerType.Dot, true, 1)]
+    setLayerStore("layers", DEFAULT_LAYERS);
+    setLayerStore("activeLayerId", DEFAULT_LAYERS[0].id);
     navigate(`/editor`, { replace: false });
   }
 
@@ -3142,6 +3195,7 @@ export default function Home() {
                 <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
                   <For each={globalStore.recentOpenedFiles}>
                     {(item, i) => {
+                      console.log(item)
                       return <div class="recent_files">
                         <p>■</p>
                         <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
@@ -3155,7 +3209,7 @@ export default function Home() {
 
             <div class="side_section">
               <a class="side_item" onClick={() => createNew()}>+ new.</a>
-              <a class="side_item" style={{ "margin-left": "2px" }}>&gt; open.</a>
+              <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => importProjectJsonFromFileSelection()}>&gt; open.</a>
             </div>
           </div>
         </div>
@@ -3311,24 +3365,23 @@ export const updateDSL = (layerId: string) => {
 </file>
 
 <file path="stores/project/layerStore.ts">
-import { createStore } from "solid-js/store";
-import { createLayer } from "~/models/factories/createLayer";
-import { LayerType } from "~/models/types/Layer";
+import { createStore } from 'solid-js/store'
+import { createLayer } from '~/models/factories/createLayer'
+import { Layer, LayerType } from '~/models/types/Layer'
 
 // layer
-const DEFAULT_LAYERS = [createLayer("dot1", LayerType.Dot, true, 1)];
 
 export const [layerStore, setLayerStore] = createStore({
-  layers: DEFAULT_LAYERS,
-  activeLayerId: DEFAULT_LAYERS[0].id,
-});
+  layers: new Array<Layer>(),
+  activeLayerId: '',
+})
 
-export const allLayers = () => layerStore.layers;
+export const allLayers = () => layerStore.layers
 export const findLayerById = (id: string) =>
-  allLayers().find((layer) => layer.id === id);
-export const activeLayer = () => findLayerById(layerStore.activeLayerId);
+  allLayers().find((layer) => layer.id === id)
+export const activeLayer = () => findLayerById(layerStore.activeLayerId)
 export const activeIndex = () =>
-  allLayers().findIndex((layer) => layer.id === layerStore.activeLayerId);
+  allLayers().findIndex((layer) => layer.id === layerStore.activeLayerId)
 </file>
 
 <file path="stores/project/projectStore.ts">
@@ -4016,12 +4069,14 @@ createEffect(() => {
   align-items: center;
   display: flex;
   flex-direction: row;
-  gap: 0.5rem;
+  gap: 1rem;
 
   .name {
     cursor: pointer;
-    font-family: '04B03B';
-    font-size: 1rem;
+    font-family: '04B03';
+    font-size: 0.5rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     &:hover {
       color: red;
@@ -4029,7 +4084,7 @@ createEffect(() => {
   }
 
   .path {
-    color: grey;
+    color: #00000030;
     font-family: '04B03B';
     font-size: 0.5rem;
   }

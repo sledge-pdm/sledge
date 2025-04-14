@@ -4,13 +4,14 @@ import EdgeInfo from "~/components/common/EdgeInfo";
 import { importProjectJsonFromFileSelection } from "~/io/project/project";
 import { createLayer } from "~/models/factories/createLayer";
 import { LayerType } from "~/models/types/Layer";
-import { globalStore, RecentFile } from "~/stores/global/globalStore";
+import { globalStore, FileLocation, addRecent, setGlobalStore } from "~/stores/global/globalStore";
 import { setLayerStore } from "~/stores/project/layerStore";
+import { getFileNameAndPath } from "~/utils/getFileNameAndPath";
 
 export default function Home() {
   const navigate = useNavigate();
 
-  const moveToEditor = async (recentFile: RecentFile) => {
+  const moveToEditor = async (recentFile: FileLocation) => {
     const params = new URLSearchParams();
     params.append("name", recentFile.name)
     params.append("path", recentFile.path)
@@ -22,6 +23,21 @@ export default function Home() {
     setLayerStore("layers", DEFAULT_LAYERS);
     setLayerStore("activeLayerId", DEFAULT_LAYERS[0].id);
     navigate(`/editor`, { replace: false });
+  }
+
+  const openProject = () => {
+    importProjectJsonFromFileSelection().then((file: string | undefined) => {
+      if (file !== undefined) {
+        const loc = getFileNameAndPath(file);
+        if (loc !== undefined) addRecent(loc)
+        navigate(`/editor`, { replace: false });
+      }
+    })
+  }
+
+
+  const clearRecentFiles = () => {
+    setGlobalStore("recentOpenedFiles", []);
   }
 
   return (
@@ -37,26 +53,30 @@ export default function Home() {
             <div class="welcome_container">
               <p class="welcome_headline">hello.</p>
 
-              <div class="section_root">
-                <p class="section_caption">recent files.</p>
+              <div class="section_root" style={{ "min-height": "180px" }}>
+                <div class="fl-row" style={{ width: "100%" }}>
+                  <p class="recent_files_caption" >recent files.</p>
+                  <p class="clear" onClick={() => clearRecentFiles()}>clear</p>
+                </div>
                 <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
                   <For each={globalStore.recentOpenedFiles}>
                     {(item, i) => {
                       console.log(item)
                       return <div class="recent_files">
-                        <p>■</p>
+                        <p>■&nbsp;</p>
                         <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
                         <p class="path">{item.path}</p>
                       </div>
                     }}
                   </For>
+
                 </div>
               </div>
             </div>
 
             <div class="side_section">
               <a class="side_item" onClick={() => createNew()}>+ new.</a>
-              <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => importProjectJsonFromFileSelection()}>&gt; open.</a>
+              <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => openProject()}>&gt; open.</a>
             </div>
           </div>
         </div>

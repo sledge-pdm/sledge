@@ -13,9 +13,15 @@
     "windows": [
       {
         "title": "sledge",
+        "label": "main",
         "width": 1400,
         "height": 900,
+        "acceptFirstMouse": true,
         "resizable": true,
+        "closable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "decorations": false,
         "fullscreen": false
       }
     ],

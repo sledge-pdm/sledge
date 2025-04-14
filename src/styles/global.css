@@ -3,6 +3,14 @@
 @import url('utils.css');
 @import url('section.css');
 
+/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
+#root {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  user-select: none;
+}
+
 #sidebar {
   display: flex;
   flex-direction: row;
@@ -25,7 +33,7 @@
 }
 
 #sidebar > #content {
-  border-right: 1px solid black;
+  border-right: 1px solid #aaa;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -62,15 +70,31 @@
   margin-bottom: 12px;
 }
 
+.recent_files_caption {
+  color: #333;
+  flex-grow: 1;
+  font-family: '04B03B';
+  margin-bottom: 12px;
+}
+
+.clear {
+  color: #777;
+  cursor: pointer;
+  font-family: '04B03B';
+
+  &:hover {
+    color: red;
+  }
+}
+
 .recent_files {
   align-items: center;
   display: flex;
   flex-direction: row;
-  gap: 1rem;
 
   .name {
     cursor: pointer;
-    font-family: '04B03';
+    font-family: '04B09';
     font-size: 0.5rem;
     text-overflow: ellipsis;
     white-space: nowrap;

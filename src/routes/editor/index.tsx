@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import CanvasArea from "~/components/canvas/CanvasArea";
 import Companion from "~/components/common/companion/Companion";
 import EdgeInfo from "~/components/common/EdgeInfo";
@@ -9,6 +9,7 @@ import LayerList from "~/components/section/LayerList";
 import PenConfig from "~/components/section/PenConfig";
 import Project from "~/components/section/Project";
 import { importProjectJsonFromPath } from "~/io/project/project";
+import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 
 export default function Editor() {
     const location = useLocation();
@@ -26,6 +27,11 @@ export default function Editor() {
             setIsImporting(false);
         })
     }
+
+    onMount(() => {
+        adjustZoomToFit();
+        centeringCanvas();
+    });
 
 
     return (

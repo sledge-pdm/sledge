@@ -1,0 +1,40 @@
+.root {
+  align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #aaa;
+  display: flex;
+  flex-direction: row;
+  height: 30px;
+  pointer-events: all;
+  user-select: none;
+  width: 100%;
+}
+
+.title {
+  font-family: '04B11';
+  font-size: 2rem;
+  margin-right: auto;
+  padding-left: 10px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.control_button {
+  align-items: center;
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+  height: 100%;
+  justify-content: center;
+  min-width: 50px;
+
+  &:hover {
+    background-color: #ddd;
+  }
+}

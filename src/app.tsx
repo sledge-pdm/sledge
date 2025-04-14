@@ -6,6 +6,7 @@ import Home from "./routes";
 import "./styles/global.css";
 import Editor from "./routes/editor";
 import { loadGlobalSettings } from "./io/global/globalIO";
+import TitleBar from "./components/TitleBar";
 
 export default function App() {
   // onMount(async () => {
@@ -23,7 +24,12 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <Suspense>{props.children}</Suspense>
+          <Suspense>
+            <div class="fl-col">
+              <TitleBar />
+              {props.children}
+            </div>
+          </Suspense>
         </MetaProvider>
       )}
     >

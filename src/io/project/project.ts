@@ -1,4 +1,5 @@
 // src/io/project.ts
+import { path } from '@tauri-apps/api'
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog'
 import {
   BaseDirectory,
@@ -12,8 +13,9 @@ import { reconcile } from 'solid-js/store'
 import { initLayer } from '~/models/layer/layerImage'
 import { Layer } from '~/models/types/Layer'
 import {
+  addRecent,
   globalStore,
-  RecentFile,
+  FileLocation,
   setGlobalStore,
 } from '~/stores/global/globalStore'
 import {
@@ -30,12 +32,16 @@ import {
 } from '~/stores/project/layerStore'
 import { projectStore, setProjectStore } from '~/stores/project/projectStore'
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
-import { saveGlobalSettings } from '../global/globalIO'
+import { getFileNameAndPath } from '~/utils/getFileNameAndPath'
 
-export async function importProjectJsonFromFileSelection() {
+export async function importProjectJsonFromFileSelection(): Promise<
+  string | undefined
+> {
+  const home = await path.homeDir()
   const file = await dialogOpen({
     multiple: false,
     directory: false,
+    defaultPath: await path.join(home, 'sledge'),
     filters: [
       {
         name: 'sledge files',
@@ -45,13 +51,15 @@ export async function importProjectJsonFromFileSelection() {
   })
   if (!file) {
     console.log('ファイルが選択されていません')
-    return
+    return undefined
   }
   console.log(file)
   const jsonText = await readTextFile(file)
   const projectJson = JSON.parse(jsonText)
 
-  importProjectJson(projectJson)
+  await importProjectJson(projectJson)
+
+  return file
 }
 
 export async function importProjectJsonFromPath(filePath: string) {
@@ -150,16 +158,17 @@ export async function saveProject(existingPath?: string) {
   } else {
     try {
       await mkdir('sledge', {
-        baseDir: BaseDirectory.Document,
+        baseDir: BaseDirectory.Home,
         recursive: true,
       })
     } catch (e) {
       console.warn('ディレクトリ作成スキップまたは失敗:', e)
     }
 
+    const home = await path.homeDir()
     selectedPath = await save({
       title: 'Sledge プロジェクトを保存',
-      defaultPath: 'sledge/project.sledge',
+      defaultPath: await path.join(home, `sledge/${projectStore.name}.sledge`),
       filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
     })
   }
@@ -170,32 +179,8 @@ export async function saveProject(existingPath?: string) {
     await writeTextFile(selectedPath, data)
     console.log('プロジェクト保存:', selectedPath)
 
-    // add to recent
-    setGlobalStore((store) => {
-      var filePath = selectedPath.substring(0, selectedPath.lastIndexOf('\\'))
-      var fileName = selectedPath.split('\\').pop()?.split('/').pop()
-      console.log('path: ' + filePath)
-      console.log('name: ' + fileName)
-      if (fileName && filePath && store.recentOpenedFiles) {
-        const isNew = store.recentOpenedFiles.every((f) => {
-          return f.name !== fileName || f.path !== filePath?.toString()
-        })
-        console.log(isNew)
-
-        if (isNew) {
-          const newRecentFiles: RecentFile[] = [
-            {
-              name: fileName,
-              path: filePath,
-            },
-            ...store.recentOpenedFiles,
-          ]
-          setGlobalStore('recentOpenedFiles', newRecentFiles)
-          saveGlobalSettings()
-        }
-      }
-      return store
-    })
+    const fileLoc = getFileNameAndPath(selectedPath)
+    if (fileLoc !== undefined) addRecent(fileLoc)
   } else {
     console.log('保存キャンセルされました')
   }

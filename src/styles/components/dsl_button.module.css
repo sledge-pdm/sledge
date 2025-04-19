@@ -1,0 +1,14 @@
+.root {
+  cursor: pointer;
+  height: 20px;
+  image-rendering: pixelated;
+  margin: 4px;
+  opacity: 0.7;
+  pointer-events: all;
+  width: 20px;
+}
+
+.root:hover {
+  opacity: 0.3;
+  transform: translate(0, 1px);
+}

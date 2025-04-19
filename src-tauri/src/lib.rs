@@ -1,20 +1,14 @@
 mod commands;
-mod pipeline; // 今後用
+mod pipeline;
 
-use commands::{brightness, grayscale, invert, jpeg_glitch, sepia};
 use pipeline::run_pipeline;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            brightness,
-            grayscale,
-            invert,
-            jpeg_glitch,
-            sepia,
-            run_pipeline,
-        ])
+        .invoke_handler(tauri::generate_handler![run_pipeline,])
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

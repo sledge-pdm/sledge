@@ -2,7 +2,7 @@ export function drawBrush(
   x: number,
   y: number,
   size: number,
-  drawFn: (x: number, y: number) => void
+  drawFn: (x: number, y: number) => void,
 ) {
   const half = Math.floor(size / 2);
   for (let dy = -half; dy <= half; dy++) {

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { DSL } from "~/dsl/DSL";
+import { DSL } from "../dsl/DSL";
 import { initLayer } from "../layer/layerImage";
 import { Layer, LayerType } from "../types/Layer";
 

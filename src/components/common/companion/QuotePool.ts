@@ -42,7 +42,7 @@ export const sayRandomQuote = (category: QuoteCategory, context?: any) => {
   // 前になんか言った
   if (lastSaidIndexes[category] != -1) {
     console.log(
-      `I previously said ${lastSaidIndexes[category]}. try saying something new.`
+      `I previously said ${lastSaidIndexes[category]}. try saying something new.`,
     );
     if (quotes.length == 1) {
       console.log(`argh. nothing to say.`);

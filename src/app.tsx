@@ -8,7 +8,7 @@ import { loadGlobalSettings } from "./io/global/globalIO";
 import TitleBar from "./components/TitleBar";
 import ToastContainer from "./components/ToastContainer";
 
-import "./styles/global.css";
+import { flexCol, h100 } from "./styles/components.css";
 
 export default function App() {
   onMount(() => {
@@ -22,7 +22,7 @@ export default function App() {
         <MetaProvider>
           <title>Sledge</title>
           <Suspense>
-            <div class="fl-col">
+            <div class={[flexCol, h100].join(" ")} style={{ "pointer-events": "all" }}>
               <TitleBar />
 
               <main class="main">

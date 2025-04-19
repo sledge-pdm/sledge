@@ -3,9 +3,10 @@ import { initLayer } from "~/models/layer/layerImage";
 import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 import { allLayers, layerStore } from "~/stores/project/layerStore";
 
-import styles from "@styles/components/section/canvas.module.css";
 import { adjustZoomToFit } from "~/stores/project/canvasStore";
 import { updateDSL } from "~/stores/project/imageStore";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/section_global.css";
+import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from "~/styles/section/canvas.css";
 
 const CanvasSettings: Component<{}> = (props) => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -30,17 +31,17 @@ const CanvasSettings: Component<{}> = (props) => {
   };
 
   return (
-    <div class="section_root">
-      <p class="section_caption">canvas.</p>
+    <div class={sectionRoot}>
+      <p class={sectionCaption}>canvas.</p>
 
-      <form class="section_content" onSubmit={(e) => {
+      <form class={sectionContent} onSubmit={(e) => {
         changeCanvasSize(e)
       }}>
-        <div class={styles.size_form}>
+        <div class={canvasSizeForm}>
           <div>
-            <p>width</p>
+            <p class={canvasSizeLabel}>width</p>
             <input
-              class={styles.size_input}
+              class={canvasSizeInput}
               type="number"
               name="width"
               onChange={(e) => setWidth(Number(e.target.value))}
@@ -51,9 +52,9 @@ const CanvasSettings: Component<{}> = (props) => {
             />
           </div>
           <div>
-            <p>height</p>
+            <p class={canvasSizeLabel}>height</p>
             <input
-              class={styles.size_input}
+              class={canvasSizeInput}
               type="number"
               name="height"
               onChange={(e) => setHeight(Number(e.target.value))}
@@ -63,13 +64,13 @@ const CanvasSettings: Component<{}> = (props) => {
               required
             />
           </div>
-          <button class={styles.button} type="submit">
+          <button class={canvasSizeButton} type="submit">
             change
           </button>
         </div>
       </form>
 
-      <button class={styles.button} onClick={resetAllLayers}>
+      <button class={canvasSizeButton} onClick={resetAllLayers}>
         RESET ALL LAYERS
       </button>
     </div>

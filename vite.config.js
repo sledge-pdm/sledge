@@ -2,9 +2,10 @@ import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import path from 'path'
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
 
 export default defineConfig({
-  plugins: [solidPlugin(), tsconfigPaths()],
+  plugins: [vanillaExtractPlugin(), solidPlugin(), tsconfigPaths()],
   build: {
     target: 'esnext',
     outDir: 'dist',

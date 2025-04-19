@@ -47,6 +47,7 @@ app.tsx
 components/canvas/CanvasArea.tsx
 components/canvas/CanvasAreaInteract.tsx
 components/canvas/Controls.tsx
+components/canvas/stacks/CanvasOverlaySVG.tsx
 components/canvas/stacks/CanvasStack.tsx
 components/canvas/stacks/ImagePool.tsx
 components/canvas/stacks/LayerCanvas.tsx
@@ -56,10 +57,10 @@ components/common/companion/Companion.tsx
 components/common/companion/QuotePool.ts
 components/common/DSLButton.tsx
 components/common/DSLEditor.tsx
-components/common/EdgeInfo.tsx
 components/common/ImportImageButton.tsx
 components/common/Light.tsx
 components/common/Slider.tsx
+components/EdgeInfo.tsx
 components/section/CanvasSettings.tsx
 components/section/Color.tsx
 components/section/item/ColorPicker.tsx
@@ -100,6 +101,8 @@ models/factories/utils.ts
 models/layer/getDrawnImageData.ts
 models/layer/history.ts
 models/layer/layerImage.ts
+models/tools/pen/penTool.ts
+models/tools/ToolBase.ts
 models/types/Canvas.ts
 models/types/Layer.ts
 models/types/LayerImageState.ts
@@ -107,6 +110,7 @@ models/types/Pen.ts
 routes/[...404].tsx
 routes/editor/index.tsx
 routes/index.tsx
+routes/start.css.ts
 stores/global/globalStore.ts
 stores/internal/colorStore.ts
 stores/internal/penStore.ts
@@ -136,9 +140,11 @@ styles/components/title_bar.module.css
 styles/components/toast.module.css
 styles/font.css
 styles/global.css
-styles/reset.css
-styles/section.css
-styles/utils.css
+styles/ve/canvas/canvas_area.css.ts
+styles/ve/components.css.ts
+styles/ve/global.css.ts
+styles/ve/reset.css.ts
+styles/ve/section_global.css.ts
 utils/BrushUtils.ts
 utils/DSLUtils.ts
 utils/EffectUtils.ts
@@ -163,6 +169,7 @@ import { loadGlobalSettings } from "./io/global/globalIO";
 import TitleBar from "./components/TitleBar";
 import ToastContainer from "./components/ToastContainer";
 
+import { flexCol, h100 } from "./styles/ve/components.css";
 import "./styles/global.css";
 
 export default function App() {
@@ -177,7 +184,7 @@ export default function App() {
         <MetaProvider>
           <title>Sledge</title>
           <Suspense>
-            <div class="fl-col">
+            <div class={[flexCol, h100].join(" ")}>
               <TitleBar />
 
               <main class="main">
@@ -214,6 +221,7 @@ import Controls from "./Controls";
 
 import styles from "@styles/components/canvas/canvas_area.module.css";
 import CanvasAreaInteract from "./CanvasAreaInteract";
+import { canvasArea } from "~/styles/ve/canvas/canvas_area.css";
 
 export default () => {
   let wrapper: HTMLDivElement;
@@ -247,7 +255,7 @@ export default () => {
   });
 
   return (
-    <div class={styles.canvas_area}>
+    <div class={canvasArea}>
       <div
         id="zoompan-wrapper"
         ref={(el) => {
@@ -557,6 +565,47 @@ const Controls: Component<{}> = (props) => {
 export default Controls;
 </file>
 
+<file path="components/canvas/stacks/CanvasOverlaySVG.tsx">
+import { Component } from "solid-js";
+import { currentPen, penStore } from "~/stores/internal/penStore";
+import { canvasStore } from "~/stores/project/canvasStore";
+
+const CanvasOverlaySVG: Component<{}> = (props) => {
+
+    const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom
+    const borderHeight = () => canvasStore.canvas.width * canvasStore.zoom
+
+    const zoomedPenSize = () => currentPen().size * canvasStore.zoom
+
+    return <svg viewBox={`0 0 ${borderWidth()} ${borderHeight()}`} xmlns="http://www.w3.org/2000/svg"
+        style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            "pointer-events": "none",
+            "image-rendering": "pixelated"
+        }}>
+
+        {/* border rect */}
+        <rect width={borderWidth()} height={borderHeight()} fill="none" stroke="black" stroke-width={1} />
+
+        {/* pen hover preview */}
+        <rect
+            width={zoomedPenSize()}
+            height={zoomedPenSize()}
+            x={canvasStore.lastMouseOnZoomedCanvas.x - zoomedPenSize() / 2}
+            y={canvasStore.lastMouseOnZoomedCanvas.y - zoomedPenSize() / 2}
+            fill="none"
+            stroke="black"
+            stroke-width={1} />
+    </svg>
+};
+
+export default CanvasOverlaySVG;
+</file>
+
 <file path="components/canvas/stacks/CanvasStack.tsx">
 import { Component, For, onMount } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
@@ -570,6 +619,7 @@ import { redo, undo } from "~/models/layer/history";
 import { registerNewHistory } from "~/models/layer/layerImage";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
+import CanvasOverlaySVG from "./CanvasOverlaySVG";
 
 const CanvasStack: Component<{}> = (props) => {
   const layerCanvasRefs: {
@@ -643,6 +693,9 @@ const CanvasStack: Component<{}> = (props) => {
 
   return (
     <div style={{ position: "relative" }}>
+
+      <CanvasOverlaySVG />
+
       <div
         class={styles.canvas_stack}
         style={{
@@ -979,8 +1032,12 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handlePointerMove(e: PointerEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore("lastMouseWindow", roundPosition(windowPosition));
-    setCanvasStore("lastMouseOnCanvas", roundPosition(position));
+    setCanvasStore("lastMouseWindow", windowPosition);
+    setCanvasStore("lastMouseOnCanvas", position);
+    setCanvasStore("lastMouseOnZoomedCanvas", {
+      x: position.x * canvasStore.zoom,
+      y: position.y * canvasStore.zoom,
+    });
 
     if (!isDrawableClick(e)) return;
 
@@ -1017,6 +1074,17 @@ export const TouchableCanvas: Component<Props> = (props) => {
     setTemporaryOut(true);
   }
 
+  function handleWheel(e: WheelEvent) {
+    const windowPosition = getWindowMousePosition(e);
+    const position = getCanvasMousePosition(e);
+    setCanvasStore("lastMouseWindow", windowPosition);
+    setCanvasStore("lastMouseOnCanvas", position);
+    setCanvasStore("lastMouseOnZoomedCanvas", {
+      x: position.x * canvasStore.zoom,
+      y: position.y * canvasStore.zoom,
+    });
+  }
+
   function endStroke(position: { x: number; y: number }) {
     if (props.onStrokeEnd) {
       props.onStrokeEnd(position, lastPos());
@@ -1030,12 +1098,14 @@ export const TouchableCanvas: Component<Props> = (props) => {
     window.addEventListener("pointerup", handlePointerUp);
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointercancel", handlePointerCancel);
+    window.addEventListener("wheel", handleWheel);
   });
 
   onCleanup(() => {
     window.removeEventListener("pointerup", handlePointerUp);
     window.removeEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointercancel", handlePointerCancel);
+    window.removeEventListener("wheel", handleWheel);
   });
 
   return (
@@ -1355,26 +1425,6 @@ const DSLEditor: Component<{}> = (props) => {
 export default DSLEditor;
 </file>
 
-<file path="components/common/EdgeInfo.tsx">
-import { Component } from "solid-js";
-import { JSX } from "solid-js/h/jsx-runtime";
-
-import styles from "@styles/components/edge_info.module.css"
-
-const EdgeInfo: Component<{}> = (props) => {
-
-  return (
-    <div class={styles.root}>
-      <p class={styles.text}>autosaved. (4s ago)</p>
-      <div style={{ "flex-grow": 1 }}></div>
-      <p class={styles.text}>config.</p>
-    </div>
-  );
-};
-
-export default EdgeInfo;
-</file>
-
 <file path="components/common/ImportImageButton.tsx">
 import { importImageToActiveLayer } from "~/io/internal/import"; // 上で作った関数
 
@@ -1523,6 +1573,24 @@ const Slider: Component<SliderProps> = (props) => {
 export default Slider;
 </file>
 
+<file path="components/EdgeInfo.tsx">
+import { Component } from "solid-js";
+
+import { projectStore } from "~/stores/project/projectStore";
+import { sideAreaEdge, sideAreaEdgeText } from "~/styles/ve/global.css";
+
+const EdgeInfo: Component<{}> = (props) => {
+  return (
+    <div class={sideAreaEdge}>
+      <p class={sideAreaEdgeText}>{projectStore.path || "path N/A"}</p>
+      {/* <p class={sideAreaEdgeText}>{projectStore.name || "name N/A"}</p> */}
+    </div>
+  );
+};
+
+export default EdgeInfo;
+</file>
+
 <file path="components/section/CanvasSettings.tsx">
 import { Component, createEffect, createSignal } from "solid-js";
 import { initLayer } from "~/models/layer/layerImage";
@@ -1532,6 +1600,7 @@ import { allLayers, layerStore } from "~/stores/project/layerStore";
 import styles from "@styles/components/section/canvas.module.css";
 import { adjustZoomToFit } from "~/stores/project/canvasStore";
 import { updateDSL } from "~/stores/project/imageStore";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/ve/section_global.css";
 
 const CanvasSettings: Component<{}> = (props) => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -1556,10 +1625,10 @@ const CanvasSettings: Component<{}> = (props) => {
   };
 
   return (
-    <div class="section_root">
-      <p class="section_caption">canvas.</p>
+    <div class={sectionRoot}>
+      <p class={sectionCaption}>canvas.</p>
 
-      <form class="section_content" onSubmit={(e) => {
+      <form class={sectionContent} onSubmit={(e) => {
         changeCanvasSize(e)
       }}>
         <div class={styles.size_form}>
@@ -1613,6 +1682,7 @@ import styles from "@styles/components/section/color.module.css";
 import ColorPicker from "~/components/section/item/ColorPicker";
 import { setCurrentPenColor } from "~/models/types/Pen";
 import ColorBox from "../common/ColorBox";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/ve/section_global.css";
 
 const Color: Component<{}> = (props) => {
   const onColorClicked = (color: string, index: number) => {
@@ -1620,9 +1690,9 @@ const Color: Component<{}> = (props) => {
   };
 
   return (
-    <div class="section_root">
-      <p class="section_caption">color.</p>
-      <div class="section_content" style={{ "flex-direction": "row", margin: "8px 0" }}>
+    <div class={sectionRoot}>
+      <p class={sectionCaption}>color.</p>
+      <div class={sectionContent} style={{ "flex-direction": "row", margin: "8px 0" }}>
         <div class={styles.description_container}>
           <p class={styles.swatch_description}>swatch.</p>
         </div>
@@ -1951,6 +2021,8 @@ import {
   setLayerStore,
 } from "~/stores/project/layerStore";
 import LayerItem from "./item/LayerItem";
+import { flexRow } from "~/styles/ve/components.css";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/ve/section_global.css";
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
@@ -2005,13 +2077,13 @@ const LayerList: Component<{}> = () => {
       collisionDetector={closestCenter}
     >
       <DragDropSensors>
-        <div class="section_root">
-          <div class="fl-row" style={{ "margin-bottom": "6px" }}>
-            <p class="section_caption" style={{ "flex-grow": 1 }}>
+        <div class={sectionRoot}>
+          <div class={flexRow} style={{ "margin-bottom": "6px" }}>
+            <p class={sectionCaption} style={{ "flex-grow": 1 }}>
               layers.
             </p>
 
-            <div class="fl-row" style={{ gap: "4px" }}>
+            <div class={flexRow} style={{ gap: "4px" }}>
               <button
                 onClick={() => {
                   addLayer("new");
@@ -2031,7 +2103,7 @@ const LayerList: Component<{}> = () => {
               </button>
             </div>
           </div>
-          <div class="section_content">
+          <div class={sectionContent}>
             <div class={styles.layer_list}>
               <SortableProvider ids={ids()}>
                 <For each={items()}>
@@ -2058,12 +2130,13 @@ export default LayerList;
 import { Component, For } from "solid-js";
 import { penStore } from "~/stores/internal/penStore";
 import PenItem from "./item/PenItem";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/ve/section_global.css";
 
 const PenConfig: Component<{}> = (props) => {
   return (
-    <div class="section_root">
-      <p class="section_caption">pen config.</p>
-      <div class="section_content">
+    <div class={sectionRoot}>
+      <p class={sectionCaption}>pen config.</p>
+      <div class={sectionContent}>
         <For each={penStore.pens}>
           {(item, index) => (
             <PenItem pen={item} isInUse={index() === penStore.usingIndex} />
@@ -2084,6 +2157,8 @@ import { saveProject } from "~/io/project/project";
 import styles from "@styles/components/section/project.module.css"
 import { projectStore, setProjectStore } from "~/stores/project/projectStore";
 import { exportActiveLayerUpscaled } from "~/io/internal/export";
+import { flexCol, flexRow } from "~/styles/ve/components.css";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/ve/section_global.css";
 
 const Project: Component<{}> = (props) => {
     const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
@@ -2104,11 +2179,11 @@ const Project: Component<{}> = (props) => {
     }
 
     return (
-        <div class="section_root">
-            <p class="section_caption">project.</p>
-            <div class="section_content">
+        <div class={sectionRoot}>
+            <p class={sectionCaption}>project.</p>
+            <div class={sectionContent}>
 
-                <div class="fl-col">
+                <div class={flexCol}>
                     <input
                         class={styles.project_name_input}
                         type="text"
@@ -2128,7 +2203,7 @@ const Project: Component<{}> = (props) => {
                         load.
                     </button> */}
 
-                <div class="fl-row" style={{ "align-items": "center", "margin-top": "12px" }}>
+                <div class={flexRow} style={{ "align-items": "center", "margin-top": "12px" }}>
                     <button class={styles.loadsave_button} onClick={() => exportActiveLayerUpscaled()}>
                         export.
                     </button>
@@ -2151,10 +2226,10 @@ import PenConfig from "./section/PenConfig";
 import LayerList from "./section/LayerList";
 import CanvasSettings from "./section/CanvasSettings";
 
-import styles from "@styles/components/side_sections.module.css"
+import { sideAreaContent } from "~/styles/ve/global.css";
 
 const SideSections: Component<{}> = (props) => {
-    return <div class={styles.content}>
+    return <div class={sideAreaContent}>
         <a onClick={() => window.location.href = "/"}>&lt; back</a>
         <Project />
         <Color />
@@ -2604,6 +2679,8 @@ export async function saveProject(existingPath?: string) {
 <file path="main.tsx">
 import { render } from "solid-js/web";
 import App from "./app";
+import "./styles/ve/reset.css"
+import "./styles/ve/global.css"
 
 render(() => <App />, document.getElementById("root")!);
 </file>
@@ -3139,7 +3216,7 @@ export function undo(layerId: string) {
 }
 
 export function isUndoPossible(layerId: string) {
-  return imageStore[layerId].undoStack?.length !== 0
+  return imageStore[layerId]?.undoStack?.length !== 0
 }
 
 export function redo(layerId: string) {
@@ -3155,7 +3232,7 @@ export function redo(layerId: string) {
 }
 
 export function isRedoPossible(layerId: string) {
-  return imageStore[layerId].redoStack?.length !== 0
+  return imageStore[layerId]?.redoStack?.length !== 0
 }
 </file>
 
@@ -3190,6 +3267,37 @@ export function registerNewHistory(layerId: string, newData: ImageData) {
       redoStack: [],
     }
   })
+}
+</file>
+
+<file path="models/tools/pen/penTool.ts">
+import { Tool, ToolArgs } from '../ToolBase'
+
+export class PenTool implements Tool {
+  onMove({ image, x, y, color }: ToolArgs) {
+    const idx = (y * image.width + x) * 4
+    for (let i = 0; i < 4; i++) image.data[idx + i] = color[i]
+  }
+}
+</file>
+
+<file path="models/tools/ToolBase.ts">
+export interface Tool {
+  onStart?: (args: ToolArgs) => void
+
+  onMove?: (args: ToolArgs) => void
+
+  onEnd?: (args: ToolArgs) => void
+}
+
+export interface ToolArgs {
+  image: ImageData
+  x: number
+  y: number
+  lastX?: number
+  lastY?: number
+  color: [number, number, number, number] // RGBA
+  // TODO: pressure, tilt, ...
 }
 </file>
 
@@ -3276,11 +3384,12 @@ import { useLocation } from "@solidjs/router";
 import { createSignal, onMount } from "solid-js";
 import CanvasArea from "~/components/canvas/CanvasArea";
 import Companion from "~/components/common/companion/Companion";
-import EdgeInfo from "~/components/common/EdgeInfo";
+import EdgeInfo from "~/components/EdgeInfo";
 import SideSections from "~/components/SideSections";
 import { importProjectJsonFromPath } from "~/io/project/project";
-import { showToast } from "~/stores/internal/toastStore";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
+import { flexRow } from "~/styles/ve/components.css";
+import { welcomeRoot } from "../start.css";
 
 export default function Editor() {
     const location = useLocation();
@@ -3303,13 +3412,12 @@ export default function Editor() {
         adjustZoomToFit();
         centeringCanvas();
     });
-    showToast('important info.', 'success', -1)
 
     return (
         <>
             {isImporting() &&
                 <div id="root">
-                    <div class="welcome_root">
+                    <div class={welcomeRoot}>
                         <p style={{ "font-size": "3rem" }}>please wait.</p>
                     </div>
                 </div>
@@ -3318,16 +3426,16 @@ export default function Editor() {
             {
                 !isImporting() &&
                 <div id="root">
-                    <div class="fl-row">
-                        {/* <EdgeInfo /> */}
+                    <div class={flexRow}>
+                        <EdgeInfo />
                         <SideSections />
                     </div>
 
                     <CanvasArea />
-                    <Companion />
+                    {/* <Companion /> */}
                 </div>
             }
-        </ >
+        </>
     );
 }
 </file>
@@ -3335,13 +3443,17 @@ export default function Editor() {
 <file path="routes/index.tsx">
 import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
-import EdgeInfo from "~/components/common/EdgeInfo";
+import EdgeInfo from "~/components/EdgeInfo";
 import { importProjectJsonFromFileSelection } from "~/io/project/project";
 import { createLayer } from "~/models/factories/createLayer";
 import { LayerType } from "~/models/types/Layer";
 import { globalStore, FileLocation, addRecent, setGlobalStore } from "~/stores/global/globalStore";
 import { setLayerStore } from "~/stores/project/layerStore";
+import { flexCol, flexRow, h100, w100 } from "~/styles/ve/components.css";
+import { sectionRoot } from "~/styles/ve/section_global.css";
 import { getFileNameAndPath } from "~/utils/getFileNameAndPath";
+import { clear, recentFilesCaption, recentFilesContainer, recentFilesItem, recentFilesName, recentFilesPath, sideSection, sideSectionItem, welcomeHeadline, welcomeRoot } from "./start.css";
+import { sideArea } from "~/styles/ve/global.css";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -3377,46 +3489,130 @@ export default function Home() {
 
   return (
     <div id="root">
-      <div id="sidebar">
+      <div class={sideArea}>
         <EdgeInfo />
-
       </div>
-      <div class="welcome_root">
-        <div class="fl-row" style={{ width: "50%" }}>
 
-          <div class="welcome_container">
-            <p class="welcome_headline">hello.</p>
+      <div class={welcomeRoot}>
 
-            <div class="section_root" style={{ "min-height": "180px" }}>
-              <div class="fl-row" style={{ width: "100%" }}>
-                <p class="recent_files_caption" >recent files.</p>
-                <p class="clear" onClick={() => clearRecentFiles()}>clear</p>
-              </div>
-              <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
-                <For each={globalStore.recentOpenedFiles}>
-                  {(item, i) => {
-                    console.log(item)
-                    return <div class="recent_files">
-                      <p>■</p>
-                      <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
-                      <p class="path">{item.path}</p>
-                    </div>
-                  }}
-                </For>
+        <div class={flexCol} >
+          <p class={welcomeHeadline}>hello.</p>
+          <div class={sideSection}>
+            <a class={sideSectionItem} onClick={() => createNew()}>+ new.</a>
+            <a class={sideSectionItem} style={{ "margin-left": "2px" }} onClick={(e) => openProject()}>&gt; open.</a>
+          </div>
 
-              </div>
+          <div class={sectionRoot}>
+            <div class={[flexRow, w100].join(" ")}>
+              <p class={recentFilesCaption}>recent files.</p>
+              <p class={clear} onClick={() => clearRecentFiles()}>clear</p>
+            </div>
+            <div class={recentFilesContainer}>
+              <For each={globalStore.recentOpenedFiles}>
+                {(item, i) => {
+                  console.log(item)
+                  return <div class={recentFilesItem}>
+                    <p>■</p>
+                    <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>{item.name}</a>
+                    <p class={recentFilesPath}>{item.path}</p>
+                  </div>
+                }}
+              </For>
+
             </div>
           </div>
-
-          <div class="side_section">
-            <a class="side_item" onClick={() => createNew()}>+ new.</a>
-            <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => openProject()}>&gt; open.</a>
-          </div>
         </div>
+
       </div>
-    </div>
+    </div >
   );
 }
+</file>
+
+<file path="routes/start.css.ts">
+import { style } from '@vanilla-extract/css'
+import { flexCol, flexRow, w100, wh100 } from '~/styles/ve/components.css'
+import { ZFB03B, ZFB09 } from '~/styles/ve/global.css'
+
+export const welcomeRoot = style([
+  flexCol,
+  wh100,
+  {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+])
+
+export const welcomeHeadline = style({
+  fontFamily: ZFB09,
+  fontSize: '5rem',
+  letterSpacing: '8px',
+  marginBottom: '12px',
+})
+
+export const recentFilesCaption = style({
+  fontFamily: ZFB03B,
+  color: '#333',
+  flexGrow: 1,
+  marginBottom: '12px',
+})
+
+export const clear = style({
+  color: '#777',
+  fontFamily: ZFB03B,
+})
+
+export const recentFilesContainer = style([
+  flexCol,
+  w100,
+  {
+    gap: '8px',
+    marginTop: '4px',
+  },
+])
+
+export const recentFilesItem = style([
+  flexRow,
+  w100,
+  {
+    alignItems: 'center',
+    gap: '8px',
+  },
+])
+
+export const recentFilesName = style({
+  fontFamily: ZFB09,
+  fontSize: '0.5rem',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+
+export const recentFilesPath = style({
+  fontFamily: ZFB03B,
+  fontSize: '0.5rem',
+  color: '#00000030',
+})
+
+export const sideSection = style([
+  flexCol,
+  {
+    gap: '1rem',
+    paddingBottom: '24px',
+    paddingTop: '12px',
+  },
+])
+
+export const sideSectionItem = style([
+  flexCol,
+  {
+    cursor: 'pointer',
+    fontSize: '1rem',
+    width: 'fit-content',
+    ':hover': {
+      color: 'red',
+    },
+  },
+])
 </file>
 
 <file path="stores/global/globalStore.ts">
@@ -3600,6 +3796,7 @@ export const [canvasStore, setCanvasStore] = createStore({
   canvasAreaSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
+  lastMouseOnZoomedCanvas: { x: 0, y: 0 },
   isInStroke: false,
   zoom: 1,
   zoomMin: 0.1,
@@ -3703,13 +3900,8 @@ createEffect(() => {
 </file>
 
 <file path="styles/components/canvas/canvas_stack.module.css">
-:root {
-  --layer-opacity: 0.15;
-}
-
 .canvas_stack {
   align-items: center;
-  border: 1px solid #aaa;
   display: flex;
   justify-content: center;
   position: relative;
@@ -3747,14 +3939,6 @@ createEffect(() => {
   position: absolute;
   right: 30px;
   top: 20px;
-}
-
-.button {
-  background-color: deepskyblue;
-  color: white;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 4px;
 }
 
 .top-right-nav {
@@ -3969,7 +4153,7 @@ createEffect(() => {
   width: 20px;
 }
 
-.root:any-hover {
+.root:hover {
   opacity: 0.3;
   transform: translate(0, 1px);
 }
@@ -4128,7 +4312,7 @@ createEffect(() => {
   padding: 6px;
 }
 
-.layer_det:any-hover {
+.layer_det:hover {
   filter: brightness(0.94);
   transform: translate(0, 1px);
 }
@@ -4154,7 +4338,7 @@ createEffect(() => {
 
 .name {
   font-family: '04B03B';
-  font-size: 1rem;
+  font-size: 16px;
   margin: 8px 0 0 12px;
 }
 
@@ -4169,7 +4353,7 @@ createEffect(() => {
   pointer-events: all;
 }
 
-.dot_magnif_container:any-hover {
+.dot_magnif_container:hover {
   background-color: #ffffff40;
 }
 
@@ -4388,7 +4572,7 @@ createEffect(() => {
   height: 12px;
   width: 12px;
 
-  &:any-hover {
+  &:hover {
     color: red;
   }
 }
@@ -4493,238 +4677,238 @@ createEffect(() => {
 
 <file path="styles/global.css">
 @import url('font.css');
-@import url('reset.css');
-@import url('utils.css');
-@import url('section.css');
-
-/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
-#root {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-  user-select: none;
-}
-
-.main {
-  height: 100%;
-  user-select: none;
-}
 
 #sledge {
   bottom: 2px;
   position: absolute;
   right: 2px;
 }
-
-.welcome_root {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  width: 100%;
-}
-
-.welcome_container {
-  display: flex;
-  flex-direction: column;
-  width: 60%;
-}
-
-.welcome_headline {
-  font-family: '04B09';
-  font-size: 5rem;
-  letter-spacing: 8px;
-  margin-bottom: 12px;
-}
-
-.recent_files_caption {
-  color: #333;
-  flex-grow: 1;
-  font-family: '04B03B';
-  margin-bottom: 12px;
-}
-
-.clear {
-  color: #777;
-  cursor: pointer;
-  font-family: '04B03B';
-
-  &:any-hover {
-    color: red;
-  }
-}
-
-.recent_files {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-
-  .name {
-    cursor: pointer;
-    font-family: '04B09';
-    font-size: 0.5rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    &:any-hover {
-      color: red;
-    }
-  }
-
-  .path {
-    color: #00000030;
-    font-family: '04B03B';
-    font-size: 0.5rem;
-  }
-}
-
-.side_section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  padding-top: 12px;
-  width: 40%;
-
-  .side_item {
-    cursor: pointer;
-    font-size: 1rem;
-
-    &:any-hover {
-      color: red;
-    }
-  }
-}
 </file>
 
-<file path="styles/reset.css">
-/* html, body, #root, main をウィンドウ全体に */
-html,
-body {
-  height: 100vh;
-  margin: 0;
-  overflow: hidden;
-  padding: 0;
-  touch-action: none;
-  width: 100vw;
-}
+<file path="styles/ve/canvas/canvas_area.css.ts">
+import { style } from '@vanilla-extract/css'
+import { flexCol } from '../components.css'
 
-/* body / main の背景・フォント */
-body,
-main {
-  background-color: #fdfdfd;
-  font-family: '04B08';
-  width: 100vw;
-}
-
-body {
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
-  font-smooth: never;
-}
-
-/* ==========================================================================
-     Typography & Basic Elements
-     ========================================================================== */
-
-p,
-a {
-  font-size: 0.5rem;
-  letter-spacing: 2px;
-  margin: 0;
-}
-
-a {
-  cursor: pointer;
-}
-
-ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-button,
-a,
-input {
-  font-family: '04B08';
-  letter-spacing: 2px;
-}
-
-input {
-  border: none;
-  border-bottom: 1px solid black;
-  outline: none;
-}
-
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type='number'] {
-  appearance: textfield;
-}
-
-button {
-  background: white;
-  border: 1px black solid;
-  border-radius: 2px;
-  cursor: pointer;
-  font-size: 0.5rem;
-  height: fit-content;
-  padding: 2px 6px;
-  pointer-events: all;
-
-  &:hover {
-    background: #f0f0f0;
-  }
-
-  &:active {
-    background: #f0f0f0;
-    transform: translateY(1px);
-  }
-}
+export const canvasArea = style([
+  flexCol,
+  {
+    backgroundColor: '#fcfcfc',
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    overflow: 'hidden',
+    position: 'relative',
+    width: '100%',
+  },
+])
 </file>
 
-<file path="styles/section.css">
-.section_root {
-  display: flex;
-  flex-direction: column;
-  margin-top: 12px;
-}
+<file path="styles/ve/components.css.ts">
+import { style } from '@vanilla-extract/css'
 
-.section_caption {
-  font-family: '04B11';
-  font-size: 6px;
-  margin-bottom: 12px;
-}
+export const flexCol = style({
+  display: 'flex',
+  flexDirection: 'column',
+})
 
-.section_content {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
+export const flexRow = style({
+  display: 'flex',
+  flexDirection: 'row',
+})
+
+export const w100 = style({
+  width: '100%',
+})
+
+export const h100 = style({
+  height: '100%',
+})
+
+export const wh100 = style([w100, h100])
 </file>
 
-<file path="styles/utils.css">
-:root {
-  --window-top-padding: 20px;
-}
+<file path="styles/ve/global.css.ts">
+import {
+  createGlobalTheme,
+  fontFace,
+  globalStyle,
+  style,
+} from '@vanilla-extract/css'
+import { flexCol, flexRow, h100 } from './components.css'
 
-.fl-col {
-  display: flex;
-  flex-direction: column;
-}
+export const ZFB03 = fontFace({
+  src: 'url("/fonts/04B_03__.ttf")',
+})
+export const ZFB03B = fontFace({
+  src: 'url("/fonts/04B_03B_.ttf")',
+})
+export const ZFB08 = fontFace({
+  src: 'url("/fonts/04B_08__.ttf")',
+})
+export const ZFB09 = fontFace({
+  src: 'url("/fonts/04B_09__.ttf")',
+})
+export const ZFB11 = fontFace({
+  src: 'url("/fonts/04B_11__.ttf")',
+})
+export const ZFB31 = fontFace({
+  src: 'url("/fonts/04B_31__.ttf")',
+})
+export const Terminus = fontFace({
+  src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")',
+})
 
-.fl-row {
-  display: flex;
-  flex-direction: row;
-}
+export const vars = createGlobalTheme(':root', {
+  color: {
+    primary: 'white',
+    text: '#111',
+  },
+  font: {
+    body: ZFB08,
+  },
+})
+
+globalStyle('button, p, a, input', {
+  fontFamily: ZFB08,
+})
+
+globalStyle('a:hover', {
+  color: 'red',
+})
+
+globalStyle('button', {
+  background: 'white',
+  border: '1px black solid',
+  borderRadius: '2px',
+  cursor: 'pointer',
+  fontSize: '0.5rem',
+  height: 'fit-content',
+  padding: '2px 6px',
+  pointerEvents: 'all',
+})
+
+globalStyle('button:hover', {
+  background: '#f0f0f0',
+})
+
+globalStyle('button:active', {
+  background: '#f0f0f0',
+  transform: 'translateY(1px)',
+})
+
+globalStyle('#root', {
+  display: 'flex',
+  flexDirection: 'row',
+  height: '100%',
+  userSelect: 'none',
+})
+
+export const sideArea = style([flexRow])
+
+export const sideAreaEdge = style([
+  flexCol,
+  h100,
+  {
+    gap: '20px',
+    width: '20px',
+    padding: '10px 0 20px 12px',
+  },
+])
+
+export const sideAreaEdgeText = style({
+  fontSize: '0.5rem',
+  letterSpacing: '2px',
+  margin: 0,
+  transform: 'rotate(180deg) scaleX(0.8)',
+  whiteSpace: 'nowrap',
+  writingMode: 'vertical-rl',
+})
+
+export const sideAreaContent = style([
+  flexCol,
+  {
+    borderRight: '1px solid #aaa',
+    gap: '2rem',
+    padding: '20px 40px 10px 20px',
+    width: '300px',
+  },
+])
+</file>
+
+<file path="styles/ve/reset.css.ts">
+import { globalStyle } from '@vanilla-extract/css'
+
+globalStyle('html, body', {
+  height: '100vh',
+  width: '100vw',
+  margin: 0,
+  overflow: 'hidden',
+  padding: 0,
+  touchAction: 'none',
+})
+
+globalStyle('body, main', {
+  height: '100vh',
+  width: '100vw',
+})
+
+globalStyle('main', {
+  userSelect: 'none',
+})
+
+globalStyle('p, a', {
+  fontSize: '0.5rem',
+  letterSpacing: '1px',
+  margin: 0,
+})
+
+globalStyle('ul', {
+  listStyle: 'none',
+  paddingLeft: 0,
+})
+
+globalStyle('a', {
+  cursor: 'pointer',
+})
+
+globalStyle('input', {
+  border: 'none',
+  outline: 'none',
+  borderBottom: '1px solid black',
+})
+
+globalStyle(
+  'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button',
+  {
+    appearance: 'none',
+    margin: 0,
+  }
+)
+
+globalStyle("input[type='number']", {
+  appearance: 'textfield',
+})
+</file>
+
+<file path="styles/ve/section_global.css.ts">
+import { style } from '@vanilla-extract/css'
+import { flexCol, w100 } from './components.css'
+import { ZFB11 } from './global.css'
+
+export const sectionRoot = style([
+  flexCol,
+  {
+    // border: '1px solid black',
+  },
+])
+
+export const sectionCaption = style({
+  fontFamily: ZFB11,
+  fontSize: '6px',
+})
+
+export const sectionContent = style([flexCol, w100])
 </file>
 
 <file path="utils/BrushUtils.ts">

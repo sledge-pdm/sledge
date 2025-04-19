@@ -1,13 +1,13 @@
-import styles from "@styles/components/section/layer.module.css";
+
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
-import { Component, onMount } from "solid-js";
+import { Component } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
 import { layerStore, setLayerStore } from "~/stores/project/layerStore";
 import LayerPreview from "./LayerPreview";
-import { createPreviewCanvas } from "~/models/factories/canvasPreview";
-import { imageStore } from "~/stores/project/imageStore";
+import { w100 } from "~/styles/components.css";
+import { layerItemDisabled, layerItem, layerItemType, layerItemName, dotMagnifContainer, dotMagnifText, activeLight } from "~/styles/section/layer.css";
 
 interface LayerItemProps {
   index: number;
@@ -57,7 +57,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   return (
     <div
-      class={styles.item_root}
+      class={w100}
       classList={{
         "opacity-50": sortable.isActiveDraggable,
         "transition-transform": state && !!state.active.draggable,
@@ -65,29 +65,29 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       style={{ opacity: draggingId === layer.id ? 0.4 : 1 }}
       ref={sortable}
     >
-      <p class={styles.type}>{layer.typeDescription}</p>
+      <p class={layerItemType}>{layer.typeDescription}</p>
       <p>{props.index}.</p>
       <div style={{ display: "flex", "align-items": "center" }}>
         {/* <DSLButton /> */}
         <div
-          class={[styles.layer_det, !layer.enabled && styles.disabled]
+          class={[layerItem, !layer.enabled && layerItemDisabled]
             .filter(Boolean)
             .join(" ")}
           onClick={onDetClicked}
         >
           <LayerPreview layer={layer} onClick={onPreviewClicked} />
-          <p class={styles.name}> {layer.name}</p>
+          <p class={layerItemName}> {layer.name}</p>
           <div
-            class={styles.dot_magnif_container}
+            class={dotMagnifContainer}
             onClick={(e) => {
               e.stopPropagation();
               onMagnifClicked();
             }}
             onMouseOver={(e) => e.stopPropagation()}
           >
-            <p class={styles.dot_magnif}>x{layer.dotMagnification}</p>
+            <p class={dotMagnifText}>x{layer.dotMagnification}</p>
           </div>
-          <Light class={styles.active_light} on={isActive()} />
+          <Light class={activeLight} on={isActive()} />
         </div>
       </div>
     </div>

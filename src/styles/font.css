@@ -27,3 +27,8 @@
   font-family: '04B31';
   src: url('/fonts/04B_31__.ttf');
 }
+
+@font-face {
+  font-family: 'Terminus (TTF)';
+  src: url('/fonts/terminus/TerminusTTF-4.49.3.ttf');
+}

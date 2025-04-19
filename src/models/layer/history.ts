@@ -1,7 +1,7 @@
-import { setImageStore } from '~/stores/project/imageStore'
+import { showToast } from '~/stores/internal/toastStore'
+import { imageStore, setImageStore } from '~/stores/project/imageStore'
 
 export function undo(layerId: string) {
-  console.log('undo')
   setImageStore(layerId, (state) => {
     if (state.undoStack.length === 0) return state
     const prev = state.undoStack[state.undoStack.length - 1]
@@ -12,7 +12,12 @@ export function undo(layerId: string) {
   // updateDSL(layerId);
 }
 
+export function isUndoPossible(layerId: string) {
+  return imageStore[layerId]?.undoStack?.length !== 0
+}
+
 export function redo(layerId: string) {
+  showToast('redo succeeded', 'success')
   setImageStore(layerId, (state) => {
     if (state.redoStack.length === 0) return state
     const next = state.redoStack[0]
@@ -21,4 +26,8 @@ export function redo(layerId: string) {
     return { current: next, undoStack: newUndo, redoStack: newRedo }
   })
   // updateDSL(layerId);
+}
+
+export function isRedoPossible(layerId: string) {
+  return imageStore[layerId]?.redoStack?.length !== 0
 }

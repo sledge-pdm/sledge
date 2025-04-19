@@ -5,3 +5,11 @@
   gap: 10px;
   width: 100%;
 }
+
+.name {
+  cursor: pointer;
+  font-size: 8px;
+  padding: 10px 0;
+  pointer-events: all;
+  width: 20%;
+}

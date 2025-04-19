@@ -15,7 +15,7 @@ const ColorPicker: Component<{}> = (props) => {
     <div
       ref={(el) => {
         colorPicker = iro.ColorPicker(el, {
-          width: 200,
+          width: 150,
           padding: 0,
           color: currentPen().color,
           handleRadius: 4,

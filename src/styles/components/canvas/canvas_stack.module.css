@@ -4,7 +4,6 @@
 
 .canvas_stack {
   align-items: center;
-  border: 1px solid #aaa;
   display: flex;
   justify-content: center;
   position: relative;

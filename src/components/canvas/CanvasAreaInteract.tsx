@@ -1,4 +1,4 @@
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
+import { canvasStore, getReferencedZoom, setCanvasStore } from "~/stores/project/canvasStore";
 
 class CanvasAreaInteract {
   private dragPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -90,11 +90,12 @@ class CanvasAreaInteract {
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
+    const referencedZoom = getReferencedZoom()
     const delta =
-      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
+      (e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep) * referencedZoom;
 
     const zoomOld = canvasStore.zoom;
-    const zoomNew = Math.max(0.1, Math.min(8, canvasStore.zoom + delta));
+    const zoomNew = Math.max(canvasStore.zoomMin * referencedZoom, Math.min(canvasStore.zoomMax * referencedZoom, canvasStore.zoom + delta));
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;

@@ -1,6 +1,6 @@
 .project_name_input {
   border: none;
-  font-size: 1.5rem;
+  font-size: 16px;
   margin-bottom: 4px;
   outline: none;
 
@@ -12,15 +12,18 @@
 .project_file_path {
   color: #00000040;
   font-family: '04B11';
-  font-size: 6px;
-  margin-bottom: 12px;
+  font-size: 4px;
+  margin-bottom: 8px;
   margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .loadsave_button {
   font-family: '04B11';
-  font-size: 8px;
-  margin: 4px;
+  font-size: 6px;
 }
 
 .save_log {

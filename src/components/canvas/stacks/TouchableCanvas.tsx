@@ -100,8 +100,12 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handlePointerMove(e: PointerEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore("lastMouseWindow", roundPosition(windowPosition));
-    setCanvasStore("lastMouseOnCanvas", roundPosition(position));
+    setCanvasStore("lastMouseWindow", windowPosition);
+    setCanvasStore("lastMouseOnCanvas", position);
+    setCanvasStore("lastMouseOnZoomedCanvas", {
+      x: position.x * canvasStore.zoom,
+      y: position.y * canvasStore.zoom,
+    });
 
     if (!isDrawableClick(e)) return;
 
@@ -138,6 +142,17 @@ export const TouchableCanvas: Component<Props> = (props) => {
     setTemporaryOut(true);
   }
 
+  function handleWheel(e: WheelEvent) {
+    const windowPosition = getWindowMousePosition(e);
+    const position = getCanvasMousePosition(e);
+    setCanvasStore("lastMouseWindow", windowPosition);
+    setCanvasStore("lastMouseOnCanvas", position);
+    setCanvasStore("lastMouseOnZoomedCanvas", {
+      x: position.x * canvasStore.zoom,
+      y: position.y * canvasStore.zoom,
+    });
+  }
+
   function endStroke(position: { x: number; y: number }) {
     if (props.onStrokeEnd) {
       props.onStrokeEnd(position, lastPos());
@@ -151,12 +166,14 @@ export const TouchableCanvas: Component<Props> = (props) => {
     window.addEventListener("pointerup", handlePointerUp);
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointercancel", handlePointerCancel);
+    window.addEventListener("wheel", handleWheel);
   });
 
   onCleanup(() => {
     window.removeEventListener("pointerup", handlePointerUp);
     window.removeEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointercancel", handlePointerCancel);
+    window.removeEventListener("wheel", handleWheel);
   });
 
   return (

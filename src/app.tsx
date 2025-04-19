@@ -3,22 +3,19 @@ import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { onMount, Suspense } from "solid-js";
 import Home from "./routes";
-import "./styles/global.css";
 import Editor from "./routes/editor";
 import { loadGlobalSettings } from "./io/global/globalIO";
 import TitleBar from "./components/TitleBar";
+import ToastContainer from "./components/ToastContainer";
+
+import "./styles/global.css";
 
 export default function App() {
-  // onMount(async () => {
-  //   safeInvoke<string>("hello_from_rust", { name: "Sledge" }).then((msg) => {
-  //     if (msg) {
-  //       console.log("[Rustからの返答]:", msg);
-  //     }
-  //   });
-  // });
   onMount(() => {
     loadGlobalSettings()
   })
+
+
   return (
     <Router
       root={(props) => (
@@ -27,7 +24,14 @@ export default function App() {
           <Suspense>
             <div class="fl-col">
               <TitleBar />
-              {props.children}
+
+              <main class="main">
+                {props.children}
+              </main>
+
+              <ToastContainer />
+
+              <p id="sledge">sledge.</p>
             </div>
           </Suspense>
         </MetaProvider>

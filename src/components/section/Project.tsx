@@ -3,6 +3,7 @@ import { saveProject } from "~/io/project/project";
 
 import styles from "@styles/components/section/project.module.css"
 import { projectStore, setProjectStore } from "~/stores/project/projectStore";
+import { exportActiveLayerUpscaled } from "~/io/internal/export";
 
 const Project: Component<{}> = (props) => {
     const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
@@ -41,18 +42,17 @@ const Project: Component<{}> = (props) => {
                         required
                     />
 
-                    <p class={styles.project_file_path}>{projectStore.path}</p>
+                    {/* <p class={styles.project_file_path}>{projectStore.path}</p> */}
                 </div>
-
-                <div class="fl-row" style={{ "align-items": "center" }}>
-                    {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
+                {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
                         load.
                     </button> */}
-                    <button class={styles.loadsave_button} onClick={() => save()}>
-                        save.
-                    </button>
 
-                    {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>}
+                <div class="fl-row" style={{ "align-items": "center", "margin-top": "12px" }}>
+                    <button class={styles.loadsave_button} onClick={() => exportActiveLayerUpscaled()}>
+                        export.
+                    </button>
+                    {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
                 </div>
 
             </div>

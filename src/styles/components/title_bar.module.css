@@ -11,10 +11,10 @@
 }
 
 .title {
-  font-family: '04B11';
-  font-size: 2rem;
+  font-family: 'Terminus (TTF)';
+  font-size: 11px;
   margin-right: auto;
-  padding-left: 10px;
+  padding-left: 16px;
 }
 
 .controls {
@@ -23,7 +23,8 @@
   height: 100%;
 }
 
-.control_button {
+.control_button,
+.control_button_close {
   align-items: center;
   background: none;
   border: none;
@@ -33,8 +34,12 @@
   height: 100%;
   justify-content: center;
   min-width: 50px;
+}
 
-  &:hover {
-    background-color: #ddd;
-  }
+.control_button:hover {
+  background-color: #ddd;
+}
+
+.control_button_close:hover {
+  background-color: #ff1010;
 }

@@ -7,10 +7,9 @@ declare const styles: {
   readonly "drop_placeholder": string;
   readonly "image": string;
   readonly "image_insert_arrow": string;
-  readonly "layer": string;
+  readonly "item_root": string;
   readonly "layer_det": string;
   readonly "layer_list": string;
-  readonly "layer_preview": string;
   readonly "name": string;
   readonly "type": string;
 };

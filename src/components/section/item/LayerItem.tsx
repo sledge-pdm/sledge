@@ -1,10 +1,13 @@
 import styles from "@styles/components/section/layer.module.css";
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
-import { Component } from "solid-js";
+import { Component, onMount } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
 import { layerStore, setLayerStore } from "~/stores/project/layerStore";
+import LayerPreview from "./LayerPreview";
+import { createPreviewCanvas } from "~/models/factories/canvasPreview";
+import { imageStore } from "~/stores/project/imageStore";
 
 interface LayerItemProps {
   index: number;
@@ -31,6 +34,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       detClass = "automate";
       break;
   }
+  let previewRef: HTMLDivElement;
 
   const onDetClicked = () => {
     setLayerStore("activeLayerId", layer.id);
@@ -53,7 +57,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   return (
     <div
-      class={styles.layer}
+      class={styles.item_root}
       classList={{
         "opacity-50": sortable.isActiveDraggable,
         "transition-transform": state && !!state.active.draggable,
@@ -71,7 +75,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             .join(" ")}
           onClick={onDetClicked}
         >
-          <div class={styles.layer_preview} onClick={onPreviewClicked} />
+          <LayerPreview layer={layer} onClick={onPreviewClicked} />
           <p class={styles.name}> {layer.name}</p>
           <div
             class={styles.dot_magnif_container}
@@ -83,8 +87,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           >
             <p class={styles.dot_magnif}>x{layer.dotMagnification}</p>
           </div>
+          <Light class={styles.active_light} on={isActive()} />
         </div>
-        <Light class={styles.active_light} on={isActive()} />
       </div>
     </div>
   );

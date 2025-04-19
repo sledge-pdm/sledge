@@ -1,14 +1,14 @@
 import { Component } from "solid-js";
-import { JSX } from "solid-js/h/jsx-runtime";
+
+import styles from "@styles/components/edge_info.module.css"
+import { projectStore } from "~/stores/project/projectStore";
 
 const EdgeInfo: Component<{}> = (props) => {
-  const edgeFlexStyle: JSX.CSSProperties = { "flex-grow": 1 };
-
   return (
-    <div id="edge">
-      <p>autosaved. (4s ago)</p>
-      <div style={edgeFlexStyle}></div>
-      <p>config.</p>
+    <div class={styles.root}>
+      <p class={styles.text}>{projectStore.path}</p>
+      <div style={{ "flex-grow": 1 }}></div>
+      <p class={styles.text}>{projectStore.name}</p>
     </div>
   );
 };

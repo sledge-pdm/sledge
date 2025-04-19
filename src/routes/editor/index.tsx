@@ -1,14 +1,11 @@
-import { useLocation, useNavigate } from "@solidjs/router";
+import { useLocation } from "@solidjs/router";
 import { createSignal, onMount } from "solid-js";
 import CanvasArea from "~/components/canvas/CanvasArea";
 import Companion from "~/components/common/companion/Companion";
 import EdgeInfo from "~/components/common/EdgeInfo";
-import CanvasSettings from "~/components/section/CanvasSettings";
-import Color from "~/components/section/Color";
-import LayerList from "~/components/section/LayerList";
-import PenConfig from "~/components/section/PenConfig";
-import Project from "~/components/section/Project";
+import SideSections from "~/components/SideSections";
 import { importProjectJsonFromPath } from "~/io/project/project";
+import { showToast } from "~/stores/internal/toastStore";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 
 export default function Editor() {
@@ -33,9 +30,8 @@ export default function Editor() {
         centeringCanvas();
     });
 
-
     return (
-        <main>
+        <>
             {isImporting() &&
                 <div id="root">
                     <div class="welcome_root">
@@ -47,26 +43,15 @@ export default function Editor() {
             {
                 !isImporting() &&
                 <div id="root">
-                    <div id="sidebar">
+                    <div class="fl-row">
                         <EdgeInfo />
-
-                        <div id="content">
-                            <a onClick={() => window.location.href = "/"}>&lt; back</a>
-                            <Project />
-                            <Color />
-                            <PenConfig />
-                            <LayerList />
-                            <CanvasSettings />
-                        </div>
+                        <SideSections />
                     </div>
 
                     <CanvasArea />
-                    <div id="misc_container">
-                        <p id="sledge">sledge.</p>
-                    </div>
                     <Companion />
                 </div>
             }
-        </main >
+        </ >
     );
 }

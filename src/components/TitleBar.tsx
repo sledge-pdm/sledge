@@ -7,13 +7,11 @@ export default function TitleBar() {
     return (
         <header >
             <nav class={styles.root} data-tauri-drag-region="p, button">
-                <div class={styles.title}>
-                    <p>sledge.</p>
-                </div>
+                <p class={styles.title}>sledge.</p>
                 <div class={styles.controls}>
                     <button class={styles.control_button} onClick={() => appWindow.minimize()}>–</button>
                     <button class={styles.control_button} onClick={() => appWindow.toggleMaximize()}>◻</button>
-                    <button class={styles.control_button} onClick={() => appWindow.close()}>×</button>
+                    <button class={styles.control_button_close} onClick={() => appWindow.close()}>×</button>
                 </div>
             </nav>
         </header >

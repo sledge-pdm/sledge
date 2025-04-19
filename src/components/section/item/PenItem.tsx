@@ -19,12 +19,9 @@ const PenItem: Component<Props> = (props: Props) => {
       <Light on={props.isInUse} />
 
       <p
+        class={styles.name}
         style={{
-          width: "20%",
-          padding: "10px 0",
-          color: props.isInUse ? "red" : "unset",
-          cursor: "pointer",
-          "pointer-events": "all",
+          color: props.isInUse ? "red" : "unset"
         }}
         onClick={() => {
           setPenStore({ usingIndex: penStore.pens.indexOf(props.pen) });
@@ -33,7 +30,7 @@ const PenItem: Component<Props> = (props: Props) => {
         {props.pen.name}.
       </p>
 
-      <ColorBox color={props.pen.color} />
+      <ColorBox color={props.pen.color} sizePx={8} />
 
       <div style={{ "flex-grow": 1 }}>
         <Slider

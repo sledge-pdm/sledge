@@ -43,7 +43,6 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
-app.css.d.ts
 app.tsx
 components/canvas/CanvasArea.tsx
 components/canvas/CanvasAreaInteract.tsx
@@ -53,7 +52,6 @@ components/canvas/stacks/ImagePool.tsx
 components/canvas/stacks/LayerCanvas.tsx
 components/canvas/stacks/TouchableCanvas.tsx
 components/common/ColorBox.tsx
-components/common/ColorPicker.tsx
 components/common/companion/Companion.tsx
 components/common/companion/QuotePool.ts
 components/common/DSLButton.tsx
@@ -64,11 +62,16 @@ components/common/Light.tsx
 components/common/Slider.tsx
 components/section/CanvasSettings.tsx
 components/section/Color.tsx
+components/section/item/ColorPicker.tsx
 components/section/item/LayerItem.tsx
+components/section/item/LayerPreview.tsx
 components/section/item/PenItem.tsx
 components/section/LayerList.tsx
 components/section/PenConfig.tsx
 components/section/Project.tsx
+components/SideSections.tsx
+components/TitleBar.tsx
+components/ToastContainer.tsx
 io/global/globalIO.ts
 io/internal/export.ts
 io/internal/import.ts
@@ -89,6 +92,7 @@ models/dsl/nodes/pass/LayerIn.ts
 models/dsl/nodes/pass/LayerOut.ts
 models/dsl/nodes/pass/PassNode.ts
 models/factories/addLayer.ts
+models/factories/canvasPreview.ts
 models/factories/createLayer.ts
 models/factories/createPen.ts
 models/factories/removeLayer.ts
@@ -106,6 +110,7 @@ routes/index.tsx
 stores/global/globalStore.ts
 stores/internal/colorStore.ts
 stores/internal/penStore.ts
+stores/internal/toastStore.ts
 stores/project/canvasStore.ts
 stores/project/imageStore.ts
 stores/project/layerStore.ts
@@ -117,13 +122,18 @@ styles/components/canvas/image_pool.module.css
 styles/components/canvas/layer_canvas.module.css
 styles/components/companion.module.css
 styles/components/dsl_button.module.css
+styles/components/edge_info.module.css
+styles/components/layer_preview.module.css
 styles/components/light.module.css
 styles/components/section/canvas.module.css
 styles/components/section/color.module.css
 styles/components/section/layer.module.css
 styles/components/section/pen.module.css
 styles/components/section/project.module.css
+styles/components/side_sections.module.css
 styles/components/slider.module.css
+styles/components/title_bar.module.css
+styles/components/toast.module.css
 styles/font.css
 styles/global.css
 styles/reset.css
@@ -132,6 +142,7 @@ styles/utils.css
 utils/BrushUtils.ts
 utils/DSLUtils.ts
 utils/EffectUtils.ts
+utils/getFileNameAndPath.ts
 utils/hexToRGB.ts
 utils/ImageUtils.ts
 utils/MetricUtils.ts
@@ -141,47 +152,43 @@ utils/tauri.ts
 <files>
 This section contains the contents of the repository's files.
 
-<file path="app.css.d.ts">
-declare const styles: {
-  readonly content: string;
-  readonly edge: string;
-  readonly it: string;
-  readonly misc_container: string;
-  readonly root: string;
-  readonly sidebar: string;
-  readonly sledge: string;
-  readonly white: string;
-};
-export = styles;
-</file>
-
 <file path="app.tsx">
 // @refresh reload
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { onMount, Suspense } from "solid-js";
 import Home from "./routes";
-import "./styles/global.css";
 import Editor from "./routes/editor";
 import { loadGlobalSettings } from "./io/global/globalIO";
+import TitleBar from "./components/TitleBar";
+import ToastContainer from "./components/ToastContainer";
+
+import "./styles/global.css";
 
 export default function App() {
-  // onMount(async () => {
-  //   safeInvoke<string>("hello_from_rust", { name: "Sledge" }).then((msg) => {
-  //     if (msg) {
-  //       console.log("[Rustからの返答]:", msg);
-  //     }
-  //   });
-  // });
   onMount(() => {
     loadGlobalSettings()
   })
+
+
   return (
     <Router
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <Suspense>{props.children}</Suspense>
+          <Suspense>
+            <div class="fl-col">
+              <TitleBar />
+
+              <main class="main">
+                {props.children}
+              </main>
+
+              <ToastContainer />
+
+              <p id="sledge">sledge.</p>
+            </div>
+          </Suspense>
         </MetaProvider>
       )}
     >
@@ -217,8 +224,8 @@ export default () => {
   onMount(() => {
     // set Canvas to center
     setCanvasStore("canvasAreaSize", {
-      width: wrapper.scrollWidth,
-      height: wrapper.scrollHeight,
+      width: wrapper.clientWidth,
+      height: wrapper.clientHeight,
     });
     adjustZoomToFit();
     centeringCanvas();
@@ -280,7 +287,7 @@ export default () => {
 </file>
 
 <file path="components/canvas/CanvasAreaInteract.tsx">
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
+import { canvasStore, getReferencedZoom, setCanvasStore } from "~/stores/project/canvasStore";
 
 class CanvasAreaInteract {
   private dragPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -372,11 +379,12 @@ class CanvasAreaInteract {
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
+    const referencedZoom = getReferencedZoom()
     const delta =
-      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
+      (e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep) * referencedZoom;
 
     const zoomOld = canvasStore.zoom;
-    const zoomNew = Math.max(0.1, Math.min(8, canvasStore.zoom + delta));
+    const zoomNew = Math.max(canvasStore.zoomMin * referencedZoom, Math.min(canvasStore.zoomMax * referencedZoom, canvasStore.zoom + delta));
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;
@@ -479,12 +487,9 @@ import { Component } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
-import ImportImageButton from "~/components/common/ImportImageButton";
-import { exportActiveLayerUpscaled } from "~/io/internal/export";
-import { redo, undo } from "~/models/layer/history";
+import { isRedoPossible, isUndoPossible, redo, undo } from "~/models/layer/history";
 
 import styles from "@styles/components/canvas/controls.module.css";
-import { saveProject, importProjectJson } from "~/io/project/project";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => canvasStore.zoom;
@@ -518,26 +523,30 @@ const Controls: Component<{}> = (props) => {
         </p> */}
       </div>
       <div class={styles["top-right-nav"]}>
-        <p
+        <img
           class={styles.undo_redo}
+          src="/undo.png"
+          style={{
+            opacity: isUndoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
+            cursor: isUndoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+          }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             undo(layerStore.activeLayerId);
-          }}
-        >
-          &lt;&lt;
-        </p>
-        <p
+          }} />
+        <img
           class={styles.undo_redo}
+          src="/redo.png"
+          style={{
+            opacity: isRedoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
+            cursor: isRedoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+          }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             redo(layerStore.activeLayerId);
-          }}
-        >
-          &gt;&gt;
-        </p>
+          }} />
 
         {/* <DSLEditor /> */}
       </div>
@@ -1117,54 +1126,6 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
 export default ColorBox;
 </file>
 
-<file path="components/common/ColorPicker.tsx">
-import iro from "@jaames/iro";
-import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
-import { Component, createEffect } from "solid-js";
-import { setCurrentPenColor } from "~/models/types/Pen";
-import { currentPen } from "~/stores/internal/penStore";
-
-const ColorPicker: Component<{}> = (props) => {
-  let colorPicker: IroColorPicker;
-
-  createEffect(() => {
-    colorPicker.setColors([currentPen().color]);
-  });
-
-  return (
-    <div
-      ref={(el) => {
-        colorPicker = iro.ColorPicker(el, {
-          width: 200,
-          padding: 0,
-          color: currentPen().color,
-          handleRadius: 4,
-          layoutDirection: "horizontal",
-          layout: [
-            {
-              component: iro.ui.Box,
-              options: {},
-            },
-            {
-              component: iro.ui.Slider,
-              options: {
-                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
-                sliderType: "hue",
-              },
-            },
-          ],
-        });
-        colorPicker.on("color:change", function (color: any) {
-          setCurrentPenColor(color.hexString);
-        });
-      }}
-    ></div>
-  );
-};
-
-export default ColorPicker;
-</file>
-
 <file path="components/common/companion/Companion.tsx">
 import { Component, createEffect, createSignal } from "solid-js";
 
@@ -1398,14 +1359,15 @@ export default DSLEditor;
 import { Component } from "solid-js";
 import { JSX } from "solid-js/h/jsx-runtime";
 
+import styles from "@styles/components/edge_info.module.css"
+
 const EdgeInfo: Component<{}> = (props) => {
-  const edgeFlexStyle: JSX.CSSProperties = { "flex-grow": 1 };
 
   return (
-    <div id="edge">
-      <p>autosaved. (4s ago)</p>
-      <div style={edgeFlexStyle}></div>
-      <p>config.</p>
+    <div class={styles.root}>
+      <p class={styles.text}>autosaved. (4s ago)</p>
+      <div style={{ "flex-grow": 1 }}></div>
+      <p class={styles.text}>config.</p>
     </div>
   );
 };
@@ -1593,19 +1555,14 @@ const CanvasSettings: Component<{}> = (props) => {
     });
   };
 
-
-  createEffect(() => {
-    const canvas = canvasStore.canvas;
-    setWidth(canvas.width)
-    setHeight(canvas.height)
-  })
-
   return (
     <div class="section_root">
       <p class="section_caption">canvas.</p>
 
-      <form class="section_content" onSubmit={(e) => changeCanvasSize(e)}>
-        <div class="fl-row">
+      <form class="section_content" onSubmit={(e) => {
+        changeCanvasSize(e)
+      }}>
+        <div class={styles.size_form}>
           <div>
             <p>width</p>
             <input
@@ -1615,7 +1572,7 @@ const CanvasSettings: Component<{}> = (props) => {
               onChange={(e) => setWidth(Number(e.target.value))}
               value={width()}
               min={0}
-              max={1200}
+              max={10000}
               required
             />
           </div>
@@ -1628,7 +1585,7 @@ const CanvasSettings: Component<{}> = (props) => {
               onChange={(e) => setHeight(Number(e.target.value))}
               value={height()}
               min={0}
-              max={1200}
+              max={10000}
               required
             />
           </div>
@@ -1653,7 +1610,7 @@ import { Component, For } from "solid-js";
 import { colorStore } from "~/stores/internal/colorStore";
 
 import styles from "@styles/components/section/color.module.css";
-import ColorPicker from "~/components/common/ColorPicker";
+import ColorPicker from "~/components/section/item/ColorPicker";
 import { setCurrentPenColor } from "~/models/types/Pen";
 import ColorBox from "../common/ColorBox";
 
@@ -1665,22 +1622,26 @@ const Color: Component<{}> = (props) => {
   return (
     <div class="section_root">
       <p class="section_caption">color.</p>
-      <div class="section_content">
-        <div class={styles.color_picker}>
-          <ColorPicker />
+      <div class="section_content" style={{ "flex-direction": "row", margin: "8px 0" }}>
+        <div class={styles.description_container}>
+          <p class={styles.swatch_description}>swatch.</p>
         </div>
         <div class={styles.swatch_container}>
           <For each={colorStore.swatches}>
             {(item, index) => (
               <ColorBox
                 color={item}
-                sizePx={14}
+                sizePx={8}
                 onClick={(color) => onColorClicked(color, index())}
                 enableUsingSelection={true}
               />
             )}
           </For>
         </div>
+        <div class={styles.description_container}>
+          <p class={styles.picker_description}>picker.</p>
+        </div>
+        <ColorPicker />
       </div>
     </div>
   );
@@ -1689,14 +1650,65 @@ const Color: Component<{}> = (props) => {
 export default Color;
 </file>
 
+<file path="components/section/item/ColorPicker.tsx">
+import iro from "@jaames/iro";
+import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
+import { Component, createEffect } from "solid-js";
+import { setCurrentPenColor } from "~/models/types/Pen";
+import { currentPen } from "~/stores/internal/penStore";
+
+const ColorPicker: Component<{}> = (props) => {
+  let colorPicker: IroColorPicker;
+
+  createEffect(() => {
+    colorPicker.setColors([currentPen().color]);
+  });
+
+  return (
+    <div
+      ref={(el) => {
+        colorPicker = iro.ColorPicker(el, {
+          width: 150,
+          padding: 0,
+          color: currentPen().color,
+          handleRadius: 4,
+          layoutDirection: "horizontal",
+          layout: [
+            {
+              component: iro.ui.Box,
+              options: {},
+            },
+            {
+              component: iro.ui.Slider,
+              options: {
+                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
+                sliderType: "hue",
+              },
+            },
+          ],
+        });
+        colorPicker.on("color:change", function (color: any) {
+          setCurrentPenColor(color.hexString);
+        });
+      }}
+    ></div>
+  );
+};
+
+export default ColorPicker;
+</file>
+
 <file path="components/section/item/LayerItem.tsx">
 import styles from "@styles/components/section/layer.module.css";
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
-import { Component } from "solid-js";
+import { Component, onMount } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
 import { layerStore, setLayerStore } from "~/stores/project/layerStore";
+import LayerPreview from "./LayerPreview";
+import { createPreviewCanvas } from "~/models/factories/canvasPreview";
+import { imageStore } from "~/stores/project/imageStore";
 
 interface LayerItemProps {
   index: number;
@@ -1723,6 +1735,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       detClass = "automate";
       break;
   }
+  let previewRef: HTMLDivElement;
 
   const onDetClicked = () => {
     setLayerStore("activeLayerId", layer.id);
@@ -1745,7 +1758,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   return (
     <div
-      class={styles.layer}
+      class={styles.item_root}
       classList={{
         "opacity-50": sortable.isActiveDraggable,
         "transition-transform": state && !!state.active.draggable,
@@ -1763,7 +1776,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             .join(" ")}
           onClick={onDetClicked}
         >
-          <div class={styles.layer_preview} onClick={onPreviewClicked} />
+          <LayerPreview layer={layer} onClick={onPreviewClicked} />
           <p class={styles.name}> {layer.name}</p>
           <div
             class={styles.dot_magnif_container}
@@ -1775,14 +1788,90 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           >
             <p class={styles.dot_magnif}>x{layer.dotMagnification}</p>
           </div>
+          <Light class={styles.active_light} on={isActive()} />
         </div>
-        <Light class={styles.active_light} on={isActive()} />
       </div>
     </div>
   );
 };
 
 export default LayerItem;
+</file>
+
+<file path="components/section/item/LayerPreview.tsx">
+import { Component, createEffect, onMount } from "solid-js";
+import { Layer } from "~/models/types/Layer";
+import { imageStore } from "~/stores/project/imageStore";
+
+import styles from "@styles/components/layer_preview.module.css"
+
+interface Props {
+    layer: Layer,
+    onClick: () => void
+}
+
+const LayerPreview: Component<Props> = (props: Props) => {
+    let wrapperRef: HTMLDivElement;
+    let canvasRef: HTMLCanvasElement;
+
+    const updatePreview = (
+        originalImage: ImageData,
+        targetHeight: number
+    ) => {
+        const aspectRatio = originalImage.width / originalImage.height;
+        const targetWidth = Math.round(targetHeight * aspectRatio);
+
+        // 描画対象キャンバスの解像度とCSSサイズを一致させる
+        canvasRef.width = targetWidth;
+        canvasRef.height = targetHeight;
+        canvasRef.style.width = `${targetWidth}px`;
+        canvasRef.style.height = `${targetHeight}px`;
+
+        wrapperRef.style.width = `${targetWidth}px`;
+        wrapperRef.style.height = `${targetHeight}px`;
+
+        const tmpCanvas = document.createElement("canvas");
+        tmpCanvas.width = originalImage.width;
+        tmpCanvas.height = originalImage.height;
+        tmpCanvas.getContext("2d")!.putImageData(originalImage, 0, 0);
+
+        const ctx = canvasRef.getContext('2d')!;
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, targetWidth, targetHeight);
+
+        ctx.drawImage(
+            tmpCanvas,
+            0,
+            0,
+            originalImage.width,
+            originalImage.height,
+            0,
+            0,
+            targetWidth,
+            targetHeight
+        );
+    };
+
+    onMount(() => {
+        const originalImage = imageStore[props.layer.id]?.current;
+        const height = wrapperRef.clientHeight;
+        updatePreview(originalImage, height);
+    });
+
+    createEffect(() => {
+        const originalImage = imageStore[props.layer.id]?.current;
+        const height = wrapperRef.clientHeight;
+        updatePreview(originalImage, height);
+    })
+
+    return (
+        <div class={styles.wrapper} ref={(el) => wrapperRef = el}>
+            <canvas class={styles.canvas} ref={(el) => canvasRef = el} onClick={(e) => props.onClick()} />
+        </div>
+    );
+};
+
+export default LayerPreview
 </file>
 
 <file path="components/section/item/PenItem.tsx">
@@ -1807,12 +1896,9 @@ const PenItem: Component<Props> = (props: Props) => {
       <Light on={props.isInUse} />
 
       <p
+        class={styles.name}
         style={{
-          width: "20%",
-          padding: "10px 0",
-          color: props.isInUse ? "red" : "unset",
-          cursor: "pointer",
-          "pointer-events": "all",
+          color: props.isInUse ? "red" : "unset"
         }}
         onClick={() => {
           setPenStore({ usingIndex: penStore.pens.indexOf(props.pen) });
@@ -1821,7 +1907,7 @@ const PenItem: Component<Props> = (props: Props) => {
         {props.pen.name}.
       </p>
 
-      <ColorBox color={props.pen.color} />
+      <ColorBox color={props.pen.color} sizePx={8} />
 
       <div style={{ "flex-grow": 1 }}>
         <Slider
@@ -1997,6 +2083,7 @@ import { saveProject } from "~/io/project/project";
 
 import styles from "@styles/components/section/project.module.css"
 import { projectStore, setProjectStore } from "~/stores/project/projectStore";
+import { exportActiveLayerUpscaled } from "~/io/internal/export";
 
 const Project: Component<{}> = (props) => {
     const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
@@ -2035,18 +2122,17 @@ const Project: Component<{}> = (props) => {
                         required
                     />
 
-                    <p class={styles.project_file_path}>{projectStore.path}</p>
+                    {/* <p class={styles.project_file_path}>{projectStore.path}</p> */}
                 </div>
-
-                <div class="fl-row" style={{ "align-items": "center" }}>
-                    {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
+                {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
                         load.
                     </button> */}
-                    <button class={styles.loadsave_button} onClick={() => save()}>
-                        save.
-                    </button>
 
-                    {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>}
+                <div class="fl-row" style={{ "align-items": "center", "margin-top": "12px" }}>
+                    <button class={styles.loadsave_button} onClick={() => exportActiveLayerUpscaled()}>
+                        export.
+                    </button>
+                    {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
                 </div>
 
             </div>
@@ -2055,6 +2141,80 @@ const Project: Component<{}> = (props) => {
 };
 
 export default Project;
+</file>
+
+<file path="components/SideSections.tsx">
+import { Component } from "solid-js";
+import Project from "./section/Project";
+import Color from "./section/Color";
+import PenConfig from "./section/PenConfig";
+import LayerList from "./section/LayerList";
+import CanvasSettings from "./section/CanvasSettings";
+
+import styles from "@styles/components/side_sections.module.css"
+
+const SideSections: Component<{}> = (props) => {
+    return <div class={styles.content}>
+        <a onClick={() => window.location.href = "/"}>&lt; back</a>
+        <Project />
+        <Color />
+        <PenConfig />
+        <LayerList />
+        <CanvasSettings />
+    </div>;
+};
+
+export default SideSections;
+</file>
+
+<file path="components/TitleBar.tsx">
+import { Window } from "@tauri-apps/api/window";
+import styles from "~/styles/components/title_bar.module.css";
+
+export default function TitleBar() {
+    const appWindow = new Window('main');
+
+    return (
+        <header >
+            <nav class={styles.root} data-tauri-drag-region="p, button">
+                <p class={styles.title}>sledge.</p>
+                <div class={styles.controls}>
+                    <button class={styles.control_button} onClick={() => appWindow.minimize()}>–</button>
+                    <button class={styles.control_button} onClick={() => appWindow.toggleMaximize()}>◻</button>
+                    <button class={styles.control_button_close} onClick={() => appWindow.close()}>×</button>
+                </div>
+            </nav>
+        </header >
+    );
+}
+</file>
+
+<file path="components/ToastContainer.tsx">
+import { For } from "solid-js";
+import { setToasts, toasts } from "~/stores/internal/toastStore"
+import styles from "@styles/components/toast.module.css";
+
+export default function ToastContainer() {
+    return (
+        <div class={styles.toastContainer}>
+            <For each={toasts}>
+                {(toast) => (
+                    <div class={styles.toast_root}>
+                        <div class={`${styles.toast} ${styles[toast.type]}`}>
+                            {toast.message}
+                        </div>
+                        {toast.isPersistent &&
+                            <a class={styles.close_persistent_button} onClick={() => {
+                                setToasts((prev) => prev.filter((t) => t.id !== toast.id))
+                            }}>x</a>
+                        }
+                    </div>
+                )
+                }
+            </For >
+        </div >
+    );
+}
 </file>
 
 <file path="io/global/globalIO.ts">
@@ -2253,6 +2413,7 @@ export function importImageToActiveLayer(file: File) {
 
 <file path="io/project/project.ts">
 // src/io/project.ts
+import { path } from '@tauri-apps/api'
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog'
 import {
   BaseDirectory,
@@ -2266,8 +2427,9 @@ import { reconcile } from 'solid-js/store'
 import { initLayer } from '~/models/layer/layerImage'
 import { Layer } from '~/models/types/Layer'
 import {
+  addRecent,
   globalStore,
-  RecentFile,
+  FileLocation,
   setGlobalStore,
 } from '~/stores/global/globalStore'
 import {
@@ -2284,12 +2446,16 @@ import {
 } from '~/stores/project/layerStore'
 import { projectStore, setProjectStore } from '~/stores/project/projectStore'
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
-import { saveGlobalSettings } from '../global/globalIO'
+import { getFileNameAndPath } from '~/utils/getFileNameAndPath'
 
-export async function importProjectJsonFromFileSelection() {
+export async function importProjectJsonFromFileSelection(): Promise<
+  string | undefined
+> {
+  const home = await path.homeDir()
   const file = await dialogOpen({
     multiple: false,
     directory: false,
+    defaultPath: await path.join(home, 'sledge'),
     filters: [
       {
         name: 'sledge files',
@@ -2299,13 +2465,15 @@ export async function importProjectJsonFromFileSelection() {
   })
   if (!file) {
     console.log('ファイルが選択されていません')
-    return
+    return undefined
   }
   console.log(file)
   const jsonText = await readTextFile(file)
   const projectJson = JSON.parse(jsonText)
 
-  importProjectJson(projectJson)
+  await importProjectJson(projectJson)
+
+  return file
 }
 
 export async function importProjectJsonFromPath(filePath: string) {
@@ -2404,16 +2572,17 @@ export async function saveProject(existingPath?: string) {
   } else {
     try {
       await mkdir('sledge', {
-        baseDir: BaseDirectory.Document,
+        baseDir: BaseDirectory.Home,
         recursive: true,
       })
     } catch (e) {
       console.warn('ディレクトリ作成スキップまたは失敗:', e)
     }
 
+    const home = await path.homeDir()
     selectedPath = await save({
       title: 'Sledge プロジェクトを保存',
-      defaultPath: 'sledge/project.sledge',
+      defaultPath: await path.join(home, `sledge/${projectStore.name}.sledge`),
       filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
     })
   }
@@ -2424,32 +2593,8 @@ export async function saveProject(existingPath?: string) {
     await writeTextFile(selectedPath, data)
     console.log('プロジェクト保存:', selectedPath)
 
-    // add to recent
-    setGlobalStore((store) => {
-      var filePath = selectedPath.substring(0, selectedPath.lastIndexOf('\\'))
-      var fileName = selectedPath.split('\\').pop()?.split('/').pop()
-      console.log('path: ' + filePath)
-      console.log('name: ' + fileName)
-      if (fileName && filePath && store.recentOpenedFiles) {
-        const isNew = store.recentOpenedFiles.every((f) => {
-          return f.name !== fileName || f.path !== filePath?.toString()
-        })
-        console.log(isNew)
-
-        if (isNew) {
-          const newRecentFiles: RecentFile[] = [
-            {
-              name: fileName,
-              path: filePath,
-            },
-            ...store.recentOpenedFiles,
-          ]
-          setGlobalStore('recentOpenedFiles', newRecentFiles)
-          saveGlobalSettings()
-        }
-      }
-      return store
-    })
+    const fileLoc = getFileNameAndPath(selectedPath)
+    if (fileLoc !== undefined) addRecent(fileLoc)
   } else {
     console.log('保存キャンセルされました')
   }
@@ -2771,6 +2916,42 @@ export const addLayer = (
 }
 </file>
 
+<file path="models/factories/canvasPreview.ts">
+export function createPreviewCanvas(
+  imageData: ImageData,
+  targetHeight: number
+): HTMLCanvasElement {
+  const aspectRatio = imageData.width / imageData.height
+  const targetWidth = Math.round(targetHeight * aspectRatio)
+
+  const canvas = document.createElement('canvas')
+  canvas.width = targetWidth
+  canvas.height = targetHeight
+
+  const ctx = canvas.getContext('2d')!
+  ctx.imageSmoothingEnabled = false
+
+  const tmpCanvas = document.createElement('canvas')
+  tmpCanvas.width = imageData.width
+  tmpCanvas.height = imageData.height
+  tmpCanvas.getContext('2d')!.putImageData(imageData, 0, 0)
+
+  ctx.drawImage(
+    tmpCanvas,
+    0,
+    0,
+    imageData.width,
+    imageData.height,
+    0,
+    0,
+    targetWidth,
+    targetHeight
+  )
+
+  return canvas
+}
+</file>
+
 <file path="models/factories/createLayer.ts">
 import { v4 as uuidv4 } from "uuid";
 import { DSL } from "../dsl/DSL";
@@ -2943,10 +3124,10 @@ function getMagnificationPosition(
 </file>
 
 <file path="models/layer/history.ts">
-import { setImageStore } from '~/stores/project/imageStore'
+import { showToast } from '~/stores/internal/toastStore'
+import { imageStore, setImageStore } from '~/stores/project/imageStore'
 
 export function undo(layerId: string) {
-  console.log('undo')
   setImageStore(layerId, (state) => {
     if (state.undoStack.length === 0) return state
     const prev = state.undoStack[state.undoStack.length - 1]
@@ -2957,7 +3138,12 @@ export function undo(layerId: string) {
   // updateDSL(layerId);
 }
 
+export function isUndoPossible(layerId: string) {
+  return imageStore[layerId].undoStack?.length !== 0
+}
+
 export function redo(layerId: string) {
+  showToast('redo succeeded', 'success')
   setImageStore(layerId, (state) => {
     if (state.redoStack.length === 0) return state
     const next = state.redoStack[0]
@@ -2966,6 +3152,10 @@ export function redo(layerId: string) {
     return { current: next, undoStack: newUndo, redoStack: newRedo }
   })
   // updateDSL(layerId);
+}
+
+export function isRedoPossible(layerId: string) {
+  return imageStore[layerId].redoStack?.length !== 0
 }
 </file>
 
@@ -3082,17 +3272,15 @@ export default function NotFound() {
 </file>
 
 <file path="routes/editor/index.tsx">
-import { useLocation, useNavigate } from "@solidjs/router";
-import { createSignal } from "solid-js";
+import { useLocation } from "@solidjs/router";
+import { createSignal, onMount } from "solid-js";
 import CanvasArea from "~/components/canvas/CanvasArea";
 import Companion from "~/components/common/companion/Companion";
 import EdgeInfo from "~/components/common/EdgeInfo";
-import CanvasSettings from "~/components/section/CanvasSettings";
-import Color from "~/components/section/Color";
-import LayerList from "~/components/section/LayerList";
-import PenConfig from "~/components/section/PenConfig";
-import Project from "~/components/section/Project";
+import SideSections from "~/components/SideSections";
 import { importProjectJsonFromPath } from "~/io/project/project";
+import { showToast } from "~/stores/internal/toastStore";
+import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 
 export default function Editor() {
     const location = useLocation();
@@ -3111,9 +3299,14 @@ export default function Editor() {
         })
     }
 
+    onMount(() => {
+        adjustZoomToFit();
+        centeringCanvas();
+    });
+    showToast('important info.', 'success', -1)
 
     return (
-        <main>
+        <>
             {isImporting() &&
                 <div id="root">
                     <div class="welcome_root">
@@ -3125,27 +3318,16 @@ export default function Editor() {
             {
                 !isImporting() &&
                 <div id="root">
-                    <div id="sidebar">
-                        <EdgeInfo />
-
-                        <div id="content">
-                            <a onClick={() => window.location.href = "/"}>&lt; back</a>
-                            <Project />
-                            <Color />
-                            <PenConfig />
-                            <LayerList />
-                            <CanvasSettings />
-                        </div>
+                    <div class="fl-row">
+                        {/* <EdgeInfo /> */}
+                        <SideSections />
                     </div>
 
                     <CanvasArea />
-                    <div id="misc_container">
-                        <p id="sledge">sledge.</p>
-                    </div>
                     <Companion />
                 </div>
             }
-        </main >
+        </ >
     );
 }
 </file>
@@ -3157,13 +3339,14 @@ import EdgeInfo from "~/components/common/EdgeInfo";
 import { importProjectJsonFromFileSelection } from "~/io/project/project";
 import { createLayer } from "~/models/factories/createLayer";
 import { LayerType } from "~/models/types/Layer";
-import { globalStore, RecentFile } from "~/stores/global/globalStore";
+import { globalStore, FileLocation, addRecent, setGlobalStore } from "~/stores/global/globalStore";
 import { setLayerStore } from "~/stores/project/layerStore";
+import { getFileNameAndPath } from "~/utils/getFileNameAndPath";
 
 export default function Home() {
   const navigate = useNavigate();
 
-  const moveToEditor = async (recentFile: RecentFile) => {
+  const moveToEditor = async (recentFile: FileLocation) => {
     const params = new URLSearchParams();
     params.append("name", recentFile.name)
     params.append("path", recentFile.path)
@@ -3177,65 +3360,111 @@ export default function Home() {
     navigate(`/editor`, { replace: false });
   }
 
+  const openProject = () => {
+    importProjectJsonFromFileSelection().then((file: string | undefined) => {
+      if (file !== undefined) {
+        const loc = getFileNameAndPath(file);
+        if (loc !== undefined) addRecent(loc)
+        navigate(`/editor`, { replace: false });
+      }
+    })
+  }
+
+
+  const clearRecentFiles = () => {
+    setGlobalStore("recentOpenedFiles", []);
+  }
+
   return (
-    <main>
-      <div id="root">
-        <div id="sidebar">
-          <EdgeInfo />
+    <div id="root">
+      <div id="sidebar">
+        <EdgeInfo />
 
-        </div>
-        <div class="welcome_root">
-          <div class="fl-row" style={{ width: "50%" }}>
+      </div>
+      <div class="welcome_root">
+        <div class="fl-row" style={{ width: "50%" }}>
 
-            <div class="welcome_container">
-              <p class="welcome_headline">hello.</p>
+          <div class="welcome_container">
+            <p class="welcome_headline">hello.</p>
 
-              <div class="section_root">
-                <p class="section_caption">recent files.</p>
-                <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
-                  <For each={globalStore.recentOpenedFiles}>
-                    {(item, i) => {
-                      console.log(item)
-                      return <div class="recent_files">
-                        <p>■</p>
-                        <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
-                        <p class="path">{item.path}</p>
-                      </div>
-                    }}
-                  </For>
-                </div>
+            <div class="section_root" style={{ "min-height": "180px" }}>
+              <div class="fl-row" style={{ width: "100%" }}>
+                <p class="recent_files_caption" >recent files.</p>
+                <p class="clear" onClick={() => clearRecentFiles()}>clear</p>
+              </div>
+              <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
+                <For each={globalStore.recentOpenedFiles}>
+                  {(item, i) => {
+                    console.log(item)
+                    return <div class="recent_files">
+                      <p>■</p>
+                      <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
+                      <p class="path">{item.path}</p>
+                    </div>
+                  }}
+                </For>
+
               </div>
             </div>
+          </div>
 
-            <div class="side_section">
-              <a class="side_item" onClick={() => createNew()}>+ new.</a>
-              <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => importProjectJsonFromFileSelection()}>&gt; open.</a>
-            </div>
+          <div class="side_section">
+            <a class="side_item" onClick={() => createNew()}>+ new.</a>
+            <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => openProject()}>&gt; open.</a>
           </div>
         </div>
       </div>
-    </main >
+    </div>
   );
 }
 </file>
 
 <file path="stores/global/globalStore.ts">
 import { createStore } from 'solid-js/store'
+import { saveGlobalSettings } from '~/io/global/globalIO'
 
 // project
-export type RecentFile = {
-  name: string
+export type FileLocation = {
   path: string
+  name: string
 }
 
 export const [globalStore, setGlobalStore] = createStore({
   recentOpenedFiles: [
     {
-      name: 'project.sledge',
       path: 'C:\\Users\\innsb\\Documents',
+      name: 'project.sledge',
     },
   ],
 })
+
+export const addRecent = (loc: FileLocation) => {
+  const path = loc.path
+  const name = loc.name
+
+  // add to recent
+  setGlobalStore((store) => {
+    console.log('path: ' + path)
+    console.log('name: ' + name)
+    if (name && path && store.recentOpenedFiles) {
+      // 履歴にあっても一旦削除
+      let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
+        return f.name !== name || f.path !== path?.toString()
+      })
+      // その後、一番上に追加
+      const newRecentFiles: FileLocation[] = [
+        {
+          name: name,
+          path: path,
+        },
+        ...oldRecentFiles,
+      ]
+      setGlobalStore('recentOpenedFiles', newRecentFiles)
+      saveGlobalSettings()
+    }
+    return store
+  })
+}
 </file>
 
 <file path="stores/internal/colorStore.ts">
@@ -3272,52 +3501,99 @@ export const [penStore, setPenStore] = createStore({
 export const currentPen = () => penStore.pens[penStore.usingIndex];
 </file>
 
+<file path="stores/internal/toastStore.ts">
+import { createStore } from 'solid-js/store'
+
+export type ToastType = 'info' | 'success' | 'warn' | 'error'
+
+export interface Toast {
+  id: number
+  message: string
+  type: ToastType
+  timeout: number
+  isPersistent: boolean
+}
+
+let toastId = 0
+const MAX_COUNT = 10
+export const [toasts, setToasts] = createStore<Toast[]>([])
+
+export function showToast(
+  message: string | number,
+  type: ToastType = 'info',
+  timeout = 10000
+) {
+  if (typeof message === 'number') message = message.toString()
+  const id = toastId++
+  const isPersistent = timeout < 0
+  if (toasts.length >= MAX_COUNT) {
+    const reducedToasts = [...toasts]
+    reducedToasts.shift()
+    setToasts(reducedToasts)
+  }
+  setToasts([...toasts, { id, message, type, timeout, isPersistent }])
+
+  if (!isPersistent) {
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+    }, timeout)
+  }
+}
+</file>
+
 <file path="stores/project/canvasStore.ts">
-import { createStore } from "solid-js/store";
-import { createCanvas } from "~/models/types/Canvas";
+import { createStore } from 'solid-js/store'
+import { createCanvas } from '~/models/types/Canvas'
 
 // canvas
+const REFERENCE_LENGTH = 600
 
-export const adjustZoomToFit = (
-  width?: number,
-  height?: number,
-  reference: number = 600,
-) => {
-  if (width === undefined) width = canvasStore.canvas.width;
-  if (height === undefined) height = canvasStore.canvas.height;
+export const getReferencedZoom = (length?: number) => {
+  if (length === undefined) {
+    const width = canvasStore.canvas.width
+    const height = canvasStore.canvas.height
+    length = width > height ? width : height
+  }
 
-  let isWide = width > height;
-  let longerLength = isWide ? width : height;
+  return REFERENCE_LENGTH / length
+}
+
+export const adjustZoomToFit = (width?: number, height?: number) => {
+  if (width === undefined) width = canvasStore.canvas.width
+  if (height === undefined) height = canvasStore.canvas.height
+
+  let isWide = width > height
+  let longerLength = isWide ? width : height
 
   console.log(
-    `this is ${isWide ? "wide" : "tall"}.
-    ${reference} / ${longerLength} = ${reference / longerLength}. set zoom.`,
-  );
-  setCanvasStore("zoom", reference / longerLength);
-  centeringCanvas();
-};
+    `this is ${isWide ? 'wide' : 'tall'}.
+    ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`
+  )
+  setCanvasStore('zoom', getReferencedZoom(longerLength))
+  centeringCanvas()
+}
 
 export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas;
-  const canvasArea = canvasStore.canvasAreaSize;
-  const zoom = canvasStore.zoom;
+  const canvasSize = canvasStore.canvas
+  const canvasArea = canvasStore.canvasAreaSize
+  const zoom = canvasStore.zoom
 
   console.log(
     `area size is ${canvasArea.width} x ${canvasArea.height}.
     canvas size is ${canvasSize.width} x ${canvasSize.height}.
     current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
-    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`,
-  );
+    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
+  )
 
-  setCanvasStore("offsetOrigin", {
+  setCanvasStore('offsetOrigin', {
     x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
     y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
-  });
-  setCanvasStore("offset", {
+  })
+  setCanvasStore('offset', {
     x: 0,
     y: 0,
-  });
-};
+  })
+}
 
 export const [canvasStore, setCanvasStore] = createStore({
   canvas: createCanvas(400, 400),
@@ -3326,6 +3602,8 @@ export const [canvasStore, setCanvasStore] = createStore({
   lastMouseOnCanvas: { x: 0, y: 0 },
   isInStroke: false,
   zoom: 1,
+  zoomMin: 0.1,
+  zoomMax: 8,
   touchZoomSensitivity: 0.5,
   wheelZoomStep: 0.1,
   // オフセットの初期値
@@ -3334,7 +3612,7 @@ export const [canvasStore, setCanvasStore] = createStore({
 
   isCtrlPressed: false,
   isDragging: false,
-});
+})
 </file>
 
 <file path="stores/project/imageStore.ts">
@@ -3431,7 +3709,7 @@ createEffect(() => {
 
 .canvas_stack {
   align-items: center;
-  border: 1px solid black;
+  border: 1px solid #aaa;
   display: flex;
   justify-content: center;
   position: relative;
@@ -3482,10 +3760,10 @@ createEffect(() => {
 .top-right-nav {
   display: flex;
   flex-direction: row;
-  gap: 55px;
+  gap: 25px;
   position: absolute;
   right: 30px;
-  top: 60px;
+  top: 30px;
 }
 
 .bottom-history {
@@ -3509,9 +3787,11 @@ createEffect(() => {
 
 .undo_redo {
   cursor: pointer;
-  font-size: 1rem;
-  height: fit-content;
+  height: 24px;
+  image-rendering: pixelated;
+  padding: 8px;
   pointer-events: all;
+  width: 24px;
 }
 </file>
 
@@ -3695,6 +3975,35 @@ createEffect(() => {
 }
 </file>
 
+<file path="styles/components/edge_info.module.css">
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0 20px 12px;
+}
+
+.text {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  margin: 0;
+  transform: rotate(180deg) scaleX(0.8);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+</file>
+
+<file path="styles/components/layer_preview.module.css">
+.wrapper {
+  border: 1px solid black;
+}
+
+.canvas {
+  height: 100%;
+  width: 100%;
+}
+</file>
+
 <file path="styles/components/light.module.css">
 .light-inner {
   filter: drop-shadow(0 0 0 red);
@@ -3710,17 +4019,15 @@ createEffect(() => {
 </file>
 
 <file path="styles/components/section/canvas.module.css">
-.root {
-  margin: 1rem 0;
-}
-
 .caption {
   margin-bottom: 1rem;
 }
 
 .size_form {
+  align-items: flex-end;
   display: flex;
   flex-direction: row;
+  margin-bottom: 6px;
 }
 
 .size_label {
@@ -3729,26 +4036,49 @@ createEffect(() => {
 
 .size_input {
   font-size: 10px;
-  margin: 4px;
-  min-width: 100px;
+  margin: 8px 12px 4px 0;
+  width: 50px;
 }
 
 .button {
-  margin: 4px;
+  margin: 4px 0;
   padding: 4px;
+  width: fit-content;
 }
 </file>
 
 <file path="styles/components/section/color.module.css">
-.color_picker {
-  margin: 8px 0 12px;
-}
-
 .swatch_container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 5px;
+  margin-right: 12px;
   position: relative;
+}
+
+.description_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  margin-bottom: 8px;
+}
+
+.swatch_description {
+  color: #aaa;
+  font-family: '04B03';
+  font-size: 0.5rem;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+.picker_description {
+  color: #aaa;
+  font-family: '04B03';
+  font-size: 0.5rem;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
 }
 
 .color_content {
@@ -3774,10 +4104,8 @@ createEffect(() => {
   width: 100%;
 }
 
-#layer {
+.item_root {
   width: 100%;
-
-  /* 高さはコンテンツに合わせる */
 }
 
 .disabled {
@@ -3796,7 +4124,8 @@ createEffect(() => {
   display: flex;
   flex-direction: row;
   flex-grow: 1;
-  padding: 8px;
+  height: 24px;
+  padding: 6px;
 }
 
 .layer_det:any-hover {
@@ -3816,7 +4145,6 @@ createEffect(() => {
 
 .type {
   font-size: 0.5rem;
-  margin-right: 20px;
   opacity: 0.4;
   position: absolute;
   right: 0;
@@ -3824,16 +4152,10 @@ createEffect(() => {
   width: 100%;
 }
 
-.layer_preview {
-  border: 1px solid black;
-  height: 20px;
-  width: 14px;
-}
-
 .name {
-  font-family: "04B03B";
+  font-family: '04B03B';
   font-size: 1rem;
-  margin: 8px 0 0 24px;
+  margin: 8px 0 0 12px;
 }
 
 .dot_magnif_container {
@@ -3852,8 +4174,8 @@ createEffect(() => {
 }
 
 .dot_magnif {
-  font-family: "04B03B";
-  font-size: 0.8rem;
+  font-family: '04B03B';
+  font-size: 0.75rem;
 }
 
 .active_light {
@@ -3878,12 +4200,20 @@ createEffect(() => {
   gap: 10px;
   width: 100%;
 }
+
+.name {
+  cursor: pointer;
+  font-size: 8px;
+  padding: 10px 0;
+  pointer-events: all;
+  width: 20%;
+}
 </file>
 
 <file path="styles/components/section/project.module.css">
 .project_name_input {
   border: none;
-  font-size: 1.5rem;
+  font-size: 16px;
   margin-bottom: 4px;
   outline: none;
 
@@ -3895,20 +4225,35 @@ createEffect(() => {
 .project_file_path {
   color: #00000040;
   font-family: '04B11';
-  font-size: 6px;
-  margin-bottom: 12px;
+  font-size: 4px;
+  margin-bottom: 8px;
   margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .loadsave_button {
   font-family: '04B11';
-  font-size: 8px;
-  margin: 4px;
+  font-size: 6px;
 }
 
 .save_log {
   color: limegreen;
   margin-left: 8px;
+}
+</file>
+
+<file path="styles/components/side_sections.module.css">
+.content {
+  border-right: 1px solid #aaa;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  padding: var(--window-top-padding) 40px 10px 35px;
+  width: 230px;
 }
 </file>
 
@@ -3968,6 +4313,147 @@ createEffect(() => {
 }
 </file>
 
+<file path="styles/components/title_bar.module.css">
+.root {
+  align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #aaa;
+  display: flex;
+  flex-direction: row;
+  height: 30px;
+  pointer-events: all;
+  user-select: none;
+  width: 100%;
+}
+
+.title {
+  font-family: 'Terminus (TTF)';
+  font-size: 11px;
+  margin-right: auto;
+  padding-left: 16px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.control_button,
+.control_button_close {
+  align-items: center;
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+  height: 100%;
+  justify-content: center;
+  min-width: 50px;
+}
+
+.control_button:hover {
+  background-color: #ddd;
+}
+
+.control_button_close:hover {
+  background-color: #ff1010;
+}
+</file>
+
+<file path="styles/components/toast.module.css">
+.toastContainer {
+  bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 20px;
+  position: fixed;
+  right: 1rem;
+  z-index: 9999;
+}
+
+.toast_root {
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid black;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.close_persistent_button {
+  height: 12px;
+  width: 12px;
+
+  &:any-hover {
+    color: red;
+  }
+}
+
+.toast {
+  color: #222;
+  flex-grow: 1;
+  font-family: '04B09';
+  font-size: 0.5rem;
+  margin-top: 2px;
+}
+
+.toast.success {
+  color: #4caf50;
+}
+
+.toast.error {
+  color: #f44336;
+}
+
+.toast.warn {
+  color: #ff9800;
+}
+
+.toast.info {
+  /* background-color: #2196f3; */
+}
+
+@keyframes fade-in-out-top {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fade-in-out-bottom {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+</file>
+
 <file path="styles/font.css">
 @font-face {
   font-family: '04B03';
@@ -3998,6 +4484,11 @@ createEffect(() => {
   font-family: '04B31';
   src: url('/fonts/04B_31__.ttf');
 }
+
+@font-face {
+  font-family: 'Terminus (TTF)';
+  src: url('/fonts/terminus/TerminusTTF-4.49.3.ttf');
+}
 </file>
 
 <file path="styles/global.css">
@@ -4006,41 +4497,23 @@ createEffect(() => {
 @import url('utils.css');
 @import url('section.css');
 
-#sidebar {
+/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
+#root {
   display: flex;
   flex-direction: row;
-}
-
-#sidebar > #edge {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 10px 0 20px 14px;
-}
-
-#sidebar > #edge > p {
-  font-size: 0.5rem;
-  letter-spacing: 2px;
-  margin: 0;
-  transform: rotate(180deg) scaleX(0.8);
-  white-space: nowrap;
-  writing-mode: vertical-rl;
-}
-
-#sidebar > #content {
-  border-right: 1px solid black;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
   height: 100%;
-  padding: var(--window-top-padding) 50px 10px 40px;
-  width: 300px;
+  user-select: none;
+}
+
+.main {
+  height: 100%;
+  user-select: none;
 }
 
 #sledge {
-  bottom: 10px;
+  bottom: 2px;
   position: absolute;
-  right: 10px;
+  right: 2px;
 }
 
 .welcome_root {
@@ -4065,20 +4538,37 @@ createEffect(() => {
   margin-bottom: 12px;
 }
 
+.recent_files_caption {
+  color: #333;
+  flex-grow: 1;
+  font-family: '04B03B';
+  margin-bottom: 12px;
+}
+
+.clear {
+  color: #777;
+  cursor: pointer;
+  font-family: '04B03B';
+
+  &:any-hover {
+    color: red;
+  }
+}
+
 .recent_files {
   align-items: center;
   display: flex;
   flex-direction: row;
-  gap: 1rem;
+  gap: 8px;
 
   .name {
     cursor: pointer;
-    font-family: '04B03';
+    font-family: '04B09';
     font-size: 0.5rem;
     text-overflow: ellipsis;
     white-space: nowrap;
 
-    &:hover {
+    &:any-hover {
       color: red;
     }
   }
@@ -4095,13 +4585,14 @@ createEffect(() => {
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
+  padding-top: 12px;
   width: 40%;
 
   .side_item {
     cursor: pointer;
     font-size: 1rem;
 
-    &:hover {
+    &:any-hover {
       color: red;
     }
   }
@@ -4111,9 +4602,7 @@ createEffect(() => {
 <file path="styles/reset.css">
 /* html, body, #root, main をウィンドウ全体に */
 html,
-body,
-#root,
-main {
+body {
   height: 100vh;
   margin: 0;
   overflow: hidden;
@@ -4122,18 +4611,18 @@ main {
   width: 100vw;
 }
 
-/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
-#root {
-  display: flex;
-  flex-direction: row;
-  user-select: none;
-}
-
 /* body / main の背景・フォント */
 body,
 main {
   background-color: #fdfdfd;
   font-family: '04B08';
+  width: 100vw;
+}
+
+body {
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: never;
 }
 
 /* ==========================================================================
@@ -4151,10 +4640,6 @@ a {
   cursor: pointer;
 }
 
-.it {
-  font-style: italic;
-}
-
 ul {
   list-style: none;
   padding-left: 0;
@@ -4164,8 +4649,13 @@ button,
 a,
 input {
   font-family: '04B08';
-  font-size: 0.8rem;
   letter-spacing: 2px;
+}
+
+input {
+  border: none;
+  border-bottom: 1px solid black;
+  outline: none;
 }
 
 /* Chrome, Safari, Edge, Opera */
@@ -4189,11 +4679,15 @@ button {
   height: fit-content;
   padding: 2px 6px;
   pointer-events: all;
-}
 
-button:any-hover {
-  background: #f0f0f0;
-  transform: translateY(1px);
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &:active {
+    background: #f0f0f0;
+    transform: translateY(1px);
+  }
 }
 </file>
 
@@ -4201,11 +4695,13 @@ button:any-hover {
 .section_root {
   display: flex;
   flex-direction: column;
+  margin-top: 12px;
 }
 
 .section_caption {
   font-family: '04B11';
-  margin-bottom: 8px;
+  font-size: 6px;
+  margin-bottom: 12px;
 }
 
 .section_content {
@@ -4292,6 +4788,25 @@ export async function invertImageInRust(
   if (!result) return;
 
   return decodeImageData(result, image.width, image.height);
+}
+</file>
+
+<file path="utils/getFileNameAndPath.ts">
+import { FileLocation } from '~/stores/global/globalStore'
+
+export const getFileNameAndPath = (
+  fullPath: string
+): FileLocation | undefined => {
+  var filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'))
+  var fileName = fullPath.split('\\').pop()?.split('/').pop()
+
+  if (filePath === undefined || fileName === undefined) return undefined
+  else {
+    return {
+      path: filePath,
+      name: fileName,
+    }
+  }
 }
 </file>
 

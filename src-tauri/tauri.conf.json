@@ -14,8 +14,8 @@
       {
         "title": "sledge",
         "label": "main",
-        "width": 1400,
-        "height": 900,
+        "width": 1200,
+        "height": 800,
         "acceptFirstMouse": true,
         "resizable": true,
         "closable": true,

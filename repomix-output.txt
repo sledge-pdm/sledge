@@ -61,13 +61,18 @@ dist-tcm/styles/components/canvas/image_pool.module.css.d.ts
 dist-tcm/styles/components/canvas/layer_canvas.module.css.d.ts
 dist-tcm/styles/components/companion.module.css.d.ts
 dist-tcm/styles/components/dsl_button.module.css.d.ts
+dist-tcm/styles/components/edge_info.module.css.d.ts
+dist-tcm/styles/components/layer_preview.module.css.d.ts
 dist-tcm/styles/components/light.module.css.d.ts
 dist-tcm/styles/components/section/canvas.module.css.d.ts
 dist-tcm/styles/components/section/color.module.css.d.ts
 dist-tcm/styles/components/section/layer.module.css.d.ts
 dist-tcm/styles/components/section/pen.module.css.d.ts
 dist-tcm/styles/components/section/project.module.css.d.ts
+dist-tcm/styles/components/side_sections.module.css.d.ts
 dist-tcm/styles/components/slider.module.css.d.ts
+dist-tcm/styles/components/title_bar.module.css.d.ts
+dist-tcm/styles/components/toast.module.css.d.ts
 dist-tcm/styles/font.css.d.ts
 dist-tcm/styles/global.css.d.ts
 dist-tcm/styles/reset.css.d.ts
@@ -78,6 +83,7 @@ index.html
 package.json
 patches/@thisbeyond+solid-dnd+0.7.5.patch
 postcss.config.cjs
+public/fonts/terminus/COPYING
 README.md
 repomix.config.json
 src-tauri/.gitignore
@@ -97,7 +103,6 @@ src-tauri/src/pipeline/mod.rs
 src-tauri/src/pipeline/parser.rs
 src-tauri/src/pipeline/runner.rs
 src-tauri/tauri.conf.json
-src/app.css.d.ts
 src/app.tsx
 src/components/canvas/CanvasArea.tsx
 src/components/canvas/CanvasAreaInteract.tsx
@@ -107,7 +112,6 @@ src/components/canvas/stacks/ImagePool.tsx
 src/components/canvas/stacks/LayerCanvas.tsx
 src/components/canvas/stacks/TouchableCanvas.tsx
 src/components/common/ColorBox.tsx
-src/components/common/ColorPicker.tsx
 src/components/common/companion/Companion.tsx
 src/components/common/companion/QuotePool.ts
 src/components/common/DSLButton.tsx
@@ -118,14 +122,20 @@ src/components/common/Light.tsx
 src/components/common/Slider.tsx
 src/components/section/CanvasSettings.tsx
 src/components/section/Color.tsx
+src/components/section/item/ColorPicker.tsx
 src/components/section/item/LayerItem.tsx
+src/components/section/item/LayerPreview.tsx
 src/components/section/item/PenItem.tsx
 src/components/section/LayerList.tsx
 src/components/section/PenConfig.tsx
 src/components/section/Project.tsx
-src/io/export.ts
-src/io/import.ts
-src/io/project.ts
+src/components/SideSections.tsx
+src/components/TitleBar.tsx
+src/components/ToastContainer.tsx
+src/io/global/globalIO.ts
+src/io/internal/export.ts
+src/io/internal/import.ts
+src/io/project/project.ts
 src/main.tsx
 src/models/dsl/DSL.ts
 src/models/dsl/DSLRunner.ts
@@ -142,6 +152,7 @@ src/models/dsl/nodes/pass/LayerIn.ts
 src/models/dsl/nodes/pass/LayerOut.ts
 src/models/dsl/nodes/pass/PassNode.ts
 src/models/factories/addLayer.ts
+src/models/factories/canvasPreview.ts
 src/models/factories/createLayer.ts
 src/models/factories/createPen.ts
 src/models/factories/removeLayer.ts
@@ -159,6 +170,7 @@ src/routes/index.tsx
 src/stores/global/globalStore.ts
 src/stores/internal/colorStore.ts
 src/stores/internal/penStore.ts
+src/stores/internal/toastStore.ts
 src/stores/project/canvasStore.ts
 src/stores/project/imageStore.ts
 src/stores/project/layerStore.ts
@@ -170,13 +182,18 @@ src/styles/components/canvas/image_pool.module.css
 src/styles/components/canvas/layer_canvas.module.css
 src/styles/components/companion.module.css
 src/styles/components/dsl_button.module.css
+src/styles/components/edge_info.module.css
+src/styles/components/layer_preview.module.css
 src/styles/components/light.module.css
 src/styles/components/section/canvas.module.css
 src/styles/components/section/color.module.css
 src/styles/components/section/layer.module.css
 src/styles/components/section/pen.module.css
 src/styles/components/section/project.module.css
+src/styles/components/side_sections.module.css
 src/styles/components/slider.module.css
+src/styles/components/title_bar.module.css
+src/styles/components/toast.module.css
 src/styles/font.css
 src/styles/global.css
 src/styles/reset.css
@@ -185,6 +202,7 @@ src/styles/utils.css
 src/utils/BrushUtils.ts
 src/utils/DSLUtils.ts
 src/utils/EffectUtils.ts
+src/utils/getFileNameAndPath.ts
 src/utils/hexToRGB.ts
 src/utils/ImageUtils.ts
 src/utils/MetricUtils.ts
@@ -200,354 +218,543 @@ Files
 ================================================================
 
 ================
-File: dist-tcm/styles/components/section/project.module.css.d.ts
+File: dist-tcm/styles/components/edge_info.module.css.d.ts
 ================
 declare const styles: {
-  readonly "loadsave_button": string;
-  readonly "project_name_input": string;
+  readonly "root": string;
+  readonly "text": string;
 };
 export = styles;
 
 ================
-File: src/components/section/Project.tsx
+File: dist-tcm/styles/components/layer_preview.module.css.d.ts
 ================
-import { Component } from "solid-js";
-import { exportProjectJson, importProjectJson, importProjectJsonFromFileSelection } from "~/io/project";
+declare const styles: {
+  readonly "canvas": string;
+  readonly "wrapper": string;
+};
+export = styles;
 
-import styles from "@styles/components/section/project.module.css"
-import { projectStore, setProjectStore } from "~/stores/project/projectStore";
+================
+File: dist-tcm/styles/components/side_sections.module.css.d.ts
+================
+declare const styles: {
+  readonly "content": string;
+};
+export = styles;
 
-const Project: Component<{}> = (props) => {
+================
+File: dist-tcm/styles/components/toast.module.css.d.ts
+================
+declare const styles: {
+  readonly "close_persistent_button": string;
+  readonly "error": string;
+  readonly "fade-in-out-bottom": string;
+  readonly "fade-in-out-top": string;
+  readonly "info": string;
+  readonly "success": string;
+  readonly "toast": string;
+  readonly "toastContainer": string;
+  readonly "toast_root": string;
+  readonly "warn": string;
+};
+export = styles;
+
+================
+File: public/fonts/terminus/COPYING
+================
+Copyright (c) 2010 Dimitar Toshkov Zhekov,
+with Reserved Font Name "Terminus Font".
+
+Copyright (c) 2011-2023 Tilman Blumenbach,
+with Reserved Font Name "Terminus (TTF)".
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+http://scripts.sil.org/OFL
+
+---
+
+## SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1. Neither the Font Software nor any of its individual components,
+   in Original or Modified Versions, may be sold by itself.
+
+2. Original or Modified Versions of the Font Software may be bundled,
+   redistributed and/or sold with any software, provided that each copy
+   contains the above copyright notice and this license. These can be
+   included either as stand-alone text files, human-readable headers or
+   in the appropriate machine-readable metadata fields within text or
+   binary files as long as those fields can be easily viewed by the user.
+
+3. No Modified Version of the Font Software may use the Reserved Font
+   Name(s) unless explicit written permission is granted by the corresponding
+   Copyright Holder. This restriction only applies to the primary font name as
+   presented to the users.
+
+4. The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+   Software shall not be used to promote, endorse or advertise any
+   Modified Version, except to acknowledge the contribution(s) of the
+   Copyright Holder(s) and the Author(s) or with their explicit written
+   permission.
+
+5. The Font Software, modified or unmodified, in part or in whole,
+   must be distributed entirely under this license, and must not be
+   distributed under any other license. The requirement for fonts to
+   remain under this license does not apply to any document created
+   using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
+================
+File: src/components/section/item/ColorPicker.tsx
+================
+import iro from "@jaames/iro";
+import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
+import { Component, createEffect } from "solid-js";
+import { setCurrentPenColor } from "~/models/types/Pen";
+import { currentPen } from "~/stores/internal/penStore";
+
+const ColorPicker: Component<{}> = (props) => {
+  let colorPicker: IroColorPicker;
+
+  createEffect(() => {
+    colorPicker.setColors([currentPen().color]);
+  });
+
+  return (
+    <div
+      ref={(el) => {
+        colorPicker = iro.ColorPicker(el, {
+          width: 150,
+          padding: 0,
+          color: currentPen().color,
+          handleRadius: 4,
+          layoutDirection: "horizontal",
+          layout: [
+            {
+              component: iro.ui.Box,
+              options: {},
+            },
+            {
+              component: iro.ui.Slider,
+              options: {
+                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
+                sliderType: "hue",
+              },
+            },
+          ],
+        });
+        colorPicker.on("color:change", function (color: any) {
+          setCurrentPenColor(color.hexString);
+        });
+      }}
+    ></div>
+  );
+};
+
+export default ColorPicker;
+
+================
+File: src/components/section/item/LayerPreview.tsx
+================
+import { Component, createEffect, onMount } from "solid-js";
+import { Layer } from "~/models/types/Layer";
+import { imageStore } from "~/stores/project/imageStore";
+
+import styles from "@styles/components/layer_preview.module.css"
+
+interface Props {
+    layer: Layer,
+    onClick: () => void
+}
+
+const LayerPreview: Component<Props> = (props: Props) => {
+    let wrapperRef: HTMLDivElement;
+    let canvasRef: HTMLCanvasElement;
+
+    const updatePreview = (
+        originalImage: ImageData,
+        targetHeight: number
+    ) => {
+        const aspectRatio = originalImage.width / originalImage.height;
+        const targetWidth = Math.round(targetHeight * aspectRatio);
+
+        // 描画対象キャンバスの解像度とCSSサイズを一致させる
+        canvasRef.width = targetWidth;
+        canvasRef.height = targetHeight;
+        canvasRef.style.width = `${targetWidth}px`;
+        canvasRef.style.height = `${targetHeight}px`;
+
+        wrapperRef.style.width = `${targetWidth}px`;
+        wrapperRef.style.height = `${targetHeight}px`;
+
+        const tmpCanvas = document.createElement("canvas");
+        tmpCanvas.width = originalImage.width;
+        tmpCanvas.height = originalImage.height;
+        tmpCanvas.getContext("2d")!.putImageData(originalImage, 0, 0);
+
+        const ctx = canvasRef.getContext('2d')!;
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, targetWidth, targetHeight);
+
+        ctx.drawImage(
+            tmpCanvas,
+            0,
+            0,
+            originalImage.width,
+            originalImage.height,
+            0,
+            0,
+            targetWidth,
+            targetHeight
+        );
+    };
+
+    onMount(() => {
+        const originalImage = imageStore[props.layer.id]?.current;
+        const height = wrapperRef.clientHeight;
+        updatePreview(originalImage, height);
+    });
+
+    createEffect(() => {
+        const originalImage = imageStore[props.layer.id]?.current;
+        const height = wrapperRef.clientHeight;
+        updatePreview(originalImage, height);
+    })
+
     return (
-        <div class="section_root">
-            <p class="section_caption">project.</p>
-            <div class="section_content">
-
-                <div class="fl-col">
-                    <p>project</p>
-                    <input
-                        class={styles.project_name_input}
-                        type="text"
-                        name="height"
-                        onChange={(e) => {
-                            setProjectStore("name", e.target.value)
-                        }}
-                        value={projectStore.name}
-                        min={0}
-                        max={1200}
-                        required
-                    />
-                </div>
-
-                <div class="fl-row">
-                    <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
-                        load.
-                    </button>
-
-                    <button class={styles.loadsave_button} onClick={() => exportProjectJson()}>
-                        save.
-                    </button>
-                </div>
-
-            </div>
+        <div class={styles.wrapper} ref={(el) => wrapperRef = el}>
+            <canvas class={styles.canvas} ref={(el) => canvasRef = el} onClick={(e) => props.onClick()} />
         </div>
     );
 };
 
-export default Project;
+export default LayerPreview
 
 ================
-File: src/routes/editor/index.tsx
+File: src/components/SideSections.tsx
 ================
-import { useLocation, useSearchParams } from "@solidjs/router";
-import CanvasArea from "~/components/canvas/CanvasArea";
-import Companion from "~/components/common/companion/Companion";
-import EdgeInfo from "~/components/common/EdgeInfo";
-import CanvasSettings from "~/components/section/CanvasSettings";
-import Color from "~/components/section/Color";
-import LayerList from "~/components/section/LayerList";
-import PenConfig from "~/components/section/PenConfig";
-import Project from "~/components/section/Project";
-import { importProjectJsonFromPath } from "~/io/project";
+import { Component } from "solid-js";
+import Project from "./section/Project";
+import Color from "./section/Color";
+import PenConfig from "./section/PenConfig";
+import LayerList from "./section/LayerList";
+import CanvasSettings from "./section/CanvasSettings";
 
-export default function Editor() {
-    const location = useLocation();
+import styles from "@styles/components/side_sections.module.css"
 
-    if (location) {
-        console.log(location)
-        console.log(location.search)
-        const sp = new URLSearchParams(location.search)
-        const fileName = sp.get("name")
-        const filePath = sp.get("path")
-        console.log(`${filePath}\\${fileName}`)
-        importProjectJsonFromPath(`${filePath}\\${fileName}`)
-    }
+const SideSections: Component<{}> = (props) => {
+    return <div class={styles.content}>
+        <a onClick={() => window.location.href = "/"}>&lt; back</a>
+        <Project />
+        <Color />
+        <PenConfig />
+        <LayerList />
+        <CanvasSettings />
+    </div>;
+};
 
+export default SideSections;
+
+================
+File: src/components/ToastContainer.tsx
+================
+import { For } from "solid-js";
+import { setToasts, toasts } from "~/stores/internal/toastStore"
+import styles from "@styles/components/toast.module.css";
+
+export default function ToastContainer() {
     return (
-        <main>
-            <div id="root">
-                <div id="sidebar">
-                    <EdgeInfo />
-
-                    <div id="content">
-                        <Project />
-                        <Color />
-                        <PenConfig />
-                        <LayerList />
-                        <CanvasSettings />
+        <div class={styles.toastContainer}>
+            <For each={toasts}>
+                {(toast) => (
+                    <div class={styles.toast_root}>
+                        <div class={`${styles.toast} ${styles[toast.type]}`}>
+                            {toast.message}
+                        </div>
+                        {toast.isPersistent &&
+                            <a class={styles.close_persistent_button} onClick={() => {
+                                setToasts((prev) => prev.filter((t) => t.id !== toast.id))
+                            }}>x</a>
+                        }
                     </div>
-                </div>
-
-                <CanvasArea />
-                <div id="misc_container">
-                    <p id="sledge">sledge.</p>
-                </div>
-                <Companion />
-            </div>
-        </main>
+                )
+                }
+            </For >
+        </div >
     );
 }
 
 ================
-File: src/stores/global/globalStore.ts
+File: src/models/factories/canvasPreview.ts
+================
+export function createPreviewCanvas(
+  imageData: ImageData,
+  targetHeight: number
+): HTMLCanvasElement {
+  const aspectRatio = imageData.width / imageData.height
+  const targetWidth = Math.round(targetHeight * aspectRatio)
+
+  const canvas = document.createElement('canvas')
+  canvas.width = targetWidth
+  canvas.height = targetHeight
+
+  const ctx = canvas.getContext('2d')!
+  ctx.imageSmoothingEnabled = false
+
+  const tmpCanvas = document.createElement('canvas')
+  tmpCanvas.width = imageData.width
+  tmpCanvas.height = imageData.height
+  tmpCanvas.getContext('2d')!.putImageData(imageData, 0, 0)
+
+  ctx.drawImage(
+    tmpCanvas,
+    0,
+    0,
+    imageData.width,
+    imageData.height,
+    0,
+    0,
+    targetWidth,
+    targetHeight
+  )
+
+  return canvas
+}
+
+================
+File: src/stores/internal/toastStore.ts
 ================
 import { createStore } from 'solid-js/store'
 
-// project
-export type RecentFile = {
-  name: string
-  path: string
+export type ToastType = 'info' | 'success' | 'warn' | 'error'
+
+export interface Toast {
+  id: number
+  message: string
+  type: ToastType
+  timeout: number
+  isPersistent: boolean
 }
 
-export const [globalStore, setGlobalStore] = createStore({
-  recentOpenedFiles: [
-    {
-      name: 'project.sledge',
-      path: 'C:\\Users\\innsb\\Documents',
-    },
-    {
-      name: 'project.sledge',
-      path: 'C:\\Users\\innsb\\Documents',
-    },
-    {
-      name: 'project.sledge',
-      path: 'C:\\Users\\innsb\\Documents',
-    },
-  ],
-})
+let toastId = 0
+const MAX_COUNT = 10
+export const [toasts, setToasts] = createStore<Toast[]>([])
 
-================
-File: src/stores/internal/colorStore.ts
-================
-import { createStore } from "solid-js/store";
+export function showToast(
+  message: string | number,
+  type: ToastType = 'info',
+  timeout = 10000
+) {
+  if (typeof message === 'number') message = message.toString()
+  const id = toastId++
+  const isPersistent = timeout < 0
+  if (toasts.length >= MAX_COUNT) {
+    const reducedToasts = [...toasts]
+    reducedToasts.shift()
+    setToasts(reducedToasts)
+  }
+  setToasts([...toasts, { id, message, type, timeout, isPersistent }])
 
-// color
-
-export const [colorStore, setColorStore] = createStore({
-  swatches: [
-    "#000000",
-    "#FFFFFF",
-    "#ffff00",
-    "#00ffff",
-    "#00ff00",
-    "#ff00ff",
-    "#ff0000",
-    "#0000ff",
-    "#000080",
-    "#400080",
-  ],
-});
-
-================
-File: src/stores/internal/penStore.ts
-================
-import { createStore } from "solid-js/store";
-import { createPen } from "~/models/factories/createPen";
-
-// pen
-
-export const [penStore, setPenStore] = createStore({
-  usingIndex: 0,
-  pens: [createPen("pen", 1, "#000000"), createPen("eraser", 4, "none")],
-});
-export const currentPen = () => penStore.pens[penStore.usingIndex];
-
-================
-File: src/stores/project/canvasStore.ts
-================
-import { createStore } from "solid-js/store";
-import { createCanvas } from "~/models/types/Canvas";
-
-// canvas
-
-export const adjustZoomToFit = (
-  width?: number,
-  height?: number,
-  reference: number = 600,
-) => {
-  if (width === undefined) width = canvasStore.canvas.width;
-  if (height === undefined) height = canvasStore.canvas.height;
-
-  let isWide = width > height;
-  let longerLength = isWide ? width : height;
-
-  console.log(
-    `this is ${isWide ? "wide" : "tall"}.
-    ${reference} / ${longerLength} = ${reference / longerLength}. set zoom.`,
-  );
-  setCanvasStore("zoom", reference / longerLength);
-  centeringCanvas();
-};
-
-export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas;
-  const canvasArea = canvasStore.canvasAreaSize;
-  const zoom = canvasStore.zoom;
-
-  console.log(
-    `area size is ${canvasArea.width} x ${canvasArea.height}.
-    canvas size is ${canvasSize.width} x ${canvasSize.height}.
-    current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
-    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`,
-  );
-
-  setCanvasStore("offsetOrigin", {
-    x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
-    y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
-  });
-  setCanvasStore("offset", {
-    x: 0,
-    y: 0,
-  });
-};
-
-export const [canvasStore, setCanvasStore] = createStore({
-  canvas: createCanvas(400, 400),
-  canvasAreaSize: { width: 0, height: 0 },
-  lastMouseWindow: { x: 0, y: 0 },
-  lastMouseOnCanvas: { x: 0, y: 0 },
-  isInStroke: false,
-  zoom: 1,
-  touchZoomSensitivity: 0.5,
-  wheelZoomStep: 0.1,
-  // オフセットの初期値
-  offsetOrigin: { x: 0, y: 0 },
-  offset: { x: 0, y: 0 },
-
-  isCtrlPressed: false,
-  isDragging: false,
-});
-
-================
-File: src/stores/project/imageStore.ts
-================
-import { createStore } from 'solid-js/store'
-import { runDSL } from '~/models/dsl/DSLRunner'
-import { LayerImageState } from '~/models/types/LayerImageState'
-import { findLayerById, layerStore } from './layerStore'
-
-// image
-
-export const [imageStore, setImageStore] = createStore<
-  Record<string, LayerImageState>
->({})
-
-export const activeImage = (): LayerImageState =>
-  imageStore[layerStore.activeLayerId]
-
-export const updateDSL = (layerId: string) => {
-  const dsl = findLayerById(layerId)?.dsl
-  const image = imageStore[layerId].current
-  if (dsl === undefined) return
-  runDSL(dsl, image).then((result) => {
-    if (result) {
-      setImageStore(layerId, 'DSLcurrent', result)
-    }
-  })
+  if (!isPersistent) {
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+    }, timeout)
+  }
 }
 
 ================
-File: src/stores/project/layerStore.ts
+File: src/styles/components/edge_info.module.css
 ================
-import { createStore } from "solid-js/store";
-import { createLayer } from "~/models/factories/createLayer";
-import { LayerType } from "~/models/types/Layer";
-
-// layer
-const DEFAULT_LAYERS = [createLayer("dot1", LayerType.Dot, true, 1)];
-
-export const [layerStore, setLayerStore] = createStore({
-  layers: DEFAULT_LAYERS,
-  activeLayerId: DEFAULT_LAYERS[0].id,
-});
-
-export const allLayers = () => layerStore.layers;
-export const findLayerById = (id: string) =>
-  allLayers().find((layer) => layer.id === id);
-export const activeLayer = () => findLayerById(layerStore.activeLayerId);
-export const activeIndex = () =>
-  allLayers().findIndex((layer) => layer.id === layerStore.activeLayerId);
-
-================
-File: src/stores/project/projectStore.ts
-================
-import { createStore } from 'solid-js/store'
-
-// project
-export const [projectStore, setProjectStore] = createStore({
-  name: '',
-})
-
-================
-File: src/styles/components/section/project.module.css
-================
-.project_name_input {
-  border: none;
-  font-size: 1.5rem;
-  outline: none;
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0 20px 12px;
 }
 
-.loadsave_button {
-  font-family: '04B11';
-  font-size: 8px;
-  margin: 4px;
+.text {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  margin: 0;
+  transform: rotate(180deg) scaleX(0.8);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
 }
 
 ================
-File: .gitignore
+File: src/styles/components/layer_preview.module.css
 ================
-dist
-.wrangler
-.output
-.vercel
-.netlify
-.vinxi
-app.config.timestamp_*.js
+.wrapper {
+  border: 1px solid black;
+}
 
-# Environment
-.env
-.env*.local
+.canvas {
+  height: 100%;
+  width: 100%;
+}
 
-# dependencies
-/node_modules
+================
+File: src/styles/components/side_sections.module.css
+================
+.content {
+  border-right: 1px solid #aaa;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  padding: var(--window-top-padding) 40px 10px 35px;
+  width: 230px;
+}
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-*.launch
-.settings/
+================
+File: src/styles/components/toast.module.css
+================
+.toastContainer {
+  bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 20px;
+  position: fixed;
+  right: 1rem;
+  z-index: 9999;
+}
 
-# Temp
-gitignore
+.toast_root {
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid black;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 0.5rem;
+}
 
-# System Files
-.DS_Store
-Thumbs.db
+.close_persistent_button {
+  height: 12px;
+  width: 12px;
 
-# repomix
-repomix-output.txt
-repomix-output.xml
+  &:hover {
+    color: red;
+  }
+}
+
+.toast {
+  color: #222;
+  flex-grow: 1;
+  font-family: '04B09';
+  font-size: 0.5rem;
+  margin-top: 2px;
+}
+
+.toast.success {
+  color: #4caf50;
+}
+
+.toast.error {
+  color: #f44336;
+}
+
+.toast.warn {
+  color: #ff9800;
+}
+
+.toast.info {
+  /* background-color: #2196f3; */
+}
+
+@keyframes fade-in-out-top {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fade-in-out-bottom {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
 
 ================
 File: .repomix/bundles.json
@@ -580,13 +787,6 @@ File: .stylelintrc.json
     ],
 
     "font-family-no-missing-generic-family-keyword": null,
-
-    "selector-pseudo-class-no-unknown": [
-      true,
-      {
-        "ignorePseudoClasses": ["any-hover"]
-      }
-    ],
 
     "declaration-property-value-no-unknown": [
       true,
@@ -664,7 +864,6 @@ File: dist-tcm/styles/components/section/canvas.module.css.d.ts
 declare const styles: {
   readonly "button": string;
   readonly "caption": string;
-  readonly "root": string;
   readonly "size_form": string;
   readonly "size_input": string;
   readonly "size_label": string;
@@ -676,8 +875,10 @@ File: dist-tcm/styles/components/section/color.module.css.d.ts
 ================
 declare const styles: {
   readonly "color_content": string;
-  readonly "color_picker": string;
+  readonly "description_container": string;
+  readonly "picker_description": string;
   readonly "swatch_container": string;
+  readonly "swatch_description": string;
 };
 export = styles;
 
@@ -693,10 +894,9 @@ declare const styles: {
   readonly "drop_placeholder": string;
   readonly "image": string;
   readonly "image_insert_arrow": string;
-  readonly "layer": string;
+  readonly "item_root": string;
   readonly "layer_det": string;
   readonly "layer_list": string;
-  readonly "layer_preview": string;
   readonly "name": string;
   readonly "type": string;
 };
@@ -706,7 +906,19 @@ export = styles;
 File: dist-tcm/styles/components/section/pen.module.css.d.ts
 ================
 declare const styles: {
+  readonly "name": string;
   readonly "row": string;
+};
+export = styles;
+
+================
+File: dist-tcm/styles/components/section/project.module.css.d.ts
+================
+declare const styles: {
+  readonly "loadsave_button": string;
+  readonly "project_file_path": string;
+  readonly "project_name_input": string;
+  readonly "save_log": string;
 };
 export = styles;
 
@@ -724,35 +936,21 @@ declare const styles: {
 export = styles;
 
 ================
+File: dist-tcm/styles/components/title_bar.module.css.d.ts
+================
+declare const styles: {
+  readonly "control_button": string;
+  readonly "control_button_close": string;
+  readonly "controls": string;
+  readonly "root": string;
+  readonly "title": string;
+};
+export = styles;
+
+================
 File: dist-tcm/styles/font.css.d.ts
 ================
 export {};
-
-================
-File: dist-tcm/styles/global.css.d.ts
-================
-declare const styles: {
-  readonly "content": string;
-  readonly "edge": string;
-  readonly "name": string;
-  readonly "path": string;
-  readonly "recent_files": string;
-  readonly "sidebar": string;
-  readonly "sledge": string;
-  readonly "welcome_container": string;
-  readonly "welcome_headline": string;
-  readonly "welcome_root": string;
-};
-export = styles;
-
-================
-File: dist-tcm/styles/reset.css.d.ts
-================
-declare const styles: {
-  readonly "it": string;
-  readonly "root": string;
-};
-export = styles;
 
 ================
 File: dist-tcm/styles/section.css.d.ts
@@ -1158,14 +1356,15 @@ File: src/components/common/EdgeInfo.tsx
 import { Component } from "solid-js";
 import { JSX } from "solid-js/h/jsx-runtime";
 
+import styles from "@styles/components/edge_info.module.css"
+
 const EdgeInfo: Component<{}> = (props) => {
-  const edgeFlexStyle: JSX.CSSProperties = { "flex-grow": 1 };
 
   return (
-    <div id="edge">
-      <p>autosaved. (4s ago)</p>
-      <div style={edgeFlexStyle}></div>
-      <p>config.</p>
+    <div class={styles.root}>
+      <p class={styles.text}>autosaved. (4s ago)</p>
+      <div style={{ "flex-grow": 1 }}></div>
+      <p class={styles.text}>config.</p>
     </div>
   );
 };
@@ -1173,7 +1372,138 @@ const EdgeInfo: Component<{}> = (props) => {
 export default EdgeInfo;
 
 ================
-File: src/io/export.ts
+File: src/components/section/Project.tsx
+================
+import { Component, createSignal } from "solid-js";
+import { saveProject } from "~/io/project/project";
+
+import styles from "@styles/components/section/project.module.css"
+import { projectStore, setProjectStore } from "~/stores/project/projectStore";
+import { exportActiveLayerUpscaled } from "~/io/internal/export";
+
+const Project: Component<{}> = (props) => {
+    const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
+
+    const save = () => {
+        if (projectStore.name && projectStore.path) {
+            // 上書き保存
+            saveProject(`${projectStore.path}`).then(() => {
+                setSaveLog("saved!")
+                setProjectStore("isProjectChangedAfterSave", false)
+            })
+        } else {
+            saveProject().then(() => {
+                setSaveLog("saved!")
+                setProjectStore("isProjectChangedAfterSave", false)
+            })
+        }
+    }
+
+    return (
+        <div class="section_root">
+            <p class="section_caption">project.</p>
+            <div class="section_content">
+
+                <div class="fl-col">
+                    <input
+                        class={styles.project_name_input}
+                        type="text"
+                        name="height"
+                        onChange={(e) => {
+                            setProjectStore("name", e.target.value)
+                        }}
+                        value={projectStore.name}
+                        placeholder="project name"
+                        autocomplete="off"
+                        required
+                    />
+
+                    {/* <p class={styles.project_file_path}>{projectStore.path}</p> */}
+                </div>
+                {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
+                        load.
+                    </button> */}
+
+                <div class="fl-row" style={{ "align-items": "center", "margin-top": "12px" }}>
+                    <button class={styles.loadsave_button} onClick={() => exportActiveLayerUpscaled()}>
+                        export.
+                    </button>
+                    {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+export default Project;
+
+================
+File: src/components/TitleBar.tsx
+================
+import { Window } from "@tauri-apps/api/window";
+import styles from "~/styles/components/title_bar.module.css";
+
+export default function TitleBar() {
+    const appWindow = new Window('main');
+
+    return (
+        <header >
+            <nav class={styles.root} data-tauri-drag-region="p, button">
+                <p class={styles.title}>sledge.</p>
+                <div class={styles.controls}>
+                    <button class={styles.control_button} onClick={() => appWindow.minimize()}>–</button>
+                    <button class={styles.control_button} onClick={() => appWindow.toggleMaximize()}>◻</button>
+                    <button class={styles.control_button_close} onClick={() => appWindow.close()}>×</button>
+                </div>
+            </nav>
+        </header >
+    );
+}
+
+================
+File: src/io/global/globalIO.ts
+================
+import {
+  BaseDirectory,
+  mkdir,
+  readTextFile,
+  writeTextFile,
+} from '@tauri-apps/plugin-fs'
+import { globalStore, setGlobalStore } from '~/stores/global/globalStore'
+
+const FILE_NAME = 'global.sledgeconfig'
+
+export async function saveGlobalSettings() {
+  try {
+    const json = JSON.stringify(globalStore)
+    await mkdir('', { baseDir: BaseDirectory.AppConfig, recursive: true })
+    await writeTextFile(FILE_NAME, json, { baseDir: BaseDirectory.AppConfig })
+    console.log('[globalIO] 設定保存完了')
+  } catch (e) {
+    console.error('[globalIO] 設定保存失敗', e)
+  }
+}
+
+export async function loadGlobalSettings() {
+  try {
+    const json = await readTextFile(FILE_NAME, {
+      baseDir: BaseDirectory.AppConfig,
+    })
+    const data = JSON.parse(json)
+
+    if (data.recentOpenedFiles) {
+      setGlobalStore('recentOpenedFiles', data.recentOpenedFiles)
+    }
+
+    console.log('[globalIO] 設定読み込み完了')
+  } catch (e) {
+    console.warn('[globalIO] 設定ファイルが存在しないか、読み込み失敗:', e)
+  }
+}
+
+================
+File: src/io/internal/export.ts
 ================
 import { layerStore } from '~/stores/project/layerStore'
 
@@ -1283,7 +1613,7 @@ export function downloadImageData(
 }
 
 ================
-File: src/io/import.ts
+File: src/io/internal/import.ts
 ================
 import { registerNewHistory } from '~/models/layer/layerImage'
 import { imageStore } from '~/stores/project/imageStore'
@@ -1326,168 +1656,6 @@ export function importImageToActiveLayer(file: File) {
   }
 
   reader.readAsDataURL(file)
-}
-
-================
-File: src/io/project.ts
-================
-// src/io/project.ts
-import { open, save } from '@tauri-apps/plugin-dialog'
-import {
-  BaseDirectory,
-  mkdir,
-  readTextFile,
-  writeTextFile,
-} from '@tauri-apps/plugin-fs'
-import { initLayer } from '~/models/layer/layerImage'
-import { Layer } from '~/models/types/Layer'
-import { LayerImageState } from '~/models/types/LayerImageState'
-import {
-  adjustZoomToFit,
-  canvasStore,
-  centeringCanvas,
-  setCanvasStore,
-} from '~/stores/project/canvasStore'
-import { imageStore, setImageStore } from '~/stores/project/imageStore'
-import {
-  findLayerById,
-  layerStore,
-  setLayerStore,
-} from '~/stores/project/layerStore'
-import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
-
-export async function importProjectJsonFromFileSelection() {
-  const file = await open({
-    multiple: false,
-    directory: false,
-    filters: [
-      {
-        name: 'sledge files',
-        extensions: ['sledge'],
-      },
-    ],
-  })
-  if (!file) {
-    console.log('ファイルが選択されていません')
-    return
-  }
-  console.log(file)
-  const jsonText = await readTextFile(file)
-  const projectJson = JSON.parse(jsonText)
-
-  importProjectJson(projectJson)
-}
-
-// C:\Users\innsb\Documents\project.sledge
-// C:\Users\innsb\Documents\project.sledge
-export async function importProjectJsonFromPath(filePath: string) {
-  if (!filePath) {
-    console.log('ファイルが選択されていません')
-    return
-  }
-  const jsonText = await readTextFile(filePath)
-  const projectJson = JSON.parse(jsonText)
-
-  importProjectJson(projectJson)
-}
-
-export async function importProjectJson(projectJson: any) {
-  if (projectJson.canvas) {
-    const { width, height } = projectJson.canvas
-    setCanvasStore('canvas', 'width', width)
-    setCanvasStore('canvas', 'height', height)
-  }
-
-  if (projectJson.images) {
-    setImageStore({})
-    const newImageStore: Record<string, LayerImageState> = {}
-    console.log(projectJson.images)
-    Object.keys(projectJson.images).forEach((id) => {
-      console.log(`read ${id}`)
-      const imageData = projectJson.images[id]
-      console.log(imageData)
-      initLayer(id, Number(imageData.dotMagnification || 1))
-      setImageStore(
-        id,
-        'current',
-        decodeImageData(
-          imageData.current,
-          Number(imageData.width),
-          Number(imageData.height)
-        )
-      )
-    })
-  }
-
-  if (
-    projectJson.layer &&
-    projectJson.layer.layers &&
-    Array.isArray(projectJson.layer.layers)
-  ) {
-    const layers: Layer[] = []
-    projectJson.layer.layers.map((l: any) => {
-      layers.push({
-        ...l,
-        dsl: undefined,
-      } as Layer)
-    })
-
-    setLayerStore('layers', layers)
-    setLayerStore('activeLayerId', projectJson.layer.activeLayerId)
-  }
-
-  adjustZoomToFit()
-  centeringCanvas()
-}
-
-export const parseCurrentProject = (): string => {
-  return JSON.stringify({
-    canvas: canvasStore.canvas,
-    images: Object.fromEntries(
-      Object.entries(imageStore).map(([id, state]) => [
-        id,
-        {
-          current: encodeImageData(state.current),
-          width: state.current.width,
-          height: state.current.height,
-          dotMagnification: findLayerById(id)?.dotMagnification,
-        },
-      ])
-    ),
-    layer: {
-      layers: layerStore.layers.map((layer) => ({
-        ...layer,
-        dsl: undefined, // TODO: save dsl
-      })),
-      activeLayerId: layerStore.activeLayerId,
-    },
-  })
-}
-
-export async function exportProjectJson() {
-  const data = parseCurrentProject()
-
-  // 1. %User%/Documents/sledge を作成
-  try {
-    await mkdir('sledge', { baseDir: BaseDirectory.Document, recursive: true })
-  } catch (e) {
-    console.warn('ディレクトリ作成スキップまたは失敗:', e)
-  }
-
-  // 2. 保存ダイアログを開く（.sledge拡張子）
-  const selectedPath = await save({
-    title: 'Sledge プロジェクトを保存',
-    defaultPath: 'sledge/project.sledge',
-    filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
-  })
-
-  if (typeof selectedPath === 'string') {
-    // 3. 保存処理
-    await writeTextFile(selectedPath, data)
-    console.log('プロジェクト保存:', selectedPath)
-  } else {
-    console.log('保存キャンセルされました')
-  }
 }
 
 ================
@@ -1757,27 +1925,6 @@ export function cloneImageData(src: ImageData): ImageData {
 }
 
 ================
-File: src/models/types/Layer.ts
-================
-import { DSL } from '~/models/dsl/DSL'
-
-export enum LayerType {
-  Dot,
-  Image,
-  Automate,
-}
-
-export type Layer = {
-  id: string
-  name: string
-  type: LayerType
-  typeDescription: string // 各タイプの説明
-  enabled: boolean
-  dotMagnification: number
-  dsl: DSL
-}
-
-================
 File: src/models/types/LayerImageState.ts
 ================
 export type LayerImageState = {
@@ -1786,6 +1933,190 @@ export type LayerImageState = {
   undoStack: ImageData[];
   redoStack: ImageData[];
 };
+
+================
+File: src/stores/internal/colorStore.ts
+================
+import { createStore } from "solid-js/store";
+
+// color
+
+export const [colorStore, setColorStore] = createStore({
+  swatches: [
+    "#000000",
+    "#FFFFFF",
+    "#ffff00",
+    "#00ffff",
+    "#00ff00",
+    "#ff00ff",
+    "#ff0000",
+    "#0000ff",
+    "#000080",
+    "#400080",
+  ],
+});
+
+================
+File: src/stores/internal/penStore.ts
+================
+import { createStore } from "solid-js/store";
+import { createPen } from "~/models/factories/createPen";
+
+// pen
+
+export const [penStore, setPenStore] = createStore({
+  usingIndex: 0,
+  pens: [createPen("pen", 1, "#000000"), createPen("eraser", 4, "none")],
+});
+export const currentPen = () => penStore.pens[penStore.usingIndex];
+
+================
+File: src/stores/project/canvasStore.ts
+================
+import { createStore } from 'solid-js/store'
+import { createCanvas } from '~/models/types/Canvas'
+
+// canvas
+const REFERENCE_LENGTH = 600
+
+export const getReferencedZoom = (length?: number) => {
+  if (length === undefined) {
+    const width = canvasStore.canvas.width
+    const height = canvasStore.canvas.height
+    length = width > height ? width : height
+  }
+
+  return REFERENCE_LENGTH / length
+}
+
+export const adjustZoomToFit = (width?: number, height?: number) => {
+  if (width === undefined) width = canvasStore.canvas.width
+  if (height === undefined) height = canvasStore.canvas.height
+
+  let isWide = width > height
+  let longerLength = isWide ? width : height
+
+  console.log(
+    `this is ${isWide ? 'wide' : 'tall'}.
+    ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`
+  )
+  setCanvasStore('zoom', getReferencedZoom(longerLength))
+  centeringCanvas()
+}
+
+export const centeringCanvas = () => {
+  const canvasSize = canvasStore.canvas
+  const canvasArea = canvasStore.canvasAreaSize
+  const zoom = canvasStore.zoom
+
+  console.log(
+    `area size is ${canvasArea.width} x ${canvasArea.height}.
+    canvas size is ${canvasSize.width} x ${canvasSize.height}.
+    current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
+    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
+  )
+
+  setCanvasStore('offsetOrigin', {
+    x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
+    y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
+  })
+  setCanvasStore('offset', {
+    x: 0,
+    y: 0,
+  })
+}
+
+export const [canvasStore, setCanvasStore] = createStore({
+  canvas: createCanvas(400, 400),
+  canvasAreaSize: { width: 0, height: 0 },
+  lastMouseWindow: { x: 0, y: 0 },
+  lastMouseOnCanvas: { x: 0, y: 0 },
+  isInStroke: false,
+  zoom: 1,
+  zoomMin: 0.1,
+  zoomMax: 8,
+  touchZoomSensitivity: 0.5,
+  wheelZoomStep: 0.1,
+  // オフセットの初期値
+  offsetOrigin: { x: 0, y: 0 },
+  offset: { x: 0, y: 0 },
+
+  isCtrlPressed: false,
+  isDragging: false,
+})
+
+================
+File: src/stores/project/imageStore.ts
+================
+import { createStore } from 'solid-js/store'
+import { runDSL } from '~/models/dsl/DSLRunner'
+import { LayerImageState } from '~/models/types/LayerImageState'
+import { findLayerById, layerStore } from './layerStore'
+
+// image
+
+export const [imageStore, setImageStore] = createStore<
+  Record<string, LayerImageState>
+>({})
+
+export const activeImage = (): LayerImageState =>
+  imageStore[layerStore.activeLayerId]
+
+export const updateDSL = (layerId: string) => {
+  const dsl = findLayerById(layerId)?.dsl
+  const image = imageStore[layerId].current
+  if (dsl === undefined) return
+  runDSL(dsl, image).then((result) => {
+    if (result) {
+      setImageStore(layerId, 'DSLcurrent', result)
+    }
+  })
+}
+
+================
+File: src/stores/project/layerStore.ts
+================
+import { createStore } from 'solid-js/store'
+import { createLayer } from '~/models/factories/createLayer'
+import { Layer, LayerType } from '~/models/types/Layer'
+
+// layer
+
+export const [layerStore, setLayerStore] = createStore({
+  layers: new Array<Layer>(),
+  activeLayerId: '',
+})
+
+export const allLayers = () => layerStore.layers
+export const findLayerById = (id: string) =>
+  allLayers().find((layer) => layer.id === id)
+export const activeLayer = () => findLayerById(layerStore.activeLayerId)
+export const activeIndex = () =>
+  allLayers().findIndex((layer) => layer.id === layerStore.activeLayerId)
+
+================
+File: src/stores/project/projectStore.ts
+================
+import { createEffect } from 'solid-js'
+import { createStore } from 'solid-js/store'
+import { canvasStore } from './canvasStore'
+import { imageStore } from './imageStore'
+import { layerStore } from './layerStore'
+import { trackStore } from '@solid-primitives/deep'
+
+// project
+export const [projectStore, setProjectStore] = createStore({
+  name: '',
+  path: '',
+  isProjectChangedAfterSave: false,
+})
+
+createEffect(() => {
+  trackStore(canvasStore.canvas)
+  trackStore(imageStore)
+  trackStore(layerStore)
+  setProjectStore('isProjectChangedAfterSave', true)
+})
 
 ================
 File: src/styles/components/canvas/canvas_area.module.css
@@ -1841,10 +2172,10 @@ File: src/styles/components/canvas/controls.module.css
 .top-right-nav {
   display: flex;
   flex-direction: row;
-  gap: 55px;
+  gap: 25px;
   position: absolute;
   right: 30px;
-  top: 60px;
+  top: 30px;
 }
 
 .bottom-history {
@@ -1868,9 +2199,11 @@ File: src/styles/components/canvas/controls.module.css
 
 .undo_redo {
   cursor: pointer;
-  font-size: 1rem;
-  height: fit-content;
+  height: 24px;
+  image-rendering: pixelated;
+  padding: 8px;
   pointer-events: all;
+  width: 24px;
 }
 
 ================
@@ -1941,7 +2274,7 @@ File: src/styles/components/dsl_button.module.css
   width: 20px;
 }
 
-.root:any-hover {
+.root:hover {
   opacity: 0.3;
   transform: translate(0, 1px);
 }
@@ -1964,17 +2297,15 @@ File: src/styles/components/light.module.css
 ================
 File: src/styles/components/section/canvas.module.css
 ================
-.root {
-  margin: 1rem 0;
-}
-
 .caption {
   margin-bottom: 1rem;
 }
 
 .size_form {
+  align-items: flex-end;
   display: flex;
   flex-direction: row;
+  margin-bottom: 6px;
 }
 
 .size_label {
@@ -1983,33 +2314,92 @@ File: src/styles/components/section/canvas.module.css
 
 .size_input {
   font-size: 10px;
-  margin: 4px;
-  min-width: 100px;
+  margin: 8px 12px 4px 0;
+  width: 50px;
 }
 
 .button {
-  margin: 4px;
+  margin: 4px 0;
   padding: 4px;
+  width: fit-content;
 }
 
 ================
 File: src/styles/components/section/color.module.css
 ================
-.color_picker {
-  margin: 8px 0 12px;
-}
-
 .swatch_container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 5px;
+  margin-right: 12px;
   position: relative;
+}
+
+.description_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  margin-bottom: 8px;
+}
+
+.swatch_description {
+  color: #aaa;
+  font-family: '04B03';
+  font-size: 0.5rem;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+.picker_description {
+  color: #aaa;
+  font-family: '04B03';
+  font-size: 0.5rem;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
 }
 
 .color_content {
   display: flex;
   flex-direction: column;
   margin-left: 10px;
+}
+
+================
+File: src/styles/components/section/project.module.css
+================
+.project_name_input {
+  border: none;
+  font-size: 16px;
+  margin-bottom: 4px;
+  outline: none;
+
+  &::placeholder {
+    opacity: 0.5;
+  }
+}
+
+.project_file_path {
+  color: #00000040;
+  font-family: '04B11';
+  font-size: 4px;
+  margin-bottom: 8px;
+  margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.loadsave_button {
+  font-family: '04B11';
+  font-size: 6px;
+}
+
+.save_log {
+  color: limegreen;
+  margin-left: 8px;
 }
 
 ================
@@ -2070,22 +2460,52 @@ File: src/styles/components/slider.module.css
 }
 
 ================
-File: src/styles/section.css
+File: src/styles/components/title_bar.module.css
 ================
-.section_root {
+.root {
+  align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #aaa;
   display: flex;
-  flex-direction: column;
-}
-
-.section_caption {
-  font-family: '04B11';
-  margin-bottom: 8px;
-}
-
-.section_content {
-  display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  height: 30px;
+  pointer-events: all;
+  user-select: none;
   width: 100%;
+}
+
+.title {
+  font-family: 'Terminus (TTF)';
+  font-size: 11px;
+  margin-right: auto;
+  padding-left: 16px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.control_button,
+.control_button_close {
+  align-items: center;
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+  height: 100%;
+  justify-content: center;
+  min-width: 50px;
+}
+
+.control_button:hover {
+  background-color: #ddd;
+}
+
+.control_button_close:hover {
+  background-color: #ff1010;
 }
 
 ================
@@ -2103,6 +2523,26 @@ File: src/styles/utils.css
 .fl-row {
   display: flex;
   flex-direction: row;
+}
+
+================
+File: src/utils/getFileNameAndPath.ts
+================
+import { FileLocation } from '~/stores/global/globalStore'
+
+export const getFileNameAndPath = (
+  fullPath: string
+): FileLocation | undefined => {
+  var filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'))
+  var fileName = fullPath.split('\\').pop()?.split('/').pop()
+
+  if (filePath === undefined || fileName === undefined) return undefined
+  else {
+    return {
+      path: filePath,
+      name: fileName,
+    }
+  }
 }
 
 ================
@@ -2173,6 +2613,42 @@ File: tslint.json
 }
 
 ================
+File: .gitignore
+================
+dist
+.wrangler
+.output
+.vercel
+.netlify
+.vinxi
+app.config.timestamp_*.js
+
+# Environment
+.env
+.env*.local
+
+# dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+*.launch
+.settings/
+
+# Temp
+gitignore
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# repomix
+repomix-output.txt
+repomix-output.xml
+
+================
 File: dist-tcm/styles/components/canvas/canvas_stack.module.css.d.ts
 ================
 declare const styles: {
@@ -2183,7 +2659,7 @@ declare const styles: {
 export = styles;
 
 ================
-File: dist-tcm/styles/components/companion.module.css.d.ts
+File: dist-tcm/styles/reset.css.d.ts
 ================
 export {};
 
@@ -2208,31 +2684,6 @@ File: index.html
     <script src="/libs/speakjs/speakClient.js"></script>
   </body>
 </html>
-
-================
-File: src-tauri/capabilities/default.json
-================
-{
-  "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "default",
-  "description": "enables the default permissions",
-  "windows": ["main"],
-  "permissions": [
-    "core:default",
-    "dialog:default",
-    "dialog:allow-save",
-    {
-      "identifier": "fs:allow-read-file",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
-    "fs:allow-app-read",
-    "fs:allow-app-write"
-  ]
-}
 
 ================
 File: src-tauri/src/commands/brightness.rs
@@ -2346,138 +2797,6 @@ pub fn parse_pipeline(input: &str) -> Result<Vec<PipelineNode>, String> {
         })
         .collect()
 }
-
-================
-File: src/app.css.d.ts
-================
-declare const styles: {
-  readonly content: string;
-  readonly edge: string;
-  readonly it: string;
-  readonly misc_container: string;
-  readonly root: string;
-  readonly sidebar: string;
-  readonly sledge: string;
-  readonly white: string;
-};
-export = styles;
-
-================
-File: src/components/canvas/stacks/CanvasStack.tsx
-================
-import { Component, For, onMount } from "solid-js";
-import { canvasStore } from "~/stores/project/canvasStore";
-import { activeLayer, allLayers, layerStore } from "~/stores/project/layerStore";
-
-import styles from "@styles/components/canvas/canvas_stack.module.css";
-
-import { cloneImageData } from "~/models/factories/utils";
-import { DrawState, getDrawnImageData } from "~/models/layer/getDrawnImageData";
-import { redo, undo } from "~/models/layer/history";
-import { registerNewHistory } from "~/models/layer/layerImage";
-import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
-import { TouchableCanvas } from "./TouchableCanvas";
-
-const CanvasStack: Component<{}> = (props) => {
-  const layerCanvasRefs: {
-    [id: string]: LayerCanvasRef;
-  } = {};
-
-  const activeCanvasRef = () => {
-    const active = activeLayer();
-
-    if (active) return layerCanvasRefs[active.id];
-    else return;
-  };
-
-  onMount(() => {
-    window.addEventListener("keydown", (e) => {
-      if (e.ctrlKey && e.key === "z") {
-        undo(layerStore.activeLayerId);
-        activeCanvasRef()?.update();
-      } else if (e.ctrlKey && e.key === "y") {
-        redo(layerStore.activeLayerId);
-        activeCanvasRef()?.update();
-      }
-    });
-  });
-
-  const handleDraw = (
-    type: DrawState,
-    position: { x: number; y: number },
-    lastPos?: { x: number; y: number },
-  ) => {
-    switch (type) {
-      case DrawState.start:
-        console.log("stroke start.");
-        break;
-      case DrawState.move:
-        console.log("stroke move.");
-        break;
-      case DrawState.end:
-        console.log("stroke end.");
-        break;
-    }
-
-    const active = activeLayer();
-
-    if (active) {
-      const activeRef = layerCanvasRefs[active.id];
-      if (type === DrawState.start) {
-        activeRef.initDrawingBuffer();
-      } else {
-        const drawingBuffer = activeRef.getDrawingBuffer();
-        if (drawingBuffer) {
-          const newImageData = getDrawnImageData(
-            active.id,
-            type,
-            drawingBuffer,
-            position,
-            lastPos,
-          );
-
-          if (newImageData) {
-            activeRef.setImageData(newImageData);
-            if (type === DrawState.end) {
-              activeRef.resetDrawingBuffer();
-              registerNewHistory(active.id, cloneImageData(newImageData));
-            }
-          }
-        }
-      }
-    }
-  };
-
-  return (
-    <div style={{ position: "relative" }}>
-      <div
-        class={styles.canvas_stack}
-        style={{
-          width: `${canvasStore.canvas.width}px`,
-          height: `${canvasStore.canvas.height}px`,
-        }}
-      >
-        <TouchableCanvas
-          onStrokeStart={(p, lp) => handleDraw(DrawState.start, p, lp)}
-          onStrokeMove={(p, lp) => handleDraw(DrawState.move, p, lp)}
-          onStrokeEnd={(p, lp) => handleDraw(DrawState.end, p, lp)}
-        />
-
-        <For each={allLayers()}>
-          {(layer, index) => (
-            <LayerCanvas
-              ref={layerCanvasRefs[layer.id]}
-              layer={layer}
-              zIndex={allLayers().length - index()}
-            />
-          )}
-        </For>
-      </div>
-    </div>
-  );
-};
-
-export default CanvasStack;
 
 ================
 File: src/components/canvas/stacks/ImagePool.tsx
@@ -2668,44 +2987,6 @@ const DSLButton: Component<Props> = (props: Props) => {
 export default DSLButton;
 
 ================
-File: src/components/common/ImportImageButton.tsx
-================
-import { importImageToActiveLayer } from "~/io/import"; // 上で作った関数
-
-const ImportImageButton = () => {
-  let fileInputRef: HTMLInputElement | undefined;
-
-  const handleClick = () => {
-    fileInputRef?.click(); // hidden input を手動でクリック
-  };
-
-  const handleFileChange = (e: Event) => {
-    const target = e.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (file) {
-      importImageToActiveLayer(file);
-      target.value = ""; // 同じファイルを再選択可能にする
-    }
-  };
-
-  return (
-    <>
-      <button onClick={handleClick}>Import</button>
-
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        onChange={handleFileChange}
-      />
-    </>
-  );
-};
-
-export default ImportImageButton;
-
-================
 File: src/components/common/Light.tsx
 ================
 import styles from "@styles/components/light.module.css";
@@ -2744,144 +3025,215 @@ const Light: Component<LightProps> = (props: LightProps) => {
 export default Light;
 
 ================
-File: src/components/common/Slider.tsx
+File: src/io/project/project.ts
 ================
-import styles from "@styles/components/slider.module.css";
-import { Component, createSignal } from "solid-js";
+// src/io/project.ts
+import { path } from '@tauri-apps/api'
+import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog'
+import {
+  BaseDirectory,
+  exists,
+  mkdir,
+  open,
+  readTextFile,
+  writeTextFile,
+} from '@tauri-apps/plugin-fs'
+import { reconcile } from 'solid-js/store'
+import { initLayer } from '~/models/layer/layerImage'
+import { Layer } from '~/models/types/Layer'
+import {
+  addRecent,
+  globalStore,
+  FileLocation,
+  setGlobalStore,
+} from '~/stores/global/globalStore'
+import {
+  adjustZoomToFit,
+  canvasStore,
+  centeringCanvas,
+  setCanvasStore,
+} from '~/stores/project/canvasStore'
+import { imageStore, setImageStore } from '~/stores/project/imageStore'
+import {
+  findLayerById,
+  layerStore,
+  setLayerStore,
+} from '~/stores/project/layerStore'
+import { projectStore, setProjectStore } from '~/stores/project/projectStore'
+import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
+import { getFileNameAndPath } from '~/utils/getFileNameAndPath'
 
-interface SliderProps {
-  min: number;
-  max: number;
-  default: number;
-  allowFloat?: boolean;
+export async function importProjectJsonFromFileSelection(): Promise<
+  string | undefined
+> {
+  const home = await path.homeDir()
+  const file = await dialogOpen({
+    multiple: false,
+    directory: false,
+    defaultPath: await path.join(home, 'sledge'),
+    filters: [
+      {
+        name: 'sledge files',
+        extensions: ['sledge'],
+      },
+    ],
+  })
+  if (!file) {
+    console.log('ファイルが選択されていません')
+    return undefined
+  }
+  console.log(file)
+  const jsonText = await readTextFile(file)
+  const projectJson = JSON.parse(jsonText)
 
-  onValueChanged?: (newValue: number) => void;
+  await importProjectJson(projectJson)
+
+  return file
 }
 
-const Slider: Component<SliderProps> = (props) => {
-  let sliderRef: HTMLDivElement | undefined;
-  const [isDrag, setDrag] = createSignal(false);
-  const [value, setValue] = createSignal(props.default);
+export async function importProjectJsonFromPath(filePath: string) {
+  if (!filePath) {
+    console.log('ファイルが選択されていません')
+    return
+  }
+  const jsonText = await readTextFile(filePath)
+  const projectJson = JSON.parse(jsonText)
 
-  const percent = () => ((value() - props.min) / (props.max - props.min)) * 100;
+  importProjectJson(projectJson)
+}
 
-  const handlePointerDown = (e: PointerEvent) => {
-    setDrag(true);
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
-  };
-
-  const handlePointerMove = (e: PointerEvent) => {
-    if (!sliderRef || !isDrag()) return;
-    const rect = sliderRef.getBoundingClientRect();
-    let pos = e.clientX - rect.left;
-    pos = Math.max(0, Math.min(pos, rect.width)); // clamp
-
-    const newValueRaw =
-      props.min + (pos / rect.width) * (props.max - props.min);
-    const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
-    setValue(newValue);
-    if (props.onValueChanged) props.onValueChanged(newValue);
-  };
-
-  const handlePointerUp = (e: PointerEvent) => {
-    setDrag(false);
-    window.removeEventListener("pointermove", handlePointerMove);
-    window.removeEventListener("pointerup", handlePointerUp);
-  };
-
-  const onLineClick = (e: MouseEvent) => {
-    if (!sliderRef) return;
-    const rect = sliderRef.getBoundingClientRect();
-    let pos = e.clientX - rect.left;
-    pos = Math.max(0, Math.min(pos, rect.width)); // clamp
-
-    const newValueRaw =
-      props.min + (pos / rect.width) * (props.max - props.min);
-    const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
-    setValue(newValue);
-    if (props.onValueChanged) props.onValueChanged(newValue);
-  };
-
-  return (
-    <div class={styles.root}>
-      <div class={styles.slider} ref={sliderRef}>
-        <div class={styles["line-hitbox"]} onPointerDown={handlePointerDown} onClick={onLineClick}>
-          <div class={styles.line} />
-        </div>
-        <div style={{ left: `${percent()}%` }} class={styles.handle} />
-      </div>
-    </div>
-  );
-};
-
-export default Slider;
-
-================
-File: src/models/dsl/DSL.ts
-================
-import { SledgeNode } from '~/models/dsl/nodes/DSLNodes'
-import { findLayerById } from '~/stores/project/layerStore'
-import { LayerIn } from './nodes/pass/LayerIn'
-import { LayerOut } from './nodes/pass/LayerOut'
-
-export class DSL {
-  layerIn: LayerIn
-  readonly nodes: SledgeNode[]
-  layerOut: LayerOut
-
-  constructor(inLayerId: string, outLayerId: string) {
-    this.layerIn = new LayerIn(inLayerId)
-    this.nodes = []
-    this.layerOut = new LayerOut(outLayerId)
+export async function importProjectJson(projectJson: any) {
+  if (projectJson.project) {
+    console.log(projectJson.project)
+    setProjectStore('name', projectJson.project.name)
+    setProjectStore('path', projectJson.project.path)
   }
 
-  public addNode(node: SledgeNode) {
-    this?.nodes.push(node)
+  if (projectJson.canvas) {
+    const { width, height } = projectJson.canvas
+    setCanvasStore('canvas', 'width', width)
+    setCanvasStore('canvas', 'height', height)
   }
 
-  public build(exceptIn: boolean = false): string | undefined {
-    const nodes =
-      exceptIn ?
-        [...this.nodes, this.layerOut]
-      : [this.layerIn, ...this.nodes, this.layerOut]
+  if (projectJson.images) {
+    setImageStore({})
+    Object.keys(projectJson.images).forEach((id) => {
+      console.log(`read ${id}`)
+      const imageData = projectJson.images[id]
+      console.log(imageData)
+      initLayer(id, Number(imageData.dotMagnification || 1))
+      setImageStore(
+        id,
+        'current',
+        decodeImageData(
+          imageData.current,
+          Number(imageData.width),
+          Number(imageData.height)
+        )
+      )
+    })
+  }
 
-    let nodeStrings: string[] = []
-    let isAllNodeParseSuccessful = true
-    nodes.forEach((node, i) => {
-      const nodeStr = node.getNodeString()
-      if (nodeStr !== undefined) nodeStrings.push(nodeStr)
-      else {
-        isAllNodeParseSuccessful = false
-        throw `DSL parse failed in: ${node.name} [${i}]`
-      }
+  if (
+    projectJson.layer &&
+    projectJson.layer.layers &&
+    Array.isArray(projectJson.layer.layers)
+  ) {
+    const layers: Layer[] = []
+    projectJson.layer.layers.map((l: any) => {
+      layers.push({
+        ...l,
+        dsl: undefined,
+      } as Layer)
     })
 
-    if (isAllNodeParseSuccessful) {
-      // if all nodes parsed successfully
-      return nodeStrings.join(' > ') // in(inLayerId) > out(outLayerId) by default
-    } else {
-      // if some nodes failed to parse
-      return undefined
-    }
+    setLayerStore('layers', layers)
+    setLayerStore('activeLayerId', projectJson.layer.activeLayerId)
   }
 
-  public toString(): string {
-    let str = this.build()
-    if (str === undefined) throw 'DSL parse failed.'
-    else {
-      // 読みやすくする
-      const inId = this.layerIn.layerId
-      const outId = this.layerOut.layerId
-      if (inId !== undefined)
-        str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`)
-      if (outId !== undefined)
-        str = str.replaceAll(outId, `${findLayerById(outId)?.name || 'N/A'} ID`)
-      str = str.replaceAll(' > ', '\n> ')
-      return str
+  adjustZoomToFit()
+  centeringCanvas()
+}
+
+export const parseCurrentProject = (): string => {
+  return JSON.stringify({
+    project: projectStore,
+    canvas: canvasStore.canvas,
+    images: Object.fromEntries(
+      Object.entries(imageStore).map(([id, state]) => [
+        id,
+        {
+          current: encodeImageData(state.current),
+          width: state.current.width,
+          height: state.current.height,
+          dotMagnification: findLayerById(id)?.dotMagnification,
+        },
+      ])
+    ),
+    layer: {
+      layers: layerStore.layers.map((layer) => ({
+        ...layer,
+        dsl: undefined, // TODO: save dsl
+      })),
+      activeLayerId: layerStore.activeLayerId,
+    },
+  })
+}
+
+export async function saveProject(existingPath?: string) {
+  let selectedPath: String | null
+  if (existingPath) {
+    selectedPath = existingPath
+  } else {
+    try {
+      await mkdir('sledge', {
+        baseDir: BaseDirectory.Home,
+        recursive: true,
+      })
+    } catch (e) {
+      console.warn('ディレクトリ作成スキップまたは失敗:', e)
     }
+
+    const home = await path.homeDir()
+    selectedPath = await save({
+      title: 'Sledge プロジェクトを保存',
+      defaultPath: await path.join(home, `sledge/${projectStore.name}.sledge`),
+      filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
+    })
   }
+
+  if (typeof selectedPath === 'string') {
+    setProjectStore('path', selectedPath)
+    const data = parseCurrentProject()
+    await writeTextFile(selectedPath, data)
+    console.log('プロジェクト保存:', selectedPath)
+
+    const fileLoc = getFileNameAndPath(selectedPath)
+    if (fileLoc !== undefined) addRecent(fileLoc)
+  } else {
+    console.log('保存キャンセルされました')
+  }
+}
+
+================
+File: src/models/types/Layer.ts
+================
+import { DSL } from '~/models/dsl/DSL'
+
+export enum LayerType {
+  Dot,
+  Image,
+  Automate,
+}
+
+export type Layer = {
+  id: string
+  name: string
+  type: LayerType
+  typeDescription: string // 各タイプの説明
+  enabled: boolean
+  dotMagnification: number
+  dsl: DSL
 }
 
 ================
@@ -2906,28 +3258,114 @@ export default function NotFound() {
 }
 
 ================
-File: src/styles/components/canvas/canvas_stack.module.css
+File: src/routes/editor/index.tsx
 ================
-:root {
-  --layer-opacity: 0.15;
+import { useLocation } from "@solidjs/router";
+import { createSignal, onMount } from "solid-js";
+import CanvasArea from "~/components/canvas/CanvasArea";
+import Companion from "~/components/common/companion/Companion";
+import EdgeInfo from "~/components/common/EdgeInfo";
+import SideSections from "~/components/SideSections";
+import { importProjectJsonFromPath } from "~/io/project/project";
+import { showToast } from "~/stores/internal/toastStore";
+import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
+
+export default function Editor() {
+    const location = useLocation();
+
+    const [isImporting, setIsImporting] = createSignal(false)
+
+    if (location.search) {
+        setIsImporting(true);
+        const sp = new URLSearchParams(location.search)
+        const fileName = sp.get("name")
+        const filePath = sp.get("path")
+        const path = `${filePath}\\${fileName}`;
+        console.log(path)
+        importProjectJsonFromPath(path).then(() => {
+            setIsImporting(false);
+        })
+    }
+
+    onMount(() => {
+        adjustZoomToFit();
+        centeringCanvas();
+    });
+    showToast('important info.', 'success', -1)
+
+    return (
+        <>
+            {isImporting() &&
+                <div id="root">
+                    <div class="welcome_root">
+                        <p style={{ "font-size": "3rem" }}>please wait.</p>
+                    </div>
+                </div>
+            }
+
+            {
+                !isImporting() &&
+                <div id="root">
+                    <div class="fl-row">
+                        {/* <EdgeInfo /> */}
+                        <SideSections />
+                    </div>
+
+                    <CanvasArea />
+                    <Companion />
+                </div>
+            }
+        </ >
+    );
 }
 
-.canvas_stack {
-  align-items: center;
-  border: 1px solid black;
-  display: flex;
-  justify-content: center;
-  position: relative;
+================
+File: src/stores/global/globalStore.ts
+================
+import { createStore } from 'solid-js/store'
+import { saveGlobalSettings } from '~/io/global/globalIO'
+
+// project
+export type FileLocation = {
+  path: string
+  name: string
 }
 
-.image-container:focus-within {
-  border: 2px black solid;
-}
+export const [globalStore, setGlobalStore] = createStore({
+  recentOpenedFiles: [
+    {
+      path: 'C:\\Users\\innsb\\Documents',
+      name: 'project.sledge',
+    },
+  ],
+})
 
-.resize-image {
-  height: 100%;
-  object-fit: fill;
-  width: 100%;
+export const addRecent = (loc: FileLocation) => {
+  const path = loc.path
+  const name = loc.name
+
+  // add to recent
+  setGlobalStore((store) => {
+    console.log('path: ' + path)
+    console.log('name: ' + name)
+    if (name && path && store.recentOpenedFiles) {
+      // 履歴にあっても一旦削除
+      let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
+        return f.name !== name || f.path !== path?.toString()
+      })
+      // その後、一番上に追加
+      const newRecentFiles: FileLocation[] = [
+        {
+          name: name,
+          path: path,
+        },
+        ...oldRecentFiles,
+      ]
+      setGlobalStore('recentOpenedFiles', newRecentFiles)
+      saveGlobalSettings()
+    }
+    return store
+  })
 }
 
 ================
@@ -3059,10 +3497,8 @@ File: src/styles/components/section/layer.module.css
   width: 100%;
 }
 
-#layer {
+.item_root {
   width: 100%;
-
-  /* 高さはコンテンツに合わせる */
 }
 
 .disabled {
@@ -3081,10 +3517,11 @@ File: src/styles/components/section/layer.module.css
   display: flex;
   flex-direction: row;
   flex-grow: 1;
-  padding: 8px;
+  height: 24px;
+  padding: 6px;
 }
 
-.layer_det:any-hover {
+.layer_det:hover {
   filter: brightness(0.94);
   transform: translate(0, 1px);
 }
@@ -3101,7 +3538,6 @@ File: src/styles/components/section/layer.module.css
 
 .type {
   font-size: 0.5rem;
-  margin-right: 20px;
   opacity: 0.4;
   position: absolute;
   right: 0;
@@ -3109,16 +3545,10 @@ File: src/styles/components/section/layer.module.css
   width: 100%;
 }
 
-.layer_preview {
-  border: 1px solid black;
-  height: 20px;
-  width: 14px;
-}
-
 .name {
-  font-family: "04B03B";
-  font-size: 1rem;
-  margin: 8px 0 0 24px;
+  font-family: '04B03B';
+  font-size: 16px;
+  margin: 8px 0 0 12px;
 }
 
 .dot_magnif_container {
@@ -3132,13 +3562,13 @@ File: src/styles/components/section/layer.module.css
   pointer-events: all;
 }
 
-.dot_magnif_container:any-hover {
+.dot_magnif_container:hover {
   background-color: #ffffff40;
 }
 
 .dot_magnif {
-  font-family: "04B03B";
-  font-size: 0.8rem;
+  font-family: '04B03B';
+  font-size: 0.75rem;
 }
 
 .active_light {
@@ -3165,122 +3595,33 @@ File: src/styles/components/section/pen.module.css
   width: 100%;
 }
 
-================
-File: src/styles/font.css
-================
-@font-face {
-  font-family: '04B03';
-  src: url('/fonts/04B_03__.ttf');
-}
-
-@font-face {
-  font-family: '04B08';
-  src: url('/fonts/04B_08__.ttf');
-}
-
-@font-face {
-  font-family: '04B03B';
-  src: url('/fonts/04B_03B_.ttf');
-}
-
-@font-face {
-  font-family: '04B09';
-  src: url('/fonts/04B_09__.ttf');
-}
-
-@font-face {
-  font-family: '04B11';
-  src: url('/fonts/04B_11__.ttf');
-}
-
-@font-face {
-  font-family: '04B31';
-  src: url('/fonts/04B_31__.ttf');
-}
-
-================
-File: src/styles/reset.css
-================
-/* html, body, #root, main をウィンドウ全体に */
-html,
-body,
-#root,
-main {
-  height: 100vh;
-  margin: 0;
-  overflow: hidden;
-  padding: 0;
-  touch-action: none;
-  width: 100vw;
-}
-
-/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
-#root {
-  display: flex;
-  flex-direction: row;
-  user-select: none;
-}
-
-/* body / main の背景・フォント */
-body,
-main {
-  background-color: #fdfdfd;
-  font-family: "04B08";
-}
-
-/* ==========================================================================
-     Typography & Basic Elements
-     ========================================================================== */
-
-p {
-  font-size: 0.5rem;
-  letter-spacing: 2px;
-  margin: 0;
-}
-
-.it {
-  font-style: italic;
-}
-
-ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-button,
-a,
-input {
-  font-family: "04B08";
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-}
-
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type="number"] {
-  appearance: textfield;
-}
-
-button {
-  background: white;
-  border: 1px black solid;
-  border-radius: 2px;
+.name {
   cursor: pointer;
-  font-size: 0.5rem;
-  height: fit-content;
-  padding: 2px 6px;
+  font-size: 8px;
+  padding: 10px 0;
   pointer-events: all;
+  width: 20%;
 }
 
-button:any-hover {
-  background: #f0f0f0;
-  transform: translateY(1px);
+================
+File: src/styles/section.css
+================
+.section_root {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.section_caption {
+  font-family: '04B11';
+  font-size: 6px;
+  margin-bottom: 12px;
+}
+
+.section_content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 ================
@@ -3486,6 +3827,41 @@ File: todo.md
 - [x] `ui:` companion
 
 ================
+File: dist-tcm/styles/components/companion.module.css.d.ts
+================
+declare const styles: {
+  readonly "companion": string;
+  readonly "fluffy": string;
+  readonly "giggle": string;
+  readonly "quote": string;
+  readonly "quote_box": string;
+  readonly "quote_box_container": string;
+  readonly "root": string;
+  readonly "wrapper": string;
+};
+export = styles;
+
+================
+File: dist-tcm/styles/global.css.d.ts
+================
+declare const styles: {
+  readonly "clear": string;
+  readonly "main": string;
+  readonly "name": string;
+  readonly "path": string;
+  readonly "recent_files": string;
+  readonly "recent_files_caption": string;
+  readonly "root": string;
+  readonly "side_item": string;
+  readonly "side_section": string;
+  readonly "sledge": string;
+  readonly "welcome_container": string;
+  readonly "welcome_headline": string;
+  readonly "welcome_root": string;
+};
+export = styles;
+
+================
 File: src-tauri/src/commands/jpeg_glitch.rs
 ================
 use image::{RgbImage, Rgba, RgbaImage};
@@ -3641,9 +4017,522 @@ pub fn run_pipeline(
 }
 
 ================
+File: src/components/canvas/stacks/CanvasStack.tsx
+================
+import { Component, createEffect, For, onMount } from "solid-js";
+import { canvasStore } from "~/stores/project/canvasStore";
+import { activeLayer, allLayers, layerStore } from "~/stores/project/layerStore";
+
+import styles from "@styles/components/canvas/canvas_stack.module.css";
+
+import { cloneImageData } from "~/models/factories/utils";
+import { DrawState, getDrawnImageData } from "~/models/layer/getDrawnImageData";
+import { redo, undo } from "~/models/layer/history";
+import { registerNewHistory } from "~/models/layer/layerImage";
+import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
+import { TouchableCanvas } from "./TouchableCanvas";
+
+const CanvasStack: Component<{}> = (props) => {
+  let wrapper;
+  const layerCanvasRefs: {
+    [id: string]: LayerCanvasRef;
+  } = {};
+
+  const activeCanvasRef = () => {
+    const active = activeLayer();
+
+    if (active) return layerCanvasRefs[active.id];
+    else return;
+  };
+
+  onMount(() => {
+    window.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key === "z") {
+        undo(layerStore.activeLayerId);
+        activeCanvasRef()?.update();
+      } else if (e.ctrlKey && e.key === "y") {
+        redo(layerStore.activeLayerId);
+        activeCanvasRef()?.update();
+      }
+    });
+  });
+
+  const handleDraw = (
+    type: DrawState,
+    position: { x: number; y: number },
+    lastPos?: { x: number; y: number },
+  ) => {
+    switch (type) {
+      case DrawState.start:
+        console.log("stroke start.");
+        break;
+      case DrawState.move:
+        console.log("stroke move.");
+        break;
+      case DrawState.end:
+        console.log("stroke end.");
+        break;
+    }
+
+    const active = activeLayer();
+
+    if (active) {
+      const activeRef = layerCanvasRefs[active.id];
+      if (type === DrawState.start) {
+        activeRef.initDrawingBuffer();
+      } else {
+        const drawingBuffer = activeRef.getDrawingBuffer();
+        if (drawingBuffer) {
+          const newImageData = getDrawnImageData(
+            active.id,
+            type,
+            drawingBuffer,
+            position,
+            lastPos,
+          );
+
+          if (newImageData) {
+            activeRef.setImageData(newImageData);
+            if (type === DrawState.end) {
+              activeRef.resetDrawingBuffer();
+              registerNewHistory(active.id, cloneImageData(newImageData));
+            }
+          }
+        }
+      }
+    }
+  };
+
+  createEffect(() => {
+    const borderCanvas = document.getElementById("borderCanvas") as HTMLCanvasElement;
+    const ctx = borderCanvas.getContext("2d")!;
+    ctx.clearRect(0, 0, borderCanvas.width, borderCanvas.height);
+    ctx.strokeStyle = "#999";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, borderCanvas.width - 1, borderCanvas.height - 1);
+  });
+
+  return (
+    <div style={{ position: "relative" }}>
+      <svg viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" />
+
+        <rect x="120" width="100" height="100" rx="15" />
+      </svg>
+
+      <div ref={wrapper} class={styles.canvas_stack}>
+
+        <TouchableCanvas
+          onStrokeStart={(p, lp) => handleDraw(DrawState.start, p, lp)}
+          onStrokeMove={(p, lp) => handleDraw(DrawState.move, p, lp)}
+          onStrokeEnd={(p, lp) => handleDraw(DrawState.end, p, lp)}
+        />
+
+        <For each={allLayers()}>
+          {(layer, index) => (
+            <LayerCanvas
+              ref={layerCanvasRefs[layer.id]}
+              layer={layer}
+              zIndex={allLayers().length - index()}
+            />
+          )}
+        </For>
+      </div>
+    </div>
+  );
+};
+
+export default CanvasStack;
+
+================
+File: src/components/common/ImportImageButton.tsx
+================
+import { importImageToActiveLayer } from "~/io/internal/import"; // 上で作った関数
+
+const ImportImageButton = () => {
+  let fileInputRef: HTMLInputElement | undefined;
+
+  const handleClick = () => {
+    fileInputRef?.click(); // hidden input を手動でクリック
+  };
+
+  const handleFileChange = (e: Event) => {
+    const target = e.currentTarget as HTMLInputElement;
+    const file = target.files?.[0];
+    if (file) {
+      importImageToActiveLayer(file);
+      target.value = ""; // 同じファイルを再選択可能にする
+    }
+  };
+
+  return (
+    <>
+      <button onClick={handleClick}>Import</button>
+
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+    </>
+  );
+};
+
+export default ImportImageButton;
+
+================
+File: src/components/common/Slider.tsx
+================
+import styles from "@styles/components/slider.module.css";
+import { Component, createSignal } from "solid-js";
+
+interface SliderProps {
+  min: number;
+  max: number;
+  default: number;
+  allowFloat?: boolean;
+
+  onValueChanged?: (newValue: number) => void;
+}
+
+const Slider: Component<SliderProps> = (props) => {
+  let sliderRef: HTMLDivElement | undefined;
+  const [isDrag, setDrag] = createSignal(false);
+  const [value, setValue] = createSignal(props.default);
+
+  const percent = () => ((value() - props.min) / (props.max - props.min)) * 100;
+
+  const handlePointerDown = (e: PointerEvent) => {
+    setDrag(true);
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+  };
+
+  const handlePointerMove = (e: PointerEvent) => {
+    if (!sliderRef || !isDrag()) return;
+    const rect = sliderRef.getBoundingClientRect();
+    let pos = e.clientX - rect.left;
+    pos = Math.max(0, Math.min(pos, rect.width)); // clamp
+
+    const newValueRaw =
+      props.min + (pos / rect.width) * (props.max - props.min);
+    const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
+    setValue(newValue);
+    if (props.onValueChanged) props.onValueChanged(newValue);
+  };
+
+  const handlePointerUp = (e: PointerEvent) => {
+    setDrag(false);
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", handlePointerUp);
+  };
+
+  const onLineClick = (e: MouseEvent) => {
+    if (!sliderRef) return;
+    const rect = sliderRef.getBoundingClientRect();
+    let pos = e.clientX - rect.left;
+    pos = Math.max(0, Math.min(pos, rect.width)); // clamp
+
+    const newValueRaw =
+      props.min + (pos / rect.width) * (props.max - props.min);
+    const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
+    setValue(newValue);
+    if (props.onValueChanged) props.onValueChanged(newValue);
+  };
+
+  return (
+    <div class={styles.root}>
+      <div class={styles.slider} ref={sliderRef}>
+        <div class={styles["line-hitbox"]} onPointerDown={handlePointerDown} onClick={onLineClick}>
+          <div class={styles.line} />
+        </div>
+        <div style={{ left: `${percent()}%` }} class={styles.handle} />
+      </div>
+    </div>
+  );
+};
+
+export default Slider;
+
+================
+File: src/main.tsx
+================
+import { render } from "solid-js/web";
+import App from "./app";
+
+render(() => <App />, document.getElementById("root")!);
+
+================
+File: src/models/dsl/DSL.ts
+================
+import { SledgeNode } from '~/models/dsl/nodes/DSLNodes'
+import { findLayerById } from '~/stores/project/layerStore'
+import { LayerIn } from './nodes/pass/LayerIn'
+import { LayerOut } from './nodes/pass/LayerOut'
+
+export class DSL {
+  layerIn: LayerIn
+  readonly nodes: SledgeNode[]
+  layerOut: LayerOut
+
+  constructor(inLayerId: string, outLayerId: string) {
+    this.layerIn = new LayerIn(inLayerId)
+    this.nodes = []
+    this.layerOut = new LayerOut(outLayerId)
+  }
+
+  public addNode(node: SledgeNode) {
+    this?.nodes.push(node)
+  }
+
+  public build(exceptIn: boolean = false): string | undefined {
+    const nodes =
+      exceptIn ?
+        [...this.nodes, this.layerOut]
+      : [this.layerIn, ...this.nodes, this.layerOut]
+
+    let nodeStrings: string[] = []
+    let isAllNodeParseSuccessful = true
+    nodes.forEach((node, i) => {
+      const nodeStr = node.getNodeString()
+      if (nodeStr !== undefined) nodeStrings.push(nodeStr)
+      else {
+        isAllNodeParseSuccessful = false
+        throw `DSL parse failed in: ${node.name} [${i}]`
+      }
+    })
+
+    if (isAllNodeParseSuccessful) {
+      // if all nodes parsed successfully
+      return nodeStrings.join(' > ') // in(inLayerId) > out(outLayerId) by default
+    } else {
+      // if some nodes failed to parse
+      return undefined
+    }
+  }
+
+  public toString(): string {
+    let str = this.build()
+    if (str === undefined) throw 'DSL parse failed.'
+    else {
+      // 読みやすくする
+      const inId = this.layerIn.layerId
+      const outId = this.layerOut.layerId
+      if (inId !== undefined)
+        str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`)
+      if (outId !== undefined)
+        str = str.replaceAll(outId, `${findLayerById(outId)?.name || 'N/A'} ID`)
+      str = str.replaceAll(' > ', '\n> ')
+      return str
+    }
+  }
+}
+
+================
+File: src/models/factories/createLayer.ts
+================
+import { v4 as uuidv4 } from "uuid";
+import { DSL } from "../dsl/DSL";
+import { initLayer } from "../layer/layerImage";
+import { Layer, LayerType } from "../types/Layer";
+
+export const createLayer = (
+  name: string,
+  type: LayerType,
+  enabled = true,
+  dotMagnification = 1,
+  dsl?: DSL,
+): Layer => {
+  const id = uuidv4();
+  initLayer(id, dotMagnification);
+  return {
+    id,
+    name,
+    type,
+    typeDescription: getTypeString(type),
+    enabled,
+    dotMagnification,
+    dsl: dsl || new DSL(id, id),
+  };
+};
+
+function getTypeString(type: LayerType): string {
+  switch (type) {
+    case LayerType.Dot:
+      return "dot layer.";
+    case LayerType.Image:
+      return "image layer.";
+    case LayerType.Automate:
+      return "automate layer.";
+    default:
+      return "N/A.";
+  }
+}
+
+================
+File: src/models/types/Canvas.ts
+================
+export type Canvas = {
+  width: number;
+  height: number;
+};
+
+export const createCanvas = (width = 800, height = 1200): Canvas => {
+  return {
+    width,
+    height,
+  };
+};
+
+================
+File: src/styles/components/canvas/canvas_stack.module.css
+================
+:root {
+  --layer-opacity: 0.15;
+}
+
+.canvas_stack {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.image-container:focus-within {
+  border: 2px black solid;
+}
+
+.resize-image {
+  height: 100%;
+  object-fit: fill;
+  width: 100%;
+}
+
+================
+File: src/styles/font.css
+================
+@font-face {
+  font-family: '04B03';
+  src: url('/fonts/04B_03__.ttf');
+}
+
+@font-face {
+  font-family: '04B08';
+  src: url('/fonts/04B_08__.ttf');
+}
+
+@font-face {
+  font-family: '04B03B';
+  src: url('/fonts/04B_03B_.ttf');
+}
+
+@font-face {
+  font-family: '04B09';
+  src: url('/fonts/04B_09__.ttf');
+}
+
+@font-face {
+  font-family: '04B11';
+  src: url('/fonts/04B_11__.ttf');
+}
+
+@font-face {
+  font-family: '04B31';
+  src: url('/fonts/04B_31__.ttf');
+}
+
+@font-face {
+  font-family: 'Terminus (TTF)';
+  src: url('/fonts/terminus/TerminusTTF-4.49.3.ttf');
+}
+
+================
+File: src/utils/MetricUtils.ts
+================
+export function roundPosition(position: { x: number; y: number }): {
+  x: number;
+  y: number;
+} {
+  return {
+    x: Math.floor(position.x),
+    y: Math.floor(position.y),
+  };
+}
+
+export function drawLine(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  draw: (x: number, y: number) => void,
+) {
+  const dx = Math.abs(x1 - x0);
+  const dy = Math.abs(y1 - y0);
+  const sx = x0 < x1 ? 1 : -1;
+  const sy = y0 < y1 ? 1 : -1;
+  let err = dx - dy;
+
+  while (true) {
+    draw(x0, y0);
+    if (x0 === x1 && y0 === y1) break;
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x0 += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y0 += sy;
+    }
+  }
+}
+
+================
+File: src-tauri/capabilities/default.json
+================
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "enables the default permissions",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "fs:default",
+
+    "dialog:allow-save",
+    "dialog:allow-open",
+
+    "fs:allow-open",
+    "fs:allow-write",
+    "fs:allow-read",
+    "fs:allow-rename",
+    "fs:allow-mkdir",
+    "fs:allow-remove",
+    "fs:allow-write-text-file",
+    "fs:allow-read-text-file",
+    "fs:read-all",
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "**" }]
+    },
+
+    "core:window:allow-hide",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:window:allow-close",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging"
+  ]
+}
+
+================
 File: src/components/canvas/CanvasAreaInteract.tsx
 ================
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
+import { canvasStore, getReferencedZoom, setCanvasStore } from "~/stores/project/canvasStore";
 
 class CanvasAreaInteract {
   private dragPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -3735,11 +4624,12 @@ class CanvasAreaInteract {
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
+    const referencedZoom = getReferencedZoom()
     const delta =
-      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
+      (e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep) * referencedZoom;
 
     const zoomOld = canvasStore.zoom;
-    const zoomNew = Math.max(0.1, Math.min(8, canvasStore.zoom + delta));
+    const zoomNew = Math.max(canvasStore.zoomMin * referencedZoom, Math.min(canvasStore.zoomMax * referencedZoom, canvasStore.zoom + delta));
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;
@@ -3905,55 +4795,6 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
 export default ColorBox;
 
 ================
-File: src/components/common/ColorPicker.tsx
-================
-import iro from "@jaames/iro";
-import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
-import { Component, createEffect } from "solid-js";
-import { setCurrentPenColor } from "~/models/types/Pen";
-import { currentPen } from "~/stores/internal/penStore";
-
-const ColorPicker: Component<{}> = (props) => {
-  let colorPicker: IroColorPicker;
-
-  createEffect(() => {
-    colorPicker.setColors([currentPen().color]);
-  });
-
-  return (
-    <div
-      ref={(el) => {
-        colorPicker = iro.ColorPicker(el, {
-          width: 200,
-          padding: 0,
-          color: currentPen().color,
-          handleRadius: 4,
-          layoutDirection: "horizontal",
-          layout: [
-            {
-              component: iro.ui.Box,
-              options: {},
-            },
-            {
-              component: iro.ui.Slider,
-              options: {
-                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
-                sliderType: "hue",
-              },
-            },
-          ],
-        });
-        colorPicker.on("color:change", function (color: any) {
-          setCurrentPenColor(color.hexString);
-        });
-      }}
-    ></div>
-  );
-};
-
-export default ColorPicker;
-
-================
 File: src/components/common/DSLEditor.tsx
 ================
 import { Component, createSignal, For, onMount } from "solid-js";
@@ -4012,7 +4853,7 @@ import { Component, For } from "solid-js";
 import { colorStore } from "~/stores/internal/colorStore";
 
 import styles from "@styles/components/section/color.module.css";
-import ColorPicker from "~/components/common/ColorPicker";
+import ColorPicker from "~/components/section/item/ColorPicker";
 import { setCurrentPenColor } from "~/models/types/Pen";
 import ColorBox from "../common/ColorBox";
 
@@ -4024,22 +4865,26 @@ const Color: Component<{}> = (props) => {
   return (
     <div class="section_root">
       <p class="section_caption">color.</p>
-      <div class="section_content">
-        <div class={styles.color_picker}>
-          <ColorPicker />
+      <div class="section_content" style={{ "flex-direction": "row", margin: "8px 0" }}>
+        <div class={styles.description_container}>
+          <p class={styles.swatch_description}>swatch.</p>
         </div>
         <div class={styles.swatch_container}>
           <For each={colorStore.swatches}>
             {(item, index) => (
               <ColorBox
                 color={item}
-                sizePx={14}
+                sizePx={8}
                 onClick={(color) => onColorClicked(color, index())}
                 enableUsingSelection={true}
               />
             )}
           </For>
         </div>
+        <div class={styles.description_container}>
+          <p class={styles.picker_description}>picker.</p>
+        </div>
+        <ColorPicker />
       </div>
     </div>
   );
@@ -4052,11 +4897,14 @@ File: src/components/section/item/LayerItem.tsx
 ================
 import styles from "@styles/components/section/layer.module.css";
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
-import { Component } from "solid-js";
+import { Component, onMount } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
 import { layerStore, setLayerStore } from "~/stores/project/layerStore";
+import LayerPreview from "./LayerPreview";
+import { createPreviewCanvas } from "~/models/factories/canvasPreview";
+import { imageStore } from "~/stores/project/imageStore";
 
 interface LayerItemProps {
   index: number;
@@ -4083,6 +4931,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       detClass = "automate";
       break;
   }
+  let previewRef: HTMLDivElement;
 
   const onDetClicked = () => {
     setLayerStore("activeLayerId", layer.id);
@@ -4105,7 +4954,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   return (
     <div
-      class={styles.layer}
+      class={styles.item_root}
       classList={{
         "opacity-50": sortable.isActiveDraggable,
         "transition-transform": state && !!state.active.draggable,
@@ -4123,7 +4972,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             .join(" ")}
           onClick={onDetClicked}
         >
-          <div class={styles.layer_preview} onClick={onPreviewClicked} />
+          <LayerPreview layer={layer} onClick={onPreviewClicked} />
           <p class={styles.name}> {layer.name}</p>
           <div
             class={styles.dot_magnif_container}
@@ -4135,8 +4984,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           >
             <p class={styles.dot_magnif}>x{layer.dotMagnification}</p>
           </div>
+          <Light class={styles.active_light} on={isActive()} />
         </div>
-        <Light class={styles.active_light} on={isActive()} />
       </div>
     </div>
   );
@@ -4168,12 +5017,9 @@ const PenItem: Component<Props> = (props: Props) => {
       <Light on={props.isInUse} />
 
       <p
+        class={styles.name}
         style={{
-          width: "20%",
-          padding: "10px 0",
-          color: props.isInUse ? "red" : "unset",
-          cursor: "pointer",
-          "pointer-events": "all",
+          color: props.isInUse ? "red" : "unset"
         }}
         onClick={() => {
           setPenStore({ usingIndex: penStore.pens.indexOf(props.pen) });
@@ -4182,7 +5028,7 @@ const PenItem: Component<Props> = (props: Props) => {
         {props.pen.name}.
       </p>
 
-      <ColorBox color={props.pen.color} />
+      <ColorBox color={props.pen.color} sizePx={8} />
 
       <div style={{ "flex-grow": 1 }}>
         <Slider
@@ -4354,55 +5200,6 @@ const PenConfig: Component<{}> = (props) => {
 export default PenConfig;
 
 ================
-File: src/main.tsx
-================
-import { render } from "solid-js/web";
-import App from "./app";
-
-render(() => <App />, document.getElementById("root")!);
-
-================
-File: src/models/factories/createLayer.ts
-================
-import { v4 as uuidv4 } from "uuid";
-import { DSL } from "../dsl/DSL";
-import { initLayer } from "../layer/layerImage";
-import { Layer, LayerType } from "../types/Layer";
-
-export const createLayer = (
-  name: string,
-  type: LayerType,
-  enabled = true,
-  dotMagnification = 1,
-  dsl?: DSL,
-): Layer => {
-  const id = uuidv4();
-  initLayer(id, dotMagnification);
-  return {
-    id,
-    name,
-    type,
-    typeDescription: getTypeString(type),
-    enabled,
-    dotMagnification,
-    dsl: dsl || new DSL(id, id),
-  };
-};
-
-function getTypeString(type: LayerType): string {
-  switch (type) {
-    case LayerType.Dot:
-      return "dot layer.";
-    case LayerType.Image:
-      return "image layer.";
-    case LayerType.Automate:
-      return "automate layer.";
-    default:
-      return "N/A.";
-  }
-}
-
-================
 File: src/models/factories/removeLayer.ts
 ================
 import { imageStore, setImageStore } from '~/stores/project/imageStore'
@@ -4460,21 +5257,6 @@ export function registerNewHistory(layerId: string, newData: ImageData) {
 }
 
 ================
-File: src/models/types/Canvas.ts
-================
-export type Canvas = {
-  width: number;
-  height: number;
-};
-
-export const createCanvas = (width = 800, height = 1200): Canvas => {
-  return {
-    width,
-    height,
-  };
-};
-
-================
 File: src/models/types/Pen.ts
 ================
 import { penStore, setPenStore } from '~/stores/internal/penStore'
@@ -4491,135 +5273,157 @@ export const setCurrentPenColor = (colorHexString: string) => {
 }
 
 ================
-File: src/styles/global.css
+File: src/styles/reset.css
 ================
-@import url('font.css');
-@import url('reset.css');
-@import url('utils.css');
-@import url('section.css');
-
-#sidebar {
-  display: flex;
-  flex-direction: row;
+/* html, body, #root, main をウィンドウ全体に */
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  touch-action: none;
+  width: 100vw;
 }
 
-#sidebar > #edge {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 10px 0 20px 14px;
+/* body / main の背景・フォント */
+body,
+main {
+  background-color: #fdfdfd;
+  font-family: '04B08';
+  width: 100vw;
 }
 
-#sidebar > #edge > p {
+body {
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: never;
+}
+
+/* ==========================================================================
+     Typography & Basic Elements
+     ========================================================================== */
+
+p,
+a {
   font-size: 0.5rem;
   letter-spacing: 2px;
   margin: 0;
-  transform: rotate(180deg) scaleX(0.8);
-  white-space: nowrap;
-  writing-mode: vertical-rl;
 }
 
-#sidebar > #content {
-  border-right: 1px solid black;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  height: 100%;
-  padding: var(--window-top-padding) 50px 10px 40px;
-  width: 300px;
+a {
+  cursor: pointer;
 }
 
-#sledge {
-  bottom: 10px;
-  position: absolute;
-  right: 10px;
+ul {
+  list-style: none;
+  padding-left: 0;
 }
 
-.welcome_root {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  width: 100%;
+button,
+a,
+input {
+  font-family: '04B08';
+  letter-spacing: 2px;
 }
 
-.welcome_container {
-  display: flex;
-  flex-direction: column;
-  min-width: 50%;
+input {
+  border: none;
+  border-bottom: 1px solid black;
+  outline: none;
 }
 
-.welcome_headline {
-  font-family: '04B09';
-  font-size: 5rem;
-  letter-spacing: 8px;
-  margin-bottom: 12px;
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
-.recent_files {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
+/* Firefox */
+input[type='number'] {
+  appearance: textfield;
+}
 
-  .name {
-    cursor: pointer;
-    font-family: '04B03B';
-    font-size: 1rem;
+button {
+  background: white;
+  border: 1px black solid;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.5rem;
+  height: fit-content;
+  padding: 2px 6px;
+  pointer-events: all;
 
-    &:hover {
-      color: red;
-    }
+  &:hover {
+    background: #f0f0f0;
   }
 
-  .path {
-    color: grey;
-    font-family: '04B03B';
-    font-size: 0.5rem;
+  &:active {
+    background: #f0f0f0;
+    transform: translateY(1px);
   }
 }
 
 ================
-File: src/utils/MetricUtils.ts
+File: tsconfig.json
 ================
-export function roundPosition(position: { x: number; y: number }): {
-  x: number;
-  y: number;
-} {
-  return {
-    x: Math.floor(position.x),
-    y: Math.floor(position.y),
-  };
-}
-
-export function drawLine(
-  x0: number,
-  y0: number,
-  x1: number,
-  y1: number,
-  draw: (x: number, y: number) => void,
-) {
-  const dx = Math.abs(x1 - x0);
-  const dy = Math.abs(y1 - y0);
-  const sx = x0 < x1 ? 1 : -1;
-  const sy = y0 < y1 ? 1 : -1;
-  let err = dx - dy;
-
-  while (true) {
-    draw(x0, y0);
-    if (x0 === x1 && y0 === y1) break;
-    const e2 = 2 * err;
-    if (e2 > -dy) {
-      err -= dy;
-      x0 += sx;
-    }
-    if (e2 < dx) {
-      err += dx;
-      y0 += sy;
-    }
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "paths": {
+      "~/*": ["./src/*", "./dist-tcm/*"],
+      "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"]
+    },
+    "rootDirs": ["src", "dist-tcm"]
   }
 }
+
+================
+File: src-tauri/Cargo.toml
+================
+[package]
+name = "app"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.1.1", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.4.1", features = [] }
+tauri-plugin-log = "2.0.0-rc"
+base64 = "0.22.1"
+rand = "0.9.0"
+image = "0.25.6"
+jpeg-decoder = "0.3.1"
+jpeg-encoder = "0.6.1"
+tauri-plugin-dialog = "2.2.1"
+tauri-plugin-fs = "2.2.1"
 
 ================
 File: src/components/canvas/Controls.tsx
@@ -4628,12 +5432,9 @@ import { Component } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
-import ImportImageButton from "~/components/common/ImportImageButton";
-import { exportActiveLayerUpscaled } from "~/io/export";
-import { redo, undo } from "~/models/layer/history";
+import { isRedoPossible, isUndoPossible, redo, undo } from "~/models/layer/history";
 
 import styles from "@styles/components/canvas/controls.module.css";
-import { exportProjectJson, importProjectJson } from "~/io/project";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => canvasStore.zoom;
@@ -4667,26 +5468,30 @@ const Controls: Component<{}> = (props) => {
         </p> */}
       </div>
       <div class={styles["top-right-nav"]}>
-        <p
+        <img
           class={styles.undo_redo}
+          src="/undo.png"
+          style={{
+            opacity: isUndoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
+            cursor: isUndoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+          }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             undo(layerStore.activeLayerId);
-          }}
-        >
-          &lt;&lt;
-        </p>
-        <p
+          }} />
+        <img
           class={styles.undo_redo}
+          src="/redo.png"
+          style={{
+            opacity: isRedoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
+            cursor: isRedoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+          }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             redo(layerStore.activeLayerId);
-          }}
-        >
-          &gt;&gt;
-        </p>
+          }} />
 
         {/* <DSLEditor /> */}
       </div>
@@ -4920,10 +5725,10 @@ function getMagnificationPosition(
 ================
 File: src/models/layer/history.ts
 ================
-import { setImageStore } from '~/stores/project/imageStore'
+import { showToast } from '~/stores/internal/toastStore'
+import { imageStore, setImageStore } from '~/stores/project/imageStore'
 
 export function undo(layerId: string) {
-  console.log('undo')
   setImageStore(layerId, (state) => {
     if (state.undoStack.length === 0) return state
     const prev = state.undoStack[state.undoStack.length - 1]
@@ -4934,7 +5739,12 @@ export function undo(layerId: string) {
   // updateDSL(layerId);
 }
 
+export function isUndoPossible(layerId: string) {
+  return imageStore[layerId].undoStack?.length !== 0
+}
+
 export function redo(layerId: string) {
+  showToast('redo succeeded', 'success')
   setImageStore(layerId, (state) => {
     if (state.redoStack.length === 0) return state
     const next = state.redoStack[0]
@@ -4945,123 +5755,116 @@ export function redo(layerId: string) {
   // updateDSL(layerId);
 }
 
-================
-File: tsconfig.json
-================
-{
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "allowJs": true,
-    "strict": true,
-    "noEmit": true,
-    "isolatedModules": true,
-    "paths": {
-      "~/*": ["./src/*", "./dist-tcm/*"],
-      "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"]
-    },
-    "rootDirs": ["src", "dist-tcm"]
-  }
+export function isRedoPossible(layerId: string) {
+  return imageStore[layerId].redoStack?.length !== 0
 }
 
 ================
-File: src-tauri/Cargo.toml
+File: src/styles/global.css
 ================
-[package]
-name = "app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
-edition = "2021"
-rust-version = "1.77.2"
+@import url('font.css');
+@import url('reset.css');
+@import url('utils.css');
+@import url('section.css');
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+/* 全体レイアウト（SolidJS のルートを flex コンテナに） */
+#root {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  user-select: none;
+}
 
-[lib]
-name = "app_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
+.main {
+  height: 100%;
+  user-select: none;
+}
 
-[build-dependencies]
-tauri-build = { version = "2.1.1", features = [] }
+#sledge {
+  bottom: 2px;
+  position: absolute;
+  right: 2px;
+}
 
-[dependencies]
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-log = "0.4"
-tauri = { version = "2.4.1", features = [] }
-tauri-plugin-log = "2.0.0-rc"
-base64 = "0.22.1"
-rand = "0.9.0"
-image = "0.25.6"
-jpeg-decoder = "0.3.1"
-jpeg-encoder = "0.6.1"
-tauri-plugin-dialog = "2.2.1"
-tauri-plugin-fs = "2.2.1"
+.welcome_root {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  padding-top: 24px;
+  width: 100%;
+}
 
-================
-File: src-tauri/tauri.conf.json
-================
-{
-  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "sledge",
-  "version": "0.1.0",
-  "identifier": "com.innsbluck",
-  "build": {
-    "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run prettier && npm run build"
-  },
-  "app": {
-    "windows": [
-      {
-        "title": "sledge",
-        "width": 1400,
-        "height": 900,
-        "resizable": true,
-        "fullscreen": false
-      }
-    ],
-    "security": {
-      "csp": null
+.welcome_container {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome_headline {
+  font-family: '04B09';
+  font-size: 5rem;
+  letter-spacing: 8px;
+  margin-bottom: 12px;
+}
+
+.recent_files_caption {
+  color: #333;
+  flex-grow: 1;
+  font-family: '04B03B';
+  margin-bottom: 12px;
+}
+
+.clear {
+  color: #777;
+  cursor: pointer;
+  font-family: '04B03B';
+
+  &:hover {
+    color: red;
+  }
+}
+
+.recent_files {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+
+  .name {
+    cursor: pointer;
+    font-family: '04B09';
+    font-size: 0.5rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      color: red;
     }
-  },
-  "bundle": {
-    "windows": {
-      "allowDowngrades": true,
-      "certificateThumbprint": null,
-      "digestAlgorithm": null,
-      "nsis": null,
-      "signCommand": null,
-      "timestampUrl": null,
-      "tsp": false,
-      "webviewInstallMode": {
-        "silent": true,
-        "type": "downloadBootstrapper"
-      },
-      "wix": null
-    },
-    "fileAssociations": [
-      {
-        "ext": ["sledge"],
-        "description": "Sledge Project File"
-      }
-    ],
-    "active": true,
-    "targets": "all",
-    "icon": [
-      "icons_light/icon.ico",
-      "icons_light/32x32.png",
-      "icons_light/128x128.png",
-      "icons_light/256x256.png"
-    ]
+  }
+
+  .path {
+    color: #00000030;
+    font-family: '04B03B';
+    font-size: 0.5rem;
+  }
+}
+
+.side_section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 24px;
+  padding-top: 12px;
+
+  .side_item {
+    cursor: pointer;
+    font-size: 1rem;
+    width: fit-content;
+
+    &:hover {
+      color: red;
+    }
   }
 }
 
@@ -5250,158 +6053,6 @@ export const TouchableCanvas: Component<Props> = (props) => {
 };
 
 ================
-File: src/components/section/CanvasSettings.tsx
-================
-import { Component, createEffect, createSignal } from "solid-js";
-import { initLayer } from "~/models/layer/layerImage";
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
-import { allLayers, layerStore } from "~/stores/project/layerStore";
-
-import styles from "@styles/components/section/canvas.module.css";
-import { adjustZoomToFit } from "~/stores/project/canvasStore";
-import { updateDSL } from "~/stores/project/imageStore";
-
-const CanvasSettings: Component<{}> = (props) => {
-  const [width, setWidth] = createSignal(canvasStore.canvas.width);
-  const [height, setHeight] = createSignal(canvasStore.canvas.height);
-
-  const changeCanvasSize = (e: any) => {
-    e.preventDefault();
-    setCanvasStore("canvas", "width", width());
-    setCanvasStore("canvas", "height", height());
-    adjustZoomToFit(width(), height());
-
-    allLayers().forEach((layer, i) => {
-      initLayer(layer.id, layer.dotMagnification);
-      updateDSL(layer.id);
-    });
-  };
-
-  const resetAllLayers = (e: any) => {
-    layerStore.layers.forEach((l) => {
-      initLayer(l.id, l.dotMagnification);
-    });
-  };
-
-
-  createEffect(() => {
-    const canvas = canvasStore.canvas;
-    setWidth(canvas.width)
-    setHeight(canvas.height)
-  })
-
-  return (
-    <div class="section_root">
-      <p class="section_caption">canvas.</p>
-
-      <form class="section_content" onSubmit={(e) => changeCanvasSize(e)}>
-        <div class="fl-row">
-          <div>
-            <p>width</p>
-            <input
-              class={styles.size_input}
-              type="number"
-              name="width"
-              onChange={(e) => setWidth(Number(e.target.value))}
-              value={width()}
-              min={0}
-              max={1200}
-              required
-            />
-          </div>
-          <div>
-            <p>height</p>
-            <input
-              class={styles.size_input}
-              type="number"
-              name="height"
-              onChange={(e) => setHeight(Number(e.target.value))}
-              value={height()}
-              min={0}
-              max={1200}
-              required
-            />
-          </div>
-          <button class={styles.button} type="submit">
-            change
-          </button>
-        </div>
-      </form>
-
-      <button class={styles.button} onClick={resetAllLayers}>
-        RESET ALL LAYERS
-      </button>
-    </div>
-  );
-};
-
-export default CanvasSettings;
-
-================
-File: src/utils/DSLUtils.ts
-================
-import { runDSL } from '~/models/dsl/DSLRunner'
-import { imageStore } from '~/stores/project/imageStore'
-import { findLayerById } from '~/stores/project/layerStore'
-import { downloadImageData } from '../io/export'
-
-export const testDSLTime = (layerId: string) => {
-  const layer = findLayerById(layerId)
-  if (layer === undefined) {
-    throw 'layer not found.'
-    return
-  }
-  const imageData = imageStore[layerId].current
-
-  const start = new Date().getTime()
-  console.log(`DSL run started.\n${layer.dsl.build()}`)
-  runDSL(layer.dsl, imageData).then((im) => {
-    const end = new Date().getTime()
-    console.log(`DSL run end.`)
-    console.log(
-      `result: ${im ? 'success' : 'failed'}. TOTAL TIME IS ${end - start}ms.`
-    )
-
-    if (im) downloadImageData(im, 'test-' + end + '.png')
-  })
-}
-
-================
-File: src/app.tsx
-================
-// @refresh reload
-import { MetaProvider } from "@solidjs/meta";
-import { Route, Router } from "@solidjs/router";
-import { Suspense } from "solid-js";
-import Home from "./routes";
-import "./styles/global.css";
-import Editor from "./routes/editor";
-
-export default function App() {
-  // onMount(async () => {
-  //   safeInvoke<string>("hello_from_rust", { name: "Sledge" }).then((msg) => {
-  //     if (msg) {
-  //       console.log("[Rustからの返答]:", msg);
-  //     }
-  //   });
-  // });
-
-  return (
-    <Router
-      root={(props) => (
-        <MetaProvider>
-          <title>Sledge</title>
-          <Suspense>{props.children}</Suspense>
-        </MetaProvider>
-      )}
-    >
-      <Route path="/" component={Home} />
-      <Route path="/editor" component={Editor} />
-    </Router>
-  );
-}
-
-================
 File: src/components/common/companion/Companion.tsx
 ================
 import { Component, createEffect, createSignal } from "solid-js";
@@ -5483,6 +6134,118 @@ export const smartSay = (text: string): boolean => {
 export default Companion;
 
 ================
+File: src/components/section/CanvasSettings.tsx
+================
+import { Component, createEffect, createSignal } from "solid-js";
+import { initLayer } from "~/models/layer/layerImage";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
+import { allLayers, layerStore } from "~/stores/project/layerStore";
+
+import styles from "@styles/components/section/canvas.module.css";
+import { adjustZoomToFit } from "~/stores/project/canvasStore";
+import { updateDSL } from "~/stores/project/imageStore";
+
+const CanvasSettings: Component<{}> = (props) => {
+  const [width, setWidth] = createSignal(canvasStore.canvas.width);
+  const [height, setHeight] = createSignal(canvasStore.canvas.height);
+
+  const changeCanvasSize = (e: any) => {
+    e.preventDefault();
+    setCanvasStore("canvas", "width", width());
+    setCanvasStore("canvas", "height", height());
+    adjustZoomToFit(width(), height());
+
+    allLayers().forEach((layer, i) => {
+      initLayer(layer.id, layer.dotMagnification);
+      updateDSL(layer.id);
+    });
+  };
+
+  const resetAllLayers = (e: any) => {
+    layerStore.layers.forEach((l) => {
+      initLayer(l.id, l.dotMagnification);
+    });
+  };
+
+  return (
+    <div class="section_root">
+      <p class="section_caption">canvas.</p>
+
+      <form class="section_content" onSubmit={(e) => {
+        changeCanvasSize(e)
+      }}>
+        <div class={styles.size_form}>
+          <div>
+            <p>width</p>
+            <input
+              class={styles.size_input}
+              type="number"
+              name="width"
+              onChange={(e) => setWidth(Number(e.target.value))}
+              value={width()}
+              min={0}
+              max={10000}
+              required
+            />
+          </div>
+          <div>
+            <p>height</p>
+            <input
+              class={styles.size_input}
+              type="number"
+              name="height"
+              onChange={(e) => setHeight(Number(e.target.value))}
+              value={height()}
+              min={0}
+              max={10000}
+              required
+            />
+          </div>
+          <button class={styles.button} type="submit">
+            change
+          </button>
+        </div>
+      </form>
+
+      <button class={styles.button} onClick={resetAllLayers}>
+        RESET ALL LAYERS
+      </button>
+    </div>
+  );
+};
+
+export default CanvasSettings;
+
+================
+File: src/utils/DSLUtils.ts
+================
+import { runDSL } from '~/models/dsl/DSLRunner'
+import { imageStore } from '~/stores/project/imageStore'
+import { findLayerById } from '~/stores/project/layerStore'
+import { downloadImageData } from '../io/internal/export'
+
+export const testDSLTime = (layerId: string) => {
+  const layer = findLayerById(layerId)
+  if (layer === undefined) {
+    throw 'layer not found.'
+    return
+  }
+  const imageData = imageStore[layerId].current
+
+  const start = new Date().getTime()
+  console.log(`DSL run started.\n${layer.dsl.build()}`)
+  runDSL(layer.dsl, imageData).then((im) => {
+    const end = new Date().getTime()
+    console.log(`DSL run end.`)
+    console.log(
+      `result: ${im ? 'success' : 'failed'}. TOTAL TIME IS ${end - start}ms.`
+    )
+
+    if (im) downloadImageData(im, 'test-' + end + '.png')
+  })
+}
+
+================
 File: vite.config.js
 ================
 import { defineConfig } from 'vite'
@@ -5534,39 +6297,175 @@ pub fn run() {
 }
 
 ================
+File: src-tauri/tauri.conf.json
+================
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "sledge",
+  "version": "0.1.0",
+  "identifier": "com.innsbluck",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run prettier && npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "sledge",
+        "label": "main",
+        "width": 1200,
+        "height": 800,
+        "acceptFirstMouse": true,
+        "resizable": true,
+        "closable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "decorations": false,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["sledge"],
+        "description": "Sledge Project File"
+      }
+    ],
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons_light/icon.ico",
+      "icons_light/32x32.png",
+      "icons_light/128x128.png",
+      "icons_light/256x256.png"
+    ]
+  }
+}
+
+================
+File: src/app.tsx
+================
+// @refresh reload
+import { MetaProvider } from "@solidjs/meta";
+import { Route, Router } from "@solidjs/router";
+import { onMount, Suspense } from "solid-js";
+import Home from "./routes";
+import Editor from "./routes/editor";
+import { loadGlobalSettings } from "./io/global/globalIO";
+import TitleBar from "./components/TitleBar";
+import ToastContainer from "./components/ToastContainer";
+
+import "./styles/global.css";
+
+export default function App() {
+  onMount(() => {
+    loadGlobalSettings()
+  })
+
+
+  return (
+    <Router
+      root={(props) => (
+        <MetaProvider>
+          <title>Sledge</title>
+          <Suspense>
+            <div class="fl-col">
+              <TitleBar />
+
+              <main class="main">
+                {props.children}
+              </main>
+
+              <ToastContainer />
+
+              <p id="sledge">sledge.</p>
+            </div>
+          </Suspense>
+        </MetaProvider>
+      )}
+    >
+      <Route path="/" component={Home} />
+      <Route path="/editor" component={Editor} />
+    </Router>
+  );
+}
+
+================
 File: src/routes/index.tsx
 ================
 import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
 import EdgeInfo from "~/components/common/EdgeInfo";
-import { globalStore, RecentFile } from "~/stores/global/globalStore";
+import { importProjectJsonFromFileSelection } from "~/io/project/project";
+import { createLayer } from "~/models/factories/createLayer";
+import { LayerType } from "~/models/types/Layer";
+import { globalStore, FileLocation, addRecent, setGlobalStore } from "~/stores/global/globalStore";
+import { setLayerStore } from "~/stores/project/layerStore";
+import { getFileNameAndPath } from "~/utils/getFileNameAndPath";
 
 export default function Home() {
   const navigate = useNavigate();
 
-  const moveToEditor = (recentFile: RecentFile) => {
+  const moveToEditor = async (recentFile: FileLocation) => {
     const params = new URLSearchParams();
     params.append("name", recentFile.name)
     params.append("path", recentFile.path)
     navigate(`/editor?${params.toString()}`, { replace: false });
   }
 
-  return (
-    <main>
-      <div id="root">
-        <div id="sidebar">
-          <EdgeInfo />
+  const createNew = () => {
+    const DEFAULT_LAYERS = [createLayer('dot1', LayerType.Dot, true, 1)]
+    setLayerStore("layers", DEFAULT_LAYERS);
+    setLayerStore("activeLayerId", DEFAULT_LAYERS[0].id);
+    navigate(`/editor`, { replace: false });
+  }
 
-        </div>
-        <div class="welcome_root">
+  const openProject = () => {
+    importProjectJsonFromFileSelection().then((file: string | undefined) => {
+      if (file !== undefined) {
+        const loc = getFileNameAndPath(file);
+        if (loc !== undefined) addRecent(loc)
+        navigate(`/editor`, { replace: false });
+      }
+    })
+  }
+
+
+  const clearRecentFiles = () => {
+    setGlobalStore("recentOpenedFiles", []);
+  }
+
+  return (
+    <div id="root">
+      <div id="sidebar">
+        <EdgeInfo />
+
+      </div>
+      <div class="welcome_root">
+        <div class="fl-row" style={{ width: "50%" }}>
+
           <div class="welcome_container">
             <p class="welcome_headline">hello.</p>
+            <div class="side_section">
+              <a class="side_item" onClick={() => createNew()}>+ new.</a>
+              <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => openProject()}>&gt; open.</a>
+            </div>
 
-            <div class="section_root">
-              <p class="section_caption">recent files.</p>
+            <div class="section_root" style={{ "min-height": "180px" }}>
+              <div class="fl-row" style={{ width: "100%" }}>
+                <p class="recent_files_caption" >recent files.</p>
+                <p class="clear" onClick={() => clearRecentFiles()}>clear</p>
+              </div>
               <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
                 <For each={globalStore.recentOpenedFiles}>
                   {(item, i) => {
+                    console.log(item)
                     return <div class="recent_files">
                       <p>■</p>
                       <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
@@ -5574,12 +6473,14 @@ export default function Home() {
                     </div>
                   }}
                 </For>
+
               </div>
             </div>
           </div>
+
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -5610,8 +6511,8 @@ export default () => {
   onMount(() => {
     // set Canvas to center
     setCanvasStore("canvasAreaSize", {
-      width: wrapper.scrollWidth,
-      height: wrapper.scrollHeight,
+      width: wrapper.clientWidth,
+      height: wrapper.clientHeight,
     });
     adjustZoomToFit();
     centeringCanvas();
@@ -5773,6 +6674,7 @@ File: package.json
   },
   "dependencies": {
     "@jaames/iro": "^5.5.2",
+    "@solid-primitives/deep": "^0.3.1",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@tauri-apps/api": "^2.4.1",

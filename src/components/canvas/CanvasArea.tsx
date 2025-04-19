@@ -22,8 +22,8 @@ export default () => {
   onMount(() => {
     // set Canvas to center
     setCanvasStore("canvasAreaSize", {
-      width: wrapper.scrollWidth,
-      height: wrapper.scrollHeight,
+      width: wrapper.clientWidth,
+      height: wrapper.clientHeight,
     });
     adjustZoomToFit();
     centeringCanvas();

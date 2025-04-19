@@ -10,6 +10,7 @@ import { redo, undo } from "~/models/layer/history";
 import { registerNewHistory } from "~/models/layer/layerImage";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
+import CanvasOverlaySVG from "./CanvasOverlaySVG";
 
 const CanvasStack: Component<{}> = (props) => {
   const layerCanvasRefs: {
@@ -83,6 +84,9 @@ const CanvasStack: Component<{}> = (props) => {
 
   return (
     <div style={{ position: "relative" }}>
+
+      <CanvasOverlaySVG />
+
       <div
         class={styles.canvas_stack}
         style={{

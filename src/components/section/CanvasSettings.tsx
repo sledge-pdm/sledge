@@ -29,19 +29,14 @@ const CanvasSettings: Component<{}> = (props) => {
     });
   };
 
-
-  createEffect(() => {
-    const canvas = canvasStore.canvas;
-    setWidth(canvas.width)
-    setHeight(canvas.height)
-  })
-
   return (
     <div class="section_root">
       <p class="section_caption">canvas.</p>
 
-      <form class="section_content" onSubmit={(e) => changeCanvasSize(e)}>
-        <div class="fl-row">
+      <form class="section_content" onSubmit={(e) => {
+        changeCanvasSize(e)
+      }}>
+        <div class={styles.size_form}>
           <div>
             <p>width</p>
             <input
@@ -51,7 +46,7 @@ const CanvasSettings: Component<{}> = (props) => {
               onChange={(e) => setWidth(Number(e.target.value))}
               value={width()}
               min={0}
-              max={1200}
+              max={10000}
               required
             />
           </div>
@@ -64,7 +59,7 @@ const CanvasSettings: Component<{}> = (props) => {
               onChange={(e) => setHeight(Number(e.target.value))}
               value={height()}
               min={0}
-              max={1200}
+              max={10000}
               required
             />
           </div>

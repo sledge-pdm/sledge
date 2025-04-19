@@ -1,5 +1,14 @@
 # TODO
 
+## roadmap
+
+- [x] phase0: prototype/mock
+- [x] phase1: drawing features (pen, eraser, layer)
+- [ ] phase2: in-app settings (add+edit layers / add+edit pens / edit canvas size + misc)
+- [ ] phase3: more ui feature (dialog, toast, internal log), import/export
+- [ ] phase4: effects (js implementation)
+- [ ] phase5: extra features (optimization, animation, etc)
+
 ## pen / tools
 
 - [x] `tool:` pen
@@ -51,6 +60,8 @@
 
 ## misc
 
+- [x] `misc:` document(dsl)
+- [ ] `misc:` document(sledge)
 - [ ] `ui:` setting screen
 - [ ] `ui:` dialog
 - [ ] `ui:` toast

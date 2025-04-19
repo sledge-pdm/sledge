@@ -1,19 +1,8 @@
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-
-#[tauri::command]
-pub fn brightness(
-    encoded: String,
-    width: usize,
-    height: usize,
-    delta: i8,
-) -> Result<String, String> {
-    let mut data = decode_image_base64(&encoded)?;
-
+pub fn brightness(mut data: Vec<u8>, delta: i8) -> Result<Vec<u8>, String> {
     for i in (0..data.len()).step_by(4) {
         data[i] = data[i].saturating_add_signed(delta);
         data[i + 1] = data[i + 1].saturating_add_signed(delta);
         data[i + 2] = data[i + 2].saturating_add_signed(delta);
     }
-
-    encode_image_base64(&data)
+    Ok(data)
 }

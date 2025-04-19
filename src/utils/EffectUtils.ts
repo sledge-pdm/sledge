@@ -2,7 +2,7 @@ import { decodeImageData, encodeImageData } from "./ImageUtils";
 import { safeInvoke } from "./tauri";
 
 export async function invertImageInRust(
-  image: ImageData
+  image: ImageData,
 ): Promise<ImageData | undefined> {
   const encoded = encodeImageData(image);
   const result = await safeInvoke<string>("invert", {

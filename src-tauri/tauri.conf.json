@@ -7,15 +7,21 @@
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeBuildCommand": "npm run prettier && npm run build"
   },
   "app": {
     "windows": [
       {
         "title": "sledge",
-        "width": 1400,
-        "height": 900,
+        "label": "main",
+        "width": 1200,
+        "height": 800,
+        "acceptFirstMouse": true,
         "resizable": true,
+        "closable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "decorations": false,
         "fullscreen": false
       }
     ],
@@ -24,8 +30,19 @@
     }
   },
   "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["sledge"],
+        "description": "Sledge Project File"
+      }
+    ],
     "active": true,
     "targets": "all",
-    "icon": ["icons_light/icon.ico", "icons_light/32x32.png", "icons_light/128x128.png", "icons_light/256x256.png"]
+    "icon": [
+      "icons_light/icon.ico",
+      "icons_light/32x32.png",
+      "icons_light/128x128.png",
+      "icons_light/256x256.png"
+    ]
   }
 }

@@ -3,8 +3,8 @@ export function roundPosition(position: { x: number; y: number }): {
   y: number;
 } {
   return {
-    x: Math.round(position.x - 0.5),
-    y: Math.round(position.y - 0.5),
+    x: Math.floor(position.x),
+    y: Math.floor(position.y),
   };
 }
 
@@ -13,7 +13,7 @@ export function drawLine(
   y0: number,
   x1: number,
   y1: number,
-  draw: (x: number, y: number) => void
+  draw: (x: number, y: number) => void,
 ) {
   const dx = Math.abs(x1 - x0);
   const dy = Math.abs(y1 - y0);

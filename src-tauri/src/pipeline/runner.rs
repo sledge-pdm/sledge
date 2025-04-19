@@ -21,10 +21,7 @@ pub fn run_pipeline(
             PipelineNode::Command { name, args } => {
                 // matchで対応コマンドを呼び分け（必要なら引数あり）
                 buffer = match name.as_str() {
-                    "grayscale" => {
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&grayscale(encoded, width, height)?)?
-                    }
+                    "grayscale" => grayscale(buffer)?,
                     "jpeg_glitch" => {
                         if args.len() < 2 {
                             return Err("jpeg_glitch requires 2 arguments: seed, quality".into());
@@ -32,20 +29,11 @@ pub fn run_pipeline(
                         let seed = args[0].parse().map_err(|_| "Invalid seed")?;
                         let quality = args[1].parse().map_err(|_| "Invalid quality")?;
                         let amount = args[2].parse().map_err(|_| "Invalid amount")?;
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&jpeg_glitch(
-                            encoded, width, height, seed, quality, amount,
-                        )?)?
+                        jpeg_glitch(buffer, width, height, seed, quality, amount)?
                     }
 
-                    "invert" => {
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&invert(encoded, width, height)?)?
-                    }
-                    "sepia" => {
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&sepia(encoded, width, height)?)?
-                    }
+                    "invert" => invert(buffer)?,
+                    "sepia" => sepia(buffer)?,
                     "brightness" => {
                         if args.len() != 1 {
                             return Err("brightness requires 1 argument".to_string());
@@ -53,8 +41,8 @@ pub fn run_pipeline(
                         let delta: i8 = args[0]
                             .parse()
                             .map_err(|_| "Invalid number for brightness".to_string())?;
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&brightness(encoded, width, height, delta)?)?
+
+                        brightness(buffer, delta)?
                     }
                     _ => return Err(format!("Unknown command: {name}")),
                 };

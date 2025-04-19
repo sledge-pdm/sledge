@@ -1,13 +1,3 @@
 {
-  "emeraldwalk.runonsave": {
-    "commands": [
-      {
-        "match": ".*", // どんなファイルでもいい
-        "isShellCommand": true,
-        "cmd": "npm run watch:css",
-        "runIn": "terminal",
-        "runAtStartup": true
-      }
-    ]
-  }
+  "editor.formatOnSave": true
 }

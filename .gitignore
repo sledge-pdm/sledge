@@ -26,3 +26,7 @@ gitignore
 # System Files
 .DS_Store
 Thumbs.db
+
+# repomix
+repomix-output.txt
+repomix-output.xml

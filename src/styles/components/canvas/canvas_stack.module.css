@@ -1,7 +1,3 @@
-:root {
-  --layer-opacity: 0.15;
-}
-
 .canvas_stack {
   align-items: center;
   display: flex;

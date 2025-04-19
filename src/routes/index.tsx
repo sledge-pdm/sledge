@@ -1,12 +1,16 @@
 import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
-import EdgeInfo from "~/components/common/EdgeInfo";
+import EdgeInfo from "~/components/EdgeInfo";
 import { importProjectJsonFromFileSelection } from "~/io/project/project";
 import { createLayer } from "~/models/factories/createLayer";
 import { LayerType } from "~/models/types/Layer";
 import { globalStore, FileLocation, addRecent, setGlobalStore } from "~/stores/global/globalStore";
 import { setLayerStore } from "~/stores/project/layerStore";
+import { flexCol, flexRow, h100, w100 } from "~/styles/components.css";
+import { sectionRoot } from "~/styles/section_global.css";
 import { getFileNameAndPath } from "~/utils/getFileNameAndPath";
+import { clear, recentFilesCaption, recentFilesContainer, recentFilesItem, recentFilesName, recentFilesPath, sideSection, sideSectionItem, welcomeHeadline, welcomeRoot } from "./start.css";
+import { sideArea } from "~/styles/global.css";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -42,43 +46,41 @@ export default function Home() {
 
   return (
     <div id="root">
-      <div id="sidebar">
+      <div class={sideArea}>
         <EdgeInfo />
-
       </div>
-      <div class="welcome_root">
-        <div class="fl-row" style={{ width: "50%" }}>
 
-          <div class="welcome_container">
-            <p class="welcome_headline">hello.</p>
-            <div class="side_section">
-              <a class="side_item" onClick={() => createNew()}>+ new.</a>
-              <a class="side_item" style={{ "margin-left": "2px" }} onClick={(e) => openProject()}>&gt; open.</a>
-            </div>
+      <div class={welcomeRoot}>
 
-            <div class="section_root" style={{ "min-height": "180px" }}>
-              <div class="fl-row" style={{ width: "100%" }}>
-                <p class="recent_files_caption" >recent files.</p>
-                <p class="clear" onClick={() => clearRecentFiles()}>clear</p>
-              </div>
-              <div class="section_content" style={{ gap: "8px", "margin-top": "4px" }}>
-                <For each={globalStore.recentOpenedFiles}>
-                  {(item, i) => {
-                    console.log(item)
-                    return <div class="recent_files">
-                      <p>■</p>
-                      <p class="name" onClick={(e) => moveToEditor(item)}>{item.name}</p>
-                      <p class="path">{item.path}</p>
-                    </div>
-                  }}
-                </For>
-
-              </div>
-            </div>
+        <div class={flexCol} >
+          <p class={welcomeHeadline}>hello.</p>
+          <div class={sideSection}>
+            <a class={sideSectionItem} onClick={() => createNew()}>+ new.</a>
+            <a class={sideSectionItem} style={{ "margin-left": "2px" }} onClick={(e) => openProject()}>&gt; open.</a>
           </div>
 
+          <div class={sectionRoot}>
+            <div class={[flexRow, w100].join(" ")}>
+              <p class={recentFilesCaption}>recent files.</p>
+              <p class={clear} onClick={() => clearRecentFiles()}>clear</p>
+            </div>
+            <div class={recentFilesContainer}>
+              <For each={globalStore.recentOpenedFiles}>
+                {(item, i) => {
+                  console.log(item)
+                  return <div class={recentFilesItem}>
+                    <p>■</p>
+                    <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>{item.name}</a>
+                    <p class={recentFilesPath}>{item.path}</p>
+                  </div>
+                }}
+              </For>
+
+            </div>
+          </div>
         </div>
+
       </div>
-    </div>
+    </div >
   );
 }

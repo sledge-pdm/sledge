@@ -10,8 +10,8 @@ import {
 import { createMemo, onCleanup, onMount } from "solid-js";
 import Controls from "./Controls";
 
-import styles from "@styles/components/canvas/canvas_area.module.css";
 import CanvasAreaInteract from "./CanvasAreaInteract";
+import { canvasArea } from "~/styles/components/canvas/canvas_area.css";
 
 export default () => {
   let wrapper: HTMLDivElement;
@@ -45,7 +45,7 @@ export default () => {
   });
 
   return (
-    <div class={styles.canvas_area}>
+    <div class={canvasArea}>
       <div
         id="zoompan-wrapper"
         ref={(el) => {

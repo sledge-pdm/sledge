@@ -1,9 +1,11 @@
 import { Component, createSignal } from "solid-js";
 import { saveProject } from "~/io/project/project";
 
-import styles from "@styles/components/section/project.module.css"
 import { projectStore, setProjectStore } from "~/stores/project/projectStore";
 import { exportActiveLayerUpscaled } from "~/io/internal/export";
+import { flexCol, flexRow } from "~/styles/components.css";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/section_global.css";
+import { projectNameInput } from "~/styles/section/project.css";
 
 const Project: Component<{}> = (props) => {
     const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
@@ -24,13 +26,13 @@ const Project: Component<{}> = (props) => {
     }
 
     return (
-        <div class="section_root">
-            <p class="section_caption">project.</p>
-            <div class="section_content">
+        <div class={sectionRoot}>
+            <p class={sectionCaption}>project.</p>
+            <div class={sectionContent}>
 
-                <div class="fl-col">
+                <div class={flexCol}>
                     <input
-                        class={styles.project_name_input}
+                        class={projectNameInput}
                         type="text"
                         name="height"
                         onChange={(e) => {
@@ -48,8 +50,8 @@ const Project: Component<{}> = (props) => {
                         load.
                     </button> */}
 
-                <div class="fl-row" style={{ "align-items": "center", "margin-top": "12px" }}>
-                    <button class={styles.loadsave_button} onClick={() => exportActiveLayerUpscaled()}>
+                <div class={flexRow} style={{ "align-items": "center", "margin-top": "12px" }}>
+                    <button onClick={() => exportActiveLayerUpscaled()}>
                         export.
                     </button>
                     {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}

@@ -139,34 +139,18 @@ pub fn encode_image_base64(data: &[u8]) -> Result<String, String> {
 </file>
 
 <file path="src/commands/brightness.rs">
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-
-#[tauri::command]
-pub fn brightness(
-    encoded: String,
-    width: usize,
-    height: usize,
-    delta: i8,
-) -> Result<String, String> {
-    let mut data = decode_image_base64(&encoded)?;
-
+pub fn brightness(mut data: Vec<u8>, delta: i8) -> Result<Vec<u8>, String> {
     for i in (0..data.len()).step_by(4) {
         data[i] = data[i].saturating_add_signed(delta);
         data[i + 1] = data[i + 1].saturating_add_signed(delta);
         data[i + 2] = data[i + 2].saturating_add_signed(delta);
     }
-
-    encode_image_base64(&data)
+    Ok(data)
 }
 </file>
 
 <file path="src/commands/grayscale.rs">
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-
-#[tauri::command]
-pub fn grayscale(encoded: String, width: usize, height: usize) -> Result<String, String> {
-    let mut data = decode_image_base64(&encoded)?;
-
+pub fn grayscale(mut data: Vec<u8>) -> Result<Vec<u8>, String> {
     for i in (0..data.len()).step_by(4) {
         let r = data[i] as u16;
         let g = data[i + 1] as u16;
@@ -177,37 +161,82 @@ pub fn grayscale(encoded: String, width: usize, height: usize) -> Result<String,
         data[i + 1] = gray;
         data[i + 2] = gray;
     }
-
-    encode_image_base64(&data)
+    Ok(data)
 }
 </file>
 
 <file path="src/commands/invert.rs">
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-
-#[tauri::command]
-pub fn invert(encoded: String, width: usize, height: usize) -> Result<String, String> {
-    let mut decoded = decode_image_base64(&encoded)?;
-
-    for i in (0..decoded.len()).step_by(4) {
-        decoded[i] = 255 - decoded[i];
-        decoded[i + 1] = 255 - decoded[i + 1];
-        decoded[i + 2] = 255 - decoded[i + 2];
+pub fn invert(mut data: Vec<u8>) -> Result<Vec<u8>, String> {
+    for i in (0..data.len()).step_by(4) {
+        data[i] = 255 - data[i];
+        data[i + 1] = 255 - data[i + 1];
+        data[i + 2] = 255 - data[i + 2];
         // alphaはそのまま
     }
-
-    encode_image_base64(&decoded)
+    Ok(data)
 }
 </file>
 
 <file path="src/commands/jpeg_glitch.rs">
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
+use image::{RgbImage, Rgba, RgbaImage};
+use jpeg_decoder::Decoder;
+use jpeg_encoder::{ColorType, Encoder};
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
+use std::io::Cursor;
 
-#[tauri::command]
-pub fn jpeg_glitch(encoded: String, width: usize, height: usize) -> Result<String, String> {
-    let mut data = decode_image_base64(&encoded)?;
+pub fn jpeg_glitch(
+    mut data: Vec<u8>,
+    width: usize,
+    height: usize,
+    seed: u64,
+    quality: u8,
+    amount: f32, // 0.0〜1.0
+) -> Result<Vec<u8>, String> {
+    // RGBA → RGB
+    let mut rgb = RgbImage::new(width as u32, height as u32);
+    for (i, pixel) in data.chunks(4).enumerate() {
+        let x = (i % width) as u32;
+        let y = (i / width) as u32;
+        rgb.put_pixel(x, y, image::Rgb([pixel[0], pixel[1], pixel[2]]));
+    }
 
-    encode_image_base64(&data)
+    // Encode to JPEG
+    let mut jpeg_data: Vec<u8> = Vec::new();
+    {
+        let mut encoder = Encoder::new(&mut jpeg_data, quality);
+        encoder
+            .encode(&rgb, width as u16, height as u16, ColorType::Rgb)
+            .map_err(|e| format!("JPEG encode failed: {e}"))?;
+    }
+
+    // Glitch parameters
+    let mut rng = StdRng::seed_from_u64(seed);
+    let start = 300;
+    let length = jpeg_data.len().saturating_sub(start);
+    let count = ((length as f32) * amount.clamp(0.0, 1.0)).round() as usize;
+
+    for _ in 0..count {
+        let idx = start + rng.random_range(0..length);
+        jpeg_data[idx] = rng.random();
+    }
+
+    // Decode JPEG
+    let mut decoder = Decoder::new(Cursor::new(&jpeg_data));
+    let pixels = decoder
+        .decode()
+        .map_err(|e| format!("JPEG decode failed: {e}"))?;
+    let info = decoder.info().ok_or("Missing JPEG info")?;
+
+    // RGB → RGBA
+    let mut rgba = RgbaImage::new(info.width as u32, info.height as u32);
+    for (i, pixel) in pixels.chunks(3).enumerate() {
+        let x = (i % info.width as usize) as u32;
+        let y = (i / info.width as usize) as u32;
+        rgba.put_pixel(x, y, Rgba([pixel[0], pixel[1], pixel[2], 255]));
+    }
+
+    Ok(rgba.into_raw())
 }
 </file>
 
@@ -238,12 +267,7 @@ pub fn hello_from_rust(name: String) -> String {
 </file>
 
 <file path="src/commands/sepia.rs">
-use crate::commands::base64_utils::{decode_image_base64, encode_image_base64};
-
-#[tauri::command]
-pub fn sepia(encoded: String, width: usize, height: usize) -> Result<String, String> {
-    let mut data = decode_image_base64(&encoded)?;
-
+pub fn sepia(mut data: Vec<u8>) -> Result<Vec<u8>, String> {
     for i in (0..data.len()).step_by(4) {
         let r = data[i] as f32;
         let g = data[i + 1] as f32;
@@ -257,29 +281,20 @@ pub fn sepia(encoded: String, width: usize, height: usize) -> Result<String, Str
         data[i + 1] = tg;
         data[i + 2] = tb;
     }
-
-    encode_image_base64(&data)
+    Ok(data)
 }
 </file>
 
 <file path="src/lib.rs">
 mod commands;
-mod pipeline; // 今後用
+mod pipeline;
 
-use commands::{brightness, grayscale, invert, jpeg_glitch, sepia};
 use pipeline::run_pipeline;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            brightness,
-            grayscale,
-            invert,
-            jpeg_glitch,
-            sepia,
-            run_pipeline,
-        ])
+        .invoke_handler(tauri::generate_handler![run_pipeline,])
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -364,7 +379,7 @@ pub fn parse_pipeline(input: &str) -> Result<Vec<PipelineNode>, String> {
 
 <file path="src/pipeline/runner.rs">
 use super::parser::{parse_pipeline, PipelineNode};
-use crate::commands::{brightness, grayscale, invert, jpeg_glitch, jpeg_glitch, sepia};
+use crate::commands::{brightness, grayscale, invert, jpeg_glitch, sepia};
 use crate::commands::{decode_image_base64, encode_image_base64};
 
 #[tauri::command]
@@ -386,21 +401,19 @@ pub fn run_pipeline(
             PipelineNode::Command { name, args } => {
                 // matchで対応コマンドを呼び分け（必要なら引数あり）
                 buffer = match name.as_str() {
-                    "grayscale" => {
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&grayscale(encoded, width, height)?)?
-                    }
+                    "grayscale" => grayscale(buffer)?,
                     "jpeg_glitch" => {
-                        // something
+                        if args.len() < 2 {
+                            return Err("jpeg_glitch requires 2 arguments: seed, quality".into());
+                        }
+                        let seed = args[0].parse().map_err(|_| "Invalid seed")?;
+                        let quality = args[1].parse().map_err(|_| "Invalid quality")?;
+                        let amount = args[2].parse().map_err(|_| "Invalid amount")?;
+                        jpeg_glitch(buffer, width, height, seed, quality, amount)?
                     }
-                    "invert" => {
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&invert(encoded, width, height)?)?
-                    }
-                    "sepia" => {
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&sepia(encoded, width, height)?)?
-                    }
+
+                    "invert" => invert(buffer)?,
+                    "sepia" => sepia(buffer)?,
                     "brightness" => {
                         if args.len() != 1 {
                             return Err("brightness requires 1 argument".to_string());
@@ -408,8 +421,8 @@ pub fn run_pipeline(
                         let delta: i8 = args[0]
                             .parse()
                             .map_err(|_| "Invalid number for brightness".to_string())?;
-                        let encoded = encode_image_base64(&buffer)?;
-                        decode_image_base64(&brightness(encoded, width, height, delta)?)?
+
+                        brightness(buffer, delta)?
                     }
                     _ => return Err(format!("Unknown command: {name}")),
                 };

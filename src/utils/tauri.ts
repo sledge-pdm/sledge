@@ -1,5 +1,5 @@
-import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 import { getTauriVersion } from "@tauri-apps/api/app";
+import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
 let _isTauri: boolean | null = null;
 
@@ -16,7 +16,7 @@ export async function isTauri(): Promise<boolean> {
 
 export async function safeInvoke<T>(
   cmd: string,
-  args?: Record<string, unknown>
+  args?: Record<string, unknown>,
 ): Promise<T | undefined> {
   if (!(await isTauri())) {
     console.warn(`[safeInvoke] '${cmd}' skipped (not in Tauri environment)`);

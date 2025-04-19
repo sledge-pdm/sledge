@@ -1,18 +1,84 @@
-import CanvasStack from "./canvas_stack/CanvasStack";
+import CanvasStack from "./stacks/CanvasStack";
 
-import styles from "./canvas_area.module.css"
-import Controls from "./controls/Controls";
+import {
+  adjustZoomToFit,
+  canvasStore,
+  centeringCanvas,
+  setCanvasStore,
+} from "~/stores/project/canvasStore";
+
+import { createMemo, onCleanup, onMount } from "solid-js";
+import Controls from "./Controls";
+
+import styles from "@styles/components/canvas/canvas_area.module.css";
+import CanvasAreaInteract from "./CanvasAreaInteract";
 
 export default () => {
+  let wrapper: HTMLDivElement;
+  let canvasStack: HTMLDivElement;
 
-    return (
-        <div class={styles.canvas_area}>
+  let interact: CanvasAreaInteract = new CanvasAreaInteract();
 
-            <div class={styles.canvas_stack_container}>
-                <CanvasStack />
-            </div>
+  onMount(() => {
+    // set Canvas to center
+    setCanvasStore("canvasAreaSize", {
+      width: wrapper.clientWidth,
+      height: wrapper.clientHeight,
+    });
+    adjustZoomToFit();
+    centeringCanvas();
 
-            <Controls />
+    interact.setInteractListeners(wrapper, canvasStack);
+  });
+
+  onCleanup(() => {
+    if (interact !== undefined) {
+      interact.removeInteractListeners(wrapper, canvasStack);
+    }
+  });
+
+  const offsetX = () => canvasStore.offsetOrigin.x + canvasStore.offset.x;
+  const offsetY = () => canvasStore.offsetOrigin.y + canvasStore.offset.y;
+
+  const transform = createMemo(() => {
+    return `translate(${offsetX()}px, ${offsetY()}px) scale(${canvasStore.zoom})`;
+  });
+
+  return (
+    <div class={styles.canvas_area}>
+      <div
+        id="zoompan-wrapper"
+        ref={(el) => {
+          wrapper = el;
+        }}
+        style={{
+          display: "flex",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          padding: 0,
+          margin: 0,
+          width: "100%",
+          height: "100%",
+          "touch-action": "none",
+        }}
+      >
+        <div
+          ref={(el) => (canvasStack = el)}
+          style={{
+            padding: 0,
+            margin: 0,
+            "transform-origin": "0 0",
+            transform: transform(),
+          }}
+        >
+          <CanvasStack />
         </div>
-    );
-}
+      </div>
+
+      <Controls />
+    </div>
+  );
+};

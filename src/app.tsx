@@ -2,31 +2,43 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { onMount, Suspense } from "solid-js";
-import "./app.css";
 import Home from "./routes";
-import { safeInvoke } from "./utils/tauri";
+import Editor from "./routes/editor";
+import { loadGlobalSettings } from "./io/global/globalIO";
+import TitleBar from "./components/TitleBar";
+import ToastContainer from "./components/ToastContainer";
+
+import "./styles/global.css";
 
 export default function App() {
-  // onMount(async () => {
-  //   safeInvoke<string>("hello_from_rust", { name: "Sledge" }).then((msg) => {
-  //     if (msg) {
-  //       console.log("[Rustからの返答]:", msg);
-  //     }
-  //   });
-  // });
+  onMount(() => {
+    loadGlobalSettings()
+  })
+
 
   return (
     <Router
-      root={props => (
+      root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
           <Suspense>
-            {props.children}
+            <div class="fl-col">
+              <TitleBar />
+
+              <main class="main">
+                {props.children}
+              </main>
+
+              <ToastContainer />
+
+              <p id="sledge">sledge.</p>
+            </div>
           </Suspense>
-        </ MetaProvider>
+        </MetaProvider>
       )}
     >
       <Route path="/" component={Home} />
+      <Route path="/editor" component={Editor} />
     </Router>
   );
 }

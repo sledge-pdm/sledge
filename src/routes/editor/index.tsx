@@ -2,11 +2,12 @@ import { useLocation } from "@solidjs/router";
 import { createSignal, onMount } from "solid-js";
 import CanvasArea from "~/components/canvas/CanvasArea";
 import Companion from "~/components/common/companion/Companion";
-import EdgeInfo from "~/components/common/EdgeInfo";
+import EdgeInfo from "~/components/EdgeInfo";
 import SideSections from "~/components/SideSections";
 import { importProjectJsonFromPath } from "~/io/project/project";
-import { showToast } from "~/stores/internal/toastStore";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
+import { flexRow } from "~/styles/components.css";
+import { welcomeRoot } from "../start.css";
 
 export default function Editor() {
     const location = useLocation();
@@ -34,7 +35,7 @@ export default function Editor() {
         <>
             {isImporting() &&
                 <div id="root">
-                    <div class="welcome_root">
+                    <div class={welcomeRoot}>
                         <p style={{ "font-size": "3rem" }}>please wait.</p>
                     </div>
                 </div>
@@ -43,15 +44,15 @@ export default function Editor() {
             {
                 !isImporting() &&
                 <div id="root">
-                    <div class="fl-row">
+                    <div class={flexRow}>
                         <EdgeInfo />
                         <SideSections />
                     </div>
 
                     <CanvasArea />
-                    <Companion />
+                    {/* <Companion /> */}
                 </div>
             }
-        </ >
+        </>
     );
 }

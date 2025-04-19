@@ -1,5 +1,5 @@
 declare const styles: {
-  readonly "canvas_area": string;
+  readonly "content": string;
 };
 export = styles;
 

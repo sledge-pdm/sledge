@@ -1,10 +1,11 @@
 import { Component, For } from "solid-js";
 import { colorStore } from "~/stores/internal/colorStore";
 
-import styles from "@styles/components/section/color.module.css";
 import ColorPicker from "~/components/section/item/ColorPicker";
 import { setCurrentPenColor } from "~/models/types/Pen";
 import ColorBox from "../common/ColorBox";
+import { sectionCaption, sectionContent, sectionRoot } from "~/styles/section_global.css";
+import { colorElemDescription, descriptionContainer, swatchContainer } from "~/styles/section/color.css";
 
 const Color: Component<{}> = (props) => {
   const onColorClicked = (color: string, index: number) => {
@@ -12,13 +13,13 @@ const Color: Component<{}> = (props) => {
   };
 
   return (
-    <div class="section_root">
-      <p class="section_caption">color.</p>
-      <div class="section_content" style={{ "flex-direction": "row", margin: "8px 0" }}>
-        <div class={styles.description_container}>
-          <p class={styles.swatch_description}>swatch.</p>
+    <div class={sectionRoot}>
+      <p class={sectionCaption}>color.</p>
+      <div class={sectionContent} style={{ "flex-direction": "row", margin: "8px 0" }}>
+        <div class={descriptionContainer}>
+          <p class={colorElemDescription}>swatch.</p>
         </div>
-        <div class={styles.swatch_container}>
+        <div class={swatchContainer}>
           <For each={colorStore.swatches}>
             {(item, index) => (
               <ColorBox
@@ -30,8 +31,8 @@ const Color: Component<{}> = (props) => {
             )}
           </For>
         </div>
-        <div class={styles.description_container}>
-          <p class={styles.picker_description}>picker.</p>
+        <div class={descriptionContainer}>
+          <p class={colorElemDescription}>picker.</p>
         </div>
         <ColorPicker />
       </div>

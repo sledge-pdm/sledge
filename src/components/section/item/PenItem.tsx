@@ -5,8 +5,7 @@ import Light from "~/components/common/Light";
 import Slider from "~/components/common/Slider";
 import { Pen } from "~/models/types/Pen";
 import { penStore, setPenStore } from "~/stores/internal/penStore";
-
-import styles from "@styles/components/section/pen.module.css";
+import { penConfigRow, penConfigRowName } from "~/styles/section/pen.css";
 
 interface Props {
   pen: Pen;
@@ -15,11 +14,11 @@ interface Props {
 
 const PenItem: Component<Props> = (props: Props) => {
   return (
-    <div class={styles.row}>
+    <div class={penConfigRow}>
       <Light on={props.isInUse} />
 
       <p
-        class={styles.name}
+        class={penConfigRowName}
         style={{
           color: props.isInUse ? "red" : "unset"
         }}

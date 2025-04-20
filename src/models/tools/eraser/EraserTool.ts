@@ -1,4 +1,3 @@
-import { setPixel } from '~/utils/ImageUtils'
 import { Tool, ToolArgs } from '../ToolBase'
 import { drawCompletionLine, drawSquarePixel } from '../DrawUtils'
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
@@ -12,20 +11,25 @@ export class EraserTool implements Tool {
     agent: LayerImageAgent,
     { position, lastPosition, color, size }: ToolArgs
   ) {
-    const [r, g, b, a] = [0, 0, 0, 0]
-
     if (!size) return false
 
-    drawSquarePixel(position, size, (x, y) => {
-      agent.setPixel({ x, y }, r, g, b, a)
+    drawSquarePixel(position, size, (px, py) => {
+      const diff = agent.deletePixel({ x: px, y: py })
+      if (diff !== undefined) {
+        agent.addPixelDiffs([diff])
+      }
     })
 
-    if (lastPosition !== undefined)
+    if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
-        drawSquarePixel(position, size, (px, py) => {
-          agent.setPixel({ x: px, y: py }, r, g, b, a)
+        drawSquarePixel({ x, y }, size, (px, py) => {
+          const diff = agent.deletePixel({ x: px, y: py })
+          if (diff !== undefined) {
+            agent.addPixelDiffs([diff])
+          }
         })
       })
+    }
 
     return true
   }

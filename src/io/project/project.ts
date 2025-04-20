@@ -7,7 +7,7 @@ import {
   readTextFile,
   writeTextFile,
 } from '@tauri-apps/plugin-fs'
-import { initLayer } from '~/models/layer/layerImage'
+import { initLayerImage } from '~/models/layer/layerImage'
 import { Layer } from '~/models/types/Layer'
 import { addRecent } from '~/stores/global/globalStore'
 import {
@@ -16,7 +16,10 @@ import {
   centeringCanvas,
   setCanvasStore,
 } from '~/stores/project/canvasStore'
-import { imageStore, setImageStore } from '~/stores/project/imageStore'
+import {
+  layerImageStore,
+  setLayerImageStore,
+} from '~/stores/project/layerImageStore'
 import {
   findLayerById,
   layerStore,
@@ -79,13 +82,13 @@ export async function importProjectJson(projectJson: any) {
   }
 
   if (projectJson.images) {
-    setImageStore({})
+    setLayerImageStore({})
     Object.keys(projectJson.images).forEach((id) => {
       console.log(`read ${id}`)
       const imageData = projectJson.images[id]
       console.log(imageData)
-      initLayer(id, Number(imageData.dotMagnification || 1))
-      setImageStore(
+      initLayerImage(id, Number(imageData.dotMagnification || 1))
+      setLayerImageStore(
         id,
         'current',
         decodeImageData(
@@ -123,7 +126,7 @@ export const parseCurrentProject = (): string => {
     project: projectStore,
     canvas: canvasStore.canvas,
     images: Object.fromEntries(
-      Object.entries(imageStore).map(([id, state]) => [
+      Object.entries(layerImageStore).map(([id, state]) => [
         id,
         {
           current: encodeImageData(state.current),

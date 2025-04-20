@@ -1,7 +1,8 @@
-import { setPixel } from '~/utils/ImageUtils'
 import { Tool, ToolArgs } from '../ToolBase'
 import { drawCompletionLine, drawSquarePixel } from '../DrawUtils'
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
+import { PixelDiff } from '~/models/layer_image/HistoryManager'
+import { Vec2 } from '~/models/types/Vector'
 
 export class PenTool implements Tool {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
@@ -16,16 +17,23 @@ export class PenTool implements Tool {
 
     if (!size) return false
 
-    drawSquarePixel(position, size, (x, y) => {
-      agent.setPixel({ x, y }, r, g, b, a)
+    drawSquarePixel(position, size, (px, py) => {
+      const diff = agent.setPixel({ x: px, y: py }, r, g, b, a)
+      if (diff !== undefined) {
+        agent.addPixelDiffs([diff])
+      }
     })
 
-    if (lastPosition !== undefined)
+    if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
-        drawSquarePixel(position, size, (px, py) => {
-          agent.setPixel({ x: px, y: py }, r, g, b, a)
+        drawSquarePixel({ x, y }, size, (px, py) => {
+          const diff = agent.setPixel({ x: px, y: py }, r, g, b, a)
+          if (diff !== undefined) {
+            agent.addPixelDiffs([diff])
+          }
         })
       })
+    }
 
     return true
   }

@@ -3,7 +3,6 @@ import { canvasStore } from "~/stores/project/canvasStore";
 import {
   activeLayer,
   allLayers,
-  layerStore,
 } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/canvas_stack.module.css";
@@ -14,8 +13,9 @@ import { TouchableCanvas } from "./TouchableCanvas";
 import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
 import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
-import { redo, undo } from "~/models/layer/history";
 import Tile from "~/models/layer_image/Tile";
+
+export const layerImageManager = new LayerImageManager();
 
 const CanvasStack: Component<{}> = (props) => {
   const layerCanvasRefs: {
@@ -24,7 +24,6 @@ const CanvasStack: Component<{}> = (props) => {
 
   const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
 
-  const layerImageManager = new LayerImageManager();
 
   const activeCanvasRef = () => {
     const active = activeLayer();
@@ -36,9 +35,17 @@ const CanvasStack: Component<{}> = (props) => {
   onMount(() => {
     window.addEventListener("keydown", (e) => {
       if (e.ctrlKey && e.key === "z") {
-        undo(layerStore.activeLayerId);
+        const active = activeLayer();
+        if (active) {
+          const agent = layerImageManager.getAgent(active.id);
+          agent?.undo();
+        }
       } else if (e.ctrlKey && e.key === "y") {
-        redo(layerStore.activeLayerId);
+        const active = activeLayer();
+        if (active) {
+          const agent = layerImageManager.getAgent(active.id);
+          agent?.redo();
+        }
       }
     });
   });
@@ -64,7 +71,7 @@ const CanvasStack: Component<{}> = (props) => {
     if (active) {
       const agent = layerImageManager.getAgent(active.id);
       if (agent instanceof TileLayerImageAgent) {
-        return (agent as TileLayerImageAgent).getDirtyTiles();
+        return (agent as TileLayerImageAgent).getDirtyTilesInAction();
       }
     }
     return [];

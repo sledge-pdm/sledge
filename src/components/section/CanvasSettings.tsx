@@ -1,10 +1,9 @@
 import { Component, createSignal } from "solid-js";
-import { initLayer } from "~/models/layer/layerImage";
+import { initLayerImage } from "~/models/layer/layerImage";
 import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 import { allLayers, layerStore } from "~/stores/project/layerStore";
 
 import { adjustZoomToFit } from "~/stores/project/canvasStore";
-import { updateDSL } from "~/stores/project/imageStore";
 import {
   canvasSizeButton,
   canvasSizeForm,
@@ -25,17 +24,17 @@ const CanvasSettings: Component<{}> = (props) => {
     e.preventDefault();
     setCanvasStore("canvas", "width", width());
     setCanvasStore("canvas", "height", height());
-    adjustZoomToFit(width(), height());
 
     allLayers().forEach((layer, i) => {
-      initLayer(layer.id, layer.dotMagnification);
-      updateDSL(layer.id);
+      initLayerImage(layer.id, layer.dotMagnification);
     });
+
+    adjustZoomToFit(width(), height());
   };
 
   const resetAllLayers = (e: any) => {
     layerStore.layers.forEach((l) => {
-      initLayer(l.id, l.dotMagnification);
+      initLayerImage(l.id, l.dotMagnification);
     });
   };
 

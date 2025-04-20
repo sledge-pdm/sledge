@@ -1,6 +1,7 @@
+import { DiffAction } from '../layer_image/HistoryManager'
+
 export type LayerImage = {
   current: ImageData
-  DSLcurrent?: ImageData
-  undoStack: ImageData[]
-  redoStack: ImageData[]
+  undoStack: DiffAction[]
+  redoStack: DiffAction[]
 }

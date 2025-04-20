@@ -1,3 +1,4 @@
+import { Vec2 } from "~/models/types/Vector";
 import {
   canvasStore,
   getReferencedZoom,

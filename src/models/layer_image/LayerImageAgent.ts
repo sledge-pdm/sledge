@@ -1,4 +1,8 @@
 import { Vec2 } from '~/models/types/Vector'
+import { DiffAction, HistoryManager, PixelDiff } from './HistoryManager'
+import { cloneImageData } from '../factories/utils'
+import { colorMatch } from '~/utils/colorUtils'
+import { setBottomInfo } from '~/components/BottomInfo'
 
 interface DrawingBufferChangeEvent {}
 interface ImageChangeEvent {}
@@ -7,6 +11,7 @@ interface ImageChangeEvent {}
 export default abstract class LayerImageAgent {
   protected image: ImageData
   protected drawingBuffer: ImageData | undefined
+  protected historyManager
 
   protected onImageChangedListeners: {
     [key: string]: (e: ImageChangeEvent) => void
@@ -15,20 +20,20 @@ export default abstract class LayerImageAgent {
     [key: string]: (e: DrawingBufferChangeEvent) => void
   } = {}
 
-  constructor(imageData: ImageData) {
+  constructor(imageData: ImageData, historyManager?: HistoryManager) {
     this.image = imageData
     this.drawingBuffer = imageData
+    this.historyManager = historyManager
   }
 
   getImage() {
     return this.image
   }
 
-  setImage(image: ImageData) {
+  setImage(image: ImageData, silentlySet?: boolean) {
     this.image = image
-    Object.values(this.onImageChangedListeners).forEach((listener) =>
-      listener({})
-    )
+    if (silentlySet) this.callOnImageChangeListeners()
+    this.resetDrawingBuffer()
   }
 
   getDrawingBuffer() {
@@ -37,17 +42,22 @@ export default abstract class LayerImageAgent {
 
   setDrawingBuffer(imageData?: ImageData) {
     this.drawingBuffer = imageData
-    Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
-      listener({})
-    )
+    this.callOnDrawingBufferChangeListeners()
   }
 
   resetDrawingBuffer() {
-    this.setDrawingBuffer(undefined)
+    this.setDrawingBuffer(this.image)
   }
 
   abstract putImageInto(ctx: CanvasRenderingContext2D): void
   abstract putDrawingBufferInto(ctx: CanvasRenderingContext2D): void
+
+  putImageIntoForce(ctx: CanvasRenderingContext2D) {
+    ctx.putImageData(this.image, 0, 0)
+  }
+  putDrawingBufferIntoForce(ctx: CanvasRenderingContext2D) {
+    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0)
+  }
 
   setOnImageChangeListener(
     key: string,
@@ -63,8 +73,72 @@ export default abstract class LayerImageAgent {
     this.onDrawingBufferChangedListeners[key] = listener
   }
 
+  callOnImageChangeListeners() {
+    Object.values(this.onImageChangedListeners).forEach((listener) =>
+      listener({})
+    )
+  }
+
+  callOnDrawingBufferChangeListeners() {
+    Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
+      listener({})
+    )
+  }
+
   getWidth = (): number => this.image.width
   getHeight = (): number => this.image.height
+
+  public currentDiffAction: DiffAction = { diffs: new Map() }
+
+  public addPixelDiffs(diffs: PixelDiff[]) {
+    diffs.forEach((d) => {
+      this.currentDiffAction.diffs.set(`${d.position.x},${d.position.y}`, d)
+    })
+  }
+
+  public registerDiffAction() {
+    this.historyManager?.addAction(this.currentDiffAction)
+    this.currentDiffAction = { diffs: new Map() }
+  }
+
+  public canUndo = () => this.historyManager?.canUndo()
+  public canRedo = () => this.historyManager?.canRedo()
+
+  public undo() {
+    const undoedAction = this.historyManager?.undo()
+    if (undoedAction === undefined) return
+    setBottomInfo(`undo.`)
+    undoedAction.diffs.forEach((pxDiff) => {
+      this.setPixel(
+        pxDiff.position,
+        pxDiff.before[0],
+        pxDiff.before[1],
+        pxDiff.before[2],
+        pxDiff.before[3]
+      )
+    })
+    setBottomInfo(`undo done. (${undoedAction.diffs.size} px updated)`)
+
+    this.callOnImageChangeListeners()
+  }
+
+  public redo() {
+    const redoedAction = this.historyManager?.redo()
+    if (redoedAction === undefined) return
+    setBottomInfo(`redo.`)
+    redoedAction.diffs.forEach((pxDiff) => {
+      this.setPixel(
+        pxDiff.position,
+        pxDiff.after[0],
+        pxDiff.after[1],
+        pxDiff.after[2],
+        pxDiff.after[3]
+      )
+    })
+    setBottomInfo(`redo done. (${redoedAction.diffs.size} px updated)`)
+
+    this.callOnImageChangeListeners()
+  }
 
   public abstract setPixel(
     position: Vec2,
@@ -72,7 +146,46 @@ export default abstract class LayerImageAgent {
     g: number,
     b: number,
     a: number
-  ): void
+  ): PixelDiff | undefined
+
+  protected setPixelInPosition(
+    position: Vec2,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): PixelDiff | undefined {
+    if (!this.isInBounds(position)) return undefined
+    if (this.currentDiffAction.diffs.has(`${position.x},${position.y}`))
+      return undefined
+    const i = (position.y * this.getWidth() + position.x) * 4
+    const beforeColor: [number, number, number, number] = [
+      this.image.data[i + 0],
+      this.image.data[i + 1],
+      this.image.data[i + 2],
+      this.image.data[i + 3],
+    ]
+    if (colorMatch(beforeColor, [r, g, b, a])) return undefined
+
+    if (!this.drawingBuffer) this.drawingBuffer = cloneImageData(this.image)
+
+    this.drawingBuffer.data[i + 0] = r
+    this.drawingBuffer.data[i + 1] = g
+    this.drawingBuffer.data[i + 2] = b
+    this.drawingBuffer.data[i + 3] = a
+
+    return {
+      position,
+      before: beforeColor,
+      after: [r, g, b, a],
+    }
+  }
+
+  public abstract deletePixel(position: Vec2): PixelDiff | undefined
+
+  protected deletePixelInPosition(position: Vec2): PixelDiff | undefined {
+    return this.setPixelInPosition(position, 0, 0, 0, 0)
+  }
 
   public abstract getPixel(position: Vec2): [number, number, number, number]
 
@@ -84,6 +197,4 @@ export default abstract class LayerImageAgent {
       position.y < this.getHeight()
     )
   }
-
-  // TODO: Tile処理で有効になるであろう取得関数(getPixelInRangeとか、getSelectionAreaとか？)
 }

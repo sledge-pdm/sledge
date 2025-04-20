@@ -122,9 +122,11 @@ export const TouchableCanvas: Component<Props> = (props) => {
     // if (canvasStore.isInStroke) endStroke(position);
 
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
-    const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.move, position, lastPos());
-    setTemporaryOut(true);
+    if (canvasStore.isDragging) {
+      const position = getCanvasMousePosition(e);
+      props.operator.handleDraw(DrawState.move, position, lastPos());
+      setTemporaryOut(true);
+    }
   }
 
   function handleWheel(e: WheelEvent) {

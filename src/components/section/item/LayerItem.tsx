@@ -14,7 +14,7 @@ import {
   layerItemType,
 } from "~/styles/section/layer.css";
 import { w100 } from "~/styles/snippets.css";
-import LayerPreview from "./LayerPreview";
+import LayerPreview from "../../common/LayerPreview";
 
 interface LayerItemProps {
   index: number;
@@ -81,7 +81,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             .join(" ")}
           onClick={onDetClicked}
         >
-          <LayerPreview layer={layer} onClick={onPreviewClicked} />
+          <LayerPreview layer={layer} onClick={onPreviewClicked} maxHeight={30} maxWidth={30} />
           <p class={layerItemName}> {layer.name}</p>
           <div
             class={dotMagnifContainer}

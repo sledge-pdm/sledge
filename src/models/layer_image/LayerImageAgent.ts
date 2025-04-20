@@ -109,12 +109,14 @@ export default abstract class LayerImageAgent {
     if (undoedAction === undefined) return
     setBottomInfo(`undo.`)
     undoedAction.diffs.forEach((pxDiff) => {
-      this.setPixel(
+      this.setPixelInPosition(
         pxDiff.position,
         pxDiff.before[0],
         pxDiff.before[1],
         pxDiff.before[2],
-        pxDiff.before[3]
+        pxDiff.before[3],
+        false,
+        false
       )
     })
     setBottomInfo(`undo done. (${undoedAction.diffs.size} px updated)`)
@@ -127,12 +129,14 @@ export default abstract class LayerImageAgent {
     if (redoedAction === undefined) return
     setBottomInfo(`redo.`)
     redoedAction.diffs.forEach((pxDiff) => {
-      this.setPixel(
+      this.setPixelInPosition(
         pxDiff.position,
         pxDiff.after[0],
         pxDiff.after[1],
         pxDiff.after[2],
-        pxDiff.after[3]
+        pxDiff.after[3],
+        false,
+        false
       )
     })
     setBottomInfo(`redo done. (${redoedAction.diffs.size} px updated)`)
@@ -145,7 +149,9 @@ export default abstract class LayerImageAgent {
     r: number,
     g: number,
     b: number,
-    a: number
+    a: number,
+    excludePositionMatch: boolean,
+    excludeColorMatch: boolean
   ): PixelDiff | undefined
 
   protected setPixelInPosition(
@@ -153,10 +159,15 @@ export default abstract class LayerImageAgent {
     r: number,
     g: number,
     b: number,
-    a: number
+    a: number,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     if (!this.isInBounds(position)) return undefined
-    if (this.currentDiffAction.diffs.has(`${position.x},${position.y}`))
+    if (
+      excludePositionMatch &&
+      this.currentDiffAction.diffs.has(`${position.x},${position.y}`)
+    )
       return undefined
     const i = (position.y * this.getWidth() + position.x) * 4
     const beforeColor: [number, number, number, number] = [
@@ -165,7 +176,8 @@ export default abstract class LayerImageAgent {
       this.image.data[i + 2],
       this.image.data[i + 3],
     ]
-    if (colorMatch(beforeColor, [r, g, b, a])) return undefined
+    if (excludeColorMatch && colorMatch(beforeColor, [r, g, b, a]))
+      return undefined
 
     if (!this.drawingBuffer) this.drawingBuffer = cloneImageData(this.image)
 
@@ -181,10 +193,26 @@ export default abstract class LayerImageAgent {
     }
   }
 
-  public abstract deletePixel(position: Vec2): PixelDiff | undefined
+  public abstract deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean,
+    excludeColorMatch: boolean
+  ): PixelDiff | undefined
 
-  protected deletePixelInPosition(position: Vec2): PixelDiff | undefined {
-    return this.setPixelInPosition(position, 0, 0, 0, 0)
+  protected deletePixelInPosition(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    return this.setPixelInPosition(
+      position,
+      0,
+      0,
+      0,
+      0,
+      excludePositionMatch,
+      excludeColorMatch
+    )
   }
 
   public abstract getPixel(position: Vec2): [number, number, number, number]

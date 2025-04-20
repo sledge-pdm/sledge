@@ -14,7 +14,7 @@ export class EraserTool implements Tool {
     if (!size) return false
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.deletePixel({ x: px, y: py })
+      const diff = agent.deletePixel({ x: px, y: py }, true, true)
       if (diff !== undefined) {
         agent.addPixelDiffs([diff])
       }
@@ -23,7 +23,7 @@ export class EraserTool implements Tool {
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.deletePixel({ x: px, y: py })
+          const diff = agent.deletePixel({ x: px, y: py }, true, true)
           if (diff !== undefined) {
             agent.addPixelDiffs([diff])
           }

@@ -18,7 +18,7 @@ export class PenTool implements Tool {
     if (!size) return false
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.setPixel({ x: px, y: py }, r, g, b, a)
+      const diff = agent.setPixel({ x: px, y: py }, r, g, b, a, true, true)
       if (diff !== undefined) {
         agent.addPixelDiffs([diff])
       }
@@ -27,7 +27,7 @@ export class PenTool implements Tool {
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.setPixel({ x: px, y: py }, r, g, b, a)
+          const diff = agent.setPixel({ x: px, y: py }, r, g, b, a, true, true)
           if (diff !== undefined) {
             agent.addPixelDiffs([diff])
           }

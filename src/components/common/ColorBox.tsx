@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { penStore } from "~/stores/internal/penStore";
+import { toolStore } from "~/stores/internal/toolsStore";
 import { sayRandomQuote } from "./companion/QuotePool";
 
 interface ColorBoxProps {
@@ -14,7 +14,7 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
 
   const isSelected = () =>
     props.enableUsingSelection &&
-    penStore.pens[penStore.usingIndex].color === props.color;
+    toolStore.tools[toolStore.usingIndex].color === props.color;
   const isWhiteOrNone = () =>
     props.color === "none" || props.color.toLowerCase() === "#ffffff";
 

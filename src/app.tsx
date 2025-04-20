@@ -2,19 +2,19 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { onMount, Suspense } from "solid-js";
-import Home from "./routes";
-import Editor from "./routes/editor";
-import { loadGlobalSettings } from "./io/global/globalIO";
 import TitleBar from "./components/TitleBar";
 import ToastContainer from "./components/ToastContainer";
+import { loadGlobalSettings } from "./io/global/globalIO";
+import Home from "./routes";
+import Editor from "./routes/editor";
 
-import { flexCol, h100 } from "./styles/components.css";
+import { sledgeLogo } from "./styles/global.css";
+import { flexCol, h100 } from "./styles/snippets.css";
 
 export default function App() {
   onMount(() => {
-    loadGlobalSettings()
-  })
-
+    loadGlobalSettings();
+  });
 
   return (
     <Router
@@ -22,16 +22,17 @@ export default function App() {
         <MetaProvider>
           <title>Sledge</title>
           <Suspense>
-            <div class={[flexCol, h100].join(" ")} style={{ "pointer-events": "all" }}>
+            <div
+              class={[flexCol, h100].join(" ")}
+              style={{ "pointer-events": "all" }}
+            >
               <TitleBar />
 
-              <main class="main">
-                {props.children}
-              </main>
+              <main>{props.children}</main>
 
               <ToastContainer />
 
-              <p id="sledge">sledge.</p>
+              {/* <p class={sledgeLogo}>sledge.</p> */}
             </div>
           </Suspense>
         </MetaProvider>

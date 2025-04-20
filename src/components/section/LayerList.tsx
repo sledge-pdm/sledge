@@ -1,4 +1,3 @@
-
 import {
   closestCenter,
   DragDropProvider,
@@ -14,10 +13,14 @@ import {
   layerStore,
   setLayerStore,
 } from "~/stores/project/layerStore";
-import LayerItem from "./item/LayerItem";
-import { flexRow } from "~/styles/components.css";
-import { sectionCaption, sectionContent, sectionRoot } from "~/styles/section_global.css";
 import { layerList } from "~/styles/section/layer.css";
+import {
+  sectionCaption,
+  sectionContent,
+  sectionRoot,
+} from "~/styles/section_global.css";
+import { flexRow } from "~/styles/snippets.css";
+import LayerItem from "./item/LayerItem";
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
@@ -26,12 +29,12 @@ const LayerList: Component<{}> = () => {
   const ids = () => items().map((l) => l.id);
 
   onMount(() => {
-    setItems(allLayers())
-  })
+    setItems(allLayers());
+  });
 
   createEffect(() => {
-    setItems(allLayers())
-  })
+    setItems(allLayers());
+  });
 
   const onDragStart = ({ draggable }: { draggable: any }) =>
     setActiveItem(draggable.id);

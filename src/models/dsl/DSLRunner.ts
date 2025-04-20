@@ -1,24 +1,24 @@
-import { cloneImageData } from "~/models/factories/utils";
-import { decodeImageData, encodeImageData } from "~/utils/ImageUtils";
-import { safeInvoke } from "~/utils/tauri";
-import { DSL } from "./DSL";
+import { cloneImageData } from '~/models/factories/utils'
+import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
+import { safeInvoke } from '~/utils/tauriUtils'
+import { DSL } from './DSL'
 
 export async function runDSL(
   dsl: DSL,
-  image: ImageData,
+  image: ImageData
 ): Promise<ImageData | undefined> {
-  const encoded = encodeImageData(cloneImageData(image));
+  const encoded = encodeImageData(cloneImageData(image))
 
-  const dslStr = dsl.build(true);
-  if (dslStr === undefined) return;
+  const dslStr = dsl.build(true)
+  if (dslStr === undefined) return
 
-  const result = await safeInvoke<string>("run_pipeline", {
+  const result = await safeInvoke<string>('run_pipeline', {
     dsl: dslStr,
     encoded,
     width: image.width,
     height: image.height,
-  });
+  })
 
-  if (!result) return;
-  return decodeImageData(result, image.width, image.height);
+  if (!result) return
+  return decodeImageData(result, image.width, image.height)
 }

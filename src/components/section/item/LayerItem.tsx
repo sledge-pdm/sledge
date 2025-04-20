@@ -1,13 +1,20 @@
-
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
 import { Component } from "solid-js";
 import Light from "~/components/common/Light";
 import { getNextMagnification } from "~/models/factories/utils";
 import { Layer, LayerType } from "~/models/types/Layer";
 import { layerStore, setLayerStore } from "~/stores/project/layerStore";
+import {
+  activeLight,
+  dotMagnifContainer,
+  dotMagnifText,
+  layerItem,
+  layerItemDisabled,
+  layerItemName,
+  layerItemType,
+} from "~/styles/section/layer.css";
+import { w100 } from "~/styles/snippets.css";
 import LayerPreview from "./LayerPreview";
-import { w100 } from "~/styles/components.css";
-import { layerItemDisabled, layerItem, layerItemType, layerItemName, dotMagnifContainer, dotMagnifText, activeLight } from "~/styles/section/layer.css";
 
 interface LayerItemProps {
   index: number;
@@ -34,7 +41,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       detClass = "automate";
       break;
   }
-  let previewRef: HTMLDivElement;
 
   const onDetClicked = () => {
     setLayerStore("activeLayerId", layer.id);

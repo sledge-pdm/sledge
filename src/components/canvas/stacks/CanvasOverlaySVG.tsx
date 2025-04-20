@@ -1,38 +1,71 @@
-import { Component } from "solid-js";
-import { currentPen, penStore } from "~/stores/internal/penStore";
+import { Component, For } from "solid-js";
+import Tile from "~/models/layer_image/Tile";
+import { currentTool } from "~/stores/internal/toolsStore";
 import { canvasStore } from "~/stores/project/canvasStore";
 
-const CanvasOverlaySVG: Component<{}> = (props) => {
+const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
+  const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom;
+  const borderHeight = () => canvasStore.canvas.height * canvasStore.zoom;
 
-    const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom
-    const borderHeight = () => canvasStore.canvas.width * canvasStore.zoom
+  const zoomedPenSize = () => currentTool().size * canvasStore.zoom;
 
-    const zoomedPenSize = () => currentPen().size * canvasStore.zoom
+  return (
+    <svg
+      viewBox={`0 0 ${borderWidth()} ${borderHeight()}`}
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        "pointer-events": "none",
+        "image-rendering": "pixelated",
+      }}
+    >
+      {/* border rect */}
+      <rect
+        width={borderWidth()}
+        height={borderHeight()}
+        fill="none"
+        stroke="black"
+        stroke-width={1}
+        pointer-events="none"
+      />
 
-    return <svg viewBox={`0 0 ${borderWidth()} ${borderHeight()}`} xmlns="http://www.w3.org/2000/svg"
-        style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
-            "pointer-events": "none",
-            "image-rendering": "pixelated"
-        }}>
+      {/* pen hover preview */}
+      <rect
+        width={zoomedPenSize()}
+        height={zoomedPenSize()}
+        x={
+          Math.round(canvasStore.lastMouseOnZoomedCanvas.x) -
+          zoomedPenSize() / 2
+        }
+        y={
+          Math.round(canvasStore.lastMouseOnZoomedCanvas.y) -
+          zoomedPenSize() / 2
+        }
+        fill="none"
+        stroke="black"
+        stroke-width={1}
+        pointer-events="none"
+      />
 
-        {/* border rect */}
-        <rect width={borderWidth()} height={borderHeight()} fill="none" stroke="black" stroke-width={1} />
-
-        {/* pen hover preview */}
-        <rect
-            width={zoomedPenSize()}
-            height={zoomedPenSize()}
-            x={canvasStore.lastMouseOnZoomedCanvas.x - zoomedPenSize() / 2}
-            y={canvasStore.lastMouseOnZoomedCanvas.y - zoomedPenSize() / 2}
-            fill="none"
-            stroke="black"
-            stroke-width={1} />
-    </svg>
+      <For each={props.dirtyRects}>
+        {dirtyRect => {
+          return <rect
+            width={dirtyRect.globalTileSize * canvasStore.zoom}
+            height={dirtyRect.globalTileSize * canvasStore.zoom}
+            x={dirtyRect.getOffset().x * canvasStore.zoom}
+            y={dirtyRect.getOffset().y * canvasStore.zoom}
+            fill="#00ffff60"
+            stroke="none"
+            pointer-events="none"
+          />
+        }}
+      </For>
+    </svg >
+  );
 };
 
 export default CanvasOverlaySVG;

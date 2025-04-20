@@ -1,15 +1,15 @@
 import { createStore } from 'solid-js/store'
 import { runDSL } from '~/models/dsl/DSLRunner'
-import { LayerImageState } from '~/models/types/LayerImageState'
+import { LayerImage } from '~/models/types/LayerImage'
 import { findLayerById, layerStore } from './layerStore'
 
 // image
 
 export const [imageStore, setImageStore] = createStore<
-  Record<string, LayerImageState>
+  Record<string, LayerImage>
 >({})
 
-export const activeImage = (): LayerImageState =>
+export const activeImage = (): LayerImage =>
   imageStore[layerStore.activeLayerId]
 
 export const updateDSL = (layerId: string) => {

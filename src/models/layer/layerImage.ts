@@ -1,6 +1,6 @@
 import { canvasStore } from '~/stores/project/canvasStore'
 import { setImageStore } from '~/stores/project/imageStore'
-import { LayerImageState } from '../types/LayerImageState'
+import { LayerImage } from '../types/LayerImage'
 
 export function initLayer(layerId: string, dotMagnification: number) {
   const blank = new ImageData(
@@ -20,7 +20,7 @@ export function initLayer(layerId: string, dotMagnification: number) {
 }
 
 export function registerNewHistory(layerId: string, newData: ImageData) {
-  setImageStore(layerId, (state: LayerImageState) => {
+  setImageStore(layerId, (state: LayerImage) => {
     const prev = state.current
     return {
       current: newData,

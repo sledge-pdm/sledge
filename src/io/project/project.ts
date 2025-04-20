@@ -3,21 +3,13 @@ import { path } from '@tauri-apps/api'
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog'
 import {
   BaseDirectory,
-  exists,
   mkdir,
-  open,
   readTextFile,
   writeTextFile,
 } from '@tauri-apps/plugin-fs'
-import { reconcile } from 'solid-js/store'
 import { initLayer } from '~/models/layer/layerImage'
 import { Layer } from '~/models/types/Layer'
-import {
-  addRecent,
-  globalStore,
-  FileLocation,
-  setGlobalStore,
-} from '~/stores/global/globalStore'
+import { addRecent } from '~/stores/global/globalStore'
 import {
   adjustZoomToFit,
   canvasStore,
@@ -32,7 +24,7 @@ import {
 } from '~/stores/project/layerStore'
 import { projectStore, setProjectStore } from '~/stores/project/projectStore'
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
-import { getFileNameAndPath } from '~/utils/getFileNameAndPath'
+import { getFileNameAndPath } from '~/utils/pathUtils'
 
 export async function importProjectJsonFromFileSelection(): Promise<
   string | undefined

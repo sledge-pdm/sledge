@@ -5,7 +5,7 @@
     "dev": "vite",
     "build": "vite build",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build",
+    "tauri:build": "tauri build --debug",
     "tcm-watch": "tcm -o dist-tcm src --watch",
     "postinstall": "patch-package",
     "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .vscode/.prettierrc",

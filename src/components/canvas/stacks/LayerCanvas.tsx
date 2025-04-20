@@ -5,10 +5,9 @@ import {
   onMount,
   Ref,
 } from "solid-js";
-import { cloneImageData } from "~/models/factories/utils";
 import { Layer } from "~/models/types/Layer";
 import { canvasStore } from "~/stores/project/canvasStore";
-import { activeImage, imageStore } from "~/stores/project/imageStore";
+import { layerImageStore } from "~/stores/project/layerImageStore";
 
 import styles from "@styles/components/canvas/layer_canvas.module.css";
 import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
@@ -56,27 +55,27 @@ export const LayerCanvas: Component<Props> = (props) => {
     canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
-    const agent = props.manager.registerAgent(props.layer.id, imageStore[props.layer.id]?.current)
+    const agent = props.manager.registerAgent(props.layer.id, layerImageStore[props.layer.id]?.current)
+
     ctx = canvasRef?.getContext("2d") ?? null;
     if (ctx) agent.putImageInto(ctx)
 
     agent.setOnImageChangeListener("layercanvas_refresh", () => {
-      if (ctx) agent.putImageInto(ctx)
+      if (ctx) {
+        agent.putImageIntoForce(ctx)
+      }
     })
-
     agent.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
-      if (ctx) agent.putDrawingBufferInto(ctx)
+      if (ctx) {
+        agent.putDrawingBufferIntoForce(ctx)
+      }
     })
   });
 
   createEffect(() => {
-    const canvas = canvasStore.canvas;
-    canvas.width;
-    canvas.height;
-
-    agent()?.setImage(imageStore[props.layer.id]?.current)
-    ctx = canvasRef?.getContext("2d") ?? null;
-    if (ctx) agent()?.putImageInto(ctx)
+    const image = layerImageStore[props.layer.id].current
+    agent()?.setImage(image, true)
+    if (ctx) agent()?.putImageIntoForce(ctx)
   });
 
   return (

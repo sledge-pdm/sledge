@@ -1,6 +1,5 @@
 import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas'
 import { cloneImageData } from '~/models/factories/utils'
-import { registerNewHistory } from '~/models/layer/layerImage'
 import { Vec2 } from '~/models/types/Vector'
 import { currentTool } from '~/stores/internal/toolsStore'
 import { hexToRGBA } from '~/utils/colorUtils'
@@ -10,6 +9,7 @@ import { DrawState } from './DrawState'
 import { getToolInstance } from '../tools/ToolBase'
 import LayerImageAgent from '../layer_image/LayerImageAgent'
 import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent'
+import { setLayerImageStore } from '~/stores/project/layerImageStore'
 
 export default class LayerCanvasOperator {
   constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
@@ -31,19 +31,18 @@ export default class LayerCanvasOperator {
       currentTool(),
       position,
       last
-    ) // ←ここでCanvasAgentを叩く...が、仮で普通にこの中で描画処理までやっちゃう
+    )
 
     if (result) {
-      agent.setImage(result)
+      agent.setDrawingBuffer(result)
       if (state === DrawState.end) {
-        agent.resetDrawingBuffer()
+        agent.registerDiffAction()
+        agent.setImage(result)
+        setLayerImageStore(layer.id, 'current', cloneImageData(result))
+
         if (agent instanceof TileLayerImageAgent) {
-          ;(agent as TileLayerImageAgent).resetDirtyStates()
+          ;(agent as TileLayerImageAgent).resetAllDirtyStates()
         }
-        registerNewHistory(
-          this.getActiveLayerCanvas().getLayer().id,
-          cloneImageData(result)
-        )
       }
     }
   }

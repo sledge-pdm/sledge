@@ -58,7 +58,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
             height={dirtyRect.globalTileSize * canvasStore.zoom}
             x={dirtyRect.getOffset().x * canvasStore.zoom}
             y={dirtyRect.getOffset().y * canvasStore.zoom}
-            fill="#00ffff60"
+            fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
             stroke="none"
             pointer-events="none"
           />

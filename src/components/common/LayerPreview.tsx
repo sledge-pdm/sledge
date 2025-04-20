@@ -1,15 +1,19 @@
 import { Component, createEffect, onMount } from "solid-js";
 import { Layer } from "~/models/types/Layer";
-import { imageStore } from "~/stores/project/imageStore";
+import { v4 as uuidv4 } from "uuid";
 
 import styles from "@styles/components/layer_preview.module.css";
+import { layerImageStore } from "~/stores/project/layerImageStore";
 
 interface Props {
   layer: Layer;
-  onClick: () => void;
+  maxWidth?: number;
+  maxHeight?: number;
+  onClick?: () => void;
 }
 
 const LayerPreview: Component<Props> = (props: Props) => {
+  const id = uuidv4();
   let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
 
@@ -21,11 +25,11 @@ const LayerPreview: Component<Props> = (props: Props) => {
     canvasRef.width = targetWidth;
     canvasRef.height = targetHeight;
 
-    const maxWidth = 40
-    const maxHeight = 40
+    const maxWidth = props.maxWidth
+    const maxHeight = props.maxHeight
     let zoom = 1;
-    if (targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
+    // if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
+    // if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -55,14 +59,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
     );
   };
 
-  onMount(() => {
-    const originalImage = imageStore[props.layer.id]?.current;
-    const height = wrapperRef.clientHeight;
-    updatePreview(originalImage, height);
-  });
-
   createEffect(() => {
-    const originalImage = imageStore[props.layer.id]?.current;
+    const originalImage = layerImageStore[props.layer.id].current
     const height = wrapperRef.clientHeight;
     updatePreview(originalImage, height);
   });
@@ -72,8 +70,10 @@ const LayerPreview: Component<Props> = (props: Props) => {
       <canvas
         class={styles.canvas}
         ref={(el) => (canvasRef = el)}
-        onClick={(e) => props.onClick()}
-      />
+        onClick={(e) => {
+          if (props.onClick) props.onClick()
+        }
+        } />
     </div>
   );
 };

@@ -1,19 +1,21 @@
+import { HistoryManager } from './../HistoryManager'
 import { Vec2 } from '~/models/types/Vector'
 import LayerImageAgent from '../LayerImageAgent'
 import Tile from '../Tile'
+import { PixelDiff } from '../HistoryManager'
 
 export default class TileLayerImageAgent extends LayerImageAgent {
   readonly TILE_SIZE = 10
 
   private tiles: Tile[][] = []
 
-  constructor(imageData: ImageData) {
-    super(imageData)
+  constructor(imageData: ImageData, historyManager: HistoryManager) {
+    super(imageData, historyManager)
+  }
 
-    const width = this.getWidth()
-    const height = this.getHeight()
-    const tileRowCount = Math.ceil(width / this.TILE_SIZE)
-    const tileColumnCount = Math.ceil(height / this.TILE_SIZE)
+  initTile() {
+    const tileRowCount = Math.ceil(this.getWidth() / this.TILE_SIZE)
+    const tileColumnCount = Math.ceil(this.getHeight() / this.TILE_SIZE)
     for (let row = 0; row < tileRowCount; row++) {
       this.tiles[row] = []
       for (let column = 0; column < tileColumnCount; column++) {
@@ -22,12 +24,21 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     }
   }
 
+  setImage(image: ImageData): void {
+    super.setImage(image)
+    this.initTile()
+  }
+
   putImageInto(ctx: CanvasRenderingContext2D) {
-    this.putOnlyForDirtyTiles(ctx, this.image)
+    if (this.getDirtyTiles().length > 0) {
+      this.putOnlyForDirtyTiles(ctx, this.image)
+    }
   }
 
   putDrawingBufferInto(ctx: CanvasRenderingContext2D) {
-    if (this.drawingBuffer) this.putOnlyForDirtyTiles(ctx, this.drawingBuffer)
+    if (this.getDirtyTiles().length > 0) {
+      if (this.drawingBuffer) this.putOnlyForDirtyTiles(ctx, this.drawingBuffer)
+    }
   }
 
   private putOnlyForDirtyTiles(
@@ -48,6 +59,8 @@ export default class TileLayerImageAgent extends LayerImageAgent {
         this.TILE_SIZE
       )
     })
+
+    this.resetDirtyStates()
   }
 
   private getTileIndex(layerPosition: Vec2): { row: number; column: number } {
@@ -66,8 +79,26 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     })
   }
 
+  public resetAllDirtyStates() {
+    this.tiles = this.tiles.map((tR) => {
+      tR = tR.map((t) => {
+        t.isDirty = false
+        t.isDirtyThroughAction = false
+        return t
+      })
+      return tR
+    })
+  }
+
   public getDirtyTiles(): Tile[] {
     return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirty))
+  }
+  public getDirtyTilesInAction(): Tile[] {
+    return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirtyThroughAction))
+  }
+
+  public addPixelDiffs(diffs: PixelDiff[]) {
+    super.addPixelDiffs(diffs)
   }
 
   public setPixel(
@@ -76,39 +107,29 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     g: number,
     b: number,
     a: number
-  ): void {
-    {
-      if (
-        position.x < 0 ||
-        position.x >= this.getWidth() ||
-        position.y < 0 ||
-        position.y >= this.getHeight()
-      )
-        return
-      const i = (position.y * this.getWidth() + position.x) * 4
-      this.image.data[i + 0] = r
-      this.image.data[i + 1] = g
-      this.image.data[i + 2] = b
-      this.image.data[i + 3] = a
-
+  ): PixelDiff | undefined {
+    const result = this.setPixelInPosition(position, r, g, b, a)
+    if (result !== undefined) {
       const tileIndex = this.getTileIndex(position)
       this.tiles[tileIndex.row][tileIndex.column].isDirty = true
+      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
     }
+    return result
+  }
 
-    // console.log(
-    //   `somebody toucha my ${this.getTileInLayerPosition(position).toString()}!`
-    // )
-
-    // console.log(this.getDirtyTiles())
+  public deletePixel(position: Vec2): PixelDiff | undefined {
+    const result = this.deletePixelInPosition(position)
+    if (result !== undefined) {
+      const tileIndex = this.getTileIndex(position)
+      this.tiles[tileIndex.row][tileIndex.column].isDirty = true
+      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
+    }
+    return result
   }
 
   public getPixel(position: Vec2): [number, number, number, number] {
     const i = (position.y * this.image.width + position.x) * 4
     const d = this.image.data
-
-    // console.log(
-    //   `somebody gotta my ${this.getTileInLayerPosition(position).toString()}!`
-    // )
 
     return [d[i], d[i + 1], d[i + 2], d[i + 3]]
   }

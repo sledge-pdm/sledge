@@ -1,6 +1,9 @@
 import { Vec2 } from '../types/Vector'
 
 export default class Tile {
+  // 一連の動作全体で変更があったか（累計表示、UI表示用）
+  public isDirtyThroughAction: boolean
+  // 前回の描画更新から変更があったか（canvas更新用）
   public isDirty: boolean
 
   constructor(
@@ -8,6 +11,7 @@ export default class Tile {
     public readonly column: number,
     public readonly globalTileSize: number
   ) {
+    this.isDirtyThroughAction = false
     this.isDirty = false
   }
 

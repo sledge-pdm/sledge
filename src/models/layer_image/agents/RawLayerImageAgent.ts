@@ -1,7 +1,6 @@
 import { Vec2 } from '~/models/types/Vector'
 import LayerImageAgent from '../LayerImageAgent'
 import { PixelDiff } from '../HistoryManager'
-import { cloneImageData } from '~/models/factories/utils'
 
 export default class RawLayerImageAgent extends LayerImageAgent {
   putImageInto(ctx: CanvasRenderingContext2D) {
@@ -17,13 +16,31 @@ export default class RawLayerImageAgent extends LayerImageAgent {
     r: number,
     g: number,
     b: number,
-    a: number
+    a: number,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    return this.setPixelInPosition(position, r, g, b, a)
+    return this.setPixelInPosition(
+      position,
+      r,
+      g,
+      b,
+      a,
+      excludePositionMatch,
+      excludeColorMatch
+    )
   }
 
-  public deletePixel(position: Vec2): PixelDiff | undefined {
-    return this.deletePixelInPosition(position)
+  public deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    return this.deletePixelInPosition(
+      position,
+      excludePositionMatch,
+      excludeColorMatch
+    )
   }
 
   public getPixel(position: Vec2): [number, number, number, number] {

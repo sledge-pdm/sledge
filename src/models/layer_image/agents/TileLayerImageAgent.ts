@@ -27,6 +27,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
   setImage(image: ImageData): void {
     super.setImage(image)
     this.initTile()
+    this.resetAllDirtyStates()
   }
 
   putImageInto(ctx: CanvasRenderingContext2D) {
@@ -106,9 +107,19 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     r: number,
     g: number,
     b: number,
-    a: number
+    a: number,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    const result = this.setPixelInPosition(position, r, g, b, a)
+    const result = this.setPixelInPosition(
+      position,
+      r,
+      g,
+      b,
+      a,
+      excludePositionMatch,
+      excludeColorMatch
+    )
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position)
       this.tiles[tileIndex.row][tileIndex.column].isDirty = true
@@ -117,8 +128,16 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     return result
   }
 
-  public deletePixel(position: Vec2): PixelDiff | undefined {
-    const result = this.deletePixelInPosition(position)
+  public deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    const result = this.deletePixelInPosition(
+      position,
+      excludePositionMatch,
+      excludeColorMatch
+    )
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position)
       this.tiles[tileIndex.row][tileIndex.column].isDirty = true

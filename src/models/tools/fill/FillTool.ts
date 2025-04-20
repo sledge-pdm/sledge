@@ -47,7 +47,15 @@ export class FillTool implements Tool {
     const pxDiffs: PixelDiff[] = []
     // バッファに一括反映
     for (const p of filled) {
-      const diff = agent.setPixel(p, color[0], color[1], color[2], color[3])
+      const diff = agent.setPixel(
+        p,
+        color[0],
+        color[1],
+        color[2],
+        color[3],
+        false,
+        false
+      )
       if (diff !== undefined) pxDiffs.push(diff)
     }
 

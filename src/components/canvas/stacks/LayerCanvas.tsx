@@ -11,47 +11,39 @@ import { canvasStore } from "~/stores/project/canvasStore";
 import { activeImage, imageStore } from "~/stores/project/imageStore";
 
 import styles from "@styles/components/canvas/layer_canvas.module.css";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
+import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
 
 type Props = {
+  manager: LayerImageManager,
   ref?: LayerCanvasRef;
   layer: Layer;
   zIndex: number;
 };
 
 export type LayerCanvasRef = {
-  initDrawingBuffer: () => void;
-  getDrawingBuffer: () => ImageData | undefined;
-  resetDrawingBuffer: () => void;
-  setImageData: (imageData: ImageData) => void;
-  update: () => void;
+  getLayer: () => Layer;
+  getManager: () => LayerImageManager;
+  getAgent: () => LayerImageAgent;
 };
 
 export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
   let ctx: CanvasRenderingContext2D | null = null;
-  let drawingBuffer: ImageData | undefined;
+
+  const agent = () => props.manager.getAgent(props.layer.id);
 
   createRefContent(
     () => props.ref,
     () => ({
-      initDrawingBuffer() {
-        drawingBuffer = cloneImageData(activeImage().current);
+      getLayer() {
+        return props.layer
       },
-      getDrawingBuffer() {
-        return drawingBuffer;
+      getManager() {
+        return props.manager
       },
-      resetDrawingBuffer() {
-        drawingBuffer = undefined;
-      },
-      setImageData(imageData) {
-        drawingBuffer = imageData;
-        if (ctx && imageData) {
-          ctx.putImageData(imageData, 0, 0);
-        }
-      },
-      update() {
-        const imageData = imageStore[props.layer.id].current;
-        this.setImageData(imageData);
+      getAgent() {
+        return agent()
       },
     }),
   );
@@ -64,14 +56,27 @@ export const LayerCanvas: Component<Props> = (props) => {
     canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
+    const agent = props.manager.registerAgent(props.layer.id, imageStore[props.layer.id]?.current)
     ctx = canvasRef?.getContext("2d") ?? null;
+    if (ctx) agent.putImageInto(ctx)
+
+    agent.setOnImageChangeListener("layercanvas_refresh", () => {
+      if (ctx) agent.putImageInto(ctx)
+    })
+
+    agent.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
+      if (ctx) agent.putDrawingBufferInto(ctx)
+    })
   });
 
   createEffect(() => {
-    const current = imageStore[props.layer.id]?.current;
-    if (ctx && current) {
-      ctx.putImageData(current, 0, 0);
-    }
+    const canvas = canvasStore.canvas;
+    canvas.width;
+    canvas.height;
+
+    agent()?.setImage(imageStore[props.layer.id]?.current)
+    ctx = canvasRef?.getContext("2d") ?? null;
+    if (ctx) agent()?.putImageInto(ctx)
   });
 
   return (

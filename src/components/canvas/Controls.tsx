@@ -2,7 +2,12 @@ import { Component } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
-import { isRedoPossible, isUndoPossible, redo, undo } from "~/models/layer/history";
+import {
+  isRedoPossible,
+  isUndoPossible,
+  redo,
+  undo,
+} from "~/models/layer/history";
 
 import styles from "@styles/components/canvas/controls.module.css";
 
@@ -43,25 +48,31 @@ const Controls: Component<{}> = (props) => {
           src="/undo.png"
           style={{
             opacity: isUndoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
-            cursor: isUndoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+            cursor: isUndoPossible(layerStore.activeLayerId)
+              ? "pointer"
+              : "unset",
           }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             undo(layerStore.activeLayerId);
-          }} />
+          }}
+        />
         <img
           class={styles.undo_redo}
           src="/redo.png"
           style={{
             opacity: isRedoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
-            cursor: isRedoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+            cursor: isRedoPossible(layerStore.activeLayerId)
+              ? "pointer"
+              : "unset",
           }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             redo(layerStore.activeLayerId);
-          }} />
+          }}
+        />
 
         {/* <DSLEditor /> */}
       </div>

@@ -1,20 +1,12 @@
 import { Component, createSignal, onCleanup, onMount } from "solid-js";
 import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
-import { roundPosition } from "~/utils/MetricUtils";
+import { Vec2 } from "~/models/types/Vector";
+import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
+import { DrawState } from "~/models/layer_canvas/DrawState";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 
 interface Props {
-  onStrokeStart?: (
-    position: { x: number; y: number },
-    lastPos?: { x: number; y: number },
-  ) => void;
-  onStrokeMove?: (
-    position: { x: number; y: number },
-    lastPos?: { x: number; y: number },
-  ) => void;
-  onStrokeEnd?: (
-    position: { x: number; y: number },
-    lastPos?: { x: number; y: number },
-  ) => void;
+  operator: LayerCanvasOperator,
 }
 
 // レイヤーごとのキャンバスの上でタッチイベントを受けるだけのキャンバス
@@ -25,7 +17,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
   const styleHeight = () => canvasStore.canvas.height;
 
   const [lastPos, setLastPos] = createSignal<
-    { x: number; y: number } | undefined
+    Vec2 | undefined
   >(undefined);
   const [temporaryOut, setTemporaryOut] = createSignal(false);
 
@@ -85,9 +77,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
     if (!isDrawableClick(e)) return;
 
     const position = getCanvasMousePosition(e);
-    if (props.onStrokeStart) {
-      props.onStrokeStart(position, lastPos());
-    }
+    props.operator.handleDraw(DrawState.start, position, lastPos());
     setCanvasStore("isInStroke", true);
     setLastPos(position);
   }
@@ -117,9 +107,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
     }
     if (!canvasStore.isInStroke || !lastPos()) return;
 
-    if (props.onStrokeMove) {
-      props.onStrokeMove(position, lastPos());
-    }
+    props.operator.handleDraw(DrawState.move, position, lastPos());
     setLastPos(position);
   }
 
@@ -135,10 +123,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     const position = getCanvasMousePosition(e);
-    if (props.onStrokeMove) {
-      // 最後の位置を通知
-      props.onStrokeMove(position, lastPos());
-    }
+    props.operator.handleDraw(DrawState.move, position, lastPos());
     setTemporaryOut(true);
   }
 
@@ -153,10 +138,8 @@ export const TouchableCanvas: Component<Props> = (props) => {
     });
   }
 
-  function endStroke(position: { x: number; y: number }) {
-    if (props.onStrokeEnd) {
-      props.onStrokeEnd(position, lastPos());
-    }
+  function endStroke(position: Vec2) {
+    props.operator.handleDraw(DrawState.end, position, lastPos());
     setCanvasStore("isInStroke", false);
     setLastPos(undefined);
     setTemporaryOut(false);

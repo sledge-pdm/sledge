@@ -1,4 +1,4 @@
-import { DSL } from '~/models/dsl/DSL'
+import { DSL } from "~/models/dsl/DSL";
 
 export enum LayerType {
   Dot,
@@ -7,11 +7,11 @@ export enum LayerType {
 }
 
 export type Layer = {
-  id: string
-  name: string
-  type: LayerType
-  typeDescription: string // 各タイプの説明
-  enabled: boolean
-  dotMagnification: number
-  dsl: DSL
-}
+  id: string;
+  name: string;
+  type: LayerType;
+  typeDescription: string; // 各タイプの説明
+  enabled: boolean;
+  dotMagnification: number;
+  dsl: DSL;
+};

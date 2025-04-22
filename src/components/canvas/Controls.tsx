@@ -1,4 +1,4 @@
-import { Component } from "solid-js";
+import { Component, For } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
@@ -25,12 +25,19 @@ const Controls: Component<{}> = (props) => {
       <p>
         offset:({canvasStore.offset.x}, {canvasStore.offset.y})
       </p>
-      {/* <p>UNDO STACKS.</p>
-        <For each={activeImage()?.undoStack}>
-            {item =>
-                <p>{item.toString()}</p>
-            }
-        </For> */}
+
+      <p>UNDO STACKS.</p>
+      <For each={layerImageManager.getAgent(activeLayer().id)?.getHistoryManager()?.getUndoStack()}>
+        {(item, i) => {
+          if (i() === 0) {
+            <>
+              <p>pixel diffs: {item.diffs.values().toArray().filter(d => d.kind === "pixel").length}px.</p>
+              <p>tile diffs: {item.diffs.values().toArray().filter(d => d.kind === "tile").length}px.</p>
+            </>
+          } else return <></>
+        }
+        }
+      </For>
       <div class={styles["top-right-button-container"]}>
         {/* <ImportImageButton />
         <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>

@@ -7,16 +7,13 @@ export class EraserTool implements Tool {
     return false
   }
 
-  onMove(
-    agent: LayerImageAgent,
-    { position, lastPosition, color, size }: ToolArgs
-  ) {
+  onMove(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs) {
     if (!size) return false
 
     drawSquarePixel(position, size, (px, py) => {
       const diff = agent.deletePixel({ x: px, y: py }, true, true)
       if (diff !== undefined) {
-        agent.addPixelDiffs([diff])
+        agent.addDiffs([diff])
       }
     })
 
@@ -25,7 +22,7 @@ export class EraserTool implements Tool {
         drawSquarePixel({ x, y }, size, (px, py) => {
           const diff = agent.deletePixel({ x: px, y: py }, true, true)
           if (diff !== undefined) {
-            agent.addPixelDiffs([diff])
+            agent.addDiffs([diff])
           }
         })
       })

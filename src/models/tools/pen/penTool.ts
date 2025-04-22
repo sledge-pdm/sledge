@@ -13,23 +13,21 @@ export class PenTool implements Tool {
     agent: LayerImageAgent,
     { position, lastPosition, color, size }: ToolArgs
   ) {
-    const [r, g, b, a] = color
-
     if (!size) return false
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.setPixel({ x: px, y: py }, r, g, b, a, true, true)
+      const diff = agent.setPixel({ x: px, y: py }, color, true, true)
       if (diff !== undefined) {
-        agent.addPixelDiffs([diff])
+        agent.addDiffs([diff])
       }
     })
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.setPixel({ x: px, y: py }, r, g, b, a, true, true)
+          const diff = agent.setPixel({ x: px, y: py }, color, true, true)
           if (diff !== undefined) {
-            agent.addPixelDiffs([diff])
+            agent.addDiffs([diff])
           }
         })
       })

@@ -107,12 +107,13 @@ models/layer_image/HistoryManager.ts
 models/layer_image/LayerImageAgent.ts
 models/layer_image/LayerImageManager.ts
 models/layer_image/Tile.ts
-models/layer/history.ts
 models/layer/layerImage.ts
 models/tools/DrawUtils.ts
 models/tools/eraser/EraserTool.ts
 models/tools/fill/FillTool.ts
 models/tools/fill/LegacyFills.ts
+models/tools/fill/PixelFloodFill.ts
+models/tools/fill/TileFloodFill.ts
 models/tools/pen/PenTool.ts
 models/tools/ToolBase.ts
 models/types/Canvas.ts
@@ -535,7 +536,7 @@ export default CanvasAreaInteract;
 </file>
 
 <file path="components/canvas/Controls.tsx">
-import { Component } from "solid-js";
+import { Component, For } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
@@ -562,12 +563,19 @@ const Controls: Component<{}> = (props) => {
       <p>
         offset:({canvasStore.offset.x}, {canvasStore.offset.y})
       </p>
-      {/* <p>UNDO STACKS.</p>
-        <For each={activeImage()?.undoStack}>
-            {item =>
-                <p>{item.toString()}</p>
-            }
-        </For> */}
+
+      <p>UNDO STACKS.</p>
+      <For each={layerImageManager.getAgent(activeLayer().id)?.getHistoryManager()?.getUndoStack()}>
+        {(item, i) => {
+          if (i() === 0) {
+            <>
+              <p>pixel diffs: {item.diffs.values().toArray().filter(d => d.kind === "pixel").length}px.</p>
+              <p>tile diffs: {item.diffs.values().toArray().filter(d => d.kind === "tile").length}px.</p>
+            </>
+          } else return <></>
+        }
+        }
+      </For>
       <div class={styles["top-right-button-container"]}>
         {/* <ImportImageButton />
         <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>
@@ -2909,7 +2917,6 @@ export class DSL {
 </file>
 
 <file path="models/dsl/DSLRunner.ts">
-import { cloneImageData } from '~/models/factories/utils'
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
 import { safeInvoke } from '~/utils/tauriUtils'
 import { DSL } from './DSL'
@@ -2918,7 +2925,7 @@ export async function runDSL(
   dsl: DSL,
   image: ImageData
 ): Promise<ImageData | undefined> {
-  const encoded = encodeImageData(cloneImageData(image))
+  const encoded = encodeImageData(image)
 
   const dslStr = dsl.build(true)
   if (dslStr === undefined) return
@@ -3303,22 +3310,14 @@ export const removeLayer = (layerId?: string) => {
 </file>
 
 <file path="models/factories/utils.ts">
-const magnificationList: number[] = [1, 2, 4];
+const magnificationList: number[] = [1, 2, 4]
 export const getNextMagnification = (dotMagnification: number) => {
-  let index = magnificationList.findIndex((m) => m === dotMagnification);
+  let index = magnificationList.findIndex((m) => m === dotMagnification)
   if (index != -1) {
     // 循環
-    let nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0;
-    return magnificationList[nextIndex];
-  } else return 1;
-};
-
-export function cloneImageData(src: ImageData): ImageData {
-  return new ImageData(
-    new Uint8ClampedArray(src.data), // ← 必ず新しい配列
-    src.width,
-    src.height,
-  );
+    let nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0
+    return magnificationList[nextIndex]
+  } else return 1
 }
 </file>
 
@@ -3332,7 +3331,6 @@ export enum DrawState {
 
 <file path="models/layer_canvas/LayerCanvasOperator.ts">
 import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas'
-import { cloneImageData } from '~/models/factories/utils'
 import { Vec2 } from '~/models/types/Vector'
 import { currentTool } from '~/stores/internal/toolsStore'
 import { hexToRGBA } from '~/utils/colorUtils'
@@ -3343,6 +3341,7 @@ import { getToolInstance } from '../tools/ToolBase'
 import LayerImageAgent from '../layer_image/LayerImageAgent'
 import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent'
 import { setLayerImageStore } from '~/stores/project/layerImageStore'
+import { reconcile } from 'solid-js/store'
 
 export default class LayerCanvasOperator {
   constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
@@ -3371,7 +3370,7 @@ export default class LayerCanvasOperator {
       if (state === DrawState.end) {
         agent.registerDiffAction()
         agent.setImage(result)
-        setLayerImageStore(layer.id, 'current', cloneImageData(result))
+        setLayerImageStore(layer.id, 'current', reconcile(result))
 
         if (agent instanceof TileLayerImageAgent) {
           ;(agent as TileLayerImageAgent).resetAllDirtyStates()
@@ -3435,7 +3434,7 @@ export default class LayerCanvasOperator {
 import { Vec2 } from '~/models/types/Vector'
 import LayerImageAgent from '../LayerImageAgent'
 import { PixelDiff } from '../HistoryManager'
-import { cloneImageData } from '~/models/factories/utils'
+import { RGBAColor } from '~/utils/colorUtils'
 
 export default class RawLayerImageAgent extends LayerImageAgent {
   putImageInto(ctx: CanvasRenderingContext2D) {
@@ -3448,19 +3447,31 @@ export default class RawLayerImageAgent extends LayerImageAgent {
 
   public setPixel(
     position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number
+    color: RGBAColor,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    return this.setPixelInPosition(position, r, g, b, a)
+    return this.setPixelInPosition(
+      position,
+      color,
+      excludePositionMatch,
+      excludeColorMatch
+    )
   }
 
-  public deletePixel(position: Vec2): PixelDiff | undefined {
-    return this.deletePixelInPosition(position)
+  public deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    return this.deletePixelInPosition(
+      position,
+      excludePositionMatch,
+      excludeColorMatch
+    )
   }
 
-  public getPixel(position: Vec2): [number, number, number, number] {
+  public getPixel(position: Vec2): RGBAColor {
     const i = (position.y * this.image.width + position.x) * 4
     const d = this.image.data
     return [d[i], d[i + 1], d[i + 2], d[i + 3]]
@@ -3469,28 +3480,71 @@ export default class RawLayerImageAgent extends LayerImageAgent {
 </file>
 
 <file path="models/layer_image/agents/TileLayerImageAgent.ts">
-import { HistoryManager } from './../HistoryManager'
+import { HistoryManager, TileDiff } from './../HistoryManager'
 import { Vec2 } from '~/models/types/Vector'
 import LayerImageAgent from '../LayerImageAgent'
-import Tile from '../Tile'
+import Tile, { TileIndex } from '../Tile'
 import { PixelDiff } from '../HistoryManager'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
 
 export default class TileLayerImageAgent extends LayerImageAgent {
-  readonly TILE_SIZE = 10
+  readonly TILE_SIZE = 32
 
   private tiles: Tile[][] = []
+
+  getTile(index: TileIndex) {
+    return this.tiles[index.row][index.column]
+  }
+
+  getTiles() {
+    return this.tiles
+  }
 
   constructor(imageData: ImageData, historyManager: HistoryManager) {
     super(imageData, historyManager)
   }
 
   initTile() {
-    const tileRowCount = Math.ceil(this.getWidth() / this.TILE_SIZE)
-    const tileColumnCount = Math.ceil(this.getHeight() / this.TILE_SIZE)
+    const tileRowCount = Math.ceil(this.getHeight() / this.TILE_SIZE)
+    const tileColumnCount = Math.ceil(this.getWidth() / this.TILE_SIZE)
     for (let row = 0; row < tileRowCount; row++) {
       this.tiles[row] = []
       for (let column = 0; column < tileColumnCount; column++) {
         this.tiles[row][column] = new Tile(row, column, this.TILE_SIZE)
+      }
+    }
+    this.scanAllTilesUniformity()
+  }
+
+  scanAllTilesUniformity() {
+    const { TILE_SIZE } = this
+    const w = this.getWidth()
+    const h = this.getHeight()
+
+    for (const row of this.tiles) {
+      for (const tile of row) {
+        const { x: ox, y: oy } = tile.getOffset()
+
+        // ①タイルの左上ピクセルを基準色に
+        const base = this.getPixel({ x: ox, y: oy })
+
+        let uniform = true
+        // ②タイル内を走査（画像端は超えないよう clamp）
+        for (let dy = 0; dy < TILE_SIZE && uniform; dy++) {
+          const py = oy + dy
+          if (py >= h) break
+          for (let dx = 0; dx < TILE_SIZE; dx++) {
+            const px = ox + dx
+            if (px >= w) break
+            if (!colorMatch(this.getPixel({ x: px, y: py }), base)) {
+              uniform = false
+              break
+            }
+          }
+        }
+        // ③結果を保存
+        tile.isUniform = uniform
+        tile.uniformColor = uniform ? base : undefined
       }
     }
   }
@@ -3534,9 +3588,9 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     this.resetDirtyStates()
   }
 
-  private getTileIndex(layerPosition: Vec2): { row: number; column: number } {
-    const row = Math.floor(layerPosition.x / this.TILE_SIZE)
-    const column = Math.floor(layerPosition.y / this.TILE_SIZE)
+  public getTileIndex(layerPosition: Vec2): TileIndex {
+    const row = Math.floor(layerPosition.y / this.TILE_SIZE)
+    const column = Math.floor(layerPosition.x / this.TILE_SIZE)
     return { row, column }
   }
 
@@ -3568,18 +3622,104 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirtyThroughAction))
   }
 
-  public addPixelDiffs(diffs: PixelDiff[]) {
-    super.addPixelDiffs(diffs)
+  protected undoTileDiff(tileDiff: TileDiff): void {
+    console.log(`tilediff. fill ${tileDiff.beforeColor}`)
+    if (tileDiff.beforeColor)
+      this.fillWholeTile(tileDiff.index, tileDiff.beforeColor, false)
+  }
+
+  protected redoTileDiff(tileDiff: TileDiff): void {
+    console.log(`tilediff. fill ${tileDiff.afterColor}`)
+    this.fillWholeTile(tileDiff.index, tileDiff.afterColor, false)
   }
 
   public setPixel(
     position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number
+    color: RGBAColor,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    const result = this.setPixelInPosition(position, r, g, b, a)
+    const result = this.setPixelInPosition(
+      position,
+      color,
+      excludePositionMatch,
+      excludeColorMatch
+    )
+    if (result !== undefined) {
+      const tileIndex = this.getTileIndex(position)
+      this.tiles[tileIndex.row][tileIndex.column].isDirty = true
+      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
+
+      const tile = this.getTile(tileIndex)
+      if (
+        tile.isUniform &&
+        tile.uniformColor !== undefined &&
+        colorMatch(tile.uniformColor, color)
+      ) {
+        this.tiles[tileIndex.row][tileIndex.column].isUniform = false
+        this.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined
+      }
+    }
+    return result
+  }
+
+  fillWholeTile(index: TileIndex, color: RGBAColor, collectDiff = true) {
+    const tile = this.getTile(index)
+    if (
+      tile.isUniform &&
+      tile.uniformColor &&
+      colorMatch(tile.uniformColor, color)
+    )
+      return
+
+    const [r, g, b, a] = color
+    const { x: ox, y: oy } = tile.getOffset()
+    const { TILE_SIZE } = this
+    const { width, data } = this.image
+
+    for (let dy = 0; dy < TILE_SIZE; dy++) {
+      const y = oy + dy
+      if (y >= this.getHeight()) break
+      let i = (y * width + ox) * 4 // 行頭インデックス
+      for (let dx = 0; dx < TILE_SIZE; dx++) {
+        const x = ox + dx
+        if (x >= this.getWidth()) break
+
+        data[i] = r
+        data[i + 1] = g
+        data[i + 2] = b
+        data[i + 3] = a
+        i += 4
+      }
+    }
+
+    if (collectDiff)
+      this.addDiffs([
+        {
+          kind: 'tile',
+          index,
+          beforeColor: tile.uniformColor,
+          afterColor: [r, g, b, a],
+        },
+      ])
+
+    // 状態更新
+    tile.isDirty = tile.isDirty = true
+    tile.isDirty = tile.isDirtyThroughAction = true
+    tile.isUniform = true
+    tile.uniformColor = color
+  }
+
+  public deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    const result = this.deletePixelInPosition(
+      position,
+      excludePositionMatch,
+      excludeColorMatch
+    )
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position)
       this.tiles[tileIndex.row][tileIndex.column].isDirty = true
@@ -3588,21 +3728,28 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     return result
   }
 
-  public deletePixel(position: Vec2): PixelDiff | undefined {
-    const result = this.deletePixelInPosition(position)
-    if (result !== undefined) {
-      const tileIndex = this.getTileIndex(position)
-      this.tiles[tileIndex.row][tileIndex.column].isDirty = true
-      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
-    }
-    return result
-  }
-
-  public getPixel(position: Vec2): [number, number, number, number] {
+  public getPixel(position: Vec2): RGBAColor {
     const i = (position.y * this.image.width + position.x) * 4
     const d = this.image.data
 
     return [d[i], d[i + 1], d[i + 2], d[i + 3]]
+  }
+
+  public getTileRowCount() {
+    return this.tiles.length
+  }
+
+  public getTileColumnCount() {
+    return this.tiles[0].length
+  }
+
+  public isTileInBounds(index: TileIndex) {
+    return (
+      index.row >= 0 &&
+      index.row < this.getTileRowCount() &&
+      index.column >= 0 &&
+      index.column < this.getTileColumnCount()
+    )
   }
 }
 </file>
@@ -3614,15 +3761,36 @@ import {
 } from '~/stores/project/layerImageStore'
 import { Vec2 } from '../types/Vector'
 import { reconcile } from 'solid-js/store'
+import { RGBAColor } from '~/utils/colorUtils'
+import { TileIndex } from './Tile'
 
 export type PixelDiff = {
+  kind: 'pixel'
   position: Vec2
-  before: [number, number, number, number] // undo時の色
-  after: [number, number, number, number] // redo時の色
+  before: RGBAColor
+  after: RGBAColor
+}
+
+export type TileDiff = {
+  kind: 'tile'
+  index: TileIndex
+  beforeColor: RGBAColor | undefined
+  afterColor: RGBAColor
+}
+
+export type Diff = PixelDiff | TileDiff
+
+export const getDiffHash = (diff: Diff) => {
+  switch (diff.kind) {
+    case 'pixel':
+      return `px:${diff.position.x},${diff.position.y}`
+    case 'tile':
+      return `tile:${diff.index.row},${diff.index.column}`
+  }
 }
 
 export type DiffAction = {
-  diffs: Map<string, PixelDiff>
+  diffs: Map<string, Diff>
 }
 
 export class HistoryManager {
@@ -3632,6 +3800,14 @@ export class HistoryManager {
   constructor(public layerId: string) {
     this.undoActionsStack = []
     this.redoActionsStack = []
+  }
+
+  public getUndoStack() {
+    return this.undoActionsStack
+  }
+
+  public getRedoStack() {
+    return this.undoActionsStack
   }
 
   public canUndo() {
@@ -3644,15 +3820,16 @@ export class HistoryManager {
 
   public addAction(action: DiffAction) {
     this.undoActionsStack.push(action)
+    this.redoActionsStack = []
     setLayerImageStore(
       this.layerId,
       'undoStack',
-      reconcile([...this.undoActionsStack])
+      reconcile(this.undoActionsStack)
     )
     setLayerImageStore(
       this.layerId,
       'redoStack',
-      reconcile([...this.redoActionsStack])
+      reconcile(this.redoActionsStack)
     )
   }
 
@@ -3663,12 +3840,12 @@ export class HistoryManager {
     setLayerImageStore(
       this.layerId,
       'undoStack',
-      reconcile([...this.undoActionsStack])
+      reconcile(this.undoActionsStack)
     )
     setLayerImageStore(
       this.layerId,
       'redoStack',
-      reconcile([...this.redoActionsStack])
+      reconcile(this.redoActionsStack)
     )
     return undoedAction
   }
@@ -3680,12 +3857,12 @@ export class HistoryManager {
     setLayerImageStore(
       this.layerId,
       'undoStack',
-      reconcile([...this.undoActionsStack])
+      reconcile(this.undoActionsStack)
     )
     setLayerImageStore(
       this.layerId,
       'redoStack',
-      reconcile([...this.redoActionsStack])
+      reconcile(this.redoActionsStack)
     )
     return redoedAction
   }
@@ -3694,9 +3871,15 @@ export class HistoryManager {
 
 <file path="models/layer_image/LayerImageAgent.ts">
 import { Vec2 } from '~/models/types/Vector'
-import { DiffAction, HistoryManager, PixelDiff } from './HistoryManager'
-import { cloneImageData } from '../factories/utils'
-import { colorMatch } from '~/utils/colorUtils'
+import {
+  Diff,
+  DiffAction,
+  getDiffHash,
+  HistoryManager,
+  PixelDiff,
+  TileDiff,
+} from './HistoryManager'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
 import { setBottomInfo } from '~/components/BottomInfo'
 
 interface DrawingBufferChangeEvent {}
@@ -3719,6 +3902,10 @@ export default abstract class LayerImageAgent {
     this.image = imageData
     this.drawingBuffer = imageData
     this.historyManager = historyManager
+  }
+
+  getHistoryManager() {
+    return this.historyManager
   }
 
   getImage() {
@@ -3785,10 +3972,8 @@ export default abstract class LayerImageAgent {
 
   public currentDiffAction: DiffAction = { diffs: new Map() }
 
-  public addPixelDiffs(diffs: PixelDiff[]) {
-    diffs.forEach((d) => {
-      this.currentDiffAction.diffs.set(`${d.position.x},${d.position.y}`, d)
-    })
+  addDiffs(diffs: Diff[]) {
+    diffs.forEach((d) => this.currentDiffAction.diffs.set(getDiffHash(d), d))
   }
 
   public registerDiffAction() {
@@ -3800,89 +3985,118 @@ export default abstract class LayerImageAgent {
   public canRedo = () => this.historyManager?.canRedo()
 
   public undo() {
+    const undoStart = Date.now()
     const undoedAction = this.historyManager?.undo()
     if (undoedAction === undefined) return
     setBottomInfo(`undo.`)
-    undoedAction.diffs.forEach((pxDiff) => {
-      this.setPixel(
-        pxDiff.position,
-        pxDiff.before[0],
-        pxDiff.before[1],
-        pxDiff.before[2],
-        pxDiff.before[3]
-      )
+    undoedAction.diffs.forEach((diff) => {
+      switch (diff.kind) {
+        case 'pixel':
+          this.setPixelInPosition(diff.position, diff.before, false, false)
+          break
+        case 'tile':
+          this.undoTileDiff(diff)
+          break
+      }
     })
-    setBottomInfo(`undo done. (${undoedAction.diffs.size} px updated)`)
+    const undoEnd = Date.now()
+    setBottomInfo(
+      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`
+    )
 
     this.callOnImageChangeListeners()
   }
 
+  protected undoTileDiff(tileDiff: TileDiff) {}
+
   public redo() {
+    const redoStart = Date.now()
     const redoedAction = this.historyManager?.redo()
     if (redoedAction === undefined) return
     setBottomInfo(`redo.`)
-    redoedAction.diffs.forEach((pxDiff) => {
-      this.setPixel(
-        pxDiff.position,
-        pxDiff.after[0],
-        pxDiff.after[1],
-        pxDiff.after[2],
-        pxDiff.after[3]
-      )
+    redoedAction.diffs.forEach((diff) => {
+      switch (diff.kind) {
+        case 'pixel':
+          this.setPixelInPosition(diff.position, diff.after, false, false)
+          break
+        case 'tile':
+          this.redoTileDiff(diff)
+          break
+      }
     })
-    setBottomInfo(`redo done. (${redoedAction.diffs.size} px updated)`)
+    const redoEnd = Date.now()
+    setBottomInfo(
+      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`
+    )
 
     this.callOnImageChangeListeners()
   }
 
+  protected redoTileDiff(tileDiff: TileDiff) {}
+
   public abstract setPixel(
     position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number
+    color: RGBAColor,
+    excludePositionMatch: boolean,
+    excludeColorMatch: boolean
   ): PixelDiff | undefined
 
   protected setPixelInPosition(
     position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number
+    color: RGBAColor,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     if (!this.isInBounds(position)) return undefined
-    if (this.currentDiffAction.diffs.has(`${position.x},${position.y}`))
+    if (
+      excludePositionMatch &&
+      this.currentDiffAction.diffs.has(`${position.x},${position.y}`)
+    )
       return undefined
     const i = (position.y * this.getWidth() + position.x) * 4
-    const beforeColor: [number, number, number, number] = [
+    const beforeColor: RGBAColor = [
       this.image.data[i + 0],
       this.image.data[i + 1],
       this.image.data[i + 2],
       this.image.data[i + 3],
     ]
-    if (colorMatch(beforeColor, [r, g, b, a])) return undefined
+    if (excludeColorMatch && colorMatch(beforeColor, color)) return undefined
 
-    if (!this.drawingBuffer) this.drawingBuffer = cloneImageData(this.image)
+    if (!this.drawingBuffer) return
 
-    this.drawingBuffer.data[i + 0] = r
-    this.drawingBuffer.data[i + 1] = g
-    this.drawingBuffer.data[i + 2] = b
-    this.drawingBuffer.data[i + 3] = a
+    this.drawingBuffer.data[i + 0] = color[0]
+    this.drawingBuffer.data[i + 1] = color[1]
+    this.drawingBuffer.data[i + 2] = color[2]
+    this.drawingBuffer.data[i + 3] = color[3]
 
     return {
+      kind: 'pixel',
       position,
       before: beforeColor,
-      after: [r, g, b, a],
+      after: color,
     }
   }
 
-  public abstract deletePixel(position: Vec2): PixelDiff | undefined
+  public abstract deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean,
+    excludeColorMatch: boolean
+  ): PixelDiff | undefined
 
-  protected deletePixelInPosition(position: Vec2): PixelDiff | undefined {
-    return this.setPixelInPosition(position, 0, 0, 0, 0)
+  protected deletePixelInPosition(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    return this.setPixelInPosition(
+      position,
+      [0, 0, 0, 0],
+      excludePositionMatch,
+      excludeColorMatch
+    )
   }
 
-  public abstract getPixel(position: Vec2): [number, number, number, number]
+  public abstract getPixel(position: Vec2): RGBAColor
 
   public isInBounds(position: Vec2) {
     return (
@@ -3916,13 +4130,24 @@ export class LayerImageManager {
 </file>
 
 <file path="models/layer_image/Tile.ts">
+import { RGBAColor } from '~/utils/colorUtils'
 import { Vec2 } from '../types/Vector'
+
+export interface TileIndex {
+  row: number
+  column: number
+}
 
 export default class Tile {
   // 一連の動作全体で変更があったか（累計表示、UI表示用）
   public isDirtyThroughAction: boolean
   // 前回の描画更新から変更があったか（canvas更新用）
   public isDirty: boolean
+
+  // このタイルが単色（すべて同一RGBA）なら true
+  public isUniform = false
+  // 単色時のカラーキャッシュ
+  public uniformColor: RGBAColor | undefined = undefined
 
   constructor(
     public readonly row: number,
@@ -3944,48 +4169,7 @@ export default class Tile {
     }
   }
 
-  updateState() {
-    // TODO (...maybe slow if All Layers Updated at once)
-  }
-}
-</file>
-
-<file path="models/layer/history.ts">
-import { showToast } from '~/stores/internal/toastStore'
-import {
-  layerImageStore,
-  setLayerImageStore,
-} from '~/stores/project/layerImageStore'
-
-export function undo(layerId: string) {
-  setLayerImageStore(layerId, (state) => {
-    if (state.undoStack.length === 0) return state
-    const prev = state.undoStack[state.undoStack.length - 1]
-    const newUndo = state.undoStack.slice(0, -1)
-    const newRedo = [state.current, ...state.redoStack]
-    return { current: prev, undoStack: newUndo, redoStack: newRedo }
-  })
-  // updateDSL(layerId);
-}
-
-export function isUndoPossible(layerId: string) {
-  return layerImageStore[layerId]?.undoStack?.length !== 0
-}
-
-export function redo(layerId: string) {
-  showToast('redo succeeded', 'success')
-  setLayerImageStore(layerId, (state) => {
-    if (state.redoStack.length === 0) return state
-    const next = state.redoStack[0]
-    const newRedo = state.redoStack.slice(1)
-    const newUndo = [...state.undoStack, state.current]
-    return { current: next, undoStack: newUndo, redoStack: newRedo }
-  })
-  // updateDSL(layerId);
-}
-
-export function isRedoPossible(layerId: string) {
-  return layerImageStore[layerId]?.redoStack?.length !== 0
+  updateState() {}
 }
 </file>
 
@@ -4059,25 +4243,22 @@ export class EraserTool implements Tool {
     return false
   }
 
-  onMove(
-    agent: LayerImageAgent,
-    { position, lastPosition, color, size }: ToolArgs
-  ) {
+  onMove(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs) {
     if (!size) return false
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.deletePixel({ x: px, y: py })
+      const diff = agent.deletePixel({ x: px, y: py }, true, true)
       if (diff !== undefined) {
-        agent.addPixelDiffs([diff])
+        agent.addDiffs([diff])
       }
     })
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.deletePixel({ x: px, y: py })
+          const diff = agent.deletePixel({ x: px, y: py }, true, true)
           if (diff !== undefined) {
-            agent.addPixelDiffs([diff])
+            agent.addDiffs([diff])
           }
         })
       })
@@ -4093,60 +4274,26 @@ export class EraserTool implements Tool {
 </file>
 
 <file path="models/tools/fill/FillTool.ts">
-import { decodeImageData, encodeImageData, setPixel } from '~/utils/ImageUtils'
 import { Tool, ToolArgs } from '../ToolBase'
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
-import { colorMatch } from '~/utils/colorUtils'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
 import { Vec2 } from '~/models/types/Vector'
-import { PixelDiff } from '~/models/layer_image/HistoryManager'
+import { TileFloodFill } from './TileFloodFill'
+
+export interface FillProps {
+  agent: LayerImageAgent
+  color: RGBAColor
+  position: Vec2
+}
+export interface Fill {
+  fill: (props: FillProps) => void
+}
 
 export class FillTool implements Tool {
   onStart(agent: LayerImageAgent, { position, lastPosition, color }: ToolArgs) {
-    const targetColor = agent.getPixel(position)
-    console.log(color)
-    console.log(targetColor)
-    const matches = (p: Vec2) => colorMatch(agent.getPixel(p), targetColor)
+    const fill = new TileFloodFill()
 
-    if (colorMatch(targetColor, color)) return false
-
-    // console.log(`---${image.width}x${image.height} flood fill---`)
-
-    const startTime = Date.now()
-    const queue: Vec2[] = [position]
-    const filled: Vec2[] = []
-    const visited = new Uint8Array(agent.getWidth() * agent.getHeight()) // 0:未訪問, 1:訪問済
-    const index = (p: Vec2) => p.y * agent.getWidth() + p.x
-    let queueCount = 0
-    let visitCount = 0
-    while (queue.length > 0) {
-      queueCount++
-      const c = queue.pop()!
-      if (!agent.isInBounds(c)) continue
-
-      const i = index(c)
-      if (visited[i]) continue
-      visited[i] = 1
-      visitCount++
-
-      if (matches(c)) {
-        filled.push(c)
-        queue.push({ x: c.x + 1, y: c.y })
-        queue.push({ x: c.x - 1, y: c.y })
-        queue.push({ x: c.x, y: c.y + 1 })
-        queue.push({ x: c.x, y: c.y - 1 })
-      }
-    }
-    const endTime = Date.now()
-    // console.log('new: ' + (endTime - startTime))
-
-    const pxDiffs: PixelDiff[] = []
-    // バッファに一括反映
-    for (const p of filled) {
-      const diff = agent.setPixel(p, color[0], color[1], color[2], color[3])
-      if (diff !== undefined) pxDiffs.push(diff)
-    }
-
-    agent.addPixelDiffs(pxDiffs)
+    fill.fill({ agent, color, position })
 
     return true
   }
@@ -4254,6 +4401,159 @@ function legacyByteBufRust({ image, position, lastPosition, color }: ToolArgs) {
 }
 </file>
 
+<file path="models/tools/fill/PixelFloodFill.ts">
+import { PixelDiff } from '~/models/layer_image/HistoryManager'
+import { Vec2 } from '~/models/types/Vector'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
+import { Fill, FillProps } from './FillTool'
+
+export class PixelFloodFill implements Fill {
+  fill({ agent, color, position }: FillProps) {
+    const targetColor = agent.getPixel(position)
+    const matches = (p: Vec2) => colorMatch(agent.getPixel(p), targetColor)
+
+    console.log(color)
+    console.log(targetColor)
+
+    if (colorMatch(targetColor, color)) return false
+
+    // console.log(`---${image.width}x${image.height} flood fill---`)
+
+    if (colorMatch(targetColor, color)) return false
+    console.log('fill started.')
+
+    const scanStart = Date.now()
+    const queue: Vec2[] = [position]
+    const filled: Vec2[] = []
+    const visited = new Uint8Array(agent.getWidth() * agent.getHeight()) // 0:未訪問, 1:訪問済
+    const index = (p: Vec2) => p.y * agent.getWidth() + p.x
+    let queueCount = 0
+    let visitCount = 0
+    while (queue.length > 0) {
+      queueCount++
+      const c = queue.pop()!
+      if (!agent.isInBounds(c)) continue
+
+      const i = index(c)
+      if (visited[i]) continue
+      visited[i] = 1
+      visitCount++
+
+      if (matches(c)) {
+        filled.push(c)
+        queue.push({ x: c.x + 1, y: c.y })
+        queue.push({ x: c.x - 1, y: c.y })
+        queue.push({ x: c.x, y: c.y + 1 })
+        queue.push({ x: c.x, y: c.y - 1 })
+      }
+    }
+
+    const scanEnd = Date.now()
+    console.log('scan finished. ' + (scanEnd - scanStart) + 'ms.')
+
+    const writeStart = Date.now()
+
+    const pxDiffs: PixelDiff[] = []
+    // バッファに一括反映
+    for (const p of filled) {
+      const diff = agent.setPixel(p, color, false, false)
+      if (diff !== undefined) pxDiffs.push(diff)
+    }
+    const writeEnd = Date.now()
+    console.log('write finished. ' + (writeEnd - writeStart) + 'ms.')
+
+    agent.addDiffs(pxDiffs)
+  }
+}
+</file>
+
+<file path="models/tools/fill/TileFloodFill.ts">
+import { PixelDiff } from '~/models/layer_image/HistoryManager'
+import { Vec2 } from '~/models/types/Vector'
+import { colorMatch } from '~/utils/colorUtils'
+import { Fill, FillProps } from './FillTool'
+import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent'
+import { TileIndex } from '~/models/layer_image/Tile'
+
+export class TileFloodFill implements Fill {
+  fill({ agent, color, position }: FillProps) {
+    if (!(agent instanceof TileLayerImageAgent)) {
+      throw 'Agent for this layer is not a TileLayerImageAgent!'
+      return
+    }
+    const tileAgent = agent as TileLayerImageAgent
+
+    const targetColor = tileAgent.getPixel(position)
+    const tileUniformMatches = (p: TileIndex): boolean => {
+      const tile = tileAgent.getTile(p)
+      if (tile.isUniform && tile.uniformColor !== undefined) {
+        return colorMatch(tile.uniformColor, targetColor)
+      }
+      return false
+    }
+    const matches = (p: Vec2) => colorMatch(tileAgent.getPixel(p), targetColor)
+
+    console.log(color)
+    console.log(targetColor)
+
+    if (colorMatch(targetColor, color)) return false
+    console.log('fill started.')
+
+    const scanStart = Date.now()
+
+    const pxDiffs: PixelDiff[] = []
+
+    const tileRowCount = tileAgent.getTileRowCount()
+    const tileColumnCount = tileAgent.getTileColumnCount()
+
+    const initialTileIndex = tileAgent.getTileIndex(position)
+    const tileQueue: TileIndex[] = [initialTileIndex]
+    const tilesFilled: TileIndex[] = []
+    const tilesVisited = new Uint8Array(tileRowCount * tileColumnCount)
+    const flatten = (ti: TileIndex) => ti.column * tileColumnCount + ti.row
+    let queueCount = 0
+    let visitCount = 0
+    while (tileQueue.length > 0) {
+      queueCount++
+      const ti = tileQueue.pop()!
+      if (!agent.isTileInBounds(ti)) continue
+
+      const i = flatten(ti)
+      if (tilesVisited[i]) continue
+      tilesVisited[i] = 1
+      visitCount++
+
+      if (tileUniformMatches(ti)) {
+        tilesFilled.push(ti)
+        tileQueue.push({ row: ti.row + 1, column: ti.column })
+        tileQueue.push({ row: ti.row - 1, column: ti.column })
+        tileQueue.push({ row: ti.row, column: ti.column + 1 })
+        tileQueue.push({ row: ti.row, column: ti.column - 1 })
+      }
+    }
+
+    const scanEnd = Date.now()
+    console.log(
+      'scan finished. ' +
+        (scanEnd - scanStart) +
+        'ms. visited ' +
+        visitCount +
+        'tiles'
+    )
+
+    const writeStart = Date.now()
+    // バッファに一括反映
+    for (const ti of tilesFilled) {
+      tileAgent.fillWholeTile(ti, color, true)
+    }
+    const writeEnd = Date.now()
+    console.log('write finished. ' + (writeEnd - writeStart) + 'ms.')
+
+    agent.addDiffs(pxDiffs)
+  }
+}
+</file>
+
 <file path="models/tools/pen/PenTool.ts">
 import { Tool, ToolArgs } from '../ToolBase'
 import { drawCompletionLine, drawSquarePixel } from '../DrawUtils'
@@ -4270,23 +4570,21 @@ export class PenTool implements Tool {
     agent: LayerImageAgent,
     { position, lastPosition, color, size }: ToolArgs
   ) {
-    const [r, g, b, a] = color
-
     if (!size) return false
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.setPixel({ x: px, y: py }, r, g, b, a)
+      const diff = agent.setPixel({ x: px, y: py }, color, true, true)
       if (diff !== undefined) {
-        agent.addPixelDiffs([diff])
+        agent.addDiffs([diff])
       }
     })
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.setPixel({ x: px, y: py }, r, g, b, a)
+          const diff = agent.setPixel({ x: px, y: py }, color, true, true)
           if (diff !== undefined) {
-            agent.addPixelDiffs([diff])
+            agent.addDiffs([diff])
           }
         })
       })
@@ -4302,6 +4600,7 @@ export class PenTool implements Tool {
 </file>
 
 <file path="models/tools/ToolBase.ts">
+import { RGBAColor } from '~/utils/colorUtils'
 import LayerImageAgent from '../layer_image/LayerImageAgent'
 import { ToolType } from '../types/Tool'
 import { Vec2 } from '../types/Vector'
@@ -4320,7 +4619,7 @@ export interface Tool {
 export interface ToolArgs {
   position: Vec2
   lastPosition?: Vec2
-  color: [number, number, number, number] // RGBA
+  color: RGBAColor // RGBA
   size?: number
   // TODO: pressure, tilt, ...
 }
@@ -6011,8 +6310,11 @@ export const wh100 = style([w100, h100]);
 </file>
 
 <file path="utils/colorUtils.ts">
+export type RGBColor = [number, number, number]
+export type RGBAColor = [number, number, number, number]
+
 // "#rrggbb" -> r/g/b
-export function hexToRGB(hex: string): [number, number, number] {
+export function hexToRGB(hex: string): RGBColor {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
@@ -6020,7 +6322,7 @@ export function hexToRGB(hex: string): [number, number, number] {
 }
 
 // "#rrggbbaa" -> r/g/b/a
-export function hexToRGBA(hex: string): [number, number, number, number] {
+export function hexToRGBA(hex: string): RGBAColor {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
@@ -6029,10 +6331,7 @@ export function hexToRGBA(hex: string): [number, number, number, number] {
   return [r, g, b, a]
 }
 
-export function colorMatch(
-  a: [number, number, number, number],
-  b: [number, number, number, number]
-): boolean {
+export function colorMatch(a: RGBAColor, b: RGBAColor): boolean {
   return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3]
 }
 </file>

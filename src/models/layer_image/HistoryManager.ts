@@ -4,15 +4,36 @@ import {
 } from '~/stores/project/layerImageStore'
 import { Vec2 } from '../types/Vector'
 import { reconcile } from 'solid-js/store'
+import { RGBAColor } from '~/utils/colorUtils'
+import { TileIndex } from './Tile'
 
 export type PixelDiff = {
+  kind: 'pixel'
   position: Vec2
-  before: [number, number, number, number] // undo時の色
-  after: [number, number, number, number] // redo時の色
+  before: RGBAColor
+  after: RGBAColor
+}
+
+export type TileDiff = {
+  kind: 'tile'
+  index: TileIndex
+  beforeColor: RGBAColor | undefined
+  afterColor: RGBAColor
+}
+
+export type Diff = PixelDiff | TileDiff
+
+export const getDiffHash = (diff: Diff) => {
+  switch (diff.kind) {
+    case 'pixel':
+      return `px:${diff.position.x},${diff.position.y}`
+    case 'tile':
+      return `tile:${diff.index.row},${diff.index.column}`
+  }
 }
 
 export type DiffAction = {
-  diffs: Map<string, PixelDiff>
+  diffs: Map<string, Diff>
 }
 
 export class HistoryManager {
@@ -22,6 +43,14 @@ export class HistoryManager {
   constructor(public layerId: string) {
     this.undoActionsStack = []
     this.redoActionsStack = []
+  }
+
+  public getUndoStack() {
+    return this.undoActionsStack
+  }
+
+  public getRedoStack() {
+    return this.undoActionsStack
   }
 
   public canUndo() {
@@ -34,15 +63,16 @@ export class HistoryManager {
 
   public addAction(action: DiffAction) {
     this.undoActionsStack.push(action)
+    this.redoActionsStack = []
     setLayerImageStore(
       this.layerId,
       'undoStack',
-      reconcile([...this.undoActionsStack])
+      reconcile(this.undoActionsStack)
     )
     setLayerImageStore(
       this.layerId,
       'redoStack',
-      reconcile([...this.redoActionsStack])
+      reconcile(this.redoActionsStack)
     )
   }
 
@@ -53,12 +83,12 @@ export class HistoryManager {
     setLayerImageStore(
       this.layerId,
       'undoStack',
-      reconcile([...this.undoActionsStack])
+      reconcile(this.undoActionsStack)
     )
     setLayerImageStore(
       this.layerId,
       'redoStack',
-      reconcile([...this.redoActionsStack])
+      reconcile(this.redoActionsStack)
     )
     return undoedAction
   }
@@ -70,12 +100,12 @@ export class HistoryManager {
     setLayerImageStore(
       this.layerId,
       'undoStack',
-      reconcile([...this.undoActionsStack])
+      reconcile(this.undoActionsStack)
     )
     setLayerImageStore(
       this.layerId,
       'redoStack',
-      reconcile([...this.redoActionsStack])
+      reconcile(this.redoActionsStack)
     )
     return redoedAction
   }

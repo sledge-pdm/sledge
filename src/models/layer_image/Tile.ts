@@ -1,10 +1,21 @@
+import { RGBAColor } from '~/utils/colorUtils'
 import { Vec2 } from '../types/Vector'
+
+export interface TileIndex {
+  row: number
+  column: number
+}
 
 export default class Tile {
   // 一連の動作全体で変更があったか（累計表示、UI表示用）
   public isDirtyThroughAction: boolean
   // 前回の描画更新から変更があったか（canvas更新用）
   public isDirty: boolean
+
+  // このタイルが単色（すべて同一RGBA）なら true
+  public isUniform = false
+  // 単色時のカラーキャッシュ
+  public uniformColor: RGBAColor | undefined = undefined
 
   constructor(
     public readonly row: number,
@@ -21,12 +32,19 @@ export default class Tile {
 
   public getOffset(): Vec2 {
     return {
-      x: this.row * this.globalTileSize,
-      y: this.column * this.globalTileSize,
+      x: this.column * this.globalTileSize,
+      y: this.row * this.globalTileSize,
     }
   }
 
-  updateState() {
-    // TODO (...maybe slow if All Layers Updated at once)
+  public isInBounds(positionInTile: Vec2) {
+    return (
+      positionInTile.x >= 0 &&
+      positionInTile.x < this.globalTileSize &&
+      positionInTile.y >= 0 &&
+      positionInTile.y < this.globalTileSize
+    )
   }
+
+  updateState() {}
 }

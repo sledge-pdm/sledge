@@ -1,4 +1,3 @@
-import { cloneImageData } from '~/models/factories/utils'
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
 import { safeInvoke } from '~/utils/tauriUtils'
 import { DSL } from './DSL'
@@ -7,7 +6,7 @@ export async function runDSL(
   dsl: DSL,
   image: ImageData
 ): Promise<ImageData | undefined> {
-  const encoded = encodeImageData(cloneImageData(image))
+  const encoded = encodeImageData(image)
 
   const dslStr = dsl.build(true)
   if (dslStr === undefined) return

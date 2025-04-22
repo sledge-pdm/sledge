@@ -1,6 +1,5 @@
 import { Vec2 } from '~/models/types/Vector'
 import { DiffAction, HistoryManager, PixelDiff } from './HistoryManager'
-import { cloneImageData } from '../factories/utils'
 import { colorMatch } from '~/utils/colorUtils'
 import { setBottomInfo } from '~/components/BottomInfo'
 
@@ -179,7 +178,7 @@ export default abstract class LayerImageAgent {
     if (excludeColorMatch && colorMatch(beforeColor, [r, g, b, a]))
       return undefined
 
-    if (!this.drawingBuffer) this.drawingBuffer = cloneImageData(this.image)
+    if (!this.drawingBuffer) return
 
     this.drawingBuffer.data[i + 0] = r
     this.drawingBuffer.data[i + 1] = g

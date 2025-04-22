@@ -1,5 +1,4 @@
 import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas'
-import { cloneImageData } from '~/models/factories/utils'
 import { Vec2 } from '~/models/types/Vector'
 import { currentTool } from '~/stores/internal/toolsStore'
 import { hexToRGBA } from '~/utils/colorUtils'
@@ -10,6 +9,7 @@ import { getToolInstance } from '../tools/ToolBase'
 import LayerImageAgent from '../layer_image/LayerImageAgent'
 import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent'
 import { setLayerImageStore } from '~/stores/project/layerImageStore'
+import { reconcile } from 'solid-js/store'
 
 export default class LayerCanvasOperator {
   constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
@@ -38,7 +38,7 @@ export default class LayerCanvasOperator {
       if (state === DrawState.end) {
         agent.registerDiffAction()
         agent.setImage(result)
-        setLayerImageStore(layer.id, 'current', cloneImageData(result))
+        setLayerImageStore(layer.id, 'current', reconcile(result))
 
         if (agent instanceof TileLayerImageAgent) {
           ;(agent as TileLayerImageAgent).resetAllDirtyStates()

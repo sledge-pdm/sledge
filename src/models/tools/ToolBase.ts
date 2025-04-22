@@ -1,3 +1,4 @@
+import { RGBAColor } from '~/utils/colorUtils'
 import LayerImageAgent from '../layer_image/LayerImageAgent'
 import { ToolType } from '../types/Tool'
 import { Vec2 } from '../types/Vector'
@@ -16,7 +17,7 @@ export interface Tool {
 export interface ToolArgs {
   position: Vec2
   lastPosition?: Vec2
-  color: [number, number, number, number] // RGBA
+  color: RGBAColor // RGBA
   size?: number
   // TODO: pressure, tilt, ...
 }

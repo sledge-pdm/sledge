@@ -5,7 +5,11 @@ import path from 'path'
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
 
 export default defineConfig({
-  plugins: [vanillaExtractPlugin(), solidPlugin(), tsconfigPaths()],
+  plugins: [
+    vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }),
+    solidPlugin(),
+    tsconfigPaths(),
+  ],
   build: {
     target: 'esnext',
     outDir: 'dist',

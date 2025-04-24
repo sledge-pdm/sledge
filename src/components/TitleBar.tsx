@@ -1,19 +1,70 @@
-import { Window } from "@tauri-apps/api/window";
-import { titleBarControlButton, titleBarControlCloseButton, titleBarControls, titleBarRoot, titleBarTitle } from "~/styles/components/title_bar.css";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { createSignal, onMount } from "solid-js";
+import {
+  titleBarControlButtonImg,
+  titleBarControlCloseButton,
+  titleBarControlMaximizeButton,
+  titleBarControlMinimizeButton,
+  titleBarControls,
+  titleBarRoot,
+  titleBarTitle,
+} from "~/styles/components/title_bar.css";
 
 export default function TitleBar() {
-    const appWindow = new Window('main');
+  const window = getCurrentWindow();
 
-    return (
-        <header style={{ "pointer-events": "all" }}>
-            <nav class={titleBarRoot} data-tauri-drag-region="p, button">
-                <p class={titleBarTitle}>sledge.</p>
-                <div class={titleBarControls}>
-                    <button class={titleBarControlButton} onClick={() => appWindow.minimize()}>–</button>
-                    <button class={titleBarControlButton} onClick={() => appWindow.toggleMaximize()}>◻</button>
-                    <button class={titleBarControlCloseButton} onClick={() => appWindow.close()}>×</button>
-                </div>
-            </nav>
-        </header >
-    );
+  const [isMaximizable, setIsMaximizable] = createSignal(true);
+  const [isMinimizable, setIsMinimizable] = createSignal(true);
+  const [isClosable, setIsClosable] = createSignal(true);
+  const [title, setTitle] = createSignal("");
+  const [isMaximized, setMaximized] = createSignal(false);
+
+  onMount(async () => {
+    setIsMaximizable(await window.isMaximizable());
+    setIsMinimizable(await window.isMinimizable());
+    setIsClosable(await window.isClosable());
+    setTitle(await window.title());
+  });
+
+  window.onResized(async (handler) => {
+    console.log("resize");
+    setMaximized(await window.isMaximized());
+  });
+
+  return (
+    <header style={{ "pointer-events": "all", "border": window.label === "main" ? "1px solid #aaa" : "none" }}>
+      <nav class={titleBarRoot} data-tauri-drag-region="p, button">
+        <p class={titleBarTitle}>{title()}.</p>
+        <div class={titleBarControls}>
+          {isMinimizable() && (
+            <button
+              class={titleBarControlMinimizeButton}
+              onClick={() => window.minimize()}
+            >
+              <img class={titleBarControlButtonImg} src={"/minimize.png"} />
+            </button>
+          )}
+          {isMaximizable() && (
+            <button
+              class={titleBarControlMaximizeButton}
+              onClick={() => window.toggleMaximize()}
+            >
+              <img
+                class={titleBarControlButtonImg}
+                src={isMaximized() ? "/leave_maximize.png" : "/maximize.png"}
+              />
+            </button>
+          )}
+          {isClosable() && (
+            <button
+              class={titleBarControlCloseButton}
+              onClick={() => window.close()}
+            >
+              <img class={titleBarControlButtonImg} src={"/close.png"} />
+            </button>
+          )}
+        </div>
+      </nav>
+    </header>
+  );
 }

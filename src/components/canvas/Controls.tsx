@@ -1,10 +1,10 @@
-import { Component } from "solid-js";
+import { Component, For } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
-import { isRedoPossible, isUndoPossible, redo, undo } from "~/models/layer/history";
-
 import styles from "@styles/components/canvas/controls.module.css";
+import { canRedo, canUndo } from "~/stores/project/layerImageStore";
+import { layerImageManager } from "./stacks/CanvasStack";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => canvasStore.zoom;
@@ -25,12 +25,43 @@ const Controls: Component<{}> = (props) => {
       <p>
         offset:({canvasStore.offset.x}, {canvasStore.offset.y})
       </p>
-      {/* <p>UNDO STACKS.</p>
-        <For each={activeImage()?.undoStack}>
-            {item =>
-                <p>{item.toString()}</p>
-            }
-        </For> */}
+      <p>zoom.</p>
+      <p>x {canvasStore.zoom}</p>
+
+      <p>UNDO STACKS.</p>
+      <For
+        each={layerImageManager
+          .getAgent(activeLayer()?.id)
+          ?.getHistoryManager()
+          ?.getUndoStack()}
+      >
+        {(item, i) => {
+          if (i() === 0) {
+            <>
+              <p>
+                pixel diffs:{" "}
+                {
+                  item.diffs
+                    .values()
+                    .toArray()
+                    .filter((d) => d.kind === "pixel").length
+                }
+                px.
+              </p>
+              <p>
+                tile diffs:{" "}
+                {
+                  item.diffs
+                    .values()
+                    .toArray()
+                    .filter((d) => d.kind === "tile").length
+                }
+                px.
+              </p>
+            </>;
+          } else return <></>;
+        }}
+      </For>
       <div class={styles["top-right-button-container"]}>
         {/* <ImportImageButton />
         <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>
@@ -42,26 +73,28 @@ const Controls: Component<{}> = (props) => {
           class={styles.undo_redo}
           src="/undo.png"
           style={{
-            opacity: isUndoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
-            cursor: isUndoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+            opacity: canUndo() ? "1.0" : "0.3",
+            cursor: canUndo() ? "pointer" : "unset",
           }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            undo(layerStore.activeLayerId);
-          }} />
+            layerImageManager.getAgent(layerStore.activeLayerId)?.undo();
+          }}
+        />
         <img
           class={styles.undo_redo}
           src="/redo.png"
           style={{
-            opacity: isRedoPossible(layerStore.activeLayerId) ? "1.0" : "0.3",
-            cursor: isRedoPossible(layerStore.activeLayerId) ? "pointer" : "unset"
+            opacity: canRedo() ? "1.0" : "0.3",
+            cursor: canRedo() ? "pointer" : "unset",
           }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            redo(layerStore.activeLayerId);
-          }} />
+            layerImageManager.getAgent(layerStore.activeLayerId)?.redo();
+          }}
+        />
 
         {/* <DSLEditor /> */}
       </div>

@@ -1,37 +1,34 @@
 // @refresh reload
 import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
-import { onMount, Suspense } from "solid-js";
-import Home from "./routes";
-import Editor from "./routes/editor";
-import { loadGlobalSettings } from "./io/global/globalIO";
+import { Suspense } from "solid-js";
 import TitleBar from "./components/TitleBar";
 import ToastContainer from "./components/ToastContainer";
+import Home from "./routes";
+import Editor from "./routes/editor";
 
-import { flexCol, h100 } from "./styles/components.css";
+import About from "./routes/about";
+import Settings from "./routes/settings";
+import { flexCol, h100 } from "./styles/snippets.css";
 
 export default function App() {
-  onMount(() => {
-    loadGlobalSettings()
-  })
-
-
   return (
     <Router
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
           <Suspense>
-            <div class={[flexCol, h100].join(" ")} style={{ "pointer-events": "all" }}>
+            <div
+              class={[flexCol, h100].join(" ")}
+              style={{ "pointer-events": "all" }}
+            >
               <TitleBar />
 
-              <main class="main">
-                {props.children}
-              </main>
+              <main>{props.children}</main>
 
               <ToastContainer />
 
-              <p id="sledge">sledge.</p>
+              {/* <p class={sledgeLogo}>sledge.</p> */}
             </div>
           </Suspense>
         </MetaProvider>
@@ -39,6 +36,8 @@ export default function App() {
     >
       <Route path="/" component={Home} />
       <Route path="/editor" component={Editor} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/about" component={About} />;
     </Router>
   );
 }

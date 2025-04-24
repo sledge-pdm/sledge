@@ -1,6 +1,10 @@
 import { Component, createSignal, For, onMount } from "solid-js";
 import { ALL_NODES } from "~/dsl/nodes/AvailableNodes";
-import { activeIndex, activeLayer, setLayerStore } from "~/stores/project/layerStore";
+import {
+  activeIndex,
+  activeLayer,
+  setLayerStore,
+} from "~/stores/project/layerStore";
 
 const DSLEditor: Component<{}> = (props) => {
   let [activeDSLStr, setDSLStr] = createSignal("");

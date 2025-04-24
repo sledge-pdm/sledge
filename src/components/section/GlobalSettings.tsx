@@ -19,14 +19,13 @@ const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: "crispEdges", value: "crispEdges" },
 ];
 
-const [autoSave, setAutoSave] = createSignal(true);
 
 const GlobalSettings: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>settings.</p>
       <div class={sectionContent} style={{ gap: "8px" }}>
-        <ToggleSwitch checked={autoSave()} onChange={setAutoSave}>
+        <ToggleSwitch checked={globalStore.showDirtyRects} onChange={e => setGlobalStore("showDirtyRects", e)}>
           <p style={{ "font-size": "0.5rem" }}> autosave.</p>
         </ToggleSwitch>
 

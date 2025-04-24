@@ -5,11 +5,9 @@ export const createTool = (
   type: ToolType,
   name: string,
   size: number,
-  color: string,
 ): Tool => ({
   id: uuidv4(),
   type,
   name,
   size,
-  color,
 });

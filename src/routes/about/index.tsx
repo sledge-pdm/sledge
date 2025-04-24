@@ -1,5 +1,7 @@
+import { WebviewOptions } from "@tauri-apps/api/webview";
+import { WindowOptions } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-shell";
-import { flexCol, flexRow, w100, wh100 } from "~/styles/snippets.css";
+import { flexRow, w100, wh100 } from "~/styles/snippets.css";
 import {
   aaContainer,
   aaText,
@@ -12,10 +14,12 @@ import {
   contentContainer,
   sendFBButton,
 } from "./about.css";
-import { WindowOptions } from "@tauri-apps/api/window";
-import { WebviewOptions } from "@tauri-apps/api/webview";
 
-export const AboutWindowOptions: Omit<WebviewOptions, "x" | "y" | "width" | "height"> & WindowOptions = {
+export const AboutWindowOptions: Omit<
+  WebviewOptions,
+  "x" | "y" | "width" | "height"
+> &
+  WindowOptions = {
   url: "/about",
   width: 420,
   height: 260,
@@ -26,7 +30,7 @@ export const AboutWindowOptions: Omit<WebviewOptions, "x" | "y" | "width" | "hei
   closable: true,
   acceptFirstMouse: true,
   focus: true,
-}
+};
 
 const About = () => {
   const openLink = (url: string) => {
@@ -70,10 +74,7 @@ const About = () => {
           <p class={aboutSubTitle} style={{ "margin-bottom": "14px" }}>
             pre-alpha v0.1
           </p>
-          <p
-            class={aboutContent}
-            style={{ "margin-bottom": "50px" }}
-          >
+          <p class={aboutContent} style={{ "margin-bottom": "50px" }}>
             made with much <span style={{ color: "magenta" }}>love</span> for:
             <br />-{" "}
             <a
@@ -103,18 +104,26 @@ const About = () => {
             &lt;HP dead RIP&gt;
             <br />
           </p>
-          <div class={[flexRow, w100].join(" ")} style={{ "align-items": "center", }}>
+          <div
+            class={[flexRow, w100].join(" ")}
+            style={{ "align-items": "center" }}
+          >
             <p class={aboutFeedback}>
               気軽に意見を投げつけよう！
               <br />
               feel FREE to send feedback!!
             </p>
-            <button class={sendFBButton} onClick={(e) => openLink("https://tally.so/r/w7jZNL")}>&gt;&gt; send feedback</button>
+            <button
+              class={sendFBButton}
+              onClick={(e) => openLink("https://tally.so/r/w7jZNL")}
+            >
+              &gt;&gt; send feedback
+            </button>
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
-}
+};
 
 export default About;

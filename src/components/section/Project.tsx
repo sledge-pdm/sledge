@@ -57,6 +57,7 @@ const Project: Component<{}> = (props) => {
           class={flexRow}
           style={{ "align-items": "center", "margin-top": "12px" }}
         >
+          <button onClick={() => saveProject()}>save.</button>
           <button onClick={() => exportActiveLayerUpscaled()}>export.</button>
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
         </div>

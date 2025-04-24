@@ -81,7 +81,12 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             .join(" ")}
           onClick={onDetClicked}
         >
-          <LayerPreview layer={layer} onClick={onPreviewClicked} maxHeight={30} maxWidth={30} />
+          <LayerPreview
+            layer={layer}
+            onClick={onPreviewClicked}
+            maxHeight={30}
+            maxWidth={30}
+          />
           <p class={layerItemName}> {layer.name}</p>
           <div
             class={dotMagnifContainer}

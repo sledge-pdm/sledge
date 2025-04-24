@@ -1,10 +1,23 @@
 import { createStore } from "solid-js/store";
 import { saveGlobalSettings } from "~/io/global/globalIO";
+import { canvasStore } from "../project/canvasStore";
 
-// project
+// global
 export type FileLocation = {
   path: string;
   name: string;
+};
+export type ImageRenderingAttribute = "auto" | "pixelated" | "crispEdges";
+export type CanvasRenderingMode = "adaptive" | "pixelated" | "crispEdges";
+
+export const getCanvasImageRenderingAttribute = (mode: CanvasRenderingMode) => {
+  switch (mode) {
+    case "pixelated":
+    case "crispEdges":
+      return mode;
+    case "adaptive":
+      return canvasStore.zoom > 1.0 ? "pixelated" : "crispEdges";
+  }
 };
 
 export const [globalStore, setGlobalStore] = createStore({
@@ -14,6 +27,8 @@ export const [globalStore, setGlobalStore] = createStore({
       name: "project.sledge",
     },
   ],
+
+  canvasRenderingMode: "adaptive" as CanvasRenderingMode,
 });
 
 export const addRecent = (loc: FileLocation) => {

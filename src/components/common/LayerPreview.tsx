@@ -1,9 +1,9 @@
-import { Component, createEffect, onMount } from "solid-js";
+import { Component, onMount } from "solid-js";
 import { Layer } from "~/models/types/Layer";
-import { v4 as uuidv4 } from "uuid";
 
 import styles from "@styles/components/layer_preview.module.css";
-import { layerImageStore } from "~/stores/project/layerImageStore";
+import { v4 as uuidv4 } from "uuid";
+import { layerImageManager } from "../canvas/stacks/CanvasStack";
 
 interface Props {
   layer: Layer;
@@ -25,8 +25,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
     canvasRef.width = targetWidth;
     canvasRef.height = targetHeight;
 
-    const maxWidth = props.maxWidth
-    const maxHeight = props.maxHeight
+    const maxWidth = props.maxWidth;
+    const maxHeight = props.maxHeight;
     let zoom = 1;
     // if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
     // if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
@@ -59,10 +59,12 @@ const LayerPreview: Component<Props> = (props: Props) => {
     );
   };
 
-  createEffect(() => {
-    const originalImage = layerImageStore[props.layer.id].current
-    const height = wrapperRef.clientHeight;
-    updatePreview(originalImage, height);
+  onMount(() => {
+    const agent = layerImageManager.getAgent(props.layer.id);
+    agent?.setOnImageChangeListener("layer_preview_" + id, () => {
+      const height = wrapperRef.clientHeight;
+      updatePreview(agent.getImage(), height);
+    });
   });
 
   return (
@@ -71,9 +73,9 @@ const LayerPreview: Component<Props> = (props: Props) => {
         class={styles.canvas}
         ref={(el) => (canvasRef = el)}
         onClick={(e) => {
-          if (props.onClick) props.onClick()
-        }
-        } />
+          if (props.onClick) props.onClick();
+        }}
+      />
     </div>
   );
 };

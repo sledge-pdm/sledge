@@ -1,5 +1,5 @@
-import { Window } from "@tauri-apps/api/window";
-import { createSignal } from "solid-js";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { createSignal, onMount } from "solid-js";
 import {
   titleBarControlButtonImg,
   titleBarControlCloseButton,
@@ -11,43 +11,58 @@ import {
 } from "~/styles/components/title_bar.css";
 
 export default function TitleBar() {
-  const appWindow = new Window("main");
+  const window = getCurrentWindow();
 
+  const [isMaximizable, setIsMaximizable] = createSignal(true);
+  const [isMinimizable, setIsMinimizable] = createSignal(true);
+  const [isClosable, setIsClosable] = createSignal(true);
+  const [title, setTitle] = createSignal("");
   const [isMaximized, setMaximized] = createSignal(false);
 
-  appWindow.onResized(async (handler) => {
+  onMount(async () => {
+    setIsMaximizable(await window.isMaximizable());
+    setIsMinimizable(await window.isMinimizable());
+    setIsClosable(await window.isClosable());
+    setTitle(await window.title());
+  });
+
+  window.onResized(async (handler) => {
     console.log("resize");
-    setMaximized(await appWindow.isMaximized());
+    setMaximized(await window.isMaximized());
   });
 
   return (
     <header style={{ "pointer-events": "all" }}>
       <nav class={titleBarRoot} data-tauri-drag-region="p, button">
-        <p class={titleBarTitle}>sledge.</p>
+        <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
-          <button
-            class={titleBarControlMinimizeButton}
-            onClick={() => appWindow.minimize()}
-          >
-            <img class={titleBarControlButtonImg} src={"/minimize.png"} />
-          </button>
-
-          <button
-            class={titleBarControlMaximizeButton}
-            onClick={() => appWindow.toggleMaximize()}
-          >
-            <img
-              class={titleBarControlButtonImg}
-              src={isMaximized() ? "/leave_maximize.png" : "/maximize.png"}
-            />
-          </button>
-
-          <button
-            class={titleBarControlCloseButton}
-            onClick={() => appWindow.close()}
-          >
-            <img class={titleBarControlButtonImg} src={"/close.png"} />
-          </button>
+          {isMinimizable() && (
+            <button
+              class={titleBarControlMinimizeButton}
+              onClick={() => window.minimize()}
+            >
+              <img class={titleBarControlButtonImg} src={"/minimize.png"} />
+            </button>
+          )}
+          {isMaximizable() && (
+            <button
+              class={titleBarControlMaximizeButton}
+              onClick={() => window.toggleMaximize()}
+            >
+              <img
+                class={titleBarControlButtonImg}
+                src={isMaximized() ? "/leave_maximize.png" : "/maximize.png"}
+              />
+            </button>
+          )}
+          {isClosable() && (
+            <button
+              class={titleBarControlCloseButton}
+              onClick={() => window.close()}
+            >
+              <img class={titleBarControlButtonImg} src={"/close.png"} />
+            </button>
+          )}
         </div>
       </nav>
     </header>

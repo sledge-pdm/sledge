@@ -26,8 +26,13 @@ export async function loadGlobalSettings() {
     });
     const data = JSON.parse(json);
 
+    console.log(data);
+
     if (data.recentOpenedFiles) {
       setGlobalStore("recentOpenedFiles", data.recentOpenedFiles);
+    }
+    if (data.canvasRenderingMode) {
+      setGlobalStore("canvasRenderingMode", data.canvasRenderingMode);
     }
 
     console.log("[globalIO] 設定読み込み完了");

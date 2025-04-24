@@ -4,6 +4,7 @@ import BottomInfo from "~/components/BottomInfo";
 import CanvasArea from "~/components/canvas/CanvasArea";
 import EdgeInfo from "~/components/EdgeInfo";
 import SideSections from "~/components/SideSections";
+import { loadGlobalSettings } from "~/io/global/globalIO";
 import { importProjectJsonFromPath } from "~/io/project/project";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 import { flexCol, flexRow } from "~/styles/snippets.css";
@@ -29,6 +30,7 @@ export default function Editor() {
   onMount(() => {
     adjustZoomToFit();
     centeringCanvas();
+    loadGlobalSettings();
   });
 
   return (
@@ -48,7 +50,10 @@ export default function Editor() {
             <SideSections />
           </div>
 
-          <div class={flexCol} style={{ "flex-grow": 1 }}>
+          <div
+            class={flexCol}
+            style={{ "flex-grow": 1, height: "100%", overflow: "hidden" }}
+          >
             <CanvasArea />
             <BottomInfo />
           </div>

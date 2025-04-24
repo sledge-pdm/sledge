@@ -1,12 +1,17 @@
-import { Component, createSignal, onCleanup, onMount } from "solid-js";
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
-import { Vec2 } from "~/models/types/Vector";
-import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
+import {
+  Component,
+  createEffect,
+  createSignal,
+  onCleanup,
+  onMount,
+} from "solid-js";
 import { DrawState } from "~/models/layer_canvas/DrawState";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
+import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
+import { Vec2 } from "~/models/types/Vector";
+import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 
 interface Props {
-  operator: LayerCanvasOperator,
+  operator: LayerCanvasOperator;
 }
 
 // レイヤーごとのキャンバスの上でタッチイベントを受けるだけのキャンバス
@@ -16,9 +21,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
   const styleWidth = () => canvasStore.canvas.width;
   const styleHeight = () => canvasStore.canvas.height;
 
-  const [lastPos, setLastPos] = createSignal<
-    Vec2 | undefined
-  >(undefined);
+  const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
   const [temporaryOut, setTemporaryOut] = createSignal(false);
 
   function getOffset() {
@@ -159,6 +162,14 @@ export const TouchableCanvas: Component<Props> = (props) => {
     window.removeEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointercancel", handlePointerCancel);
     window.removeEventListener("wheel", handleWheel);
+  });
+
+  createEffect(() => {
+    if (canvasRef)
+      setCanvasStore("canvasElementSize", {
+        width: canvasRef.clientWidth,
+        height: canvasRef.clientHeight,
+      });
   });
 
   return (

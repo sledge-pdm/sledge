@@ -1,37 +1,37 @@
-import { Tool, ToolArgs } from '../ToolBase'
-import { drawCompletionLine, drawSquarePixel } from '../DrawUtils'
-import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
+import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
+import { drawCompletionLine, drawSquarePixel } from "../DrawUtils";
+import { Tool, ToolArgs } from "../ToolBase";
 
 export class EraserTool implements Tool {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    return false
+    return false;
   }
 
   onMove(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs) {
-    if (!size) return false
+    if (!size) return false;
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.deletePixel({ x: px, y: py }, true, true)
+      const diff = agent.deletePixel({ x: px, y: py }, true, true);
       if (diff !== undefined) {
-        agent.addDiffs([diff])
+        agent.addDiffs([diff]);
       }
-    })
+    });
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.deletePixel({ x: px, y: py }, true, true)
+          const diff = agent.deletePixel({ x: px, y: py }, true, true);
           if (diff !== undefined) {
-            agent.addDiffs([diff])
+            agent.addDiffs([diff]);
           }
-        })
-      })
+        });
+      });
     }
 
-    return true
+    return true;
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    return false
+    return false;
   }
 }

@@ -17,8 +17,6 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         position: "absolute",
         top: 0,
         left: 0,
-        bottom: 0,
-        right: 0,
         "pointer-events": "none",
         "image-rendering": "pixelated",
       }}
@@ -52,19 +50,21 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
       />
 
       <For each={props.dirtyRects}>
-        {dirtyRect => {
-          return <rect
-            width={dirtyRect.globalTileSize * canvasStore.zoom}
-            height={dirtyRect.globalTileSize * canvasStore.zoom}
-            x={dirtyRect.getOffset().x * canvasStore.zoom}
-            y={dirtyRect.getOffset().y * canvasStore.zoom}
-            fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
-            stroke="none"
-            pointer-events="none"
-          />
+        {(dirtyRect) => {
+          return (
+            <rect
+              width={dirtyRect.globalTileSize * canvasStore.zoom}
+              height={dirtyRect.globalTileSize * canvasStore.zoom}
+              x={dirtyRect.getOffset().x * canvasStore.zoom}
+              y={dirtyRect.getOffset().y * canvasStore.zoom}
+              fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
+              stroke="none"
+              pointer-events="none"
+            />
+          );
         }}
       </For>
-    </svg >
+    </svg>
   );
 };
 

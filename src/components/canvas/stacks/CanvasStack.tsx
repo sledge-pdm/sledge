@@ -1,19 +1,16 @@
 import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
-import {
-  activeLayer,
-  allLayers,
-} from "~/stores/project/layerStore";
+import { activeLayer, allLayers } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/canvas_stack.module.css";
 
+import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
+import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
+import Tile from "~/models/layer_image/Tile";
 import CanvasOverlaySVG from "./CanvasOverlaySVG";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
-import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
-import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
-import Tile from "~/models/layer_image/Tile";
 
 export const layerImageManager = new LayerImageManager();
 
@@ -23,7 +20,6 @@ const CanvasStack: Component<{}> = (props) => {
   } = {};
 
   const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
-
 
   const activeCanvasRef = () => {
     const active = activeLayer();
@@ -55,16 +51,16 @@ const CanvasStack: Component<{}> = (props) => {
 
     if (active) {
       const agent = layerImageManager.getAgent(active.id);
-      console.log(agent)
+      console.log(agent);
       if (!agent) return;
       agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
         setDirtyRects([...getDirtyRects()]);
-      })
+      });
       agent.setOnImageChangeListener("stack_dirty_rect", () => {
         setDirtyRects([...getDirtyRects()]);
-      })
+      });
     }
-  })
+  });
 
   const getDirtyRects = () => {
     const active = activeLayer();
@@ -75,7 +71,7 @@ const CanvasStack: Component<{}> = (props) => {
       }
     }
     return [];
-  }
+  };
 
   return (
     <div style={{ position: "relative" }}>
@@ -88,11 +84,14 @@ const CanvasStack: Component<{}> = (props) => {
           height: `${canvasStore.canvas.height}px`,
         }}
       >
-        <TouchableCanvas operator={new LayerCanvasOperator(() => activeCanvasRef()!!)} />
+        <TouchableCanvas
+          operator={new LayerCanvasOperator(() => activeCanvasRef()!!)}
+        />
 
         <For each={allLayers()}>
           {(layer, index) => (
-            <LayerCanvas manager={layerImageManager}
+            <LayerCanvas
+              manager={layerImageManager}
               ref={layerCanvasRefs[layer.id]}
               layer={layer}
               zIndex={allLayers().length - index()}

@@ -4,7 +4,7 @@ import { Component, createEffect } from "solid-js";
 import { setCurrentToolColor } from "~/models/types/Tool";
 import { currentTool } from "~/stores/internal/toolsStore";
 
-const ColorPicker: Component<{}> = (props) => {
+const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
 
   createEffect(() => {
@@ -15,7 +15,7 @@ const ColorPicker: Component<{}> = (props) => {
     <div
       ref={(el) => {
         colorPicker = iro.ColorPicker(el, {
-          width: 150,
+          width: props.width,
           padding: 0,
           color: currentTool().color,
           handleRadius: 4,

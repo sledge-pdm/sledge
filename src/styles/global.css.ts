@@ -4,7 +4,7 @@ import {
   globalStyle,
   style,
 } from '@vanilla-extract/css'
-import { flexCol, flexRow, h100 } from './components.css'
+import { flexCol, flexRow, h100 } from './snippets.css'
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',
@@ -27,6 +27,18 @@ export const ZFB31 = fontFace({
 export const Terminus = fontFace({
   src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")',
 })
+export const k8x12 = fontFace({
+  src: 'url("/fonts/k8x12/k8x12.ttf")',
+})
+export const k8x12L = fontFace({
+  src: 'url("/fonts/k8x12/k8x12L.ttf")',
+})
+export const k8x12S = fontFace({
+  src: 'url("/fonts/k8x12/k8x12S.ttf")',
+})
+export const k12x8 = fontFace({
+  src: 'url("/fonts/k12x8/k12x8.ttf")',
+})
 
 export const vars = createGlobalTheme(':root', {
   color: {
@@ -35,7 +47,10 @@ export const vars = createGlobalTheme(':root', {
     text: '#111111',
     danger: '#ff0000',
     muted: '#00000030',
+
     bg: '#ffffff',
+    bg_canvas_area: '#fAfAfA  ',
+
     surface: '#f0f0f0',
 
     button: '#ffffff',
@@ -57,7 +72,7 @@ export const vars = createGlobalTheme(':root', {
     xl: '16px',
   },
   font: {
-    body: ZFB08,
+    body: `${ZFB08}, ${k8x12}`,
   },
 })
 
@@ -95,9 +110,10 @@ globalStyle('#root', {
   flexDirection: 'row',
   height: '100%',
   userSelect: 'none',
+  overflow: 'hidden',
 })
 
-export const sideArea = style([flexRow])
+export const sideArea = style([flexRow, h100])
 
 export const sideAreaEdge = style([
   flexCol,
@@ -105,14 +121,15 @@ export const sideAreaEdge = style([
   {
     gap: '20px',
     width: '20px',
-    padding: '10px 0 20px 12px',
+    margin: '10px 0 20px 2px',
+    paddingBottom: '20px',
+    justifyContent: 'flex-end',
   },
 ])
 
 export const sideAreaEdgeText = style({
   fontSize: '0.5rem',
   letterSpacing: '2px',
-  margin: 0,
   transform: 'rotate(180deg) scaleX(0.8)',
   whiteSpace: 'nowrap',
   writingMode: 'vertical-rl',
@@ -123,8 +140,20 @@ export const sideAreaContent = style([
   {
     borderRight: '1px solid #aaa',
     gap: '1rem',
-    padding: '20px 40px 10px 20px',
+    padding: '20px 40px 90px 20px',
     width: '230px',
+    overflowY: 'scroll',
+    '::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: 'transparent',
+    },
+    selectors: {
+      '&:hover::-webkit-scrollbar-thumb': {
+        backgroundColor: '#ddd',
+      },
+    },
   },
 ])
 

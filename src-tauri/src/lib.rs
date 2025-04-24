@@ -1,14 +1,21 @@
 mod commands;
 mod pipeline;
+mod standalone;
 
 use pipeline::run_pipeline;
+use standalone::{flood_fill, flood_fill_raw};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![run_pipeline,])
+        .invoke_handler(tauri::generate_handler![
+            run_pipeline,
+            flood_fill,
+            flood_fill_raw
+        ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

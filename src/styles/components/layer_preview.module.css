@@ -1,8 +1,5 @@
-.wrapper {
-  border: 1px solid black;
-}
-
 .canvas {
   height: 100%;
+  border: 1px solid black;
   width: 100%;
 }

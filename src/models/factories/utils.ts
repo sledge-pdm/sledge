@@ -7,11 +7,3 @@ export const getNextMagnification = (dotMagnification: number) => {
     return magnificationList[nextIndex];
   } else return 1;
 };
-
-export function cloneImageData(src: ImageData): ImageData {
-  return new ImageData(
-    new Uint8ClampedArray(src.data), // ← 必ず新しい配列
-    src.width,
-    src.height,
-  );
-}

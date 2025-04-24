@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css'
-import { flexCol, flexRow, w100, wh100 } from '~/styles/components.css'
-import { ZFB03B, ZFB09 } from '~/styles/global.css'
+import { ZFB03B, ZFB09, ZFB31 } from '~/styles/global.css'
+import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css'
 
 export const welcomeRoot = style([
   flexCol,
@@ -12,22 +12,26 @@ export const welcomeRoot = style([
 ])
 
 export const welcomeHeadline = style({
-  fontFamily: ZFB09,
-  fontSize: '5rem',
+  fontFamily: ZFB31,
+  fontSize: '4rem',
   letterSpacing: '8px',
   marginBottom: '12px',
 })
 
 export const recentFilesCaption = style({
   fontFamily: ZFB03B,
-  color: '#333',
+  fontSize: '16px',
+  color: '#000',
   flexGrow: 1,
   marginBottom: '12px',
 })
 
 export const clear = style({
-  color: '#777',
   fontFamily: ZFB03B,
+  fontSize: '15px',
+  ':hover': {
+    color: 'red',
+  },
 })
 
 export const recentFilesContainer = style([
@@ -52,6 +56,7 @@ export const recentFilesName = style({
   fontFamily: ZFB09,
   fontSize: '0.5rem',
   textOverflow: 'ellipsis',
+  color: '#555',
   whiteSpace: 'nowrap',
 })
 
@@ -62,9 +67,9 @@ export const recentFilesPath = style({
 })
 
 export const sideSection = style([
-  flexCol,
+  flexRow,
   {
-    gap: '1rem',
+    gap: '24px',
     paddingBottom: '24px',
     paddingTop: '12px',
   },

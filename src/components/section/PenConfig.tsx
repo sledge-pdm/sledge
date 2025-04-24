@@ -1,16 +1,20 @@
 import { Component, For } from "solid-js";
-import { penStore } from "~/stores/internal/penStore";
+import { toolStore } from "~/stores/internal/toolsStore";
+import {
+  sectionCaption,
+  sectionContent,
+  sectionRoot,
+} from "~/styles/section_global.css";
 import PenItem from "./item/PenItem";
-import { sectionCaption, sectionContent, sectionRoot } from "~/styles/section_global.css";
 
 const PenConfig: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>pen config.</p>
       <div class={sectionContent}>
-        <For each={penStore.pens}>
+        <For each={toolStore.tools}>
           {(item, index) => (
-            <PenItem pen={item} isInUse={index() === penStore.usingIndex} />
+            <PenItem pen={item} isInUse={index() === toolStore.usingIndex} />
           )}
         </For>
       </div>

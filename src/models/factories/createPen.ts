@@ -1,8 +1,14 @@
 import { v4 as uuidv4 } from "uuid";
-import { Pen } from "../types/Pen";
+import { Tool, ToolType } from "../types/Tool";
 
-export const createPen = (name: string, size: number, color: string): Pen => ({
+export const createTool = (
+  type: ToolType,
+  name: string,
+  size: number,
+  color: string,
+): Tool => ({
   id: uuidv4(),
+  type,
   name,
   size,
   color,

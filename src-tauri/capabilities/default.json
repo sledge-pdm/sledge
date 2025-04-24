@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
-  "windows": ["main"],
+  "windows": ["main", "about", "settings"],
   "permissions": [
     "core:default",
     "dialog:default",
@@ -10,6 +10,8 @@
 
     "dialog:allow-save",
     "dialog:allow-open",
+
+    "shell:allow-open",
 
     "fs:allow-open",
     "fs:allow-write",
@@ -25,6 +27,10 @@
       "allow": [{ "path": "**" }]
     },
 
+    "core:webview:allow-create-webview-window",
+
+    "core:window:allow-show",
+    "core:window:allow-set-focus",
     "core:window:allow-hide",
     "core:window:allow-minimize",
     "core:window:allow-maximize",

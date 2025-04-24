@@ -1,12 +1,20 @@
-import { Component, createEffect, createSignal } from "solid-js";
-import { initLayer } from "~/models/layer/layerImage";
+import { Component, createSignal } from "solid-js";
+import { initLayerImage } from "~/models/layer/layerImage";
 import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 import { allLayers, layerStore } from "~/stores/project/layerStore";
 
 import { adjustZoomToFit } from "~/stores/project/canvasStore";
-import { updateDSL } from "~/stores/project/imageStore";
-import { sectionCaption, sectionContent, sectionRoot } from "~/styles/section_global.css";
-import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from "~/styles/section/canvas.css";
+import {
+  canvasSizeButton,
+  canvasSizeForm,
+  canvasSizeInput,
+  canvasSizeLabel,
+} from "~/styles/section/canvas.css";
+import {
+  sectionCaption,
+  sectionContent,
+  sectionRoot,
+} from "~/styles/section_global.css";
 
 const CanvasSettings: Component<{}> = (props) => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -16,17 +24,17 @@ const CanvasSettings: Component<{}> = (props) => {
     e.preventDefault();
     setCanvasStore("canvas", "width", width());
     setCanvasStore("canvas", "height", height());
-    adjustZoomToFit(width(), height());
 
     allLayers().forEach((layer, i) => {
-      initLayer(layer.id, layer.dotMagnification);
-      updateDSL(layer.id);
+      initLayerImage(layer.id, layer.dotMagnification);
     });
+
+    adjustZoomToFit(width(), height());
   };
 
   const resetAllLayers = (e: any) => {
     layerStore.layers.forEach((l) => {
-      initLayer(l.id, l.dotMagnification);
+      initLayerImage(l.id, l.dotMagnification);
     });
   };
 
@@ -34,9 +42,12 @@ const CanvasSettings: Component<{}> = (props) => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>canvas.</p>
 
-      <form class={sectionContent} onSubmit={(e) => {
-        changeCanvasSize(e)
-      }}>
+      <form
+        class={sectionContent}
+        onSubmit={(e) => {
+          changeCanvasSize(e);
+        }}
+      >
         <div class={canvasSizeForm}>
           <div>
             <p class={canvasSizeLabel}>width</p>

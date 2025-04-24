@@ -1,5 +1,5 @@
 import { open } from "@tauri-apps/plugin-shell";
-import { flexRow, w100, wh100 } from "~/styles/snippets.css";
+import { flexCol, flexRow, w100, wh100 } from "~/styles/snippets.css";
 import {
   aaContainer,
   aaText,
@@ -12,6 +12,21 @@ import {
   contentContainer,
   sendFBButton,
 } from "./about.css";
+import { WindowOptions } from "@tauri-apps/api/window";
+import { WebviewOptions } from "@tauri-apps/api/webview";
+
+export const AboutWindowOptions: Omit<WebviewOptions, "x" | "y" | "width" | "height"> & WindowOptions = {
+  url: "/about",
+  width: 420,
+  height: 260,
+  resizable: false,
+  decorations: false,
+  minimizable: false,
+  maximizable: false,
+  closable: true,
+  acceptFirstMouse: true,
+  focus: true,
+}
 
 const About = () => {
   const openLink = (url: string) => {
@@ -20,7 +35,7 @@ const About = () => {
 
   return (
     <div id="root">
-      <div class={`${flexRow} ${wh100}`}>
+      <div class={`${flexRow} ${wh100}`} style={{ "align-items": "center" }}>
         <div class={aaContainer}>
           <p class={aaText}>
             ⠀⠀⠀⠀⠀⠀⠀⠀⢠⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -52,14 +67,14 @@ const About = () => {
               by alphendp
             </p>
           </div>
-          <p class={aboutSubTitle} style={{ "margin-bottom": "24px" }}>
+          <p class={aboutSubTitle} style={{ "margin-bottom": "14px" }}>
             pre-alpha v0.1
           </p>
           <p
             class={aboutContent}
-            style={{ "margin-bottom": "36px", "line-height": "1.2" }}
+            style={{ "margin-bottom": "50px" }}
           >
-            made with much <span style={{ color: "magenta" }}>love</span> 4
+            made with much <span style={{ color: "magenta" }}>love</span> for:
             <br />-{" "}
             <a
               class={aboutLink}
@@ -88,15 +103,17 @@ const About = () => {
             &lt;HP dead RIP&gt;
             <br />
           </p>
-          <button class={sendFBButton}>&gt;&gt; send feedback</button>
-          <p class={aboutFeedback}>
-            feel free to send feedback!!
-            <br />
-            気軽に意見を投げつけよう
-          </p>
+          <div class={[flexRow, w100].join(" ")} style={{ "align-items": "center", }}>
+            <p class={aboutFeedback}>
+              気軽に意見を投げつけよう！
+              <br />
+              feel FREE to send feedback!!
+            </p>
+            <button class={sendFBButton} onClick={(e) => openLink("https://tally.so/r/w7jZNL")}>&gt;&gt; send feedback</button>
+          </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

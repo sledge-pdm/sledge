@@ -14,13 +14,15 @@ const Palette: Component<{}> = (props) => {
         color={colorStore.primary}
         sizePx={24}
         onClick={(color) => selectPalette(PaletteType.primary)}
-        enableUsingSelection={true}
+        enableUsingSelection={colorStore.currentPalette === PaletteType.primary}
       />
       <ColorBox
         color={colorStore.secondary}
         sizePx={24}
         onClick={(color) => selectPalette(PaletteType.secondary)}
-        enableUsingSelection={true}
+        enableUsingSelection={
+          colorStore.currentPalette === PaletteType.secondary
+        }
       />
     </div>
   );

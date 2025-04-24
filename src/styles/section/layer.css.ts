@@ -16,8 +16,8 @@ export const layerItem = style([
   flexRow,
   w100,
   {
-    height: "24px",
-    padding: vars.spacing.sm,
+    height: "32px",
+    padding: "6px",
     flexGrow: 1,
     cursor: "pointer",
     backgroundColor: vars.color.surface,
@@ -26,11 +26,14 @@ export const layerItem = style([
       filter: "brightness(0.94)",
       transform: "translate(0, 1px)",
     },
+    ":active": {
+      transform: "translate(0, 1px)",
+    },
   },
 ]);
 
 export const layerItemDisabled = style({
-  color: vars.color.muted,
+  opacity: 0.3,
 });
 
 export const layerItemType = style([
@@ -48,7 +51,7 @@ export const layerItemName = style([
   {
     fontSize: vars.text.xl,
     fontFamily: ZFB03B,
-    margin: `${vars.spacing.sm} 0 0 ${vars.spacing.lg}`,
+    margin: `${vars.spacing.md} 0 0 ${vars.spacing.lg}`,
   },
 ]);
 

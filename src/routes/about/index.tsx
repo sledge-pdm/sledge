@@ -22,7 +22,7 @@ export const AboutWindowOptions: Omit<
   WindowOptions = {
   url: "/about",
   width: 420,
-  height: 260,
+  height: 290,
   resizable: false,
   decorations: false,
   minimizable: false,

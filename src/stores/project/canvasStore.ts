@@ -60,7 +60,7 @@ export const [canvasStore, setCanvasStore] = createStore({
   lastMouseOnZoomedCanvas: { x: 0, y: 0 },
   isInStroke: false,
   zoom: 1,
-  zoomMin: 0.1,
+  zoomMin: 0.5,
   zoomMax: 8,
   touchZoomSensitivity: 0.5,
   wheelZoomStep: 0.1,

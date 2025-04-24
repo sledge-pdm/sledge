@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { Component } from "solid-js";
 import { saveGlobalSettings } from "~/io/global/globalIO";
 import {
   CanvasRenderingMode,
@@ -19,13 +19,15 @@ const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: "crispEdges", value: "crispEdges" },
 ];
 
-
 const GlobalSettings: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>settings.</p>
       <div class={sectionContent} style={{ gap: "8px" }}>
-        <ToggleSwitch checked={globalStore.showDirtyRects} onChange={e => setGlobalStore("showDirtyRects", e)}>
+        <ToggleSwitch
+          checked={globalStore.showDirtyRects}
+          onChange={(e) => setGlobalStore("showDirtyRects", e)}
+        >
           <p style={{ "font-size": "0.5rem" }}> autosave.</p>
         </ToggleSwitch>
 

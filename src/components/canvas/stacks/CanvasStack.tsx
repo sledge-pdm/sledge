@@ -2,16 +2,15 @@ import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, allLayers } from "~/stores/project/layerStore";
 
-import styles from "@styles/components/canvas/canvas_stack.module.css";
-
 import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
 import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
 import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import Tile from "~/models/layer_image/Tile";
+import { globalStore } from "~/stores/global/globalStore";
+import { canvasStack } from "~/styles/components/canvas/canvas_stack.css";
 import CanvasOverlaySVG from "./CanvasOverlaySVG";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
-import { globalStore } from "~/stores/global/globalStore";
 
 export const layerImageManager = new LayerImageManager();
 
@@ -52,7 +51,6 @@ const CanvasStack: Component<{}> = (props) => {
 
     if (active) {
       const agent = layerImageManager.getAgent(active.id);
-      console.log(agent);
       if (!agent) return;
       if (globalStore.showDirtyRects) {
         agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
@@ -66,7 +64,6 @@ const CanvasStack: Component<{}> = (props) => {
         agent.clearOnDrawingBufferChangeListener("stack_dirty_rect");
       }
     }
-
   });
 
   const getDirtyRects = () => {
@@ -82,10 +79,8 @@ const CanvasStack: Component<{}> = (props) => {
 
   return (
     <div style={{ position: "relative" }}>
-      <CanvasOverlaySVG dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined} />
-
       <div
-        class={styles.canvas_stack}
+        class={canvasStack}
         style={{
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
@@ -98,7 +93,6 @@ const CanvasStack: Component<{}> = (props) => {
         <For each={allLayers()}>
           {(layer, index) => (
             <LayerCanvas
-              manager={layerImageManager}
               ref={layerCanvasRefs[layer.id]}
               layer={layer}
               zIndex={allLayers().length - index()}
@@ -106,6 +100,9 @@ const CanvasStack: Component<{}> = (props) => {
           )}
         </For>
       </div>
+      <CanvasOverlaySVG
+        dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined}
+      />
     </div>
   );
 };

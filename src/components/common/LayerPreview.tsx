@@ -28,8 +28,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
     let zoom = 1;
-    // if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    // if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
+    if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
+    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;

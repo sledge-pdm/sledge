@@ -11,6 +11,7 @@ import Tile from "~/models/layer_image/Tile";
 import CanvasOverlaySVG from "./CanvasOverlaySVG";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
+import { globalStore } from "~/stores/global/globalStore";
 
 export const layerImageManager = new LayerImageManager();
 
@@ -53,13 +54,19 @@ const CanvasStack: Component<{}> = (props) => {
       const agent = layerImageManager.getAgent(active.id);
       console.log(agent);
       if (!agent) return;
-      agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
-        setDirtyRects([...getDirtyRects()]);
-      });
-      agent.setOnImageChangeListener("stack_dirty_rect", () => {
-        setDirtyRects([...getDirtyRects()]);
-      });
+      if (globalStore.showDirtyRects) {
+        agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
+          setDirtyRects([...getDirtyRects()]);
+        });
+        agent.setOnImageChangeListener("stack_dirty_rect", () => {
+          setDirtyRects([...getDirtyRects()]);
+        });
+      } else {
+        agent.clearOnImageChangeListener("stack_dirty_rect");
+        agent.clearOnDrawingBufferChangeListener("stack_dirty_rect");
+      }
     }
+
   });
 
   const getDirtyRects = () => {
@@ -75,7 +82,7 @@ const CanvasStack: Component<{}> = (props) => {
 
   return (
     <div style={{ position: "relative" }}>
-      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
+      <CanvasOverlaySVG dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined} />
 
       <div
         class={styles.canvas_stack}

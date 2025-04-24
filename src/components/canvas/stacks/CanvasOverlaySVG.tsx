@@ -2,6 +2,7 @@ import { Component, For } from "solid-js";
 import Tile from "~/models/layer_image/Tile";
 import { currentTool } from "~/stores/internal/toolsStore";
 import { canvasStore } from "~/stores/project/canvasStore";
+import { activeLayer } from "~/stores/project/layerStore";
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
   const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom;
@@ -53,10 +54,10 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         {(dirtyRect) => {
           return (
             <rect
-              width={dirtyRect.globalTileSize * canvasStore.zoom}
-              height={dirtyRect.globalTileSize * canvasStore.zoom}
-              x={dirtyRect.getOffset().x * canvasStore.zoom}
-              y={dirtyRect.getOffset().y * canvasStore.zoom}
+              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
+              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
+              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * canvasStore.zoom}
+              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * canvasStore.zoom}
               fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
               stroke="none"
               pointer-events="none"

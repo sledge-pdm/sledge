@@ -1,5 +1,3 @@
-import { setToolStore, toolStore } from "~/stores/internal/toolsStore";
-
 export enum ToolType {
   Pen = "pen",
   Eraser = "eraser",
@@ -11,9 +9,4 @@ export type Tool = {
   id: string;
   name: string;
   size: number;
-  color: string;
-};
-
-export const setCurrentToolColor = (colorHexString: string) => {
-  return setToolStore("tools", toolStore.usingIndex, "color", colorHexString);
 };

@@ -32,7 +32,12 @@ export default function TitleBar() {
   });
 
   return (
-    <header style={{ "pointer-events": "all", "border": window.label === "main" ? "1px solid #aaa" : "none" }}>
+    <header
+      style={{
+        "pointer-events": "all",
+        border: window.label === "main" ? "1px solid #aaa" : "none",
+      }}
+    >
       <nav class={titleBarRoot} data-tauri-drag-region="p, button">
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>

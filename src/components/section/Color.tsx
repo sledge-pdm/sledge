@@ -1,8 +1,7 @@
 import { Component, For } from "solid-js";
-import { colorStore } from "~/stores/internal/colorStore";
+import { colorStore, setCurrentColor } from "~/stores/internal/colorStore";
 
 import ColorPicker from "~/components/section/item/ColorPicker";
-import { setCurrentToolColor } from "~/models/types/Tool";
 import {
   colorElemDescription,
   descriptionContainer,
@@ -14,10 +13,11 @@ import {
   sectionRoot,
 } from "~/styles/section_global.css";
 import ColorBox from "../common/ColorBox";
+import Palette from "./item/Palette";
 
 const Color: Component<{}> = (props) => {
   const onColorClicked = (color: string, index: number) => {
-    setCurrentToolColor(color);
+    setCurrentColor(color);
   };
 
   return (
@@ -27,9 +27,6 @@ const Color: Component<{}> = (props) => {
         class={sectionContent}
         style={{ "flex-direction": "row", margin: "8px 0" }}
       >
-        <div class={descriptionContainer}>
-          <p class={colorElemDescription}>swatch.</p>
-        </div>
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
             {(item, index) => (
@@ -45,8 +42,9 @@ const Color: Component<{}> = (props) => {
         <div class={descriptionContainer}>
           <p class={colorElemDescription}>picker.</p>
         </div>
-        <ColorPicker width={130} />
+        <ColorPicker width={150} />
       </div>
+      <Palette />
     </div>
   );
 };

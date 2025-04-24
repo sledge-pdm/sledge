@@ -17,7 +17,6 @@ import { sectionRoot } from "~/styles/section_global.css";
 import { flexCol, flexRow, w100 } from "~/styles/snippets.css";
 import { getFileNameAndPath } from "~/utils/pathUtils";
 import {
-  clear,
   recentFilesCaption,
   recentFilesContainer,
   recentFilesItem,

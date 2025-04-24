@@ -1,9 +1,8 @@
 import { Component } from "solid-js";
-import ColorBox from "~/components/common/ColorBox";
 import { sayRandomQuote } from "~/components/common/companion/QuotePool";
 import Light from "~/components/common/Light";
 import Slider from "~/components/common/Slider";
-import { Tool } from "~/models/types/Tool";
+import { Tool, ToolType } from "~/models/types/Tool";
 import { setToolStore, toolStore } from "~/stores/internal/toolsStore";
 import { penConfigRow, penConfigRowName } from "~/styles/section/pen.css";
 
@@ -29,25 +28,28 @@ const PenItem: Component<Props> = (props: Props) => {
         {props.pen.name}.
       </p>
 
-      <ColorBox color={props.pen.color} sizePx={8} />
+      {(props.pen.type === ToolType.Pen ||
+        props.pen.type === ToolType.Eraser) && (
+        <>
+          <div style={{ "flex-grow": 1 }}>
+            <Slider
+              min={1}
+              max={30}
+              default={props.pen.size}
+              onValueChanged={(newValue) => {
+                sayRandomQuote("pen-resize");
+                console.log("size set to " + newValue);
+                const penIndex = toolStore.tools.findIndex(
+                  (p) => p.id === props.pen.id,
+                );
+                setToolStore("tools", penIndex, "size", newValue);
+              }}
+            />
+          </div>
 
-      <div style={{ "flex-grow": 1 }}>
-        <Slider
-          min={1}
-          max={30}
-          default={props.pen.size}
-          onValueChanged={(newValue) => {
-            sayRandomQuote("pen-resize");
-            console.log("size set to " + newValue);
-            const penIndex = toolStore.tools.findIndex(
-              (p) => p.id === props.pen.id,
-            );
-            setToolStore("tools", penIndex, "size", newValue);
-          }}
-        />
-      </div>
-
-      <p style={{ width: "auto" }}>{props.pen.size}.</p>
+          <p style={{ width: "auto" }}>{props.pen.size}.</p>
+        </>
+      )}
     </div>
   );
 };

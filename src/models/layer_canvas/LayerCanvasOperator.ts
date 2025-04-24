@@ -2,6 +2,7 @@ import { reconcile } from "solid-js/store";
 import { setBottomInfo } from "~/components/BottomInfo";
 import { LayerCanvasRef } from "~/components/canvas/stacks/LayerCanvas";
 import { Vec2 } from "~/models/types/Vector";
+import { currentColor } from "~/stores/internal/colorStore";
 import { currentTool } from "~/stores/internal/toolsStore";
 import { setLayerImageStore } from "~/stores/project/layerImageStore";
 import { hexToRGBA } from "~/utils/colorUtils";
@@ -61,7 +62,7 @@ export default class LayerCanvasOperator {
       position,
       lastPosition: last,
       size: tool.size,
-      color: hexToRGBA(tool.color),
+      color: hexToRGBA(currentColor()),
     };
     const startTime = Date.now();
     let isDrawnAction;

@@ -89,9 +89,9 @@ export default function Home() {
           <div class={sectionRoot}>
             <div class={[flexRow, w100].join(" ")}>
               <p class={recentFilesCaption}>recent files.</p>
-              <p class={clear} onClick={() => clearRecentFiles()}>
+              {/* <p class={clear} onClick={() => clearRecentFiles()}>
                 clear
-              </p>
+              </p> */}
             </div>
             <div class={recentFilesContainer}>
               <For each={globalStore.recentOpenedFiles}>

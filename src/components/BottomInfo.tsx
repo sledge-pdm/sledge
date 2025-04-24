@@ -1,4 +1,5 @@
 import { Component, createSignal } from "solid-js";
+import { AboutWindowOptions } from "~/routes/about";
 
 import {
   bottomInfoRoot,
@@ -14,7 +15,7 @@ const BottomInfo: Component<{}> = (props) => {
       <p
         class={bottomInfoTextStyle}
         style={{ "pointer-events": "all", cursor: "pointer" }}
-        onClick={() => openSingletonWindow("about", "/about")}
+        onClick={() => openSingletonWindow("about", AboutWindowOptions)}
       >
         sledge.
       </p>

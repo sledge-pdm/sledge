@@ -13,7 +13,7 @@ export const aaContainer = style([
   flexCol,
   {
     position: "absolute",
-    top: "20px",
+    top: "24px",
     right: "40px",
     width: "200px",
     height: "100%",
@@ -33,6 +33,7 @@ export const contentContainer = style([
   {
     width: "100%",
     margin: "0 30px",
+    marginTop: "8px",
     pointerEvents: "none",
   },
 ]);

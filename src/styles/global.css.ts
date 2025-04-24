@@ -49,7 +49,7 @@ export const vars = createGlobalTheme(":root", {
     muted: "#00000030",
 
     bg: "#ffffff",
-    bg_canvas_area: "#fAfAfA  ",
+    bg_canvas_area: "#fefefe",
 
     surface: "#f0f0f0",
 

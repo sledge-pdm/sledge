@@ -71,7 +71,9 @@ components/section/Color.tsx
 components/section/GlobalSettings.tsx
 components/section/item/ColorPicker.tsx
 components/section/item/LayerItem.tsx
+components/section/item/Palette.tsx
 components/section/item/PenItem.tsx
+components/section/item/PenSize.tsx
 components/section/LayerList.tsx
 components/section/PenConfig.tsx
 components/section/Project.tsx
@@ -118,7 +120,7 @@ models/tools/fill/FillTool.ts
 models/tools/fill/LegacyFills.ts
 models/tools/fill/PixelFloodFill.ts
 models/tools/fill/TileFloodFill.ts
-models/tools/pen/penTool.ts
+models/tools/pen/PenTool.ts
 models/tools/ToolBase.ts
 models/types/Canvas.ts
 models/types/Layer.ts
@@ -142,6 +144,7 @@ stores/project/layerStore.ts
 stores/project/projectStore.ts
 styles/components/bottom_info.css.ts
 styles/components/canvas/canvas_area.css.ts
+styles/components/canvas/canvas_stack.css.ts
 styles/components/canvas/canvas_stack.module.css
 styles/components/canvas/controls.module.css
 styles/components/canvas/image_pool.module.css
@@ -152,6 +155,7 @@ styles/components/dsl_button.module.css
 styles/components/edge_info.module.css
 styles/components/layer_preview.module.css
 styles/components/light.module.css
+styles/components/palette.css.ts
 styles/components/slider.module.css
 styles/components/title_bar.css.ts
 styles/components/toast.module.css
@@ -360,7 +364,7 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() {}
+  constructor() { }
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
@@ -448,10 +452,10 @@ class CanvasAreaInteract {
       e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
 
     const zoomOld = canvasStore.zoom;
-    const zoomNew = Math.max(
-      canvasStore.zoomMin * referencedZoom,
-      Math.min(canvasStore.zoomMax * referencedZoom, canvasStore.zoom + delta),
-    );
+    const zoomNew = canvasStore.zoom + delta;
+
+    if (zoomNew < canvasStore.zoomMin * referencedZoom || canvasStore.zoomMax * referencedZoom < zoomNew) return
+
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;
@@ -556,6 +560,7 @@ import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/controls.module.css";
 import { canRedo, canUndo } from "~/stores/project/layerImageStore";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import { layerImageManager } from "./stacks/CanvasStack";
 
 const Controls: Component<{}> = (props) => {
@@ -662,6 +667,7 @@ import { Component, For } from "solid-js";
 import Tile from "~/models/layer_image/Tile";
 import { currentTool } from "~/stores/internal/toolsStore";
 import { canvasStore } from "~/stores/project/canvasStore";
+import { activeLayer } from "~/stores/project/layerStore";
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
   const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom;
@@ -713,10 +719,10 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         {(dirtyRect) => {
           return (
             <rect
-              width={dirtyRect.globalTileSize * canvasStore.zoom}
-              height={dirtyRect.globalTileSize * canvasStore.zoom}
-              x={dirtyRect.getOffset().x * canvasStore.zoom}
-              y={dirtyRect.getOffset().y * canvasStore.zoom}
+              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
+              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
+              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * canvasStore.zoom}
+              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * canvasStore.zoom}
               fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
               stroke="none"
               pointer-events="none"
@@ -736,15 +742,16 @@ import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, allLayers } from "~/stores/project/layerStore";
 
-import styles from "@styles/components/canvas/canvas_stack.module.css";
-
 import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
 import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import Tile from "~/models/layer_image/Tile";
 import CanvasOverlaySVG from "./CanvasOverlaySVG";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
+import { globalStore } from "~/stores/global/globalStore";
+import { canvasStack } from "~/styles/components/canvas/canvas_stack.css";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
+import { layerImageStore } from "~/stores/project/layerImageStore";
 
 export const layerImageManager = new LayerImageManager();
 
@@ -785,14 +792,18 @@ const CanvasStack: Component<{}> = (props) => {
 
     if (active) {
       const agent = layerImageManager.getAgent(active.id);
-      console.log(agent);
       if (!agent) return;
-      agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
-        setDirtyRects([...getDirtyRects()]);
-      });
-      agent.setOnImageChangeListener("stack_dirty_rect", () => {
-        setDirtyRects([...getDirtyRects()]);
-      });
+      if (globalStore.showDirtyRects) {
+        agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
+          setDirtyRects([...getDirtyRects()]);
+        });
+        agent.setOnImageChangeListener("stack_dirty_rect", () => {
+          setDirtyRects([...getDirtyRects()]);
+        });
+      } else {
+        agent.clearOnImageChangeListener("stack_dirty_rect");
+        agent.clearOnDrawingBufferChangeListener("stack_dirty_rect");
+      }
     }
   });
 
@@ -807,12 +818,13 @@ const CanvasStack: Component<{}> = (props) => {
     return [];
   };
 
+
+
   return (
     <div style={{ position: "relative" }}>
-      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
 
       <div
-        class={styles.canvas_stack}
+        class={canvasStack}
         style={{
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
@@ -825,7 +837,6 @@ const CanvasStack: Component<{}> = (props) => {
         <For each={allLayers()}>
           {(layer, index) => (
             <LayerCanvas
-              manager={layerImageManager}
               ref={layerCanvasRefs[layer.id]}
               layer={layer}
               zIndex={allLayers().length - index()}
@@ -833,7 +844,8 @@ const CanvasStack: Component<{}> = (props) => {
           )}
         </For>
       </div>
-    </div>
+      <CanvasOverlaySVG dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined} />
+    </div >
   );
 };
 
@@ -941,15 +953,15 @@ import { canvasStore } from "~/stores/project/canvasStore";
 import { layerImageStore } from "~/stores/project/layerImageStore";
 
 import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import {
   getCanvasImageRenderingAttribute,
   globalStore,
 } from "~/stores/global/globalStore";
 import { layerCanvas } from "~/styles/components/canvas/layer_canvas.css";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
+import { layerImageManager } from "./CanvasStack";
 
 type Props = {
-  manager: LayerImageManager;
   ref?: LayerCanvasRef;
   layer: Layer;
   zIndex: number;
@@ -965,16 +977,13 @@ export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
   let ctx: CanvasRenderingContext2D | null = null;
 
-  const agent = () => props.manager.getAgent(props.layer.id);
+  const agent = () => layerImageManager.getAgent(props.layer.id);
 
   createRefContent(
     () => props.ref,
     () => ({
       getLayer() {
         return props.layer;
-      },
-      getManager() {
-        return props.manager;
       },
       getAgent() {
         return agent();
@@ -990,22 +999,21 @@ export const LayerCanvas: Component<Props> = (props) => {
     canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
-    const agent = props.manager.registerAgent(
+    layerImageManager.registerAgent(
       props.layer.id,
       layerImageStore[props.layer.id]?.current,
     );
-
     ctx = canvasRef?.getContext("2d") ?? null;
-    if (ctx) agent.putImageInto(ctx);
+    if (ctx) agent()?.putImageInto(ctx);
 
-    agent.setOnImageChangeListener("layercanvas_refresh", () => {
+    agent()?.setOnImageChangeListener("layercanvas_refresh", () => {
       if (ctx) {
-        agent.putImageIntoForce(ctx);
+        agent()?.putImageIntoForce(ctx);
       }
     });
-    agent.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
+    agent()?.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
       if (ctx) {
-        agent.putDrawingBufferIntoForce(ctx);
+        agent()?.putDrawingBufferIntoForce(ctx);
       }
     });
   });
@@ -1261,10 +1269,11 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
 <file path="components/common/ColorBox.tsx">
 import { Component } from "solid-js";
-import { toolStore } from "~/stores/internal/toolsStore";
+import { currentColor } from "~/stores/internal/colorStore";
 import { sayRandomQuote } from "./companion/QuotePool";
 
 interface ColorBoxProps {
+  class?: string;
   enableUsingSelection?: boolean;
   sizePx?: number;
   color: string;
@@ -1275,8 +1284,7 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
   const size = props.sizePx || 10;
 
   const isSelected = () =>
-    props.enableUsingSelection &&
-    toolStore.tools[toolStore.usingIndex].color === props.color;
+    props.enableUsingSelection && currentColor() === props.color;
   const isWhiteOrNone = () =>
     props.color === "none" || props.color.toLowerCase() === "#ffffff";
 
@@ -1286,39 +1294,41 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
   };
 
   return (
-    <div
-      style={{
-        position: "relative",
-        display: "flex",
-        width: `${size}px`,
-        height: `${size}px`,
-        "align-items": "center",
-        "justify-content": "center",
-        cursor: "pointer",
-        "background-color": props.color,
-        border:
-          isWhiteOrNone() || isSelected()
-            ? "0.05rem solid black"
-            : "0.05rem solid transparent",
-      }}
-      onClick={() => {
-        onColorClicked(props.color);
-      }}
-    >
-      {props.enableUsingSelection && isSelected() && (
-        <div
-          style={{
-            width: `${Math.round(size / 3)}px`,
-            height: `${Math.round(size / 3)}px`,
-            margin: 0,
-            padding: 0,
-            "background-color": "black",
-          }}
-          onClick={() => {
-            onColorClicked(props.color);
-          }}
-        />
-      )}
+    <div class={props.class}>
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          width: `${size}px`,
+          height: `${size}px`,
+          "align-items": "center",
+          "justify-content": "center",
+          cursor: "pointer",
+          "background-color": props.color,
+          border:
+            isWhiteOrNone() || isSelected()
+              ? "0.05rem solid black"
+              : "0.05rem solid transparent",
+        }}
+        onClick={() => {
+          onColorClicked(props.color);
+        }}
+      >
+        {props.enableUsingSelection && isSelected() && (
+          <div
+            style={{
+              width: `${Math.round(size / 3)}px`,
+              height: `${Math.round(size / 3)}px`,
+              margin: 0,
+              padding: 0,
+              "background-color": props.color !== "#000000" ? "black" : "white",
+            }}
+            onClick={() => {
+              onColorClicked(props.color);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
@@ -1650,11 +1660,11 @@ export default ImportImageButton;
 </file>
 
 <file path="components/common/LayerPreview.tsx">
-import { Component, onMount } from "solid-js";
+import { Component, createEffect, onMount } from "solid-js";
 import { Layer } from "~/models/types/Layer";
 
 import styles from "@styles/components/layer_preview.module.css";
-import { v4 as uuidv4 } from "uuid";
+import { layerImageStore } from "~/stores/project/layerImageStore";
 import { layerImageManager } from "../canvas/stacks/CanvasStack";
 
 interface Props {
@@ -1665,13 +1675,14 @@ interface Props {
 }
 
 const LayerPreview: Component<Props> = (props: Props) => {
-  const id = uuidv4();
   let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
 
   const updatePreview = (originalImage: ImageData, targetHeight: number) => {
     const aspectRatio = originalImage.width / originalImage.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
+
+    console.log("aaaa")
 
     // 描画対象キャンバスの解像度とCSSサイズを一致させる
     canvasRef.width = targetWidth;
@@ -1680,8 +1691,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
     let zoom = 1;
-    // if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    // if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
+    if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
+    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -1712,12 +1723,16 @@ const LayerPreview: Component<Props> = (props: Props) => {
   };
 
   onMount(() => {
-    const agent = layerImageManager.getAgent(props.layer.id);
-    agent?.setOnImageChangeListener("layer_preview_" + id, () => {
-      const height = wrapperRef.clientHeight;
-      updatePreview(agent.getImage(), height);
-    });
+    const height = wrapperRef.clientHeight;
+    updatePreview(layerImageStore[props.layer.id].current, height);
+    const agent = layerImageManager.getAgent(props.layer.id)
+    agent?.setOnImageChangeListener("layer_prev_" + props.layer.id, (e) => {
+      console.log("aoijdfg")
+    })
   });
+
+  createEffect(() => {
+  })
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
@@ -2001,10 +2016,9 @@ export default CanvasSettings;
 
 <file path="components/section/Color.tsx">
 import { Component, For } from "solid-js";
-import { colorStore } from "~/stores/internal/colorStore";
+import { colorStore, setCurrentColor } from "~/stores/internal/colorStore";
 
 import ColorPicker from "~/components/section/item/ColorPicker";
-import { setCurrentToolColor } from "~/models/types/Tool";
 import {
   colorElemDescription,
   descriptionContainer,
@@ -2016,10 +2030,11 @@ import {
   sectionRoot,
 } from "~/styles/section_global.css";
 import ColorBox from "../common/ColorBox";
+import Palette from "./item/Palette";
 
 const Color: Component<{}> = (props) => {
   const onColorClicked = (color: string, index: number) => {
-    setCurrentToolColor(color);
+    setCurrentColor(color);
   };
 
   return (
@@ -2029,9 +2044,6 @@ const Color: Component<{}> = (props) => {
         class={sectionContent}
         style={{ "flex-direction": "row", margin: "8px 0" }}
       >
-        <div class={descriptionContainer}>
-          <p class={colorElemDescription}>swatch.</p>
-        </div>
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
             {(item, index) => (
@@ -2047,8 +2059,9 @@ const Color: Component<{}> = (props) => {
         <div class={descriptionContainer}>
           <p class={colorElemDescription}>picker.</p>
         </div>
-        <ColorPicker width={130} />
+        <ColorPicker width={150} />
       </div>
+      <Palette />
     </div>
   );
 };
@@ -2078,14 +2091,13 @@ const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: "crispEdges", value: "crispEdges" },
 ];
 
-const [autoSave, setAutoSave] = createSignal(true);
 
 const GlobalSettings: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>settings.</p>
       <div class={sectionContent} style={{ gap: "8px" }}>
-        <ToggleSwitch checked={autoSave()} onChange={setAutoSave}>
+        <ToggleSwitch checked={globalStore.showDirtyRects} onChange={e => setGlobalStore("showDirtyRects", e)}>
           <p style={{ "font-size": "0.5rem" }}> autosave.</p>
         </ToggleSwitch>
 
@@ -2112,14 +2124,13 @@ export default GlobalSettings;
 import iro from "@jaames/iro";
 import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
 import { Component, createEffect } from "solid-js";
-import { setCurrentToolColor } from "~/models/types/Tool";
-import { currentTool } from "~/stores/internal/toolsStore";
+import { currentColor, setCurrentColor } from "~/stores/internal/colorStore";
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
 
   createEffect(() => {
-    colorPicker.setColors([currentTool().color]);
+    colorPicker.setColors([currentColor()]);
   });
 
   return (
@@ -2128,7 +2139,7 @@ const ColorPicker: Component<{ width: number }> = (props) => {
         colorPicker = iro.ColorPicker(el, {
           width: props.width,
           padding: 0,
-          color: currentTool().color,
+          color: currentColor(),
           handleRadius: 4,
           layoutDirection: "horizontal",
           layout: [
@@ -2146,7 +2157,7 @@ const ColorPicker: Component<{ width: number }> = (props) => {
           ],
         });
         colorPicker.on("color:change", function (color: any) {
-          setCurrentToolColor(color.hexString);
+          setCurrentColor(color.hexString);
         });
       }}
     ></div>
@@ -2267,13 +2278,44 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 export default LayerItem;
 </file>
 
-<file path="components/section/item/PenItem.tsx">
+<file path="components/section/item/Palette.tsx">
 import { Component } from "solid-js";
 import ColorBox from "~/components/common/ColorBox";
+import {
+  colorStore,
+  PaletteType,
+  selectPalette,
+} from "~/stores/internal/colorStore";
+import { paletteRoot } from "~/styles/components/palette.css";
+
+const Palette: Component<{}> = (props) => {
+  return (
+    <div class={paletteRoot}>
+      <ColorBox
+        color={colorStore.primary}
+        sizePx={24}
+        onClick={(color) => selectPalette(PaletteType.primary)}
+        enableUsingSelection={colorStore.currentPalette === PaletteType.primary}
+      />
+      <ColorBox
+        color={colorStore.secondary}
+        sizePx={24}
+        onClick={(color) => selectPalette(PaletteType.secondary)}
+        enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
+      />
+    </div>
+  );
+};
+
+export default Palette;
+</file>
+
+<file path="components/section/item/PenItem.tsx">
+import { Component } from "solid-js";
 import { sayRandomQuote } from "~/components/common/companion/QuotePool";
 import Light from "~/components/common/Light";
 import Slider from "~/components/common/Slider";
-import { Tool } from "~/models/types/Tool";
+import { Tool, ToolType } from "~/models/types/Tool";
 import { setToolStore, toolStore } from "~/stores/internal/toolsStore";
 import { penConfigRow, penConfigRowName } from "~/styles/section/pen.css";
 
@@ -2299,30 +2341,44 @@ const PenItem: Component<Props> = (props: Props) => {
         {props.pen.name}.
       </p>
 
-      <ColorBox color={props.pen.color} sizePx={8} />
+      {(props.pen.type === ToolType.Pen ||
+        props.pen.type === ToolType.Eraser) && (
+        <>
+          <div style={{ "flex-grow": 1 }}>
+            <Slider
+              min={1}
+              max={30}
+              default={props.pen.size}
+              onValueChanged={(newValue) => {
+                sayRandomQuote("pen-resize");
+                console.log("size set to " + newValue);
+                const penIndex = toolStore.tools.findIndex(
+                  (p) => p.id === props.pen.id,
+                );
+                setToolStore("tools", penIndex, "size", newValue);
+              }}
+            />
+          </div>
 
-      <div style={{ "flex-grow": 1 }}>
-        <Slider
-          min={1}
-          max={30}
-          default={props.pen.size}
-          onValueChanged={(newValue) => {
-            sayRandomQuote("pen-resize");
-            console.log("size set to " + newValue);
-            const penIndex = toolStore.tools.findIndex(
-              (p) => p.id === props.pen.id,
-            );
-            setToolStore("tools", penIndex, "size", newValue);
-          }}
-        />
-      </div>
-
-      <p style={{ width: "auto" }}>{props.pen.size}.</p>
+          <p style={{ width: "auto" }}>{props.pen.size}.</p>
+        </>
+      )}
     </div>
   );
 };
 
 export default PenItem;
+</file>
+
+<file path="components/section/item/PenSize.tsx">
+import { Component } from "solid-js";
+import { penConfigRow } from "~/styles/section/pen.css";
+
+const PenSize: Component<{}> = (props) => {
+  return <div class={penConfigRow}></div>;
+};
+
+export default PenSize;
 </file>
 
 <file path="components/section/LayerList.tsx">
@@ -2462,12 +2518,14 @@ import {
   sectionRoot,
 } from "~/styles/section_global.css";
 import PenItem from "./item/PenItem";
+import PenSize from "./item/PenSize";
 
 const PenConfig: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>pen config.</p>
       <div class={sectionContent}>
+        <PenSize />
         <For each={toolStore.tools}>
           {(item, index) => (
             <PenItem pen={item} isInUse={index() === toolStore.usingIndex} />
@@ -2541,6 +2599,7 @@ const Project: Component<{}> = (props) => {
           class={flexRow}
           style={{ "align-items": "center", "margin-top": "12px" }}
         >
+          <button onClick={() => saveProject()}>save.</button>
           <button onClick={() => exportActiveLayerUpscaled()}>export.</button>
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
         </div>
@@ -2615,7 +2674,12 @@ export default function TitleBar() {
   });
 
   return (
-    <header style={{ "pointer-events": "all", "border": window.label === "main" ? "1px solid #aaa" : "none" }}>
+    <header
+      style={{
+        "pointer-events": "all",
+        border: window.label === "main" ? "1px solid #aaa" : "none",
+      }}
+    >
       <nav class={titleBarRoot} data-tauri-drag-region="p, button">
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
@@ -3504,13 +3568,11 @@ export const createTool = (
   type: ToolType,
   name: string,
   size: number,
-  color: string,
 ): Tool => ({
   id: uuidv4(),
   type,
   name,
   size,
-  color,
 });
 </file>
 
@@ -3563,6 +3625,7 @@ import { reconcile } from "solid-js/store";
 import { setBottomInfo } from "~/components/BottomInfo";
 import { LayerCanvasRef } from "~/components/canvas/stacks/LayerCanvas";
 import { Vec2 } from "~/models/types/Vector";
+import { currentColor } from "~/stores/internal/colorStore";
 import { currentTool } from "~/stores/internal/toolsStore";
 import { setLayerImageStore } from "~/stores/project/layerImageStore";
 import { hexToRGBA } from "~/utils/colorUtils";
@@ -3622,7 +3685,7 @@ export default class LayerCanvasOperator {
       position,
       lastPosition: last,
       size: tool.size,
-      color: hexToRGBA(tool.color),
+      color: hexToRGBA(currentColor()),
     };
     const startTime = Date.now();
     let isDrawnAction;
@@ -4098,9 +4161,9 @@ export class HistoryManager {
 </file>
 
 <file path="models/layer_image/LayerImageAgent.ts">
-import { setBottomInfo } from "~/components/BottomInfo";
-import { Vec2 } from "~/models/types/Vector";
-import { colorMatch, RGBAColor } from "~/utils/colorUtils";
+import { setBottomInfo } from '~/components/BottomInfo'
+import { Vec2 } from '~/models/types/Vector'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
 import {
   Diff,
   DiffAction,
@@ -4108,156 +4171,162 @@ import {
   HistoryManager,
   PixelDiff,
   TileDiff,
-} from "./HistoryManager";
+} from './HistoryManager'
 
 interface DrawingBufferChangeEvent {}
 interface ImageChangeEvent {}
 
 // それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
 export default abstract class LayerImageAgent {
-  protected image: ImageData;
-  protected drawingBuffer: ImageData | undefined;
-  protected historyManager;
+  protected image: ImageData
+  protected drawingBuffer: ImageData | undefined
+  protected historyManager
 
   protected onImageChangedListeners: {
-    [key: string]: (e: ImageChangeEvent) => void;
-  } = {};
+    [key: string]: (e: ImageChangeEvent) => void
+  } = {}
   protected onDrawingBufferChangedListeners: {
-    [key: string]: (e: DrawingBufferChangeEvent) => void;
-  } = {};
+    [key: string]: (e: DrawingBufferChangeEvent) => void
+  } = {}
 
   constructor(imageData: ImageData, historyManager?: HistoryManager) {
-    this.image = imageData;
-    this.drawingBuffer = imageData;
-    this.historyManager = historyManager;
+    this.image = imageData
+    this.drawingBuffer = imageData
+    this.historyManager = historyManager
   }
 
   getHistoryManager() {
-    return this.historyManager;
+    return this.historyManager
   }
 
   getImage() {
-    return this.image;
+    return this.image
   }
 
   setImage(image: ImageData, silentlySet?: boolean) {
-    this.image = image;
-    if (silentlySet) this.callOnImageChangeListeners();
-    this.resetDrawingBuffer();
+    this.image = image
+    if (silentlySet) this.callOnImageChangeListeners()
+    this.resetDrawingBuffer()
   }
 
   getDrawingBuffer() {
-    return this.drawingBuffer;
+    return this.drawingBuffer
   }
 
   setDrawingBuffer(imageData?: ImageData) {
-    this.drawingBuffer = imageData;
-    this.callOnDrawingBufferChangeListeners();
+    this.drawingBuffer = imageData
+    this.callOnDrawingBufferChangeListeners()
   }
 
   resetDrawingBuffer() {
-    this.setDrawingBuffer(this.image);
+    this.setDrawingBuffer(this.image)
   }
 
-  abstract putImageInto(ctx: CanvasRenderingContext2D): void;
-  abstract putDrawingBufferInto(ctx: CanvasRenderingContext2D): void;
+  abstract putImageInto(ctx: CanvasRenderingContext2D): void
+  abstract putDrawingBufferInto(ctx: CanvasRenderingContext2D): void
 
   putImageIntoForce(ctx: CanvasRenderingContext2D) {
-    ctx.putImageData(this.image, 0, 0);
+    ctx.putImageData(this.image, 0, 0)
   }
   putDrawingBufferIntoForce(ctx: CanvasRenderingContext2D) {
-    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0);
+    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0)
   }
 
   setOnImageChangeListener(
     key: string,
-    listener: (e: ImageChangeEvent) => void,
+    listener: (e: ImageChangeEvent) => void
   ) {
-    this.onImageChangedListeners[key] = listener;
+    this.onImageChangedListeners[key] = listener
+  }
+  clearOnImageChangeListener(key: string) {
+    delete this.onImageChangedListeners[key]
   }
 
   setOnDrawingBufferChangeListener(
     key: string,
-    listener: (e: DrawingBufferChangeEvent) => void,
+    listener: (e: DrawingBufferChangeEvent) => void
   ) {
-    this.onDrawingBufferChangedListeners[key] = listener;
+    this.onDrawingBufferChangedListeners[key] = listener
+  }
+  clearOnDrawingBufferChangeListener(key: string) {
+    delete this.onDrawingBufferChangedListeners[key]
   }
 
   callOnImageChangeListeners() {
     Object.values(this.onImageChangedListeners).forEach((listener) =>
-      listener({}),
-    );
+      listener({})
+    )
   }
 
   callOnDrawingBufferChangeListeners() {
     Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
-      listener({}),
-    );
+      listener({})
+    )
   }
 
-  getWidth = (): number => this.image.width;
-  getHeight = (): number => this.image.height;
+  getWidth = (): number => this.image.width
+  getHeight = (): number => this.image.height
 
-  public currentDiffAction: DiffAction = { diffs: new Map() };
+  public currentDiffAction: DiffAction = { diffs: new Map() }
 
   addDiffs(diffs: Diff[]) {
-    diffs.forEach((d) => this.currentDiffAction.diffs.set(getDiffHash(d), d));
+    diffs.forEach((d) => this.currentDiffAction.diffs.set(getDiffHash(d), d))
   }
 
   public registerDiffAction() {
-    this.historyManager?.addAction(this.currentDiffAction);
-    this.currentDiffAction = { diffs: new Map() };
+    this.historyManager?.addAction(this.currentDiffAction)
+    this.currentDiffAction = { diffs: new Map() }
   }
 
-  public canUndo = () => this.historyManager?.canUndo();
-  public canRedo = () => this.historyManager?.canRedo();
+  public canUndo = () => this.historyManager?.canUndo()
+  public canRedo = () => this.historyManager?.canRedo()
 
   public undo() {
-    const undoStart = Date.now();
-    const undoedAction = this.historyManager?.undo();
-    if (undoedAction === undefined) return;
-    setBottomInfo(`undo.`);
+    const undoStart = Date.now()
+    const undoedAction = this.historyManager?.undo()
+    if (undoedAction === undefined) return
+    setBottomInfo(`undo.`)
     undoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
-        case "pixel":
-          this.setPixelInPosition(diff.position, diff.before, false, false);
-          break;
-        case "tile":
-          this.undoTileDiff(diff);
-          break;
+        case 'pixel':
+          this.setPixelInPosition(diff.position, diff.before, false, false)
+          break
+        case 'tile':
+          this.undoTileDiff(diff)
+          break
       }
-    });
-    const undoEnd = Date.now();
+    })
+    const undoEnd = Date.now()
     setBottomInfo(
-      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`,
-    );
+      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`
+    )
 
-    this.callOnImageChangeListeners();
+    this.callOnImageChangeListeners()
   }
 
   protected undoTileDiff(tileDiff: TileDiff) {}
 
   public redo() {
-    const redoStart = Date.now();
-    const redoedAction = this.historyManager?.redo();
-    if (redoedAction === undefined) return;
-    setBottomInfo(`redo.`);
+    const redoStart = Date.now()
+    const redoedAction = this.historyManager?.redo()
+    if (redoedAction === undefined) return
+    setBottomInfo(`redo.`)
     redoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
-        case "pixel":
-          this.setPixelInPosition(diff.position, diff.after, false, false);
-          break;
-        case "tile":
-          this.redoTileDiff(diff);
-          break;
+        case 'pixel':
+          this.setPixelInPosition(diff.position, diff.after, false, false)
+          break
+        case 'tile':
+          this.redoTileDiff(diff)
+          break
       }
-    });
-    const redoEnd = Date.now();
+    })
+    const redoEnd = Date.now()
     setBottomInfo(
-      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`,
-    );
+      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`
+    )
 
-    this.callOnImageChangeListeners();
+    this.callOnImageChangeListeners()
   }
 
   protected redoTileDiff(tileDiff: TileDiff) {}
@@ -4266,65 +4335,65 @@ export default abstract class LayerImageAgent {
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean,
-    excludeColorMatch: boolean,
-  ): PixelDiff | undefined;
+    excludeColorMatch: boolean
+  ): PixelDiff | undefined
 
   protected setPixelInPosition(
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    if (!this.isInBounds(position)) return undefined;
+    if (!this.isInBounds(position)) return undefined
     if (
       excludePositionMatch &&
       this.currentDiffAction.diffs.has(`${position.x},${position.y}`)
     )
-      return undefined;
-    const i = (position.y * this.getWidth() + position.x) * 4;
+      return undefined
+    const i = (position.y * this.getWidth() + position.x) * 4
     const beforeColor: RGBAColor = [
       this.image.data[i + 0],
       this.image.data[i + 1],
       this.image.data[i + 2],
       this.image.data[i + 3],
-    ];
-    if (excludeColorMatch && colorMatch(beforeColor, color)) return undefined;
+    ]
+    if (excludeColorMatch && colorMatch(beforeColor, color)) return undefined
 
-    if (!this.drawingBuffer) return;
+    if (!this.drawingBuffer) return
 
-    this.drawingBuffer.data[i + 0] = color[0];
-    this.drawingBuffer.data[i + 1] = color[1];
-    this.drawingBuffer.data[i + 2] = color[2];
-    this.drawingBuffer.data[i + 3] = color[3];
+    this.drawingBuffer.data[i + 0] = color[0]
+    this.drawingBuffer.data[i + 1] = color[1]
+    this.drawingBuffer.data[i + 2] = color[2]
+    this.drawingBuffer.data[i + 3] = color[3]
 
     return {
-      kind: "pixel",
+      kind: 'pixel',
       position,
       before: beforeColor,
       after: color,
-    };
+    }
   }
 
   public abstract deletePixel(
     position: Vec2,
     excludePositionMatch: boolean,
-    excludeColorMatch: boolean,
-  ): PixelDiff | undefined;
+    excludeColorMatch: boolean
+  ): PixelDiff | undefined
 
   protected deletePixelInPosition(
     position: Vec2,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     return this.setPixelInPosition(
       position,
       [0, 0, 0, 0],
       excludePositionMatch,
-      excludeColorMatch,
-    );
+      excludeColorMatch
+    )
   }
 
-  public abstract getPixel(position: Vec2): RGBAColor;
+  public abstract getPixel(position: Vec2): RGBAColor
 
   public isInBounds(position: Vec2) {
     return (
@@ -4332,27 +4401,27 @@ export default abstract class LayerImageAgent {
       position.y >= 0 &&
       position.x < this.getWidth() &&
       position.y < this.getHeight()
-    );
+    )
   }
 }
 </file>
 
 <file path="models/layer_image/LayerImageManager.ts">
-import { HistoryManager } from "./HistoryManager";
-import LayerImageAgent from "./LayerImageAgent";
-import TileLayerImageAgent from "./agents/TileLayerImageAgent";
+import { HistoryManager } from './HistoryManager'
+import LayerImageAgent from './LayerImageAgent'
+import TileLayerImageAgent from './agents/TileLayerImageAgent'
 
 export class LayerImageManager {
-  private agents: Map<string, LayerImageAgent> = new Map();
+  private agents: Map<string, LayerImageAgent> = new Map()
 
   public getAgent(layerId: string): LayerImageAgent | undefined {
-    return this.agents.get(layerId);
+    return this.agents.get(layerId)
   }
 
   public registerAgent(layerId: string, image: ImageData): LayerImageAgent {
-    const agent = new TileLayerImageAgent(image, new HistoryManager(layerId));
-    this.agents.set(layerId, agent);
-    return agent;
+    const agent = new TileLayerImageAgent(image, new HistoryManager(layerId))
+    this.agents.set(layerId, agent)
+    return agent
   }
 }
 </file>
@@ -4883,7 +4952,7 @@ export class TileFloodFill implements Fill {
 }
 </file>
 
-<file path="models/tools/pen/penTool.ts">
+<file path="models/tools/pen/PenTool.ts">
 import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
 import { drawCompletionLine, drawSquarePixel } from "../DrawUtils";
 import { Tool, ToolArgs } from "../ToolBase";
@@ -5011,8 +5080,6 @@ export type LayerImage = {
 </file>
 
 <file path="models/types/Tool.ts">
-import { setToolStore, toolStore } from "~/stores/internal/toolsStore";
-
 export enum ToolType {
   Pen = "pen",
   Eraser = "eraser",
@@ -5024,11 +5091,6 @@ export type Tool = {
   id: string;
   name: string;
   size: number;
-  color: string;
-};
-
-export const setCurrentToolColor = (colorHexString: string) => {
-  return setToolStore("tools", toolStore.usingIndex, "color", colorHexString);
 };
 </file>
 
@@ -5068,7 +5130,7 @@ export const aaContainer = style([
   flexCol,
   {
     position: 'absolute',
-    top: '20px',
+    top: '24px',
     right: '40px',
     width: '200px',
     height: '100%',
@@ -5088,6 +5150,7 @@ export const contentContainer = style([
   {
     width: '100%',
     margin: '0 30px',
+    marginTop: '8px',
     pointerEvents: 'none',
   },
 ])
@@ -5146,8 +5209,10 @@ export const aboutFeedback = style({
 </file>
 
 <file path="routes/about/index.tsx">
+import { WebviewOptions } from "@tauri-apps/api/webview";
+import { WindowOptions } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-shell";
-import { flexCol, flexRow, w100, wh100 } from "~/styles/snippets.css";
+import { flexRow, w100, wh100 } from "~/styles/snippets.css";
 import {
   aaContainer,
   aaText,
@@ -5160,13 +5225,15 @@ import {
   contentContainer,
   sendFBButton,
 } from "./about.css";
-import { WindowOptions } from "@tauri-apps/api/window";
-import { WebviewOptions } from "@tauri-apps/api/webview";
 
-export const AboutWindowOptions: Omit<WebviewOptions, "x" | "y" | "width" | "height"> & WindowOptions = {
+export const AboutWindowOptions: Omit<
+  WebviewOptions,
+  "x" | "y" | "width" | "height"
+> &
+  WindowOptions = {
   url: "/about",
   width: 420,
-  height: 260,
+  height: 290,
   resizable: false,
   decorations: false,
   minimizable: false,
@@ -5174,7 +5241,7 @@ export const AboutWindowOptions: Omit<WebviewOptions, "x" | "y" | "width" | "hei
   closable: true,
   acceptFirstMouse: true,
   focus: true,
-}
+};
 
 const About = () => {
   const openLink = (url: string) => {
@@ -5218,10 +5285,7 @@ const About = () => {
           <p class={aboutSubTitle} style={{ "margin-bottom": "14px" }}>
             pre-alpha v0.1
           </p>
-          <p
-            class={aboutContent}
-            style={{ "margin-bottom": "50px" }}
-          >
+          <p class={aboutContent} style={{ "margin-bottom": "50px" }}>
             made with much <span style={{ color: "magenta" }}>love</span> for:
             <br />-{" "}
             <a
@@ -5251,19 +5315,27 @@ const About = () => {
             &lt;HP dead RIP&gt;
             <br />
           </p>
-          <div class={[flexRow, w100].join(" ")} style={{ "align-items": "center", }}>
+          <div
+            class={[flexRow, w100].join(" ")}
+            style={{ "align-items": "center" }}
+          >
             <p class={aboutFeedback}>
               気軽に意見を投げつけよう！
               <br />
               feel FREE to send feedback!!
             </p>
-            <button class={sendFBButton} onClick={(e) => openLink("https://tally.so/r/w7jZNL")}>&gt;&gt; send feedback</button>
+            <button
+              class={sendFBButton}
+              onClick={(e) => openLink("https://tally.so/r/w7jZNL")}
+            >
+              &gt;&gt; send feedback
+            </button>
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
-}
+};
 
 export default About;
 </file>
@@ -5280,6 +5352,9 @@ import { importProjectJsonFromPath } from "~/io/project/project";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 import { flexCol, flexRow } from "~/styles/snippets.css";
 import { welcomeRoot } from "../start.css";
+import { allLayers } from "~/stores/project/layerStore";
+import { layerImageManager } from "~/components/canvas/stacks/CanvasStack";
+import { layerImageStore } from "~/stores/project/layerImageStore";
 
 export default function Editor() {
   const location = useLocation();
@@ -5356,7 +5431,6 @@ import { sectionRoot } from "~/styles/section_global.css";
 import { flexCol, flexRow, w100 } from "~/styles/snippets.css";
 import { getFileNameAndPath } from "~/utils/pathUtils";
 import {
-  clear,
   recentFilesCaption,
   recentFilesContainer,
   recentFilesItem,
@@ -5478,143 +5552,144 @@ export default function Settings() {
 </file>
 
 <file path="routes/start.css.ts">
-import { style } from '@vanilla-extract/css'
-import { ZFB03B, ZFB09, ZFB31 } from '~/styles/global.css'
-import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css'
+import { style } from "@vanilla-extract/css";
+import { ZFB03B, ZFB09, ZFB31 } from "~/styles/global.css";
+import { flexCol, flexRow, w100, wh100 } from "~/styles/snippets.css";
 
 export const welcomeRoot = style([
   flexCol,
   wh100,
   {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-])
+]);
 
 export const welcomeHeadline = style({
   fontFamily: ZFB31,
-  fontSize: '4rem',
-  letterSpacing: '8px',
-  marginBottom: '12px',
-})
+  fontSize: "4rem",
+  letterSpacing: "8px",
+  marginBottom: "12px",
+});
 
 export const recentFilesCaption = style({
   fontFamily: ZFB03B,
-  fontSize: '16px',
-  color: '#000',
+  fontSize: "16px",
+  color: "#000",
   flexGrow: 1,
-  marginBottom: '12px',
-})
+  marginBottom: "12px",
+});
 
 export const clear = style({
   fontFamily: ZFB03B,
-  fontSize: '15px',
-  ':hover': {
-    color: 'red',
+  fontSize: "15px",
+  ":hover": {
+    color: "red",
   },
-})
+});
 
 export const recentFilesContainer = style([
   flexCol,
   w100,
   {
-    gap: '8px',
-    marginTop: '4px',
+    gap: "8px",
+    marginTop: "4px",
   },
-])
+]);
 
 export const recentFilesItem = style([
   flexRow,
   w100,
   {
-    alignItems: 'center',
-    gap: '8px',
+    alignItems: "center",
+    gap: "8px",
   },
-])
+]);
 
 export const recentFilesName = style({
   fontFamily: ZFB09,
-  fontSize: '0.5rem',
-  textOverflow: 'ellipsis',
-  color: '#555',
-  whiteSpace: 'nowrap',
-})
+  fontSize: "0.5rem",
+  textOverflow: "ellipsis",
+  color: "#555",
+  whiteSpace: "nowrap",
+});
 
 export const recentFilesPath = style({
   fontFamily: ZFB03B,
-  fontSize: '0.5rem',
-  color: '#00000030',
-})
+  fontSize: "0.5rem",
+  color: "#00000030",
+});
 
 export const sideSection = style([
   flexRow,
   {
-    gap: '24px',
-    paddingBottom: '24px',
-    paddingTop: '12px',
+    gap: "24px",
+    paddingBottom: "24px",
+    paddingTop: "12px",
   },
-])
+]);
 
 export const sideSectionItem = style([
   flexCol,
   {
-    cursor: 'pointer',
-    fontSize: '1rem',
-    width: 'fit-content',
-    ':hover': {
-      color: 'red',
+    cursor: "pointer",
+    fontSize: "1rem",
+    width: "fit-content",
+    ":hover": {
+      color: "red",
     },
   },
-])
+]);
 </file>
 
 <file path="stores/global/globalStore.ts">
-import { createStore } from "solid-js/store";
-import { saveGlobalSettings } from "~/io/global/globalIO";
-import { canvasStore } from "../project/canvasStore";
+import { createStore } from 'solid-js/store'
+import { saveGlobalSettings } from '~/io/global/globalIO'
+import { canvasStore } from '../project/canvasStore'
 
 // global
 export type FileLocation = {
-  path: string;
-  name: string;
-};
-export type ImageRenderingAttribute = "auto" | "pixelated" | "crispEdges";
-export type CanvasRenderingMode = "adaptive" | "pixelated" | "crispEdges";
+  path: string
+  name: string
+}
+export type ImageRenderingAttribute = 'auto' | 'pixelated' | 'crispEdges'
+export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crispEdges'
 
 export const getCanvasImageRenderingAttribute = (mode: CanvasRenderingMode) => {
   switch (mode) {
-    case "pixelated":
-    case "crispEdges":
-      return mode;
-    case "adaptive":
-      return canvasStore.zoom > 1.0 ? "pixelated" : "crispEdges";
+    case 'pixelated':
+    case 'crispEdges':
+      return mode
+    case 'adaptive':
+      return canvasStore.zoom > 1.0 ? 'pixelated' : 'crispEdges'
   }
-};
+}
 
 export const [globalStore, setGlobalStore] = createStore({
   recentOpenedFiles: [
     {
-      path: "C:\\Users\\innsb\\Documents",
-      name: "project.sledge",
+      path: 'C:\\Users\\innsb\\Documents',
+      name: 'project.sledge',
     },
   ],
 
-  canvasRenderingMode: "adaptive" as CanvasRenderingMode,
-});
+  showDirtyRects: false,
+  canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
+})
 
 export const addRecent = (loc: FileLocation) => {
-  const path = loc.path;
-  const name = loc.name;
+  const path = loc.path
+  const name = loc.name
 
   // add to recent
   setGlobalStore((store) => {
-    console.log("path: " + path);
-    console.log("name: " + name);
+    console.log('path: ' + path)
+    console.log('name: ' + name)
     if (name && path && store.recentOpenedFiles) {
       // 履歴にあっても一旦削除
       let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
-        return f.name !== name || f.path !== path?.toString();
-      });
+        return f.name !== name || f.path !== path?.toString()
+      })
       // その後、一番上に追加
       const newRecentFiles: FileLocation[] = [
         {
@@ -5622,13 +5697,13 @@ export const addRecent = (loc: FileLocation) => {
           path: path,
         },
         ...oldRecentFiles,
-      ];
-      setGlobalStore("recentOpenedFiles", newRecentFiles);
-      saveGlobalSettings();
+      ]
+      setGlobalStore('recentOpenedFiles', newRecentFiles)
+      saveGlobalSettings()
     }
-    return store;
-  });
-};
+    return store
+  })
+}
 </file>
 
 <file path="stores/internal/colorStore.ts">
@@ -5636,7 +5711,15 @@ import { createStore } from "solid-js/store";
 
 // color
 
+export enum PaletteType {
+  primary = "primary",
+  secondary = "secondary",
+}
+
 export const [colorStore, setColorStore] = createStore({
+  currentPalette: "primary" as PaletteType,
+  primary: "#000000", // 通常の描画色
+  secondary: "#ffffff", // 背景・消しゴムなど
   swatches: [
     "#000000",
     "#FFFFFF",
@@ -5650,6 +5733,19 @@ export const [colorStore, setColorStore] = createStore({
     "#400080",
   ],
 });
+
+export const currentColor = (): string => {
+  return colorStore[colorStore.currentPalette];
+};
+export const setCurrentColor = (colorHexString: string) => {
+  return setColorStore(colorStore.currentPalette, colorHexString);
+};
+export const setColor = (palette: PaletteType, colorHexString: string) => {
+  return setColorStore(palette, colorHexString);
+};
+export const selectPalette = (palette: PaletteType) => {
+  return setColorStore("currentPalette", palette);
+};
 </file>
 
 <file path="stores/internal/toastStore.ts">
@@ -5700,67 +5796,67 @@ import { ToolType } from "~/models/types/Tool";
 export const [toolStore, setToolStore] = createStore({
   usingIndex: 0,
   tools: [
-    createTool(ToolType.Pen, "pen", 1, "#000000"),
-    createTool(ToolType.Eraser, "eraser", 4, "none"),
-    createTool(ToolType.Fill, "fill", 4, "#FF0000"),
+    createTool(ToolType.Pen, "pen", 1),
+    createTool(ToolType.Eraser, "eraser", 4),
+    createTool(ToolType.Fill, "fill", 4),
   ],
 });
 export const currentTool = () => toolStore.tools[toolStore.usingIndex];
 </file>
 
 <file path="stores/project/canvasStore.ts">
-import { createStore } from "solid-js/store";
-import { createCanvas } from "~/models/types/Canvas";
+import { createStore } from 'solid-js/store'
+import { createCanvas } from '~/models/types/Canvas'
 
 // canvas
-const REFERENCE_LENGTH = 600;
+const REFERENCE_LENGTH = 600
 
 export const getReferencedZoom = (length?: number) => {
   if (length === undefined) {
-    const width = canvasStore.canvas.width;
-    const height = canvasStore.canvas.height;
-    length = width > height ? width : height;
+    const width = canvasStore.canvas.width
+    const height = canvasStore.canvas.height
+    length = width > height ? width : height
   }
 
-  return REFERENCE_LENGTH / length;
-};
+  return REFERENCE_LENGTH / length
+}
 
 export const adjustZoomToFit = (width?: number, height?: number) => {
-  if (width === undefined) width = canvasStore.canvas.width;
-  if (height === undefined) height = canvasStore.canvas.height;
+  if (width === undefined) width = canvasStore.canvas.width
+  if (height === undefined) height = canvasStore.canvas.height
 
-  let isWide = width > height;
-  let longerLength = isWide ? width : height;
+  let isWide = width > height
+  let longerLength = isWide ? width : height
 
   console.log(
-    `this is ${isWide ? "wide" : "tall"}.
-    ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`,
-  );
-  setCanvasStore("zoom", getReferencedZoom(longerLength));
-  centeringCanvas();
-};
+    `this is ${isWide ? 'wide' : 'tall'}.
+    ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`
+  )
+  setCanvasStore('zoom', getReferencedZoom(longerLength))
+  centeringCanvas()
+}
 
 export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas;
-  const canvasArea = canvasStore.canvasAreaSize;
-  const zoom = canvasStore.zoom;
+  const canvasSize = canvasStore.canvas
+  const canvasArea = canvasStore.canvasAreaSize
+  const zoom = canvasStore.zoom
 
   console.log(
     `area size is ${canvasArea.width} x ${canvasArea.height}.
     canvas size is ${canvasSize.width} x ${canvasSize.height}.
     current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
-    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`,
-  );
+    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
+  )
 
-  setCanvasStore("offsetOrigin", {
+  setCanvasStore('offsetOrigin', {
     x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
     y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
-  });
-  setCanvasStore("offset", {
+  })
+  setCanvasStore('offset', {
     x: 0,
     y: 0,
-  });
-};
+  })
+}
 
 export const [canvasStore, setCanvasStore] = createStore({
   canvas: createCanvas(400, 400),
@@ -5771,7 +5867,7 @@ export const [canvasStore, setCanvasStore] = createStore({
   lastMouseOnZoomedCanvas: { x: 0, y: 0 },
   isInStroke: false,
   zoom: 1,
-  zoomMin: 0.1,
+  zoomMin: 0.5,
   zoomMax: 8,
   touchZoomSensitivity: 0.5,
   wheelZoomStep: 0.1,
@@ -5781,7 +5877,7 @@ export const [canvasStore, setCanvasStore] = createStore({
 
   isCtrlPressed: false,
   isDragging: false,
-});
+})
 </file>
 
 <file path="stores/project/layerImageStore.ts">
@@ -5848,44 +5944,68 @@ createEffect(() => {
 </file>
 
 <file path="styles/components/bottom_info.css.ts">
-import { style } from '@vanilla-extract/css'
-import { vars } from '../global.css'
-import { flexRow, w100 } from '../snippets.css'
+import { style } from "@vanilla-extract/css";
+import { vars } from "../global.css";
+import { flexRow, w100 } from "../snippets.css";
 
 export const bottomInfoRoot = style([
   flexRow,
   w100,
   {
-    position: 'absolute',
+    position: "absolute",
     backgroundColor: vars.color.bg,
     bottom: 0,
-    borderTop: '1px solid #aaa',
-    height: '20px',
-    alignItems: 'center',
+    borderTop: "1px solid #aaa",
+    height: "20px",
+    alignItems: "center",
     padding: `0 ${vars.spacing.md}`,
     gap: vars.spacing.md,
   },
-])
+]);
 
-export const bottomInfoText = style({})
+export const bottomInfoText = style({});
 </file>
 
 <file path="styles/components/canvas/canvas_area.css.ts">
-import { style } from '@vanilla-extract/css'
-import { flexCol } from '../../snippets.css'
-import { vars } from '~/styles/global.css'
+import { style } from "@vanilla-extract/css";
+import { vars } from "~/styles/global.css";
+import { flexCol } from "../../snippets.css";
 
 export const canvasArea = style([
   flexCol,
   {
     backgroundColor: vars.color.bg_canvas_area,
-    display: 'flex',
+    display: "flex",
     flex: 1,
-    flexDirection: 'column',
-    height: '100vh',
-    overflow: 'hidden',
+    flexDirection: "column",
+    height: "100vh",
+    overflow: "hidden",
+    position: "relative",
+    width: "100%",
+  },
+]);
+</file>
+
+<file path="styles/components/canvas/canvas_stack.css.ts">
+'background-image'
+import { style } from '@vanilla-extract/css'
+import { flexRow } from '~/styles/snippets.css'
+
+const transparent_bg_size = 4
+const transparent_bg_color = '#0000000A'
+
+export const canvasStack = style([
+  flexRow,
+  {
+    alignItems: 'center',
+    justifyContent: 'center',
     position: 'relative',
-    width: '100%',
+
+    backgroundImage:
+      `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
+      `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%)`,
+    backgroundSize: `${transparent_bg_size * 2}px ${transparent_bg_size * 2}px`,
+    backgroundPosition: `0 0, ${transparent_bg_size}px ${transparent_bg_size}px`,
   },
 ])
 </file>
@@ -6219,6 +6339,34 @@ export const dropdownRoot = style({
 }
 </file>
 
+<file path="styles/components/palette.css.ts">
+import { style } from "@vanilla-extract/css";
+import { flexRow } from "../snippets.css";
+
+export const paletteRoot = style([
+  flexRow,
+  {
+    gap: "6px",
+  },
+]);
+
+export const paletteColorBoxContainer = style({
+  position: "relative",
+});
+
+export const paletteColorBoxPrimary = style({
+  position: "absolute",
+  top: 0,
+  left: 0,
+});
+
+export const paletteColorBoxSecondary = style({
+  position: "absolute",
+  top: 10,
+  left: 10,
+});
+</file>
+
 <file path="styles/components/slider.module.css">
 .root {
   width: 100%;
@@ -6276,35 +6424,35 @@ export const dropdownRoot = style({
 </file>
 
 <file path="styles/components/title_bar.css.ts">
-import { style } from '@vanilla-extract/css'
-import { vars, ZFB08 } from '../global.css'
-import { flexCol, flexRow, h100, w100 } from '../snippets.css'
+import { style } from "@vanilla-extract/css";
+import { vars, ZFB08 } from "../global.css";
+import { flexCol, flexRow, h100, w100 } from "../snippets.css";
 
 export const titleBarRoot = style([
   flexRow,
   w100,
   {
-    background: '#fff',
-    pointerEvents: 'all',
-    height: '28px',
+    background: "#fff",
+    pointerEvents: "all",
+    height: "28px",
     // borderBottom: "1px solid #aaa",
-    alignItems: 'center',
+    alignItems: "center",
     zIndex: 9999,
   },
-])
+]);
 
 export const titleBarTitle = style([
   flexRow,
   w100,
   {
-    width: 'fit-content',
+    width: "fit-content",
     fontFamily: ZFB08,
     fontSize: vars.text.sm,
-    marginRight: 'auto',
+    marginRight: "auto",
     paddingLeft: vars.spacing.lg,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
-])
+]);
 
 export const titleBarControls = style([
   flexRow,
@@ -6313,59 +6461,59 @@ export const titleBarControls = style([
     gap: vars.spacing.sm,
     marginRight: vars.spacing.sm,
   },
-])
+]);
 
 export const titleBarControlButton = style([
   flexCol,
   h100,
   {
-    background: 'none',
-    backgroundColor: 'transparent',
-    border: 'none',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: '24px',
-    ':hover': {
-      backgroundColor: 'transparent',
+    background: "none",
+    backgroundColor: "transparent",
+    border: "none",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: "24px",
+    ":hover": {
+      backgroundColor: "transparent",
     },
   },
-])
+]);
 
 export const titleBarControlMinimizeButton = style([
   titleBarControlButton,
   {
-    ':hover': {
+    ":hover": {
       filter:
-        'invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);', // 青っぽく
+        "invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);", // 青っぽく
     },
   },
-])
+]);
 
 export const titleBarControlMaximizeButton = style([
   titleBarControlButton,
   {
-    ':hover': {
+    ":hover": {
       filter:
-        'invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);', // 緑っぽく
+        "invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);", // 緑っぽく
     },
   },
-])
+]);
 
 export const titleBarControlCloseButton = style([
   titleBarControlButton,
   {
-    ':hover': {
+    ":hover": {
       filter:
-        'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
+        "invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);", // 赤っぽく
     },
   },
-])
+]);
 
 export const titleBarControlButtonImg = style({
-  width: '10px',
-  height: '10px',
-  imageRendering: 'pixelated',
-})
+  width: "10px",
+  height: "10px",
+  imageRendering: "pixelated",
+});
 </file>
 
 <file path="styles/components/toast.module.css">
@@ -6576,7 +6724,7 @@ export const vars = createGlobalTheme(':root', {
     muted: '#00000030',
 
     bg: '#ffffff',
-    bg_canvas_area: '#fAfAfA  ',
+    bg_canvas_area: '#fefefe',
 
     surface: '#f0f0f0',
 
@@ -7154,25 +7302,26 @@ export async function safeInvoke<T>(
 </file>
 
 <file path="utils/windowUtils.ts">
-import { WebviewOptions } from '@tauri-apps/api/webview'
-import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
-import { WindowOptions } from '@tauri-apps/api/window'
+import { WebviewOptions } from "@tauri-apps/api/webview";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { WindowOptions } from "@tauri-apps/api/window";
 
 /** 同一ラベルのウィンドウがあれば再利用してフォーカスする */
 export async function openSingletonWindow(
   label: string,
-  options?: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions
+  options?: Omit<WebviewOptions, "x" | "y" | "width" | "height"> &
+    WindowOptions,
 ) {
-  let win = await WebviewWindow.getByLabel(label)
+  let win = await WebviewWindow.getByLabel(label);
   if (win) {
-    win.show()
-    win.setFocus()
-    return
+    win.show();
+    win.setFocus();
+    return;
   }
   win = new WebviewWindow(label, {
     ...options,
     title: label,
-  })
+  });
 }
 </file>
 

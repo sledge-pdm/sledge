@@ -16,6 +16,7 @@ export const addLayer = (
   layers.push(newLayer);
 
   setLayerStore("layers", layers);
+  setLayerStore("activeLayerId", newLayer.id);
 
   return layers;
 };

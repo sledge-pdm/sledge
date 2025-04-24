@@ -17,9 +17,9 @@ import {
   globalStore,
 } from "~/stores/global/globalStore";
 import { layerCanvas } from "~/styles/components/canvas/layer_canvas.css";
+import { layerImageManager } from "./CanvasStack";
 
 type Props = {
-  manager: LayerImageManager;
   ref?: LayerCanvasRef;
   layer: Layer;
   zIndex: number;
@@ -35,16 +35,13 @@ export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
   let ctx: CanvasRenderingContext2D | null = null;
 
-  const agent = () => props.manager.getAgent(props.layer.id);
+  const agent = () => layerImageManager.getAgent(props.layer.id);
 
   createRefContent(
     () => props.ref,
     () => ({
       getLayer() {
         return props.layer;
-      },
-      getManager() {
-        return props.manager;
       },
       getAgent() {
         return agent();
@@ -60,11 +57,13 @@ export const LayerCanvas: Component<Props> = (props) => {
     canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
-    const agent = props.manager.registerAgent(
-      props.layer.id,
-      layerImageStore[props.layer.id]?.current,
-    );
-
+    let agent = layerImageManager.getAgent(props.layer.id);
+    if (!agent) {
+      agent = layerImageManager.registerAgent(
+        props.layer.id,
+        layerImageStore[props.layer.id]?.current,
+      );
+    }
     ctx = canvasRef?.getContext("2d") ?? null;
     if (ctx) agent.putImageInto(ctx);
 

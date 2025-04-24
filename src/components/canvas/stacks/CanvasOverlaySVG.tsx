@@ -54,10 +54,26 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         {(dirtyRect) => {
           return (
             <rect
-              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
-              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
-              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * canvasStore.zoom}
-              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * canvasStore.zoom}
+              width={
+                dirtyRect.globalTileSize *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
+              height={
+                dirtyRect.globalTileSize *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
+              x={
+                dirtyRect.getOffset().x *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
+              y={
+                dirtyRect.getOffset().y *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
               fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
               stroke="none"
               pointer-events="none"

@@ -51,7 +51,7 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
               height: `${Math.round(size / 3)}px`,
               margin: 0,
               padding: 0,
-              "background-color": "black",
+              "background-color": props.color !== "#000000" ? "black" : "white",
             }}
             onClick={() => {
               onColorClicked(props.color);

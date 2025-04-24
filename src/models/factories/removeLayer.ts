@@ -7,6 +7,7 @@ import { allLayers, setLayerStore } from "~/stores/project/layerStore";
 export const removeLayer = (layerId?: string) => {
   if (layerId === undefined) return;
   const layers = [...allLayers()];
+  if (layers.length <= 1) return;
   const index = layers.findIndex((l) => l.id === layerId);
   let newActiveIndex = 0;
   if (index !== 0) newActiveIndex = index - 1;

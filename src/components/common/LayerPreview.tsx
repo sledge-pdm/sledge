@@ -2,7 +2,7 @@ import { Component, onMount } from "solid-js";
 import { Layer } from "~/models/types/Layer";
 
 import styles from "@styles/components/layer_preview.module.css";
-import { v4 as uuidv4 } from "uuid";
+import { layerImageStore } from "~/stores/project/layerImageStore";
 import { layerImageManager } from "../canvas/stacks/CanvasStack";
 
 interface Props {
@@ -13,7 +13,6 @@ interface Props {
 }
 
 const LayerPreview: Component<Props> = (props: Props) => {
-  const id = uuidv4();
   let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
 
@@ -29,7 +28,12 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
+    if (
+      maxHeight &&
+      targetHeight > maxHeight &&
+      zoom < maxHeight / targetHeight
+    )
+      zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -58,12 +62,23 @@ const LayerPreview: Component<Props> = (props: Props) => {
       targetHeight,
     );
   };
-
   onMount(() => {
-    const agent = layerImageManager.getAgent(props.layer.id);
-    agent?.setOnImageChangeListener("layer_preview_" + id, () => {
-      const height = wrapperRef.clientHeight;
-      updatePreview(agent.getImage(), height);
+    const height = wrapperRef.clientHeight;
+    const currentImage = layerImageStore[props.layer.id].current;
+
+    let agent = layerImageManager.getAgent(props.layer.id);
+    if (!agent) {
+      agent = layerImageManager.registerAgent(props.layer.id, currentImage);
+    } else {
+      agent.setImage(currentImage, true);
+    }
+
+    updatePreview(currentImage, height);
+
+    agent.setOnImageChangeListener("layer_prev_" + props.layer.id, () => {
+      console.log("aasdffa");
+      const img = layerImageStore[props.layer.id].current;
+      updatePreview(img, height);
     });
   });
 

@@ -56,15 +56,18 @@ components/canvas/stacks/TouchableCanvas.tsx
 components/common/ColorBox.tsx
 components/common/companion/Companion.tsx
 components/common/companion/QuotePool.ts
+components/common/Dropdown.tsx
 components/common/DSLButton.tsx
 components/common/DSLEditor.tsx
 components/common/ImportImageButton.tsx
 components/common/LayerPreview.tsx
 components/common/Light.tsx
 components/common/Slider.tsx
+components/common/ToggleSwitch.tsx
 components/EdgeInfo.tsx
 components/section/CanvasSettings.tsx
 components/section/Color.tsx
+components/section/GlobalSettings.tsx
 components/section/item/ColorPicker.tsx
 components/section/item/LayerItem.tsx
 components/section/item/PenItem.tsx
@@ -138,16 +141,17 @@ styles/components/canvas/canvas_area.css.ts
 styles/components/canvas/canvas_stack.module.css
 styles/components/canvas/controls.module.css
 styles/components/canvas/image_pool.module.css
-styles/components/canvas/layer_canvas.module.css
+styles/components/canvas/layer_canvas.css.ts
 styles/components/companion.module.css
+styles/components/dropdown.css.ts
 styles/components/dsl_button.module.css
 styles/components/edge_info.module.css
 styles/components/layer_preview.module.css
 styles/components/light.module.css
-styles/components/side_sections.module.css
 styles/components/slider.module.css
 styles/components/title_bar.css.ts
 styles/components/toast.module.css
+styles/components/toggle_switch.css.ts
 styles/global.css.ts
 styles/reset.css.ts
 styles/section_global.css.ts
@@ -182,10 +186,6 @@ import { sledgeLogo } from "./styles/global.css";
 import { flexCol, h100 } from "./styles/snippets.css";
 
 export default function App() {
-  onMount(() => {
-    loadGlobalSettings();
-  });
-
   return (
     <Router
       root={(props) => (
@@ -430,8 +430,7 @@ class CanvasAreaInteract {
     e.preventDefault();
     const referencedZoom = getReferencedZoom();
     const delta =
-      (e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep) *
-      referencedZoom;
+      (e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep);
 
     const zoomOld = canvasStore.zoom;
     const zoomNew = Math.max(
@@ -542,7 +541,7 @@ import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/controls.module.css";
 import { layerImageManager } from "./stacks/CanvasStack";
-import { canRedo, canUndo, layerImageStore } from "~/stores/project/layerImageStore";
+import { canRedo, canUndo } from "~/stores/project/layerImageStore";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => canvasStore.zoom;
@@ -563,9 +562,13 @@ const Controls: Component<{}> = (props) => {
       <p>
         offset:({canvasStore.offset.x}, {canvasStore.offset.y})
       </p>
+      <p>zoom.</p>
+      <p>
+        x {canvasStore.zoom}
+      </p>
 
       <p>UNDO STACKS.</p>
-      <For each={layerImageManager.getAgent(activeLayer().id)?.getHistoryManager()?.getUndoStack()}>
+      <For each={layerImageManager.getAgent(activeLayer()?.id)?.getHistoryManager()?.getUndoStack()}>
         {(item, i) => {
           if (i() === 0) {
             <>
@@ -643,8 +646,6 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         position: "absolute",
         top: 0,
         left: 0,
-        bottom: 0,
-        right: 0,
         "pointer-events": "none",
         "image-rendering": "pixelated",
       }}
@@ -723,7 +724,6 @@ const CanvasStack: Component<{}> = (props) => {
   } = {};
 
   const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
-
 
   const activeCanvasRef = () => {
     const active = activeLayer();
@@ -899,6 +899,7 @@ import {
   Component,
   createEffect,
   createRenderEffect,
+  createSignal,
   onMount,
   Ref,
 } from "solid-js";
@@ -909,6 +910,8 @@ import { layerImageStore } from "~/stores/project/layerImageStore";
 import styles from "@styles/components/canvas/layer_canvas.module.css";
 import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
+import { layerCanvas } from "~/styles/components/canvas/layer_canvas.css";
+import { getCanvasImageRenderingAttribute, globalStore } from "~/stores/global/globalStore";
 
 type Props = {
   manager: LayerImageManager,
@@ -969,10 +972,14 @@ export const LayerCanvas: Component<Props> = (props) => {
     })
   });
 
+  const [renderAttr, setRenderAttr] = createSignal(getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode))
+
   createEffect(() => {
     const image = layerImageStore[props.layer.id].current
     agent()?.setImage(image, true)
     if (ctx) agent()?.putImageIntoForce(ctx)
+
+    setRenderAttr(getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode))
   });
 
   return (
@@ -980,10 +987,10 @@ export const LayerCanvas: Component<Props> = (props) => {
       ref={canvasRef}
       id={`canvas-${props.layer.id}`}
       data-layer-id={props.layer.name}
-      classList={{
-        [styles["layer-canvas"]]: true,
-        [styles["hidden"]]: !props.layer.enabled,
-      }}
+      class={layerCanvas({
+        rendering: renderAttr(),
+        hidden: !props.layer.enabled
+      })}
       width={internalWidth()}
       height={internalHeight()}
       style={{
@@ -1015,7 +1022,7 @@ function createRefContent<T extends Exclude<unknown, Function>>(
 </file>
 
 <file path="components/canvas/stacks/TouchableCanvas.tsx">
-import { Component, createSignal, onCleanup, onMount } from "solid-js";
+import { Component, createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 import { Vec2 } from "~/models/types/Vector";
 import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
@@ -1177,6 +1184,14 @@ export const TouchableCanvas: Component<Props> = (props) => {
     window.removeEventListener("pointercancel", handlePointerCancel);
     window.removeEventListener("wheel", handleWheel);
   });
+
+  createEffect(() => {
+    if (canvasRef)
+      setCanvasStore("canvasElementSize", {
+        width: canvasRef.clientWidth,
+        height: canvasRef.clientHeight,
+      });
+  })
 
   return (
     <canvas
@@ -1418,6 +1433,44 @@ export const sayRandomQuote = (category: QuoteCategory, context?: any) => {
 };
 </file>
 
+<file path="components/common/Dropdown.tsx">
+import { Component, JSX } from "solid-js";
+import { dropdownRoot } from "~/styles/components/dropdown.css";
+
+export type DropdownOption<T extends string | number> = {
+    label: string;
+    value: T;
+};
+
+interface Props<T extends string | number = string> {
+    value: T | (() => T);
+    selected: T | (() => T);
+    /** 選択候補 */
+    options: DropdownOption<T>[];
+    /** 値変更時に呼び出される */
+    onChange?: (value: T) => void;
+    /** aria-label など任意で渡す */
+    props?: JSX.SelectHTMLAttributes<HTMLSelectElement>;
+}
+
+const Dropdown = <T extends string | number>(p: Props<T>) => {
+    const getValue = () => typeof p.value === "function" ? (p.value as () => T)() : p.value;
+
+    return <select
+        {...p.props}
+        class={dropdownRoot}
+        value={String(getValue())}
+        onChange={(e) => p.onChange?.(e.currentTarget.value as unknown as T)}
+    >
+        {p.options.map((o) => (
+            <option selected={p.selected === o.value} value={String(o.value)}>{o.label}</option>
+        ))}
+    </select>
+}
+
+export default Dropdown;
+</file>
+
 <file path="components/common/DSLButton.tsx">
 import styles from "@styles/components/dsl_button.module.css";
 import { Component } from "solid-js";
@@ -1539,10 +1592,11 @@ export default ImportImageButton;
 <file path="components/common/LayerPreview.tsx">
 import { Component, createEffect, onMount } from "solid-js";
 import { Layer } from "~/models/types/Layer";
-import { v4 as uuidv4 } from "uuid";
 
 import styles from "@styles/components/layer_preview.module.css";
 import { layerImageStore } from "~/stores/project/layerImageStore";
+import { layerImageManager } from "../canvas/stacks/CanvasStack";
+import { v4 as uuidv4 } from "uuid";
 
 interface Props {
   layer: Layer;
@@ -1598,11 +1652,13 @@ const LayerPreview: Component<Props> = (props: Props) => {
     );
   };
 
-  createEffect(() => {
-    const originalImage = layerImageStore[props.layer.id].current
-    const height = wrapperRef.clientHeight;
-    updatePreview(originalImage, height);
-  });
+  onMount(() => {
+    const agent = layerImageManager.getAgent(props.layer.id)
+    agent?.setOnImageChangeListener("layer_preview_" + id, () => {
+      const height = wrapperRef.clientHeight;
+      updatePreview(agent.getImage(), height);
+    })
+  })
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
@@ -1733,6 +1789,41 @@ const Slider: Component<SliderProps> = (props) => {
 };
 
 export default Slider;
+</file>
+
+<file path="components/common/ToggleSwitch.tsx">
+import { Component } from "solid-js";
+import {
+    toggleWrapper,
+    toggleTrack,
+    toggleThumb,
+    toggleInput,
+} from "~/styles/components/toggle_switch.css";
+
+interface Props {
+    checked: boolean;
+    onChange?: (checked: boolean) => void;
+    /** 任意でラベル等を配置する場合の slot */
+    children?: any;
+}
+
+const ToggleSwitch: Component<Props> = (p) => (
+    /* label 全体でクリック可能に */
+    <label class={toggleWrapper}>
+        {p.children}
+        <input
+            type="checkbox"
+            checked={p.checked}
+            onInput={(e) => p.onChange?.(e.currentTarget.checked)}
+            class={toggleInput}
+        />
+        <span class={toggleTrack}>
+            <span class={toggleThumb} />
+        </span>
+    </label>
+);
+
+export default ToggleSwitch;
 </file>
 
 <file path="components/EdgeInfo.tsx">
@@ -1904,6 +1995,59 @@ const Color: Component<{}> = (props) => {
 };
 
 export default Color;
+</file>
+
+<file path="components/section/GlobalSettings.tsx">
+import { Component, createEffect, createSignal, onMount } from "solid-js";
+import {
+    sectionCaption,
+    sectionContent,
+    sectionRoot,
+} from "~/styles/section_global.css";
+import Dropdown, { DropdownOption } from "../common/Dropdown";
+import ToggleSwitch from "../common/ToggleSwitch";
+import { CanvasRenderingMode, globalStore, setGlobalStore } from "~/stores/global/globalStore";
+import { loadGlobalSettings, saveGlobalSettings } from "~/io/global/globalIO";
+
+const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
+    { label: "adaptive", value: "adaptive" },
+    { label: "pixelated", value: 'pixelated' },
+    { label: "crispEdges", value: 'crispEdges' },
+];
+
+const [autoSave, setAutoSave] = createSignal(true);
+
+const GlobalSettings: Component<{}> = (props) => {
+    return (
+        <div class={sectionRoot}>
+            <p class={sectionCaption}>settings.</p>
+            <div class={sectionContent} style={{ gap: "8px" }}>
+
+                <ToggleSwitch checked={autoSave()} onChange={setAutoSave}>
+                    <p style={{ "font-size": "0.5rem" }}>   autosave.</p>
+                </ToggleSwitch>
+
+                <p>canvas rendering.</p>
+
+                <Dropdown
+                    selected={globalStore
+                        .canvasRenderingMode
+                    }
+                    value={globalStore
+                        .canvasRenderingMode}
+                    options={renderingOptions}
+                    onChange={(v) => {
+                        setGlobalStore("canvasRenderingMode", v)
+                        saveGlobalSettings()
+                    }}
+                />
+
+            </div>
+        </div>
+    );
+};
+
+export default GlobalSettings;
 </file>
 
 <file path="components/section/item/ColorPicker.tsx">
@@ -2354,6 +2498,7 @@ import PenConfig from "./section/PenConfig";
 import Project from "./section/Project";
 
 import { sideAreaContent } from "~/styles/global.css";
+import GlobalSettings from "./section/GlobalSettings";
 
 const SideSections: Component<{}> = (props) => {
   return (
@@ -2364,6 +2509,7 @@ const SideSections: Component<{}> = (props) => {
       <PenConfig />
       <LayerList />
       <CanvasSettings />
+      <GlobalSettings />
     </div>
   );
 };
@@ -2467,19 +2613,19 @@ import {
   mkdir,
   readTextFile,
   writeTextFile,
-} from "@tauri-apps/plugin-fs";
-import { globalStore, setGlobalStore } from "~/stores/global/globalStore";
+} from '@tauri-apps/plugin-fs'
+import { globalStore, setGlobalStore } from '~/stores/global/globalStore'
 
-const FILE_NAME = "global.sledgeconfig";
+const FILE_NAME = 'global.sledgeconfig'
 
 export async function saveGlobalSettings() {
   try {
-    const json = JSON.stringify(globalStore);
-    await mkdir("", { baseDir: BaseDirectory.AppConfig, recursive: true });
-    await writeTextFile(FILE_NAME, json, { baseDir: BaseDirectory.AppConfig });
-    console.log("[globalIO] 設定保存完了");
+    const json = JSON.stringify(globalStore)
+    await mkdir('', { baseDir: BaseDirectory.AppConfig, recursive: true })
+    await writeTextFile(FILE_NAME, json, { baseDir: BaseDirectory.AppConfig })
+    console.log('[globalIO] 設定保存完了')
   } catch (e) {
-    console.error("[globalIO] 設定保存失敗", e);
+    console.error('[globalIO] 設定保存失敗', e)
   }
 }
 
@@ -2487,16 +2633,21 @@ export async function loadGlobalSettings() {
   try {
     const json = await readTextFile(FILE_NAME, {
       baseDir: BaseDirectory.AppConfig,
-    });
-    const data = JSON.parse(json);
+    })
+    const data = JSON.parse(json)
+
+    console.log(data)
 
     if (data.recentOpenedFiles) {
-      setGlobalStore("recentOpenedFiles", data.recentOpenedFiles);
+      setGlobalStore('recentOpenedFiles', data.recentOpenedFiles)
+    }
+    if (data.canvasRenderingMode) {
+      setGlobalStore('canvasRenderingMode', data.canvasRenderingMode)
     }
 
-    console.log("[globalIO] 設定読み込み完了");
+    console.log('[globalIO] 設定読み込み完了')
   } catch (e) {
-    console.warn("[globalIO] 設定ファイルが存在しないか、読み込み失敗:", e);
+    console.warn('[globalIO] 設定ファイルが存在しないか、読み込み失敗:', e)
   }
 }
 </file>
@@ -3488,11 +3639,12 @@ import { PixelDiff } from '../HistoryManager'
 import { colorMatch, RGBAColor } from '~/utils/colorUtils'
 
 export default class TileLayerImageAgent extends LayerImageAgent {
-  readonly TILE_SIZE = 32
+  readonly TILE_SIZE = 16
 
   private tiles: Tile[][] = []
 
   getTile(index: TileIndex) {
+    // console.log(`tile access to ${index.row}. ${index.column}`)
     return this.tiles[index.row][index.column]
   }
 
@@ -4164,9 +4316,18 @@ export default class Tile {
 
   public getOffset(): Vec2 {
     return {
-      x: this.row * this.globalTileSize,
-      y: this.column * this.globalTileSize,
+      x: this.column * this.globalTileSize,
+      y: this.row * this.globalTileSize,
     }
+  }
+
+  public isInBounds(positionInTile: Vec2) {
+    return (
+      positionInTile.x >= 0 &&
+      positionInTile.x < this.globalTileSize &&
+      positionInTile.y >= 0 &&
+      positionInTile.y < this.globalTileSize
+    )
   }
 
   updateState() {}
@@ -4470,86 +4631,175 @@ export class PixelFloodFill implements Fill {
 <file path="models/tools/fill/TileFloodFill.ts">
 import { PixelDiff } from '~/models/layer_image/HistoryManager'
 import { Vec2 } from '~/models/types/Vector'
-import { colorMatch } from '~/utils/colorUtils'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
 import { Fill, FillProps } from './FillTool'
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent'
-import { TileIndex } from '~/models/layer_image/Tile'
+import Tile, { TileIndex } from '~/models/layer_image/Tile'
+
+interface FillPassProps {
+  index: TileIndex
+}
 
 export class TileFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {
-    if (!(agent instanceof TileLayerImageAgent)) {
-      throw 'Agent for this layer is not a TileLayerImageAgent!'
-      return
-    }
+    if (!(agent instanceof TileLayerImageAgent))
+      throw 'Agent is not a TileLayerImageAgent'
     const tileAgent = agent as TileLayerImageAgent
 
     const targetColor = tileAgent.getPixel(position)
-    const tileUniformMatches = (p: TileIndex): boolean => {
-      const tile = tileAgent.getTile(p)
-      if (tile.isUniform && tile.uniformColor !== undefined) {
-        return colorMatch(tile.uniformColor, targetColor)
-      }
-      return false
-    }
-    const matches = (p: Vec2) => colorMatch(tileAgent.getPixel(p), targetColor)
-
-    console.log(color)
-    console.log(targetColor)
-
     if (colorMatch(targetColor, color)) return false
-    console.log('fill started.')
-
-    const scanStart = Date.now()
-
-    const pxDiffs: PixelDiff[] = []
 
     const tileRowCount = tileAgent.getTileRowCount()
     const tileColumnCount = tileAgent.getTileColumnCount()
+    const flatten = (ti: TileIndex) => ti.row * tileColumnCount + ti.column
+    const tileUniformMatches = (ti: TileIndex) => {
+      const tile = tileAgent.getTile(ti)
+      return (
+        tile.isUniform &&
+        tile.uniformColor &&
+        colorMatch(tile.uniformColor, targetColor)
+      )
+    }
 
-    const initialTileIndex = tileAgent.getTileIndex(position)
-    const tileQueue: TileIndex[] = [initialTileIndex]
+    const visitedTiles = new Uint8Array(tileRowCount * tileColumnCount)
     const tilesFilled: TileIndex[] = []
-    const tilesVisited = new Uint8Array(tileRowCount * tileColumnCount)
-    const flatten = (ti: TileIndex) => ti.column * tileColumnCount + ti.row
-    let queueCount = 0
-    let visitCount = 0
+    const tileQueue: TileIndex[] = [tileAgent.getTileIndex(position)]
+
+    const pxDiffs: PixelDiff[] = []
+    const visitedPx = new Uint8Array(agent.getWidth() * agent.getHeight())
+
+    // First tile flood pass
+    let tileFillCount = 0
     while (tileQueue.length > 0) {
-      queueCount++
       const ti = tileQueue.pop()!
-      if (!agent.isTileInBounds(ti)) continue
-
+      if (!tileAgent.isTileInBounds(ti)) continue
       const i = flatten(ti)
-      if (tilesVisited[i]) continue
-      tilesVisited[i] = 1
-      visitCount++
+      if (visitedTiles[i]) continue
+      visitedTiles[i] = 1
+      if (!tileUniformMatches(ti)) continue
 
-      if (tileUniformMatches(ti)) {
-        tilesFilled.push(ti)
-        tileQueue.push({ row: ti.row + 1, column: ti.column })
-        tileQueue.push({ row: ti.row - 1, column: ti.column })
-        tileQueue.push({ row: ti.row, column: ti.column + 1 })
-        tileQueue.push({ row: ti.row, column: ti.column - 1 })
+      tilesFilled.push(ti)
+      tileFillCount++
+      tileQueue.push({ row: ti.row - 1, column: ti.column })
+      tileQueue.push({ row: ti.row + 1, column: ti.column })
+      tileQueue.push({ row: ti.row, column: ti.column - 1 })
+      tileQueue.push({ row: ti.row, column: ti.column + 1 })
+    }
+    for (const ti of tilesFilled) {
+      const offset = tileAgent.getTile(ti).getOffset()
+      for (let dy = 0; dy < tileAgent.TILE_SIZE; dy++) {
+        for (let dx = 0; dx < tileAgent.TILE_SIZE; dx++) {
+          const x = offset.x + dx
+          const y = offset.y + dy
+          const i = y * agent.getWidth() + x
+          visitedPx[i] = 1
+        }
       }
     }
+    console.log(`initial tile fill finished: ${tileFillCount} tiles`)
 
-    const scanEnd = Date.now()
-    console.log(
-      'scan finished. ' +
-        (scanEnd - scanStart) +
-        'ms. visited ' +
-        visitCount +
-        'tiles'
-    )
+    const edgePixels =
+      tilesFilled.length > 0 ?
+        this.collectEdgePixels(tileAgent, tilesFilled)
+      : [position]
 
-    const writeStart = Date.now()
-    // バッファに一括反映
-    for (const ti of tilesFilled) {
-      tileAgent.fillWholeTile(ti, color, true)
+    const pixelQueue: Vec2[] = edgePixels
+    const pixelsFilled: Vec2[] = []
+    const pxIndex = (p: Vec2) => p.y * agent.getWidth() + p.x
+
+    let pixelFillCount = 0
+    while (pixelQueue.length > 0) {
+      const p = pixelQueue.pop()!
+      if (!agent.isInBounds(p)) continue
+      const idx = pxIndex(p)
+      if (visitedPx[idx]) continue
+      visitedPx[idx] = 1
+
+      const tileIndex = tileAgent.getTileIndex(p)
+      const tileIdxFlat = flatten(tileIndex)
+      const tilesFilledInReEntry: TileIndex[] = []
+      if (!visitedTiles[tileIdxFlat] && tileUniformMatches(tileIndex)) {
+        const reentryQueue: TileIndex[] = [tileIndex]
+        let reentryCount = 0
+        while (reentryQueue.length > 0) {
+          const ti = reentryQueue.pop()!
+          if (!tileAgent.isTileInBounds(ti)) continue
+          const i = flatten(ti)
+          if (visitedTiles[i]) continue
+          visitedTiles[i] = 1
+          if (!tileUniformMatches(ti)) continue
+          tilesFilled.push(ti)
+          tilesFilledInReEntry.push(ti)
+          reentryCount++
+          reentryQueue.push({ row: ti.row - 1, column: ti.column })
+          reentryQueue.push({ row: ti.row + 1, column: ti.column })
+          reentryQueue.push({ row: ti.row, column: ti.column - 1 })
+          reentryQueue.push({ row: ti.row, column: ti.column + 1 })
+        }
+        // ↓ 前はこれがなかった ↓
+        const newEdges = this.collectEdgePixels(tileAgent, tilesFilledInReEntry)
+        for (const edge of newEdges) {
+          pixelQueue.push(edge)
+        }
+        for (const ti of tilesFilled) {
+          const offset = tileAgent.getTile(ti).getOffset()
+          for (let dy = 0; dy < tileAgent.TILE_SIZE; dy++) {
+            for (let dx = 0; dx < tileAgent.TILE_SIZE; dx++) {
+              const x = offset.x + dx
+              const y = offset.y + dy
+              const i = y * agent.getWidth() + x
+              visitedPx[i] = 1
+            }
+          }
+        }
+        console.log(`tile reentry fill: ${reentryCount} tiles`)
+        continue
+      }
+
+      if (!colorMatch(tileAgent.getPixel(p), targetColor)) continue
+      pixelsFilled.push(p)
+      pixelFillCount++
+      pixelQueue.push({ x: p.x + 1, y: p.y })
+      pixelQueue.push({ x: p.x - 1, y: p.y })
+      pixelQueue.push({ x: p.x, y: p.y + 1 })
+      pixelQueue.push({ x: p.x, y: p.y - 1 })
     }
-    const writeEnd = Date.now()
-    console.log('write finished. ' + (writeEnd - writeStart) + 'ms.')
+    console.log(`pixel fill finished: ${pixelFillCount} pixels`)
 
-    agent.addDiffs(pxDiffs)
+    for (const ti of tilesFilled) tileAgent.fillWholeTile(ti, color, true)
+    for (const p of pixelsFilled) {
+      const diff = tileAgent.setPixel(p, color, false, false)
+      if (diff) pxDiffs.push(diff)
+    }
+
+    if (pxDiffs.length > 0) tileAgent.addDiffs(pxDiffs)
+  }
+
+  collectEdgePixels(agent: TileLayerImageAgent, filled: TileIndex[]): Vec2[] {
+    const edge: Vec2[] = []
+    const TILE_SIZE = agent.TILE_SIZE
+    const filledSet = new Set(filled.map((t) => `${t.row},${t.column}`))
+
+    for (const ti of filled) {
+      const offset = agent.getTile(ti).getOffset()
+      const neighbors = [
+        { dr: -1, dc: 0, dx: 0, dy: -1, axis: 'x' },
+        { dr: 1, dc: 0, dx: 0, dy: TILE_SIZE, axis: 'x' },
+        { dr: 0, dc: -1, dx: -1, dy: 0, axis: 'y' },
+        { dr: 0, dc: 1, dx: TILE_SIZE, dy: 0, axis: 'y' },
+      ]
+
+      for (const { dr, dc, dx, dy, axis } of neighbors) {
+        const ni = `${ti.row + dr},${ti.column + dc}`
+        if (filledSet.has(ni)) continue
+        for (let i = 0; i < TILE_SIZE; i++) {
+          const x = axis === 'x' ? offset.x + i : offset.x + dx
+          const y = axis === 'y' ? offset.y + i : offset.y + dy
+          edge.push({ x, y })
+        }
+      }
+    }
+    return edge
   }
 }
 </file>
@@ -4746,6 +4996,7 @@ import { importProjectJsonFromPath } from "~/io/project/project";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 import { flexCol, flexRow } from "~/styles/snippets.css";
 import { welcomeRoot } from "../start.css";
+import { loadGlobalSettings } from "~/io/global/globalIO";
 
 export default function Editor() {
   const location = useLocation();
@@ -4767,6 +5018,7 @@ export default function Editor() {
   onMount(() => {
     adjustZoomToFit();
     centeringCanvas();
+    loadGlobalSettings();
   });
 
   return (
@@ -4800,7 +5052,7 @@ export default function Editor() {
 
 <file path="routes/index.tsx">
 import { useNavigate } from "@solidjs/router";
-import { For } from "solid-js";
+import { For, onMount } from "solid-js";
 import EdgeInfo from "~/components/EdgeInfo";
 import { importProjectJsonFromFileSelection } from "~/io/project/project";
 import { createLayer } from "~/models/factories/createLayer";
@@ -4828,9 +5080,14 @@ import {
   welcomeHeadline,
   welcomeRoot,
 } from "./start.css";
+import { loadGlobalSettings } from "~/io/global/globalIO";
 
 export default function Home() {
   const navigate = useNavigate();
+
+  onMount(() => {
+    loadGlobalSettings();
+  });
 
   const moveToEditor = async (recentFile: FileLocation) => {
     const params = new URLSearchParams();
@@ -5003,37 +5260,53 @@ export const sideSectionItem = style([
 </file>
 
 <file path="stores/global/globalStore.ts">
-import { createStore } from "solid-js/store";
-import { saveGlobalSettings } from "~/io/global/globalIO";
+import { createStore } from 'solid-js/store'
+import { saveGlobalSettings } from '~/io/global/globalIO'
+import { canvasStore } from '../project/canvasStore'
+import { createEffect } from 'solid-js'
 
-// project
+// global
 export type FileLocation = {
-  path: string;
-  name: string;
-};
+  path: string
+  name: string
+}
+export type ImageRenderingAttribute = 'auto' | 'pixelated' | 'crispEdges'
+export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crispEdges'
+
+export const getCanvasImageRenderingAttribute = (mode: CanvasRenderingMode) => {
+  switch (mode) {
+    case 'pixelated':
+    case 'crispEdges':
+      return mode
+    case 'adaptive':
+      return canvasStore.zoom > 1.0 ? 'pixelated' : 'crispEdges'
+  }
+}
 
 export const [globalStore, setGlobalStore] = createStore({
   recentOpenedFiles: [
     {
-      path: "C:\\Users\\innsb\\Documents",
-      name: "project.sledge",
+      path: 'C:\\Users\\innsb\\Documents',
+      name: 'project.sledge',
     },
   ],
-});
+
+  canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
+})
 
 export const addRecent = (loc: FileLocation) => {
-  const path = loc.path;
-  const name = loc.name;
+  const path = loc.path
+  const name = loc.name
 
   // add to recent
   setGlobalStore((store) => {
-    console.log("path: " + path);
-    console.log("name: " + name);
+    console.log('path: ' + path)
+    console.log('name: ' + name)
     if (name && path && store.recentOpenedFiles) {
       // 履歴にあっても一旦削除
       let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
-        return f.name !== name || f.path !== path?.toString();
-      });
+        return f.name !== name || f.path !== path?.toString()
+      })
       // その後、一番上に追加
       const newRecentFiles: FileLocation[] = [
         {
@@ -5041,13 +5314,13 @@ export const addRecent = (loc: FileLocation) => {
           path: path,
         },
         ...oldRecentFiles,
-      ];
-      setGlobalStore("recentOpenedFiles", newRecentFiles);
-      saveGlobalSettings();
+      ]
+      setGlobalStore('recentOpenedFiles', newRecentFiles)
+      saveGlobalSettings()
     }
-    return store;
-  });
-};
+    return store
+  })
+}
 </file>
 
 <file path="stores/internal/colorStore.ts">
@@ -5184,6 +5457,7 @@ export const centeringCanvas = () => {
 export const [canvasStore, setCanvasStore] = createStore({
   canvas: createCanvas(400, 400),
   canvasAreaSize: { width: 0, height: 0 },
+  canvasElementSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
   lastMouseOnZoomedCanvas: { x: 0, y: 0 },
@@ -5218,9 +5492,9 @@ export const activeLayerImage = (): LayerImage =>
   layerImageStore[layerStore.activeLayerId]
 
 export const canUndo = (): boolean =>
-  layerImageStore[layerStore.activeLayerId].undoStack.length > 0
+  layerImageStore[layerStore.activeLayerId]?.undoStack.length > 0
 export const canRedo = (): boolean =>
-  layerImageStore[layerStore.activeLayerId].redoStack.length > 0
+  layerImageStore[layerStore.activeLayerId]?.redoStack.length > 0
 </file>
 
 <file path="stores/project/layerStore.ts">
@@ -5405,37 +5679,40 @@ export const canvasArea = style([
 }
 </file>
 
-<file path="styles/components/canvas/layer_canvas.module.css">
-.layer-canvas {
-  image-rendering: pixelated; /* ドット絵に重要 */
-  pointer-events: none; /* マウスイベントは通さない（必要に応じて） */
-  position: absolute;
-}
+<file path="styles/components/canvas/layer_canvas.css.ts">
+import { recipe } from '@vanilla-extract/recipes'
 
-.layer-canvas.dev-hint[data-layer-id="dot1"] {
-  background-color: rgb(255 0 0 / var(--layer-opacity)); /* 赤系 */
-}
+export const layerCanvas = recipe({
+  base: {
+    pointerEvents: 'none',
+    position: 'absolute',
+  },
 
-.layer-canvas.dev-hint[data-layer-id="dot2"] {
-  background-color: rgb(0 255 0 / var(--layer-opacity)); /* 緑系 */
-}
+  variants: {
+    rendering: {
+      auto: {
+        imageRendering: 'auto',
+      },
+      pixelated: {
+        imageRendering: 'pixelated',
+      },
+      crispEdges: {
+        imageRendering: 'crisp-edges',
+      },
+    },
+    hidden: {
+      true: {
+        opacity: 0,
+        pointerEvents: 'auto',
+      },
+    },
+  },
 
-.layer-canvas.dev-hint[data-layer-id="dot3"] {
-  background-color: rgb(0 0 255 / var(--layer-opacity)); /* 青系 */
-}
-
-.layer-canvas.dev-hint[data-layer-id="auto1"] {
-  background-color: rgb(255 255 0 / var(--layer-opacity)); /* 黄系 */
-}
-
-.layer-canvas.dev-hint[data-layer-id="image1"] {
-  background-color: rgb(255 0 255 / var(--layer-opacity)); /* ピンク系 */
-}
-
-.hidden {
-  opacity: 0;
-  pointer-events: auto; /* display:none ではなくイベントを通す */
-}
+  defaultVariants: {
+    rendering: 'auto',
+    hidden: false,
+  },
+})
 </file>
 
 <file path="styles/components/companion.module.css">
@@ -5548,6 +5825,31 @@ export const canvasArea = style([
 }
 </file>
 
+<file path="styles/components/dropdown.css.ts">
+import { style } from '@vanilla-extract/css'
+import { vars } from '~/styles/global.css'
+
+export const dropdownRoot = style({
+  fontFamily: vars.font.body,
+  fontSize: vars.text.sm,
+  backgroundColor: vars.color.secondary,
+  border: '0px solid black',
+  borderRadius: '0px',
+  padding: '2px 6px',
+  height: '20px',
+  cursor: 'pointer',
+  lineHeight: '12px',
+  selectors: {
+    '&:hover': { backgroundColor: vars.color.button_hover },
+    '&:active': {
+      backgroundColor: vars.color.button_pressed,
+    },
+    /* Windows の ▼ 矢印が滲むのを抑止 */
+    '&::-ms-expand': { display: 'none' },
+  },
+})
+</file>
+
 <file path="styles/components/dsl_button.module.css">
 .root {
   cursor: pointer;
@@ -5603,18 +5905,6 @@ export const canvasArea = style([
   filter: drop-shadow(0 0 1px red);
   opacity: 1;
   transition: opacity 01s ease;
-}
-</file>
-
-<file path="styles/components/side_sections.module.css">
-.content {
-  border-right: 1px solid #aaa;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  height: 100%;
-  padding: var(--window-top-padding) 40px 10px 35px;
-  width: 230px;
 }
 </file>
 
@@ -5859,143 +6149,231 @@ export const titleBarControlButtonImg = style({
 }
 </file>
 
+<file path="styles/components/toggle_switch.css.ts">
+import { style, globalStyle } from '@vanilla-extract/css'
+import { vars } from '~/styles/global.css'
+
+const globalWidth = 16
+const thumbWidth = 10
+const thumbPadding = 2
+const globalHeight = 10
+
+/* ラベル全体 */
+export const toggleWrapper = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: vars.spacing.sm,
+  cursor: 'pointer',
+  userSelect: 'none',
+})
+
+/* 入力本体 (隠す) */
+export const toggleInput = style({
+  opacity: 0,
+  width: 0,
+  height: 0,
+  position: 'absolute',
+})
+
+/* バックグラウンドとなるトラック */
+export const toggleTrack = style({
+  width: `${globalWidth}px`,
+  height: `${globalHeight}px`,
+  backgroundColor: vars.color.muted,
+  border: '1px solid black',
+  borderRadius: '0px',
+  position: 'relative',
+  transition: 'background-color 0.05s',
+})
+
+/* つまみ */
+export const toggleThumb = style({
+  position: 'absolute',
+  top: '-1px',
+  left: '0px',
+  width: `${thumbWidth - thumbPadding}px`,
+  height: `${globalHeight}px`,
+  backgroundColor: vars.color.button,
+  border: '1px solid black',
+  borderRadius: '0px',
+  transition: 'transform 0.05s',
+})
+
+/* ───────── 状態連動スタイル ───────── */
+
+/* input が :checked のとき隣接する track を赤系へ */
+globalStyle(`${toggleInput}:checked + ${toggleTrack}`, {
+  backgroundColor: vars.color.danger,
+})
+
+/* さらに thumb を右へスライド */
+globalStyle(`${toggleInput}:checked + ${toggleTrack} ${toggleThumb}`, {
+  transform: `translateX(${globalWidth - thumbWidth}px)`,
+})
+</file>
+
 <file path="styles/global.css.ts">
 import {
   createGlobalTheme,
   fontFace,
   globalStyle,
+  keyframes,
   style,
-} from "@vanilla-extract/css";
-import { flexCol, flexRow, h100 } from "./snippets.css";
+} from '@vanilla-extract/css'
+import { flexCol, flexRow, h100 } from './snippets.css'
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',
-});
+})
 export const ZFB03B = fontFace({
   src: 'url("/fonts/04B_03B_.ttf")',
-});
+})
 export const ZFB08 = fontFace({
   src: 'url("/fonts/04B_08__.ttf")',
-});
+})
 export const ZFB09 = fontFace({
   src: 'url("/fonts/04B_09__.ttf")',
-});
+})
 export const ZFB11 = fontFace({
   src: 'url("/fonts/04B_11__.ttf")',
-});
+})
 export const ZFB31 = fontFace({
   src: 'url("/fonts/04B_31__.ttf")',
-});
+})
 export const Terminus = fontFace({
   src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")',
-});
+})
+export const k8x12 = fontFace({
+  src: 'url("/fonts/k8x12/k8x12.ttf")',
+})
+export const k8x12L = fontFace({
+  src: 'url("/fonts/k8x12/k8x12L.ttf")',
+})
+export const k8x12S = fontFace({
+  src: 'url("/fonts/k8x12/k8x12S.ttf")',
+})
+export const k12x8 = fontFace({
+  src: 'url("/fonts/k12x8/k12x8.ttf")',
+})
 
-export const vars = createGlobalTheme(":root", {
+export const vars = createGlobalTheme(':root', {
   color: {
-    primary: "#ffffff",
-    secondary: "#f0f0f0",
-    text: "#111111",
-    danger: "#ff0000",
-    muted: "#00000030",
-    bg: "#ffffff",
-    surface: "#f0f0f0",
+    primary: '#ffffff',
+    secondary: '#f0f0f0',
+    text: '#111111',
+    danger: '#ff0000',
+    muted: '#00000030',
+    bg: '#ffffff',
+    surface: '#f0f0f0',
 
-    button: "#ffffff",
-    button_hover: "#f0f0f0",
-    button_pressed: "#f0f0f0",
+    button: '#ffffff',
+    button_hover: '#f0f0f0',
+    button_pressed: '#f0f0f0',
   },
   spacing: {
-    xs: "4px",
-    sm: "8px",
-    md: "12px",
-    lg: "16px",
-    xl: "24px",
+    xs: '4px',
+    sm: '8px',
+    md: '12px',
+    lg: '16px',
+    xl: '24px',
   },
   text: {
-    xs: "6px",
-    sm: "8px",
-    md: "10px",
-    lg: "12px",
-    xl: "16px",
+    xs: '6px',
+    sm: '8px',
+    md: '10px',
+    lg: '12px',
+    xl: '16px',
   },
   font: {
-    body: ZFB08,
+    body: `${ZFB08}, ${k8x12}`,
   },
-});
+})
 
-globalStyle("button, p, a, input", {
+globalStyle('button, p, a, input', {
   fontFamily: ZFB08,
   color: vars.color.text,
-});
+})
 
-globalStyle("a:hover", {
-  color: "red",
-});
+globalStyle('a:hover', {
+  color: 'red',
+})
 
-globalStyle("button", {
+globalStyle('button', {
   background: vars.color.button,
-  border: "1px black solid",
-  borderRadius: "2px",
-  cursor: "pointer",
-  fontSize: "0.5rem",
-  height: "fit-content",
-  padding: "2px 6px",
-  pointerEvents: "all",
-});
+  border: '1px black solid',
+  borderRadius: '2px',
+  cursor: 'pointer',
+  fontSize: '0.5rem',
+  height: 'fit-content',
+  padding: '2px 6px',
+  pointerEvents: 'all',
+})
 
-globalStyle("button:hover", {
+globalStyle('button:hover', {
   background: vars.color.button_hover,
-});
+})
 
-globalStyle("button:active", {
+globalStyle('button:active', {
   background: vars.color.button_pressed,
-  transform: "translateY(1px)",
-});
+  transform: 'translateY(1px)',
+})
 
-globalStyle("#root", {
-  display: "flex",
-  flexDirection: "row",
-  height: "100%",
-  userSelect: "none",
-});
+globalStyle('#root', {
+  display: 'flex',
+  flexDirection: 'row',
+  height: '100%',
+  userSelect: 'none',
+})
 
-export const sideArea = style([flexRow, h100]);
+export const sideArea = style([flexRow, h100])
 
 export const sideAreaEdge = style([
   flexCol,
   h100,
   {
-    gap: "20px",
-    width: "20px",
-    margin: "10px 0 20px 2px",
-    paddingBottom: "20px",
-    justifyContent: "flex-end",
+    gap: '20px',
+    width: '20px',
+    margin: '10px 0 20px 2px',
+    paddingBottom: '20px',
+    justifyContent: 'flex-end',
   },
-]);
+])
 
 export const sideAreaEdgeText = style({
-  fontSize: "0.5rem",
-  letterSpacing: "2px",
-  transform: "rotate(180deg) scaleX(0.8)",
-  whiteSpace: "nowrap",
-  writingMode: "vertical-rl",
-});
+  fontSize: '0.5rem',
+  letterSpacing: '2px',
+  transform: 'rotate(180deg) scaleX(0.8)',
+  whiteSpace: 'nowrap',
+  writingMode: 'vertical-rl',
+})
 
 export const sideAreaContent = style([
   flexCol,
   {
-    borderRight: "1px solid #aaa",
-    gap: "1rem",
-    padding: "20px 40px 10px 20px",
-    width: "230px",
+    borderRight: '1px solid #aaa',
+    gap: '1rem',
+    padding: '20px 40px 90px 20px',
+    width: '230px',
+    overflowY: 'scroll',
+    '::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: 'transparent',
+    },
+    selectors: {
+      '&:hover::-webkit-scrollbar-thumb': {
+        backgroundColor: '#ddd',
+      },
+    },
   },
-]);
+])
 
 export const sledgeLogo = style({
-  bottom: "2px",
-  position: "absolute",
-  right: "2px",
-});
+  bottom: '2px',
+  position: 'absolute',
+  right: '2px',
+})
 </file>
 
 <file path="styles/reset.css.ts">
@@ -6056,24 +6434,24 @@ globalStyle("input[type='number']", {
 </file>
 
 <file path="styles/section_global.css.ts">
-import { style } from "@vanilla-extract/css";
-import { vars, ZFB11 } from "./global.css";
-import { flexCol, w100 } from "./snippets.css";
+import { style } from '@vanilla-extract/css'
+import { vars, ZFB11 } from './global.css'
+import { flexCol, w100 } from './snippets.css'
 
 export const sectionRoot = style([
   flexCol,
   {
     // border: '1px solid black',
   },
-]);
+])
 
 export const sectionCaption = style({
   fontFamily: ZFB11,
-  fontSize: vars.text.xs,
+  fontSize: vars.text.sm,
   marginBottom: vars.spacing.md,
-});
+})
 
-export const sectionContent = style([flexCol, w100]);
+export const sectionContent = style([flexCol, w100])
 </file>
 
 <file path="styles/section/canvas.css.ts">

@@ -1,9 +1,9 @@
-const magnificationList: number[] = [1, 2, 4]
+const magnificationList: number[] = [1, 2, 4];
 export const getNextMagnification = (dotMagnification: number) => {
-  let index = magnificationList.findIndex((m) => m === dotMagnification)
+  let index = magnificationList.findIndex((m) => m === dotMagnification);
   if (index != -1) {
     // 循環
-    let nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0
-    return magnificationList[nextIndex]
-  } else return 1
-}
+    let nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0;
+    return magnificationList[nextIndex];
+  } else return 1;
+};

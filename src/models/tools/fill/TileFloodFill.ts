@@ -1,178 +1,176 @@
-import { PixelDiff } from '~/models/layer_image/HistoryManager'
-import { Vec2 } from '~/models/types/Vector'
-import { colorMatch, RGBAColor } from '~/utils/colorUtils'
-import { Fill, FillProps } from './FillTool'
-import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent'
-import Tile, { TileIndex } from '~/models/layer_image/Tile'
+import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
+import { PixelDiff } from "~/models/layer_image/HistoryManager";
+import { TileIndex } from "~/models/layer_image/Tile";
+import { Vec2 } from "~/models/types/Vector";
+import { colorMatch } from "~/utils/colorUtils";
+import { Fill, FillProps } from "./FillTool";
 
 interface FillPassProps {
-  index: TileIndex
-}
-
-interface PixelFillResult {
-  filledPositions: Vec2[]
-  next: FillPassProps[]
+  index: TileIndex;
 }
 
 export class TileFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {
-    if (!(agent instanceof TileLayerImageAgent)) {
-      throw 'Agent for this layer is not a TileLayerImageAgent!'
-      return
-    }
-    const tileAgent = agent as TileLayerImageAgent
+    if (!(agent instanceof TileLayerImageAgent))
+      throw "Agent is not a TileLayerImageAgent";
+    const tileAgent = agent as TileLayerImageAgent;
 
-    const targetColor = tileAgent.getPixel(position)
-    const tileUniformMatches = (p: TileIndex): boolean => {
-      const tile = tileAgent.getTile(p)
-      if (tile.isUniform && tile.uniformColor !== undefined) {
-        return colorMatch(tile.uniformColor, targetColor)
-      }
-      return false
-    }
+    const targetColor = tileAgent.getPixel(position);
+    if (colorMatch(targetColor, color)) return false;
 
-    console.log(color)
-    console.log(targetColor)
+    const tileRowCount = tileAgent.getTileRowCount();
+    const tileColumnCount = tileAgent.getTileColumnCount();
+    const flatten = (ti: TileIndex) => ti.row * tileColumnCount + ti.column;
+    const tileUniformMatches = (ti: TileIndex) => {
+      const tile = tileAgent.getTile(ti);
+      return (
+        tile.isUniform &&
+        tile.uniformColor &&
+        colorMatch(tile.uniformColor, targetColor)
+      );
+    };
 
-    if (colorMatch(targetColor, color)) return false
-    console.log('fill started.')
+    const visitedTiles = new Uint8Array(tileRowCount * tileColumnCount);
+    const tilesFilled: TileIndex[] = [];
+    const tileQueue: TileIndex[] = [tileAgent.getTileIndex(position)];
 
-    const tileScanStart = Date.now()
+    const pxDiffs: PixelDiff[] = [];
+    const visitedPx = new Uint8Array(agent.getWidth() * agent.getHeight());
 
-    const pxDiffs: PixelDiff[] = []
-
-    const tileRowCount = tileAgent.getTileRowCount()
-    const tileColumnCount = tileAgent.getTileColumnCount()
-
-    const initialTileIndex = tileAgent.getTileIndex(position)
-    const tileQueue: TileIndex[] = [initialTileIndex]
-    const tilesFilled: TileIndex[] = []
-    const tilesVisited = new Uint8Array(tileRowCount * tileColumnCount)
-    const flatten = (ti: TileIndex) => ti.row * tileColumnCount + ti.column
-
-    // Tile-Level Fill
-    let tileQueueCount = 0
-    let tileVisitCount = 0
+    // First tile flood pass
+    let tileFillCount = 0;
     while (tileQueue.length > 0) {
-      tileQueueCount++
-      const ti = tileQueue.pop()!
+      const ti = tileQueue.pop()!;
+      if (!tileAgent.isTileInBounds(ti)) continue;
+      const i = flatten(ti);
+      if (visitedTiles[i]) continue;
+      visitedTiles[i] = 1;
+      if (!tileUniformMatches(ti)) continue;
 
-      if (!agent.isTileInBounds(ti)) continue
-
-      const i = flatten(ti)
-      if (tilesVisited[i]) continue
-      tilesVisited[i] = 1
-      tileVisitCount++
-
-      if (tileUniformMatches(ti)) {
-        tilesFilled.push(ti)
-
-        const topTi = { row: ti.row - 1, column: ti.column }
-        const bottomTi = { row: ti.row + 1, column: ti.column }
-        const leftTi = { row: ti.row, column: ti.column - 1 }
-        const rightTi = { row: ti.row, column: ti.column + 1 }
-
-        tileQueue.push(topTi)
-        tileQueue.push(bottomTi)
-        tileQueue.push(leftTi)
-        tileQueue.push(rightTi)
-      }
+      tilesFilled.push(ti);
+      tileFillCount++;
+      tileQueue.push({ row: ti.row - 1, column: ti.column });
+      tileQueue.push({ row: ti.row + 1, column: ti.column });
+      tileQueue.push({ row: ti.row, column: ti.column - 1 });
+      tileQueue.push({ row: ti.row, column: ti.column + 1 });
     }
-
-    const tileScanEnd = Date.now()
-    console.log(
-      'tile scan finished. ' +
-        (tileScanEnd - tileScanStart) +
-        'ms. visited ' +
-        tileVisitCount +
-        'tiles'
-    )
-
-    // ここまでで、edgePixelsには「タイルでは塗れなかったが、塗れそうな限界の境界(Tile-Levelによる塗りつぶしの"ちょうど"外側)の座標が入っている
-    // それらをもとに、Pixel-Level Fillを行う
-    // また、タイルが1回も塗られなかった場合は初期位置からPixel-Level Fillを始める
-    const edgePixels =
-      tilesFilled.length > 0 ?
-        this.collectEdgePixels(tileAgent, tilesFilled)
-      : [position]
-
-    // Pixel-Level Fill
-    const matches = (p: Vec2) => colorMatch(tileAgent.getPixel(p), targetColor)
-    const scanStart = Date.now()
-    const queue: Vec2[] = edgePixels
-    const pxFilled: Vec2[] = []
-    const visited = new Uint8Array(agent.getWidth() * agent.getHeight()) // 0:未訪問, 1:訪問済
-    const index = (p: Vec2) => p.y * agent.getWidth() + p.x
-    let queueCount = 0
-    let visitCount = 0
-    while (queue.length > 0) {
-      queueCount++
-      const c = queue.pop()!
-      if (!agent.isInBounds(c)) continue
-
-      const i = index(c)
-      if (visited[i]) continue
-      visited[i] = 1
-      visitCount++
-
-      if (matches(c)) {
-        pxFilled.push(c)
-        queue.push({ x: c.x + 1, y: c.y })
-        queue.push({ x: c.x - 1, y: c.y })
-        queue.push({ x: c.x, y: c.y + 1 })
-        queue.push({ x: c.x, y: c.y - 1 })
-      }
-    }
-
-    const scanEnd = Date.now()
-    console.log('pixel scan finished. ' + (scanEnd - scanStart) + 'ms.')
-
-    const writeStart = Date.now()
-    // Tile-Level Fillの結果を書き込み
     for (const ti of tilesFilled) {
-      tileAgent.fillWholeTile(ti, color, true)
-    }
-    // Pixel-Level Fillの結果を書き込み
-    for (const p of pxFilled) {
-      const diff = agent.setPixel(p, color, false, false)
-      if (diff !== undefined) pxDiffs.push(diff)
-    }
-
-    const writeEnd = Date.now()
-    console.log('write finished. ' + (writeEnd - writeStart) + 'ms.')
-
-    if (pxDiffs.length > 0) agent.addDiffs(pxDiffs)
-  }
-
-  collectEdgePixels(agent: TileLayerImageAgent, filled: TileIndex[]): Vec2[] {
-    const TILE_SIZE = agent.TILE_SIZE
-    const edge: Vec2[] = []
-    const filledSet = new Set<string>(filled.map((t) => `${t.row},${t.column}`))
-
-    for (const ti of filled) {
-      const { row, column } = ti
-      const offset = agent.getTile(ti).getOffset()
-
-      // 各方向に隣接する未塗タイルがある場合、その境界ピクセルをedgeとして追加
-      const directions = [
-        { dr: -1, dc: 0, dx: 0, dy: -1, range: TILE_SIZE, axis: 'x' }, // top
-        { dr: 1, dc: 0, dx: 0, dy: TILE_SIZE, range: TILE_SIZE, axis: 'x' }, // bottom
-        { dr: 0, dc: -1, dx: -1, dy: 0, range: TILE_SIZE, axis: 'y' }, // left
-        { dr: 0, dc: 1, dx: TILE_SIZE, dy: 0, range: TILE_SIZE, axis: 'y' }, // right
-      ]
-
-      for (const { dr, dc, dx, dy, range, axis } of directions) {
-        const ni = `${row + dr},${column + dc}`
-        if (filledSet.has(ni)) continue
-
-        for (let i = 0; i < range; i++) {
-          const x = axis === 'x' ? offset.x + i : offset.x + dx
-          const y = axis === 'y' ? offset.y + i : offset.y + dy
-          edge.push({ x, y })
+      const offset = tileAgent.getTile(ti).getOffset();
+      for (let dy = 0; dy < tileAgent.TILE_SIZE; dy++) {
+        for (let dx = 0; dx < tileAgent.TILE_SIZE; dx++) {
+          const x = offset.x + dx;
+          const y = offset.y + dy;
+          const i = y * agent.getWidth() + x;
+          visitedPx[i] = 1;
         }
       }
     }
+    console.log(`initial tile fill finished: ${tileFillCount} tiles`);
 
-    return edge
+    const edgePixels =
+      tilesFilled.length > 0
+        ? this.collectEdgePixels(tileAgent, tilesFilled)
+        : [position];
+
+    const pixelQueue: Vec2[] = edgePixels;
+    const pixelsFilled: Vec2[] = [];
+    const pxIndex = (p: Vec2) => p.y * agent.getWidth() + p.x;
+
+    let pixelFillCount = 0;
+    while (pixelQueue.length > 0) {
+      const p = pixelQueue.pop()!;
+      if (!agent.isInBounds(p)) continue;
+      const idx = pxIndex(p);
+      if (visitedPx[idx]) continue;
+      visitedPx[idx] = 1;
+
+      const tileIndex = tileAgent.getTileIndex(p);
+      const tileIdxFlat = flatten(tileIndex);
+      const tilesFilledInReEntry: TileIndex[] = [];
+      if (!visitedTiles[tileIdxFlat] && tileUniformMatches(tileIndex)) {
+        const reentryQueue: TileIndex[] = [tileIndex];
+        let reentryCount = 0;
+        while (reentryQueue.length > 0) {
+          const ti = reentryQueue.pop()!;
+          if (!tileAgent.isTileInBounds(ti)) continue;
+          const i = flatten(ti);
+          if (visitedTiles[i]) continue;
+          visitedTiles[i] = 1;
+          if (!tileUniformMatches(ti)) continue;
+          tilesFilled.push(ti);
+          tilesFilledInReEntry.push(ti);
+          reentryCount++;
+          reentryQueue.push({ row: ti.row - 1, column: ti.column });
+          reentryQueue.push({ row: ti.row + 1, column: ti.column });
+          reentryQueue.push({ row: ti.row, column: ti.column - 1 });
+          reentryQueue.push({ row: ti.row, column: ti.column + 1 });
+        }
+        // ↓ 前はこれがなかった ↓
+        const newEdges = this.collectEdgePixels(
+          tileAgent,
+          tilesFilledInReEntry,
+        );
+        for (const edge of newEdges) {
+          pixelQueue.push(edge);
+        }
+        for (const ti of tilesFilled) {
+          const offset = tileAgent.getTile(ti).getOffset();
+          for (let dy = 0; dy < tileAgent.TILE_SIZE; dy++) {
+            for (let dx = 0; dx < tileAgent.TILE_SIZE; dx++) {
+              const x = offset.x + dx;
+              const y = offset.y + dy;
+              const i = y * agent.getWidth() + x;
+              visitedPx[i] = 1;
+            }
+          }
+        }
+        console.log(`tile reentry fill: ${reentryCount} tiles`);
+        continue;
+      }
+
+      if (!colorMatch(tileAgent.getPixel(p), targetColor)) continue;
+      pixelsFilled.push(p);
+      pixelFillCount++;
+      pixelQueue.push({ x: p.x + 1, y: p.y });
+      pixelQueue.push({ x: p.x - 1, y: p.y });
+      pixelQueue.push({ x: p.x, y: p.y + 1 });
+      pixelQueue.push({ x: p.x, y: p.y - 1 });
+    }
+    console.log(`pixel fill finished: ${pixelFillCount} pixels`);
+
+    for (const ti of tilesFilled) tileAgent.fillWholeTile(ti, color, true);
+    for (const p of pixelsFilled) {
+      const diff = tileAgent.setPixel(p, color, false, false);
+      if (diff) pxDiffs.push(diff);
+    }
+
+    if (pxDiffs.length > 0) tileAgent.addDiffs(pxDiffs);
+  }
+
+  collectEdgePixels(agent: TileLayerImageAgent, filled: TileIndex[]): Vec2[] {
+    const edge: Vec2[] = [];
+    const TILE_SIZE = agent.TILE_SIZE;
+    const filledSet = new Set(filled.map((t) => `${t.row},${t.column}`));
+
+    for (const ti of filled) {
+      const offset = agent.getTile(ti).getOffset();
+      const neighbors = [
+        { dr: -1, dc: 0, dx: 0, dy: -1, axis: "x" },
+        { dr: 1, dc: 0, dx: 0, dy: TILE_SIZE, axis: "x" },
+        { dr: 0, dc: -1, dx: -1, dy: 0, axis: "y" },
+        { dr: 0, dc: 1, dx: TILE_SIZE, dy: 0, axis: "y" },
+      ];
+
+      for (const { dr, dc, dx, dy, axis } of neighbors) {
+        const ni = `${ti.row + dr},${ti.column + dc}`;
+        if (filledSet.has(ni)) continue;
+        for (let i = 0; i < TILE_SIZE; i++) {
+          const x = axis === "x" ? offset.x + i : offset.x + dx;
+          const y = axis === "y" ? offset.y + i : offset.y + dy;
+          edge.push({ x, y });
+        }
+      }
+    }
+    return edge;
   }
 }

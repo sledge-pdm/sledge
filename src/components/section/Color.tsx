@@ -45,7 +45,7 @@ const Color: Component<{}> = (props) => {
         <div class={descriptionContainer}>
           <p class={colorElemDescription}>picker.</p>
         </div>
-        <ColorPicker />
+        <ColorPicker width={130} />
       </div>
     </div>
   );

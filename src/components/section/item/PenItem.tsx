@@ -4,7 +4,7 @@ import { sayRandomQuote } from "~/components/common/companion/QuotePool";
 import Light from "~/components/common/Light";
 import Slider from "~/components/common/Slider";
 import { Tool } from "~/models/types/Tool";
-import { toolStore, setToolStore } from "~/stores/internal/toolsStore";
+import { setToolStore, toolStore } from "~/stores/internal/toolsStore";
 import { penConfigRow, penConfigRowName } from "~/styles/section/pen.css";
 
 interface Props {

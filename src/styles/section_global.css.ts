@@ -11,7 +11,7 @@ export const sectionRoot = style([
 
 export const sectionCaption = style({
   fontFamily: ZFB11,
-  fontSize: vars.text.xs,
+  fontSize: vars.text.sm,
   marginBottom: vars.spacing.md,
 });
 

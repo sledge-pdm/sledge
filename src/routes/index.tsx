@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
-import { For } from "solid-js";
+import { For, onMount } from "solid-js";
 import EdgeInfo from "~/components/EdgeInfo";
+import { loadGlobalSettings } from "~/io/global/globalIO";
 import { importProjectJsonFromFileSelection } from "~/io/project/project";
 import { createLayer } from "~/models/factories/createLayer";
 import { LayerType } from "~/models/types/Layer";
@@ -30,6 +31,10 @@ import {
 
 export default function Home() {
   const navigate = useNavigate();
+
+  onMount(() => {
+    loadGlobalSettings();
+  });
 
   const moveToEditor = async (recentFile: FileLocation) => {
     const params = new URLSearchParams();
@@ -67,7 +72,7 @@ export default function Home() {
 
       <div class={welcomeRoot}>
         <div class={flexCol}>
-          <p class={welcomeHeadline}>hello.</p>
+          <p class={welcomeHeadline}>HELLO.</p>
           <div class={sideSection}>
             <a class={sideSectionItem} onClick={() => createNew()}>
               + new.

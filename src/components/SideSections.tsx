@@ -6,6 +6,7 @@ import PenConfig from "./section/PenConfig";
 import Project from "./section/Project";
 
 import { sideAreaContent } from "~/styles/global.css";
+import GlobalSettings from "./section/GlobalSettings";
 
 const SideSections: Component<{}> = (props) => {
   return (
@@ -16,6 +17,7 @@ const SideSections: Component<{}> = (props) => {
       <PenConfig />
       <LayerList />
       <CanvasSettings />
+      <GlobalSettings />
     </div>
   );
 };

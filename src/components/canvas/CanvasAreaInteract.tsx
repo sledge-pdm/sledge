@@ -12,7 +12,7 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() { }
+  constructor() {}
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
@@ -97,8 +97,7 @@ class CanvasAreaInteract {
     e.preventDefault();
     const referencedZoom = getReferencedZoom();
     const delta =
-      (e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep) *
-      referencedZoom;
+      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
 
     const zoomOld = canvasStore.zoom;
     const zoomNew = Math.max(

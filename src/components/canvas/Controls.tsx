@@ -3,8 +3,8 @@ import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/controls.module.css";
+import { canRedo, canUndo } from "~/stores/project/layerImageStore";
 import { layerImageManager } from "./stacks/CanvasStack";
-import { canRedo, canUndo, layerImageStore } from "~/stores/project/layerImageStore";
 
 const Controls: Component<{}> = (props) => {
   // const zoom = () => canvasStore.zoom;
@@ -25,18 +25,42 @@ const Controls: Component<{}> = (props) => {
       <p>
         offset:({canvasStore.offset.x}, {canvasStore.offset.y})
       </p>
+      <p>zoom.</p>
+      <p>x {canvasStore.zoom}</p>
 
       <p>UNDO STACKS.</p>
-      <For each={layerImageManager.getAgent(activeLayer().id)?.getHistoryManager()?.getUndoStack()}>
+      <For
+        each={layerImageManager
+          .getAgent(activeLayer()?.id)
+          ?.getHistoryManager()
+          ?.getUndoStack()}
+      >
         {(item, i) => {
           if (i() === 0) {
             <>
-              <p>pixel diffs: {item.diffs.values().toArray().filter(d => d.kind === "pixel").length}px.</p>
-              <p>tile diffs: {item.diffs.values().toArray().filter(d => d.kind === "tile").length}px.</p>
-            </>
-          } else return <></>
-        }
-        }
+              <p>
+                pixel diffs:{" "}
+                {
+                  item.diffs
+                    .values()
+                    .toArray()
+                    .filter((d) => d.kind === "pixel").length
+                }
+                px.
+              </p>
+              <p>
+                tile diffs:{" "}
+                {
+                  item.diffs
+                    .values()
+                    .toArray()
+                    .filter((d) => d.kind === "tile").length
+                }
+                px.
+              </p>
+            </>;
+          } else return <></>;
+        }}
       </For>
       <div class={styles["top-right-button-container"]}>
         {/* <ImportImageButton />
@@ -50,9 +74,7 @@ const Controls: Component<{}> = (props) => {
           src="/undo.png"
           style={{
             opacity: canUndo() ? "1.0" : "0.3",
-            cursor: canUndo()
-              ? "pointer"
-              : "unset",
+            cursor: canUndo() ? "pointer" : "unset",
           }}
           onClick={(e) => {
             e.preventDefault();
@@ -65,9 +87,7 @@ const Controls: Component<{}> = (props) => {
           src="/redo.png"
           style={{
             opacity: canRedo() ? "1.0" : "0.3",
-            cursor: canRedo()
-              ? "pointer"
-              : "unset",
+            cursor: canRedo() ? "pointer" : "unset",
           }}
           onClick={(e) => {
             e.preventDefault();

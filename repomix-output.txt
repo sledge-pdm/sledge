@@ -77,6 +77,8 @@ DSL_doc_jp.md
 index.html
 package.json
 patches/@thisbeyond+solid-dnd+0.7.5.patch
+public/fonts/k8x12/k8x12.txt
+public/fonts/k8x12/readme.txt
 public/fonts/terminus/COPYING
 README.md
 repomix.config.json
@@ -113,15 +115,18 @@ src/components/canvas/stacks/TouchableCanvas.tsx
 src/components/common/ColorBox.tsx
 src/components/common/companion/Companion.tsx
 src/components/common/companion/QuotePool.ts
+src/components/common/Dropdown.tsx
 src/components/common/DSLButton.tsx
 src/components/common/DSLEditor.tsx
 src/components/common/ImportImageButton.tsx
 src/components/common/LayerPreview.tsx
 src/components/common/Light.tsx
 src/components/common/Slider.tsx
+src/components/common/ToggleSwitch.tsx
 src/components/EdgeInfo.tsx
 src/components/section/CanvasSettings.tsx
 src/components/section/Color.tsx
+src/components/section/GlobalSettings.tsx
 src/components/section/item/ColorPicker.tsx
 src/components/section/item/LayerItem.tsx
 src/components/section/item/PenItem.tsx
@@ -164,12 +169,13 @@ src/models/layer_image/HistoryManager.ts
 src/models/layer_image/LayerImageAgent.ts
 src/models/layer_image/LayerImageManager.ts
 src/models/layer_image/Tile.ts
-src/models/layer/history.ts
 src/models/layer/layerImage.ts
 src/models/tools/DrawUtils.ts
 src/models/tools/eraser/EraserTool.ts
 src/models/tools/fill/FillTool.ts
 src/models/tools/fill/LegacyFills.ts
+src/models/tools/fill/PixelFloodFill.ts
+src/models/tools/fill/TileFloodFill.ts
 src/models/tools/pen/PenTool.ts
 src/models/tools/ToolBase.ts
 src/models/types/Canvas.ts
@@ -194,8 +200,9 @@ src/styles/components/canvas/canvas_area.css.ts
 src/styles/components/canvas/canvas_stack.module.css
 src/styles/components/canvas/controls.module.css
 src/styles/components/canvas/image_pool.module.css
-src/styles/components/canvas/layer_canvas.module.css
+src/styles/components/canvas/layer_canvas.css.ts
 src/styles/components/companion.module.css
+src/styles/components/dropdown.css.ts
 src/styles/components/dsl_button.module.css
 src/styles/components/edge_info.module.css
 src/styles/components/layer_preview.module.css
@@ -204,6 +211,7 @@ src/styles/components/side_sections.module.css
 src/styles/components/slider.module.css
 src/styles/components/title_bar.css.ts
 src/styles/components/toast.module.css
+src/styles/components/toggle_switch.css.ts
 src/styles/global.css.ts
 src/styles/reset.css.ts
 src/styles/section_global.css.ts
@@ -229,6 +237,281 @@ Files
 ================================================================
 
 ================
+File: public/fonts/k8x12/k8x12.txt
+================
+===============================================================================
+
+                8×12 ドット日本語ビットマップフォント「k8x12」
+                                (2021-05-05 版)
+
+                       Copyright (C) 2015-2021 Num Kadoma
+
+===============================================================================
+
+-------------------------------------------------------------------------------
+ 概要
+-------------------------------------------------------------------------------
+　k8x12 は 8×12 ドットの日本語ビットマップフォントです。
+　JIS 第一・第二水準をサポートしており、その他の記号も一部含んでいます。
+
+
+-------------------------------------------------------------------------------
+ バリエーション
+-------------------------------------------------------------------------------
+　オリジナルの k8x12 の他に、
+　バリエーションとして k8x12L, k8x12S が存在します。
+　漢字の字形はこれらすべてで共通です (仝々〆〇 を含む)。
+
+・k8x12L
+　k8x12L は k8x12 の仮名を縦に長い形に変更したものです。
+　漢字同様に下端に空白を 1 ラインとった残りの縦 11 ドットを使っています。
+
+・k8x12S
+　k8x12S は k8x12 の非漢字を縦 8 ドットの字形に変更したものです。
+　濁点、半濁点は仮名の上に乗る形になっています。
+　このバリエーションは、8×8 ドット単位でグラフィックを扱うような、
+　昔のゲーム機やマイコンにおける制限を意識しています。
+　
+　文字の枠を 8×12 ではなく 8×16 ドットに広げた方がより「らしく」なりますが、
+　フォントとしての使い勝手を考えてそのままにしています。
+
+
+-------------------------------------------------------------------------------
+ 備考
+-------------------------------------------------------------------------------
+・縦書きには未対応です。
+
+
+-------------------------------------------------------------------------------
+ ライセンス
+-------------------------------------------------------------------------------
+　These fonts are free software.
+　Unlimited permission is granted to use, copy, and distribute them, with or without modification, either commercially or noncommercially.
+　THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.
+
+　これらのフォントはフリー（自由な）ソフトウエアです。
+　あらゆる改変の有無に関わらず、また商業的な利用であっても、自由にご利用、複製、再配布することができますが、全て無保証とさせていただきます。
+
+
+-------------------------------------------------------------------------------
+ 制作履歴
+-------------------------------------------------------------------------------
+■2021-05-05
+・文字の追加: ␣
+・字形の修正・変更:
+　*售堕寉寓崔帯廼滞焦瞿矍臭蕉隹隻隼雀集雋霍
+　(k8x12S のみ)│┃┌┏┐┓└┗┘┛├┝┠┣┤┥┨┫┬┯┰┳┴┷┸┻┼┿╂╋╞╡╪╭╮╯╰ホ
+・[TTF] ビットマップを埋込み
+・[BDF] アーカイブ形式を zip に変更
+
+■2017-02-20
+・「8」を首の細長い形状に変更 (「0」との誤認対策)
+
+■2016-08-27
+・「莱」の字形が「菜」になっている問題を修正
+
+■2015-01-29
+・[TTF] Windows 環境で文字幅が広がってしまう問題を修正
+
+■2015-01-28
+・初版公開
+
+■2014-12-09
+・JIS 第二水準漢字が揃う
+
+■2014-08-初～11-初
+・(休憩)
+
+■2014-08-08
+・JIS 第一水準漢字が揃う
+
+■2014-07-06
+・制作開始
+
+
+-------------------------------------------------------------------------------
+ バージョン情報
+-------------------------------------------------------------------------------
+■2021-05-05
+・k8x12 2017-05-05 版 (BDF/TTF/PNG)
+
+■2017-02-20
+・k8x12 2017-07-20 版 (BDF/TTF/PNG)
+
+■2016-08-27
+・k8x12 2016-08-27 版 (BDF/TTF/PNG)
+
+■2015-01-29
+・k8x12 2015-01-29 版 (TTF)
+
+■2015-01-28
+・k8x12 2015-01-28 版 (BDF/TTF/PNG)
+
+
+-------------------------------------------------------------------------------
+ 連絡先
+-------------------------------------------------------------------------------
+　門真 なむ (Num Kadoma)
+　・Twitter: @num_kadoma
+　・Website: http://littlelimit.net/
+
+================
+File: public/fonts/k8x12/readme.txt
+================
+===============================================================================
+
+                                  k8x12 TTF 版
+
+===============================================================================
+
+-------------------------------------------------------------------------------
+ 概要
+-------------------------------------------------------------------------------
+　k8x12 TTF 版は TrueType 形式の等幅フォントです。
+　k8x12 のアウトラインと埋込みビットマップを含んでいます。
+
+
+-------------------------------------------------------------------------------
+ アーカイブの内容
+-------------------------------------------------------------------------------
+・k8x12.txt
+　k8x12 のマニュアル
+
+・readme.txt
+　k8x12 TTF 版のマニュアル (このファイル)
+
+・k8x12.ttf
+　k8x12 TTF 版 (Regular)
+
+・k8x12L.ttf
+　k8x12L TTF 版 (Regular)
+
+・k8x12S.ttf
+　k8x12S TTF 版 (Regular)
+
+
+-------------------------------------------------------------------------------
+ ライセンス
+-------------------------------------------------------------------------------
+　アーカイブ同梱の「k8x12.txt」の内容に従うものとします。
+
+================
+File: src/components/common/Dropdown.tsx
+================
+import { Component, JSX } from "solid-js";
+import { dropdownRoot } from "~/styles/components/dropdown.css";
+
+export type DropdownOption<T extends string | number> = {
+    label: string;
+    value: T;
+};
+
+interface Props<T extends string | number = string> {
+    /** 現在選択中の値 */
+    value: T;
+    /** 選択候補 */
+    options: DropdownOption<T>[];
+    /** 値変更時に呼び出される */
+    onChange?: (value: T) => void;
+    /** aria-label など任意で渡す */
+    props?: JSX.SelectHTMLAttributes<HTMLSelectElement>;
+}
+
+const Dropdown = <T extends string | number>(p: Props<T>) => (
+    /* コンポーネント外でも使うので export default */
+    <select
+        {...p.props}
+        class={dropdownRoot}
+        value={String(p.value)}
+        onChange={(e) => p.onChange?.(e.currentTarget.value as unknown as T)}
+    >
+        {p.options.map((o) => (
+            <option value={String(o.value)}>{o.label}</option>
+        ))}
+    </select>
+);
+
+export default Dropdown;
+
+================
+File: src/components/common/ToggleSwitch.tsx
+================
+import { Component } from "solid-js";
+import {
+    toggleWrapper,
+    toggleTrack,
+    toggleThumb,
+    toggleInput,
+} from "~/styles/components/toggle_switch.css";
+
+interface Props {
+    checked: boolean;
+    onChange?: (checked: boolean) => void;
+    /** 任意でラベル等を配置する場合の slot */
+    children?: any;
+}
+
+const ToggleSwitch: Component<Props> = (p) => (
+    /* label 全体でクリック可能に */
+    <label class={toggleWrapper}>
+        <input
+            type="checkbox"
+            checked={p.checked}
+            onInput={(e) => p.onChange?.(e.currentTarget.checked)}
+            class={toggleInput}
+        />
+        <span class={toggleTrack}>
+            <span class={toggleThumb} />
+        </span>
+        {p.children}
+    </label>
+);
+
+export default ToggleSwitch;
+
+================
+File: src/components/section/GlobalSettings.tsx
+================
+import { Component, createSignal } from "solid-js";
+import { setCurrentToolColor } from "~/models/types/Tool";
+import {
+    sectionCaption,
+    sectionRoot,
+} from "~/styles/section_global.css";
+import Dropdown, { DropdownOption } from "../common/Dropdown";
+import ToggleSwitch from "../common/ToggleSwitch";
+import { CanvasRenderingMode, globalStore, setGlobalStore } from "~/stores/global/globalStore";
+
+const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
+    { label: "auto", value: "auto" },
+    { label: "pixelated", value: 'pixelated' },
+    { label: "crispEdges", value: 'crispEdges' },
+];
+
+const [autoSave, setAutoSave] = createSignal(true);
+
+const GlobalSettings: Component<{}> = (props) => {
+
+
+    return (
+        <div class={sectionRoot}>
+            <p class={sectionCaption}>settings.</p>
+            <Dropdown
+                value={globalStore.canvasRenderingMode}
+                options={renderingOptions}
+                onChange={(v) => setGlobalStore("canvasRenderingMode", v)}
+            />
+
+            <ToggleSwitch checked={autoSave()} onChange={setAutoSave}>
+                <p style={{ "font-size": "0.5rem" }}>autosave.</p>
+            </ToggleSwitch>
+        </div>
+    );
+};
+
+export default GlobalSettings;
+
+================
 File: src/models/tools/pen/PenTool.ts
 ================
 import { Tool, ToolArgs } from '../ToolBase'
@@ -246,23 +529,21 @@ export class PenTool implements Tool {
     agent: LayerImageAgent,
     { position, lastPosition, color, size }: ToolArgs
   ) {
-    const [r, g, b, a] = color
-
     if (!size) return false
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.setPixel({ x: px, y: py }, r, g, b, a, true, true)
+      const diff = agent.setPixel({ x: px, y: py }, color, true, true)
       if (diff !== undefined) {
-        agent.addPixelDiffs([diff])
+        agent.addDiffs([diff])
       }
     })
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.setPixel({ x: px, y: py }, r, g, b, a, true, true)
+          const diff = agent.setPixel({ x: px, y: py }, color, true, true)
           if (diff !== undefined) {
-            agent.addPixelDiffs([diff])
+            agent.addDiffs([diff])
           }
         })
       })
@@ -275,6 +556,133 @@ export class PenTool implements Tool {
     return false
   }
 }
+
+================
+File: src/styles/components/canvas/layer_canvas.css.ts
+================
+import { recipe } from '@vanilla-extract/recipes'
+
+export const layerCanvas = recipe({
+  base: {
+    pointerEvents: 'none',
+    position: 'absolute',
+  },
+
+  variants: {
+    rendering: {
+      auto: {
+        imageRendering: 'auto',
+      },
+      pixelated: {
+        imageRendering: 'pixelated',
+      },
+      crispEdges: {
+        imageRendering: 'crisp-edges',
+      },
+    },
+    hidden: {
+      true: {
+        opacity: 0,
+        pointerEvents: 'auto',
+      },
+    },
+  },
+
+  defaultVariants: {
+    rendering: 'auto',
+    hidden: false,
+  },
+})
+
+================
+File: src/styles/components/dropdown.css.ts
+================
+import { style } from '@vanilla-extract/css'
+import { vars } from '~/styles/global.css'
+
+export const dropdownRoot = style({
+  fontFamily: vars.font.body,
+  fontSize: vars.text.lg,
+  backgroundColor: vars.color.secondary,
+  border: '0px solid black',
+  borderRadius: '0px',
+  padding: '2px 6px',
+  height: '20px',
+  cursor: 'pointer',
+  lineHeight: '12px',
+  selectors: {
+    '&:hover': { backgroundColor: vars.color.button_hover },
+    '&:active': {
+      backgroundColor: vars.color.button_pressed,
+    },
+    /* Windows の ▼ 矢印が滲むのを抑止 */
+    '&::-ms-expand': { display: 'none' },
+  },
+})
+
+================
+File: src/styles/components/toggle_switch.css.ts
+================
+import { style, globalStyle } from '@vanilla-extract/css'
+import { vars } from '~/styles/global.css'
+
+const globalWidth = 16
+const thumbWidth = 8
+const thumbPadding = 2
+const globalHeight = 12
+
+/* ラベル全体 */
+export const toggleWrapper = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: vars.spacing.sm,
+  cursor: 'pointer',
+  userSelect: 'none',
+})
+
+/* 入力本体 (隠す) */
+export const toggleInput = style({
+  opacity: 0,
+  width: 0,
+  height: 0,
+  position: 'absolute',
+})
+
+/* バックグラウンドとなるトラック */
+export const toggleTrack = style({
+  width: `${globalWidth}px`,
+  height: `${globalHeight}px`,
+  backgroundColor: vars.color.muted,
+  border: '1px solid black',
+  borderRadius: '0px',
+  position: 'relative',
+  transition: 'background-color 0.05s',
+})
+
+/* つまみ */
+export const toggleThumb = style({
+  position: 'absolute',
+  top: '-1px',
+  left: '0px',
+  width: `${thumbWidth - thumbPadding}px`,
+  height: `${globalHeight}px`,
+  backgroundColor: vars.color.button,
+  border: '1px solid black',
+  borderRadius: '0px',
+  transition: 'transform 0.05s',
+})
+
+/* ───────── 状態連動スタイル ───────── */
+
+/* input が :checked のとき隣接する track を赤系へ */
+globalStyle(`${toggleInput}:checked + ${toggleTrack}`, {
+  backgroundColor: vars.color.danger,
+})
+
+/* さらに thumb を右へスライド */
+globalStyle(`${toggleInput}:checked + ${toggleTrack} ${toggleThumb}`, {
+  transform: `translateX(${globalWidth - thumbWidth}px)`,
+})
 
 ================
 File: .repomix/bundles.json
@@ -1084,10 +1492,11 @@ File: src/components/common/LayerPreview.tsx
 ================
 import { Component, createEffect, onMount } from "solid-js";
 import { Layer } from "~/models/types/Layer";
-import { v4 as uuidv4 } from "uuid";
 
 import styles from "@styles/components/layer_preview.module.css";
 import { layerImageStore } from "~/stores/project/layerImageStore";
+import { layerImageManager } from "../canvas/stacks/CanvasStack";
+import { v4 as uuidv4 } from "uuid";
 
 interface Props {
   layer: Layer;
@@ -1143,11 +1552,13 @@ const LayerPreview: Component<Props> = (props: Props) => {
     );
   };
 
-  createEffect(() => {
-    const originalImage = layerImageStore[props.layer.id].current
-    const height = wrapperRef.clientHeight;
-    updatePreview(originalImage, height);
-  });
+  onMount(() => {
+    const agent = layerImageManager.getAgent(props.layer.id)
+    agent?.setOnImageChangeListener("layer_preview_" + id, () => {
+      const height = wrapperRef.clientHeight;
+      updatePreview(agent.getImage(), height);
+    })
+  })
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
@@ -1369,119 +1780,12 @@ export abstract class PassNode extends SledgeNode {
 }
 
 ================
-File: src/models/factories/utils.ts
-================
-const magnificationList: number[] = [1, 2, 4];
-export const getNextMagnification = (dotMagnification: number) => {
-  let index = magnificationList.findIndex((m) => m === dotMagnification);
-  if (index != -1) {
-    // 循環
-    let nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0;
-    return magnificationList[nextIndex];
-  } else return 1;
-};
-
-export function cloneImageData(src: ImageData): ImageData {
-  return new ImageData(
-    new Uint8ClampedArray(src.data), // ← 必ず新しい配列
-    src.width,
-    src.height,
-  );
-}
-
-================
 File: src/models/layer_canvas/DrawState.ts
 ================
 export enum DrawState {
   start,
   move,
   end,
-}
-
-================
-File: src/models/layer_image/HistoryManager.ts
-================
-import {
-  layerImageStore,
-  setLayerImageStore,
-} from '~/stores/project/layerImageStore'
-import { Vec2 } from '../types/Vector'
-import { reconcile } from 'solid-js/store'
-
-export type PixelDiff = {
-  position: Vec2
-  before: [number, number, number, number] // undo時の色
-  after: [number, number, number, number] // redo時の色
-}
-
-export type DiffAction = {
-  diffs: Map<string, PixelDiff>
-}
-
-export class HistoryManager {
-  protected undoActionsStack: DiffAction[]
-  protected redoActionsStack: DiffAction[]
-
-  constructor(public layerId: string) {
-    this.undoActionsStack = []
-    this.redoActionsStack = []
-  }
-
-  public canUndo() {
-    return this.undoActionsStack.length > 0
-  }
-
-  public canRedo() {
-    return this.redoActionsStack.length > 0
-  }
-
-  public addAction(action: DiffAction) {
-    this.undoActionsStack.push(action)
-    setLayerImageStore(
-      this.layerId,
-      'undoStack',
-      reconcile([...this.undoActionsStack])
-    )
-    setLayerImageStore(
-      this.layerId,
-      'redoStack',
-      reconcile([...this.redoActionsStack])
-    )
-  }
-
-  public undo(): DiffAction | undefined {
-    const undoedAction = this.undoActionsStack.pop()
-    if (undoedAction === undefined) return undefined
-    this.redoActionsStack = [undoedAction, ...this.redoActionsStack]
-    setLayerImageStore(
-      this.layerId,
-      'undoStack',
-      reconcile([...this.undoActionsStack])
-    )
-    setLayerImageStore(
-      this.layerId,
-      'redoStack',
-      reconcile([...this.redoActionsStack])
-    )
-    return undoedAction
-  }
-
-  public redo(): DiffAction | undefined {
-    const redoedAction = this.redoActionsStack.shift()
-    if (redoedAction === undefined) return undefined
-    this.undoActionsStack = [...this.undoActionsStack, redoedAction]
-    setLayerImageStore(
-      this.layerId,
-      'undoStack',
-      reconcile([...this.undoActionsStack])
-    )
-    setLayerImageStore(
-      this.layerId,
-      'redoStack',
-      reconcile([...this.redoActionsStack])
-    )
-    return redoedAction
-  }
 }
 
 ================
@@ -1623,6 +1927,250 @@ function legacyByteBufRust({ image, position, lastPosition, color }: ToolArgs) {
 }
 
 ================
+File: src/models/tools/fill/PixelFloodFill.ts
+================
+import { PixelDiff } from '~/models/layer_image/HistoryManager'
+import { Vec2 } from '~/models/types/Vector'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
+import { Fill, FillProps } from './FillTool'
+
+export class PixelFloodFill implements Fill {
+  fill({ agent, color, position }: FillProps) {
+    const targetColor = agent.getPixel(position)
+    const matches = (p: Vec2) => colorMatch(agent.getPixel(p), targetColor)
+
+    console.log(color)
+    console.log(targetColor)
+
+    if (colorMatch(targetColor, color)) return false
+
+    // console.log(`---${image.width}x${image.height} flood fill---`)
+
+    if (colorMatch(targetColor, color)) return false
+    console.log('fill started.')
+
+    const scanStart = Date.now()
+    const queue: Vec2[] = [position]
+    const filled: Vec2[] = []
+    const visited = new Uint8Array(agent.getWidth() * agent.getHeight()) // 0:未訪問, 1:訪問済
+    const index = (p: Vec2) => p.y * agent.getWidth() + p.x
+    let queueCount = 0
+    let visitCount = 0
+    while (queue.length > 0) {
+      queueCount++
+      const c = queue.pop()!
+      if (!agent.isInBounds(c)) continue
+
+      const i = index(c)
+      if (visited[i]) continue
+      visited[i] = 1
+      visitCount++
+
+      if (matches(c)) {
+        filled.push(c)
+        queue.push({ x: c.x + 1, y: c.y })
+        queue.push({ x: c.x - 1, y: c.y })
+        queue.push({ x: c.x, y: c.y + 1 })
+        queue.push({ x: c.x, y: c.y - 1 })
+      }
+    }
+
+    const scanEnd = Date.now()
+    console.log('scan finished. ' + (scanEnd - scanStart) + 'ms.')
+
+    const writeStart = Date.now()
+
+    const pxDiffs: PixelDiff[] = []
+    // バッファに一括反映
+    for (const p of filled) {
+      const diff = agent.setPixel(p, color, false, false)
+      if (diff !== undefined) pxDiffs.push(diff)
+    }
+    const writeEnd = Date.now()
+    console.log('write finished. ' + (writeEnd - writeStart) + 'ms.')
+
+    agent.addDiffs(pxDiffs)
+  }
+}
+
+================
+File: src/models/tools/fill/TileFloodFill.ts
+================
+import { PixelDiff } from '~/models/layer_image/HistoryManager'
+import { Vec2 } from '~/models/types/Vector'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
+import { Fill, FillProps } from './FillTool'
+import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent'
+import Tile, { TileIndex } from '~/models/layer_image/Tile'
+
+interface FillPassProps {
+  index: TileIndex
+}
+
+export class TileFloodFill implements Fill {
+  fill({ agent, color, position }: FillProps) {
+    if (!(agent instanceof TileLayerImageAgent))
+      throw 'Agent is not a TileLayerImageAgent'
+    const tileAgent = agent as TileLayerImageAgent
+
+    const targetColor = tileAgent.getPixel(position)
+    if (colorMatch(targetColor, color)) return false
+
+    const tileRowCount = tileAgent.getTileRowCount()
+    const tileColumnCount = tileAgent.getTileColumnCount()
+    const flatten = (ti: TileIndex) => ti.row * tileColumnCount + ti.column
+    const tileUniformMatches = (ti: TileIndex) => {
+      const tile = tileAgent.getTile(ti)
+      return (
+        tile.isUniform &&
+        tile.uniformColor &&
+        colorMatch(tile.uniformColor, targetColor)
+      )
+    }
+
+    const visitedTiles = new Uint8Array(tileRowCount * tileColumnCount)
+    const tilesFilled: TileIndex[] = []
+    const tileQueue: TileIndex[] = [tileAgent.getTileIndex(position)]
+
+    const pxDiffs: PixelDiff[] = []
+    const visitedPx = new Uint8Array(agent.getWidth() * agent.getHeight())
+
+    // First tile flood pass
+    let tileFillCount = 0
+    while (tileQueue.length > 0) {
+      const ti = tileQueue.pop()!
+      if (!tileAgent.isTileInBounds(ti)) continue
+      const i = flatten(ti)
+      if (visitedTiles[i]) continue
+      visitedTiles[i] = 1
+      if (!tileUniformMatches(ti)) continue
+
+      tilesFilled.push(ti)
+      tileFillCount++
+      tileQueue.push({ row: ti.row - 1, column: ti.column })
+      tileQueue.push({ row: ti.row + 1, column: ti.column })
+      tileQueue.push({ row: ti.row, column: ti.column - 1 })
+      tileQueue.push({ row: ti.row, column: ti.column + 1 })
+    }
+    for (const ti of tilesFilled) {
+      const offset = tileAgent.getTile(ti).getOffset()
+      for (let dy = 0; dy < tileAgent.TILE_SIZE; dy++) {
+        for (let dx = 0; dx < tileAgent.TILE_SIZE; dx++) {
+          const x = offset.x + dx
+          const y = offset.y + dy
+          const i = y * agent.getWidth() + x
+          visitedPx[i] = 1
+        }
+      }
+    }
+    console.log(`initial tile fill finished: ${tileFillCount} tiles`)
+
+    const edgePixels =
+      tilesFilled.length > 0 ?
+        this.collectEdgePixels(tileAgent, tilesFilled)
+      : [position]
+
+    const pixelQueue: Vec2[] = edgePixels
+    const pixelsFilled: Vec2[] = []
+    const pxIndex = (p: Vec2) => p.y * agent.getWidth() + p.x
+
+    let pixelFillCount = 0
+    while (pixelQueue.length > 0) {
+      const p = pixelQueue.pop()!
+      if (!agent.isInBounds(p)) continue
+      const idx = pxIndex(p)
+      if (visitedPx[idx]) continue
+      visitedPx[idx] = 1
+
+      const tileIndex = tileAgent.getTileIndex(p)
+      const tileIdxFlat = flatten(tileIndex)
+      const tilesFilledInReEntry: TileIndex[] = []
+      if (!visitedTiles[tileIdxFlat] && tileUniformMatches(tileIndex)) {
+        const reentryQueue: TileIndex[] = [tileIndex]
+        let reentryCount = 0
+        while (reentryQueue.length > 0) {
+          const ti = reentryQueue.pop()!
+          if (!tileAgent.isTileInBounds(ti)) continue
+          const i = flatten(ti)
+          if (visitedTiles[i]) continue
+          visitedTiles[i] = 1
+          if (!tileUniformMatches(ti)) continue
+          tilesFilled.push(ti)
+          tilesFilledInReEntry.push(ti)
+          reentryCount++
+          reentryQueue.push({ row: ti.row - 1, column: ti.column })
+          reentryQueue.push({ row: ti.row + 1, column: ti.column })
+          reentryQueue.push({ row: ti.row, column: ti.column - 1 })
+          reentryQueue.push({ row: ti.row, column: ti.column + 1 })
+        }
+        // ↓ 前はこれがなかった ↓
+        const newEdges = this.collectEdgePixels(tileAgent, tilesFilledInReEntry)
+        for (const edge of newEdges) {
+          pixelQueue.push(edge)
+        }
+        for (const ti of tilesFilled) {
+          const offset = tileAgent.getTile(ti).getOffset()
+          for (let dy = 0; dy < tileAgent.TILE_SIZE; dy++) {
+            for (let dx = 0; dx < tileAgent.TILE_SIZE; dx++) {
+              const x = offset.x + dx
+              const y = offset.y + dy
+              const i = y * agent.getWidth() + x
+              visitedPx[i] = 1
+            }
+          }
+        }
+        console.log(`tile reentry fill: ${reentryCount} tiles`)
+        continue
+      }
+
+      if (!colorMatch(tileAgent.getPixel(p), targetColor)) continue
+      pixelsFilled.push(p)
+      pixelFillCount++
+      pixelQueue.push({ x: p.x + 1, y: p.y })
+      pixelQueue.push({ x: p.x - 1, y: p.y })
+      pixelQueue.push({ x: p.x, y: p.y + 1 })
+      pixelQueue.push({ x: p.x, y: p.y - 1 })
+    }
+    console.log(`pixel fill finished: ${pixelFillCount} pixels`)
+
+    for (const ti of tilesFilled) tileAgent.fillWholeTile(ti, color, true)
+    for (const p of pixelsFilled) {
+      const diff = tileAgent.setPixel(p, color, false, false)
+      if (diff) pxDiffs.push(diff)
+    }
+
+    if (pxDiffs.length > 0) tileAgent.addDiffs(pxDiffs)
+  }
+
+  collectEdgePixels(agent: TileLayerImageAgent, filled: TileIndex[]): Vec2[] {
+    const edge: Vec2[] = []
+    const TILE_SIZE = agent.TILE_SIZE
+    const filledSet = new Set(filled.map((t) => `${t.row},${t.column}`))
+
+    for (const ti of filled) {
+      const offset = agent.getTile(ti).getOffset()
+      const neighbors = [
+        { dr: -1, dc: 0, dx: 0, dy: -1, axis: 'x' },
+        { dr: 1, dc: 0, dx: 0, dy: TILE_SIZE, axis: 'x' },
+        { dr: 0, dc: -1, dx: -1, dy: 0, axis: 'y' },
+        { dr: 0, dc: 1, dx: TILE_SIZE, dy: 0, axis: 'y' },
+      ]
+
+      for (const { dr, dc, dx, dy, axis } of neighbors) {
+        const ni = `${ti.row + dr},${ti.column + dc}`
+        if (filledSet.has(ni)) continue
+        for (let i = 0; i < TILE_SIZE; i++) {
+          const x = axis === 'x' ? offset.x + i : offset.x + dx
+          const y = axis === 'y' ? offset.y + i : offset.y + dy
+          edge.push({ x, y })
+        }
+      }
+    }
+    return edge
+  }
+}
+
+================
 File: src/models/types/Tool.ts
 ================
 import {
@@ -1713,9 +2261,9 @@ export const activeLayerImage = (): LayerImage =>
   layerImageStore[layerStore.activeLayerId]
 
 export const canUndo = (): boolean =>
-  layerImageStore[layerStore.activeLayerId].undoStack.length > 0
+  layerImageStore[layerStore.activeLayerId]?.undoStack.length > 0
 export const canRedo = (): boolean =>
-  layerImageStore[layerStore.activeLayerId].redoStack.length > 0
+  layerImageStore[layerStore.activeLayerId]?.redoStack.length > 0
 
 ================
 File: src/styles/components/bottom_info.css.ts
@@ -1757,40 +2305,6 @@ File: src/styles/components/canvas/image_pool.module.css
 .image-container {
   height: 100%;
   width: 100%;
-}
-
-================
-File: src/styles/components/canvas/layer_canvas.module.css
-================
-.layer-canvas {
-  image-rendering: pixelated; /* ドット絵に重要 */
-  pointer-events: none; /* マウスイベントは通さない（必要に応じて） */
-  position: absolute;
-}
-
-.layer-canvas.dev-hint[data-layer-id="dot1"] {
-  background-color: rgb(255 0 0 / var(--layer-opacity)); /* 赤系 */
-}
-
-.layer-canvas.dev-hint[data-layer-id="dot2"] {
-  background-color: rgb(0 255 0 / var(--layer-opacity)); /* 緑系 */
-}
-
-.layer-canvas.dev-hint[data-layer-id="dot3"] {
-  background-color: rgb(0 0 255 / var(--layer-opacity)); /* 青系 */
-}
-
-.layer-canvas.dev-hint[data-layer-id="auto1"] {
-  background-color: rgb(255 255 0 / var(--layer-opacity)); /* 黄系 */
-}
-
-.layer-canvas.dev-hint[data-layer-id="image1"] {
-  background-color: rgb(255 0 255 / var(--layer-opacity)); /* ピンク系 */
-}
-
-.hidden {
-  opacity: 0;
-  pointer-events: auto; /* display:none ではなくイベントを通す */
 }
 
 ================
@@ -1902,34 +2416,6 @@ export const h100 = style({
 });
 
 export const wh100 = style([w100, h100]);
-
-================
-File: src/utils/colorUtils.ts
-================
-// "#rrggbb" -> r/g/b
-export function hexToRGB(hex: string): [number, number, number] {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return [r, g, b]
-}
-
-// "#rrggbbaa" -> r/g/b/a
-export function hexToRGBA(hex: string): [number, number, number, number] {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  let a = parseInt(hex.slice(7, 9), 16)
-  if (!a) a = 255 // ここがなかったので a=NaN となり、塗る際にエラー？
-  return [r, g, b, a]
-}
-
-export function colorMatch(
-  a: [number, number, number, number],
-  b: [number, number, number, number]
-): boolean {
-  return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3]
-}
 
 ================
 File: src/utils/pathUtils.ts
@@ -2587,19 +3073,19 @@ import {
   mkdir,
   readTextFile,
   writeTextFile,
-} from "@tauri-apps/plugin-fs";
-import { globalStore, setGlobalStore } from "~/stores/global/globalStore";
+} from '@tauri-apps/plugin-fs'
+import { globalStore, setGlobalStore } from '~/stores/global/globalStore'
 
-const FILE_NAME = "global.sledgeconfig";
+const FILE_NAME = 'global.sledgeconfig'
 
 export async function saveGlobalSettings() {
   try {
-    const json = JSON.stringify(globalStore);
-    await mkdir("", { baseDir: BaseDirectory.AppConfig, recursive: true });
-    await writeTextFile(FILE_NAME, json, { baseDir: BaseDirectory.AppConfig });
-    console.log("[globalIO] 設定保存完了");
+    const json = JSON.stringify(globalStore)
+    await mkdir('', { baseDir: BaseDirectory.AppConfig, recursive: true })
+    await writeTextFile(FILE_NAME, json, { baseDir: BaseDirectory.AppConfig })
+    console.log('[globalIO] 設定保存完了')
   } catch (e) {
-    console.error("[globalIO] 設定保存失敗", e);
+    console.error('[globalIO] 設定保存失敗', e)
   }
 }
 
@@ -2607,16 +3093,19 @@ export async function loadGlobalSettings() {
   try {
     const json = await readTextFile(FILE_NAME, {
       baseDir: BaseDirectory.AppConfig,
-    });
-    const data = JSON.parse(json);
+    })
+    const data = JSON.parse(json)
 
     if (data.recentOpenedFiles) {
-      setGlobalStore("recentOpenedFiles", data.recentOpenedFiles);
+      setGlobalStore('recentOpenedFiles', data.recentOpenedFiles)
+    }
+    if (data.canvasRenderingMode) {
+      setGlobalStore('canvasRenderingMode', data.canvasRenderingMode)
     }
 
-    console.log("[globalIO] 設定読み込み完了");
+    console.log('[globalIO] 設定読み込み完了')
   } catch (e) {
-    console.warn("[globalIO] 設定ファイルが存在しないか、読み込み失敗:", e);
+    console.warn('[globalIO] 設定ファイルが存在しないか、読み込み失敗:', e)
   }
 }
 
@@ -2731,34 +3220,6 @@ export function downloadImageData(
 }
 
 ================
-File: src/models/dsl/DSLRunner.ts
-================
-import { cloneImageData } from '~/models/factories/utils'
-import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
-import { safeInvoke } from '~/utils/tauriUtils'
-import { DSL } from './DSL'
-
-export async function runDSL(
-  dsl: DSL,
-  image: ImageData
-): Promise<ImageData | undefined> {
-  const encoded = encodeImageData(cloneImageData(image))
-
-  const dslStr = dsl.build(true)
-  if (dslStr === undefined) return
-
-  const result = await safeInvoke<string>('run_pipeline', {
-    dsl: dslStr,
-    encoded,
-    width: image.width,
-    height: image.height,
-  })
-
-  if (!result) return
-  return decodeImageData(result, image.width, image.height)
-}
-
-================
 File: src/models/factories/canvasPreview.ts
 ================
 export function createPreviewCanvas(
@@ -2815,104 +3276,131 @@ export const createTool = (
 });
 
 ================
-File: src/models/layer_canvas/LayerCanvasOperator.ts
+File: src/models/factories/utils.ts
 ================
-import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas'
-import { cloneImageData } from '~/models/factories/utils'
-import { Vec2 } from '~/models/types/Vector'
-import { currentTool } from '~/stores/internal/toolsStore'
-import { hexToRGBA } from '~/utils/colorUtils'
-import { Tool } from '../types/Tool'
-import { setBottomInfo } from '~/components/BottomInfo'
-import { DrawState } from './DrawState'
-import { getToolInstance } from '../tools/ToolBase'
-import LayerImageAgent from '../layer_image/LayerImageAgent'
-import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent'
-import { setLayerImageStore } from '~/stores/project/layerImageStore'
+const magnificationList: number[] = [1, 2, 4]
+export const getNextMagnification = (dotMagnification: number) => {
+  let index = magnificationList.findIndex((m) => m === dotMagnification)
+  if (index != -1) {
+    // 循環
+    let nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0
+    return magnificationList[nextIndex]
+  } else return 1
+}
 
-export default class LayerCanvasOperator {
-  constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
+================
+File: src/models/layer_image/HistoryManager.ts
+================
+import {
+  layerImageStore,
+  setLayerImageStore,
+} from '~/stores/project/layerImageStore'
+import { Vec2 } from '../types/Vector'
+import { reconcile } from 'solid-js/store'
+import { RGBAColor } from '~/utils/colorUtils'
+import { TileIndex } from './Tile'
 
-  public handleDraw(state: DrawState, position: Vec2, last?: Vec2) {
-    const layerCanvasRef = this.getActiveLayerCanvas()
-    const layer = layerCanvasRef.getLayer()
-    const agent = layerCanvasRef.getAgent()
-    const image = agent.getImage()
-    if (!image) return
+export type PixelDiff = {
+  kind: 'pixel'
+  position: Vec2
+  before: RGBAColor
+  after: RGBAColor
+}
 
-    position = this.getMagnificatedPosition(position, layer.dotMagnification)
-    if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification)
+export type TileDiff = {
+  kind: 'tile'
+  index: TileIndex
+  beforeColor: RGBAColor | undefined
+  afterColor: RGBAColor
+}
 
-    const result = this.useTool(
-      agent,
-      state,
-      image,
-      currentTool(),
-      position,
-      last
+export type Diff = PixelDiff | TileDiff
+
+export const getDiffHash = (diff: Diff) => {
+  switch (diff.kind) {
+    case 'pixel':
+      return `px:${diff.position.x},${diff.position.y}`
+    case 'tile':
+      return `tile:${diff.index.row},${diff.index.column}`
+  }
+}
+
+export type DiffAction = {
+  diffs: Map<string, Diff>
+}
+
+export class HistoryManager {
+  protected undoActionsStack: DiffAction[]
+  protected redoActionsStack: DiffAction[]
+
+  constructor(public layerId: string) {
+    this.undoActionsStack = []
+    this.redoActionsStack = []
+  }
+
+  public getUndoStack() {
+    return this.undoActionsStack
+  }
+
+  public getRedoStack() {
+    return this.undoActionsStack
+  }
+
+  public canUndo() {
+    return this.undoActionsStack.length > 0
+  }
+
+  public canRedo() {
+    return this.redoActionsStack.length > 0
+  }
+
+  public addAction(action: DiffAction) {
+    this.undoActionsStack.push(action)
+    this.redoActionsStack = []
+    setLayerImageStore(
+      this.layerId,
+      'undoStack',
+      reconcile(this.undoActionsStack)
     )
-
-    if (result) {
-      agent.setDrawingBuffer(result)
-      if (state === DrawState.end) {
-        agent.registerDiffAction()
-        agent.setImage(result)
-        setLayerImageStore(layer.id, 'current', cloneImageData(result))
-
-        if (agent instanceof TileLayerImageAgent) {
-          ;(agent as TileLayerImageAgent).resetAllDirtyStates()
-        }
-      }
-    }
+    setLayerImageStore(
+      this.layerId,
+      'redoStack',
+      reconcile(this.redoActionsStack)
+    )
   }
 
-  private useTool(
-    agent: LayerImageAgent,
-    state: DrawState,
-    image: ImageData,
-    tool: Tool,
-    position: Vec2,
-    last?: Vec2
-  ) {
-    const toolInstance = getToolInstance(tool.type)
-    const toolArgs = {
-      image,
-      position,
-      lastPosition: last,
-      size: tool.size,
-      color: hexToRGBA(tool.color),
-    }
-    const startTime = Date.now()
-    let isDrawnAction
-    switch (state) {
-      case DrawState.start:
-        isDrawnAction = toolInstance.onStart(agent, toolArgs)
-        break
-      case DrawState.move:
-        isDrawnAction = toolInstance.onMove(agent, toolArgs)
-        break
-      case DrawState.end:
-        isDrawnAction = toolInstance.onEnd(agent, toolArgs)
-        break
-    }
-    const endTime = Date.now()
-    if (isDrawnAction) {
-      if (agent instanceof TileLayerImageAgent) {
-        setBottomInfo(
-          `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`
-        )
-      } else {
-        setBottomInfo(`${tool.type} finished. ${endTime - startTime} ms.`)
-      }
-    }
-    return image
+  public undo(): DiffAction | undefined {
+    const undoedAction = this.undoActionsStack.pop()
+    if (undoedAction === undefined) return undefined
+    this.redoActionsStack = [undoedAction, ...this.redoActionsStack]
+    setLayerImageStore(
+      this.layerId,
+      'undoStack',
+      reconcile(this.undoActionsStack)
+    )
+    setLayerImageStore(
+      this.layerId,
+      'redoStack',
+      reconcile(this.redoActionsStack)
+    )
+    return undoedAction
   }
 
-  private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
-    return {
-      x: Math.floor(position.x / dotMagnification),
-      y: Math.floor(position.y / dotMagnification),
-    }
+  public redo(): DiffAction | undefined {
+    const redoedAction = this.redoActionsStack.shift()
+    if (redoedAction === undefined) return undefined
+    this.undoActionsStack = [...this.undoActionsStack, redoedAction]
+    setLayerImageStore(
+      this.layerId,
+      'undoStack',
+      reconcile(this.undoActionsStack)
+    )
+    setLayerImageStore(
+      this.layerId,
+      'redoStack',
+      reconcile(this.redoActionsStack)
+    )
+    return redoedAction
   }
 }
 
@@ -2934,82 +3422,6 @@ export class LayerImageManager {
     const agent = new TileLayerImageAgent(image, new HistoryManager(layerId))
     this.agents.set(layerId, agent)
     return agent
-  }
-}
-
-================
-File: src/models/layer_image/Tile.ts
-================
-import { Vec2 } from '../types/Vector'
-
-export default class Tile {
-  // 一連の動作全体で変更があったか（累計表示、UI表示用）
-  public isDirtyThroughAction: boolean
-  // 前回の描画更新から変更があったか（canvas更新用）
-  public isDirty: boolean
-
-  constructor(
-    public readonly row: number,
-    public readonly column: number,
-    public readonly globalTileSize: number
-  ) {
-    this.isDirtyThroughAction = false
-    this.isDirty = false
-  }
-
-  toString(): string {
-    return `Tile[${this.row},${this.column}]`
-  }
-
-  public getOffset(): Vec2 {
-    return {
-      x: this.row * this.globalTileSize,
-      y: this.column * this.globalTileSize,
-    }
-  }
-
-  updateState() {
-    // TODO (...maybe slow if All Layers Updated at once)
-  }
-}
-
-================
-File: src/models/tools/ToolBase.ts
-================
-import LayerImageAgent from '../layer_image/LayerImageAgent'
-import { ToolType } from '../types/Tool'
-import { Vec2 } from '../types/Vector'
-import { EraserTool } from './eraser/EraserTool'
-import { FillTool } from './fill/FillTool'
-import { PenTool } from './pen/PenTool'
-
-export interface Tool {
-  onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean
-
-  onMove: (agent: LayerImageAgent, args: ToolArgs) => boolean
-
-  onEnd: (agent: LayerImageAgent, args: ToolArgs) => boolean
-}
-
-export interface ToolArgs {
-  position: Vec2
-  lastPosition?: Vec2
-  color: [number, number, number, number] // RGBA
-  size?: number
-  // TODO: pressure, tilt, ...
-}
-
-export const getToolInstance = (toolType: ToolType) => {
-  switch (toolType) {
-    case ToolType.Pen:
-      return new PenTool()
-    case ToolType.Eraser:
-      return new EraserTool()
-    case ToolType.Fill:
-      return new FillTool()
-
-    default:
-      return new PenTool()
   }
 }
 
@@ -3643,137 +4055,149 @@ import {
   fontFace,
   globalStyle,
   style,
-} from "@vanilla-extract/css";
-import { flexCol, flexRow, h100 } from "./snippets.css";
+} from '@vanilla-extract/css'
+import { flexCol, flexRow, h100 } from './snippets.css'
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',
-});
+})
 export const ZFB03B = fontFace({
   src: 'url("/fonts/04B_03B_.ttf")',
-});
+})
 export const ZFB08 = fontFace({
   src: 'url("/fonts/04B_08__.ttf")',
-});
+})
 export const ZFB09 = fontFace({
   src: 'url("/fonts/04B_09__.ttf")',
-});
+})
 export const ZFB11 = fontFace({
   src: 'url("/fonts/04B_11__.ttf")',
-});
+})
 export const ZFB31 = fontFace({
   src: 'url("/fonts/04B_31__.ttf")',
-});
+})
 export const Terminus = fontFace({
   src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")',
-});
+})
+export const k8x12 = fontFace({
+  src: 'url("/fonts/k8x12/k8x12.ttf")',
+})
+export const k8x12L = fontFace({
+  src: 'url("/fonts/k8x12/k8x12L.ttf")',
+})
+export const k8x12S = fontFace({
+  src: 'url("/fonts/k8x12/k8x12S.ttf")',
+})
+export const k12x8 = fontFace({
+  src: 'url("/fonts/k12x8/k12x8.ttf")',
+})
 
-export const vars = createGlobalTheme(":root", {
+export const vars = createGlobalTheme(':root', {
   color: {
-    primary: "#ffffff",
-    secondary: "#f0f0f0",
-    text: "#111111",
-    danger: "#ff0000",
-    muted: "#00000030",
-    bg: "#ffffff",
-    surface: "#f0f0f0",
+    primary: '#ffffff',
+    secondary: '#f0f0f0',
+    text: '#111111',
+    danger: '#ff0000',
+    muted: '#00000030',
+    bg: '#ffffff',
+    surface: '#f0f0f0',
 
-    button: "#ffffff",
-    button_hover: "#f0f0f0",
-    button_pressed: "#f0f0f0",
+    button: '#ffffff',
+    button_hover: '#f0f0f0',
+    button_pressed: '#f0f0f0',
   },
   spacing: {
-    xs: "4px",
-    sm: "8px",
-    md: "12px",
-    lg: "16px",
-    xl: "24px",
+    xs: '4px',
+    sm: '8px',
+    md: '12px',
+    lg: '16px',
+    xl: '24px',
   },
   text: {
-    xs: "6px",
-    sm: "8px",
-    md: "10px",
-    lg: "12px",
-    xl: "16px",
+    xs: '6px',
+    sm: '8px',
+    md: '10px',
+    lg: '12px',
+    xl: '16px',
   },
   font: {
-    body: ZFB08,
+    body: `${ZFB08}, ${k8x12}`,
   },
-});
+})
 
-globalStyle("button, p, a, input", {
+globalStyle('button, p, a, input', {
   fontFamily: ZFB08,
   color: vars.color.text,
-});
+})
 
-globalStyle("a:hover", {
-  color: "red",
-});
+globalStyle('a:hover', {
+  color: 'red',
+})
 
-globalStyle("button", {
+globalStyle('button', {
   background: vars.color.button,
-  border: "1px black solid",
-  borderRadius: "2px",
-  cursor: "pointer",
-  fontSize: "0.5rem",
-  height: "fit-content",
-  padding: "2px 6px",
-  pointerEvents: "all",
-});
+  border: '1px black solid',
+  borderRadius: '2px',
+  cursor: 'pointer',
+  fontSize: '0.5rem',
+  height: 'fit-content',
+  padding: '2px 6px',
+  pointerEvents: 'all',
+})
 
-globalStyle("button:hover", {
+globalStyle('button:hover', {
   background: vars.color.button_hover,
-});
+})
 
-globalStyle("button:active", {
+globalStyle('button:active', {
   background: vars.color.button_pressed,
-  transform: "translateY(1px)",
-});
+  transform: 'translateY(1px)',
+})
 
-globalStyle("#root", {
-  display: "flex",
-  flexDirection: "row",
-  height: "100%",
-  userSelect: "none",
-});
+globalStyle('#root', {
+  display: 'flex',
+  flexDirection: 'row',
+  height: '100%',
+  userSelect: 'none',
+})
 
-export const sideArea = style([flexRow, h100]);
+export const sideArea = style([flexRow, h100])
 
 export const sideAreaEdge = style([
   flexCol,
   h100,
   {
-    gap: "20px",
-    width: "20px",
-    margin: "10px 0 20px 2px",
-    paddingBottom: "20px",
-    justifyContent: "flex-end",
+    gap: '20px',
+    width: '20px',
+    margin: '10px 0 20px 2px',
+    paddingBottom: '20px',
+    justifyContent: 'flex-end',
   },
-]);
+])
 
 export const sideAreaEdgeText = style({
-  fontSize: "0.5rem",
-  letterSpacing: "2px",
-  transform: "rotate(180deg) scaleX(0.8)",
-  whiteSpace: "nowrap",
-  writingMode: "vertical-rl",
-});
+  fontSize: '0.5rem',
+  letterSpacing: '2px',
+  transform: 'rotate(180deg) scaleX(0.8)',
+  whiteSpace: 'nowrap',
+  writingMode: 'vertical-rl',
+})
 
 export const sideAreaContent = style([
   flexCol,
   {
-    borderRight: "1px solid #aaa",
-    gap: "1rem",
-    padding: "20px 40px 10px 20px",
-    width: "230px",
+    borderRight: '1px solid #aaa',
+    gap: '1rem',
+    padding: '20px 40px 10px 20px',
+    width: '230px',
   },
-]);
+])
 
 export const sledgeLogo = style({
-  bottom: "2px",
-  position: "absolute",
-  right: "2px",
-});
+  bottom: '2px',
+  position: 'absolute',
+  right: '2px',
+})
 
 ================
 File: src/styles/reset.css.ts
@@ -3836,24 +4260,24 @@ globalStyle("input[type='number']", {
 ================
 File: src/styles/section_global.css.ts
 ================
-import { style } from "@vanilla-extract/css";
-import { vars, ZFB11 } from "./global.css";
-import { flexCol, w100 } from "./snippets.css";
+import { style } from '@vanilla-extract/css'
+import { vars, ZFB11 } from './global.css'
+import { flexCol, w100 } from './snippets.css'
 
 export const sectionRoot = style([
   flexCol,
   {
     // border: '1px solid black',
   },
-]);
+])
 
 export const sectionCaption = style({
   fontFamily: ZFB11,
-  fontSize: vars.text.xs,
+  fontSize: vars.text.sm,
   marginBottom: vars.spacing.md,
-});
+})
 
-export const sectionContent = style([flexCol, w100]);
+export const sectionContent = style([flexCol, w100])
 
 ================
 File: src/styles/section/canvas.css.ts
@@ -4068,6 +4492,34 @@ export const saveLog = style({
   color: "limegreen",
   marginLeft: vars.spacing.sm,
 });
+
+================
+File: src/utils/colorUtils.ts
+================
+export type RGBColor = [number, number, number]
+export type RGBAColor = [number, number, number, number]
+
+// "#rrggbb" -> r/g/b
+export function hexToRGB(hex: string): RGBColor {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return [r, g, b]
+}
+
+// "#rrggbbaa" -> r/g/b/a
+export function hexToRGBA(hex: string): RGBAColor {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  let a = parseInt(hex.slice(7, 9), 16)
+  if (!a) a = 255 // ここがなかったので a=NaN となり、塗る際にエラー？
+  return [r, g, b, a]
+}
+
+export function colorMatch(a: RGBAColor, b: RGBAColor): boolean {
+  return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3]
+}
 
 ================
 File: src/utils/ImageUtils.ts
@@ -4512,6 +4964,7 @@ import PenConfig from "./section/PenConfig";
 import Project from "./section/Project";
 
 import { sideAreaContent } from "~/styles/global.css";
+import GlobalSettings from "./section/GlobalSettings";
 
 const SideSections: Component<{}> = (props) => {
   return (
@@ -4522,6 +4975,7 @@ const SideSections: Component<{}> = (props) => {
       <PenConfig />
       <LayerList />
       <CanvasSettings />
+      <GlobalSettings />
     </div>
   );
 };
@@ -4575,570 +5029,226 @@ export function importImageToActiveLayer(file: File) {
 }
 
 ================
-File: src/models/layer_image/agents/RawLayerImageAgent.ts
+File: src/models/dsl/DSLRunner.ts
 ================
-import { Vec2 } from '~/models/types/Vector'
-import LayerImageAgent from '../LayerImageAgent'
-import { PixelDiff } from '../HistoryManager'
+import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
+import { safeInvoke } from '~/utils/tauriUtils'
+import { DSL } from './DSL'
 
-export default class RawLayerImageAgent extends LayerImageAgent {
-  putImageInto(ctx: CanvasRenderingContext2D) {
-    ctx.putImageData(this.image, 0, 0)
-  }
+export async function runDSL(
+  dsl: DSL,
+  image: ImageData
+): Promise<ImageData | undefined> {
+  const encoded = encodeImageData(image)
 
-  putDrawingBufferInto(ctx: CanvasRenderingContext2D) {
-    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0)
-  }
+  const dslStr = dsl.build(true)
+  if (dslStr === undefined) return
 
-  public setPixel(
-    position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number,
-    excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
-  ): PixelDiff | undefined {
-    return this.setPixelInPosition(
-      position,
-      r,
-      g,
-      b,
-      a,
-      excludePositionMatch,
-      excludeColorMatch
-    )
-  }
+  const result = await safeInvoke<string>('run_pipeline', {
+    dsl: dslStr,
+    encoded,
+    width: image.width,
+    height: image.height,
+  })
 
-  public deletePixel(
-    position: Vec2,
-    excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
-  ): PixelDiff | undefined {
-    return this.deletePixelInPosition(
-      position,
-      excludePositionMatch,
-      excludeColorMatch
-    )
-  }
-
-  public getPixel(position: Vec2): [number, number, number, number] {
-    const i = (position.y * this.image.width + position.x) * 4
-    const d = this.image.data
-    return [d[i], d[i + 1], d[i + 2], d[i + 3]]
-  }
+  if (!result) return
+  return decodeImageData(result, image.width, image.height)
 }
 
 ================
-File: src/models/layer_image/agents/TileLayerImageAgent.ts
+File: src/models/layer_canvas/LayerCanvasOperator.ts
 ================
-import { HistoryManager } from './../HistoryManager'
+import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas'
 import { Vec2 } from '~/models/types/Vector'
-import LayerImageAgent from '../LayerImageAgent'
-import Tile from '../Tile'
-import { PixelDiff } from '../HistoryManager'
-
-export default class TileLayerImageAgent extends LayerImageAgent {
-  readonly TILE_SIZE = 10
-
-  private tiles: Tile[][] = []
-
-  constructor(imageData: ImageData, historyManager: HistoryManager) {
-    super(imageData, historyManager)
-  }
-
-  initTile() {
-    const tileRowCount = Math.ceil(this.getWidth() / this.TILE_SIZE)
-    const tileColumnCount = Math.ceil(this.getHeight() / this.TILE_SIZE)
-    for (let row = 0; row < tileRowCount; row++) {
-      this.tiles[row] = []
-      for (let column = 0; column < tileColumnCount; column++) {
-        this.tiles[row][column] = new Tile(row, column, this.TILE_SIZE)
-      }
-    }
-  }
-
-  setImage(image: ImageData): void {
-    super.setImage(image)
-    this.initTile()
-    this.resetAllDirtyStates()
-  }
-
-  putImageInto(ctx: CanvasRenderingContext2D) {
-    if (this.getDirtyTiles().length > 0) {
-      this.putOnlyForDirtyTiles(ctx, this.image)
-    }
-  }
-
-  putDrawingBufferInto(ctx: CanvasRenderingContext2D) {
-    if (this.getDirtyTiles().length > 0) {
-      if (this.drawingBuffer) this.putOnlyForDirtyTiles(ctx, this.drawingBuffer)
-    }
-  }
-
-  private putOnlyForDirtyTiles(
-    ctx: CanvasRenderingContext2D,
-    image: ImageData
-  ) {
-    const dirtyTiles = this.getDirtyTiles()
-
-    dirtyTiles.forEach((dirtyTile) => {
-      const offset = dirtyTile.getOffset()
-      ctx.putImageData(
-        image,
-        0,
-        0,
-        offset.x,
-        offset.y,
-        this.TILE_SIZE,
-        this.TILE_SIZE
-      )
-    })
-
-    this.resetDirtyStates()
-  }
-
-  private getTileIndex(layerPosition: Vec2): { row: number; column: number } {
-    const row = Math.floor(layerPosition.x / this.TILE_SIZE)
-    const column = Math.floor(layerPosition.y / this.TILE_SIZE)
-    return { row, column }
-  }
-
-  public resetDirtyStates() {
-    this.tiles = this.tiles.map((tR) => {
-      tR = tR.map((t) => {
-        t.isDirty = false
-        return t
-      })
-      return tR
-    })
-  }
-
-  public resetAllDirtyStates() {
-    this.tiles = this.tiles.map((tR) => {
-      tR = tR.map((t) => {
-        t.isDirty = false
-        t.isDirtyThroughAction = false
-        return t
-      })
-      return tR
-    })
-  }
-
-  public getDirtyTiles(): Tile[] {
-    return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirty))
-  }
-  public getDirtyTilesInAction(): Tile[] {
-    return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirtyThroughAction))
-  }
-
-  public addPixelDiffs(diffs: PixelDiff[]) {
-    super.addPixelDiffs(diffs)
-  }
-
-  public setPixel(
-    position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number,
-    excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
-  ): PixelDiff | undefined {
-    const result = this.setPixelInPosition(
-      position,
-      r,
-      g,
-      b,
-      a,
-      excludePositionMatch,
-      excludeColorMatch
-    )
-    if (result !== undefined) {
-      const tileIndex = this.getTileIndex(position)
-      this.tiles[tileIndex.row][tileIndex.column].isDirty = true
-      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
-    }
-    return result
-  }
-
-  public deletePixel(
-    position: Vec2,
-    excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
-  ): PixelDiff | undefined {
-    const result = this.deletePixelInPosition(
-      position,
-      excludePositionMatch,
-      excludeColorMatch
-    )
-    if (result !== undefined) {
-      const tileIndex = this.getTileIndex(position)
-      this.tiles[tileIndex.row][tileIndex.column].isDirty = true
-      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
-    }
-    return result
-  }
-
-  public getPixel(position: Vec2): [number, number, number, number] {
-    const i = (position.y * this.image.width + position.x) * 4
-    const d = this.image.data
-
-    return [d[i], d[i + 1], d[i + 2], d[i + 3]]
-  }
-}
-
-================
-File: src/models/layer_image/LayerImageAgent.ts
-================
-import { Vec2 } from '~/models/types/Vector'
-import { DiffAction, HistoryManager, PixelDiff } from './HistoryManager'
-import { cloneImageData } from '../factories/utils'
-import { colorMatch } from '~/utils/colorUtils'
+import { currentTool } from '~/stores/internal/toolsStore'
+import { hexToRGBA } from '~/utils/colorUtils'
+import { Tool } from '../types/Tool'
 import { setBottomInfo } from '~/components/BottomInfo'
+import { DrawState } from './DrawState'
+import { getToolInstance } from '../tools/ToolBase'
+import LayerImageAgent from '../layer_image/LayerImageAgent'
+import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent'
+import { setLayerImageStore } from '~/stores/project/layerImageStore'
+import { reconcile } from 'solid-js/store'
 
-interface DrawingBufferChangeEvent {}
-interface ImageChangeEvent {}
+export default class LayerCanvasOperator {
+  constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
 
-// それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
-export default abstract class LayerImageAgent {
-  protected image: ImageData
-  protected drawingBuffer: ImageData | undefined
-  protected historyManager
+  public handleDraw(state: DrawState, position: Vec2, last?: Vec2) {
+    const layerCanvasRef = this.getActiveLayerCanvas()
+    const layer = layerCanvasRef.getLayer()
+    const agent = layerCanvasRef.getAgent()
+    const image = agent.getImage()
+    if (!image) return
 
-  protected onImageChangedListeners: {
-    [key: string]: (e: ImageChangeEvent) => void
-  } = {}
-  protected onDrawingBufferChangedListeners: {
-    [key: string]: (e: DrawingBufferChangeEvent) => void
-  } = {}
+    position = this.getMagnificatedPosition(position, layer.dotMagnification)
+    if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification)
 
-  constructor(imageData: ImageData, historyManager?: HistoryManager) {
-    this.image = imageData
-    this.drawingBuffer = imageData
-    this.historyManager = historyManager
-  }
-
-  getImage() {
-    return this.image
-  }
-
-  setImage(image: ImageData, silentlySet?: boolean) {
-    this.image = image
-    if (silentlySet) this.callOnImageChangeListeners()
-    this.resetDrawingBuffer()
-  }
-
-  getDrawingBuffer() {
-    return this.drawingBuffer
-  }
-
-  setDrawingBuffer(imageData?: ImageData) {
-    this.drawingBuffer = imageData
-    this.callOnDrawingBufferChangeListeners()
-  }
-
-  resetDrawingBuffer() {
-    this.setDrawingBuffer(this.image)
-  }
-
-  abstract putImageInto(ctx: CanvasRenderingContext2D): void
-  abstract putDrawingBufferInto(ctx: CanvasRenderingContext2D): void
-
-  putImageIntoForce(ctx: CanvasRenderingContext2D) {
-    ctx.putImageData(this.image, 0, 0)
-  }
-  putDrawingBufferIntoForce(ctx: CanvasRenderingContext2D) {
-    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0)
-  }
-
-  setOnImageChangeListener(
-    key: string,
-    listener: (e: ImageChangeEvent) => void
-  ) {
-    this.onImageChangedListeners[key] = listener
-  }
-
-  setOnDrawingBufferChangeListener(
-    key: string,
-    listener: (e: DrawingBufferChangeEvent) => void
-  ) {
-    this.onDrawingBufferChangedListeners[key] = listener
-  }
-
-  callOnImageChangeListeners() {
-    Object.values(this.onImageChangedListeners).forEach((listener) =>
-      listener({})
-    )
-  }
-
-  callOnDrawingBufferChangeListeners() {
-    Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
-      listener({})
-    )
-  }
-
-  getWidth = (): number => this.image.width
-  getHeight = (): number => this.image.height
-
-  public currentDiffAction: DiffAction = { diffs: new Map() }
-
-  public addPixelDiffs(diffs: PixelDiff[]) {
-    diffs.forEach((d) => {
-      this.currentDiffAction.diffs.set(`${d.position.x},${d.position.y}`, d)
-    })
-  }
-
-  public registerDiffAction() {
-    this.historyManager?.addAction(this.currentDiffAction)
-    this.currentDiffAction = { diffs: new Map() }
-  }
-
-  public canUndo = () => this.historyManager?.canUndo()
-  public canRedo = () => this.historyManager?.canRedo()
-
-  public undo() {
-    const undoedAction = this.historyManager?.undo()
-    if (undoedAction === undefined) return
-    setBottomInfo(`undo.`)
-    undoedAction.diffs.forEach((pxDiff) => {
-      this.setPixelInPosition(
-        pxDiff.position,
-        pxDiff.before[0],
-        pxDiff.before[1],
-        pxDiff.before[2],
-        pxDiff.before[3],
-        false,
-        false
-      )
-    })
-    setBottomInfo(`undo done. (${undoedAction.diffs.size} px updated)`)
-
-    this.callOnImageChangeListeners()
-  }
-
-  public redo() {
-    const redoedAction = this.historyManager?.redo()
-    if (redoedAction === undefined) return
-    setBottomInfo(`redo.`)
-    redoedAction.diffs.forEach((pxDiff) => {
-      this.setPixelInPosition(
-        pxDiff.position,
-        pxDiff.after[0],
-        pxDiff.after[1],
-        pxDiff.after[2],
-        pxDiff.after[3],
-        false,
-        false
-      )
-    })
-    setBottomInfo(`redo done. (${redoedAction.diffs.size} px updated)`)
-
-    this.callOnImageChangeListeners()
-  }
-
-  public abstract setPixel(
-    position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number,
-    excludePositionMatch: boolean,
-    excludeColorMatch: boolean
-  ): PixelDiff | undefined
-
-  protected setPixelInPosition(
-    position: Vec2,
-    r: number,
-    g: number,
-    b: number,
-    a: number,
-    excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
-  ): PixelDiff | undefined {
-    if (!this.isInBounds(position)) return undefined
-    if (
-      excludePositionMatch &&
-      this.currentDiffAction.diffs.has(`${position.x},${position.y}`)
-    )
-      return undefined
-    const i = (position.y * this.getWidth() + position.x) * 4
-    const beforeColor: [number, number, number, number] = [
-      this.image.data[i + 0],
-      this.image.data[i + 1],
-      this.image.data[i + 2],
-      this.image.data[i + 3],
-    ]
-    if (excludeColorMatch && colorMatch(beforeColor, [r, g, b, a]))
-      return undefined
-
-    if (!this.drawingBuffer) this.drawingBuffer = cloneImageData(this.image)
-
-    this.drawingBuffer.data[i + 0] = r
-    this.drawingBuffer.data[i + 1] = g
-    this.drawingBuffer.data[i + 2] = b
-    this.drawingBuffer.data[i + 3] = a
-
-    return {
+    const result = this.useTool(
+      agent,
+      state,
+      image,
+      currentTool(),
       position,
-      before: beforeColor,
-      after: [r, g, b, a],
+      last
+    )
+
+    if (result) {
+      agent.setDrawingBuffer(result)
+      if (state === DrawState.end) {
+        agent.registerDiffAction()
+        agent.setImage(result)
+        setLayerImageStore(layer.id, 'current', reconcile(result))
+
+        if (agent instanceof TileLayerImageAgent) {
+          ;(agent as TileLayerImageAgent).resetAllDirtyStates()
+        }
+      }
     }
   }
 
-  public abstract deletePixel(
-    position: Vec2,
-    excludePositionMatch: boolean,
-    excludeColorMatch: boolean
-  ): PixelDiff | undefined
-
-  protected deletePixelInPosition(
-    position: Vec2,
-    excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
-  ): PixelDiff | undefined {
-    return this.setPixelInPosition(
-      position,
-      0,
-      0,
-      0,
-      0,
-      excludePositionMatch,
-      excludeColorMatch
-    )
-  }
-
-  public abstract getPixel(position: Vec2): [number, number, number, number]
-
-  public isInBounds(position: Vec2) {
-    return (
-      position.x >= 0 &&
-      position.y >= 0 &&
-      position.x < this.getWidth() &&
-      position.y < this.getHeight()
-    )
-  }
-}
-
-================
-File: src/models/tools/eraser/EraserTool.ts
-================
-import { Tool, ToolArgs } from '../ToolBase'
-import { drawCompletionLine, drawSquarePixel } from '../DrawUtils'
-import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
-
-export class EraserTool implements Tool {
-  onStart(agent: LayerImageAgent, args: ToolArgs) {
-    return false
-  }
-
-  onMove(
+  private useTool(
     agent: LayerImageAgent,
-    { position, lastPosition, color, size }: ToolArgs
+    state: DrawState,
+    image: ImageData,
+    tool: Tool,
+    position: Vec2,
+    last?: Vec2
   ) {
-    if (!size) return false
-
-    drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.deletePixel({ x: px, y: py }, true, true)
-      if (diff !== undefined) {
-        agent.addPixelDiffs([diff])
-      }
-    })
-
-    if (lastPosition !== undefined) {
-      drawCompletionLine(position, lastPosition, (x, y) => {
-        drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.deletePixel({ x: px, y: py }, true, true)
-          if (diff !== undefined) {
-            agent.addPixelDiffs([diff])
-          }
-        })
-      })
+    const toolInstance = getToolInstance(tool.type)
+    const toolArgs = {
+      image,
+      position,
+      lastPosition: last,
+      size: tool.size,
+      color: hexToRGBA(tool.color),
     }
-
-    return true
-  }
-
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    return false
-  }
-}
-
-================
-File: src/models/tools/fill/FillTool.ts
-================
-import { decodeImageData, encodeImageData, setPixel } from '~/utils/ImageUtils'
-import { Tool, ToolArgs } from '../ToolBase'
-import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
-import { colorMatch } from '~/utils/colorUtils'
-import { Vec2 } from '~/models/types/Vector'
-import { PixelDiff } from '~/models/layer_image/HistoryManager'
-
-export class FillTool implements Tool {
-  onStart(agent: LayerImageAgent, { position, lastPosition, color }: ToolArgs) {
-    const targetColor = agent.getPixel(position)
-    console.log(color)
-    console.log(targetColor)
-    const matches = (p: Vec2) => colorMatch(agent.getPixel(p), targetColor)
-
-    if (colorMatch(targetColor, color)) return false
-
-    // console.log(`---${image.width}x${image.height} flood fill---`)
-
     const startTime = Date.now()
-    const queue: Vec2[] = [position]
-    const filled: Vec2[] = []
-    const visited = new Uint8Array(agent.getWidth() * agent.getHeight()) // 0:未訪問, 1:訪問済
-    const index = (p: Vec2) => p.y * agent.getWidth() + p.x
-    let queueCount = 0
-    let visitCount = 0
-    while (queue.length > 0) {
-      queueCount++
-      const c = queue.pop()!
-      if (!agent.isInBounds(c)) continue
-
-      const i = index(c)
-      if (visited[i]) continue
-      visited[i] = 1
-      visitCount++
-
-      if (matches(c)) {
-        filled.push(c)
-        queue.push({ x: c.x + 1, y: c.y })
-        queue.push({ x: c.x - 1, y: c.y })
-        queue.push({ x: c.x, y: c.y + 1 })
-        queue.push({ x: c.x, y: c.y - 1 })
-      }
+    let isDrawnAction
+    switch (state) {
+      case DrawState.start:
+        isDrawnAction = toolInstance.onStart(agent, toolArgs)
+        break
+      case DrawState.move:
+        isDrawnAction = toolInstance.onMove(agent, toolArgs)
+        break
+      case DrawState.end:
+        isDrawnAction = toolInstance.onEnd(agent, toolArgs)
+        break
     }
     const endTime = Date.now()
-    // console.log('new: ' + (endTime - startTime))
-
-    const pxDiffs: PixelDiff[] = []
-    // バッファに一括反映
-    for (const p of filled) {
-      const diff = agent.setPixel(
-        p,
-        color[0],
-        color[1],
-        color[2],
-        color[3],
-        false,
-        false
-      )
-      if (diff !== undefined) pxDiffs.push(diff)
+    if (isDrawnAction) {
+      if (agent instanceof TileLayerImageAgent) {
+        setBottomInfo(
+          `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`
+        )
+      } else {
+        setBottomInfo(`${tool.type} finished. ${endTime - startTime} ms.`)
+      }
     }
-
-    agent.addPixelDiffs(pxDiffs)
-
-    return true
+    return image
   }
 
-  onMove(agent: LayerImageAgent, args: ToolArgs) {
-    return false
+  private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
+    return {
+      x: Math.floor(position.x / dotMagnification),
+      y: Math.floor(position.y / dotMagnification),
+    }
+  }
+}
+
+================
+File: src/models/layer_image/Tile.ts
+================
+import { RGBAColor } from '~/utils/colorUtils'
+import { Vec2 } from '../types/Vector'
+
+export interface TileIndex {
+  row: number
+  column: number
+}
+
+export default class Tile {
+  // 一連の動作全体で変更があったか（累計表示、UI表示用）
+  public isDirtyThroughAction: boolean
+  // 前回の描画更新から変更があったか（canvas更新用）
+  public isDirty: boolean
+
+  // このタイルが単色（すべて同一RGBA）なら true
+  public isUniform = false
+  // 単色時のカラーキャッシュ
+  public uniformColor: RGBAColor | undefined = undefined
+
+  constructor(
+    public readonly row: number,
+    public readonly column: number,
+    public readonly globalTileSize: number
+  ) {
+    this.isDirtyThroughAction = false
+    this.isDirty = false
   }
 
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    return false
+  toString(): string {
+    return `Tile[${this.row},${this.column}]`
+  }
+
+  public getOffset(): Vec2 {
+    return {
+      x: this.column * this.globalTileSize,
+      y: this.row * this.globalTileSize,
+    }
+  }
+
+  public isInBounds(positionInTile: Vec2) {
+    return (
+      positionInTile.x >= 0 &&
+      positionInTile.x < this.globalTileSize &&
+      positionInTile.y >= 0 &&
+      positionInTile.y < this.globalTileSize
+    )
+  }
+
+  updateState() {}
+}
+
+================
+File: src/models/tools/ToolBase.ts
+================
+import { RGBAColor } from '~/utils/colorUtils'
+import LayerImageAgent from '../layer_image/LayerImageAgent'
+import { ToolType } from '../types/Tool'
+import { Vec2 } from '../types/Vector'
+import { EraserTool } from './eraser/EraserTool'
+import { FillTool } from './fill/FillTool'
+import { PenTool } from './pen/PenTool'
+
+export interface Tool {
+  onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean
+
+  onMove: (agent: LayerImageAgent, args: ToolArgs) => boolean
+
+  onEnd: (agent: LayerImageAgent, args: ToolArgs) => boolean
+}
+
+export interface ToolArgs {
+  position: Vec2
+  lastPosition?: Vec2
+  color: RGBAColor // RGBA
+  size?: number
+  // TODO: pressure, tilt, ...
+}
+
+export const getToolInstance = (toolType: ToolType) => {
+  switch (toolType) {
+    case ToolType.Pen:
+      return new PenTool()
+    case ToolType.Eraser:
+      return new EraserTool()
+    case ToolType.Fill:
+      return new FillTool()
+
+    default:
+      return new PenTool()
   }
 }
 
@@ -5181,37 +5291,41 @@ export type Layer = {
 ================
 File: src/stores/global/globalStore.ts
 ================
-import { createStore } from "solid-js/store";
-import { saveGlobalSettings } from "~/io/global/globalIO";
+import { createStore } from 'solid-js/store'
+import { saveGlobalSettings } from '~/io/global/globalIO'
 
 // project
 export type FileLocation = {
-  path: string;
-  name: string;
-};
+  path: string
+  name: string
+}
+
+export type CanvasRenderingMode = 'auto' | 'pixelated' | 'crispEdges'
 
 export const [globalStore, setGlobalStore] = createStore({
   recentOpenedFiles: [
     {
-      path: "C:\\Users\\innsb\\Documents",
-      name: "project.sledge",
+      path: 'C:\\Users\\innsb\\Documents',
+      name: 'project.sledge',
     },
   ],
-});
+
+  canvasRenderingMode: 'auto' as CanvasRenderingMode,
+})
 
 export const addRecent = (loc: FileLocation) => {
-  const path = loc.path;
-  const name = loc.name;
+  const path = loc.path
+  const name = loc.name
 
   // add to recent
   setGlobalStore((store) => {
-    console.log("path: " + path);
-    console.log("name: " + name);
+    console.log('path: ' + path)
+    console.log('name: ' + name)
     if (name && path && store.recentOpenedFiles) {
       // 履歴にあっても一旦削除
       let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
-        return f.name !== name || f.path !== path?.toString();
-      });
+        return f.name !== name || f.path !== path?.toString()
+      })
       // その後、一番上に追加
       const newRecentFiles: FileLocation[] = [
         {
@@ -5219,13 +5333,13 @@ export const addRecent = (loc: FileLocation) => {
           path: path,
         },
         ...oldRecentFiles,
-      ];
-      setGlobalStore("recentOpenedFiles", newRecentFiles);
-      saveGlobalSettings();
+      ]
+      setGlobalStore('recentOpenedFiles', newRecentFiles)
+      saveGlobalSettings()
     }
-    return store;
-  });
-};
+    return store
+  })
+}
 
 ================
 File: src/stores/project/projectStore.ts
@@ -5817,6 +5931,410 @@ export class DSL {
 }
 
 ================
+File: src/models/layer_image/agents/RawLayerImageAgent.ts
+================
+import { Vec2 } from '~/models/types/Vector'
+import LayerImageAgent from '../LayerImageAgent'
+import { PixelDiff } from '../HistoryManager'
+import { RGBAColor } from '~/utils/colorUtils'
+
+export default class RawLayerImageAgent extends LayerImageAgent {
+  putImageInto(ctx: CanvasRenderingContext2D) {
+    ctx.putImageData(this.image, 0, 0)
+  }
+
+  putDrawingBufferInto(ctx: CanvasRenderingContext2D) {
+    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0)
+  }
+
+  public setPixel(
+    position: Vec2,
+    color: RGBAColor,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    return this.setPixelInPosition(
+      position,
+      color,
+      excludePositionMatch,
+      excludeColorMatch
+    )
+  }
+
+  public deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    return this.deletePixelInPosition(
+      position,
+      excludePositionMatch,
+      excludeColorMatch
+    )
+  }
+
+  public getPixel(position: Vec2): RGBAColor {
+    const i = (position.y * this.image.width + position.x) * 4
+    const d = this.image.data
+    return [d[i], d[i + 1], d[i + 2], d[i + 3]]
+  }
+}
+
+================
+File: src/models/layer_image/agents/TileLayerImageAgent.ts
+================
+import { HistoryManager, TileDiff } from './../HistoryManager'
+import { Vec2 } from '~/models/types/Vector'
+import LayerImageAgent from '../LayerImageAgent'
+import Tile, { TileIndex } from '../Tile'
+import { PixelDiff } from '../HistoryManager'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
+
+export default class TileLayerImageAgent extends LayerImageAgent {
+  readonly TILE_SIZE = 16
+
+  private tiles: Tile[][] = []
+
+  getTile(index: TileIndex) {
+    // console.log(`tile access to ${index.row}. ${index.column}`)
+    return this.tiles[index.row][index.column]
+  }
+
+  getTiles() {
+    return this.tiles
+  }
+
+  constructor(imageData: ImageData, historyManager: HistoryManager) {
+    super(imageData, historyManager)
+  }
+
+  initTile() {
+    const tileRowCount = Math.ceil(this.getHeight() / this.TILE_SIZE)
+    const tileColumnCount = Math.ceil(this.getWidth() / this.TILE_SIZE)
+    for (let row = 0; row < tileRowCount; row++) {
+      this.tiles[row] = []
+      for (let column = 0; column < tileColumnCount; column++) {
+        this.tiles[row][column] = new Tile(row, column, this.TILE_SIZE)
+      }
+    }
+    this.scanAllTilesUniformity()
+  }
+
+  scanAllTilesUniformity() {
+    const { TILE_SIZE } = this
+    const w = this.getWidth()
+    const h = this.getHeight()
+
+    for (const row of this.tiles) {
+      for (const tile of row) {
+        const { x: ox, y: oy } = tile.getOffset()
+
+        // ①タイルの左上ピクセルを基準色に
+        const base = this.getPixel({ x: ox, y: oy })
+
+        let uniform = true
+        // ②タイル内を走査（画像端は超えないよう clamp）
+        for (let dy = 0; dy < TILE_SIZE && uniform; dy++) {
+          const py = oy + dy
+          if (py >= h) break
+          for (let dx = 0; dx < TILE_SIZE; dx++) {
+            const px = ox + dx
+            if (px >= w) break
+            if (!colorMatch(this.getPixel({ x: px, y: py }), base)) {
+              uniform = false
+              break
+            }
+          }
+        }
+        // ③結果を保存
+        tile.isUniform = uniform
+        tile.uniformColor = uniform ? base : undefined
+      }
+    }
+  }
+
+  setImage(image: ImageData): void {
+    super.setImage(image)
+    this.initTile()
+  }
+
+  putImageInto(ctx: CanvasRenderingContext2D) {
+    if (this.getDirtyTiles().length > 0) {
+      this.putOnlyForDirtyTiles(ctx, this.image)
+    }
+  }
+
+  putDrawingBufferInto(ctx: CanvasRenderingContext2D) {
+    if (this.getDirtyTiles().length > 0) {
+      if (this.drawingBuffer) this.putOnlyForDirtyTiles(ctx, this.drawingBuffer)
+    }
+  }
+
+  private putOnlyForDirtyTiles(
+    ctx: CanvasRenderingContext2D,
+    image: ImageData
+  ) {
+    const dirtyTiles = this.getDirtyTiles()
+
+    dirtyTiles.forEach((dirtyTile) => {
+      const offset = dirtyTile.getOffset()
+      ctx.putImageData(
+        image,
+        0,
+        0,
+        offset.x,
+        offset.y,
+        this.TILE_SIZE,
+        this.TILE_SIZE
+      )
+    })
+
+    this.resetDirtyStates()
+  }
+
+  public getTileIndex(layerPosition: Vec2): TileIndex {
+    const row = Math.floor(layerPosition.y / this.TILE_SIZE)
+    const column = Math.floor(layerPosition.x / this.TILE_SIZE)
+    return { row, column }
+  }
+
+  public resetDirtyStates() {
+    this.tiles = this.tiles.map((tR) => {
+      tR = tR.map((t) => {
+        t.isDirty = false
+        return t
+      })
+      return tR
+    })
+  }
+
+  public resetAllDirtyStates() {
+    this.tiles = this.tiles.map((tR) => {
+      tR = tR.map((t) => {
+        t.isDirty = false
+        t.isDirtyThroughAction = false
+        return t
+      })
+      return tR
+    })
+  }
+
+  public getDirtyTiles(): Tile[] {
+    return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirty))
+  }
+  public getDirtyTilesInAction(): Tile[] {
+    return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirtyThroughAction))
+  }
+
+  protected undoTileDiff(tileDiff: TileDiff): void {
+    console.log(`tilediff. fill ${tileDiff.beforeColor}`)
+    if (tileDiff.beforeColor)
+      this.fillWholeTile(tileDiff.index, tileDiff.beforeColor, false)
+  }
+
+  protected redoTileDiff(tileDiff: TileDiff): void {
+    console.log(`tilediff. fill ${tileDiff.afterColor}`)
+    this.fillWholeTile(tileDiff.index, tileDiff.afterColor, false)
+  }
+
+  public setPixel(
+    position: Vec2,
+    color: RGBAColor,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    const result = this.setPixelInPosition(
+      position,
+      color,
+      excludePositionMatch,
+      excludeColorMatch
+    )
+    if (result !== undefined) {
+      const tileIndex = this.getTileIndex(position)
+      this.tiles[tileIndex.row][tileIndex.column].isDirty = true
+      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
+
+      const tile = this.getTile(tileIndex)
+      if (
+        tile.isUniform &&
+        tile.uniformColor !== undefined &&
+        colorMatch(tile.uniformColor, color)
+      ) {
+        this.tiles[tileIndex.row][tileIndex.column].isUniform = false
+        this.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined
+      }
+    }
+    return result
+  }
+
+  fillWholeTile(index: TileIndex, color: RGBAColor, collectDiff = true) {
+    const tile = this.getTile(index)
+    if (
+      tile.isUniform &&
+      tile.uniformColor &&
+      colorMatch(tile.uniformColor, color)
+    )
+      return
+
+    const [r, g, b, a] = color
+    const { x: ox, y: oy } = tile.getOffset()
+    const { TILE_SIZE } = this
+    const { width, data } = this.image
+
+    for (let dy = 0; dy < TILE_SIZE; dy++) {
+      const y = oy + dy
+      if (y >= this.getHeight()) break
+      let i = (y * width + ox) * 4 // 行頭インデックス
+      for (let dx = 0; dx < TILE_SIZE; dx++) {
+        const x = ox + dx
+        if (x >= this.getWidth()) break
+
+        data[i] = r
+        data[i + 1] = g
+        data[i + 2] = b
+        data[i + 3] = a
+        i += 4
+      }
+    }
+
+    if (collectDiff)
+      this.addDiffs([
+        {
+          kind: 'tile',
+          index,
+          beforeColor: tile.uniformColor,
+          afterColor: [r, g, b, a],
+        },
+      ])
+
+    // 状態更新
+    tile.isDirty = tile.isDirty = true
+    tile.isDirty = tile.isDirtyThroughAction = true
+    tile.isUniform = true
+    tile.uniformColor = color
+  }
+
+  public deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    const result = this.deletePixelInPosition(
+      position,
+      excludePositionMatch,
+      excludeColorMatch
+    )
+    if (result !== undefined) {
+      const tileIndex = this.getTileIndex(position)
+      this.tiles[tileIndex.row][tileIndex.column].isDirty = true
+      this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true
+    }
+    return result
+  }
+
+  public getPixel(position: Vec2): RGBAColor {
+    const i = (position.y * this.image.width + position.x) * 4
+    const d = this.image.data
+
+    return [d[i], d[i + 1], d[i + 2], d[i + 3]]
+  }
+
+  public getTileRowCount() {
+    return this.tiles.length
+  }
+
+  public getTileColumnCount() {
+    return this.tiles[0].length
+  }
+
+  public isTileInBounds(index: TileIndex) {
+    return (
+      index.row >= 0 &&
+      index.row < this.getTileRowCount() &&
+      index.column >= 0 &&
+      index.column < this.getTileColumnCount()
+    )
+  }
+}
+
+================
+File: src/models/tools/eraser/EraserTool.ts
+================
+import { Tool, ToolArgs } from '../ToolBase'
+import { drawCompletionLine, drawSquarePixel } from '../DrawUtils'
+import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
+
+export class EraserTool implements Tool {
+  onStart(agent: LayerImageAgent, args: ToolArgs) {
+    return false
+  }
+
+  onMove(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs) {
+    if (!size) return false
+
+    drawSquarePixel(position, size, (px, py) => {
+      const diff = agent.deletePixel({ x: px, y: py }, true, true)
+      if (diff !== undefined) {
+        agent.addDiffs([diff])
+      }
+    })
+
+    if (lastPosition !== undefined) {
+      drawCompletionLine(position, lastPosition, (x, y) => {
+        drawSquarePixel({ x, y }, size, (px, py) => {
+          const diff = agent.deletePixel({ x: px, y: py }, true, true)
+          if (diff !== undefined) {
+            agent.addDiffs([diff])
+          }
+        })
+      })
+    }
+
+    return true
+  }
+
+  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    return false
+  }
+}
+
+================
+File: src/models/tools/fill/FillTool.ts
+================
+import { Tool, ToolArgs } from '../ToolBase'
+import LayerImageAgent from '~/models/layer_image/LayerImageAgent'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
+import { Vec2 } from '~/models/types/Vector'
+import { TileFloodFill } from './TileFloodFill'
+
+export interface FillProps {
+  agent: LayerImageAgent
+  color: RGBAColor
+  position: Vec2
+}
+export interface Fill {
+  fill: (props: FillProps) => void
+}
+
+export class FillTool implements Tool {
+  onStart(agent: LayerImageAgent, { position, lastPosition, color }: ToolArgs) {
+    const fill = new TileFloodFill()
+
+    fill.fill({ agent, color, position })
+
+    return true
+  }
+
+  onMove(agent: LayerImageAgent, args: ToolArgs) {
+    return false
+  }
+
+  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    return false
+  }
+}
+
+================
 File: tsconfig.json
 ================
 {
@@ -5973,6 +6491,247 @@ import "./styles/global.css";
 import "./styles/reset.css";
 
 render(() => <App />, document.getElementById("root")!);
+
+================
+File: src/models/layer_image/LayerImageAgent.ts
+================
+import { Vec2 } from '~/models/types/Vector'
+import {
+  Diff,
+  DiffAction,
+  getDiffHash,
+  HistoryManager,
+  PixelDiff,
+  TileDiff,
+} from './HistoryManager'
+import { colorMatch, RGBAColor } from '~/utils/colorUtils'
+import { setBottomInfo } from '~/components/BottomInfo'
+
+interface DrawingBufferChangeEvent {}
+interface ImageChangeEvent {}
+
+// それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
+export default abstract class LayerImageAgent {
+  protected image: ImageData
+  protected drawingBuffer: ImageData | undefined
+  protected historyManager
+
+  protected onImageChangedListeners: {
+    [key: string]: (e: ImageChangeEvent) => void
+  } = {}
+  protected onDrawingBufferChangedListeners: {
+    [key: string]: (e: DrawingBufferChangeEvent) => void
+  } = {}
+
+  constructor(imageData: ImageData, historyManager?: HistoryManager) {
+    this.image = imageData
+    this.drawingBuffer = imageData
+    this.historyManager = historyManager
+  }
+
+  getHistoryManager() {
+    return this.historyManager
+  }
+
+  getImage() {
+    return this.image
+  }
+
+  setImage(image: ImageData, silentlySet?: boolean) {
+    this.image = image
+    if (silentlySet) this.callOnImageChangeListeners()
+    this.resetDrawingBuffer()
+  }
+
+  getDrawingBuffer() {
+    return this.drawingBuffer
+  }
+
+  setDrawingBuffer(imageData?: ImageData) {
+    this.drawingBuffer = imageData
+    this.callOnDrawingBufferChangeListeners()
+  }
+
+  resetDrawingBuffer() {
+    this.setDrawingBuffer(this.image)
+  }
+
+  abstract putImageInto(ctx: CanvasRenderingContext2D): void
+  abstract putDrawingBufferInto(ctx: CanvasRenderingContext2D): void
+
+  putImageIntoForce(ctx: CanvasRenderingContext2D) {
+    ctx.putImageData(this.image, 0, 0)
+  }
+  putDrawingBufferIntoForce(ctx: CanvasRenderingContext2D) {
+    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0)
+  }
+
+  setOnImageChangeListener(
+    key: string,
+    listener: (e: ImageChangeEvent) => void
+  ) {
+    this.onImageChangedListeners[key] = listener
+  }
+
+  setOnDrawingBufferChangeListener(
+    key: string,
+    listener: (e: DrawingBufferChangeEvent) => void
+  ) {
+    this.onDrawingBufferChangedListeners[key] = listener
+  }
+
+  callOnImageChangeListeners() {
+    Object.values(this.onImageChangedListeners).forEach((listener) =>
+      listener({})
+    )
+  }
+
+  callOnDrawingBufferChangeListeners() {
+    Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
+      listener({})
+    )
+  }
+
+  getWidth = (): number => this.image.width
+  getHeight = (): number => this.image.height
+
+  public currentDiffAction: DiffAction = { diffs: new Map() }
+
+  addDiffs(diffs: Diff[]) {
+    diffs.forEach((d) => this.currentDiffAction.diffs.set(getDiffHash(d), d))
+  }
+
+  public registerDiffAction() {
+    this.historyManager?.addAction(this.currentDiffAction)
+    this.currentDiffAction = { diffs: new Map() }
+  }
+
+  public canUndo = () => this.historyManager?.canUndo()
+  public canRedo = () => this.historyManager?.canRedo()
+
+  public undo() {
+    const undoStart = Date.now()
+    const undoedAction = this.historyManager?.undo()
+    if (undoedAction === undefined) return
+    setBottomInfo(`undo.`)
+    undoedAction.diffs.forEach((diff) => {
+      switch (diff.kind) {
+        case 'pixel':
+          this.setPixelInPosition(diff.position, diff.before, false, false)
+          break
+        case 'tile':
+          this.undoTileDiff(diff)
+          break
+      }
+    })
+    const undoEnd = Date.now()
+    setBottomInfo(
+      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`
+    )
+
+    this.callOnImageChangeListeners()
+  }
+
+  protected undoTileDiff(tileDiff: TileDiff) {}
+
+  public redo() {
+    const redoStart = Date.now()
+    const redoedAction = this.historyManager?.redo()
+    if (redoedAction === undefined) return
+    setBottomInfo(`redo.`)
+    redoedAction.diffs.forEach((diff) => {
+      switch (diff.kind) {
+        case 'pixel':
+          this.setPixelInPosition(diff.position, diff.after, false, false)
+          break
+        case 'tile':
+          this.redoTileDiff(diff)
+          break
+      }
+    })
+    const redoEnd = Date.now()
+    setBottomInfo(
+      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`
+    )
+
+    this.callOnImageChangeListeners()
+  }
+
+  protected redoTileDiff(tileDiff: TileDiff) {}
+
+  public abstract setPixel(
+    position: Vec2,
+    color: RGBAColor,
+    excludePositionMatch: boolean,
+    excludeColorMatch: boolean
+  ): PixelDiff | undefined
+
+  protected setPixelInPosition(
+    position: Vec2,
+    color: RGBAColor,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    if (!this.isInBounds(position)) return undefined
+    if (
+      excludePositionMatch &&
+      this.currentDiffAction.diffs.has(`${position.x},${position.y}`)
+    )
+      return undefined
+    const i = (position.y * this.getWidth() + position.x) * 4
+    const beforeColor: RGBAColor = [
+      this.image.data[i + 0],
+      this.image.data[i + 1],
+      this.image.data[i + 2],
+      this.image.data[i + 3],
+    ]
+    if (excludeColorMatch && colorMatch(beforeColor, color)) return undefined
+
+    if (!this.drawingBuffer) return
+
+    this.drawingBuffer.data[i + 0] = color[0]
+    this.drawingBuffer.data[i + 1] = color[1]
+    this.drawingBuffer.data[i + 2] = color[2]
+    this.drawingBuffer.data[i + 3] = color[3]
+
+    return {
+      kind: 'pixel',
+      position,
+      before: beforeColor,
+      after: color,
+    }
+  }
+
+  public abstract deletePixel(
+    position: Vec2,
+    excludePositionMatch: boolean,
+    excludeColorMatch: boolean
+  ): PixelDiff | undefined
+
+  protected deletePixelInPosition(
+    position: Vec2,
+    excludePositionMatch: boolean = true,
+    excludeColorMatch: boolean = true
+  ): PixelDiff | undefined {
+    return this.setPixelInPosition(
+      position,
+      [0, 0, 0, 0],
+      excludePositionMatch,
+      excludeColorMatch
+    )
+  }
+
+  public abstract getPixel(position: Vec2): RGBAColor
+
+  public isInBounds(position: Vec2) {
+    return (
+      position.x >= 0 &&
+      position.y >= 0 &&
+      position.x < this.getWidth() &&
+      position.y < this.getHeight()
+    )
+  }
+}
 
 ================
 File: src/routes/editor/index.tsx
@@ -6810,6 +7569,8 @@ import { layerImageStore } from "~/stores/project/layerImageStore";
 import styles from "@styles/components/canvas/layer_canvas.module.css";
 import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
+import { layerCanvas } from "~/styles/components/canvas/layer_canvas.css";
+import { globalStore } from "~/stores/global/globalStore";
 
 type Props = {
   manager: LayerImageManager,
@@ -6881,10 +7642,10 @@ export const LayerCanvas: Component<Props> = (props) => {
       ref={canvasRef}
       id={`canvas-${props.layer.id}`}
       data-layer-id={props.layer.name}
-      classList={{
-        [styles["layer-canvas"]]: true,
-        [styles["hidden"]]: !props.layer.enabled,
-      }}
+      class={layerCanvas({
+        rendering: globalStore.canvasRenderingMode,
+        hidden: !props.layer.enabled
+      })}
       width={internalWidth()}
       height={internalHeight()}
       style={{
@@ -7118,88 +7879,6 @@ File: src-tauri/tauri.conf.json
 }
 
 ================
-File: src/components/canvas/Controls.tsx
-================
-import { Component } from "solid-js";
-import { canvasStore } from "~/stores/project/canvasStore";
-import { activeLayer, layerStore } from "~/stores/project/layerStore";
-
-import styles from "@styles/components/canvas/controls.module.css";
-import { layerImageManager } from "./stacks/CanvasStack";
-import { canRedo, canUndo, layerImageStore } from "~/stores/project/layerImageStore";
-
-const Controls: Component<{}> = (props) => {
-  // const zoom = () => canvasStore.zoom;
-  const lastMouseWindow = () => canvasStore.lastMouseWindow;
-  const lastMouseOnCanvas = () => canvasStore.lastMouseOnCanvas;
-
-  return (
-    <>
-      <p>canvas.</p>
-      <p>
-        ({lastMouseWindow().x}, {lastMouseWindow().y}) ON WINDOW.
-      </p>
-      <p>
-        ({lastMouseOnCanvas().x}, {lastMouseOnCanvas().y}) ON CANVAS.
-      </p>
-      {/* <p>x{zoom().toFixed(2)}</p> */}
-      <p>active: {activeLayer()?.name}</p>
-      <p>
-        offset:({canvasStore.offset.x}, {canvasStore.offset.y})
-      </p>
-      {/* <p>UNDO STACKS.</p>
-        <For each={activeImage()?.undoStack}>
-            {item =>
-                <p>{item.toString()}</p>
-            }
-        </For> */}
-      <div class={styles["top-right-button-container"]}>
-        {/* <ImportImageButton />
-        <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>
-          export
-        </p> */}
-      </div>
-      <div class={styles["top-right-nav"]}>
-        <img
-          class={styles.undo_redo}
-          src="/undo.png"
-          style={{
-            opacity: canUndo() ? "1.0" : "0.3",
-            cursor: canUndo()
-              ? "pointer"
-              : "unset",
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            layerImageManager.getAgent(layerStore.activeLayerId)?.undo();
-          }}
-        />
-        <img
-          class={styles.undo_redo}
-          src="/redo.png"
-          style={{
-            opacity: canRedo() ? "1.0" : "0.3",
-            cursor: canRedo()
-              ? "pointer"
-              : "unset",
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            layerImageManager.getAgent(layerStore.activeLayerId)?.redo();
-          }}
-        />
-
-        {/* <DSLEditor /> */}
-      </div>
-    </>
-  );
-};
-
-export default Controls;
-
-================
 File: src/components/section/item/LayerItem.tsx
 ================
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
@@ -7307,46 +7986,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 export default LayerItem;
 
 ================
-File: src/models/layer/history.ts
-================
-import { showToast } from '~/stores/internal/toastStore'
-import {
-  layerImageStore,
-  setLayerImageStore,
-} from '~/stores/project/layerImageStore'
-
-export function undo(layerId: string) {
-  setLayerImageStore(layerId, (state) => {
-    if (state.undoStack.length === 0) return state
-    const prev = state.undoStack[state.undoStack.length - 1]
-    const newUndo = state.undoStack.slice(0, -1)
-    const newRedo = [state.current, ...state.redoStack]
-    return { current: prev, undoStack: newUndo, redoStack: newRedo }
-  })
-  // updateDSL(layerId);
-}
-
-export function isUndoPossible(layerId: string) {
-  return layerImageStore[layerId]?.undoStack?.length !== 0
-}
-
-export function redo(layerId: string) {
-  showToast('redo succeeded', 'success')
-  setLayerImageStore(layerId, (state) => {
-    if (state.redoStack.length === 0) return state
-    const next = state.redoStack[0]
-    const newRedo = state.redoStack.slice(1)
-    const newUndo = [...state.undoStack, state.current]
-    return { current: next, undoStack: newUndo, redoStack: newRedo }
-  })
-  // updateDSL(layerId);
-}
-
-export function isRedoPossible(layerId: string) {
-  return layerImageStore[layerId]?.redoStack?.length !== 0
-}
-
-================
 File: src/utils/DSLUtils.ts
 ================
 import { runDSL } from '~/models/dsl/DSLRunner'
@@ -7402,6 +8041,95 @@ export default defineConfig({
     '~': path.resolve(__dirname, 'src'),
   },
 })
+
+================
+File: src/components/canvas/Controls.tsx
+================
+import { Component, For } from "solid-js";
+import { canvasStore } from "~/stores/project/canvasStore";
+import { activeLayer, layerStore } from "~/stores/project/layerStore";
+
+import styles from "@styles/components/canvas/controls.module.css";
+import { layerImageManager } from "./stacks/CanvasStack";
+import { canRedo, canUndo, layerImageStore } from "~/stores/project/layerImageStore";
+
+const Controls: Component<{}> = (props) => {
+  // const zoom = () => canvasStore.zoom;
+  const lastMouseWindow = () => canvasStore.lastMouseWindow;
+  const lastMouseOnCanvas = () => canvasStore.lastMouseOnCanvas;
+
+  return (
+    <>
+      <p>canvas.</p>
+      <p>
+        ({lastMouseWindow().x}, {lastMouseWindow().y}) ON WINDOW.
+      </p>
+      <p>
+        ({lastMouseOnCanvas().x}, {lastMouseOnCanvas().y}) ON CANVAS.
+      </p>
+      {/* <p>x{zoom().toFixed(2)}</p> */}
+      <p>active: {activeLayer()?.name}</p>
+      <p>
+        offset:({canvasStore.offset.x}, {canvasStore.offset.y})
+      </p>
+
+      <p>UNDO STACKS.</p>
+      <For each={layerImageManager.getAgent(activeLayer()?.id)?.getHistoryManager()?.getUndoStack()}>
+        {(item, i) => {
+          if (i() === 0) {
+            <>
+              <p>pixel diffs: {item.diffs.values().toArray().filter(d => d.kind === "pixel").length}px.</p>
+              <p>tile diffs: {item.diffs.values().toArray().filter(d => d.kind === "tile").length}px.</p>
+            </>
+          } else return <></>
+        }
+        }
+      </For>
+      <div class={styles["top-right-button-container"]}>
+        {/* <ImportImageButton />
+        <p class={styles.button} onClick={() => exportActiveLayerUpscaled()}>
+          export
+        </p> */}
+      </div>
+      <div class={styles["top-right-nav"]}>
+        <img
+          class={styles.undo_redo}
+          src="/undo.png"
+          style={{
+            opacity: canUndo() ? "1.0" : "0.3",
+            cursor: canUndo()
+              ? "pointer"
+              : "unset",
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            layerImageManager.getAgent(layerStore.activeLayerId)?.undo();
+          }}
+        />
+        <img
+          class={styles.undo_redo}
+          src="/redo.png"
+          style={{
+            opacity: canRedo() ? "1.0" : "0.3",
+            cursor: canRedo()
+              ? "pointer"
+              : "unset",
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            layerImageManager.getAgent(layerStore.activeLayerId)?.redo();
+          }}
+        />
+
+        {/* <DSLEditor /> */}
+      </div>
+    </>
+  );
+};
+
+export default Controls;
 
 ================
 File: src/components/canvas/stacks/TouchableCanvas.tsx

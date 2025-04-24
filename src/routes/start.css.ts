@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { ZFB03B, ZFB09 } from "~/styles/global.css";
+import { ZFB03B, ZFB09, ZFB31 } from "~/styles/global.css";
 import { flexCol, flexRow, w100, wh100 } from "~/styles/snippets.css";
 
 export const welcomeRoot = style([
@@ -12,8 +12,8 @@ export const welcomeRoot = style([
 ]);
 
 export const welcomeHeadline = style({
-  fontFamily: ZFB09,
-  fontSize: "5rem",
+  fontFamily: ZFB31,
+  fontSize: "4rem",
   letterSpacing: "8px",
   marginBottom: "12px",
 });
@@ -62,7 +62,7 @@ export const recentFilesPath = style({
 });
 
 export const sideSection = style([
-  flexCol,
+  flexRow,
   {
     gap: "1rem",
     paddingBottom: "24px",

@@ -1,23 +1,23 @@
 import iro from "@jaames/iro";
 import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
 import { Component, createEffect } from "solid-js";
-import { setCurrentPenColor } from "~/models/types/Pen";
-import { currentPen } from "~/stores/internal/penStore";
+import { setCurrentToolColor } from "~/models/types/Tool";
+import { currentTool } from "~/stores/internal/toolsStore";
 
-const ColorPicker: Component<{}> = (props) => {
+const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
 
   createEffect(() => {
-    colorPicker.setColors([currentPen().color]);
+    colorPicker.setColors([currentTool().color]);
   });
 
   return (
     <div
       ref={(el) => {
         colorPicker = iro.ColorPicker(el, {
-          width: 150,
+          width: props.width,
           padding: 0,
-          color: currentPen().color,
+          color: currentTool().color,
           handleRadius: 4,
           layoutDirection: "horizontal",
           layout: [
@@ -35,7 +35,7 @@ const ColorPicker: Component<{}> = (props) => {
           ],
         });
         colorPicker.on("color:change", function (color: any) {
-          setCurrentPenColor(color.hexString);
+          setCurrentToolColor(color.hexString);
         });
       }}
     ></div>

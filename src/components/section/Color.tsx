@@ -2,20 +2,31 @@ import { Component, For } from "solid-js";
 import { colorStore } from "~/stores/internal/colorStore";
 
 import ColorPicker from "~/components/section/item/ColorPicker";
-import { setCurrentPenColor } from "~/models/types/Pen";
+import { setCurrentToolColor } from "~/models/types/Tool";
+import {
+  colorElemDescription,
+  descriptionContainer,
+  swatchContainer,
+} from "~/styles/section/color.css";
+import {
+  sectionCaption,
+  sectionContent,
+  sectionRoot,
+} from "~/styles/section_global.css";
 import ColorBox from "../common/ColorBox";
-import { sectionCaption, sectionContent, sectionRoot } from "~/styles/section_global.css";
-import { colorElemDescription, descriptionContainer, swatchContainer } from "~/styles/section/color.css";
 
 const Color: Component<{}> = (props) => {
   const onColorClicked = (color: string, index: number) => {
-    setCurrentPenColor(color);
+    setCurrentToolColor(color);
   };
 
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>color.</p>
-      <div class={sectionContent} style={{ "flex-direction": "row", margin: "8px 0" }}>
+      <div
+        class={sectionContent}
+        style={{ "flex-direction": "row", margin: "8px 0" }}
+      >
         <div class={descriptionContainer}>
           <p class={colorElemDescription}>swatch.</p>
         </div>
@@ -34,7 +45,7 @@ const Color: Component<{}> = (props) => {
         <div class={descriptionContainer}>
           <p class={colorElemDescription}>picker.</p>
         </div>
-        <ColorPicker />
+        <ColorPicker width={130} />
       </div>
     </div>
   );

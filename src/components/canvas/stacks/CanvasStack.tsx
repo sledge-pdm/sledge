@@ -1,91 +1,81 @@
-import { Component, For, onMount } from "solid-js";
+import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import { canvasStore } from "~/stores/project/canvasStore";
-import { activeLayer, allLayers, layerStore } from "~/stores/project/layerStore";
+import { activeLayer, allLayers } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/canvas_stack.module.css";
 
-import { cloneImageData } from "~/models/factories/utils";
-import { DrawState, getDrawnImageData } from "~/models/layer/getDrawnImageData";
-import { redo, undo } from "~/models/layer/history";
-import { registerNewHistory } from "~/models/layer/layerImage";
+import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
+import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
+import Tile from "~/models/layer_image/Tile";
+import CanvasOverlaySVG from "./CanvasOverlaySVG";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
-import CanvasOverlaySVG from "./CanvasOverlaySVG";
+
+export const layerImageManager = new LayerImageManager();
 
 const CanvasStack: Component<{}> = (props) => {
   const layerCanvasRefs: {
     [id: string]: LayerCanvasRef;
   } = {};
 
+  const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
+
   const activeCanvasRef = () => {
     const active = activeLayer();
 
     if (active) return layerCanvasRefs[active.id];
-    else return;
+    else return undefined;
   };
 
   onMount(() => {
     window.addEventListener("keydown", (e) => {
       if (e.ctrlKey && e.key === "z") {
-        undo(layerStore.activeLayerId);
-        activeCanvasRef()?.update();
+        const active = activeLayer();
+        if (active) {
+          const agent = layerImageManager.getAgent(active.id);
+          agent?.undo();
+        }
       } else if (e.ctrlKey && e.key === "y") {
-        redo(layerStore.activeLayerId);
-        activeCanvasRef()?.update();
+        const active = activeLayer();
+        if (active) {
+          const agent = layerImageManager.getAgent(active.id);
+          agent?.redo();
+        }
       }
     });
   });
 
-  const handleDraw = (
-    type: DrawState,
-    position: { x: number; y: number },
-    lastPos?: { x: number; y: number },
-  ) => {
-    switch (type) {
-      case DrawState.start:
-        console.log("stroke start.");
-        break;
-      case DrawState.move:
-        console.log("stroke move.");
-        break;
-      case DrawState.end:
-        console.log("stroke end.");
-        break;
-    }
-
+  createEffect(() => {
     const active = activeLayer();
 
     if (active) {
-      const activeRef = layerCanvasRefs[active.id];
-      if (type === DrawState.start) {
-        activeRef.initDrawingBuffer();
-      } else {
-        const drawingBuffer = activeRef.getDrawingBuffer();
-        if (drawingBuffer) {
-          const newImageData = getDrawnImageData(
-            active.id,
-            type,
-            drawingBuffer,
-            position,
-            lastPos,
-          );
+      const agent = layerImageManager.getAgent(active.id);
+      console.log(agent);
+      if (!agent) return;
+      agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
+        setDirtyRects([...getDirtyRects()]);
+      });
+      agent.setOnImageChangeListener("stack_dirty_rect", () => {
+        setDirtyRects([...getDirtyRects()]);
+      });
+    }
+  });
 
-          if (newImageData) {
-            activeRef.setImageData(newImageData);
-            if (type === DrawState.end) {
-              activeRef.resetDrawingBuffer();
-              registerNewHistory(active.id, cloneImageData(newImageData));
-            }
-          }
-        }
+  const getDirtyRects = () => {
+    const active = activeLayer();
+    if (active) {
+      const agent = layerImageManager.getAgent(active.id);
+      if (agent instanceof TileLayerImageAgent) {
+        return (agent as TileLayerImageAgent).getDirtyTilesInAction();
       }
     }
+    return [];
   };
 
   return (
     <div style={{ position: "relative" }}>
-
-      <CanvasOverlaySVG />
+      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
 
       <div
         class={styles.canvas_stack}
@@ -95,14 +85,13 @@ const CanvasStack: Component<{}> = (props) => {
         }}
       >
         <TouchableCanvas
-          onStrokeStart={(p, lp) => handleDraw(DrawState.start, p, lp)}
-          onStrokeMove={(p, lp) => handleDraw(DrawState.move, p, lp)}
-          onStrokeEnd={(p, lp) => handleDraw(DrawState.end, p, lp)}
+          operator={new LayerCanvasOperator(() => activeCanvasRef()!!)}
         />
 
         <For each={allLayers()}>
           {(layer, index) => (
             <LayerCanvas
+              manager={layerImageManager}
               ref={layerCanvasRefs[layer.id]}
               layer={layer}
               zIndex={allLayers().length - index()}

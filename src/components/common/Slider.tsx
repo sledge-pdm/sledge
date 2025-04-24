@@ -59,7 +59,11 @@ const Slider: Component<SliderProps> = (props) => {
   return (
     <div class={styles.root}>
       <div class={styles.slider} ref={sliderRef}>
-        <div class={styles["line-hitbox"]} onPointerDown={handlePointerDown} onClick={onLineClick}>
+        <div
+          class={styles["line-hitbox"]}
+          onPointerDown={handlePointerDown}
+          onClick={onLineClick}
+        >
           <div class={styles.line} />
         </div>
         <div style={{ left: `${percent()}%` }} class={styles.handle} />

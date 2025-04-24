@@ -10,8 +10,8 @@ import {
 import { createMemo, onCleanup, onMount } from "solid-js";
 import Controls from "./Controls";
 
-import CanvasAreaInteract from "./CanvasAreaInteract";
 import { canvasArea } from "~/styles/components/canvas/canvas_area.css";
+import CanvasAreaInteract from "./CanvasAreaInteract";
 
 export default () => {
   let wrapper: HTMLDivElement;

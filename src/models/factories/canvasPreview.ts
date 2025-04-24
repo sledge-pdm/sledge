@@ -1,21 +1,21 @@
 export function createPreviewCanvas(
   imageData: ImageData,
-  targetHeight: number
+  targetHeight: number,
 ): HTMLCanvasElement {
-  const aspectRatio = imageData.width / imageData.height
-  const targetWidth = Math.round(targetHeight * aspectRatio)
+  const aspectRatio = imageData.width / imageData.height;
+  const targetWidth = Math.round(targetHeight * aspectRatio);
 
-  const canvas = document.createElement('canvas')
-  canvas.width = targetWidth
-  canvas.height = targetHeight
+  const canvas = document.createElement("canvas");
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
 
-  const ctx = canvas.getContext('2d')!
-  ctx.imageSmoothingEnabled = false
+  const ctx = canvas.getContext("2d")!;
+  ctx.imageSmoothingEnabled = false;
 
-  const tmpCanvas = document.createElement('canvas')
-  tmpCanvas.width = imageData.width
-  tmpCanvas.height = imageData.height
-  tmpCanvas.getContext('2d')!.putImageData(imageData, 0, 0)
+  const tmpCanvas = document.createElement("canvas");
+  tmpCanvas.width = imageData.width;
+  tmpCanvas.height = imageData.height;
+  tmpCanvas.getContext("2d")!.putImageData(imageData, 0, 0);
 
   ctx.drawImage(
     tmpCanvas,
@@ -26,8 +26,8 @@ export function createPreviewCanvas(
     0,
     0,
     targetWidth,
-    targetHeight
-  )
+    targetHeight,
+  );
 
-  return canvas
+  return canvas;
 }

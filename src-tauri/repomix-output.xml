@@ -59,6 +59,8 @@ src/main.rs
 src/pipeline/mod.rs
 src/pipeline/parser.rs
 src/pipeline/runner.rs
+src/standalone/flood_fill.rs
+src/standalone/mod.rs
 tauri.conf.json
 </directory_structure>
 
@@ -83,11 +85,35 @@ fn main() {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "dialog:default",
+    "fs:default",
+
+    "dialog:allow-save",
+    "dialog:allow-open",
+
+    "fs:allow-open",
+    "fs:allow-write",
+    "fs:allow-read",
+    "fs:allow-rename",
+    "fs:allow-mkdir",
+    "fs:allow-remove",
+    "fs:allow-write-text-file",
+    "fs:allow-read-text-file",
+    "fs:read-all",
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "**" }]
+    },
+
+    "core:window:allow-hide",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:window:allow-close",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging"
   ]
 }
 </file>
@@ -123,6 +149,8 @@ rand = "0.9.0"
 image = "0.25.6"
 jpeg-decoder = "0.3.1"
 jpeg-encoder = "0.6.1"
+tauri-plugin-dialog = "2.2.1"
+tauri-plugin-fs = "2.2.1"
 </file>
 
 <file path="src/commands/base64_utils.rs">
@@ -288,13 +316,17 @@ pub fn sepia(mut data: Vec<u8>) -> Result<Vec<u8>, String> {
 <file path="src/lib.rs">
 mod commands;
 mod pipeline;
+mod standalone;
 
 use pipeline::run_pipeline;
+use standalone::flood_fill;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![run_pipeline,])
+        .invoke_handler(tauri::generate_handler![run_pipeline, flood_fill])
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -440,6 +472,56 @@ pub fn run_pipeline(
 }
 </file>
 
+<file path="src/standalone/flood_fill.rs">
+#[tauri::command]
+pub fn flood_fill(
+    image: &mut [u8],
+    width: usize,
+    height: usize,
+    x: usize,
+    y: usize,
+    new_color: [u8; 4],
+) {
+    let mut visited = vec![false; width * height];
+    let mut stack = Vec::with_capacity(4096);
+
+    let idx = |x, y| (y * width + x) * 4;
+
+    let target = &image[idx(x, y)..idx(x, y) + 4];
+    if target == &new_color {
+        return;
+    }
+
+    stack.push((x, y));
+    while let Some((cx, cy)) = stack.pop() {
+        if cx >= width || cy >= height {
+            continue;
+        }
+        let i = idx(cx, cy);
+        if visited[cy * width + cx] {
+            continue;
+        }
+        if &image[i..i + 4] != target {
+            continue;
+        }
+
+        image[i..i + 4].copy_from_slice(&new_color);
+        visited[cy * width + cx] = true;
+
+        stack.push((cx + 1, cy));
+        stack.push((cx - 1, cy));
+        stack.push((cx, cy + 1));
+        stack.push((cx, cy - 1));
+    }
+}
+</file>
+
+<file path="src/standalone/mod.rs">
+pub mod flood_fill;
+
+pub use flood_fill::flood_fill;
+</file>
+
 <file path="tauri.conf.json">
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
@@ -450,15 +532,21 @@ pub fn run_pipeline(
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeBuildCommand": "npm run prettier && npm run build"
   },
   "app": {
     "windows": [
       {
         "title": "sledge",
-        "width": 1400,
-        "height": 900,
+        "label": "main",
+        "width": 1200,
+        "height": 800,
+        "acceptFirstMouse": true,
         "resizable": true,
+        "closable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "decorations": false,
         "fullscreen": false
       }
     ],
@@ -467,9 +555,20 @@ pub fn run_pipeline(
     }
   },
   "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["sledge"],
+        "description": "Sledge Project File"
+      }
+    ],
     "active": true,
     "targets": "all",
-    "icon": ["icons_light/icon.ico", "icons_light/32x32.png", "icons_light/128x128.png", "icons_light/256x256.png"]
+    "icon": [
+      "icons_light/icon.ico",
+      "icons_light/32x32.png",
+      "icons_light/128x128.png",
+      "icons_light/256x256.png"
+    ]
   }
 }
 </file>

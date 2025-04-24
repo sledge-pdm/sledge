@@ -3,12 +3,12 @@ import ColorBox from "~/components/common/ColorBox";
 import { sayRandomQuote } from "~/components/common/companion/QuotePool";
 import Light from "~/components/common/Light";
 import Slider from "~/components/common/Slider";
-import { Pen } from "~/models/types/Pen";
-import { penStore, setPenStore } from "~/stores/internal/penStore";
+import { Tool } from "~/models/types/Tool";
+import { setToolStore, toolStore } from "~/stores/internal/toolsStore";
 import { penConfigRow, penConfigRowName } from "~/styles/section/pen.css";
 
 interface Props {
-  pen: Pen;
+  pen: Tool;
   isInUse: boolean;
 }
 
@@ -20,10 +20,10 @@ const PenItem: Component<Props> = (props: Props) => {
       <p
         class={penConfigRowName}
         style={{
-          color: props.isInUse ? "red" : "unset"
+          color: props.isInUse ? "red" : "unset",
         }}
         onClick={() => {
-          setPenStore({ usingIndex: penStore.pens.indexOf(props.pen) });
+          setToolStore({ usingIndex: toolStore.tools.indexOf(props.pen) });
         }}
       >
         {props.pen.name}.
@@ -39,10 +39,10 @@ const PenItem: Component<Props> = (props: Props) => {
           onValueChanged={(newValue) => {
             sayRandomQuote("pen-resize");
             console.log("size set to " + newValue);
-            const penIndex = penStore.pens.findIndex(
+            const penIndex = toolStore.tools.findIndex(
               (p) => p.id === props.pen.id,
             );
-            setPenStore("pens", penIndex, "size", newValue);
+            setToolStore("tools", penIndex, "size", newValue);
           }}
         />
       </div>

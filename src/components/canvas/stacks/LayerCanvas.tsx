@@ -2,56 +2,52 @@ import {
   Component,
   createEffect,
   createRenderEffect,
+  createSignal,
   onMount,
   Ref,
 } from "solid-js";
-import { cloneImageData } from "~/models/factories/utils";
 import { Layer } from "~/models/types/Layer";
 import { canvasStore } from "~/stores/project/canvasStore";
-import { activeImage, imageStore } from "~/stores/project/imageStore";
+import { layerImageStore } from "~/stores/project/layerImageStore";
 
-import styles from "@styles/components/canvas/layer_canvas.module.css";
+import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
+import {
+  getCanvasImageRenderingAttribute,
+  globalStore,
+} from "~/stores/global/globalStore";
+import { layerCanvas } from "~/styles/components/canvas/layer_canvas.css";
 
 type Props = {
+  manager: LayerImageManager;
   ref?: LayerCanvasRef;
   layer: Layer;
   zIndex: number;
 };
 
 export type LayerCanvasRef = {
-  initDrawingBuffer: () => void;
-  getDrawingBuffer: () => ImageData | undefined;
-  resetDrawingBuffer: () => void;
-  setImageData: (imageData: ImageData) => void;
-  update: () => void;
+  getLayer: () => Layer;
+  getManager: () => LayerImageManager;
+  getAgent: () => LayerImageAgent;
 };
 
 export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
   let ctx: CanvasRenderingContext2D | null = null;
-  let drawingBuffer: ImageData | undefined;
+
+  const agent = () => props.manager.getAgent(props.layer.id);
 
   createRefContent(
     () => props.ref,
     () => ({
-      initDrawingBuffer() {
-        drawingBuffer = cloneImageData(activeImage().current);
+      getLayer() {
+        return props.layer;
       },
-      getDrawingBuffer() {
-        return drawingBuffer;
+      getManager() {
+        return props.manager;
       },
-      resetDrawingBuffer() {
-        drawingBuffer = undefined;
-      },
-      setImageData(imageData) {
-        drawingBuffer = imageData;
-        if (ctx && imageData) {
-          ctx.putImageData(imageData, 0, 0);
-        }
-      },
-      update() {
-        const imageData = imageStore[props.layer.id].current;
-        this.setImageData(imageData);
+      getAgent() {
+        return agent();
       },
     }),
   );
@@ -64,14 +60,38 @@ export const LayerCanvas: Component<Props> = (props) => {
     canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
+    const agent = props.manager.registerAgent(
+      props.layer.id,
+      layerImageStore[props.layer.id]?.current,
+    );
+
     ctx = canvasRef?.getContext("2d") ?? null;
+    if (ctx) agent.putImageInto(ctx);
+
+    agent.setOnImageChangeListener("layercanvas_refresh", () => {
+      if (ctx) {
+        agent.putImageIntoForce(ctx);
+      }
+    });
+    agent.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
+      if (ctx) {
+        agent.putDrawingBufferIntoForce(ctx);
+      }
+    });
   });
 
+  const [renderAttr, setRenderAttr] = createSignal(
+    getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode),
+  );
+
   createEffect(() => {
-    const current = imageStore[props.layer.id]?.current;
-    if (ctx && current) {
-      ctx.putImageData(current, 0, 0);
-    }
+    const image = layerImageStore[props.layer.id].current;
+    agent()?.setImage(image, true);
+    if (ctx) agent()?.putImageIntoForce(ctx);
+
+    setRenderAttr(
+      getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode),
+    );
   });
 
   return (
@@ -79,10 +99,10 @@ export const LayerCanvas: Component<Props> = (props) => {
       ref={canvasRef}
       id={`canvas-${props.layer.id}`}
       data-layer-id={props.layer.name}
-      classList={{
-        [styles["layer-canvas"]]: true,
-        [styles["hidden"]]: !props.layer.enabled,
-      }}
+      class={layerCanvas({
+        rendering: renderAttr(),
+        hidden: !props.layer.enabled,
+      })}
       width={internalWidth()}
       height={internalHeight()}
       style={{

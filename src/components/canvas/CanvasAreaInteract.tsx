@@ -1,13 +1,18 @@
-import { canvasStore, getReferencedZoom, setCanvasStore } from "~/stores/project/canvasStore";
+import { Vec2 } from "~/models/types/Vector";
+import {
+  canvasStore,
+  getReferencedZoom,
+  setCanvasStore,
+} from "~/stores/project/canvasStore";
 
 class CanvasAreaInteract {
-  private dragPosition: { x: number; y: number } = { x: 0, y: 0 };
+  private dragPosition: Vec2 = { x: 0, y: 0 };
 
   private lastX: number[] = [0, 0];
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() { }
+  constructor() {}
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
@@ -90,12 +95,15 @@ class CanvasAreaInteract {
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
-    const referencedZoom = getReferencedZoom()
+    const referencedZoom = getReferencedZoom();
     const delta =
-      (e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep) * referencedZoom;
+      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
 
     const zoomOld = canvasStore.zoom;
-    const zoomNew = Math.max(canvasStore.zoomMin * referencedZoom, Math.min(canvasStore.zoomMax * referencedZoom, canvasStore.zoom + delta));
+    const zoomNew = Math.max(
+      canvasStore.zoomMin * referencedZoom,
+      Math.min(canvasStore.zoomMax * referencedZoom, canvasStore.zoom + delta),
+    );
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;

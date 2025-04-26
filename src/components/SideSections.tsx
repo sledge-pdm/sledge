@@ -6,18 +6,21 @@ import PenConfig from "./section/PenConfig";
 import Project from "./section/Project";
 
 import { sideAreaContent } from "~/styles/global.css";
-import GlobalSettings from "./section/GlobalSettings";
+import EditorSettings from "./section/settings/EditorSettings";
+import { openSingletonWindow } from "~/utils/windowUtils";
+import { SettingsWindowOptions } from "~/routes/settings";
 
 const SideSections: Component<{}> = (props) => {
   return (
     <div class={sideAreaContent}>
-      <a onClick={() => (window.location.href = "/")}>&lt; back</a>
+      {/* <a onClick={() => (window.location.href = "/")}>&lt; back</a> */}
       <Project />
       <Color />
       <PenConfig />
       <LayerList />
       <CanvasSettings />
-      <GlobalSettings />
+      <button onClick={() => openSingletonWindow("settings", SettingsWindowOptions)}>settings.</button>
+      {/* <GlobalSettings /> */}
     </div>
   );
 };

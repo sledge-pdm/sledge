@@ -1,8 +1,8 @@
 import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
 import { Component } from "solid-js";
 import Light from "~/components/common/Light";
-import { getNextMagnification } from "~/models/factories/utils";
-import { Layer, LayerType } from "~/models/types/Layer";
+import { getNextMagnification } from "~/models/factories/getNextMagnification";
+import { Layer, LayerType } from "~/types/Layer";
 import { layerStore, setLayerStore } from "~/stores/project/layerStore";
 import {
   activeLight,

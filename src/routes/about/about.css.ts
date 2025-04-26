@@ -1,91 +1,84 @@
-import { style } from "@vanilla-extract/css";
-import {
-  k12x8,
-  Terminus,
-  vars,
-  ZFB03,
-  ZFB08,
-  ZFB31,
-} from "~/styles/global.css";
-import { flexCol } from "~/styles/snippets.css";
+import { style } from '@vanilla-extract/css'
+import { k12x8, Terminus, vars, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css'
+import { flexCol } from '~/styles/snippets.css'
 
 export const aaContainer = style([
   flexCol,
   {
-    position: "absolute",
-    top: "24px",
-    right: "40px",
-    width: "200px",
-    height: "100%",
-    alignItems: "center",
-    pointerEvents: "none",
+    position: 'absolute',
+    top: '32px',
+    right: '40px',
+    width: '200px',
+    height: '100%',
+    alignItems: 'center',
+    pointerEvents: 'none',
   },
-]);
+])
 
 export const aaText = style({
   fontFamily: Terminus,
-  fontSize: "22px",
+  fontSize: '22px',
   opacity: 0.4,
-});
+})
 
 export const contentContainer = style([
   flexCol,
   {
-    width: "100%",
-    margin: "0 30px",
-    marginTop: "8px",
-    pointerEvents: "none",
+    width: '100%',
+    margin: '0 30px',
+    marginTop: '8px',
+    pointerEvents: 'none',
   },
-]);
+])
 
 export const aboutLink = style({
-  pointerEvents: "all",
-  borderBottom: "1px solid black",
-  paddingBottom: "1px",
-  ":hover": {
-    borderBottom: "none",
-    color: "magenta",
+  pointerEvents: 'all',
+  borderBottom: '1px solid black',
+  paddingBottom: '1px',
+  ':hover': {
+    borderBottom: 'none',
+    color: 'magenta',
   },
-});
+})
 
 export const aboutTitle = style({
   fontFamily: ZFB31,
-  fontSize: "31px",
-});
+  fontSize: '31px',
+})
 
 export const aboutSubTitle = style({
   fontFamily: ZFB03,
-  fontSize: "9px",
-  color: "#777",
-});
+  fontSize: '9px',
+  color: '#777',
+})
 
 export const aboutDev = style({
   fontFamily: ZFB08,
-  fontSize: "8px",
-});
+  fontSize: '8px',
+})
 
 export const aboutContent = style({
   fontFamily: ZFB08,
-  fontSize: "8px",
+  fontSize: '8px',
   lineHeight: 1.6,
-});
+})
 
 export const sendFBButton = style({
-  width: "fit-content",
-  padding: "4px 4px",
-  fontSize: "8px",
-  borderColor: "blue",
+  width: 'fit-content',
+  padding: '4px 4px',
+  fontSize: '8px',
+  borderColor: 'blue',
   background: vars.color.button,
-  color: "blue",
-  ":hover": {
-    color: "white",
-    background: "blue",
+  color: 'blue',
+  ':hover': {
+    color: 'white',
+    background: 'blue',
   },
-});
+})
 
 export const aboutFeedback = style({
   fontFamily: k12x8,
-  fontSize: "8px",
-  marginRight: "60px",
+  fontSize: '8px',
+  marginRight: '60px',
   lineHeight: 1.5,
-});
+})

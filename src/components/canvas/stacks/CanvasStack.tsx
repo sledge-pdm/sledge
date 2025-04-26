@@ -5,12 +5,12 @@ import { activeLayer, allLayers } from "~/stores/project/layerStore";
 import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
 import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
 import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
-import Tile from "~/models/layer_image/Tile";
 import { globalStore } from "~/stores/global/globalStore";
 import { canvasStack } from "~/styles/components/canvas/canvas_stack.css";
 import CanvasOverlaySVG from "./CanvasOverlaySVG";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
+import Tile from "~/types/Tile";
 
 export const layerImageManager = new LayerImageManager();
 
@@ -78,7 +78,9 @@ const CanvasStack: Component<{}> = (props) => {
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{
+      position: "relative",
+    }}>
       <div
         class={canvasStack}
         style={{

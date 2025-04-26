@@ -1,5 +1,5 @@
 import { Component, onMount } from "solid-js";
-import { Layer } from "~/models/types/Layer";
+import { Layer } from "~/types/Layer";
 
 import styles from "@styles/components/layer_preview.module.css";
 import { layerImageStore } from "~/stores/project/layerImageStore";

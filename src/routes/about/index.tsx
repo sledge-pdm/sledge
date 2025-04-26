@@ -14,6 +14,7 @@ import {
   contentContainer,
   sendFBButton,
 } from "./about.css";
+import { pageRoot } from "~/styles/global.css";
 
 export const AboutWindowOptions: Omit<
   WebviewOptions,
@@ -38,7 +39,7 @@ const About = () => {
   };
 
   return (
-    <div id="root">
+    <div class={pageRoot}>
       <div class={`${flexRow} ${wh100}`} style={{ "align-items": "center" }}>
         <div class={aaContainer}>
           <p class={aaText}>

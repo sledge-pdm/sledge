@@ -10,8 +10,8 @@ import {
   sectionContent,
   sectionRoot,
 } from "~/styles/section_global.css";
-import Dropdown, { DropdownOption } from "../common/Dropdown";
-import ToggleSwitch from "../common/ToggleSwitch";
+import Dropdown, { DropdownOption } from "../../common/Dropdown";
+import ToggleSwitch from "../../common/ToggleSwitch";
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: "adaptive", value: "adaptive" },
@@ -19,10 +19,10 @@ const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: "crispEdges", value: "crispEdges" },
 ];
 
-const GlobalSettings: Component<{}> = (props) => {
+const EditorSettings: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
-      <p class={sectionCaption}>settings.</p>
+      <p class={sectionCaption}>editor.</p>
       <div class={sectionContent} style={{ gap: "8px" }}>
         <ToggleSwitch
           checked={globalStore.showDirtyRects}
@@ -47,4 +47,4 @@ const GlobalSettings: Component<{}> = (props) => {
   );
 };
 
-export default GlobalSettings;
+export default EditorSettings;

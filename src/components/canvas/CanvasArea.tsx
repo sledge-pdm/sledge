@@ -56,18 +56,19 @@ export default () => {
           position: "absolute",
           top: 0,
           left: 0,
-          bottom: 0,
-          right: 0,
           padding: 0,
           margin: 0,
           width: "100%",
           height: "100%",
+          overflow: "hidden",
           "touch-action": "none",
         }}
       >
         <div
           ref={(el) => (canvasStack = el)}
           style={{
+            width: "fit-content",
+            height: "fit-content",
             padding: 0,
             margin: 0,
             "transform-origin": "0 0",

@@ -4,15 +4,14 @@ import EdgeInfo from "~/components/EdgeInfo";
 import { loadGlobalSettings } from "~/io/global/globalIO";
 import { importProjectJsonFromFileSelection } from "~/io/project/project";
 import { createLayer } from "~/models/factories/createLayer";
-import { LayerType } from "~/models/types/Layer";
+import { LayerType } from "~/types/Layer";
 import {
-  FileLocation,
   addRecent,
   globalStore,
   setGlobalStore,
 } from "~/stores/global/globalStore";
 import { setLayerStore } from "~/stores/project/layerStore";
-import { sideArea } from "~/styles/global.css";
+import { pageRoot, sideArea } from "~/styles/global.css";
 import { sectionRoot } from "~/styles/section_global.css";
 import { flexCol, flexRow, w100 } from "~/styles/snippets.css";
 import { getFileNameAndPath } from "~/utils/pathUtils";
@@ -27,26 +26,26 @@ import {
   welcomeHeadline,
   welcomeRoot,
 } from "./start.css";
+import { openEditorWindow, openSingletonWindow } from "~/utils/windowUtils";
+import { SettingsWindowOptions } from "./settings";
+import { FileLocation } from "~/types/FileLocation";
 
 export default function Home() {
-  const navigate = useNavigate();
 
   onMount(() => {
     loadGlobalSettings();
   });
 
-  const moveToEditor = async (recentFile: FileLocation) => {
-    const params = new URLSearchParams();
-    params.append("name", recentFile.name);
-    params.append("path", recentFile.path);
-    navigate(`/editor?${params.toString()}`, { replace: false });
+  const moveToEditor = async (selectedFile: FileLocation) => {
+    openEditorWindow(selectedFile)
   };
 
   const createNew = () => {
     const DEFAULT_LAYERS = [createLayer("dot1", LayerType.Dot, true, 1)];
     setLayerStore("layers", DEFAULT_LAYERS);
     setLayerStore("activeLayerId", DEFAULT_LAYERS[0].id);
-    navigate(`/editor`, { replace: false });
+
+    openEditorWindow()
   };
 
   const openProject = () => {
@@ -54,7 +53,7 @@ export default function Home() {
       if (file !== undefined) {
         const loc = getFileNameAndPath(file);
         if (loc !== undefined) addRecent(loc);
-        navigate(`/editor`, { replace: false });
+        openEditorWindow(loc)
       }
     });
   };
@@ -64,7 +63,7 @@ export default function Home() {
   };
 
   return (
-    <div id="root">
+    <div class={pageRoot}>
       <div class={sideArea}>
         <EdgeInfo />
       </div>
@@ -74,14 +73,21 @@ export default function Home() {
           <p class={welcomeHeadline}>HELLO.</p>
           <div class={sideSection}>
             <a class={sideSectionItem} onClick={() => createNew()}>
-              + new.
+              +&ensp;new.
             </a>
             <a
               class={sideSectionItem}
               style={{ "margin-left": "2px" }}
               onClick={(e) => openProject()}
             >
-              &gt; open.
+              &gt;&ensp;open.
+            </a>
+            <a
+              class={sideSectionItem}
+              style={{ "margin-left": "2px" }}
+              onClick={(e) => openSingletonWindow("settings", SettingsWindowOptions)}
+            >
+              <img src={"/settings.png"} width={16} height={16} />&ensp;settings.
             </a>
           </div>
 
@@ -92,7 +98,7 @@ export default function Home() {
                 clear
               </p> */}
             </div>
-            <div class={recentFilesContainer}>
+            <div class={recentFilesContainer} style={{ "margin-bottom": "24px" }}>
               <For each={globalStore.recentOpenedFiles}>
                 {(item, i) => {
                   console.log(item);

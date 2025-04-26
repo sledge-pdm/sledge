@@ -1,5 +1,4 @@
 import { Component, createSignal } from "solid-js";
-import { initLayerImage } from "~/models/layer/layerImage";
 import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 import { allLayers, layerStore } from "~/stores/project/layerStore";
 
@@ -15,6 +14,7 @@ import {
   sectionContent,
   sectionRoot,
 } from "~/styles/section_global.css";
+import initLayerImage from "~/models/factories/initLayerImage";
 
 const CanvasSettings: Component<{}> = (props) => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);

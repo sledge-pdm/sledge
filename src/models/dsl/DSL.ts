@@ -23,7 +23,7 @@ export class DSL {
       ? [...this.nodes, this.layerOut]
       : [this.layerIn, ...this.nodes, this.layerOut];
 
-    let nodeStrings: string[] = [];
+    const nodeStrings: string[] = [];
     let isAllNodeParseSuccessful = true;
     nodes.forEach((node, i) => {
       const nodeStr = node.getNodeString();

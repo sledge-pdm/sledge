@@ -38,6 +38,7 @@ export async function openEditorWindow(fileLocation?: FileLocation) {
     const params = new URLSearchParams()
     params.append('name', fileLocation.name)
     params.append('path', fileLocation.path)
+    console.log(`/editor?${params.toString()}`)
     const editorWin = new WebviewWindow('editor', {
       ...EditorWindowOptions,
       url: `/editor?${params.toString()}`,

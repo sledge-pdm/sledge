@@ -14,9 +14,9 @@ const ImagePool: Component<{}> = (props) => {
 
         listeners: {
           move(event) {
-            var target = event.target;
-            var x = parseFloat(target.getAttribute("data-x")) || 0;
-            var y = parseFloat(target.getAttribute("data-y")) || 0;
+            const target = event.target;
+            let x = parseFloat(target.getAttribute("data-x")) || 0;
+            let y = parseFloat(target.getAttribute("data-y")) || 0;
 
             // update the element's style
             target.style.width = event.rect.width + "px";

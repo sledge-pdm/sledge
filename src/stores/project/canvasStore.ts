@@ -18,8 +18,8 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
   if (width === undefined) width = canvasStore.canvas.width
   if (height === undefined) height = canvasStore.canvas.height
 
-  let isWide = width > height
-  let longerLength = isWide ? width : height
+  const isWide = width > height
+  const longerLength = isWide ? width : height
 
   console.log(
     `this is ${isWide ? 'wide' : 'tall'}.

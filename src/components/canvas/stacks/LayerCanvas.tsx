@@ -125,7 +125,7 @@ function createRefContent<T extends Exclude<unknown, Function>>(
       );
     }
 
-    let refFunc = refProp as (value: T) => void;
+    const refFunc = refProp as (value: T) => void;
 
     refFunc(createRef());
   });

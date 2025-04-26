@@ -89,7 +89,7 @@ const CanvasStack: Component<{}> = (props) => {
         }}
       >
         <TouchableCanvas
-          operator={new LayerCanvasOperator(() => activeCanvasRef()!!)}
+          operator={new LayerCanvasOperator(() => activeCanvasRef()!)}
         />
 
         <For each={allLayers()}>

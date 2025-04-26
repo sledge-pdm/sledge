@@ -1,40 +1,40 @@
-import { RGBAColor } from '~/utils/colorUtils'
-import { Vec2 } from './Vector'
+import { Vec2 } from './Vector';
+import { RGBAColor } from '~/utils/colorUtils';
 
 export interface TileIndex {
-  row: number
-  column: number
+  row: number;
+  column: number;
 }
 
 export default class Tile {
   // 一連の動作全体で変更があったか（累計表示、UI表示用）
-  public isDirtyThroughAction: boolean
+  public isDirtyThroughAction: boolean;
   // 前回の描画更新から変更があったか（canvas更新用）
-  public isDirty: boolean
+  public isDirty: boolean;
 
   // このタイルが単色（すべて同一RGBA）なら true
-  public isUniform = false
+  public isUniform = false;
   // 単色時のカラーキャッシュ
-  public uniformColor: RGBAColor | undefined = undefined
+  public uniformColor: RGBAColor | undefined = undefined;
 
   constructor(
     public readonly row: number,
     public readonly column: number,
     public readonly globalTileSize: number
   ) {
-    this.isDirtyThroughAction = false
-    this.isDirty = false
+    this.isDirtyThroughAction = false;
+    this.isDirty = false;
   }
 
   toString(): string {
-    return `Tile[${this.row},${this.column}]`
+    return `Tile[${this.row},${this.column}]`;
   }
 
   public getOffset(): Vec2 {
     return {
       x: this.column * this.globalTileSize,
       y: this.row * this.globalTileSize,
-    }
+    };
   }
 
   public isInBounds(positionInTile: Vec2) {
@@ -43,7 +43,7 @@ export default class Tile {
       positionInTile.x < this.globalTileSize &&
       positionInTile.y >= 0 &&
       positionInTile.y < this.globalTileSize
-    )
+    );
   }
 
   updateState() {}

@@ -1,33 +1,33 @@
-import { recipe } from "@vanilla-extract/recipes";
+import { recipe } from '@vanilla-extract/recipes';
 
 export const layerCanvas = recipe({
   base: {
-    pointerEvents: "none",
-    position: "absolute",
+    pointerEvents: 'none',
+    position: 'absolute',
   },
 
   variants: {
     rendering: {
       auto: {
-        imageRendering: "auto",
+        imageRendering: 'auto',
       },
       pixelated: {
-        imageRendering: "pixelated",
+        imageRendering: 'pixelated',
       },
       crispEdges: {
-        imageRendering: "crisp-edges",
+        imageRendering: 'crisp-edges',
       },
     },
     hidden: {
       true: {
         opacity: 0,
-        pointerEvents: "auto",
+        pointerEvents: 'auto',
       },
     },
   },
 
   defaultVariants: {
-    rendering: "auto",
+    rendering: 'auto',
     hidden: false,
   },
 });

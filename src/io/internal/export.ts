@@ -1,14 +1,12 @@
-import { layerStore } from "~/stores/project/layerStore";
+import { layerStore } from '~/stores/project/layerStore';
 
 export function exportActiveLayerUpscaled(scale = 10) {
   const layerId = layerStore.activeLayerId;
   if (!layerId) return;
 
-  const originalCanvas = document.getElementById(
-    `canvas-${layerId}`,
-  ) as HTMLCanvasElement;
+  const originalCanvas = document.getElementById(`canvas-${layerId}`) as HTMLCanvasElement;
   if (!originalCanvas) {
-    alert("対象のレイヤーが見つかりません。");
+    alert('対象のレイヤーが見つかりません。');
     return;
   }
 
@@ -16,13 +14,13 @@ export function exportActiveLayerUpscaled(scale = 10) {
   const h = originalCanvas.height;
 
   // オフスクリーンキャンバスを作る
-  const exportCanvas = document.createElement("canvas");
+  const exportCanvas = document.createElement('canvas');
   exportCanvas.width = w * scale;
   exportCanvas.height = h * scale;
 
-  const ctx = exportCanvas.getContext("2d");
+  const ctx = exportCanvas.getContext('2d');
   if (!ctx) {
-    alert("Canvasコンテキスト取得に失敗しました。");
+    alert('Canvasコンテキスト取得に失敗しました。');
     return;
   }
 
@@ -35,35 +33,35 @@ export function exportActiveLayerUpscaled(scale = 10) {
   // エクスポート処理
   exportCanvas.toBlob((blob) => {
     if (!blob) {
-      alert("エクスポートに失敗しました。");
+      alert('エクスポートに失敗しました。');
       return;
     }
 
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `${layerId}_x${scale}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-  }, "image/png");
+  }, 'image/png');
 }
 
 export function downloadImageData(
   imageData: ImageData,
-  filename: string = "image",
-  scale: number = 10,
+  filename: string = 'image',
+  scale: number = 10
 ) {
   // 一時的な canvas を作成
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = imageData.width;
   canvas.height = imageData.height;
 
   // ImageData を描画
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   if (!ctx) {
-    console.error("2D context not available");
+    console.error('2D context not available');
     return;
   }
   ctx.putImageData(imageData, 0, 0);
@@ -72,13 +70,13 @@ export function downloadImageData(
   const h = canvas.height;
 
   // オフスクリーンキャンバスを作る
-  const exportCanvas = document.createElement("canvas");
+  const exportCanvas = document.createElement('canvas');
   exportCanvas.width = w * scale;
   exportCanvas.height = h * scale;
 
-  const ctxEx = exportCanvas.getContext("2d");
+  const ctxEx = exportCanvas.getContext('2d');
   if (!ctxEx) {
-    alert("Canvasコンテキスト取得に失敗しました。");
+    alert('Canvasコンテキスト取得に失敗しました。');
     return;
   }
 
@@ -90,17 +88,17 @@ export function downloadImageData(
   // エクスポート処理
   exportCanvas.toBlob((blob) => {
     if (!blob) {
-      alert("エクスポートに失敗しました。");
+      alert('エクスポートに失敗しました。');
       return;
     }
 
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `${filename}_x${scale}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-  }, "image/png");
+  }, 'image/png');
 }

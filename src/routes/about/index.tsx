@@ -1,7 +1,6 @@
-import { WebviewOptions } from "@tauri-apps/api/webview";
-import { WindowOptions } from "@tauri-apps/api/window";
-import { open } from "@tauri-apps/plugin-shell";
-import { flexRow, w100, wh100 } from "~/styles/snippets.css";
+import { WebviewOptions } from '@tauri-apps/api/webview';
+import { WindowOptions } from '@tauri-apps/api/window';
+import { open } from '@tauri-apps/plugin-shell';
 import {
   aaContainer,
   aaText,
@@ -13,15 +12,13 @@ import {
   aboutTitle,
   contentContainer,
   sendFBButton,
-} from "./about.css";
-import { pageRoot } from "~/styles/global.css";
+} from './about.css';
+import { pageRoot } from '~/styles/global.css';
+import { flexRow, w100, wh100 } from '~/styles/snippets.css';
 
-export const AboutWindowOptions: Omit<
-  WebviewOptions,
-  "x" | "y" | "width" | "height"
-> &
+export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> &
   WindowOptions = {
-  url: "/about",
+  url: '/about',
   width: 420,
   height: 290,
   resizable: false,
@@ -40,7 +37,7 @@ const About = () => {
 
   return (
     <div class={pageRoot}>
-      <div class={`${flexRow} ${wh100}`} style={{ "align-items": "center" }}>
+      <div class={`${flexRow} ${wh100}`} style={{ 'align-items': 'center' }}>
         <div class={aaContainer}>
           <p class={aaText}>
             ⠀⠀⠀⠀⠀⠀⠀⠀⢠⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -66,58 +63,45 @@ const About = () => {
           </p>
         </div>
         <div class={`${contentContainer} ${w100}`}>
-          <div class={`${flexRow}`} style={{ width: "360px" }}>
+          <div class={`${flexRow}`} style={{ width: '360px' }}>
             <p class={aboutTitle}>SLEDGE.</p>
-            <p class={aboutDev} style={{ "margin-top": "3px" }}>
+            <p class={aboutDev} style={{ 'margin-top': '3px' }}>
               by alphendp
             </p>
           </div>
-          <p class={aboutSubTitle} style={{ "margin-bottom": "14px" }}>
+          <p class={aboutSubTitle} style={{ 'margin-bottom': '14px' }}>
             pre-alpha v0.1
           </p>
-          <p class={aboutContent} style={{ "margin-bottom": "50px" }}>
-            made with much <span style={{ color: "magenta" }}>love</span> for:
-            <br />-{" "}
+          <p class={aboutContent} style={{ 'margin-bottom': '50px' }}>
+            made with much <span style={{ color: 'magenta' }}>love</span> for:
+            <br />-{' '}
             <a
               class={aboutLink}
-              onClick={(e) =>
-                openLink("https://www.sojamo.de/libraries/controlP5/")
-              }
+              onClick={(e) => openLink('https://www.sojamo.de/libraries/controlP5/')}
             >
               ControlP5
             </a>
-            <br />-{" "}
-            <a
-              class={aboutLink}
-              onClick={(e) => openLink("https://archlinux.org/")}
-            >
+            <br />-{' '}
+            <a class={aboutLink} onClick={(e) => openLink('https://archlinux.org/')}>
               Arch Linux
             </a>
-            <br />-{" "}
+            <br />-{' '}
             <a
               class={aboutLink}
-              onClick={(e) =>
-                openLink("https://apps.apple.com/jp/app/caustic/id775735447/")
-              }
+              onClick={(e) => openLink('https://apps.apple.com/jp/app/caustic/id775735447/')}
             >
               Caustic3
-            </a>{" "}
+            </a>{' '}
             &lt;HP dead RIP&gt;
             <br />
           </p>
-          <div
-            class={[flexRow, w100].join(" ")}
-            style={{ "align-items": "center" }}
-          >
+          <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'center' }}>
             <p class={aboutFeedback}>
               気軽に意見を投げつけよう！
               <br />
               feel FREE to send feedback!!
             </p>
-            <button
-              class={sendFBButton}
-              onClick={(e) => openLink("https://tally.so/r/w7jZNL")}
-            >
+            <button class={sendFBButton} onClick={(e) => openLink('https://tally.so/r/w7jZNL')}>
               &gt;&gt; send feedback
             </button>
           </div>

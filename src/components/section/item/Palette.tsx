@@ -1,11 +1,7 @@
-import { Component } from "solid-js";
-import ColorBox from "~/components/common/ColorBox";
-import {
-  colorStore,
-  PaletteType,
-  selectPalette,
-} from "~/stores/internal/colorStore";
-import { paletteRoot } from "~/styles/components/palette.css";
+import { Component } from 'solid-js';
+import ColorBox from '~/components/common/ColorBox';
+import { colorStore, PaletteType, selectPalette } from '~/stores/internal/colorStore';
+import { paletteRoot } from '~/styles/components/palette.css';
 
 const Palette: Component<{}> = (props) => {
   return (
@@ -20,9 +16,7 @@ const Palette: Component<{}> = (props) => {
         color={colorStore.secondary}
         sizePx={24}
         onClick={(color) => selectPalette(PaletteType.secondary)}
-        enableUsingSelection={
-          colorStore.currentPalette === PaletteType.secondary
-        }
+        enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
       />
     </div>
   );

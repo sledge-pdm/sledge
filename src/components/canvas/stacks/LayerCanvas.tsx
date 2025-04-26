@@ -1,23 +1,13 @@
-import {
-  Component,
-  createEffect,
-  createRenderEffect,
-  createSignal,
-  onMount,
-  Ref,
-} from "solid-js";
-import { Layer } from "~/types/Layer";
-import { canvasStore } from "~/stores/project/canvasStore";
-import { layerImageStore } from "~/stores/project/layerImageStore";
+import { Component, createEffect, createRenderEffect, createSignal, onMount, Ref } from 'solid-js';
+import { layerImageManager } from './CanvasStack';
+import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 
-import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
-import {
-  getCanvasImageRenderingAttribute,
-  globalStore,
-} from "~/stores/global/globalStore";
-import { layerCanvas } from "~/styles/components/canvas/layer_canvas.css";
-import { layerImageManager } from "./CanvasStack";
+import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { getCanvasImageRenderingAttribute, globalStore } from '~/stores/global/globalStore';
+import { canvasStore } from '~/stores/project/canvasStore';
+import { layerImageStore } from '~/stores/project/layerImageStore';
+import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
+import { Layer } from '~/types/Layer';
 
 type Props = {
   ref?: LayerCanvasRef;
@@ -46,33 +36,31 @@ export const LayerCanvas: Component<Props> = (props) => {
       getAgent() {
         return agent();
       },
-    }),
+    })
   );
 
   const styleWidth = () => canvasStore.canvas.width;
   const styleHeight = () => canvasStore.canvas.height;
-  const internalWidth = () =>
-    canvasStore.canvas.width / props.layer.dotMagnification;
-  const internalHeight = () =>
-    canvasStore.canvas.height / props.layer.dotMagnification;
+  const internalWidth = () => canvasStore.canvas.width / props.layer.dotMagnification;
+  const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
     let agent = layerImageManager.getAgent(props.layer.id);
     if (!agent) {
       agent = layerImageManager.registerAgent(
         props.layer.id,
-        layerImageStore[props.layer.id]?.current,
+        layerImageStore[props.layer.id]?.current
       );
     }
-    ctx = canvasRef?.getContext("2d") ?? null;
+    ctx = canvasRef?.getContext('2d') ?? null;
     if (ctx) agent.putImageInto(ctx);
 
-    agent.setOnImageChangeListener("layercanvas_refresh", () => {
+    agent.setOnImageChangeListener('layercanvas_refresh', () => {
       if (ctx) {
         agent.putImageIntoForce(ctx);
       }
     });
-    agent.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
+    agent.setOnDrawingBufferChangeListener('layercanvas_refresh', () => {
       if (ctx) {
         agent.putDrawingBufferIntoForce(ctx);
       }
@@ -80,7 +68,7 @@ export const LayerCanvas: Component<Props> = (props) => {
   });
 
   const [renderAttr, setRenderAttr] = createSignal(
-    getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode),
+    getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode)
   );
 
   createEffect(() => {
@@ -88,9 +76,7 @@ export const LayerCanvas: Component<Props> = (props) => {
     agent()?.setImage(image, true);
     if (ctx) agent()?.putImageIntoForce(ctx);
 
-    setRenderAttr(
-      getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode),
-    );
+    setRenderAttr(getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode));
   });
 
   return (
@@ -107,7 +93,7 @@ export const LayerCanvas: Component<Props> = (props) => {
       style={{
         width: `${styleWidth()}px`,
         height: `${styleHeight()}px`,
-        "z-index": props.zIndex,
+        'z-index': props.zIndex,
       }}
     />
   );
@@ -115,14 +101,12 @@ export const LayerCanvas: Component<Props> = (props) => {
 
 function createRefContent<T extends Exclude<unknown, Function>>(
   getRef: () => Ref<T>,
-  createRef: () => T,
+  createRef: () => T
 ) {
   createRenderEffect(() => {
     const refProp = getRef();
-    if (typeof refProp !== "function") {
-      throw new Error(
-        "Should never happen, as solid always passes refs as functions",
-      );
+    if (typeof refProp !== 'function') {
+      throw new Error('Should never happen, as solid always passes refs as functions');
     }
 
     const refFunc = refProp as (value: T) => void;

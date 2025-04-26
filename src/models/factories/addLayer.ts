@@ -1,7 +1,7 @@
-import { allLayers, setLayerStore } from '~/stores/project/layerStore'
-import { DSL } from '../dsl/DSL'
-import { LayerType } from '../../types/Layer'
-import { createLayer } from './createLayer'
+import { LayerType } from '../../types/Layer';
+import { DSL } from '../dsl/DSL';
+import { createLayer } from './createLayer';
+import { allLayers, setLayerStore } from '~/stores/project/layerStore';
 
 export const addLayer = (
   name: string,
@@ -10,13 +10,13 @@ export const addLayer = (
   dotMagnification = 1,
   dsl?: DSL
 ) => {
-  const newLayer = createLayer(name, type, enabled, dotMagnification, dsl)
+  const newLayer = createLayer(name, type, enabled, dotMagnification, dsl);
 
-  const layers = [...allLayers()]
-  layers.push(newLayer)
+  const layers = [...allLayers()];
+  layers.push(newLayer);
 
-  setLayerStore('layers', layers)
-  setLayerStore('activeLayerId', newLayer.id)
+  setLayerStore('layers', layers);
+  setLayerStore('activeLayerId', newLayer.id);
 
-  return layers
-}
+  return layers;
+};

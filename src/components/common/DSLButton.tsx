@@ -1,5 +1,5 @@
-import styles from "@styles/components/dsl_button.module.css";
-import { Component } from "solid-js";
+import { Component } from 'solid-js';
+import styles from '@styles/components/dsl_button.module.css';
 
 interface Props {
   onClick?: (e: MouseEvent) => {};

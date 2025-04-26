@@ -1,12 +1,12 @@
-import { onMount } from "solid-js";
-import EditorSettings from "~/components/section/settings/EditorSettings";
-import { loadGlobalSettings } from "~/io/global/globalIO";
-import { WindowOptionsProp } from "~/utils/windowUtils";
-import { settingContainer } from "./settings.css";
-import { pageRoot } from "~/styles/global.css";
+import { onMount } from 'solid-js';
+import { settingContainer } from './settings.css';
+import EditorSettings from '~/components/section/settings/EditorSettings';
+import { loadGlobalSettings } from '~/io/global/globalIO';
+import { pageRoot } from '~/styles/global.css';
+import { WindowOptionsProp } from '~/utils/windowUtils';
 
 export const SettingsWindowOptions: WindowOptionsProp = {
-  url: "/settings",
+  url: '/settings',
   width: 420,
   height: 290,
   resizable: false,
@@ -28,6 +28,6 @@ export default function Settings() {
       <div class={settingContainer}>
         <EditorSettings />
       </div>
-    </div >
+    </div>
   );
 }

@@ -1,8 +1,8 @@
-import { EffectNode } from "./EffectNode";
+import { EffectNode } from './EffectNode';
 
 export class Brightness extends EffectNode {
-  name: string = "brightness";
-  description: string = "brightness";
+  name: string = 'brightness';
+  description: string = 'brightness';
 
   constructor(private delta: number = 30) {
     super();

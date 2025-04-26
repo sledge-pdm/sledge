@@ -1,4 +1,8 @@
-import { canvasStore, getReferencedZoom, setCanvasStore } from '~/stores/project/canvasStore';
+import {
+  canvasStore,
+  getReferencedZoom,
+  setCanvasStore,
+} from '~/stores/project/canvasStore';
 import { Vec2 } from '~/types/Vector';
 
 class CanvasAreaInteract {
@@ -7,8 +11,6 @@ class CanvasAreaInteract {
   private lastX: number[] = [0, 0];
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
-
-  constructor() {}
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
@@ -40,7 +42,8 @@ class CanvasAreaInteract {
     if (e.touches.length >= 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx * dx + dy * dy) * canvasStore.touchZoomSensitivity;
+      const dist =
+        Math.sqrt(dx * dx + dy * dy) * canvasStore.touchZoomSensitivity;
       if (this.lastDist !== 0) {
         const scaleFactor = dist / this.lastDist;
         const zoomOld = canvasStore.zoom;
@@ -91,10 +94,12 @@ class CanvasAreaInteract {
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
     const referencedZoom = getReferencedZoom();
-    const delta = e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
+    const delta =
+      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
 
     const zoomOld = canvasStore.zoom;
-    const zoomNew = canvasStore.zoom + delta;
+    const zoomNew =
+      Math.round((canvasStore.zoom + canvasStore.zoom * delta) * 1000) / 1000;
 
     if (
       zoomNew < canvasStore.zoomMin * referencedZoom ||
@@ -149,11 +154,18 @@ class CanvasAreaInteract {
     if (e.key === 'Control') setCanvasStore('isCtrlPressed', false);
   }
 
-  public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
-    wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack));
+  public setInteractListeners(
+    wrapper: HTMLDivElement,
+    canvasStack: HTMLDivElement
+  ) {
+    wrapper.addEventListener('touchmove', (e) =>
+      this.handleTouchMove.bind(this)(e, canvasStack)
+    );
     wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this));
 
-    wrapper.addEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
+    wrapper.addEventListener('wheel', (e) =>
+      this.handleWheel.bind(this)(e, canvasStack)
+    );
 
     wrapper.addEventListener('mousedown', this.handleMouseDown.bind(this));
     wrapper.addEventListener('mousemove', this.handleMouseMove.bind(this));
@@ -165,13 +177,18 @@ class CanvasAreaInteract {
     window.addEventListener('keyup', this.handleKeyUp.bind(this));
   }
 
-  public removeInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
+  public removeInteractListeners(
+    wrapper: HTMLDivElement,
+    canvasStack: HTMLDivElement
+  ) {
     wrapper.removeEventListener('touchmove', (e) =>
       this.handleTouchMove.bind(this)(e, canvasStack)
     );
     wrapper.removeEventListener('touchend', this.handleTouchEnd.bind(this));
 
-    wrapper.removeEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
+    wrapper.removeEventListener('wheel', (e) =>
+      this.handleWheel.bind(this)(e, canvasStack)
+    );
 
     wrapper.removeEventListener('mousedown', this.handleMouseDown.bind(this));
     wrapper.removeEventListener('mousemove', this.handleMouseMove.bind(this));

@@ -4,13 +4,13 @@ import styles from '@styles/components/canvas/controls.module.css';
 import { canRedo, canUndo } from '~/stores/project/layerImageStore';
 import { layerStore } from '~/stores/project/layerStore';
 
-const Controls: Component<{}> = (props) => {
+const Controls: Component = () => {
   return (
     <>
       <div class={styles['top-right-nav']}>
         <img
           class={styles.undo_redo}
-          src="/undo.png"
+          src='/undo.png'
           style={{
             opacity: canUndo() ? '1.0' : '0.3',
             cursor: canUndo() ? 'pointer' : 'unset',
@@ -23,7 +23,7 @@ const Controls: Component<{}> = (props) => {
         />
         <img
           class={styles.undo_redo}
-          src="/redo.png"
+          src='/redo.png'
           style={{
             opacity: canRedo() ? '1.0' : '0.3',
             cursor: canRedo() ? 'pointer' : 'unset',

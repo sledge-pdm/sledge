@@ -62,7 +62,7 @@ export const [canvasStore, setCanvasStore] = createStore({
   zoomMin: 0.5,
   zoomMax: 8,
   touchZoomSensitivity: 0.5,
-  wheelZoomStep: 0.1,
+  wheelZoomStep: 0.05,
   // オフセットの初期値
   offsetOrigin: { x: 0, y: 0 },
   offset: { x: 0, y: 0 },

@@ -3,7 +3,7 @@ import { layerImageManager } from './stacks/CanvasStack';
 import { canvasStore } from '~/stores/project/canvasStore';
 import { activeLayer } from '~/stores/project/layerStore';
 
-const CanvasDebugOverlay: Component<{}> = (props) => {
+const CanvasDebugOverlay: Component = () => {
   // const zoom = () => canvasStore.zoom;
   const lastMouseWindow = () => canvasStore.lastMouseWindow;
   const lastMouseOnCanvas = () => canvasStore.lastMouseOnCanvas;
@@ -26,7 +26,10 @@ const CanvasDebugOverlay: Component<{}> = (props) => {
 
       <p>UNDO STACKS.</p>
       <For
-        each={layerImageManager.getAgent(activeLayer()?.id)?.getHistoryManager()?.getUndoStack()}
+        each={layerImageManager
+          .getAgent(activeLayer()?.id)
+          ?.getHistoryManager()
+          ?.getUndoStack()}
       >
         {(item, i) => {
           if (i() === 0) {

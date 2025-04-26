@@ -3,7 +3,7 @@ import { DSL } from '../dsl/DSL';
 import { createLayer } from './createLayer';
 import { allLayers, setLayerStore } from '~/stores/project/layerStore';
 
-export const addLayer = (
+export const addLayer = async (
   name: string,
   type: LayerType = LayerType.Dot,
   enabled = true,

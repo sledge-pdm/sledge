@@ -28,10 +28,10 @@ export default function App() {
         </MetaProvider>
       )}
     >
-      <Route path="/" component={Home} />
-      <Route path="/editor" component={Editor} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/about" component={About} />;
+      <Route path='/' component={Home} />
+      <Route path='/editor' component={Editor} />
+      <Route path='/settings' component={Settings} />
+      <Route path='/about' component={About} />;
     </Router>
   );
 }

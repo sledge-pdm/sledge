@@ -14,7 +14,7 @@ import Tile from '~/types/Tile';
 
 export const layerImageManager = new LayerImageManager();
 
-const CanvasStack: Component<{}> = (props) => {
+const CanvasStack: Component = () => {
   const layerCanvasRefs: {
     [id: string]: LayerCanvasRef;
   } = {};
@@ -90,7 +90,9 @@ const CanvasStack: Component<{}> = (props) => {
           height: `${canvasStore.canvas.height}px`,
         }}
       >
-        <TouchableCanvas operator={new LayerCanvasOperator(() => activeCanvasRef()!)} />
+        <TouchableCanvas
+          operator={new LayerCanvasOperator(() => activeCanvasRef()!)}
+        />
 
         <For each={allLayers()}>
           {(layer, index) => (
@@ -102,7 +104,9 @@ const CanvasStack: Component<{}> = (props) => {
           )}
         </For>
       </div>
-      <CanvasOverlaySVG dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined} />
+      <CanvasOverlaySVG
+        dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined}
+      />
     </div>
   );
 };

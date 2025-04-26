@@ -28,7 +28,8 @@ const PenItem: Component<Props> = (props: Props) => {
         {props.pen.name}.
       </p>
 
-      {(props.pen.type === ToolType.Pen || props.pen.type === ToolType.Eraser) && (
+      {(props.pen.type === ToolType.Pen ||
+        props.pen.type === ToolType.Eraser) && (
         <>
           <div style={{ 'flex-grow': 1 }}>
             <Slider
@@ -38,7 +39,9 @@ const PenItem: Component<Props> = (props: Props) => {
               onValueChanged={(newValue) => {
                 sayRandomQuote('pen-resize');
                 console.log('size set to ' + newValue);
-                const penIndex = toolStore.tools.findIndex((p) => p.id === props.pen.id);
+                const penIndex = toolStore.tools.findIndex(
+                  (p) => p.id === props.pen.id
+                );
                 setToolStore('tools', penIndex, 'size', newValue);
               }}
             />

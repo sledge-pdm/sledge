@@ -11,6 +11,7 @@ export const dropdownRoot = style({
   height: '20px',
   cursor: 'pointer',
   lineHeight: '12px',
+
   selectors: {
     '&:hover': { backgroundColor: vars.color.button_hover },
     '&:active': {

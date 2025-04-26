@@ -1,4 +1,7 @@
-import { layerImageStore, setLayerImageStore } from '~/stores/project/layerImageStore';
+import {
+  layerImageStore,
+  setLayerImageStore,
+} from '~/stores/project/layerImageStore';
 import { allLayers, setLayerStore } from '~/stores/project/layerStore';
 
 export const removeLayer = (layerId?: string) => {

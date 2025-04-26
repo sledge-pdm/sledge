@@ -24,7 +24,11 @@ export function encodeImageData(imageData: ImageData): string {
   return btoa(binary); // Base64 encode
 }
 
-export function decodeImageData(encoded: string, width: number, height: number): ImageData {
+export function decodeImageData(
+  encoded: string,
+  width: number,
+  height: number
+): ImageData {
   const binary = atob(encoded);
   const buffer = new Uint8ClampedArray(binary.length);
   for (let i = 0; i < binary.length; i++) {

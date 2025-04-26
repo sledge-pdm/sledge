@@ -1,4 +1,7 @@
-export function createPreviewCanvas(imageData: ImageData, targetHeight: number): HTMLCanvasElement {
+export function createPreviewCanvas(
+  imageData: ImageData,
+  targetHeight: number
+): HTMLCanvasElement {
   const aspectRatio = imageData.width / imageData.height;
   const targetWidth = Math.round(targetHeight * aspectRatio);
 

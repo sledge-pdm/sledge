@@ -8,10 +8,8 @@
     "tauri:build": "tauri build --debug",
     "tcm-watch": "tcm -o dist-tcm src --watch",
     "postinstall": "patch-package",
-    "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .vscode/.prettierrc",
-    "stylelint": "stylelint -c .\\.stylelintrc.json \"src/**/*.css\" --fix",
-    "lint:src": "eslint \"src/**/*.{ts,tsx,js,jsx}\"",
-    "lint:tauri": "cd src-tauri && cargo fmt && cargo clippy"
+    "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .prettierrc",
+    "stylelint": "stylelint -c .\\.stylelintrc.json \"src/**/*.css\" --fix"
   },
   "dependencies": {
     "@jaames/iro": "^5.5.2",
@@ -35,26 +33,15 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.1",
-    "@typescript-eslint/eslint-plugin": "^8.31.0",
-    "@typescript-eslint/parser": "^8.31.0",
     "@vanilla-extract/vite-plugin": "^5.0.1",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^10.1.2",
-    "eslint-import-resolver-alias": "^1.1.2",
-    "eslint-import-resolver-typescript": "^4.3.4",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.6",
-    "eslint-plugin-solid": "^0.14.5",
-    "eslint-plugin-unused-imports": "^4.1.4",
-    "globals": "^16.0.0",
     "patch-package": "^8.0.0",
     "prettier": "^3.5.3",
+    "prettier-plugin-organize-imports": "^4.1.0",
     "solid-refresh": "^0.7.5",
     "stylelint": "^16.18.0",
     "stylelint-config-standard": "^38.0.0",
     "stylelint-order": "^6.0.4",
-    "vite": "^6.2.4",
-    "vite-plugin-checker": "^0.9.1",
+    "vite": "^6.3.3",
     "vite-plugin-solid": "^2.11.6",
     "vite-tsconfig-paths": "^5.1.4"
   }

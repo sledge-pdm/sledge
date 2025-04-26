@@ -28,7 +28,7 @@
     },
 
     "core:webview:allow-create-webview-window",
-
+    "core:window:allow-destroy",
     "core:window:allow-show",
     "core:window:allow-set-focus",
     "core:window:allow-hide",

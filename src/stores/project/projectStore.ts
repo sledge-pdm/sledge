@@ -16,5 +16,6 @@ createEffect(() => {
   trackStore(canvasStore.canvas);
   trackStore(layerImageStore);
   trackStore(layerStore);
+  console.log('changed!');
   setProjectStore('isProjectChangedAfterSave', true);
 });

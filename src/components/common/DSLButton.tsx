@@ -13,9 +13,11 @@ const DSLButton: Component<Props> = (props: Props) => {
         e.preventDefault();
         e.stopPropagation();
       }}
-      onClick={props.onClick}
+      onClick={(e) => {
+        if (props.onClick) props.onClick(e);
+      }}
     >
-      <img src="/DSL.png" />
+      <img src='/DSL.png' />
     </div>
   );
 };

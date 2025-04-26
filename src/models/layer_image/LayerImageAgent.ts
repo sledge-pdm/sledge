@@ -69,14 +69,20 @@ export default abstract class LayerImageAgent {
     if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0);
   }
 
-  setOnImageChangeListener(key: string, listener: (e: ImageChangeEvent) => void) {
+  setOnImageChangeListener(
+    key: string,
+    listener: (e: ImageChangeEvent) => void
+  ) {
     this.onImageChangedListeners[key] = listener;
   }
   clearOnImageChangeListener(key: string) {
     delete this.onImageChangedListeners[key];
   }
 
-  setOnDrawingBufferChangeListener(key: string, listener: (e: DrawingBufferChangeEvent) => void) {
+  setOnDrawingBufferChangeListener(
+    key: string,
+    listener: (e: DrawingBufferChangeEvent) => void
+  ) {
     this.onDrawingBufferChangedListeners[key] = listener;
   }
   clearOnDrawingBufferChangeListener(key: string) {
@@ -85,11 +91,15 @@ export default abstract class LayerImageAgent {
 
   callOnImageChangeListeners() {
     console.log('no tnui');
-    Object.values(this.onImageChangedListeners).forEach((listener) => listener({}));
+    Object.values(this.onImageChangedListeners).forEach((listener) =>
+      listener({})
+    );
   }
 
   callOnDrawingBufferChangeListeners() {
-    Object.values(this.onDrawingBufferChangedListeners).forEach((listener) => listener({}));
+    Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
+      listener({})
+    );
   }
 
   getWidth = (): number => this.image.width;
@@ -125,7 +135,9 @@ export default abstract class LayerImageAgent {
       }
     });
     const undoEnd = Date.now();
-    setBottomInfo(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
+    setBottomInfo(
+      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`
+    );
 
     this.callOnImageChangeListeners();
   }
@@ -148,7 +160,9 @@ export default abstract class LayerImageAgent {
       }
     });
     const redoEnd = Date.now();
-    setBottomInfo(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
+    setBottomInfo(
+      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`
+    );
 
     this.callOnImageChangeListeners();
   }
@@ -169,7 +183,10 @@ export default abstract class LayerImageAgent {
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     if (!this.isInBounds(position)) return undefined;
-    if (excludePositionMatch && this.currentDiffAction.diffs.has(`${position.x},${position.y}`))
+    if (
+      excludePositionMatch &&
+      this.currentDiffAction.diffs.has(`${position.x},${position.y}`)
+    )
       return undefined;
     const i = (position.y * this.getWidth() + position.x) * 4;
     const beforeColor: RGBAColor = [
@@ -206,7 +223,12 @@ export default abstract class LayerImageAgent {
     excludePositionMatch: boolean = true,
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    return this.setPixelInPosition(position, [0, 0, 0, 0], excludePositionMatch, excludeColorMatch);
+    return this.setPixelInPosition(
+      position,
+      [0, 0, 0, 0],
+      excludePositionMatch,
+      excludeColorMatch
+    );
   }
 
   public abstract getPixel(position: Vec2): RGBAColor;

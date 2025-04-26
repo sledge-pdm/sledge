@@ -1,16 +1,13 @@
-import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
-import { drawCompletionLine, drawSquarePixel } from "../DrawUtils";
-import { Tool, ToolArgs } from "../ToolBase";
+import { drawCompletionLine, drawSquarePixel } from '../DrawUtils';
+import { Tool, ToolArgs } from '../ToolBase';
+import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 
 export class PenTool implements Tool {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     return false;
   }
 
-  onMove(
-    agent: LayerImageAgent,
-    { position, lastPosition, color, size }: ToolArgs,
-  ) {
+  onMove(agent: LayerImageAgent, { position, lastPosition, color, size }: ToolArgs) {
     if (!size) return false;
 
     drawSquarePixel(position, size, (px, py) => {

@@ -1,7 +1,7 @@
-import { Component } from "solid-js";
+import { Component } from 'solid-js';
 
 const CompanionAA: Component<{}> = (props) => {
-  return <div></div>;
+  return <div />;
 };
 
 export default CompanionAA;

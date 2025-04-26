@@ -1,7 +1,7 @@
 export enum ToolType {
-  Pen = "pen",
-  Eraser = "eraser",
-  Fill = "fill",
+  Pen = 'pen',
+  Eraser = 'eraser',
+  Fill = 'fill',
 }
 
 export type Tool = {

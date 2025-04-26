@@ -1,20 +1,15 @@
-import { Component, createSignal } from "solid-js";
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
-import { allLayers, layerStore } from "~/stores/project/layerStore";
+import { Component, createSignal } from 'solid-js';
+import initLayerImage from '~/models/factories/initLayerImage';
+import { canvasStore, setCanvasStore, adjustZoomToFit } from '~/stores/project/canvasStore';
+import { allLayers, layerStore } from '~/stores/project/layerStore';
 
-import { adjustZoomToFit } from "~/stores/project/canvasStore";
 import {
   canvasSizeButton,
   canvasSizeForm,
   canvasSizeInput,
   canvasSizeLabel,
-} from "~/styles/section/canvas.css";
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from "~/styles/section_global.css";
-import initLayerImage from "~/models/factories/initLayerImage";
+} from '~/styles/section/canvas.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 
 const CanvasSettings: Component<{}> = (props) => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -22,8 +17,8 @@ const CanvasSettings: Component<{}> = (props) => {
 
   const changeCanvasSize = (e: any) => {
     e.preventDefault();
-    setCanvasStore("canvas", "width", width());
-    setCanvasStore("canvas", "height", height());
+    setCanvasStore('canvas', 'width', width());
+    setCanvasStore('canvas', 'height', height());
 
     allLayers().forEach((layer, i) => {
       initLayerImage(layer.id, layer.dotMagnification);

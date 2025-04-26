@@ -1,9 +1,8 @@
-import { Component, onMount } from "solid-js";
-import { Layer } from "~/types/Layer";
-
-import styles from "@styles/components/layer_preview.module.css";
-import { layerImageStore } from "~/stores/project/layerImageStore";
-import { layerImageManager } from "../canvas/stacks/CanvasStack";
+import { Component, onMount } from 'solid-js';
+import { layerImageManager } from '../canvas/stacks/CanvasStack';
+import styles from '@styles/components/layer_preview.module.css';
+import { layerImageStore } from '~/stores/project/layerImageStore';
+import { Layer } from '~/types/Layer';
 
 interface Props {
   layer: Layer;
@@ -28,11 +27,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (
-      maxHeight &&
-      targetHeight > maxHeight &&
-      zoom < maxHeight / targetHeight
-    )
+    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight)
       zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
@@ -41,12 +36,12 @@ const LayerPreview: Component<Props> = (props: Props) => {
     wrapperRef.style.width = `${targetWidth * zoom}px !important`;
     wrapperRef.style.height = `${targetHeight * zoom}px !important`;
 
-    const tmpCanvas = document.createElement("canvas");
+    const tmpCanvas = document.createElement('canvas');
     tmpCanvas.width = originalImage.width;
     tmpCanvas.height = originalImage.height;
-    tmpCanvas.getContext("2d")!.putImageData(originalImage, 0, 0);
+    tmpCanvas.getContext('2d')!.putImageData(originalImage, 0, 0);
 
-    const ctx = canvasRef.getContext("2d")!;
+    const ctx = canvasRef.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, targetWidth, targetHeight);
 
@@ -59,7 +54,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
       0,
       0,
       targetWidth,
-      targetHeight,
+      targetHeight
     );
   };
   onMount(() => {
@@ -75,8 +70,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
     updatePreview(currentImage, height);
 
-    agent.setOnImageChangeListener("layer_prev_" + props.layer.id, () => {
-      console.log("aasdffa");
+    agent.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
+      console.log('aasdffa');
       const img = layerImageStore[props.layer.id].current;
       updatePreview(img, height);
     });

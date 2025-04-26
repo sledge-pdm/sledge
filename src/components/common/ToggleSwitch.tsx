@@ -1,10 +1,10 @@
-import { Component } from "solid-js";
+import { Component } from 'solid-js';
 import {
   toggleInput,
   toggleThumb,
   toggleTrack,
   toggleWrapper,
-} from "~/styles/components/toggle_switch.css";
+} from '~/styles/components/toggle_switch.css';
 
 interface Props {
   checked: boolean;

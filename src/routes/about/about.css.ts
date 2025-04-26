@@ -1,6 +1,6 @@
-import { style } from '@vanilla-extract/css'
-import { k12x8, Terminus, vars, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css'
-import { flexCol } from '~/styles/snippets.css'
+import { style } from '@vanilla-extract/css';
+import { k12x8, Terminus, vars, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css';
+import { flexCol } from '~/styles/snippets.css';
 
 export const aaContainer = style([
   flexCol,
@@ -13,13 +13,13 @@ export const aaContainer = style([
     alignItems: 'center',
     pointerEvents: 'none',
   },
-])
+]);
 
 export const aaText = style({
   fontFamily: Terminus,
   fontSize: '22px',
   opacity: 0.4,
-})
+});
 
 export const contentContainer = style([
   flexCol,
@@ -29,7 +29,7 @@ export const contentContainer = style([
     marginTop: '8px',
     pointerEvents: 'none',
   },
-])
+]);
 
 export const aboutLink = style({
   pointerEvents: 'all',
@@ -39,29 +39,29 @@ export const aboutLink = style({
     borderBottom: 'none',
     color: 'magenta',
   },
-})
+});
 
 export const aboutTitle = style({
   fontFamily: ZFB31,
   fontSize: '31px',
-})
+});
 
 export const aboutSubTitle = style({
   fontFamily: ZFB03,
   fontSize: '9px',
   color: '#777',
-})
+});
 
 export const aboutDev = style({
   fontFamily: ZFB08,
   fontSize: '8px',
-})
+});
 
 export const aboutContent = style({
   fontFamily: ZFB08,
   fontSize: '8px',
   lineHeight: 1.6,
-})
+});
 
 export const sendFBButton = style({
   width: 'fit-content',
@@ -74,11 +74,11 @@ export const sendFBButton = style({
     color: 'white',
     background: 'blue',
   },
-})
+});
 
 export const aboutFeedback = style({
   fontFamily: k12x8,
   fontSize: '8px',
   marginRight: '60px',
   lineHeight: 1.5,
-})
+});

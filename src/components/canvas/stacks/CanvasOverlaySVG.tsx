@@ -1,8 +1,8 @@
-import { Component, For } from "solid-js";
-import { currentTool } from "~/stores/internal/toolsStore";
-import { canvasStore } from "~/stores/project/canvasStore";
-import { activeLayer } from "~/stores/project/layerStore";
-import Tile from "~/types/Tile";
+import { Component, For } from 'solid-js';
+import { currentTool } from '~/stores/internal/toolsStore';
+import { canvasStore } from '~/stores/project/canvasStore';
+import { activeLayer } from '~/stores/project/layerStore';
+import Tile from '~/types/Tile';
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
   const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom;
@@ -15,11 +15,11 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
       viewBox={`0 0 ${borderWidth()} ${borderHeight()}`}
       xmlns="http://www.w3.org/2000/svg"
       style={{
-        position: "absolute",
+        position: 'absolute',
         top: 0,
         left: 0,
-        "pointer-events": "none",
-        "image-rendering": "pixelated",
+        'pointer-events': 'none',
+        'image-rendering': 'pixelated',
       }}
     >
       {/* border rect */}
@@ -36,14 +36,8 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
       <rect
         width={zoomedPenSize()}
         height={zoomedPenSize()}
-        x={
-          Math.round(canvasStore.lastMouseOnCanvas.x) * canvasStore.zoom -
-          zoomedPenSize() / 2
-        }
-        y={
-          Math.round(canvasStore.lastMouseOnCanvas.y) * canvasStore.zoom -
-          zoomedPenSize() / 2
-        }
+        x={Math.round(canvasStore.lastMouseOnCanvas.x) * canvasStore.zoom - zoomedPenSize() / 2}
+        y={Math.round(canvasStore.lastMouseOnCanvas.y) * canvasStore.zoom - zoomedPenSize() / 2}
         fill="none"
         stroke="black"
         stroke-width={1}
@@ -54,27 +48,11 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         {(dirtyRect) => {
           return (
             <rect
-              width={
-                dirtyRect.globalTileSize *
-                activeLayer()?.dotMagnification *
-                canvasStore.zoom
-              }
-              height={
-                dirtyRect.globalTileSize *
-                activeLayer()?.dotMagnification *
-                canvasStore.zoom
-              }
-              x={
-                dirtyRect.getOffset().x *
-                activeLayer()?.dotMagnification *
-                canvasStore.zoom
-              }
-              y={
-                dirtyRect.getOffset().y *
-                activeLayer()?.dotMagnification *
-                canvasStore.zoom
-              }
-              fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
+              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
+              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
+              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * canvasStore.zoom}
+              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * canvasStore.zoom}
+              fill={dirtyRect.isDirty ? '#ff000060' : '#00ffff60'}
               stroke="none"
               pointer-events="none"
             />

@@ -1,14 +1,14 @@
 // @refresh reload
-import { MetaProvider } from "@solidjs/meta";
-import { Route, Router } from "@solidjs/router";
-import { Suspense } from "solid-js";
-import TitleBar from "./components/TitleBar";
-import Home from "./routes";
-import Editor from "./routes/editor";
+import { MetaProvider } from '@solidjs/meta';
+import { Route, Router } from '@solidjs/router';
+import { Suspense } from 'solid-js';
+import TitleBar from './components/TitleBar';
+import Home from './routes';
+import About from './routes/about';
+import Editor from './routes/editor';
 
-import About from "./routes/about";
-import Settings from "./routes/settings";
-import { flexCol, h100 } from "./styles/snippets.css";
+import Settings from './routes/settings';
+import { flexCol, h100 } from './styles/snippets.css';
 
 export default function App() {
   return (
@@ -17,9 +17,7 @@ export default function App() {
         <MetaProvider>
           <title>Sledge</title>
           <Suspense>
-            <div
-              class={[flexCol, h100].join(" ")}
-            >
+            <div class={[flexCol, h100].join(' ')}>
               <TitleBar />
 
               <main>{props.children}</main>

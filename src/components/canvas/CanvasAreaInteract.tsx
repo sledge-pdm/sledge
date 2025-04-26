@@ -1,9 +1,5 @@
-import { Vec2 } from "~/types/Vector";
-import {
-  canvasStore,
-  getReferencedZoom,
-  setCanvasStore,
-} from "~/stores/project/canvasStore";
+import { canvasStore, getReferencedZoom, setCanvasStore } from '~/stores/project/canvasStore';
+import { Vec2 } from '~/types/Vector';
 
 class CanvasAreaInteract {
   private dragPosition: Vec2 = { x: 0, y: 0 };
@@ -12,7 +8,7 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() { }
+  constructor() {}
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
@@ -26,14 +22,14 @@ class CanvasAreaInteract {
     if (e.touches.length === 1) {
       const xMove0 = e.touches[0].clientX - this.lastX[0];
       if (xMove0 !== 0 && this.lastX[0] !== 0) {
-        setCanvasStore("offset", {
+        setCanvasStore('offset', {
           x: canvasStore.offset.x + xMove0,
           y: canvasStore.offset.y,
         });
       }
       const yMove0 = e.touches[0].clientY - this.lastY[0];
       if (yMove0 !== 0 && this.lastY[0] !== 0) {
-        setCanvasStore("offset", {
+        setCanvasStore('offset', {
           x: canvasStore.offset.x,
           y: canvasStore.offset.y + yMove0,
         });
@@ -44,8 +40,7 @@ class CanvasAreaInteract {
     if (e.touches.length >= 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist =
-        Math.sqrt(dx * dx + dy * dy) * canvasStore.touchZoomSensitivity;
+      const dist = Math.sqrt(dx * dx + dy * dy) * canvasStore.touchZoomSensitivity;
       if (this.lastDist !== 0) {
         const scaleFactor = dist / this.lastDist;
         const zoomOld = canvasStore.zoom;
@@ -55,8 +50,8 @@ class CanvasAreaInteract {
         const rect = canvasStack.getBoundingClientRect();
         const canvasX = (midX - rect.left) / zoomOld;
         const canvasY = (midY - rect.top) / zoomOld;
-        setCanvasStore("zoom", zoomNew);
-        setCanvasStore("offset", {
+        setCanvasStore('zoom', zoomNew);
+        setCanvasStore('offset', {
           x: canvasStore.offset.x + canvasX * (zoomOld - zoomNew),
           y: canvasStore.offset.y + canvasY * (zoomOld - zoomNew),
         });
@@ -65,7 +60,7 @@ class CanvasAreaInteract {
       const xMove1 = e.touches[1].clientX - this.lastX[1];
       const mutualMoveX = this.getMutualMove(xMove0, xMove1);
       if (mutualMoveX !== 0 && this.lastX[0] !== 0 && this.lastX[1] !== 0) {
-        setCanvasStore("offset", {
+        setCanvasStore('offset', {
           x: canvasStore.offset.x + mutualMoveX,
           y: canvasStore.offset.y,
         });
@@ -74,7 +69,7 @@ class CanvasAreaInteract {
       const yMove1 = e.touches[1].clientY - this.lastY[1];
       const mutualMoveY = this.getMutualMove(yMove0, yMove1);
       if (mutualMoveY !== 0 && this.lastY[0] !== 0 && this.lastY[1] !== 0) {
-        setCanvasStore("offset", {
+        setCanvasStore('offset', {
           x: canvasStore.offset.x,
           y: canvasStore.offset.y + mutualMoveY,
         });
@@ -96,8 +91,7 @@ class CanvasAreaInteract {
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
     const referencedZoom = getReferencedZoom();
-    const delta =
-      e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
+    const delta = e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
 
     const zoomOld = canvasStore.zoom;
     const zoomNew = canvasStore.zoom + delta;
@@ -111,8 +105,8 @@ class CanvasAreaInteract {
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;
-    setCanvasStore("zoom", zoomNew);
-    setCanvasStore("offset", {
+    setCanvasStore('zoom', zoomNew);
+    setCanvasStore('offset', {
       x: canvasStore.offset.x + canvasX * (zoomOld - zoomNew),
       y: canvasStore.offset.y + canvasY * (zoomOld - zoomNew),
     });
@@ -122,7 +116,7 @@ class CanvasAreaInteract {
     if (e.buttons === 4 || (e.buttons === 1 && canvasStore.isCtrlPressed)) {
       e.preventDefault();
       e.stopPropagation();
-      setCanvasStore("isDragging", true);
+      setCanvasStore('isDragging', true);
       this.dragPosition = { x: e.clientX, y: e.clientY };
     }
   }
@@ -134,7 +128,7 @@ class CanvasAreaInteract {
       if (canvasStore.isDragging) {
         const dx = e.clientX - this.dragPosition.x;
         const dy = e.clientY - this.dragPosition.y;
-        setCanvasStore("offset", {
+        setCanvasStore('offset', {
           x: canvasStore.offset.x + dx,
           y: canvasStore.offset.y + dy,
         });
@@ -144,61 +138,49 @@ class CanvasAreaInteract {
   }
 
   private handleMouseOff(e: MouseEvent) {
-    setCanvasStore("isDragging", false);
+    setCanvasStore('isDragging', false);
   }
 
   private handleKeyDown(e: KeyboardEvent) {
-    if (e.ctrlKey) setCanvasStore("isCtrlPressed", true);
+    if (e.ctrlKey) setCanvasStore('isCtrlPressed', true);
   }
 
   private handleKeyUp(e: KeyboardEvent) {
-    if (e.key === "Control") setCanvasStore("isCtrlPressed", false);
+    if (e.key === 'Control') setCanvasStore('isCtrlPressed', false);
   }
 
-  public setInteractListeners(
-    wrapper: HTMLDivElement,
-    canvasStack: HTMLDivElement,
-  ) {
-    wrapper.addEventListener("touchmove", (e) =>
-      this.handleTouchMove.bind(this)(e, canvasStack),
-    );
-    wrapper.addEventListener("touchend", this.handleTouchEnd.bind(this));
+  public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
+    wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack));
+    wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this));
 
-    wrapper.addEventListener("wheel", (e) =>
-      this.handleWheel.bind(this)(e, canvasStack),
-    );
+    wrapper.addEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
 
-    wrapper.addEventListener("mousedown", this.handleMouseDown.bind(this));
-    wrapper.addEventListener("mousemove", this.handleMouseMove.bind(this));
-    wrapper.addEventListener("mouseup", this.handleMouseOff.bind(this));
-    wrapper.addEventListener("mouseleave", this.handleMouseOff.bind(this));
-    wrapper.addEventListener("mouseout", this.handleMouseOff.bind(this));
+    wrapper.addEventListener('mousedown', this.handleMouseDown.bind(this));
+    wrapper.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    wrapper.addEventListener('mouseup', this.handleMouseOff.bind(this));
+    wrapper.addEventListener('mouseleave', this.handleMouseOff.bind(this));
+    wrapper.addEventListener('mouseout', this.handleMouseOff.bind(this));
 
-    window.addEventListener("keydown", this.handleKeyDown.bind(this));
-    window.addEventListener("keyup", this.handleKeyUp.bind(this));
+    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    window.addEventListener('keyup', this.handleKeyUp.bind(this));
   }
 
-  public removeInteractListeners(
-    wrapper: HTMLDivElement,
-    canvasStack: HTMLDivElement,
-  ) {
-    wrapper.removeEventListener("touchmove", (e) =>
-      this.handleTouchMove.bind(this)(e, canvasStack),
+  public removeInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
+    wrapper.removeEventListener('touchmove', (e) =>
+      this.handleTouchMove.bind(this)(e, canvasStack)
     );
-    wrapper.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    wrapper.removeEventListener('touchend', this.handleTouchEnd.bind(this));
 
-    wrapper.removeEventListener("wheel", (e) =>
-      this.handleWheel.bind(this)(e, canvasStack),
-    );
+    wrapper.removeEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
 
-    wrapper.removeEventListener("mousedown", this.handleMouseDown.bind(this));
-    wrapper.removeEventListener("mousemove", this.handleMouseMove.bind(this));
-    wrapper.removeEventListener("mouseup", this.handleMouseOff.bind(this));
-    wrapper.removeEventListener("mouseleave", this.handleMouseOff.bind(this));
-    wrapper.removeEventListener("mouseout", this.handleMouseOff.bind(this));
+    wrapper.removeEventListener('mousedown', this.handleMouseDown.bind(this));
+    wrapper.removeEventListener('mousemove', this.handleMouseMove.bind(this));
+    wrapper.removeEventListener('mouseup', this.handleMouseOff.bind(this));
+    wrapper.removeEventListener('mouseleave', this.handleMouseOff.bind(this));
+    wrapper.removeEventListener('mouseout', this.handleMouseOff.bind(this));
 
-    window.removeEventListener("keydown", this.handleKeyDown.bind(this));
-    window.removeEventListener("keyup", this.handleKeyUp.bind(this));
+    window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+    window.removeEventListener('keyup', this.handleKeyUp.bind(this));
   }
 }
 

@@ -32,7 +32,7 @@
 .toast {
   color: #222;
   flex-grow: 1;
-  font-family: "04B09";
+  font-family: '04B09';
   font-size: 0.5rem;
   margin-top: 2px;
 }

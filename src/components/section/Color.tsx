@@ -1,19 +1,15 @@
-import { Component, For } from "solid-js";
-import { colorStore, setCurrentColor } from "~/stores/internal/colorStore";
+import { Component, For } from 'solid-js';
+import ColorBox from '../common/ColorBox';
+import Palette from './item/Palette';
+import ColorPicker from '~/components/section/item/ColorPicker';
+import { colorStore, setCurrentColor } from '~/stores/internal/colorStore';
 
-import ColorPicker from "~/components/section/item/ColorPicker";
 import {
   colorElemDescription,
   descriptionContainer,
   swatchContainer,
-} from "~/styles/section/color.css";
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from "~/styles/section_global.css";
-import ColorBox from "../common/ColorBox";
-import Palette from "./item/Palette";
+} from '~/styles/section/color.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 
 const Color: Component<{}> = (props) => {
   const onColorClicked = (color: string, index: number) => {
@@ -23,10 +19,7 @@ const Color: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>color.</p>
-      <div
-        class={sectionContent}
-        style={{ "flex-direction": "row", margin: "8px 0" }}
-      >
+      <div class={sectionContent} style={{ 'flex-direction': 'row', margin: '8px 0' }}>
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
             {(item, index) => (

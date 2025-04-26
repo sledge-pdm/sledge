@@ -1,44 +1,39 @@
-import {
-  createGlobalTheme,
-  fontFace,
-  globalStyle,
-  style,
-} from '@vanilla-extract/css'
-import { flexCol, flexRow, h100 } from './snippets.css'
+import { createGlobalTheme, fontFace, globalStyle, style } from '@vanilla-extract/css';
+import { flexCol, flexRow, h100 } from './snippets.css';
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',
-})
+});
 export const ZFB03B = fontFace({
   src: 'url("/fonts/04B_03B_.ttf")',
-})
+});
 export const ZFB08 = fontFace({
   src: 'url("/fonts/04B_08__.ttf")',
-})
+});
 export const ZFB09 = fontFace({
   src: 'url("/fonts/04B_09__.ttf")',
-})
+});
 export const ZFB11 = fontFace({
   src: 'url("/fonts/04B_11__.ttf")',
-})
+});
 export const ZFB31 = fontFace({
   src: 'url("/fonts/04B_31__.ttf")',
-})
+});
 export const Terminus = fontFace({
   src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")',
-})
+});
 export const k8x12 = fontFace({
   src: 'url("/fonts/k8x12/k8x12.ttf")',
-})
+});
 export const k8x12L = fontFace({
   src: 'url("/fonts/k8x12/k8x12L.ttf")',
-})
+});
 export const k8x12S = fontFace({
   src: 'url("/fonts/k8x12/k8x12S.ttf")',
-})
+});
 export const k12x8 = fontFace({
   src: 'url("/fonts/k12x8/k12x8.ttf")',
-})
+});
 
 export const vars = createGlobalTheme(':root', {
   color: {
@@ -74,16 +69,16 @@ export const vars = createGlobalTheme(':root', {
   font: {
     body: `${ZFB08}, ${k8x12}`,
   },
-})
+});
 
 globalStyle('button, p, a, input', {
   fontFamily: ZFB08,
   color: vars.color.text,
-})
+});
 
 globalStyle('a:hover', {
   color: 'red',
-})
+});
 
 globalStyle('button', {
   background: vars.color.button,
@@ -95,16 +90,16 @@ globalStyle('button', {
   padding: '2px 6px',
   pointerEvents: 'all',
   width: 'fit-content',
-})
+});
 
 globalStyle('button:hover', {
   background: vars.color.button_hover,
-})
+});
 
 globalStyle('button:active', {
   background: vars.color.button_pressed,
   transform: 'translateY(1px)',
-})
+});
 
 export const pageRoot = style({
   display: 'flex',
@@ -112,9 +107,9 @@ export const pageRoot = style({
   height: '100%',
   userSelect: 'none',
   overflow: 'hidden',
-})
+});
 
-export const sideArea = style([flexRow, h100])
+export const sideArea = style([flexRow, h100]);
 
 export const sideAreaEdge = style([
   flexCol,
@@ -125,7 +120,7 @@ export const sideAreaEdge = style([
     padding: '10px 0 50px 2px',
     justifyContent: 'flex-end',
   },
-])
+]);
 
 export const sideAreaEdgeText = style({
   fontSize: '0.5rem',
@@ -133,7 +128,7 @@ export const sideAreaEdgeText = style({
   transform: 'rotate(180deg)',
   whiteSpace: 'nowrap',
   writingMode: 'vertical-rl',
-})
+});
 
 export const sideAreaContent = style([
   flexCol,
@@ -155,10 +150,10 @@ export const sideAreaContent = style([
       },
     },
   },
-])
+]);
 
 export const sledgeLogo = style({
   bottom: '2px',
   position: 'absolute',
   right: '2px',
-})
+});

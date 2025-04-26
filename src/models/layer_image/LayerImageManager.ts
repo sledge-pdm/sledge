@@ -1,6 +1,6 @@
-import { HistoryManager } from "./HistoryManager";
-import LayerImageAgent from "./LayerImageAgent";
-import TileLayerImageAgent from "./agents/TileLayerImageAgent";
+import { HistoryManager } from './HistoryManager';
+import LayerImageAgent from './LayerImageAgent';
+import TileLayerImageAgent from './agents/TileLayerImageAgent';
 
 export class LayerImageManager {
   private agents: Map<string, LayerImageAgent> = new Map();

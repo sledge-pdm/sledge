@@ -1,15 +1,11 @@
-import { Component, createSignal } from "solid-js";
-import { saveProject } from "~/io/project/project";
+import { Component, createSignal } from 'solid-js';
+import { exportActiveLayerUpscaled } from '~/io/internal/export';
+import { saveProject } from '~/io/project/project';
 
-import { exportActiveLayerUpscaled } from "~/io/internal/export";
-import { projectStore, setProjectStore } from "~/stores/project/projectStore";
-import { projectNameInput } from "~/styles/section/project.css";
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from "~/styles/section_global.css";
-import { flexCol, flexRow } from "~/styles/snippets.css";
+import { projectStore, setProjectStore } from '~/stores/project/projectStore';
+import { projectNameInput } from '~/styles/section/project.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component<{}> = (props) => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
@@ -18,13 +14,13 @@ const Project: Component<{}> = (props) => {
     if (projectStore.name && projectStore.path) {
       // 上書き保存
       saveProject(`${projectStore.path}`).then(() => {
-        setSaveLog("saved!");
-        setProjectStore("isProjectChangedAfterSave", false);
+        setSaveLog('saved!');
+        setProjectStore('isProjectChangedAfterSave', false);
       });
     } else {
       saveProject().then(() => {
-        setSaveLog("saved!");
-        setProjectStore("isProjectChangedAfterSave", false);
+        setSaveLog('saved!');
+        setProjectStore('isProjectChangedAfterSave', false);
       });
     }
   };
@@ -39,7 +35,7 @@ const Project: Component<{}> = (props) => {
             type="text"
             name="height"
             onChange={(e) => {
-              setProjectStore("name", e.target.value);
+              setProjectStore('name', e.target.value);
             }}
             value={projectStore.name}
             placeholder="project name"
@@ -53,10 +49,7 @@ const Project: Component<{}> = (props) => {
                         load.
                     </button> */}
 
-        <div
-          class={flexRow}
-          style={{ "align-items": "center", "margin-top": "12px" }}
-        >
+        <div class={flexRow} style={{ 'align-items': 'center', 'margin-top': '12px' }}>
           <button onClick={() => saveProject()}>save.</button>
           <button onClick={() => exportActiveLayerUpscaled()}>export.</button>
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}

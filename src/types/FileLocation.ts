@@ -1,4 +1,4 @@
 export type FileLocation = {
-  path: string
-  name: string
-}
+  path: string;
+  name: string;
+};

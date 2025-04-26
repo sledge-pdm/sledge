@@ -1,4 +1,4 @@
-import { importImageToActiveLayer } from "~/io/internal/import"; // 上で作った関数
+import { importImageToActiveLayer } from '~/io/internal/import'; // 上で作った関数
 
 const ImportImageButton = () => {
   let fileInputRef: HTMLInputElement | undefined;
@@ -12,7 +12,7 @@ const ImportImageButton = () => {
     const file = target.files?.[0];
     if (file) {
       importImageToActiveLayer(file);
-      target.value = ""; // 同じファイルを再選択可能にする
+      target.value = ''; // 同じファイルを再選択可能にする
     }
   };
 
@@ -24,7 +24,7 @@ const ImportImageButton = () => {
         type="file"
         accept="image/*"
         ref={fileInputRef}
-        style={{ display: "none" }}
+        style={{ display: 'none' }}
         onChange={handleFileChange}
       />
     </>

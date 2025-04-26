@@ -1,8 +1,5 @@
-import {
-  layerImageStore,
-  setLayerImageStore,
-} from "~/stores/project/layerImageStore";
-import { allLayers, setLayerStore } from "~/stores/project/layerStore";
+import { layerImageStore, setLayerImageStore } from '~/stores/project/layerImageStore';
+import { allLayers, setLayerStore } from '~/stores/project/layerStore';
 
 export const removeLayer = (layerId?: string) => {
   if (layerId === undefined) return;
@@ -16,7 +13,7 @@ export const removeLayer = (layerId?: string) => {
   const images = Object.assign({}, layerImageStore);
   delete images[layerId];
 
-  setLayerStore("layers", layers);
-  setLayerStore("activeLayerId", layers[newActiveIndex].id);
+  setLayerStore('layers', layers);
+  setLayerStore('activeLayerId', layers[newActiveIndex].id);
   setLayerImageStore(images);
 };

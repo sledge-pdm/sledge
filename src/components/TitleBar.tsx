@@ -1,5 +1,5 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { createSignal, onMount } from "solid-js";
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { createSignal, onMount } from 'solid-js';
 import {
   titleBarControlButtonImg,
   titleBarControlCloseButton,
@@ -8,7 +8,7 @@ import {
   titleBarControls,
   titleBarRoot,
   titleBarTitle,
-} from "~/styles/components/title_bar.css";
+} from '~/styles/components/title_bar.css';
 
 export default function TitleBar() {
   const window = getCurrentWindow();
@@ -16,7 +16,7 @@ export default function TitleBar() {
   const [isMaximizable, setIsMaximizable] = createSignal(true);
   const [isMinimizable, setIsMinimizable] = createSignal(true);
   const [isClosable, setIsClosable] = createSignal(true);
-  const [title, setTitle] = createSignal("");
+  const [title, setTitle] = createSignal('');
   const [isMaximized, setMaximized] = createSignal(false);
 
   onMount(async () => {
@@ -27,48 +27,39 @@ export default function TitleBar() {
   });
 
   window.onResized(async (handler) => {
-    console.log("resize");
+    console.log('resize');
     setMaximized(await window.isMaximized());
   });
 
-  const borderWindowLabels: string[] = ["editor"]
-  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label)
+  const borderWindowLabels: string[] = ['editor'];
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
 
   return (
     <header
       style={{
-        "pointer-events": "all",
-        border: shouldShowBorder() ? "1px solid #aaa" : "none",
+        'pointer-events': 'all',
+        border: shouldShowBorder() ? '1px solid #aaa' : 'none',
       }}
     >
       <nav class={titleBarRoot} data-tauri-drag-region="p, button">
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
           {isMinimizable() && (
-            <button
-              class={titleBarControlMinimizeButton}
-              onClick={() => window.minimize()}
-            >
-              <img class={titleBarControlButtonImg} src={"/minimize.png"} />
+            <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
+              <img class={titleBarControlButtonImg} src={'/minimize.png'} />
             </button>
           )}
           {isMaximizable() && (
-            <button
-              class={titleBarControlMaximizeButton}
-              onClick={() => window.toggleMaximize()}
-            >
+            <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
               <img
                 class={titleBarControlButtonImg}
-                src={isMaximized() ? "/leave_maximize.png" : "/maximize.png"}
+                src={isMaximized() ? '/leave_maximize.png' : '/maximize.png'}
               />
             </button>
           )}
           {isClosable() && (
-            <button
-              class={titleBarControlCloseButton}
-              onClick={() => window.close()}
-            >
-              <img class={titleBarControlButtonImg} src={"/close.png"} />
+            <button class={titleBarControlCloseButton} onClick={() => window.close()}>
+              <img class={titleBarControlButtonImg} src={'/close.png'} />
             </button>
           )}
         </div>

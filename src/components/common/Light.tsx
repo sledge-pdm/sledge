@@ -1,5 +1,5 @@
-import styles from "@styles/components/light.module.css";
-import { Component, Show } from "solid-js";
+import { Component, Show } from 'solid-js';
+import styles from '@styles/components/light.module.css';
 
 interface LightProps {
   class?: string;
@@ -17,13 +17,13 @@ const Light: Component<LightProps> = (props: LightProps) => {
       style={{
         width: `${width}px`,
         height: `${height}px`,
-        overflow: "visible",
+        overflow: 'visible',
       }}
       viewBox={`0 0 ${width} ${height}`}
       xmlns="http://www.w3.org/2000/svg"
     >
       <Show when={true}>
-        <g class={`${styles["light-inner"]} ${props.on && styles["on"]}`}>
+        <g class={`${styles['light-inner']} ${props.on && styles['on']}`}>
           <circle cx={width / 2} cy={height / 2} r={radius} fill="red" />
         </g>
       </Show>

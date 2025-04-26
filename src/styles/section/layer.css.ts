@@ -1,6 +1,6 @@
-import { style } from "@vanilla-extract/css";
-import { vars, ZFB03B } from "../global.css";
-import { flexCol, flexRow, w100 } from "../snippets.css";
+import { style } from '@vanilla-extract/css';
+import { vars, ZFB03B } from '../global.css';
+import { flexCol, flexRow, w100 } from '../snippets.css';
 
 export const layerList = style([
   flexCol,
@@ -8,7 +8,7 @@ export const layerList = style([
   {
     flexGrow: 1,
     gap: vars.spacing.xs,
-    position: "relative",
+    position: 'relative',
   },
 ]);
 
@@ -16,18 +16,18 @@ export const layerItem = style([
   flexRow,
   w100,
   {
-    height: "32px",
-    padding: "6px",
+    height: '32px',
+    padding: '6px',
     flexGrow: 1,
-    cursor: "pointer",
+    cursor: 'pointer',
     backgroundColor: vars.color.surface,
-    borderLeft: "1px solid black",
-    ":hover": {
-      filter: "brightness(0.94)",
-      transform: "translate(0, 1px)",
+    borderLeft: '1px solid black',
+    ':hover': {
+      filter: 'brightness(0.94)',
+      transform: 'translate(0, 1px)',
     },
-    ":active": {
-      transform: "translate(0, 1px)",
+    ':active': {
+      transform: 'translate(0, 1px)',
     },
   },
 ]);
@@ -41,9 +41,9 @@ export const layerItemType = style([
   {
     fontSize: vars.text.sm,
     opacity: 0.4,
-    position: "absolute",
+    position: 'absolute',
     right: 0,
-    textAlign: "end",
+    textAlign: 'end',
   },
 ]);
 
@@ -57,16 +57,16 @@ export const layerItemName = style([
 
 export const dotMagnifContainer = style([
   {
-    alignSelf: "center",
-    border: "1px black solid",
+    alignSelf: 'center',
+    border: '1px black solid',
     borderRadius: vars.spacing.xs,
-    cursor: "pointer",
-    marginLeft: "auto",
+    cursor: 'pointer',
+    marginLeft: 'auto',
     marginRight: 0,
     padding: `2px ${vars.spacing.xs}`,
-    pointerEvents: "all",
+    pointerEvents: 'all',
 
-    ":hover": {
+    ':hover': {
       color: vars.color.muted,
     },
   },
@@ -81,7 +81,7 @@ export const dotMagnifText = style([
 
 export const activeLight = style([
   {
-    alignSelf: "center",
+    alignSelf: 'center',
     margin: `${vars.spacing.sm}px 0`,
     marginLeft: vars.spacing.sm,
   },
@@ -89,9 +89,9 @@ export const activeLight = style([
 
 export const dropPlaceholder = style([
   {
-    border: "2px dashed #aaa",
+    border: '2px dashed #aaa',
     borderRadius: vars.spacing.md,
-    height: "32px",
+    height: '32px',
     margin: `${vars.spacing.xs}px 0`,
   },
 ]);

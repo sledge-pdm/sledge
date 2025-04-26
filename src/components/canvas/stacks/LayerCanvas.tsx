@@ -1,9 +1,14 @@
-import { Component, createEffect, createRenderEffect, createSignal, onMount, Ref } from 'solid-js';
-import { layerImageManager } from './CanvasStack';
+import {
+  Component,
+  createEffect,
+  createRenderEffect,
+  onMount,
+  Ref,
+} from 'solid-js';
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
+import { layerImageManager } from './CanvasStack';
 
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
-import { getCanvasImageRenderingAttribute, globalStore } from '~/stores/global/globalStore';
 import { canvasStore } from '~/stores/project/canvasStore';
 import { layerImageStore } from '~/stores/project/layerImageStore';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
@@ -41,8 +46,10 @@ export const LayerCanvas: Component<Props> = (props) => {
 
   const styleWidth = () => canvasStore.canvas.width;
   const styleHeight = () => canvasStore.canvas.height;
-  const internalWidth = () => canvasStore.canvas.width / props.layer.dotMagnification;
-  const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
+  const internalWidth = () =>
+    canvasStore.canvas.width / props.layer.dotMagnification;
+  const internalHeight = () =>
+    canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
     let agent = layerImageManager.getAgent(props.layer.id);
@@ -67,16 +74,10 @@ export const LayerCanvas: Component<Props> = (props) => {
     });
   });
 
-  const [renderAttr, setRenderAttr] = createSignal(
-    getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode)
-  );
-
   createEffect(() => {
     const image = layerImageStore[props.layer.id].current;
     agent()?.setImage(image, true);
     if (ctx) agent()?.putImageIntoForce(ctx);
-
-    setRenderAttr(getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode));
   });
 
   return (
@@ -84,16 +85,16 @@ export const LayerCanvas: Component<Props> = (props) => {
       ref={canvasRef}
       id={`canvas-${props.layer.id}`}
       data-layer-id={props.layer.name}
-      class={layerCanvas({
-        rendering: renderAttr(),
-        hidden: !props.layer.enabled,
-      })}
+      class={layerCanvas}
       width={internalWidth()}
       height={internalHeight()}
       style={{
+        position: 'absolute',
         width: `${styleWidth()}px`,
         height: `${styleHeight()}px`,
+        'image-rendering': 'pixelated',
         'z-index': props.zIndex,
+        opacity: props.layer.enabled ? 1 : 0,
       }}
     />
   );
@@ -106,7 +107,9 @@ function createRefContent<T extends Exclude<unknown, Function>>(
   createRenderEffect(() => {
     const refProp = getRef();
     if (typeof refProp !== 'function') {
-      throw new Error('Should never happen, as solid always passes refs as functions');
+      throw new Error(
+        'Should never happen, as solid always passes refs as functions'
+      );
     }
 
     const refFunc = refProp as (value: T) => void;

@@ -1,6 +1,6 @@
 import { Component } from 'solid-js';
 
-const CompanionAA: Component<{}> = (props) => {
+const CompanionAA: Component = () => {
   return <div />;
 };
 

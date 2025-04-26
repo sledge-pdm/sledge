@@ -9,8 +9,8 @@ import {
   centeringCanvas,
   setCanvasStore,
 } from '~/stores/project/canvasStore';
-
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
+import BottomInfo from '../BottomInfo';
 
 export default () => {
   let wrapper: HTMLDivElement;
@@ -46,7 +46,7 @@ export default () => {
   return (
     <div class={canvasArea}>
       <div
-        id="zoompan-wrapper"
+        id='zoompan-wrapper'
         ref={(el) => {
           wrapper = el;
         }}
@@ -79,6 +79,7 @@ export default () => {
       </div>
 
       <Controls />
+      <BottomInfo />
     </div>
   );
 };

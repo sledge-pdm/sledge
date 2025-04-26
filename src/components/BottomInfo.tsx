@@ -1,5 +1,6 @@
 import { Component, createSignal } from 'solid-js';
 import { AboutWindowOptions } from '~/routes/about';
+import { canvasStore } from '~/stores/project/canvasStore';
 
 import {
   bottomInfoRoot,
@@ -9,19 +10,18 @@ import { openSingletonWindow } from '~/utils/windowUtils';
 
 const [bottomInfoText, setBottomInfoText] = createSignal('');
 
-const BottomInfo: Component<{}> = (props) => {
+const BottomInfo: Component = () => {
   return (
     <div class={bottomInfoRoot}>
-      <p
+      <a
         class={bottomInfoTextStyle}
         style={{ 'pointer-events': 'all', cursor: 'pointer' }}
         onClick={() => openSingletonWindow('about', AboutWindowOptions)}
       >
         sledge.
-      </p>
-      &nbsp;
+      </a>
+      <p class={bottomInfoTextStyle}>x{canvasStore.zoom}</p>
       <p class={bottomInfoTextStyle}>{bottomInfoText()}</p>
-      {/* <p class={sideAreaEdgeText}>{projectStore.name || "name N/A"}</p> */}
     </div>
   );
 };

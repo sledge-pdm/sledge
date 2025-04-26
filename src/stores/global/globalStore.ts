@@ -1,17 +1,20 @@
 import { createStore } from 'solid-js/store';
-import { canvasStore } from '../project/canvasStore';
 import { saveGlobalSettings } from '~/io/global/globalIO';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import { FileLocation } from '~/types/FileLocation';
 
 // global
-export const getCanvasImageRenderingAttribute = (mode: CanvasRenderingMode) => {
+export const getCanvasImageRenderingAttribute = (
+  zoom: number,
+  mode: CanvasRenderingMode
+): 'pixelated' | 'crisp-edges' => {
   switch (mode) {
     case 'pixelated':
+      return 'pixelated';
     case 'crispEdges':
-      return mode;
+      return 'crisp-edges';
     case 'adaptive':
-      return canvasStore.zoom > 1.0 ? 'pixelated' : 'crispEdges';
+      return zoom > 1.0 ? 'pixelated' : 'crisp-edges';
   }
 };
 

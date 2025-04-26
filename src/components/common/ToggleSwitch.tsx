@@ -18,7 +18,7 @@ const ToggleSwitch: Component<Props> = (p) => (
   <label class={toggleWrapper}>
     {p.children}
     <input
-      type="checkbox"
+      type='checkbox'
       checked={p.checked}
       onInput={(e) => p.onChange?.(e.currentTarget.checked)}
       class={toggleInput}

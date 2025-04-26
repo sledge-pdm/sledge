@@ -16,7 +16,9 @@ export const testDSLTime = (layerId: string) => {
   runDSL(layer.dsl, imageData).then((im) => {
     const end = new Date().getTime();
     console.log(`DSL run end.`);
-    console.log(`result: ${im ? 'success' : 'failed'}. TOTAL TIME IS ${end - start}ms.`);
+    console.log(
+      `result: ${im ? 'success' : 'failed'}. TOTAL TIME IS ${end - start}ms.`
+    );
 
     if (im) downloadImageData(im, 'test-' + end + '.png');
   });

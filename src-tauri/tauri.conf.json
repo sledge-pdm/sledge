@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "create": true,
         "title": "sledge",
         "label": "start",
         "width": 700,

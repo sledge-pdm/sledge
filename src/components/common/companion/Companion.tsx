@@ -28,7 +28,11 @@ const Companion: Component = () => {
       const element = document.getElementById('companion');
       setTimeout(() => {
         setQuote('');
-        if (element) element.className = element.className.replace(` ${styles['giggle']}`, '');
+        if (element)
+          element.className = element.className.replace(
+            ` ${styles['giggle']}`,
+            ''
+          );
       }, 5000);
       window.requestAnimationFrame(function (time) {
         window.requestAnimationFrame(function (time) {
@@ -42,8 +46,8 @@ const Companion: Component = () => {
   return (
     <div class={styles.root}>
       <div class={styles.wrapper}>
-        <div class={styles.companion} id="companion">
-          <img src="/companion.png" alt="you challenge me?" />
+        <div class={styles.companion} id='companion'>
+          <img src='/companion.png' alt='you challenge me?' />
         </div>
         {quote() && (
           <div class={styles.quote_box_container}>
@@ -53,7 +57,7 @@ const Companion: Component = () => {
           </div>
         )}
       </div>
-      <div id="audio" />
+      <div id='audio' />
     </div>
   );
 };

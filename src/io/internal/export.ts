@@ -4,7 +4,9 @@ export function exportActiveLayerUpscaled(scale = 10) {
   const layerId = layerStore.activeLayerId;
   if (!layerId) return;
 
-  const originalCanvas = document.getElementById(`canvas-${layerId}`) as HTMLCanvasElement;
+  const originalCanvas = document.getElementById(
+    `canvas-${layerId}`
+  ) as HTMLCanvasElement;
   if (!originalCanvas) {
     alert('対象のレイヤーが見つかりません。');
     return;

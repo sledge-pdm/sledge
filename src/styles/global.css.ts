@@ -1,5 +1,9 @@
-import { createGlobalTheme, fontFace, globalStyle, style } from '@vanilla-extract/css';
-import { flexCol, flexRow, h100 } from './snippets.css';
+import {
+  createGlobalTheme,
+  fontFace,
+  globalStyle,
+  style,
+} from '@vanilla-extract/css';
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',
@@ -51,6 +55,13 @@ export const vars = createGlobalTheme(':root', {
     button: '#ffffff',
     button_hover: '#f0f0f0',
     button_pressed: '#f0f0f0',
+
+    input_bg: '#fafafa',
+  },
+  size: {
+    edge_info: '20px',
+    side_area: '250px',
+    bottom_bar_margin: '270px',
   },
   spacing: {
     xs: '4px',
@@ -71,7 +82,7 @@ export const vars = createGlobalTheme(':root', {
   },
 });
 
-globalStyle('button, p, a, input', {
+globalStyle('button, p, a, input, label', {
   fontFamily: ZFB08,
   color: vars.color.text,
 });
@@ -105,52 +116,9 @@ export const pageRoot = style({
   display: 'flex',
   flexDirection: 'row',
   height: '100%',
+  width: '100vw',
   userSelect: 'none',
-  overflow: 'hidden',
 });
-
-export const sideArea = style([flexRow, h100]);
-
-export const sideAreaEdge = style([
-  flexCol,
-  h100,
-  {
-    gap: '20px',
-    width: '20px',
-    padding: '10px 0 50px 2px',
-    justifyContent: 'flex-end',
-  },
-]);
-
-export const sideAreaEdgeText = style({
-  fontSize: '0.5rem',
-  letterSpacing: '2px',
-  transform: 'rotate(180deg)',
-  whiteSpace: 'nowrap',
-  writingMode: 'vertical-rl',
-});
-
-export const sideAreaContent = style([
-  flexCol,
-  {
-    borderRight: '1px solid #aaa',
-    gap: '1rem',
-    padding: '20px 40px 90px 20px',
-    width: '230px',
-    overflowY: 'scroll',
-    '::-webkit-scrollbar': {
-      width: '4px',
-    },
-    '::-webkit-scrollbar-thumb': {
-      backgroundColor: 'transparent',
-    },
-    selectors: {
-      '&:hover::-webkit-scrollbar-thumb': {
-        backgroundColor: '#ddd',
-      },
-    },
-  },
-]);
 
 export const sledgeLogo = style({
   bottom: '2px',

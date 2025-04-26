@@ -18,7 +18,12 @@ export default class RawLayerImageAgent extends LayerImageAgent {
     excludePositionMatch: boolean = true,
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    return this.setPixelInPosition(position, color, excludePositionMatch, excludeColorMatch);
+    return this.setPixelInPosition(
+      position,
+      color,
+      excludePositionMatch,
+      excludeColorMatch
+    );
   }
 
   public deletePixel(
@@ -26,7 +31,11 @@ export default class RawLayerImageAgent extends LayerImageAgent {
     excludePositionMatch: boolean = true,
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    return this.deletePixelInPosition(position, excludePositionMatch, excludeColorMatch);
+    return this.deletePixelInPosition(
+      position,
+      excludePositionMatch,
+      excludeColorMatch
+    );
   }
 
   public getPixel(position: Vec2): RGBAColor {

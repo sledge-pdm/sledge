@@ -5,7 +5,6 @@ import {
   aaContainer,
   aaText,
   aboutContent,
-  aboutDev,
   aboutFeedback,
   aboutLink,
   aboutSubTitle,
@@ -16,10 +15,13 @@ import {
 import { pageRoot } from '~/styles/global.css';
 import { flexRow, w100, wh100 } from '~/styles/snippets.css';
 
-export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> &
+export const AboutWindowOptions: Omit<
+  WebviewOptions,
+  'x' | 'y' | 'width' | 'height'
+> &
   WindowOptions = {
   url: '/about',
-  width: 420,
+  width: 380,
   height: 290,
   resizable: false,
   decorations: false,
@@ -28,6 +30,7 @@ export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'hei
   closable: true,
   acceptFirstMouse: true,
   focus: true,
+  skipTaskbar: true,
 };
 
 const About = () => {
@@ -65,9 +68,9 @@ const About = () => {
         <div class={`${contentContainer} ${w100}`}>
           <div class={`${flexRow}`} style={{ width: '360px' }}>
             <p class={aboutTitle}>SLEDGE.</p>
-            <p class={aboutDev} style={{ 'margin-top': '3px' }}>
+            {/* <p class={aboutDev} style={{ 'margin-top': '3px' }}>
               by alphendp
-            </p>
+            </p> */}
           </div>
           <p class={aboutSubTitle} style={{ 'margin-bottom': '14px' }}>
             pre-alpha v0.1
@@ -77,31 +80,44 @@ const About = () => {
             <br />-{' '}
             <a
               class={aboutLink}
-              onClick={(e) => openLink('https://www.sojamo.de/libraries/controlP5/')}
+              onClick={(e) =>
+                openLink('https://www.sojamo.de/libraries/controlP5/')
+              }
             >
               ControlP5
             </a>
             <br />-{' '}
-            <a class={aboutLink} onClick={(e) => openLink('https://archlinux.org/')}>
+            <a
+              class={aboutLink}
+              onClick={(e) => openLink('https://archlinux.org/')}
+            >
               Arch Linux
             </a>
             <br />-{' '}
             <a
               class={aboutLink}
-              onClick={(e) => openLink('https://apps.apple.com/jp/app/caustic/id775735447/')}
+              onClick={(e) =>
+                openLink('https://apps.apple.com/jp/app/caustic/id775735447/')
+              }
             >
               Caustic3
             </a>{' '}
             &lt;HP dead RIP&gt;
             <br />
           </p>
-          <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'center' }}>
+          <div
+            class={[flexRow, w100].join(' ')}
+            style={{ 'align-items': 'center' }}
+          >
             <p class={aboutFeedback}>
               気軽に意見を投げつけよう！
               <br />
               feel FREE to send feedback!!
             </p>
-            <button class={sendFBButton} onClick={(e) => openLink('https://tally.so/r/w7jZNL')}>
+            <button
+              class={sendFBButton}
+              onClick={(e) => openLink('https://tally.so/r/w7jZNL')}
+            >
               &gt;&gt; send feedback
             </button>
           </div>

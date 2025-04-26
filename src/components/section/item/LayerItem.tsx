@@ -23,14 +23,12 @@ interface LayerItemProps {
 }
 
 const LayerItem: Component<LayerItemProps> = (props) => {
-  const { layer, draggingId } = props;
-
-  const sortable = createSortable(layer.id);
+  const sortable = createSortable(props.layer.id);
   const context = useDragDropContext();
   const state = context?.[0];
 
   let detClass: 'dot' | 'image' | 'automate' | undefined;
-  switch (layer.type) {
+  switch (props.layer.type) {
     case LayerType.Dot:
       detClass = 'dot';
       break;
@@ -43,7 +41,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   }
 
   const onDetClicked = () => {
-    setLayerStore('activeLayerId', layer.id);
+    setLayerStore('activeLayerId', props.layer.id);
   };
 
   const onPreviewClicked = () => {
@@ -53,13 +51,13 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   };
 
   const onMagnifClicked = () => {
-    const next = getNextMagnification(layer.dotMagnification);
+    const next = getNextMagnification(props.layer.dotMagnification);
     if (props.index !== -1) {
       setLayerStore('layers', props.index, 'dotMagnification', next);
     }
   };
 
-  const isActive = () => layerStore.activeLayerId === layer.id;
+  const isActive = () => layerStore.activeLayerId === props.layer.id;
 
   return (
     <div
@@ -68,19 +66,26 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         'opacity-50': sortable.isActiveDraggable,
         'transition-transform': state && !!state.active.draggable,
       }}
-      style={{ opacity: draggingId === layer.id ? 0.4 : 1 }}
+      style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1 }}
       ref={sortable}
     >
-      <p class={layerItemType}>{layer.typeDescription}</p>
+      <p class={layerItemType}>{props.layer.typeDescription}</p>
       <p>{props.index}.</p>
       <div style={{ display: 'flex', 'align-items': 'center' }}>
         {/* <DSLButton /> */}
         <div
-          class={[layerItem, !layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
+          class={[layerItem, !props.layer.enabled && layerItemDisabled]
+            .filter(Boolean)
+            .join(' ')}
           onClick={onDetClicked}
         >
-          <LayerPreview layer={layer} onClick={onPreviewClicked} maxHeight={30} maxWidth={30} />
-          <p class={layerItemName}> {layer.name}</p>
+          <LayerPreview
+            layer={props.layer}
+            onClick={onPreviewClicked}
+            maxHeight={30}
+            maxWidth={30}
+          />
+          <p class={layerItemName}> {props.layer.name}</p>
           <div
             class={dotMagnifContainer}
             onClick={(e) => {
@@ -89,7 +94,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
             onMouseOver={(e) => e.stopPropagation()}
           >
-            <p class={dotMagnifText}>x{layer.dotMagnification}</p>
+            <p class={dotMagnifText}>x{props.layer.dotMagnification}</p>
           </div>
           <Light class={activeLight} on={isActive()} />
         </div>

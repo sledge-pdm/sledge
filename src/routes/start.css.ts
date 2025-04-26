@@ -13,7 +13,7 @@ export const welcomeRoot = style([
 
 export const welcomeHeadline = style({
   fontFamily: ZFB31,
-  fontSize: '4rem',
+  fontSize: '3rem',
   letterSpacing: '8px',
   marginBottom: '12px',
 });
@@ -70,7 +70,7 @@ export const sideSection = style([
   flexRow,
   {
     gap: '24px',
-    paddingBottom: '24px',
+    paddingBottom: '48px',
     paddingTop: '12px',
   },
 ]);

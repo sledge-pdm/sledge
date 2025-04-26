@@ -38,13 +38,13 @@ export const toggleTrack = style({
 export const toggleThumb = style({
   position: 'absolute',
   top: '-1px',
-  left: '0px',
+  left: '-1px',
   width: `${thumbWidth - thumbPadding}px`,
   height: `${globalHeight}px`,
   backgroundColor: vars.color.button,
   border: '1px solid black',
   borderRadius: '0px',
-  transition: 'transform 0.05s',
+  transition: 'transform 0.02s',
 });
 
 /* ───────── 状態連動スタイル ───────── */
@@ -56,5 +56,5 @@ globalStyle(`${toggleInput}:checked + ${toggleTrack}`, {
 
 /* さらに thumb を右へスライド */
 globalStyle(`${toggleInput}:checked + ${toggleTrack} ${toggleThumb}`, {
-  transform: `translateX(${globalWidth - thumbWidth}px)`,
+  transform: `translateX(${globalWidth - thumbWidth + 2}px)`,
 });

@@ -1,6 +1,11 @@
 import { smartSay } from './Companion';
 
-type QuoteCategory = 'color-pick' | 'pen-resize' | 'canvas-resize' | 'undo-spam' | 'random';
+type QuoteCategory =
+  | 'color-pick'
+  | 'pen-resize'
+  | 'canvas-resize'
+  | 'undo-spam'
+  | 'random';
 
 const lastSaidIndexes = {
   'color-pick': -1,
@@ -24,7 +29,10 @@ export const quotePool = {
     'Shrinking the canvas? Afraid of commitment?',
     'Small canvas, big ideas. I like it.',
   ],
-  'undo-spam': ['UNDO UNDO UNDO—are you OK?', "That's the 5th undo. I’m getting dizzy."],
+  'undo-spam': [
+    'UNDO UNDO UNDO—are you OK?',
+    "That's the 5th undo. I’m getting dizzy.",
+  ],
   random: ['Daisy, Daisy, give me your answer do do do'],
 };
 
@@ -33,7 +41,9 @@ export const sayRandomQuote = (category: QuoteCategory, context?: any) => {
   let index = Math.floor(Math.random() * quotes.length);
   // 前になんか言った
   if (lastSaidIndexes[category] != -1) {
-    console.log(`I previously said ${lastSaidIndexes[category]}. try saying something new.`);
+    console.log(
+      `I previously said ${lastSaidIndexes[category]}. try saying something new.`
+    );
     if (quotes.length == 1) {
       console.log(`argh. nothing to say.`);
       // もう言えることない

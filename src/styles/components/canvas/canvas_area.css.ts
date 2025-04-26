@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
-import { flexCol } from '../../snippets.css';
 import { vars } from '~/styles/global.css';
+import { flexCol } from '../../snippets.css';
 
 export const canvasArea = style([
   flexCol,
@@ -9,7 +9,6 @@ export const canvasArea = style([
     display: 'flex',
     position: 'relative',
     height: '100%',
-    width: '100%',
     overflow: 'hidden',
   },
 ]);

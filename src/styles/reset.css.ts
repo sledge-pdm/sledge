@@ -18,7 +18,7 @@ globalStyle('main', {
   userSelect: 'none',
 });
 
-globalStyle('p, a', {
+globalStyle('p, a, label', {
   fontSize: '0.5rem',
   letterSpacing: '1px',
   margin: 0,
@@ -37,13 +37,13 @@ globalStyle('input', {
   border: 'none',
   outline: 'none',
   borderBottom: '1px solid black',
+  fontSize: '0.5rem',
 });
 
-globalStyle('input::-webkit-outer-spin-button, input::-webkit-inner-spin-button', {
-  appearance: 'none',
-  margin: 0,
-});
-
-globalStyle("input[type='number']", {
-  appearance: 'textfield',
-});
+globalStyle(
+  'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button',
+  {
+    appearance: 'none',
+    margin: 0,
+  }
+);

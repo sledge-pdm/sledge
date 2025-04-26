@@ -53,7 +53,10 @@ export class DSL {
       if (inId !== undefined)
         str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`);
       if (outId !== undefined)
-        str = str.replaceAll(outId, `${findLayerById(outId)?.name || 'N/A'} ID`);
+        str = str.replaceAll(
+          outId,
+          `${findLayerById(outId)?.name || 'N/A'} ID`
+        );
       str = str.replaceAll(' > ', '\n> ');
       return str;
     }

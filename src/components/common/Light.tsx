@@ -20,11 +20,11 @@ const Light: Component<LightProps> = (props: LightProps) => {
         overflow: 'visible',
       }}
       viewBox={`0 0 ${width} ${height}`}
-      xmlns="http://www.w3.org/2000/svg"
+      xmlns='http://www.w3.org/2000/svg'
     >
       <Show when={true}>
         <g class={`${styles['light-inner']} ${props.on && styles['on']}`}>
-          <circle cx={width / 2} cy={height / 2} r={radius} fill="red" />
+          <circle cx={width / 2} cy={height / 2} r={radius} fill='red' />
         </g>
       </Show>
     </svg>

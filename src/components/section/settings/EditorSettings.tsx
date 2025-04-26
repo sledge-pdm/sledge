@@ -1,9 +1,16 @@
 import { Component } from 'solid-js';
+import { saveGlobalSettings } from '~/io/global/globalIO';
+import { globalStore, setGlobalStore } from '~/stores/global/globalStore';
+import {
+  sectionCaption,
+  sectionContent,
+  sectionRoot,
+} from '~/styles/section_global.css';
+import { CanvasRenderingMode } from '~/types/Canvas';
 import Dropdown, { DropdownOption } from '../../common/Dropdown';
 import ToggleSwitch from '../../common/ToggleSwitch';
-import { saveGlobalSettings } from '~/io/global/globalIO';
-import { CanvasRenderingMode, globalStore, setGlobalStore } from '~/stores/global/globalStore';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import Checkbox from '~/components/common/Checkbox';
+import RadioButton from '~/components/common/RadioButton';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'adaptive', value: 'adaptive' },
@@ -11,7 +18,7 @@ const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'crispEdges', value: 'crispEdges' },
 ];
 
-const EditorSettings: Component<{}> = (props) => {
+const EditorSettings: Component = () => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>editor.</p>
@@ -23,6 +30,10 @@ const EditorSettings: Component<{}> = (props) => {
           <p style={{ 'font-size': '0.5rem' }}> autosave.</p>
         </ToggleSwitch>
 
+        <div>
+          <p>autosave span.</p>
+          <input type='number' name='width' min={0} max={10000} required />
+        </div>
         <p>canvas rendering.</p>
 
         <Dropdown
@@ -34,6 +45,10 @@ const EditorSettings: Component<{}> = (props) => {
             saveGlobalSettings();
           }}
         />
+
+        <Checkbox label='chexkbox.' />
+
+        <RadioButton label='radiobutton.' name='some' />
       </div>
     </div>
   );

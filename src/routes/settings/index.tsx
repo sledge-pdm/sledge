@@ -16,6 +16,7 @@ export const SettingsWindowOptions: WindowOptionsProp = {
   closable: true,
   acceptFirstMouse: true,
   focus: true,
+  skipTaskbar: true,
 };
 
 export default function Settings() {

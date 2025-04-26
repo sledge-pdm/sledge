@@ -1,21 +1,14 @@
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
-import path from 'path';
-import { defineConfig } from 'vite';
-import checker from 'vite-plugin-checker';
-import solidPlugin from 'vite-plugin-solid';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'vite'
+import solidPlugin from 'vite-plugin-solid'
+import tsconfigPaths from 'vite-tsconfig-paths'
+import path from 'path'
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
 
 export default defineConfig({
   plugins: [
     vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }),
     solidPlugin(),
     tsconfigPaths(),
-    checker({
-      eslint: { lintCommand: 'eslint "./src/**/*.{ts,tsx}"' },
-      typescript: true, // 型チェックも要れば
-      terminal: false,
-      overlay: false,
-    }),
   ],
   build: {
     target: 'esnext',
@@ -28,4 +21,4 @@ export default defineConfig({
   alias: {
     '~': path.resolve(__dirname, 'src'),
   },
-});
+})

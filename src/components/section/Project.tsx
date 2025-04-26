@@ -4,10 +4,14 @@ import { saveProject } from '~/io/project/project';
 
 import { projectStore, setProjectStore } from '~/stores/project/projectStore';
 import { projectNameInput } from '~/styles/section/project.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import {
+  sectionCaption,
+  sectionContent,
+  sectionRoot,
+} from '~/styles/section_global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
-const Project: Component<{}> = (props) => {
+const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
 
   const save = () => {
@@ -32,14 +36,14 @@ const Project: Component<{}> = (props) => {
         <div class={flexCol}>
           <input
             class={projectNameInput}
-            type="text"
-            name="height"
+            type='text'
+            name='height'
             onChange={(e) => {
               setProjectStore('name', e.target.value);
             }}
             value={projectStore.name}
-            placeholder="project name"
-            autocomplete="off"
+            placeholder='project name'
+            autocomplete='off'
             required
           />
 
@@ -49,8 +53,11 @@ const Project: Component<{}> = (props) => {
                         load.
                     </button> */}
 
-        <div class={flexRow} style={{ 'align-items': 'center', 'margin-top': '12px' }}>
-          <button onClick={() => saveProject()}>save.</button>
+        <div
+          class={flexRow}
+          style={{ 'align-items': 'center', 'margin-top': '12px' }}
+        >
+          <button onClick={() => save()}>save.</button>
           <button onClick={() => exportActiveLayerUpscaled()}>export.</button>
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
         </div>

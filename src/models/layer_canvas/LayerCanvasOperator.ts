@@ -25,7 +25,14 @@ export default class LayerCanvasOperator {
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
-    const result = this.useTool(agent, state, image, currentTool(), position, last);
+    const result = this.useTool(
+      agent,
+      state,
+      image,
+      currentTool(),
+      position,
+      last
+    );
 
     if (result) {
       agent.setDrawingBuffer(result);

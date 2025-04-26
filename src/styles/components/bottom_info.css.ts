@@ -6,13 +6,14 @@ export const bottomInfoRoot = style([
   flexRow,
   w100,
   {
-    position: 'absolute',
+    position: 'fixed',
     backgroundColor: vars.color.bg,
-    bottom: 0,
     borderTop: '1px solid #aaa',
     height: '20px',
     alignItems: 'center',
     padding: `0 ${vars.spacing.md}`,
+    margin: 0,
+    bottom: 0,
     gap: vars.spacing.md,
   },
 ]);

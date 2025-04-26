@@ -1,7 +1,7 @@
 import { Fill, FillProps } from './FillTool';
 import { PixelDiff } from '~/models/layer_image/HistoryManager';
-import { TileIndex } from '~/models/layer_image/Tile';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
+import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch } from '~/utils/colorUtils';
 
@@ -11,7 +11,8 @@ interface FillPassProps {
 
 export class TileFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {
-    if (!(agent instanceof TileLayerImageAgent)) throw 'Agent is not a TileLayerImageAgent';
+    if (!(agent instanceof TileLayerImageAgent))
+      throw 'Agent is not a TileLayerImageAgent';
     const tileAgent = agent as TileLayerImageAgent;
 
     const targetColor = tileAgent.getPixel(position);
@@ -22,7 +23,11 @@ export class TileFloodFill implements Fill {
     const flatten = (ti: TileIndex) => ti.row * tileColumnCount + ti.column;
     const tileUniformMatches = (ti: TileIndex) => {
       const tile = tileAgent.getTile(ti);
-      return tile.isUniform && tile.uniformColor && colorMatch(tile.uniformColor, targetColor);
+      return (
+        tile.isUniform &&
+        tile.uniformColor &&
+        colorMatch(tile.uniformColor, targetColor)
+      );
     };
 
     const visitedTiles = new Uint8Array(tileRowCount * tileColumnCount);
@@ -63,7 +68,9 @@ export class TileFloodFill implements Fill {
     console.log(`initial tile fill finished: ${tileFillCount} tiles`);
 
     const edgePixels =
-      tilesFilled.length > 0 ? this.collectEdgePixels(tileAgent, tilesFilled) : [position];
+      tilesFilled.length > 0
+        ? this.collectEdgePixels(tileAgent, tilesFilled)
+        : [position];
 
     const pixelQueue: Vec2[] = edgePixels;
     const pixelsFilled: Vec2[] = [];
@@ -99,7 +106,10 @@ export class TileFloodFill implements Fill {
           reentryQueue.push({ row: ti.row, column: ti.column + 1 });
         }
         // ↓ 前はこれがなかった ↓
-        const newEdges = this.collectEdgePixels(tileAgent, tilesFilledInReEntry);
+        const newEdges = this.collectEdgePixels(
+          tileAgent,
+          tilesFilledInReEntry
+        );
         for (const edge of newEdges) {
           pixelQueue.push(edge);
         }

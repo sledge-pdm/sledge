@@ -11,10 +11,12 @@ interface ColorBoxProps {
 }
 
 const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
-  const size = props.sizePx || 10;
+  const size = () => props.sizePx || 10;
 
-  const isSelected = () => props.enableUsingSelection && currentColor() === props.color;
-  const isWhiteOrNone = () => props.color === 'none' || props.color.toLowerCase() === '#ffffff';
+  const isSelected = () =>
+    props.enableUsingSelection && currentColor() === props.color;
+  const isWhiteOrNone = () =>
+    props.color === 'none' || props.color.toLowerCase() === '#ffffff';
 
   const onColorClicked = (color: string) => {
     sayRandomQuote('color-pick', { color: color });
@@ -27,14 +29,16 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
         style={{
           position: 'relative',
           display: 'flex',
-          width: `${size}px`,
-          height: `${size}px`,
+          width: `${size()}px`,
+          height: `${size()}px`,
           'align-items': 'center',
           'justify-content': 'center',
           cursor: 'pointer',
           'background-color': props.color,
           border:
-            isWhiteOrNone() || isSelected() ? '0.05rem solid black' : '0.05rem solid transparent',
+            isWhiteOrNone() || isSelected()
+              ? '0.05rem solid black'
+              : '0.05rem solid transparent',
         }}
         onClick={() => {
           onColorClicked(props.color);
@@ -43,8 +47,8 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
         {props.enableUsingSelection && isSelected() && (
           <div
             style={{
-              width: `${Math.round(size / 3)}px`,
-              height: `${Math.round(size / 3)}px`,
+              width: `${Math.round(size() / 3)}px`,
+              height: `${Math.round(size() / 3)}px`,
               margin: 0,
               padding: 0,
               'background-color': props.color !== '#000000' ? 'black' : 'white',

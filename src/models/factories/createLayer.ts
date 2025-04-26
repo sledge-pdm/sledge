@@ -11,6 +11,7 @@ export const createLayer = (
   dotMagnification = 1,
   dsl?: DSL
 ): Layer => {
+  console.log('yeah tried');
   // check if name already exists
   const endNums = name.match(/^(.*)(\d+)$/);
   if (endNums && endNums.length >= 3) {
@@ -38,6 +39,7 @@ export const createLayer = (
 
   const id = uuidv4();
   initLayerImage(id, dotMagnification);
+
   return {
     id,
     name,

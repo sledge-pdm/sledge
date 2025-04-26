@@ -100,7 +100,15 @@ export class HistoryManager {
    * Synchronize the undo/redo stacks with the SolidJS store
    */
   private syncStores() {
-    setLayerImageStore(this.layerId, 'undoStack', reconcile(this.undoActionsStack));
-    setLayerImageStore(this.layerId, 'redoStack', reconcile(this.redoActionsStack));
+    setLayerImageStore(
+      this.layerId,
+      'undoStack',
+      reconcile(this.undoActionsStack)
+    );
+    setLayerImageStore(
+      this.layerId,
+      'redoStack',
+      reconcile(this.redoActionsStack)
+    );
   }
 }

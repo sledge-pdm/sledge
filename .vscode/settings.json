@@ -1,8 +1,3 @@
 {
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll": true,
-    "source.organizeImports": true
-  },
-  "eslint.validate": ["typescript", "typescriptreact"]
+  "editor.formatOnSave": true
 }

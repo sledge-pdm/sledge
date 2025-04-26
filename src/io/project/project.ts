@@ -1,7 +1,11 @@
-// src/io/project.ts
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
-import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import {
+  BaseDirectory,
+  mkdir,
+  readTextFile,
+  writeTextFile,
+} from '@tauri-apps/plugin-fs';
 import initLayerImage from '~/models/factories/initLayerImage';
 import { addRecent } from '~/stores/global/globalStore';
 import {
@@ -10,14 +14,23 @@ import {
   centeringCanvas,
   setCanvasStore,
 } from '~/stores/project/canvasStore';
-import { layerImageStore, setLayerImageStore } from '~/stores/project/layerImageStore';
-import { findLayerById, layerStore, setLayerStore } from '~/stores/project/layerStore';
+import {
+  layerImageStore,
+  setLayerImageStore,
+} from '~/stores/project/layerImageStore';
+import {
+  findLayerById,
+  layerStore,
+  setLayerStore,
+} from '~/stores/project/layerStore';
 import { projectStore, setProjectStore } from '~/stores/project/projectStore';
 import { Layer } from '~/types/Layer';
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils';
 import { getFileNameAndPath } from '~/utils/pathUtils';
 
-export async function importProjectJsonFromFileSelection(): Promise<string | undefined> {
+export async function importProjectJsonFromFileSelection(): Promise<
+  string | undefined
+> {
   const home = await path.homeDir();
   const file = await dialogOpen({
     multiple: false,
@@ -77,12 +90,20 @@ export async function importProjectJson(projectJson: any) {
       setLayerImageStore(
         id,
         'current',
-        decodeImageData(imageData.current, Number(imageData.width), Number(imageData.height))
+        decodeImageData(
+          imageData.current,
+          Number(imageData.width),
+          Number(imageData.height)
+        )
       );
     });
   }
 
-  if (projectJson.layer && projectJson.layer.layers && Array.isArray(projectJson.layer.layers)) {
+  if (
+    projectJson.layer &&
+    projectJson.layer.layers &&
+    Array.isArray(projectJson.layer.layers)
+  ) {
     const layers: Layer[] = [];
     projectJson.layer.layers.map((l: any) => {
       layers.push({
@@ -151,6 +172,8 @@ export async function saveProject(existingPath?: string) {
     const data = parseCurrentProject();
     await writeTextFile(selectedPath, data);
     console.log('プロジェクト保存:', selectedPath);
+
+    setProjectStore('isProjectChangedAfterSave', false);
 
     const fileLoc = getFileNameAndPath(selectedPath);
     if (fileLoc !== undefined) addRecent(fileLoc);

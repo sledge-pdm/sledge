@@ -2,7 +2,7 @@ import interact from 'interactjs';
 import { Component, onMount } from 'solid-js';
 import styles from '@styles/components/canvas/image_pool.module.css';
 
-const ImagePool: Component<{}> = (props) => {
+const ImagePool: Component = () => {
   let imageRef: HTMLDivElement;
 
   onMount(() => {
@@ -51,8 +51,10 @@ const ImagePool: Component<{}> = (props) => {
             event.preventDefault();
             event.stopPropagation();
             const target = event.target;
-            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+            const x =
+              (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            const y =
+              (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
             target.style.transform = `translate(${x}px, ${y}px)`;
             target.setAttribute('data-x', x);
@@ -68,7 +70,10 @@ const ImagePool: Component<{}> = (props) => {
       ref={(r) => (imageRef = r)}
       onMouseDown={(e) => e.preventDefault()}
     >
-      <div class={styles['image-container']} onMouseDown={(e) => e.preventDefault()}>
+      <div
+        class={styles['image-container']}
+        onMouseDown={(e) => e.preventDefault()}
+      >
         {/* <img class={styles["resize-image"]} src="/333121.jpg" /> */}
       </div>
     </div>

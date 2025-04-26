@@ -20,7 +20,6 @@ export default function App() {
           <Suspense>
             <div
               class={[flexCol, h100].join(" ")}
-              style={{ "pointer-events": "all" }}
             >
               <TitleBar />
 

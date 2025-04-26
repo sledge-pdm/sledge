@@ -6,7 +6,7 @@ import {
   onMount,
   Ref,
 } from "solid-js";
-import { Layer } from "~/models/types/Layer";
+import { Layer } from "~/types/Layer";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { layerImageStore } from "~/stores/project/layerImageStore";
 

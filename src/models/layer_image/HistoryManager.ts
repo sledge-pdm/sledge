@@ -1,8 +1,8 @@
 import { reconcile } from 'solid-js/store'
 import { setLayerImageStore } from '~/stores/project/layerImageStore'
 import { RGBAColor } from '~/utils/colorUtils'
-import { Vec2 } from '../types/Vector'
-import { TileIndex } from './Tile'
+import { Vec2 } from '../../types/Vector'
+import { TileIndex } from '~/types/Tile'
 
 export type PixelDiff = {
   kind: 'pixel'

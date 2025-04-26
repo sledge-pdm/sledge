@@ -31,11 +31,14 @@ export default function TitleBar() {
     setMaximized(await window.isMaximized());
   });
 
+  const borderWindowLabels: string[] = ["editor"]
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label)
+
   return (
     <header
       style={{
         "pointer-events": "all",
-        border: window.label === "main" ? "1px solid #aaa" : "none",
+        border: shouldShowBorder() ? "1px solid #aaa" : "none",
       }}
     >
       <nav class={titleBarRoot} data-tauri-drag-region="p, button">

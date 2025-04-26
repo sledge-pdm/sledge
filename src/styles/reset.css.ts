@@ -1,54 +1,52 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { globalStyle } from '@vanilla-extract/css'
 
-globalStyle("html, body", {
-  height: "100vh",
-  width: "100vw",
+globalStyle('html, body', {
+  height: '100vh',
+  width: '100vw',
   margin: 0,
-  overflow: "hidden",
+  overflow: 'hidden',
   padding: 0,
-  touchAction: "none",
-});
+  touchAction: 'none',
+  display: 'flex',
+  flexDirection: 'row',
+  userSelect: 'none',
+})
 
-globalStyle("body", {
-  height: "100vh",
-  width: "100vw",
-});
+globalStyle('main', {
+  height: '100%',
+  width: '100vw',
+  userSelect: 'none',
+})
 
-globalStyle("main", {
-  height: "100vh",
-  width: "100vw",
-  userSelect: "none",
-});
-
-globalStyle("p, a", {
-  fontSize: "0.5rem",
-  letterSpacing: "1px",
+globalStyle('p, a', {
+  fontSize: '0.5rem',
+  letterSpacing: '1px',
   margin: 0,
-});
+})
 
-globalStyle("ul", {
-  listStyle: "none",
+globalStyle('ul', {
+  listStyle: 'none',
   paddingLeft: 0,
-});
+})
 
-globalStyle("a", {
-  cursor: "pointer",
-});
+globalStyle('a', {
+  cursor: 'pointer',
+})
 
-globalStyle("input", {
-  border: "none",
-  outline: "none",
-  borderBottom: "1px solid black",
-});
+globalStyle('input', {
+  border: 'none',
+  outline: 'none',
+  borderBottom: '1px solid black',
+})
 
 globalStyle(
-  "input::-webkit-outer-spin-button, input::-webkit-inner-spin-button",
+  'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button',
   {
-    appearance: "none",
+    appearance: 'none',
     margin: 0,
-  },
-);
+  }
+)
 
 globalStyle("input[type='number']", {
-  appearance: "textfield",
-});
+  appearance: 'textfield',
+})

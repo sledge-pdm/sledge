@@ -1,8 +1,8 @@
 import { Component, For } from "solid-js";
-import Tile from "~/models/layer_image/Tile";
 import { currentTool } from "~/stores/internal/toolsStore";
 import { canvasStore } from "~/stores/project/canvasStore";
 import { activeLayer } from "~/stores/project/layerStore";
+import Tile from "~/types/Tile";
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
   const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom;
@@ -37,11 +37,11 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         width={zoomedPenSize()}
         height={zoomedPenSize()}
         x={
-          Math.round(canvasStore.lastMouseOnZoomedCanvas.x) -
+          Math.round(canvasStore.lastMouseOnCanvas.x) * canvasStore.zoom -
           zoomedPenSize() / 2
         }
         y={
-          Math.round(canvasStore.lastMouseOnZoomedCanvas.y) -
+          Math.round(canvasStore.lastMouseOnCanvas.y) * canvasStore.zoom -
           zoomedPenSize() / 2
         }
         fill="none"

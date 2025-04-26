@@ -9,6 +9,20 @@ import { importProjectJsonFromPath } from "~/io/project/project";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 import { flexCol, flexRow } from "~/styles/snippets.css";
 import { welcomeRoot } from "../start.css";
+import { pageRoot } from "~/styles/global.css";
+import { WindowOptionsProp } from "~/utils/windowUtils";
+
+export const EditorWindowOptions: WindowOptionsProp = {
+  width: 1200,
+  height: 800,
+  acceptFirstMouse: true,
+  resizable: true,
+  closable: true,
+  maximizable: true,
+  minimizable: true,
+  decorations: false,
+  fullscreen: false
+};
 
 export default function Editor() {
   const location = useLocation();
@@ -36,23 +50,24 @@ export default function Editor() {
   return (
     <>
       {isImporting() && (
-        <div id="root">
+        <div class={pageRoot}>
           <div class={welcomeRoot}>
-            <p style={{ "font-size": "3rem" }}>please wait.</p>
+            <p style={{ "font-size": "2rem" }}>please wait.</p>
           </div>
         </div>
       )}
 
       {!isImporting() && (
-        <div id="root">
-          <div class={flexRow}>
+        <div class={pageRoot}>
+          <div class={flexRow}
+            style={{ height: "100%", overflow: "hidden" }}>
             <EdgeInfo />
             <SideSections />
           </div>
 
           <div
             class={flexCol}
-            style={{ "flex-grow": 1, height: "100%", overflow: "hidden" }}
+            style={{ "flex-grow": 1, height: "100%" }}
           >
             <CanvasArea />
             <BottomInfo />

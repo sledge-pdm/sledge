@@ -1,4 +1,4 @@
-import { Vec2 } from "~/models/types/Vector";
+import { Vec2 } from "~/types/Vector";
 import {
   canvasStore,
   getReferencedZoom,
@@ -12,7 +12,7 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() {}
+  constructor() { }
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0

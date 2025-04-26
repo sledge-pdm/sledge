@@ -5,9 +5,9 @@ import {
   onCleanup,
   onMount,
 } from "solid-js";
-import { DrawState } from "~/models/layer_canvas/DrawState";
+import { DrawState } from "~/types/DrawState";
 import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
-import { Vec2 } from "~/models/types/Vector";
+import { Vec2 } from "~/types/Vector";
 import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
 
 interface Props {
@@ -95,10 +95,6 @@ export const TouchableCanvas: Component<Props> = (props) => {
     const position = getCanvasMousePosition(e);
     setCanvasStore("lastMouseWindow", windowPosition);
     setCanvasStore("lastMouseOnCanvas", position);
-    setCanvasStore("lastMouseOnZoomedCanvas", {
-      x: position.x * canvasStore.zoom,
-      y: position.y * canvasStore.zoom,
-    });
 
     if (!isDrawableClick(e)) return;
 
@@ -137,10 +133,6 @@ export const TouchableCanvas: Component<Props> = (props) => {
     const position = getCanvasMousePosition(e);
     setCanvasStore("lastMouseWindow", windowPosition);
     setCanvasStore("lastMouseOnCanvas", position);
-    setCanvasStore("lastMouseOnZoomedCanvas", {
-      x: position.x * canvasStore.zoom,
-      y: position.y * canvasStore.zoom,
-    });
   }
 
   function endStroke(position: Vec2) {

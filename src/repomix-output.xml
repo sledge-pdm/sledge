@@ -364,7 +364,7 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() { }
+  constructor() {}
 
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
@@ -454,7 +454,11 @@ class CanvasAreaInteract {
     const zoomOld = canvasStore.zoom;
     const zoomNew = canvasStore.zoom + delta;
 
-    if (zoomNew < canvasStore.zoomMin * referencedZoom || canvasStore.zoomMax * referencedZoom < zoomNew) return
+    if (
+      zoomNew < canvasStore.zoomMin * referencedZoom ||
+      canvasStore.zoomMax * referencedZoom < zoomNew
+    )
+      return;
 
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
@@ -560,7 +564,6 @@ import { activeLayer, layerStore } from "~/stores/project/layerStore";
 
 import styles from "@styles/components/canvas/controls.module.css";
 import { canRedo, canUndo } from "~/stores/project/layerImageStore";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import { layerImageManager } from "./stacks/CanvasStack";
 
 const Controls: Component<{}> = (props) => {
@@ -719,10 +722,26 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         {(dirtyRect) => {
           return (
             <rect
-              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
-              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
-              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * canvasStore.zoom}
-              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * canvasStore.zoom}
+              width={
+                dirtyRect.globalTileSize *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
+              height={
+                dirtyRect.globalTileSize *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
+              x={
+                dirtyRect.getOffset().x *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
+              y={
+                dirtyRect.getOffset().y *
+                activeLayer()?.dotMagnification *
+                canvasStore.zoom
+              }
               fill={dirtyRect.isDirty ? "#ff000060" : "#00ffff60"}
               stroke="none"
               pointer-events="none"
@@ -744,14 +763,13 @@ import { activeLayer, allLayers } from "~/stores/project/layerStore";
 
 import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
 import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import Tile from "~/models/layer_image/Tile";
+import { globalStore } from "~/stores/global/globalStore";
+import { canvasStack } from "~/styles/components/canvas/canvas_stack.css";
 import CanvasOverlaySVG from "./CanvasOverlaySVG";
 import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
 import { TouchableCanvas } from "./TouchableCanvas";
-import { globalStore } from "~/stores/global/globalStore";
-import { canvasStack } from "~/styles/components/canvas/canvas_stack.css";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
-import { layerImageStore } from "~/stores/project/layerImageStore";
 
 export const layerImageManager = new LayerImageManager();
 
@@ -818,11 +836,8 @@ const CanvasStack: Component<{}> = (props) => {
     return [];
   };
 
-
-
   return (
     <div style={{ position: "relative" }}>
-
       <div
         class={canvasStack}
         style={{
@@ -844,8 +859,10 @@ const CanvasStack: Component<{}> = (props) => {
           )}
         </For>
       </div>
-      <CanvasOverlaySVG dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined} />
-    </div >
+      <CanvasOverlaySVG
+        dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined}
+      />
+    </div>
   );
 };
 
@@ -953,12 +970,12 @@ import { canvasStore } from "~/stores/project/canvasStore";
 import { layerImageStore } from "~/stores/project/layerImageStore";
 
 import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
+import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import {
   getCanvasImageRenderingAttribute,
   globalStore,
 } from "~/stores/global/globalStore";
 import { layerCanvas } from "~/styles/components/canvas/layer_canvas.css";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
 import { layerImageManager } from "./CanvasStack";
 
 type Props = {
@@ -999,21 +1016,24 @@ export const LayerCanvas: Component<Props> = (props) => {
     canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
-    layerImageManager.registerAgent(
-      props.layer.id,
-      layerImageStore[props.layer.id]?.current,
-    );
+    let agent = layerImageManager.getAgent(props.layer.id);
+    if (!agent) {
+      agent = layerImageManager.registerAgent(
+        props.layer.id,
+        layerImageStore[props.layer.id]?.current,
+      );
+    }
     ctx = canvasRef?.getContext("2d") ?? null;
-    if (ctx) agent()?.putImageInto(ctx);
+    if (ctx) agent.putImageInto(ctx);
 
-    agent()?.setOnImageChangeListener("layercanvas_refresh", () => {
+    agent.setOnImageChangeListener("layercanvas_refresh", () => {
       if (ctx) {
-        agent()?.putImageIntoForce(ctx);
+        agent.putImageIntoForce(ctx);
       }
     });
-    agent()?.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
+    agent.setOnDrawingBufferChangeListener("layercanvas_refresh", () => {
       if (ctx) {
-        agent()?.putDrawingBufferIntoForce(ctx);
+        agent.putDrawingBufferIntoForce(ctx);
       }
     });
   });
@@ -1660,7 +1680,7 @@ export default ImportImageButton;
 </file>
 
 <file path="components/common/LayerPreview.tsx">
-import { Component, createEffect, onMount } from "solid-js";
+import { Component, onMount } from "solid-js";
 import { Layer } from "~/models/types/Layer";
 
 import styles from "@styles/components/layer_preview.module.css";
@@ -1682,8 +1702,6 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const aspectRatio = originalImage.width / originalImage.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
 
-    console.log("aaaa")
-
     // 描画対象キャンバスの解像度とCSSサイズを一致させる
     canvasRef.width = targetWidth;
     canvasRef.height = targetHeight;
@@ -1692,7 +1710,12 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
+    if (
+      maxHeight &&
+      targetHeight > maxHeight &&
+      zoom < maxHeight / targetHeight
+    )
+      zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -1721,18 +1744,25 @@ const LayerPreview: Component<Props> = (props: Props) => {
       targetHeight,
     );
   };
-
   onMount(() => {
     const height = wrapperRef.clientHeight;
-    updatePreview(layerImageStore[props.layer.id].current, height);
-    const agent = layerImageManager.getAgent(props.layer.id)
-    agent?.setOnImageChangeListener("layer_prev_" + props.layer.id, (e) => {
-      console.log("aoijdfg")
-    })
-  });
+    const currentImage = layerImageStore[props.layer.id].current;
 
-  createEffect(() => {
-  })
+    let agent = layerImageManager.getAgent(props.layer.id);
+    if (!agent) {
+      agent = layerImageManager.registerAgent(props.layer.id, currentImage);
+    } else {
+      agent.setImage(currentImage, true);
+    }
+
+    updatePreview(currentImage, height);
+
+    agent.setOnImageChangeListener("layer_prev_" + props.layer.id, () => {
+      console.log("aasdffa");
+      const img = layerImageStore[props.layer.id].current;
+      updatePreview(img, height);
+    });
+  });
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
@@ -2070,7 +2100,7 @@ export default Color;
 </file>
 
 <file path="components/section/GlobalSettings.tsx">
-import { Component, createSignal } from "solid-js";
+import { Component } from "solid-js";
 import { saveGlobalSettings } from "~/io/global/globalIO";
 import {
   CanvasRenderingMode,
@@ -2091,13 +2121,15 @@ const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: "crispEdges", value: "crispEdges" },
 ];
 
-
 const GlobalSettings: Component<{}> = (props) => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>settings.</p>
       <div class={sectionContent} style={{ gap: "8px" }}>
-        <ToggleSwitch checked={globalStore.showDirtyRects} onChange={e => setGlobalStore("showDirtyRects", e)}>
+        <ToggleSwitch
+          checked={globalStore.showDirtyRects}
+          onChange={(e) => setGlobalStore("showDirtyRects", e)}
+        >
           <p style={{ "font-size": "0.5rem" }}> autosave.</p>
         </ToggleSwitch>
 
@@ -2301,7 +2333,9 @@ const Palette: Component<{}> = (props) => {
         color={colorStore.secondary}
         sizePx={24}
         onClick={(color) => selectPalette(PaletteType.secondary)}
-        enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
+        enableUsingSelection={
+          colorStore.currentPalette === PaletteType.secondary
+        }
       />
     </div>
   );
@@ -3446,6 +3480,7 @@ export const addLayer = (
   layers.push(newLayer);
 
   setLayerStore("layers", layers);
+  setLayerStore("activeLayerId", newLayer.id);
 
   return layers;
 };
@@ -3586,6 +3621,7 @@ import { allLayers, setLayerStore } from "~/stores/project/layerStore";
 export const removeLayer = (layerId?: string) => {
   if (layerId === undefined) return;
   const layers = [...allLayers()];
+  if (layers.length <= 1) return;
   const index = layers.findIndex((l) => l.id === layerId);
   let newActiveIndex = 0;
   if (index !== 0) newActiveIndex = index - 1;
@@ -4049,121 +4085,126 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 </file>
 
 <file path="models/layer_image/HistoryManager.ts">
-import { reconcile } from "solid-js/store";
-import { setLayerImageStore } from "~/stores/project/layerImageStore";
-import { RGBAColor } from "~/utils/colorUtils";
-import { Vec2 } from "../types/Vector";
-import { TileIndex } from "./Tile";
+import { reconcile } from 'solid-js/store'
+import { setLayerImageStore } from '~/stores/project/layerImageStore'
+import { RGBAColor } from '~/utils/colorUtils'
+import { Vec2 } from '../types/Vector'
+import { TileIndex } from './Tile'
 
 export type PixelDiff = {
-  kind: "pixel";
-  position: Vec2;
-  before: RGBAColor;
-  after: RGBAColor;
-};
+  kind: 'pixel'
+  position: Vec2
+  before: RGBAColor
+  after: RGBAColor
+}
 
 export type TileDiff = {
-  kind: "tile";
-  index: TileIndex;
-  beforeColor: RGBAColor | undefined;
-  afterColor: RGBAColor;
-};
+  kind: 'tile'
+  index: TileIndex
+  beforeColor: RGBAColor | undefined
+  afterColor: RGBAColor
+}
 
-export type Diff = PixelDiff | TileDiff;
+export type Diff = PixelDiff | TileDiff
 
 export const getDiffHash = (diff: Diff) => {
   switch (diff.kind) {
-    case "pixel":
-      return `px:${diff.position.x},${diff.position.y}`;
-    case "tile":
-      return `tile:${diff.index.row},${diff.index.column}`;
+    case 'pixel':
+      return `px:${diff.position.x},${diff.position.y}`
+    case 'tile':
+      return `tile:${diff.index.row},${diff.index.column}`
   }
-};
+}
 
 export type DiffAction = {
-  diffs: Map<string, Diff>;
-};
+  diffs: Map<string, Diff>
+}
 
 export class HistoryManager {
-  protected undoActionsStack: DiffAction[];
-  protected redoActionsStack: DiffAction[];
+  protected undoActionsStack: DiffAction[] = []
+  protected redoActionsStack: DiffAction[] = []
+  private readonly maxStackSize = 50
 
-  constructor(public layerId: string) {
-    this.undoActionsStack = [];
-    this.redoActionsStack = [];
-  }
+  constructor(public layerId: string) {}
 
   public getUndoStack() {
-    return this.undoActionsStack;
+    return this.undoActionsStack
   }
 
   public getRedoStack() {
-    return this.undoActionsStack;
+    return this.redoActionsStack
   }
 
   public canUndo() {
-    return this.undoActionsStack.length > 0;
+    return this.undoActionsStack.length > 0
   }
 
   public canRedo() {
-    return this.redoActionsStack.length > 0;
+    return this.redoActionsStack.length > 0
   }
 
   public addAction(action: DiffAction) {
-    this.undoActionsStack.push(action);
-    this.redoActionsStack = [];
-    setLayerImageStore(
-      this.layerId,
-      "undoStack",
-      reconcile(this.undoActionsStack),
-    );
-    setLayerImageStore(
-      this.layerId,
-      "redoStack",
-      reconcile(this.redoActionsStack),
-    );
+    // push new action and cap undo history
+    this.undoActionsStack.push(action)
+    if (this.undoActionsStack.length > this.maxStackSize) {
+      this.undoActionsStack.shift()
+    }
+    // clear redo history
+    this.redoActionsStack = []
+
+    this.syncStores()
   }
 
   public undo(): DiffAction | undefined {
-    const undoedAction = this.undoActionsStack.pop();
-    if (undoedAction === undefined) return undefined;
-    this.redoActionsStack = [undoedAction, ...this.redoActionsStack];
-    setLayerImageStore(
-      this.layerId,
-      "undoStack",
-      reconcile(this.undoActionsStack),
-    );
-    setLayerImageStore(
-      this.layerId,
-      "redoStack",
-      reconcile(this.redoActionsStack),
-    );
-    return undoedAction;
+    const undoedAction = this.undoActionsStack.pop()
+    if (!undoedAction) return undefined
+
+    // push to redo and cap redo history
+    this.redoActionsStack.unshift(undoedAction)
+    if (this.redoActionsStack.length > this.maxStackSize) {
+      this.redoActionsStack.pop()
+    }
+
+    this.syncStores()
+    return undoedAction
   }
 
   public redo(): DiffAction | undefined {
-    const redoedAction = this.redoActionsStack.shift();
-    if (redoedAction === undefined) return undefined;
-    this.undoActionsStack = [...this.undoActionsStack, redoedAction];
+    const redoedAction = this.redoActionsStack.shift()
+    if (!redoedAction) return undefined
+
+    // push back to undo and cap undo history
+    this.undoActionsStack.push(redoedAction)
+    if (this.undoActionsStack.length > this.maxStackSize) {
+      this.undoActionsStack.shift()
+    }
+
+    this.syncStores()
+    return redoedAction
+  }
+
+  /**
+   * Synchronize the undo/redo stacks with the SolidJS store
+   */
+  private syncStores() {
     setLayerImageStore(
       this.layerId,
-      "undoStack",
-      reconcile(this.undoActionsStack),
-    );
+      'undoStack',
+      reconcile(this.undoActionsStack)
+    )
     setLayerImageStore(
       this.layerId,
-      "redoStack",
-      reconcile(this.redoActionsStack),
-    );
-    return redoedAction;
+      'redoStack',
+      reconcile(this.redoActionsStack)
+    )
   }
 }
 </file>
 
 <file path="models/layer_image/LayerImageAgent.ts">
-import { setBottomInfo } from '~/components/BottomInfo'
-import { Vec2 } from '~/models/types/Vector'
-import { colorMatch, RGBAColor } from '~/utils/colorUtils'
+import { setBottomInfo } from "~/components/BottomInfo";
+import { Vec2 } from "~/models/types/Vector";
+import { colorMatch, RGBAColor } from "~/utils/colorUtils";
 import {
   Diff,
   DiffAction,
@@ -4171,162 +4212,163 @@ import {
   HistoryManager,
   PixelDiff,
   TileDiff,
-} from './HistoryManager'
+} from "./HistoryManager";
 
 interface DrawingBufferChangeEvent {}
 interface ImageChangeEvent {}
 
 // それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
 export default abstract class LayerImageAgent {
-  protected image: ImageData
-  protected drawingBuffer: ImageData | undefined
-  protected historyManager
+  protected image: ImageData;
+  protected drawingBuffer: ImageData | undefined;
+  protected historyManager;
 
   protected onImageChangedListeners: {
-    [key: string]: (e: ImageChangeEvent) => void
-  } = {}
+    [key: string]: (e: ImageChangeEvent) => void;
+  } = {};
   protected onDrawingBufferChangedListeners: {
-    [key: string]: (e: DrawingBufferChangeEvent) => void
-  } = {}
+    [key: string]: (e: DrawingBufferChangeEvent) => void;
+  } = {};
 
   constructor(imageData: ImageData, historyManager?: HistoryManager) {
-    this.image = imageData
-    this.drawingBuffer = imageData
-    this.historyManager = historyManager
+    this.image = imageData;
+    this.drawingBuffer = imageData;
+    this.historyManager = historyManager;
   }
 
   getHistoryManager() {
-    return this.historyManager
+    return this.historyManager;
   }
 
   getImage() {
-    return this.image
+    return this.image;
   }
 
-  setImage(image: ImageData, silentlySet?: boolean) {
-    this.image = image
-    if (silentlySet) this.callOnImageChangeListeners()
-    this.resetDrawingBuffer()
+  setImage(image: ImageData, silentlySet: boolean = false) {
+    this.image = image;
+    if (!silentlySet) this.callOnImageChangeListeners();
+    this.resetDrawingBuffer();
   }
 
   getDrawingBuffer() {
-    return this.drawingBuffer
+    return this.drawingBuffer;
   }
 
   setDrawingBuffer(imageData?: ImageData) {
-    this.drawingBuffer = imageData
-    this.callOnDrawingBufferChangeListeners()
+    this.drawingBuffer = imageData;
+    this.callOnDrawingBufferChangeListeners();
   }
 
   resetDrawingBuffer() {
-    this.setDrawingBuffer(this.image)
+    this.setDrawingBuffer(this.image);
   }
 
-  abstract putImageInto(ctx: CanvasRenderingContext2D): void
-  abstract putDrawingBufferInto(ctx: CanvasRenderingContext2D): void
+  abstract putImageInto(ctx: CanvasRenderingContext2D): void;
+  abstract putDrawingBufferInto(ctx: CanvasRenderingContext2D): void;
 
   putImageIntoForce(ctx: CanvasRenderingContext2D) {
-    ctx.putImageData(this.image, 0, 0)
+    ctx.putImageData(this.image, 0, 0);
   }
   putDrawingBufferIntoForce(ctx: CanvasRenderingContext2D) {
-    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0)
+    if (this.drawingBuffer) ctx.putImageData(this.drawingBuffer, 0, 0);
   }
 
   setOnImageChangeListener(
     key: string,
-    listener: (e: ImageChangeEvent) => void
+    listener: (e: ImageChangeEvent) => void,
   ) {
-    this.onImageChangedListeners[key] = listener
+    this.onImageChangedListeners[key] = listener;
   }
   clearOnImageChangeListener(key: string) {
-    delete this.onImageChangedListeners[key]
+    delete this.onImageChangedListeners[key];
   }
 
   setOnDrawingBufferChangeListener(
     key: string,
-    listener: (e: DrawingBufferChangeEvent) => void
+    listener: (e: DrawingBufferChangeEvent) => void,
   ) {
-    this.onDrawingBufferChangedListeners[key] = listener
+    this.onDrawingBufferChangedListeners[key] = listener;
   }
   clearOnDrawingBufferChangeListener(key: string) {
-    delete this.onDrawingBufferChangedListeners[key]
+    delete this.onDrawingBufferChangedListeners[key];
   }
 
   callOnImageChangeListeners() {
+    console.log("no tnui");
     Object.values(this.onImageChangedListeners).forEach((listener) =>
-      listener({})
-    )
+      listener({}),
+    );
   }
 
   callOnDrawingBufferChangeListeners() {
     Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
-      listener({})
-    )
+      listener({}),
+    );
   }
 
-  getWidth = (): number => this.image.width
-  getHeight = (): number => this.image.height
+  getWidth = (): number => this.image.width;
+  getHeight = (): number => this.image.height;
 
-  public currentDiffAction: DiffAction = { diffs: new Map() }
+  public currentDiffAction: DiffAction = { diffs: new Map() };
 
   addDiffs(diffs: Diff[]) {
-    diffs.forEach((d) => this.currentDiffAction.diffs.set(getDiffHash(d), d))
+    diffs.forEach((d) => this.currentDiffAction.diffs.set(getDiffHash(d), d));
   }
 
   public registerDiffAction() {
-    this.historyManager?.addAction(this.currentDiffAction)
-    this.currentDiffAction = { diffs: new Map() }
+    this.historyManager?.addAction(this.currentDiffAction);
+    this.currentDiffAction = { diffs: new Map() };
   }
 
-  public canUndo = () => this.historyManager?.canUndo()
-  public canRedo = () => this.historyManager?.canRedo()
+  public canUndo = () => this.historyManager?.canUndo();
+  public canRedo = () => this.historyManager?.canRedo();
 
   public undo() {
-    const undoStart = Date.now()
-    const undoedAction = this.historyManager?.undo()
-    if (undoedAction === undefined) return
-    setBottomInfo(`undo.`)
+    const undoStart = Date.now();
+    const undoedAction = this.historyManager?.undo();
+    if (undoedAction === undefined) return;
+    setBottomInfo(`undo.`);
     undoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
-        case 'pixel':
-          this.setPixelInPosition(diff.position, diff.before, false, false)
-          break
-        case 'tile':
-          this.undoTileDiff(diff)
-          break
+        case "pixel":
+          this.setPixelInPosition(diff.position, diff.before, false, false);
+          break;
+        case "tile":
+          this.undoTileDiff(diff);
+          break;
       }
-    })
-    const undoEnd = Date.now()
+    });
+    const undoEnd = Date.now();
     setBottomInfo(
-      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`
-    )
+      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`,
+    );
 
-    this.callOnImageChangeListeners()
+    this.callOnImageChangeListeners();
   }
 
   protected undoTileDiff(tileDiff: TileDiff) {}
 
   public redo() {
-    const redoStart = Date.now()
-    const redoedAction = this.historyManager?.redo()
-    if (redoedAction === undefined) return
-    setBottomInfo(`redo.`)
+    const redoStart = Date.now();
+    const redoedAction = this.historyManager?.redo();
+    if (redoedAction === undefined) return;
+    setBottomInfo(`redo.`);
     redoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
-        case 'pixel':
-          this.setPixelInPosition(diff.position, diff.after, false, false)
-          break
-        case 'tile':
-          this.redoTileDiff(diff)
-          break
+        case "pixel":
+          this.setPixelInPosition(diff.position, diff.after, false, false);
+          break;
+        case "tile":
+          this.redoTileDiff(diff);
+          break;
       }
-    })
-    const redoEnd = Date.now()
+    });
+    const redoEnd = Date.now();
     setBottomInfo(
-      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`
-    )
+      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`,
+    );
 
-    this.callOnImageChangeListeners()
+    this.callOnImageChangeListeners();
   }
 
   protected redoTileDiff(tileDiff: TileDiff) {}
@@ -4335,65 +4377,65 @@ export default abstract class LayerImageAgent {
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean,
-    excludeColorMatch: boolean
-  ): PixelDiff | undefined
+    excludeColorMatch: boolean,
+  ): PixelDiff | undefined;
 
   protected setPixelInPosition(
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
+    excludeColorMatch: boolean = true,
   ): PixelDiff | undefined {
-    if (!this.isInBounds(position)) return undefined
+    if (!this.isInBounds(position)) return undefined;
     if (
       excludePositionMatch &&
       this.currentDiffAction.diffs.has(`${position.x},${position.y}`)
     )
-      return undefined
-    const i = (position.y * this.getWidth() + position.x) * 4
+      return undefined;
+    const i = (position.y * this.getWidth() + position.x) * 4;
     const beforeColor: RGBAColor = [
       this.image.data[i + 0],
       this.image.data[i + 1],
       this.image.data[i + 2],
       this.image.data[i + 3],
-    ]
-    if (excludeColorMatch && colorMatch(beforeColor, color)) return undefined
+    ];
+    if (excludeColorMatch && colorMatch(beforeColor, color)) return undefined;
 
-    if (!this.drawingBuffer) return
+    if (!this.drawingBuffer) return;
 
-    this.drawingBuffer.data[i + 0] = color[0]
-    this.drawingBuffer.data[i + 1] = color[1]
-    this.drawingBuffer.data[i + 2] = color[2]
-    this.drawingBuffer.data[i + 3] = color[3]
+    this.drawingBuffer.data[i + 0] = color[0];
+    this.drawingBuffer.data[i + 1] = color[1];
+    this.drawingBuffer.data[i + 2] = color[2];
+    this.drawingBuffer.data[i + 3] = color[3];
 
     return {
-      kind: 'pixel',
+      kind: "pixel",
       position,
       before: beforeColor,
       after: color,
-    }
+    };
   }
 
   public abstract deletePixel(
     position: Vec2,
     excludePositionMatch: boolean,
-    excludeColorMatch: boolean
-  ): PixelDiff | undefined
+    excludeColorMatch: boolean,
+  ): PixelDiff | undefined;
 
   protected deletePixelInPosition(
     position: Vec2,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true
+    excludeColorMatch: boolean = true,
   ): PixelDiff | undefined {
     return this.setPixelInPosition(
       position,
       [0, 0, 0, 0],
       excludePositionMatch,
-      excludeColorMatch
-    )
+      excludeColorMatch,
+    );
   }
 
-  public abstract getPixel(position: Vec2): RGBAColor
+  public abstract getPixel(position: Vec2): RGBAColor;
 
   public isInBounds(position: Vec2) {
     return (
@@ -4401,27 +4443,27 @@ export default abstract class LayerImageAgent {
       position.y >= 0 &&
       position.x < this.getWidth() &&
       position.y < this.getHeight()
-    )
+    );
   }
 }
 </file>
 
 <file path="models/layer_image/LayerImageManager.ts">
-import { HistoryManager } from './HistoryManager'
-import LayerImageAgent from './LayerImageAgent'
-import TileLayerImageAgent from './agents/TileLayerImageAgent'
+import { HistoryManager } from "./HistoryManager";
+import LayerImageAgent from "./LayerImageAgent";
+import TileLayerImageAgent from "./agents/TileLayerImageAgent";
 
 export class LayerImageManager {
-  private agents: Map<string, LayerImageAgent> = new Map()
+  private agents: Map<string, LayerImageAgent> = new Map();
 
   public getAgent(layerId: string): LayerImageAgent | undefined {
-    return this.agents.get(layerId)
+    return this.agents.get(layerId);
   }
 
   public registerAgent(layerId: string, image: ImageData): LayerImageAgent {
-    const agent = new TileLayerImageAgent(image, new HistoryManager(layerId))
-    this.agents.set(layerId, agent)
-    return agent
+    const agent = new TileLayerImageAgent(image, new HistoryManager(layerId));
+    this.agents.set(layerId, agent);
+    return agent;
   }
 }
 </file>
@@ -5122,90 +5164,97 @@ export default function NotFound() {
 </file>
 
 <file path="routes/about/about.css.ts">
-import { style } from '@vanilla-extract/css'
-import { k12x8, Terminus, vars, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css'
-import { flexCol } from '~/styles/snippets.css'
+import { style } from "@vanilla-extract/css";
+import {
+  k12x8,
+  Terminus,
+  vars,
+  ZFB03,
+  ZFB08,
+  ZFB31,
+} from "~/styles/global.css";
+import { flexCol } from "~/styles/snippets.css";
 
 export const aaContainer = style([
   flexCol,
   {
-    position: 'absolute',
-    top: '24px',
-    right: '40px',
-    width: '200px',
-    height: '100%',
-    alignItems: 'center',
-    pointerEvents: 'none',
+    position: "absolute",
+    top: "24px",
+    right: "40px",
+    width: "200px",
+    height: "100%",
+    alignItems: "center",
+    pointerEvents: "none",
   },
-])
+]);
 
 export const aaText = style({
   fontFamily: Terminus,
-  fontSize: '22px',
+  fontSize: "22px",
   opacity: 0.4,
-})
+});
 
 export const contentContainer = style([
   flexCol,
   {
-    width: '100%',
-    margin: '0 30px',
-    marginTop: '8px',
-    pointerEvents: 'none',
+    width: "100%",
+    margin: "0 30px",
+    marginTop: "8px",
+    pointerEvents: "none",
   },
-])
+]);
 
 export const aboutLink = style({
-  pointerEvents: 'all',
-  borderBottom: '1px solid black',
-  paddingBottom: '1px',
-  ':hover': {
-    borderBottom: 'none',
-    color: 'magenta',
+  pointerEvents: "all",
+  borderBottom: "1px solid black",
+  paddingBottom: "1px",
+  ":hover": {
+    borderBottom: "none",
+    color: "magenta",
   },
-})
+});
 
 export const aboutTitle = style({
   fontFamily: ZFB31,
-  fontSize: '31px',
-})
+  fontSize: "31px",
+});
 
 export const aboutSubTitle = style({
   fontFamily: ZFB03,
-  fontSize: '9px',
-  color: '#777',
-})
+  fontSize: "9px",
+  color: "#777",
+});
 
 export const aboutDev = style({
   fontFamily: ZFB08,
-  fontSize: '8px',
-})
+  fontSize: "8px",
+});
 
 export const aboutContent = style({
   fontFamily: ZFB08,
-  fontSize: '8px',
+  fontSize: "8px",
   lineHeight: 1.6,
-})
+});
 
 export const sendFBButton = style({
-  width: 'fit-content',
-  padding: '4px 4px',
-  fontSize: '8px',
-  borderColor: 'blue',
+  width: "fit-content",
+  padding: "4px 4px",
+  fontSize: "8px",
+  borderColor: "blue",
   background: vars.color.button,
-  color: 'blue',
-  ':hover': {
-    color: 'white',
-    background: 'blue',
+  color: "blue",
+  ":hover": {
+    color: "white",
+    background: "blue",
   },
-})
+});
 
 export const aboutFeedback = style({
   fontFamily: k12x8,
-  fontSize: '8px',
-  marginRight: '60px',
+  fontSize: "8px",
+  marginRight: "60px",
   lineHeight: 1.5,
-})
+});
 </file>
 
 <file path="routes/about/index.tsx">
@@ -5352,9 +5401,6 @@ import { importProjectJsonFromPath } from "~/io/project/project";
 import { adjustZoomToFit, centeringCanvas } from "~/stores/project/canvasStore";
 import { flexCol, flexRow } from "~/styles/snippets.css";
 import { welcomeRoot } from "../start.css";
-import { allLayers } from "~/stores/project/layerStore";
-import { layerImageManager } from "~/components/canvas/stacks/CanvasStack";
-import { layerImageStore } from "~/stores/project/layerImageStore";
 
 export default function Editor() {
   const location = useLocation();
@@ -5643,53 +5689,53 @@ export const sideSectionItem = style([
 </file>
 
 <file path="stores/global/globalStore.ts">
-import { createStore } from 'solid-js/store'
-import { saveGlobalSettings } from '~/io/global/globalIO'
-import { canvasStore } from '../project/canvasStore'
+import { createStore } from "solid-js/store";
+import { saveGlobalSettings } from "~/io/global/globalIO";
+import { canvasStore } from "../project/canvasStore";
 
 // global
 export type FileLocation = {
-  path: string
-  name: string
-}
-export type ImageRenderingAttribute = 'auto' | 'pixelated' | 'crispEdges'
-export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crispEdges'
+  path: string;
+  name: string;
+};
+export type ImageRenderingAttribute = "auto" | "pixelated" | "crispEdges";
+export type CanvasRenderingMode = "adaptive" | "pixelated" | "crispEdges";
 
 export const getCanvasImageRenderingAttribute = (mode: CanvasRenderingMode) => {
   switch (mode) {
-    case 'pixelated':
-    case 'crispEdges':
-      return mode
-    case 'adaptive':
-      return canvasStore.zoom > 1.0 ? 'pixelated' : 'crispEdges'
+    case "pixelated":
+    case "crispEdges":
+      return mode;
+    case "adaptive":
+      return canvasStore.zoom > 1.0 ? "pixelated" : "crispEdges";
   }
-}
+};
 
 export const [globalStore, setGlobalStore] = createStore({
   recentOpenedFiles: [
     {
-      path: 'C:\\Users\\innsb\\Documents',
-      name: 'project.sledge',
+      path: "C:\\Users\\innsb\\Documents",
+      name: "project.sledge",
     },
   ],
 
   showDirtyRects: false,
-  canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
-})
+  canvasRenderingMode: "adaptive" as CanvasRenderingMode,
+});
 
 export const addRecent = (loc: FileLocation) => {
-  const path = loc.path
-  const name = loc.name
+  const path = loc.path;
+  const name = loc.name;
 
   // add to recent
   setGlobalStore((store) => {
-    console.log('path: ' + path)
-    console.log('name: ' + name)
+    console.log("path: " + path);
+    console.log("name: " + name);
     if (name && path && store.recentOpenedFiles) {
       // 履歴にあっても一旦削除
       let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
-        return f.name !== name || f.path !== path?.toString()
-      })
+        return f.name !== name || f.path !== path?.toString();
+      });
       // その後、一番上に追加
       const newRecentFiles: FileLocation[] = [
         {
@@ -5697,13 +5743,13 @@ export const addRecent = (loc: FileLocation) => {
           path: path,
         },
         ...oldRecentFiles,
-      ]
-      setGlobalStore('recentOpenedFiles', newRecentFiles)
-      saveGlobalSettings()
+      ];
+      setGlobalStore("recentOpenedFiles", newRecentFiles);
+      saveGlobalSettings();
     }
-    return store
-  })
-}
+    return store;
+  });
+};
 </file>
 
 <file path="stores/internal/colorStore.ts">
@@ -5805,58 +5851,58 @@ export const currentTool = () => toolStore.tools[toolStore.usingIndex];
 </file>
 
 <file path="stores/project/canvasStore.ts">
-import { createStore } from 'solid-js/store'
-import { createCanvas } from '~/models/types/Canvas'
+import { createStore } from "solid-js/store";
+import { createCanvas } from "~/models/types/Canvas";
 
 // canvas
-const REFERENCE_LENGTH = 600
+const REFERENCE_LENGTH = 600;
 
 export const getReferencedZoom = (length?: number) => {
   if (length === undefined) {
-    const width = canvasStore.canvas.width
-    const height = canvasStore.canvas.height
-    length = width > height ? width : height
+    const width = canvasStore.canvas.width;
+    const height = canvasStore.canvas.height;
+    length = width > height ? width : height;
   }
 
-  return REFERENCE_LENGTH / length
-}
+  return REFERENCE_LENGTH / length;
+};
 
 export const adjustZoomToFit = (width?: number, height?: number) => {
-  if (width === undefined) width = canvasStore.canvas.width
-  if (height === undefined) height = canvasStore.canvas.height
+  if (width === undefined) width = canvasStore.canvas.width;
+  if (height === undefined) height = canvasStore.canvas.height;
 
-  let isWide = width > height
-  let longerLength = isWide ? width : height
+  let isWide = width > height;
+  let longerLength = isWide ? width : height;
 
   console.log(
-    `this is ${isWide ? 'wide' : 'tall'}.
-    ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`
-  )
-  setCanvasStore('zoom', getReferencedZoom(longerLength))
-  centeringCanvas()
-}
+    `this is ${isWide ? "wide" : "tall"}.
+    ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`,
+  );
+  setCanvasStore("zoom", getReferencedZoom(longerLength));
+  centeringCanvas();
+};
 
 export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas
-  const canvasArea = canvasStore.canvasAreaSize
-  const zoom = canvasStore.zoom
+  const canvasSize = canvasStore.canvas;
+  const canvasArea = canvasStore.canvasAreaSize;
+  const zoom = canvasStore.zoom;
 
   console.log(
     `area size is ${canvasArea.width} x ${canvasArea.height}.
     canvas size is ${canvasSize.width} x ${canvasSize.height}.
     current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
-    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
-  )
+    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`,
+  );
 
-  setCanvasStore('offsetOrigin', {
+  setCanvasStore("offsetOrigin", {
     x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
     y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
-  })
-  setCanvasStore('offset', {
+  });
+  setCanvasStore("offset", {
     x: 0,
     y: 0,
-  })
-}
+  });
+};
 
 export const [canvasStore, setCanvasStore] = createStore({
   canvas: createCanvas(400, 400),
@@ -5877,7 +5923,7 @@ export const [canvasStore, setCanvasStore] = createStore({
 
   isCtrlPressed: false,
   isDragging: false,
-})
+});
 </file>
 
 <file path="stores/project/layerImageStore.ts">
@@ -5987,19 +6033,19 @@ export const canvasArea = style([
 </file>
 
 <file path="styles/components/canvas/canvas_stack.css.ts">
-'background-image'
-import { style } from '@vanilla-extract/css'
-import { flexRow } from '~/styles/snippets.css'
+"background-image";
+import { style } from "@vanilla-extract/css";
+import { flexRow } from "~/styles/snippets.css";
 
-const transparent_bg_size = 4
-const transparent_bg_color = '#0000000A'
+const transparent_bg_size = 4;
+const transparent_bg_color = "#0000000A";
 
 export const canvasStack = style([
   flexRow,
   {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
 
     backgroundImage:
       `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
@@ -6007,7 +6053,7 @@ export const canvasStack = style([
     backgroundSize: `${transparent_bg_size * 2}px ${transparent_bg_size * 2}px`,
     backgroundPosition: `0 0, ${transparent_bg_size}px ${transparent_bg_size}px`,
   },
-])
+]);
 </file>
 
 <file path="styles/components/canvas/canvas_stack.module.css">
@@ -6322,6 +6368,7 @@ export const dropdownRoot = style({
   height: 100%;
   border: 1px solid black;
   width: 100%;
+  image-rendering: pixelated;
 }
 </file>
 
@@ -6678,165 +6725,165 @@ import {
   fontFace,
   globalStyle,
   style,
-} from '@vanilla-extract/css'
-import { flexCol, flexRow, h100 } from './snippets.css'
+} from "@vanilla-extract/css";
+import { flexCol, flexRow, h100 } from "./snippets.css";
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',
-})
+});
 export const ZFB03B = fontFace({
   src: 'url("/fonts/04B_03B_.ttf")',
-})
+});
 export const ZFB08 = fontFace({
   src: 'url("/fonts/04B_08__.ttf")',
-})
+});
 export const ZFB09 = fontFace({
   src: 'url("/fonts/04B_09__.ttf")',
-})
+});
 export const ZFB11 = fontFace({
   src: 'url("/fonts/04B_11__.ttf")',
-})
+});
 export const ZFB31 = fontFace({
   src: 'url("/fonts/04B_31__.ttf")',
-})
+});
 export const Terminus = fontFace({
   src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")',
-})
+});
 export const k8x12 = fontFace({
   src: 'url("/fonts/k8x12/k8x12.ttf")',
-})
+});
 export const k8x12L = fontFace({
   src: 'url("/fonts/k8x12/k8x12L.ttf")',
-})
+});
 export const k8x12S = fontFace({
   src: 'url("/fonts/k8x12/k8x12S.ttf")',
-})
+});
 export const k12x8 = fontFace({
   src: 'url("/fonts/k12x8/k12x8.ttf")',
-})
+});
 
-export const vars = createGlobalTheme(':root', {
+export const vars = createGlobalTheme(":root", {
   color: {
-    primary: '#ffffff',
-    secondary: '#f0f0f0',
-    text: '#111111',
-    danger: '#ff0000',
-    muted: '#00000030',
+    primary: "#ffffff",
+    secondary: "#f0f0f0",
+    text: "#111111",
+    danger: "#ff0000",
+    muted: "#00000030",
 
-    bg: '#ffffff',
-    bg_canvas_area: '#fefefe',
+    bg: "#ffffff",
+    bg_canvas_area: "#fefefe",
 
-    surface: '#f0f0f0',
+    surface: "#f0f0f0",
 
-    button: '#ffffff',
-    button_hover: '#f0f0f0',
-    button_pressed: '#f0f0f0',
+    button: "#ffffff",
+    button_hover: "#f0f0f0",
+    button_pressed: "#f0f0f0",
   },
   spacing: {
-    xs: '4px',
-    sm: '8px',
-    md: '12px',
-    lg: '16px',
-    xl: '24px',
+    xs: "4px",
+    sm: "8px",
+    md: "12px",
+    lg: "16px",
+    xl: "24px",
   },
   text: {
-    xs: '6px',
-    sm: '8px',
-    md: '10px',
-    lg: '12px',
-    xl: '16px',
+    xs: "6px",
+    sm: "8px",
+    md: "10px",
+    lg: "12px",
+    xl: "16px",
   },
   font: {
     body: `${ZFB08}, ${k8x12}`,
   },
-})
+});
 
-globalStyle('button, p, a, input', {
+globalStyle("button, p, a, input", {
   fontFamily: ZFB08,
   color: vars.color.text,
-})
+});
 
-globalStyle('a:hover', {
-  color: 'red',
-})
+globalStyle("a:hover", {
+  color: "red",
+});
 
-globalStyle('button', {
+globalStyle("button", {
   background: vars.color.button,
-  border: '1px black solid',
-  borderRadius: '2px',
-  cursor: 'pointer',
-  fontSize: '0.5rem',
-  height: 'fit-content',
-  padding: '2px 6px',
-  pointerEvents: 'all',
-})
+  border: "1px black solid",
+  borderRadius: "2px",
+  cursor: "pointer",
+  fontSize: "0.5rem",
+  height: "fit-content",
+  padding: "2px 6px",
+  pointerEvents: "all",
+});
 
-globalStyle('button:hover', {
+globalStyle("button:hover", {
   background: vars.color.button_hover,
-})
+});
 
-globalStyle('button:active', {
+globalStyle("button:active", {
   background: vars.color.button_pressed,
-  transform: 'translateY(1px)',
-})
+  transform: "translateY(1px)",
+});
 
-globalStyle('#root', {
-  display: 'flex',
-  flexDirection: 'row',
-  height: '100%',
-  userSelect: 'none',
-  overflow: 'hidden',
-})
+globalStyle("#root", {
+  display: "flex",
+  flexDirection: "row",
+  height: "100%",
+  userSelect: "none",
+  overflow: "hidden",
+});
 
-export const sideArea = style([flexRow, h100])
+export const sideArea = style([flexRow, h100]);
 
 export const sideAreaEdge = style([
   flexCol,
   h100,
   {
-    gap: '20px',
-    width: '20px',
-    margin: '10px 0 20px 2px',
-    paddingBottom: '20px',
-    justifyContent: 'flex-end',
+    gap: "20px",
+    width: "20px",
+    margin: "10px 0 20px 2px",
+    paddingBottom: "20px",
+    justifyContent: "flex-end",
   },
-])
+]);
 
 export const sideAreaEdgeText = style({
-  fontSize: '0.5rem',
-  letterSpacing: '2px',
-  transform: 'rotate(180deg) scaleX(0.8)',
-  whiteSpace: 'nowrap',
-  writingMode: 'vertical-rl',
-})
+  fontSize: "0.5rem",
+  letterSpacing: "2px",
+  transform: "rotate(180deg) scaleX(0.8)",
+  whiteSpace: "nowrap",
+  writingMode: "vertical-rl",
+});
 
 export const sideAreaContent = style([
   flexCol,
   {
-    borderRight: '1px solid #aaa',
-    gap: '1rem',
-    padding: '20px 40px 90px 20px',
-    width: '230px',
-    overflowY: 'scroll',
-    '::-webkit-scrollbar': {
-      width: '4px',
+    borderRight: "1px solid #aaa",
+    gap: "1rem",
+    padding: "20px 40px 90px 20px",
+    width: "230px",
+    overflowY: "scroll",
+    "::-webkit-scrollbar": {
+      width: "4px",
     },
-    '::-webkit-scrollbar-thumb': {
-      backgroundColor: 'transparent',
+    "::-webkit-scrollbar-thumb": {
+      backgroundColor: "transparent",
     },
     selectors: {
-      '&:hover::-webkit-scrollbar-thumb': {
-        backgroundColor: '#ddd',
+      "&:hover::-webkit-scrollbar-thumb": {
+        backgroundColor: "#ddd",
       },
     },
   },
-])
+]);
 
 export const sledgeLogo = style({
-  bottom: '2px',
-  position: 'absolute',
-  right: '2px',
-})
+  bottom: "2px",
+  position: "absolute",
+  right: "2px",
+});
 </file>
 
 <file path="styles/reset.css.ts">
@@ -7003,8 +7050,8 @@ export const layerItem = style([
   flexRow,
   w100,
   {
-    height: "24px",
-    padding: vars.spacing.sm,
+    height: "32px",
+    padding: "6px",
     flexGrow: 1,
     cursor: "pointer",
     backgroundColor: vars.color.surface,
@@ -7013,11 +7060,14 @@ export const layerItem = style([
       filter: "brightness(0.94)",
       transform: "translate(0, 1px)",
     },
+    ":active": {
+      transform: "translate(0, 1px)",
+    },
   },
 ]);
 
 export const layerItemDisabled = style({
-  color: vars.color.muted,
+  opacity: 0.3,
 });
 
 export const layerItemType = style([
@@ -7035,7 +7085,7 @@ export const layerItemName = style([
   {
     fontSize: vars.text.xl,
     fontFamily: ZFB03B,
-    margin: `${vars.spacing.sm} 0 0 ${vars.spacing.lg}`,
+    margin: `${vars.spacing.md} 0 0 ${vars.spacing.lg}`,
   },
 ]);
 

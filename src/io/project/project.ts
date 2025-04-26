@@ -1,103 +1,102 @@
 // src/io/project.ts
-import { path } from "@tauri-apps/api";
-import { open as dialogOpen, save } from "@tauri-apps/plugin-dialog";
+import { path } from '@tauri-apps/api'
+import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog'
 import {
   BaseDirectory,
   mkdir,
   readTextFile,
   writeTextFile,
-} from "@tauri-apps/plugin-fs";
-import { initLayerImage } from "~/models/layer/layerImage";
-import { Layer } from "~/models/types/Layer";
-import { addRecent } from "~/stores/global/globalStore";
+} from '@tauri-apps/plugin-fs'
+import { Layer } from '~/types/Layer'
+import { addRecent } from '~/stores/global/globalStore'
 import {
   adjustZoomToFit,
   canvasStore,
   centeringCanvas,
   setCanvasStore,
-} from "~/stores/project/canvasStore";
+} from '~/stores/project/canvasStore'
 import {
   layerImageStore,
   setLayerImageStore,
-} from "~/stores/project/layerImageStore";
+} from '~/stores/project/layerImageStore'
 import {
   findLayerById,
   layerStore,
   setLayerStore,
-} from "~/stores/project/layerStore";
-import { projectStore, setProjectStore } from "~/stores/project/projectStore";
-import { decodeImageData, encodeImageData } from "~/utils/ImageUtils";
-import { getFileNameAndPath } from "~/utils/pathUtils";
+} from '~/stores/project/layerStore'
+import { projectStore, setProjectStore } from '~/stores/project/projectStore'
+import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
+import { getFileNameAndPath } from '~/utils/pathUtils'
 
 export async function importProjectJsonFromFileSelection(): Promise<
   string | undefined
 > {
-  const home = await path.homeDir();
+  const home = await path.homeDir()
   const file = await dialogOpen({
     multiple: false,
     directory: false,
-    defaultPath: await path.join(home, "sledge"),
+    defaultPath: await path.join(home, 'sledge'),
     filters: [
       {
-        name: "sledge files",
-        extensions: ["sledge"],
+        name: 'sledge files',
+        extensions: ['sledge'],
       },
     ],
-  });
+  })
   if (!file) {
-    console.log("ファイルが選択されていません");
-    return undefined;
+    console.log('ファイルが選択されていません')
+    return undefined
   }
-  console.log(file);
-  const jsonText = await readTextFile(file);
-  const projectJson = JSON.parse(jsonText);
+  console.log(file)
+  const jsonText = await readTextFile(file)
+  const projectJson = JSON.parse(jsonText)
 
-  await importProjectJson(projectJson);
+  await importProjectJson(projectJson)
 
-  return file;
+  return file
 }
 
 export async function importProjectJsonFromPath(filePath: string) {
   if (!filePath) {
-    console.log("ファイルが選択されていません");
-    return;
+    console.log('ファイルが選択されていません')
+    return
   }
-  const jsonText = await readTextFile(filePath);
-  const projectJson = JSON.parse(jsonText);
+  const jsonText = await readTextFile(filePath)
+  const projectJson = JSON.parse(jsonText)
 
-  importProjectJson(projectJson);
+  importProjectJson(projectJson)
 }
 
 export async function importProjectJson(projectJson: any) {
   if (projectJson.project) {
-    console.log(projectJson.project);
-    setProjectStore("name", projectJson.project.name);
-    setProjectStore("path", projectJson.project.path);
+    console.log(projectJson.project)
+    setProjectStore('name', projectJson.project.name)
+    setProjectStore('path', projectJson.project.path)
   }
 
   if (projectJson.canvas) {
-    const { width, height } = projectJson.canvas;
-    setCanvasStore("canvas", "width", width);
-    setCanvasStore("canvas", "height", height);
+    const { width, height } = projectJson.canvas
+    setCanvasStore('canvas', 'width', width)
+    setCanvasStore('canvas', 'height', height)
   }
 
   if (projectJson.images) {
-    setLayerImageStore({});
+    setLayerImageStore({})
     Object.keys(projectJson.images).forEach((id) => {
-      console.log(`read ${id}`);
-      const imageData = projectJson.images[id];
-      console.log(imageData);
-      initLayerImage(id, Number(imageData.dotMagnification || 1));
+      console.log(`read ${id}`)
+      const imageData = projectJson.images[id]
+      console.log(imageData)
+      initLayerImage(id, Number(imageData.dotMagnification || 1))
       setLayerImageStore(
         id,
-        "current",
+        'current',
         decodeImageData(
           imageData.current,
           Number(imageData.width),
-          Number(imageData.height),
-        ),
-      );
-    });
+          Number(imageData.height)
+        )
+      )
+    })
   }
 
   if (
@@ -105,20 +104,20 @@ export async function importProjectJson(projectJson: any) {
     projectJson.layer.layers &&
     Array.isArray(projectJson.layer.layers)
   ) {
-    const layers: Layer[] = [];
+    const layers: Layer[] = []
     projectJson.layer.layers.map((l: any) => {
       layers.push({
         ...l,
         dsl: undefined,
-      } as Layer);
-    });
+      } as Layer)
+    })
 
-    setLayerStore("layers", layers);
-    setLayerStore("activeLayerId", projectJson.layer.activeLayerId);
+    setLayerStore('layers', layers)
+    setLayerStore('activeLayerId', projectJson.layer.activeLayerId)
   }
 
-  adjustZoomToFit();
-  centeringCanvas();
+  adjustZoomToFit()
+  centeringCanvas()
 }
 
 export const parseCurrentProject = (): string => {
@@ -134,7 +133,7 @@ export const parseCurrentProject = (): string => {
           height: state.current.height,
           dotMagnification: findLayerById(id)?.dotMagnification,
         },
-      ]),
+      ])
     ),
     layer: {
       layers: layerStore.layers.map((layer) => ({
@@ -143,40 +142,40 @@ export const parseCurrentProject = (): string => {
       })),
       activeLayerId: layerStore.activeLayerId,
     },
-  });
-};
+  })
+}
 
 export async function saveProject(existingPath?: string) {
-  let selectedPath: String | null;
+  let selectedPath: String | null
   if (existingPath) {
-    selectedPath = existingPath;
+    selectedPath = existingPath
   } else {
     try {
-      await mkdir("sledge", {
+      await mkdir('sledge', {
         baseDir: BaseDirectory.Home,
         recursive: true,
-      });
+      })
     } catch (e) {
-      console.warn("ディレクトリ作成スキップまたは失敗:", e);
+      console.warn('ディレクトリ作成スキップまたは失敗:', e)
     }
 
-    const home = await path.homeDir();
+    const home = await path.homeDir()
     selectedPath = await save({
-      title: "Sledge プロジェクトを保存",
+      title: 'Sledge プロジェクトを保存',
       defaultPath: await path.join(home, `sledge/${projectStore.name}.sledge`),
-      filters: [{ name: "Sledge Project", extensions: ["sledge"] }],
-    });
+      filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
+    })
   }
 
-  if (typeof selectedPath === "string") {
-    setProjectStore("path", selectedPath);
-    const data = parseCurrentProject();
-    await writeTextFile(selectedPath, data);
-    console.log("プロジェクト保存:", selectedPath);
+  if (typeof selectedPath === 'string') {
+    setProjectStore('path', selectedPath)
+    const data = parseCurrentProject()
+    await writeTextFile(selectedPath, data)
+    console.log('プロジェクト保存:', selectedPath)
 
-    const fileLoc = getFileNameAndPath(selectedPath);
-    if (fileLoc !== undefined) addRecent(fileLoc);
+    const fileLoc = getFileNameAndPath(selectedPath)
+    if (fileLoc !== undefined) addRecent(fileLoc)
   } else {
-    console.log("保存キャンセルされました");
+    console.log('保存キャンセルされました')
   }
 }

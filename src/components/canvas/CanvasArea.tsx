@@ -17,7 +17,7 @@ export default () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
-  let interact: CanvasAreaInteract = new CanvasAreaInteract();
+  const interact: CanvasAreaInteract = new CanvasAreaInteract();
 
   onMount(() => {
     // set Canvas to center

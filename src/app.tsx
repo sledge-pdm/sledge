@@ -3,7 +3,6 @@ import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { Suspense } from "solid-js";
 import TitleBar from "./components/TitleBar";
-import ToastContainer from "./components/ToastContainer";
 import Home from "./routes";
 import Editor from "./routes/editor";
 
@@ -24,8 +23,6 @@ export default function App() {
               <TitleBar />
 
               <main>{props.children}</main>
-
-              <ToastContainer />
 
               {/* <p class={sledgeLogo}>sledge.</p> */}
             </div>

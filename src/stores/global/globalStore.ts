@@ -37,7 +37,7 @@ export const addRecent = (loc: FileLocation) => {
     console.log('name: ' + name)
     if (name && path && store.recentOpenedFiles) {
       // 履歴にあっても一旦削除
-      let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
+      const oldRecentFiles = store.recentOpenedFiles.filter((f) => {
         return f.name !== name || f.path !== path?.toString()
       })
       // その後、一番上に追加

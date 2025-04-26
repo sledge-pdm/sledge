@@ -27,6 +27,7 @@ import {
 import { projectStore, setProjectStore } from '~/stores/project/projectStore'
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils'
 import { getFileNameAndPath } from '~/utils/pathUtils'
+import initLayerImage from '~/models/factories/initLayerImage'
 
 export async function importProjectJsonFromFileSelection(): Promise<
   string | undefined
@@ -146,7 +147,7 @@ export const parseCurrentProject = (): string => {
 }
 
 export async function saveProject(existingPath?: string) {
-  let selectedPath: String | null
+  let selectedPath: string | null
   if (existingPath) {
     selectedPath = existingPath
   } else {

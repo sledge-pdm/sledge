@@ -41,9 +41,6 @@ export default function Home() {
   };
 
   const createNew = () => {
-    const DEFAULT_LAYERS = [createLayer("dot1", LayerType.Dot, true, 1)];
-    setLayerStore("layers", DEFAULT_LAYERS);
-    setLayerStore("activeLayerId", DEFAULT_LAYERS[0].id);
 
     openEditorWindow()
   };

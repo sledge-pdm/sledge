@@ -7,7 +7,7 @@ import {
 } from "~/stores/project/layerStore";
 
 const DSLEditor: Component<{}> = (props) => {
-  let [activeDSLStr, setDSLStr] = createSignal("");
+  const [activeDSLStr, setDSLStr] = createSignal("");
 
   onMount(() => {
     setDSLStr(activeLayer()?.dsl.toString() || "");

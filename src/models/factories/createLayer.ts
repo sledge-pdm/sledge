@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid'
-import { showToast } from '~/stores/internal/toastStore'
 import { layerStore } from '~/stores/project/layerStore'
 import { Layer, LayerType } from '~/types/Layer'
 import { DSL } from '../dsl/DSL'
@@ -17,8 +16,6 @@ export const createLayer = (
   if (endNums && endNums.length >= 3) {
     const nameWithoutNum = endNums[1]
     const endNum = Number(endNums[2])
-    showToast(nameWithoutNum, 'info', 1000)
-    showToast(endNum, 'info', 1000)
 
     const foundSameNameNums: number[] = []
     layerStore.layers.forEach((layer) => {
@@ -32,14 +29,10 @@ export const createLayer = (
       }
     })
 
-    showToast(foundSameNameNums.join(','), 'info', 1000)
-
     let num = endNum
     while (foundSameNameNums.find((foundNum) => foundNum === num)) {
       num++
     }
-
-    showToast(`num ok!! ${num}`, 'success', 1000)
     name = nameWithoutNum + num
   }
 

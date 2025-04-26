@@ -39,6 +39,8 @@ export default function Editor() {
     importProjectJsonFromPath(path).then(() => {
       setIsImporting(false);
     });
+  } else {
+
   }
 
   onMount(() => {

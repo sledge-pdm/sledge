@@ -23,32 +23,20 @@ const EditorSettings: Component = () => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>editor.</p>
       <div class={sectionContent} style={{ gap: '8px' }}>
-        <ToggleSwitch
-          checked={globalStore.showDirtyRects}
-          onChange={(e) => setGlobalStore('showDirtyRects', e)}
-        >
-          <p style={{ 'font-size': '0.5rem' }}> autosave.</p>
-        </ToggleSwitch>
-
         <div>
-          <p>autosave span.</p>
+          <p>autosave span (wip).</p>
           <input type='number' name='width' min={0} max={10000} required />
         </div>
-        <p>canvas rendering.</p>
 
+        <p>canvas rendering (temp not works).</p>
         <Dropdown
           selected={globalStore.canvasRenderingMode}
           value={globalStore.canvasRenderingMode}
           options={renderingOptions}
           onChange={(v) => {
             setGlobalStore('canvasRenderingMode', v);
-            saveGlobalSettings();
           }}
         />
-
-        <Checkbox label='chexkbox.' />
-
-        <RadioButton label='radiobutton.' name='some' />
       </div>
     </div>
   );

@@ -107,7 +107,11 @@ const LayerList: Component<{}> = () => {
               <SortableProvider ids={ids()}>
                 <For each={items()}>
                   {(layer, index) => (
-                    <LayerItem layer={layer} index={index()} />
+                    <LayerItem
+                      layer={layer}
+                      index={index()}
+                      isLast={index() === items().length - 1}
+                    />
                   )}
                 </For>
               </SortableProvider>

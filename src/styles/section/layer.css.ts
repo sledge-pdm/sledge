@@ -7,8 +7,9 @@ export const layerList = style([
   w100,
   {
     flexGrow: 1,
-    gap: vars.spacing.xs,
     position: 'relative',
+    gap: vars.spacing.xs,
+    // border: '1px solid #333',
   },
 ]);
 
@@ -16,15 +17,15 @@ export const layerItem = style([
   flexRow,
   w100,
   {
-    height: '32px',
-    padding: '6px',
+    height: '36px',
     flexGrow: 1,
     cursor: 'pointer',
     backgroundColor: vars.color.surface,
-    borderLeft: '1px solid black',
+    borderLeft: '3px solid #333',
+    paddingLeft: '3px',
+
     ':hover': {
       filter: 'brightness(0.94)',
-      transform: 'translate(0, 1px)',
     },
     ':active': {
       transform: 'translate(0, 1px)',
@@ -36,16 +37,18 @@ export const layerItemDisabled = style({
   opacity: 0.3,
 });
 
-export const layerItemType = style([
-  w100,
+export const layerItemIndex = style([
   {
+    flexGrow: 1,
     fontSize: vars.text.sm,
-    opacity: 0.4,
-    position: 'absolute',
-    right: 0,
-    textAlign: 'end',
   },
 ]);
+
+export const layerItemType = style({
+  whiteSpace: 'nowrap',
+  fontSize: vars.text.sm,
+  opacity: 0.4,
+});
 
 export const layerItemName = style([
   {
@@ -58,9 +61,10 @@ export const layerItemName = style([
 export const dotMagnifContainer = style([
   {
     alignSelf: 'center',
-    border: '1px black solid',
-    borderRadius: vars.spacing.xs,
+    // border: '1px black solid',
+    // borderRadius: vars.spacing.xs,
     cursor: 'pointer',
+    marginTop: vars.spacing.sm,
     marginLeft: 'auto',
     marginRight: 0,
     padding: `2px ${vars.spacing.xs}`,
@@ -75,7 +79,7 @@ export const dotMagnifContainer = style([
 export const dotMagnifText = style([
   {
     fontFamily: ZFB03B,
-    fontSize: vars.text.md,
+    fontSize: vars.text.lg,
   },
 ]);
 
@@ -84,6 +88,7 @@ export const activeLight = style([
     alignSelf: 'center',
     margin: `${vars.spacing.sm}px 0`,
     marginLeft: vars.spacing.sm,
+    marginRight: vars.spacing.md,
   },
 ]);
 

@@ -26,16 +26,11 @@ export async function loadGlobalSettings() {
     });
     const data = JSON.parse(json);
 
-    console.log(data);
+    // data の各キーをまとめてストアに反映
+    // createStore の setter はオブジェクトを渡すだけで部分更新してくれます
+    setGlobalStore(data);
 
-    if (data.recentOpenedFiles) {
-      setGlobalStore('recentOpenedFiles', data.recentOpenedFiles);
-    }
-    if (data.canvasRenderingMode) {
-      setGlobalStore('canvasRenderingMode', data.canvasRenderingMode);
-    }
-
-    console.log('[globalIO] 設定読み込み完了');
+    console.log('[globalIO] 設定読み込み完了', data);
   } catch (e) {
     console.warn('[globalIO] 設定ファイルが存在しないか、読み込み失敗:', e);
   }

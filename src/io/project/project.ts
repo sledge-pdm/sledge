@@ -70,8 +70,8 @@ export async function importProjectJsonFromPath(filePath: string) {
 export async function importProjectJson(projectJson: any) {
   if (projectJson.project) {
     console.log(projectJson.project);
-    setProjectStore('name', projectJson.project.name);
-    setProjectStore('path', projectJson.project.path);
+    setProjectStore('name', projectJson.project.name || undefined);
+    setProjectStore('path', projectJson.project.path || undefined);
   }
 
   if (projectJson.canvas) {

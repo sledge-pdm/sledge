@@ -47,10 +47,12 @@ export const vars = createGlobalTheme(':root', {
     danger: '#ff0000',
     muted: '#00000030',
 
+    accent: '#0000ff',
+
     bg: '#ffffff',
     bg_canvas_area: '#fefefe',
 
-    surface: '#f0f0f0',
+    surface: '#f2f2f2',
 
     button: '#ffffff',
     button_hover: '#f0f0f0',
@@ -59,9 +61,9 @@ export const vars = createGlobalTheme(':root', {
     input_bg: '#fafafa',
   },
   size: {
-    edge_info: '20px',
-    side_area: '250px',
-    bottom_bar_margin: '270px',
+    edge_info: '32px',
+    side_area: '220px',
+    bottom_bar_margin: '252px',
   },
   spacing: {
     xs: '4px',
@@ -83,7 +85,7 @@ export const vars = createGlobalTheme(':root', {
 });
 
 globalStyle('button, p, a, input, label', {
-  fontFamily: ZFB08,
+  fontFamily: `${ZFB08}, ${k12x8}`,
   color: vars.color.text,
 });
 

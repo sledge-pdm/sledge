@@ -6,5 +6,6 @@ export const settingContainer = style([
   flexCol,
   {
     padding: vars.spacing.lg,
+    gap: vars.spacing.lg,
   },
 ]);

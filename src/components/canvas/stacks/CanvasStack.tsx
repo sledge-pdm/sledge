@@ -1,4 +1,11 @@
-import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+} from 'solid-js';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
 import { TouchableCanvas } from './TouchableCanvas';
@@ -7,7 +14,11 @@ import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import { globalStore } from '~/stores/global/globalStore';
 import { canvasStore } from '~/stores/project/canvasStore';
-import { activeLayer, allLayers } from '~/stores/project/layerStore';
+import {
+  activeLayer,
+  allLayers,
+  layerStore,
+} from '~/stores/project/layerStore';
 
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
@@ -48,21 +59,15 @@ const CanvasStack: Component = () => {
 
   createEffect(() => {
     const active = activeLayer();
-
     if (active) {
       const agent = layerImageManager.getAgent(active.id);
       if (!agent) return;
-      if (globalStore.showDirtyRects) {
-        agent.setOnDrawingBufferChangeListener('stack_dirty_rect', () => {
-          setDirtyRects([...getDirtyRects()]);
-        });
-        agent.setOnImageChangeListener('stack_dirty_rect', () => {
-          setDirtyRects([...getDirtyRects()]);
-        });
-      } else {
-        agent.clearOnImageChangeListener('stack_dirty_rect');
-        agent.clearOnDrawingBufferChangeListener('stack_dirty_rect');
-      }
+      agent.setOnDrawingBufferChangeListener('stack_dirty_rect', () => {
+        setDirtyRects([...getDirtyRects()]);
+      });
+      agent.setOnImageChangeListener('stack_dirty_rect', () => {
+        setDirtyRects([...getDirtyRects()]);
+      });
     }
   });
 
@@ -104,9 +109,8 @@ const CanvasStack: Component = () => {
           )}
         </For>
       </div>
-      <CanvasOverlaySVG
-        dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined}
-      />
+
+      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
     </div>
   );
 };

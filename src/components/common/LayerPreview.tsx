@@ -61,6 +61,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
       targetHeight
     );
   };
+
   onMount(() => {
     const height = wrapperRef.clientHeight;
     const currentImage = layerImageStore[props.layer.id].current;
@@ -75,7 +76,6 @@ const LayerPreview: Component<Props> = (props: Props) => {
     updatePreview(currentImage, height);
 
     agent.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      console.log('aasdffa');
       const img = layerImageStore[props.layer.id].current;
       updatePreview(img, height);
     });

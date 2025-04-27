@@ -1,4 +1,5 @@
 import { Component } from 'solid-js';
+import { loadGlobalSettings } from '~/io/global/globalIO';
 import { SettingsWindowOptions } from '~/routes/settings';
 
 import {
@@ -14,7 +15,15 @@ const EdgeInfo: Component = () => {
       <div class={edgeInfoItem}>
         <a
           class={edgeInfoText}
-          onClick={() => openSingletonWindow('settings', SettingsWindowOptions)}
+          onClick={async () => {
+            let win = await openSingletonWindow(
+              'settings',
+              SettingsWindowOptions
+            );
+            win.once('tauri://destroyed', (e) => {
+              loadGlobalSettings();
+            });
+          }}
         >
           settings.
         </a>

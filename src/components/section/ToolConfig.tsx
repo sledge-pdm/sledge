@@ -8,10 +8,10 @@ import {
   sectionRoot,
 } from '~/styles/section_global.css';
 
-const PenConfig: Component = () => {
+const ToolConfig: Component = () => {
   return (
     <div class={sectionRoot}>
-      <p class={sectionCaption}>pen config.</p>
+      <p class={sectionCaption}>tools.</p>
       <div class={sectionContent}>
         <PenSize />
         <For each={toolStore.tools}>
@@ -24,4 +24,4 @@ const PenConfig: Component = () => {
   );
 };
 
-export default PenConfig;
+export default ToolConfig;

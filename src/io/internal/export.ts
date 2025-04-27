@@ -1,6 +1,10 @@
 import { layerStore } from '~/stores/project/layerStore';
 
-export function exportActiveLayerUpscaled(scale = 10) {
+export function exportActiveLayerUpscaled(
+  fileName?: string,
+  path?: string,
+  scale = 10
+) {
   const layerId = layerStore.activeLayerId;
   if (!layerId) return;
 
@@ -38,11 +42,10 @@ export function exportActiveLayerUpscaled(scale = 10) {
       alert('エクスポートに失敗しました。');
       return;
     }
-
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${layerId}_x${scale}.png`;
+    a.download = `${fileName || layerId}_x${scale}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();

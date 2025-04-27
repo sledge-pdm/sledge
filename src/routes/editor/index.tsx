@@ -32,6 +32,7 @@ export const EditorWindowOptions: WindowOptionsProp = {
 };
 
 export default function Editor() {
+  const window = getCurrentWebviewWindow();
   const location = useLocation();
 
   const [isLoading, setIsLoading] = createSignal(true);
@@ -62,31 +63,35 @@ export default function Editor() {
     centeringCanvas();
     loadGlobalSettings();
 
-    unlisten = await getCurrentWebviewWindow().onCloseRequested(
-      async (event) => {
-        if (isCloseRequested()) {
-          event.preventDefault();
-          return;
-        }
-        SetIsCloseRequested(true);
+    unlisten = await window.onCloseRequested(async (event) => {
+      if (isCloseRequested()) {
         event.preventDefault();
-        if (projectStore.isProjectChangedAfterSave) {
-          const confirmed = await confirm('Are you sure?', {
+        return;
+      }
+      SetIsCloseRequested(true);
+      event.preventDefault();
+      if (projectStore.isProjectChangedAfterSave) {
+        const confirmed = await confirm(
+          'the project is not saved.\nsure to quit without save?',
+          {
             okLabel: 'quit w/o save.',
             cancelLabel: 'cancel.',
-          });
-          if (confirmed) {
-            await openStartWindow();
-            closeWindowsByLabel('editor');
-          } else {
           }
-        } else {
+        );
+        if (confirmed) {
           await openStartWindow();
           closeWindowsByLabel('editor');
+          SetIsCloseRequested(false);
+        } else {
+          event.preventDefault();
+          SetIsCloseRequested(false);
         }
+      } else {
+        await openStartWindow();
+        closeWindowsByLabel('editor');
         SetIsCloseRequested(false);
       }
-    );
+    });
   });
 
   onCleanup(() => {

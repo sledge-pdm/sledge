@@ -2,13 +2,10 @@ import { Component } from 'solid-js';
 import CanvasSettings from './section/CanvasSettings';
 import Color from './section/Color';
 import LayerList from './section/LayerList';
-import PenConfig from './section/PenConfig';
+import ToolConfig from './section/ToolConfig';
 import Project from './section/Project';
 
-import { loadGlobalSettings } from '~/io/global/globalIO';
-import { SettingsWindowOptions } from '~/routes/settings';
 import { sideAreaContent } from '~/styles/components/side_sections.css';
-import { openSingletonWindow } from '~/utils/windowUtils';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 const SideSections: Component = () => {
@@ -17,10 +14,10 @@ const SideSections: Component = () => {
       <a onClick={() => getCurrentWebviewWindow().close()}>&lt; back</a>
       <Project />
       <Color />
-      <PenConfig />
+      <ToolConfig />
       <LayerList />
       <CanvasSettings />
-      <button
+      {/* <button
         onClick={async () => {
           const settingsWin = await openSingletonWindow(
             'settings',
@@ -32,7 +29,7 @@ const SideSections: Component = () => {
         }}
       >
         settings.
-      </button>
+      </button> */}
       {/* <GlobalSettings /> */}
     </div>
   );

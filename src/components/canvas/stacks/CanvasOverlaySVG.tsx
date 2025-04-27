@@ -1,4 +1,5 @@
 import { Component, For } from 'solid-js';
+import { globalStore } from '~/stores/global/globalStore';
 import { currentTool } from '~/stores/internal/toolsStore';
 import { canvasStore } from '~/stores/project/canvasStore';
 import { activeLayer } from '~/stores/project/layerStore';
@@ -10,6 +11,8 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
 
   const zoomedPenSize = () => currentTool().size * canvasStore.zoom;
 
+  const dirtyRects = () => (globalStore.showDirtyRects ? props.dirtyRects : []);
+
   return (
     <svg
       viewBox={`0 0 ${borderWidth()} ${borderHeight()}`}
@@ -20,6 +23,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         left: 0,
         'pointer-events': 'none',
         'image-rendering': 'pixelated',
+        'z-index': 1000,
       }}
     >
       {/* border rect */}
@@ -37,11 +41,11 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         width={zoomedPenSize()}
         height={zoomedPenSize()}
         x={
-          Math.round(canvasStore.lastMouseOnCanvas.x) * canvasStore.zoom -
+          Math.round(canvasStore.lastMouseOnCanvas.x * canvasStore.zoom) -
           zoomedPenSize() / 2
         }
         y={
-          Math.round(canvasStore.lastMouseOnCanvas.y) * canvasStore.zoom -
+          Math.round(canvasStore.lastMouseOnCanvas.y * canvasStore.zoom) -
           zoomedPenSize() / 2
         }
         fill='none'
@@ -50,7 +54,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         pointer-events='none'
       />
 
-      <For each={props.dirtyRects}>
+      <For each={dirtyRects()}>
         {(dirtyRect) => {
           return (
             <rect

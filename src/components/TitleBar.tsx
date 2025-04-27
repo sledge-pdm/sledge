@@ -41,15 +41,13 @@ export default function TitleBar() {
       let pathText = '';
       let isSavedText = '';
       if (projectStore.path !== undefined && projectStore.path !== '') {
-        pathText = ' - ' + projectStore.path;
-        isSavedText = projectStore.isProjectChangedAfterSave
-          ? '(not saved)'
-          : '';
+        pathText += projectStore.isProjectChangedAfterSave ? '(unsaved)' : '';
+        pathText += ' - ' + projectStore.path;
       } else {
-        pathText = '(not saved)';
+        pathText += '(not saved yet)';
       }
 
-      setTitle(`${projectStore.name} ${pathText} ${isSavedText}`);
+      setTitle(`${projectStore.name} ${pathText} `);
     }
   });
 

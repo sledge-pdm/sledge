@@ -1,9 +1,10 @@
-import { onMount } from 'solid-js';
+import { onCleanup, onMount } from 'solid-js';
 import { settingContainer } from './settings.css';
 import EditorSettings from '~/components/section/settings/EditorSettings';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import { loadGlobalSettings, saveGlobalSettings } from '~/io/global/globalIO';
 import { pageRoot } from '~/styles/global.css';
 import { WindowOptionsProp } from '~/utils/windowUtils';
+import PerformanceSettings from '~/components/section/settings/PerformanceSettings';
 
 export const SettingsWindowOptions: WindowOptionsProp = {
   url: '/settings',
@@ -17,6 +18,7 @@ export const SettingsWindowOptions: WindowOptionsProp = {
   acceptFirstMouse: true,
   focus: true,
   skipTaskbar: true,
+  alwaysOnTop: true,
 };
 
 export default function Settings() {
@@ -24,11 +26,29 @@ export default function Settings() {
     loadGlobalSettings();
   });
 
+  onCleanup(async () => {
+    await saveGlobalSettings();
+  });
+
   return (
     <div class={pageRoot}>
-      <div class={settingContainer}>
+      <form
+        class={settingContainer}
+        onChange={(e) => {
+          saveGlobalSettings();
+        }}
+      >
         <EditorSettings />
-      </div>
+        <PerformanceSettings />
+        {/* <button
+          onClick={() => {
+            console.log('[globalIO] 設定保存完了');
+            saveGlobalSettings();
+          }}
+        >
+          save.
+        </button> */}
+      </form>
     </div>
   );
 }

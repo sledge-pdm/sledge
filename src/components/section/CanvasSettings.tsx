@@ -32,6 +32,8 @@ const CanvasSettings: Component = () => {
       initLayerImage(layer.id, layer.dotMagnification);
     });
 
+    console.log(`canvas size changed. ${width()} x ${height}`);
+
     adjustZoomToFit(width(), height());
   };
 

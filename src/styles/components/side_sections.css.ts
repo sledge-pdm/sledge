@@ -9,7 +9,7 @@ export const sideAreaContent = style([
     borderRight: '1px solid #aaa',
     gap: '1rem',
     marginLeft: vars.size.edge_info,
-    padding: '20px 40px 90px 20px',
+    padding: '20px 30px 90px 20px',
     width: vars.size.side_area,
     overflowY: 'scroll',
 

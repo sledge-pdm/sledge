@@ -86,6 +86,6 @@ export const sendFBButton = style({
 export const aboutFeedback = style({
   fontFamily: k12x8,
   fontSize: '8px',
-  marginRight: '60px',
+  marginRight: '50px',
   lineHeight: 1.5,
 });

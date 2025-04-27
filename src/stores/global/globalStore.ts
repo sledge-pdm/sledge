@@ -28,6 +28,8 @@ export const [globalStore, setGlobalStore] = createStore({
 
   showDirtyRects: false,
   canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
+
+  showPerfMonitor: false,
 });
 
 export const addRecent = (loc: FileLocation) => {

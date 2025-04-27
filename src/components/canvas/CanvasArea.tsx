@@ -11,6 +11,8 @@ import {
 } from '~/stores/project/canvasStore';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import BottomInfo from '../BottomInfo';
+import CanvasDebugOverlay from './CanvasDebugOverlay';
+import { globalStore } from '~/stores/global/globalStore';
 
 export default () => {
   let wrapper: HTMLDivElement;
@@ -78,6 +80,7 @@ export default () => {
         </div>
       </div>
 
+      <CanvasDebugOverlay />
       <Controls />
       <BottomInfo />
     </div>

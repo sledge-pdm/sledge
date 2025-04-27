@@ -8,6 +8,8 @@
     "dialog:default",
     "fs:default",
 
+    "system-info:allow-all",
+
     "dialog:allow-save",
     "dialog:allow-open",
 

@@ -21,7 +21,7 @@ export const AboutWindowOptions: Omit<
 > &
   WindowOptions = {
   url: '/about',
-  width: 380,
+  width: 400,
   height: 290,
   resizable: false,
   decorations: false,
@@ -31,6 +31,7 @@ export const AboutWindowOptions: Omit<
   acceptFirstMouse: true,
   focus: true,
   skipTaskbar: true,
+  alwaysOnTop: true,
 };
 
 const About = () => {

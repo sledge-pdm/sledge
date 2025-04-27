@@ -10,9 +10,10 @@ export const edgeInfoRoot = style([
     bottom: 0,
     left: 0,
     gap: '10px',
-    padding: '10px 0',
+    paddingTop: '32px',
     width: vars.size.edge_info,
-    justifyContent: 'end',
+    justifyContent: 'start',
+    alignItems: 'center',
   },
 ]);
 export const edgeInfoItem = style([
@@ -28,5 +29,6 @@ export const edgeInfoText = style({
   letterSpacing: '2px',
   whiteSpace: 'nowrap',
   transform: 'rotate(180deg)',
+  transformOrigin: 'center',
   writingMode: 'vertical-lr',
 });

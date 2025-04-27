@@ -7,8 +7,9 @@ import { layerStore } from './layerStore';
 
 // project
 export const [projectStore, setProjectStore] = createStore({
-  name: '',
-  path: '',
+  newName: undefined as string | undefined,
+  name: undefined as string | undefined,
+  path: undefined as string | undefined,
   isProjectChangedAfterSave: false,
 });
 
@@ -16,6 +17,5 @@ createEffect(() => {
   trackStore(canvasStore.canvas);
   trackStore(layerImageStore);
   trackStore(layerStore);
-  console.log('changed!');
   setProjectStore('isProjectChangedAfterSave', true);
 });

@@ -90,7 +90,6 @@ export default abstract class LayerImageAgent {
   }
 
   callOnImageChangeListeners() {
-    console.log('no tnui');
     Object.values(this.onImageChangedListeners).forEach((listener) =>
       listener({})
     );

@@ -14,6 +14,7 @@ import {
   sectionContent,
   sectionRoot,
 } from '~/styles/section_global.css';
+import { flexCol } from '~/styles/snippets.css';
 
 const Color: Component = () => {
   const onColorClicked = (color: string, index: number) => {
@@ -39,12 +40,14 @@ const Color: Component = () => {
             )}
           </For>
         </div>
-        <div class={descriptionContainer}>
+        {/* <div class={descriptionContainer}>
           <p class={colorElemDescription}>picker.</p>
+        </div> */}
+        <div class={flexCol}>
+          <ColorPicker width={150} />
+          <Palette />
         </div>
-        <ColorPicker width={150} />
       </div>
-      <Palette />
     </div>
   );
 };

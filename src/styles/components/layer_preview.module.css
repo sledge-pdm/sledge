@@ -1,6 +1,6 @@
 .canvas {
   height: 100%;
-  border: 1px solid black;
   width: 100%;
   image-rendering: crisp-edges;
+  border-right: 1px solid black;
 }

@@ -30,7 +30,7 @@ import {
 } from './start.css';
 
 export const StartWindowOptions: WindowOptionsProp = {
-  title: 'start',
+  title: 'sledeg',
   width: 700,
   height: 500,
   acceptFirstMouse: true,
@@ -110,7 +110,6 @@ export default function Home() {
           <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
             <For each={globalStore.recentOpenedFiles}>
               {(item, i) => {
-                console.log(item);
                 return (
                   <div class={recentFilesItem}>
                     <p>■</p>

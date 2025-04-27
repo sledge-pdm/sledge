@@ -10,14 +10,17 @@ import {
   dotMagnifText,
   layerItem,
   layerItemDisabled,
+  layerItemIndex,
   layerItemName,
   layerItemType,
 } from '~/styles/section/layer.css';
-import { w100 } from '~/styles/snippets.css';
+import { flexRow, w100 } from '~/styles/snippets.css';
 import { Layer, LayerType } from '~/types/Layer';
+import { vars } from '~/styles/global.css';
 
 interface LayerItemProps {
   index: number;
+  isLast?: boolean;
   layer: Layer;
   draggingId?: string | null;
 }
@@ -69,22 +72,42 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1 }}
       ref={sortable}
     >
-      <p class={layerItemType}>{props.layer.typeDescription}</p>
-      <p>{props.index}.</p>
-      <div style={{ display: 'flex', 'align-items': 'center' }}>
-        {/* <DSLButton /> */}
+      {/* <DSLButton /> */}
+      <div
+        class={[layerItem, !props.layer.enabled && layerItemDisabled]
+          .filter(Boolean)
+          .join(' ')}
+        // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
+        onClick={onDetClicked}
+      >
+        <LayerPreview
+          layer={props.layer}
+          onClick={onPreviewClicked}
+          maxHeight={36}
+          maxWidth={36}
+        />
+
         <div
-          class={[layerItem, !props.layer.enabled && layerItemDisabled]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={onDetClicked}
+          class={[flexRow, w100].join(' ')}
+          style={{
+            'align-items': 'center',
+            position: 'relative',
+          }}
         >
-          <LayerPreview
-            layer={props.layer}
-            onClick={onPreviewClicked}
-            maxHeight={30}
-            maxWidth={30}
-          />
+          <div
+            class={flexRow}
+            style={{
+              top: '2px',
+              right: 0,
+              left: 0,
+              'margin-left': '6px',
+              position: 'absolute',
+            }}
+          >
+            <p class={layerItemIndex}>{props.index}.</p>
+            <p class={layerItemType}>{props.layer.typeDescription}</p>
+          </div>
+
           <p class={layerItemName}> {props.layer.name}</p>
           <div
             class={dotMagnifContainer}

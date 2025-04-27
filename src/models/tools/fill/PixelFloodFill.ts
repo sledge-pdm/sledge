@@ -1,7 +1,7 @@
-import { PixelDiff } from "~/models/layer_image/HistoryManager";
-import { Vec2 } from "~/models/types/Vector";
-import { colorMatch } from "~/utils/colorUtils";
-import { Fill, FillProps } from "./FillTool";
+import { Fill, FillProps } from './FillTool';
+import { PixelDiff } from '~/models/layer_image/HistoryManager';
+import { Vec2 } from '~/types/Vector';
+import { colorMatch } from '~/utils/colorUtils';
 
 export class PixelFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {
@@ -16,7 +16,7 @@ export class PixelFloodFill implements Fill {
     // console.log(`---${image.width}x${image.height} flood fill---`)
 
     if (colorMatch(targetColor, color)) return false;
-    console.log("fill started.");
+    console.log('fill started.');
 
     const scanStart = Date.now();
     const queue: Vec2[] = [position];
@@ -45,7 +45,7 @@ export class PixelFloodFill implements Fill {
     }
 
     const scanEnd = Date.now();
-    console.log("scan finished. " + (scanEnd - scanStart) + "ms.");
+    console.log('scan finished. ' + (scanEnd - scanStart) + 'ms.');
 
     const writeStart = Date.now();
 
@@ -56,7 +56,7 @@ export class PixelFloodFill implements Fill {
       if (diff !== undefined) pxDiffs.push(diff);
     }
     const writeEnd = Date.now();
-    console.log("write finished. " + (writeEnd - writeStart) + "ms.");
+    console.log('write finished. ' + (writeEnd - writeStart) + 'ms.');
 
     agent.addDiffs(pxDiffs);
   }

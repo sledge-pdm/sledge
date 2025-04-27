@@ -1,5 +1,5 @@
-import { NodeType, SledgeNode } from "../DSLNodes";
+import { NodeType, SledgeNode } from '../DSLNodes';
 
 export abstract class PassNode extends SledgeNode {
-  type: NodeType = "pass";
+  type: NodeType = 'pass';
 }

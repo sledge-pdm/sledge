@@ -3,24 +3,24 @@ import {
   DragDropProvider,
   DragDropSensors,
   SortableProvider,
-} from "@thisbeyond/solid-dnd";
-import { Component, createEffect, createSignal, For, onMount } from "solid-js";
-import { addLayer } from "~/models/factories/addLayer";
-import { removeLayer } from "~/models/factories/removeLayer";
+} from '@thisbeyond/solid-dnd';
+import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
+import LayerItem from './item/LayerItem';
+import { addLayer } from '~/models/factories/addLayer';
+import { removeLayer } from '~/models/factories/removeLayer';
 import {
   activeLayer,
   allLayers,
   layerStore,
   setLayerStore,
-} from "~/stores/project/layerStore";
-import { layerList } from "~/styles/section/layer.css";
+} from '~/stores/project/layerStore';
+import { layerList } from '~/styles/section/layer.css';
 import {
   sectionCaption,
   sectionContent,
   sectionRoot,
-} from "~/styles/section_global.css";
-import { flexRow } from "~/styles/snippets.css";
-import LayerItem from "./item/LayerItem";
+} from '~/styles/section_global.css';
+import { flexRow } from '~/styles/snippets.css';
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
@@ -46,7 +46,7 @@ const LayerList: Component<{}> = () => {
     const updated = [...layerStore.layers];
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(targetIndex, 0, moved);
-    setLayerStore("layers", updated);
+    setLayerStore('layers', updated);
     setItems(allLayers());
   }
 
@@ -77,15 +77,15 @@ const LayerList: Component<{}> = () => {
     >
       <DragDropSensors>
         <div class={sectionRoot}>
-          <div class={flexRow} style={{ "margin-bottom": "6px" }}>
-            <p class={sectionCaption} style={{ "flex-grow": 1 }}>
+          <div class={flexRow} style={{ 'margin-bottom': '6px' }}>
+            <p class={sectionCaption} style={{ 'flex-grow': 1 }}>
               layers.
             </p>
 
-            <div class={flexRow} style={{ gap: "4px" }}>
+            <div class={flexRow} style={{ gap: '4px' }}>
               <button
-                onClick={() => {
-                  addLayer("dot1");
+                onClick={async () => {
+                  await addLayer('dot1');
                   setItems(allLayers());
                 }}
               >
@@ -107,7 +107,11 @@ const LayerList: Component<{}> = () => {
               <SortableProvider ids={ids()}>
                 <For each={items()}>
                   {(layer, index) => (
-                    <LayerItem layer={layer} index={index()} />
+                    <LayerItem
+                      layer={layer}
+                      index={index()}
+                      isLast={index() === items().length - 1}
+                    />
                   )}
                 </For>
               </SortableProvider>

@@ -1,23 +1,36 @@
-import { Component } from "solid-js";
-import CanvasSettings from "./section/CanvasSettings";
-import Color from "./section/Color";
-import LayerList from "./section/LayerList";
-import PenConfig from "./section/PenConfig";
-import Project from "./section/Project";
+import { Component } from 'solid-js';
+import CanvasSettings from './section/CanvasSettings';
+import Color from './section/Color';
+import LayerList from './section/LayerList';
+import ToolConfig from './section/ToolConfig';
+import Project from './section/Project';
 
-import { sideAreaContent } from "~/styles/global.css";
-import GlobalSettings from "./section/GlobalSettings";
+import { sideAreaContent } from '~/styles/components/side_sections.css';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
-const SideSections: Component<{}> = (props) => {
+const SideSections: Component = () => {
   return (
     <div class={sideAreaContent}>
-      <a onClick={() => (window.location.href = "/")}>&lt; back</a>
+      <a onClick={() => getCurrentWebviewWindow().close()}>&lt; back</a>
       <Project />
       <Color />
-      <PenConfig />
+      <ToolConfig />
       <LayerList />
       <CanvasSettings />
-      <GlobalSettings />
+      {/* <button
+        onClick={async () => {
+          const settingsWin = await openSingletonWindow(
+            'settings',
+            SettingsWindowOptions
+          );
+          settingsWin.onCloseRequested(() => {
+            loadGlobalSettings();
+          });
+        }}
+      >
+        settings.
+      </button> */}
+      {/* <GlobalSettings /> */}
     </div>
   );
 };

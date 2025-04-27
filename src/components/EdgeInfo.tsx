@@ -1,14 +1,33 @@
-import { Component } from "solid-js";
+import { Component } from 'solid-js';
+import { loadGlobalSettings } from '~/io/global/globalIO';
+import { SettingsWindowOptions } from '~/routes/settings';
 
-import { projectStore } from "~/stores/project/projectStore";
-import { sideAreaEdge, sideAreaEdgeText } from "~/styles/global.css";
+import {
+  edgeInfoItem,
+  edgeInfoRoot,
+  edgeInfoText,
+} from '~/styles/components/edge_info.css';
+import { openSingletonWindow } from '~/utils/windowUtils';
 
-const EdgeInfo: Component<{}> = (props) => {
+const EdgeInfo: Component = () => {
   return (
-    <div class={sideAreaEdge}>
-      <p class={sideAreaEdgeText}>
-        &nbsp;&nbsp;{projectStore.path || "path N/A"}
-      </p>
+    <div class={edgeInfoRoot}>
+      <div class={edgeInfoItem}>
+        <a
+          class={edgeInfoText}
+          onClick={async () => {
+            let win = await openSingletonWindow(
+              'settings',
+              SettingsWindowOptions
+            );
+            win.once('tauri://destroyed', (e) => {
+              loadGlobalSettings();
+            });
+          }}
+        >
+          settings.
+        </a>
+      </div>
       {/* <p class={sideAreaEdgeText}>{projectStore.name || "name N/A"}</p> */}
     </div>
   );

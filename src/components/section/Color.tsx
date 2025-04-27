@@ -1,23 +1,24 @@
-import { Component, For } from "solid-js";
-import { colorStore } from "~/stores/internal/colorStore";
+import { Component, For } from 'solid-js';
+import ColorBox from '../common/ColorBox';
+import Palette from './item/Palette';
+import ColorPicker from '~/components/section/item/ColorPicker';
+import { colorStore, setCurrentColor } from '~/stores/internal/colorStore';
 
-import ColorPicker from "~/components/section/item/ColorPicker";
-import { setCurrentToolColor } from "~/models/types/Tool";
 import {
   colorElemDescription,
   descriptionContainer,
   swatchContainer,
-} from "~/styles/section/color.css";
+} from '~/styles/section/color.css';
 import {
   sectionCaption,
   sectionContent,
   sectionRoot,
-} from "~/styles/section_global.css";
-import ColorBox from "../common/ColorBox";
+} from '~/styles/section_global.css';
+import { flexCol } from '~/styles/snippets.css';
 
-const Color: Component<{}> = (props) => {
+const Color: Component = () => {
   const onColorClicked = (color: string, index: number) => {
-    setCurrentToolColor(color);
+    setCurrentColor(color);
   };
 
   return (
@@ -25,11 +26,8 @@ const Color: Component<{}> = (props) => {
       <p class={sectionCaption}>color.</p>
       <div
         class={sectionContent}
-        style={{ "flex-direction": "row", margin: "8px 0" }}
+        style={{ 'flex-direction': 'row', margin: '8px 0' }}
       >
-        <div class={descriptionContainer}>
-          <p class={colorElemDescription}>swatch.</p>
-        </div>
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
             {(item, index) => (
@@ -42,10 +40,13 @@ const Color: Component<{}> = (props) => {
             )}
           </For>
         </div>
-        <div class={descriptionContainer}>
+        {/* <div class={descriptionContainer}>
           <p class={colorElemDescription}>picker.</p>
+        </div> */}
+        <div class={flexCol}>
+          <ColorPicker width={150} />
+          <Palette />
         </div>
-        <ColorPicker width={130} />
       </div>
     </div>
   );

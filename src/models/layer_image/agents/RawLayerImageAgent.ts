@@ -1,7 +1,7 @@
-import { Vec2 } from "~/models/types/Vector";
-import { RGBAColor } from "~/utils/colorUtils";
-import { PixelDiff } from "../HistoryManager";
-import LayerImageAgent from "../LayerImageAgent";
+import { PixelDiff } from '../HistoryManager';
+import LayerImageAgent from '../LayerImageAgent';
+import { Vec2 } from '~/types/Vector';
+import { RGBAColor } from '~/utils/colorUtils';
 
 export default class RawLayerImageAgent extends LayerImageAgent {
   putImageInto(ctx: CanvasRenderingContext2D) {
@@ -16,25 +16,25 @@ export default class RawLayerImageAgent extends LayerImageAgent {
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     return this.setPixelInPosition(
       position,
       color,
       excludePositionMatch,
-      excludeColorMatch,
+      excludeColorMatch
     );
   }
 
   public deletePixel(
     position: Vec2,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     return this.deletePixelInPosition(
       position,
       excludePositionMatch,
-      excludeColorMatch,
+      excludeColorMatch
     );
   }
 

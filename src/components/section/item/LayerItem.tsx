@@ -1,93 +1,114 @@
-import { createSortable, useDragDropContext } from "@thisbeyond/solid-dnd";
-import { Component } from "solid-js";
-import Light from "~/components/common/Light";
-import { getNextMagnification } from "~/models/factories/utils";
-import { Layer, LayerType } from "~/models/types/Layer";
-import { layerStore, setLayerStore } from "~/stores/project/layerStore";
+import { createSortable, useDragDropContext } from '@thisbeyond/solid-dnd';
+import { Component } from 'solid-js';
+import LayerPreview from '../../common/LayerPreview';
+import Light from '~/components/common/Light';
+import { getNextMagnification } from '~/models/factories/getNextMagnification';
+import { layerStore, setLayerStore } from '~/stores/project/layerStore';
 import {
   activeLight,
   dotMagnifContainer,
   dotMagnifText,
   layerItem,
   layerItemDisabled,
+  layerItemIndex,
   layerItemName,
   layerItemType,
-} from "~/styles/section/layer.css";
-import { w100 } from "~/styles/snippets.css";
-import LayerPreview from "../../common/LayerPreview";
+} from '~/styles/section/layer.css';
+import { flexRow, w100 } from '~/styles/snippets.css';
+import { Layer, LayerType } from '~/types/Layer';
+import { vars } from '~/styles/global.css';
 
 interface LayerItemProps {
   index: number;
+  isLast?: boolean;
   layer: Layer;
   draggingId?: string | null;
 }
 
 const LayerItem: Component<LayerItemProps> = (props) => {
-  const { layer, draggingId } = props;
-
-  const sortable = createSortable(layer.id);
+  const sortable = createSortable(props.layer.id);
   const context = useDragDropContext();
   const state = context?.[0];
 
-  let detClass: "dot" | "image" | "automate" | undefined;
-  switch (layer.type) {
+  let detClass: 'dot' | 'image' | 'automate' | undefined;
+  switch (props.layer.type) {
     case LayerType.Dot:
-      detClass = "dot";
+      detClass = 'dot';
       break;
     case LayerType.Image:
-      detClass = "image";
+      detClass = 'image';
       break;
     case LayerType.Automate:
-      detClass = "automate";
+      detClass = 'automate';
       break;
   }
 
   const onDetClicked = () => {
-    setLayerStore("activeLayerId", layer.id);
+    setLayerStore('activeLayerId', props.layer.id);
   };
 
   const onPreviewClicked = () => {
     if (props.index !== -1) {
-      setLayerStore("layers", props.index, "enabled", (v: boolean) => !v);
+      setLayerStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
   };
 
   const onMagnifClicked = () => {
-    const next = getNextMagnification(layer.dotMagnification);
+    const next = getNextMagnification(props.layer.dotMagnification);
     if (props.index !== -1) {
-      setLayerStore("layers", props.index, "dotMagnification", next);
+      setLayerStore('layers', props.index, 'dotMagnification', next);
     }
   };
 
-  const isActive = () => layerStore.activeLayerId === layer.id;
+  const isActive = () => layerStore.activeLayerId === props.layer.id;
 
   return (
     <div
       class={w100}
       classList={{
-        "opacity-50": sortable.isActiveDraggable,
-        "transition-transform": state && !!state.active.draggable,
+        'opacity-50': sortable.isActiveDraggable,
+        'transition-transform': state && !!state.active.draggable,
       }}
-      style={{ opacity: draggingId === layer.id ? 0.4 : 1 }}
+      style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1 }}
       ref={sortable}
     >
-      <p class={layerItemType}>{layer.typeDescription}</p>
-      <p>{props.index}.</p>
-      <div style={{ display: "flex", "align-items": "center" }}>
-        {/* <DSLButton /> */}
+      {/* <DSLButton /> */}
+      <div
+        class={[layerItem, !props.layer.enabled && layerItemDisabled]
+          .filter(Boolean)
+          .join(' ')}
+        // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
+        onClick={onDetClicked}
+      >
+        <LayerPreview
+          layer={props.layer}
+          onClick={onPreviewClicked}
+          maxHeight={36}
+          maxWidth={36}
+        />
+
         <div
-          class={[layerItem, !layer.enabled && layerItemDisabled]
-            .filter(Boolean)
-            .join(" ")}
-          onClick={onDetClicked}
+          class={[flexRow, w100].join(' ')}
+          style={{
+            'align-items': 'center',
+            position: 'relative',
+          }}
         >
-          <LayerPreview
-            layer={layer}
-            onClick={onPreviewClicked}
-            maxHeight={30}
-            maxWidth={30}
-          />
-          <p class={layerItemName}> {layer.name}</p>
+          <div
+            class={flexRow}
+            style={{
+              top: '2px',
+              right: 0,
+              left: 0,
+              'margin-left': '6px',
+              position: 'absolute',
+            }}
+          >
+            <p class={layerItemIndex}>{props.index}.</p>
+            <p class={layerItemType}>{props.layer.typeDescription}</p>
+          </div>
+
+          <p class={layerItemName}> {props.layer.name}</p>
           <div
             class={dotMagnifContainer}
             onClick={(e) => {
@@ -96,7 +117,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
             onMouseOver={(e) => e.stopPropagation()}
           >
-            <p class={dotMagnifText}>x{layer.dotMagnification}</p>
+            <p class={dotMagnifText}>x{props.layer.dotMagnification}</p>
           </div>
           <Light class={activeLight} on={isActive()} />
         </div>

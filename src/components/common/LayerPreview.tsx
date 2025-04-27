@@ -1,9 +1,8 @@
-import { Component, onMount } from "solid-js";
-import { Layer } from "~/models/types/Layer";
-
-import styles from "@styles/components/layer_preview.module.css";
-import { v4 as uuidv4 } from "uuid";
-import { layerImageManager } from "../canvas/stacks/CanvasStack";
+import { Component, onMount } from 'solid-js';
+import { layerImageManager } from '../canvas/stacks/CanvasStack';
+import styles from '@styles/components/layer_preview.module.css';
+import { layerImageStore } from '~/stores/project/layerImageStore';
+import { Layer } from '~/types/Layer';
 
 interface Props {
   layer: Layer;
@@ -13,7 +12,6 @@ interface Props {
 }
 
 const LayerPreview: Component<Props> = (props: Props) => {
-  const id = uuidv4();
   let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
 
@@ -28,8 +26,13 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
     let zoom = 1;
-    // if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    // if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
+    if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
+    if (
+      maxHeight &&
+      targetHeight > maxHeight &&
+      zoom < maxHeight / targetHeight
+    )
+      zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -37,12 +40,12 @@ const LayerPreview: Component<Props> = (props: Props) => {
     wrapperRef.style.width = `${targetWidth * zoom}px !important`;
     wrapperRef.style.height = `${targetHeight * zoom}px !important`;
 
-    const tmpCanvas = document.createElement("canvas");
+    const tmpCanvas = document.createElement('canvas');
     tmpCanvas.width = originalImage.width;
     tmpCanvas.height = originalImage.height;
-    tmpCanvas.getContext("2d")!.putImageData(originalImage, 0, 0);
+    tmpCanvas.getContext('2d')!.putImageData(originalImage, 0, 0);
 
-    const ctx = canvasRef.getContext("2d")!;
+    const ctx = canvasRef.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, targetWidth, targetHeight);
 
@@ -55,15 +58,26 @@ const LayerPreview: Component<Props> = (props: Props) => {
       0,
       0,
       targetWidth,
-      targetHeight,
+      targetHeight
     );
   };
 
   onMount(() => {
-    const agent = layerImageManager.getAgent(props.layer.id);
-    agent?.setOnImageChangeListener("layer_preview_" + id, () => {
-      const height = wrapperRef.clientHeight;
-      updatePreview(agent.getImage(), height);
+    const height = wrapperRef.clientHeight;
+    const currentImage = layerImageStore[props.layer.id].current;
+
+    let agent = layerImageManager.getAgent(props.layer.id);
+    if (!agent) {
+      agent = layerImageManager.registerAgent(props.layer.id, currentImage);
+    } else {
+      agent.setImage(currentImage, true);
+    }
+
+    updatePreview(currentImage, height);
+
+    agent.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
+      const img = layerImageStore[props.layer.id].current;
+      updatePreview(img, height);
     });
   });
 

@@ -1,18 +1,18 @@
-import { reconcile } from "solid-js/store";
-import { setLayerImageStore } from "~/stores/project/layerImageStore";
-import { RGBAColor } from "~/utils/colorUtils";
-import { Vec2 } from "../types/Vector";
-import { TileIndex } from "./Tile";
+import { reconcile } from 'solid-js/store';
+import { Vec2 } from '../../types/Vector';
+import { setLayerImageStore } from '~/stores/project/layerImageStore';
+import { TileIndex } from '~/types/Tile';
+import { RGBAColor } from '~/utils/colorUtils';
 
 export type PixelDiff = {
-  kind: "pixel";
+  kind: 'pixel';
   position: Vec2;
   before: RGBAColor;
   after: RGBAColor;
 };
 
 export type TileDiff = {
-  kind: "tile";
+  kind: 'tile';
   index: TileIndex;
   beforeColor: RGBAColor | undefined;
   afterColor: RGBAColor;
@@ -22,9 +22,9 @@ export type Diff = PixelDiff | TileDiff;
 
 export const getDiffHash = (diff: Diff) => {
   switch (diff.kind) {
-    case "pixel":
+    case 'pixel':
       return `px:${diff.position.x},${diff.position.y}`;
-    case "tile":
+    case 'tile':
       return `tile:${diff.index.row},${diff.index.column}`;
   }
 };
@@ -34,20 +34,18 @@ export type DiffAction = {
 };
 
 export class HistoryManager {
-  protected undoActionsStack: DiffAction[];
-  protected redoActionsStack: DiffAction[];
+  protected undoActionsStack: DiffAction[] = [];
+  protected redoActionsStack: DiffAction[] = [];
+  private readonly maxStackSize = 50;
 
-  constructor(public layerId: string) {
-    this.undoActionsStack = [];
-    this.redoActionsStack = [];
-  }
+  constructor(public layerId: string) {}
 
   public getUndoStack() {
     return this.undoActionsStack;
   }
 
   public getRedoStack() {
-    return this.undoActionsStack;
+    return this.redoActionsStack;
   }
 
   public canUndo() {
@@ -59,51 +57,58 @@ export class HistoryManager {
   }
 
   public addAction(action: DiffAction) {
+    // push new action and cap undo history
     this.undoActionsStack.push(action);
+    if (this.undoActionsStack.length > this.maxStackSize) {
+      this.undoActionsStack.shift();
+    }
+    // clear redo history
     this.redoActionsStack = [];
-    setLayerImageStore(
-      this.layerId,
-      "undoStack",
-      reconcile(this.undoActionsStack),
-    );
-    setLayerImageStore(
-      this.layerId,
-      "redoStack",
-      reconcile(this.redoActionsStack),
-    );
+
+    this.syncStores();
   }
 
   public undo(): DiffAction | undefined {
     const undoedAction = this.undoActionsStack.pop();
-    if (undoedAction === undefined) return undefined;
-    this.redoActionsStack = [undoedAction, ...this.redoActionsStack];
-    setLayerImageStore(
-      this.layerId,
-      "undoStack",
-      reconcile(this.undoActionsStack),
-    );
-    setLayerImageStore(
-      this.layerId,
-      "redoStack",
-      reconcile(this.redoActionsStack),
-    );
+    if (!undoedAction) return undefined;
+
+    // push to redo and cap redo history
+    this.redoActionsStack.unshift(undoedAction);
+    if (this.redoActionsStack.length > this.maxStackSize) {
+      this.redoActionsStack.pop();
+    }
+
+    this.syncStores();
     return undoedAction;
   }
 
   public redo(): DiffAction | undefined {
     const redoedAction = this.redoActionsStack.shift();
-    if (redoedAction === undefined) return undefined;
-    this.undoActionsStack = [...this.undoActionsStack, redoedAction];
-    setLayerImageStore(
-      this.layerId,
-      "undoStack",
-      reconcile(this.undoActionsStack),
-    );
-    setLayerImageStore(
-      this.layerId,
-      "redoStack",
-      reconcile(this.redoActionsStack),
-    );
+    if (!redoedAction) return undefined;
+
+    // push back to undo and cap undo history
+    this.undoActionsStack.push(redoedAction);
+    if (this.undoActionsStack.length > this.maxStackSize) {
+      this.undoActionsStack.shift();
+    }
+
+    this.syncStores();
     return redoedAction;
+  }
+
+  /**
+   * Synchronize the undo/redo stacks with the SolidJS store
+   */
+  private syncStores() {
+    setLayerImageStore(
+      this.layerId,
+      'undoStack',
+      reconcile(this.undoActionsStack)
+    );
+    setLayerImageStore(
+      this.layerId,
+      'redoStack',
+      reconcile(this.redoActionsStack)
+    );
   }
 }

@@ -1,20 +1,31 @@
-import { Component, createEffect, createSignal, For, onMount } from "solid-js";
-import { canvasStore } from "~/stores/project/canvasStore";
-import { activeLayer, allLayers } from "~/stores/project/layerStore";
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+} from 'solid-js';
+import CanvasOverlaySVG from './CanvasOverlaySVG';
+import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
+import { TouchableCanvas } from './TouchableCanvas';
+import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
+import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
+import { globalStore } from '~/stores/global/globalStore';
+import { canvasStore } from '~/stores/project/canvasStore';
+import {
+  activeLayer,
+  allLayers,
+  layerStore,
+} from '~/stores/project/layerStore';
 
-import styles from "@styles/components/canvas/canvas_stack.module.css";
-
-import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
-import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
-import { LayerImageManager } from "~/models/layer_image/LayerImageManager";
-import Tile from "~/models/layer_image/Tile";
-import CanvasOverlaySVG from "./CanvasOverlaySVG";
-import { LayerCanvas, LayerCanvasRef } from "./LayerCanvas";
-import { TouchableCanvas } from "./TouchableCanvas";
+import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
+import Tile from '~/types/Tile';
 
 export const layerImageManager = new LayerImageManager();
 
-const CanvasStack: Component<{}> = (props) => {
+const CanvasStack: Component = () => {
   const layerCanvasRefs: {
     [id: string]: LayerCanvasRef;
   } = {};
@@ -29,14 +40,14 @@ const CanvasStack: Component<{}> = (props) => {
   };
 
   onMount(() => {
-    window.addEventListener("keydown", (e) => {
-      if (e.ctrlKey && e.key === "z") {
+    window.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'z') {
         const active = activeLayer();
         if (active) {
           const agent = layerImageManager.getAgent(active.id);
           agent?.undo();
         }
-      } else if (e.ctrlKey && e.key === "y") {
+      } else if (e.ctrlKey && e.key === 'y') {
         const active = activeLayer();
         if (active) {
           const agent = layerImageManager.getAgent(active.id);
@@ -48,15 +59,13 @@ const CanvasStack: Component<{}> = (props) => {
 
   createEffect(() => {
     const active = activeLayer();
-
     if (active) {
       const agent = layerImageManager.getAgent(active.id);
-      console.log(agent);
       if (!agent) return;
-      agent.setOnDrawingBufferChangeListener("stack_dirty_rect", () => {
+      agent.setOnDrawingBufferChangeListener('stack_dirty_rect', () => {
         setDirtyRects([...getDirtyRects()]);
       });
-      agent.setOnImageChangeListener("stack_dirty_rect", () => {
+      agent.setOnImageChangeListener('stack_dirty_rect', () => {
         setDirtyRects([...getDirtyRects()]);
       });
     }
@@ -74,24 +83,25 @@ const CanvasStack: Component<{}> = (props) => {
   };
 
   return (
-    <div style={{ position: "relative" }}>
-      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
-
+    <div
+      style={{
+        position: 'relative',
+      }}
+    >
       <div
-        class={styles.canvas_stack}
+        class={canvasStack}
         style={{
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
         }}
       >
         <TouchableCanvas
-          operator={new LayerCanvasOperator(() => activeCanvasRef()!!)}
+          operator={new LayerCanvasOperator(() => activeCanvasRef()!)}
         />
 
         <For each={allLayers()}>
           {(layer, index) => (
             <LayerCanvas
-              manager={layerImageManager}
               ref={layerCanvasRefs[layer.id]}
               layer={layer}
               zIndex={allLayers().length - index()}
@@ -99,6 +109,8 @@ const CanvasStack: Component<{}> = (props) => {
           )}
         </For>
       </div>
+
+      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
     </div>
   );
 };

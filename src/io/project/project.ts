@@ -1,33 +1,32 @@
-// src/io/project.ts
-import { path } from "@tauri-apps/api";
-import { open as dialogOpen, save } from "@tauri-apps/plugin-dialog";
+import { path } from '@tauri-apps/api';
+import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
 import {
   BaseDirectory,
   mkdir,
   readTextFile,
   writeTextFile,
-} from "@tauri-apps/plugin-fs";
-import { initLayerImage } from "~/models/layer/layerImage";
-import { Layer } from "~/models/types/Layer";
-import { addRecent } from "~/stores/global/globalStore";
+} from '@tauri-apps/plugin-fs';
+import initLayerImage from '~/models/factories/initLayerImage';
+import { addRecent } from '~/stores/global/globalStore';
 import {
   adjustZoomToFit,
   canvasStore,
   centeringCanvas,
   setCanvasStore,
-} from "~/stores/project/canvasStore";
+} from '~/stores/project/canvasStore';
 import {
   layerImageStore,
   setLayerImageStore,
-} from "~/stores/project/layerImageStore";
+} from '~/stores/project/layerImageStore';
 import {
   findLayerById,
   layerStore,
   setLayerStore,
-} from "~/stores/project/layerStore";
-import { projectStore, setProjectStore } from "~/stores/project/projectStore";
-import { decodeImageData, encodeImageData } from "~/utils/ImageUtils";
-import { getFileNameAndPath } from "~/utils/pathUtils";
+} from '~/stores/project/layerStore';
+import { projectStore, setProjectStore } from '~/stores/project/projectStore';
+import { Layer } from '~/types/Layer';
+import { decodeImageData, encodeImageData } from '~/utils/ImageUtils';
+import { getFileNameAndPath } from '~/utils/pathUtils';
 
 export async function importProjectJsonFromFileSelection(): Promise<
   string | undefined
@@ -36,16 +35,16 @@ export async function importProjectJsonFromFileSelection(): Promise<
   const file = await dialogOpen({
     multiple: false,
     directory: false,
-    defaultPath: await path.join(home, "sledge"),
+    defaultPath: await path.join(home, 'sledge'),
     filters: [
       {
-        name: "sledge files",
-        extensions: ["sledge"],
+        name: 'sledge files',
+        extensions: ['sledge'],
       },
     ],
   });
   if (!file) {
-    console.log("ファイルが選択されていません");
+    console.log('ファイルが選択されていません');
     return undefined;
   }
   console.log(file);
@@ -59,7 +58,7 @@ export async function importProjectJsonFromFileSelection(): Promise<
 
 export async function importProjectJsonFromPath(filePath: string) {
   if (!filePath) {
-    console.log("ファイルが選択されていません");
+    console.log('ファイルが選択されていません');
     return;
   }
   const jsonText = await readTextFile(filePath);
@@ -71,14 +70,14 @@ export async function importProjectJsonFromPath(filePath: string) {
 export async function importProjectJson(projectJson: any) {
   if (projectJson.project) {
     console.log(projectJson.project);
-    setProjectStore("name", projectJson.project.name);
-    setProjectStore("path", projectJson.project.path);
+    setProjectStore('name', projectJson.project.name || undefined);
+    setProjectStore('path', projectJson.project.path || undefined);
   }
 
   if (projectJson.canvas) {
     const { width, height } = projectJson.canvas;
-    setCanvasStore("canvas", "width", width);
-    setCanvasStore("canvas", "height", height);
+    setCanvasStore('canvas', 'width', width);
+    setCanvasStore('canvas', 'height', height);
   }
 
   if (projectJson.images) {
@@ -90,12 +89,12 @@ export async function importProjectJson(projectJson: any) {
       initLayerImage(id, Number(imageData.dotMagnification || 1));
       setLayerImageStore(
         id,
-        "current",
+        'current',
         decodeImageData(
           imageData.current,
           Number(imageData.width),
-          Number(imageData.height),
-        ),
+          Number(imageData.height)
+        )
       );
     });
   }
@@ -113,8 +112,8 @@ export async function importProjectJson(projectJson: any) {
       } as Layer);
     });
 
-    setLayerStore("layers", layers);
-    setLayerStore("activeLayerId", projectJson.layer.activeLayerId);
+    setLayerStore('layers', layers);
+    setLayerStore('activeLayerId', projectJson.layer.activeLayerId);
   }
 
   adjustZoomToFit();
@@ -134,7 +133,7 @@ export const parseCurrentProject = (): string => {
           height: state.current.height,
           dotMagnification: findLayerById(id)?.dotMagnification,
         },
-      ]),
+      ])
     ),
     layer: {
       layers: layerStore.layers.map((layer) => ({
@@ -147,36 +146,38 @@ export const parseCurrentProject = (): string => {
 };
 
 export async function saveProject(existingPath?: string) {
-  let selectedPath: String | null;
+  let selectedPath: string | null;
   if (existingPath) {
     selectedPath = existingPath;
   } else {
     try {
-      await mkdir("sledge", {
+      await mkdir('sledge', {
         baseDir: BaseDirectory.Home,
         recursive: true,
       });
     } catch (e) {
-      console.warn("ディレクトリ作成スキップまたは失敗:", e);
+      console.warn('ディレクトリ作成スキップまたは失敗:', e);
     }
 
     const home = await path.homeDir();
     selectedPath = await save({
-      title: "Sledge プロジェクトを保存",
+      title: 'Sledge プロジェクトを保存',
       defaultPath: await path.join(home, `sledge/${projectStore.name}.sledge`),
-      filters: [{ name: "Sledge Project", extensions: ["sledge"] }],
+      filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
     });
   }
 
-  if (typeof selectedPath === "string") {
-    setProjectStore("path", selectedPath);
+  if (typeof selectedPath === 'string') {
+    setProjectStore('path', selectedPath);
     const data = parseCurrentProject();
     await writeTextFile(selectedPath, data);
-    console.log("プロジェクト保存:", selectedPath);
+    console.log('プロジェクト保存:', selectedPath);
+
+    setProjectStore('isProjectChangedAfterSave', false);
 
     const fileLoc = getFileNameAndPath(selectedPath);
     if (fileLoc !== undefined) addRecent(fileLoc);
   } else {
-    console.log("保存キャンセルされました");
+    console.log('保存キャンセルされました');
   }
 }

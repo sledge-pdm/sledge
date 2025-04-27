@@ -1,6 +1,6 @@
-import LayerImageAgent from "~/models/layer_image/LayerImageAgent";
-import { drawCompletionLine, drawSquarePixel } from "../DrawUtils";
-import { Tool, ToolArgs } from "../ToolBase";
+import { drawCompletionLine, drawSquarePixel } from '../DrawUtils';
+import { Tool, ToolArgs } from '../ToolBase';
+import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 
 export class EraserTool implements Tool {
   onStart(agent: LayerImageAgent, args: ToolArgs) {

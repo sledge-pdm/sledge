@@ -1,5 +1,5 @@
-import { RGBAColor } from "~/utils/colorUtils";
-import { Vec2 } from "../types/Vector";
+import { Vec2 } from './Vector';
+import { RGBAColor } from '~/utils/colorUtils';
 
 export interface TileIndex {
   row: number;
@@ -20,7 +20,7 @@ export default class Tile {
   constructor(
     public readonly row: number,
     public readonly column: number,
-    public readonly globalTileSize: number,
+    public readonly globalTileSize: number
   ) {
     this.isDirtyThroughAction = false;
     this.isDirty = false;

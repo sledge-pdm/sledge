@@ -1,8 +1,8 @@
-import { PassNode } from "./PassNode";
+import { PassNode } from './PassNode';
 
 export class LayerIn extends PassNode {
-  name: string = "in";
-  description: string = "layer_in";
+  name: string = 'in';
+  description: string = 'layer_in';
 
   constructor(public layerId?: string) {
     super();

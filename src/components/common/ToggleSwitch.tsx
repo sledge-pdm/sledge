@@ -1,10 +1,10 @@
-import { Component } from "solid-js";
+import { Component } from 'solid-js';
 import {
   toggleInput,
   toggleThumb,
   toggleTrack,
   toggleWrapper,
-} from "~/styles/components/toggle_switch.css";
+} from '~/styles/components/toggle_switch.css';
 
 interface Props {
   checked: boolean;
@@ -18,7 +18,7 @@ const ToggleSwitch: Component<Props> = (p) => (
   <label class={toggleWrapper}>
     {p.children}
     <input
-      type="checkbox"
+      type='checkbox'
       checked={p.checked}
       onInput={(e) => p.onChange?.(e.currentTarget.checked)}
       class={toggleInput}

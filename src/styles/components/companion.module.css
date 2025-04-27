@@ -52,7 +52,7 @@
 .quote_box::before {
   border: 7px solid transparent;
   border-top: 7px solid #fff;
-  content: "";
+  content: '';
   padding-left: 1px;
   position: absolute;
   position-anchor: --companion;
@@ -63,7 +63,7 @@
 .quote_box::after {
   border: 8px solid transparent;
   border-top: 8px solid #555;
-  content: "";
+  content: '';
   position: absolute;
   position-anchor: --companion;
   top: calc(anchor(--box bottom) - 1px);

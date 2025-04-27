@@ -5,15 +5,16 @@
     "dev": "vite",
     "build": "vite build",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build --debug",
+    "tauri:build": "tauri build",
     "tcm-watch": "tcm -o dist-tcm src --watch",
     "postinstall": "patch-package",
-    "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .vscode/.prettierrc",
+    "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .prettierrc",
     "stylelint": "stylelint -c .\\.stylelintrc.json \"src/**/*.css\" --fix"
   },
   "dependencies": {
     "@jaames/iro": "^5.5.2",
     "@solid-primitives/deep": "^0.3.1",
+    "@solid-primitives/timer": "^1.4.0",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@tauri-apps/api": "^2.4.1",
@@ -26,6 +27,7 @@
     "interactjs": "^1.10.27",
     "solid-js": "^1.9.5",
     "solidjs-use": "^2.3.0",
+    "tauri-plugin-system-info-api": "^2.0.10",
     "uuid": "^11.1.0"
   },
   "engines": {
@@ -41,7 +43,7 @@
     "stylelint": "^16.18.0",
     "stylelint-config-standard": "^38.0.0",
     "stylelint-order": "^6.0.4",
-    "vite": "^6.2.4",
+    "vite": "^6.3.3",
     "vite-plugin-solid": "^2.11.6",
     "vite-tsconfig-paths": "^5.1.4"
   }

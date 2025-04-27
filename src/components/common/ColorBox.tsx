@@ -1,8 +1,9 @@
-import { Component } from "solid-js";
-import { toolStore } from "~/stores/internal/toolsStore";
-import { sayRandomQuote } from "./companion/QuotePool";
+import { Component } from 'solid-js';
+import { sayRandomQuote } from './companion/QuotePool';
+import { currentColor } from '~/stores/internal/colorStore';
 
 interface ColorBoxProps {
+  class?: string;
   enableUsingSelection?: boolean;
   sizePx?: number;
   color: string;
@@ -10,53 +11,54 @@ interface ColorBoxProps {
 }
 
 const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
-  const size = props.sizePx || 10;
+  const size = () => props.sizePx || 10;
 
   const isSelected = () =>
-    props.enableUsingSelection &&
-    toolStore.tools[toolStore.usingIndex].color === props.color;
+    props.enableUsingSelection && currentColor() === props.color;
   const isWhiteOrNone = () =>
-    props.color === "none" || props.color.toLowerCase() === "#ffffff";
+    props.color === 'none' || props.color.toLowerCase() === '#ffffff';
 
   const onColorClicked = (color: string) => {
-    sayRandomQuote("color-pick", { color: color });
+    sayRandomQuote('color-pick', { color: color });
     if (props.onClick) props.onClick(color);
   };
 
   return (
-    <div
-      style={{
-        position: "relative",
-        display: "flex",
-        width: `${size}px`,
-        height: `${size}px`,
-        "align-items": "center",
-        "justify-content": "center",
-        cursor: "pointer",
-        "background-color": props.color,
-        border:
-          isWhiteOrNone() || isSelected()
-            ? "0.05rem solid black"
-            : "0.05rem solid transparent",
-      }}
-      onClick={() => {
-        onColorClicked(props.color);
-      }}
-    >
-      {props.enableUsingSelection && isSelected() && (
-        <div
-          style={{
-            width: `${Math.round(size / 3)}px`,
-            height: `${Math.round(size / 3)}px`,
-            margin: 0,
-            padding: 0,
-            "background-color": "black",
-          }}
-          onClick={() => {
-            onColorClicked(props.color);
-          }}
-        />
-      )}
+    <div class={props.class}>
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          width: `${size()}px`,
+          height: `${size()}px`,
+          'align-items': 'center',
+          'justify-content': 'center',
+          cursor: 'pointer',
+          'background-color': props.color,
+          border:
+            isWhiteOrNone() || isSelected()
+              ? '0.05rem solid black'
+              : '0.05rem solid transparent',
+        }}
+        onClick={() => {
+          onColorClicked(props.color);
+        }}
+      >
+        {props.enableUsingSelection && isSelected() && (
+          <div
+            style={{
+              width: `${Math.round(size() / 3)}px`,
+              height: `${Math.round(size() / 3)}px`,
+              margin: 0,
+              padding: 0,
+              'background-color': props.color !== '#000000' ? 'black' : 'white',
+            }}
+            onClick={() => {
+              onColorClicked(props.color);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

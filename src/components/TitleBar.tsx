@@ -1,5 +1,6 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { createSignal, onMount } from "solid-js";
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { createEffect, createSignal, onMount } from 'solid-js';
+import { projectStore } from '~/stores/project/projectStore';
 import {
   titleBarControlButtonImg,
   titleBarControlCloseButton,
@@ -8,7 +9,7 @@ import {
   titleBarControls,
   titleBarRoot,
   titleBarTitle,
-} from "~/styles/components/title_bar.css";
+} from '~/styles/components/title_bar.css';
 
 export default function TitleBar() {
   const window = getCurrentWindow();
@@ -16,7 +17,8 @@ export default function TitleBar() {
   const [isMaximizable, setIsMaximizable] = createSignal(true);
   const [isMinimizable, setIsMinimizable] = createSignal(true);
   const [isClosable, setIsClosable] = createSignal(true);
-  const [title, setTitle] = createSignal("");
+  const [isEditor, setIsEditor] = createSignal(false);
+  const [title, setTitle] = createSignal('');
   const [isMaximized, setMaximized] = createSignal(false);
 
   onMount(async () => {
@@ -24,16 +26,43 @@ export default function TitleBar() {
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
     setTitle(await window.title());
+    setIsEditor(window.label.startsWith('editor'));
+    // if (isEditor()) {
+    //   setTitle(`${projectStore.name} - ${projectStore.path}`);
+    // }
   });
 
   window.onResized(async (handler) => {
-    console.log("resize");
     setMaximized(await window.isMaximized());
   });
 
+  createEffect(() => {
+    if (isEditor()) {
+      let pathText = '';
+      let isSavedText = '';
+      if (projectStore.path !== undefined && projectStore.path !== '') {
+        pathText += projectStore.isProjectChangedAfterSave ? '(unsaved)' : '';
+        pathText += ' - ' + projectStore.path;
+      } else {
+        pathText += '(not saved yet)';
+      }
+
+      setTitle(`${projectStore.name} ${pathText} `);
+    }
+  });
+
+  const borderWindowLabels: string[] = ['editor'];
+  const shouldShowBorder = () =>
+    borderWindowLabels.find((l) => l === window.label);
+
   return (
-    <header style={{ "pointer-events": "all", "border": window.label === "main" ? "1px solid #aaa" : "none" }}>
-      <nav class={titleBarRoot} data-tauri-drag-region="p, button">
+    <header
+      style={{
+        'pointer-events': 'all',
+        'border-bottom': shouldShowBorder() ? '1px solid #aaa' : 'none',
+      }}
+    >
+      <nav class={titleBarRoot} data-tauri-drag-region='p, button'>
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
           {isMinimizable() && (
@@ -41,7 +70,7 @@ export default function TitleBar() {
               class={titleBarControlMinimizeButton}
               onClick={() => window.minimize()}
             >
-              <img class={titleBarControlButtonImg} src={"/minimize.png"} />
+              <img class={titleBarControlButtonImg} src={'/minimize.png'} />
             </button>
           )}
           {isMaximizable() && (
@@ -51,7 +80,7 @@ export default function TitleBar() {
             >
               <img
                 class={titleBarControlButtonImg}
-                src={isMaximized() ? "/leave_maximize.png" : "/maximize.png"}
+                src={isMaximized() ? '/leave_maximize.png' : '/maximize.png'}
               />
             </button>
           )}
@@ -60,7 +89,7 @@ export default function TitleBar() {
               class={titleBarControlCloseButton}
               onClick={() => window.close()}
             >
-              <img class={titleBarControlButtonImg} src={"/close.png"} />
+              <img class={titleBarControlButtonImg} src={'/close.png'} />
             </button>
           )}
         </div>

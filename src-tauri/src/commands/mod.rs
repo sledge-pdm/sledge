@@ -15,9 +15,3 @@ pub use jpeg_glitch::jpeg_glitch;
 
 pub mod sepia;
 pub use sepia::sepia;
-
-// デバッグ用など
-#[tauri::command]
-pub fn hello_from_rust(name: String) -> String {
-    format!("Hello, {name}! This is Rust talking.")
-}

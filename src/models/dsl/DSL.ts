@@ -1,7 +1,7 @@
-import { SledgeNode } from "~/models/dsl/nodes/DSLNodes";
-import { findLayerById } from "~/stores/project/layerStore";
-import { LayerIn } from "./nodes/pass/LayerIn";
-import { LayerOut } from "./nodes/pass/LayerOut";
+import { LayerIn } from './nodes/pass/LayerIn';
+import { LayerOut } from './nodes/pass/LayerOut';
+import { SledgeNode } from '~/models/dsl/nodes/DSLNodes';
+import { findLayerById } from '~/stores/project/layerStore';
 
 export class DSL {
   layerIn: LayerIn;
@@ -23,7 +23,7 @@ export class DSL {
       ? [...this.nodes, this.layerOut]
       : [this.layerIn, ...this.nodes, this.layerOut];
 
-    let nodeStrings: string[] = [];
+    const nodeStrings: string[] = [];
     let isAllNodeParseSuccessful = true;
     nodes.forEach((node, i) => {
       const nodeStr = node.getNodeString();
@@ -36,7 +36,7 @@ export class DSL {
 
     if (isAllNodeParseSuccessful) {
       // if all nodes parsed successfully
-      return nodeStrings.join(" > "); // in(inLayerId) > out(outLayerId) by default
+      return nodeStrings.join(' > '); // in(inLayerId) > out(outLayerId) by default
     } else {
       // if some nodes failed to parse
       return undefined;
@@ -45,19 +45,19 @@ export class DSL {
 
   public toString(): string {
     let str = this.build();
-    if (str === undefined) throw "DSL parse failed.";
+    if (str === undefined) throw 'DSL parse failed.';
     else {
       // 読みやすくする
       const inId = this.layerIn.layerId;
       const outId = this.layerOut.layerId;
       if (inId !== undefined)
-        str = str.replaceAll(inId, `${findLayerById(inId)?.name || "N/A"} ID`);
+        str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`);
       if (outId !== undefined)
         str = str.replaceAll(
           outId,
-          `${findLayerById(outId)?.name || "N/A"} ID`,
+          `${findLayerById(outId)?.name || 'N/A'} ID`
         );
-      str = str.replaceAll(" > ", "\n> ");
+      str = str.replaceAll(' > ', '\n> ');
       return str;
     }
   }

@@ -4,11 +4,11 @@ import {
   createSignal,
   onCleanup,
   onMount,
-} from "solid-js";
-import { DrawState } from "~/models/layer_canvas/DrawState";
-import LayerCanvasOperator from "~/models/layer_canvas/LayerCanvasOperator";
-import { Vec2 } from "~/models/types/Vector";
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
+} from 'solid-js';
+import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
+import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
+import { DrawState } from '~/types/DrawState';
+import { Vec2 } from '~/types/Vector';
 
 interface Props {
   operator: LayerCanvasOperator;
@@ -33,11 +33,11 @@ export const TouchableCanvas: Component<Props> = (props) => {
     let x = 0;
     let y = 0;
 
-    if ("clientX" in e && "clientY" in e) {
+    if ('clientX' in e && 'clientY' in e) {
       x = e.clientX;
       y = e.clientY;
-    } else if ("touches" in e && e.touches.length > 0) {
-      console.log("touch");
+    } else if ('touches' in e && e.touches.length > 0) {
+      console.log('touch');
       x = e.touches[0].clientX;
       y = e.touches[0].clientY;
     }
@@ -50,11 +50,11 @@ export const TouchableCanvas: Component<Props> = (props) => {
     let x = 0;
     let y = 0;
 
-    if ("clientX" in e && "clientY" in e) {
+    if ('clientX' in e && 'clientY' in e) {
       x = e.clientX;
       y = e.clientY;
-    } else if ("touches" in e && e.touches.length > 0) {
-      console.log("touch");
+    } else if ('touches' in e && e.touches.length > 0) {
+      console.log('touch');
       x = e.touches[0].clientX;
       y = e.touches[0].clientY;
     }
@@ -68,10 +68,10 @@ export const TouchableCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === "touch" || canvasStore.isCtrlPressed) return false;
+    if (e.pointerType === 'touch' || canvasStore.isCtrlPressed) return false;
     // right=1, left=2, middle=4
     // console.log(e.buttons)
-    if (e.pointerType === "mouse" && e.buttons !== 1) return false;
+    if (e.pointerType === 'mouse' && e.buttons !== 1) return false;
 
     return true;
   }
@@ -81,31 +81,27 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.start, position, lastPos());
-    setCanvasStore("isInStroke", true);
+    setCanvasStore('isInStroke', true);
     setLastPos(position);
   }
 
   function handlePointerCancel(e: PointerEvent) {
-    console.warn("pointercancel", e);
+    console.warn('pointercancel', e);
     endStroke(getCanvasMousePosition(e));
   }
 
   function handlePointerMove(e: PointerEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore("lastMouseWindow", windowPosition);
-    setCanvasStore("lastMouseOnCanvas", position);
-    setCanvasStore("lastMouseOnZoomedCanvas", {
-      x: position.x * canvasStore.zoom,
-      y: position.y * canvasStore.zoom,
-    });
+    setCanvasStore('lastMouseWindow', windowPosition);
+    setCanvasStore('lastMouseOnCanvas', position);
 
     if (!isDrawableClick(e)) return;
 
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
       setTemporaryOut(false);
-      setCanvasStore("isInStroke", true);
+      setCanvasStore('isInStroke', true);
       setLastPos(position);
     }
     if (!canvasStore.isInStroke || !lastPos()) return;
@@ -135,38 +131,34 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handleWheel(e: WheelEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore("lastMouseWindow", windowPosition);
-    setCanvasStore("lastMouseOnCanvas", position);
-    setCanvasStore("lastMouseOnZoomedCanvas", {
-      x: position.x * canvasStore.zoom,
-      y: position.y * canvasStore.zoom,
-    });
+    setCanvasStore('lastMouseWindow', windowPosition);
+    setCanvasStore('lastMouseOnCanvas', position);
   }
 
   function endStroke(position: Vec2) {
     props.operator.handleDraw(DrawState.end, position, lastPos());
-    setCanvasStore("isInStroke", false);
+    setCanvasStore('isInStroke', false);
     setLastPos(undefined);
     setTemporaryOut(false);
   }
 
   onMount(() => {
-    window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointercancel", handlePointerCancel);
-    window.addEventListener("wheel", handleWheel);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointercancel', handlePointerCancel);
+    window.addEventListener('wheel', handleWheel);
   });
 
   onCleanup(() => {
-    window.removeEventListener("pointerup", handlePointerUp);
-    window.removeEventListener("pointermove", handlePointerMove);
-    window.removeEventListener("pointercancel", handlePointerCancel);
-    window.removeEventListener("wheel", handleWheel);
+    window.removeEventListener('pointerup', handlePointerUp);
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointercancel', handlePointerCancel);
+    window.removeEventListener('wheel', handleWheel);
   });
 
   createEffect(() => {
     if (canvasRef)
-      setCanvasStore("canvasElementSize", {
+      setCanvasStore('canvasElementSize', {
         width: canvasRef.clientWidth,
         height: canvasRef.clientHeight,
       });
@@ -182,11 +174,11 @@ export const TouchableCanvas: Component<Props> = (props) => {
       onPointerDown={handlePointerDown}
       onPointerOut={handlePointerOut}
       style={{
-        "touch-action": "none",
+        'touch-action': 'none',
         width: `${styleWidth()}px`,
         height: `${styleHeight()}px`,
-        "pointer-events": "all",
-        "z-index": "100", // どのレイヤーよりも上だが、image poolよりも下
+        'pointer-events': 'all',
+        'z-index': '100', // どのレイヤーよりも上だが、image poolよりも下
       }}
     />
   );

@@ -1,14 +1,13 @@
-import iro from "@jaames/iro";
-import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
-import { Component, createEffect } from "solid-js";
-import { setCurrentToolColor } from "~/models/types/Tool";
-import { currentTool } from "~/stores/internal/toolsStore";
+import iro from '@jaames/iro';
+import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
+import { Component, createEffect } from 'solid-js';
+import { currentColor, setCurrentColor } from '~/stores/internal/colorStore';
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
 
   createEffect(() => {
-    colorPicker.setColors([currentTool().color]);
+    colorPicker.setColors([currentColor()]);
   });
 
   return (
@@ -17,9 +16,9 @@ const ColorPicker: Component<{ width: number }> = (props) => {
         colorPicker = iro.ColorPicker(el, {
           width: props.width,
           padding: 0,
-          color: currentTool().color,
+          color: currentColor(),
           handleRadius: 4,
-          layoutDirection: "horizontal",
+          layoutDirection: 'horizontal',
           layout: [
             {
               component: iro.ui.Box,
@@ -29,16 +28,16 @@ const ColorPicker: Component<{ width: number }> = (props) => {
               component: iro.ui.Slider,
               options: {
                 // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
-                sliderType: "hue",
+                sliderType: 'hue',
               },
             },
           ],
         });
-        colorPicker.on("color:change", function (color: any) {
-          setCurrentToolColor(color.hexString);
+        colorPicker.on('color:change', function (color: any) {
+          setCurrentColor(color.hexString);
         });
       }}
-    ></div>
+    />
   );
 };
 

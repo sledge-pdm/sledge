@@ -1,24 +1,22 @@
-import { v4 as uuidv4 } from "uuid";
-import { showToast } from "~/stores/internal/toastStore";
-import { layerStore } from "~/stores/project/layerStore";
-import { DSL } from "../dsl/DSL";
-import { initLayerImage } from "../layer/layerImage";
-import { Layer, LayerType } from "../types/Layer";
+import { v4 as uuidv4 } from 'uuid';
+import { DSL } from '../dsl/DSL';
+import initLayerImage from './initLayerImage';
+import { layerStore } from '~/stores/project/layerStore';
+import { Layer, LayerType } from '~/types/Layer';
 
 export const createLayer = (
   name: string,
   type: LayerType,
   enabled = true,
   dotMagnification = 1,
-  dsl?: DSL,
+  dsl?: DSL
 ): Layer => {
+  console.log('yeah tried');
   // check if name already exists
   const endNums = name.match(/^(.*)(\d+)$/);
   if (endNums && endNums.length >= 3) {
     const nameWithoutNum = endNums[1];
     const endNum = Number(endNums[2]);
-    showToast(nameWithoutNum, "info", 1000);
-    showToast(endNum, "info", 1000);
 
     const foundSameNameNums: number[] = [];
     layerStore.layers.forEach((layer) => {
@@ -32,19 +30,16 @@ export const createLayer = (
       }
     });
 
-    showToast(foundSameNameNums.join(","), "info", 1000);
-
     let num = endNum;
     while (foundSameNameNums.find((foundNum) => foundNum === num)) {
       num++;
     }
-
-    showToast(`num ok!! ${num}`, "success", 1000);
     name = nameWithoutNum + num;
   }
 
   const id = uuidv4();
   initLayerImage(id, dotMagnification);
+
   return {
     id,
     name,
@@ -59,12 +54,12 @@ export const createLayer = (
 function getTypeString(type: LayerType): string {
   switch (type) {
     case LayerType.Dot:
-      return "dot layer.";
+      return 'dot layer.';
     case LayerType.Image:
-      return "image layer.";
+      return 'image layer.';
     case LayerType.Automate:
-      return "automate layer.";
+      return 'automate layer.';
     default:
-      return "N/A.";
+      return 'N/A.';
   }
 }

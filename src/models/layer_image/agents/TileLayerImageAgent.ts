@@ -1,9 +1,8 @@
-import { Vec2 } from "~/models/types/Vector";
-import { colorMatch, RGBAColor } from "~/utils/colorUtils";
-import { PixelDiff } from "../HistoryManager";
-import LayerImageAgent from "../LayerImageAgent";
-import Tile, { TileIndex } from "../Tile";
-import { HistoryManager, TileDiff } from "./../HistoryManager";
+import { PixelDiff, HistoryManager, TileDiff } from '../HistoryManager';
+import LayerImageAgent from '../LayerImageAgent';
+import Tile, { TileIndex } from '~/types/Tile';
+import { Vec2 } from '~/types/Vector';
+import { colorMatch, RGBAColor } from '~/utils/colorUtils';
 
 export default class TileLayerImageAgent extends LayerImageAgent {
   readonly TILE_SIZE = 16;
@@ -88,7 +87,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 
   private putOnlyForDirtyTiles(
     ctx: CanvasRenderingContext2D,
-    image: ImageData,
+    image: ImageData
   ) {
     const dirtyTiles = this.getDirtyTiles();
 
@@ -101,7 +100,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
         offset.x,
         offset.y,
         this.TILE_SIZE,
-        this.TILE_SIZE,
+        this.TILE_SIZE
       );
     });
 
@@ -157,13 +156,13 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     const result = this.setPixelInPosition(
       position,
       color,
       excludePositionMatch,
-      excludeColorMatch,
+      excludeColorMatch
     );
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position);
@@ -216,7 +215,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     if (collectDiff)
       this.addDiffs([
         {
-          kind: "tile",
+          kind: 'tile',
           index,
           beforeColor: tile.uniformColor,
           afterColor: [r, g, b, a],
@@ -233,12 +232,12 @@ export default class TileLayerImageAgent extends LayerImageAgent {
   public deletePixel(
     position: Vec2,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     const result = this.deletePixelInPosition(
       position,
       excludePositionMatch,
-      excludeColorMatch,
+      excludeColorMatch
     );
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position);

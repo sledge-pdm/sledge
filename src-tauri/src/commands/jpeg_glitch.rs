@@ -6,7 +6,7 @@ use rand::{Rng, SeedableRng};
 use std::io::Cursor;
 
 pub fn jpeg_glitch(
-    mut data: Vec<u8>,
+    data: Vec<u8>,
     width: usize,
     height: usize,
     seed: u64,
@@ -24,7 +24,7 @@ pub fn jpeg_glitch(
     // Encode to JPEG
     let mut jpeg_data: Vec<u8> = Vec::new();
     {
-        let mut encoder = Encoder::new(&mut jpeg_data, quality);
+        let encoder = Encoder::new(&mut jpeg_data, quality);
         encoder
             .encode(&rgb, width as u16, height as u16, ColorType::Rgb)
             .map_err(|e| format!("JPEG encode failed: {e}"))?;

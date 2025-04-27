@@ -1,33 +1,38 @@
-import { Component, createSignal } from "solid-js";
-import { initLayerImage } from "~/models/layer/layerImage";
-import { canvasStore, setCanvasStore } from "~/stores/project/canvasStore";
-import { allLayers, layerStore } from "~/stores/project/layerStore";
+import { Component, createSignal } from 'solid-js';
+import initLayerImage from '~/models/factories/initLayerImage';
+import {
+  adjustZoomToFit,
+  canvasStore,
+  setCanvasStore,
+} from '~/stores/project/canvasStore';
+import { allLayers, layerStore } from '~/stores/project/layerStore';
 
-import { adjustZoomToFit } from "~/stores/project/canvasStore";
 import {
   canvasSizeButton,
   canvasSizeForm,
   canvasSizeInput,
   canvasSizeLabel,
-} from "~/styles/section/canvas.css";
+} from '~/styles/section/canvas.css';
 import {
   sectionCaption,
   sectionContent,
   sectionRoot,
-} from "~/styles/section_global.css";
+} from '~/styles/section_global.css';
 
-const CanvasSettings: Component<{}> = (props) => {
+const CanvasSettings: Component = () => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
   const [height, setHeight] = createSignal(canvasStore.canvas.height);
 
   const changeCanvasSize = (e: any) => {
     e.preventDefault();
-    setCanvasStore("canvas", "width", width());
-    setCanvasStore("canvas", "height", height());
+    setCanvasStore('canvas', 'width', width());
+    setCanvasStore('canvas', 'height', height());
 
     allLayers().forEach((layer, i) => {
       initLayerImage(layer.id, layer.dotMagnification);
     });
+
+    console.log(`canvas size changed. ${width()} x ${height}`);
 
     adjustZoomToFit(width(), height());
   };
@@ -53,8 +58,8 @@ const CanvasSettings: Component<{}> = (props) => {
             <p class={canvasSizeLabel}>width</p>
             <input
               class={canvasSizeInput}
-              type="number"
-              name="width"
+              type='number'
+              name='width'
               onChange={(e) => setWidth(Number(e.target.value))}
               value={width()}
               min={0}
@@ -66,8 +71,8 @@ const CanvasSettings: Component<{}> = (props) => {
             <p class={canvasSizeLabel}>height</p>
             <input
               class={canvasSizeInput}
-              type="number"
-              name="height"
+              type='number'
+              name='height'
               onChange={(e) => setHeight(Number(e.target.value))}
               value={height()}
               min={0}
@@ -75,7 +80,7 @@ const CanvasSettings: Component<{}> = (props) => {
               required
             />
           </div>
-          <button class={canvasSizeButton} type="submit">
+          <button class={canvasSizeButton} type='submit'>
             change
           </button>
         </div>

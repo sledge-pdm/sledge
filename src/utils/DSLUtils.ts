@@ -1,12 +1,12 @@
-import { runDSL } from "~/models/dsl/DSLRunner";
-import { layerImageStore } from "~/stores/project/layerImageStore";
-import { findLayerById } from "~/stores/project/layerStore";
-import { downloadImageData } from "../io/internal/export";
+import { downloadImageData } from '../io/internal/export';
+import { runDSL } from '~/models/dsl/DSLRunner';
+import { layerImageStore } from '~/stores/project/layerImageStore';
+import { findLayerById } from '~/stores/project/layerStore';
 
 export const testDSLTime = (layerId: string) => {
   const layer = findLayerById(layerId);
   if (layer === undefined) {
-    throw "layer not found.";
+    throw 'layer not found.';
     return;
   }
   const imageData = layerImageStore[layerId].current;
@@ -17,9 +17,9 @@ export const testDSLTime = (layerId: string) => {
     const end = new Date().getTime();
     console.log(`DSL run end.`);
     console.log(
-      `result: ${im ? "success" : "failed"}. TOTAL TIME IS ${end - start}ms.`,
+      `result: ${im ? 'success' : 'failed'}. TOTAL TIME IS ${end - start}ms.`
     );
 
-    if (im) downloadImageData(im, "test-" + end + ".png");
+    if (im) downloadImageData(im, 'test-' + end + '.png');
   });
 };

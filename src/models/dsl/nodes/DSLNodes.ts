@@ -15,7 +15,7 @@
 //     }
 //   | { command: ImageCommands.BRIGHTNESS; delta: number };
 
-export type NodeType = "effect" | "pass" | "fracture";
+export type NodeType = 'effect' | 'pass' | 'fracture';
 
 export interface NodeArg {
   name: string;

@@ -1,6 +1,3 @@
-import { setBottomInfo } from "~/components/BottomInfo";
-import { Vec2 } from "~/models/types/Vector";
-import { colorMatch, RGBAColor } from "~/utils/colorUtils";
 import {
   Diff,
   DiffAction,
@@ -8,7 +5,10 @@ import {
   HistoryManager,
   PixelDiff,
   TileDiff,
-} from "./HistoryManager";
+} from './HistoryManager';
+import { setBottomInfo } from '~/components/BottomInfo';
+import { Vec2 } from '~/types/Vector';
+import { colorMatch, RGBAColor } from '~/utils/colorUtils';
 
 interface DrawingBufferChangeEvent {}
 interface ImageChangeEvent {}
@@ -40,9 +40,9 @@ export default abstract class LayerImageAgent {
     return this.image;
   }
 
-  setImage(image: ImageData, silentlySet?: boolean) {
+  setImage(image: ImageData, silentlySet: boolean = false) {
     this.image = image;
-    if (silentlySet) this.callOnImageChangeListeners();
+    if (!silentlySet) this.callOnImageChangeListeners();
     this.resetDrawingBuffer();
   }
 
@@ -71,27 +71,33 @@ export default abstract class LayerImageAgent {
 
   setOnImageChangeListener(
     key: string,
-    listener: (e: ImageChangeEvent) => void,
+    listener: (e: ImageChangeEvent) => void
   ) {
     this.onImageChangedListeners[key] = listener;
+  }
+  clearOnImageChangeListener(key: string) {
+    delete this.onImageChangedListeners[key];
   }
 
   setOnDrawingBufferChangeListener(
     key: string,
-    listener: (e: DrawingBufferChangeEvent) => void,
+    listener: (e: DrawingBufferChangeEvent) => void
   ) {
     this.onDrawingBufferChangedListeners[key] = listener;
+  }
+  clearOnDrawingBufferChangeListener(key: string) {
+    delete this.onDrawingBufferChangedListeners[key];
   }
 
   callOnImageChangeListeners() {
     Object.values(this.onImageChangedListeners).forEach((listener) =>
-      listener({}),
+      listener({})
     );
   }
 
   callOnDrawingBufferChangeListeners() {
     Object.values(this.onDrawingBufferChangedListeners).forEach((listener) =>
-      listener({}),
+      listener({})
     );
   }
 
@@ -119,17 +125,17 @@ export default abstract class LayerImageAgent {
     setBottomInfo(`undo.`);
     undoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
-        case "pixel":
+        case 'pixel':
           this.setPixelInPosition(diff.position, diff.before, false, false);
           break;
-        case "tile":
+        case 'tile':
           this.undoTileDiff(diff);
           break;
       }
     });
     const undoEnd = Date.now();
     setBottomInfo(
-      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`,
+      `undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`
     );
 
     this.callOnImageChangeListeners();
@@ -144,17 +150,17 @@ export default abstract class LayerImageAgent {
     setBottomInfo(`redo.`);
     redoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
-        case "pixel":
+        case 'pixel':
           this.setPixelInPosition(diff.position, diff.after, false, false);
           break;
-        case "tile":
+        case 'tile':
           this.redoTileDiff(diff);
           break;
       }
     });
     const redoEnd = Date.now();
     setBottomInfo(
-      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`,
+      `redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`
     );
 
     this.callOnImageChangeListeners();
@@ -166,14 +172,14 @@ export default abstract class LayerImageAgent {
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean,
-    excludeColorMatch: boolean,
+    excludeColorMatch: boolean
   ): PixelDiff | undefined;
 
   protected setPixelInPosition(
     position: Vec2,
     color: RGBAColor,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     if (!this.isInBounds(position)) return undefined;
     if (
@@ -198,7 +204,7 @@ export default abstract class LayerImageAgent {
     this.drawingBuffer.data[i + 3] = color[3];
 
     return {
-      kind: "pixel",
+      kind: 'pixel',
       position,
       before: beforeColor,
       after: color,
@@ -208,19 +214,19 @@ export default abstract class LayerImageAgent {
   public abstract deletePixel(
     position: Vec2,
     excludePositionMatch: boolean,
-    excludeColorMatch: boolean,
+    excludeColorMatch: boolean
   ): PixelDiff | undefined;
 
   protected deletePixelInPosition(
     position: Vec2,
     excludePositionMatch: boolean = true,
-    excludeColorMatch: boolean = true,
+    excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     return this.setPixelInPosition(
       position,
       [0, 0, 0, 0],
       excludePositionMatch,
-      excludeColorMatch,
+      excludeColorMatch
     );
   }
 

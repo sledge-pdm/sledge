@@ -22,7 +22,6 @@ export const layerItem = style([
     cursor: 'pointer',
     backgroundColor: vars.color.surface,
     borderLeft: '3px solid #333',
-    paddingLeft: '3px',
 
     ':hover': {
       filter: 'brightness(0.94)',

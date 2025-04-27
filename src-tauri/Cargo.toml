@@ -1,12 +1,12 @@
 [package]
-name = "app"
+name = "sledge"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "A playful pixel drawing tool"
+authors = ["innsbluck"]
 license = ""
 repository = ""
-edition = "2021"
-rust-version = "1.77.2"
+edition = "2024"
+rust-version = "1.86.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

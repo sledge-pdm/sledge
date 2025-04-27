@@ -12,12 +12,13 @@
   "app": {
     "windows": [
       {
+        "create": true,
         "title": "sledge",
-        "label": "main",
-        "width": 1200,
-        "height": 800,
+        "label": "start",
+        "width": 700,
+        "height": 500,
         "acceptFirstMouse": true,
-        "resizable": true,
+        "resizable": false,
         "closable": true,
         "maximizable": true,
         "minimizable": true,

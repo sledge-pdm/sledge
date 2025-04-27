@@ -1,6 +1,6 @@
-import { style } from '@vanilla-extract/css'
-import { ZFB03B, ZFB09, ZFB31 } from '~/styles/global.css'
-import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css'
+import { style } from '@vanilla-extract/css';
+import { ZFB03B, ZFB09, ZFB31 } from '~/styles/global.css';
+import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css';
 
 export const welcomeRoot = style([
   flexCol,
@@ -9,14 +9,14 @@ export const welcomeRoot = style([
     alignItems: 'center',
     justifyContent: 'center',
   },
-])
+]);
 
 export const welcomeHeadline = style({
   fontFamily: ZFB31,
-  fontSize: '4rem',
+  fontSize: '3rem',
   letterSpacing: '8px',
   marginBottom: '12px',
-})
+});
 
 export const recentFilesCaption = style({
   fontFamily: ZFB03B,
@@ -24,7 +24,7 @@ export const recentFilesCaption = style({
   color: '#000',
   flexGrow: 1,
   marginBottom: '12px',
-})
+});
 
 export const clear = style({
   fontFamily: ZFB03B,
@@ -32,7 +32,7 @@ export const clear = style({
   ':hover': {
     color: 'red',
   },
-})
+});
 
 export const recentFilesContainer = style([
   flexCol,
@@ -41,7 +41,7 @@ export const recentFilesContainer = style([
     gap: '8px',
     marginTop: '4px',
   },
-])
+]);
 
 export const recentFilesItem = style([
   flexRow,
@@ -50,7 +50,7 @@ export const recentFilesItem = style([
     alignItems: 'center',
     gap: '8px',
   },
-])
+]);
 
 export const recentFilesName = style({
   fontFamily: ZFB09,
@@ -58,31 +58,33 @@ export const recentFilesName = style({
   textOverflow: 'ellipsis',
   color: '#555',
   whiteSpace: 'nowrap',
-})
+});
 
 export const recentFilesPath = style({
   fontFamily: ZFB03B,
   fontSize: '0.5rem',
   color: '#00000030',
-})
+});
 
 export const sideSection = style([
   flexRow,
   {
     gap: '24px',
-    paddingBottom: '24px',
+    paddingBottom: '48px',
     paddingTop: '12px',
   },
-])
+]);
 
 export const sideSectionItem = style([
-  flexCol,
+  flexRow,
   {
     cursor: 'pointer',
     fontSize: '1rem',
     width: 'fit-content',
+    alignItems: 'center',
+    justifyContent: 'center',
     ':hover': {
       color: 'red',
     },
   },
-])
+]);

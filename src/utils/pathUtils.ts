@@ -1,10 +1,10 @@
-import { FileLocation } from "~/stores/global/globalStore";
+import { FileLocation } from '~/types/FileLocation';
 
 export const getFileNameAndPath = (
-  fullPath: string,
+  fullPath: string
 ): FileLocation | undefined => {
-  var filePath = fullPath.substring(0, fullPath.lastIndexOf("\\"));
-  var fileName = fullPath.split("\\").pop()?.split("/").pop();
+  const filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'));
+  const fileName = fullPath.split('\\').pop()?.split('/').pop();
 
   if (filePath === undefined || fileName === undefined) return undefined;
   else {

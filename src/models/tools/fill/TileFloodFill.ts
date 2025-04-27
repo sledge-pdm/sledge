@@ -1,9 +1,9 @@
-import TileLayerImageAgent from "~/models/layer_image/agents/TileLayerImageAgent";
-import { PixelDiff } from "~/models/layer_image/HistoryManager";
-import { TileIndex } from "~/models/layer_image/Tile";
-import { Vec2 } from "~/models/types/Vector";
-import { colorMatch } from "~/utils/colorUtils";
-import { Fill, FillProps } from "./FillTool";
+import { Fill, FillProps } from './FillTool';
+import { PixelDiff } from '~/models/layer_image/HistoryManager';
+import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
+import { TileIndex } from '~/types/Tile';
+import { Vec2 } from '~/types/Vector';
+import { colorMatch } from '~/utils/colorUtils';
 
 interface FillPassProps {
   index: TileIndex;
@@ -12,7 +12,7 @@ interface FillPassProps {
 export class TileFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {
     if (!(agent instanceof TileLayerImageAgent))
-      throw "Agent is not a TileLayerImageAgent";
+      throw 'Agent is not a TileLayerImageAgent';
     const tileAgent = agent as TileLayerImageAgent;
 
     const targetColor = tileAgent.getPixel(position);
@@ -108,7 +108,7 @@ export class TileFloodFill implements Fill {
         // ↓ 前はこれがなかった ↓
         const newEdges = this.collectEdgePixels(
           tileAgent,
-          tilesFilledInReEntry,
+          tilesFilledInReEntry
         );
         for (const edge of newEdges) {
           pixelQueue.push(edge);
@@ -155,18 +155,18 @@ export class TileFloodFill implements Fill {
     for (const ti of filled) {
       const offset = agent.getTile(ti).getOffset();
       const neighbors = [
-        { dr: -1, dc: 0, dx: 0, dy: -1, axis: "x" },
-        { dr: 1, dc: 0, dx: 0, dy: TILE_SIZE, axis: "x" },
-        { dr: 0, dc: -1, dx: -1, dy: 0, axis: "y" },
-        { dr: 0, dc: 1, dx: TILE_SIZE, dy: 0, axis: "y" },
+        { dr: -1, dc: 0, dx: 0, dy: -1, axis: 'x' },
+        { dr: 1, dc: 0, dx: 0, dy: TILE_SIZE, axis: 'x' },
+        { dr: 0, dc: -1, dx: -1, dy: 0, axis: 'y' },
+        { dr: 0, dc: 1, dx: TILE_SIZE, dy: 0, axis: 'y' },
       ];
 
       for (const { dr, dc, dx, dy, axis } of neighbors) {
         const ni = `${ti.row + dr},${ti.column + dc}`;
         if (filledSet.has(ni)) continue;
         for (let i = 0; i < TILE_SIZE; i++) {
-          const x = axis === "x" ? offset.x + i : offset.x + dx;
-          const y = axis === "y" ? offset.y + i : offset.y + dy;
+          const x = axis === 'x' ? offset.x + i : offset.x + dx;
+          const y = axis === 'y' ? offset.y + i : offset.y + dy;
           edge.push({ x, y });
         }
       }

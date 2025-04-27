@@ -1,15 +1,16 @@
-import { reconcile } from "solid-js/store";
-import { setBottomInfo } from "~/components/BottomInfo";
-import { LayerCanvasRef } from "~/components/canvas/stacks/LayerCanvas";
-import { Vec2 } from "~/models/types/Vector";
-import { currentTool } from "~/stores/internal/toolsStore";
-import { setLayerImageStore } from "~/stores/project/layerImageStore";
-import { hexToRGBA } from "~/utils/colorUtils";
-import LayerImageAgent from "../layer_image/LayerImageAgent";
-import TileLayerImageAgent from "../layer_image/agents/TileLayerImageAgent";
-import { getToolInstance } from "../tools/ToolBase";
-import { Tool } from "../types/Tool";
-import { DrawState } from "./DrawState";
+import { reconcile } from 'solid-js/store';
+import { DrawState } from '../../types/DrawState';
+import { Tool } from '../../types/Tool';
+import LayerImageAgent from '../layer_image/LayerImageAgent';
+import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent';
+import { getToolInstance } from '../tools/ToolBase';
+import { setBottomInfo } from '~/components/BottomInfo';
+import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas';
+import { currentColor } from '~/stores/internal/colorStore';
+import { currentTool } from '~/stores/internal/toolsStore';
+import { setLayerImageStore } from '~/stores/project/layerImageStore';
+import { Vec2 } from '~/types/Vector';
+import { hexToRGBA } from '~/utils/colorUtils';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
@@ -30,7 +31,7 @@ export default class LayerCanvasOperator {
       image,
       currentTool(),
       position,
-      last,
+      last
     );
 
     if (result) {
@@ -38,7 +39,7 @@ export default class LayerCanvasOperator {
       if (state === DrawState.end) {
         agent.registerDiffAction();
         agent.setImage(result);
-        setLayerImageStore(layer.id, "current", reconcile(result));
+        setLayerImageStore(layer.id, 'current', reconcile(result));
 
         if (agent instanceof TileLayerImageAgent) {
           (agent as TileLayerImageAgent).resetAllDirtyStates();
@@ -53,7 +54,7 @@ export default class LayerCanvasOperator {
     image: ImageData,
     tool: Tool,
     position: Vec2,
-    last?: Vec2,
+    last?: Vec2
   ) {
     const toolInstance = getToolInstance(tool.type);
     const toolArgs = {
@@ -61,13 +62,15 @@ export default class LayerCanvasOperator {
       position,
       lastPosition: last,
       size: tool.size,
-      color: hexToRGBA(tool.color),
+      color: hexToRGBA(currentColor()),
     };
     const startTime = Date.now();
     let isDrawnAction;
     switch (state) {
       case DrawState.start:
-        isDrawnAction = toolInstance.onStart(agent, toolArgs);
+        const isDrawnActionInStart = toolInstance.onStart(agent, toolArgs);
+        const isDrawnActionInMove = toolInstance.onMove(agent, toolArgs);
+        isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
         break;
       case DrawState.move:
         isDrawnAction = toolInstance.onMove(agent, toolArgs);
@@ -80,7 +83,7 @@ export default class LayerCanvasOperator {
     if (isDrawnAction) {
       if (agent instanceof TileLayerImageAgent) {
         setBottomInfo(
-          `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`,
+          `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`
         );
       } else {
         setBottomInfo(`${tool.type} finished. ${endTime - startTime} ms.`);

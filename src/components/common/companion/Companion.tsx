@@ -1,6 +1,5 @@
-import { Component, createEffect, createSignal } from "solid-js";
-
-import styles from "@styles/components/companion.module.css";
+import { Component, createEffect, createSignal } from 'solid-js';
+import styles from '@styles/components/companion.module.css';
 
 const [sayRequest, setSayRequest] = createSignal<string | null>(null);
 
@@ -10,7 +9,7 @@ export const CompanionEvents = {
 };
 
 const Companion: Component = () => {
-  const [quote, setQuote] = createSignal("");
+  const [quote, setQuote] = createSignal('');
 
   const say = (text: string) => {
     window.speak?.(text, {
@@ -26,18 +25,18 @@ const Companion: Component = () => {
     if (message) {
       say(message);
       setQuote(message);
-      const element = document.getElementById("companion");
+      const element = document.getElementById('companion');
       setTimeout(() => {
-        setQuote("");
+        setQuote('');
         if (element)
           element.className = element.className.replace(
-            ` ${styles["giggle"]}`,
-            "",
+            ` ${styles['giggle']}`,
+            ''
           );
       }, 5000);
       window.requestAnimationFrame(function (time) {
         window.requestAnimationFrame(function (time) {
-          if (element) element.className += ` ${styles["giggle"]}`;
+          if (element) element.className += ` ${styles['giggle']}`;
         });
       });
       CompanionEvents.setSayRequest(null); // 一度で消費
@@ -47,8 +46,8 @@ const Companion: Component = () => {
   return (
     <div class={styles.root}>
       <div class={styles.wrapper}>
-        <div class={styles.companion} id="companion">
-          <img src="/companion.png" alt="you challenge me?" />
+        <div class={styles.companion} id='companion'>
+          <img src='/companion.png' alt='you challenge me?' />
         </div>
         {quote() && (
           <div class={styles.quote_box_container}>
@@ -58,7 +57,7 @@ const Companion: Component = () => {
           </div>
         )}
       </div>
-      <div id="audio" />
+      <div id='audio' />
     </div>
   );
 };

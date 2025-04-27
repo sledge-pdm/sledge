@@ -1,11 +1,11 @@
-import { createStore } from "solid-js/store";
-import { Layer } from "~/models/types/Layer";
+import { createStore } from 'solid-js/store';
+import { Layer } from '~/types/Layer';
 
 // layer
 
 export const [layerStore, setLayerStore] = createStore({
   layers: new Array<Layer>(),
-  activeLayerId: "",
+  activeLayerId: '',
 });
 
 export const allLayers = () => layerStore.layers;

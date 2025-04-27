@@ -1,34 +1,35 @@
-import { createStore } from "solid-js/store";
-import { saveGlobalSettings } from "~/io/global/globalIO";
-import { canvasStore } from "../project/canvasStore";
+import { createStore } from 'solid-js/store';
+import { saveGlobalSettings } from '~/io/global/globalIO';
+import { CanvasRenderingMode } from '~/types/Canvas';
+import { FileLocation } from '~/types/FileLocation';
 
 // global
-export type FileLocation = {
-  path: string;
-  name: string;
-};
-export type ImageRenderingAttribute = "auto" | "pixelated" | "crispEdges";
-export type CanvasRenderingMode = "adaptive" | "pixelated" | "crispEdges";
-
-export const getCanvasImageRenderingAttribute = (mode: CanvasRenderingMode) => {
+export const getCanvasImageRenderingAttribute = (
+  zoom: number,
+  mode: CanvasRenderingMode
+): 'pixelated' | 'crisp-edges' => {
   switch (mode) {
-    case "pixelated":
-    case "crispEdges":
-      return mode;
-    case "adaptive":
-      return canvasStore.zoom > 1.0 ? "pixelated" : "crispEdges";
+    case 'pixelated':
+      return 'pixelated';
+    case 'crispEdges':
+      return 'crisp-edges';
+    case 'adaptive':
+      return zoom > 1.0 ? 'pixelated' : 'crisp-edges';
   }
 };
 
 export const [globalStore, setGlobalStore] = createStore({
   recentOpenedFiles: [
     {
-      path: "C:\\Users\\innsb\\Documents",
-      name: "project.sledge",
+      path: 'C:\\Users\\innsb\\Documents',
+      name: 'project.sledge',
     },
   ],
 
-  canvasRenderingMode: "adaptive" as CanvasRenderingMode,
+  showDirtyRects: false,
+  canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
+
+  showPerfMonitor: false,
 });
 
 export const addRecent = (loc: FileLocation) => {
@@ -37,11 +38,11 @@ export const addRecent = (loc: FileLocation) => {
 
   // add to recent
   setGlobalStore((store) => {
-    console.log("path: " + path);
-    console.log("name: " + name);
+    console.log('path: ' + path);
+    console.log('name: ' + name);
     if (name && path && store.recentOpenedFiles) {
       // 履歴にあっても一旦削除
-      let oldRecentFiles = store.recentOpenedFiles.filter((f) => {
+      const oldRecentFiles = store.recentOpenedFiles.filter((f) => {
         return f.name !== name || f.path !== path?.toString();
       });
       // その後、一番上に追加
@@ -52,7 +53,7 @@ export const addRecent = (loc: FileLocation) => {
         },
         ...oldRecentFiles,
       ];
-      setGlobalStore("recentOpenedFiles", newRecentFiles);
+      setGlobalStore('recentOpenedFiles', newRecentFiles);
       saveGlobalSettings();
     }
     return store;

@@ -5,7 +5,7 @@ export function setPixel(
   r: number,
   g: number,
   b: number,
-  a: number,
+  a: number
 ) {
   if (x < 0 || x >= image.width || y < 0 || y >= image.height) return;
   const i = (y * image.width + x) * 4;
@@ -17,7 +17,7 @@ export function setPixel(
 
 export function encodeImageData(imageData: ImageData): string {
   const bytes = new Uint8Array(imageData.data.buffer);
-  let binary = "";
+  let binary = '';
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
@@ -27,7 +27,7 @@ export function encodeImageData(imageData: ImageData): string {
 export function decodeImageData(
   encoded: string,
   width: number,
-  height: number,
+  height: number
 ): ImageData {
   const binary = atob(encoded);
   const buffer = new Uint8ClampedArray(binary.length);

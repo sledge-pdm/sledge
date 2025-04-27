@@ -1,5 +1,5 @@
-import styles from "@styles/components/slider.module.css";
-import { Component, createSignal } from "solid-js";
+import { Component, createSignal } from 'solid-js';
+import styles from '@styles/components/slider.module.css';
 
 interface SliderProps {
   min: number;
@@ -20,8 +20,8 @@ const Slider: Component<SliderProps> = (props) => {
   const handlePointerDown = (e: PointerEvent) => {
     setDrag(true);
 
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
   };
 
   const handlePointerMove = (e: PointerEvent) => {
@@ -39,8 +39,8 @@ const Slider: Component<SliderProps> = (props) => {
 
   const handlePointerUp = (e: PointerEvent) => {
     setDrag(false);
-    window.removeEventListener("pointermove", handlePointerMove);
-    window.removeEventListener("pointerup", handlePointerUp);
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerup', handlePointerUp);
   };
 
   const onLineClick = (e: MouseEvent) => {
@@ -60,7 +60,7 @@ const Slider: Component<SliderProps> = (props) => {
     <div class={styles.root}>
       <div class={styles.slider} ref={sliderRef}>
         <div
-          class={styles["line-hitbox"]}
+          class={styles['line-hitbox']}
           onPointerDown={handlePointerDown}
           onClick={onLineClick}
         >

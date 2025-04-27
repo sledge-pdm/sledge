@@ -1,6 +1,6 @@
-import { style } from "@vanilla-extract/css";
-import { vars, ZFB11 } from "./global.css";
-import { flexCol, w100 } from "./snippets.css";
+import { style } from '@vanilla-extract/css';
+import { vars, ZFB11 } from './global.css';
+import { flexCol, w100 } from './snippets.css';
 
 export const sectionRoot = style([
   flexCol,
@@ -12,7 +12,7 @@ export const sectionRoot = style([
 export const sectionCaption = style({
   fontFamily: ZFB11,
   fontSize: vars.text.sm,
-  marginBottom: vars.spacing.md,
+  marginBottom: vars.spacing.sm,
 });
 
 export const sectionContent = style([flexCol, w100]);

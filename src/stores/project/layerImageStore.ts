@@ -1,9 +1,8 @@
-import { createStore } from "solid-js/store";
-import { LayerImage } from "~/models/types/LayerImage";
-import { layerStore } from "./layerStore";
+import { createStore } from 'solid-js/store';
+import { layerStore } from './layerStore';
+import { LayerImage } from '~/types/LayerImage';
 
 // image
-
 export const [layerImageStore, setLayerImageStore] = createStore<
   Record<string, LayerImage>
 >({});

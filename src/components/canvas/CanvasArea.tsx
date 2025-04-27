@@ -1,27 +1,28 @@
-import CanvasStack from "./stacks/CanvasStack";
+import { createMemo, onCleanup, onMount } from 'solid-js';
+import CanvasAreaInteract from './CanvasAreaInteract';
+import Controls from './Controls';
+import CanvasStack from './stacks/CanvasStack';
 
 import {
   adjustZoomToFit,
   canvasStore,
   centeringCanvas,
   setCanvasStore,
-} from "~/stores/project/canvasStore";
-
-import { createMemo, onCleanup, onMount } from "solid-js";
-import Controls from "./Controls";
-
-import { canvasArea } from "~/styles/components/canvas/canvas_area.css";
-import CanvasAreaInteract from "./CanvasAreaInteract";
+} from '~/stores/project/canvasStore';
+import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
+import BottomInfo from '../BottomInfo';
+import CanvasDebugOverlay from './CanvasDebugOverlay';
+import { globalStore } from '~/stores/global/globalStore';
 
 export default () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
-  let interact: CanvasAreaInteract = new CanvasAreaInteract();
+  const interact: CanvasAreaInteract = new CanvasAreaInteract();
 
   onMount(() => {
     // set Canvas to center
-    setCanvasStore("canvasAreaSize", {
+    setCanvasStore('canvasAreaSize', {
       width: wrapper.clientWidth,
       height: wrapper.clientHeight,
     });
@@ -47,30 +48,31 @@ export default () => {
   return (
     <div class={canvasArea}>
       <div
-        id="zoompan-wrapper"
+        id='zoompan-wrapper'
         ref={(el) => {
           wrapper = el;
         }}
         style={{
-          display: "flex",
-          position: "absolute",
+          display: 'flex',
+          position: 'absolute',
           top: 0,
           left: 0,
-          bottom: 0,
-          right: 0,
           padding: 0,
           margin: 0,
-          width: "100%",
-          height: "100%",
-          "touch-action": "none",
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+          'touch-action': 'none',
         }}
       >
         <div
           ref={(el) => (canvasStack = el)}
           style={{
+            width: 'fit-content',
+            height: 'fit-content',
             padding: 0,
             margin: 0,
-            "transform-origin": "0 0",
+            'transform-origin': '0 0',
             transform: transform(),
           }}
         >
@@ -78,7 +80,9 @@ export default () => {
         </div>
       </div>
 
+      <CanvasDebugOverlay />
       <Controls />
+      <BottomInfo />
     </div>
   );
 };

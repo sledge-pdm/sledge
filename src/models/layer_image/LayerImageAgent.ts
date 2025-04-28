@@ -1,6 +1,6 @@
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { Vec2 } from '~/types/Vector';
-import { colorMatch, RGBAColor } from '~/utils/colorUtils';
+import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { Diff, DiffAction, getDiffHash, HistoryManager, PixelDiff, TileDiff } from './HistoryManager';
 
 interface DrawingBufferChangeEvent {}

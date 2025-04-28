@@ -1,11 +1,12 @@
 import { For, onMount } from 'solid-js';
-import { loadGlobalSettings } from '~/io/global_setting/globalSettings';
+import { addRecentFile } from '~/controllers/config/GlobalConfigController';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromFileSelection } from '~/io/project/project';
-import { addRecent, globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { sectionRoot } from '~/styles/section_global.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
-import { getFileNameAndPath } from '~/utils/pathUtils';
+import { getFileNameAndPath } from '~/utils/PathUtils';
 import { closeWindowsByLabel, openEditorWindow, openSingletonWindow, WindowOptionsProp } from '~/utils/windowUtils';
 import { SettingsWindowOptions } from './settings';
 import {
@@ -53,7 +54,7 @@ export default function Home() {
     importProjectJsonFromFileSelection().then((file: string | undefined) => {
       if (file !== undefined) {
         const loc = getFileNameAndPath(file);
-        if (loc !== undefined) addRecent(loc);
+        addRecentFile(loc);
         openEditorWindow(loc);
         closeWindowsByLabel('start');
       }
@@ -61,7 +62,7 @@ export default function Home() {
   };
 
   const clearRecentFiles = () => {
-    setGlobalStore('recentOpenedFiles', []);
+    setGlobalStore('recentFiles', []);
   };
 
   return (
@@ -93,7 +94,7 @@ export default function Home() {
               </p> */}
           </div>
           <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
-            <For each={globalStore.recentOpenedFiles}>
+            <For each={globalStore.recentFiles}>
               {(item, i) => {
                 return (
                   <div class={recentFilesItem}>

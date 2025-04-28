@@ -7,12 +7,13 @@ import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/global/EdgeInfo';
 import SideSections from '~/components/global/SideSections';
-import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
-import resetLayerImage from '~/controllers/layer/LayerController';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
-import { loadGlobalSettings } from '~/io/global_setting/globalSettings';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromPath } from '~/io/project/project';
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { globalStore } from '~/stores/GlobalStores';
 import { canvasStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { pageRoot } from '~/styles/global.css';
@@ -20,8 +21,8 @@ import { LayerType } from '~/types/Layer';
 import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
-  width: 1200,
-  height: 800,
+  width: 1000,
+  height: 750,
   acceptFirstMouse: true,
   resizable: true,
   closable: true,
@@ -46,11 +47,25 @@ export default function Editor() {
     setProjectStore('isProjectChangedAfterSave', true);
   });
 
+  const isNewProject = location.search === '';
   const [isLoading, setIsLoading] = createSignal(true);
 
   const onProjectLoad = () => {
     setProjectStore('isProjectChangedAfterSave', false);
     setIsLoading(false);
+
+    loadGlobalSettings();
+
+    if (isNewProject) {
+      changeCanvasSize(globalStore.newProjectCanvasSize);
+    }
+
+    layerListStore.layers.forEach((layer) => {
+      resetLayerImage(layer.id, 1);
+    });
+
+    adjustZoomToFit();
+    centeringCanvas();
   };
 
   if (location.search) {
@@ -73,14 +88,6 @@ export default function Editor() {
   let unlisten: UnlistenFn;
 
   onMount(async () => {
-    adjustZoomToFit();
-    centeringCanvas();
-    loadGlobalSettings();
-
-    layerListStore.layers.forEach((layer) => {
-      resetLayerImage(layer.id, 1);
-    });
-
     unlisten = await window.onCloseRequested(async (event) => {
       if (isCloseRequested()) {
         event.preventDefault();

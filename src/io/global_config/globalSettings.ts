@@ -21,8 +21,6 @@ export async function loadGlobalSettings() {
     });
     const data = JSON.parse(json);
 
-    // data の各キーをまとめてストアに反映
-    // createStore の setter はオブジェクトを渡すだけで部分更新してくれます
     setGlobalStore(data);
 
     console.log('[globalIO] 設定読み込み完了', data);

@@ -44,44 +44,53 @@ The content is organized as follows:
 
 <directory_structure>
 app.tsx
-components/BottomInfo.tsx
 components/canvas/CanvasArea.tsx
 components/canvas/CanvasAreaInteract.tsx
 components/canvas/CanvasDebugOverlay.tsx
 components/canvas/Controls.tsx
 components/canvas/stacks/CanvasOverlaySVG.tsx
 components/canvas/stacks/CanvasStack.tsx
-components/canvas/stacks/ImagePool.tsx
 components/canvas/stacks/LayerCanvas.tsx
 components/canvas/stacks/TouchableCanvas.tsx
+components/common/Checkbox.tsx
 components/common/ColorBox.tsx
 components/common/companion/Companion.tsx
 components/common/companion/QuotePool.ts
-components/common/CompanionAA.tsx
 components/common/Dropdown.tsx
 components/common/DSLButton.tsx
-components/common/ImportImageButton.tsx
 components/common/LayerPreview.tsx
 components/common/Light.tsx
+components/common/PixelLineChart.tsx
+components/common/RadioButton.tsx
 components/common/Slider.tsx
 components/common/ToggleSwitch.tsx
-components/EdgeInfo.tsx
+components/global/BottomInfo.tsx
+components/global/EdgeInfo.tsx
+components/global/SideSections.tsx
+components/global/TitleBar.tsx
 components/section/CanvasSettings.tsx
 components/section/Color.tsx
 components/section/item/ColorPicker.tsx
 components/section/item/LayerItem.tsx
 components/section/item/Palette.tsx
-components/section/item/PenItem.tsx
-components/section/item/PenSize.tsx
+components/section/item/ToolItem.tsx
 components/section/LayerList.tsx
-components/section/PenConfig.tsx
 components/section/Project.tsx
 components/section/settings/EditorSettings.tsx
-components/SideSections.tsx
-components/TitleBar.tsx
-io/global/globalIO.ts
-io/internal/export.ts
-io/internal/import.ts
+components/section/settings/PerformanceSettings.tsx
+components/section/ToolConfig.tsx
+controllers/canvas/CanvasController.ts
+controllers/canvas/LayerCanvasOperator.ts
+controllers/canvas/PreviewCanvasFactory.ts
+controllers/color/ColorController.ts
+controllers/config/GlobalConfigController.ts
+controllers/layer_list/LayerListController.ts
+controllers/layer/LayerController.ts
+controllers/layer/LayerFactory.ts
+controllers/log/LogController.tsx
+controllers/tool/ToolController.ts
+io/global_config/globalSettings.ts
+io/image_io/save.ts
 io/project/project.ts
 main.tsx
 models/dsl/DSL.ts
@@ -98,28 +107,18 @@ models/dsl/nodes/fracture/JpegGlitch.ts
 models/dsl/nodes/pass/LayerIn.ts
 models/dsl/nodes/pass/LayerOut.ts
 models/dsl/nodes/pass/PassNode.ts
-models/factories/addLayer.ts
-models/factories/canvasPreview.ts
-models/factories/createCanvas.ts
-models/factories/createLayer.ts
-models/factories/createPen.ts
-models/factories/getNextMagnification.ts
-models/factories/initLayerImage.ts
-models/factories/removeLayer.ts
-models/layer_canvas/LayerCanvasOperator.ts
 models/layer_image/agents/RawLayerImageAgent.ts
 models/layer_image/agents/TileLayerImageAgent.ts
 models/layer_image/HistoryManager.ts
 models/layer_image/LayerImageAgent.ts
 models/layer_image/LayerImageManager.ts
-models/tools/DrawUtils.ts
-models/tools/eraser/EraserTool.ts
-models/tools/fill/FillTool.ts
-models/tools/fill/LegacyFills.ts
-models/tools/fill/PixelFloodFill.ts
-models/tools/fill/TileFloodFill.ts
-models/tools/pen/PenTool.ts
-models/tools/ToolBase.ts
+models/tool/eraser/EraserTool.ts
+models/tool/fill/FillTool.ts
+models/tool/fill/PixelFloodFill.ts
+models/tool/fill/TileFloodFill.ts
+models/tool/pen/PenTool.ts
+models/tool/ToolBase.ts
+models/tool/ToolFactory.ts
 routes/[...404].tsx
 routes/about/about.css.ts
 routes/about/index.tsx
@@ -128,30 +127,29 @@ routes/index.tsx
 routes/settings/index.tsx
 routes/settings/settings.css.ts
 routes/start.css.ts
-stores/global/globalStore.ts
-stores/internal/colorStore.ts
-stores/internal/toolsStore.ts
-stores/project/canvasStore.ts
-stores/project/layerHistoryStore.ts
-stores/project/layerStore.ts
-stores/project/projectStore.ts
+stores/EditorStores.ts
+stores/GlobalStores.ts
+stores/ProjectStores.ts
 styles/components/bottom_info.css.ts
 styles/components/canvas/canvas_area.css.ts
+styles/components/canvas/canvas_debug_overlay.css.ts
 styles/components/canvas/canvas_stack.css.ts
 styles/components/canvas/canvas_stack.module.css
 styles/components/canvas/controls.module.css
 styles/components/canvas/image_pool.module.css
 styles/components/canvas/layer_canvas.css.ts
+styles/components/checkbox.css.ts
 styles/components/companion.module.css
 styles/components/dropdown.css.ts
 styles/components/dsl_button.module.css
-styles/components/edge_info.module.css
+styles/components/edge_info.css.ts
 styles/components/layer_preview.module.css
 styles/components/light.module.css
 styles/components/palette.css.ts
+styles/components/radio_button.css.ts
+styles/components/side_sections.css.ts
 styles/components/slider.module.css
 styles/components/title_bar.css.ts
-styles/components/toast.module.css
 styles/components/toggle_switch.css.ts
 styles/global.css.ts
 styles/reset.css.ts
@@ -166,15 +164,18 @@ types/Canvas.ts
 types/DrawState.ts
 types/FileLocation.ts
 types/Layer.ts
-types/LayerImage.ts
+types/LayerHistory.ts
+types/PaletteType.ts
+types/Size.ts
 types/Tile.ts
 types/Tool.ts
 types/Vector.ts
-utils/colorUtils.ts
-utils/DSLUtils.ts
+utils/ColorUtils.ts
+utils/consts.ts
+utils/DrawUtils.ts
 utils/ImageUtils.ts
-utils/pathUtils.ts
-utils/tauriUtils.ts
+utils/PathUtils.ts
+utils/TauriUtils.ts
 utils/windowUtils.ts
 </directory_structure>
 
@@ -186,7 +187,7 @@ This section contains the contents of the repository's files.
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
 import { Suspense } from 'solid-js';
-import TitleBar from './components/TitleBar';
+import TitleBar from './components/global/TitleBar';
 import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';
@@ -212,49 +213,13 @@ export default function App() {
         </MetaProvider>
       )}
     >
-      <Route path="/" component={Home} />
-      <Route path="/editor" component={Editor} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/about" component={About} />;
+      <Route path='/' component={Home} />
+      <Route path='/editor' component={Editor} />
+      <Route path='/settings' component={Settings} />
+      <Route path='/about' component={About} />;
     </Router>
   );
 }
-</file>
-
-<file path="components/BottomInfo.tsx">
-import { Component, createSignal } from 'solid-js';
-import { AboutWindowOptions } from '~/routes/about';
-
-import {
-  bottomInfoRoot,
-  bottomInfoText as bottomInfoTextStyle,
-} from '~/styles/components/bottom_info.css';
-import { openSingletonWindow } from '~/utils/windowUtils';
-
-const [bottomInfoText, setBottomInfoText] = createSignal('');
-
-const BottomInfo: Component = () => {
-  return (
-    <div class={bottomInfoRoot}>
-      <p
-        class={bottomInfoTextStyle}
-        style={{ 'pointer-events': 'all', cursor: 'pointer' }}
-        onClick={() => openSingletonWindow('about', AboutWindowOptions)}
-      >
-        sledge.
-      </p>
-      &nbsp;
-      <p class={bottomInfoTextStyle}>{bottomInfoText()}</p>
-      {/* <p class={sideAreaEdgeText}>{projectStore.name || "name N/A"}</p> */}
-    </div>
-  );
-};
-
-export const setBottomInfo = (text: string) => {
-  setBottomInfoText(text);
-};
-
-export default BottomInfo;
 </file>
 
 <file path="components/canvas/CanvasArea.tsx">
@@ -263,14 +228,11 @@ import CanvasAreaInteract from './CanvasAreaInteract';
 import Controls from './Controls';
 import CanvasStack from './stacks/CanvasStack';
 
-import {
-  adjustZoomToFit,
-  canvasStore,
-  centeringCanvas,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
-
+import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
+import BottomInfo from '../global/BottomInfo';
+import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 export default () => {
   let wrapper: HTMLDivElement;
@@ -280,7 +242,7 @@ export default () => {
 
   onMount(() => {
     // set Canvas to center
-    setCanvasStore('canvasAreaSize', {
+    setInteractStore('canvasAreaSize', {
       width: wrapper.clientWidth,
       height: wrapper.clientHeight,
     });
@@ -296,17 +258,17 @@ export default () => {
     }
   });
 
-  const offsetX = () => canvasStore.offsetOrigin.x + canvasStore.offset.x;
-  const offsetY = () => canvasStore.offsetOrigin.y + canvasStore.offset.y;
+  const offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
+  const offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
 
   const transform = createMemo(() => {
-    return `translate(${offsetX()}px, ${offsetY()}px) scale(${canvasStore.zoom})`;
+    return `translate(${offsetX()}px, ${offsetY()}px) scale(${interactStore.zoom})`;
   });
 
   return (
     <div class={canvasArea}>
       <div
-        id="zoompan-wrapper"
+        id='zoompan-wrapper'
         ref={(el) => {
           wrapper = el;
         }}
@@ -338,14 +300,17 @@ export default () => {
         </div>
       </div>
 
+      <CanvasDebugOverlay />
       <Controls />
+      <BottomInfo />
     </div>
   );
 };
 </file>
 
 <file path="components/canvas/CanvasAreaInteract.tsx">
-import { canvasStore, getReferencedZoom, setCanvasStore } from '~/stores/project/canvasStore';
+import { getReferencedZoom } from '~/controllers/canvas/CanvasController';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { Vec2 } from '~/types/Vector';
 
 class CanvasAreaInteract {
@@ -355,8 +320,6 @@ class CanvasAreaInteract {
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  constructor() {}
-
   private getMutualMove = (move0: number, move1: number) => {
     // 逆方向なら0
     if (Math.sign(move0) !== Math.sign(move1)) return 0;
@@ -364,21 +327,21 @@ class CanvasAreaInteract {
   };
 
   private handleTouchMove(e: TouchEvent, canvasStack: HTMLDivElement) {
-    if (canvasStore.isInStroke) return;
+    if (interactStore.isInStroke) return;
 
     if (e.touches.length === 1) {
       const xMove0 = e.touches[0].clientX - this.lastX[0];
       if (xMove0 !== 0 && this.lastX[0] !== 0) {
-        setCanvasStore('offset', {
-          x: canvasStore.offset.x + xMove0,
-          y: canvasStore.offset.y,
+        setInteractStore('offset', {
+          x: interactStore.offset.x + xMove0,
+          y: interactStore.offset.y,
         });
       }
       const yMove0 = e.touches[0].clientY - this.lastY[0];
       if (yMove0 !== 0 && this.lastY[0] !== 0) {
-        setCanvasStore('offset', {
-          x: canvasStore.offset.x,
-          y: canvasStore.offset.y + yMove0,
+        setInteractStore('offset', {
+          x: interactStore.offset.x,
+          y: interactStore.offset.y + yMove0,
         });
       }
       this.lastX[0] = e.touches[0].clientX;
@@ -387,38 +350,38 @@ class CanvasAreaInteract {
     if (e.touches.length >= 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx * dx + dy * dy) * canvasStore.touchZoomSensitivity;
+      const dist = Math.sqrt(dx * dx + dy * dy) * interactStore.touchZoomSensitivity;
       if (this.lastDist !== 0) {
         const scaleFactor = dist / this.lastDist;
-        const zoomOld = canvasStore.zoom;
+        const zoomOld = interactStore.zoom;
         const zoomNew = zoomOld * scaleFactor;
         const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         const rect = canvasStack.getBoundingClientRect();
         const canvasX = (midX - rect.left) / zoomOld;
         const canvasY = (midY - rect.top) / zoomOld;
-        setCanvasStore('zoom', zoomNew);
-        setCanvasStore('offset', {
-          x: canvasStore.offset.x + canvasX * (zoomOld - zoomNew),
-          y: canvasStore.offset.y + canvasY * (zoomOld - zoomNew),
+        setInteractStore('zoom', zoomNew);
+        setInteractStore('offset', {
+          x: interactStore.offset.x + canvasX * (zoomOld - zoomNew),
+          y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
         });
       }
       const xMove0 = e.touches[0].clientX - this.lastX[0];
       const xMove1 = e.touches[1].clientX - this.lastX[1];
       const mutualMoveX = this.getMutualMove(xMove0, xMove1);
       if (mutualMoveX !== 0 && this.lastX[0] !== 0 && this.lastX[1] !== 0) {
-        setCanvasStore('offset', {
-          x: canvasStore.offset.x + mutualMoveX,
-          y: canvasStore.offset.y,
+        setInteractStore('offset', {
+          x: interactStore.offset.x + mutualMoveX,
+          y: interactStore.offset.y,
         });
       }
       const yMove0 = e.touches[0].clientY - this.lastY[0];
       const yMove1 = e.touches[1].clientY - this.lastY[1];
       const mutualMoveY = this.getMutualMove(yMove0, yMove1);
       if (mutualMoveY !== 0 && this.lastY[0] !== 0 && this.lastY[1] !== 0) {
-        setCanvasStore('offset', {
-          x: canvasStore.offset.x,
-          y: canvasStore.offset.y + mutualMoveY,
+        setInteractStore('offset', {
+          x: interactStore.offset.x,
+          y: interactStore.offset.y + mutualMoveY,
         });
       }
       this.lastX[0] = e.touches[0].clientX;
@@ -436,48 +399,44 @@ class CanvasAreaInteract {
   }
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
-    e.preventDefault();
     const referencedZoom = getReferencedZoom();
-    const delta = e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
+    if (!referencedZoom) return;
+    const delta = e.deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep;
 
-    const zoomOld = canvasStore.zoom;
-    const zoomNew = canvasStore.zoom + delta;
+    const zoomOld = interactStore.zoom;
+    const zoomNew = Math.round((interactStore.zoom + interactStore.zoom * delta) * 1000) / 1000;
 
-    if (
-      zoomNew < canvasStore.zoomMin * referencedZoom ||
-      canvasStore.zoomMax * referencedZoom < zoomNew
-    )
-      return;
+    if (zoomNew < interactStore.zoomMin * referencedZoom || interactStore.zoomMax * referencedZoom < zoomNew) return;
 
     const rect = canvasStack.getBoundingClientRect();
     const canvasX = (e.clientX - rect.left) / zoomOld;
     const canvasY = (e.clientY - rect.top) / zoomOld;
-    setCanvasStore('zoom', zoomNew);
-    setCanvasStore('offset', {
-      x: canvasStore.offset.x + canvasX * (zoomOld - zoomNew),
-      y: canvasStore.offset.y + canvasY * (zoomOld - zoomNew),
+    setInteractStore('zoom', zoomNew);
+    setInteractStore('offset', {
+      x: interactStore.offset.x + canvasX * (zoomOld - zoomNew),
+      y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
     });
   }
 
   private handleMouseDown(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && canvasStore.isCtrlPressed)) {
+    if (e.buttons === 4 || (e.buttons === 1 && interactStore.isCtrlPressed)) {
       e.preventDefault();
       e.stopPropagation();
-      setCanvasStore('isDragging', true);
+      setInteractStore('isDragging', true);
       this.dragPosition = { x: e.clientX, y: e.clientY };
     }
   }
 
   private handleMouseMove(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && canvasStore.isCtrlPressed)) {
+    if (e.buttons === 4 || (e.buttons === 1 && interactStore.isCtrlPressed)) {
       e.preventDefault();
       e.stopPropagation();
-      if (canvasStore.isDragging) {
+      if (interactStore.isDragging) {
         const dx = e.clientX - this.dragPosition.x;
         const dy = e.clientY - this.dragPosition.y;
-        setCanvasStore('offset', {
-          x: canvasStore.offset.x + dx,
-          y: canvasStore.offset.y + dy,
+        setInteractStore('offset', {
+          x: interactStore.offset.x + dx,
+          y: interactStore.offset.y + dy,
         });
         this.dragPosition = { x: e.clientX, y: e.clientY };
       }
@@ -485,22 +444,22 @@ class CanvasAreaInteract {
   }
 
   private handleMouseOff(e: MouseEvent) {
-    setCanvasStore('isDragging', false);
+    setInteractStore('isDragging', false);
   }
 
   private handleKeyDown(e: KeyboardEvent) {
-    if (e.ctrlKey) setCanvasStore('isCtrlPressed', true);
+    if (e.ctrlKey) setInteractStore('isCtrlPressed', true);
   }
 
   private handleKeyUp(e: KeyboardEvent) {
-    if (e.key === 'Control') setCanvasStore('isCtrlPressed', false);
+    if (e.key === 'Control') setInteractStore('isCtrlPressed', false);
   }
 
   public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
-    wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack));
-    wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this));
+    wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack), { passive: true });
+    wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
 
-    wrapper.addEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
+    wrapper.addEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack), { passive: true });
 
     wrapper.addEventListener('mousedown', this.handleMouseDown.bind(this));
     wrapper.addEventListener('mousemove', this.handleMouseMove.bind(this));
@@ -513,9 +472,7 @@ class CanvasAreaInteract {
   }
 
   public removeInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
-    wrapper.removeEventListener('touchmove', (e) =>
-      this.handleTouchMove.bind(this)(e, canvasStack)
-    );
+    wrapper.removeEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack));
     wrapper.removeEventListener('touchend', this.handleTouchEnd.bind(this));
 
     wrapper.removeEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
@@ -535,64 +492,103 @@ export default CanvasAreaInteract;
 </file>
 
 <file path="components/canvas/CanvasDebugOverlay.tsx">
-import { Component, For } from 'solid-js';
-import { layerImageManager } from './stacks/CanvasStack';
-import { canvasStore } from '~/stores/project/canvasStore';
-import { activeLayer } from '~/stores/project/layerStore';
+import { makeTimer } from '@solid-primitives/timer';
+import { Component, createSignal, Show } from 'solid-js';
+import { interactStore } from '~/stores/EditorStores';
+import { globalStore } from '~/stores/GlobalStores';
+import {
+  canvasDebugOverlayBottomLeft,
+  canvasDebugOverlayTopLeft,
+} from '~/styles/components/canvas/canvas_debug_overlay.css';
+import { flexCol } from '~/styles/snippets.css';
+import { safeInvoke } from '~/utils/TauriUtils';
+import { PixelLineChart } from '../common/PixelLineChart';
 
-const CanvasDebugOverlay: Component = () => {
+interface TauriMemInfo {
+  total_bytes: number;
+  main_bytes: number;
+  children_bytes: number;
+}
+
+const CanvasDebugOverlay: Component = (props) => {
+  const toMiB = (bytes?: number): string => {
+    if (bytes !== undefined) return (bytes / 1024 / 1024).toFixed(1) + ' MiB';
+    else return '- MiB';
+  };
+
   // const zoom = () => canvasStore.zoom;
-  const lastMouseWindow = () => canvasStore.lastMouseWindow;
-  const lastMouseOnCanvas = () => canvasStore.lastMouseOnCanvas;
-  return (
-    <div>
-      <p>canvas.</p>
-      <p>
-        ({lastMouseWindow().x}, {lastMouseWindow().y}) ON WINDOW.
-      </p>
-      <p>
-        ({lastMouseOnCanvas().x}, {lastMouseOnCanvas().y}) ON CANVAS.
-      </p>
-      {/* <p>x{zoom().toFixed(2)}</p> */}
-      <p>active: {activeLayer()?.name}</p>
-      <p>
-        offset:({canvasStore.offset.x}, {canvasStore.offset.y})
-      </p>
-      <p>zoom.</p>
-      <p>x {canvasStore.zoom}</p>
+  const lastMouseWindow = () => interactStore.lastMouseWindow;
+  const lastMouseOnCanvas = () => interactStore.lastMouseOnCanvas;
+  const [jsMemInfo, setJsMemInfo] = createSignal<any>({});
+  const [processMemInfo, setProcessMemInfo] = createSignal<TauriMemInfo>();
+  const callback = async () => {
+    setJsMemInfo((performance as any).memory);
 
-      <p>UNDO STACKS.</p>
-      <For
-        each={layerImageManager.getAgent(activeLayer()?.id)?.getHistoryManager()?.getUndoStack()}
-      >
-        {(item, i) => {
-          if (i() === 0) {
-            <>
-              <p>
-                pixel diffs:{' '}
-                {
-                  item.diffs
-                    .values()
-                    .toArray()
-                    .filter((d) => d.kind === 'pixel').length
-                }
-                px.
-              </p>
-              <p>
-                tile diffs:{' '}
-                {
-                  item.diffs
-                    .values()
-                    .toArray()
-                    .filter((d) => d.kind === 'tile').length
-                }
-                px.
-              </p>
-            </>;
-          } else return <></>;
-        }}
-      </For>
-    </div>
+    const processInfo = await safeInvoke<TauriMemInfo>('get_process_memory');
+    if (processInfo) {
+      setProcessMemInfo(processInfo);
+      // console.log(processInfo);
+    }
+    // console.log(`MAIN: ${toMiB(processMemInfo()?.main_bytes)}
+    // CHILDREN: ${toMiB(processMemInfo()?.children_bytes)}
+    // TOTAL: ${toMiB(processMemInfo()?.total_bytes)}
+    // JS Heap: ${toMiB(jsMemInfo().usedJSHeapSize)} / ${toMiB(jsMemInfo().totalJSHeapSize)}`);
+  };
+
+  const disposeInterval = makeTimer(callback, 1000, setInterval);
+
+  return (
+    <>
+      <div class={canvasDebugOverlayTopLeft}>
+        <div class={flexCol}>
+          <p>canvas.</p>
+          <p>
+            ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y})
+          </p>
+          <p>
+            ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)})
+          </p>
+          <p>
+            offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)})
+          </p>
+        </div>
+      </div>
+
+      <Show when={globalStore.showPerfMonitor}>
+        <div class={canvasDebugOverlayBottomLeft}>
+          <div class={flexCol}>
+            <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>
+            <p>CHILDREN: {toMiB(processMemInfo()?.children_bytes)}</p>
+            <p>TOTAL: {toMiB(processMemInfo()?.total_bytes)}</p>
+            <PixelLineChart
+              width={160}
+              height={60}
+              color='#00ca00'
+              suffix='MiB'
+              fetchSample={async () => {
+                const processInfo = await safeInvoke<TauriMemInfo>('get_process_memory');
+                return processInfo ? processInfo.total_bytes / 1024 / 1024 : undefined;
+              }}
+              interval={500}
+            />
+          </div>
+          <div class={flexCol}>
+            <p>
+              JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
+            </p>
+
+            <PixelLineChart
+              width={160}
+              height={60}
+              color='#f44336'
+              suffix='MiB'
+              fetchSample={async () => (performance as any).memory.usedJSHeapSize / 1024 / 1024}
+              interval={500}
+            />
+          </div>
+        </div>
+      </Show>
+    </>
   );
 };
 
@@ -600,11 +596,11 @@ export default CanvasDebugOverlay;
 </file>
 
 <file path="components/canvas/Controls.tsx">
-import { Component } from 'solid-js';
-import { layerImageManager } from './stacks/CanvasStack';
 import styles from '@styles/components/canvas/controls.module.css';
-import { canRedo, canUndo } from '~/stores/project/layerHistoryStore';
-import { layerStore } from '~/stores/project/layerStore';
+import { Component } from 'solid-js';
+import { canRedo, canUndo } from '~/controllers/layer/LayerController';
+import { layerImageManager } from '~/routes/editor';
+import { layerListStore } from '~/stores/ProjectStores';
 
 const Controls: Component = () => {
   return (
@@ -612,7 +608,7 @@ const Controls: Component = () => {
       <div class={styles['top-right-nav']}>
         <img
           class={styles.undo_redo}
-          src="/undo.png"
+          src='/undo.png'
           style={{
             opacity: canUndo() ? '1.0' : '0.3',
             cursor: canUndo() ? 'pointer' : 'unset',
@@ -620,12 +616,12 @@ const Controls: Component = () => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            layerImageManager.getAgent(layerStore.activeLayerId)?.undo();
+            layerImageManager.getAgent(layerListStore.activeLayerId)?.undo();
           }}
         />
         <img
           class={styles.undo_redo}
-          src="/redo.png"
+          src='/redo.png'
           style={{
             opacity: canRedo() ? '1.0' : '0.3',
             cursor: canRedo() ? 'pointer' : 'unset',
@@ -633,7 +629,7 @@ const Controls: Component = () => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            layerImageManager.getAgent(layerStore.activeLayerId)?.redo();
+            layerImageManager.getAgent(layerListStore.activeLayerId)?.redo();
           }}
         />
 
@@ -648,62 +644,67 @@ export default Controls;
 
 <file path="components/canvas/stacks/CanvasOverlaySVG.tsx">
 import { Component, For } from 'solid-js';
-import { currentTool } from '~/stores/internal/toolsStore';
-import { canvasStore } from '~/stores/project/canvasStore';
-import { activeLayer } from '~/stores/project/layerStore';
+import { activeLayer } from '~/controllers/layer_list/LayerListController';
+import { currentTool as getCurrentTool } from '~/controllers/tool/ToolController';
+import { interactStore } from '~/stores/EditorStores';
+import { globalStore } from '~/stores/GlobalStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import Tile from '~/types/Tile';
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
-  const borderWidth = () => canvasStore.canvas.width * canvasStore.zoom;
-  const borderHeight = () => canvasStore.canvas.height * canvasStore.zoom;
+  const borderWidth = () => canvasStore.canvas.width * interactStore.zoom;
+  const borderHeight = () => canvasStore.canvas.height * interactStore.zoom;
 
-  const zoomedPenSize = () => currentTool().size * canvasStore.zoom;
+  const zoomedPenSize = () => getCurrentTool().size * interactStore.zoom;
+
+  const dirtyRects = () => (globalStore.showDirtyRects ? props.dirtyRects : []);
 
   return (
     <svg
       viewBox={`0 0 ${borderWidth()} ${borderHeight()}`}
-      xmlns="http://www.w3.org/2000/svg"
+      xmlns='http://www.w3.org/2000/svg'
       style={{
         position: 'absolute',
         top: 0,
         left: 0,
         'pointer-events': 'none',
         'image-rendering': 'pixelated',
+        'z-index': 1000,
       }}
     >
       {/* border rect */}
       <rect
         width={borderWidth()}
         height={borderHeight()}
-        fill="none"
-        stroke="black"
+        fill='none'
+        stroke='black'
         stroke-width={1}
-        pointer-events="none"
+        pointer-events='none'
       />
 
       {/* pen hover preview */}
       <rect
         width={zoomedPenSize()}
         height={zoomedPenSize()}
-        x={Math.round(canvasStore.lastMouseOnCanvas.x) * canvasStore.zoom - zoomedPenSize() / 2}
-        y={Math.round(canvasStore.lastMouseOnCanvas.y) * canvasStore.zoom - zoomedPenSize() / 2}
-        fill="none"
-        stroke="black"
+        x={Math.round(interactStore.lastMouseOnCanvas.x * interactStore.zoom) - zoomedPenSize() / 2}
+        y={Math.round(interactStore.lastMouseOnCanvas.y * interactStore.zoom) - zoomedPenSize() / 2}
+        fill='none'
+        stroke='black'
         stroke-width={1}
-        pointer-events="none"
+        pointer-events='none'
       />
 
-      <For each={props.dirtyRects}>
+      <For each={dirtyRects()}>
         {(dirtyRect) => {
           return (
             <rect
-              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
-              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * canvasStore.zoom}
-              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * canvasStore.zoom}
-              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * canvasStore.zoom}
+              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * interactStore.zoom}
+              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * interactStore.zoom}
+              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * interactStore.zoom}
+              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * interactStore.zoom}
               fill={dirtyRect.isDirty ? '#ff000060' : '#00ffff60'}
-              stroke="none"
-              pointer-events="none"
+              stroke='none'
+              pointer-events='none'
             />
           );
         }}
@@ -717,20 +718,17 @@ export default CanvasOverlaySVG;
 
 <file path="components/canvas/stacks/CanvasStack.tsx">
 import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
+import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
+import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
 import { TouchableCanvas } from './TouchableCanvas';
-import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
-import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
-import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
-import { globalStore } from '~/stores/global/globalStore';
-import { canvasStore } from '~/stores/project/canvasStore';
-import { activeLayer, allLayers } from '~/stores/project/layerStore';
 
+import { activeLayer, allLayers } from '~/controllers/layer_list/LayerListController';
+import { layerImageManager } from '~/routes/editor';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
-
-export const layerImageManager = new LayerImageManager();
+import { canvasStore } from '~/stores/ProjectStores';
 
 const CanvasStack: Component = () => {
   const layerCanvasRefs: {
@@ -766,21 +764,15 @@ const CanvasStack: Component = () => {
 
   createEffect(() => {
     const active = activeLayer();
-
     if (active) {
       const agent = layerImageManager.getAgent(active.id);
       if (!agent) return;
-      if (globalStore.showDirtyRects) {
-        agent.setOnDrawingBufferChangeListener('stack_dirty_rect', () => {
-          setDirtyRects([...getDirtyRects()]);
-        });
-        agent.setOnImageChangeListener('stack_dirty_rect', () => {
-          setDirtyRects([...getDirtyRects()]);
-        });
-      } else {
-        agent.clearOnImageChangeListener('stack_dirty_rect');
-        agent.clearOnDrawingBufferChangeListener('stack_dirty_rect');
-      }
+      agent.setOnDrawingBufferChangeListener('stack_dirty_rect', () => {
+        setDirtyRects([...getDirtyRects()]);
+      });
+      agent.setOnImageChangeListener('stack_dirty_rect', () => {
+        setDirtyRects([...getDirtyRects()]);
+      });
     }
   });
 
@@ -812,15 +804,12 @@ const CanvasStack: Component = () => {
 
         <For each={allLayers()}>
           {(layer, index) => (
-            <LayerCanvas
-              ref={layerCanvasRefs[layer.id]}
-              layer={layer}
-              zIndex={allLayers().length - index()}
-            />
+            <LayerCanvas ref={layerCanvasRefs[layer.id]} layer={layer} zIndex={allLayers().length - index()} />
           )}
         </For>
       </div>
-      <CanvasOverlaySVG dirtyRects={globalStore.showDirtyRects ? dirtyRects() : undefined} />
+
+      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
     </div>
   );
 };
@@ -828,96 +817,13 @@ const CanvasStack: Component = () => {
 export default CanvasStack;
 </file>
 
-<file path="components/canvas/stacks/ImagePool.tsx">
-import interact from 'interactjs';
-import { Component, onMount } from 'solid-js';
-import styles from '@styles/components/canvas/image_pool.module.css';
-
-const ImagePool: Component = () => {
-  let imageRef: HTMLDivElement;
-
-  onMount(() => {
-    interact(imageRef)
-      .resizable({
-        // resize from all edges and corners
-        edges: { left: true, right: true, bottom: true, top: true },
-
-        listeners: {
-          move(event) {
-            const target = event.target;
-            let x = parseFloat(target.getAttribute('data-x')) || 0;
-            let y = parseFloat(target.getAttribute('data-y')) || 0;
-
-            // update the element's style
-            target.style.width = event.rect.width + 'px';
-            target.style.height = event.rect.height + 'px';
-
-            // translate when resizing from top or left edges
-            x += event.deltaRect.left;
-            y += event.deltaRect.top;
-
-            target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-          },
-        },
-        modifiers: [
-          // keep the edges inside the parent
-          interact.modifiers.restrictEdges({
-            outer: 'parent',
-          }),
-
-          // minimum size
-          interact.modifiers.restrictSize({
-            min: { width: 100, height: 50 },
-          }),
-        ],
-
-        inertia: true,
-      })
-      .draggable({
-        listeners: {
-          move(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const target = event.target;
-            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-            target.style.transform = `translate(${x}px, ${y}px)`;
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-          },
-        },
-      });
-  });
-
-  return (
-    <div
-      class={styles['resize-drag-container']}
-      ref={(r) => (imageRef = r)}
-      onMouseDown={(e) => e.preventDefault()}
-    >
-      <div class={styles['image-container']} onMouseDown={(e) => e.preventDefault()}>
-        {/* <img class={styles["resize-image"]} src="/333121.jpg" /> */}
-      </div>
-    </div>
-  );
-};
-
-export default ImagePool;
-</file>
-
 <file path="components/canvas/stacks/LayerCanvas.tsx">
-import { Component, createEffect, createRenderEffect, createSignal, onMount, Ref } from 'solid-js';
-import { layerImageManager } from './CanvasStack';
+import { Component, createRenderEffect, onMount, Ref } from 'solid-js';
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
-import { getCanvasImageRenderingAttribute, globalStore } from '~/stores/global/globalStore';
-import { canvasStore } from '~/stores/project/canvasStore';
-import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
+import { layerImageManager } from '~/routes/editor';
+import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { Layer } from '~/types/Layer';
 
@@ -935,7 +841,6 @@ export type LayerCanvasRef = {
 
 export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
-  let ctx: CanvasRenderingContext2D | null = null;
 
   const agent = () => layerImageManager.getAgent(props.layer.id);
 
@@ -958,63 +863,41 @@ export const LayerCanvas: Component<Props> = (props) => {
 
   onMount(() => {
     let agent = layerImageManager.getAgent(props.layer.id);
-    if (!agent) {
-      agent = layerImageManager.registerAgent(
-        props.layer.id,
-        layerHistoryStore[props.layer.id]?.current
-      );
-    }
-    ctx = canvasRef?.getContext('2d') ?? null;
-    if (ctx) agent.putImageInto(ctx);
+    const ctx = canvasRef?.getContext('2d');
 
-    agent.setOnImageChangeListener('layercanvas_refresh', () => {
-      if (ctx) {
-        agent.putImageIntoForce(ctx);
-      }
+    if (ctx) agent?.putImageIntoForce(ctx);
+
+    agent?.setOnImageChangeListener('layercanvas_refresh_' + props.layer.id, () => {
+      if (ctx) agent.putImageIntoForce(ctx);
     });
-    agent.setOnDrawingBufferChangeListener('layercanvas_refresh', () => {
-      if (ctx) {
-        agent.putDrawingBufferIntoForce(ctx);
-      }
+    agent?.setOnDrawingBufferChangeListener('layercanvas_refresh_' + props.layer.id, () => {
+      if (ctx) agent.putDrawingBufferIntoForce(ctx);
     });
-  });
-
-  const [renderAttr, setRenderAttr] = createSignal(
-    getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode)
-  );
-
-  createEffect(() => {
-    const image = layerHistoryStore[props.layer.id].current;
-    agent()?.setImage(image, true);
-    if (ctx) agent()?.putImageIntoForce(ctx);
-
-    setRenderAttr(getCanvasImageRenderingAttribute(globalStore.canvasRenderingMode));
   });
 
   return (
     <canvas
-      ref={canvasRef}
+      ref={(el) => {
+        canvasRef = el;
+      }}
       id={`canvas-${props.layer.id}`}
       data-layer-id={props.layer.name}
-      class={layerCanvas({
-        rendering: renderAttr(),
-        hidden: !props.layer.enabled,
-      })}
+      class={layerCanvas}
       width={internalWidth()}
       height={internalHeight()}
       style={{
+        position: 'absolute',
         width: `${styleWidth()}px`,
         height: `${styleHeight()}px`,
+        'image-rendering': 'pixelated',
         'z-index': props.zIndex,
+        opacity: props.layer.enabled ? 1 : 0,
       }}
     />
   );
 };
 
-function createRefContent<T extends Exclude<unknown, Function>>(
-  getRef: () => Ref<T>,
-  createRef: () => T
-) {
+function createRefContent<T extends Exclude<unknown, Function>>(getRef: () => Ref<T>, createRef: () => T) {
   createRenderEffect(() => {
     const refProp = getRef();
     if (typeof refProp !== 'function') {
@@ -1030,8 +913,9 @@ function createRefContent<T extends Exclude<unknown, Function>>(
 
 <file path="components/canvas/stacks/TouchableCanvas.tsx">
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
-import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
+import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import { DrawState } from '~/types/DrawState';
 import { Vec2 } from '~/types/Vector';
 
@@ -1084,7 +968,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
       y = e.touches[0].clientY;
     }
 
-    const zoom = canvasStore.zoom;
+    const zoom = interactStore.zoom;
 
     return {
       x: (x - offset.x) / zoom,
@@ -1093,7 +977,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === 'touch' || canvasStore.isCtrlPressed) return false;
+    if (e.pointerType === 'touch' || interactStore.isCtrlPressed) return false;
     // right=1, left=2, middle=4
     // console.log(e.buttons)
     if (e.pointerType === 'mouse' && e.buttons !== 1) return false;
@@ -1106,7 +990,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.start, position, lastPos());
-    setCanvasStore('isInStroke', true);
+    setInteractStore('isInStroke', true);
     setLastPos(position);
   }
 
@@ -1118,18 +1002,18 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handlePointerMove(e: PointerEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore('lastMouseWindow', windowPosition);
-    setCanvasStore('lastMouseOnCanvas', position);
+    setInteractStore('lastMouseWindow', windowPosition);
+    setInteractStore('lastMouseOnCanvas', position);
 
     if (!isDrawableClick(e)) return;
 
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
       setTemporaryOut(false);
-      setCanvasStore('isInStroke', true);
+      setInteractStore('isInStroke', true);
       setLastPos(position);
     }
-    if (!canvasStore.isInStroke || !lastPos()) return;
+    if (!interactStore.isInStroke || !lastPos()) return;
 
     props.operator.handleDraw(DrawState.move, position, lastPos());
     setLastPos(position);
@@ -1137,16 +1021,16 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
   function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
-    if (canvasStore.isInStroke) endStroke(position);
+    if (interactStore.isInStroke) endStroke(position);
   }
 
   function handlePointerOut(e: PointerEvent) {
     // 出た時点でストロークを切る場合
     // const position = getCanvasMousePosition(e);
-    // if (canvasStore.isInStroke) endStroke(position);
+    // if (interactStore.isInStroke) endStroke(position);
 
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
-    if (canvasStore.isDragging) {
+    if (interactStore.isDragging) {
       const position = getCanvasMousePosition(e);
       props.operator.handleDraw(DrawState.move, position, lastPos());
       setTemporaryOut(true);
@@ -1156,13 +1040,13 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handleWheel(e: WheelEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore('lastMouseWindow', windowPosition);
-    setCanvasStore('lastMouseOnCanvas', position);
+    setInteractStore('lastMouseWindow', windowPosition);
+    setInteractStore('lastMouseOnCanvas', position);
   }
 
   function endStroke(position: Vec2) {
     props.operator.handleDraw(DrawState.end, position, lastPos());
-    setCanvasStore('isInStroke', false);
+    setInteractStore('isInStroke', false);
     setLastPos(undefined);
     setTemporaryOut(false);
   }
@@ -1183,7 +1067,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
   createEffect(() => {
     if (canvasRef)
-      setCanvasStore('canvasElementSize', {
+      setInteractStore('canvasElementSize', {
         width: canvasRef.clientWidth,
         height: canvasRef.clientHeight,
       });
@@ -1210,9 +1094,37 @@ export const TouchableCanvas: Component<Props> = (props) => {
 };
 </file>
 
+<file path="components/common/Checkbox.tsx">
+import { Component } from 'solid-js';
+import { checkboxWrapper, customCheckbox, hiddenCheckbox } from '~/styles/components/checkbox.css';
+
+const Checkbox: Component<{
+  label?: string;
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+  inputRef?: (el: HTMLInputElement) => void;
+}> = (props) => {
+  return (
+    <label class={checkboxWrapper}>
+      <input
+        class={hiddenCheckbox}
+        type='checkbox'
+        checked={props.checked}
+        onChange={(e) => props.onChange?.(e.currentTarget.checked)}
+        ref={props.inputRef}
+      />
+      <span class={customCheckbox}></span>
+      {props.label}
+    </label>
+  );
+};
+
+export default Checkbox;
+</file>
+
 <file path="components/common/ColorBox.tsx">
 import { Component } from 'solid-js';
-import { currentColor } from '~/stores/internal/colorStore';
+import { currentColor } from '~/controllers/color/ColorController';
 import { sayRandomQuote } from './companion/QuotePool';
 
 interface ColorBoxProps {
@@ -1246,8 +1158,7 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
           'justify-content': 'center',
           cursor: 'pointer',
           'background-color': props.color,
-          border:
-            isWhiteOrNone() || isSelected() ? '0.05rem solid black' : '0.05rem solid transparent',
+          border: isWhiteOrNone() || isSelected() ? '0.05rem solid black' : '0.05rem solid transparent',
         }}
         onClick={() => {
           onColorClicked(props.color);
@@ -1276,82 +1187,82 @@ export default ColorBox;
 </file>
 
 <file path="components/common/companion/Companion.tsx">
-import { Component, createEffect, createSignal } from 'solid-js';
-import styles from '@styles/components/companion.module.css';
+// import { Component, createEffect, createSignal } from 'solid-js';
+// import styles from '@styles/components/companion.module.css';
 
-const [sayRequest, setSayRequest] = createSignal<string | null>(null);
+// const [sayRequest, setSayRequest] = createSignal<string | null>(null);
 
-export const CompanionEvents = {
-  sayRequest,
-  setSayRequest,
-};
+// export const CompanionEvents = {
+//   sayRequest,
+//   setSayRequest,
+// };
 
-const Companion: Component = () => {
-  const [quote, setQuote] = createSignal('');
+// const Companion: Component = () => {
+//   const [quote, setQuote] = createSignal('');
 
-  const say = (text: string) => {
-    window.speak?.(text, {
-      amplitude: 5,
-      pitch: 10,
-      speed: 200,
-      wordgap: 0,
-    });
-  };
+//   const say = (text: string) => {
+//     window.speak?.(text, {
+//       amplitude: 5,
+//       pitch: 10,
+//       speed: 200,
+//       wordgap: 0,
+//     });
+//   };
 
-  createEffect(() => {
-    const message = CompanionEvents.sayRequest();
-    if (message) {
-      say(message);
-      setQuote(message);
-      const element = document.getElementById('companion');
-      setTimeout(() => {
-        setQuote('');
-        if (element) element.className = element.className.replace(` ${styles['giggle']}`, '');
-      }, 5000);
-      window.requestAnimationFrame(function (time) {
-        window.requestAnimationFrame(function (time) {
-          if (element) element.className += ` ${styles['giggle']}`;
-        });
-      });
-      CompanionEvents.setSayRequest(null); // 一度で消費
-    }
-  });
+//   createEffect(() => {
+//     const message = CompanionEvents.sayRequest();
+//     if (message) {
+//       say(message);
+//       setQuote(message);
+//       const element = document.getElementById('companion');
+//       setTimeout(() => {
+//         setQuote('');
+//         if (element) element.className = element.className.replace(` ${styles['giggle']}`, '');
+//       }, 5000);
+//       window.requestAnimationFrame(function (time) {
+//         window.requestAnimationFrame(function (time) {
+//           if (element) element.className += ` ${styles['giggle']}`;
+//         });
+//       });
+//       CompanionEvents.setSayRequest(null); // 一度で消費
+//     }
+//   });
 
-  return (
-    <div class={styles.root}>
-      <div class={styles.wrapper}>
-        <div class={styles.companion} id="companion">
-          <img src="/companion.png" alt="you challenge me?" />
-        </div>
-        {quote() && (
-          <div class={styles.quote_box_container}>
-            <div class={styles.quote_box}>
-              <p class={styles.quote}>{quote()}</p>
-            </div>
-          </div>
-        )}
-      </div>
-      <div id="audio" />
-    </div>
-  );
-};
+//   return (
+//     <div class={styles.root}>
+//       <div class={styles.wrapper}>
+//         <div class={styles.companion} id='companion'>
+//           <img src='/companion.png' alt='you challenge me?' />
+//         </div>
+//         {quote() && (
+//           <div class={styles.quote_box_container}>
+//             <div class={styles.quote_box}>
+//               <p class={styles.quote}>{quote()}</p>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//       <div id='audio' />
+//     </div>
+//   );
+// };
 
-let lastSpoke = 0;
-export const smartSay = (text: string): boolean => {
-  const now = Date.now();
-  if (now - lastSpoke > 5000) {
-    CompanionEvents.setSayRequest(text);
-    lastSpoke = now;
-    return true;
-  }
-  return false;
-};
+// let lastSpoke = 0;
+// export const smartSay = (text: string): boolean => {
+//   const now = Date.now();
+//   if (now - lastSpoke > 5000) {
+//     CompanionEvents.setSayRequest(text);
+//     lastSpoke = now;
+//     return true;
+//   }
+//   return false;
+// };
 
-export default Companion;
+// export default Companion;
 </file>
 
 <file path="components/common/companion/QuotePool.ts">
-import { smartSay } from './Companion';
+// import { smartSay } from './Companion';
 
 type QuoteCategory = 'color-pick' | 'pen-resize' | 'canvas-resize' | 'undo-spam' | 'random';
 
@@ -1373,10 +1284,7 @@ export const quotePool = {
     "Go bigger, I'll crash 'em harder.",
     'Have you ever heard of the word "pixel perfect"?',
   ],
-  'canvas-resize': [
-    'Shrinking the canvas? Afraid of commitment?',
-    'Small canvas, big ideas. I like it.',
-  ],
+  'canvas-resize': ['Shrinking the canvas? Afraid of commitment?', 'Small canvas, big ideas. I like it.'],
   'undo-spam': ['UNDO UNDO UNDO—are you OK?', "That's the 5th undo. I’m getting dizzy."],
   random: ['Daisy, Daisy, give me your answer do do do'],
 };
@@ -1403,23 +1311,13 @@ export const sayRandomQuote = (category: QuoteCategory, context?: any) => {
   }
   let quote = quotes[index];
   quote = context?.color ? quote.replace('[color]', context.color) : quote;
-  if (smartSay(quote)) {
-    console.log(`◯ yay!`);
-    lastSaidIndexes[category] = index;
-  } else {
-    console.log(`✕ hmm maybe I'd keep silence now?`);
-  }
+  // if (smartSay(quote)) {
+  //   console.log(`◯ yay!`);
+  //   lastSaidIndexes[category] = index;
+  // } else {
+  //   console.log(`✕ hmm maybe I'd keep silence now?`);
+  // }
 };
-</file>
-
-<file path="components/common/CompanionAA.tsx">
-import { Component } from 'solid-js';
-
-const CompanionAA: Component = () => {
-  return <div />;
-};
-
-export default CompanionAA;
 </file>
 
 <file path="components/common/Dropdown.tsx">
@@ -1486,7 +1384,7 @@ const DSLButton: Component<Props> = (props: Props) => {
         if (props.onClick) props.onClick(e);
       }}
     >
-      <img src="/DSL.png" />
+      <img src='/DSL.png' />
     </div>
   );
 };
@@ -1494,48 +1392,10 @@ const DSLButton: Component<Props> = (props: Props) => {
 export default DSLButton;
 </file>
 
-<file path="components/common/ImportImageButton.tsx">
-import { importImageToActiveLayer } from '~/io/internal/import'; // 上で作った関数
-
-const ImportImageButton = () => {
-  let fileInputRef: HTMLInputElement | undefined;
-
-  const handleClick = () => {
-    fileInputRef?.click(); // hidden input を手動でクリック
-  };
-
-  const handleFileChange = (e: Event) => {
-    const target = e.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (file) {
-      importImageToActiveLayer(file);
-      target.value = ''; // 同じファイルを再選択可能にする
-    }
-  };
-
-  return (
-    <>
-      <button onClick={handleClick}>Import</button>
-
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-        onChange={handleFileChange}
-      />
-    </>
-  );
-};
-
-export default ImportImageButton;
-</file>
-
 <file path="components/common/LayerPreview.tsx">
-import { Component, onMount } from 'solid-js';
-import { layerImageManager } from '../canvas/stacks/CanvasStack';
 import styles from '@styles/components/layer_preview.module.css';
-import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
+import { Component, onMount } from 'solid-js';
+import { getImageOf, layerImageManager } from '~/routes/editor';
 import { Layer } from '~/types/Layer';
 
 interface Props {
@@ -1561,8 +1421,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight)
-      zoom = maxHeight / targetHeight;
+    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -1579,35 +1438,21 @@ const LayerPreview: Component<Props> = (props: Props) => {
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, targetWidth, targetHeight);
 
-    ctx.drawImage(
-      tmpCanvas,
-      0,
-      0,
-      originalImage.width,
-      originalImage.height,
-      0,
-      0,
-      targetWidth,
-      targetHeight
-    );
+    ctx.drawImage(tmpCanvas, 0, 0, originalImage.width, originalImage.height, 0, 0, targetWidth, targetHeight);
   };
+
   onMount(() => {
     const height = wrapperRef.clientHeight;
-    const currentImage = layerHistoryStore[props.layer.id].current;
+    const currentImage = getImageOf(props.layer.id);
 
     let agent = layerImageManager.getAgent(props.layer.id);
-    if (!agent) {
-      agent = layerImageManager.registerAgent(props.layer.id, currentImage);
-    } else {
-      agent.setImage(currentImage, true);
+    if (currentImage) {
+      agent?.setImage(currentImage, true);
+      updatePreview(currentImage, height);
     }
-
-    updatePreview(currentImage, height);
-
-    agent.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      console.log('aasdffa');
-      const img = layerHistoryStore[props.layer.id].current;
-      updatePreview(img, height);
+    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
+      const img = getImageOf(props.layer.id);
+      if (img) updatePreview(img, height);
     });
   });
 
@@ -1650,11 +1495,11 @@ const Light: Component<LightProps> = (props: LightProps) => {
         overflow: 'visible',
       }}
       viewBox={`0 0 ${width} ${height}`}
-      xmlns="http://www.w3.org/2000/svg"
+      xmlns='http://www.w3.org/2000/svg'
     >
       <Show when={true}>
         <g class={`${styles['light-inner']} ${props.on && styles['on']}`}>
-          <circle cx={width / 2} cy={height / 2} r={radius} fill="red" />
+          <circle cx={width / 2} cy={height / 2} r={radius} fill='red' />
         </g>
       </Show>
     </svg>
@@ -1662,6 +1507,125 @@ const Light: Component<LightProps> = (props: LightProps) => {
 };
 
 export default Light;
+</file>
+
+<file path="components/common/PixelLineChart.tsx">
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+
+interface PixelLineChartProps {
+  /** 横ピクセル数＝バッファ長 */
+  width: number;
+  /** 縦ピクセル数 */
+  height: number;
+  /** 新しいサンプルを返す非同期関数 */
+  fetchSample: () => Promise<number | undefined>;
+  /** ミリ秒 */
+  interval?: number;
+  /** 線の色 */
+  color?: string;
+  suffix?: string;
+  initialMaxValue?: number;
+}
+
+export const PixelLineChart: Component<PixelLineChartProps> = (props) => {
+  let canvas: HTMLCanvasElement;
+  let ctx: CanvasRenderingContext2D;
+  // width ピクセル分のバッファをゼロ埋め
+  const buffer: number[] = Array(props.width).fill(0);
+  const [lastBuffer, setLastBuffer] = createSignal<number | undefined>(-1);
+  const [maxValue, setMaxValue] = createSignal(1);
+
+  onMount(() => {
+    ctx = canvas.getContext('2d')!;
+    // ピクセルパーフェクトを狙うなら、実際の canvas.width/height と CSSサイズを同じに
+    canvas.width = props.width;
+    canvas.height = props.height;
+
+    // 描画関数：バッファ全部を１ドットずつ打っていく
+    const draw = () => {
+      // クリア
+      ctx.clearRect(0, 0, props.width, props.height);
+      ctx.fillStyle = props.color || 'lime';
+
+      for (let x = 0; x < buffer.length; x++) {
+        // 0〜maxValue を 0〜(height-1) に丸め込む
+        const q = Math.round((buffer[x] / maxValue()) * (props.height - 1));
+        // 底辺を y=height-1 として上向きに描画
+        const y = props.height - 1 - q;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    };
+
+    // 定期取得＋描画ループ
+    const iv = setInterval(async () => {
+      try {
+        const v = await props.fetchSample();
+        buffer.shift();
+        buffer.push(v ?? 0);
+        setLastBuffer(v ? Math.round(v * 10) / 10 : undefined);
+        // バッファ全体の現在最大値を取得し、1.5倍してスケール更新
+        const bufMax = Math.max(...buffer);
+        // 0除算防止 & 少なくとも initialMaxValue 以上にはする
+        const newMax = Math.max(bufMax * 1.5, props.initialMaxValue ?? 0);
+        setMaxValue(Math.round(newMax * 10) / 10);
+        draw();
+      } catch {
+        // 無視
+      }
+    }, props.interval ?? 1000);
+
+    // マウント解除時に止める
+    onCleanup(() => clearInterval(iv));
+  });
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: `${props.width}px`,
+        height: `${props.height}px`,
+        background: '#00000017',
+        border: '1px solid #aaa',
+      }}
+    >
+      <canvas
+        ref={(el) => (canvas = el)}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          // 拡大時にもドットがにじまないように
+          'image-rendering': 'pixelated',
+          // 必要なら表示を大きくする
+          width: `${props.width}px`,
+          height: `${props.height}px`,
+        }}
+      />
+      <p style={{ position: 'absolute', top: '0px', left: '4px' }}>{maxValue()}</p>
+      <p style={{ position: 'absolute', bottom: '0px', left: '4px' }}>{0}</p>
+      <p style={{ position: 'absolute', top: '0px', right: '4px' }}>
+        {lastBuffer()} {props.suffix}
+      </p>
+    </div>
+  );
+};
+</file>
+
+<file path="components/common/RadioButton.tsx">
+import { Component } from 'solid-js';
+import { customRadio, hiddenRadio, radioWrapper } from '~/styles/components/radio_button.css';
+
+const RadioButton: Component<{ label?: string; name: string }> = (props) => {
+  return (
+    <label class={radioWrapper}>
+      {props.label}
+      <input class={hiddenRadio} type='radio' name={props.name} />
+      <span class={customRadio}></span>
+    </label>
+  );
+};
+
+export default RadioButton;
 </file>
 
 <file path="components/common/Slider.tsx">
@@ -1738,12 +1702,7 @@ export default Slider;
 
 <file path="components/common/ToggleSwitch.tsx">
 import { Component } from 'solid-js';
-import {
-  toggleInput,
-  toggleThumb,
-  toggleTrack,
-  toggleWrapper,
-} from '~/styles/components/toggle_switch.css';
+import { toggleInput, toggleThumb, toggleTrack, toggleWrapper } from '~/styles/components/toggle_switch.css';
 
 interface Props {
   checked: boolean;
@@ -1757,7 +1716,7 @@ const ToggleSwitch: Component<Props> = (p) => (
   <label class={toggleWrapper}>
     {p.children}
     <input
-      type="checkbox"
+      type='checkbox'
       checked={p.checked}
       onInput={(e) => p.onChange?.(e.currentTarget.checked)}
       class={toggleInput}
@@ -1771,19 +1730,58 @@ const ToggleSwitch: Component<Props> = (p) => (
 export default ToggleSwitch;
 </file>
 
-<file path="components/EdgeInfo.tsx">
+<file path="components/global/BottomInfo.tsx">
 import { Component } from 'solid-js';
+import { AboutWindowOptions } from '~/routes/about';
+import { interactStore, logStore } from '~/stores/EditorStores';
 
-import { projectStore } from '~/stores/project/projectStore';
-import { sideAreaEdge, sideAreaEdgeItem, sideAreaEdgeText } from '~/styles/global.css';
+import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/components/bottom_info.css';
+import { openSingletonWindow } from '~/utils/windowUtils';
+
+const BottomInfo: Component = () => {
+  return (
+    <div class={bottomInfoRoot}>
+      <a
+        class={bottomInfoTextStyle}
+        style={{ 'pointer-events': 'all', cursor: 'pointer' }}
+        onClick={() => openSingletonWindow('about', AboutWindowOptions)}
+      >
+        sledge.
+      </a>
+      <p class={bottomInfoTextStyle}>x{interactStore.zoom}</p>
+      <p class={bottomInfoTextStyle}>{logStore.bottomBarText}</p>
+    </div>
+  );
+};
+
+export default BottomInfo;
+</file>
+
+<file path="components/global/EdgeInfo.tsx">
+import { Component } from 'solid-js';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
+import { SettingsWindowOptions } from '~/routes/settings';
+
+import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/components/edge_info.css';
+import { openSingletonWindow } from '~/utils/windowUtils';
 
 const EdgeInfo: Component = () => {
   return (
-    <div class={sideAreaEdge}>
-      <div class={sideAreaEdgeItem}>
-        <p class={sideAreaEdgeText}>&nbsp;&nbsp;{projectStore.path || 'path N/A'}</p>
-        {/* <p class={sideAreaEdgeText}>{projectStore.name || "name N/A"}</p> */}
+    <div class={edgeInfoRoot}>
+      <div class={edgeInfoItem}>
+        <a
+          class={edgeInfoText}
+          onClick={async () => {
+            let win = await openSingletonWindow('settings', SettingsWindowOptions);
+            win.once('tauri://destroyed', (e) => {
+              loadGlobalSettings();
+            });
+          }}
+        >
+          settings.
+        </a>
       </div>
+      {/* <p class={sideAreaEdgeText}>{projectStore.name || "name N/A"}</p> */}
     </div>
   );
 };
@@ -1791,19 +1789,131 @@ const EdgeInfo: Component = () => {
 export default EdgeInfo;
 </file>
 
+<file path="components/global/SideSections.tsx">
+import { Component } from 'solid-js';
+import CanvasSettings from '../section/CanvasSettings';
+import Color from '../section/Color';
+import LayerList from '../section/LayerList';
+import Project from '../section/Project';
+import ToolConfig from '../section/ToolConfig';
+
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { sideAreaContent } from '~/styles/components/side_sections.css';
+
+const SideSections: Component = () => {
+  return (
+    <div class={sideAreaContent}>
+      <a onClick={() => getCurrentWebviewWindow().close()}>&lt; back</a>
+      <Project />
+      <Color />
+      <ToolConfig />
+      <LayerList />
+      <CanvasSettings />
+    </div>
+  );
+};
+
+export default SideSections;
+</file>
+
+<file path="components/global/TitleBar.tsx">
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { createEffect, createSignal, onMount } from 'solid-js';
+import { projectStore } from '~/stores/ProjectStores';
+import {
+  titleBarControlButtonImg,
+  titleBarControlCloseButton,
+  titleBarControlMaximizeButton,
+  titleBarControlMinimizeButton,
+  titleBarControls,
+  titleBarRoot,
+  titleBarTitle,
+} from '~/styles/components/title_bar.css';
+
+export default function TitleBar() {
+  const window = getCurrentWindow();
+
+  const [isMaximizable, setIsMaximizable] = createSignal(true);
+  const [isMinimizable, setIsMinimizable] = createSignal(true);
+  const [isClosable, setIsClosable] = createSignal(true);
+  const [isEditor, setIsEditor] = createSignal(false);
+  const [title, setTitle] = createSignal('');
+  const [isMaximized, setMaximized] = createSignal(false);
+
+  onMount(async () => {
+    setIsMaximizable(await window.isMaximizable());
+    setIsMinimizable(await window.isMinimizable());
+    setIsClosable(await window.isClosable());
+    setTitle(await window.title());
+    setIsEditor(window.label.startsWith('editor'));
+    // if (isEditor()) {
+    //   setTitle(`${projectStore.name} - ${projectStore.path}`);
+    // }
+  });
+
+  window.onResized(async (handler) => {
+    setMaximized(await window.isMaximized());
+  });
+
+  createEffect(() => {
+    if (isEditor()) {
+      let pathText = '';
+      let isSavedText = '';
+      if (projectStore.path !== undefined && projectStore.path !== '') {
+        pathText += projectStore.isProjectChangedAfterSave ? '(unsaved)' : '';
+        pathText += ' - ' + projectStore.path;
+      } else {
+        pathText += '(not saved yet)';
+      }
+
+      setTitle(`${projectStore.name} ${pathText} `);
+    }
+  });
+
+  const borderWindowLabels: string[] = ['editor'];
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
+
+  return (
+    <header
+      style={{
+        'pointer-events': 'all',
+        'border-bottom': shouldShowBorder() ? '1px solid #aaa' : 'none',
+      }}
+    >
+      <nav class={titleBarRoot} data-tauri-drag-region='p, button'>
+        <p class={titleBarTitle}>{title()}.</p>
+        <div class={titleBarControls}>
+          {isMinimizable() && (
+            <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
+              <img class={titleBarControlButtonImg} src={'/minimize.png'} />
+            </button>
+          )}
+          {isMaximizable() && (
+            <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
+              <img class={titleBarControlButtonImg} src={isMaximized() ? '/leave_maximize.png' : '/maximize.png'} />
+            </button>
+          )}
+          {isClosable() && (
+            <button class={titleBarControlCloseButton} onClick={() => window.close()}>
+              <img class={titleBarControlButtonImg} src={'/close.png'} />
+            </button>
+          )}
+        </div>
+      </nav>
+    </header>
+  );
+}
+</file>
+
 <file path="components/section/CanvasSettings.tsx">
 import { Component, createSignal } from 'solid-js';
-import initLayerImage from '~/models/factories/initLayerImage';
-import { canvasStore, setCanvasStore, adjustZoomToFit } from '~/stores/project/canvasStore';
-import { allLayers, layerStore } from '~/stores/project/layerStore';
+import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 
-import {
-  canvasSizeButton,
-  canvasSizeForm,
-  canvasSizeInput,
-  canvasSizeLabel,
-} from '~/styles/section/canvas.css';
+import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { Consts } from '~/utils/consts';
 
 const CanvasSettings: Component = () => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -1814,16 +1924,16 @@ const CanvasSettings: Component = () => {
     setCanvasStore('canvas', 'width', width());
     setCanvasStore('canvas', 'height', height());
 
-    allLayers().forEach((layer, i) => {
-      initLayerImage(layer.id, layer.dotMagnification);
-    });
+    changeCanvasSize({ width: width(), height: height() });
+
+    console.log(`canvas size changed. ${width()} x ${height}`);
 
     adjustZoomToFit(width(), height());
   };
 
   const resetAllLayers = (e: any) => {
-    layerStore.layers.forEach((l) => {
-      initLayerImage(l.id, l.dotMagnification);
+    layerListStore.layers.forEach((l) => {
+      resetLayerImage(l.id, l.dotMagnification);
     });
   };
 
@@ -1842,12 +1952,12 @@ const CanvasSettings: Component = () => {
             <p class={canvasSizeLabel}>width</p>
             <input
               class={canvasSizeInput}
-              type="number"
-              name="width"
+              type='number'
+              name='width'
               onChange={(e) => setWidth(Number(e.target.value))}
               value={width()}
-              min={0}
-              max={10000}
+              min={Consts.minCanvasWidth}
+              max={Consts.maxCanvasWidth}
               required
             />
           </div>
@@ -1855,16 +1965,16 @@ const CanvasSettings: Component = () => {
             <p class={canvasSizeLabel}>height</p>
             <input
               class={canvasSizeInput}
-              type="number"
-              name="height"
+              type='number'
+              name='height'
               onChange={(e) => setHeight(Number(e.target.value))}
               value={height()}
-              min={0}
-              max={10000}
+              min={Consts.minCanvasHeight}
+              max={Consts.maxCanvasHeight}
               required
             />
           </div>
-          <button class={canvasSizeButton} type="submit">
+          <button class={canvasSizeButton} type='submit'>
             change
           </button>
         </div>
@@ -1882,17 +1992,15 @@ export default CanvasSettings;
 
 <file path="components/section/Color.tsx">
 import { Component, For } from 'solid-js';
+import ColorPicker from '~/components/section/item/ColorPicker';
 import ColorBox from '../common/ColorBox';
 import Palette from './item/Palette';
-import ColorPicker from '~/components/section/item/ColorPicker';
-import { colorStore, setCurrentColor } from '~/stores/internal/colorStore';
 
-import {
-  colorElemDescription,
-  descriptionContainer,
-  swatchContainer,
-} from '~/styles/section/color.css';
+import { setCurrentColor } from '~/controllers/color/ColorController';
+import { colorStore } from '~/stores/EditorStores';
+import { swatchContainer } from '~/styles/section/color.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { flexCol } from '~/styles/snippets.css';
 
 const Color: Component = () => {
   const onColorClicked = (color: string, index: number) => {
@@ -1915,12 +2023,14 @@ const Color: Component = () => {
             )}
           </For>
         </div>
-        <div class={descriptionContainer}>
+        {/* <div class={descriptionContainer}>
           <p class={colorElemDescription}>picker.</p>
+        </div> */}
+        <div class={flexCol}>
+          <ColorPicker width={150} />
+          <Palette />
         </div>
-        <ColorPicker width={150} />
       </div>
-      <Palette />
     </div>
   );
 };
@@ -1932,7 +2042,7 @@ export default Color;
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
 import { Component, createEffect } from 'solid-js';
-import { currentColor, setCurrentColor } from '~/stores/internal/colorStore';
+import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
@@ -1978,24 +2088,26 @@ export default ColorPicker;
 <file path="components/section/item/LayerItem.tsx">
 import { createSortable, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
-import LayerPreview from '../../common/LayerPreview';
 import Light from '~/components/common/Light';
-import { getNextMagnification } from '~/models/factories/getNextMagnification';
-import { layerStore, setLayerStore } from '~/stores/project/layerStore';
+import { getNextMagnification } from '~/controllers/layer/LayerController';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import {
   activeLight,
   dotMagnifContainer,
   dotMagnifText,
   layerItem,
   layerItemDisabled,
+  layerItemIndex,
   layerItemName,
   layerItemType,
 } from '~/styles/section/layer.css';
-import { w100 } from '~/styles/snippets.css';
+import { flexRow, w100 } from '~/styles/snippets.css';
 import { Layer, LayerType } from '~/types/Layer';
+import LayerPreview from '../../common/LayerPreview';
 
 interface LayerItemProps {
   index: number;
+  isLast?: boolean;
   layer: Layer;
   draggingId?: string | null;
 }
@@ -2019,23 +2131,23 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   }
 
   const onDetClicked = () => {
-    setLayerStore('activeLayerId', props.layer.id);
+    setLayerListStore('activeLayerId', props.layer.id);
   };
 
   const onPreviewClicked = () => {
     if (props.index !== -1) {
-      setLayerStore('layers', props.index, 'enabled', (v: boolean) => !v);
+      setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
   };
 
   const onMagnifClicked = () => {
     const next = getNextMagnification(props.layer.dotMagnification);
     if (props.index !== -1) {
-      setLayerStore('layers', props.index, 'dotMagnification', next);
+      setLayerListStore('layers', props.index, 'dotMagnification', next);
     }
   };
 
-  const isActive = () => layerStore.activeLayerId === props.layer.id;
+  const isActive = () => layerListStore.activeLayerId === props.layer.id;
 
   return (
     <div
@@ -2047,20 +2159,35 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1 }}
       ref={sortable}
     >
-      <p class={layerItemType}>{props.layer.typeDescription}</p>
-      <p>{props.index}.</p>
-      <div style={{ display: 'flex', 'align-items': 'center' }}>
-        {/* <DSLButton /> */}
+      {/* <DSLButton /> */}
+      <div
+        class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
+        // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
+        onClick={onDetClicked}
+      >
+        <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
+
         <div
-          class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
-          onClick={onDetClicked}
+          class={[flexRow, w100].join(' ')}
+          style={{
+            'align-items': 'center',
+            position: 'relative',
+          }}
         >
-          <LayerPreview
-            layer={props.layer}
-            onClick={onPreviewClicked}
-            maxHeight={30}
-            maxWidth={30}
-          />
+          <div
+            class={flexRow}
+            style={{
+              top: '2px',
+              right: 0,
+              left: 0,
+              'margin-left': '6px',
+              position: 'absolute',
+            }}
+          >
+            <p class={layerItemIndex}>{props.index}.</p>
+            <p class={layerItemType}>{props.layer.typeDescription}</p>
+          </div>
+
           <p class={layerItemName}> {props.layer.name}</p>
           <div
             class={dotMagnifContainer}
@@ -2085,8 +2212,10 @@ export default LayerItem;
 <file path="components/section/item/Palette.tsx">
 import { Component } from 'solid-js';
 import ColorBox from '~/components/common/ColorBox';
-import { colorStore, PaletteType, selectPalette } from '~/stores/internal/colorStore';
+import { selectPalette } from '~/controllers/color/ColorController';
+import { colorStore } from '~/stores/EditorStores';
 import { paletteRoot } from '~/styles/components/palette.css';
+import { PaletteType } from '~/types/PaletteType';
 
 const Palette: Component = () => {
   return (
@@ -2110,89 +2239,100 @@ const Palette: Component = () => {
 export default Palette;
 </file>
 
-<file path="components/section/item/PenItem.tsx">
+<file path="components/section/item/ToolItem.tsx">
 import { Component } from 'solid-js';
-import Light from '~/components/common/Light';
 import Slider from '~/components/common/Slider';
 import { sayRandomQuote } from '~/components/common/companion/QuotePool';
-import { setToolStore, toolStore } from '~/stores/internal/toolsStore';
-import { penConfigRow, penConfigRowName } from '~/styles/section/pen.css';
+import { setToolStore, toolStore } from '~/stores/EditorStores';
+import { toolConfigRow, toolConfigRowClickable, toolConfigRowIcon, toolConfigRowName } from '~/styles/section/pen.css';
 import { Tool, ToolType } from '~/types/Tool';
+import { Consts } from '~/utils/consts';
 
 interface Props {
-  pen: Tool;
+  tool: Tool;
   isInUse: boolean;
 }
 
-const PenItem: Component<Props> = (props: Props) => {
+const ToolItem: Component<Props> = (props: Props) => {
+  let src = '';
+  switch (props.tool.type) {
+    case ToolType.Pen:
+      src = '/pen.png';
+      break;
+    case ToolType.Eraser:
+      src = '/eraser_b.png';
+      break;
+    case ToolType.Fill:
+      src = '/fill_G_x10.png';
+      break;
+  }
   return (
-    <div class={penConfigRow}>
-      <Light on={props.isInUse} />
-
-      <p
-        class={penConfigRowName}
-        style={{
-          color: props.isInUse ? 'red' : 'unset',
-        }}
+    <div class={toolConfigRow}>
+      {/* <Light on={props.isInUse} /> */}
+      <div
+        class={toolConfigRowClickable}
         onClick={() => {
-          setToolStore({ usingIndex: toolStore.tools.indexOf(props.pen) });
+          setToolStore({ usingIndex: toolStore.tools.indexOf(props.tool) });
         }}
       >
-        {props.pen.name}.
-      </p>
+        <img
+          class={toolConfigRowIcon}
+          style={{
+            'image-rendering': 'pixelated',
+            filter: props.isInUse
+              ? 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%)'
+              : 'none',
+          }}
+          src={src}
+          width={20}
+          height={20}
+        />
+        <p
+          class={toolConfigRowName}
+          style={{
+            color: props.isInUse ? 'red' : 'unset',
+          }}
+        >
+          {props.tool.name}.
+        </p>
+      </div>
 
-      {(props.pen.type === ToolType.Pen || props.pen.type === ToolType.Eraser) && (
+      {(props.tool.type === ToolType.Pen || props.tool.type === ToolType.Eraser) && (
         <>
           <div style={{ 'flex-grow': 1 }}>
             <Slider
               min={1}
-              max={30}
-              default={props.pen.size}
+              max={Consts.maxPenSize}
+              default={props.tool.size}
               onValueChanged={(newValue) => {
                 sayRandomQuote('pen-resize');
                 console.log('size set to ' + newValue);
-                const penIndex = toolStore.tools.findIndex((p) => p.id === props.pen.id);
+                const penIndex = toolStore.tools.findIndex((p) => p.id === props.tool.id);
                 setToolStore('tools', penIndex, 'size', newValue);
               }}
             />
           </div>
 
-          <p style={{ width: 'auto' }}>{props.pen.size}.</p>
+          <p style={{ width: 'auto' }}>{props.tool.size}.</p>
         </>
       )}
     </div>
   );
 };
 
-export default PenItem;
-</file>
-
-<file path="components/section/item/PenSize.tsx">
-import { Component } from 'solid-js';
-import { penConfigRow } from '~/styles/section/pen.css';
-
-const PenSize: Component = () => {
-  return <div class={penConfigRow} />;
-};
-
-export default PenSize;
+export default ToolItem;
 </file>
 
 <file path="components/section/LayerList.tsx">
-import {
-  closestCenter,
-  DragDropProvider,
-  DragDropSensors,
-  SortableProvider,
-} from '@thisbeyond/solid-dnd';
+import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
-import LayerItem from './item/LayerItem';
-import { addLayer } from '~/models/factories/addLayer';
-import { removeLayer } from '~/models/factories/removeLayer';
-import { activeLayer, allLayers, layerStore, setLayerStore } from '~/stores/project/layerStore';
+import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer_list/LayerListController';
+
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/layer.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
+import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
@@ -2211,13 +2351,13 @@ const LayerList: Component<{}> = () => {
   const onDragStart = ({ draggable }: { draggable: any }) => setActiveItem(draggable.id);
 
   function moveLayer(draggedId: string, targetIndex: number) {
-    const fromIndex = layerStore.layers.findIndex((l) => l.id === draggedId);
+    const fromIndex = layerListStore.layers.findIndex((l) => l.id === draggedId);
     if (fromIndex === -1 || fromIndex === targetIndex) return;
 
-    const updated = [...layerStore.layers];
+    const updated = [...layerListStore.layers];
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(targetIndex, 0, moved);
-    setLayerStore('layers', updated);
+    setLayerListStore('layers', updated);
     setItems(allLayers());
   }
 
@@ -2249,8 +2389,8 @@ const LayerList: Component<{}> = () => {
 
             <div class={flexRow} style={{ gap: '4px' }}>
               <button
-                onClick={() => {
-                  addLayer('dot1');
+                onClick={async () => {
+                  await addLayer('dot1');
                   setItems(allLayers());
                 }}
               >
@@ -2271,7 +2411,9 @@ const LayerList: Component<{}> = () => {
             <div class={layerList}>
               <SortableProvider ids={ids()}>
                 <For each={items()}>
-                  {(layer, index) => <LayerItem layer={layer} index={index()} />}
+                  {(layer, index) => (
+                    <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />
+                  )}
                 </For>
               </SortableProvider>
             </div>
@@ -2288,45 +2430,31 @@ const LayerList: Component<{}> = () => {
 export default LayerList;
 </file>
 
-<file path="components/section/PenConfig.tsx">
-import { Component, For } from 'solid-js';
-import PenItem from './item/PenItem';
-import PenSize from './item/PenSize';
-import { toolStore } from '~/stores/internal/toolsStore';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
-
-const PenConfig: Component = () => {
-  return (
-    <div class={sectionRoot}>
-      <p class={sectionCaption}>pen config.</p>
-      <div class={sectionContent}>
-        <PenSize />
-        <For each={toolStore.tools}>
-          {(item, index) => <PenItem pen={item} isInUse={index() === toolStore.usingIndex} />}
-        </For>
-      </div>
-    </div>
-  );
-};
-
-export default PenConfig;
-</file>
-
 <file path="components/section/Project.tsx">
-import { Component, createSignal } from 'solid-js';
-import { exportActiveLayerUpscaled } from '~/io/internal/export';
+import { Component, createSignal, onMount, Show } from 'solid-js';
+import { exportActiveLayerUpscaled } from '~/io/image_io/save';
 import { saveProject } from '~/io/project/project';
+import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
-import { projectStore, setProjectStore } from '~/stores/project/projectStore';
+import { vars } from '~/styles/global.css';
 import { projectNameInput } from '~/styles/section/project.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
+  const isNameChanged = () => projectStore.name !== projectStore.newName;
+  const isOWPossible = () => projectStore.name !== undefined && projectStore.path !== undefined && !isNameChanged();
+
+  onMount(() => {
+    setProjectStore('newName', projectStore.name);
+  });
 
   const save = () => {
-    if (projectStore.name && projectStore.path) {
+    if (isNameChanged()) {
+      setProjectStore('name', projectStore.newName);
+    }
+    if (isOWPossible()) {
       // 上書き保存
       saveProject(`${projectStore.path}`).then(() => {
         setSaveLog('saved!');
@@ -2339,23 +2467,53 @@ const Project: Component = () => {
       });
     }
   };
+  const OWSave = () => {
+    if (isNameChanged()) {
+      setProjectStore('name', projectStore.newName);
+    }
+    // 上書き保存
+    saveProject(`${projectStore.path}`).then(() => {
+      setSaveLog('saved!');
+      setProjectStore('isProjectChangedAfterSave', false);
+    });
+  };
+  const forceNewSave = () => {
+    if (isNameChanged()) {
+      setProjectStore('name', projectStore.newName);
+    }
+    saveProject().then(() => {
+      setSaveLog('saved!');
+      setProjectStore('isProjectChangedAfterSave', false);
+    });
+  };
 
   return (
     <div class={sectionRoot}>
-      <p class={sectionCaption}>project.</p>
+      {/* <p class={sectionCaption}>project.</p> */}
       <div class={sectionContent}>
-        <div class={flexCol}>
+        <div
+          class={flexCol}
+          style={{
+            'margin-top': '8px',
+          }}
+        >
+          <Show when={isNameChanged()}>
+            <p>{projectStore.name} →</p>
+          </Show>
+
           <input
             class={projectNameInput}
-            type="text"
-            name="height"
+            type='text'
+            name='height'
+            onInput={(e) => {
+              if (e.target.value) setProjectStore('newName', e.target.value);
+            }}
             onChange={(e) => {
-              setProjectStore('name', e.target.value);
+              if (e.target.value) setProjectStore('newName', e.target.value);
             }}
             value={projectStore.name}
-            placeholder="project name"
-            autocomplete="off"
-            required
+            placeholder='project name'
+            autocomplete='off'
           />
 
           {/* <p class={styles.project_file_path}>{projectStore.path}</p> */}
@@ -2364,9 +2522,39 @@ const Project: Component = () => {
                         load.
                     </button> */}
 
-        <div class={flexRow} style={{ 'align-items': 'center', 'margin-top': '12px' }}>
-          <button onClick={() => saveProject()}>save.</button>
-          <button onClick={() => exportActiveLayerUpscaled()}>export.</button>
+        <div
+          class={flexRow}
+          style={{
+            'align-items': 'center',
+            'margin-top': '4px',
+            'margin-bottom': '12px',
+            gap: vars.spacing.sm,
+          }}
+        >
+          <Show when={isOWPossible()}>
+            <button
+              onClick={() => OWSave()}
+              style={{
+                color: vars.color.accent,
+                'border-color': vars.color.accent,
+              }}
+            >
+              save.
+            </button>
+            <button onClick={() => forceNewSave()}>save (new).</button>
+          </Show>
+          <Show when={!isOWPossible()}>
+            <button
+              onClick={() => forceNewSave()}
+              style={{
+                color: vars.color.accent,
+                'border-color': vars.color.accent,
+              }}
+            >
+              save (new).
+            </button>
+          </Show>
+          <button onClick={() => exportActiveLayerUpscaled(projectStore.newName || projectStore.name)}>export.</button>
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
         </div>
       </div>
@@ -2379,12 +2567,13 @@ export default Project;
 
 <file path="components/section/settings/EditorSettings.tsx">
 import { Component } from 'solid-js';
-import Dropdown, { DropdownOption } from '../../common/Dropdown';
-import ToggleSwitch from '../../common/ToggleSwitch';
-import { saveGlobalSettings } from '~/io/global/globalIO';
-import { globalStore, setGlobalStore } from '~/stores/global/globalStore';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { vars } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { flexRow } from '~/styles/snippets.css';
 import { CanvasRenderingMode } from '~/types/Canvas';
+import { Consts } from '~/utils/consts';
+import Dropdown, { DropdownOption } from '../../common/Dropdown';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'adaptive', value: 'adaptive' },
@@ -2397,22 +2586,49 @@ const EditorSettings: Component = () => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>editor.</p>
       <div class={sectionContent} style={{ gap: '8px' }}>
-        <ToggleSwitch
-          checked={globalStore.showDirtyRects}
-          onChange={(e) => setGlobalStore('showDirtyRects', e)}
-        >
-          <p style={{ 'font-size': '0.5rem' }}> autosave.</p>
-        </ToggleSwitch>
+        <div>
+          <p>default canvas size.</p>
+          <div class={flexRow} style={{ gap: vars.spacing.xs, 'margin-top': vars.spacing.sm, 'align-items': 'center' }}>
+            <input
+              type='number'
+              name='width'
+              min={Consts.minCanvasWidth}
+              max={Consts.maxCanvasWidth}
+              value={globalStore.newProjectCanvasSize.width}
+              onChange={(e) => {
+                setGlobalStore('newProjectCanvasSize', 'width', Number(e.target.value));
+              }}
+              style={{ 'font-size': vars.text.lg }}
+              required
+            />
+            <p>x</p>
+            <input
+              type='number'
+              name='height'
+              min={Consts.minCanvasHeight}
+              max={Consts.maxCanvasHeight}
+              value={globalStore.newProjectCanvasSize.height}
+              onChange={(e) => {
+                setGlobalStore('newProjectCanvasSize', 'height', Number(e.target.value));
+              }}
+              style={{ 'font-size': vars.text.lg }}
+              required
+            />
+          </div>
+        </div>
 
-        <p>canvas rendering.</p>
+        <div>
+          <p>autosave span (wip).</p>
+          <input type='number' name='width' min={100} max={1000000} required />
+        </div>
 
+        <p>canvas rendering (temp not works).</p>
         <Dropdown
           selected={globalStore.canvasRenderingMode}
           value={globalStore.canvasRenderingMode}
           options={renderingOptions}
           onChange={(v) => {
             setGlobalStore('canvasRenderingMode', v);
-            saveGlobalSettings();
           }}
         />
       </div>
@@ -2423,113 +2639,446 @@ const EditorSettings: Component = () => {
 export default EditorSettings;
 </file>
 
-<file path="components/SideSections.tsx">
+<file path="components/section/settings/PerformanceSettings.tsx">
 import { Component } from 'solid-js';
-import CanvasSettings from './section/CanvasSettings';
-import Color from './section/Color';
-import LayerList from './section/LayerList';
-import PenConfig from './section/PenConfig';
-import Project from './section/Project';
+import Checkbox from '~/components/common/Checkbox';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 
-import { SettingsWindowOptions } from '~/routes/settings';
-import { sideAreaContent } from '~/styles/global.css';
-import { openSingletonWindow } from '~/utils/windowUtils';
-
-const SideSections: Component = () => {
+const PerformanceSettings: Component = () => {
   return (
-    <div class={sideAreaContent}>
-      {/* <a onClick={() => (window.location.href = "/")}>&lt; back</a> */}
-      <Project />
-      <Color />
-      <PenConfig />
-      <LayerList />
-      <CanvasSettings />
-      <button onClick={() => openSingletonWindow('settings', SettingsWindowOptions)}>
-        settings.
-      </button>
-      {/* <GlobalSettings /> */}
+    <div class={sectionRoot}>
+      <p class={sectionCaption}>performance.</p>
+      <div class={sectionContent} style={{ gap: '8px' }}>
+        <Checkbox
+          label='show dirtyrects.'
+          checked={globalStore.showDirtyRects}
+          onChange={(e) => setGlobalStore('showDirtyRects', e)}
+        />
+        <Checkbox
+          label='performance monitor.'
+          checked={globalStore.showPerfMonitor}
+          onChange={(e) => setGlobalStore('showPerfMonitor', e)}
+        />
+      </div>
     </div>
   );
 };
 
-export default SideSections;
+export default PerformanceSettings;
 </file>
 
-<file path="components/TitleBar.tsx">
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createSignal, onMount } from 'solid-js';
-import {
-  titleBarControlButtonImg,
-  titleBarControlCloseButton,
-  titleBarControlMaximizeButton,
-  titleBarControlMinimizeButton,
-  titleBarControls,
-  titleBarRoot,
-  titleBarTitle,
-} from '~/styles/components/title_bar.css';
+<file path="components/section/ToolConfig.tsx">
+import { Component, For } from 'solid-js';
+import { toolStore } from '~/stores/EditorStores';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import ToolItem from './item/ToolItem';
 
-export default function TitleBar() {
-  const window = getCurrentWindow();
-
-  const [isMaximizable, setIsMaximizable] = createSignal(true);
-  const [isMinimizable, setIsMinimizable] = createSignal(true);
-  const [isClosable, setIsClosable] = createSignal(true);
-  const [title, setTitle] = createSignal('');
-  const [isMaximized, setMaximized] = createSignal(false);
-
-  onMount(async () => {
-    setIsMaximizable(await window.isMaximizable());
-    setIsMinimizable(await window.isMinimizable());
-    setIsClosable(await window.isClosable());
-    setTitle(await window.title());
-  });
-
-  window.onResized(async (handler) => {
-    console.log('resize');
-    setMaximized(await window.isMaximized());
-  });
-
-  const borderWindowLabels: string[] = ['editor'];
-  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
-
+const ToolConfig: Component = () => {
   return (
-    <header
-      style={{
-        'pointer-events': 'all',
-        border: shouldShowBorder() ? '1px solid #aaa' : 'none',
-      }}
-    >
-      <nav class={titleBarRoot} data-tauri-drag-region="p, button">
-        <p class={titleBarTitle}>{title()}.</p>
-        <div class={titleBarControls}>
-          {isMinimizable() && (
-            <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
-              <img class={titleBarControlButtonImg} src={'/minimize.png'} />
-            </button>
-          )}
-          {isMaximizable() && (
-            <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
-              <img
-                class={titleBarControlButtonImg}
-                src={isMaximized() ? '/leave_maximize.png' : '/maximize.png'}
-              />
-            </button>
-          )}
-          {isClosable() && (
-            <button class={titleBarControlCloseButton} onClick={() => window.close()}>
-              <img class={titleBarControlButtonImg} src={'/close.png'} />
-            </button>
-          )}
-        </div>
-      </nav>
-    </header>
+    <div class={sectionRoot}>
+      <p class={sectionCaption}>tools.</p>
+      <div class={sectionContent}>
+        <For each={toolStore.tools}>
+          {(item, index) => <ToolItem tool={item} isInUse={index() === toolStore.usingIndex} />}
+        </For>
+      </div>
+    </div>
   );
+};
+
+export default ToolConfig;
+</file>
+
+<file path="controllers/canvas/CanvasController.ts">
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
+import { Size2D } from '~/types/Size';
+import { Consts } from '~/utils/consts';
+import { resetLayerImage } from '../layer/LayerController';
+import { allLayers } from '../layer_list/LayerListController';
+
+export function changeCanvasSize(newSize: Size2D): boolean {
+  if (newSize.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < newSize.width) return false;
+  if (newSize.height < Consts.minCanvasHeight || Consts.maxCanvasHeight < newSize.height) return false;
+
+  setCanvasStore('canvas', newSize);
+  allLayers().forEach((layer) => {
+    resetLayerImage(layer.id, layer.dotMagnification);
+  });
+  return true;
+}
+
+const REFERENCE_LENGTH = 600;
+
+export const getReferencedZoom = (length?: number) => {
+  if (length === undefined) {
+    const width = canvasStore.canvas.width;
+    const height = canvasStore.canvas.height;
+    length = width > height ? width : height;
+    if (!length) return undefined;
+  }
+
+  return REFERENCE_LENGTH / length;
+};
+
+export const adjustZoomToFit = (width?: number, height?: number) => {
+  if (width === undefined) width = canvasStore.canvas.width;
+  if (height === undefined) height = canvasStore.canvas.height;
+  if (!width || !height) return;
+
+  const isWide = width > height;
+  const longerLength = isWide ? width : height;
+
+  const referencedZoom = getReferencedZoom(longerLength);
+  if (!referencedZoom) return;
+  setInteractStore('zoom', referencedZoom);
+  centeringCanvas();
+};
+
+export const centeringCanvas = () => {
+  const canvasSize = canvasStore.canvas;
+  const canvasArea = interactStore.canvasAreaSize;
+  const zoom = interactStore.zoom;
+
+  setInteractStore('offsetOrigin', {
+    x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
+    y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
+  });
+  setInteractStore('offset', {
+    x: 0,
+    y: 0,
+  });
+};
+</file>
+
+<file path="controllers/canvas/LayerCanvasOperator.ts">
+import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas';
+import { setBottomBarText } from '~/controllers/log/LogController';
+import { currentTool } from '~/controllers/tool/ToolController';
+import { Vec2 } from '~/types/Vector';
+import { hexToRGBA } from '~/utils/ColorUtils';
+import LayerImageAgent from '../../models/layer_image/LayerImageAgent';
+import TileLayerImageAgent from '../../models/layer_image/agents/TileLayerImageAgent';
+import { getToolInstance } from '../../models/tool/ToolBase';
+import { DrawState } from '../../types/DrawState';
+import { Tool } from '../../types/Tool';
+import { currentColor } from '../color/ColorController';
+
+export default class LayerCanvasOperator {
+  constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
+
+  public handleDraw(state: DrawState, position: Vec2, last?: Vec2) {
+    const layerCanvasRef = this.getActiveLayerCanvas();
+    const layer = layerCanvasRef.getLayer();
+    const agent = layerCanvasRef.getAgent();
+    const image = agent.getImage();
+    if (!image) return;
+
+    position = this.getMagnificatedPosition(position, layer.dotMagnification);
+    if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
+
+    const result = this.useTool(agent, state, image, currentTool(), position, last);
+
+    if (result) {
+      agent.setDrawingBuffer(result);
+      if (state === DrawState.end) {
+        agent.registerDiffAction();
+        agent.setImage(result);
+
+        if (agent instanceof TileLayerImageAgent) {
+          (agent as TileLayerImageAgent).resetAllDirtyStates();
+        }
+      }
+    }
+  }
+
+  private useTool(agent: LayerImageAgent, state: DrawState, image: ImageData, tool: Tool, position: Vec2, last?: Vec2) {
+    const toolInstance = getToolInstance(tool.type);
+    const toolArgs = {
+      image,
+      position,
+      lastPosition: last,
+      size: tool.size,
+      color: hexToRGBA(currentColor()),
+    };
+    const startTime = Date.now();
+    let isDrawnAction;
+    switch (state) {
+      case DrawState.start:
+        const isDrawnActionInStart = toolInstance.onStart(agent, toolArgs);
+        const isDrawnActionInMove = toolInstance.onMove(agent, toolArgs);
+        isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
+        break;
+      case DrawState.move:
+        isDrawnAction = toolInstance.onMove(agent, toolArgs);
+        break;
+      case DrawState.end:
+        isDrawnAction = toolInstance.onEnd(agent, toolArgs);
+        break;
+    }
+    const endTime = Date.now();
+    if (isDrawnAction) {
+      if (agent instanceof TileLayerImageAgent) {
+        setBottomBarText(
+          `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`
+        );
+      } else {
+        setBottomBarText(`${tool.type} finished. ${endTime - startTime} ms.`);
+      }
+    }
+    return image;
+  }
+
+  private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
+    return {
+      x: Math.floor(position.x / dotMagnification),
+      y: Math.floor(position.y / dotMagnification),
+    };
+  }
 }
 </file>
 
-<file path="io/global/globalIO.ts">
+<file path="controllers/canvas/PreviewCanvasFactory.ts">
+export function createPreviewCanvas(imageData: ImageData, targetHeight: number): HTMLCanvasElement {
+  const aspectRatio = imageData.width / imageData.height;
+  const targetWidth = Math.round(targetHeight * aspectRatio);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingEnabled = false;
+
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width = imageData.width;
+  tmpCanvas.height = imageData.height;
+  tmpCanvas.getContext('2d')!.putImageData(imageData, 0, 0);
+
+  ctx.drawImage(tmpCanvas, 0, 0, imageData.width, imageData.height, 0, 0, targetWidth, targetHeight);
+
+  return canvas;
+}
+</file>
+
+<file path="controllers/color/ColorController.ts">
+import { colorStore, setColorStore } from '~/stores/EditorStores';
+import { PaletteType } from '~/types/PaletteType';
+
+export const currentColor = (): string => {
+  return colorStore[colorStore.currentPalette];
+};
+export const setCurrentColor = (colorHexString: string) => {
+  return setColorStore(colorStore.currentPalette, colorHexString);
+};
+export const setColor = (palette: PaletteType, colorHexString: string) => {
+  return setColorStore(palette, colorHexString);
+};
+export const selectPalette = (palette: PaletteType) => {
+  return setColorStore('currentPalette', palette);
+};
+</file>
+
+<file path="controllers/config/GlobalConfigController.ts">
+import { saveGlobalSettings } from '~/io/global_config/globalSettings';
+import { setGlobalStore } from '~/stores/GlobalStores';
+import { FileLocation } from '~/types/FileLocation';
+
+export const addRecentFile = (fileLocation?: FileLocation) => {
+  if (!fileLocation) return;
+  const path = fileLocation.path;
+  const name = fileLocation.name;
+
+  // add to recent
+  setGlobalStore((store) => {
+    console.log('path: ' + path);
+    console.log('name: ' + name);
+    if (name && path && store.recentFiles) {
+      const oldRecentFiles = store.recentFiles.filter((f) => {
+        return f.name !== name || f.path !== path?.toString();
+      });
+      // その後、一番上に追加
+      const newRecentFiles: FileLocation[] = [
+        {
+          name: name,
+          path: path,
+        },
+        ...oldRecentFiles,
+      ];
+      setGlobalStore('recentFiles', newRecentFiles);
+      saveGlobalSettings();
+    }
+    return store;
+  });
+};
+</file>
+
+<file path="controllers/layer_list/LayerListController.ts">
+import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { LayerType } from '~/types/Layer';
+import { DSL } from '../../models/dsl/DSL';
+import { createLayer } from '../layer/LayerFactory';
+
+export const addLayer = async (
+  name: string,
+  type: LayerType = LayerType.Dot,
+  enabled = true,
+  dotMagnification = 1,
+  dsl?: DSL
+) => {
+  const newLayer = createLayer(name, type, enabled, dotMagnification, dsl);
+
+  const layers = [...allLayers()];
+  layers.push(newLayer);
+
+  setLayerListStore('layers', layers);
+  setLayerListStore('activeLayerId', newLayer.id);
+
+  return layers;
+};
+
+export const removeLayer = (layerId?: string) => {
+  if (layerId === undefined) return;
+  const layers = [...allLayers()];
+  if (layers.length <= 1) return;
+  const index = layers.findIndex((l) => l.id === layerId);
+  let newActiveIndex = 0;
+  if (index !== 0) newActiveIndex = index - 1;
+
+  layers.splice(index, 1);
+  const histories = Object.assign({}, layerHistoryStore);
+  delete histories[layerId];
+
+  setLayerListStore('layers', layers);
+  setLayerListStore('activeLayerId', layers[newActiveIndex].id);
+  setLayerHistoryStore(histories);
+};
+
+export const allLayers = () => layerListStore.layers;
+export const findLayerById = (id: string) => allLayers().find((layer) => layer.id === id);
+export const activeLayer = () => findLayerById(layerListStore.activeLayerId) || allLayers()[0] || undefined;
+export const activeIndex = () => allLayers().findIndex((layer) => layer.id === layerListStore.activeLayerId);
+</file>
+
+<file path="controllers/layer/LayerController.ts">
+import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
+import { layerImageManager } from '~/routes/editor';
+import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore } from '~/stores/ProjectStores';
+
+const magnificationList: number[] = [1, 2, 4];
+
+export const getNextMagnification = (dotMagnification: number) => {
+  const index = magnificationList.findIndex((m) => m === dotMagnification);
+  if (index != -1) {
+    // 循環
+    const nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0;
+    return magnificationList[nextIndex];
+  } else return 1;
+};
+
+export function resetLayerImage(layerId: string, dotMagnification: number): LayerImageAgent {
+  const blank = new ImageData(
+    Math.round(canvasStore.canvas.width / dotMagnification),
+    Math.round(canvasStore.canvas.height / dotMagnification)
+  );
+  setLayerHistoryStore(layerId, {
+    undoStack: [],
+    redoStack: [],
+  });
+  const agent = layerImageManager.getAgent(layerId);
+  if (agent !== undefined) {
+    console.log('udpate');
+    agent.setImage(blank, false);
+    return agent;
+  } else {
+    console.log('not found');
+    return layerImageManager.registerAgent(layerId, blank);
+  }
+}
+
+export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.undoStack.length > 0;
+export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.redoStack.length > 0;
+</file>
+
+<file path="controllers/layer/LayerFactory.ts">
+import { v4 } from 'uuid';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { layerListStore } from '~/stores/ProjectStores';
+import { Layer, LayerType } from '~/types/Layer';
+import { DSL } from '../../models/dsl/DSL';
+
+export const createLayer = (name: string, type: LayerType, enabled = true, dotMagnification = 1, dsl?: DSL): Layer => {
+  // check if name already exists
+  const endNums = name.match(/^(.*)(\d+)$/);
+  if (endNums && endNums.length >= 3) {
+    const nameWithoutNum = endNums[1];
+    const endNum = Number(endNums[2]);
+
+    const foundSameNameNums: number[] = [];
+    layerListStore.layers.forEach((layer) => {
+      const layerEndNums = layer.name.match(/^(.*)(\d+)$/);
+      if (layerEndNums && layerEndNums.length >= 3) {
+        const layerNameWithoutNum = layerEndNums[1];
+        const layerEndNum = Number(layerEndNums[2]);
+        if (nameWithoutNum === layerNameWithoutNum) {
+          foundSameNameNums.push(layerEndNum);
+        }
+      }
+    });
+
+    let num = endNum;
+    while (foundSameNameNums.find((foundNum) => foundNum === num)) {
+      num++;
+    }
+    name = nameWithoutNum + num;
+  }
+
+  const id = v4();
+  resetLayerImage(id, dotMagnification);
+
+  return {
+    id,
+    name,
+    type,
+    typeDescription: getTypeString(type),
+    enabled,
+    dotMagnification,
+    dsl: dsl || new DSL(id, id),
+  };
+};
+
+function getTypeString(type: LayerType): string {
+  switch (type) {
+    case LayerType.Dot:
+      return 'dot layer.';
+    case LayerType.Image:
+      return 'image layer.';
+    case LayerType.Automate:
+      return 'automate layer.';
+    default:
+      return 'N/A.';
+  }
+}
+</file>
+
+<file path="controllers/log/LogController.tsx">
+import { setLogStore } from '~/stores/EditorStores';
+
+export function setBottomBarText(text: string) {
+  setLogStore('bottomBarText', text);
+}
+</file>
+
+<file path="controllers/tool/ToolController.ts">
+import { toolStore } from '~/stores/EditorStores';
+
+export const currentTool = () => toolStore.tools[toolStore.usingIndex];
+</file>
+
+<file path="io/global_config/globalSettings.ts">
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import { globalStore, setGlobalStore } from '~/stores/global/globalStore';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 
 const FILE_NAME = 'global.sledgeconfig';
 
@@ -2551,27 +3100,20 @@ export async function loadGlobalSettings() {
     });
     const data = JSON.parse(json);
 
-    console.log(data);
+    setGlobalStore(data);
 
-    if (data.recentOpenedFiles) {
-      setGlobalStore('recentOpenedFiles', data.recentOpenedFiles);
-    }
-    if (data.canvasRenderingMode) {
-      setGlobalStore('canvasRenderingMode', data.canvasRenderingMode);
-    }
-
-    console.log('[globalIO] 設定読み込み完了');
+    console.log('[globalIO] 設定読み込み完了', data);
   } catch (e) {
     console.warn('[globalIO] 設定ファイルが存在しないか、読み込み失敗:', e);
   }
 }
 </file>
 
-<file path="io/internal/export.ts">
-import { layerStore } from '~/stores/project/layerStore';
+<file path="io/image_io/save.ts">
+import { layerListStore } from '~/stores/ProjectStores';
 
-export function exportActiveLayerUpscaled(scale = 10) {
-  const layerId = layerStore.activeLayerId;
+export function exportActiveLayerUpscaled(fileName?: string, path?: string, scale = 10) {
+  const layerId = layerListStore.activeLayerId;
   if (!layerId) return;
 
   const originalCanvas = document.getElementById(`canvas-${layerId}`) as HTMLCanvasElement;
@@ -2606,11 +3148,10 @@ export function exportActiveLayerUpscaled(scale = 10) {
       alert('エクスポートに失敗しました。');
       return;
     }
-
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${layerId}_x${scale}.png`;
+    a.download = `${fileName || layerId}_x${scale}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -2618,11 +3159,7 @@ export function exportActiveLayerUpscaled(scale = 10) {
   }, 'image/png');
 }
 
-export function downloadImageData(
-  imageData: ImageData,
-  filename: string = 'image',
-  scale: number = 10
-) {
+export function downloadImageData(imageData: ImageData, filename: string = 'image', scale: number = 10) {
   // 一時的な canvas を作成
   const canvas = document.createElement('canvas');
   canvas.width = imageData.width;
@@ -2674,69 +3211,23 @@ export function downloadImageData(
 }
 </file>
 
-<file path="io/internal/import.ts">
-import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
-import { layerStore } from '~/stores/project/layerStore';
-
-// 画像ファイルをキャンバスに焼き込む（補完なし・左上合わせ・切り捨て）
-export function importImageToActiveLayer(file: File) {
-  const layerId = layerStore.activeLayerId;
-  if (!layerId) return;
-
-  const imageData = layerHistoryStore[layerId]?.current;
-  if (!imageData) {
-    alert('現在のレイヤーに描画できません。');
-    return;
-  }
-
-  const img = new Image();
-  const reader = new FileReader();
-
-  reader.onload = (e) => {
-    img.onload = () => {
-      const w = imageData.width;
-      const h = imageData.height;
-
-      // オフスクリーンCanvasで描画 → ImageData取得
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      ctx.imageSmoothingEnabled = false;
-      ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(img, 0, 0, w, h); // 左上にそのまま描く（拡大/縮小なし）
-
-      const importedData = ctx.getImageData(0, 0, w, h);
-      // registerNewHistory(layerId, importedData);
-    };
-    img.src = e.target?.result as string;
-  };
-
-  reader.readAsDataURL(file);
-}
-</file>
-
 <file path="io/project/project.ts">
-// src/io/project.ts
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import initLayerImage from '~/models/factories/initLayerImage';
-import { addRecent } from '~/stores/global/globalStore';
+import { addRecentFile } from '~/controllers/config/GlobalConfigController';
+import { findLayerById } from '~/controllers/layer_list/LayerListController';
+import { getImageOf } from '~/routes/editor';
 import {
-  adjustZoomToFit,
   canvasStore,
-  centeringCanvas,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
-import { layerHistoryStore, setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
-import { findLayerById, layerStore, setLayerStore } from '~/stores/project/layerStore';
-import { projectStore, setProjectStore } from '~/stores/project/projectStore';
-import { Layer } from '~/types/Layer';
-import { decodeImageData, encodeImageData } from '~/utils/ImageUtils';
-import { getFileNameAndPath } from '~/utils/pathUtils';
+  layerHistoryStore,
+  layerListStore,
+  loadStoreFromProjectJson as loadProjectStore,
+  projectStore,
+  setProjectStore,
+} from '~/stores/ProjectStores';
+import { encodeImageData } from '~/utils/ImageUtils';
+import { getFileNameAndPath } from '~/utils/PathUtils';
 
 export async function importProjectJsonFromFileSelection(): Promise<string | undefined> {
   const home = await path.homeDir();
@@ -2755,11 +3246,11 @@ export async function importProjectJsonFromFileSelection(): Promise<string | und
     console.log('ファイルが選択されていません');
     return undefined;
   }
-  console.log(file);
+
   const jsonText = await readTextFile(file);
   const projectJson = JSON.parse(jsonText);
 
-  await importProjectJson(projectJson);
+  loadProjectStore(projectJson);
 
   return file;
 }
@@ -2772,52 +3263,7 @@ export async function importProjectJsonFromPath(filePath: string) {
   const jsonText = await readTextFile(filePath);
   const projectJson = JSON.parse(jsonText);
 
-  importProjectJson(projectJson);
-}
-
-export async function importProjectJson(projectJson: any) {
-  if (projectJson.project) {
-    console.log(projectJson.project);
-    setProjectStore('name', projectJson.project.name);
-    setProjectStore('path', projectJson.project.path);
-  }
-
-  if (projectJson.canvas) {
-    const { width, height } = projectJson.canvas;
-    setCanvasStore('canvas', 'width', width);
-    setCanvasStore('canvas', 'height', height);
-  }
-
-  if (projectJson.images) {
-    setlayerHistoryStore({});
-    Object.keys(projectJson.images).forEach((id) => {
-      console.log(`read ${id}`);
-      const imageData = projectJson.images[id];
-      console.log(imageData);
-      initLayerImage(id, Number(imageData.dotMagnification || 1));
-      setlayerHistoryStore(
-        id,
-        'current',
-        decodeImageData(imageData.current, Number(imageData.width), Number(imageData.height))
-      );
-    });
-  }
-
-  if (projectJson.layer && projectJson.layer.layers && Array.isArray(projectJson.layer.layers)) {
-    const layers: Layer[] = [];
-    projectJson.layer.layers.map((l: any) => {
-      layers.push({
-        ...l,
-        dsl: undefined,
-      } as Layer);
-    });
-
-    setLayerStore('layers', layers);
-    setLayerStore('activeLayerId', projectJson.layer.activeLayerId);
-  }
-
-  adjustZoomToFit();
-  centeringCanvas();
+  loadProjectStore(projectJson);
 }
 
 export const parseCurrentProject = (): string => {
@@ -2825,22 +3271,26 @@ export const parseCurrentProject = (): string => {
     project: projectStore,
     canvas: canvasStore.canvas,
     images: Object.fromEntries(
-      Object.entries(layerHistoryStore).map(([id, state]) => [
-        id,
-        {
-          current: encodeImageData(state.current),
-          width: state.current.width,
-          height: state.current.height,
-          dotMagnification: findLayerById(id)?.dotMagnification,
-        },
-      ])
+      Object.entries(layerHistoryStore).map(([id, state]) => {
+        const image = getImageOf(id);
+        if (!image) return [];
+        return [
+          id,
+          {
+            current: encodeImageData(image),
+            width: image.width,
+            height: image.height,
+            dotMagnification: findLayerById(id)?.dotMagnification,
+          },
+        ];
+      })
     ),
     layer: {
-      layers: layerStore.layers.map((layer) => ({
+      layers: layerListStore.layers.map((layer) => ({
         ...layer,
         dsl: undefined, // TODO: save dsl
       })),
-      activeLayerId: layerStore.activeLayerId,
+      activeLayerId: layerListStore.activeLayerId,
     },
   });
 };
@@ -2873,8 +3323,8 @@ export async function saveProject(existingPath?: string) {
     await writeTextFile(selectedPath, data);
     console.log('プロジェクト保存:', selectedPath);
 
-    const fileLoc = getFileNameAndPath(selectedPath);
-    if (fileLoc !== undefined) addRecent(fileLoc);
+    setProjectStore('isProjectChangedAfterSave', false);
+    addRecentFile(getFileNameAndPath(selectedPath));
   } else {
     console.log('保存キャンセルされました');
   }
@@ -2891,10 +3341,10 @@ render(() => <App />, document.getElementById('root')!);
 </file>
 
 <file path="models/dsl/DSL.ts">
+import { SledgeNode } from '~/models/dsl/nodes/DSLNodes';
+import { findLayerById } from '../../controllers/layer_list/LayerListController';
 import { LayerIn } from './nodes/pass/LayerIn';
 import { LayerOut } from './nodes/pass/LayerOut';
-import { SledgeNode } from '~/models/dsl/nodes/DSLNodes';
-import { findLayerById } from '~/stores/project/layerStore';
 
 export class DSL {
   layerIn: LayerIn;
@@ -2912,9 +3362,7 @@ export class DSL {
   }
 
   public build(exceptIn: boolean = false): string | undefined {
-    const nodes = exceptIn
-      ? [...this.nodes, this.layerOut]
-      : [this.layerIn, ...this.nodes, this.layerOut];
+    const nodes = exceptIn ? [...this.nodes, this.layerOut] : [this.layerIn, ...this.nodes, this.layerOut];
 
     const nodeStrings: string[] = [];
     let isAllNodeParseSuccessful = true;
@@ -2943,10 +3391,8 @@ export class DSL {
       // 読みやすくする
       const inId = this.layerIn.layerId;
       const outId = this.layerOut.layerId;
-      if (inId !== undefined)
-        str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`);
-      if (outId !== undefined)
-        str = str.replaceAll(outId, `${findLayerById(outId)?.name || 'N/A'} ID`);
+      if (inId !== undefined) str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`);
+      if (outId !== undefined) str = str.replaceAll(outId, `${findLayerById(outId)?.name || 'N/A'} ID`);
       str = str.replaceAll(' > ', '\n> ');
       return str;
     }
@@ -2955,9 +3401,9 @@ export class DSL {
 </file>
 
 <file path="models/dsl/DSLRunner.ts">
-import { DSL } from './DSL';
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils';
-import { safeInvoke } from '~/utils/tauriUtils';
+import { safeInvoke } from '~/utils/TauriUtils';
+import { DSL } from './DSL';
 
 export async function runDSL(dsl: DSL, image: ImageData): Promise<ImageData | undefined> {
   const encoded = encodeImageData(image);
@@ -3169,305 +3615,11 @@ export abstract class PassNode extends SledgeNode {
 }
 </file>
 
-<file path="models/factories/addLayer.ts">
-import { LayerType } from '../../types/Layer';
-import { DSL } from '../dsl/DSL';
-import { createLayer } from './createLayer';
-import { allLayers, setLayerStore } from '~/stores/project/layerStore';
-
-export const addLayer = (
-  name: string,
-  type: LayerType = LayerType.Dot,
-  enabled = true,
-  dotMagnification = 1,
-  dsl?: DSL
-) => {
-  const newLayer = createLayer(name, type, enabled, dotMagnification, dsl);
-
-  const layers = [...allLayers()];
-  layers.push(newLayer);
-
-  setLayerStore('layers', layers);
-  setLayerStore('activeLayerId', newLayer.id);
-
-  return layers;
-};
-</file>
-
-<file path="models/factories/canvasPreview.ts">
-export function createPreviewCanvas(imageData: ImageData, targetHeight: number): HTMLCanvasElement {
-  const aspectRatio = imageData.width / imageData.height;
-  const targetWidth = Math.round(targetHeight * aspectRatio);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-
-  const ctx = canvas.getContext('2d')!;
-  ctx.imageSmoothingEnabled = false;
-
-  const tmpCanvas = document.createElement('canvas');
-  tmpCanvas.width = imageData.width;
-  tmpCanvas.height = imageData.height;
-  tmpCanvas.getContext('2d')!.putImageData(imageData, 0, 0);
-
-  ctx.drawImage(
-    tmpCanvas,
-    0,
-    0,
-    imageData.width,
-    imageData.height,
-    0,
-    0,
-    targetWidth,
-    targetHeight
-  );
-
-  return canvas;
-}
-</file>
-
-<file path="models/factories/createCanvas.ts">
-import { Canvas } from '~/types/Canvas';
-
-export const createCanvas = (width = 800, height = 1200): Canvas => {
-  return {
-    width,
-    height,
-  };
-};
-</file>
-
-<file path="models/factories/createLayer.ts">
-import { v4 as uuidv4 } from 'uuid';
-import { DSL } from '../dsl/DSL';
-import initLayerImage from './initLayerImage';
-import { layerStore } from '~/stores/project/layerStore';
-import { Layer, LayerType } from '~/types/Layer';
-
-export const createLayer = (
-  name: string,
-  type: LayerType,
-  enabled = true,
-  dotMagnification = 1,
-  dsl?: DSL
-): Layer => {
-  // check if name already exists
-  const endNums = name.match(/^(.*)(\d+)$/);
-  if (endNums && endNums.length >= 3) {
-    const nameWithoutNum = endNums[1];
-    const endNum = Number(endNums[2]);
-
-    const foundSameNameNums: number[] = [];
-    layerStore.layers.forEach((layer) => {
-      const layerEndNums = layer.name.match(/^(.*)(\d+)$/);
-      if (layerEndNums && layerEndNums.length >= 3) {
-        const layerNameWithoutNum = layerEndNums[1];
-        const layerEndNum = Number(layerEndNums[2]);
-        if (nameWithoutNum === layerNameWithoutNum) {
-          foundSameNameNums.push(layerEndNum);
-        }
-      }
-    });
-
-    let num = endNum;
-    while (foundSameNameNums.find((foundNum) => foundNum === num)) {
-      num++;
-    }
-    name = nameWithoutNum + num;
-  }
-
-  const id = uuidv4();
-  initLayerImage(id, dotMagnification);
-  return {
-    id,
-    name,
-    type,
-    typeDescription: getTypeString(type),
-    enabled,
-    dotMagnification,
-    dsl: dsl || new DSL(id, id),
-  };
-};
-
-function getTypeString(type: LayerType): string {
-  switch (type) {
-    case LayerType.Dot:
-      return 'dot layer.';
-    case LayerType.Image:
-      return 'image layer.';
-    case LayerType.Automate:
-      return 'automate layer.';
-    default:
-      return 'N/A.';
-  }
-}
-</file>
-
-<file path="models/factories/createPen.ts">
-import { v4 as uuidv4 } from 'uuid';
-import { Tool, ToolType } from '../../types/Tool';
-
-export const createTool = (type: ToolType, name: string, size: number): Tool => ({
-  id: uuidv4(),
-  type,
-  name,
-  size,
-});
-</file>
-
-<file path="models/factories/getNextMagnification.ts">
-const magnificationList: number[] = [1, 2, 4];
-
-export const getNextMagnification = (dotMagnification: number) => {
-  const index = magnificationList.findIndex((m) => m === dotMagnification);
-  if (index != -1) {
-    // 循環
-    const nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0;
-    return magnificationList[nextIndex];
-  } else return 1;
-};
-</file>
-
-<file path="models/factories/initLayerImage.ts">
-import { canvasStore } from '~/stores/project/canvasStore';
-import { setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
-
-export default function initLayerImage(layerId: string, dotMagnification: number) {
-  const blank = new ImageData(
-    Math.round(canvasStore.canvas.width / dotMagnification),
-    Math.round(canvasStore.canvas.height / dotMagnification)
-  );
-  setlayerHistoryStore(layerId, {
-    current: blank,
-    undoStack: [],
-    redoStack: [],
-  });
-}
-</file>
-
-<file path="models/factories/removeLayer.ts">
-import { layerHistoryStore, setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
-import { allLayers, setLayerStore } from '~/stores/project/layerStore';
-
-export const removeLayer = (layerId?: string) => {
-  if (layerId === undefined) return;
-  const layers = [...allLayers()];
-  if (layers.length <= 1) return;
-  const index = layers.findIndex((l) => l.id === layerId);
-  let newActiveIndex = 0;
-  if (index !== 0) newActiveIndex = index - 1;
-
-  layers.splice(index, 1);
-  const images = Object.assign({}, layerHistoryStore);
-  delete images[layerId];
-
-  setLayerStore('layers', layers);
-  setLayerStore('activeLayerId', layers[newActiveIndex].id);
-  setlayerHistoryStore(images);
-};
-</file>
-
-<file path="models/layer_canvas/LayerCanvasOperator.ts">
-import { reconcile } from 'solid-js/store';
-import { DrawState } from '../../types/DrawState';
-import { Tool } from '../../types/Tool';
-import LayerImageAgent from '../layer_image/LayerImageAgent';
-import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent';
-import { getToolInstance } from '../tools/ToolBase';
-import { setBottomInfo } from '~/components/BottomInfo';
-import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas';
-import { currentColor } from '~/stores/internal/colorStore';
-import { currentTool } from '~/stores/internal/toolsStore';
-import { setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
-import { Vec2 } from '~/types/Vector';
-import { hexToRGBA } from '~/utils/colorUtils';
-
-export default class LayerCanvasOperator {
-  constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
-
-  public handleDraw(state: DrawState, position: Vec2, last?: Vec2) {
-    const layerCanvasRef = this.getActiveLayerCanvas();
-    const layer = layerCanvasRef.getLayer();
-    const agent = layerCanvasRef.getAgent();
-    const image = agent.getImage();
-    if (!image) return;
-
-    position = this.getMagnificatedPosition(position, layer.dotMagnification);
-    if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
-
-    const result = this.useTool(agent, state, image, currentTool(), position, last);
-
-    if (result) {
-      agent.setDrawingBuffer(result);
-      if (state === DrawState.end) {
-        agent.registerDiffAction();
-        agent.setImage(result);
-        setlayerHistoryStore(layer.id, 'current', reconcile(result));
-
-        if (agent instanceof TileLayerImageAgent) {
-          (agent as TileLayerImageAgent).resetAllDirtyStates();
-        }
-      }
-    }
-  }
-
-  private useTool(
-    agent: LayerImageAgent,
-    state: DrawState,
-    image: ImageData,
-    tool: Tool,
-    position: Vec2,
-    last?: Vec2
-  ) {
-    const toolInstance = getToolInstance(tool.type);
-    const toolArgs = {
-      image,
-      position,
-      lastPosition: last,
-      size: tool.size,
-      color: hexToRGBA(currentColor()),
-    };
-    const startTime = Date.now();
-    let isDrawnAction;
-    switch (state) {
-      case DrawState.start:
-        isDrawnAction = toolInstance.onStart(agent, toolArgs);
-        break;
-      case DrawState.move:
-        isDrawnAction = toolInstance.onMove(agent, toolArgs);
-        break;
-      case DrawState.end:
-        isDrawnAction = toolInstance.onEnd(agent, toolArgs);
-        break;
-    }
-    const endTime = Date.now();
-    if (isDrawnAction) {
-      if (agent instanceof TileLayerImageAgent) {
-        setBottomInfo(
-          `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`
-        );
-      } else {
-        setBottomInfo(`${tool.type} finished. ${endTime - startTime} ms.`);
-      }
-    }
-    return image;
-  }
-
-  private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
-    return {
-      x: Math.floor(position.x / dotMagnification),
-      y: Math.floor(position.y / dotMagnification),
-    };
-  }
-}
-</file>
-
 <file path="models/layer_image/agents/RawLayerImageAgent.ts">
+import { Vec2 } from '~/types/Vector';
+import { RGBAColor } from '~/utils/ColorUtils';
 import { PixelDiff } from '../HistoryManager';
 import LayerImageAgent from '../LayerImageAgent';
-import { Vec2 } from '~/types/Vector';
-import { RGBAColor } from '~/utils/colorUtils';
 
 export default class RawLayerImageAgent extends LayerImageAgent {
   putImageInto(ctx: CanvasRenderingContext2D) {
@@ -3504,11 +3656,11 @@ export default class RawLayerImageAgent extends LayerImageAgent {
 </file>
 
 <file path="models/layer_image/agents/TileLayerImageAgent.ts">
-import { PixelDiff, HistoryManager, TileDiff } from '../HistoryManager';
-import LayerImageAgent from '../LayerImageAgent';
 import Tile, { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
-import { colorMatch, RGBAColor } from '~/utils/colorUtils';
+import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
+import { HistoryManager, PixelDiff, TileDiff } from '../HistoryManager';
+import LayerImageAgent from '../LayerImageAgent';
 
 export default class TileLayerImageAgent extends LayerImageAgent {
   readonly TILE_SIZE = 16;
@@ -3526,6 +3678,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 
   constructor(imageData: ImageData, historyManager: HistoryManager) {
     super(imageData, historyManager);
+    this.initTile();
   }
 
   initTile() {
@@ -3651,23 +3804,14 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     excludePositionMatch: boolean = true,
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    const result = this.setPixelInPosition(
-      position,
-      color,
-      excludePositionMatch,
-      excludeColorMatch
-    );
+    const result = this.setPixelInPosition(position, color, excludePositionMatch, excludeColorMatch);
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position);
       this.tiles[tileIndex.row][tileIndex.column].isDirty = true;
       this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true;
 
       const tile = this.getTile(tileIndex);
-      if (
-        tile.isUniform &&
-        tile.uniformColor !== undefined &&
-        colorMatch(tile.uniformColor, color)
-      ) {
+      if (tile.isUniform && tile.uniformColor !== undefined && colorMatch(tile.uniformColor, color)) {
         this.tiles[tileIndex.row][tileIndex.column].isUniform = false;
         this.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined;
       }
@@ -3759,10 +3903,10 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 
 <file path="models/layer_image/HistoryManager.ts">
 import { reconcile } from 'solid-js/store';
-import { Vec2 } from '../../types/Vector';
-import { setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
+import { setLayerHistoryStore } from '~/stores/ProjectStores';
 import { TileIndex } from '~/types/Tile';
-import { RGBAColor } from '~/utils/colorUtils';
+import { RGBAColor } from '~/utils/ColorUtils';
+import { Vec2 } from '../../types/Vector';
 
 export type PixelDiff = {
   kind: 'pixel';
@@ -3860,24 +4004,17 @@ export class HistoryManager {
    * Synchronize the undo/redo stacks with the SolidJS store
    */
   private syncStores() {
-    setlayerHistoryStore(this.layerId, 'undoStack', reconcile(this.undoActionsStack));
-    setlayerHistoryStore(this.layerId, 'redoStack', reconcile(this.redoActionsStack));
+    setLayerHistoryStore(this.layerId, 'undoStack', reconcile(this.undoActionsStack));
+    setLayerHistoryStore(this.layerId, 'redoStack', reconcile(this.redoActionsStack));
   }
 }
 </file>
 
 <file path="models/layer_image/LayerImageAgent.ts">
-import {
-  Diff,
-  DiffAction,
-  getDiffHash,
-  HistoryManager,
-  PixelDiff,
-  TileDiff,
-} from './HistoryManager';
-import { setBottomInfo } from '~/components/BottomInfo';
+import { setBottomBarText } from '~/controllers/log/LogController';
 import { Vec2 } from '~/types/Vector';
-import { colorMatch, RGBAColor } from '~/utils/colorUtils';
+import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
+import { Diff, DiffAction, getDiffHash, HistoryManager, PixelDiff, TileDiff } from './HistoryManager';
 
 interface DrawingBufferChangeEvent {}
 interface ImageChangeEvent {}
@@ -3953,7 +4090,6 @@ export default abstract class LayerImageAgent {
   }
 
   callOnImageChangeListeners() {
-    console.log('no tnui');
     Object.values(this.onImageChangedListeners).forEach((listener) => listener({}));
   }
 
@@ -3982,7 +4118,7 @@ export default abstract class LayerImageAgent {
     const undoStart = Date.now();
     const undoedAction = this.historyManager?.undo();
     if (undoedAction === undefined) return;
-    setBottomInfo(`undo.`);
+    setBottomBarText(`undo.`);
     undoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
         case 'pixel':
@@ -3994,7 +4130,7 @@ export default abstract class LayerImageAgent {
       }
     });
     const undoEnd = Date.now();
-    setBottomInfo(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
+    setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
     this.callOnImageChangeListeners();
   }
@@ -4005,7 +4141,7 @@ export default abstract class LayerImageAgent {
     const redoStart = Date.now();
     const redoedAction = this.historyManager?.redo();
     if (redoedAction === undefined) return;
-    setBottomInfo(`redo.`);
+    setBottomBarText(`redo.`);
     redoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
         case 'pixel':
@@ -4017,7 +4153,7 @@ export default abstract class LayerImageAgent {
       }
     });
     const redoEnd = Date.now();
-    setBottomInfo(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
+    setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
     this.callOnImageChangeListeners();
   }
@@ -4038,8 +4174,7 @@ export default abstract class LayerImageAgent {
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
     if (!this.isInBounds(position)) return undefined;
-    if (excludePositionMatch && this.currentDiffAction.diffs.has(`${position.x},${position.y}`))
-      return undefined;
+    if (excludePositionMatch && this.currentDiffAction.diffs.has(`${position.x},${position.y}`)) return undefined;
     const i = (position.y * this.getWidth() + position.x) * 4;
     const beforeColor: RGBAColor = [
       this.image.data[i + 0],
@@ -4081,12 +4216,7 @@ export default abstract class LayerImageAgent {
   public abstract getPixel(position: Vec2): RGBAColor;
 
   public isInBounds(position: Vec2) {
-    return (
-      position.x >= 0 &&
-      position.y >= 0 &&
-      position.x < this.getWidth() &&
-      position.y < this.getHeight()
-    );
+    return position.x >= 0 && position.y >= 0 && position.x < this.getWidth() && position.y < this.getHeight();
   }
 }
 </file>
@@ -4111,45 +4241,10 @@ export class LayerImageManager {
 }
 </file>
 
-<file path="models/tools/DrawUtils.ts">
-import { Vec2 } from '~/types/Vector';
-
-export function drawSquarePixel(p: Vec2, size: number, drawFn: (x: number, y: number) => void) {
-  const half = Math.floor(size / 2);
-  for (let dy = -half; dy <= half; dy++) {
-    for (let dx = -half; dx <= half; dx++) {
-      drawFn(p.x + dx, p.y + dy);
-    }
-  }
-}
-
-export function drawCompletionLine(p0: Vec2, p1: Vec2, draw: (x: number, y: number) => void) {
-  const dx = Math.abs(p1.x - p0.x);
-  const dy = Math.abs(p1.y - p0.y);
-  const sx = p0.x < p1.x ? 1 : -1;
-  const sy = p0.y < p1.y ? 1 : -1;
-  let err = dx - dy;
-
-  const current = { x: p0.x, y: p0.y };
-  while (current.x !== p1.x && current.y !== p1.y) {
-    draw(current.x, current.y);
-    const e2 = 2 * err;
-    if (e2 > -dy) {
-      err -= dy;
-      current.x += sx;
-    }
-    if (e2 < dx) {
-      err += dx;
-      current.y += sy;
-    }
-  }
-}
-</file>
-
-<file path="models/tools/eraser/EraserTool.ts">
-import { drawCompletionLine, drawSquarePixel } from '../DrawUtils';
-import { Tool, ToolArgs } from '../ToolBase';
+<file path="models/tool/eraser/EraserTool.ts">
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
+import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
+import { Tool, ToolArgs } from '../ToolBase';
 
 export class EraserTool implements Tool {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
@@ -4186,12 +4281,12 @@ export class EraserTool implements Tool {
 }
 </file>
 
-<file path="models/tools/fill/FillTool.ts">
-import { Tool, ToolArgs } from '../ToolBase';
-import { TileFloodFill } from './TileFloodFill';
+<file path="models/tool/fill/FillTool.ts">
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 import { Vec2 } from '~/types/Vector';
-import { RGBAColor } from '~/utils/colorUtils';
+import { RGBAColor } from '~/utils/ColorUtils';
+import { Tool, ToolArgs } from '../ToolBase';
+import { TileFloodFill } from './TileFloodFill';
 
 export interface FillProps {
   agent: LayerImageAgent;
@@ -4221,97 +4316,11 @@ export class FillTool implements Tool {
 }
 </file>
 
-<file path="models/tools/fill/LegacyFills.ts">
-import { ToolArgs } from '../ToolBase';
-import { colorMatch, getPixel, isInBounds } from './FillTool';
-import { decodeImageData, encodeImageData, setPixel } from '~/utils/ImageUtils';
-import { safeInvoke } from '~/utils/tauriUtils';
-
-function legacyFloodFillJS({ image, position, lastPosition, color }: ToolArgs) {
-  const targetColor = getPixel(image, position.x, position.y);
-  const matches = (p: [number, number]) => colorMatch(getPixel(image, p[0], p[1]), targetColor);
-
-  const startTimeLegacy = Date.now();
-  const queueLegacy: [number, number][] = [[position.x, position.y]];
-  const filledLegacy: [number, number][] = [];
-  const visitedLegacy = new Set<string>();
-
-  while (queueLegacy.length > 0) {
-    const [cx, cy] = queueLegacy.pop()!;
-    const key = `${cx},${cy}`;
-    if (visitedLegacy.has(key) || !isInBounds(image, cx, cy)) continue;
-    visitedLegacy.add(key);
-    if (matches([cx, cy])) {
-      filledLegacy.push([cx, cy]);
-      queueLegacy.push([cx + 1, cy]);
-      queueLegacy.push([cx - 1, cy]);
-      queueLegacy.push([cx, cy + 1]);
-      queueLegacy.push([cx, cy - 1]);
-    }
-  }
-  const endTimeLegacy = Date.now();
-  console.log('legacy: ' + (endTimeLegacy - startTimeLegacy));
-
-  // バッファに一括反映
-  for (const [px, py] of filledLegacy) {
-    setPixel(image, px, py, color[0], color[1], color[2], color[3]);
-  }
-}
-
-function legacyBase64Rust({ image, position, lastPosition, color }: ToolArgs) {
-  const targetColor = getPixel(image, position.x, position.y);
-  const matches = (p: [number, number]) => colorMatch(getPixel(image, p[0], p[1]), targetColor);
-  (async () => {
-    const startTime = Date.now();
-    const result = await safeInvoke('flood_fill', {
-      encoded: encodeImageData(image),
-      width: image.width,
-      height: image.height,
-      x: position.x,
-      y: position.y,
-      newColor: color,
-    });
-
-    // 結果を ImageData に復元
-    const resultImage = decodeImageData(result as string, image.width, image.height);
-    // image = resultImage
-    const endTime = Date.now();
-    console.log('rust(old, base64): ' + (endTime - startTime));
-  })();
-}
-
-function legacyByteBufRust({ image, position, lastPosition, color }: ToolArgs) {
-  const targetColor = getPixel(image, position.x, position.y);
-  const matches = (p: [number, number]) => colorMatch(getPixel(image, p[0], p[1]), targetColor);
-  (async () => {
-    const startTime = Date.now();
-    const result = await safeInvoke('flood_fill_raw', {
-      image: Array.from(image.data),
-      width: image.width,
-      height: image.height,
-      x: position.x,
-      y: position.y,
-      newColor: color,
-    });
-
-    // 結果（Uint8Array）を ImageData に復元
-    const resultImage = new ImageData(
-      new Uint8ClampedArray(result as number[]),
-      image.width,
-      image.height
-    );
-    // image = resultImage
-    const endTime = Date.now();
-    console.log('rust(raw, ByteBuf): ' + (endTime - startTime));
-  })();
-}
-</file>
-
-<file path="models/tools/fill/PixelFloodFill.ts">
-import { Fill, FillProps } from './FillTool';
+<file path="models/tool/fill/PixelFloodFill.ts">
 import { PixelDiff } from '~/models/layer_image/HistoryManager';
 import { Vec2 } from '~/types/Vector';
-import { colorMatch } from '~/utils/colorUtils';
+import { colorMatch } from '~/utils/ColorUtils';
+import { Fill, FillProps } from './FillTool';
 
 export class PixelFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {
@@ -4373,13 +4382,13 @@ export class PixelFloodFill implements Fill {
 }
 </file>
 
-<file path="models/tools/fill/TileFloodFill.ts">
-import { Fill, FillProps } from './FillTool';
+<file path="models/tool/fill/TileFloodFill.ts">
 import { PixelDiff } from '~/models/layer_image/HistoryManager';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
-import { colorMatch } from '~/utils/colorUtils';
+import { colorMatch } from '~/utils/ColorUtils';
+import { Fill, FillProps } from './FillTool';
 
 interface FillPassProps {
   index: TileIndex;
@@ -4438,8 +4447,7 @@ export class TileFloodFill implements Fill {
     }
     console.log(`initial tile fill finished: ${tileFillCount} tiles`);
 
-    const edgePixels =
-      tilesFilled.length > 0 ? this.collectEdgePixels(tileAgent, tilesFilled) : [position];
+    const edgePixels = tilesFilled.length > 0 ? this.collectEdgePixels(tileAgent, tilesFilled) : [position];
 
     const pixelQueue: Vec2[] = edgePixels;
     const pixelsFilled: Vec2[] = [];
@@ -4542,10 +4550,10 @@ export class TileFloodFill implements Fill {
 }
 </file>
 
-<file path="models/tools/pen/PenTool.ts">
-import { drawCompletionLine, drawSquarePixel } from '../DrawUtils';
-import { Tool, ToolArgs } from '../ToolBase';
+<file path="models/tool/pen/PenTool.ts">
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
+import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
+import { Tool, ToolArgs } from '../ToolBase';
 
 export class PenTool implements Tool {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
@@ -4582,14 +4590,14 @@ export class PenTool implements Tool {
 }
 </file>
 
-<file path="models/tools/ToolBase.ts">
+<file path="models/tool/ToolBase.ts">
+import { RGBAColor } from '~/utils/ColorUtils';
 import { ToolType } from '../../types/Tool';
 import { Vec2 } from '../../types/Vector';
 import LayerImageAgent from '../layer_image/LayerImageAgent';
 import { EraserTool } from './eraser/EraserTool';
 import { FillTool } from './fill/FillTool';
 import { PenTool } from './pen/PenTool';
-import { RGBAColor } from '~/utils/colorUtils';
 
 export interface Tool {
   onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean;
@@ -4622,6 +4630,18 @@ export const getToolInstance = (toolType: ToolType) => {
 };
 </file>
 
+<file path="models/tool/ToolFactory.ts">
+import { v4 } from 'uuid';
+import { Tool, ToolType } from '~/types/Tool';
+
+export const createTool = (type: ToolType, name: string, size: number): Tool => ({
+  id: v4(),
+  type,
+  name,
+  size,
+});
+</file>
+
 <file path="routes/[...404].tsx">
 import { Title } from '@solidjs/meta';
 
@@ -4632,7 +4652,7 @@ export default function NotFound() {
       <h1>Page Not Found</h1>
       <p>
         Visit{' '}
-        <a href="https://start.solidjs.com" target="_blank">
+        <a href='https://start.solidjs.com' target='_blank'>
           start.solidjs.com
         </a>{' '}
         to learn how to build SolidStart apps.
@@ -4724,7 +4744,7 @@ export const sendFBButton = style({
 export const aboutFeedback = style({
   fontFamily: k12x8,
   fontSize: '8px',
-  marginRight: '60px',
+  marginRight: '50px',
   lineHeight: 1.5,
 });
 </file>
@@ -4737,7 +4757,6 @@ import {
   aaContainer,
   aaText,
   aboutContent,
-  aboutDev,
   aboutFeedback,
   aboutLink,
   aboutSubTitle,
@@ -4748,10 +4767,9 @@ import {
 import { pageRoot } from '~/styles/global.css';
 import { flexRow, w100, wh100 } from '~/styles/snippets.css';
 
-export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> &
-  WindowOptions = {
+export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions = {
   url: '/about',
-  width: 420,
+  width: 400,
   height: 290,
   resizable: false,
   decorations: false,
@@ -4760,6 +4778,8 @@ export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'hei
   closable: true,
   acceptFirstMouse: true,
   focus: true,
+  skipTaskbar: true,
+  alwaysOnTop: true,
 };
 
 const About = () => {
@@ -4797,9 +4817,9 @@ const About = () => {
         <div class={`${contentContainer} ${w100}`}>
           <div class={`${flexRow}`} style={{ width: '360px' }}>
             <p class={aboutTitle}>SLEDGE.</p>
-            <p class={aboutDev} style={{ 'margin-top': '3px' }}>
+            {/* <p class={aboutDev} style={{ 'margin-top': '3px' }}>
               by alphendp
-            </p>
+            </p> */}
           </div>
           <p class={aboutSubTitle} style={{ 'margin-bottom': '14px' }}>
             pre-alpha v0.1
@@ -4807,10 +4827,7 @@ const About = () => {
           <p class={aboutContent} style={{ 'margin-bottom': '50px' }}>
             made with much <span style={{ color: 'magenta' }}>love</span> for:
             <br />-{' '}
-            <a
-              class={aboutLink}
-              onClick={(e) => openLink('https://www.sojamo.de/libraries/controlP5/')}
-            >
+            <a class={aboutLink} onClick={(e) => openLink('https://www.sojamo.de/libraries/controlP5/')}>
               ControlP5
             </a>
             <br />-{' '}
@@ -4818,10 +4835,7 @@ const About = () => {
               Arch Linux
             </a>
             <br />-{' '}
-            <a
-              class={aboutLink}
-              onClick={(e) => openLink('https://apps.apple.com/jp/app/caustic/id775735447/')}
-            >
+            <a class={aboutLink} onClick={(e) => openLink('https://apps.apple.com/jp/app/caustic/id775735447/')}>
               Caustic3
             </a>{' '}
             &lt;HP dead RIP&gt;
@@ -4847,23 +4861,31 @@ export default About;
 </file>
 
 <file path="routes/editor/index.tsx">
+import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
-import { createSignal, onMount } from 'solid-js';
-import BottomInfo from '~/components/BottomInfo';
-import EdgeInfo from '~/components/EdgeInfo';
-import SideSections from '~/components/SideSections';
+import { UnlistenFn } from '@tauri-apps/api/event';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { confirm } from '@tauri-apps/plugin-dialog';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import EdgeInfo from '~/components/global/EdgeInfo';
+import SideSections from '~/components/global/SideSections';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { addLayer } from '~/controllers/layer_list/LayerListController';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromPath } from '~/io/project/project';
-import { adjustZoomToFit, centeringCanvas } from '~/stores/project/canvasStore';
+import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { globalStore } from '~/stores/GlobalStores';
+import { canvasStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+
 import { pageRoot } from '~/styles/global.css';
-import { flexCol, flexRow } from '~/styles/snippets.css';
-import { WindowOptionsProp } from '~/utils/windowUtils';
-import { welcomeRoot } from '../start.css';
+import { LayerType } from '~/types/Layer';
+import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
-  width: 1200,
-  height: 800,
+  width: 1000,
+  height: 750,
   acceptFirstMouse: true,
   resizable: true,
   closable: true,
@@ -4873,50 +4895,108 @@ export const EditorWindowOptions: WindowOptionsProp = {
   fullscreen: false,
 };
 
+export const layerImageManager = new LayerImageManager();
+
+export const getImageOf = (layerId: string) => layerImageManager.getAgent(layerId)?.getImage();
+
 export default function Editor() {
+  const window = getCurrentWebviewWindow();
   const location = useLocation();
 
-  const [isImporting, setIsImporting] = createSignal(false);
+  createEffect(() => {
+    trackStore(canvasStore.canvas);
+    trackStore(layerHistoryStore);
+    trackStore(layerListStore);
+    setProjectStore('isProjectChangedAfterSave', true);
+  });
+
+  const isNewProject = location.search === '';
+  const [isLoading, setIsLoading] = createSignal(true);
+
+  const onProjectLoad = () => {
+    setProjectStore('isProjectChangedAfterSave', false);
+    setIsLoading(false);
+
+    loadGlobalSettings();
+
+    if (isNewProject) {
+      changeCanvasSize(globalStore.newProjectCanvasSize);
+    }
+
+    layerListStore.layers.forEach((layer) => {
+      resetLayerImage(layer.id, 1);
+    });
+
+    adjustZoomToFit();
+    centeringCanvas();
+  };
 
   if (location.search) {
-    setIsImporting(true);
     const sp = new URLSearchParams(location.search);
     const fileName = sp.get('name');
     const filePath = sp.get('path');
     const path = `${filePath}\\${fileName}`;
-    console.log(path);
     importProjectJsonFromPath(path).then(() => {
-      setIsImporting(false);
+      onProjectLoad();
+    });
+  } else {
+    // create new
+    setProjectStore('name', 'new project');
+    addLayer('dot', LayerType.Dot, true, 1).then(() => {
+      onProjectLoad();
     });
   }
 
-  onMount(() => {
-    adjustZoomToFit();
-    centeringCanvas();
-    loadGlobalSettings();
+  const [isCloseRequested, SetIsCloseRequested] = createSignal(false);
+  let unlisten: UnlistenFn;
+
+  onMount(async () => {
+    unlisten = await window.onCloseRequested(async (event) => {
+      if (isCloseRequested()) {
+        event.preventDefault();
+        return;
+      }
+      SetIsCloseRequested(true);
+      event.preventDefault();
+      if (projectStore.isProjectChangedAfterSave) {
+        const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
+          okLabel: 'quit w/o save.',
+          cancelLabel: 'cancel.',
+        });
+        if (confirmed) {
+          await openStartWindow();
+          closeWindowsByLabel('editor');
+          SetIsCloseRequested(false);
+        } else {
+          event.preventDefault();
+          SetIsCloseRequested(false);
+        }
+      } else {
+        await openStartWindow();
+        closeWindowsByLabel('editor');
+        SetIsCloseRequested(false);
+      }
+    });
+  });
+
+  onCleanup(() => {
+    unlisten();
   });
 
   return (
     <>
-      {isImporting() && (
+      {isLoading() && (
         <div class={pageRoot}>
-          <div class={welcomeRoot}>
-            <p style={{ 'font-size': '2rem' }}>please wait.</p>
-          </div>
+          <p style={{ 'font-size': '2rem' }}>please wait.</p>
         </div>
       )}
 
-      {!isImporting() && (
+      {!isLoading() && (
         <div class={pageRoot}>
           <EdgeInfo />
-
-          <div class={flexRow}>
-            <SideSections />
-          </div>
-
-          <div class={flexCol} style={{ 'flex-grow': 1, height: '100%' }}>
+          <SideSections />
+          <div style={{ 'flex-grow': 1 }}>
             <CanvasArea />
-            <BottomInfo />
           </div>
           {/* <Companion /> */}
         </div>
@@ -4928,6 +5008,15 @@ export default function Editor() {
 
 <file path="routes/index.tsx">
 import { For, onMount } from 'solid-js';
+import { addRecentFile } from '~/controllers/config/GlobalConfigController';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
+import { importProjectJsonFromFileSelection } from '~/io/project/project';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { sectionRoot } from '~/styles/section_global.css';
+import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
+import { FileLocation } from '~/types/FileLocation';
+import { getFileNameAndPath } from '~/utils/PathUtils';
+import { closeWindowsByLabel, openEditorWindow, openSingletonWindow, WindowOptionsProp } from '~/utils/windowUtils';
 import { SettingsWindowOptions } from './settings';
 import {
   recentFilesCaption,
@@ -4940,97 +5029,93 @@ import {
   welcomeHeadline,
   welcomeRoot,
 } from './start.css';
-import EdgeInfo from '~/components/EdgeInfo';
-import { loadGlobalSettings } from '~/io/global/globalIO';
-import { importProjectJsonFromFileSelection } from '~/io/project/project';
-import { addRecent, globalStore, setGlobalStore } from '~/stores/global/globalStore';
-import { pageRoot, sideArea } from '~/styles/global.css';
-import { sectionRoot } from '~/styles/section_global.css';
-import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
-import { FileLocation } from '~/types/FileLocation';
-import { getFileNameAndPath } from '~/utils/pathUtils';
-import { openEditorWindow, openSingletonWindow } from '~/utils/windowUtils';
+
+export const StartWindowOptions: WindowOptionsProp = {
+  title: 'sledge',
+  width: 700,
+  height: 500,
+  acceptFirstMouse: true,
+  resizable: false,
+  parent: undefined,
+  closable: true,
+  maximizable: true,
+  minimizable: true,
+  decorations: false,
+  fullscreen: false,
+};
 
 export default function Home() {
   onMount(() => {
     loadGlobalSettings();
   });
 
-  const moveToEditor = async (selectedFile: FileLocation) => {
+  const moveToEditor = (selectedFile: FileLocation) => {
     openEditorWindow(selectedFile);
+    closeWindowsByLabel('start');
   };
 
   const createNew = () => {
     openEditorWindow();
+    closeWindowsByLabel('start');
   };
 
   const openProject = () => {
     importProjectJsonFromFileSelection().then((file: string | undefined) => {
       if (file !== undefined) {
         const loc = getFileNameAndPath(file);
-        if (loc !== undefined) addRecent(loc);
+        addRecentFile(loc);
         openEditorWindow(loc);
+        closeWindowsByLabel('start');
       }
     });
   };
 
   const clearRecentFiles = () => {
-    setGlobalStore('recentOpenedFiles', []);
+    setGlobalStore('recentFiles', []);
   };
 
   return (
-    <div class={pageRoot}>
-      <div class={sideArea}>
-        <EdgeInfo />
-      </div>
+    <div class={welcomeRoot}>
+      <div class={flexCol}>
+        <p class={welcomeHeadline}>HELLO.</p>
+        <div class={sideSection}>
+          <a class={sideSectionItem} onClick={() => createNew()}>
+            +&ensp;new.
+          </a>
+          <a class={sideSectionItem} style={{ 'margin-left': '2px' }} onClick={(e) => openProject()}>
+            &gt;&ensp;open.
+          </a>
+          <a
+            class={sideSectionItem}
+            style={{ 'margin-left': '2px' }}
+            onClick={(e) => openSingletonWindow('settings', SettingsWindowOptions)}
+          >
+            <img src={'/settings.png'} width={16} height={16} />
+            &ensp;settings.
+          </a>
+        </div>
 
-      <div class={welcomeRoot}>
-        <div class={flexCol}>
-          <p class={welcomeHeadline}>HELLO.</p>
-          <div class={sideSection}>
-            <a class={sideSectionItem} onClick={() => createNew()}>
-              +&ensp;new.
-            </a>
-            <a
-              class={sideSectionItem}
-              style={{ 'margin-left': '2px' }}
-              onClick={(e) => openProject()}
-            >
-              &gt;&ensp;open.
-            </a>
-            <a
-              class={sideSectionItem}
-              style={{ 'margin-left': '2px' }}
-              onClick={(e) => openSingletonWindow('settings', SettingsWindowOptions)}
-            >
-              <img src={'/settings.png'} width={16} height={16} />
-              &ensp;settings.
-            </a>
-          </div>
-
-          <div class={sectionRoot}>
-            <div class={[flexRow, w100].join(' ')}>
-              <p class={recentFilesCaption}>recent files.</p>
-              {/* <p class={clear} onClick={() => clearRecentFiles()}>
+        <div class={sectionRoot}>
+          <div class={[flexRow, w100].join(' ')}>
+            <p class={recentFilesCaption}>recent files.</p>
+            {/* <p class={clear} onClick={() => clearRecentFiles()}>
                 clear
               </p> */}
-            </div>
-            <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
-              <For each={globalStore.recentOpenedFiles}>
-                {(item, i) => {
-                  console.log(item);
-                  return (
-                    <div class={recentFilesItem}>
-                      <p>■</p>
-                      <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>
-                        {item.name}
-                      </a>
-                      <p class={recentFilesPath}>{item.path}</p>
-                    </div>
-                  );
-                }}
-              </For>
-            </div>
+          </div>
+          <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
+            <For each={globalStore.recentFiles}>
+              {(item, i) => {
+                return (
+                  <div class={recentFilesItem}>
+                    <p>■</p>
+                    <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>
+                      {item.name}
+                    </a>
+                    <p class={recentFilesPath}>{item.path}</p>
+                  </div>
+                );
+              }}
+            </For>
           </div>
         </div>
       </div>
@@ -5040,12 +5125,13 @@ export default function Home() {
 </file>
 
 <file path="routes/settings/index.tsx">
-import { onMount } from 'solid-js';
-import { settingContainer } from './settings.css';
+import { onCleanup, onMount } from 'solid-js';
 import EditorSettings from '~/components/section/settings/EditorSettings';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import PerformanceSettings from '~/components/section/settings/PerformanceSettings';
+import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { pageRoot } from '~/styles/global.css';
 import { WindowOptionsProp } from '~/utils/windowUtils';
+import { settingContainer } from './settings.css';
 
 export const SettingsWindowOptions: WindowOptionsProp = {
   url: '/settings',
@@ -5058,6 +5144,8 @@ export const SettingsWindowOptions: WindowOptionsProp = {
   closable: true,
   acceptFirstMouse: true,
   focus: true,
+  skipTaskbar: true,
+  alwaysOnTop: true,
 };
 
 export default function Settings() {
@@ -5065,11 +5153,21 @@ export default function Settings() {
     loadGlobalSettings();
   });
 
+  onCleanup(async () => {
+    await saveGlobalSettings();
+  });
+
   return (
     <div class={pageRoot}>
-      <div class={settingContainer}>
+      <form
+        class={settingContainer}
+        onChange={(e) => {
+          saveGlobalSettings();
+        }}
+      >
         <EditorSettings />
-      </div>
+        <PerformanceSettings />
+      </form>
     </div>
   );
 }
@@ -5084,6 +5182,7 @@ export const settingContainer = style([
   flexCol,
   {
     padding: vars.spacing.lg,
+    gap: vars.spacing.lg,
   },
 ]);
 </file>
@@ -5104,7 +5203,7 @@ export const welcomeRoot = style([
 
 export const welcomeHeadline = style({
   fontFamily: ZFB31,
-  fontSize: '4rem',
+  fontSize: '3rem',
   letterSpacing: '8px',
   marginBottom: '12px',
 });
@@ -5161,7 +5260,7 @@ export const sideSection = style([
   flexRow,
   {
     gap: '24px',
-    paddingBottom: '24px',
+    paddingBottom: '48px',
     paddingTop: '12px',
   },
 ]);
@@ -5181,76 +5280,47 @@ export const sideSectionItem = style([
 ]);
 </file>
 
-<file path="stores/global/globalStore.ts">
+<file path="stores/EditorStores.ts">
+// editorStore.tsx
 import { createStore } from 'solid-js/store';
-import { canvasStore } from '../project/canvasStore';
-import { saveGlobalSettings } from '~/io/global/globalIO';
-import { CanvasRenderingMode } from '~/types/Canvas';
-import { FileLocation } from '~/types/FileLocation';
+import { createTool } from '~/models/tool/ToolFactory';
+import { PaletteType } from '~/types/PaletteType';
+import { Size2D } from '~/types/Size';
+import { Tool, ToolType } from '~/types/Tool';
+import { Vec2 } from '~/types/Vector';
 
-// global
-export const getCanvasImageRenderingAttribute = (mode: CanvasRenderingMode) => {
-  switch (mode) {
-    case 'pixelated':
-    case 'crispEdges':
-      return mode;
-    case 'adaptive':
-      return canvasStore.zoom > 1.0 ? 'pixelated' : 'crispEdges';
-  }
+type ColorStore = {
+  currentPalette: PaletteType;
+  primary: string;
+  secondary: string;
+  swatches: string[];
+};
+type InteractStore = {
+  canvasAreaSize: Size2D;
+  canvasElementSize: Size2D;
+  lastMouseWindow: Vec2;
+  lastMouseOnCanvas: Vec2;
+  isInStroke: boolean;
+  zoom: number;
+  zoomMin: number;
+  zoomMax: number;
+  touchZoomSensitivity: number;
+  wheelZoomStep: number;
+  offsetOrigin: Vec2;
+  offset: Vec2;
+
+  isCtrlPressed: boolean;
+  isDragging: boolean;
+};
+type LogStore = {
+  bottomBarText: string;
+};
+type ToolStore = {
+  usingIndex: number;
+  tools: Tool[];
 };
 
-export const [globalStore, setGlobalStore] = createStore({
-  recentOpenedFiles: [
-    {
-      path: 'C:\\Users\\innsb\\Documents',
-      name: 'project.sledge',
-    },
-  ],
-
-  showDirtyRects: false,
-  canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
-});
-
-export const addRecent = (loc: FileLocation) => {
-  const path = loc.path;
-  const name = loc.name;
-
-  // add to recent
-  setGlobalStore((store) => {
-    console.log('path: ' + path);
-    console.log('name: ' + name);
-    if (name && path && store.recentOpenedFiles) {
-      // 履歴にあっても一旦削除
-      const oldRecentFiles = store.recentOpenedFiles.filter((f) => {
-        return f.name !== name || f.path !== path?.toString();
-      });
-      // その後、一番上に追加
-      const newRecentFiles: FileLocation[] = [
-        {
-          name: name,
-          path: path,
-        },
-        ...oldRecentFiles,
-      ];
-      setGlobalStore('recentOpenedFiles', newRecentFiles);
-      saveGlobalSettings();
-    }
-    return store;
-  });
-};
-</file>
-
-<file path="stores/internal/colorStore.ts">
-import { createStore } from 'solid-js/store';
-
-// color
-
-export enum PaletteType {
-  primary = 'primary',
-  secondary = 'secondary',
-}
-
-export const [colorStore, setColorStore] = createStore({
+const defaultColorStore: ColorStore = {
   currentPalette: 'primary' as PaletteType,
   primary: '#000000', // 通常の描画色
   secondary: '#ffffff', // 背景・消しゴムなど
@@ -5266,94 +5336,8 @@ export const [colorStore, setColorStore] = createStore({
     '#000080',
     '#400080',
   ],
-});
-
-export const currentColor = (): string => {
-  return colorStore[colorStore.currentPalette];
 };
-export const setCurrentColor = (colorHexString: string) => {
-  return setColorStore(colorStore.currentPalette, colorHexString);
-};
-export const setColor = (palette: PaletteType, colorHexString: string) => {
-  return setColorStore(palette, colorHexString);
-};
-export const selectPalette = (palette: PaletteType) => {
-  return setColorStore('currentPalette', palette);
-};
-</file>
-
-<file path="stores/internal/toolsStore.ts">
-import { createStore } from 'solid-js/store';
-import { createTool } from '~/models/factories/createPen';
-import { ToolType } from '~/types/Tool';
-
-export const [toolStore, setToolStore] = createStore({
-  usingIndex: 0,
-  tools: [
-    createTool(ToolType.Pen, 'pen', 1),
-    createTool(ToolType.Eraser, 'eraser', 1),
-    createTool(ToolType.Fill, 'fill', 1),
-  ],
-});
-export const currentTool = () => toolStore.tools[toolStore.usingIndex];
-</file>
-
-<file path="stores/project/canvasStore.ts">
-import { createStore } from 'solid-js/store';
-import { createCanvas } from '~/models/factories/createCanvas';
-
-// canvas
-const REFERENCE_LENGTH = 600;
-
-export const getReferencedZoom = (length?: number) => {
-  if (length === undefined) {
-    const width = canvasStore.canvas.width;
-    const height = canvasStore.canvas.height;
-    length = width > height ? width : height;
-  }
-
-  return REFERENCE_LENGTH / length;
-};
-
-export const adjustZoomToFit = (width?: number, height?: number) => {
-  if (width === undefined) width = canvasStore.canvas.width;
-  if (height === undefined) height = canvasStore.canvas.height;
-
-  const isWide = width > height;
-  const longerLength = isWide ? width : height;
-
-  console.log(
-    `this is ${isWide ? 'wide' : 'tall'}.
-    ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`
-  );
-  setCanvasStore('zoom', getReferencedZoom(longerLength));
-  centeringCanvas();
-};
-
-export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas;
-  const canvasArea = canvasStore.canvasAreaSize;
-  const zoom = canvasStore.zoom;
-
-  console.log(
-    `area size is ${canvasArea.width} x ${canvasArea.height}.
-    canvas size is ${canvasSize.width} x ${canvasSize.height}.
-    current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
-    new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
-  );
-
-  setCanvasStore('offsetOrigin', {
-    x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
-    y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
-  });
-  setCanvasStore('offset', {
-    x: 0,
-    y: 0,
-  });
-};
-
-export const [canvasStore, setCanvasStore] = createStore({
-  canvas: createCanvas(200, 200),
+const defaultInteractStore: InteractStore = {
   canvasAreaSize: { width: 0, height: 0 },
   canvasElementSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
@@ -5363,72 +5347,227 @@ export const [canvasStore, setCanvasStore] = createStore({
   zoomMin: 0.5,
   zoomMax: 8,
   touchZoomSensitivity: 0.5,
-  wheelZoomStep: 0.1,
+  wheelZoomStep: 0.05,
   // オフセットの初期値
   offsetOrigin: { x: 0, y: 0 },
   offset: { x: 0, y: 0 },
 
   isCtrlPressed: false,
   isDragging: false,
-});
+};
+const defaultLogStore: LogStore = {
+  bottomBarText: '',
+};
+const defaultToolStore: ToolStore = {
+  usingIndex: 0,
+  tools: [
+    createTool(ToolType.Pen, 'pen', 1),
+    createTool(ToolType.Eraser, 'eraser', 1),
+    createTool(ToolType.Fill, 'fill', 1),
+  ],
+};
+
+export const initEditorStore = () => {
+  const [colorStore, setColorStore] = createStore<ColorStore>(defaultColorStore);
+  const [interactStore, setInteractStore] = createStore<InteractStore>(defaultInteractStore);
+  const [toolStore, setToolStore] = createStore<ToolStore>(defaultToolStore);
+  const [logStore, setLogStore] = createStore<LogStore>(defaultLogStore);
+
+  return {
+    colorStore,
+    setColorStore,
+    interactStore,
+    setInteractStore,
+    logStore,
+    setLogStore,
+    toolStore,
+    setToolStore,
+  };
+};
+
+const editorStore = initEditorStore();
+
+export const colorStore = editorStore.colorStore;
+export const setColorStore = editorStore.setColorStore;
+
+export const interactStore = editorStore.interactStore;
+export const setInteractStore = editorStore.setInteractStore;
+
+export const logStore = editorStore.logStore;
+export const setLogStore = editorStore.setLogStore;
+
+export const toolStore = editorStore.toolStore;
+export const setToolStore = editorStore.setToolStore;
 </file>
 
-<file path="stores/project/layerHistoryStore.ts">
+<file path="stores/GlobalStores.ts">
 import { createStore } from 'solid-js/store';
-import { layerStore } from './layerStore';
-import { LayerImage } from '~/types/LayerImage';
+import { CanvasRenderingMode } from '~/types/Canvas';
+import { FileLocation } from '~/types/FileLocation';
+import { Size2D } from '~/types/Size';
 
-// image
-export const [layerHistoryStore, setlayerHistoryStore] = createStore<Record<string, LayerImage>>({});
+// global
+export const getCanvasImageRenderingAttribute = (
+  zoom: number,
+  mode: CanvasRenderingMode
+): 'pixelated' | 'crisp-edges' => {
+  switch (mode) {
+    case 'pixelated':
+      return 'pixelated';
+    case 'crispEdges':
+      return 'crisp-edges';
+    case 'adaptive':
+      return zoom > 1.0 ? 'pixelated' : 'crisp-edges';
+  }
+};
 
-export const activeLayerImage = (): LayerImage => layerHistoryStore[layerStore.activeLayerId];
+type GlobalConfigStore = {
+  maxRecentFiles: number;
+  recentFiles: FileLocation[];
+  newProjectCanvasSize: Size2D;
+  canvasRenderingMode: CanvasRenderingMode;
+  showDirtyRects: boolean;
+  showPerfMonitor: boolean;
+};
+const defaultGlobalConfigStore: GlobalConfigStore = {
+  maxRecentFiles: 8,
+  recentFiles: [],
 
-export const canUndo = (): boolean =>
-  layerHistoryStore[layerStore.activeLayerId]?.undoStack.length > 0;
-export const canRedo = (): boolean =>
-  layerHistoryStore[layerStore.activeLayerId]?.redoStack.length > 0;
+  newProjectCanvasSize: {
+    width: 1000,
+    height: 1000,
+  },
+  canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
+
+  showDirtyRects: false,
+  showPerfMonitor: false,
+};
+
+const initGlobalStore = () => {
+  const [globalConfigStore, setGlobalConfigStore] = createStore(defaultGlobalConfigStore);
+  return { globalConfigStore, setGlobalConfigStore };
+};
+
+let globalRootStore = initGlobalStore();
+
+export const globalStore = globalRootStore.globalConfigStore;
+export const setGlobalStore = globalRootStore.setGlobalConfigStore;
 </file>
 
-<file path="stores/project/layerStore.ts">
+<file path="stores/ProjectStores.ts">
+// projectStore.ts
 import { createStore } from 'solid-js/store';
 import { Layer } from '~/types/Layer';
+import { LayerHistory } from '~/types/LayerHistory';
+import { Size2D } from '~/types/Size';
+import { decodeImageData } from '~/utils/ImageUtils';
+import { globalStore } from './GlobalStores';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
 
-// layer
+type CanvasStore = {
+  canvas: Size2D;
+};
+type ProjectStore = {
+  newName: string | undefined;
+  name: string | undefined;
+  path: string | undefined;
+  isProjectChangedAfterSave: boolean;
+};
+type LayerHistoryStore = Record<string, LayerHistory>;
+type LayerListStore = {
+  layers: Layer[];
+  activeLayerId: string;
+};
 
-export const [layerStore, setLayerStore] = createStore({
+const defaultProjectStore: ProjectStore = {
+  newName: undefined as string | undefined,
+  name: undefined as string | undefined,
+  path: undefined as string | undefined,
+  isProjectChangedAfterSave: false,
+};
+const defaultCanvasStore: CanvasStore = {
+  canvas: {
+    width: 400,
+    height: 400,
+  },
+};
+const defaultLayerHistoryStore: LayerHistoryStore = {};
+const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),
   activeLayerId: '',
-});
+};
 
-export const allLayers = () => layerStore.layers;
-export const findLayerById = (id: string) => allLayers().find((layer) => layer.id === id);
-export const activeLayer = () =>
-  findLayerById(layerStore.activeLayerId) || allLayers()[0] || undefined;
-export const activeIndex = () =>
-  allLayers().findIndex((layer) => layer.id === layerStore.activeLayerId);
-</file>
+export const initProjectStore = () => {
+  const [canvasStore, setCanvasStore] = createStore<CanvasStore>(defaultCanvasStore);
+  const [projectStore, setProjectStore] = createStore<ProjectStore>(defaultProjectStore);
+  const [layerHistoryStore, setLayerHistoryStore] = createStore<LayerHistoryStore>(defaultLayerHistoryStore);
+  const [layerListStore, setLayerListStore] = createStore<LayerListStore>(defaultLayerListStore);
 
-<file path="stores/project/projectStore.ts">
-import { trackStore } from '@solid-primitives/deep';
-import { createEffect } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { canvasStore } from './canvasStore';
-import { layerHistoryStore } from './layerHistoryStore';
-import { layerStore } from './layerStore';
+  console.log(globalStore.newProjectCanvasSize);
+  setCanvasStore('canvas', globalStore.newProjectCanvasSize);
 
-// project
-export const [projectStore, setProjectStore] = createStore({
-  name: '',
-  path: '',
-  isProjectChangedAfterSave: false,
-});
+  return {
+    canvasStore,
+    setCanvasStore,
+    layerListStore,
+    setLayerListStore,
+    layerHistoryStore,
+    setLayerHistoryStore,
+    projectStore,
+    setProjectStore,
+  };
+};
 
-createEffect(() => {
-  trackStore(canvasStore.canvas);
-  trackStore(layerHistoryStore);
-  trackStore(layerStore);
-  setProjectStore('isProjectChangedAfterSave', true);
-});
+const projectRootStore = initProjectStore();
+
+export const canvasStore = projectRootStore.canvasStore;
+export const setCanvasStore = projectRootStore.setCanvasStore;
+
+export const layerListStore = projectRootStore.layerListStore;
+export const setLayerListStore = projectRootStore.setLayerListStore;
+
+export const layerHistoryStore = projectRootStore.layerHistoryStore;
+export const setLayerHistoryStore = projectRootStore.setLayerHistoryStore;
+
+export const projectStore = projectRootStore.projectStore;
+export const setProjectStore = projectRootStore.setProjectStore;
+
+export const loadStoreFromProjectJson = async (projectJson: any) => {
+  if (projectJson.project) {
+    console.log(projectJson.project);
+    setProjectStore('name', projectJson.project.name || undefined);
+    setProjectStore('path', projectJson.project.path || undefined);
+  }
+
+  if (projectJson.canvas) {
+    const { width, height } = projectJson.canvas;
+    setCanvasStore('canvas', 'width', width);
+    setCanvasStore('canvas', 'height', height);
+  }
+
+  if (projectJson.images) {
+    setLayerHistoryStore({});
+    Object.keys(projectJson.images).forEach((id) => {
+      const imageData = projectJson.images[id];
+      const agent = resetLayerImage(id, Number(imageData.dotMagnification || 1));
+      const image = decodeImageData(imageData.current, Number(imageData.width), Number(imageData.height));
+      agent.setImage(image);
+    });
+  }
+
+  if (projectJson.layer && projectJson.layer.layers && Array.isArray(projectJson.layer.layers)) {
+    const layers: Layer[] = [];
+    projectJson.layer.layers.map((l: any) => {
+      layers.push({
+        ...l,
+        dsl: undefined,
+      } as Layer);
+    });
+
+    setLayerListStore('layers', layers);
+    setLayerListStore('activeLayerId', projectJson.layer.activeLayerId);
+  }
+};
 </file>
 
 <file path="styles/components/bottom_info.css.ts">
@@ -5440,13 +5579,14 @@ export const bottomInfoRoot = style([
   flexRow,
   w100,
   {
-    position: 'absolute',
+    position: 'fixed',
     backgroundColor: vars.color.bg,
-    bottom: 0,
     borderTop: '1px solid #aaa',
     height: '20px',
     alignItems: 'center',
     padding: `0 ${vars.spacing.md}`,
+    margin: 0,
+    bottom: 0,
     gap: vars.spacing.md,
   },
 ]);
@@ -5456,8 +5596,8 @@ export const bottomInfoText = style({});
 
 <file path="styles/components/canvas/canvas_area.css.ts">
 import { style } from '@vanilla-extract/css';
-import { flexCol } from '../../snippets.css';
 import { vars } from '~/styles/global.css';
+import { flexCol } from '../../snippets.css';
 
 export const canvasArea = style([
   flexCol,
@@ -5466,8 +5606,38 @@ export const canvasArea = style([
     display: 'flex',
     position: 'relative',
     height: '100%',
-    width: '100%',
     overflow: 'hidden',
+  },
+]);
+</file>
+
+<file path="styles/components/canvas/canvas_debug_overlay.css.ts">
+import { style } from '@vanilla-extract/css';
+import { vars } from '~/styles/global.css';
+import { flexCol, flexRow } from '~/styles/snippets.css';
+
+export const canvasDebugOverlayTopLeft = style([
+  flexCol,
+  {
+    // gap: vars.spacing.xs,
+    position: 'absolute',
+    left: vars.spacing.sm,
+    top: vars.spacing.sm,
+    pointerEvents: 'none',
+  },
+]);
+
+export const canvasDebugOverlayBottomLeft = style([
+  flexRow,
+  {
+    // gap: vars.spacing.xs,
+    position: 'absolute',
+    left: vars.spacing.sm,
+    bottom: 0,
+    transform: 'translateY(-50%)',
+    alignItems: 'end',
+    gap: vars.spacing.md,
+    pointerEvents: 'none',
   },
 ]);
 </file>
@@ -5593,37 +5763,71 @@ export const canvasStack = style([
 </file>
 
 <file path="styles/components/canvas/layer_canvas.css.ts">
-import { recipe } from '@vanilla-extract/recipes';
+import { style } from '@vanilla-extract/css';
 
-export const layerCanvas = recipe({
-  base: {
-    pointerEvents: 'none',
-    position: 'absolute',
-  },
+export const layerCanvas = style({});
+</file>
 
-  variants: {
-    rendering: {
-      auto: {
-        imageRendering: 'auto',
-      },
-      pixelated: {
-        imageRendering: 'pixelated',
-      },
-      crispEdges: {
-        imageRendering: 'crisp-edges',
-      },
+<file path="styles/components/checkbox.css.ts">
+import { style } from '@vanilla-extract/css';
+
+export const checkboxWrapper = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  cursor: 'pointer',
+  position: 'relative',
+});
+
+export const hiddenCheckbox = style({
+  opacity: 0,
+  width: 0,
+  height: 0,
+  position: 'absolute',
+});
+
+export const customCheckbox = style({
+  width: '10px',
+  height: '10px',
+  border: '1px solid #000',
+  borderRadius: '0px',
+  marginRight: '8px',
+  display: 'inline-block',
+  position: 'relative',
+  overflow: 'hidden',
+  transition: 'all 0.1s',
+  selectors: {
+    [`&::before`]: {
+      content: '',
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      width: '14px', // √2倍ちょい弱くらい
+      height: '1px',
+      backgroundColor: 'red',
+      opacity: 0,
+      transform: 'translate(-50%, -50%) rotate(45deg)',
+      transformOrigin: 'center center',
+      transition: 'opacity 0.1s',
     },
-    hidden: {
-      true: {
-        opacity: 0,
-        pointerEvents: 'auto',
-      },
+    [`&::after`]: {
+      content: '',
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      width: '14px',
+      height: '1px',
+      backgroundColor: 'red',
+      opacity: 0,
+      transform: 'translate(-50%, -50%) rotate(-45deg)',
+      transformOrigin: 'center center',
+      transition: 'opacity 0.1s',
     },
-  },
-
-  defaultVariants: {
-    rendering: 'auto',
-    hidden: false,
+    [`${checkboxWrapper} input:checked + &::before`]: {
+      opacity: 1,
+    },
+    [`${checkboxWrapper} input:checked + &::after`]: {
+      opacity: 1,
+    },
   },
 });
 </file>
@@ -5752,6 +5956,7 @@ export const dropdownRoot = style({
   height: '20px',
   cursor: 'pointer',
   lineHeight: '12px',
+
   selectors: {
     '&:hover': { backgroundColor: vars.color.button_hover },
     '&:active': {
@@ -5780,31 +5985,49 @@ export const dropdownRoot = style({
 }
 </file>
 
-<file path="styles/components/edge_info.module.css">
-.root {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 10px 0 20px 12px;
-  justify-items: start;
-}
+<file path="styles/components/edge_info.css.ts">
+import { style } from '@vanilla-extract/css';
+import { vars } from '../global.css';
+import { flexCol, flexRow } from '../snippets.css';
 
-.text {
-  font-size: 0.5rem;
-  letter-spacing: 2px;
-  margin: 0;
-  transform: rotate(180deg) scaleX(0.8);
-  white-space: nowrap;
-  writing-mode: vertical-rl;
-}
+export const edgeInfoRoot = style([
+  flexCol,
+  {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    gap: '10px',
+    paddingTop: '32px',
+    width: vars.size.edge_info,
+    justifyContent: 'start',
+    alignItems: 'center',
+  },
+]);
+export const edgeInfoItem = style([
+  flexRow,
+  {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+]);
+
+export const edgeInfoText = style({
+  fontSize: '0.5rem',
+  letterSpacing: '2px',
+  whiteSpace: 'nowrap',
+  transform: 'rotate(180deg)',
+  transformOrigin: 'center',
+  writingMode: 'vertical-lr',
+});
 </file>
 
 <file path="styles/components/layer_preview.module.css">
 .canvas {
   height: 100%;
-  border: 1px solid black;
   width: 100%;
   image-rendering: crisp-edges;
+  border-right: 1px solid black;
 }
 </file>
 
@@ -5848,6 +6071,78 @@ export const paletteColorBoxSecondary = style({
   top: 10,
   left: 10,
 });
+</file>
+
+<file path="styles/components/radio_button.css.ts">
+import { style } from '@vanilla-extract/css';
+import { checkboxWrapper } from '~/styles/components/checkbox.css';
+
+export const radioWrapper = checkboxWrapper; // チェックボックスと共通でOK！
+
+export const hiddenRadio = style({
+  opacity: 0,
+  width: 0,
+  height: 0,
+  position: 'absolute',
+});
+
+export const customRadio = style({
+  width: '10px',
+  height: '10px',
+  border: '1px solid #000',
+  borderRadius: '0px', // 今は四角、丸くしたかったら '50%' にするだけ
+  marginLeft: '8px',
+  display: 'inline-block',
+  position: 'relative',
+  transition: 'all 0.1s',
+  selectors: {
+    [`&::after`]: {
+      content: '',
+      position: 'absolute',
+      left: '2px',
+      top: '2px',
+      width: '6px',
+      height: '6px',
+      backgroundColor: 'red',
+      opacity: 0,
+      transition: 'opacity 0.1s',
+    },
+    [`${radioWrapper} input:checked + &::after`]: {
+      opacity: 1,
+    },
+  },
+});
+</file>
+
+<file path="styles/components/side_sections.css.ts">
+import { style } from '@vanilla-extract/css';
+import { vars } from '../global.css';
+import { flexCol, h100 } from '../snippets.css';
+
+export const sideAreaContent = style([
+  flexCol,
+  h100,
+  {
+    borderRight: '1px solid #aaa',
+    gap: '1rem',
+    marginLeft: vars.size.edge_info,
+    padding: '20px 30px 90px 20px',
+    width: vars.size.side_area,
+    overflowY: 'scroll',
+
+    '::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: 'transparent',
+    },
+    selectors: {
+      '&:hover::-webkit-scrollbar-thumb': {
+        backgroundColor: '#ddd',
+      },
+    },
+  },
+]);
 </file>
 
 <file path="styles/components/slider.module.css">
@@ -5966,8 +6261,7 @@ export const titleBarControlMinimizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter:
-        'invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);', // 青っぽく
+      filter: 'invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);', // 青っぽく
     },
   },
 ]);
@@ -5976,8 +6270,7 @@ export const titleBarControlMaximizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter:
-        'invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);', // 緑っぽく
+      filter: 'invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);', // 緑っぽく
     },
   },
 ]);
@@ -5986,8 +6279,7 @@ export const titleBarControlCloseButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter:
-        'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
+      filter: 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
     },
   },
 ]);
@@ -5997,99 +6289,6 @@ export const titleBarControlButtonImg = style({
   height: '10px',
   imageRendering: 'pixelated',
 });
-</file>
-
-<file path="styles/components/toast.module.css">
-.toastContainer {
-  bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding-bottom: 20px;
-  position: fixed;
-  right: 1rem;
-  z-index: 9999;
-}
-
-.toast_root {
-  align-items: center;
-  background-color: #fff;
-  border: 1px solid black;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  padding: 0.5rem;
-}
-
-.close_persistent_button {
-  height: 12px;
-  width: 12px;
-
-  &:hover {
-    color: red;
-  }
-}
-
-.toast {
-  color: #222;
-  flex-grow: 1;
-  font-family: '04B09';
-  font-size: 0.5rem;
-  margin-top: 2px;
-}
-
-.toast.success {
-  color: #4caf50;
-}
-
-.toast.error {
-  color: #f44336;
-}
-
-.toast.warn {
-  color: #ff9800;
-}
-
-.toast.info {
-  /* background-color: #2196f3; */
-}
-
-@keyframes fade-in-out-top {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  10%,
-  90% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes fade-in-out-bottom {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  10%,
-  90% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
 </file>
 
 <file path="styles/components/toggle_switch.css.ts">
@@ -6133,13 +6332,13 @@ export const toggleTrack = style({
 export const toggleThumb = style({
   position: 'absolute',
   top: '-1px',
-  left: '0px',
+  left: '-1px',
   width: `${thumbWidth - thumbPadding}px`,
   height: `${globalHeight}px`,
   backgroundColor: vars.color.button,
   border: '1px solid black',
   borderRadius: '0px',
-  transition: 'transform 0.05s',
+  transition: 'transform 0.02s',
 });
 
 /* ───────── 状態連動スタイル ───────── */
@@ -6151,13 +6350,12 @@ globalStyle(`${toggleInput}:checked + ${toggleTrack}`, {
 
 /* さらに thumb を右へスライド */
 globalStyle(`${toggleInput}:checked + ${toggleTrack} ${toggleThumb}`, {
-  transform: `translateX(${globalWidth - thumbWidth}px)`,
+  transform: `translateX(${globalWidth - thumbWidth + 2}px)`,
 });
 </file>
 
 <file path="styles/global.css.ts">
 import { createGlobalTheme, fontFace, globalStyle, style } from '@vanilla-extract/css';
-import { flexCol, flexRow, h100 } from './snippets.css';
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',
@@ -6201,14 +6399,23 @@ export const vars = createGlobalTheme(':root', {
     danger: '#ff0000',
     muted: '#00000030',
 
+    accent: '#0000ff',
+
     bg: '#ffffff',
     bg_canvas_area: '#fefefe',
 
-    surface: '#f0f0f0',
+    surface: '#f2f2f2',
 
     button: '#ffffff',
     button_hover: '#f0f0f0',
     button_pressed: '#f0f0f0',
+
+    input_bg: '#fafafa',
+  },
+  size: {
+    edge_info: '32px',
+    side_area: '220px',
+    bottom_bar_margin: '252px',
   },
   spacing: {
     xs: '4px',
@@ -6229,8 +6436,8 @@ export const vars = createGlobalTheme(':root', {
   },
 });
 
-globalStyle('button, p, a, input', {
-  fontFamily: ZFB08,
+globalStyle('button, p, a, input, label', {
+  fontFamily: `${ZFB08}, ${k12x8}`,
   color: vars.color.text,
 });
 
@@ -6263,59 +6470,9 @@ export const pageRoot = style({
   display: 'flex',
   flexDirection: 'row',
   height: '100%',
-  flexGrow: 1,
+  width: '100vw',
   userSelect: 'none',
-  overflow: 'hidden',
 });
-
-export const sideArea = style([flexRow, h100]);
-
-export const sideAreaEdge = style([
-  flexCol,
-  {
-    gap: '20px',
-    width: '30px',
-    justifyContent: 'end',
-  },
-]);
-export const sideAreaEdgeItem = style([
-  flexCol,
-  {
-    whiteSpace: 'nowrap',
-  },
-]);
-
-export const sideAreaEdgeText = style({
-  fontSize: '0.5rem',
-  width: 'max-content',
-  letterSpacing: '2px',
-  transform: 'rotate(270deg)',
-  transformOrigin: '0 0',
-});
-
-export const sideAreaContent = style([
-  flexCol,
-  h100,
-  {
-    borderRight: '1px solid #aaa',
-    gap: '1rem',
-    padding: '20px 40px 90px 20px',
-    width: '230px',
-    overflowY: 'scroll',
-
-    '::-webkit-scrollbar': {
-      width: '4px',
-    },
-    '::-webkit-scrollbar-thumb': {
-      backgroundColor: 'transparent',
-    },
-    selectors: {
-      '&:hover::-webkit-scrollbar-thumb': {
-        backgroundColor: '#ddd',
-      },
-    },
-  },
-]);
 
 export const sledgeLogo = style({
   bottom: '2px',
@@ -6345,7 +6502,7 @@ globalStyle('main', {
   userSelect: 'none',
 });
 
-globalStyle('p, a', {
+globalStyle('p, a, label', {
   fontSize: '0.5rem',
   letterSpacing: '1px',
   margin: 0,
@@ -6364,15 +6521,12 @@ globalStyle('input', {
   border: 'none',
   outline: 'none',
   borderBottom: '1px solid black',
+  fontSize: '0.5rem',
 });
 
 globalStyle('input::-webkit-outer-spin-button, input::-webkit-inner-spin-button', {
   appearance: 'none',
   margin: 0,
-});
-
-globalStyle("input[type='number']", {
-  appearance: 'textfield',
 });
 </file>
 
@@ -6391,7 +6545,7 @@ export const sectionRoot = style([
 export const sectionCaption = style({
   fontFamily: ZFB11,
   fontSize: vars.text.sm,
-  marginBottom: vars.spacing.md,
+  marginBottom: vars.spacing.sm,
 });
 
 export const sectionContent = style([flexCol, w100]);
@@ -6474,8 +6628,9 @@ export const layerList = style([
   w100,
   {
     flexGrow: 1,
-    gap: vars.spacing.xs,
     position: 'relative',
+    gap: vars.spacing.xs,
+    // border: '1px solid #333',
   },
 ]);
 
@@ -6483,15 +6638,14 @@ export const layerItem = style([
   flexRow,
   w100,
   {
-    height: '32px',
-    padding: '6px',
+    height: '36px',
     flexGrow: 1,
     cursor: 'pointer',
     backgroundColor: vars.color.surface,
-    borderLeft: '1px solid black',
+    borderLeft: '3px solid #333',
+
     ':hover': {
       filter: 'brightness(0.94)',
-      transform: 'translate(0, 1px)',
     },
     ':active': {
       transform: 'translate(0, 1px)',
@@ -6503,16 +6657,18 @@ export const layerItemDisabled = style({
   opacity: 0.3,
 });
 
-export const layerItemType = style([
-  w100,
+export const layerItemIndex = style([
   {
+    flexGrow: 1,
     fontSize: vars.text.sm,
-    opacity: 0.4,
-    position: 'absolute',
-    right: 0,
-    textAlign: 'end',
   },
 ]);
+
+export const layerItemType = style({
+  whiteSpace: 'nowrap',
+  fontSize: vars.text.sm,
+  opacity: 0.4,
+});
 
 export const layerItemName = style([
   {
@@ -6525,9 +6681,10 @@ export const layerItemName = style([
 export const dotMagnifContainer = style([
   {
     alignSelf: 'center',
-    border: '1px black solid',
-    borderRadius: vars.spacing.xs,
+    // border: '1px black solid',
+    // borderRadius: vars.spacing.xs,
     cursor: 'pointer',
+    marginTop: vars.spacing.sm,
     marginLeft: 'auto',
     marginRight: 0,
     padding: `2px ${vars.spacing.xs}`,
@@ -6542,7 +6699,7 @@ export const dotMagnifContainer = style([
 export const dotMagnifText = style([
   {
     fontFamily: ZFB03B,
-    fontSize: vars.text.md,
+    fontSize: vars.text.lg,
   },
 ]);
 
@@ -6551,6 +6708,7 @@ export const activeLight = style([
     alignSelf: 'center',
     margin: `${vars.spacing.sm}px 0`,
     marginLeft: vars.spacing.sm,
+    marginRight: vars.spacing.md,
   },
 ]);
 
@@ -6569,7 +6727,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '../global.css';
 import { flexRow, w100 } from '../snippets.css';
 
-export const penConfigRow = style([
+export const toolConfigRow = style([
   flexRow,
   w100,
   {
@@ -6577,13 +6735,26 @@ export const penConfigRow = style([
     alignItems: 'center',
   },
 ]);
+export const toolConfigRowClickable = style([
+  flexRow,
+  {
+    gap: vars.spacing.md,
+    alignItems: 'center',
+    width: '35%',
+  },
+]);
 
-export const penConfigRowName = style({
+export const toolConfigRowName = style({
   cursor: 'pointer',
   fontSize: vars.text.sm,
   padding: `${vars.spacing.md} 0`,
   pointerEvents: 'all',
-  width: '20%',
+});
+
+export const toolConfigRowIcon = style({
+  ':hover': {
+    filter: 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
+  },
 });
 </file>
 
@@ -6678,19 +6849,32 @@ export type Layer = {
 };
 </file>
 
-<file path="types/LayerImage.ts">
+<file path="types/LayerHistory.ts">
 import { DiffAction } from '../models/layer_image/HistoryManager';
 
-export type LayerImage = {
-  current: ImageData;
+export type LayerHistory = {
   undoStack: DiffAction[];
   redoStack: DiffAction[];
 };
 </file>
 
+<file path="types/PaletteType.ts">
+export enum PaletteType {
+  primary = 'primary',
+  secondary = 'secondary',
+}
+</file>
+
+<file path="types/Size.ts">
+export type Size2D = {
+  width: number;
+  height: number;
+};
+</file>
+
 <file path="types/Tile.ts">
+import { RGBAColor } from '~/utils/ColorUtils';
 import { Vec2 } from './Vector';
-import { RGBAColor } from '~/utils/colorUtils';
 
 export interface TileIndex {
   row: number;
@@ -6763,7 +6947,7 @@ export interface Vec2 {
 }
 </file>
 
-<file path="utils/colorUtils.ts">
+<file path="utils/ColorUtils.ts">
 export type RGBColor = [number, number, number];
 export type RGBAColor = [number, number, number, number];
 
@@ -6790,50 +6974,59 @@ export function colorMatch(a: RGBAColor, b: RGBAColor): boolean {
 }
 </file>
 
-<file path="utils/DSLUtils.ts">
-import { downloadImageData } from '../io/internal/export';
-import { runDSL } from '~/models/dsl/DSLRunner';
-import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
-import { findLayerById } from '~/stores/project/layerStore';
-
-export const testDSLTime = (layerId: string) => {
-  const layer = findLayerById(layerId);
-  if (layer === undefined) {
-    throw 'layer not found.';
-    return;
-  }
-  const imageData = layerHistoryStore[layerId].current;
-
-  const start = new Date().getTime();
-  console.log(`DSL run started.\n${layer.dsl.build()}`);
-  runDSL(layer.dsl, imageData).then((im) => {
-    const end = new Date().getTime();
-    console.log(`DSL run end.`);
-    console.log(`result: ${im ? 'success' : 'failed'}. TOTAL TIME IS ${end - start}ms.`);
-
-    if (im) downloadImageData(im, 'test-' + end + '.png');
-  });
+<file path="utils/consts.ts">
+export const Consts = {
+  maxPenSize: 20,
+  minCanvasWidth: 1,
+  maxCanvasWidth: 5000,
+  minCanvasHeight: 1,
+  maxCanvasHeight: 5000,
 };
 </file>
 
-<file path="utils/ImageUtils.ts">
-export function setPixel(
-  image: ImageData,
-  x: number,
-  y: number,
-  r: number,
-  g: number,
-  b: number,
-  a: number
-) {
-  if (x < 0 || x >= image.width || y < 0 || y >= image.height) return;
-  const i = (y * image.width + x) * 4;
-  image.data[i + 0] = r;
-  image.data[i + 1] = g;
-  image.data[i + 2] = b;
-  image.data[i + 3] = a;
+<file path="utils/DrawUtils.ts">
+import { Vec2 } from '../types/Vector';
+
+export function drawSquarePixel(p: Vec2, size: number, drawFn: (x: number, y: number) => void) {
+  const half = Math.floor(size / 2);
+  for (let dy = -half; dy <= half; dy++) {
+    for (let dx = -half; dx <= half; dx++) {
+      drawFn(p.x + dx, p.y + dy);
+    }
+  }
 }
 
+export function drawCompletionLine(p0: Vec2, p1: Vec2, draw: (x: number, y: number) => void) {
+  const dx = Math.abs(p1.x - p0.x);
+  const dy = Math.abs(p1.y - p0.y);
+  const sx = p0.x < p1.x ? 1 : -1;
+  const sy = p0.y < p1.y ? 1 : -1;
+  let err = dx - dy;
+
+  const steps = Math.max(dx, dy); // 移動回数の上限
+
+  let x = p0.x;
+  let y = p0.y;
+
+  for (let i = 0; i <= steps; i++) {
+    draw(x, y);
+    if (x === p1.x && y === p1.y) {
+      break; // 念のため（ただたどり着く設計にはなってる）
+    }
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y += sy;
+    }
+  }
+}
+</file>
+
+<file path="utils/ImageUtils.ts">
 export function encodeImageData(imageData: ImageData): string {
   const bytes = new Uint8Array(imageData.data.buffer);
   let binary = '';
@@ -6853,7 +7046,7 @@ export function decodeImageData(encoded: string, width: number, height: number):
 }
 </file>
 
-<file path="utils/pathUtils.ts">
+<file path="utils/PathUtils.ts">
 import { FileLocation } from '~/types/FileLocation';
 
 export const getFileNameAndPath = (fullPath: string): FileLocation | undefined => {
@@ -6870,7 +7063,7 @@ export const getFileNameAndPath = (fullPath: string): FileLocation | undefined =
 };
 </file>
 
-<file path="utils/tauriUtils.ts">
+<file path="utils/TauriUtils.ts">
 import { getTauriVersion } from '@tauri-apps/api/app';
 import { invoke as tauriInvoke } from '@tauri-apps/api/core';
 
@@ -6887,10 +7080,7 @@ export async function isTauri(): Promise<boolean> {
   return _isTauri;
 }
 
-export async function safeInvoke<T>(
-  cmd: string,
-  args?: Record<string, unknown>
-): Promise<T | undefined> {
+export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T | undefined> {
   if (!(await isTauri())) {
     console.warn(`[safeInvoke] '${cmd}' skipped (not in Tauri environment)`);
     return undefined;
@@ -6908,13 +7098,13 @@ export async function safeInvoke<T>(
 
 <file path="utils/windowUtils.ts">
 import { WebviewOptions } from '@tauri-apps/api/webview';
-import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { getAllWebviewWindows, WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { WindowOptions } from '@tauri-apps/api/window';
+import { StartWindowOptions } from '~/routes';
 import { EditorWindowOptions } from '~/routes/editor';
 import { FileLocation } from '~/types/FileLocation';
 
-export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> &
-  WindowOptions;
+export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
 
 /** 同一ラベルのウィンドウがあれば再利用してフォーカスする */
 export async function openSingletonWindow(label: string, options?: WindowOptionsProp) {
@@ -6922,12 +7112,21 @@ export async function openSingletonWindow(label: string, options?: WindowOptions
   if (win) {
     win.show();
     win.setFocus();
-    return;
+    return win;
   }
-  win = new WebviewWindow(label, {
+  return new WebviewWindow(label, {
     ...options,
     title: label,
   });
+}
+
+export async function closeWindowsByLabel(label: string) {
+  (await getAllWebviewWindows())
+    .filter((w) => w.label === label)
+    .forEach(async (w) => {
+      await w.close();
+      await w.destroy();
+    });
 }
 
 export async function openEditorWindow(fileLocation?: FileLocation) {
@@ -6948,6 +7147,20 @@ export async function openEditorWindow(fileLocation?: FileLocation) {
       title: 'sledge',
     });
   }
+}
+
+export async function openStartWindow() {
+  let startWin = await WebviewWindow.getByLabel('start');
+  if (startWin) {
+    startWin.show();
+    startWin.setFocus();
+    return;
+  }
+
+  startWin = new WebviewWindow('start', {
+    ...StartWindowOptions,
+    url: `/`,
+  });
 }
 </file>
 

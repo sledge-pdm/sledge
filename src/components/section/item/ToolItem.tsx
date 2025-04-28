@@ -2,17 +2,18 @@ import { Component } from 'solid-js';
 import Slider from '~/components/common/Slider';
 import { sayRandomQuote } from '~/components/common/companion/QuotePool';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { penConfigRow, penConfigRowClickable, penConfigRowIcon, penConfigRowName } from '~/styles/section/pen.css';
+import { toolConfigRow, toolConfigRowClickable, toolConfigRowIcon, toolConfigRowName } from '~/styles/section/pen.css';
 import { Tool, ToolType } from '~/types/Tool';
+import { Consts } from '~/utils/consts';
 
 interface Props {
-  pen: Tool;
+  tool: Tool;
   isInUse: boolean;
 }
 
-const PenItem: Component<Props> = (props: Props) => {
+const ToolItem: Component<Props> = (props: Props) => {
   let src = '';
-  switch (props.pen.type) {
+  switch (props.tool.type) {
     case ToolType.Pen:
       src = '/pen.png';
       break;
@@ -24,16 +25,16 @@ const PenItem: Component<Props> = (props: Props) => {
       break;
   }
   return (
-    <div class={penConfigRow}>
+    <div class={toolConfigRow}>
       {/* <Light on={props.isInUse} /> */}
       <div
-        class={penConfigRowClickable}
+        class={toolConfigRowClickable}
         onClick={() => {
-          setToolStore({ usingIndex: toolStore.tools.indexOf(props.pen) });
+          setToolStore({ usingIndex: toolStore.tools.indexOf(props.tool) });
         }}
       >
         <img
-          class={penConfigRowIcon}
+          class={toolConfigRowIcon}
           style={{
             'image-rendering': 'pixelated',
             filter: props.isInUse
@@ -45,36 +46,36 @@ const PenItem: Component<Props> = (props: Props) => {
           height={20}
         />
         <p
-          class={penConfigRowName}
+          class={toolConfigRowName}
           style={{
             color: props.isInUse ? 'red' : 'unset',
           }}
         >
-          {props.pen.name}.
+          {props.tool.name}.
         </p>
       </div>
 
-      {(props.pen.type === ToolType.Pen || props.pen.type === ToolType.Eraser) && (
+      {(props.tool.type === ToolType.Pen || props.tool.type === ToolType.Eraser) && (
         <>
           <div style={{ 'flex-grow': 1 }}>
             <Slider
               min={1}
-              max={30}
-              default={props.pen.size}
+              max={Consts.maxPenSize}
+              default={props.tool.size}
               onValueChanged={(newValue) => {
                 sayRandomQuote('pen-resize');
                 console.log('size set to ' + newValue);
-                const penIndex = toolStore.tools.findIndex((p) => p.id === props.pen.id);
+                const penIndex = toolStore.tools.findIndex((p) => p.id === props.tool.id);
                 setToolStore('tools', penIndex, 'size', newValue);
               }}
             />
           </div>
 
-          <p style={{ width: 'auto' }}>{props.pen.size}.</p>
+          <p style={{ width: 'auto' }}>{props.tool.size}.</p>
         </>
       )}
     </div>
   );
 };
 
-export default PenItem;
+export default ToolItem;

@@ -1,7 +1,10 @@
 import { Component } from 'solid-js';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { vars } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { flexRow } from '~/styles/snippets.css';
 import { CanvasRenderingMode } from '~/types/Canvas';
+import { Consts } from '~/utils/consts';
 import Dropdown, { DropdownOption } from '../../common/Dropdown';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
@@ -16,8 +19,39 @@ const EditorSettings: Component = () => {
       <p class={sectionCaption}>editor.</p>
       <div class={sectionContent} style={{ gap: '8px' }}>
         <div>
+          <p>default canvas size.</p>
+          <div class={flexRow} style={{ gap: vars.spacing.xs, 'margin-top': vars.spacing.sm, 'align-items': 'center' }}>
+            <input
+              type='number'
+              name='width'
+              min={Consts.minCanvasWidth}
+              max={Consts.maxCanvasWidth}
+              value={globalStore.newProjectCanvasSize.width}
+              onChange={(e) => {
+                setGlobalStore('newProjectCanvasSize', 'width', Number(e.target.value));
+              }}
+              style={{ 'font-size': vars.text.lg }}
+              required
+            />
+            <p>x</p>
+            <input
+              type='number'
+              name='height'
+              min={Consts.minCanvasHeight}
+              max={Consts.maxCanvasHeight}
+              value={globalStore.newProjectCanvasSize.height}
+              onChange={(e) => {
+                setGlobalStore('newProjectCanvasSize', 'height', Number(e.target.value));
+              }}
+              style={{ 'font-size': vars.text.lg }}
+              required
+            />
+          </div>
+        </div>
+
+        <div>
           <p>autosave span (wip).</p>
-          <input type='number' name='width' min={0} max={10000} required />
+          <input type='number' name='width' min={100} max={1000000} required />
         </div>
 
         <p>canvas rendering (temp not works).</p>

@@ -1,5 +1,5 @@
+import { RGBAColor } from '~/utils/ColorUtils';
 import { Vec2 } from './Vector';
-import { RGBAColor } from '~/utils/colorUtils';
 
 export interface TileIndex {
   row: number;

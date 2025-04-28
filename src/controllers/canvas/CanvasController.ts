@@ -1,5 +1,20 @@
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
+import { Size2D } from '~/types/Size';
+import { Consts } from '~/utils/consts';
+import { resetLayerImage } from '../layer/LayerController';
+import { allLayers } from '../layer_list/LayerListController';
+
+export function changeCanvasSize(newSize: Size2D): boolean {
+  if (newSize.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < newSize.width) return false;
+  if (newSize.height < Consts.minCanvasHeight || Consts.maxCanvasHeight < newSize.height) return false;
+
+  setCanvasStore('canvas', newSize);
+  allLayers().forEach((layer) => {
+    resetLayerImage(layer.id, layer.dotMagnification);
+  });
+  return true;
+}
 
 const REFERENCE_LENGTH = 600;
 

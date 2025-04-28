@@ -1,6 +1,6 @@
-import { DSL } from './DSL';
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils';
-import { safeInvoke } from '~/utils/tauriUtils';
+import { safeInvoke } from '~/utils/TauriUtils';
+import { DSL } from './DSL';
 
 export async function runDSL(dsl: DSL, image: ImageData): Promise<ImageData | undefined> {
   const encoded = encodeImageData(image);

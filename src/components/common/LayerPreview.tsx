@@ -55,6 +55,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
       agent?.setImage(currentImage, true);
       updatePreview(currentImage, height);
     }
+
     agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
       const img = getImageOf(props.layer.id);
       if (img) updatePreview(img, height);

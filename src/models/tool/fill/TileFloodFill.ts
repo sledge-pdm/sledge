@@ -1,9 +1,9 @@
-import { Fill, FillProps } from './FillTool';
 import { PixelDiff } from '~/models/layer_image/HistoryManager';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
-import { colorMatch } from '~/utils/colorUtils';
+import { colorMatch } from '~/utils/ColorUtils';
+import { Fill, FillProps } from './FillTool';
 
 interface FillPassProps {
   index: TileIndex;

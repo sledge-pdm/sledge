@@ -1,10 +1,11 @@
 // projectStore.ts
 import { createStore } from 'solid-js/store';
-import resetLayerImage from '~/controllers/layer/LayerController';
 import { Layer } from '~/types/Layer';
 import { LayerHistory } from '~/types/LayerHistory';
 import { Size2D } from '~/types/Size';
 import { decodeImageData } from '~/utils/ImageUtils';
+import { globalStore } from './GlobalStores';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
 
 type CanvasStore = {
   canvas: Size2D;
@@ -44,6 +45,9 @@ export const initProjectStore = () => {
   const [projectStore, setProjectStore] = createStore<ProjectStore>(defaultProjectStore);
   const [layerHistoryStore, setLayerHistoryStore] = createStore<LayerHistoryStore>(defaultLayerHistoryStore);
   const [layerListStore, setLayerListStore] = createStore<LayerListStore>(defaultLayerListStore);
+
+  console.log(globalStore.newProjectCanvasSize);
+  setCanvasStore('canvas', globalStore.newProjectCanvasSize);
 
   return {
     canvasStore,

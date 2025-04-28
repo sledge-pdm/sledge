@@ -50,13 +50,14 @@ export default function Editor() {
   const isNewProject = location.search === '';
   const [isLoading, setIsLoading] = createSignal(true);
 
-  const onProjectLoad = () => {
+  const onProjectLoad = async () => {
     setProjectStore('isProjectChangedAfterSave', false);
     setIsLoading(false);
 
-    loadGlobalSettings();
+    await loadGlobalSettings();
 
     if (isNewProject) {
+      console.log(globalStore.newProjectCanvasSize);
       changeCanvasSize(globalStore.newProjectCanvasSize);
     }
 

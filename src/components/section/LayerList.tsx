@@ -1,24 +1,10 @@
-import {
-  closestCenter,
-  DragDropProvider,
-  DragDropSensors,
-  SortableProvider,
-} from '@thisbeyond/solid-dnd';
+import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
-import {
-  activeLayer,
-  addLayer,
-  allLayers,
-  removeLayer,
-} from '~/controllers/layer_list/LayerListController';
+import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer_list/LayerListController';
 
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/layer.css';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
 import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
@@ -36,13 +22,10 @@ const LayerList: Component<{}> = () => {
     setItems(allLayers());
   });
 
-  const onDragStart = ({ draggable }: { draggable: any }) =>
-    setActiveItem(draggable.id);
+  const onDragStart = ({ draggable }: { draggable: any }) => setActiveItem(draggable.id);
 
   function moveLayer(draggedId: string, targetIndex: number) {
-    const fromIndex = layerListStore.layers.findIndex(
-      (l) => l.id === draggedId
-    );
+    const fromIndex = layerListStore.layers.findIndex((l) => l.id === draggedId);
     if (fromIndex === -1 || fromIndex === targetIndex) return;
 
     const updated = [...layerListStore.layers];
@@ -52,13 +35,7 @@ const LayerList: Component<{}> = () => {
     setItems(allLayers());
   }
 
-  const onDragEnd = ({
-    draggable,
-    droppable,
-  }: {
-    draggable: any;
-    droppable: any;
-  }) => {
+  const onDragEnd = ({ draggable, droppable }: { draggable: any; droppable: any }) => {
     if (draggable && droppable) {
       const currentItems = ids();
       const fromIndex = currentItems.indexOf(draggable.id);
@@ -109,11 +86,7 @@ const LayerList: Component<{}> = () => {
               <SortableProvider ids={ids()}>
                 <For each={items()}>
                   {(layer, index) => (
-                    <LayerItem
-                      layer={layer}
-                      index={index()}
-                      isLast={index() === items().length - 1}
-                    />
+                    <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />
                   )}
                 </For>
               </SortableProvider>

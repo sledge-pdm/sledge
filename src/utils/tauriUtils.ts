@@ -14,10 +14,7 @@ export async function isTauri(): Promise<boolean> {
   return _isTauri;
 }
 
-export async function safeInvoke<T>(
-  cmd: string,
-  args?: Record<string, unknown>
-): Promise<T | undefined> {
+export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T | undefined> {
   if (!(await isTauri())) {
     console.warn(`[safeInvoke] '${cmd}' skipped (not in Tauri environment)`);
     return undefined;

@@ -5,8 +5,7 @@ import { safeInvoke } from '~/utils/tauriUtils';
 
 function legacyFloodFillJS({ image, position, lastPosition, color }: ToolArgs) {
   const targetColor = getPixel(image, position.x, position.y);
-  const matches = (p: [number, number]) =>
-    colorMatch(getPixel(image, p[0], p[1]), targetColor);
+  const matches = (p: [number, number]) => colorMatch(getPixel(image, p[0], p[1]), targetColor);
 
   const startTimeLegacy = Date.now();
   const queueLegacy: [number, number][] = [[position.x, position.y]];
@@ -37,8 +36,7 @@ function legacyFloodFillJS({ image, position, lastPosition, color }: ToolArgs) {
 
 function legacyBase64Rust({ image, position, lastPosition, color }: ToolArgs) {
   const targetColor = getPixel(image, position.x, position.y);
-  const matches = (p: [number, number]) =>
-    colorMatch(getPixel(image, p[0], p[1]), targetColor);
+  const matches = (p: [number, number]) => colorMatch(getPixel(image, p[0], p[1]), targetColor);
   (async () => {
     const startTime = Date.now();
     const result = await safeInvoke('flood_fill', {
@@ -51,11 +49,7 @@ function legacyBase64Rust({ image, position, lastPosition, color }: ToolArgs) {
     });
 
     // 結果を ImageData に復元
-    const resultImage = decodeImageData(
-      result as string,
-      image.width,
-      image.height
-    );
+    const resultImage = decodeImageData(result as string, image.width, image.height);
     // image = resultImage
     const endTime = Date.now();
     console.log('rust(old, base64): ' + (endTime - startTime));
@@ -64,8 +58,7 @@ function legacyBase64Rust({ image, position, lastPosition, color }: ToolArgs) {
 
 function legacyByteBufRust({ image, position, lastPosition, color }: ToolArgs) {
   const targetColor = getPixel(image, position.x, position.y);
-  const matches = (p: [number, number]) =>
-    colorMatch(getPixel(image, p[0], p[1]), targetColor);
+  const matches = (p: [number, number]) => colorMatch(getPixel(image, p[0], p[1]), targetColor);
   (async () => {
     const startTime = Date.now();
     const result = await safeInvoke('flood_fill_raw', {
@@ -78,11 +71,7 @@ function legacyByteBufRust({ image, position, lastPosition, color }: ToolArgs) {
     });
 
     // 結果（Uint8Array）を ImageData に復元
-    const resultImage = new ImageData(
-      new Uint8ClampedArray(result as number[]),
-      image.width,
-      image.height
-    );
+    const resultImage = new ImageData(new Uint8ClampedArray(result as number[]), image.width, image.height);
     // image = resultImage
     const endTime = Date.now();
     console.log('rust(raw, ByteBuf): ' + (endTime - startTime));

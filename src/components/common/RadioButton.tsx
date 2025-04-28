@@ -1,9 +1,5 @@
 import { Component } from 'solid-js';
-import {
-  customRadio,
-  hiddenRadio,
-  radioWrapper,
-} from '~/styles/components/radio_button.css';
+import { customRadio, hiddenRadio, radioWrapper } from '~/styles/components/radio_button.css';
 
 const RadioButton: Component<{ label?: string; name: string }> = (props) => {
   return (

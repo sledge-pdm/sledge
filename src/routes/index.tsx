@@ -1,17 +1,12 @@
 import { For, onMount } from 'solid-js';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import { loadGlobalSettings } from '~/io/global_setting/globalSettings';
 import { importProjectJsonFromFileSelection } from '~/io/project/project';
 import { addRecent, globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { sectionRoot } from '~/styles/section_global.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/pathUtils';
-import {
-  closeWindowsByLabel,
-  openEditorWindow,
-  openSingletonWindow,
-  WindowOptionsProp,
-} from '~/utils/windowUtils';
+import { closeWindowsByLabel, openEditorWindow, openSingletonWindow, WindowOptionsProp } from '~/utils/windowUtils';
 import { SettingsWindowOptions } from './settings';
 import {
   recentFilesCaption,
@@ -77,19 +72,13 @@ export default function Home() {
           <a class={sideSectionItem} onClick={() => createNew()}>
             +&ensp;new.
           </a>
-          <a
-            class={sideSectionItem}
-            style={{ 'margin-left': '2px' }}
-            onClick={(e) => openProject()}
-          >
+          <a class={sideSectionItem} style={{ 'margin-left': '2px' }} onClick={(e) => openProject()}>
             &gt;&ensp;open.
           </a>
           <a
             class={sideSectionItem}
             style={{ 'margin-left': '2px' }}
-            onClick={(e) =>
-              openSingletonWindow('settings', SettingsWindowOptions)
-            }
+            onClick={(e) => openSingletonWindow('settings', SettingsWindowOptions)}
           >
             <img src={'/settings.png'} width={16} height={16} />
             &ensp;settings.
@@ -109,10 +98,7 @@ export default function Home() {
                 return (
                   <div class={recentFilesItem}>
                     <p>■</p>
-                    <a
-                      class={recentFilesName}
-                      onClick={(e) => moveToEditor(item)}
-                    >
+                    <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>
                       {item.name}
                     </a>
                     <p class={recentFilesPath}>{item.path}</p>

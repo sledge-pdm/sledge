@@ -1,12 +1,7 @@
-import {
-  Component,
-  createEffect,
-  createSignal,
-  onCleanup,
-  onMount,
-} from 'solid-js';
-import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
-import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import LayerCanvasOperator from '~/models/canvas/LayerCanvasOperator';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { canvasStore } from '~/stores/project/canvasStore';
 import { DrawState } from '~/types/DrawState';
 import { Vec2 } from '~/types/Vector';
 
@@ -59,7 +54,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
       y = e.touches[0].clientY;
     }
 
-    const zoom = canvasStore.zoom;
+    const zoom = interactStore.zoom;
 
     return {
       x: (x - offset.x) / zoom,
@@ -68,7 +63,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === 'touch' || canvasStore.isCtrlPressed) return false;
+    if (e.pointerType === 'touch' || interactStore.isCtrlPressed) return false;
     // right=1, left=2, middle=4
     // console.log(e.buttons)
     if (e.pointerType === 'mouse' && e.buttons !== 1) return false;
@@ -81,7 +76,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.start, position, lastPos());
-    setCanvasStore('isInStroke', true);
+    setInteractStore('isInStroke', true);
     setLastPos(position);
   }
 
@@ -93,18 +88,18 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handlePointerMove(e: PointerEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore('lastMouseWindow', windowPosition);
-    setCanvasStore('lastMouseOnCanvas', position);
+    setInteractStore('lastMouseWindow', windowPosition);
+    setInteractStore('lastMouseOnCanvas', position);
 
     if (!isDrawableClick(e)) return;
 
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
       setTemporaryOut(false);
-      setCanvasStore('isInStroke', true);
+      setInteractStore('isInStroke', true);
       setLastPos(position);
     }
-    if (!canvasStore.isInStroke || !lastPos()) return;
+    if (!interactStore.isInStroke || !lastPos()) return;
 
     props.operator.handleDraw(DrawState.move, position, lastPos());
     setLastPos(position);
@@ -112,16 +107,16 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
   function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
-    if (canvasStore.isInStroke) endStroke(position);
+    if (interactStore.isInStroke) endStroke(position);
   }
 
   function handlePointerOut(e: PointerEvent) {
     // 出た時点でストロークを切る場合
     // const position = getCanvasMousePosition(e);
-    // if (canvasStore.isInStroke) endStroke(position);
+    // if (interactStore.isInStroke) endStroke(position);
 
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
-    if (canvasStore.isDragging) {
+    if (interactStore.isDragging) {
       const position = getCanvasMousePosition(e);
       props.operator.handleDraw(DrawState.move, position, lastPos());
       setTemporaryOut(true);
@@ -131,13 +126,13 @@ export const TouchableCanvas: Component<Props> = (props) => {
   function handleWheel(e: WheelEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setCanvasStore('lastMouseWindow', windowPosition);
-    setCanvasStore('lastMouseOnCanvas', position);
+    setInteractStore('lastMouseWindow', windowPosition);
+    setInteractStore('lastMouseOnCanvas', position);
   }
 
   function endStroke(position: Vec2) {
     props.operator.handleDraw(DrawState.end, position, lastPos());
-    setCanvasStore('isInStroke', false);
+    setInteractStore('isInStroke', false);
     setLastPos(undefined);
     setTemporaryOut(false);
   }
@@ -158,7 +153,7 @@ export const TouchableCanvas: Component<Props> = (props) => {
 
   createEffect(() => {
     if (canvasRef)
-      setCanvasStore('canvasElementSize', {
+      setInteractStore('canvasElementSize', {
         width: canvasRef.clientWidth,
         height: canvasRef.clientHeight,
       });

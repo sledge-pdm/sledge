@@ -39,10 +39,8 @@ export const LayerCanvas: Component<Props> = (props) => {
 
   const styleWidth = () => canvasStore.canvas.width;
   const styleHeight = () => canvasStore.canvas.height;
-  const internalWidth = () =>
-    canvasStore.canvas.width / props.layer.dotMagnification;
-  const internalHeight = () =>
-    canvasStore.canvas.height / props.layer.dotMagnification;
+  const internalWidth = () => canvasStore.canvas.width / props.layer.dotMagnification;
+  const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
     let agent = layerImageManager.getAgent(props.layer.id);
@@ -81,16 +79,11 @@ export const LayerCanvas: Component<Props> = (props) => {
   );
 };
 
-function createRefContent<T extends Exclude<unknown, Function>>(
-  getRef: () => Ref<T>,
-  createRef: () => T
-) {
+function createRefContent<T extends Exclude<unknown, Function>>(getRef: () => Ref<T>, createRef: () => T) {
   createRenderEffect(() => {
     const refProp = getRef();
     if (typeof refProp !== 'function') {
-      throw new Error(
-        'Should never happen, as solid always passes refs as functions'
-      );
+      throw new Error('Should never happen, as solid always passes refs as functions');
     }
 
     const refFunc = refProp as (value: T) => void;

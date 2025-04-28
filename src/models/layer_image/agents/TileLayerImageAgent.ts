@@ -81,28 +81,16 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 
   putDrawingBufferInto(ctx: CanvasRenderingContext2D) {
     if (this.getDirtyTiles().length > 0) {
-      if (this.drawingBuffer)
-        this.putOnlyForDirtyTiles(ctx, this.drawingBuffer);
+      if (this.drawingBuffer) this.putOnlyForDirtyTiles(ctx, this.drawingBuffer);
     }
   }
 
-  private putOnlyForDirtyTiles(
-    ctx: CanvasRenderingContext2D,
-    image: ImageData
-  ) {
+  private putOnlyForDirtyTiles(ctx: CanvasRenderingContext2D, image: ImageData) {
     const dirtyTiles = this.getDirtyTiles();
 
     dirtyTiles.forEach((dirtyTile) => {
       const offset = dirtyTile.getOffset();
-      ctx.putImageData(
-        image,
-        0,
-        0,
-        offset.x,
-        offset.y,
-        this.TILE_SIZE,
-        this.TILE_SIZE
-      );
+      ctx.putImageData(image, 0, 0, offset.x, offset.y, this.TILE_SIZE, this.TILE_SIZE);
     });
 
     this.resetDirtyStates();
@@ -144,8 +132,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 
   protected undoTileDiff(tileDiff: TileDiff): void {
     console.log(`tilediff. fill ${tileDiff.beforeColor}`);
-    if (tileDiff.beforeColor)
-      this.fillWholeTile(tileDiff.index, tileDiff.beforeColor, false);
+    if (tileDiff.beforeColor) this.fillWholeTile(tileDiff.index, tileDiff.beforeColor, false);
   }
 
   protected redoTileDiff(tileDiff: TileDiff): void {
@@ -159,23 +146,14 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     excludePositionMatch: boolean = true,
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    const result = this.setPixelInPosition(
-      position,
-      color,
-      excludePositionMatch,
-      excludeColorMatch
-    );
+    const result = this.setPixelInPosition(position, color, excludePositionMatch, excludeColorMatch);
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position);
       this.tiles[tileIndex.row][tileIndex.column].isDirty = true;
       this.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true;
 
       const tile = this.getTile(tileIndex);
-      if (
-        tile.isUniform &&
-        tile.uniformColor !== undefined &&
-        colorMatch(tile.uniformColor, color)
-      ) {
+      if (tile.isUniform && tile.uniformColor !== undefined && colorMatch(tile.uniformColor, color)) {
         this.tiles[tileIndex.row][tileIndex.column].isUniform = false;
         this.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined;
       }
@@ -185,12 +163,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 
   fillWholeTile(index: TileIndex, color: RGBAColor, collectDiff = true) {
     const tile = this.getTile(index);
-    if (
-      tile.isUniform &&
-      tile.uniformColor &&
-      colorMatch(tile.uniformColor, color)
-    )
-      return;
+    if (tile.isUniform && tile.uniformColor && colorMatch(tile.uniformColor, color)) return;
 
     const [r, g, b, a] = color;
     const { x: ox, y: oy } = tile.getOffset();
@@ -235,11 +208,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
     excludePositionMatch: boolean = true,
     excludeColorMatch: boolean = true
   ): PixelDiff | undefined {
-    const result = this.deletePixelInPosition(
-      position,
-      excludePositionMatch,
-      excludeColorMatch
-    );
+    const result = this.deletePixelInPosition(position, excludePositionMatch, excludeColorMatch);
     if (result !== undefined) {
       const tileIndex = this.getTileIndex(position);
       this.tiles[tileIndex.row][tileIndex.column].isDirty = true;

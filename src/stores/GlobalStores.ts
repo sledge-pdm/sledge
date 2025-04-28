@@ -1,5 +1,5 @@
 import { createStore } from 'solid-js/store';
-import { saveGlobalSettings } from '~/io/global/globalIO';
+import { saveGlobalSettings } from '~/io/global_setting/globalSettings';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import { FileLocation } from '~/types/FileLocation';
 

@@ -19,9 +19,7 @@ export class DSL {
   }
 
   public build(exceptIn: boolean = false): string | undefined {
-    const nodes = exceptIn
-      ? [...this.nodes, this.layerOut]
-      : [this.layerIn, ...this.nodes, this.layerOut];
+    const nodes = exceptIn ? [...this.nodes, this.layerOut] : [this.layerIn, ...this.nodes, this.layerOut];
 
     const nodeStrings: string[] = [];
     let isAllNodeParseSuccessful = true;
@@ -50,13 +48,8 @@ export class DSL {
       // 読みやすくする
       const inId = this.layerIn.layerId;
       const outId = this.layerOut.layerId;
-      if (inId !== undefined)
-        str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`);
-      if (outId !== undefined)
-        str = str.replaceAll(
-          outId,
-          `${findLayerById(outId)?.name || 'N/A'} ID`
-        );
+      if (inId !== undefined) str = str.replaceAll(inId, `${findLayerById(inId)?.name || 'N/A'} ID`);
+      if (outId !== undefined) str = str.replaceAll(outId, `${findLayerById(outId)?.name || 'N/A'} ID`);
       str = str.replaceAll(' > ', '\n> ');
       return str;
     }

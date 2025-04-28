@@ -7,30 +7,18 @@ import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/EdgeInfo';
 import SideSections from '~/components/SideSections';
-import {
-  adjustZoomToFit,
-  centeringCanvas,
-} from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
 import resetLayerImage from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import { loadGlobalSettings } from '~/io/global_setting/globalSettings';
 import { importProjectJsonFromPath } from '~/io/project/project';
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
 import { canvasStore } from '~/stores/project/canvasStore';
-import {
-  layerHistoryStore,
-  layerListStore,
-  projectStore,
-  setProjectStore,
-} from '~/stores/ProjectStores';
+import { layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { pageRoot } from '~/styles/global.css';
 import { LayerType } from '~/types/Layer';
-import {
-  closeWindowsByLabel,
-  openStartWindow,
-  WindowOptionsProp,
-} from '~/utils/windowUtils';
+import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
   width: 1200,
@@ -46,8 +34,7 @@ export const EditorWindowOptions: WindowOptionsProp = {
 
 export const layerImageManager = new LayerImageManager();
 
-export const getImageOf = (layerId: string) =>
-  layerImageManager.getAgent(layerId)?.getImage();
+export const getImageOf = (layerId: string) => layerImageManager.getAgent(layerId)?.getImage();
 
 export default function Editor() {
   const window = getCurrentWebviewWindow();
@@ -102,13 +89,10 @@ export default function Editor() {
       SetIsCloseRequested(true);
       event.preventDefault();
       if (projectStore.isProjectChangedAfterSave) {
-        const confirmed = await confirm(
-          'the project is not saved.\nsure to quit without save?',
-          {
-            okLabel: 'quit w/o save.',
-            cancelLabel: 'cancel.',
-          }
-        );
+        const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
+          okLabel: 'quit w/o save.',
+          cancelLabel: 'cancel.',
+        });
         if (confirmed) {
           await openStartWindow();
           closeWindowsByLabel('editor');

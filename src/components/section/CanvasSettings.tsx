@@ -5,17 +5,8 @@ import { allLayers } from '~/controllers/layer_list/LayerListController';
 import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
 import { layerListStore } from '~/stores/ProjectStores';
 
-import {
-  canvasSizeButton,
-  canvasSizeForm,
-  canvasSizeInput,
-  canvasSizeLabel,
-} from '~/styles/section/canvas.css';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
+import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 
 const CanvasSettings: Component = () => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);

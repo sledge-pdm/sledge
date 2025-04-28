@@ -28,7 +28,6 @@ export const penConfigRowName = style({
 
 export const penConfigRowIcon = style({
   ':hover': {
-    filter:
-      'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
+    filter: 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
   },
 });

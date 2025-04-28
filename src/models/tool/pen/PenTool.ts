@@ -7,10 +7,7 @@ export class PenTool implements Tool {
     return false;
   }
 
-  onMove(
-    agent: LayerImageAgent,
-    { position, lastPosition, color, size }: ToolArgs
-  ) {
+  onMove(agent: LayerImageAgent, { position, lastPosition, color, size }: ToolArgs) {
     if (!size) return false;
 
     drawSquarePixel(position, size, (px, py) => {

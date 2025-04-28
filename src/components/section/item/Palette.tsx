@@ -1,9 +1,9 @@
 import { Component } from 'solid-js';
 import ColorBox from '~/components/common/ColorBox';
 import { selectPalette } from '~/controllers/color/ColorController';
-import { PaletteType } from '~/stores/editor/ColorStore';
 import { colorStore } from '~/stores/EditorStores';
 import { paletteRoot } from '~/styles/components/palette.css';
+import { PaletteType } from '~/types/PaletteType';
 
 const Palette: Component = () => {
   return (
@@ -18,9 +18,7 @@ const Palette: Component = () => {
         color={colorStore.secondary}
         sizePx={24}
         onClick={(color) => selectPalette(PaletteType.secondary)}
-        enableUsingSelection={
-          colorStore.currentPalette === PaletteType.secondary
-        }
+        enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
       />
     </div>
   );

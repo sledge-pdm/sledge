@@ -1,10 +1,6 @@
 import { Component, For } from 'solid-js';
 import { toolStore } from '~/stores/EditorStores';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 import PenItem from './item/PenItem';
 import PenSize from './item/PenSize';
 
@@ -15,9 +11,7 @@ const ToolConfig: Component = () => {
       <div class={sectionContent}>
         <PenSize />
         <For each={toolStore.tools}>
-          {(item, index) => (
-            <PenItem pen={item} isInUse={index() === toolStore.usingIndex} />
-          )}
+          {(item, index) => <PenItem pen={item} isInUse={index() === toolStore.usingIndex} />}
         </For>
       </div>
     </div>

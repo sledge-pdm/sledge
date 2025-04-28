@@ -1,16 +1,10 @@
 import { layerListStore } from '~/stores/ProjectStores';
 
-export function exportActiveLayerUpscaled(
-  fileName?: string,
-  path?: string,
-  scale = 10
-) {
+export function exportActiveLayerUpscaled(fileName?: string, path?: string, scale = 10) {
   const layerId = layerListStore.activeLayerId;
   if (!layerId) return;
 
-  const originalCanvas = document.getElementById(
-    `canvas-${layerId}`
-  ) as HTMLCanvasElement;
+  const originalCanvas = document.getElementById(`canvas-${layerId}`) as HTMLCanvasElement;
   if (!originalCanvas) {
     alert('対象のレイヤーが見つかりません。');
     return;
@@ -53,11 +47,7 @@ export function exportActiveLayerUpscaled(
   }, 'image/png');
 }
 
-export function downloadImageData(
-  imageData: ImageData,
-  filename: string = 'image',
-  scale: number = 10
-) {
+export function downloadImageData(imageData: ImageData, filename: string = 'image', scale: number = 10) {
   // 一時的な canvas を作成
   const canvas = document.createElement('canvas');
   canvas.width = imageData.width;

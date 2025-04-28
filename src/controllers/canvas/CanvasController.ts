@@ -1,4 +1,5 @@
-import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { canvasStore } from '~/stores/project/canvasStore';
 
 const REFERENCE_LENGTH = 600;
 
@@ -28,27 +29,27 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
-  setCanvasStore('zoom', referencedZoom);
+  setInteractStore('zoom', referencedZoom);
   centeringCanvas();
 };
 
 export const centeringCanvas = () => {
   const canvasSize = canvasStore.canvas;
-  const canvasArea = canvasStore.canvasAreaSize;
-  const zoom = canvasStore.zoom;
+  const canvasArea = interactStore.canvasAreaSize;
+  const zoom = interactStore.zoom;
 
   console.log(
     `area size is ${canvasArea.width} x ${canvasArea.height}.
       canvas size is ${canvasSize.width} x ${canvasSize.height}.
-      current offset origin is ${canvasStore.offsetOrigin.x}, ${canvasStore.offsetOrigin.y}.
-      new offset origin is ${canvasStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${canvasStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
+      current offset origin is ${interactStore.offsetOrigin.x}, ${interactStore.offsetOrigin.y}.
+      new offset origin is ${interactStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${interactStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
   );
 
-  setCanvasStore('offsetOrigin', {
+  setInteractStore('offsetOrigin', {
     x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
     y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
   });
-  setCanvasStore('offset', {
+  setInteractStore('offset', {
     x: 0,
     y: 0,
   });

@@ -1,35 +1,21 @@
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
-import {
-  BaseDirectory,
-  mkdir,
-  readTextFile,
-  writeTextFile,
-} from '@tauri-apps/plugin-fs';
-import {
-  adjustZoomToFit,
-  centeringCanvas,
-} from '~/controllers/canvas/CanvasController';
-import resetLayerImage from '~/controllers/layer/LayerController';
+import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { findLayerById } from '~/controllers/layer_list/LayerListController';
 import { getImageOf } from '~/routes/editor';
 import { addRecent } from '~/stores/GlobalStores';
-import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
+import { canvasStore } from '~/stores/project/canvasStore';
 import {
   layerHistoryStore,
   layerListStore,
+  loadStoreFromProjectJson as loadProjectStore,
   projectStore,
-  setLayerHistoryStore,
-  setLayerListStore,
   setProjectStore,
 } from '~/stores/ProjectStores';
-import { Layer } from '~/types/Layer';
-import { decodeImageData, encodeImageData } from '~/utils/ImageUtils';
+import { encodeImageData } from '~/utils/ImageUtils';
 import { getFileNameAndPath } from '~/utils/pathUtils';
 
-export async function importProjectJsonFromFileSelection(): Promise<
-  string | undefined
-> {
+export async function importProjectJsonFromFileSelection(): Promise<string | undefined> {
   const home = await path.homeDir();
   const file = await dialogOpen({
     multiple: false,
@@ -46,11 +32,11 @@ export async function importProjectJsonFromFileSelection(): Promise<
     console.log('ファイルが選択されていません');
     return undefined;
   }
-  console.log(file);
+
   const jsonText = await readTextFile(file);
   const projectJson = JSON.parse(jsonText);
 
-  await importProjectJson(projectJson);
+  loadProjectStore(projectJson);
 
   return file;
 }
@@ -63,59 +49,7 @@ export async function importProjectJsonFromPath(filePath: string) {
   const jsonText = await readTextFile(filePath);
   const projectJson = JSON.parse(jsonText);
 
-  importProjectJson(projectJson);
-}
-
-export async function importProjectJson(projectJson: any) {
-  if (projectJson.project) {
-    console.log(projectJson.project);
-    setProjectStore('name', projectJson.project.name || undefined);
-    setProjectStore('path', projectJson.project.path || undefined);
-  }
-
-  if (projectJson.canvas) {
-    const { width, height } = projectJson.canvas;
-    setCanvasStore('canvas', 'width', width);
-    setCanvasStore('canvas', 'height', height);
-  }
-
-  if (projectJson.images) {
-    setLayerHistoryStore({});
-    Object.keys(projectJson.images).forEach((id) => {
-      console.log(`read ${id}`);
-      const imageData = projectJson.images[id];
-      const agent = resetLayerImage(
-        id,
-        Number(imageData.dotMagnification || 1)
-      );
-      const image = decodeImageData(
-        imageData.current,
-        Number(imageData.width),
-        Number(imageData.height)
-      );
-      agent.setImage(image);
-    });
-  }
-
-  if (
-    projectJson.layer &&
-    projectJson.layer.layers &&
-    Array.isArray(projectJson.layer.layers)
-  ) {
-    const layers: Layer[] = [];
-    projectJson.layer.layers.map((l: any) => {
-      layers.push({
-        ...l,
-        dsl: undefined,
-      } as Layer);
-    });
-
-    setLayerListStore('layers', layers);
-    setLayerListStore('activeLayerId', projectJson.layer.activeLayerId);
-  }
-
-  adjustZoomToFit();
-  centeringCanvas();
+  loadProjectStore(projectJson);
 }
 
 export const parseCurrentProject = (): string => {

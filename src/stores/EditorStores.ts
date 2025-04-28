@@ -1,9 +1,41 @@
 // editorStore.tsx
 import { createStore } from 'solid-js/store';
 import { createTool } from '~/models/tool/ToolFactory';
-import { ToolType } from '~/types/Tool';
-import { ToolStore } from './editor/ToolsStore';
-import { ColorStore, PaletteType } from './editor/ColorStore';
+import { PaletteType } from '~/types/PaletteType';
+import { Size2D } from '~/types/Size';
+import { Tool, ToolType } from '~/types/Tool';
+import { Vec2 } from '~/types/Vector';
+
+type ColorStore = {
+  currentPalette: PaletteType;
+  primary: string;
+  secondary: string;
+  swatches: string[];
+};
+type InteractStore = {
+  canvasAreaSize: Size2D;
+  canvasElementSize: Size2D;
+  lastMouseWindow: Vec2;
+  lastMouseOnCanvas: Vec2;
+  isInStroke: boolean;
+  zoom: number;
+  zoomMin: number;
+  zoomMax: number;
+  touchZoomSensitivity: number;
+  wheelZoomStep: number;
+  offsetOrigin: Vec2;
+  offset: Vec2;
+
+  isCtrlPressed: boolean;
+  isDragging: boolean;
+};
+type LogStore = {
+  bottomBarText: string;
+};
+type ToolStore = {
+  usingIndex: number;
+  tools: Tool[];
+};
 
 const defaultColorStore: ColorStore = {
   currentPalette: 'primary' as PaletteType,
@@ -22,7 +54,27 @@ const defaultColorStore: ColorStore = {
     '#400080',
   ],
 };
+const defaultInteractStore: InteractStore = {
+  canvasAreaSize: { width: 0, height: 0 },
+  canvasElementSize: { width: 0, height: 0 },
+  lastMouseWindow: { x: 0, y: 0 },
+  lastMouseOnCanvas: { x: 0, y: 0 },
+  isInStroke: false,
+  zoom: 1,
+  zoomMin: 0.5,
+  zoomMax: 8,
+  touchZoomSensitivity: 0.5,
+  wheelZoomStep: 0.05,
+  // オフセットの初期値
+  offsetOrigin: { x: 0, y: 0 },
+  offset: { x: 0, y: 0 },
 
+  isCtrlPressed: false,
+  isDragging: false,
+};
+const defaultLogStore: LogStore = {
+  bottomBarText: '',
+};
 const defaultToolStore: ToolStore = {
   usingIndex: 0,
   tools: [
@@ -33,13 +85,18 @@ const defaultToolStore: ToolStore = {
 };
 
 export const initEditorStore = () => {
-  const [colorStore, setColorStore] =
-    createStore<ColorStore>(defaultColorStore);
+  const [colorStore, setColorStore] = createStore<ColorStore>(defaultColorStore);
+  const [interactStore, setInteractStore] = createStore<InteractStore>(defaultInteractStore);
   const [toolStore, setToolStore] = createStore<ToolStore>(defaultToolStore);
+  const [logStore, setLogStore] = createStore<LogStore>(defaultLogStore);
 
   return {
     colorStore,
     setColorStore,
+    interactStore,
+    setInteractStore,
+    logStore,
+    setLogStore,
     toolStore,
     setToolStore,
   };
@@ -49,6 +106,12 @@ const editorStore = initEditorStore();
 
 export const colorStore = editorStore.colorStore;
 export const setColorStore = editorStore.setColorStore;
+
+export const interactStore = editorStore.interactStore;
+export const setInteractStore = editorStore.setInteractStore;
+
+export const logStore = editorStore.logStore;
+export const setLogStore = editorStore.setLogStore;
 
 export const toolStore = editorStore.toolStore;
 export const setToolStore = editorStore.setToolStore;

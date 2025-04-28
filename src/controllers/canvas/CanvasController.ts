@@ -1,5 +1,5 @@
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/project/canvasStore';
+import { canvasStore } from '~/stores/ProjectStores';
 
 const REFERENCE_LENGTH = 600;
 
@@ -22,11 +22,6 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
   const isWide = width > height;
   const longerLength = isWide ? width : height;
 
-  console.log(
-    `this is ${isWide ? 'wide' : 'tall'}.
-      ${REFERENCE_LENGTH} / ${longerLength} = ${REFERENCE_LENGTH / longerLength}. set zoom.`
-  );
-
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
   setInteractStore('zoom', referencedZoom);
@@ -37,13 +32,6 @@ export const centeringCanvas = () => {
   const canvasSize = canvasStore.canvas;
   const canvasArea = interactStore.canvasAreaSize;
   const zoom = interactStore.zoom;
-
-  console.log(
-    `area size is ${canvasArea.width} x ${canvasArea.height}.
-      canvas size is ${canvasSize.width} x ${canvasSize.height}.
-      current offset origin is ${interactStore.offsetOrigin.x}, ${interactStore.offsetOrigin.y}.
-      new offset origin is ${interactStore.canvasAreaSize.width / 2 - canvasStore.canvas.width / 2}, ${interactStore.canvasAreaSize.height / 2 - canvasStore.canvas.height / 2}`
-  );
 
   setInteractStore('offsetOrigin', {
     x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,

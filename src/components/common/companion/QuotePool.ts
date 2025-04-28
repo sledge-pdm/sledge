@@ -1,4 +1,4 @@
-import { smartSay } from './Companion';
+// import { smartSay } from './Companion';
 
 type QuoteCategory = 'color-pick' | 'pen-resize' | 'canvas-resize' | 'undo-spam' | 'random';
 
@@ -47,10 +47,10 @@ export const sayRandomQuote = (category: QuoteCategory, context?: any) => {
   }
   let quote = quotes[index];
   quote = context?.color ? quote.replace('[color]', context.color) : quote;
-  if (smartSay(quote)) {
-    console.log(`◯ yay!`);
-    lastSaidIndexes[category] = index;
-  } else {
-    console.log(`✕ hmm maybe I'd keep silence now?`);
-  }
+  // if (smartSay(quote)) {
+  //   console.log(`◯ yay!`);
+  //   lastSaidIndexes[category] = index;
+  // } else {
+  //   console.log(`✕ hmm maybe I'd keep silence now?`);
+  // }
 };

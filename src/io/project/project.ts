@@ -4,8 +4,8 @@ import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/p
 import { findLayerById } from '~/controllers/layer_list/LayerListController';
 import { getImageOf } from '~/routes/editor';
 import { addRecent } from '~/stores/GlobalStores';
-import { canvasStore } from '~/stores/project/canvasStore';
 import {
+  canvasStore,
   layerHistoryStore,
   layerListStore,
   loadStoreFromProjectJson as loadProjectStore,

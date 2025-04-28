@@ -3,7 +3,7 @@ import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
 import { layerImageManager } from '~/routes/editor';
-import { canvasStore } from '~/stores/project/canvasStore';
+import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { Layer } from '~/types/Layer';
 
@@ -21,7 +21,6 @@ export type LayerCanvasRef = {
 
 export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
-  let ctx: CanvasRenderingContext2D | null = null;
 
   const agent = () => layerImageManager.getAgent(props.layer.id);
 
@@ -44,24 +43,23 @@ export const LayerCanvas: Component<Props> = (props) => {
 
   onMount(() => {
     let agent = layerImageManager.getAgent(props.layer.id);
-    ctx = canvasRef?.getContext('2d') ?? null;
-    if (ctx) agent?.putImageInto(ctx);
+    const ctx = canvasRef?.getContext('2d');
 
-    agent?.setOnImageChangeListener('layercanvas_refresh', () => {
-      if (ctx) {
-        agent.putImageIntoForce(ctx);
-      }
+    if (ctx) agent?.putImageIntoForce(ctx);
+
+    agent?.setOnImageChangeListener('layercanvas_refresh_' + props.layer.id, () => {
+      if (ctx) agent.putImageIntoForce(ctx);
     });
-    agent?.setOnDrawingBufferChangeListener('layercanvas_refresh', () => {
-      if (ctx) {
-        agent.putDrawingBufferIntoForce(ctx);
-      }
+    agent?.setOnDrawingBufferChangeListener('layercanvas_refresh_' + props.layer.id, () => {
+      if (ctx) agent.putDrawingBufferIntoForce(ctx);
     });
   });
 
   return (
     <canvas
-      ref={canvasRef}
+      ref={(el) => {
+        canvasRef = el;
+      }}
       id={`canvas-${props.layer.id}`}
       data-layer-id={props.layer.name}
       class={layerCanvas}

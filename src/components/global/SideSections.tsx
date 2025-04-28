@@ -1,12 +1,12 @@
 import { Component } from 'solid-js';
-import CanvasSettings from './section/CanvasSettings';
-import Color from './section/Color';
-import LayerList from './section/LayerList';
-import ToolConfig from './section/ToolConfig';
-import Project from './section/Project';
+import CanvasSettings from '../section/CanvasSettings';
+import Color from '../section/Color';
+import LayerList from '../section/LayerList';
+import Project from '../section/Project';
+import ToolConfig from '../section/ToolConfig';
 
-import { sideAreaContent } from '~/styles/components/side_sections.css';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { sideAreaContent } from '~/styles/components/side_sections.css';
 
 const SideSections: Component = () => {
   return (

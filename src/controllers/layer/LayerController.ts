@@ -1,7 +1,6 @@
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 import { layerImageManager } from '~/routes/editor';
-import { canvasStore } from '~/stores/project/canvasStore';
-import { setLayerHistoryStore } from '~/stores/ProjectStores';
+import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore } from '~/stores/ProjectStores';
 
 const magnificationList: number[] = [1, 2, 4];
 
@@ -23,5 +22,16 @@ export default function resetLayerImage(layerId: string, dotMagnification: numbe
     undoStack: [],
     redoStack: [],
   });
-  return layerImageManager.registerAgent(layerId, blank);
+  const agent = layerImageManager.getAgent(layerId);
+  if (agent !== undefined) {
+    console.log('udpate');
+    agent.setImage(blank, false);
+    return agent;
+  } else {
+    console.log('not found');
+    return layerImageManager.registerAgent(layerId, blank);
+  }
 }
+
+export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.undoStack.length > 0;
+export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.redoStack.length > 0;

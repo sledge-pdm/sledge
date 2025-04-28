@@ -4,11 +4,10 @@ import Controls from './Controls';
 import CanvasStack from './stacks/CanvasStack';
 
 import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
-import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
-import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
-import BottomInfo from '../BottomInfo';
-import CanvasDebugOverlay from './CanvasDebugOverlay';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
+import BottomInfo from '../global/BottomInfo';
+import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 export default () => {
   let wrapper: HTMLDivElement;

@@ -1,7 +1,7 @@
 import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
 import { LayerType } from '~/types/Layer';
 import { DSL } from '../../models/dsl/DSL';
-import { createLayer } from '../../models/layer/LayerFactory';
+import { createLayer } from '../layer/LayerFactory';
 
 export const addLayer = async (
   name: string,

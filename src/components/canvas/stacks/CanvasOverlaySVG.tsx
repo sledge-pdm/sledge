@@ -3,7 +3,7 @@ import { activeLayer } from '~/controllers/layer_list/LayerListController';
 import { currentTool as getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalStore } from '~/stores/GlobalStores';
-import { canvasStore } from '~/stores/project/canvasStore';
+import { canvasStore } from '~/stores/ProjectStores';
 import Tile from '~/types/Tile';
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {

@@ -5,16 +5,15 @@ import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import EdgeInfo from '~/components/EdgeInfo';
-import SideSections from '~/components/SideSections';
+import EdgeInfo from '~/components/global/EdgeInfo';
+import SideSections from '~/components/global/SideSections';
 import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
 import resetLayerImage from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global_setting/globalSettings';
 import { importProjectJsonFromPath } from '~/io/project/project';
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
-import { canvasStore } from '~/stores/project/canvasStore';
-import { layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { pageRoot } from '~/styles/global.css';
 import { LayerType } from '~/types/Layer';
@@ -40,15 +39,16 @@ export default function Editor() {
   const window = getCurrentWebviewWindow();
   const location = useLocation();
 
+  createEffect(() => {
+    trackStore(canvasStore.canvas);
+    trackStore(layerHistoryStore);
+    trackStore(layerListStore);
+    setProjectStore('isProjectChangedAfterSave', true);
+  });
+
   const [isLoading, setIsLoading] = createSignal(true);
 
   const onProjectLoad = () => {
-    createEffect(() => {
-      trackStore(canvasStore.canvas);
-      trackStore(layerHistoryStore);
-      trackStore(layerListStore);
-      setProjectStore('isProjectChangedAfterSave', true);
-    });
     setProjectStore('isProjectChangedAfterSave', false);
     setIsLoading(false);
   };

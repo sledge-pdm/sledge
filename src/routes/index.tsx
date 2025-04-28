@@ -21,7 +21,7 @@ import {
 } from './start.css';
 
 export const StartWindowOptions: WindowOptionsProp = {
-  title: 'sledeg',
+  title: 'sledge',
   width: 700,
   height: 500,
   acceptFirstMouse: true,

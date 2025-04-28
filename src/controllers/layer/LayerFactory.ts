@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import resetLayerImage from '~/controllers/layer/LayerController';
 import { layerListStore } from '~/stores/ProjectStores';
 import { Layer, LayerType } from '~/types/Layer';
-import { DSL } from '../dsl/DSL';
+import { DSL } from '../../models/dsl/DSL';
 
 export const createLayer = (name: string, type: LayerType, enabled = true, dotMagnification = 1, dsl?: DSL): Layer => {
   // check if name already exists

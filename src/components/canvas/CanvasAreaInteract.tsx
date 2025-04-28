@@ -88,7 +88,6 @@ class CanvasAreaInteract {
   }
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
-    e.preventDefault();
     const referencedZoom = getReferencedZoom();
     if (!referencedZoom) return;
     const delta = e.deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep;
@@ -146,10 +145,10 @@ class CanvasAreaInteract {
   }
 
   public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
-    wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack));
-    wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this));
+    wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack), { passive: true });
+    wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
 
-    wrapper.addEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
+    wrapper.addEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack), { passive: true });
 
     wrapper.addEventListener('mousedown', this.handleMouseDown.bind(this));
     wrapper.addEventListener('mousemove', this.handleMouseMove.bind(this));

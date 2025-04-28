@@ -1,4 +1,4 @@
-import { Component, JSX } from 'solid-js';
+import { Component } from 'solid-js';
 import { checkboxWrapper, customCheckbox, hiddenCheckbox } from '~/styles/components/checkbox.css';
 
 const Checkbox: Component<{

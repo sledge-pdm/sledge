@@ -1,7 +1,7 @@
 import styles from '@styles/components/canvas/controls.module.css';
 import { Component } from 'solid-js';
+import { canRedo, canUndo } from '~/controllers/layer/LayerController';
 import { layerImageManager } from '~/routes/editor';
-import { canRedo, canUndo } from '~/stores/project/LayerHistoryStore';
 import { layerListStore } from '~/stores/ProjectStores';
 
 const Controls: Component = () => {

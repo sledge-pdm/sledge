@@ -1,5 +1,4 @@
-import { Component, onMount, onCleanup, createSignal } from 'solid-js';
-import { vars } from '~/styles/global.css';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 
 interface PixelLineChartProps {
   /** 横ピクセル数＝バッファ長 */

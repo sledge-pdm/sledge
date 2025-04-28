@@ -1,5 +1,5 @@
-import { PaletteType } from '~/stores/editor/ColorStore';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
+import { PaletteType } from '~/types/PaletteType';
 
 export const currentColor = (): string => {
   return colorStore[colorStore.currentPalette];

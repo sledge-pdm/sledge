@@ -1,7 +1,7 @@
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import LayerCanvasOperator from '~/models/canvas/LayerCanvasOperator';
+import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/project/canvasStore';
+import { canvasStore } from '~/stores/ProjectStores';
 import { DrawState } from '~/types/DrawState';
 import { Vec2 } from '~/types/Vector';
 

@@ -2,8 +2,7 @@ import { Component, createSignal } from 'solid-js';
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import resetLayerImage from '~/controllers/layer/LayerController';
 import { allLayers } from '~/controllers/layer_list/LayerListController';
-import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
-import { layerListStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';

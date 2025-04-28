@@ -2,7 +2,7 @@
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
 import { Suspense } from 'solid-js';
-import TitleBar from './components/TitleBar';
+import TitleBar from './components/global/TitleBar';
 import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';

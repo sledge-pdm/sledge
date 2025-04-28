@@ -3,9 +3,9 @@ import { exportActiveLayerUpscaled } from '~/io/image_io/save';
 import { saveProject } from '~/io/project/project';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
+import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
 import { projectNameInput } from '~/styles/section/project.css';
-import { sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component = () => {

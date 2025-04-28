@@ -1,6 +1,6 @@
-import styles from '@styles/components/layer_preview.module.css';
 import { Component, onMount } from 'solid-js';
 import { getImageOf, layerImageManager } from '~/routes/editor';
+import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
 import { Layer } from '~/types/Layer';
 
 interface Props {
@@ -65,7 +65,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
   return (
     <div ref={(el) => (wrapperRef = el)}>
       <canvas
-        class={styles.canvas}
+        class={layerPreviewCanvas}
         ref={(el) => (canvasRef = el)}
         onClick={(e) => {
           if (props.onClick) props.onClick();

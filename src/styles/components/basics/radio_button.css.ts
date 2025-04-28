@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { checkboxWrapper } from '~/styles/components/checkbox.css';
+import { checkboxWrapper } from '~/styles/components/basics/checkbox.css';
 
 export const radioWrapper = checkboxWrapper; // チェックボックスと共通でOK！
 

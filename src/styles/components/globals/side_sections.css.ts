@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
-import { vars } from '../global.css';
-import { flexCol, h100 } from '../snippets.css';
+import { vars } from '../../global.css';
+import { flexCol, h100 } from '../../snippets.css';
 
 export const sideAreaContent = style([
   flexCol,

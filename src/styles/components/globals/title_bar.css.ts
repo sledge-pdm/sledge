@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB08 } from '../global.css';
-import { flexCol, flexRow, h100, w100 } from '../snippets.css';
+import { vars, ZFB08 } from '../../global.css';
+import { flexCol, flexRow, h100, w100 } from '../../snippets.css';
 
 export const titleBarRoot = style([
   flexRow,

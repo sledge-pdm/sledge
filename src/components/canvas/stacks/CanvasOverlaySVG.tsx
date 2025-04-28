@@ -24,6 +24,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         left: 0,
         'pointer-events': 'none',
         'image-rendering': 'pixelated',
+        'shape-rendering': 'geometricPrecision',
         'z-index': 1000,
       }}
     >

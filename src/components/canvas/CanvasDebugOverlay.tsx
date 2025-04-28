@@ -67,7 +67,7 @@ const CanvasDebugOverlay: Component = (props) => {
             <p>CHILDREN: {toMiB(processMemInfo()?.children_bytes)}</p>
             <p>TOTAL: {toMiB(processMemInfo()?.total_bytes)}</p>
             <PixelLineChart
-              width={160}
+              width={120}
               height={60}
               color='#00ca00'
               suffix='MiB'
@@ -84,7 +84,7 @@ const CanvasDebugOverlay: Component = (props) => {
             </p>
 
             <PixelLineChart
-              width={160}
+              width={120}
               height={60}
               color='#f44336'
               suffix='MiB'

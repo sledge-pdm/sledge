@@ -24,11 +24,9 @@ export function resetLayerImage(layerId: string, dotMagnification: number): Laye
   });
   const agent = layerImageManager.getAgent(layerId);
   if (agent !== undefined) {
-    console.log('udpate');
     agent.setImage(blank, false);
     return agent;
   } else {
-    console.log('not found');
     return layerImageManager.registerAgent(layerId, blank);
   }
 }

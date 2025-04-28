@@ -1,16 +1,17 @@
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { getGlobalRootStore, globalStore, keyConfigStore, loadGlobalStore } from '~/stores/GlobalStores';
 
 const FILE_NAME = 'global.sledgeconfig';
 
 export async function saveGlobalSettings() {
   try {
-    const json = JSON.stringify(globalStore);
+    const json = JSON.stringify(getGlobalRootStore());
+    console.log(json);
     await mkdir('', { baseDir: BaseDirectory.AppConfig, recursive: true });
     await writeTextFile(FILE_NAME, json, { baseDir: BaseDirectory.AppConfig });
-    console.log('[globalIO] 設定保存完了');
+    console.log('global settings save done.');
   } catch (e) {
-    console.error('[globalIO] 設定保存失敗', e);
+    console.error('global settings save failed.', e);
   }
 }
 
@@ -21,10 +22,10 @@ export async function loadGlobalSettings() {
     });
     const data = JSON.parse(json);
 
-    setGlobalStore(data);
+    loadGlobalStore(data);
 
-    console.log('[globalIO] 設定読み込み完了', data);
+    console.log('global settings load done.', data);
   } catch (e) {
-    console.warn('[globalIO] 設定ファイルが存在しないか、読み込み失敗:', e);
+    console.log('global settings load failed.', e);
   }
 }

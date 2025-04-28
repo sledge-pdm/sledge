@@ -1,12 +1,11 @@
 import { Component, createSignal } from 'solid-js';
-import styles from '@styles/components/slider.module.css';
+import * as styles from '~/styles/components/basics/slider.css'; // vanilla-extractはこれ！
 
 interface SliderProps {
   min: number;
   max: number;
   default: number;
   allowFloat?: boolean;
-
   onValueChanged?: (newValue: number) => void;
 }
 
@@ -19,7 +18,6 @@ const Slider: Component<SliderProps> = (props) => {
 
   const handlePointerDown = (e: PointerEvent) => {
     setDrag(true);
-
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
   };
@@ -28,12 +26,12 @@ const Slider: Component<SliderProps> = (props) => {
     if (!sliderRef || !isDrag()) return;
     const rect = sliderRef.getBoundingClientRect();
     let pos = e.clientX - rect.left;
-    pos = Math.max(0, Math.min(pos, rect.width)); // clamp
+    pos = Math.max(0, Math.min(pos, rect.width));
 
     const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
     setValue(newValue);
-    if (props.onValueChanged) props.onValueChanged(newValue);
+    props.onValueChanged?.(newValue);
   };
 
   const handlePointerUp = (e: PointerEvent) => {
@@ -46,18 +44,18 @@ const Slider: Component<SliderProps> = (props) => {
     if (!sliderRef) return;
     const rect = sliderRef.getBoundingClientRect();
     let pos = e.clientX - rect.left;
-    pos = Math.max(0, Math.min(pos, rect.width)); // clamp
+    pos = Math.max(0, Math.min(pos, rect.width));
 
     const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
     setValue(newValue);
-    if (props.onValueChanged) props.onValueChanged(newValue);
+    props.onValueChanged?.(newValue);
   };
 
   return (
     <div class={styles.root}>
       <div class={styles.slider} ref={sliderRef}>
-        <div class={styles['line-hitbox']} onPointerDown={handlePointerDown} onClick={onLineClick}>
+        <div class={styles.lineHitbox} onPointerDown={handlePointerDown} onClick={onLineClick}>
           <div class={styles.line} />
         </div>
         <div style={{ left: `${percent()}%` }} class={styles.handle} />

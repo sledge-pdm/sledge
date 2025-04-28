@@ -2,7 +2,7 @@ import { Component } from 'solid-js';
 import { AboutWindowOptions } from '~/routes/about';
 import { interactStore, logStore } from '~/stores/EditorStores';
 
-import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/components/bottom_info.css';
+import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/components/globals/bottom_info.css';
 import { openSingletonWindow } from '~/utils/windowUtils';
 
 const BottomInfo: Component = () => {

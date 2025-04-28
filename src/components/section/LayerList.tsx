@@ -3,8 +3,8 @@ import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
 import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer_list/LayerListController';
 
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { layerList } from '~/styles/section/layer.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
 import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数

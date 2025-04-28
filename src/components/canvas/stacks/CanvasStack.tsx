@@ -2,14 +2,14 @@ import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
+import { InteractCanvas } from './InteractCanvas';
 import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
-import { TouchableCanvas } from './TouchableCanvas';
 
 import { activeLayer, allLayers } from '~/controllers/layer_list/LayerListController';
 import { layerImageManager } from '~/routes/editor';
+import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
-import { canvasStore } from '~/stores/ProjectStores';
 
 const CanvasStack: Component = () => {
   const layerCanvasRefs: {
@@ -81,7 +81,7 @@ const CanvasStack: Component = () => {
           height: `${canvasStore.canvas.height}px`,
         }}
       >
-        <TouchableCanvas operator={new LayerCanvasOperator(() => activeCanvasRef()!)} />
+        <InteractCanvas operator={new LayerCanvasOperator(() => activeCanvasRef()!)} />
 
         <For each={allLayers()}>
           {(layer, index) => (

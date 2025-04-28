@@ -1,4 +1,4 @@
-import { onCleanup, onMount } from 'solid-js';
+import { onCleanup, onMount, useContext } from 'solid-js';
 import { settingContainer } from './settings.css';
 import EditorSettings from '~/components/section/settings/EditorSettings';
 import { loadGlobalSettings, saveGlobalSettings } from '~/io/global/globalIO';

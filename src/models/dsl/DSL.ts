@@ -1,7 +1,7 @@
+import { SledgeNode } from '~/models/dsl/nodes/DSLNodes';
+import { findLayerById } from '../../controllers/layer_list/LayerListController';
 import { LayerIn } from './nodes/pass/LayerIn';
 import { LayerOut } from './nodes/pass/LayerOut';
-import { SledgeNode } from '~/models/dsl/nodes/DSLNodes';
-import { findLayerById } from '~/stores/project/layerStore';
 
 export class DSL {
   layerIn: LayerIn;

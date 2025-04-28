@@ -1,16 +1,9 @@
-import {
-  Component,
-  createEffect,
-  createRenderEffect,
-  onMount,
-  Ref,
-} from 'solid-js';
+import { Component, createRenderEffect, onMount, Ref } from 'solid-js';
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
-import { layerImageManager } from './CanvasStack';
 
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { layerImageManager } from '~/routes/editor';
 import { canvasStore } from '~/stores/project/canvasStore';
-import { layerImageStore } from '~/stores/project/layerImageStore';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { Layer } from '~/types/Layer';
 
@@ -53,31 +46,19 @@ export const LayerCanvas: Component<Props> = (props) => {
 
   onMount(() => {
     let agent = layerImageManager.getAgent(props.layer.id);
-    if (!agent) {
-      agent = layerImageManager.registerAgent(
-        props.layer.id,
-        layerImageStore[props.layer.id]?.current
-      );
-    }
     ctx = canvasRef?.getContext('2d') ?? null;
-    if (ctx) agent.putImageInto(ctx);
+    if (ctx) agent?.putImageInto(ctx);
 
-    agent.setOnImageChangeListener('layercanvas_refresh', () => {
+    agent?.setOnImageChangeListener('layercanvas_refresh', () => {
       if (ctx) {
         agent.putImageIntoForce(ctx);
       }
     });
-    agent.setOnDrawingBufferChangeListener('layercanvas_refresh', () => {
+    agent?.setOnDrawingBufferChangeListener('layercanvas_refresh', () => {
       if (ctx) {
         agent.putDrawingBufferIntoForce(ctx);
       }
     });
-  });
-
-  createEffect(() => {
-    const image = layerImageStore[props.layer.id].current;
-    agent()?.setImage(image, true);
-    if (ctx) agent()?.putImageIntoForce(ctx);
   });
 
   return (

@@ -1,8 +1,5 @@
-import {
-  canvasStore,
-  getReferencedZoom,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
+import { getReferencedZoom } from '~/controllers/canvas/CanvasController';
+import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
 import { Vec2 } from '~/types/Vector';
 
 class CanvasAreaInteract {
@@ -94,6 +91,7 @@ class CanvasAreaInteract {
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
     e.preventDefault();
     const referencedZoom = getReferencedZoom();
+    if (!referencedZoom) return;
     const delta =
       e.deltaY > 0 ? -canvasStore.wheelZoomStep : canvasStore.wheelZoomStep;
 

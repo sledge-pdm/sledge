@@ -20,6 +20,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 
   constructor(imageData: ImageData, historyManager: HistoryManager) {
     super(imageData, historyManager);
+    this.initTile();
   }
 
   initTile() {

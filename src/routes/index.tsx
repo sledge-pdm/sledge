@@ -1,11 +1,7 @@
 import { For, onMount } from 'solid-js';
 import { loadGlobalSettings } from '~/io/global/globalIO';
 import { importProjectJsonFromFileSelection } from '~/io/project/project';
-import {
-  addRecent,
-  globalStore,
-  setGlobalStore,
-} from '~/stores/global/globalStore';
+import { addRecent, globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { sectionRoot } from '~/styles/section_global.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';

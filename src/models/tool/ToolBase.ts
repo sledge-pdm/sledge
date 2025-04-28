@@ -3,8 +3,8 @@ import { Vec2 } from '../../types/Vector';
 import LayerImageAgent from '../layer_image/LayerImageAgent';
 import { EraserTool } from './eraser/EraserTool';
 import { FillTool } from './fill/FillTool';
-import { PenTool } from './pen/PenTool';
 import { RGBAColor } from '~/utils/colorUtils';
+import { PenTool } from './pen/penTool';
 
 export interface Tool {
   onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean;

@@ -18,6 +18,7 @@ export const getCanvasImageRenderingAttribute = (
   }
 };
 
+export const createGlobalStore = () => {};
 export const [globalStore, setGlobalStore] = createStore({
   recentOpenedFiles: [
     {

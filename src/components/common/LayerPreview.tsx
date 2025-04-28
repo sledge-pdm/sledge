@@ -1,7 +1,6 @@
-import { Component, onMount } from 'solid-js';
-import { layerImageManager } from '../canvas/stacks/CanvasStack';
 import styles from '@styles/components/layer_preview.module.css';
-import { layerImageStore } from '~/stores/project/layerImageStore';
+import { Component, onMount } from 'solid-js';
+import { getImageOf, layerImageManager } from '~/routes/editor';
 import { Layer } from '~/types/Layer';
 
 interface Props {
@@ -64,20 +63,16 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
   onMount(() => {
     const height = wrapperRef.clientHeight;
-    const currentImage = layerImageStore[props.layer.id].current;
+    const currentImage = getImageOf(props.layer.id);
 
     let agent = layerImageManager.getAgent(props.layer.id);
-    if (!agent) {
-      agent = layerImageManager.registerAgent(props.layer.id, currentImage);
-    } else {
-      agent.setImage(currentImage, true);
+    if (currentImage) {
+      agent?.setImage(currentImage, true);
+      updatePreview(currentImage, height);
     }
-
-    updatePreview(currentImage, height);
-
-    agent.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      const img = layerImageStore[props.layer.id].current;
-      updatePreview(img, height);
+    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
+      const img = getImageOf(props.layer.id);
+      if (img) updatePreview(img, height);
     });
   });
 

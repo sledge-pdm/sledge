@@ -1,15 +1,11 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { exportActiveLayerUpscaled } from '~/io/internal/export';
 import { saveProject } from '~/io/project/project';
+import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
-import { projectStore, setProjectStore } from '~/stores/project/projectStore';
 import { vars } from '~/styles/global.css';
 import { projectNameInput } from '~/styles/section/project.css';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
+import { sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component = () => {

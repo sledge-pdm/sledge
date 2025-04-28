@@ -1,15 +1,13 @@
 import { Component } from 'solid-js';
-import Light from '~/components/common/Light';
 import Slider from '~/components/common/Slider';
 import { sayRandomQuote } from '~/components/common/companion/QuotePool';
-import { setToolStore, toolStore } from '~/stores/internal/toolsStore';
+import { setToolStore, toolStore } from '~/stores/EditorStores';
 import {
   penConfigRow,
   penConfigRowClickable,
   penConfigRowIcon,
   penConfigRowName,
 } from '~/styles/section/pen.css';
-import { flexRow } from '~/styles/snippets.css';
 import { Tool, ToolType } from '~/types/Tool';
 
 interface Props {

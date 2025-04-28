@@ -1,12 +1,12 @@
-import { layerImageStore } from '~/stores/project/layerImageStore';
-import { layerStore } from '~/stores/project/layerStore';
+import { getImageOf } from '~/routes/editor';
+import { layerListStore } from '~/stores/ProjectStores';
 
 // 画像ファイルをキャンバスに焼き込む（補完なし・左上合わせ・切り捨て）
 export function importImageToActiveLayer(file: File) {
-  const layerId = layerStore.activeLayerId;
+  const layerId = layerListStore.activeLayerId;
   if (!layerId) return;
 
-  const imageData = layerImageStore[layerId]?.current;
+  const imageData = getImageOf(layerId);
   if (!imageData) {
     alert('現在のレイヤーに描画できません。');
     return;

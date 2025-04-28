@@ -5,15 +5,14 @@ import {
   SortableProvider,
 } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
-import LayerItem from './item/LayerItem';
-import { addLayer } from '~/models/factories/addLayer';
-import { removeLayer } from '~/models/factories/removeLayer';
 import {
   activeLayer,
+  addLayer,
   allLayers,
-  layerStore,
-  setLayerStore,
-} from '~/stores/project/layerStore';
+  removeLayer,
+} from '~/controllers/layer_list/LayerListController';
+
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/layer.css';
 import {
   sectionCaption,
@@ -21,6 +20,7 @@ import {
   sectionRoot,
 } from '~/styles/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
+import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
@@ -40,13 +40,15 @@ const LayerList: Component<{}> = () => {
     setActiveItem(draggable.id);
 
   function moveLayer(draggedId: string, targetIndex: number) {
-    const fromIndex = layerStore.layers.findIndex((l) => l.id === draggedId);
+    const fromIndex = layerListStore.layers.findIndex(
+      (l) => l.id === draggedId
+    );
     if (fromIndex === -1 || fromIndex === targetIndex) return;
 
-    const updated = [...layerStore.layers];
+    const updated = [...layerListStore.layers];
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(targetIndex, 0, moved);
-    setLayerStore('layers', updated);
+    setLayerListStore('layers', updated);
     setItems(allLayers());
   }
 

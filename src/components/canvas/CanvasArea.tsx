@@ -5,14 +5,12 @@ import CanvasStack from './stacks/CanvasStack';
 
 import {
   adjustZoomToFit,
-  canvasStore,
   centeringCanvas,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
+} from '~/controllers/canvas/CanvasController';
+import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import BottomInfo from '../BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
-import { globalStore } from '~/stores/global/globalStore';
 
 export default () => {
   let wrapper: HTMLDivElement;

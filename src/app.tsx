@@ -8,7 +8,10 @@ import About from './routes/about';
 import Editor from './routes/editor';
 
 import Settings from './routes/settings';
+import { createGlobalStore } from './stores/GlobalStores';
 import { flexCol, h100 } from './styles/snippets.css';
+
+export const globalStore = createGlobalStore(); // グローバルストアは全体共通
 
 export default function App() {
   return (

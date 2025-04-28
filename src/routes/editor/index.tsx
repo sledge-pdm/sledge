@@ -1,16 +1,29 @@
+import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/EdgeInfo';
 import SideSections from '~/components/SideSections';
-import CanvasArea from '~/components/canvas/CanvasArea';
+import {
+  adjustZoomToFit,
+  centeringCanvas,
+} from '~/controllers/canvas/CanvasController';
+import resetLayerImage from '~/controllers/layer/LayerController';
+import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global/globalIO';
 import { importProjectJsonFromPath } from '~/io/project/project';
-import { addLayer } from '~/models/factories/addLayer';
-import { adjustZoomToFit, centeringCanvas } from '~/stores/project/canvasStore';
-import { projectStore, setProjectStore } from '~/stores/project/projectStore';
+import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { canvasStore } from '~/stores/project/canvasStore';
+import {
+  layerHistoryStore,
+  layerListStore,
+  projectStore,
+  setProjectStore,
+} from '~/stores/ProjectStores';
+
 import { pageRoot } from '~/styles/global.css';
 import { LayerType } from '~/types/Layer';
 import {
@@ -31,11 +44,27 @@ export const EditorWindowOptions: WindowOptionsProp = {
   fullscreen: false,
 };
 
+export const layerImageManager = new LayerImageManager();
+
+export const getImageOf = (layerId: string) =>
+  layerImageManager.getAgent(layerId)?.getImage();
+
 export default function Editor() {
   const window = getCurrentWebviewWindow();
   const location = useLocation();
 
   const [isLoading, setIsLoading] = createSignal(true);
+
+  const onProjectLoad = () => {
+    createEffect(() => {
+      trackStore(canvasStore.canvas);
+      trackStore(layerHistoryStore);
+      trackStore(layerListStore);
+      setProjectStore('isProjectChangedAfterSave', true);
+    });
+    setProjectStore('isProjectChangedAfterSave', false);
+    setIsLoading(false);
+  };
 
   if (location.search) {
     const sp = new URLSearchParams(location.search);
@@ -43,15 +72,13 @@ export default function Editor() {
     const filePath = sp.get('path');
     const path = `${filePath}\\${fileName}`;
     importProjectJsonFromPath(path).then(() => {
-      setProjectStore('isProjectChangedAfterSave', false);
-      setIsLoading(false);
+      onProjectLoad();
     });
   } else {
     // create new
     setProjectStore('name', 'new project');
     addLayer('dot', LayerType.Dot, true, 1).then(() => {
-      setProjectStore('isProjectChangedAfterSave', false);
-      setIsLoading(false);
+      onProjectLoad();
     });
   }
 
@@ -62,6 +89,10 @@ export default function Editor() {
     adjustZoomToFit();
     centeringCanvas();
     loadGlobalSettings();
+
+    layerListStore.layers.forEach((layer) => {
+      resetLayerImage(layer.id, 1);
+    });
 
     unlisten = await window.onCloseRequested(async (event) => {
       if (isCloseRequested()) {

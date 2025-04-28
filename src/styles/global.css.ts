@@ -1,9 +1,4 @@
-import {
-  createGlobalTheme,
-  fontFace,
-  globalStyle,
-  style,
-} from '@vanilla-extract/css';
+import { createGlobalTheme, fontFace, globalStyle, style } from '@vanilla-extract/css';
 
 export const ZFB03 = fontFace({
   src: 'url("/fonts/04B_03__.ttf")',

@@ -26,12 +26,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (
-      maxHeight &&
-      targetHeight > maxHeight &&
-      zoom < maxHeight / targetHeight
-    )
-      zoom = maxHeight / targetHeight;
+    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -48,17 +43,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, targetWidth, targetHeight);
 
-    ctx.drawImage(
-      tmpCanvas,
-      0,
-      0,
-      originalImage.width,
-      originalImage.height,
-      0,
-      0,
-      targetWidth,
-      targetHeight
-    );
+    ctx.drawImage(tmpCanvas, 0, 0, originalImage.width, originalImage.height, 0, 0, targetWidth, targetHeight);
   };
 
   onMount(() => {

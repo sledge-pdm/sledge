@@ -1,14 +1,9 @@
-import { Component, createSignal } from 'solid-js';
+import { Component } from 'solid-js';
 import { AboutWindowOptions } from '~/routes/about';
-import { canvasStore } from '~/stores/project/canvasStore';
+import { interactStore, logStore } from '~/stores/EditorStores';
 
-import {
-  bottomInfoRoot,
-  bottomInfoText as bottomInfoTextStyle,
-} from '~/styles/components/bottom_info.css';
+import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/components/bottom_info.css';
 import { openSingletonWindow } from '~/utils/windowUtils';
-
-const [bottomInfoText, setBottomInfoText] = createSignal('');
 
 const BottomInfo: Component = () => {
   return (
@@ -20,14 +15,10 @@ const BottomInfo: Component = () => {
       >
         sledge.
       </a>
-      <p class={bottomInfoTextStyle}>x{canvasStore.zoom}</p>
-      <p class={bottomInfoTextStyle}>{bottomInfoText()}</p>
+      <p class={bottomInfoTextStyle}>x{interactStore.zoom}</p>
+      <p class={bottomInfoTextStyle}>{logStore.bottomBarText}</p>
     </div>
   );
-};
-
-export const setBottomInfo = (text: string) => {
-  setBottomInfoText(text);
 };
 
 export default BottomInfo;

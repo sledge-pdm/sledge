@@ -1,9 +1,4 @@
-import {
-  layerHistoryStore,
-  layerListStore,
-  setLayerHistoryStore,
-  setLayerListStore,
-} from '~/stores/ProjectStores';
+import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
 import { LayerType } from '~/types/Layer';
 import { DSL } from '../../models/dsl/DSL';
 import { createLayer } from '../../models/layer/LayerFactory';
@@ -44,9 +39,6 @@ export const removeLayer = (layerId?: string) => {
 };
 
 export const allLayers = () => layerListStore.layers;
-export const findLayerById = (id: string) =>
-  allLayers().find((layer) => layer.id === id);
-export const activeLayer = () =>
-  findLayerById(layerListStore.activeLayerId) || allLayers()[0] || undefined;
-export const activeIndex = () =>
-  allLayers().findIndex((layer) => layer.id === layerListStore.activeLayerId);
+export const findLayerById = (id: string) => allLayers().find((layer) => layer.id === id);
+export const activeLayer = () => findLayerById(layerListStore.activeLayerId) || allLayers()[0] || undefined;
+export const activeIndex = () => allLayers().findIndex((layer) => layer.id === layerListStore.activeLayerId);

@@ -1,10 +1,6 @@
 import { Component } from 'solid-js';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import Dropdown, { DropdownOption } from '../../common/Dropdown';
 

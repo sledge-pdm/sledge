@@ -40,10 +40,7 @@ globalStyle('input', {
   fontSize: '0.5rem',
 });
 
-globalStyle(
-  'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button',
-  {
-    appearance: 'none',
-    margin: 0,
-  }
-);
+globalStyle('input::-webkit-outer-spin-button, input::-webkit-inner-spin-button', {
+  appearance: 'none',
+  margin: 0,
+});

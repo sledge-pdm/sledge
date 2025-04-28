@@ -30,8 +30,7 @@ const Slider: Component<SliderProps> = (props) => {
     let pos = e.clientX - rect.left;
     pos = Math.max(0, Math.min(pos, rect.width)); // clamp
 
-    const newValueRaw =
-      props.min + (pos / rect.width) * (props.max - props.min);
+    const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
     setValue(newValue);
     if (props.onValueChanged) props.onValueChanged(newValue);
@@ -49,8 +48,7 @@ const Slider: Component<SliderProps> = (props) => {
     let pos = e.clientX - rect.left;
     pos = Math.max(0, Math.min(pos, rect.width)); // clamp
 
-    const newValueRaw =
-      props.min + (pos / rect.width) * (props.max - props.min);
+    const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
     setValue(newValue);
     if (props.onValueChanged) props.onValueChanged(newValue);
@@ -59,11 +57,7 @@ const Slider: Component<SliderProps> = (props) => {
   return (
     <div class={styles.root}>
       <div class={styles.slider} ref={sliderRef}>
-        <div
-          class={styles['line-hitbox']}
-          onPointerDown={handlePointerDown}
-          onClick={onLineClick}
-        >
+        <div class={styles['line-hitbox']} onPointerDown={handlePointerDown} onClick={onLineClick}>
           <div class={styles.line} />
         </div>
         <div style={{ left: `${percent()}%` }} class={styles.handle} />

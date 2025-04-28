@@ -2,12 +2,7 @@ import { Component } from 'solid-js';
 import Slider from '~/components/common/Slider';
 import { sayRandomQuote } from '~/components/common/companion/QuotePool';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import {
-  penConfigRow,
-  penConfigRowClickable,
-  penConfigRowIcon,
-  penConfigRowName,
-} from '~/styles/section/pen.css';
+import { penConfigRow, penConfigRowClickable, penConfigRowIcon, penConfigRowName } from '~/styles/section/pen.css';
 import { Tool, ToolType } from '~/types/Tool';
 
 interface Props {
@@ -59,8 +54,7 @@ const PenItem: Component<Props> = (props: Props) => {
         </p>
       </div>
 
-      {(props.pen.type === ToolType.Pen ||
-        props.pen.type === ToolType.Eraser) && (
+      {(props.pen.type === ToolType.Pen || props.pen.type === ToolType.Eraser) && (
         <>
           <div style={{ 'flex-grow': 1 }}>
             <Slider
@@ -70,9 +64,7 @@ const PenItem: Component<Props> = (props: Props) => {
               onValueChanged={(newValue) => {
                 sayRandomQuote('pen-resize');
                 console.log('size set to ' + newValue);
-                const penIndex = toolStore.tools.findIndex(
-                  (p) => p.id === props.pen.id
-                );
+                const penIndex = toolStore.tools.findIndex((p) => p.id === props.pen.id);
                 setToolStore('tools', penIndex, 'size', newValue);
               }}
             />

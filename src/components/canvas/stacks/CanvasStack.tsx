@@ -1,15 +1,12 @@
 import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
-import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
+import LayerCanvasOperator from '~/models/canvas/LayerCanvasOperator';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import { canvasStore } from '~/stores/project/canvasStore';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
 import { TouchableCanvas } from './TouchableCanvas';
 
-import {
-  activeLayer,
-  allLayers,
-} from '~/controllers/layer_list/LayerListController';
+import { activeLayer, allLayers } from '~/controllers/layer_list/LayerListController';
 import { layerImageManager } from '~/routes/editor';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
@@ -84,17 +81,11 @@ const CanvasStack: Component = () => {
           height: `${canvasStore.canvas.height}px`,
         }}
       >
-        <TouchableCanvas
-          operator={new LayerCanvasOperator(() => activeCanvasRef()!)}
-        />
+        <TouchableCanvas operator={new LayerCanvasOperator(() => activeCanvasRef()!)} />
 
         <For each={allLayers()}>
           {(layer, index) => (
-            <LayerCanvas
-              ref={layerCanvasRefs[layer.id]}
-              layer={layer}
-              zIndex={allLayers().length - index()}
-            />
+            <LayerCanvas ref={layerCanvasRefs[layer.id]} layer={layer} zIndex={allLayers().length - index()} />
           )}
         </For>
       </div>

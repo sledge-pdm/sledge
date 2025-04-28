@@ -1,9 +1,4 @@
-import {
-  BaseDirectory,
-  mkdir,
-  readTextFile,
-  writeTextFile,
-} from '@tauri-apps/plugin-fs';
+import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 
 const FILE_NAME = 'global.sledgeconfig';

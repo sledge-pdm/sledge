@@ -1,12 +1,4 @@
-export function setPixel(
-  image: ImageData,
-  x: number,
-  y: number,
-  r: number,
-  g: number,
-  b: number,
-  a: number
-) {
+export function setPixel(image: ImageData, x: number, y: number, r: number, g: number, b: number, a: number) {
   if (x < 0 || x >= image.width || y < 0 || y >= image.height) return;
   const i = (y * image.width + x) * 4;
   image.data[i + 0] = r;
@@ -24,11 +16,7 @@ export function encodeImageData(imageData: ImageData): string {
   return btoa(binary); // Base64 encode
 }
 
-export function decodeImageData(
-  encoded: string,
-  width: number,
-  height: number
-): ImageData {
+export function decodeImageData(encoded: string, width: number, height: number): ImageData {
   const binary = atob(encoded);
   const buffer = new Uint8ClampedArray(binary.length);
   for (let i = 0; i < binary.length; i++) {

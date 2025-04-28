@@ -20,13 +20,7 @@ const ImportImageButton = () => {
     <>
       <button onClick={handleClick}>Import</button>
 
-      <input
-        type='file'
-        accept='image/*'
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-        onChange={handleFileChange}
-      />
+      <input type='file' accept='image/*' ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
     </>
   );
 };

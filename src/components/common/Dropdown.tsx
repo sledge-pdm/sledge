@@ -18,8 +18,7 @@ interface Props<T extends string | number = string> {
 }
 
 const Dropdown = <T extends string | number>(p: Props<T>) => {
-  const getValue = () =>
-    typeof p.value === 'function' ? (p.value as () => T)() : p.value;
+  const getValue = () => (typeof p.value === 'function' ? (p.value as () => T)() : p.value);
 
   return (
     <select

@@ -1,6 +1,5 @@
-import { setBottomInfo } from '~/components/BottomInfo';
 import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas';
-import { currentTool } from '~/stores/editor/ToolsStore';
+import { setBottomBarText } from '~/controllers/log/LogController';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/colorUtils';
 import { currentColor } from '../../controllers/color/ColorController';
@@ -9,6 +8,7 @@ import { Tool } from '../../types/Tool';
 import LayerImageAgent from '../layer_image/LayerImageAgent';
 import TileLayerImageAgent from '../layer_image/agents/TileLayerImageAgent';
 import { getToolInstance } from '../tool/ToolBase';
+import { currentTool } from '~/controllers/tool/ToolController';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
@@ -23,14 +23,7 @@ export default class LayerCanvasOperator {
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
-    const result = this.useTool(
-      agent,
-      state,
-      image,
-      currentTool(),
-      position,
-      last
-    );
+    const result = this.useTool(agent, state, image, currentTool(), position, last);
 
     if (result) {
       agent.setDrawingBuffer(result);
@@ -45,14 +38,7 @@ export default class LayerCanvasOperator {
     }
   }
 
-  private useTool(
-    agent: LayerImageAgent,
-    state: DrawState,
-    image: ImageData,
-    tool: Tool,
-    position: Vec2,
-    last?: Vec2
-  ) {
+  private useTool(agent: LayerImageAgent, state: DrawState, image: ImageData, tool: Tool, position: Vec2, last?: Vec2) {
     const toolInstance = getToolInstance(tool.type);
     const toolArgs = {
       image,
@@ -79,11 +65,11 @@ export default class LayerCanvasOperator {
     const endTime = Date.now();
     if (isDrawnAction) {
       if (agent instanceof TileLayerImageAgent) {
-        setBottomInfo(
+        setBottomBarText(
           `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`
         );
       } else {
-        setBottomInfo(`${tool.type} finished. ${endTime - startTime} ms.`);
+        setBottomBarText(`${tool.type} finished. ${endTime - startTime} ms.`);
       }
     }
     return image;

@@ -17,20 +17,6 @@ const SideSections: Component = () => {
       <ToolConfig />
       <LayerList />
       <CanvasSettings />
-      {/* <button
-        onClick={async () => {
-          const settingsWin = await openSingletonWindow(
-            'settings',
-            SettingsWindowOptions
-          );
-          settingsWin.onCloseRequested(() => {
-            loadGlobalSettings();
-          });
-        }}
-      >
-        settings.
-      </button> */}
-      {/* <GlobalSettings /> */}
     </div>
   );
 };

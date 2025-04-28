@@ -1,5 +1,5 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { exportActiveLayerUpscaled } from '~/io/internal/export';
+import { exportActiveLayerUpscaled } from '~/io/image_io/export';
 import { saveProject } from '~/io/project/project';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
@@ -11,10 +11,7 @@ import { flexCol, flexRow } from '~/styles/snippets.css';
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
   const isNameChanged = () => projectStore.name !== projectStore.newName;
-  const isOWPossible = () =>
-    projectStore.name !== undefined &&
-    projectStore.path !== undefined &&
-    !isNameChanged();
+  const isOWPossible = () => projectStore.name !== undefined && projectStore.path !== undefined && !isNameChanged();
 
   onMount(() => {
     setProjectStore('newName', projectStore.name);
@@ -124,15 +121,7 @@ const Project: Component = () => {
               save (new).
             </button>
           </Show>
-          <button
-            onClick={() =>
-              exportActiveLayerUpscaled(
-                projectStore.newName || projectStore.name
-              )
-            }
-          >
-            export.
-          </button>
+          <button onClick={() => exportActiveLayerUpscaled(projectStore.newName || projectStore.name)}>export.</button>
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
         </div>
       </div>

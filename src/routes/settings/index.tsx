@@ -1,10 +1,10 @@
-import { onCleanup, onMount, useContext } from 'solid-js';
-import { settingContainer } from './settings.css';
+import { onCleanup, onMount } from 'solid-js';
 import EditorSettings from '~/components/section/settings/EditorSettings';
-import { loadGlobalSettings, saveGlobalSettings } from '~/io/global/globalIO';
+import PerformanceSettings from '~/components/section/settings/PerformanceSettings';
+import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_setting/globalSettings';
 import { pageRoot } from '~/styles/global.css';
 import { WindowOptionsProp } from '~/utils/windowUtils';
-import PerformanceSettings from '~/components/section/settings/PerformanceSettings';
+import { settingContainer } from './settings.css';
 
 export const SettingsWindowOptions: WindowOptionsProp = {
   url: '/settings',

@@ -1,10 +1,7 @@
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
 import { Component, createEffect } from 'solid-js';
-import {
-  currentColor,
-  setCurrentColor,
-} from '~/controllers/color/ColorController';
+import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;

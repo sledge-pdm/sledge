@@ -73,18 +73,11 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     >
       {/* <DSLButton /> */}
       <div
-        class={[layerItem, !props.layer.enabled && layerItemDisabled]
-          .filter(Boolean)
-          .join(' ')}
+        class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
         // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
         onClick={onDetClicked}
       >
-        <LayerPreview
-          layer={props.layer}
-          onClick={onPreviewClicked}
-          maxHeight={36}
-          maxWidth={36}
-        />
+        <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
 
         <div
           class={[flexRow, w100].join(' ')}

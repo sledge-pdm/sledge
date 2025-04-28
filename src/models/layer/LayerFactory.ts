@@ -4,13 +4,7 @@ import { layerListStore } from '~/stores/ProjectStores';
 import { Layer, LayerType } from '~/types/Layer';
 import { DSL } from '../dsl/DSL';
 
-export const createLayer = (
-  name: string,
-  type: LayerType,
-  enabled = true,
-  dotMagnification = 1,
-  dsl?: DSL
-): Layer => {
+export const createLayer = (name: string, type: LayerType, enabled = true, dotMagnification = 1, dsl?: DSL): Layer => {
   // check if name already exists
   const endNums = name.match(/^(.*)(\d+)$/);
   if (endNums && endNums.length >= 3) {

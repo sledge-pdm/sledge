@@ -57,8 +57,7 @@ export const titleBarControlMinimizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter:
-        'invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);', // 青っぽく
+      filter: 'invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);', // 青っぽく
     },
   },
 ]);
@@ -67,8 +66,7 @@ export const titleBarControlMaximizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter:
-        'invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);', // 緑っぽく
+      filter: 'invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);', // 緑っぽく
     },
   },
 ]);
@@ -77,8 +75,7 @@ export const titleBarControlCloseButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter:
-        'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
+      filter: 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
     },
   },
 ]);

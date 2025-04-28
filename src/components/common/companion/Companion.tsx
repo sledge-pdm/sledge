@@ -28,11 +28,7 @@ const Companion: Component = () => {
       const element = document.getElementById('companion');
       setTimeout(() => {
         setQuote('');
-        if (element)
-          element.className = element.className.replace(
-            ` ${styles['giggle']}`,
-            ''
-          );
+        if (element) element.className = element.className.replace(` ${styles['giggle']}`, '');
       }, 5000);
       window.requestAnimationFrame(function (time) {
         window.requestAnimationFrame(function (time) {

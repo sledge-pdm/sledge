@@ -52,8 +52,7 @@ export default function TitleBar() {
   });
 
   const borderWindowLabels: string[] = ['editor'];
-  const shouldShowBorder = () =>
-    borderWindowLabels.find((l) => l === window.label);
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
 
   return (
     <header
@@ -66,29 +65,17 @@ export default function TitleBar() {
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
           {isMinimizable() && (
-            <button
-              class={titleBarControlMinimizeButton}
-              onClick={() => window.minimize()}
-            >
+            <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
               <img class={titleBarControlButtonImg} src={'/minimize.png'} />
             </button>
           )}
           {isMaximizable() && (
-            <button
-              class={titleBarControlMaximizeButton}
-              onClick={() => window.toggleMaximize()}
-            >
-              <img
-                class={titleBarControlButtonImg}
-                src={isMaximized() ? '/leave_maximize.png' : '/maximize.png'}
-              />
+            <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
+              <img class={titleBarControlButtonImg} src={isMaximized() ? '/leave_maximize.png' : '/maximize.png'} />
             </button>
           )}
           {isClosable() && (
-            <button
-              class={titleBarControlCloseButton}
-              onClick={() => window.close()}
-            >
+            <button class={titleBarControlCloseButton} onClick={() => window.close()}>
               <img class={titleBarControlButtonImg} src={'/close.png'} />
             </button>
           )}

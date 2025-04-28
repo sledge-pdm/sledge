@@ -1,7 +1,7 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, Show } from 'solid-js';
+import { interactStore } from '~/stores/EditorStores';
 import { globalStore } from '~/stores/GlobalStores';
-import { canvasStore } from '~/stores/project/canvasStore';
 import {
   canvasDebugOverlayBottomLeft,
   canvasDebugOverlayTopLeft,
@@ -23,8 +23,8 @@ const CanvasDebugOverlay: Component = (props) => {
   };
 
   // const zoom = () => canvasStore.zoom;
-  const lastMouseWindow = () => canvasStore.lastMouseWindow;
-  const lastMouseOnCanvas = () => canvasStore.lastMouseOnCanvas;
+  const lastMouseWindow = () => interactStore.lastMouseWindow;
+  const lastMouseOnCanvas = () => interactStore.lastMouseOnCanvas;
   const [jsMemInfo, setJsMemInfo] = createSignal<any>({});
   const [processMemInfo, setProcessMemInfo] = createSignal<TauriMemInfo>();
   const callback = async () => {
@@ -52,12 +52,10 @@ const CanvasDebugOverlay: Component = (props) => {
             ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y})
           </p>
           <p>
-            ON CANVAS. ({Math.round(lastMouseOnCanvas().x)},{' '}
-            {Math.round(lastMouseOnCanvas().y)})
+            ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)})
           </p>
           <p>
-            offset:({Math.round(canvasStore.offset.x)},{' '}
-            {Math.round(canvasStore.offset.y)})
+            offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)})
           </p>
         </div>
       </div>
@@ -74,19 +72,15 @@ const CanvasDebugOverlay: Component = (props) => {
               color='#00ca00'
               suffix='MiB'
               fetchSample={async () => {
-                const processInfo =
-                  await safeInvoke<TauriMemInfo>('get_process_memory');
-                return processInfo
-                  ? processInfo.total_bytes / 1024 / 1024
-                  : undefined;
+                const processInfo = await safeInvoke<TauriMemInfo>('get_process_memory');
+                return processInfo ? processInfo.total_bytes / 1024 / 1024 : undefined;
               }}
               interval={500}
             />
           </div>
           <div class={flexCol}>
             <p>
-              JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} /{' '}
-              {toMiB(jsMemInfo().totalJSHeapSize)}
+              JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
             </p>
 
             <PixelLineChart
@@ -94,9 +88,7 @@ const CanvasDebugOverlay: Component = (props) => {
               height={60}
               color='#f44336'
               suffix='MiB'
-              fetchSample={async () =>
-                (performance as any).memory.usedJSHeapSize / 1024 / 1024
-              }
+              fetchSample={async () => (performance as any).memory.usedJSHeapSize / 1024 / 1024}
               interval={500}
             />
           </div>

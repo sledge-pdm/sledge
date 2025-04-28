@@ -1,12 +1,8 @@
 import { Component } from 'solid-js';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import { loadGlobalSettings } from '~/io/global_setting/globalSettings';
 import { SettingsWindowOptions } from '~/routes/settings';
 
-import {
-  edgeInfoItem,
-  edgeInfoRoot,
-  edgeInfoText,
-} from '~/styles/components/edge_info.css';
+import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/components/edge_info.css';
 import { openSingletonWindow } from '~/utils/windowUtils';
 
 const EdgeInfo: Component = () => {
@@ -16,10 +12,7 @@ const EdgeInfo: Component = () => {
         <a
           class={edgeInfoText}
           onClick={async () => {
-            let win = await openSingletonWindow(
-              'settings',
-              SettingsWindowOptions
-            );
+            let win = await openSingletonWindow('settings', SettingsWindowOptions);
             win.once('tauri://destroyed', (e) => {
               loadGlobalSettings();
             });

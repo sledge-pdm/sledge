@@ -14,10 +14,7 @@ export const getNextMagnification = (dotMagnification: number) => {
   } else return 1;
 };
 
-export default function resetLayerImage(
-  layerId: string,
-  dotMagnification: number
-): LayerImageAgent {
+export default function resetLayerImage(layerId: string, dotMagnification: number): LayerImageAgent {
   const blank = new ImageData(
     Math.round(canvasStore.canvas.width / dotMagnification),
     Math.round(canvasStore.canvas.height / dotMagnification)

@@ -1,8 +1,8 @@
 import { Component, For } from 'solid-js';
-import { globalStore } from '~/stores/global/globalStore';
-import { currentTool } from '~/stores/internal/toolsStore';
+import { activeLayer } from '~/controllers/layer_list/LayerListController';
+import { currentTool } from '~/stores/editor/ToolsStore';
+import { globalStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/project/canvasStore';
-import { activeLayer } from '~/stores/project/layerStore';
 import Tile from '~/types/Tile';
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {

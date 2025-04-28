@@ -1,6 +1,6 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount } from 'solid-js';
-import { projectStore } from '~/stores/project/projectStore';
+import { projectStore } from '~/stores/ProjectStores';
 import {
   titleBarControlButtonImg,
   titleBarControlCloseButton,

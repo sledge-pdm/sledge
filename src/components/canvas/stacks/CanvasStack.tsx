@@ -1,29 +1,18 @@
-import {
-  Component,
-  createEffect,
-  createSignal,
-  For,
-  onCleanup,
-  onMount,
-} from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
+import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
+import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
+import { canvasStore } from '~/stores/project/canvasStore';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
 import { TouchableCanvas } from './TouchableCanvas';
-import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
-import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
-import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
-import { globalStore } from '~/stores/global/globalStore';
-import { canvasStore } from '~/stores/project/canvasStore';
+
 import {
   activeLayer,
   allLayers,
-  layerStore,
-} from '~/stores/project/layerStore';
-
+} from '~/controllers/layer_list/LayerListController';
+import { layerImageManager } from '~/routes/editor';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
-
-export const layerImageManager = new LayerImageManager();
 
 const CanvasStack: Component = () => {
   const layerCanvasRefs: {

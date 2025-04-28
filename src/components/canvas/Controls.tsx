@@ -1,8 +1,8 @@
-import { Component } from 'solid-js';
-import { layerImageManager } from './stacks/CanvasStack';
 import styles from '@styles/components/canvas/controls.module.css';
-import { canRedo, canUndo } from '~/stores/project/layerImageStore';
-import { layerStore } from '~/stores/project/layerStore';
+import { Component } from 'solid-js';
+import { layerImageManager } from '~/routes/editor';
+import { canRedo, canUndo } from '~/stores/project/LayerHistoryStore';
+import { layerListStore } from '~/stores/ProjectStores';
 
 const Controls: Component = () => {
   return (
@@ -18,7 +18,7 @@ const Controls: Component = () => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            layerImageManager.getAgent(layerStore.activeLayerId)?.undo();
+            layerImageManager.getAgent(layerListStore.activeLayerId)?.undo();
           }}
         />
         <img
@@ -31,7 +31,7 @@ const Controls: Component = () => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            layerImageManager.getAgent(layerStore.activeLayerId)?.redo();
+            layerImageManager.getAgent(layerListStore.activeLayerId)?.redo();
           }}
         />
 

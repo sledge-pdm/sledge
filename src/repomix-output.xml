@@ -132,7 +132,7 @@ stores/global/globalStore.ts
 stores/internal/colorStore.ts
 stores/internal/toolsStore.ts
 stores/project/canvasStore.ts
-stores/project/layerImageStore.ts
+stores/project/layerHistoryStore.ts
 stores/project/layerStore.ts
 stores/project/projectStore.ts
 styles/components/bottom_info.css.ts
@@ -603,7 +603,7 @@ export default CanvasDebugOverlay;
 import { Component } from 'solid-js';
 import { layerImageManager } from './stacks/CanvasStack';
 import styles from '@styles/components/canvas/controls.module.css';
-import { canRedo, canUndo } from '~/stores/project/layerImageStore';
+import { canRedo, canUndo } from '~/stores/project/layerHistoryStore';
 import { layerStore } from '~/stores/project/layerStore';
 
 const Controls: Component = () => {
@@ -917,7 +917,7 @@ import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
 import { getCanvasImageRenderingAttribute, globalStore } from '~/stores/global/globalStore';
 import { canvasStore } from '~/stores/project/canvasStore';
-import { layerImageStore } from '~/stores/project/layerImageStore';
+import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { Layer } from '~/types/Layer';
 
@@ -961,7 +961,7 @@ export const LayerCanvas: Component<Props> = (props) => {
     if (!agent) {
       agent = layerImageManager.registerAgent(
         props.layer.id,
-        layerImageStore[props.layer.id]?.current
+        layerHistoryStore[props.layer.id]?.current
       );
     }
     ctx = canvasRef?.getContext('2d') ?? null;
@@ -984,7 +984,7 @@ export const LayerCanvas: Component<Props> = (props) => {
   );
 
   createEffect(() => {
-    const image = layerImageStore[props.layer.id].current;
+    const image = layerHistoryStore[props.layer.id].current;
     agent()?.setImage(image, true);
     if (ctx) agent()?.putImageIntoForce(ctx);
 
@@ -1535,7 +1535,7 @@ export default ImportImageButton;
 import { Component, onMount } from 'solid-js';
 import { layerImageManager } from '../canvas/stacks/CanvasStack';
 import styles from '@styles/components/layer_preview.module.css';
-import { layerImageStore } from '~/stores/project/layerImageStore';
+import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { Layer } from '~/types/Layer';
 
 interface Props {
@@ -1593,7 +1593,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
   };
   onMount(() => {
     const height = wrapperRef.clientHeight;
-    const currentImage = layerImageStore[props.layer.id].current;
+    const currentImage = layerHistoryStore[props.layer.id].current;
 
     let agent = layerImageManager.getAgent(props.layer.id);
     if (!agent) {
@@ -1606,7 +1606,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
     agent.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
       console.log('aasdffa');
-      const img = layerImageStore[props.layer.id].current;
+      const img = layerHistoryStore[props.layer.id].current;
       updatePreview(img, height);
     });
   });
@@ -2675,7 +2675,7 @@ export function downloadImageData(
 </file>
 
 <file path="io/internal/import.ts">
-import { layerImageStore } from '~/stores/project/layerImageStore';
+import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { layerStore } from '~/stores/project/layerStore';
 
 // 画像ファイルをキャンバスに焼き込む（補完なし・左上合わせ・切り捨て）
@@ -2683,7 +2683,7 @@ export function importImageToActiveLayer(file: File) {
   const layerId = layerStore.activeLayerId;
   if (!layerId) return;
 
-  const imageData = layerImageStore[layerId]?.current;
+  const imageData = layerHistoryStore[layerId]?.current;
   if (!imageData) {
     alert('現在のレイヤーに描画できません。');
     return;
@@ -2731,7 +2731,7 @@ import {
   centeringCanvas,
   setCanvasStore,
 } from '~/stores/project/canvasStore';
-import { layerImageStore, setLayerImageStore } from '~/stores/project/layerImageStore';
+import { layerHistoryStore, setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { findLayerById, layerStore, setLayerStore } from '~/stores/project/layerStore';
 import { projectStore, setProjectStore } from '~/stores/project/projectStore';
 import { Layer } from '~/types/Layer';
@@ -2789,13 +2789,13 @@ export async function importProjectJson(projectJson: any) {
   }
 
   if (projectJson.images) {
-    setLayerImageStore({});
+    setlayerHistoryStore({});
     Object.keys(projectJson.images).forEach((id) => {
       console.log(`read ${id}`);
       const imageData = projectJson.images[id];
       console.log(imageData);
       initLayerImage(id, Number(imageData.dotMagnification || 1));
-      setLayerImageStore(
+      setlayerHistoryStore(
         id,
         'current',
         decodeImageData(imageData.current, Number(imageData.width), Number(imageData.height))
@@ -2825,7 +2825,7 @@ export const parseCurrentProject = (): string => {
     project: projectStore,
     canvas: canvasStore.canvas,
     images: Object.fromEntries(
-      Object.entries(layerImageStore).map(([id, state]) => [
+      Object.entries(layerHistoryStore).map(([id, state]) => [
         id,
         {
           current: encodeImageData(state.current),
@@ -3331,14 +3331,14 @@ export const getNextMagnification = (dotMagnification: number) => {
 
 <file path="models/factories/initLayerImage.ts">
 import { canvasStore } from '~/stores/project/canvasStore';
-import { setLayerImageStore } from '~/stores/project/layerImageStore';
+import { setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
 
 export default function initLayerImage(layerId: string, dotMagnification: number) {
   const blank = new ImageData(
     Math.round(canvasStore.canvas.width / dotMagnification),
     Math.round(canvasStore.canvas.height / dotMagnification)
   );
-  setLayerImageStore(layerId, {
+  setlayerHistoryStore(layerId, {
     current: blank,
     undoStack: [],
     redoStack: [],
@@ -3347,7 +3347,7 @@ export default function initLayerImage(layerId: string, dotMagnification: number
 </file>
 
 <file path="models/factories/removeLayer.ts">
-import { layerImageStore, setLayerImageStore } from '~/stores/project/layerImageStore';
+import { layerHistoryStore, setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { allLayers, setLayerStore } from '~/stores/project/layerStore';
 
 export const removeLayer = (layerId?: string) => {
@@ -3359,12 +3359,12 @@ export const removeLayer = (layerId?: string) => {
   if (index !== 0) newActiveIndex = index - 1;
 
   layers.splice(index, 1);
-  const images = Object.assign({}, layerImageStore);
+  const images = Object.assign({}, layerHistoryStore);
   delete images[layerId];
 
   setLayerStore('layers', layers);
   setLayerStore('activeLayerId', layers[newActiveIndex].id);
-  setLayerImageStore(images);
+  setlayerHistoryStore(images);
 };
 </file>
 
@@ -3379,7 +3379,7 @@ import { setBottomInfo } from '~/components/BottomInfo';
 import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas';
 import { currentColor } from '~/stores/internal/colorStore';
 import { currentTool } from '~/stores/internal/toolsStore';
-import { setLayerImageStore } from '~/stores/project/layerImageStore';
+import { setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/colorUtils';
 
@@ -3403,7 +3403,7 @@ export default class LayerCanvasOperator {
       if (state === DrawState.end) {
         agent.registerDiffAction();
         agent.setImage(result);
-        setLayerImageStore(layer.id, 'current', reconcile(result));
+        setlayerHistoryStore(layer.id, 'current', reconcile(result));
 
         if (agent instanceof TileLayerImageAgent) {
           (agent as TileLayerImageAgent).resetAllDirtyStates();
@@ -3760,7 +3760,7 @@ export default class TileLayerImageAgent extends LayerImageAgent {
 <file path="models/layer_image/HistoryManager.ts">
 import { reconcile } from 'solid-js/store';
 import { Vec2 } from '../../types/Vector';
-import { setLayerImageStore } from '~/stores/project/layerImageStore';
+import { setlayerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { TileIndex } from '~/types/Tile';
 import { RGBAColor } from '~/utils/colorUtils';
 
@@ -3860,8 +3860,8 @@ export class HistoryManager {
    * Synchronize the undo/redo stacks with the SolidJS store
    */
   private syncStores() {
-    setLayerImageStore(this.layerId, 'undoStack', reconcile(this.undoActionsStack));
-    setLayerImageStore(this.layerId, 'redoStack', reconcile(this.redoActionsStack));
+    setlayerHistoryStore(this.layerId, 'undoStack', reconcile(this.undoActionsStack));
+    setlayerHistoryStore(this.layerId, 'redoStack', reconcile(this.redoActionsStack));
   }
 }
 </file>
@@ -5373,20 +5373,20 @@ export const [canvasStore, setCanvasStore] = createStore({
 });
 </file>
 
-<file path="stores/project/layerImageStore.ts">
+<file path="stores/project/layerHistoryStore.ts">
 import { createStore } from 'solid-js/store';
 import { layerStore } from './layerStore';
 import { LayerImage } from '~/types/LayerImage';
 
 // image
-export const [layerImageStore, setLayerImageStore] = createStore<Record<string, LayerImage>>({});
+export const [layerHistoryStore, setlayerHistoryStore] = createStore<Record<string, LayerImage>>({});
 
-export const activeLayerImage = (): LayerImage => layerImageStore[layerStore.activeLayerId];
+export const activeLayerImage = (): LayerImage => layerHistoryStore[layerStore.activeLayerId];
 
 export const canUndo = (): boolean =>
-  layerImageStore[layerStore.activeLayerId]?.undoStack.length > 0;
+  layerHistoryStore[layerStore.activeLayerId]?.undoStack.length > 0;
 export const canRedo = (): boolean =>
-  layerImageStore[layerStore.activeLayerId]?.redoStack.length > 0;
+  layerHistoryStore[layerStore.activeLayerId]?.redoStack.length > 0;
 </file>
 
 <file path="stores/project/layerStore.ts">
@@ -5413,7 +5413,7 @@ import { trackStore } from '@solid-primitives/deep';
 import { createEffect } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { canvasStore } from './canvasStore';
-import { layerImageStore } from './layerImageStore';
+import { layerHistoryStore } from './layerHistoryStore';
 import { layerStore } from './layerStore';
 
 // project
@@ -5425,7 +5425,7 @@ export const [projectStore, setProjectStore] = createStore({
 
 createEffect(() => {
   trackStore(canvasStore.canvas);
-  trackStore(layerImageStore);
+  trackStore(layerHistoryStore);
   trackStore(layerStore);
   setProjectStore('isProjectChangedAfterSave', true);
 });
@@ -6793,7 +6793,7 @@ export function colorMatch(a: RGBAColor, b: RGBAColor): boolean {
 <file path="utils/DSLUtils.ts">
 import { downloadImageData } from '../io/internal/export';
 import { runDSL } from '~/models/dsl/DSLRunner';
-import { layerImageStore } from '~/stores/project/layerImageStore';
+import { layerHistoryStore } from '~/stores/project/layerHistoryStore';
 import { findLayerById } from '~/stores/project/layerStore';
 
 export const testDSLTime = (layerId: string) => {
@@ -6802,7 +6802,7 @@ export const testDSLTime = (layerId: string) => {
     throw 'layer not found.';
     return;
   }
-  const imageData = layerImageStore[layerId].current;
+  const imageData = layerHistoryStore[layerId].current;
 
   const start = new Date().getTime();
   console.log(`DSL run started.\n${layer.dsl.build()}`);

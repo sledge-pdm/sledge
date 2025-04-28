@@ -6,24 +6,23 @@ import {
   readTextFile,
   writeTextFile,
 } from '@tauri-apps/plugin-fs';
-import initLayerImage from '~/models/factories/initLayerImage';
-import { addRecent } from '~/stores/global/globalStore';
 import {
   adjustZoomToFit,
-  canvasStore,
   centeringCanvas,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
+} from '~/controllers/canvas/CanvasController';
+import resetLayerImage from '~/controllers/layer/LayerController';
+import { findLayerById } from '~/controllers/layer_list/LayerListController';
+import { getImageOf } from '~/routes/editor';
+import { addRecent } from '~/stores/GlobalStores';
+import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
 import {
-  layerImageStore,
-  setLayerImageStore,
-} from '~/stores/project/layerImageStore';
-import {
-  findLayerById,
-  layerStore,
-  setLayerStore,
-} from '~/stores/project/layerStore';
-import { projectStore, setProjectStore } from '~/stores/project/projectStore';
+  layerHistoryStore,
+  layerListStore,
+  projectStore,
+  setLayerHistoryStore,
+  setLayerListStore,
+  setProjectStore,
+} from '~/stores/ProjectStores';
 import { Layer } from '~/types/Layer';
 import { decodeImageData, encodeImageData } from '~/utils/ImageUtils';
 import { getFileNameAndPath } from '~/utils/pathUtils';
@@ -81,21 +80,20 @@ export async function importProjectJson(projectJson: any) {
   }
 
   if (projectJson.images) {
-    setLayerImageStore({});
+    setLayerHistoryStore({});
     Object.keys(projectJson.images).forEach((id) => {
       console.log(`read ${id}`);
       const imageData = projectJson.images[id];
-      console.log(imageData);
-      initLayerImage(id, Number(imageData.dotMagnification || 1));
-      setLayerImageStore(
+      const agent = resetLayerImage(
         id,
-        'current',
-        decodeImageData(
-          imageData.current,
-          Number(imageData.width),
-          Number(imageData.height)
-        )
+        Number(imageData.dotMagnification || 1)
       );
+      const image = decodeImageData(
+        imageData.current,
+        Number(imageData.width),
+        Number(imageData.height)
+      );
+      agent.setImage(image);
     });
   }
 
@@ -112,8 +110,8 @@ export async function importProjectJson(projectJson: any) {
       } as Layer);
     });
 
-    setLayerStore('layers', layers);
-    setLayerStore('activeLayerId', projectJson.layer.activeLayerId);
+    setLayerListStore('layers', layers);
+    setLayerListStore('activeLayerId', projectJson.layer.activeLayerId);
   }
 
   adjustZoomToFit();
@@ -125,22 +123,26 @@ export const parseCurrentProject = (): string => {
     project: projectStore,
     canvas: canvasStore.canvas,
     images: Object.fromEntries(
-      Object.entries(layerImageStore).map(([id, state]) => [
-        id,
-        {
-          current: encodeImageData(state.current),
-          width: state.current.width,
-          height: state.current.height,
-          dotMagnification: findLayerById(id)?.dotMagnification,
-        },
-      ])
+      Object.entries(layerHistoryStore).map(([id, state]) => {
+        const image = getImageOf(id);
+        if (!image) return [];
+        return [
+          id,
+          {
+            current: encodeImageData(image),
+            width: image.width,
+            height: image.height,
+            dotMagnification: findLayerById(id)?.dotMagnification,
+          },
+        ];
+      })
     ),
     layer: {
-      layers: layerStore.layers.map((layer) => ({
+      layers: layerListStore.layers.map((layer) => ({
         ...layer,
         dsl: undefined, // TODO: save dsl
       })),
-      activeLayerId: layerStore.activeLayerId,
+      activeLayerId: layerListStore.activeLayerId,
     },
   });
 };

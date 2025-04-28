@@ -4,7 +4,7 @@ import {
   readTextFile,
   writeTextFile,
 } from '@tauri-apps/plugin-fs';
-import { globalStore, setGlobalStore } from '~/stores/global/globalStore';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 
 const FILE_NAME = 'global.sledgeconfig';
 

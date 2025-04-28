@@ -1,12 +1,12 @@
 import { Component, For } from 'solid-js';
-import PenItem from './item/PenItem';
-import PenSize from './item/PenSize';
-import { toolStore } from '~/stores/internal/toolsStore';
+import { toolStore } from '~/stores/EditorStores';
 import {
   sectionCaption,
   sectionContent,
   sectionRoot,
 } from '~/styles/section_global.css';
+import PenItem from './item/PenItem';
+import PenSize from './item/PenSize';
 
 const ToolConfig: Component = () => {
   return (

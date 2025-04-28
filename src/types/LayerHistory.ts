@@ -1,7 +1,6 @@
 import { DiffAction } from '../models/layer_image/HistoryManager';
 
-export type LayerImage = {
-  current: ImageData;
+export type LayerHistory = {
   undoStack: DiffAction[];
   redoStack: DiffAction[];
 };

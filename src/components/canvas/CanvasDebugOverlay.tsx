@@ -1,16 +1,14 @@
+import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, Show } from 'solid-js';
+import { globalStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/project/canvasStore';
-import { activeLayer } from '~/stores/project/layerStore';
-import { globalStore } from '~/stores/global/globalStore';
 import {
   canvasDebugOverlayBottomLeft,
   canvasDebugOverlayTopLeft,
 } from '~/styles/components/canvas/canvas_debug_overlay.css';
-import { makeTimer } from '@solid-primitives/timer';
-import { memoryInfo } from 'tauri-plugin-system-info-api';
+import { flexCol } from '~/styles/snippets.css';
 import { safeInvoke } from '~/utils/tauriUtils';
 import { PixelLineChart } from '../common/PixelLineChart';
-import { flexCol } from '~/styles/snippets.css';
 
 interface TauriMemInfo {
   total_bytes: number;
@@ -35,12 +33,12 @@ const CanvasDebugOverlay: Component = (props) => {
     const processInfo = await safeInvoke<TauriMemInfo>('get_process_memory');
     if (processInfo) {
       setProcessMemInfo(processInfo);
-      console.log(processInfo);
+      // console.log(processInfo);
     }
-    console.log(`MAIN: ${toMiB(processMemInfo()?.main_bytes)}
-    CHILDREN: ${toMiB(processMemInfo()?.children_bytes)}
-    TOTAL: ${toMiB(processMemInfo()?.total_bytes)}
-    JS Heap: ${toMiB(jsMemInfo().usedJSHeapSize)} / ${toMiB(jsMemInfo().totalJSHeapSize)}`);
+    // console.log(`MAIN: ${toMiB(processMemInfo()?.main_bytes)}
+    // CHILDREN: ${toMiB(processMemInfo()?.children_bytes)}
+    // TOTAL: ${toMiB(processMemInfo()?.total_bytes)}
+    // JS Heap: ${toMiB(jsMemInfo().usedJSHeapSize)} / ${toMiB(jsMemInfo().totalJSHeapSize)}`);
   };
 
   const disposeInterval = makeTimer(callback, 1000, setInterval);

@@ -1,6 +1,6 @@
 import { Component } from 'solid-js';
+import { currentColor } from '~/controllers/color/ColorController';
 import { sayRandomQuote } from './companion/QuotePool';
-import { currentColor } from '~/stores/internal/colorStore';
 
 interface ColorBoxProps {
   class?: string;

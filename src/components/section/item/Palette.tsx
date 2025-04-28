@@ -1,10 +1,8 @@
 import { Component } from 'solid-js';
 import ColorBox from '~/components/common/ColorBox';
-import {
-  colorStore,
-  PaletteType,
-  selectPalette,
-} from '~/stores/internal/colorStore';
+import { selectPalette } from '~/controllers/color/ColorController';
+import { PaletteType } from '~/stores/editor/ColorStore';
+import { colorStore } from '~/stores/EditorStores';
 import { paletteRoot } from '~/styles/components/palette.css';
 
 const Palette: Component = () => {

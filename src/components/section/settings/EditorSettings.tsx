@@ -1,6 +1,5 @@
 import { Component } from 'solid-js';
-import { saveGlobalSettings } from '~/io/global/globalIO';
-import { globalStore, setGlobalStore } from '~/stores/global/globalStore';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import {
   sectionCaption,
   sectionContent,
@@ -8,9 +7,6 @@ import {
 } from '~/styles/section_global.css';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import Dropdown, { DropdownOption } from '../../common/Dropdown';
-import ToggleSwitch from '../../common/ToggleSwitch';
-import Checkbox from '~/components/common/Checkbox';
-import RadioButton from '~/components/common/RadioButton';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'adaptive', value: 'adaptive' },

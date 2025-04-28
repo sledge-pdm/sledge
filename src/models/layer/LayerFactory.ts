@@ -1,8 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
-import { DSL } from '../dsl/DSL';
-import initLayerImage from './initLayerImage';
-import { layerStore } from '~/stores/project/layerStore';
+import { v4 } from 'uuid';
+import resetLayerImage from '~/controllers/layer/LayerController';
+import { layerListStore } from '~/stores/ProjectStores';
 import { Layer, LayerType } from '~/types/Layer';
+import { DSL } from '../dsl/DSL';
 
 export const createLayer = (
   name: string,
@@ -11,7 +11,6 @@ export const createLayer = (
   dotMagnification = 1,
   dsl?: DSL
 ): Layer => {
-  console.log('yeah tried');
   // check if name already exists
   const endNums = name.match(/^(.*)(\d+)$/);
   if (endNums && endNums.length >= 3) {
@@ -19,7 +18,7 @@ export const createLayer = (
     const endNum = Number(endNums[2]);
 
     const foundSameNameNums: number[] = [];
-    layerStore.layers.forEach((layer) => {
+    layerListStore.layers.forEach((layer) => {
       const layerEndNums = layer.name.match(/^(.*)(\d+)$/);
       if (layerEndNums && layerEndNums.length >= 3) {
         const layerNameWithoutNum = layerEndNums[1];
@@ -37,8 +36,8 @@ export const createLayer = (
     name = nameWithoutNum + num;
   }
 
-  const id = uuidv4();
-  initLayerImage(id, dotMagnification);
+  const id = v4();
+  resetLayerImage(id, dotMagnification);
 
   return {
     id,

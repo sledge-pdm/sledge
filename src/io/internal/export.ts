@@ -1,11 +1,11 @@
-import { layerStore } from '~/stores/project/layerStore';
+import { layerListStore } from '~/stores/ProjectStores';
 
 export function exportActiveLayerUpscaled(
   fileName?: string,
   path?: string,
   scale = 10
 ) {
-  const layerId = layerStore.activeLayerId;
+  const layerId = layerListStore.activeLayerId;
   if (!layerId) return;
 
   const originalCanvas = document.getElementById(

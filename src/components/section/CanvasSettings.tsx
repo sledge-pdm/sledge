@@ -1,11 +1,9 @@
 import { Component, createSignal } from 'solid-js';
-import initLayerImage from '~/models/factories/initLayerImage';
-import {
-  adjustZoomToFit,
-  canvasStore,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
-import { allLayers, layerStore } from '~/stores/project/layerStore';
+import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
+import resetLayerImage from '~/controllers/layer/LayerController';
+import { allLayers } from '~/controllers/layer_list/LayerListController';
+import { canvasStore, setCanvasStore } from '~/stores/project/canvasStore';
+import { layerListStore } from '~/stores/ProjectStores';
 
 import {
   canvasSizeButton,
@@ -29,7 +27,7 @@ const CanvasSettings: Component = () => {
     setCanvasStore('canvas', 'height', height());
 
     allLayers().forEach((layer, i) => {
-      initLayerImage(layer.id, layer.dotMagnification);
+      resetLayerImage(layer.id, layer.dotMagnification);
     });
 
     console.log(`canvas size changed. ${width()} x ${height}`);
@@ -38,8 +36,8 @@ const CanvasSettings: Component = () => {
   };
 
   const resetAllLayers = (e: any) => {
-    layerStore.layers.forEach((l) => {
-      initLayerImage(l.id, l.dotMagnification);
+    layerListStore.layers.forEach((l) => {
+      resetLayerImage(l.id, l.dotMagnification);
     });
   };
 

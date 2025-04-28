@@ -1,14 +1,11 @@
 import { Component, For } from 'solid-js';
+import ColorPicker from '~/components/section/item/ColorPicker';
 import ColorBox from '../common/ColorBox';
 import Palette from './item/Palette';
-import ColorPicker from '~/components/section/item/ColorPicker';
-import { colorStore, setCurrentColor } from '~/stores/internal/colorStore';
 
-import {
-  colorElemDescription,
-  descriptionContainer,
-  swatchContainer,
-} from '~/styles/section/color.css';
+import { setCurrentColor } from '~/controllers/color/ColorController';
+import { colorStore } from '~/stores/EditorStores';
+import { swatchContainer } from '~/styles/section/color.css';
 import {
   sectionCaption,
   sectionContent,

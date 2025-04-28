@@ -1,9 +1,9 @@
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { findLayerById } from '~/controllers/layer_list/LayerListController';
 import { getImageOf } from '~/routes/editor';
-import { addRecent } from '~/stores/GlobalStores';
 import {
   canvasStore,
   layerHistoryStore,
@@ -13,7 +13,7 @@ import {
   setProjectStore,
 } from '~/stores/ProjectStores';
 import { encodeImageData } from '~/utils/ImageUtils';
-import { getFileNameAndPath } from '~/utils/pathUtils';
+import { getFileNameAndPath } from '~/utils/PathUtils';
 
 export async function importProjectJsonFromFileSelection(): Promise<string | undefined> {
   const home = await path.homeDir();
@@ -110,9 +110,7 @@ export async function saveProject(existingPath?: string) {
     console.log('プロジェクト保存:', selectedPath);
 
     setProjectStore('isProjectChangedAfterSave', false);
-
-    const fileLoc = getFileNameAndPath(selectedPath);
-    if (fileLoc !== undefined) addRecent(fileLoc);
+    addRecentFile(getFileNameAndPath(selectedPath));
   } else {
     console.log('保存キャンセルされました');
   }

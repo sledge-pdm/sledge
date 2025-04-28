@@ -1,7 +1,7 @@
 import { onCleanup, onMount } from 'solid-js';
 import EditorSettings from '~/components/section/settings/EditorSettings';
 import PerformanceSettings from '~/components/section/settings/PerformanceSettings';
-import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_setting/globalSettings';
+import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { pageRoot } from '~/styles/global.css';
 import { WindowOptionsProp } from '~/utils/windowUtils';
 import { settingContainer } from './settings.css';
@@ -40,14 +40,6 @@ export default function Settings() {
       >
         <EditorSettings />
         <PerformanceSettings />
-        {/* <button
-          onClick={() => {
-            console.log('[globalIO] 設定保存完了');
-            saveGlobalSettings();
-          }}
-        >
-          save.
-        </button> */}
       </form>
     </div>
   );

@@ -1,4 +1,4 @@
-import { RGBAColor } from '~/utils/colorUtils';
+import { RGBAColor } from '~/utils/ColorUtils';
 import { ToolType } from '../../types/Tool';
 import { Vec2 } from '../../types/Vector';
 import LayerImageAgent from '../layer_image/LayerImageAgent';

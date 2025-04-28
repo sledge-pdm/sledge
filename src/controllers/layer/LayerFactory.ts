@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import resetLayerImage from '~/controllers/layer/LayerController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { layerListStore } from '~/stores/ProjectStores';
 import { Layer, LayerType } from '~/types/Layer';
 import { DSL } from '../../models/dsl/DSL';

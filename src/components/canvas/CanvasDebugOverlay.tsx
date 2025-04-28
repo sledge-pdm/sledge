@@ -7,7 +7,7 @@ import {
   canvasDebugOverlayTopLeft,
 } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { flexCol } from '~/styles/snippets.css';
-import { safeInvoke } from '~/utils/tauriUtils';
+import { safeInvoke } from '~/utils/TauriUtils';
 import { PixelLineChart } from '../common/PixelLineChart';
 
 interface TauriMemInfo {

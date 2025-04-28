@@ -1,7 +1,7 @@
-import { Fill, FillProps } from './FillTool';
 import { PixelDiff } from '~/models/layer_image/HistoryManager';
 import { Vec2 } from '~/types/Vector';
-import { colorMatch } from '~/utils/colorUtils';
+import { colorMatch } from '~/utils/ColorUtils';
+import { Fill, FillProps } from './FillTool';
 
 export class PixelFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {

@@ -1,5 +1,5 @@
 import { Component } from 'solid-js';
-import { loadGlobalSettings } from '~/io/global_setting/globalSettings';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { SettingsWindowOptions } from '~/routes/settings';
 
 import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/components/edge_info.css';

@@ -1,11 +1,11 @@
 import { Component, createSignal } from 'solid-js';
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
-import resetLayerImage from '~/controllers/layer/LayerController';
-import { allLayers } from '~/controllers/layer_list/LayerListController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { Consts } from '~/utils/consts';
 
 const CanvasSettings: Component = () => {
   const [width, setWidth] = createSignal(canvasStore.canvas.width);
@@ -16,9 +16,7 @@ const CanvasSettings: Component = () => {
     setCanvasStore('canvas', 'width', width());
     setCanvasStore('canvas', 'height', height());
 
-    allLayers().forEach((layer, i) => {
-      resetLayerImage(layer.id, layer.dotMagnification);
-    });
+    changeCanvasSize({ width: width(), height: height() });
 
     console.log(`canvas size changed. ${width()} x ${height}`);
 
@@ -50,8 +48,8 @@ const CanvasSettings: Component = () => {
               name='width'
               onChange={(e) => setWidth(Number(e.target.value))}
               value={width()}
-              min={0}
-              max={10000}
+              min={Consts.minCanvasWidth}
+              max={Consts.maxCanvasWidth}
               required
             />
           </div>
@@ -63,8 +61,8 @@ const CanvasSettings: Component = () => {
               name='height'
               onChange={(e) => setHeight(Number(e.target.value))}
               value={height()}
-              min={0}
-              max={10000}
+              min={Consts.minCanvasHeight}
+              max={Consts.maxCanvasHeight}
               required
             />
           </div>

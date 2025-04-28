@@ -1,7 +1,7 @@
 import { createStore } from 'solid-js/store';
-import { saveGlobalSettings } from '~/io/global_setting/globalSettings';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import { FileLocation } from '~/types/FileLocation';
+import { Size2D } from '~/types/Size';
 
 // global
 export const getCanvasImageRenderingAttribute = (
@@ -18,45 +18,34 @@ export const getCanvasImageRenderingAttribute = (
   }
 };
 
-export const createGlobalStore = () => {};
-export const [globalStore, setGlobalStore] = createStore({
-  recentOpenedFiles: [
-    {
-      path: 'C:\\Users\\innsb\\Documents',
-      name: 'project.sledge',
-    },
-  ],
+type GlobalConfigStore = {
+  maxRecentFiles: number;
+  recentFiles: FileLocation[];
+  newProjectCanvasSize: Size2D;
+  canvasRenderingMode: CanvasRenderingMode;
+  showDirtyRects: boolean;
+  showPerfMonitor: boolean;
+};
+const defaultGlobalConfigStore: GlobalConfigStore = {
+  maxRecentFiles: 8,
+  recentFiles: [],
 
-  showDirtyRects: false,
+  newProjectCanvasSize: {
+    width: 1000,
+    height: 1000,
+  },
   canvasRenderingMode: 'adaptive' as CanvasRenderingMode,
 
+  showDirtyRects: false,
   showPerfMonitor: false,
-});
-
-export const addRecent = (loc: FileLocation) => {
-  const path = loc.path;
-  const name = loc.name;
-
-  // add to recent
-  setGlobalStore((store) => {
-    console.log('path: ' + path);
-    console.log('name: ' + name);
-    if (name && path && store.recentOpenedFiles) {
-      // 履歴にあっても一旦削除
-      const oldRecentFiles = store.recentOpenedFiles.filter((f) => {
-        return f.name !== name || f.path !== path?.toString();
-      });
-      // その後、一番上に追加
-      const newRecentFiles: FileLocation[] = [
-        {
-          name: name,
-          path: path,
-        },
-        ...oldRecentFiles,
-      ];
-      setGlobalStore('recentOpenedFiles', newRecentFiles);
-      saveGlobalSettings();
-    }
-    return store;
-  });
 };
+
+const initGlobalStore = () => {
+  const [globalConfigStore, setGlobalConfigStore] = createStore(defaultGlobalConfigStore);
+  return { globalConfigStore, setGlobalConfigStore };
+};
+
+let globalRootStore = initGlobalStore();
+
+export const globalStore = globalRootStore.globalConfigStore;
+export const setGlobalStore = globalRootStore.setGlobalConfigStore;

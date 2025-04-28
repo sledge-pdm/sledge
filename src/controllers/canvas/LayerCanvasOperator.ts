@@ -2,7 +2,7 @@ import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { currentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/types/Vector';
-import { hexToRGBA } from '~/utils/colorUtils';
+import { hexToRGBA } from '~/utils/ColorUtils';
 import LayerImageAgent from '../../models/layer_image/LayerImageAgent';
 import TileLayerImageAgent from '../../models/layer_image/agents/TileLayerImageAgent';
 import { getToolInstance } from '../../models/tool/ToolBase';

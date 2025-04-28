@@ -1,7 +1,7 @@
+import { Vec2 } from '~/types/Vector';
+import { RGBAColor } from '~/utils/ColorUtils';
 import { PixelDiff } from '../HistoryManager';
 import LayerImageAgent from '../LayerImageAgent';
-import { Vec2 } from '~/types/Vector';
-import { RGBAColor } from '~/utils/colorUtils';
 
 export default class RawLayerImageAgent extends LayerImageAgent {
   putImageInto(ctx: CanvasRenderingContext2D) {

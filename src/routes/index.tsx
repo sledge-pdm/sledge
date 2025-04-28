@@ -3,7 +3,7 @@ import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromFileSelection } from '~/io/project/project';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
-import { sectionRoot } from '~/styles/section_global.css';
+import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';

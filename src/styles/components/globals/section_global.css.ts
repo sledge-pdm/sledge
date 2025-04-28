@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB11 } from './global.css';
-import { flexCol, w100 } from './snippets.css';
+import { vars, ZFB11 } from '~/styles/global.css';
+import { flexCol, w100 } from '~/styles/snippets.css';
 
 export const sectionRoot = style([
   flexCol,

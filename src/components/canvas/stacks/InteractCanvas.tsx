@@ -10,7 +10,7 @@ interface Props {
 }
 
 // レイヤーごとのキャンバスの上でタッチイベントを受けるだけのキャンバス
-export const TouchableCanvas: Component<Props> = (props) => {
+export const InteractCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
 
   const styleWidth = () => canvasStore.canvas.width;
@@ -81,7 +81,6 @@ export const TouchableCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerCancel(e: PointerEvent) {
-    console.warn('pointercancel', e);
     endStroke(getCanvasMousePosition(e));
   }
 

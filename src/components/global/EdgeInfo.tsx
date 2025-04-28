@@ -2,7 +2,7 @@ import { Component } from 'solid-js';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { SettingsWindowOptions } from '~/routes/settings';
 
-import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/components/edge_info.css';
+import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/components/globals/edge_info.css';
 import { openSingletonWindow } from '~/utils/windowUtils';
 
 const EdgeInfo: Component = () => {

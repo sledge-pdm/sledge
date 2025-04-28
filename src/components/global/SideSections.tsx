@@ -6,7 +6,7 @@ import Project from '../section/Project';
 import ToolConfig from '../section/ToolConfig';
 
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-import { sideAreaContent } from '~/styles/components/side_sections.css';
+import { sideAreaContent } from '~/styles/components/globals/side_sections.css';
 
 const SideSections: Component = () => {
   return (

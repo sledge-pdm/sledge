@@ -1912,7 +1912,7 @@ import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { Consts } from '~/utils/consts';
 
 const CanvasSettings: Component = () => {
@@ -1999,7 +1999,7 @@ import Palette from './item/Palette';
 import { setCurrentColor } from '~/controllers/color/ColorController';
 import { colorStore } from '~/stores/EditorStores';
 import { swatchContainer } from '~/styles/section/color.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexCol } from '~/styles/snippets.css';
 
 const Color: Component = () => {
@@ -2330,7 +2330,7 @@ import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/lay
 
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/layer.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
 import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
@@ -2438,7 +2438,7 @@ import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { vars } from '~/styles/global.css';
 import { projectNameInput } from '~/styles/section/project.css';
-import { sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component = () => {
@@ -2569,7 +2569,7 @@ export default Project;
 import { Component } from 'solid-js';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { vars } from '~/styles/global.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import { Consts } from '~/utils/consts';
@@ -2643,7 +2643,7 @@ export default EditorSettings;
 import { Component } from 'solid-js';
 import Checkbox from '~/components/common/Checkbox';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 
 const PerformanceSettings: Component = () => {
   return (
@@ -2671,7 +2671,7 @@ export default PerformanceSettings;
 <file path="components/section/ToolConfig.tsx">
 import { Component, For } from 'solid-js';
 import { toolStore } from '~/stores/EditorStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import ToolItem from './item/ToolItem';
 
 const ToolConfig: Component = () => {
@@ -5012,7 +5012,7 @@ import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromFileSelection } from '~/io/project/project';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
-import { sectionRoot } from '~/styles/section_global.css';
+import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';

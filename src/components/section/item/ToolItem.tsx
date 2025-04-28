@@ -1,5 +1,5 @@
 import { Component } from 'solid-js';
-import Slider from '~/components/common/Slider';
+import Slider from '~/components/common/basics/Slider';
 import { sayRandomQuote } from '~/components/common/companion/QuotePool';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { toolConfigRow, toolConfigRowClickable, toolConfigRowIcon, toolConfigRowName } from '~/styles/section/pen.css';

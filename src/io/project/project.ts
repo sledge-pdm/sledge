@@ -29,7 +29,7 @@ export async function importProjectJsonFromFileSelection(): Promise<string | und
     ],
   });
   if (!file) {
-    console.log('ファイルが選択されていません');
+    console.log('file not selected');
     return undefined;
   }
 
@@ -43,7 +43,7 @@ export async function importProjectJsonFromFileSelection(): Promise<string | und
 
 export async function importProjectJsonFromPath(filePath: string) {
   if (!filePath) {
-    console.log('ファイルが選択されていません');
+    console.log('file not selected');
     return;
   }
   const jsonText = await readTextFile(filePath);
@@ -92,14 +92,14 @@ export async function saveProject(existingPath?: string) {
         recursive: true,
       });
     } catch (e) {
-      console.warn('ディレクトリ作成スキップまたは失敗:', e);
+      console.warn('failed or skipped making new directory:', e);
     }
 
     const home = await path.homeDir();
     selectedPath = await save({
-      title: 'Sledge プロジェクトを保存',
+      title: 'save sledge project',
       defaultPath: await path.join(home, `sledge/${projectStore.name}.sledge`),
-      filters: [{ name: 'Sledge Project', extensions: ['sledge'] }],
+      filters: [{ name: 'sledge project', extensions: ['sledge'] }],
     });
   }
 
@@ -107,11 +107,11 @@ export async function saveProject(existingPath?: string) {
     setProjectStore('path', selectedPath);
     const data = parseCurrentProject();
     await writeTextFile(selectedPath, data);
-    console.log('プロジェクト保存:', selectedPath);
+    console.log('project saved to:', selectedPath);
 
     setProjectStore('isProjectChangedAfterSave', false);
     addRecentFile(getFileNameAndPath(selectedPath));
   } else {
-    console.log('保存キャンセルされました');
+    console.log('save cancelled');
   }
 }

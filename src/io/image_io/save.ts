@@ -71,7 +71,6 @@ export function downloadImageData(imageData: ImageData, filename: string = 'imag
 
   const ctxEx = exportCanvas.getContext('2d');
   if (!ctxEx) {
-    alert('Canvasコンテキスト取得に失敗しました。');
     return;
   }
 
@@ -83,7 +82,7 @@ export function downloadImageData(imageData: ImageData, filename: string = 'imag
   // エクスポート処理
   exportCanvas.toBlob((blob) => {
     if (!blob) {
-      alert('エクスポートに失敗しました。');
+      alert('export failed.');
       return;
     }
 

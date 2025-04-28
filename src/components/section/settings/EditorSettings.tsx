@@ -1,11 +1,11 @@
 import { Component } from 'solid-js';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import { Consts } from '~/utils/consts';
-import Dropdown, { DropdownOption } from '../../common/Dropdown';
+import Dropdown, { DropdownOption } from '../../common/basics/Dropdown';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'adaptive', value: 'adaptive' },
@@ -30,7 +30,7 @@ const EditorSettings: Component = () => {
               onChange={(e) => {
                 setGlobalStore('newProjectCanvasSize', 'width', Number(e.target.value));
               }}
-              style={{ 'font-size': vars.text.lg }}
+              style={{ 'font-size': '10px' }}
               required
             />
             <p>x</p>
@@ -43,7 +43,7 @@ const EditorSettings: Component = () => {
               onChange={(e) => {
                 setGlobalStore('newProjectCanvasSize', 'height', Number(e.target.value));
               }}
-              style={{ 'font-size': vars.text.lg }}
+              style={{ 'font-size': '10px' }}
               required
             />
           </div>

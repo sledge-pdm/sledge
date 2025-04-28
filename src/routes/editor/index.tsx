@@ -57,7 +57,6 @@ export default function Editor() {
     await loadGlobalSettings();
 
     if (isNewProject) {
-      console.log(globalStore.newProjectCanvasSize);
       changeCanvasSize(globalStore.newProjectCanvasSize);
     }
 

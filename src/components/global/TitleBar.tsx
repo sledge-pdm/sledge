@@ -9,7 +9,7 @@ import {
   titleBarControls,
   titleBarRoot,
   titleBarTitle,
-} from '~/styles/components/title_bar.css';
+} from '~/styles/components/globals/title_bar.css';
 
 export default function TitleBar() {
   const window = getCurrentWindow();

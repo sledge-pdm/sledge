@@ -3,8 +3,8 @@ import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasCo
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section_global.css';
 import { Consts } from '~/utils/consts';
 
 const CanvasSettings: Component = () => {

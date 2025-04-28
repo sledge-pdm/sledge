@@ -1,6 +1,6 @@
 import { createMemo, onCleanup, onMount } from 'solid-js';
-import CanvasAreaInteract from './CanvasAreaInteract';
-import Controls from './Controls';
+import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
+import CanvasControls from './CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
 
 import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
@@ -76,7 +76,7 @@ export default () => {
       </div>
 
       <CanvasDebugOverlay />
-      <Controls />
+      <CanvasControls />
       <BottomInfo />
     </div>
   );

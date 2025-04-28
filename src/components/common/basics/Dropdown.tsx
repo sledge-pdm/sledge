@@ -1,5 +1,5 @@
-import { JSX, For } from 'solid-js';
-import { dropdownRoot } from '~/styles/components/dropdown.css';
+import { For, JSX } from 'solid-js';
+import { dropdownRoot } from '~/styles/components/basics/dropdown.css';
 
 export type DropdownOption<T extends string | number> = {
   label: string;

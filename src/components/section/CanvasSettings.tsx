@@ -10,15 +10,12 @@ import { Consts } from '~/utils/consts';
 const CanvasSettings: Component = () => {
   const onSizeChange = (type: 'width' | 'height', value: number) => {
     if (type === 'width') {
-      setCanvasStore('canvas', 'width', value);
       changeCanvasSize({ width: value, height: canvasStore.canvas.height });
     } else {
-      setCanvasStore('canvas', 'height', value);
       changeCanvasSize({ width: canvasStore.canvas.width, height: value });
     }
 
     console.log(`canvas size changed. ${canvasStore.canvas.width} x ${canvasStore.canvas.height}`);
-
     adjustZoomToFit();
   };
 
@@ -26,6 +23,7 @@ const CanvasSettings: Component = () => {
     layerListStore.layers.forEach((l) => {
       resetLayerImage(l.id, l.dotMagnification);
     });
+    adjustZoomToFit();
   };
 
   return (

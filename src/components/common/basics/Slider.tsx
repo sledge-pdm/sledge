@@ -53,7 +53,7 @@ const Slider: Component<SliderProps> = (props) => {
   };
 
   return (
-    <div class={styles.root}>
+    <div class={styles.sliderRoot}>
       <div class={styles.slider} ref={sliderRef}>
         <div class={styles.lineHitbox} onPointerDown={handlePointerDown} onClick={onLineClick}>
           <div class={styles.line} />

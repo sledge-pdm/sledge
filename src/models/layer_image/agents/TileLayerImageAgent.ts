@@ -5,7 +5,7 @@ import { HistoryManager, PixelDiff, TileDiff } from '../HistoryManager';
 import LayerImageAgent from '../LayerImageAgent';
 
 export default class TileLayerImageAgent extends LayerImageAgent {
-  readonly TILE_SIZE = 16;
+  readonly TILE_SIZE = 32;
 
   private tiles: Tile[][] = [];
 

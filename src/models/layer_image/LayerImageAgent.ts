@@ -65,12 +65,18 @@ export default abstract class LayerImageAgent {
   setOnImageChangeListener(key: string, listener: (e: ImageChangeEvent) => void) {
     this.onImageChangedListeners[key] = listener;
   }
+  removeOnImageChangeListener(key: string) {
+    delete this.onImageChangedListeners[key];
+  }
   clearOnImageChangeListener(key: string) {
     delete this.onImageChangedListeners[key];
   }
 
   setOnDrawingBufferChangeListener(key: string, listener: (e: DrawingBufferChangeEvent) => void) {
     this.onDrawingBufferChangedListeners[key] = listener;
+  }
+  removeOnDrawingBufferChangeListener(key: string) {
+    delete this.onDrawingBufferChangedListeners[key];
   }
   clearOnDrawingBufferChangeListener(key: string) {
     delete this.onDrawingBufferChangedListeners[key];

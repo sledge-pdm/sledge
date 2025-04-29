@@ -16,7 +16,14 @@ import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromPath } from '~/io/project/project';
 import { LayerImageManager as LayerAgentManager } from '~/models/layer_image/LayerImageManager';
 import { globalStore } from '~/stores/GlobalStores';
-import { canvasStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+import {
+  canvasStore,
+  layerHistoryStore,
+  layerListStore,
+  projectStore,
+  setCanvasStore,
+  setProjectStore,
+} from '~/stores/ProjectStores';
 
 import { pageRoot } from '~/styles/global.css';
 import { LayerType } from '~/types/Layer';
@@ -60,6 +67,7 @@ export default function Editor() {
 
     if (isNewProject) {
       changeCanvasSize(globalStore.newProjectCanvasSize);
+      setCanvasStore('canvas', globalStore.newProjectCanvasSize);
     }
 
     layerListStore.layers.forEach((layer) => {
@@ -67,11 +75,11 @@ export default function Editor() {
     });
 
     adjustZoomToFit();
-    centeringCanvas();
   };
 
-  if (location.search) {
-    const sp = new URLSearchParams(location.search);
+  const sp = new URLSearchParams(location.search);
+
+  if (location.search && sp.get('new') !== 'true') {
     const fileName = sp.get('name');
     const filePath = sp.get('path');
     const path = `${filePath}\\${fileName}`;
@@ -81,6 +89,10 @@ export default function Editor() {
   } else {
     // create new
     setProjectStore('name', 'new project');
+    if (sp.has('width') && sp.has('height')) {
+      setCanvasStore('canvas', 'width', Number(sp.get('width')));
+      setCanvasStore('canvas', 'height', Number(sp.get('height')));
+    }
     addLayer('dot', LayerType.Dot, true, 1).then(() => {
       onProjectLoad();
     });

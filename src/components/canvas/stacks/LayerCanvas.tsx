@@ -1,40 +1,18 @@
 import { Component, createRenderEffect, onMount, Ref } from 'solid-js';
-import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
-
-import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
 import { layerAgentManager } from '~/routes/editor';
+import { setLogStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { Layer } from '~/types/Layer';
+import { RenderMode } from '~/types/RenderMode';
 
 type Props = {
-  ref?: LayerCanvasRef;
   layer: Layer;
   zIndex: number;
 };
 
-export type LayerCanvasRef = {
-  getLayer: () => Layer;
-  getManager: () => LayerImageManager;
-  getAgent: () => LayerImageAgent;
-};
-
 export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
-
-  const agent = () => layerAgentManager.getAgent(props.layer.id);
-
-  createRefContent(
-    () => props.ref,
-    () => ({
-      getLayer() {
-        return props.layer;
-      },
-      getAgent() {
-        return agent();
-      },
-    })
-  );
 
   const styleWidth = () => canvasStore.canvas.width;
   const styleHeight = () => canvasStore.canvas.height;
@@ -42,6 +20,8 @@ export const LayerCanvas: Component<Props> = (props) => {
   const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
+    setLogStore('currentRenderMode', RenderMode.CanvasPerLayer);
+
     let agent = layerAgentManager.getAgent(props.layer.id);
     const ctx = canvasRef?.getContext('2d');
 
@@ -76,16 +56,3 @@ export const LayerCanvas: Component<Props> = (props) => {
     />
   );
 };
-
-function createRefContent<T extends Exclude<unknown, Function>>(getRef: () => Ref<T>, createRef: () => T) {
-  createRenderEffect(() => {
-    const refProp = getRef();
-    if (typeof refProp !== 'function') {
-      throw new Error('Should never happen, as solid always passes refs as functions');
-    }
-
-    const refFunc = refProp as (value: T) => void;
-
-    refFunc(createRef());
-  });
-}

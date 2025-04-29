@@ -2,6 +2,7 @@
 import { createStore } from 'solid-js/store';
 import { createTool } from '~/models/tool/ToolFactory';
 import { PaletteType } from '~/types/PaletteType';
+import { RenderMode } from '~/types/RenderMode';
 import { Size2D } from '~/types/Size';
 import { Tool, ToolType } from '~/types/Tool';
 import { Vec2 } from '~/types/Vector';
@@ -30,6 +31,7 @@ type InteractStore = {
   isDragging: boolean;
 };
 type LogStore = {
+  currentRenderMode: RenderMode;
   bottomBarText: string;
 };
 type ToolStore = {
@@ -73,6 +75,7 @@ const defaultInteractStore: InteractStore = {
   isDragging: false,
 };
 const defaultLogStore: LogStore = {
+  currentRenderMode: RenderMode.None,
   bottomBarText: '',
 };
 const defaultToolStore: ToolStore = {

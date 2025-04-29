@@ -1,29 +1,20 @@
-import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
-import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
 
 import { activeLayer, allLayers } from '~/controllers/layer_list/LayerListController';
 import { layerAgentManager } from '~/routes/editor';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
+import { globalStore } from '~/stores/GlobalStores';
+import WebglCanvasStack from './WebglCanvasStack';
+import { LayerCanvas } from './LayerCanvas';
 
 const CanvasStack: Component = () => {
-  const layerCanvasRefs: {
-    [id: string]: LayerCanvasRef;
-  } = {};
-
   const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
-
-  const activeCanvasRef = () => {
-    const active = activeLayer();
-
-    if (active) return layerCanvasRefs[active.id];
-    else return undefined;
-  };
 
   createEffect(() => {
     const active = activeLayer();
@@ -63,13 +54,18 @@ const CanvasStack: Component = () => {
           height: `${canvasStore.canvas.height}px`,
         }}
       >
-        <InteractCanvas operator={new LayerCanvasOperator(() => activeCanvasRef()!)} />
+        <InteractCanvas operator={new LayerCanvasOperator(() => activeLayer().id)} />
 
-        <For each={allLayers()}>
-          {(layer, index) => (
-            <LayerCanvas ref={layerCanvasRefs[layer.id]} layer={layer} zIndex={allLayers().length - index()} />
-          )}
-        </For>
+        <Show
+          when={globalStore.enableGLRender}
+          fallback={
+            <For each={allLayers()}>
+              {(layer, index) => <LayerCanvas layer={layer} zIndex={allLayers().length - index()} />}
+            </For>
+          }
+        >
+          <WebglCanvasStack />
+        </Show>
       </div>
 
       <CanvasOverlaySVG dirtyRects={dirtyRects()} />

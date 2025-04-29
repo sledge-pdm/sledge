@@ -6,6 +6,7 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/global/EdgeInfo';
+import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
 import { adjustZoomToFit, centeringCanvas, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
@@ -122,11 +123,7 @@ export default function Editor() {
 
   return (
     <>
-      {isLoading() && (
-        <div class={pageRoot}>
-          <p style={{ 'font-size': '2rem' }}>please wait.</p>
-        </div>
-      )}
+      {isLoading() && <Loading />}
 
       {!isLoading() && (
         <div class={pageRoot}>

@@ -1,6 +1,7 @@
 // projectStore.ts
 import { createStore } from 'solid-js/store';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { fallbackLayerProps } from '~/controllers/layer/LayerFactory';
 import { Layer } from '~/types/Layer';
 import { LayerHistory } from '~/types/LayerHistory';
 import { Size2D } from '~/types/Size';
@@ -98,6 +99,7 @@ export const loadStoreFromProjectJson = async (projectJson: any) => {
     const layers: Layer[] = [];
     projectJson.layer.layers.map((l: any) => {
       layers.push({
+        ...fallbackLayerProps,
         ...l,
         dsl: undefined,
       } as Layer);

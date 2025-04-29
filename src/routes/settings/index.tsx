@@ -1,12 +1,12 @@
 import { onCleanup, onMount } from 'solid-js';
+import EditorSettings from '~/components/settings/EditorSettings';
+import KeyConfigSettings from '~/components/settings/KeyConfigSettings';
+import PerformanceSettings from '~/components/settings/PerformanceSettings';
 import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { pageRoot } from '~/styles/global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 import { WindowOptionsProp } from '~/utils/windowUtils';
 import { settingContainer } from './settings.css';
-import EditorSettings from '~/components/settings/EditorSettings';
-import PerformanceSettings from '~/components/settings/PerformanceSettings';
-import KeyConfigSettings from '~/components/settings/KeyConfigSettings';
 
 export const SettingsWindowOptions: WindowOptionsProp = {
   url: '/settings',

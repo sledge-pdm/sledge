@@ -1,10 +1,10 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import { activeLayer } from '../layer_list/LayerListController';
-import { redoLayer, undoLayer } from '../history/HistoryController';
-import { isKeyMatchesToEntry, recordKey } from './KeyConfigController';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { switchToolType } from '../tool/ToolController';
 import { ToolType } from '~/types/Tool';
+import { redoLayer, undoLayer } from '../history/HistoryController';
+import { activeLayer } from '../layer_list/LayerListController';
+import { switchToolType } from '../tool/ToolController';
+import { isKeyMatchesToEntry } from './KeyConfigController';
 
 const KeyListener: Component = () => {
   const handleKey = (e: KeyboardEvent) => {

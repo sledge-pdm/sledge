@@ -14,10 +14,11 @@ import {
   projectStore,
   setProjectStore,
 } from '~/stores/ProjectStores';
+import { Consts } from '~/utils/consts';
 import { encodeImageData } from '~/utils/ImageUtils';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 
-export async function importProjectJsonFromFileSelection(): Promise<string | undefined> {
+export async function importProjectFromFileSelection(): Promise<string | undefined> {
   const home = await path.homeDir();
   const file = await dialogOpen({
     multiple: false,
@@ -43,7 +44,18 @@ export async function importProjectJsonFromFileSelection(): Promise<string | und
   return file;
 }
 
-export async function importProjectJsonFromPath(filePath: string) {
+export async function getProjectJsonFromPath(filePath: string) {
+  if (!filePath) {
+    console.log('file not selected');
+    return;
+  }
+  const jsonText = await readTextFile(filePath);
+  const projectJson = JSON.parse(jsonText);
+
+  return projectJson;
+}
+
+export async function importProjectFromPath(filePath: string) {
   if (!filePath) {
     console.log('file not selected');
     return;
@@ -54,7 +66,7 @@ export async function importProjectJsonFromPath(filePath: string) {
   loadProjectStore(projectJson);
 }
 
-export const parseCurrentProject = async (thumbnailSize = 64): Promise<string> => {
+export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnailSize): Promise<string> => {
   // 1) まず既存のデータ部分を作る
   const base = {
     project: projectStore,
@@ -91,6 +103,7 @@ export const parseCurrentProject = async (thumbnailSize = 64): Promise<string> =
   return JSON.stringify({
     ...base,
     thumbnail: thumbnailDataURL,
+    thumbnailSize,
   });
 };
 

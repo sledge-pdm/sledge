@@ -1,7 +1,7 @@
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import {
-  isRecordEndSave as isRecordEndKey,
   isRecordEndWithoutSave as isRecordAbortKey,
+  isRecordEndSave as isRecordEndKey,
   isRecordPossible as isRecordPossibleKey,
   parseKeyConfigEntry,
   recordKey,

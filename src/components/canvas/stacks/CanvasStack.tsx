@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
@@ -6,10 +6,10 @@ import { InteractCanvas } from './InteractCanvas';
 
 import { activeLayer, allLayers } from '~/controllers/layer_list/LayerListController';
 import { layerAgentManager } from '~/routes/editor';
+import { globalStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
-import { globalStore } from '~/stores/GlobalStores';
 import { LayerCanvas } from './LayerCanvas';
 import WebGLCanvasStack from './WebglCanvasStack';
 

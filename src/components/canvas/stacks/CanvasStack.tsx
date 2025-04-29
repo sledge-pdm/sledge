@@ -6,7 +6,7 @@ import { InteractCanvas } from './InteractCanvas';
 import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
 
 import { activeLayer, allLayers } from '~/controllers/layer_list/LayerListController';
-import { layerImageManager } from '~/routes/editor';
+import { layerAgentManager } from '~/routes/editor';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
@@ -25,28 +25,10 @@ const CanvasStack: Component = () => {
     else return undefined;
   };
 
-  onMount(() => {
-    window.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 'z') {
-        const active = activeLayer();
-        if (active) {
-          const agent = layerImageManager.getAgent(active.id);
-          agent?.undo();
-        }
-      } else if (e.ctrlKey && e.key === 'y') {
-        const active = activeLayer();
-        if (active) {
-          const agent = layerImageManager.getAgent(active.id);
-          agent?.redo();
-        }
-      }
-    });
-  });
-
   createEffect(() => {
     const active = activeLayer();
     if (active) {
-      const agent = layerImageManager.getAgent(active.id);
+      const agent = layerAgentManager.getAgent(active.id);
       if (!agent) return;
       agent.setOnDrawingBufferChangeListener('stack_dirty_rect', () => {
         setDirtyRects([...getDirtyRects()]);
@@ -60,7 +42,7 @@ const CanvasStack: Component = () => {
   const getDirtyRects = () => {
     const active = activeLayer();
     if (active) {
-      const agent = layerImageManager.getAgent(active.id);
+      const agent = layerAgentManager.getAgent(active.id);
       if (agent instanceof TileLayerImageAgent) {
         return (agent as TileLayerImageAgent).getDirtyTilesInAction();
       }

@@ -1,9 +1,0 @@
-{
-  "workbench.tree.indent": 16,
-  "workbench.tree.renderIndentGuides": "always",
-
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
-  }
-}

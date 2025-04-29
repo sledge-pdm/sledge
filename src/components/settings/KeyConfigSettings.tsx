@@ -8,14 +8,16 @@ import {
   restoreDefaultKeyConfig,
   saveKeyConfigEntry,
 } from '~/controllers/config/KeyConfigController';
+import { saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { keyConfigName } from '~/styles/components/settings/key_config_settings.css';
 import { flexRow } from '~/styles/snippets.css';
 import { KeyConfigEntry } from '~/types/KeyConfig';
+import { KeyConfigCommands } from '~/utils/consts';
 
 const KeyConfigSettings: Component = () => {
-  const [recordingName, setRecordingName] = createSignal<string | undefined>(undefined);
+  const [recordingName, setRecordingName] = createSignal<KeyConfigCommands | undefined>(undefined);
   const [recordedEntry, setRecordedEntry] = createSignal<KeyConfigEntry | undefined>(undefined);
 
   const handleOnKeyDown = (e: KeyboardEvent) => {
@@ -35,7 +37,7 @@ const KeyConfigSettings: Component = () => {
     setRecordedEntry(entry);
   };
 
-  const startRecord = (name: string) => {
+  const startRecord = (name: KeyConfigCommands) => {
     setRecordedEntry(undefined);
     setRecordingName(name);
   };
@@ -43,7 +45,10 @@ const KeyConfigSettings: Component = () => {
   const endRecord = (save: boolean) => {
     const name = recordingName();
     if (!name) return;
-    if (save) saveKeyConfigEntry(name, recordedEntry());
+    if (save) {
+      saveKeyConfigEntry(name, recordedEntry());
+      saveGlobalSettings();
+    }
     setRecordedEntry(undefined);
     setRecordingName(undefined);
   };
@@ -67,7 +72,7 @@ const KeyConfigSettings: Component = () => {
                 <p class={keyConfigName}>{name}</p>
                 <a
                   onClick={(e) => {
-                    if (!isRecording()) startRecord(name);
+                    if (!isRecording()) startRecord(name as KeyConfigCommands);
                   }}
                   style={{
                     color: isRecording() ? 'blue' : 'inherit',

@@ -2,7 +2,7 @@ import { Component, createRenderEffect, onMount, Ref } from 'solid-js';
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 
 import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
-import { layerImageManager } from '~/routes/editor';
+import { layerAgentManager } from '~/routes/editor';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { Layer } from '~/types/Layer';
@@ -22,7 +22,7 @@ export type LayerCanvasRef = {
 export const LayerCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
 
-  const agent = () => layerImageManager.getAgent(props.layer.id);
+  const agent = () => layerAgentManager.getAgent(props.layer.id);
 
   createRefContent(
     () => props.ref,
@@ -42,7 +42,7 @@ export const LayerCanvas: Component<Props> = (props) => {
   const internalHeight = () => canvasStore.canvas.height / props.layer.dotMagnification;
 
   onMount(() => {
-    let agent = layerImageManager.getAgent(props.layer.id);
+    let agent = layerAgentManager.getAgent(props.layer.id);
     const ctx = canvasRef?.getContext('2d');
 
     if (ctx) agent?.putImageIntoForce(ctx);

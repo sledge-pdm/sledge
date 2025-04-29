@@ -3,6 +3,8 @@ import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { findLayerById } from '~/controllers/layer_list/LayerListController';
+import { exportThumbnailDataURL } from '~/controllers/webgl/WebGLCanvasController';
+import { getWebglRenderer } from '~/models/webgl/WebGLRenderer';
 import { getImageOf } from '~/routes/editor';
 import {
   canvasStore,
@@ -52,8 +54,9 @@ export async function importProjectJsonFromPath(filePath: string) {
   loadProjectStore(projectJson);
 }
 
-export const parseCurrentProject = (): string => {
-  return JSON.stringify({
+export const parseCurrentProject = async (thumbnailSize = 64): Promise<string> => {
+  // 1) まず既存のデータ部分を作る
+  const base = {
     project: projectStore,
     canvas: canvasStore.canvas,
     images: Object.fromEntries(
@@ -74,10 +77,20 @@ export const parseCurrentProject = (): string => {
     layer: {
       layers: layerListStore.layers.map((layer) => ({
         ...layer,
-        dsl: undefined, // TODO: save dsl
+        dsl: undefined,
       })),
       activeLayerId: layerListStore.activeLayerId,
     },
+  };
+
+  const renderer = getWebglRenderer();
+  // 2) サムネイル生成 (WebGL Controller のインスタンスを取得)
+  const thumbnailDataURL = await exportThumbnailDataURL(renderer, thumbnailSize, thumbnailSize);
+
+  // 3) JSON に thumbnail フィールドを追加
+  return JSON.stringify({
+    ...base,
+    thumbnail: thumbnailDataURL,
   });
 };
 
@@ -105,7 +118,7 @@ export async function saveProject(existingPath?: string) {
 
   if (typeof selectedPath === 'string') {
     setProjectStore('path', selectedPath);
-    const data = parseCurrentProject();
+    const data = await parseCurrentProject();
     await writeTextFile(selectedPath, data);
     console.log('project saved to:', selectedPath);
 

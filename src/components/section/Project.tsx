@@ -1,24 +1,17 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { exportActiveLayerUpscaled } from '~/io/internal/export';
+import { exportActiveLayerUpscaled } from '~/io/image/save';
 import { saveProject } from '~/io/project/project';
+import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
-import { projectStore, setProjectStore } from '~/stores/project/projectStore';
+import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
 import { projectNameInput } from '~/styles/section/project.css';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
   const isNameChanged = () => projectStore.name !== projectStore.newName;
-  const isOWPossible = () =>
-    projectStore.name !== undefined &&
-    projectStore.path !== undefined &&
-    !isNameChanged();
+  const isOWPossible = () => projectStore.name !== undefined && projectStore.path !== undefined && !isNameChanged();
 
   onMount(() => {
     setProjectStore('newName', projectStore.name);
@@ -128,15 +121,7 @@ const Project: Component = () => {
               save (new).
             </button>
           </Show>
-          <button
-            onClick={() =>
-              exportActiveLayerUpscaled(
-                projectStore.newName || projectStore.name
-              )
-            }
-          >
-            export.
-          </button>
+          <button onClick={() => exportActiveLayerUpscaled(projectStore.newName || projectStore.name)}>export.</button>
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
         </div>
       </div>

@@ -1,12 +1,7 @@
 import { Component } from 'solid-js';
-import { saveGlobalSettings } from '~/io/global/globalIO';
-import { globalStore, setGlobalStore } from '~/stores/global/globalStore';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
-import Checkbox from '~/components/common/Checkbox';
+import Checkbox from '~/components/common/basics/Checkbox';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 
 const PerformanceSettings: Component = () => {
   return (

@@ -1,8 +1,8 @@
 import { reconcile } from 'solid-js/store';
-import { Vec2 } from '../../types/Vector';
-import { setLayerImageStore } from '~/stores/project/layerImageStore';
+import { setLayerHistoryStore } from '~/stores/ProjectStores';
 import { TileIndex } from '~/types/Tile';
-import { RGBAColor } from '~/utils/colorUtils';
+import { RGBAColor } from '~/utils/ColorUtils';
+import { Vec2 } from '../../types/Vector';
 
 export type PixelDiff = {
   kind: 'pixel';
@@ -100,15 +100,7 @@ export class HistoryManager {
    * Synchronize the undo/redo stacks with the SolidJS store
    */
   private syncStores() {
-    setLayerImageStore(
-      this.layerId,
-      'undoStack',
-      reconcile(this.undoActionsStack)
-    );
-    setLayerImageStore(
-      this.layerId,
-      'redoStack',
-      reconcile(this.redoActionsStack)
-    );
+    setLayerHistoryStore(this.layerId, 'undoStack', reconcile(this.undoActionsStack));
+    setLayerHistoryStore(this.layerId, 'redoStack', reconcile(this.redoActionsStack));
   }
 }

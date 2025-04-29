@@ -2,7 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '../global.css';
 import { flexRow, w100 } from '../snippets.css';
 
-export const penConfigRow = style([
+export const toolConfigRow = style([
   flexRow,
   w100,
   {
@@ -10,7 +10,7 @@ export const penConfigRow = style([
     alignItems: 'center',
   },
 ]);
-export const penConfigRowClickable = style([
+export const toolConfigRowClickable = style([
   flexRow,
   {
     gap: vars.spacing.md,
@@ -19,16 +19,15 @@ export const penConfigRowClickable = style([
   },
 ]);
 
-export const penConfigRowName = style({
+export const toolConfigRowName = style({
   cursor: 'pointer',
   fontSize: vars.text.sm,
   padding: `${vars.spacing.md} 0`,
   pointerEvents: 'all',
 });
 
-export const penConfigRowIcon = style({
+export const toolConfigRowIcon = style({
   ':hover': {
-    filter:
-      'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
+    filter: 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
   },
 });

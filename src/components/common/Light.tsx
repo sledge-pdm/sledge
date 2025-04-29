@@ -1,5 +1,5 @@
 import { Component, Show } from 'solid-js';
-import styles from '@styles/components/light.module.css';
+import { lightInnerOff, lightInnerOn } from '~/styles/components/light.css';
 
 interface LightProps {
   class?: string;
@@ -23,7 +23,7 @@ const Light: Component<LightProps> = (props: LightProps) => {
       xmlns='http://www.w3.org/2000/svg'
     >
       <Show when={true}>
-        <g class={`${styles['light-inner']} ${props.on && styles['on']}`}>
+        <g class={props.on ? lightInnerOn : lightInnerOff}>
           <circle cx={width / 2} cy={height / 2} r={radius} fill='red' />
         </g>
       </Show>

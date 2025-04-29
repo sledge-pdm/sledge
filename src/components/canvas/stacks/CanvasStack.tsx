@@ -1,29 +1,15 @@
-import {
-  Component,
-  createEffect,
-  createSignal,
-  For,
-  onCleanup,
-  onMount,
-} from 'solid-js';
-import CanvasOverlaySVG from './CanvasOverlaySVG';
-import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
-import { TouchableCanvas } from './TouchableCanvas';
-import LayerCanvasOperator from '~/models/layer_canvas/LayerCanvasOperator';
-import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
+import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
-import { globalStore } from '~/stores/global/globalStore';
-import { canvasStore } from '~/stores/project/canvasStore';
-import {
-  activeLayer,
-  allLayers,
-  layerStore,
-} from '~/stores/project/layerStore';
+import CanvasOverlaySVG from './CanvasOverlaySVG';
+import { InteractCanvas } from './InteractCanvas';
+import { LayerCanvas, LayerCanvasRef } from './LayerCanvas';
 
+import { activeLayer, allLayers } from '~/controllers/layer_list/LayerListController';
+import { layerImageManager } from '~/routes/editor';
+import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
-
-export const layerImageManager = new LayerImageManager();
 
 const CanvasStack: Component = () => {
   const layerCanvasRefs: {
@@ -95,17 +81,11 @@ const CanvasStack: Component = () => {
           height: `${canvasStore.canvas.height}px`,
         }}
       >
-        <TouchableCanvas
-          operator={new LayerCanvasOperator(() => activeCanvasRef()!)}
-        />
+        <InteractCanvas operator={new LayerCanvasOperator(() => activeCanvasRef()!)} />
 
         <For each={allLayers()}>
           {(layer, index) => (
-            <LayerCanvas
-              ref={layerCanvasRefs[layer.id]}
-              layer={layer}
-              zIndex={allLayers().length - index()}
-            />
+            <LayerCanvas ref={layerCanvasRefs[layer.id]} layer={layer} zIndex={allLayers().length - index()} />
           )}
         </For>
       </div>

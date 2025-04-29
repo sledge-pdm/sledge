@@ -1,45 +1,30 @@
-import { Component, createSignal } from 'solid-js';
-import initLayerImage from '~/models/factories/initLayerImage';
-import {
-  adjustZoomToFit,
-  canvasStore,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
-import { allLayers, layerStore } from '~/stores/project/layerStore';
+import { Component } from 'solid-js';
+import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 
-import {
-  canvasSizeButton,
-  canvasSizeForm,
-  canvasSizeInput,
-  canvasSizeLabel,
-} from '~/styles/section/canvas.css';
-import {
-  sectionCaption,
-  sectionContent,
-  sectionRoot,
-} from '~/styles/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
+import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
+import { Consts } from '~/utils/consts';
 
 const CanvasSettings: Component = () => {
-  const [width, setWidth] = createSignal(canvasStore.canvas.width);
-  const [height, setHeight] = createSignal(canvasStore.canvas.height);
+  const onSizeChange = (type: 'width' | 'height', value: number) => {
+    if (type === 'width') {
+      setCanvasStore('canvas', 'width', value);
+      changeCanvasSize({ width: value, height: canvasStore.canvas.height });
+    } else {
+      setCanvasStore('canvas', 'height', value);
+      changeCanvasSize({ width: canvasStore.canvas.width, height: value });
+    }
 
-  const changeCanvasSize = (e: any) => {
-    e.preventDefault();
-    setCanvasStore('canvas', 'width', width());
-    setCanvasStore('canvas', 'height', height());
+    console.log(`canvas size changed. ${canvasStore.canvas.width} x ${canvasStore.canvas.height}`);
 
-    allLayers().forEach((layer, i) => {
-      initLayerImage(layer.id, layer.dotMagnification);
-    });
-
-    console.log(`canvas size changed. ${width()} x ${height}`);
-
-    adjustZoomToFit(width(), height());
+    adjustZoomToFit();
   };
 
   const resetAllLayers = (e: any) => {
-    layerStore.layers.forEach((l) => {
-      initLayerImage(l.id, l.dotMagnification);
+    layerListStore.layers.forEach((l) => {
+      resetLayerImage(l.id, l.dotMagnification);
     });
   };
 
@@ -47,12 +32,7 @@ const CanvasSettings: Component = () => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>canvas.</p>
 
-      <form
-        class={sectionContent}
-        onSubmit={(e) => {
-          changeCanvasSize(e);
-        }}
-      >
+      <form class={sectionContent} onSubmit={(e) => e.preventDefault()}>
         <div class={canvasSizeForm}>
           <div>
             <p class={canvasSizeLabel}>width</p>
@@ -60,10 +40,13 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInput}
               type='number'
               name='width'
-              onChange={(e) => setWidth(Number(e.target.value))}
-              value={width()}
-              min={0}
-              max={10000}
+              onChange={(e) => {
+                e.preventDefault();
+                onSizeChange('width', Number(e.target.value));
+              }}
+              value={canvasStore.canvas.width}
+              min={Consts.minCanvasWidth}
+              max={Consts.maxCanvasWidth}
               required
             />
           </div>
@@ -73,10 +56,13 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInput}
               type='number'
               name='height'
-              onChange={(e) => setHeight(Number(e.target.value))}
-              value={height()}
-              min={0}
-              max={10000}
+              onChange={(e) => {
+                e.preventDefault();
+                onSizeChange('height', Number(e.target.value));
+              }}
+              value={canvasStore.canvas.height}
+              min={Consts.minCanvasHeight}
+              max={Consts.maxCanvasHeight}
               required
             />
           </div>

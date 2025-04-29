@@ -1,9 +1,8 @@
 import { createSortable, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
-import LayerPreview from '../../common/LayerPreview';
 import Light from '~/components/common/Light';
-import { getNextMagnification } from '~/models/factories/getNextMagnification';
-import { layerStore, setLayerStore } from '~/stores/project/layerStore';
+import { getNextMagnification } from '~/controllers/layer/LayerController';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import {
   activeLight,
   dotMagnifContainer,
@@ -16,7 +15,7 @@ import {
 } from '~/styles/section/layer.css';
 import { flexRow, w100 } from '~/styles/snippets.css';
 import { Layer, LayerType } from '~/types/Layer';
-import { vars } from '~/styles/global.css';
+import LayerPreview from '../../common/LayerPreview';
 
 interface LayerItemProps {
   index: number;
@@ -44,23 +43,23 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   }
 
   const onDetClicked = () => {
-    setLayerStore('activeLayerId', props.layer.id);
+    setLayerListStore('activeLayerId', props.layer.id);
   };
 
   const onPreviewClicked = () => {
     if (props.index !== -1) {
-      setLayerStore('layers', props.index, 'enabled', (v: boolean) => !v);
+      setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
   };
 
   const onMagnifClicked = () => {
     const next = getNextMagnification(props.layer.dotMagnification);
     if (props.index !== -1) {
-      setLayerStore('layers', props.index, 'dotMagnification', next);
+      setLayerListStore('layers', props.index, 'dotMagnification', next);
     }
   };
 
-  const isActive = () => layerStore.activeLayerId === props.layer.id;
+  const isActive = () => layerListStore.activeLayerId === props.layer.id;
 
   return (
     <div
@@ -74,18 +73,11 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     >
       {/* <DSLButton /> */}
       <div
-        class={[layerItem, !props.layer.enabled && layerItemDisabled]
-          .filter(Boolean)
-          .join(' ')}
+        class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
         // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
         onClick={onDetClicked}
       >
-        <LayerPreview
-          layer={props.layer}
-          onClick={onPreviewClicked}
-          maxHeight={36}
-          maxWidth={36}
-        />
+        <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
 
         <div
           class={[flexRow, w100].join(' ')}

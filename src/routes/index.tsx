@@ -81,7 +81,7 @@ export default function Home() {
             style={{ 'margin-left': '2px' }}
             onClick={(e) => openSingletonWindow('settings', SettingsWindowOptions)}
           >
-            <img src={'/settings.png'} width={16} height={16} />
+            <img src={'/icons/misc/settings.png'} width={16} height={16} />
             &ensp;settings.
           </a>
         </div>

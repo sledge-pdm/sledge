@@ -8,8 +8,8 @@ import { allLayers } from '../layer_list/LayerListController';
 export function changeCanvasSize(newSize: Size2D): boolean {
   if (newSize.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < newSize.width) return false;
   if (newSize.height < Consts.minCanvasHeight || Consts.maxCanvasHeight < newSize.height) return false;
-
   setCanvasStore('canvas', newSize);
+
   allLayers().forEach((layer) => {
     resetLayerImage(layer.id, layer.dotMagnification);
   });

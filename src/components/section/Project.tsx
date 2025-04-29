@@ -1,5 +1,5 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { exportActiveLayerUpscaled } from '~/io/image_io/save';
+import { exportActiveLayerUpscaled } from '~/io/image/save';
 import { saveProject } from '~/io/project/project';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 

@@ -30,3 +30,5 @@ Thumbs.db
 # repomix
 repomix-output.txt
 repomix-output.xml
+
+/.vscode

@@ -1,4 +1,4 @@
-import { For, onMount } from 'solid-js';
+import { For, onMount, Show } from 'solid-js';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromFileSelection } from '~/io/project/project';
@@ -86,29 +86,31 @@ export default function Home() {
           </a>
         </div>
 
-        <div class={sectionRoot}>
-          <div class={[flexRow, w100].join(' ')}>
-            <p class={recentFilesCaption}>recent files.</p>
-            {/* <p class={clear} onClick={() => clearRecentFiles()}>
+        <Show when={globalStore.recentFiles.length > 0}>
+          <div class={sectionRoot}>
+            <div class={[flexRow, w100].join(' ')}>
+              <p class={recentFilesCaption}>recent files.</p>
+              {/* <p class={clear} onClick={() => clearRecentFiles()}>
                 clear
               </p> */}
+            </div>
+            <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
+              <For each={globalStore.recentFiles}>
+                {(item, i) => {
+                  return (
+                    <div class={recentFilesItem}>
+                      <p>■</p>
+                      <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>
+                        {item.name}
+                      </a>
+                      <p class={recentFilesPath}>{item.path}</p>
+                    </div>
+                  );
+                }}
+              </For>
+            </div>
           </div>
-          <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
-            <For each={globalStore.recentFiles}>
-              {(item, i) => {
-                return (
-                  <div class={recentFilesItem}>
-                    <p>■</p>
-                    <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>
-                      {item.name}
-                    </a>
-                    <p class={recentFilesPath}>{item.path}</p>
-                  </div>
-                );
-              }}
-            </For>
-          </div>
-        </div>
+        </Show>
       </div>
     </div>
   );

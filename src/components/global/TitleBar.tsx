@@ -73,7 +73,7 @@ export default function TitleBar() {
             <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
               <img
                 class={titleBarControlButtonImg}
-                src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/maximize.png'}
+                src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/icons/title_bar/maximize.png'}
               />
             </button>
           )}

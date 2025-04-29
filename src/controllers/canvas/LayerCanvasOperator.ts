@@ -1,5 +1,6 @@
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { currentTool } from '~/controllers/tool/ToolController';
+import { layerAgentManager } from '~/routes/editor';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import LayerImageAgent from '../../models/layer_image/LayerImageAgent';
@@ -9,7 +10,6 @@ import { DrawState } from '../../types/DrawState';
 import { Tool } from '../../types/Tool';
 import { currentColor } from '../color/ColorController';
 import { findLayerById } from '../layer_list/LayerListController';
-import { layerAgentManager } from '~/routes/editor';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}

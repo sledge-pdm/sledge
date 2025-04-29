@@ -1,4 +1,3 @@
-import { createEventBus } from '@solid-primitives/event-bus';
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
 import { layerAgentManager } from '~/routes/editor';
 import {
@@ -10,7 +9,6 @@ import {
 } from '~/stores/ProjectStores';
 import { Layer } from '~/types/Layer';
 import { findLayerById } from '../layer_list/LayerListController';
-import { debounce } from '@solid-primitives/scheduled';
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {

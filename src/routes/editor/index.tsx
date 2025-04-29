@@ -8,12 +8,12 @@ import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/global/EdgeInfo';
 import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import KeyListener from '~/controllers/config/KeyListener';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
-import { importProjectJsonFromPath } from '~/io/project/project';
+import { importProjectFromPath } from '~/io/project/project';
 import { LayerImageManager as LayerAgentManager } from '~/models/layer_image/LayerImageManager';
 import { globalStore } from '~/stores/GlobalStores';
 import {
@@ -83,7 +83,7 @@ export default function Editor() {
     const fileName = sp.get('name');
     const filePath = sp.get('path');
     const path = `${filePath}\\${fileName}`;
-    importProjectJsonFromPath(path).then(() => {
+    importProjectFromPath(path).then(() => {
       onProjectLoad();
     });
   } else {

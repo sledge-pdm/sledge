@@ -1,11 +1,11 @@
 import { BlendMode, Layer } from '~/types/Layer';
+import { Consts } from '~/utils/consts';
 import { createFullScreenQuad } from './GeometryUtils';
 import { createProgramFromSources, deleteProgramSafe } from './ShaderUtils';
 import { TextureManager } from './TextureManager';
-import { Consts } from '~/utils/consts';
 // shaders
-import vertexSrc from '~/shaders/fullscreen.vert.glsl';
 import fragmentSrc from '~/shaders/blend.frag.glsl';
+import vertexSrc from '~/shaders/fullscreen.vert.glsl';
 import { blobToDataURL } from '~/utils/BlobUtils';
 
 export class WebGLCanvasController {
@@ -24,7 +24,7 @@ export class WebGLCanvasController {
 
   init(layers: Layer[]) {
     // 1) Context
-    this.gl = this.canvas.getContext('webgl', { premultipliedAlpha: false })!;
+    this.gl = this.canvas.getContext('webgl', { preserveDrawingBuffer: true, premultipliedAlpha: false })!;
     if (!this.gl) throw new Error('WebGL not supported');
 
     // 2) Shader + Program
@@ -62,8 +62,6 @@ export class WebGLCanvasController {
   }
 
   updateLayers(layers: Layer[]) {
-    console.log('update layers');
-
     const active = layers.filter((l) => l.enabled).slice(0, this.maxLayers);
     const prev = [...this.textureMgr.layerIds];
     const next = active.map((l) => l.id);
@@ -113,20 +111,31 @@ export class WebGLCanvasController {
     this.textureMgr.dispose();
     deleteProgramSafe(this.gl, this.program);
   }
+
   /**
    * 現在のキャンバス合成結果を縮小コピーして
    * PNG Blob を返す
    */
   async exportThumbnailPng(thumbW: number, thumbH: number): Promise<Blob> {
-    // 1) オフスクリーン Canvas2D を用意
+    // GPUコマンドを同期完了させる
+    this.gl.flush();
+    this.gl.finish();
+
+    console.log(
+      'src backing:',
+      this.canvas.width,
+      this.canvas.height,
+      'src css:',
+      this.canvas.style.width,
+      this.canvas.style.height
+    );
+
     const thumb = document.createElement('canvas');
     thumb.width = thumbW;
     thumb.height = thumbH;
     const ctx = thumb.getContext('2d')!;
-    // 2) WebGL Canvas 全体を縮小描画
     ctx.drawImage(this.canvas, 0, 0, thumbW, thumbH);
-    // 3) Blob 化
-    return await new Promise<Blob>((res) => thumb.toBlob((b) => res(b!)));
+    return await new Promise<Blob>((r) => thumb.toBlob((b) => r(b!)));
   }
 
   /**

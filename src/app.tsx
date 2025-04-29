@@ -2,7 +2,7 @@
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
 import { Suspense } from 'solid-js';
-import TitleBar from './components/TitleBar';
+import TitleBar from './components/global/TitleBar';
 import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';
@@ -16,15 +16,15 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <Suspense>
-            <div class={[flexCol, h100].join(' ')}>
-              <TitleBar />
+          <div class={[flexCol, h100].join(' ')}>
+            <TitleBar />
 
+            <Suspense>
               <main>{props.children}</main>
+            </Suspense>
 
-              {/* <p class={sledgeLogo}>sledge.</p> */}
-            </div>
-          </Suspense>
+            {/* <p class={sledgeLogo}>sledge.</p> */}
+          </div>
         </MetaProvider>
       )}
     >

@@ -1,27 +1,22 @@
-import {
-  createGlobalTheme,
-  fontFace,
-  globalStyle,
-  style,
-} from '@vanilla-extract/css';
+import { createGlobalTheme, fontFace, globalStyle, style } from '@vanilla-extract/css';
 
 export const ZFB03 = fontFace({
-  src: 'url("/fonts/04B_03__.ttf")',
+  src: 'url("/fonts/04B/04B_03__.ttf")',
 });
 export const ZFB03B = fontFace({
-  src: 'url("/fonts/04B_03B_.ttf")',
+  src: 'url("/fonts/04B/04B_03B_.ttf")',
 });
 export const ZFB08 = fontFace({
-  src: 'url("/fonts/04B_08__.ttf")',
+  src: 'url("/fonts/04B/04B_08__.ttf")',
 });
 export const ZFB09 = fontFace({
-  src: 'url("/fonts/04B_09__.ttf")',
+  src: 'url("/fonts/04B/04B_09__.ttf")',
 });
 export const ZFB11 = fontFace({
-  src: 'url("/fonts/04B_11__.ttf")',
+  src: 'url("/fonts/04B/04B_11__.ttf")',
 });
 export const ZFB31 = fontFace({
-  src: 'url("/fonts/04B_31__.ttf")',
+  src: 'url("/fonts/04B/04B_31__.ttf")',
 });
 export const Terminus = fontFace({
   src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")',

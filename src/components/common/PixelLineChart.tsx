@@ -1,5 +1,4 @@
-import { Component, onMount, onCleanup, createSignal } from 'solid-js';
-import { vars } from '~/styles/global.css';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 
 interface PixelLineChartProps {
   /** 横ピクセル数＝バッファ長 */
@@ -90,9 +89,7 @@ export const PixelLineChart: Component<PixelLineChartProps> = (props) => {
           height: `${props.height}px`,
         }}
       />
-      <p style={{ position: 'absolute', top: '0px', left: '4px' }}>
-        {maxValue()}
-      </p>
+      <p style={{ position: 'absolute', top: '0px', left: '4px' }}>{maxValue()}</p>
       <p style={{ position: 'absolute', bottom: '0px', left: '4px' }}>{0}</p>
       <p style={{ position: 'absolute', top: '0px', right: '4px' }}>
         {lastBuffer()} {props.suffix}

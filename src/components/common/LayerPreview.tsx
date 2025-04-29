@@ -1,7 +1,6 @@
 import { Component, onMount } from 'solid-js';
-import { layerImageManager } from '../canvas/stacks/CanvasStack';
-import styles from '@styles/components/layer_preview.module.css';
-import { layerImageStore } from '~/stores/project/layerImageStore';
+import { getImageOf, layerImageManager } from '~/routes/editor';
+import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
 import { Layer } from '~/types/Layer';
 
 interface Props {
@@ -27,12 +26,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (
-      maxHeight &&
-      targetHeight > maxHeight &&
-      zoom < maxHeight / targetHeight
-    )
-      zoom = maxHeight / targetHeight;
+    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
     canvasRef.style.width = `${targetWidth * zoom}px !important`;
     canvasRef.style.height = `${targetHeight * zoom}px !important`;
@@ -49,42 +43,29 @@ const LayerPreview: Component<Props> = (props: Props) => {
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, targetWidth, targetHeight);
 
-    ctx.drawImage(
-      tmpCanvas,
-      0,
-      0,
-      originalImage.width,
-      originalImage.height,
-      0,
-      0,
-      targetWidth,
-      targetHeight
-    );
+    ctx.drawImage(tmpCanvas, 0, 0, originalImage.width, originalImage.height, 0, 0, targetWidth, targetHeight);
   };
 
   onMount(() => {
     const height = wrapperRef.clientHeight;
-    const currentImage = layerImageStore[props.layer.id].current;
+    const currentImage = getImageOf(props.layer.id);
 
     let agent = layerImageManager.getAgent(props.layer.id);
-    if (!agent) {
-      agent = layerImageManager.registerAgent(props.layer.id, currentImage);
-    } else {
-      agent.setImage(currentImage, true);
+    if (currentImage) {
+      agent?.setImage(currentImage, true);
+      updatePreview(currentImage, height);
     }
 
-    updatePreview(currentImage, height);
-
-    agent.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      const img = layerImageStore[props.layer.id].current;
-      updatePreview(img, height);
+    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
+      const img = getImageOf(props.layer.id);
+      if (img) updatePreview(img, height);
     });
   });
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
       <canvas
-        class={styles.canvas}
+        class={layerPreviewCanvas}
         ref={(el) => (canvasRef = el)}
         onClick={(e) => {
           if (props.onClick) props.onClick();

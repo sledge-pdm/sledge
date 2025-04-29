@@ -3,6 +3,7 @@ import { CanvasRenderingMode } from '~/types/Canvas';
 import { FileLocation } from '~/types/FileLocation';
 import { KeyConfigEntry } from '~/types/KeyConfig';
 import { Size2D } from '~/types/Size';
+import { KeyConfigCommands } from '~/utils/consts';
 
 // global
 export const getCanvasImageRenderingAttribute = (
@@ -28,7 +29,7 @@ type GlobalConfigStore = {
   showPerfMonitor: boolean;
 };
 type KeyConfigStore = {
-  [command: string]: KeyConfigEntry[];
+  [command in KeyConfigCommands]: KeyConfigEntry[];
 };
 
 const defaultGlobalConfigStore: GlobalConfigStore = {

@@ -9,11 +9,12 @@ import EdgeInfo from '~/components/global/EdgeInfo';
 import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
 import { adjustZoomToFit, centeringCanvas, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import KeyListener from '~/controllers/config/KeyListener';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromPath } from '~/io/project/project';
-import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { LayerImageManager as LayerAgentManager } from '~/models/layer_image/LayerImageManager';
 import { globalStore } from '~/stores/GlobalStores';
 import { canvasStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 
@@ -33,9 +34,9 @@ export const EditorWindowOptions: WindowOptionsProp = {
   fullscreen: false,
 };
 
-export const layerImageManager = new LayerImageManager();
+export const layerAgentManager = new LayerAgentManager();
 
-export const getImageOf = (layerId: string) => layerImageManager.getAgent(layerId)?.getImage();
+export const getImageOf = (layerId: string) => layerAgentManager.getAgent(layerId)?.getImage();
 
 export default function Editor() {
   const window = getCurrentWebviewWindow();
@@ -132,6 +133,8 @@ export default function Editor() {
           <div style={{ 'flex-grow': 1 }}>
             <CanvasArea />
           </div>
+
+          <KeyListener />
           {/* <Companion /> */}
         </div>
       )}

@@ -10,8 +10,8 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
 import { globalStore } from '~/stores/GlobalStores';
-import WebglCanvasStack from './WebglCanvasStack';
 import { LayerCanvas } from './LayerCanvas';
+import WebGLCanvasStack from './WebglCanvasStack';
 
 const CanvasStack: Component = () => {
   const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
@@ -64,7 +64,7 @@ const CanvasStack: Component = () => {
             </For>
           }
         >
-          <WebglCanvasStack />
+          <WebGLCanvasStack />
         </Show>
       </div>
 

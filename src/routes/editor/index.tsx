@@ -68,11 +68,11 @@ export default function Editor() {
     if (isNewProject) {
       changeCanvasSize(globalStore.newProjectCanvasSize);
       setCanvasStore('canvas', globalStore.newProjectCanvasSize);
-    }
 
-    layerListStore.layers.forEach((layer) => {
-      resetLayerImage(layer.id, 1);
-    });
+      layerListStore.layers.forEach((layer) => {
+        resetLayerImage(layer.id, 1);
+      });
+    }
 
     adjustZoomToFit();
   };

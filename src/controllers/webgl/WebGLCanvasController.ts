@@ -6,6 +6,7 @@ import { Consts } from '~/utils/consts';
 // shaders
 import vertexSrc from '~/shaders/fullscreen.vert.glsl';
 import fragmentSrc from '~/shaders/blend.frag.glsl';
+import { blobToDataURL } from '~/utils/BlobUtils';
 
 export class WebGLCanvasController {
   private gl!: WebGLRenderingContext;
@@ -112,4 +113,40 @@ export class WebGLCanvasController {
     this.textureMgr.dispose();
     deleteProgramSafe(this.gl, this.program);
   }
+  /**
+   * 現在のキャンバス合成結果を縮小コピーして
+   * PNG Blob を返す
+   */
+  async exportThumbnailPng(thumbW: number, thumbH: number): Promise<Blob> {
+    // 1) オフスクリーン Canvas2D を用意
+    const thumb = document.createElement('canvas');
+    thumb.width = thumbW;
+    thumb.height = thumbH;
+    const ctx = thumb.getContext('2d')!;
+    // 2) WebGL Canvas 全体を縮小描画
+    ctx.drawImage(this.canvas, 0, 0, thumbW, thumbH);
+    // 3) Blob 化
+    return await new Promise<Blob>((res) => thumb.toBlob((b) => res(b!)));
+  }
+
+  /**
+   * ImageData が欲しい場合はこちら
+   */
+  getThumbnailImageData(thumbW: number, thumbH: number): ImageData {
+    const thumb = document.createElement('canvas');
+    thumb.width = thumbW;
+    thumb.height = thumbH;
+    const ctx = thumb.getContext('2d')!;
+    ctx.drawImage(this.canvas, 0, 0, thumbW, thumbH);
+    return ctx.getImageData(0, 0, thumbW, thumbH);
+  }
+}
+
+export async function exportThumbnailDataURL(
+  controller: WebGLCanvasController,
+  thumbW: number,
+  thumbH: number
+): Promise<string> {
+  const blob = await controller.exportThumbnailPng(thumbW, thumbH);
+  return await blobToDataURL(blob);
 }

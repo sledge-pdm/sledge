@@ -1,11 +1,12 @@
 import { BlendMode, Layer } from '~/types/Layer';
+import { Consts } from '~/utils/consts';
 import { createFullScreenQuad } from './GeometryUtils';
 import { createProgramFromSources, deleteProgramSafe } from './ShaderUtils';
 import { TextureManager } from './TextureManager';
-import { Consts } from '~/utils/consts';
 // shaders
-import vertexSrc from '~/shaders/fullscreen.vert.glsl';
 import fragmentSrc from '~/shaders/blend.frag.glsl';
+import vertexSrc from '~/shaders/fullscreen.vert.glsl';
+import { blobToDataURL } from '~/utils/BlobUtils';
 
 export class WebGLCanvasController {
   private gl!: WebGLRenderingContext;
@@ -23,7 +24,7 @@ export class WebGLCanvasController {
 
   init(layers: Layer[]) {
     // 1) Context
-    this.gl = this.canvas.getContext('webgl', { premultipliedAlpha: false })!;
+    this.gl = this.canvas.getContext('webgl', { preserveDrawingBuffer: true, premultipliedAlpha: false })!;
     if (!this.gl) throw new Error('WebGL not supported');
 
     // 2) Shader + Program
@@ -61,8 +62,6 @@ export class WebGLCanvasController {
   }
 
   updateLayers(layers: Layer[]) {
-    console.log('update layers');
-
     const active = layers.filter((l) => l.enabled).slice(0, this.maxLayers);
     const prev = [...this.textureMgr.layerIds];
     const next = active.map((l) => l.id);
@@ -112,4 +111,51 @@ export class WebGLCanvasController {
     this.textureMgr.dispose();
     deleteProgramSafe(this.gl, this.program);
   }
+
+  /**
+   * 現在のキャンバス合成結果を縮小コピーして
+   * PNG Blob を返す
+   */
+  async exportThumbnailPng(thumbW: number, thumbH: number): Promise<Blob> {
+    // GPUコマンドを同期完了させる
+    this.gl.flush();
+    this.gl.finish();
+
+    console.log(
+      'src backing:',
+      this.canvas.width,
+      this.canvas.height,
+      'src css:',
+      this.canvas.style.width,
+      this.canvas.style.height
+    );
+
+    const thumb = document.createElement('canvas');
+    thumb.width = thumbW;
+    thumb.height = thumbH;
+    const ctx = thumb.getContext('2d')!;
+    ctx.drawImage(this.canvas, 0, 0, thumbW, thumbH);
+    return await new Promise<Blob>((r) => thumb.toBlob((b) => r(b!)));
+  }
+
+  /**
+   * ImageData が欲しい場合はこちら
+   */
+  getThumbnailImageData(thumbW: number, thumbH: number): ImageData {
+    const thumb = document.createElement('canvas');
+    thumb.width = thumbW;
+    thumb.height = thumbH;
+    const ctx = thumb.getContext('2d')!;
+    ctx.drawImage(this.canvas, 0, 0, thumbW, thumbH);
+    return ctx.getImageData(0, 0, thumbW, thumbH);
+  }
+}
+
+export async function exportThumbnailDataURL(
+  controller: WebGLCanvasController,
+  thumbW: number,
+  thumbH: number
+): Promise<string> {
+  const blob = await controller.exportThumbnailPng(thumbW, thumbH);
+  return await blobToDataURL(blob);
 }

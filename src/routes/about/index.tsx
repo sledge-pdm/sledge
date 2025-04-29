@@ -1,6 +1,8 @@
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { WindowOptions } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-shell';
+import { pageRoot } from '~/styles/global.css';
+import { flexRow, w100, wh100 } from '~/styles/snippets.css';
 import {
   aaContainer,
   aaText,
@@ -12,8 +14,6 @@ import {
   contentContainer,
   sendFBButton,
 } from './about.css';
-import { pageRoot } from '~/styles/global.css';
-import { flexRow, w100, wh100 } from '~/styles/snippets.css';
 
 export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions = {
   url: '/about',

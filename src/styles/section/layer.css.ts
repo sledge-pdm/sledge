@@ -6,10 +6,8 @@ export const layerList = style([
   flexCol,
   w100,
   {
-    flexGrow: 1,
     position: 'relative',
     gap: vars.spacing.xs,
-    // border: '1px solid #333',
   },
 ]);
 

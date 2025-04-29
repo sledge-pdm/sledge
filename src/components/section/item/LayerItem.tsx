@@ -97,7 +97,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
           >
             <p class={layerItemIndex}>{props.index}.</p>
-            <p class={layerItemType}>{props.layer.typeDescription}</p>
+            <p class={layerItemType}>
+              {Math.ceil(props.layer.opacity * 100)}%, {props.layer.mode}
+            </p>
           </div>
 
           <p class={layerItemName}> {props.layer.name}</p>

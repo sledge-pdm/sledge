@@ -8,7 +8,6 @@ import { ToolType } from '~/types/Tool';
 
 const KeyListener: Component = () => {
   const handleKey = (e: KeyboardEvent) => {
-    console.log(recordKey(e));
     if (isKeyMatchesToEntry(e, keyConfigStore['undo'])) {
       const active = activeLayer();
       if (active) undoLayer(active.id);
@@ -23,7 +22,6 @@ const KeyListener: Component = () => {
   };
   onMount(() => {
     window.addEventListener('keydown', handleKey);
-
     onCleanup(() => window.removeEventListener('keydown', handleKey));
   });
 

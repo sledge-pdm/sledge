@@ -1,15 +1,12 @@
-import { defineConfig } from 'vite'
-import solidPlugin from 'vite-plugin-solid'
-import tsconfigPaths from 'vite-tsconfig-paths'
-import path from 'path'
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
+import { defineConfig } from 'vite';
+import solidPlugin from 'vite-plugin-solid';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import path from 'path';
+import glsl from 'vite-plugin-glsl';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 
 export default defineConfig({
-  plugins: [
-    vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }),
-    solidPlugin(),
-    tsconfigPaths(),
-  ],
+  plugins: [vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths(), glsl()],
   build: {
     target: 'esnext',
     outDir: 'dist',
@@ -21,4 +18,4 @@ export default defineConfig({
   alias: {
     '~': path.resolve(__dirname, 'src'),
   },
-})
+});

@@ -39,11 +39,6 @@
     ],
     "active": true,
     "targets": "all",
-    "icon": [
-      "icons_light/icon.ico",
-      "icons_light/32x32.png",
-      "icons_light/128x128.png",
-      "icons_light/256x256.png"
-    ]
+    "icon": ["icons_light/icon.ico", "icons_light/32x32.png", "icons_light/128x128.png", "icons_light/256x256.png"]
   }
 }

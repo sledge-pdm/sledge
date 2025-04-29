@@ -2,7 +2,7 @@
 import { style } from '@vanilla-extract/css';
 import { flexRow } from '~/styles/snippets.css';
 
-const transparent_bg_size = 4;
+const transparent_bg_size = 10;
 const transparent_bg_color = '#0000000A';
 
 export const canvasStack = style([

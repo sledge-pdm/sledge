@@ -18,6 +18,11 @@ const PerformanceSettings: Component = () => {
           checked={globalStore.showPerfMonitor}
           onChange={(e) => setGlobalStore('showPerfMonitor', e)}
         />
+        <Checkbox
+          label='enable webgl render.'
+          checked={globalStore.enableGLRender}
+          onChange={(e) => setGlobalStore('enableGLRender', e)}
+        />
       </div>
     </div>
   );

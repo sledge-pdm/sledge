@@ -27,6 +27,7 @@ type GlobalConfigStore = {
   canvasRenderingMode: CanvasRenderingMode;
   showDirtyRects: boolean;
   showPerfMonitor: boolean;
+  enableGLRender: boolean;
 };
 type KeyConfigStore = {
   [command in KeyConfigCommands]: KeyConfigEntry[];
@@ -44,6 +45,7 @@ const defaultGlobalConfigStore: GlobalConfigStore = {
 
   showDirtyRects: false,
   showPerfMonitor: false,
+  enableGLRender: true,
 };
 const KEY_CONFIG_TEMPLATE: Readonly<KeyConfigStore> = {
   undo: [{ ctrl: true, key: 'z' }],

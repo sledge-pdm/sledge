@@ -1,27 +1,29 @@
+import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { createSignal, onCleanup, onMount } from 'solid-js';
-import EdgeInfo from '~/components/EdgeInfo';
-import SideSections from '~/components/SideSections';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import EdgeInfo from '~/components/global/EdgeInfo';
+import Loading from '~/components/global/Loading';
+import SideSections from '~/components/global/SideSections';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { addLayer } from '~/controllers/layer_list/LayerListController';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromPath } from '~/io/project/project';
-import { addLayer } from '~/models/factories/addLayer';
-import { adjustZoomToFit, centeringCanvas } from '~/stores/project/canvasStore';
-import { projectStore, setProjectStore } from '~/stores/project/projectStore';
+import { LayerImageManager } from '~/models/layer_image/LayerImageManager';
+import { globalStore } from '~/stores/GlobalStores';
+import { canvasStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+
 import { pageRoot } from '~/styles/global.css';
 import { LayerType } from '~/types/Layer';
-import {
-  closeWindowsByLabel,
-  openStartWindow,
-  WindowOptionsProp,
-} from '~/utils/windowUtils';
+import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
-  width: 1200,
-  height: 800,
+  width: 1000,
+  height: 750,
   acceptFirstMouse: true,
   resizable: true,
   closable: true,
@@ -31,11 +33,41 @@ export const EditorWindowOptions: WindowOptionsProp = {
   fullscreen: false,
 };
 
+export const layerImageManager = new LayerImageManager();
+
+export const getImageOf = (layerId: string) => layerImageManager.getAgent(layerId)?.getImage();
+
 export default function Editor() {
   const window = getCurrentWebviewWindow();
   const location = useLocation();
 
+  createEffect(() => {
+    trackStore(canvasStore.canvas);
+    trackStore(layerHistoryStore);
+    trackStore(layerListStore);
+    setProjectStore('isProjectChangedAfterSave', true);
+  });
+
+  const isNewProject = location.search === '';
   const [isLoading, setIsLoading] = createSignal(true);
+
+  const onProjectLoad = async () => {
+    setProjectStore('isProjectChangedAfterSave', false);
+    setIsLoading(false);
+
+    await loadGlobalSettings();
+
+    if (isNewProject) {
+      changeCanvasSize(globalStore.newProjectCanvasSize);
+    }
+
+    layerListStore.layers.forEach((layer) => {
+      resetLayerImage(layer.id, 1);
+    });
+
+    adjustZoomToFit();
+    centeringCanvas();
+  };
 
   if (location.search) {
     const sp = new URLSearchParams(location.search);
@@ -43,15 +75,13 @@ export default function Editor() {
     const filePath = sp.get('path');
     const path = `${filePath}\\${fileName}`;
     importProjectJsonFromPath(path).then(() => {
-      setProjectStore('isProjectChangedAfterSave', false);
-      setIsLoading(false);
+      onProjectLoad();
     });
   } else {
     // create new
     setProjectStore('name', 'new project');
     addLayer('dot', LayerType.Dot, true, 1).then(() => {
-      setProjectStore('isProjectChangedAfterSave', false);
-      setIsLoading(false);
+      onProjectLoad();
     });
   }
 
@@ -59,10 +89,6 @@ export default function Editor() {
   let unlisten: UnlistenFn;
 
   onMount(async () => {
-    adjustZoomToFit();
-    centeringCanvas();
-    loadGlobalSettings();
-
     unlisten = await window.onCloseRequested(async (event) => {
       if (isCloseRequested()) {
         event.preventDefault();
@@ -71,13 +97,10 @@ export default function Editor() {
       SetIsCloseRequested(true);
       event.preventDefault();
       if (projectStore.isProjectChangedAfterSave) {
-        const confirmed = await confirm(
-          'the project is not saved.\nsure to quit without save?',
-          {
-            okLabel: 'quit w/o save.',
-            cancelLabel: 'cancel.',
-          }
-        );
+        const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
+          okLabel: 'quit w/o save.',
+          cancelLabel: 'cancel.',
+        });
         if (confirmed) {
           await openStartWindow();
           closeWindowsByLabel('editor');
@@ -100,11 +123,7 @@ export default function Editor() {
 
   return (
     <>
-      {isLoading() && (
-        <div class={pageRoot}>
-          <p style={{ 'font-size': '2rem' }}>please wait.</p>
-        </div>
-      )}
+      {isLoading() && <Loading />}
 
       {!isLoading() && (
         <div class={pageRoot}>

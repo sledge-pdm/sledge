@@ -1,11 +1,5 @@
-mod commands;
-mod pipeline;
-mod standalone;
-
-use pipeline::run_pipeline;
 use serde::Serialize;
-use standalone::{flood_fill, flood_fill_raw};
-use sysinfo::{get_current_pid, ProcessesToUpdate, System};
+use sysinfo::{ProcessesToUpdate, System, get_current_pid};
 
 #[derive(Serialize)]
 struct ProcessMem {
@@ -51,19 +45,14 @@ fn get_process_memory() -> ProcessMem {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            get_process_memory,
-            run_pipeline,
-            flood_fill,
-            flood_fill_raw
-        ])
+        .invoke_handler(tauri::generate_handler![get_process_memory,])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_system_info::init());
 
     builder
-        .setup(|app| Ok(()))
+        .setup(|_app| Ok(()))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

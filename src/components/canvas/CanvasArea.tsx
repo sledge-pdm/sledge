@@ -1,18 +1,13 @@
 import { createMemo, onCleanup, onMount } from 'solid-js';
-import CanvasAreaInteract from './CanvasAreaInteract';
-import Controls from './Controls';
+import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
+import CanvasControls from './CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
 
-import {
-  adjustZoomToFit,
-  canvasStore,
-  centeringCanvas,
-  setCanvasStore,
-} from '~/stores/project/canvasStore';
+import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
-import BottomInfo from '../BottomInfo';
+import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
-import { globalStore } from '~/stores/global/globalStore';
 
 export default () => {
   let wrapper: HTMLDivElement;
@@ -22,7 +17,7 @@ export default () => {
 
   onMount(() => {
     // set Canvas to center
-    setCanvasStore('canvasAreaSize', {
+    setInteractStore('canvasAreaSize', {
       width: wrapper.clientWidth,
       height: wrapper.clientHeight,
     });
@@ -38,11 +33,11 @@ export default () => {
     }
   });
 
-  const offsetX = () => canvasStore.offsetOrigin.x + canvasStore.offset.x;
-  const offsetY = () => canvasStore.offsetOrigin.y + canvasStore.offset.y;
+  const offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
+  const offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
 
   const transform = createMemo(() => {
-    return `translate(${offsetX()}px, ${offsetY()}px) scale(${canvasStore.zoom})`;
+    return `translate(${offsetX()}px, ${offsetY()}px) scale(${interactStore.zoom})`;
   });
 
   return (
@@ -81,7 +76,7 @@ export default () => {
       </div>
 
       <CanvasDebugOverlay />
-      <Controls />
+      <CanvasControls />
       <BottomInfo />
     </div>
   );

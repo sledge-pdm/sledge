@@ -1,21 +1,13 @@
-import { For, onMount } from 'solid-js';
-import { loadGlobalSettings } from '~/io/global/globalIO';
+import { For, onMount, Show } from 'solid-js';
+import { addRecentFile } from '~/controllers/config/GlobalConfigController';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectJsonFromFileSelection } from '~/io/project/project';
-import {
-  addRecent,
-  globalStore,
-  setGlobalStore,
-} from '~/stores/global/globalStore';
-import { sectionRoot } from '~/styles/section_global.css';
+import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
-import { getFileNameAndPath } from '~/utils/pathUtils';
-import {
-  closeWindowsByLabel,
-  openEditorWindow,
-  openSingletonWindow,
-  WindowOptionsProp,
-} from '~/utils/windowUtils';
+import { getFileNameAndPath } from '~/utils/PathUtils';
+import { closeWindowsByLabel, openEditorWindow, openSingletonWindow, WindowOptionsProp } from '~/utils/windowUtils';
 import { SettingsWindowOptions } from './settings';
 import {
   recentFilesCaption,
@@ -30,7 +22,7 @@ import {
 } from './start.css';
 
 export const StartWindowOptions: WindowOptionsProp = {
-  title: 'sledeg',
+  title: 'sledge',
   width: 700,
   height: 500,
   acceptFirstMouse: true,
@@ -62,7 +54,7 @@ export default function Home() {
     importProjectJsonFromFileSelection().then((file: string | undefined) => {
       if (file !== undefined) {
         const loc = getFileNameAndPath(file);
-        if (loc !== undefined) addRecent(loc);
+        addRecentFile(loc);
         openEditorWindow(loc);
         closeWindowsByLabel('start');
       }
@@ -70,7 +62,7 @@ export default function Home() {
   };
 
   const clearRecentFiles = () => {
-    setGlobalStore('recentOpenedFiles', []);
+    setGlobalStore('recentFiles', []);
   };
 
   return (
@@ -81,51 +73,44 @@ export default function Home() {
           <a class={sideSectionItem} onClick={() => createNew()}>
             +&ensp;new.
           </a>
-          <a
-            class={sideSectionItem}
-            style={{ 'margin-left': '2px' }}
-            onClick={(e) => openProject()}
-          >
+          <a class={sideSectionItem} style={{ 'margin-left': '2px' }} onClick={(e) => openProject()}>
             &gt;&ensp;open.
           </a>
           <a
             class={sideSectionItem}
             style={{ 'margin-left': '2px' }}
-            onClick={(e) =>
-              openSingletonWindow('settings', SettingsWindowOptions)
-            }
+            onClick={(e) => openSingletonWindow('settings', SettingsWindowOptions)}
           >
-            <img src={'/settings.png'} width={16} height={16} />
+            <img src={'/icons/misc/settings.png'} width={16} height={16} />
             &ensp;settings.
           </a>
         </div>
 
-        <div class={sectionRoot}>
-          <div class={[flexRow, w100].join(' ')}>
-            <p class={recentFilesCaption}>recent files.</p>
-            {/* <p class={clear} onClick={() => clearRecentFiles()}>
+        <Show when={globalStore.recentFiles.length > 0}>
+          <div class={sectionRoot}>
+            <div class={[flexRow, w100].join(' ')}>
+              <p class={recentFilesCaption}>recent files.</p>
+              {/* <p class={clear} onClick={() => clearRecentFiles()}>
                 clear
               </p> */}
+            </div>
+            <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
+              <For each={globalStore.recentFiles}>
+                {(item, i) => {
+                  return (
+                    <div class={recentFilesItem}>
+                      <p>■</p>
+                      <a class={recentFilesName} onClick={(e) => moveToEditor(item)}>
+                        {item.name}
+                      </a>
+                      <p class={recentFilesPath}>{item.path}</p>
+                    </div>
+                  );
+                }}
+              </For>
+            </div>
           </div>
-          <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
-            <For each={globalStore.recentOpenedFiles}>
-              {(item, i) => {
-                return (
-                  <div class={recentFilesItem}>
-                    <p>■</p>
-                    <a
-                      class={recentFilesName}
-                      onClick={(e) => moveToEditor(item)}
-                    >
-                      {item.name}
-                    </a>
-                    <p class={recentFilesPath}>{item.path}</p>
-                  </div>
-                );
-              }}
-            </For>
-          </div>
-        </div>
+        </Show>
       </div>
     </div>
   );

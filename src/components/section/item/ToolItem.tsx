@@ -15,13 +15,13 @@ const ToolItem: Component<Props> = (props: Props) => {
   let src = '';
   switch (props.tool.type) {
     case ToolType.Pen:
-      src = '/pen.png';
+      src = '/icons/tool/pen.png';
       break;
     case ToolType.Eraser:
-      src = '/eraser_b.png';
+      src = '/icons/tool/eraser_b.png';
       break;
     case ToolType.Fill:
-      src = '/fill_G_x10.png';
+      src = '/icons/tool/fill_G_x10.png';
       break;
   }
   return (

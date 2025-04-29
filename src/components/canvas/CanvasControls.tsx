@@ -9,7 +9,7 @@ const CanvasControls: Component = () => {
     <div class={styles.topRightNav}>
       <img
         class={styles.undoRedo}
-        src='/undo.png'
+        src='/icons/misc/undo.png'
         style={{
           opacity: canUndo() ? '1.0' : '0.3',
           cursor: canUndo() ? 'pointer' : 'unset',
@@ -22,7 +22,7 @@ const CanvasControls: Component = () => {
       />
       <img
         class={styles.undoRedo}
-        src='/redo.png'
+        src='/icons/misc/redo.png'
         style={{
           opacity: canRedo() ? '1.0' : '0.3',
           cursor: canRedo() ? 'pointer' : 'unset',

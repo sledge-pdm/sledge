@@ -66,17 +66,20 @@ export default function TitleBar() {
         <div class={titleBarControls}>
           {isMinimizable() && (
             <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
-              <img class={titleBarControlButtonImg} src={'/minimize.png'} />
+              <img class={titleBarControlButtonImg} src={'/icons/title_bar/minimize.png'} />
             </button>
           )}
           {isMaximizable() && (
             <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
-              <img class={titleBarControlButtonImg} src={isMaximized() ? '/leave_maximize.png' : '/maximize.png'} />
+              <img
+                class={titleBarControlButtonImg}
+                src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/maximize.png'}
+              />
             </button>
           )}
           {isClosable() && (
             <button class={titleBarControlCloseButton} onClick={() => window.close()}>
-              <img class={titleBarControlButtonImg} src={'/close.png'} />
+              <img class={titleBarControlButtonImg} src={'/icons/title_bar/close.png'} />
             </button>
           )}
         </div>

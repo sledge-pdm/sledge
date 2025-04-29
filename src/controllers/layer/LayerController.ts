@@ -1,5 +1,5 @@
 import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
-import { layerImageManager } from '~/routes/editor';
+import { layerAgentManager } from '~/routes/editor';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore } from '~/stores/ProjectStores';
 
 const magnificationList: number[] = [1, 2, 4];
@@ -22,12 +22,12 @@ export function resetLayerImage(layerId: string, dotMagnification: number): Laye
     undoStack: [],
     redoStack: [],
   });
-  const agent = layerImageManager.getAgent(layerId);
+  const agent = layerAgentManager.getAgent(layerId);
   if (agent !== undefined) {
     agent.setImage(blank, false);
     return agent;
   } else {
-    return layerImageManager.registerAgent(layerId, blank);
+    return layerAgentManager.registerAgent(layerId, blank);
   }
 }
 

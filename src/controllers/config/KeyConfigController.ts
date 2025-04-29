@@ -1,6 +1,7 @@
 import { reconcile } from 'solid-js/store';
 import { makeDefaultKeyConfigStore, setKeyConfigStore } from '~/stores/GlobalStores';
 import { KeyConfigEntry } from '~/types/KeyConfig';
+import { KeyConfigCommands } from '~/utils/consts';
 
 export const recordKey = (e: KeyboardEvent): KeyConfigEntry => {
   return {
@@ -44,11 +45,22 @@ export const parseKeyConfigEntry = (entry?: KeyConfigEntry) => {
     .join('+');
 };
 
-export function saveKeyConfigEntry(name: string, entry?: KeyConfigEntry) {
+export function saveKeyConfigEntry(name: KeyConfigCommands, entry?: KeyConfigEntry) {
   if (!entry) return;
   setKeyConfigStore(name, 0, entry);
 }
 
 export function restoreDefaultKeyConfig() {
   setKeyConfigStore(reconcile(makeDefaultKeyConfigStore()));
+}
+
+export function isKeyMatchesToEntry(e: KeyboardEvent, entries: KeyConfigEntry[]): boolean {
+  return entries.some((entry) => {
+    if (entry.key.toLowerCase() !== e.key.toLowerCase()) return false;
+    if ((entry.ctrl ?? false) !== e.ctrlKey) return false;
+    if ((entry.alt ?? false) !== e.altKey) return false;
+    if ((entry.meta ?? false) !== e.metaKey) return false;
+    if ((entry.shift ?? false) !== e.shiftKey) return false;
+    return true;
+  });
 }

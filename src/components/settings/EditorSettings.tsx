@@ -5,7 +5,7 @@ import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { CanvasRenderingMode } from '~/types/Canvas';
 import { Consts } from '~/utils/consts';
-import Dropdown, { DropdownOption } from '../../common/basics/Dropdown';
+import Dropdown, { DropdownOption } from '../common/basics/Dropdown';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'adaptive', value: 'adaptive' },

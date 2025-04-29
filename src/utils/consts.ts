@@ -5,3 +5,5 @@ export const Consts = {
   minCanvasHeight: 1,
   maxCanvasHeight: 5000,
 };
+
+export type KeyConfigCommands = 'undo' | 'redo' | 'pen' | 'eraser' | 'fill';

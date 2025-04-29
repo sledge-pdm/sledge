@@ -1,5 +1,5 @@
 import { Component, onMount } from 'solid-js';
-import { getImageOf, layerImageManager } from '~/routes/editor';
+import { getImageOf, layerAgentManager } from '~/routes/editor';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
 import { Layer } from '~/types/Layer';
 
@@ -50,7 +50,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const height = wrapperRef.clientHeight;
     const currentImage = getImageOf(props.layer.id);
 
-    let agent = layerImageManager.getAgent(props.layer.id);
+    let agent = layerAgentManager.getAgent(props.layer.id);
     if (currentImage) {
       agent?.setImage(currentImage, true);
       updatePreview(currentImage, height);

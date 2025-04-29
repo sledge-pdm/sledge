@@ -1,8 +1,10 @@
 // src/styles/components/basics/slider.css.ts
 import { style } from '@vanilla-extract/css';
 
-export const root = style({
+export const sliderRoot = style({
   width: '100%',
+  height: 'auto',
+  margin: '12px 0',
 });
 
 export const slider = style({

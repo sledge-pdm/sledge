@@ -1,6 +1,6 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, Show } from 'solid-js';
-import { interactStore } from '~/stores/EditorStores';
+import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalStore } from '~/stores/GlobalStores';
 import {
   canvasDebugOverlayBottomLeft,
@@ -9,6 +9,7 @@ import {
 import { flexCol } from '~/styles/snippets.css';
 import { safeInvoke } from '~/utils/TauriUtils';
 import { PixelLineChart } from '../common/PixelLineChart';
+import { RenderMode } from '~/types/RenderMode';
 
 interface TauriMemInfo {
   total_bytes: number;
@@ -57,6 +58,7 @@ const CanvasDebugOverlay: Component = (props) => {
           <p>
             offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)})
           </p>
+          <p>canvas render mode: {RenderMode[logStore.currentRenderMode]}</p>
         </div>
       </div>
 

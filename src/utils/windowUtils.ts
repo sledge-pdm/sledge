@@ -3,6 +3,7 @@ import { getAllWebviewWindows, WebviewWindow } from '@tauri-apps/api/webviewWind
 import { WindowOptions } from '@tauri-apps/api/window';
 import { StartWindowOptions } from '~/routes';
 import { EditorWindowOptions } from '~/routes/editor';
+import { globalStore } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
@@ -30,24 +31,35 @@ export async function closeWindowsByLabel(label: string) {
     });
 }
 
-export async function openEditorWindow(fileLocation?: FileLocation) {
-  if (fileLocation === undefined) {
-    const editorWin = new WebviewWindow('editor', {
-      ...EditorWindowOptions,
-      url: `/editor`,
-      title: 'sledge',
-    });
-  } else {
-    const params = new URLSearchParams();
-    params.append('name', fileLocation.name);
-    params.append('path', fileLocation.path);
-    console.log(`/editor?${params.toString()}`);
-    const editorWin = new WebviewWindow('editor', {
-      ...EditorWindowOptions,
-      url: `/editor?${params.toString()}`,
-      title: 'sledge',
-    });
-  }
+const getNewProjectSearchParams = (): string => {
+  const sp = new URLSearchParams();
+  sp.append('new', 'true');
+  sp.append('width', globalStore.newProjectCanvasSize.width.toString());
+  sp.append('height', globalStore.newProjectCanvasSize.height.toString());
+  return sp.toString();
+};
+
+export async function openNewEditorWindow() {
+  const editorWin = new WebviewWindow('editor', {
+    ...EditorWindowOptions,
+    url: `/editor?${getNewProjectSearchParams()}`,
+    title: 'sledge',
+  });
+}
+
+const getExistingProjectSearchParams = (fileLocation: FileLocation): string => {
+  const sp = new URLSearchParams();
+  sp.append('name', fileLocation.name);
+  sp.append('path', fileLocation.path);
+  return sp.toString();
+};
+
+export async function openEditorWindow(fileLocation: FileLocation) {
+  const editorWin = new WebviewWindow('editor', {
+    ...EditorWindowOptions,
+    url: `/editor?${getExistingProjectSearchParams(fileLocation)}`,
+    title: 'sledge',
+  });
 }
 
 export async function openStartWindow() {

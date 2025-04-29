@@ -8,6 +8,16 @@ type createLayerProps = Omit<Layer, 'id' | 'typeDescription' | 'dsl'> & {
   dsl: DSL | undefined;
 };
 
+export const fallbackLayerProps: createLayerProps = {
+  name: 'fb layer',
+  type: LayerType.Dot,
+  opacity: 1,
+  mode: BlendMode.normal,
+  enabled: true,
+  dotMagnification: 1,
+  dsl: undefined,
+};
+
 export const createLayer = (props: createLayerProps): Layer => {
   const name = getNumberUniqueLayerName(props.name);
 

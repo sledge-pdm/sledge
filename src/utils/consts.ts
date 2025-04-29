@@ -6,6 +6,8 @@ export const Consts = {
   maxCanvasHeight: 5000,
 
   maxLayerSize: 64,
+
+  projectThumbnailSize: 92,
 };
 
 export type KeyConfigCommands = 'undo' | 'redo' | 'pen' | 'eraser' | 'fill';

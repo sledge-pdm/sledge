@@ -2,16 +2,16 @@ import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } fr
 import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
 import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer_list/LayerListController';
 
+import { setLayerProp } from '~/controllers/layer/LayerController';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
-import { layerList } from '~/styles/section/layer.css';
-import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
-import LayerItem from './item/LayerItem';
-import Slider from '../common/basics/Slider';
-import { getActiveLayerIndex, setLayerProp } from '~/controllers/layer/LayerController';
 import { vars } from '~/styles/global.css';
-import Checkbox from '../common/basics/Checkbox';
+import { layerList } from '~/styles/section/layer.css';
+import { flexRow } from '~/styles/snippets.css';
 import { BlendMode } from '~/types/Layer';
+import Checkbox from '../common/basics/Checkbox';
+import Slider from '../common/basics/Slider';
+import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {

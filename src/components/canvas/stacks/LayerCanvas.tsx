@@ -1,4 +1,4 @@
-import { Component, createRenderEffect, onMount, Ref } from 'solid-js';
+import { Component, onMount } from 'solid-js';
 import { layerAgentManager } from '~/routes/editor';
 import { setLogStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';

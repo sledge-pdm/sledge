@@ -4,5 +4,6 @@
   "trailingComma": "es5",
   "singleQuote": true,
   "jsxSingleQuote": true,
-  "printWidth": 120
+  "printWidth": 120,
+  "plugins": ["prettier-plugin-organize-imports"]
 }

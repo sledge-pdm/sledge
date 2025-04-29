@@ -1,29 +1,28 @@
 import { style } from '@vanilla-extract/css';
 import { ZFB03B, ZFB09, ZFB31 } from '~/styles/global.css';
 import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css';
+import { Consts } from '~/utils/consts';
 
 export const welcomeRoot = style([
   flexCol,
   wh100,
   {
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: '42px',
   },
 ]);
 
 export const welcomeHeadline = style({
   fontFamily: ZFB31,
-  fontSize: '3rem',
-  letterSpacing: '8px',
-  marginBottom: '12px',
+  fontSize: '31px',
+  letterSpacing: '1px',
+  marginBottom: '2px',
 });
 
 export const recentFilesCaption = style({
   fontFamily: ZFB03B,
   fontSize: '16px',
   color: '#000',
-  flexGrow: 1,
-  marginBottom: '12px',
+  marginBottom: '4px',
 });
 
 export const clear = style({
@@ -35,20 +34,32 @@ export const clear = style({
 });
 
 export const recentFilesContainer = style([
-  flexCol,
   w100,
   {
+    width: '100%',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 130px)',
     gap: '8px',
-    marginTop: '4px',
+    marginTop: '12px',
   },
 ]);
 
 export const recentFilesItem = style([
-  flexRow,
-  w100,
+  flexCol,
   {
     alignItems: 'center',
     gap: '8px',
+  },
+]);
+
+export const recentFilesThumb = style([
+  flexCol,
+  {
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: '1px solid #aaa',
+    width: `${Consts.projectThumbnailSize}px`,
+    height: `${Consts.projectThumbnailSize}px`,
   },
 ]);
 
@@ -70,7 +81,7 @@ export const sideSection = style([
   flexRow,
   {
     gap: '24px',
-    paddingBottom: '48px',
+    paddingBottom: '24px',
     paddingTop: '12px',
   },
 ]);

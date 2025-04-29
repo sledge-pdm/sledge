@@ -7,7 +7,13 @@ import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
-import { closeWindowsByLabel, openEditorWindow, openSingletonWindow, WindowOptionsProp } from '~/utils/windowUtils';
+import {
+  closeWindowsByLabel,
+  openEditorWindow,
+  openNewEditorWindow,
+  openSingletonWindow,
+  WindowOptionsProp,
+} from '~/utils/windowUtils';
 import { SettingsWindowOptions } from './settings';
 import {
   recentFilesCaption,
@@ -46,7 +52,7 @@ export default function Home() {
   };
 
   const createNew = () => {
-    openEditorWindow();
+    openNewEditorWindow();
     closeWindowsByLabel('start');
   };
 
@@ -54,6 +60,7 @@ export default function Home() {
     importProjectJsonFromFileSelection().then((file: string | undefined) => {
       if (file !== undefined) {
         const loc = getFileNameAndPath(file);
+        if (!loc) return;
         addRecentFile(loc);
         openEditorWindow(loc);
         closeWindowsByLabel('start');

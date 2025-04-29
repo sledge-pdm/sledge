@@ -4,6 +4,8 @@ export const Consts = {
   maxCanvasWidth: 5000,
   minCanvasHeight: 1,
   maxCanvasHeight: 5000,
+
+  maxLayerSize: 64,
 };
 
 export type KeyConfigCommands = 'undo' | 'redo' | 'pen' | 'eraser' | 'fill';

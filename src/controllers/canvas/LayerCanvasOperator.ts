@@ -1,4 +1,3 @@
-import { LayerCanvasRef } from '~/components/canvas/stacks/LayerCanvas';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { currentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/types/Vector';
@@ -9,14 +8,17 @@ import { getToolInstance } from '../../models/tool/ToolBase';
 import { DrawState } from '../../types/DrawState';
 import { Tool } from '../../types/Tool';
 import { currentColor } from '../color/ColorController';
+import { findLayerById } from '../layer_list/LayerListController';
+import { layerAgentManager } from '~/routes/editor';
 
 export default class LayerCanvasOperator {
-  constructor(private readonly getActiveLayerCanvas: () => LayerCanvasRef) {}
+  constructor(private readonly getLayerIdToDraw: () => string) {}
 
   public handleDraw(state: DrawState, position: Vec2, last?: Vec2) {
-    const layerCanvasRef = this.getActiveLayerCanvas();
-    const layer = layerCanvasRef.getLayer();
-    const agent = layerCanvasRef.getAgent();
+    const agent = layerAgentManager.getAgent(this.getLayerIdToDraw());
+    if (!agent) return;
+    const layer = findLayerById(this.getLayerIdToDraw());
+    if (!layer) return;
     const image = agent.getImage();
     if (!image) return;
 

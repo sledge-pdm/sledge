@@ -15,6 +15,7 @@
       "~/*": ["./src/*", "./dist-tcm/*"],
       "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"]
     },
-    "rootDirs": ["src", "dist-tcm"]
+    "rootDirs": ["src", "dist-tcm"],
+    "types": ["vite-plugin-glsl/ext"]
   }
 }

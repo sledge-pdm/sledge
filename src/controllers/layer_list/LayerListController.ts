@@ -1,16 +1,18 @@
 import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
-import { LayerType } from '~/types/Layer';
+import { BlendMode, LayerType } from '~/types/Layer';
 import { DSL } from '../../models/dsl/DSL';
 import { createLayer } from '../layer/LayerFactory';
 
 export const addLayer = async (
   name: string,
   type: LayerType = LayerType.Dot,
-  enabled = true,
-  dotMagnification = 1,
+  enabled: boolean = true,
+  dotMagnification: number = 1,
+  opacity: number = 1,
+  mode: BlendMode = BlendMode.normal,
   dsl?: DSL
 ) => {
-  const newLayer = createLayer(name, type, enabled, dotMagnification, dsl);
+  const newLayer = createLayer({ name, type, enabled, dotMagnification, opacity, mode, dsl });
 
   const layers = [...allLayers()];
   layers.push(newLayer);
@@ -40,5 +42,5 @@ export const removeLayer = (layerId?: string) => {
 
 export const allLayers = () => layerListStore.layers;
 export const findLayerById = (id: string) => allLayers().find((layer) => layer.id === id);
-export const activeLayer = () => findLayerById(layerListStore.activeLayerId) || allLayers()[0] || undefined;
+export const activeLayer = () => findLayerById(layerListStore.activeLayerId) || allLayers()[0];
 export const activeIndex = () => allLayers().findIndex((layer) => layer.id === layerListStore.activeLayerId);

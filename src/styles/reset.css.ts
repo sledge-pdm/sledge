@@ -37,6 +37,10 @@ globalStyle('input', {
   outline: 'none',
   borderBottom: '1px solid black',
   fontSize: '0.5rem',
+  userSelect: 'initial',
+  WebkitUserSelect: 'initial',
+  cursor: 'text',
+  pointerEvents: 'auto',
 });
 
 globalStyle('input::-webkit-outer-spin-button, input::-webkit-inner-spin-button', {

@@ -1,10 +1,10 @@
 // editorStore.tsx
 import { createStore } from 'solid-js/store';
+import { PaletteType } from '~/models/color/PaletteType';
+import { RenderMode } from '~/models/layer/RenderMode';
+import { Tool, ToolType } from '~/models/tool/Tool';
 import { createTool } from '~/models/tool/ToolFactory';
-import { PaletteType } from '~/types/PaletteType';
-import { RenderMode } from '~/types/RenderMode';
 import { Size2D } from '~/types/Size';
-import { Tool, ToolType } from '~/types/Tool';
 import { Vec2 } from '~/types/Vector';
 
 type ColorStore = {

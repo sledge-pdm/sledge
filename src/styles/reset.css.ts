@@ -6,7 +6,6 @@ globalStyle('html, body', {
   margin: 0,
   overflow: 'hidden',
   padding: 0,
-  touchAction: 'none',
   display: 'flex',
   flexDirection: 'row',
   userSelect: 'none',

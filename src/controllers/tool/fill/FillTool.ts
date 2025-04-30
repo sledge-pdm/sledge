@@ -1,7 +1,7 @@
-import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/LayerImageAgent';
 import { Vec2 } from '~/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
-import { Tool, ToolArgs } from '../ToolBase';
+import { ToolArgs, ToolBehavior } from '../../../models/tool/ToolBase';
 import { TileFloodFill } from './TileFloodFill';
 
 export interface FillProps {
@@ -13,7 +13,7 @@ export interface Fill {
   fill: (props: FillProps) => void;
 }
 
-export class FillTool implements Tool {
+export class FillTool implements ToolBehavior {
   onStart(agent: LayerImageAgent, { position, lastPosition, color }: ToolArgs) {
     const fill = new TileFloodFill();
 

@@ -1,9 +1,9 @@
 import { Component } from 'solid-js';
+import { CanvasRenderingMode } from '~/models/canvas/Canvas';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
-import { CanvasRenderingMode } from '~/types/Canvas';
 import { Consts } from '~/utils/consts';
 import Dropdown, { DropdownOption } from '../common/basics/Dropdown';
 

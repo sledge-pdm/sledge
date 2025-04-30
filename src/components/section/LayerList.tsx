@@ -9,7 +9,7 @@ import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components
 import { vars } from '~/styles/global.css';
 import { layerList } from '~/styles/section/layer.css';
 import { flexRow } from '~/styles/snippets.css';
-import Checkbox from '../common/basics/Checkbox';
+import Dropdown from '../common/basics/Dropdown';
 import Slider from '../common/basics/Slider';
 import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
@@ -79,29 +79,47 @@ const LayerList: Component<{}> = () => {
         </div>
       </div>
       <div class={sectionContent}>
-        <div class={flexRow} style={{ 'align-items': 'center', gap: vars.spacing.sm }}>
-          <p>opacity.</p>
-          <Slider
-            default={activeLayer().opacity}
-            min={0}
-            max={1}
-            allowFloat={true}
-            onValueChanged={(newValue) => {
-              setLayerProp(activeLayer().id, 'opacity', newValue);
-            }}
-          />
-        </div>
         <div
           class={flexRow}
-          style={{ 'align-items': 'center', gap: vars.spacing.sm, 'margin-bottom': vars.spacing.md }}
+          style={{
+            'align-items': 'center',
+            gap: vars.spacing.xs,
+            'margin-bottom': vars.spacing.sm,
+          }}
         >
-          <p>multiply.</p>
-          <Checkbox
-            checked={activeLayer().mode === BlendMode.multiply}
-            onChange={(checked) => {
-              setLayerProp(activeLayer().id, 'mode', checked ? BlendMode.multiply : BlendMode.normal);
+          <div
+            class={flexRow}
+            style={{
+              gap: vars.spacing.sm,
+              'min-width': '90px',
             }}
-          />
+          >
+            <Dropdown
+              value={activeLayer().mode}
+              options={Object.entries(BlendMode).map((e) => {
+                return {
+                  label: e[0],
+                  value: e[1],
+                };
+              })}
+              onChange={(e) => {
+                setLayerProp(activeLayer().id, 'mode', e);
+              }}
+            />
+          </div>
+          <div class={flexRow} style={{ width: '100%', 'align-items': 'center', gap: vars.spacing.sm }}>
+            {/* <p>opacity.</p> */}
+            <p style={{ width: '30px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
+            <Slider
+              default={activeLayer().opacity}
+              min={0}
+              max={1}
+              allowFloat={true}
+              onValueChanged={(newValue) => {
+                setLayerProp(activeLayer().id, 'opacity', newValue);
+              }}
+            />
+          </div>
         </div>
 
         <DragDropProvider

@@ -112,12 +112,9 @@ export class WebGLCanvasController {
     deleteProgramSafe(this.gl, this.program);
   }
 
-  /**
-   * 現在のキャンバス合成結果を縮小コピーして
-   * PNG Blob を返す
-   */
+  getCanvas = () => this.canvas;
+
   async exportThumbnailPng(thumbW: number, thumbH: number): Promise<Blob> {
-    // GPUコマンドを同期完了させる
     this.gl.flush();
     this.gl.finish();
 
@@ -138,9 +135,6 @@ export class WebGLCanvasController {
     return await new Promise<Blob>((r) => thumb.toBlob((b) => r(b!)));
   }
 
-  /**
-   * ImageData が欲しい場合はこちら
-   */
   getThumbnailImageData(thumbW: number, thumbH: number): ImageData {
     const thumb = document.createElement('canvas');
     thumb.width = thumbW;

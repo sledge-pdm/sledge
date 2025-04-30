@@ -29,7 +29,7 @@ import { pageRoot } from '~/styles/global.css';
 import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
-  width: 1000,
+  width: 1200,
   height: 750,
   acceptFirstMouse: true,
   resizable: true,

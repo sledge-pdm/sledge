@@ -34,13 +34,7 @@ export default function Settings() {
 
   return (
     <div class={pageRoot}>
-      <form
-        class={settingContainer}
-        onChange={(e) => {
-          e.preventDefault();
-          saveGlobalSettings();
-        }}
-      >
+      <div class={settingContainer}>
         <div class={flexRow} style={{ 'flex-grow': 1, gap: '16px' }}>
           <div class={flexCol} style={{ 'flex-grow': 1, gap: '16px' }}>
             <EditorSettings />
@@ -50,7 +44,7 @@ export default function Settings() {
             <KeyConfigSettings />
           </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

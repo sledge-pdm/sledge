@@ -1,5 +1,5 @@
+import { Layer } from '~/models/layer/Layer';
 import { layerAgentManager } from '~/routes/editor';
-import { Layer } from '~/types/Layer';
 
 export class TextureManager {
   private textures: WebGLTexture[] = [];

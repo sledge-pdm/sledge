@@ -13,6 +13,7 @@ import {
 
 export default function TitleBar() {
   const window = getCurrentWindow();
+  let titleBarNavEl: HTMLElement;
 
   const [isMaximizable, setIsMaximizable] = createSignal(true);
   const [isMinimizable, setIsMinimizable] = createSignal(true);
@@ -30,6 +31,11 @@ export default function TitleBar() {
     // if (isEditor()) {
     //   setTitle(`${projectStore.name} - ${projectStore.path}`);
     // }
+
+    titleBarNavEl.addEventListener('touchstart', (e: TouchEvent) => {
+      e.preventDefault();
+      window.startDragging();
+    });
   });
 
   window.onResized(async (handler) => {
@@ -61,7 +67,7 @@ export default function TitleBar() {
         'border-bottom': shouldShowBorder() ? '1px solid #aaa' : 'none',
       }}
     >
-      <nav class={titleBarRoot} data-tauri-drag-region='p, button'>
+      <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region='p, button'>
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
           {isMinimizable() && (

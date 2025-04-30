@@ -1,6 +1,6 @@
+import { PixelDiff } from '~/models/history/HistoryManager';
 import { Vec2 } from '~/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
-import { PixelDiff } from '../HistoryManager';
 import LayerImageAgent from '../LayerImageAgent';
 
 export default class RawLayerImageAgent extends LayerImageAgent {

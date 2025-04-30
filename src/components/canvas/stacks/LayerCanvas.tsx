@@ -1,10 +1,10 @@
 import { Component, onMount } from 'solid-js';
+import { Layer } from '~/models/layer/Layer';
+import { RenderMode } from '~/models/layer/RenderMode';
 import { layerAgentManager } from '~/routes/editor';
 import { setLogStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
-import { Layer } from '~/types/Layer';
-import { RenderMode } from '~/types/RenderMode';
 
 type Props = {
   layer: Layer;

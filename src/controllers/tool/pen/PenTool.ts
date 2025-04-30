@@ -1,8 +1,8 @@
-import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/LayerImageAgent';
+import { ToolArgs, ToolBehavior } from '../../../models/tool/ToolBase';
 import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
-import { Tool, ToolArgs } from '../ToolBase';
 
-export class PenTool implements Tool {
+export class PenTool implements ToolBehavior {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     return false;
   }

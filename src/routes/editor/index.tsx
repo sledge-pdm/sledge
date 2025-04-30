@@ -6,15 +6,16 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/global/EdgeInfo';
+import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import KeyListener from '~/controllers/config/KeyListener';
+import { LayerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromPath } from '~/io/project/project';
-import { LayerImageManager as LayerAgentManager } from '~/models/layer_image/LayerImageManager';
+import { LayerType } from '~/models/layer/Layer';
 import { globalStore } from '~/stores/GlobalStores';
 import {
   canvasStore,
@@ -24,9 +25,7 @@ import {
   setCanvasStore,
   setProjectStore,
 } from '~/stores/ProjectStores';
-
 import { pageRoot } from '~/styles/global.css';
-import { LayerType } from '~/types/Layer';
 import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {

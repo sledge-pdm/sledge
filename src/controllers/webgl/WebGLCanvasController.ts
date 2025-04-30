@@ -1,4 +1,4 @@
-import { BlendMode, Layer } from '~/types/Layer';
+import { BlendMode, Layer } from '~/models/layer/Layer';
 import { Consts } from '~/utils/consts';
 import { createFullScreenQuad } from './GeometryUtils';
 import { createProgramFromSources, deleteProgramSafe } from './ShaderUtils';

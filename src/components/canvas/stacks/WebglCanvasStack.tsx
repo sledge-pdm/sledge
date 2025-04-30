@@ -1,11 +1,11 @@
 import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 import { allLayers } from '~/controllers/layer_list/LayerListController';
 import { WebGLCanvasController } from '~/controllers/webgl/WebGLCanvasController';
+import { RenderMode } from '~/models/layer/RenderMode';
 import { getWebglRenderer, initWebglRenderer } from '~/models/webgl/WebGLRenderer';
 import { setLogStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
-import { RenderMode } from '~/types/RenderMode';
 
 const WebGLCanvasStack: Component = () => {
   let canvasEl!: HTMLCanvasElement;

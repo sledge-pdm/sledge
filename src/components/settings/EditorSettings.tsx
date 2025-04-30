@@ -14,8 +14,6 @@ const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
 ];
 
 const EditorSettings: Component = () => {
-  const defaultNewWidth = globalStore.newProjectCanvasSize.width;
-  const defaultNewHeight = globalStore.newProjectCanvasSize.height;
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>editor.</p>
@@ -28,7 +26,7 @@ const EditorSettings: Component = () => {
               name='width'
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
-              value={defaultNewWidth}
+              value={globalStore.newProjectCanvasSize.width}
               onInput={(e) => {
                 setGlobalStore('newProjectCanvasSize', 'width', Number(e.target.value));
               }}
@@ -41,7 +39,7 @@ const EditorSettings: Component = () => {
               name='height'
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
-              value={defaultNewHeight}
+              value={globalStore.newProjectCanvasSize.height}
               onInput={(e) => {
                 setGlobalStore('newProjectCanvasSize', 'height', Number(e.target.value));
               }}
@@ -49,11 +47,6 @@ const EditorSettings: Component = () => {
               required
             />
           </div>
-        </div>
-
-        <div>
-          <p>autosave span (wip).</p>
-          <input type='number' name='width' min={100} max={1000000} required />
         </div>
 
         <p>canvas rendering (temp not works).</p>

@@ -152,6 +152,7 @@ class CanvasAreaInteract {
   }
 
   public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
+    this.removeInteractListeners(wrapper, canvasStack);
     wrapper.addEventListener('touchstart', (e) => this.handleTouchStart.bind(this)(e));
     wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack), { passive: true });
     wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });

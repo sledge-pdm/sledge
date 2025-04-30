@@ -11,6 +11,7 @@ export const sideAreaContent = style([
     marginLeft: vars.size.edge_info,
     padding: '20px 30px 90px 20px',
     width: vars.size.side_area,
+    height: 'auto',
     overflowY: 'scroll',
 
     '::-webkit-scrollbar': {

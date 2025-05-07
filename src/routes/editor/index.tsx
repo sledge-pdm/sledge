@@ -3,7 +3,7 @@ import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/global/EdgeInfo';
 import KeyListener from '~/components/global/KeyListener';
@@ -26,7 +26,8 @@ import {
   setProjectStore,
 } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
-import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
+import { safeInvoke } from '~/utils/TauriUtils';
+import { closeWindowsByLabel, WindowOptionsProp } from '~/utils/WindowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
   width: 1200,
@@ -70,6 +71,7 @@ export default function Editor() {
 
       layerListStore.layers.forEach((layer) => {
         resetLayerImage(layer.id, 1);
+        console.log('reset layer to ', globalStore.newProjectCanvasSize);
       });
     }
 
@@ -114,7 +116,7 @@ export default function Editor() {
           cancelLabel: 'cancel.',
         });
         if (confirmed) {
-          await openStartWindow();
+          await safeInvoke('open_window', { payload: { kind: 'start' } });
           closeWindowsByLabel('editor');
           SetIsCloseRequested(false);
         } else {
@@ -122,7 +124,7 @@ export default function Editor() {
           SetIsCloseRequested(false);
         }
       } else {
-        await openStartWindow();
+        await safeInvoke('open_window', { payload: { kind: 'start' } });
         closeWindowsByLabel('editor');
         SetIsCloseRequested(false);
       }
@@ -134,21 +136,17 @@ export default function Editor() {
   });
 
   return (
-    <>
-      {isLoading() && <Loading />}
-
-      {!isLoading() && (
-        <div class={pageRoot}>
-          <EdgeInfo />
-          <SideSections />
-          <div style={{ 'flex-grow': 1 }}>
-            <CanvasArea />
-          </div>
-
-          <KeyListener />
-          {/* <Companion /> */}
+    <Show when={!isLoading()} fallback={<Loading />}>
+      <div class={pageRoot}>
+        <EdgeInfo />
+        <SideSections />
+        <div style={{ 'flex-grow': 1 }}>
+          <CanvasArea />
         </div>
-      )}
-    </>
+
+        <KeyListener />
+        {/* <Companion /> */}
+      </div>
+    </Show>
   );
 }

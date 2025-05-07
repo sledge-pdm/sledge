@@ -14,8 +14,9 @@ import {
   contentContainer,
   sendFBButton,
 } from './about.css';
+import { WindowOptionsProp } from '~/utils/WindowUtils';
 
-export const AboutWindowOptions: Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions = {
+export const AboutWindowOptions: WindowOptionsProp = {
   url: '/about',
   width: 400,
   height: 290,

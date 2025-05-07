@@ -1,5 +1,6 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount } from 'solid-js';
+import { setBottomBarText } from '~/controllers/log/LogController';
 import { projectStore } from '~/stores/ProjectStores';
 import {
   titleBarControlButtonImg,
@@ -10,6 +11,7 @@ import {
   titleBarRoot,
   titleBarTitle,
 } from '~/styles/components/globals/title_bar.css';
+import "~/styles/title_bar_region.css";
 
 export default function TitleBar() {
   const window = getCurrentWindow();
@@ -28,14 +30,12 @@ export default function TitleBar() {
     setIsClosable(await window.isClosable());
     setTitle(await window.title());
     setIsEditor(window.label.startsWith('editor'));
+    titleBarNavEl.addEventListener("pointerdown", (e: PointerEvent) => {
+      setBottomBarText(e.buttons.toString() + " " + e.pointerType + " " + Date.now())
+    })
     // if (isEditor()) {
     //   setTitle(`${projectStore.name} - ${projectStore.path}`);
     // }
-
-    titleBarNavEl.addEventListener('touchstart', (e: TouchEvent) => {
-      e.preventDefault();
-      window.startDragging();
-    });
   });
 
   window.onResized(async (handler) => {

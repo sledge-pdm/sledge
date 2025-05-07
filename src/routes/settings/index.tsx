@@ -5,7 +5,7 @@ import PerformanceSettings from '~/components/settings/PerformanceSettings';
 import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { pageRoot } from '~/styles/global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
-import { WindowOptionsProp } from '~/utils/windowUtils';
+import { WindowOptionsProp } from '~/utils/WindowUtils';
 import { settingContainer } from './settings.css';
 
 export const SettingsWindowOptions: WindowOptionsProp = {

@@ -1,9 +1,8 @@
 import { Component } from 'solid-js';
-import { AboutWindowOptions } from '~/routes/about';
 import { interactStore, logStore } from '~/stores/EditorStores';
 
 import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/components/globals/bottom_info.css';
-import { openSingletonWindow } from '~/utils/windowUtils';
+import { safeInvoke } from '~/utils/TauriUtils';
 
 const BottomInfo: Component = () => {
   return (
@@ -11,7 +10,13 @@ const BottomInfo: Component = () => {
       <a
         class={bottomInfoTextStyle}
         style={{ 'pointer-events': 'all', cursor: 'pointer' }}
-        onClick={() => openSingletonWindow('about', AboutWindowOptions)}
+        onClick={() =>
+          safeInvoke('open_window', {
+            payload: {
+              kind: 'about',
+            },
+          })
+        }
       >
         sledge.
       </a>

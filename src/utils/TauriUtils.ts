@@ -1,5 +1,6 @@
 import { getTauriVersion } from '@tauri-apps/api/app';
 import { invoke as tauriInvoke } from '@tauri-apps/api/core';
+import { emit, EventCallback, listen } from '@tauri-apps/api/event';
 
 let _isTauri: boolean | null = null;
 
@@ -27,4 +28,14 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
     console.error(`[safeInvoke] '${cmd}' failed:`, e);
     return undefined;
   }
+}
+
+export type TauriEvent = 'onGlobalStoreLoad' | 'onProjectLoad' | 'onSetup';
+
+export function emitEvent(event: TauriEvent, msg?: Object) {
+  return emit(event, msg);
+}
+
+export function listenEvent(event: TauriEvent, handler: EventCallback<unknown>) {
+  return listen(event, handler);
 }

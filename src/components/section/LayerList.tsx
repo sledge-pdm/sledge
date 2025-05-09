@@ -1,5 +1,5 @@
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
-import { Component, createEffect, createSignal, For, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, For } from 'solid-js';
 import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer_list/LayerListController';
 
 import { setLayerProp } from '~/controllers/layer/LayerController';
@@ -9,6 +9,7 @@ import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components
 import { vars } from '~/styles/global.css';
 import { layerList } from '~/styles/section/layer.css';
 import { flexRow } from '~/styles/snippets.css';
+import { listenEvent } from '~/utils/TauriUtils';
 import Dropdown from '../common/basics/Dropdown';
 import Slider from '../common/basics/Slider';
 import LayerItem from './item/LayerItem';
@@ -19,7 +20,7 @@ const LayerList: Component<{}> = () => {
   const [activeItem, setActiveItem] = createSignal(null);
   const ids = () => items().map((l) => l.id);
 
-  onMount(() => {
+  listenEvent('onSetup', () => {
     setItems(allLayers());
   });
 

@@ -1,8 +1,7 @@
-import { WebviewOptions } from '@tauri-apps/api/webview';
-import { WindowOptions } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-shell';
 import { pageRoot } from '~/styles/global.css';
 import { flexRow, w100, wh100 } from '~/styles/snippets.css';
+import { WindowOptionsProp } from '~/utils/WindowUtils';
 import {
   aaContainer,
   aaText,
@@ -14,7 +13,6 @@ import {
   contentContainer,
   sendFBButton,
 } from './about.css';
-import { WindowOptionsProp } from '~/utils/WindowUtils';
 
 export const AboutWindowOptions: WindowOptionsProp = {
   url: '/about',

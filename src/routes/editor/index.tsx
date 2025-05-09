@@ -26,7 +26,7 @@ import {
   setProjectStore,
 } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
-import { safeInvoke } from '~/utils/TauriUtils';
+import { emitEvent, safeInvoke } from '~/utils/TauriUtils';
 import { closeWindowsByLabel, WindowOptionsProp } from '~/utils/WindowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
@@ -58,26 +58,6 @@ export default function Editor() {
 
   const isNewProject = location.search === '';
   const [isLoading, setIsLoading] = createSignal(true);
-
-  const onProjectLoad = async () => {
-    setProjectStore('isProjectChangedAfterSave', false);
-    setIsLoading(false);
-
-    await loadGlobalSettings();
-
-    if (isNewProject) {
-      changeCanvasSize(globalStore.newProjectCanvasSize);
-      setCanvasStore('canvas', globalStore.newProjectCanvasSize);
-
-      layerListStore.layers.forEach((layer) => {
-        resetLayerImage(layer.id, 1);
-        console.log('reset layer to ', globalStore.newProjectCanvasSize);
-      });
-    }
-
-    adjustZoomToFit();
-  };
-
   const sp = new URLSearchParams(location.search);
 
   if (location.search && sp.get('new') !== 'true') {
@@ -98,6 +78,29 @@ export default function Editor() {
       onProjectLoad();
     });
   }
+
+  const onProjectLoad = async () => {
+    await emitEvent('onProjectLoad');
+
+    setProjectStore('isProjectChangedAfterSave', false);
+    setIsLoading(false);
+    await loadGlobalSettings();
+
+    await emitEvent('onGlobalStoreLoad');
+
+    if (isNewProject) {
+      changeCanvasSize(globalStore.newProjectCanvasSize);
+      setCanvasStore('canvas', globalStore.newProjectCanvasSize);
+
+      layerListStore.layers.forEach((layer) => {
+        resetLayerImage(layer.id, 1);
+      });
+    }
+
+    await emitEvent('onSetup');
+
+    adjustZoomToFit();
+  };
 
   const [isCloseRequested, SetIsCloseRequested] = createSignal(false);
   let unlisten: UnlistenFn;

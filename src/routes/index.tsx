@@ -1,19 +1,18 @@
 import { onMount } from 'solid-js';
 import RecentFileList from '~/components/common/RecentFileList';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
-import { loadGlobalSettings } from '~/io/global_config/globalSettings';
+import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromFileSelection } from '~/io/project/project';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
+import { safeInvoke } from '~/utils/TauriUtils';
 import {
   closeWindowsByLabel,
-  openEditorWindow,
-  openNewEditorWindow,
-  openSingletonWindow,
+  getExistingProjectSearchParams,
+  getNewProjectSearchParams,
   WindowOptionsProp,
-} from '~/utils/windowUtils';
-import { SettingsWindowOptions } from './settings';
+} from '~/utils/WindowUtils';
 import { sideSection, sideSectionItem, welcomeHeadline, welcomeRoot } from './start.css';
 
 export const StartWindowOptions: WindowOptionsProp = {
@@ -33,16 +32,30 @@ export const StartWindowOptions: WindowOptionsProp = {
 export default function Home() {
   onMount(() => {
     loadGlobalSettings();
+    saveGlobalSettings();
   });
 
-  const moveToEditor = (selectedFile: FileLocation) => {
-    openEditorWindow(selectedFile);
-    closeWindowsByLabel('start');
+  const openExistingProject = (selectedFile: FileLocation) => {
+    safeInvoke('open_window', {
+      payload: {
+        kind: 'editor',
+        query: getExistingProjectSearchParams(selectedFile),
+      },
+    }).then(() => {
+      closeWindowsByLabel('start');
+    });
   };
 
   const createNew = () => {
-    openNewEditorWindow();
-    closeWindowsByLabel('start');
+    console.log(getNewProjectSearchParams());
+    safeInvoke('open_window', {
+      payload: {
+        kind: 'editor',
+        query: getNewProjectSearchParams(),
+      },
+    }).then(() => {
+      closeWindowsByLabel('start');
+    });
   };
 
   const openProject = () => {
@@ -51,8 +64,7 @@ export default function Home() {
         const loc = getFileNameAndPath(file);
         if (!loc) return;
         addRecentFile(loc);
-        openEditorWindow(loc);
-        closeWindowsByLabel('start');
+        openExistingProject(loc);
       }
     });
   };
@@ -74,13 +86,19 @@ export default function Home() {
         <a
           class={sideSectionItem}
           style={{ 'margin-left': '2px' }}
-          onClick={(e) => openSingletonWindow('settings', SettingsWindowOptions)}
+          onClick={(e) =>
+            safeInvoke('open_window', {
+              payload: {
+                kind: 'settings',
+              },
+            })
+          }
         >
           <img src={'/icons/misc/settings.png'} width={16} height={16} />
           &ensp;settings.
         </a>
       </div>
-      <RecentFileList files={globalStore.recentFiles} onClick={(item) => moveToEditor(item)} />
+      <RecentFileList files={globalStore.recentFiles} onClick={(item) => openExistingProject(item)} />
     </div>
   );
 }

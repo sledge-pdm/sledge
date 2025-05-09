@@ -1,7 +1,7 @@
 import { createStore } from 'solid-js/store';
-import { CanvasRenderingMode } from '~/types/Canvas';
+import { CanvasRenderingMode } from '~/models/canvas/Canvas';
+import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { FileLocation } from '~/types/FileLocation';
-import { KeyConfigEntry } from '~/types/KeyConfig';
 import { Size2D } from '~/types/Size';
 import { KeyConfigCommands } from '~/utils/consts';
 

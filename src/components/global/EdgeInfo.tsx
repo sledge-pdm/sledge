@@ -1,9 +1,7 @@
 import { Component } from 'solid-js';
-import { loadGlobalSettings } from '~/io/global_config/globalSettings';
-import { SettingsWindowOptions } from '~/routes/settings';
 
 import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/components/globals/edge_info.css';
-import { openSingletonWindow } from '~/utils/windowUtils';
+import { safeInvoke } from '~/utils/TauriUtils';
 
 const EdgeInfo: Component = () => {
   return (
@@ -12,9 +10,10 @@ const EdgeInfo: Component = () => {
         <a
           class={edgeInfoText}
           onClick={async () => {
-            let win = await openSingletonWindow('settings', SettingsWindowOptions);
-            win.once('tauri://destroyed', (e) => {
-              loadGlobalSettings();
+            await safeInvoke('open_window', {
+              payload: {
+                kind: 'settings',
+              },
             });
           }}
         >

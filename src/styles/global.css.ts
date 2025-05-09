@@ -44,6 +44,8 @@ export const vars = createGlobalTheme(':root', {
 
     accent: '#0000ff',
 
+    border: '#aaa',
+
     bg: '#ffffff',
     bg_canvas_area: '#fefefe',
 
@@ -57,7 +59,7 @@ export const vars = createGlobalTheme(':root', {
   },
   size: {
     edge_info: '32px',
-    side_area: '220px',
+    side_area: '250px',
     bottom_bar_margin: '252px',
   },
   spacing: {

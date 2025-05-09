@@ -1,7 +1,7 @@
 import { createSortable, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
 import Light from '~/components/common/Light';
-import { getNextMagnification } from '~/controllers/layer/LayerController';
+import { Layer, LayerType } from '~/models/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import {
   activeLight,
@@ -14,7 +14,7 @@ import {
   layerItemType,
 } from '~/styles/section/layer.css';
 import { flexRow, w100 } from '~/styles/snippets.css';
-import { Layer, LayerType } from '~/types/Layer';
+import { getNextMagnification } from '~/utils/LayerUtils';
 import LayerPreview from '../../common/LayerPreview';
 
 interface LayerItemProps {

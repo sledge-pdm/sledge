@@ -1,7 +1,7 @@
+import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
 import Tile, { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { HistoryManager, PixelDiff, TileDiff } from '../HistoryManager';
 import LayerImageAgent from '../LayerImageAgent';
 
 export default class TileLayerImageAgent extends LayerImageAgent {

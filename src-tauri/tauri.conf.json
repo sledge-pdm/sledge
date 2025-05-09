@@ -11,20 +11,6 @@
   },
   "app": {
     "windows": [
-      {
-        "create": true,
-        "title": "sledge",
-        "label": "start",
-        "width": 700,
-        "height": 500,
-        "acceptFirstMouse": true,
-        "resizable": false,
-        "closable": true,
-        "maximizable": true,
-        "minimizable": true,
-        "decorations": false,
-        "fullscreen": false
-      }
     ],
     "security": {
       "csp": null

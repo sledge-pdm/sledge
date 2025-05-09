@@ -1,14 +1,14 @@
 import { setBottomBarText } from '~/controllers/log/LogController';
-import { currentTool } from '~/controllers/tool/ToolController';
+import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { layerAgentManager } from '~/routes/editor';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
-import LayerImageAgent from '../../models/layer_image/LayerImageAgent';
-import TileLayerImageAgent from '../../models/layer_image/agents/TileLayerImageAgent';
+import { Tool } from '../../models/tool/Tool';
 import { getToolInstance } from '../../models/tool/ToolBase';
 import { DrawState } from '../../types/DrawState';
-import { Tool } from '../../types/Tool';
 import { currentColor } from '../color/ColorController';
+import TileLayerImageAgent from '../layer/agents/TileLayerImageAgent';
+import LayerImageAgent from '../layer/LayerImageAgent';
 import { findLayerById } from '../layer_list/LayerListController';
 
 export default class LayerCanvasOperator {
@@ -25,7 +25,7 @@ export default class LayerCanvasOperator {
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
-    const result = this.useTool(agent, state, image, currentTool(), position, last);
+    const result = this.useTool(agent, state, image, getCurrentTool(), position, last);
 
     if (result) {
       agent.setDrawingBuffer(result);

@@ -1,5 +1,5 @@
-import { PixelDiff } from '~/models/layer_image/HistoryManager';
-import TileLayerImageAgent from '~/models/layer_image/agents/TileLayerImageAgent';
+import TileLayerImageAgent from '~/controllers/layer/agents/TileLayerImageAgent';
+import { PixelDiff } from '~/models/history/HistoryManager';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch } from '~/utils/ColorUtils';

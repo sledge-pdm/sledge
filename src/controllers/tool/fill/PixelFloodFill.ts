@@ -1,4 +1,4 @@
-import { PixelDiff } from '~/models/layer_image/HistoryManager';
+import { PixelDiff } from '~/models/history/HistoryManager';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch } from '~/utils/ColorUtils';
 import { Fill, FillProps } from './FillTool';

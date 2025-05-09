@@ -1,8 +1,8 @@
-import { HistoryManager } from './HistoryManager';
+import { HistoryManager } from '~/models/history/HistoryManager';
 import LayerImageAgent from './LayerImageAgent';
 import TileLayerImageAgent from './agents/TileLayerImageAgent';
 
-export class LayerImageManager {
+export class LayerAgentManager {
   private agents: Map<string, LayerImageAgent> = new Map();
 
   public getAgent(layerId: string): LayerImageAgent | undefined {

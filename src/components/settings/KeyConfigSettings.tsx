@@ -9,11 +9,11 @@ import {
   saveKeyConfigEntry,
 } from '~/controllers/config/KeyConfigController';
 import { saveGlobalSettings } from '~/io/global_config/globalSettings';
+import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { keyConfigName } from '~/styles/components/settings/key_config_settings.css';
 import { flexRow } from '~/styles/snippets.css';
-import { KeyConfigEntry } from '~/types/KeyConfig';
 import { KeyConfigCommands } from '~/utils/consts';
 
 const KeyConfigSettings: Component = () => {
@@ -21,8 +21,9 @@ const KeyConfigSettings: Component = () => {
   const [recordedEntry, setRecordedEntry] = createSignal<KeyConfigEntry | undefined>(undefined);
 
   const handleOnKeyDown = (e: KeyboardEvent) => {
+    if (!(e.target instanceof HTMLElement) || e.target.closest('input')) return;
+
     if (!recordingName) return;
-    e.preventDefault();
     if (isRecordAbortKey(e)) {
       endRecord(false);
       return;
@@ -55,6 +56,7 @@ const KeyConfigSettings: Component = () => {
 
   onMount(() => {
     window.addEventListener('keydown', handleOnKeyDown);
+
     onCleanup(() => {
       window.removeEventListener('keydown', handleOnKeyDown);
     });

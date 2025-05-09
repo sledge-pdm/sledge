@@ -1,9 +1,9 @@
 import { Component } from 'solid-js';
 import Slider from '~/components/common/basics/Slider';
 import { sayRandomQuote } from '~/components/common/companion/QuotePool';
+import { Tool, ToolType } from '~/models/tool/Tool';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { toolConfigRow, toolConfigRowClickable, toolConfigRowIcon, toolConfigRowName } from '~/styles/section/pen.css';
-import { Tool, ToolType } from '~/types/Tool';
 import { Consts } from '~/utils/consts';
 
 interface Props {

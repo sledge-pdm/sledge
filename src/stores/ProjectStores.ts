@@ -1,9 +1,9 @@
 // projectStore.ts
 import { createStore } from 'solid-js/store';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { fallbackLayerProps } from '~/controllers/layer/LayerFactory';
-import { Layer } from '~/types/Layer';
-import { LayerHistory } from '~/types/LayerHistory';
+import { LayerHistory } from '~/models/history/LayerHistory';
+import { Layer } from '~/models/layer/Layer';
+import { fallbackLayerProps } from '~/models/layer/LayerFactory';
 import { Size2D } from '~/types/Size';
 import { decodeImageData } from '~/utils/ImageUtils';
 

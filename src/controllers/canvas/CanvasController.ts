@@ -16,7 +16,15 @@ export function changeCanvasSize(newSize: Size2D): boolean {
   return true;
 }
 
-const REFERENCE_LENGTH = 600;
+const referenceLengthRatio = 0.75;
+const referenceLength = () => {
+  const canvasAreaSize = interactStore.canvasAreaSize;
+  if (canvasAreaSize.width < canvasAreaSize.height) {
+    return canvasAreaSize.width * referenceLengthRatio;
+  } else {
+    return canvasAreaSize.height * referenceLengthRatio;
+  }
+};
 
 export const getReferencedZoom = (length?: number) => {
   if (length === undefined) {
@@ -26,7 +34,7 @@ export const getReferencedZoom = (length?: number) => {
     if (!length) return undefined;
   }
 
-  return REFERENCE_LENGTH / length;
+  return referenceLength() / length;
 };
 
 export const adjustZoomToFit = (width?: number, height?: number) => {

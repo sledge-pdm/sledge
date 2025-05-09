@@ -1,9 +1,9 @@
 import { Component } from 'solid-js';
+import { CanvasRenderingMode } from '~/models/canvas/Canvas';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
-import { CanvasRenderingMode } from '~/types/Canvas';
 import { Consts } from '~/utils/consts';
 import Dropdown, { DropdownOption } from '../common/basics/Dropdown';
 
@@ -27,7 +27,7 @@ const EditorSettings: Component = () => {
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
               value={globalStore.newProjectCanvasSize.width}
-              onChange={(e) => {
+              onInput={(e) => {
                 setGlobalStore('newProjectCanvasSize', 'width', Number(e.target.value));
               }}
               style={{ 'font-size': '10px' }}
@@ -40,7 +40,7 @@ const EditorSettings: Component = () => {
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
               value={globalStore.newProjectCanvasSize.height}
-              onChange={(e) => {
+              onInput={(e) => {
                 setGlobalStore('newProjectCanvasSize', 'height', Number(e.target.value));
               }}
               style={{ 'font-size': '10px' }}
@@ -49,14 +49,8 @@ const EditorSettings: Component = () => {
           </div>
         </div>
 
-        <div>
-          <p>autosave span (wip).</p>
-          <input type='number' name='width' min={100} max={1000000} required />
-        </div>
-
         <p>canvas rendering (temp not works).</p>
         <Dropdown
-          selected={globalStore.canvasRenderingMode}
           value={globalStore.canvasRenderingMode}
           options={renderingOptions}
           onChange={(v) => {

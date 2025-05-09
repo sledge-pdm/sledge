@@ -11,7 +11,7 @@ export const titleBarRoot = style([
     height: '28px',
     // borderBottom: "1px solid #aaa",
     alignItems: 'center',
-    zIndex: 9999,
+    zIndex: 99999,
   },
 ]);
 

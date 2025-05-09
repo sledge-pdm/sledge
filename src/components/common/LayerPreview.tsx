@@ -1,7 +1,7 @@
 import { Component, onMount } from 'solid-js';
+import { Layer } from '~/models/layer/Layer';
 import { getImageOf, layerAgentManager } from '~/routes/editor';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
-import { Layer } from '~/types/Layer';
 
 interface Props {
   layer: Layer;

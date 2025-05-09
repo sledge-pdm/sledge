@@ -3,18 +3,19 @@ import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import EdgeInfo from '~/components/global/EdgeInfo';
+import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import KeyListener from '~/controllers/config/KeyListener';
+import { LayerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromPath } from '~/io/project/project';
-import { LayerImageManager as LayerAgentManager } from '~/models/layer_image/LayerImageManager';
+import { LayerType } from '~/models/layer/Layer';
 import { globalStore } from '~/stores/GlobalStores';
 import {
   canvasStore,
@@ -24,13 +25,12 @@ import {
   setCanvasStore,
   setProjectStore,
 } from '~/stores/ProjectStores';
-
 import { pageRoot } from '~/styles/global.css';
-import { LayerType } from '~/types/Layer';
-import { closeWindowsByLabel, openStartWindow, WindowOptionsProp } from '~/utils/windowUtils';
+import { emitEvent, safeInvoke } from '~/utils/TauriUtils';
+import { closeWindowsByLabel, WindowOptionsProp } from '~/utils/WindowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
-  width: 1000,
+  width: 1200,
   height: 750,
   acceptFirstMouse: true,
   resizable: true,
@@ -58,25 +58,6 @@ export default function Editor() {
 
   const isNewProject = location.search === '';
   const [isLoading, setIsLoading] = createSignal(true);
-
-  const onProjectLoad = async () => {
-    setProjectStore('isProjectChangedAfterSave', false);
-    setIsLoading(false);
-
-    await loadGlobalSettings();
-
-    if (isNewProject) {
-      changeCanvasSize(globalStore.newProjectCanvasSize);
-      setCanvasStore('canvas', globalStore.newProjectCanvasSize);
-
-      layerListStore.layers.forEach((layer) => {
-        resetLayerImage(layer.id, 1);
-      });
-    }
-
-    adjustZoomToFit();
-  };
-
   const sp = new URLSearchParams(location.search);
 
   if (location.search && sp.get('new') !== 'true') {
@@ -98,6 +79,29 @@ export default function Editor() {
     });
   }
 
+  const onProjectLoad = async () => {
+    await emitEvent('onProjectLoad');
+
+    setProjectStore('isProjectChangedAfterSave', false);
+    setIsLoading(false);
+    await loadGlobalSettings();
+
+    await emitEvent('onGlobalStoreLoad');
+
+    if (isNewProject) {
+      changeCanvasSize(globalStore.newProjectCanvasSize);
+      setCanvasStore('canvas', globalStore.newProjectCanvasSize);
+
+      layerListStore.layers.forEach((layer) => {
+        resetLayerImage(layer.id, 1);
+      });
+    }
+
+    await emitEvent('onSetup');
+
+    adjustZoomToFit();
+  };
+
   const [isCloseRequested, SetIsCloseRequested] = createSignal(false);
   let unlisten: UnlistenFn;
 
@@ -115,7 +119,7 @@ export default function Editor() {
           cancelLabel: 'cancel.',
         });
         if (confirmed) {
-          await openStartWindow();
+          await safeInvoke('open_window', { payload: { kind: 'start' } });
           closeWindowsByLabel('editor');
           SetIsCloseRequested(false);
         } else {
@@ -123,7 +127,7 @@ export default function Editor() {
           SetIsCloseRequested(false);
         }
       } else {
-        await openStartWindow();
+        await safeInvoke('open_window', { payload: { kind: 'start' } });
         closeWindowsByLabel('editor');
         SetIsCloseRequested(false);
       }
@@ -135,21 +139,17 @@ export default function Editor() {
   });
 
   return (
-    <>
-      {isLoading() && <Loading />}
-
-      {!isLoading() && (
-        <div class={pageRoot}>
-          <EdgeInfo />
-          <SideSections />
-          <div style={{ 'flex-grow': 1 }}>
-            <CanvasArea />
-          </div>
-
-          <KeyListener />
-          {/* <Companion /> */}
+    <Show when={!isLoading()} fallback={<Loading />}>
+      <div class={pageRoot}>
+        <EdgeInfo />
+        <SideSections />
+        <div style={{ 'flex-grow': 1 }}>
+          <CanvasArea />
         </div>
-      )}
-    </>
+
+        <KeyListener />
+        {/* <Companion /> */}
+      </div>
+    </Show>
   );
 }

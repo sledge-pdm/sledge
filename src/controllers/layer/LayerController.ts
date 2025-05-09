@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/models/layer_image/LayerImageAgent';
+import { Layer } from '~/models/layer/Layer';
 import { layerAgentManager } from '~/routes/editor';
 import {
   canvasStore,
@@ -7,8 +7,8 @@ import {
   setLayerHistoryStore,
   setLayerListStore,
 } from '~/stores/ProjectStores';
-import { Layer } from '~/types/Layer';
 import { findLayerById } from '../layer_list/LayerListController';
+import LayerImageAgent from './LayerImageAgent';
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
@@ -31,17 +31,6 @@ export function getActiveLayerIndex(): number {
 export function getLayerIndex(layerId: string) {
   return layerListStore.layers.findIndex((l) => l.id === layerId);
 }
-
-const magnificationList: number[] = [1, 2, 4];
-
-export const getNextMagnification = (dotMagnification: number) => {
-  const index = magnificationList.findIndex((m) => m === dotMagnification);
-  if (index != -1) {
-    // 循環
-    const nextIndex = index !== magnificationList.length - 1 ? index + 1 : 0;
-    return magnificationList[nextIndex];
-  } else return 1;
-};
 
 export function resetLayerImage(layerId: string, dotMagnification: number): LayerImageAgent {
   setLayerHistoryStore(layerId, {

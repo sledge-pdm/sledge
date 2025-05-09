@@ -1,4 +1,4 @@
-import { createMemo, onCleanup, onMount } from 'solid-js';
+import { createMemo, onCleanup } from 'solid-js';
 import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
@@ -6,6 +6,7 @@ import CanvasStack from './stacks/CanvasStack';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
+import { listenEvent } from '~/utils/TauriUtils';
 import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
@@ -15,7 +16,7 @@ export default () => {
 
   const interact: CanvasAreaInteract = new CanvasAreaInteract();
 
-  onMount(() => {
+  listenEvent('onSetup', () => {
     setInteractStore('canvasAreaSize', {
       width: wrapper.clientWidth,
       height: wrapper.clientHeight,

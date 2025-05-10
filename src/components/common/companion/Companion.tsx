@@ -1,5 +1,5 @@
 // import { Component, createEffect, createSignal } from 'solid-js';
-// import styles from '@styles/components/companion.module.css';
+// import '@styles/components/companion.css';
 
 // const [sayRequest, setSayRequest] = createSignal<string | null>(null);
 
@@ -40,15 +40,15 @@
 //   });
 
 //   return (
-//     <div class={styles.root}>
-//       <div class={styles.wrapper}>
-//         <div class={styles.companion} id='companion'>
+//     <div class="root">
+//       <div class="wrapper">
+//         <div class="companion" id='companion'>
 //           <img src='/companion.png' alt='you challenge me?' />
 //         </div>
 //         {quote() && (
-//           <div class={styles.quote_box_container}>
-//             <div class={styles.quote_box}>
-//               <p class={styles.quote}>{quote()}</p>
+//           <div class="quote_box_container">
+//             <div class="quote_box">
+//               <p class="quote">{quote()}</p>
 //             </div>
 //           </div>
 //         )}

@@ -101,7 +101,9 @@ export default class LayerImageAgent {
   }
 
   public registerToHistory() {
-    this.hm.addAction(this.dm.getCurrent());
+    if (this.dm.getCurrent().diffs.size !== 0) {
+      this.hm.addAction(this.dm.getCurrent());
+    }
     this.dm.reset();
   }
 

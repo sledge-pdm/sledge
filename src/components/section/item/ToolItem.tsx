@@ -64,7 +64,6 @@ const ToolItem: Component<Props> = (props: Props) => {
               default={props.tool.size}
               onValueChanged={(newValue) => {
                 sayRandomQuote('pen-resize');
-                console.log('size set to ' + newValue);
                 const penIndex = toolStore.tools.findIndex((p) => p.id === props.tool.id);
                 setToolStore('tools', penIndex, 'size', newValue);
               }}

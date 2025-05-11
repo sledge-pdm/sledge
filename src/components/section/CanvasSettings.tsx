@@ -16,7 +16,6 @@ const CanvasSettings: Component = () => {
       changeCanvasSize({ width: canvasStore.canvas.width, height: value });
     }
 
-    console.log(`canvas size changed. ${canvasStore.canvas.width} x ${canvasStore.canvas.height}`);
     adjustZoomToFit();
   };
 

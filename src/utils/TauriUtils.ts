@@ -30,12 +30,21 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
   }
 }
 
-export type TauriEvent = 'onGlobalStoreLoad' | 'onProjectLoad' | 'onSetup' | 'onSettingsSaved' | 'onResetAllLayers' | 'onLayerHistoryChanged';
+export type TauriWindowEvent =
+  // window/editor
+  'onGlobalStoreLoad' | 'onProjectLoad' | 'onSetup' | 'onResetAllLayers' | 'onLayerHistoryChanged'
 
-export function emitEvent(event: TauriEvent, msg?: Object) {
+export function emitEvent(event: TauriWindowEvent, msg?: Object) {
   return emit(event, msg);
 }
+  
+export type TauriGlobalEvent =
+  'onSettingsSaved';
 
-export function listenEvent(event: TauriEvent, handler: EventCallback<unknown>) {
+export async function emitGlobalEvent(event: TauriGlobalEvent, msg?: Object) {
+  return await safeInvoke('emit_global_event', { event, msg });
+}
+
+export function listenEvent(event: TauriWindowEvent | TauriGlobalEvent, handler: EventCallback<unknown>) {
   return listen(event, handler);
 }

@@ -28,6 +28,8 @@ export default class LayerCanvasOperator {
 
     if (result) {
       agent.callOnImageChangeListeners();
+      agent.getTileManager().resetDirtyStates();
+      
       if (state === DrawState.end) {
         agent.registerToHistory();
         agent.getTileManager().resetAllDirtyStates();

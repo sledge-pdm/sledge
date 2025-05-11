@@ -51,7 +51,7 @@ const EditorSettings: Component = () => {
 
         <p>canvas rendering (temp not works).</p>
         <Dropdown
-          value={globalConfig.performance.canvasRenderingMode}
+          value={globalConfig.editor.canvasRenderingMode}
           options={renderingOptions}
           onChange={(v) => {
             setGlobalConfig('performance', 'canvasRenderingMode', v);

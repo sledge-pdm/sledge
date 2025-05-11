@@ -20,7 +20,7 @@ const PerformanceSettings: Component = () => {
         />
         <Checkbox
           label='enable webgl render.'
-          checked={globalConfig.performance.enableGLRender}
+          checked={globalConfig.editor.enableGLRender}
           onChange={(e) => setGlobalConfig('performance', 'enableGLRender', e)}
         />
       </div>

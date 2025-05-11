@@ -1,7 +1,7 @@
 import { createStore } from 'solid-js/store';
 import { CanvasRenderingMode } from '~/models/canvas/Canvas';
+import { defaultConfig, GlobalConfig } from '~/models/config/GlobalConfig';
 import { KeyConfigEntry } from '~/models/config/KeyConfig';
-import { FileLocation } from '~/types/FileLocation';
 import { KeyConfigCommands } from '~/utils/consts';
 
 // global
@@ -15,34 +15,10 @@ export const getCanvasImageRenderingAttribute = (zoom: number, mode: CanvasRende
       return zoom > 1.0 ? 'pixelated' : 'crisp-edges';
   }
 };
-// types.ts
-export type GlobalConfig = {
-  misc: {
-    maxRecentFiles: number;
-    recentFiles: FileLocation[]; // これは別ストア(sessionState)に分離してもOK
-  };
-  newProject: {
-    canvasSize: { width: number; height: number };
-  };
-  performance: {
-    canvasRenderingMode: CanvasRenderingMode;
-    enableGLRender: boolean;
-  };
-  debug: {
-    showPerfMonitor: boolean;
-    showDirtyRects: boolean;
-  };
-};
 type KeyConfigStore = {
   [command in KeyConfigCommands]: KeyConfigEntry[];
 };
 
-export const defaultConfig: GlobalConfig = {
-  misc: { maxRecentFiles: 8, recentFiles: [] },
-  newProject: { canvasSize: { width: 1000, height: 1000 } },
-  performance: { canvasRenderingMode: 'adaptive', enableGLRender: true },
-  debug: { showPerfMonitor: false, showDirtyRects: false },
-};
 const KEY_CONFIG_TEMPLATE: Readonly<KeyConfigStore> = {
   undo: [{ ctrl: true, key: 'z' }],
   redo: [{ ctrl: true, key: 'y' }],

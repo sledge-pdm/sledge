@@ -2,6 +2,7 @@ import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
 import DiffManager from '~/models/layer/image/DiffManager';
 import PixelBufferManager from '~/models/layer/image/PixelBuffer';
+import { globalConfig } from '~/stores/GlobalStores';
 import { Size2D } from '~/types/Size';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
@@ -101,7 +102,12 @@ export default class LayerImageAgent {
   }
 
   public registerToHistory() {
-    if (this.dm.getCurrent().diffs.size !== 0) {
+    let shouldAddAction = true;
+    if (globalConfig.editor.skipMeaninglessAction) {
+      if (this.dm.getCurrent().diffs.size === 0) shouldAddAction = false; // meaningless action
+    }
+
+    if (shouldAddAction) {
       this.hm.addAction(this.dm.getCurrent());
     }
     this.dm.reset();

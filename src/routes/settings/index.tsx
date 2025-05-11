@@ -1,11 +1,12 @@
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-import { onCleanup, onMount } from 'solid-js';
+import { onMount } from 'solid-js';
 import EditorSettings from '~/components/settings/EditorSettings';
 import KeyConfigSettings from '~/components/settings/KeyConfigSettings';
 import PerformanceSettings from '~/components/settings/PerformanceSettings';
 import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { pageRoot } from '~/styles/global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
+import { emitGlobalEvent } from '~/utils/TauriUtils';
 import { WindowOptionsProp } from '~/utils/WindowUtils';
 import { settingContainer } from './settings.css';
 
@@ -25,18 +26,12 @@ export const SettingsWindowOptions: WindowOptionsProp = {
 };
 
 export default function Settings() {
-  const window = getCurrentWebviewWindow();
-
   onMount(async () => {
-    loadGlobalSettings();
-
-    const unlisten = await window.onCloseRequested(async (event) => {
+    await loadGlobalSettings();
+    getCurrentWebviewWindow().onCloseRequested(async () => {
       await saveGlobalSettings();
-    });
-
-    onCleanup(() => {
-      unlisten();
-    });
+      await emitGlobalEvent("onSettingsSaved");
+    })
   });
 
   return (

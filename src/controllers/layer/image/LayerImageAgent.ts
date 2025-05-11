@@ -93,9 +93,6 @@ export default class LayerImageAgent {
 
   public registerToHistory() {
     this.hm.addAction(this.dm.getCurrent());
-    console.log(`history add.`);
-    console.log(`undo: ${this.hm.getUndoStack().map((s) => `${s.diffs.size}`)}`);
-    console.log(`redo: ${this.hm.getRedoStack().map((s) => `${s.diffs.size}`)}`);
     this.dm.reset();
   }
 
@@ -118,9 +115,6 @@ export default class LayerImageAgent {
       }
     });
     const undoEnd = Date.now();
-    console.log(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
-    console.log(`undo: ${this.hm.getUndoStack().map((s) => `${s.diffs.size}`)}`);
-    console.log(`redo: ${this.hm.getRedoStack().map((s) => `${s.diffs.size}`)}`);
     setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
     this.callOnImageChangeListeners();
@@ -142,9 +136,6 @@ export default class LayerImageAgent {
       }
     });
     const redoEnd = Date.now();
-    console.log(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
-    console.log(`undo: ${this.hm.getUndoStack().map((s) => `${s.diffs.size}`)}`);
-    console.log(`redo: ${this.hm.getRedoStack().map((s) => `${s.diffs.size}`)}`);
     setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
     this.callOnImageChangeListeners();

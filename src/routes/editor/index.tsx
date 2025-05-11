@@ -96,7 +96,6 @@ export default function Editor() {
 
     listenEvent('onSettingsSaved', () => {
       loadGlobalSettings();
-      console.log('yeah');
     });
   };
 
@@ -104,6 +103,10 @@ export default function Editor() {
   let unlisten: UnlistenFn;
 
   onMount(async () => {
+    listenEvent("onSettingsSaved", () => {
+      loadGlobalSettings();
+    })
+
     unlisten = await window.onCloseRequested(async (event) => {
       if (isCloseRequested()) {
         event.preventDefault();

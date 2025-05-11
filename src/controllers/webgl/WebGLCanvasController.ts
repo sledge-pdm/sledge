@@ -116,8 +116,6 @@ export class WebGLCanvasController {
     this.gl.flush();
     this.gl.finish();
 
-    console.log('src backing:', this.canvas.width, this.canvas.height, 'src css:', this.canvas.style.width, this.canvas.style.height);
-
     const thumb = document.createElement('canvas');
     thumb.width = thumbW;
     thumb.height = thumbH;

@@ -73,7 +73,6 @@ export const setProjectStore = projectRootStore.setProjectStore;
 
 export const loadStoreFromProjectJson = async (projectJson: any) => {
   if (projectJson.project) {
-    console.log(projectJson.project);
     setProjectStore('name', projectJson.project.name || undefined);
     setProjectStore('path', projectJson.project.path || undefined);
   }

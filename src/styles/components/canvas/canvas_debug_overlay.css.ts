@@ -19,7 +19,7 @@ export const canvasDebugOverlayBottomLeft = style([
     // gap: vars.spacing.xs,
     position: 'absolute',
     left: vars.spacing.sm,
-    bottom: 0,
+    bottom: vars.spacing.lg,
     transform: 'translateY(-50%)',
     alignItems: 'end',
     gap: vars.spacing.md,

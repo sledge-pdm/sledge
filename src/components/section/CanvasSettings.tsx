@@ -6,6 +6,7 @@ import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
 import { Consts } from '~/utils/consts';
+import { emitEvent } from '~/utils/TauriUtils';
 
 const CanvasSettings: Component = () => {
   const onSizeChange = (type: 'width' | 'height', value: number) => {
@@ -15,7 +16,6 @@ const CanvasSettings: Component = () => {
       changeCanvasSize({ width: canvasStore.canvas.width, height: value });
     }
 
-    console.log(`canvas size changed. ${canvasStore.canvas.width} x ${canvasStore.canvas.height}`);
     adjustZoomToFit();
   };
 
@@ -24,6 +24,7 @@ const CanvasSettings: Component = () => {
       resetLayerImage(l.id, l.dotMagnification);
     });
     adjustZoomToFit();
+    emitEvent('onResetAllLayers');
   };
 
   return (

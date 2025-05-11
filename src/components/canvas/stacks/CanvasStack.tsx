@@ -3,7 +3,6 @@ import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
-import TileLayerImageAgent from '~/controllers/layer/agents/TileLayerImageAgent';
 import { activeLayer } from '~/controllers/layer_list/LayerListController';
 import { layerAgentManager } from '~/routes/editor';
 import { globalStore } from '~/stores/GlobalStores';
@@ -20,9 +19,6 @@ const CanvasStack: Component = () => {
     if (active) {
       const agent = layerAgentManager.getAgent(active.id);
       if (!agent) return;
-      agent.setOnDrawingBufferChangeListener('stack_dirty_rect', () => {
-        setDirtyRects([...getDirtyRects()]);
-      });
       agent.setOnImageChangeListener('stack_dirty_rect', () => {
         setDirtyRects([...getDirtyRects()]);
       });
@@ -33,9 +29,7 @@ const CanvasStack: Component = () => {
     const active = activeLayer();
     if (active) {
       const agent = layerAgentManager.getAgent(active.id);
-      if (agent instanceof TileLayerImageAgent) {
-        return (agent as TileLayerImageAgent).getDirtyTilesInAction();
-      }
+      return agent?.getTileManager().getDirtyTilesInAction() ?? [];
     }
     return [];
   };

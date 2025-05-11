@@ -1,4 +1,5 @@
-import LayerImageAgent from '~/controllers/layer/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { colorMatch } from '~/utils/ColorUtils';
 import { ToolArgs, ToolBehavior } from '../../../models/tool/ToolBase';
 import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
 
@@ -9,20 +10,25 @@ export class PenTool implements ToolBehavior {
 
   onMove(agent: LayerImageAgent, { position, lastPosition, color, size }: ToolArgs) {
     if (!size) return false;
+    const pbm = agent.getPixelBufferManager();
+    const dm = agent.getDiffManager();
 
     drawSquarePixel(position, size, (px, py) => {
-      const diff = agent.setPixel({ x: px, y: py }, color, true, true);
+      const diff = agent.setPixel({ x: px, y: py }, color, true);
       if (diff !== undefined) {
-        agent.addDiffs([diff]);
+        dm.add(diff);
       }
     });
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          const diff = agent.setPixel({ x: px, y: py }, color, true, true);
-          if (diff !== undefined) {
-            agent.addDiffs([diff]);
+          const position = { x: px, y: py };
+          if (!colorMatch(pbm.getPixel(position), color)) {
+            const diff = agent.setPixel(position, color, true);
+            if (diff !== undefined) {
+              dm.add(diff);
+            }
           }
         });
       });

@@ -9,6 +9,7 @@
     "tcm-watch": "tcm -o dist-tcm src --watch",
     "postinstall": "patch-package",
     "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config .prettierrc",
+    "prettier:rust": "prettier --write 'src-tauri/src/**/*.rs' --config .prettierrc",
     "stylelint": "stylelint -c .\\.stylelintrc.json \"src/**/*.css\" --fix"
   },
   "dependencies": {
@@ -41,6 +42,7 @@
     "patch-package": "^8.0.0",
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-rust": "^0.1.9",
     "solid-refresh": "^0.7.5",
     "stylelint": "^16.18.0",
     "stylelint-config-standard": "^38.0.0",

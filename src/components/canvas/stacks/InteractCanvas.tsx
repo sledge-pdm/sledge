@@ -32,7 +32,6 @@ export const InteractCanvas: Component<Props> = (props) => {
       x = e.clientX;
       y = e.clientY;
     } else if ('touches' in e && e.touches.length > 0) {
-      console.log('touch');
       x = e.touches[0].clientX;
       y = e.touches[0].clientY;
     }
@@ -49,7 +48,6 @@ export const InteractCanvas: Component<Props> = (props) => {
       x = e.clientX;
       y = e.clientY;
     } else if ('touches' in e && e.touches.length > 0) {
-      console.log('touch');
       x = e.touches[0].clientX;
       y = e.touches[0].clientY;
     }

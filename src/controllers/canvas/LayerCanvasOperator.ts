@@ -27,7 +27,7 @@ export default class LayerCanvasOperator {
     const result = this.useTool(agent, state, image, getCurrentTool(), position, last);
 
     if (result) {
-      agent.callOnImageChangeListeners();
+      agent.callOnImageChangeListeners({});
       agent.getTileManager().resetDirtyStates();
 
       if (state === DrawState.end) {

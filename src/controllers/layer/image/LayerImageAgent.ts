@@ -2,12 +2,15 @@ import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
 import DiffManager from '~/models/layer/image/DiffManager';
 import PixelBufferManager from '~/models/layer/image/PixelBuffer';
+import { Size2D } from '~/types/Size';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import TileManager from '../../../models/layer/image/TileManager';
 
-interface ImageChangeEvent {}
+interface ImageChangeEvent {
+  newSize?: Size2D;
+}
 
 // それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
 export default class LayerImageAgent {
@@ -66,8 +69,14 @@ export default class LayerImageAgent {
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false) {
     this.pbm.buffer = rawBuffer;
-    if (!silentlySet) this.callOnImageChangeListeners();
+    if (!silentlySet) this.callOnImageChangeListeners({});
     this.tm.initTile();
+  }
+
+  changeBufferSize(newSize: Size2D) {
+    this.pbm.changeSize(newSize);
+    this.tm.setSize(newSize);
+    this.callOnImageChangeListeners({ newSize });
   }
 
   setOnImageChangeListener(key: string, listener: (e: ImageChangeEvent) => void) {
@@ -79,8 +88,8 @@ export default class LayerImageAgent {
   clearOnImageChangeListener(key: string) {
     delete this.onImageChangedListeners[key];
   }
-  callOnImageChangeListeners() {
-    Object.values(this.onImageChangedListeners).forEach((listener) => listener({}));
+  callOnImageChangeListeners(e: ImageChangeEvent) {
+    Object.values(this.onImageChangedListeners).forEach((listener) => listener(e));
   }
 
   protected undoTileDiff(tileDiff: TileDiff): void {
@@ -117,7 +126,7 @@ export default class LayerImageAgent {
     const undoEnd = Date.now();
     setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
-    this.callOnImageChangeListeners();
+    this.callOnImageChangeListeners({});
   }
 
   public redo() {
@@ -138,7 +147,7 @@ export default class LayerImageAgent {
     const redoEnd = Date.now();
     setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
-    this.callOnImageChangeListeners();
+    this.callOnImageChangeListeners({});
   }
 
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {
@@ -152,24 +161,6 @@ export default class LayerImageAgent {
 
       const tile = this.tm.getTile(tileIndex);
       if (tile.isUniform && tile.uniformColor !== undefined && !colorMatch(tile.uniformColor, color)) {
-        this.tm.tiles[tileIndex.row][tileIndex.column].isUniform = false;
-        this.tm.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined;
-      }
-    }
-    return result;
-  }
-
-  public deletePixel(position: Vec2, skipExistingDiff: boolean): PixelDiff | undefined {
-    if (!this.pbm.isInBounds(position)) return undefined;
-    if (!skipExistingDiff && this.dm.isDiffExists(position)) return undefined;
-    const result = this.pbm.deleteRawPixel(position);
-    if (result !== undefined) {
-      const tileIndex = this.tm.getTileIndex(position);
-      this.tm.tiles[tileIndex.row][tileIndex.column].isDirty = true;
-      this.tm.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true;
-
-      const tile = this.tm.getTile(tileIndex);
-      if (tile.isUniform && tile.uniformColor !== undefined && !colorMatch(tile.uniformColor, [0, 0, 0, 0])) {
         this.tm.tiles[tileIndex.row][tileIndex.column].isUniform = false;
         this.tm.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined;
       }

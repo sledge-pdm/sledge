@@ -1,8 +1,8 @@
+import { layerAgentManager } from '~/routes/editor';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';
 import { Consts } from '~/utils/consts';
-import { resetLayerImage } from '../layer/LayerController';
 import { allLayers } from '../layer_list/LayerListController';
 
 export function changeCanvasSize(newSize: Size2D): boolean {
@@ -11,7 +11,8 @@ export function changeCanvasSize(newSize: Size2D): boolean {
   setCanvasStore('canvas', newSize);
 
   allLayers().forEach((layer) => {
-    resetLayerImage(layer.id, layer.dotMagnification);
+    const agent = layerAgentManager.getAgent(layer.id);
+    agent?.changeBufferSize(newSize);
   });
   return true;
 }

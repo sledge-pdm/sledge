@@ -83,16 +83,6 @@ export const loadStoreFromProjectJson = async (projectJson: any) => {
     setCanvasStore('canvas', 'height', height);
   }
 
-  if (projectJson.images) {
-    setLayerHistoryStore({});
-    Object.keys(projectJson.images).forEach((id) => {
-      const data = projectJson.images[id];
-      const agent = resetLayerImage(id, Number(data.dotMagnification || 1));
-
-      agent.setBuffer(data.current);
-    });
-  }
-
   if (projectJson.layer && projectJson.layer.layers && Array.isArray(projectJson.layer.layers)) {
     const layers: Layer[] = [];
     projectJson.layer.layers.map((l: any) => {
@@ -105,5 +95,14 @@ export const loadStoreFromProjectJson = async (projectJson: any) => {
 
     setLayerListStore('layers', layers);
     setLayerListStore('activeLayerId', projectJson.layer.activeLayerId);
+  }
+
+  if (projectJson.images) {
+    setLayerHistoryStore({});
+    Object.keys(projectJson.images).forEach((id) => {
+      const data = projectJson.images[id];
+      const agent = resetLayerImage(id, Number(data.dotMagnification || 1), data.width, data.height);
+      agent.setBuffer(Uint8ClampedArray.from(data.current));
+    });
   }
 };

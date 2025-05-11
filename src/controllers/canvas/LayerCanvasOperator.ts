@@ -7,8 +7,7 @@ import { Tool } from '../../models/tool/Tool';
 import { getToolInstance } from '../../models/tool/ToolBase';
 import { DrawState } from '../../types/DrawState';
 import { currentColor } from '../color/ColorController';
-import TileLayerImageAgent from '../layer/agents/TileLayerImageAgent';
-import LayerImageAgent from '../layer/LayerImageAgent';
+import LayerImageAgent from '../layer/image/LayerImageAgent';
 import { findLayerById } from '../layer_list/LayerListController';
 
 export default class LayerCanvasOperator {
@@ -19,7 +18,7 @@ export default class LayerCanvasOperator {
     if (!agent) return;
     const layer = findLayerById(this.getLayerIdToDraw());
     if (!layer) return;
-    const image = agent.getImage();
+    const image = agent.getBuffer();
     if (!image) return;
 
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
@@ -28,19 +27,17 @@ export default class LayerCanvasOperator {
     const result = this.useTool(agent, state, image, getCurrentTool(), position, last);
 
     if (result) {
-      agent.setDrawingBuffer(result);
+      agent.callOnImageChangeListeners();
+      agent.getTileManager().resetDirtyStates();
+      
       if (state === DrawState.end) {
-        agent.registerDiffAction();
-        agent.setImage(result);
-
-        if (agent instanceof TileLayerImageAgent) {
-          (agent as TileLayerImageAgent).resetAllDirtyStates();
-        }
+        agent.registerToHistory();
+        agent.getTileManager().resetAllDirtyStates();
       }
     }
   }
 
-  private useTool(agent: LayerImageAgent, state: DrawState, image: ImageData, tool: Tool, position: Vec2, last?: Vec2) {
+  private useTool(agent: LayerImageAgent, state: DrawState, image: Uint8ClampedArray, tool: Tool, position: Vec2, last?: Vec2) {
     const toolInstance = getToolInstance(tool.type);
     const toolArgs = {
       image,
@@ -66,13 +63,7 @@ export default class LayerCanvasOperator {
     }
     const endTime = Date.now();
     if (isDrawnAction) {
-      if (agent instanceof TileLayerImageAgent) {
-        setBottomBarText(
-          `${tool.type} finished. ${endTime - startTime} ms. (updated ${(agent as TileLayerImageAgent).getDirtyTiles().length} dirty tiles)`
-        );
-      } else {
-        setBottomBarText(`${tool.type} finished. ${endTime - startTime} ms.`);
-      }
+      setBottomBarText(`${tool.type} finished. ${endTime - startTime} ms. (updated ${agent?.getTileManager().getDirtyTiles().length} dirty tiles)`);
     }
     return image;
   }

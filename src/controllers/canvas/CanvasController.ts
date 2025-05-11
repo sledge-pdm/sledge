@@ -31,7 +31,6 @@ export const getReferencedZoom = (length?: number) => {
     const width = canvasStore.canvas.width;
     const height = canvasStore.canvas.height;
     length = width > height ? width : height;
-    if (!length) return undefined;
   }
 
   return referenceLength() / length;

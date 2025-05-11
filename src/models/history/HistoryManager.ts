@@ -1,4 +1,3 @@
-import { reconcile } from 'solid-js/store';
 import { setLayerHistoryStore } from '~/stores/ProjectStores';
 import { TileIndex } from '~/types/Tile';
 import { RGBAColor } from '~/utils/ColorUtils';
@@ -100,7 +99,7 @@ export class HistoryManager {
    * Synchronize the undo/redo stacks with the SolidJS store
    */
   private syncStores() {
-    setLayerHistoryStore(this.layerId, 'undoStack', reconcile(this.undoActionsStack));
-    setLayerHistoryStore(this.layerId, 'redoStack', reconcile(this.redoActionsStack));
+    setLayerHistoryStore(this.layerId, 'canUndo', this.canUndo());
+    setLayerHistoryStore(this.layerId, 'canRedo', this.canRedo());
   }
 }

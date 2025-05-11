@@ -1,7 +1,9 @@
 mod analysis;
+mod commands;
 mod window;
 
 use analysis::get_process_memory;
+use commands::emit_global_event;
 use window::{OpenWindowPayload, SledgeWindowKind, open_window};
 
 use futures::executor::block_on;
@@ -9,7 +11,11 @@ use futures::executor::block_on;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![get_process_memory, open_window])
+        .invoke_handler(tauri::generate_handler![
+            get_process_memory,
+            open_window,
+            emit_global_event
+        ])
         .plugin(
             tauri_plugin_log::Builder::new()
                 .target(tauri_plugin_log::Target::new(

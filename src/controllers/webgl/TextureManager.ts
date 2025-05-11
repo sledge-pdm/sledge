@@ -1,6 +1,7 @@
 import { Layer } from '~/models/layer/Layer';
 import { layerAgentManager } from '~/routes/editor';
 import LayerImageAgent from '../layer/image/LayerImageAgent';
+import { allLayers } from '../layer_list/LayerListController';
 
 type TextureSlot = {
   layerId: string;
@@ -84,7 +85,12 @@ export class TextureManager {
 
     // 差分更新リスナー登録
     const updateFn = () => this.updateDirty(agent, tex);
-    agent.setOnImageChangeListener(key, updateFn);
+    agent.setOnImageChangeListener(key, (e) => {
+      if (e.newSize) {
+        this.initSlots(allLayers());
+      }
+      updateFn();
+    });
 
     this.slots.push({
       layerId: layer.id,

@@ -1,6 +1,8 @@
 export type RGBColor = [number, number, number];
 export type RGBAColor = [number, number, number, number];
 
+export const transparent: RGBAColor = [0, 0, 0, 0];
+
 // "#rrggbb" -> r/g/b
 export function hexToRGB(hex: string): RGBColor {
   const r = parseInt(hex.slice(1, 3), 16);

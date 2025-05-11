@@ -4,15 +4,15 @@ import * as styles from '~/styles/components/basics/slider.css'; // vanilla-extr
 interface SliderProps {
   min: number;
   max: number;
-  default: number;
+  value: number;
   allowFloat?: boolean;
-  onValueChanged?: (newValue: number) => void;
+  onChange?: (newValue: number) => void;
 }
 
 const Slider: Component<SliderProps> = (props) => {
   let sliderRef: HTMLDivElement | undefined;
   const [isDrag, setDrag] = createSignal(false);
-  const [value, setValue] = createSignal(props.default);
+  const [value, setValue] = createSignal(props.value);
 
   const percent = () => ((value() - props.min) / (props.max - props.min)) * 100;
 
@@ -31,7 +31,7 @@ const Slider: Component<SliderProps> = (props) => {
     const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
     setValue(newValue);
-    props.onValueChanged?.(newValue);
+    props.onChange?.(newValue);
   };
 
   const handlePointerUp = (e: PointerEvent) => {
@@ -49,7 +49,7 @@ const Slider: Component<SliderProps> = (props) => {
     const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
     setValue(newValue);
-    props.onValueChanged?.(newValue);
+    props.onChange?.(newValue);
   };
 
   return (

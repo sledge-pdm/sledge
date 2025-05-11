@@ -1,11 +1,11 @@
 import { Component } from 'solid-js';
 import { CanvasRenderingMode } from '~/models/canvas/Canvas';
-import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { Consts } from '~/utils/consts';
-import Dropdown, { DropdownOption } from '../common/basics/Dropdown';
+import Dropdown, { DropdownOption } from '../../common/basics/Dropdown';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'adaptive', value: 'adaptive' },
@@ -26,9 +26,9 @@ const EditorSettings: Component = () => {
               name='width'
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
-              value={globalStore.newProjectCanvasSize.width}
+              value={globalConfig.newProject.canvasSize.width}
               onInput={(e) => {
-                setGlobalStore('newProjectCanvasSize', 'width', Number(e.target.value));
+                setGlobalConfig('newProject', 'canvasSize', 'width', Number(e.target.value));
               }}
               style={{ 'font-size': '10px' }}
               required
@@ -39,9 +39,9 @@ const EditorSettings: Component = () => {
               name='height'
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
-              value={globalStore.newProjectCanvasSize.height}
+              value={globalConfig.newProject.canvasSize.height}
               onInput={(e) => {
-                setGlobalStore('newProjectCanvasSize', 'height', Number(e.target.value));
+                setGlobalConfig('newProject', 'canvasSize', 'height', Number(e.target.value));
               }}
               style={{ 'font-size': '10px' }}
               required
@@ -51,10 +51,10 @@ const EditorSettings: Component = () => {
 
         <p>canvas rendering (temp not works).</p>
         <Dropdown
-          value={globalStore.canvasRenderingMode}
+          value={globalConfig.performance.canvasRenderingMode}
           options={renderingOptions}
           onChange={(v) => {
-            setGlobalStore('canvasRenderingMode', v);
+            setGlobalConfig('performance', 'canvasRenderingMode', v);
           }}
         />
       </div>

@@ -20,10 +20,8 @@ const KeyListener: Component = () => {
     if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) switchToolType(ToolType.Eraser);
     if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) switchToolType(ToolType.Fill);
   };
-  onMount(() => {
-    window.addEventListener('keydown', handleKey);
-    onCleanup(() => window.removeEventListener('keydown', handleKey));
-  });
+  onMount(() => window.addEventListener('keydown', handleKey));
+  onCleanup(() => window.removeEventListener('keydown', handleKey));
 
   return null;
 };

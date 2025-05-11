@@ -80,7 +80,7 @@ pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(
             let _url = "/settings";
             let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
                 .title("settings")
-                .inner_size(500.0, 300.0)
+                .inner_size(700.0, 500.0)
                 .resizable(false)
                 .decorations(false)
                 .closable(true)

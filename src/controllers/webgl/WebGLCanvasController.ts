@@ -36,7 +36,7 @@ export class WebGLCanvasController {
 
     // 4) Texture Manager
     this.textureMgr = new TextureManager(this.gl, this.program, this.maxLayers);
-    this.textureMgr.setupInitialTextures(layers);
+    this.textureMgr.initSlots(layers);
 
     // 5) Render Loop
     this.renderLoop();
@@ -57,13 +57,11 @@ export class WebGLCanvasController {
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
     this.gl.viewport(0, 0, w, h);
-
-    this.textureMgr.resizeOffscreens(width, height, dpr);
   }
 
   updateLayers(layers: Layer[]) {
     const active = layers.filter((l) => l.enabled).slice(0, this.maxLayers);
-    const prev = [...this.textureMgr.layerIds];
+    const prev = [...this.textureMgr.getLayerIds()];
     const next = active.map((l) => l.id);
 
     const n = Math.max(prev.length, next.length);
@@ -74,9 +72,9 @@ export class WebGLCanvasController {
 
       if (newId != null) {
         const newLayer = active.find((l) => l.id === newId)!;
-        this.textureMgr.createTextureSlot(i, newLayer);
+        this.textureMgr.createSlot(i, newLayer);
       } else {
-        this.textureMgr.clearTextureSlot(i);
+        this.textureMgr.clearSlot(i);
       }
     }
 
@@ -118,15 +116,6 @@ export class WebGLCanvasController {
     this.gl.flush();
     this.gl.finish();
 
-    console.log(
-      'src backing:',
-      this.canvas.width,
-      this.canvas.height,
-      'src css:',
-      this.canvas.style.width,
-      this.canvas.style.height
-    );
-
     const thumb = document.createElement('canvas');
     thumb.width = thumbW;
     thumb.height = thumbH;
@@ -145,11 +134,7 @@ export class WebGLCanvasController {
   }
 }
 
-export async function exportThumbnailDataURL(
-  controller: WebGLCanvasController,
-  thumbW: number,
-  thumbH: number
-): Promise<string> {
+export async function exportThumbnailDataURL(controller: WebGLCanvasController, thumbW: number, thumbH: number): Promise<string> {
   const blob = await controller.exportThumbnailPng(thumbW, thumbH);
   return await blobToDataURL(blob);
 }

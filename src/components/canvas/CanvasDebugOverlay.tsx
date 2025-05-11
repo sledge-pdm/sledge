@@ -3,10 +3,7 @@ import { Component, createSignal, Show } from 'solid-js';
 import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalStore } from '~/stores/GlobalStores';
-import {
-  canvasDebugOverlayBottomLeft,
-  canvasDebugOverlayTopLeft,
-} from '~/styles/components/canvas/canvas_debug_overlay.css';
+import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { flexCol } from '~/styles/snippets.css';
 import { safeInvoke } from '~/utils/TauriUtils';
 import { PixelLineChart } from '../common/PixelLineChart';

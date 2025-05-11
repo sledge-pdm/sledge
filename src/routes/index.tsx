@@ -1,7 +1,7 @@
 import { onMount } from 'solid-js';
 import RecentFileList from '~/components/common/RecentFileList';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
-import { loadGlobalSettings, saveGlobalSettings } from '~/io/global_config/globalSettings';
+import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromFileSelection } from '~/io/project/project';
 import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
@@ -32,7 +32,6 @@ export const StartWindowOptions: WindowOptionsProp = {
 export default function Home() {
   onMount(() => {
     loadGlobalSettings();
-    saveGlobalSettings();
   });
 
   const openExistingProject = (selectedFile: FileLocation) => {
@@ -47,7 +46,6 @@ export default function Home() {
   };
 
   const createNew = () => {
-    console.log(getNewProjectSearchParams());
     safeInvoke('open_window', {
       payload: {
         kind: 'editor',

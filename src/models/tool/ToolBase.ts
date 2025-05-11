@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/controllers/layer/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { EraserTool } from '../../controllers/tool/eraser/EraserTool';
 import { FillTool } from '../../controllers/tool/fill/FillTool';

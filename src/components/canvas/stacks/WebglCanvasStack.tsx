@@ -11,21 +11,23 @@ const WebGLCanvasStack: Component = () => {
 
   onMount(() => {
     setLogStore('currentRenderMode', RenderMode.WebGL);
-    initWebglRenderer(canvasEl, /*MAX_LAYERS*/ 16);
+    const renderer = initWebglRenderer(canvasEl, /*MAX_LAYERS*/ 16);
   });
+
   createEffect(() => {
     const { width, height } = canvasStore.canvas;
     const renderer = getWebglRenderer();
-    renderer.resize(width, height);
+    renderer?.resize(width, height);
   });
+
   createEffect(() => {
     const renderer = getWebglRenderer();
-    renderer.updateLayers(allLayers().toReversed());
+    renderer?.updateLayers(allLayers().toReversed());
   });
 
   onCleanup(() => {
     const renderer = getWebglRenderer();
-    renderer.destroy(/* skipOnHotReload */ true);
+    renderer?.destroy(/* skipOnHotReload */ true);
   });
 
   return (

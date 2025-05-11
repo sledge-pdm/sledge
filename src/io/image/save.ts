@@ -10,6 +10,7 @@ export function exportWithScale(fileName?: string, path?: string, scale = 10) {
 
   if (globalStore.enableGLRender) {
     const renderer = getWebglRenderer();
+    if (renderer === undefined) return;
     originalCanvas = renderer.getCanvas();
   } else {
     originalCanvas = document.getElementById(`canvas-${layerId}`) as HTMLCanvasElement;

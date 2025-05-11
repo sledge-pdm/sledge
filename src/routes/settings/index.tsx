@@ -1,3 +1,4 @@
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { onCleanup, onMount } from 'solid-js';
 import EditorSettings from '~/components/settings/EditorSettings';
 import KeyConfigSettings from '~/components/settings/KeyConfigSettings';
@@ -24,12 +25,18 @@ export const SettingsWindowOptions: WindowOptionsProp = {
 };
 
 export default function Settings() {
-  onMount(() => {
-    loadGlobalSettings();
-  });
+  const window = getCurrentWebviewWindow();
 
-  onCleanup(() => {
-    saveGlobalSettings();
+  onMount(async () => {
+    loadGlobalSettings();
+
+    const unlisten = await window.onCloseRequested(async (event) => {
+      await saveGlobalSettings();
+    });
+
+    onCleanup(() => {
+      unlisten();
+    });
   });
 
   return (

@@ -1,7 +1,6 @@
-
-use std::path::PathBuf;
-use tauri::{AppHandle, WebviewWindowBuilder, WebviewUrl};
 use serde::Deserialize;
+use std::path::PathBuf;
+use tauri::{AppHandle, WebviewUrl, WebviewWindowBuilder};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -94,17 +93,15 @@ pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(
         }
     };
 
-  // data_directory をラベルごとに分けたいならここで作成
-  let data_dir = dirs::data_dir()
-  .unwrap_or_else(|| PathBuf::from("."))
-  .join(format!("sledge-browser-data-{}", label));
+    // data_directory をラベルごとに分けたいならここで作成
+    let data_dir = dirs::data_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join(format!("sledge-browser-data-{}", label));
     // ディレクトリがなければ作っておく
     std::fs::create_dir_all(&data_dir).map_err(|e| e.to_string())?;
 
-    builder = builder
-    // 共通の追加ブラウザ引数
-    .additional_browser_args(COMMON_BROWSER_ARGS);
-    
+    builder = builder.additional_browser_args(COMMON_BROWSER_ARGS);
+
     builder.build().map_err(|e| e.to_string())?;
 
     Ok(())

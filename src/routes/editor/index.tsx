@@ -17,16 +17,9 @@ import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromPath } from '~/io/project/project';
 import { LayerType } from '~/models/layer/Layer';
 import { globalStore } from '~/stores/GlobalStores';
-import {
-  canvasStore,
-  layerHistoryStore,
-  layerListStore,
-  projectStore,
-  setCanvasStore,
-  setProjectStore,
-} from '~/stores/ProjectStores';
+import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
-import { emitEvent, safeInvoke } from '~/utils/TauriUtils';
+import { emitEvent, listenEvent, safeInvoke } from '~/utils/TauriUtils';
 import { closeWindowsByLabel, WindowOptionsProp } from '~/utils/WindowUtils';
 
 export const EditorWindowOptions: WindowOptionsProp = {
@@ -43,7 +36,7 @@ export const EditorWindowOptions: WindowOptionsProp = {
 
 export const layerAgentManager = new LayerAgentManager();
 
-export const getImageOf = (layerId: string) => layerAgentManager.getAgent(layerId)?.getImage();
+export const getImageOf = (layerId: string) => layerAgentManager.getAgent(layerId)?.getBuffer();
 
 export default function Editor() {
   const window = getCurrentWebviewWindow();
@@ -100,6 +93,11 @@ export default function Editor() {
     await emitEvent('onSetup');
 
     adjustZoomToFit();
+
+    listenEvent('onSettingsSaved', () => {
+      loadGlobalSettings();
+      console.log('yeah');
+    });
   };
 
   const [isCloseRequested, SetIsCloseRequested] = createSignal(false);

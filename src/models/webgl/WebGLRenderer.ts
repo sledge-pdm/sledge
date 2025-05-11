@@ -12,7 +12,7 @@ export function initWebglRenderer(canvas: HTMLCanvasElement, maxLayers = 16) {
   return renderer;
 }
 
-export function getWebglRenderer(): WebGLCanvasController {
-  if (!renderer) throw new Error('WebGL renderer not initialized yet!');
-  return renderer;
+export function getWebglRenderer(): WebGLCanvasController | undefined {
+  if (!renderer) console.log('WebGL renderer not initialized yet!');
+  return renderer ?? undefined;
 }

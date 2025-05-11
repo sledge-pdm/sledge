@@ -2,7 +2,7 @@ import { Component, For } from 'solid-js';
 import { activeLayer } from '~/controllers/layer_list/LayerListController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
-import { globalStore } from '~/stores/GlobalStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import Tile from '~/types/Tile';
 
@@ -12,7 +12,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
 
   const zoomedPenSize = () => getCurrentTool().size * interactStore.zoom;
 
-  const dirtyRects = () => (globalStore.showDirtyRects ? props.dirtyRects : []);
+  const dirtyRects = () => (globalConfig.debug.showDirtyRects ? props.dirtyRects : []);
 
   return (
     <svg
@@ -29,14 +29,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
       }}
     >
       {/* border rect */}
-      <rect
-        width={borderWidth()}
-        height={borderHeight()}
-        fill='none'
-        stroke='black'
-        stroke-width={1}
-        pointer-events='none'
-      />
+      <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={1} pointer-events='none' />
 
       {/* pen hover preview */}
       <rect

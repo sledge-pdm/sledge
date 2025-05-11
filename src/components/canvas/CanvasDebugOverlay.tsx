@@ -2,7 +2,7 @@ import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, Show } from 'solid-js';
 import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, logStore } from '~/stores/EditorStores';
-import { globalStore } from '~/stores/GlobalStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { flexCol } from '~/styles/snippets.css';
 import { safeInvoke } from '~/utils/TauriUtils';
@@ -59,7 +59,7 @@ const CanvasDebugOverlay: Component = (props) => {
         </div>
       </div>
 
-      <Show when={globalStore.showPerfMonitor}>
+      <Show when={globalConfig.debug.showPerfMonitor}>
         <div class={canvasDebugOverlayBottomLeft}>
           <div class={flexCol}>
             <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>

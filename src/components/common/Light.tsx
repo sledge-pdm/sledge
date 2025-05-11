@@ -1,9 +1,9 @@
 import { Component, Show } from 'solid-js';
-import { lightInnerOff, lightInnerOn } from '~/styles/components/light.css';
 
 interface LightProps {
   class?: string;
   on?: boolean;
+  color?: string;
 }
 
 const Light: Component<LightProps> = (props: LightProps) => {
@@ -23,8 +23,14 @@ const Light: Component<LightProps> = (props: LightProps) => {
       xmlns='http://www.w3.org/2000/svg'
     >
       <Show when={true}>
-        <g class={props.on ? lightInnerOn : lightInnerOff}>
-          <circle cx={width / 2} cy={height / 2} r={radius} fill='red' />
+        <g
+          style={{
+            filter: `drop-shadow(0 0 ${props.on ? '1px' : '0'} ${props.color ?? 'red'})`,
+            opacity: props.on ? 1 : 0,
+            transition: props.on ? 'opacity 1s ease' : 'none',
+          }}
+        >
+          <circle cx={width / 2} cy={height / 2} r={radius} fill={props.color ?? 'red'} />
         </g>
       </Show>
     </svg>

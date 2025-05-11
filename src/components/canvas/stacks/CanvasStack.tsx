@@ -5,7 +5,7 @@ import { InteractCanvas } from './InteractCanvas';
 
 import { activeLayer } from '~/controllers/layer_list/LayerListController';
 import { layerAgentManager } from '~/routes/editor';
-import { globalStore } from '~/stores/GlobalStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
@@ -49,7 +49,7 @@ const CanvasStack: Component = () => {
       >
         <InteractCanvas operator={new LayerCanvasOperator(() => activeLayer().id)} />
 
-        <Show when={globalStore.enableGLRender}>
+        <Show when={globalConfig.performance.enableGLRender}>
           <WebGLCanvasStack />
         </Show>
       </div>

@@ -64,10 +64,10 @@ export default function Editor() {
     await emitEvent('onProjectLoad');
 
     setProjectStore('isProjectChangedAfterSave', false);
-    setIsLoading(false);
     await loadGlobalSettings();
 
     await emitEvent('onGlobalStoreLoad');
+    setIsLoading(false);
 
     if (isNewProject) {
       changeCanvasSize(globalConfig.newProject.canvasSize);
@@ -79,7 +79,6 @@ export default function Editor() {
     }
 
     await emitEvent('onSetup');
-
     adjustZoomToFit();
 
     listenEvent('onSettingsSaved', () => {

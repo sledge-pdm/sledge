@@ -5,7 +5,6 @@ import { LayerHistory } from '~/models/history/LayerHistory';
 import { Layer } from '~/models/layer/Layer';
 import { fallbackLayerProps } from '~/models/layer/LayerFactory';
 import { Size2D } from '~/types/Size';
-import { decodeImageData } from '~/utils/ImageUtils';
 
 type CanvasStore = {
   canvas: Size2D;
@@ -88,10 +87,10 @@ export const loadStoreFromProjectJson = async (projectJson: any) => {
   if (projectJson.images) {
     setLayerHistoryStore({});
     Object.keys(projectJson.images).forEach((id) => {
-      const imageData = projectJson.images[id];
-      const agent = resetLayerImage(id, Number(imageData.dotMagnification || 1));
-      const image = decodeImageData(imageData.current, Number(imageData.width), Number(imageData.height));
-      agent.setImage(image);
+      const data = projectJson.images[id];
+      const agent = resetLayerImage(id, Number(data.dotMagnification || 1));
+
+      agent.setBuffer(data.current);
     });
   }
 

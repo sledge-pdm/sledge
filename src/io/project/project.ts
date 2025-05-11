@@ -15,7 +15,6 @@ import {
   setProjectStore,
 } from '~/stores/ProjectStores';
 import { Consts } from '~/utils/consts';
-import { encodeImageData } from '~/utils/ImageUtils';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 
 export async function importProjectFromFileSelection(): Promise<string | undefined> {
@@ -31,6 +30,7 @@ export async function importProjectFromFileSelection(): Promise<string | undefin
       },
     ],
   });
+
   if (!file) {
     console.log('file not selected');
     return undefined;
@@ -78,9 +78,7 @@ export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnai
         return [
           id,
           {
-            current: encodeImageData(image),
-            width: image.width,
-            height: image.height,
+            current: image,
             dotMagnification: findLayerById(id)?.dotMagnification,
           },
         ];
@@ -96,6 +94,7 @@ export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnai
   };
 
   const renderer = getWebglRenderer();
+  if (renderer === undefined) throw new Error('wwww');
   // 2) サムネイル生成 (WebGL Controller のインスタンスを取得)
   const thumbnailDataURL = await exportThumbnailDataURL(renderer, thumbnailSize, thumbnailSize);
 

@@ -88,8 +88,7 @@ class CanvasAreaInteract {
   }
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
-    const referencedZoom = getReferencedZoom();
-    if (!referencedZoom) return;
+    const referencedZoom = getReferencedZoom() ?? 1;
     const delta = e.deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep;
 
     const zoomOld = interactStore.zoom;

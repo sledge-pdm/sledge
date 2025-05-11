@@ -30,7 +30,7 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
   }
 }
 
-export type TauriEvent = 'onGlobalStoreLoad' | 'onProjectLoad' | 'onSetup';
+export type TauriEvent = 'onGlobalStoreLoad' | 'onProjectLoad' | 'onSetup' | 'onSettingsSaved' | 'onResetAllLayers' | 'onLayerHistoryChanged';
 
 export function emitEvent(event: TauriEvent, msg?: Object) {
   return emit(event, msg);

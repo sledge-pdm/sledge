@@ -1,25 +1,17 @@
 import { Layer } from '~/models/layer/Layer';
 import { layerAgentManager } from '~/routes/editor';
-import {
-  canvasStore,
-  layerHistoryStore,
-  layerListStore,
-  setLayerHistoryStore,
-  setLayerListStore,
-} from '~/stores/ProjectStores';
+import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
 import { findLayerById } from '../layer_list/LayerListController';
-import LayerImageAgent from './LayerImageAgent';
+import LayerImageAgent from './image/LayerImageAgent';
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
     console.warn("you can't change layer id.");
     return;
   }
-  // 1) 現在のレイヤーを取得
   const layer = findLayerById(layerId);
   if (!layer) return;
 
-  // 2) Solid の store セッターを使う場合は直接ここで更新できます
   const idx = getLayerIndex(layerId);
   setLayerListStore('layers', idx, propName, newValue);
 }
@@ -34,21 +26,24 @@ export function getLayerIndex(layerId: string) {
 
 export function resetLayerImage(layerId: string, dotMagnification: number): LayerImageAgent {
   setLayerHistoryStore(layerId, {
-    undoStack: [],
-    redoStack: [],
+    canUndo: false,
+    canRedo: false,
   });
-  const blank = new ImageData(
-    Math.round(canvasStore.canvas.width / dotMagnification),
-    Math.round(canvasStore.canvas.height / dotMagnification)
-  );
+  const width = Math.round(canvasStore.canvas.width / dotMagnification);
+  const height = Math.round(canvasStore.canvas.height / dotMagnification);
+
+  // 透明（RGBA＝0,0,0,0）で初期化された Uint8ClampedArray を生成
+  const blankBuffer = new Uint8ClampedArray(width * height * 4);
+
   const agent = layerAgentManager.getAgent(layerId);
   if (agent !== undefined) {
-    agent.setImage(blank, false);
+    agent.getTileManager().setAllDirty();
+    agent.setBuffer(blankBuffer, false);
     return agent;
   } else {
-    return layerAgentManager.registerAgent(layerId, blank);
+    return layerAgentManager.registerAgent(layerId, blankBuffer, width, height);
   }
 }
 
-export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.undoStack.length > 0;
-export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.redoStack.length > 0;
+export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.canUndo;
+export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.canRedo;

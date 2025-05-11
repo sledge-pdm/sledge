@@ -26,6 +26,10 @@ export default class Tile {
     this.isDirty = false;
   }
 
+  public getIndex(): TileIndex {
+    return { row: this.row, column: this.column };
+  }
+
   toString(): string {
     return `Tile[${this.row},${this.column}]`;
   }
@@ -38,12 +42,7 @@ export default class Tile {
   }
 
   public isInBounds(positionInTile: Vec2) {
-    return (
-      positionInTile.x >= 0 &&
-      positionInTile.x < this.globalTileSize &&
-      positionInTile.y >= 0 &&
-      positionInTile.y < this.globalTileSize
-    );
+    return positionInTile.x >= 0 && positionInTile.x < this.globalTileSize && positionInTile.y >= 0 && positionInTile.y < this.globalTileSize;
   }
 
   updateState() {}

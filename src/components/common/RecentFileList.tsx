@@ -1,14 +1,7 @@
 import { Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { getProjectJsonFromPath } from '~/io/project/project';
-import {
-  recentFilesCaption,
-  recentFilesContainer,
-  recentFilesItem,
-  recentFilesName,
-  recentFilesPath,
-  recentFilesThumb,
-} from '~/routes/start.css';
+import { recentFilesCaption, recentFilesContainer, recentFilesItem, recentFilesName, recentFilesPath, recentFilesThumb } from '~/routes/start.css';
 import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';

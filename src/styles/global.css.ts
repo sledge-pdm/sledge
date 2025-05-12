@@ -111,6 +111,23 @@ globalStyle('button:active', {
   transform: 'translateY(1px)',
 });
 
+export const accentedButton = style({
+  width: 'fit-content',
+  borderColor: 'blue',
+  background: vars.color.button,
+  color: 'blue',
+  pointerEvents: 'all',
+  ':hover': {
+    color: 'white',
+    background: 'blue',
+  },
+  ':disabled': {
+    color: '#bbb',
+    borderColor: '#bbb',
+    pointerEvents: 'none',
+  },
+});
+
 export const pageRoot = style({
   display: 'flex',
   flexDirection: 'row',

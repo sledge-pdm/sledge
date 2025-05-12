@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { k12x8, Terminus, vars, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css';
+import { k12x8, Terminus, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css';
 import { flexCol } from '~/styles/snippets.css';
 
 export const aaContainer = style([
@@ -61,19 +61,6 @@ export const aboutContent = style({
   fontFamily: ZFB08,
   fontSize: '8px',
   lineHeight: 1.6,
-});
-
-export const sendFBButton = style({
-  width: 'fit-content',
-  padding: '4px 4px',
-  fontSize: '8px',
-  borderColor: 'blue',
-  background: vars.color.button,
-  color: 'blue',
-  ':hover': {
-    color: 'white',
-    background: 'blue',
-  },
 });
 
 export const aboutFeedback = style({

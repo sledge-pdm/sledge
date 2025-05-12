@@ -1,5 +1,5 @@
 import { For, JSX, Show, createSignal, onCleanup, onMount } from 'solid-js';
-import { dropdownContainer, menuItem, menuStyle, triggerButton } from '~/styles/components/basics/dropdown.css';
+import { dropdownContainer, itemText, menuItem, menuStyle, triggerButton } from '~/styles/components/basics/dropdown.css';
 
 export type DropdownOption<T extends string | number> = {
   label: string;
@@ -7,29 +7,26 @@ export type DropdownOption<T extends string | number> = {
 };
 
 interface Props<T extends string | number = string> {
-  /** 選択中の値 */
   value: T | (() => T);
-  /** 値変更時ハンドラ */
   onChange?: (value: T) => void;
-  /** 選択肢 */
   options: DropdownOption<T>[];
-  /** aria-label など追加属性 */
   props?: JSX.HTMLAttributes<HTMLDivElement>;
 }
 
 const Dropdown = <T extends string | number>(p: Props<T>) => {
-  const [open, setOpen] = createSignal(false);
   let containerRef: HTMLDivElement | undefined;
 
+  const [open, setOpen] = createSignal(false);
   const getValue = () => (typeof p.value === 'function' ? (p.value as () => T)() : p.value);
-  const selectedLabel = () => {
-    const opt = p.options.find((o) => o.value === getValue());
-    return opt ? opt.label : '';
-  };
+  const [selected, setSelected] = createSignal(p.options.find((o) => o.value === getValue())?.label);
+
+  const getLongestLabel = () => Math.max(...p.options.map((o) => o.label.length));
+  const getAdjustedLabel = (label?: string) => label?.padEnd(getLongestLabel());
 
   const toggle = () => setOpen(!open());
-  const select = (value: T) => {
-    p.onChange?.(value);
+  const select = (option: DropdownOption<T>) => {
+    p.onChange?.(option.value);
+    setSelected(option.label);
     setOpen(false);
   };
 
@@ -49,20 +46,15 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
   return (
     <div class={dropdownContainer} ref={containerRef} {...p.props}>
       <button type='button' class={triggerButton} onClick={toggle} aria-haspopup='listbox' aria-expanded={open()}>
-        <p>{selectedLabel()}</p>
+        <p class={itemText}>{getAdjustedLabel(selected())}</p>
         <img src={'/icons/misc/dropdown_caret.png'} width={9} height={9}></img>
       </button>
       <Show when={open()}>
         <ul class={menuStyle} role='listbox'>
           <For each={p.options} fallback={<li>選択肢がありません</li>}>
             {(option) => (
-              <li
-                class={menuItem}
-                role='option'
-                aria-selected={option.value === getValue()}
-                onClick={() => select(option.value)}
-              >
-                <p>{option.label}</p>
+              <li class={menuItem} role='option' aria-selected={option.value === getValue()} onClick={() => select(option)}>
+                <p class={itemText}>{getAdjustedLabel(option.label)}</p>
               </li>
             )}
           </For>

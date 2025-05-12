@@ -5,7 +5,7 @@ import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { findLayerById } from '~/controllers/layer_list/LayerListController';
 import { exportThumbnailDataURL } from '~/controllers/webgl/WebGLCanvasController';
 import { getWebglRenderer } from '~/models/webgl/WebGLRenderer';
-import { getImageOf } from '~/routes/editor';
+import { layerAgentManager } from '~/routes/editor';
 import {
   canvasStore,
   layerHistoryStore,
@@ -39,7 +39,7 @@ export async function importProjectFromFileSelection(): Promise<string | undefin
   const jsonText = await readTextFile(file);
   const projectJson = JSON.parse(jsonText);
 
-  loadProjectStore(projectJson);
+  await loadProjectStore(projectJson);
 
   return file;
 }
@@ -63,7 +63,7 @@ export async function importProjectFromPath(filePath: string) {
   const jsonText = await readTextFile(filePath);
   const projectJson = JSON.parse(jsonText);
 
-  loadProjectStore(projectJson);
+  await loadProjectStore(projectJson);
 }
 
 export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnailSize): Promise<string> => {
@@ -73,12 +73,14 @@ export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnai
     canvas: canvasStore.canvas,
     images: Object.fromEntries(
       Object.entries(layerHistoryStore).map(([id, state]) => {
-        const image = getImageOf(id);
-        if (!image) return [];
+        const agent = layerAgentManager.getAgent(id);
+        if (!agent) return [];
         return [
           id,
           {
-            current: image,
+            current: Array.from(agent.getBuffer()),
+            width: agent.getWidth(),
+            height: agent.getHeight(),
             dotMagnification: findLayerById(id)?.dotMagnification,
           },
         ];

@@ -1,33 +1,7 @@
 import { open } from '@tauri-apps/plugin-shell';
-import { pageRoot } from '~/styles/global.css';
+import { accentedButton, pageRoot } from '~/styles/global.css';
 import { flexRow, w100, wh100 } from '~/styles/snippets.css';
-import { WindowOptionsProp } from '~/utils/WindowUtils';
-import {
-  aaContainer,
-  aaText,
-  aboutContent,
-  aboutFeedback,
-  aboutLink,
-  aboutSubTitle,
-  aboutTitle,
-  contentContainer,
-  sendFBButton,
-} from './about.css';
-
-export const AboutWindowOptions: WindowOptionsProp = {
-  url: '/about',
-  width: 400,
-  height: 290,
-  resizable: false,
-  decorations: false,
-  minimizable: false,
-  maximizable: false,
-  closable: true,
-  acceptFirstMouse: true,
-  focus: true,
-  skipTaskbar: true,
-  alwaysOnTop: true,
-};
+import { aaContainer, aaText, aboutContent, aboutFeedback, aboutLink, aboutSubTitle, aboutTitle, contentContainer } from './about.css';
 
 const About = () => {
   const openLink = (url: string) => {
@@ -94,7 +68,7 @@ const About = () => {
               <br />
               feel FREE to send feedback!!
             </p>
-            <button class={sendFBButton} onClick={(e) => openLink('https://tally.so/r/w7jZNL')}>
+            <button class={accentedButton} onClick={(e) => openLink('https://tally.so/r/w7jZNL')}>
               &gt;&gt; send feedback
             </button>
           </div>

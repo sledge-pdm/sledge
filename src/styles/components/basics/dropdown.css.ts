@@ -16,9 +16,10 @@ export const triggerButton = style([
     backgroundColor: vars.color.primary,
     color: vars.color.text,
     border: `1px solid ${vars.color.border}`,
-    padding: '3px 10px 4px 10px',
+    padding: '3px 11px 4px 11px',
     width: 'fit-content',
     textAlign: 'left',
+    minWidth: '120px',
     alignItems: 'center',
     gap: '6px',
     cursor: 'pointer',
@@ -45,6 +46,7 @@ export const menuStyle = style([
     marginTop: '0px',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
     maxHeight: '200px',
+    minWidth: '120px',
     overflowY: 'auto',
     width: 'fit-content',
   },
@@ -52,9 +54,14 @@ export const menuStyle = style([
 
 // メニューアイテム
 export const menuItem = style({
-  padding: '6px 14px 7px 14px',
+  padding: '6px 10px 7px 10px',
   cursor: 'pointer',
   selectors: {
     '&:hover': { backgroundColor: vars.color.surface },
   },
+});
+
+export const itemText = style({
+  whiteSpace: 'break-spaces',
+  width: '100%',
 });

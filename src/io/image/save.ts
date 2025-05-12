@@ -1,5 +1,4 @@
 import { getWebglRenderer } from '~/models/webgl/WebGLRenderer';
-import { globalStore } from '~/stores/GlobalStores';
 import { layerListStore } from '~/stores/ProjectStores';
 
 export function exportWithScale(fileName?: string, path?: string, scale = 10) {
@@ -8,13 +7,9 @@ export function exportWithScale(fileName?: string, path?: string, scale = 10) {
 
   let originalCanvas: HTMLCanvasElement;
 
-  if (globalStore.enableGLRender) {
-    const renderer = getWebglRenderer();
-    if (renderer === undefined) return;
-    originalCanvas = renderer.getCanvas();
-  } else {
-    originalCanvas = document.getElementById(`canvas-${layerId}`) as HTMLCanvasElement;
-  }
+  const renderer = getWebglRenderer();
+  if (renderer === undefined) return;
+  originalCanvas = renderer.getCanvas();
 
   if (!originalCanvas) {
     alert('対象のレイヤーが見つかりません。');

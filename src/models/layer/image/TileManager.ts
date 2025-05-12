@@ -1,3 +1,4 @@
+import { Size2D } from '~/types/Size';
 import Tile, { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
@@ -13,6 +14,12 @@ export default class TileManager {
     private setData: (i: number, v: number) => void,
     private addTileDiff: (index: TileIndex, uniformColor: RGBAColor | undefined, fillColor: RGBAColor) => void
   ) {
+    this.initTile();
+  }
+
+  setSize(size: Size2D) {
+    this.width = size.width;
+    this.height = size.height;
     this.initTile();
   }
 

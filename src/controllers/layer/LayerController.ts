@@ -24,13 +24,13 @@ export function getLayerIndex(layerId: string) {
   return layerListStore.layers.findIndex((l) => l.id === layerId);
 }
 
-export function resetLayerImage(layerId: string, dotMagnification: number): LayerImageAgent {
+export function resetLayerImage(layerId: string, dotMagnification: number, width?: number, height?: number): LayerImageAgent {
   setLayerHistoryStore(layerId, {
     canUndo: false,
     canRedo: false,
   });
-  const width = Math.round(canvasStore.canvas.width / dotMagnification);
-  const height = Math.round(canvasStore.canvas.height / dotMagnification);
+  width = width ?? Math.round(canvasStore.canvas.width / dotMagnification);
+  height = height ?? Math.round(canvasStore.canvas.height / dotMagnification);
 
   // 透明（RGBA＝0,0,0,0）で初期化された Uint8ClampedArray を生成
   const blankBuffer = new Uint8ClampedArray(width * height * 4);

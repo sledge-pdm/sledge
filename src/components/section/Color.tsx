@@ -20,14 +20,7 @@ const Color: Component = () => {
       <div class={sectionContent} style={{ 'flex-direction': 'row', margin: '8px 0' }}>
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
-            {(item, index) => (
-              <ColorBox
-                color={item}
-                sizePx={8}
-                onClick={(color) => onColorClicked(color, index())}
-                enableUsingSelection={true}
-              />
-            )}
+            {(item, index) => <ColorBox color={item} sizePx={8} onClick={(color) => onColorClicked(color, index())} enableUsingSelection={true} />}
           </For>
         </div>
         {/* <div class={descriptionContainer}>

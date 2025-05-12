@@ -23,6 +23,8 @@ export const PixelLineChart: Component<PixelLineChartProps> = (props) => {
   const [lastBuffer, setLastBuffer] = createSignal<number | undefined>(-1);
   const [maxValue, setMaxValue] = createSignal(1);
 
+  let iv: NodeJS.Timeout;
+
   onMount(() => {
     ctx = canvas.getContext('2d')!;
     // ピクセルパーフェクトを狙うなら、実際の canvas.width/height と CSSサイズを同じに
@@ -45,7 +47,7 @@ export const PixelLineChart: Component<PixelLineChartProps> = (props) => {
     };
 
     // 定期取得＋描画ループ
-    const iv = setInterval(async () => {
+    iv = setInterval(async () => {
       try {
         const v = await props.fetchSample();
         buffer.shift();
@@ -61,10 +63,10 @@ export const PixelLineChart: Component<PixelLineChartProps> = (props) => {
         // 無視
       }
     }, props.interval ?? 1000);
-
-    // マウント解除時に止める
-    onCleanup(() => clearInterval(iv));
   });
+
+  // マウント解除時に止める
+  onCleanup(() => clearInterval(iv));
 
   return (
     <div

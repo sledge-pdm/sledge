@@ -57,7 +57,7 @@ export default function TitleBar() {
     }
   });
 
-  const borderWindowLabels: string[] = ['editor'];
+  const borderWindowLabels: string[] = ['editor', 'settings'];
   const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
 
   return (
@@ -77,10 +77,7 @@ export default function TitleBar() {
           )}
           {isMaximizable() && (
             <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
-              <img
-                class={titleBarControlButtonImg}
-                src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/icons/title_bar/maximize.png'}
-              />
+              <img class={titleBarControlButtonImg} src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/icons/title_bar/maximize.png'} />
             </button>
           )}
           {isClosable() && (

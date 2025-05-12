@@ -8,9 +8,7 @@ const ToolConfig: Component = () => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>tools.</p>
       <div class={sectionContent}>
-        <For each={toolStore.tools}>
-          {(item, index) => <ToolItem tool={item} isInUse={index() === toolStore.usingIndex} />}
-        </For>
+        <For each={toolStore.tools}>{(item, index) => <ToolItem tool={item} isInUse={index() === toolStore.usingIndex} />}</For>
       </div>
     </div>
   );

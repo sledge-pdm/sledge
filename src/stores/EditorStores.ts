@@ -43,18 +43,7 @@ const defaultColorStore: ColorStore = {
   currentPalette: 'primary' as PaletteType,
   primary: '#000000', // 通常の描画色
   secondary: '#ffffff', // 背景・消しゴムなど
-  swatches: [
-    '#000000',
-    '#FFFFFF',
-    '#ffff00',
-    '#00ffff',
-    '#00ff00',
-    '#ff00ff',
-    '#ff0000',
-    '#0000ff',
-    '#000080',
-    '#400080',
-  ],
+  swatches: ['#000000', '#FFFFFF', '#ffff00', '#00ffff', '#00ff00', '#ff00ff', '#ff0000', '#0000ff', '#000080', '#400080'],
 };
 const defaultInteractStore: InteractStore = {
   canvasAreaSize: { width: 0, height: 0 },
@@ -80,11 +69,7 @@ const defaultLogStore: LogStore = {
 };
 const defaultToolStore: ToolStore = {
   usingIndex: 0,
-  tools: [
-    createTool(ToolType.Pen, 'pen', 1),
-    createTool(ToolType.Eraser, 'eraser', 1),
-    createTool(ToolType.Fill, 'fill', 1),
-  ],
+  tools: [createTool(ToolType.Pen, 'pen', 1), createTool(ToolType.Eraser, 'eraser', 1), createTool(ToolType.Fill, 'fill', 1)],
 };
 
 export const initEditorStore = () => {

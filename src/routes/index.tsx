@@ -3,31 +3,12 @@ import RecentFileList from '~/components/common/RecentFileList';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromFileSelection } from '~/io/project/project';
-import { globalStore, setGlobalStore } from '~/stores/GlobalStores';
+import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import { safeInvoke } from '~/utils/TauriUtils';
-import {
-  closeWindowsByLabel,
-  getExistingProjectSearchParams,
-  getNewProjectSearchParams,
-  WindowOptionsProp,
-} from '~/utils/WindowUtils';
+import { closeWindowsByLabel, getExistingProjectSearchParams, getNewProjectSearchParams } from '~/utils/WindowUtils';
 import { sideSection, sideSectionItem, welcomeHeadline, welcomeRoot } from './start.css';
-
-export const StartWindowOptions: WindowOptionsProp = {
-  title: 'sledge',
-  width: 700,
-  height: 500,
-  acceptFirstMouse: true,
-  resizable: false,
-  parent: undefined,
-  closable: true,
-  maximizable: true,
-  minimizable: true,
-  decorations: false,
-  fullscreen: false,
-};
 
 export default function Home() {
   onMount(() => {
@@ -68,7 +49,7 @@ export default function Home() {
   };
 
   const clearRecentFiles = () => {
-    setGlobalStore('recentFiles', []);
+    setGlobalConfig('misc', 'recentFiles', []);
   };
 
   return (
@@ -96,7 +77,7 @@ export default function Home() {
           &ensp;settings.
         </a>
       </div>
-      <RecentFileList files={globalStore.recentFiles} onClick={(item) => openExistingProject(item)} />
+      <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />
     </div>
   );
 }

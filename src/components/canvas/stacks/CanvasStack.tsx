@@ -1,11 +1,10 @@
-import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { Component, createEffect, createSignal } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
 import { activeLayer } from '~/controllers/layer_list/LayerListController';
 import { layerAgentManager } from '~/routes/editor';
-import { globalStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
@@ -49,9 +48,7 @@ const CanvasStack: Component = () => {
       >
         <InteractCanvas operator={new LayerCanvasOperator(() => activeLayer().id)} />
 
-        <Show when={globalStore.enableGLRender}>
-          <WebGLCanvasStack />
-        </Show>
+        <WebGLCanvasStack />
       </div>
 
       <CanvasOverlaySVG dirtyRects={dirtyRects()} />

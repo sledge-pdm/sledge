@@ -37,9 +37,7 @@ const ToolItem: Component<Props> = (props: Props) => {
           class={toolConfigRowIcon}
           style={{
             'image-rendering': 'pixelated',
-            filter: props.isInUse
-              ? 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%)'
-              : 'none',
+            filter: props.isInUse ? 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%)' : 'none',
           }}
           src={src}
           width={20}
@@ -61,8 +59,8 @@ const ToolItem: Component<Props> = (props: Props) => {
             <Slider
               min={1}
               max={Consts.maxPenSize}
-              default={props.tool.size}
-              onValueChanged={(newValue) => {
+              value={props.tool.size}
+              onChange={(newValue) => {
                 sayRandomQuote('pen-resize');
                 const penIndex = toolStore.tools.findIndex((p) => p.id === props.tool.id);
                 setToolStore('tools', penIndex, 'size', newValue);

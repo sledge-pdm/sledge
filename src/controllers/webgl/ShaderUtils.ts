@@ -10,11 +10,7 @@ export function createShader(gl: WebGLRenderingContext, type: GLenum, src: strin
   return shader;
 }
 
-export function createProgramFromSources(
-  gl: WebGLRenderingContext,
-  vertexSrc: string,
-  fragmentSrc: string
-): WebGLProgram {
+export function createProgramFromSources(gl: WebGLRenderingContext, vertexSrc: string, fragmentSrc: string): WebGLProgram {
   const vert = createShader(gl, gl.VERTEX_SHADER, vertexSrc);
   const frag = createShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
   const program = gl.createProgram()!;

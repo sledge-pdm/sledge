@@ -8,11 +8,10 @@ import {
   restoreDefaultKeyConfig,
   saveKeyConfigEntry,
 } from '~/controllers/config/KeyConfigController';
-import { saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
-import { keyConfigName } from '~/styles/components/settings/key_config_settings.css';
+import { keyConfigName } from '~/styles/components/config/key_config_settings.css';
+import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { KeyConfigCommands } from '~/utils/consts';
 
@@ -48,24 +47,18 @@ const KeyConfigSettings: Component = () => {
     if (!name) return;
     if (save) {
       saveKeyConfigEntry(name, recordedEntry());
-      saveGlobalSettings();
     }
     setRecordedEntry(undefined);
     setRecordingName(undefined);
   };
 
-  onMount(() => {
-    window.addEventListener('keydown', handleOnKeyDown);
-
-    onCleanup(() => {
-      window.removeEventListener('keydown', handleOnKeyDown);
-    });
-  });
+  onMount(() => window.addEventListener('keydown', handleOnKeyDown));
+  onCleanup(() => window.removeEventListener('keydown', handleOnKeyDown));
 
   return (
     <div class={sectionRoot}>
-      <p class={sectionCaption}>key config.</p>
-      <div class={sectionContent} style={{ gap: '8px' }}>
+      <div class={sectionContent} style={{ gap: '12px', 'margin-left': '8px' }}>
+        <p style={{ 'margin-bottom': '12px' }}>click key to record new &gt; enter to confirm,</p>
         <For each={Object.entries(keyConfigStore)}>
           {([name, entry]) => {
             const isRecording = () => name === recordingName();
@@ -81,9 +74,7 @@ const KeyConfigSettings: Component = () => {
                     'pointer-events': isRecording() ? 'none' : 'all',
                   }}
                 >
-                  {name === recordingName()
-                    ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'enter any key'}]`
-                    : parseKeyConfigEntry(entry[0])}
+                  {name === recordingName() ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'enter any key'}]` : parseKeyConfigEntry(entry[0])}
                 </a>
               </div>
             );
@@ -91,6 +82,7 @@ const KeyConfigSettings: Component = () => {
         </For>
 
         <button
+          style={{ 'margin-top': '24px' }}
           onClick={(e) => {
             e.preventDefault();
             restoreDefaultKeyConfig();

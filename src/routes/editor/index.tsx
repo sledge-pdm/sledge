@@ -16,23 +16,11 @@ import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromPath } from '~/io/project/project';
 import { LayerType } from '~/models/layer/Layer';
-import { globalStore } from '~/stores/GlobalStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
 import { emitEvent, listenEvent, safeInvoke } from '~/utils/TauriUtils';
-import { closeWindowsByLabel, WindowOptionsProp } from '~/utils/WindowUtils';
-
-export const EditorWindowOptions: WindowOptionsProp = {
-  width: 1200,
-  height: 750,
-  acceptFirstMouse: true,
-  resizable: true,
-  closable: true,
-  maximizable: true,
-  minimizable: true,
-  decorations: false,
-  fullscreen: false,
-};
+import { closeWindowsByLabel } from '~/utils/WindowUtils';
 
 export const layerAgentManager = new LayerAgentManager();
 
@@ -76,14 +64,14 @@ export default function Editor() {
     await emitEvent('onProjectLoad');
 
     setProjectStore('isProjectChangedAfterSave', false);
-    setIsLoading(false);
     await loadGlobalSettings();
 
     await emitEvent('onGlobalStoreLoad');
+    setIsLoading(false);
 
     if (isNewProject) {
-      changeCanvasSize(globalStore.newProjectCanvasSize);
-      setCanvasStore('canvas', globalStore.newProjectCanvasSize);
+      changeCanvasSize(globalConfig.newProject.canvasSize);
+      setCanvasStore('canvas', globalConfig.newProject.canvasSize);
 
       layerListStore.layers.forEach((layer) => {
         resetLayerImage(layer.id, 1);
@@ -91,7 +79,6 @@ export default function Editor() {
     }
 
     await emitEvent('onSetup');
-
     adjustZoomToFit();
 
     listenEvent('onSettingsSaved', () => {
@@ -103,9 +90,9 @@ export default function Editor() {
   let unlisten: UnlistenFn;
 
   onMount(async () => {
-    listenEvent("onSettingsSaved", () => {
+    listenEvent('onSettingsSaved', () => {
       loadGlobalSettings();
-    })
+    });
 
     unlisten = await window.onCloseRequested(async (event) => {
       if (isCloseRequested()) {

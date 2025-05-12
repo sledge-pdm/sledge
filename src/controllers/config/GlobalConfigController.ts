@@ -1,5 +1,5 @@
 import { saveGlobalSettings } from '~/io/global_config/globalSettings';
-import { setGlobalStore } from '~/stores/GlobalStores';
+import { setGlobalConfig } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
 
 export const addRecentFile = (fileLocation?: FileLocation) => {
@@ -8,11 +8,11 @@ export const addRecentFile = (fileLocation?: FileLocation) => {
   const name = fileLocation.name;
 
   // add to recent
-  setGlobalStore((store) => {
+  setGlobalConfig((store) => {
     console.log('path: ' + path);
     console.log('name: ' + name);
-    if (name && path && store.recentFiles) {
-      const oldRecentFiles = store.recentFiles.filter((f) => {
+    if (name && path && store.misc.recentFiles) {
+      const oldRecentFiles = store.misc.recentFiles.filter((f) => {
         return f.name !== name || f.path !== path?.toString();
       });
       // その後、一番上に追加
@@ -23,7 +23,7 @@ export const addRecentFile = (fileLocation?: FileLocation) => {
         },
         ...oldRecentFiles,
       ];
-      setGlobalStore('recentFiles', newRecentFiles);
+      setGlobalConfig('misc', 'recentFiles', newRecentFiles);
       saveGlobalSettings();
     }
     return store;

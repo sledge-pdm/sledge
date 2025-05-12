@@ -10,16 +10,8 @@ const lastSaidIndexes = {
   random: -1,
 };
 export const quotePool = {
-  'color-pick': [
-    'That color again? You really love it, huh.',
-    'A fine choice, but not the finest.',
-    "I see you're going with [color]. Bold.",
-  ],
-  'pen-resize': [
-    'Hmm, Not quite my size.',
-    "Go bigger, I'll crash 'em harder.",
-    'Have you ever heard of the word "pixel perfect"?',
-  ],
+  'color-pick': ['That color again? You really love it, huh.', 'A fine choice, but not the finest.', "I see you're going with [color]. Bold."],
+  'pen-resize': ['Hmm, Not quite my size.', "Go bigger, I'll crash 'em harder.", 'Have you ever heard of the word "pixel perfect"?'],
   'canvas-resize': ['Shrinking the canvas? Afraid of commitment?', 'Small canvas, big ideas. I like it.'],
   'undo-spam': ['UNDO UNDO UNDO—are you OK?', "That's the 5th undo. I’m getting dizzy."],
   random: ['Daisy, Daisy, give me your answer do do do'],

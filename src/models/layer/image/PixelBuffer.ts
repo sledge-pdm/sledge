@@ -1,4 +1,6 @@
 import { PixelDiff } from '~/models/history/HistoryManager';
+import { Point } from '~/types/Point';
+import { Size2D } from '~/types/Size';
 import { Vec2 } from '~/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
 
@@ -28,8 +30,35 @@ export default class PixelBuffer {
     return { kind: 'pixel', position, before, after: color };
   }
 
-  public deleteRawPixel(position: Vec2): PixelDiff | undefined {
-    return this.setRawPixel(position, [0, 0, 0, 0]);
+  public changeSize(
+    newSize: Size2D,
+    destOrigin: Point = { x: 0, y: 0 }, // 新バッファ上の貼り付け開始位置
+    srcOrigin: Point = { x: 0, y: 0 } // 元バッファ上の切り取り開始位置
+  ): void {
+    const { width: newW, height: newH } = newSize;
+    const oldW = this.width,
+      oldH = this.height;
+    const oldBuf = this.buffer;
+    const newBuf = new Uint8ClampedArray(newW * newH * 4);
+
+    // 元バッファから実際にコピーできる幅／高さ
+    const copyW = Math.min(oldW - srcOrigin.x, newW - destOrigin.x);
+    const copyH = Math.min(oldH - srcOrigin.y, newH - destOrigin.y);
+
+    for (let y = 0; y < copyH; y++) {
+      // 元バッファの読み出し開始オフセット
+      const oldRow = (y + srcOrigin.y) * oldW + srcOrigin.x;
+      const oldOffset = oldRow * 4;
+      // 新バッファの書き込み開始オフセット
+      const newRow = (y + destOrigin.y) * newW + destOrigin.x;
+      const newOffset = newRow * 4;
+      // 一行分コピー
+      newBuf.set(oldBuf.subarray(oldOffset, oldOffset + copyW * 4), newOffset);
+    }
+
+    this.buffer = newBuf;
+    this.width = newW;
+    this.height = newH;
   }
 
   public isInBounds(position: Vec2) {

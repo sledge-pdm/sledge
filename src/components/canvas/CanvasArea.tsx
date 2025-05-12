@@ -30,12 +30,12 @@ export default () => {
       });
       interact.setInteractListeners(wrapper, canvasStack);
     });
+  });
 
-    onCleanup(() => {
-      if (interact !== undefined) {
-        interact.removeInteractListeners(wrapper, canvasStack);
-      }
-    });
+  onCleanup(() => {
+    if (interact !== undefined) {
+      interact.removeInteractListeners(wrapper, canvasStack);
+    }
   });
 
   const offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;

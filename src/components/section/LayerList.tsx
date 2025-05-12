@@ -112,11 +112,11 @@ const LayerList: Component<{}> = () => {
             {/* <p>opacity.</p> */}
             <p style={{ width: '30px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
             <Slider
-              default={activeLayer().opacity}
+              value={activeLayer().opacity}
               min={0}
               max={1}
               allowFloat={true}
-              onValueChanged={(newValue) => {
+              onChange={(newValue) => {
                 setLayerProp(activeLayer().id, 'opacity', newValue);
               }}
             />
@@ -133,11 +133,7 @@ const LayerList: Component<{}> = () => {
           <DragDropSensors>
             <div class={layerList}>
               <SortableProvider ids={ids()}>
-                <For each={items()}>
-                  {(layer, index) => (
-                    <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />
-                  )}
-                </For>
+                <For each={items()}>{(layer, index) => <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />}</For>
               </SortableProvider>
             </div>
             {/* <DragOverlay>

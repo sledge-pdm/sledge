@@ -2,6 +2,8 @@ import { Component } from 'solid-js';
 import { checkboxWrapper, customCheckbox, hiddenCheckbox } from '~/styles/components/basics/checkbox.css';
 
 const Checkbox: Component<{
+  id?: string;
+  name?: string;
   label?: string;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
@@ -10,7 +12,9 @@ const Checkbox: Component<{
   return (
     <label class={checkboxWrapper}>
       <input
+        id={props.id}
         class={hiddenCheckbox}
+        name={props.name}
         type='checkbox'
         checked={props.checked}
         onChange={(e) => props.onChange?.(e.currentTarget.checked)}

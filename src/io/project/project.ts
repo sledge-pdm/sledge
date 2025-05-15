@@ -2,10 +2,8 @@ import { path } from '@tauri-apps/api';
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer_list/LayerListController';
-import { exportThumbnailDataURL } from '~/controllers/webgl/WebGLCanvasController';
-import { getWebglRenderer } from '~/models/webgl/WebGLRenderer';
-import { layerAgentManager } from '~/routes/editor';
 import {
   canvasStore,
   layerHistoryStore,
@@ -95,16 +93,9 @@ export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnai
     },
   };
 
-  const renderer = getWebglRenderer();
-  if (renderer === undefined) throw new Error('wwww');
-  // 2) サムネイル生成 (WebGL Controller のインスタンスを取得)
-  const thumbnailDataURL = await exportThumbnailDataURL(renderer, thumbnailSize, thumbnailSize);
-
   // 3) JSON に thumbnail フィールドを追加
   return JSON.stringify({
     ...base,
-    thumbnail: thumbnailDataURL,
-    thumbnailSize,
   });
 };
 

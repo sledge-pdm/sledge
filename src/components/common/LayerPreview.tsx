@@ -1,6 +1,6 @@
 import { Component } from 'solid-js';
+import { getBufferOf, layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
-import { getImageOf, layerAgentManager } from '~/routes/editor';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
 import { listenEvent } from '~/utils/TauriUtils';
@@ -50,7 +50,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
   listenEvent('onProjectLoad', () => {
     const height = wrapperRef.clientHeight;
-    const currentImage = getImageOf(props.layer.id);
+    const currentImage = getBufferOf(props.layer.id);
 
     let agent = layerAgentManager.getAgent(props.layer.id);
     if (currentImage) {
@@ -58,7 +58,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     }
 
     agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      const img = getImageOf(props.layer.id);
+      const img = getBufferOf(props.layer.id);
       if (img) updatePreview(img, height);
     });
   });

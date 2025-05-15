@@ -1,6 +1,6 @@
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer_list/LayerListController';
+import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer/LayerListController';
 
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { BlendMode } from '~/models/layer/Layer';

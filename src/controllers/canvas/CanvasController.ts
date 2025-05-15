@@ -3,7 +3,7 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';
 import { Consts } from '~/utils/consts';
-import { allLayers } from '../layer_list/LayerListController';
+import { allLayers } from '../layer/LayerListController';
 
 export function changeCanvasSize(newSize: Size2D): boolean {
   if (newSize.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < newSize.width) return false;

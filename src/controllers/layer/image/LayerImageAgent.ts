@@ -1,13 +1,13 @@
+import DiffManager from '~/controllers/layer/image/DiffManager';
+import PixelBufferManager from '~/controllers/layer/image/PixelBuffer';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
-import DiffManager from '~/models/layer/image/DiffManager';
-import PixelBufferManager from '~/models/layer/image/PixelBuffer';
 import { globalConfig } from '~/stores/GlobalStores';
 import { Size2D } from '~/types/Size';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import TileManager from '../../../models/layer/image/TileManager';
+import TileManager from './TileManager';
 
 export interface ImageChangeEvent {
   newSize?: Size2D;

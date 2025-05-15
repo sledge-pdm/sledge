@@ -11,7 +11,7 @@ import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { addLayer } from '~/controllers/layer_list/LayerListController';
+import { addLayer } from '~/controllers/layer/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromPath } from '~/io/project/project';
 import { LayerType } from '~/models/layer/Layer';

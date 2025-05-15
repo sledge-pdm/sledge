@@ -1,7 +1,7 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { Vec2 } from '~/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
-import { ToolArgs, ToolBehavior } from '../../../models/tool/ToolBase';
+import { ToolArgs, ToolBehavior } from '../ToolBase';
 import { TileFloodFill } from './TileFloodFill';
 
 export interface FillProps {

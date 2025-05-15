@@ -1,8 +1,8 @@
 import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
-import { findLayerById } from '../layer_list/LayerListController';
 import LayerImageAgent from './image/LayerImageAgent';
+import { findLayerById } from './LayerListController';
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {

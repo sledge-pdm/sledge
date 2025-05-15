@@ -2,7 +2,7 @@ import { trackDeep } from '@solid-primitives/deep';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup } from 'solid-js';
 import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
-import { allLayers } from '~/controllers/layer_list/LayerListController';
+import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
 import { RenderMode } from '~/models/layer/RenderMode';
 import { setLogStore } from '~/stores/EditorStores';

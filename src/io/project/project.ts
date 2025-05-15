@@ -3,7 +3,7 @@ import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
-import { findLayerById } from '~/controllers/layer_list/LayerListController';
+import { findLayerById } from '~/controllers/layer/LayerListController';
 import {
   canvasStore,
   layerHistoryStore,

@@ -4,11 +4,11 @@ import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { Tool } from '../../models/tool/Tool';
-import { getToolInstance } from '../../models/tool/ToolBase';
+import { getToolInstance } from '../../tools/ToolBase';
 import { DrawState } from '../../types/DrawState';
 import { currentColor } from '../color/ColorController';
 import LayerImageAgent from '../layer/image/LayerImageAgent';
-import { findLayerById } from '../layer_list/LayerListController';
+import { findLayerById } from '../layer/LayerListController';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}

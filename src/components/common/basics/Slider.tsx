@@ -1,4 +1,4 @@
-import { Component, createSignal } from 'solid-js';
+import { Component, createMemo, createSignal } from 'solid-js';
 import * as styles from '~/styles/components/basics/slider.css'; // vanilla-extractはこれ！
 
 interface SliderProps {
@@ -12,9 +12,10 @@ interface SliderProps {
 const Slider: Component<SliderProps> = (props) => {
   let sliderRef: HTMLDivElement | undefined;
   const [isDrag, setDrag] = createSignal(false);
-  const [value, setValue] = createSignal(props.value);
+  const [draggingValue, setDraggingValue] = createSignal(props.value);
+  const current = createMemo(() => (isDrag() ? draggingValue() : props.value));
 
-  const percent = () => ((value() - props.min) / (props.max - props.min)) * 100;
+  const percent = () => ((current() - props.min) / (props.max - props.min)) * 100;
 
   const handlePointerDown = (e: PointerEvent) => {
     setDrag(true);
@@ -30,8 +31,8 @@ const Slider: Component<SliderProps> = (props) => {
 
     const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
-    setValue(newValue);
     props.onChange?.(newValue);
+    setDraggingValue(newValue);
   };
 
   const handlePointerUp = (e: PointerEvent) => {
@@ -48,8 +49,8 @@ const Slider: Component<SliderProps> = (props) => {
 
     const newValueRaw = props.min + (pos / rect.width) * (props.max - props.min);
     const newValue = props.allowFloat ? newValueRaw : Math.round(newValueRaw);
-    setValue(newValue);
     props.onChange?.(newValue);
+    setDraggingValue(newValue);
   };
 
   return (

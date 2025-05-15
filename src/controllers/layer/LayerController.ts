@@ -1,5 +1,5 @@
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
-import { layerAgentManager } from '~/routes/editor';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
 import { findLayerById } from '../layer_list/LayerListController';
 import LayerImageAgent from './image/LayerImageAgent';

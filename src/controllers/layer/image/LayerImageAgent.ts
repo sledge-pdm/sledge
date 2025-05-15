@@ -9,7 +9,7 @@ import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import TileManager from '../../../models/layer/image/TileManager';
 
-interface ImageChangeEvent {
+export interface ImageChangeEvent {
   newSize?: Size2D;
 }
 
@@ -84,9 +84,6 @@ export default class LayerImageAgent {
     this.onImageChangedListeners[key] = listener;
   }
   removeOnImageChangeListener(key: string) {
-    delete this.onImageChangedListeners[key];
-  }
-  clearOnImageChangeListener(key: string) {
     delete this.onImageChangedListeners[key];
   }
   callOnImageChangeListeners(e: ImageChangeEvent) {

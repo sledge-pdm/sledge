@@ -1,4 +1,4 @@
-import { For, JSX, Show, createSignal, onCleanup, onMount } from 'solid-js';
+import { For, JSX, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
 import { dropdownContainer, itemText, menuItem, menuStyle, triggerButton } from '~/styles/components/basics/dropdown.css';
 
 export type DropdownOption<T extends string | number> = {
@@ -18,7 +18,10 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
 
   const [open, setOpen] = createSignal(false);
   const getValue = () => (typeof p.value === 'function' ? (p.value as () => T)() : p.value);
-  const [selected, setSelected] = createSignal(p.options.find((o) => o.value === getValue())?.label);
+  const selectedLabel = createMemo(() => {
+    const opt = p.options.find((o) => o.value === (typeof p.value === 'function' ? p.value() : p.value));
+    return opt?.label ?? '';
+  });
 
   const getLongestLabel = () => Math.max(...p.options.map((o) => o.label.length));
   const getAdjustedLabel = (label?: string) => label?.padEnd(getLongestLabel());
@@ -26,7 +29,6 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
   const toggle = () => setOpen(!open());
   const select = (option: DropdownOption<T>) => {
     p.onChange?.(option.value);
-    setSelected(option.label);
     setOpen(false);
   };
 
@@ -46,7 +48,7 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
   return (
     <div class={dropdownContainer} ref={containerRef} {...p.props}>
       <button type='button' class={triggerButton} onClick={toggle} aria-haspopup='listbox' aria-expanded={open()}>
-        <p class={itemText}>{getAdjustedLabel(selected())}</p>
+        <p class={itemText}>{getAdjustedLabel(selectedLabel())}</p>
         <img src={'/icons/misc/dropdown_caret.png'} width={9} height={9}></img>
       </button>
       <Show when={open()}>

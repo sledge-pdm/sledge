@@ -10,7 +10,6 @@ import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import { LayerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer_list/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
@@ -21,10 +20,6 @@ import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvas
 import { pageRoot } from '~/styles/global.css';
 import { emitEvent, listenEvent, safeInvoke } from '~/utils/TauriUtils';
 import { closeWindowsByLabel } from '~/utils/WindowUtils';
-
-export const layerAgentManager = new LayerAgentManager();
-
-export const getImageOf = (layerId: string) => layerAgentManager.getAgent(layerId)?.getBuffer();
 
 export default function Editor() {
   const window = getCurrentWebviewWindow();

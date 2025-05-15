@@ -1,7 +1,7 @@
 import { createMemo, onCleanup } from 'solid-js';
 import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
-import CanvasStack from './stacks/CanvasStack';
+import WebGLCanvas from './stacks/CanvasStack';
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
@@ -76,7 +76,7 @@ export default () => {
             transform: transform(),
           }}
         >
-          <CanvasStack />
+          <WebGLCanvas />
         </div>
       </div>
 

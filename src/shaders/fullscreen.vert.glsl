@@ -1,9 +1,11 @@
+#version 300 es
+precision mediump float;
 
-attribute vec2 a_pos;
-attribute vec2 a_uv;
-varying vec2 v_uv;
-void main() {
-  vec2 flip_a_uv = vec2(a_uv.x, 1.0 - a_uv.y);
-  v_uv = flip_a_uv;
+in  vec2 a_pos;
+out vec2 v_uv;
+
+void main(){
+  vec2 uv = a_pos * 0.5 + 0.5;    // (-1→0, +1→1)
+  v_uv = vec2(uv.x, 1.0 - uv.y);  // Y を反転
   gl_Position = vec4(a_pos, 0.0, 1.0);
 }

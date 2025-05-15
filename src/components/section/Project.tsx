@@ -1,5 +1,4 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { exportWithScale } from '~/io/image/save';
 import { saveProject } from '~/io/project/project';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
@@ -121,7 +120,7 @@ const Project: Component = () => {
               save (new).
             </button>
           </Show>
-          <button onClick={() => exportWithScale(projectStore.newName || projectStore.name)}>export.</button>
+          {/* <button onClick={() => exportWithScale(projectStore.newName || projectStore.name)}>export.</button> */}
           {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
         </div>
       </div>

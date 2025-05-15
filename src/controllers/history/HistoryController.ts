@@ -1,4 +1,4 @@
-import { layerAgentManager } from '~/routes/editor';
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 
 export function undoLayer(layerId: string) {
   const agent = layerAgentManager.getAgent(layerId);

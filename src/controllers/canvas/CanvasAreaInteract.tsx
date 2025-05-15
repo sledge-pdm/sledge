@@ -107,16 +107,12 @@ class CanvasAreaInteract {
   }
 
   private handleTouchStart(e: TouchEvent) {
-    e.preventDefault();
-    e.stopPropagation();
     setInteractStore('isDragging', true);
     this.dragPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }
 
   private handleMouseDown(e: MouseEvent) {
     if (e.buttons === 4 || (e.buttons === 1 && interactStore.isCtrlPressed)) {
-      e.preventDefault();
-      e.stopPropagation();
       setInteractStore('isDragging', true);
       this.dragPosition = { x: e.clientX, y: e.clientY };
     }
@@ -124,8 +120,6 @@ class CanvasAreaInteract {
 
   private handleMouseMove(e: MouseEvent) {
     if (e.buttons === 4 || (e.buttons === 1 && interactStore.isCtrlPressed)) {
-      e.preventDefault();
-      e.stopPropagation();
       if (interactStore.isDragging) {
         const dx = e.clientX - this.dragPosition.x;
         const dy = e.clientY - this.dragPosition.y;
@@ -152,7 +146,7 @@ class CanvasAreaInteract {
 
   public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
     this.removeInteractListeners(wrapper, canvasStack);
-    wrapper.addEventListener('touchstart', (e) => this.handleTouchStart.bind(this)(e));
+    wrapper.addEventListener('touchstart', (e) => this.handleTouchStart.bind(this)(e), { passive: true });
     wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack), { passive: true });
     wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
 

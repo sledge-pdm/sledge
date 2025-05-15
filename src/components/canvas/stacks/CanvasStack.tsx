@@ -3,12 +3,12 @@ import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer_list/LayerListController';
-import { layerAgentManager } from '~/routes/editor';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';
-import WebGLCanvasStack from './WebglCanvasStack';
+import WebGLCanvas from './WebGLCanvas';
 
 const CanvasStack: Component = () => {
   const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
@@ -48,7 +48,7 @@ const CanvasStack: Component = () => {
       >
         <InteractCanvas operator={new LayerCanvasOperator(() => activeLayer().id)} />
 
-        <WebGLCanvasStack />
+        <WebGLCanvas />
       </div>
 
       <CanvasOverlaySVG dirtyRects={dirtyRects()} />

@@ -1,4 +1,4 @@
-import { layerAgentManager } from '~/routes/editor';
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';

@@ -1,6 +1,6 @@
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
-import { layerAgentManager } from '~/routes/editor';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { Tool } from '../../models/tool/Tool';

@@ -84,35 +84,26 @@ const LayerList: Component<{}> = () => {
           class={flexRow}
           style={{
             'align-items': 'center',
-            gap: vars.spacing.xs,
+            gap: vars.spacing.sm,
             'margin-bottom': vars.spacing.sm,
           }}
         >
-          <div
-            class={flexRow}
-            style={{
-              gap: vars.spacing.sm,
-              'min-width': '90px',
+          <Dropdown
+            value={activeLayer().mode} // not reactive
+            options={Object.entries(BlendMode).map((e) => {
+              return {
+                label: e[0],
+                value: e[1],
+              };
+            })}
+            onChange={(e) => {
+              setLayerProp(activeLayer().id, 'mode', e);
             }}
-          >
-            <Dropdown
-              value={activeLayer().mode}
-              options={Object.entries(BlendMode).map((e) => {
-                return {
-                  label: e[0],
-                  value: e[1],
-                };
-              })}
-              onChange={(e) => {
-                setLayerProp(activeLayer().id, 'mode', e);
-              }}
-            />
-          </div>
-          <div class={flexRow} style={{ width: '100%', 'align-items': 'center', gap: vars.spacing.sm }}>
-            {/* <p>opacity.</p> */}
-            <p style={{ width: '30px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
+          />
+          <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
+            <p style={{ width: '36px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
             <Slider
-              value={activeLayer().opacity}
+              value={activeLayer().opacity} // not reactive
               min={0}
               max={1}
               allowFloat={true}

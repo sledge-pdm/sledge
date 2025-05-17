@@ -2,7 +2,7 @@ import { path } from '@tauri-apps/api';
 import { open as dialogOpen, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import {
   canvasStore,
@@ -71,7 +71,7 @@ export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnai
     canvas: canvasStore.canvas,
     images: Object.fromEntries(
       Object.entries(layerHistoryStore).map(([id, state]) => {
-        const agent = layerAgentManager.getAgent(id);
+        const agent = getAgentOf(id);
         if (!agent) return [];
         return [
           id,

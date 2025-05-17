@@ -1,10 +1,10 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
-import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
+import { Component, onMount } from 'solid-js';
+import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
-import { Size2D } from '~/types/Size';
+import { listenEvent } from '~/utils/TauriUtils';
 
 interface Props {
   layer: Layer;
@@ -16,30 +16,25 @@ interface Props {
 const LayerPreview: Component<Props> = (props: Props) => {
   let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
-  let renderer: WebGLRenderer;
+  let ctx: CanvasRenderingContext2D;
 
-  const [previewSize, setPreviewSize] = createSignal<Size2D>({ width: 0, height: 0 });
+  const thumbnailGen = new ThumbnailGenerator();
 
   onMount(() => {
-    renderer = new WebGLRenderer(canvasRef);
-    updatePreviewSize();
+    // renderer = new WebGLRenderer(canvasRef); ←！！
     updatePreview();
 
-    const agent = layerAgentManager.getAgent(props.layer.id);
-    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      updatePreviewSize();
+    const agent = getAgentOf(props.layer.id);
+    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, (e) => {
+      if (e.updatePreview) updatePreview();
+    });
+
+    listenEvent('onResetAllLayers', () => {
       updatePreview();
     });
   });
 
-  createEffect(() => {
-    canvasStore.canvas.width;
-    canvasStore.canvas.height;
-    updatePreviewSize();
-    updatePreview();
-  });
-
-  const updatePreviewSize = () => {
+  const updatePreview = () => {
     const targetHeight = wrapperRef.clientHeight;
     const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
@@ -49,28 +44,34 @@ const LayerPreview: Component<Props> = (props: Props) => {
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
     if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
-    setPreviewSize({
-      width: targetWidth * zoom,
-      height: targetHeight * zoom,
-    });
-  };
+    const previewWidth = targetWidth * zoom;
+    const previewHeight = targetHeight * zoom;
 
-  const updatePreview = () => {
-    canvasRef.width = canvasStore.canvas.width;
-    canvasRef.height = canvasStore.canvas.height;
-    canvasRef.style.width = `${previewSize().width}px !important`;
-    canvasRef.style.height = `${previewSize().height}px !important`;
-    renderer.resize(canvasStore.canvas.width, canvasStore.canvas.height);
-    renderer.render(props.layer);
+    canvasRef.width = previewWidth;
+    canvasRef.height = previewHeight;
+    canvasRef.style.width = `${targetWidth}px`;
+    canvasRef.style.height = `${targetHeight}px`;
+
+    const agent = getAgentOf(props.layer.id);
+    if (agent) {
+      const preview = thumbnailGen.generateThumbnail(agent, previewWidth, previewHeight);
+      if (preview) {
+        ctx?.putImageData(preview, 0, 0);
+      }
+    }
   };
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
       <canvas
         class={layerPreviewCanvas}
-        ref={(el) => (canvasRef = el)}
+        ref={(el) => {
+          canvasRef = el;
+          ctx = canvasRef.getContext('2d')!;
+          console.log(ctx);
+        }}
         style={{
-          'image-rendering': 'auto',
+          'image-rendering': 'pixelated',
         }}
         onClick={(e) => {
           if (props.onClick) props.onClick();

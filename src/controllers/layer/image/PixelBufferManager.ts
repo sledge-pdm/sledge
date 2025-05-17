@@ -4,7 +4,7 @@ import { Size2D } from '~/types/Size';
 import { Vec2 } from '~/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
 
-export default class PixelBuffer {
+export default class PixelBufferManager {
   constructor(
     public buffer: Uint8ClampedArray,
     public width: number,

@@ -1,12 +1,11 @@
 import { Component } from 'solid-js';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { canvasStore, layerListStore } from '~/stores/ProjectStores';
+import { resetAllLayers } from '~/controllers/layer/LayerController';
+import { canvasStore } from '~/stores/ProjectStores';
 
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
 import { Consts } from '~/utils/consts';
-import { emitEvent } from '~/utils/TauriUtils';
 
 const CanvasSettings: Component = () => {
   const onSizeChange = (type: 'width' | 'height', value: number) => {
@@ -17,14 +16,6 @@ const CanvasSettings: Component = () => {
     }
 
     adjustZoomToFit();
-  };
-
-  const resetAllLayers = (e: any) => {
-    layerListStore.layers.forEach((l) => {
-      resetLayerImage(l.id, l.dotMagnification);
-    });
-    adjustZoomToFit();
-    emitEvent('onResetAllLayers');
   };
 
   return (

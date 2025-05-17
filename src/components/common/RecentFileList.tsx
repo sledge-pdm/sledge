@@ -1,11 +1,11 @@
 import { Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { getProjectJsonFromPath } from '~/io/project/project';
-import { recentFilesCaption, recentFilesContainer, recentFilesItem, recentFilesName, recentFilesPath, recentFilesThumb } from '~/routes/start.css';
+import { recentFilesCaption, recentFilesContainerCol } from '~/routes/start.css';
 import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
-import { Consts } from '~/utils/consts';
+import ListFileItem from './file_item/ListFileItem';
 
 const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLocation) => void }> = (props) => {
   const [thumbnails, setThumbnails] = createStore<Record<string, string>>({});
@@ -30,37 +30,11 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
           clear
         </p> */}
         </div>
-        <div class={recentFilesContainer} style={{ 'margin-bottom': '24px' }}>
+        <div class={recentFilesContainerCol} style={{ 'margin-bottom': '24px' }}>
           <For each={props.files}>
             {(item, i) => {
               const thumbnail = () => thumbnails[item.path + '/' + item.name];
-              return (
-                <div class={recentFilesItem}>
-                  <div class={recentFilesThumb}>
-                    <Show when={thumbnail()} fallback={<p>loading...</p>}>
-                      <Show when={thumbnail() !== 'failed'} fallback={<p>NO IMAGE</p>}>
-                        <img
-                          src={thumbnail()}
-                          width={Consts.projectThumbnailSize}
-                          height={Consts.projectThumbnailSize}
-                          style={{ 'image-rendering': 'pixelated' }}
-                        />
-                      </Show>
-                    </Show>
-                  </div>
-                  <div class={flexRow}>
-                    <a
-                      class={recentFilesName}
-                      onClick={(e) => {
-                        if (props.onClick) props.onClick(item);
-                      }}
-                    >
-                      {item.name.substring(0, item.name.lastIndexOf('.'))}
-                    </a>
-                  </div>
-                  <p class={recentFilesPath}>{item.path}</p>
-                </div>
-              );
+              return <ListFileItem onClick={props.onClick} thumbnail={thumbnail()} file={item} />;
             }}
           </For>
         </div>

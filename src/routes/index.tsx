@@ -8,7 +8,7 @@ import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import { safeInvoke } from '~/utils/TauriUtils';
 import { closeWindowsByLabel, getExistingProjectSearchParams, getNewProjectSearchParams } from '~/utils/WindowUtils';
-import { sideSection, sideSectionItem, welcomeHeadline, welcomeRoot } from './start.css';
+import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
 
 export default function Home() {
   onMount(() => {
@@ -53,16 +53,16 @@ export default function Home() {
   };
 
   return (
-    <div class={welcomeRoot}>
-      <p class={welcomeHeadline}>HELLO.</p>
-      <div class={sideSection}>
-        <a class={sideSectionItem} onClick={() => createNew()}>
+    <div class={startRoot}>
+      <p class={startHeader}>HELLO.</p>
+      <div class={menuContainer}>
+        <a class={menuItem} onClick={() => createNew()}>
           +&ensp;new.
         </a>
-        <a class={sideSectionItem} style={{ 'margin-left': '2px' }} onClick={(e) => openProject()}>
+        <a class={menuItem} style={{ 'margin-left': '2px' }} onClick={(e) => openProject()}>
           &gt;&ensp;open.
         </a>
-        <a
+        {/* <a
           class={sideSectionItem}
           style={{ 'margin-left': '2px' }}
           onClick={(e) =>
@@ -75,9 +75,35 @@ export default function Home() {
         >
           <img src={'/icons/misc/settings.png'} width={16} height={16} />
           &ensp;settings.
+        </a> */}
+      </div>
+
+      <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />
+
+      <div class={rightBottomArea}>
+        <a
+          onClick={() => {
+            safeInvoke('open_window', {
+              payload: {
+                kind: 'about',
+              },
+            });
+          }}
+        >
+          about.
+        </a>
+        <a
+          onClick={() => {
+            safeInvoke('open_window', {
+              payload: {
+                kind: 'settings',
+              },
+            });
+          }}
+        >
+          settings.
         </a>
       </div>
-      <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />
     </div>
   );
 }

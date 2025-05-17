@@ -1,5 +1,5 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createEffect, createSignal, onMount } from 'solid-js';
+import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { projectStore } from '~/stores/ProjectStores';
 import {
@@ -67,24 +67,24 @@ export default function TitleBar() {
         'border-bottom': shouldShowBorder() ? '1px solid #aaa' : 'none',
       }}
     >
-      <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region='p, button'>
+      <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region='p, button, img'>
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
-          {isMinimizable() && (
+          <Show when={isMinimizable()}>
             <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
               <img class={titleBarControlButtonImg} src={'/icons/title_bar/minimize.png'} />
             </button>
-          )}
-          {isMaximizable() && (
+          </Show>
+          <Show when={isMaximizable()}>
             <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
               <img class={titleBarControlButtonImg} src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/icons/title_bar/maximize.png'} />
             </button>
-          )}
-          {isClosable() && (
+          </Show>
+          <Show when={isClosable()}>
             <button class={titleBarControlCloseButton} onClick={() => window.close()}>
               <img class={titleBarControlButtonImg} src={'/icons/title_bar/close.png'} />
             </button>
-          )}
+          </Show>
         </div>
       </nav>
     </header>

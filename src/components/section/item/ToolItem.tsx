@@ -1,6 +1,7 @@
 import { Component } from 'solid-js';
-import Slider from '~/components/common/basics/Slider';
 import { sayRandomQuote } from '~/components/common/companion/QuotePool';
+import Slider from '~/components/common/control/Slider';
+import { LabelMode } from '~/models/config/ConfigComponents';
 import { Tool, ToolType } from '~/models/tool/Tool';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { toolConfigRow, toolConfigRowClickable, toolConfigRowIcon, toolConfigRowName } from '~/styles/section/pen.css';
@@ -65,6 +66,7 @@ const ToolItem: Component<Props> = (props: Props) => {
                 const penIndex = toolStore.tools.findIndex((p) => p.id === props.tool.id);
                 setToolStore('tools', penIndex, 'size', newValue);
               }}
+              labelMode={LabelMode.NONE}
             />
           </div>
 

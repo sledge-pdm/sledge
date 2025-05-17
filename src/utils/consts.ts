@@ -7,7 +7,7 @@ export const Consts = {
 
   maxLayerSize: 64,
 
-  projectThumbnailSize: 92,
+  projectThumbnailSize: 500,
 };
 
 export type KeyConfigCommands = 'undo' | 'redo' | 'pen' | 'eraser' | 'fill';

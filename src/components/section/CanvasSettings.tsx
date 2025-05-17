@@ -1,30 +1,25 @@
 import { Component } from 'solid-js';
-import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { canvasStore, layerListStore } from '~/stores/ProjectStores';
+import { adjustZoomToFit, changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
+import { resetAllLayers } from '~/controllers/layer/LayerController';
+import { canvasStore } from '~/stores/ProjectStores';
 
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
 import { Consts } from '~/utils/consts';
-import { emitEvent } from '~/utils/TauriUtils';
 
 const CanvasSettings: Component = () => {
-  const onSizeChange = (type: 'width' | 'height', value: number) => {
-    if (type === 'width') {
-      changeCanvasSize({ width: value, height: canvasStore.canvas.height });
-    } else {
-      changeCanvasSize({ width: canvasStore.canvas.width, height: value });
+  let widthInputRef: HTMLInputElement;
+  let heightInputRef: HTMLInputElement;
+
+  const submitSizeChange = () => {
+    const width = Number(widthInputRef.value);
+    const height = Number(heightInputRef.value);
+    const newSize = { width, height };
+
+    if (isValidCanvasSize(newSize)) {
+      changeCanvasSize(newSize);
+      adjustZoomToFit();
     }
-
-    adjustZoomToFit();
-  };
-
-  const resetAllLayers = (e: any) => {
-    layerListStore.layers.forEach((l) => {
-      resetLayerImage(l.id, l.dotMagnification);
-    });
-    adjustZoomToFit();
-    emitEvent('onResetAllLayers');
   };
 
   return (
@@ -36,13 +31,10 @@ const CanvasSettings: Component = () => {
           <div>
             <p class={canvasSizeLabel}>width</p>
             <input
+              ref={(el) => (widthInputRef = el)}
               class={canvasSizeInput}
               type='number'
               name='width'
-              onChange={(e) => {
-                e.preventDefault();
-                onSizeChange('width', Number(e.target.value));
-              }}
               value={canvasStore.canvas.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
@@ -52,20 +44,23 @@ const CanvasSettings: Component = () => {
           <div>
             <p class={canvasSizeLabel}>height</p>
             <input
+              ref={(el) => (heightInputRef = el)}
               class={canvasSizeInput}
               type='number'
               name='height'
-              onChange={(e) => {
-                e.preventDefault();
-                onSizeChange('height', Number(e.target.value));
-              }}
               value={canvasStore.canvas.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
               required
             />
           </div>
-          <button class={canvasSizeButton} type='submit'>
+          <button
+            class={canvasSizeButton}
+            onClick={(e) => {
+              e.preventDefault();
+              submitSizeChange();
+            }}
+          >
             change
           </button>
         </div>

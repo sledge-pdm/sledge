@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use std::path::PathBuf;
 use tauri::{AppHandle, WebviewUrl, WebviewWindowBuilder};
 
 #[derive(Deserialize)]
@@ -30,7 +29,7 @@ pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(
             let _url = "/";
             let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
                 .title("sledge")
-                .inner_size(600.0, 400.0)
+                .inner_size(700.0, 500.0)
                 .resizable(false)
                 .decorations(false)
                 .accept_first_mouse(true)
@@ -92,13 +91,6 @@ pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(
             (_url, builder)
         }
     };
-
-    // data_directory をラベルごとに分けたいならここで作成
-    let data_dir = dirs::data_dir()
-        .unwrap_or_else(|| PathBuf::from("."))
-        .join(format!("sledge-browser-data-{}", label));
-    // ディレクトリがなければ作っておく
-    std::fs::create_dir_all(&data_dir).map_err(|e| e.to_string())?;
 
     builder = builder.additional_browser_args(COMMON_BROWSER_ARGS);
 

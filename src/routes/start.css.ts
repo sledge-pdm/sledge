@@ -1,92 +1,33 @@
 import { style } from '@vanilla-extract/css';
-import { ZFB03B, ZFB09, ZFB31 } from '~/styles/global.css';
+import { vars, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css';
 import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css';
-import { Consts } from '~/utils/consts';
 
-export const welcomeRoot = style([
+export const startRoot = style([
   flexCol,
   wh100,
   {
-    padding: '42px',
+    position: 'relative',
+    padding: '48px 42px',
   },
 ]);
 
-export const welcomeHeadline = style({
+export const startHeader = style({
   fontFamily: ZFB31,
-  fontSize: '31px',
-  letterSpacing: '1px',
-  marginBottom: '2px',
+  fontSize: '36px',
+  letterSpacing: '2px',
+  marginBottom: '8px',
 });
 
-export const recentFilesCaption = style({
-  fontFamily: ZFB03B,
-  fontSize: '16px',
-  color: '#000',
-  marginBottom: '4px',
-});
-
-export const clear = style({
-  fontFamily: ZFB03B,
-  fontSize: '15px',
-  ':hover': {
-    color: 'red',
-  },
-});
-
-export const recentFilesContainer = style([
-  w100,
-  {
-    width: '100%',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 130px)',
-    gap: '8px',
-    marginTop: '12px',
-  },
-]);
-
-export const recentFilesItem = style([
-  flexCol,
-  {
-    alignItems: 'center',
-    gap: '8px',
-  },
-]);
-
-export const recentFilesThumb = style([
-  flexCol,
-  {
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: '1px solid #aaa',
-    width: `${Consts.projectThumbnailSize}px`,
-    height: `${Consts.projectThumbnailSize}px`,
-  },
-]);
-
-export const recentFilesName = style({
-  fontFamily: ZFB09,
-  fontSize: '0.5rem',
-  textOverflow: 'ellipsis',
-  color: '#555',
-  whiteSpace: 'nowrap',
-});
-
-export const recentFilesPath = style({
-  fontFamily: ZFB03B,
-  fontSize: '0.5rem',
-  color: '#00000030',
-});
-
-export const sideSection = style([
+export const header = style([
   flexRow,
   {
     gap: '24px',
-    paddingBottom: '24px',
+    paddingBottom: '36px',
     paddingTop: '12px',
   },
 ]);
 
-export const sideSectionItem = style([
+export const headerItem = style([
   flexRow,
   {
     cursor: 'pointer',
@@ -97,5 +38,97 @@ export const sideSectionItem = style([
     ':hover': {
       color: 'red',
     },
+  },
+]);
+
+export const recentFilesCaption = style({
+  fontFamily: ZFB08,
+  fontSize: '8px',
+  color: '#777',
+  marginBottom: '4px',
+});
+
+export const clear = style({
+  fontFamily: ZFB03,
+  fontSize: '15px',
+  ':hover': {
+    color: 'red',
+  },
+});
+
+export const recentFilesContainerGrid = style([
+  w100,
+  {
+    width: '100%',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, auto)',
+    gap: '8px',
+    marginTop: '12px',
+  },
+]);
+export const recentFilesContainerScroll = style([
+  flexCol,
+  {
+    position: 'relative',
+    marginTop: '12px',
+    maxHeight: '240px',
+    width: '500px',
+  },
+]);
+export const recentFilesContainerCol = style([
+  flexCol,
+  w100,
+  {
+    position: 'relative',
+    gap: '8px',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+
+    '::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: 'transparent',
+    },
+    selectors: {
+      '&:hover::-webkit-scrollbar-thumb': {
+        backgroundColor: '#ddd',
+      },
+    },
+  },
+]);
+
+const fadeBase = style({
+  pointerEvents: 'none',
+  position: 'absolute',
+  left: 0,
+  width: '100%',
+  height: '40px',
+});
+
+export const fadeTop = style([
+  fadeBase,
+  {
+    top: 0,
+    background: 'linear-gradient(to bottom, rgb(255, 255, 255), transparent)',
+  },
+]);
+
+export const fadeBottom = style([
+  fadeBase,
+  {
+    bottom: 0,
+    background: 'linear-gradient(to top, rgb(255, 255, 255), transparent)',
+  },
+]);
+
+export const rightBottomArea = style([
+  flexCol,
+  {
+    position: 'fixed',
+    bottom: vars.spacing.xl,
+    right: vars.spacing.xl,
+    gap: vars.spacing.md,
+    alignItems: 'end',
   },
 ]);

@@ -21,10 +21,9 @@ export class WebGLRenderer {
     private width: number = 0,
     private height: number = 0
   ) {
-    const gl = canvas.getContext('webgl2');
+    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
     if (!gl) throw new Error('WebGL2 is not supported in this browser');
     this.gl = gl;
-
     // --- シェーダコンパイル & プログラムリンク ---
     const vs = this.compileShader(gl.VERTEX_SHADER, vertexSrc);
     const fs = this.compileShader(gl.FRAGMENT_SHADER, fragmentSrc);
@@ -63,6 +62,10 @@ export class WebGLRenderer {
     this.uBlendModesLoc = this.gl.getUniformLocation(this.program, 'u_blendModes')!;
   }
 
+  public getCanvasElement(): HTMLCanvasElement {
+    return this.canvas;
+  }
+
   public resize(width: number, height: number) {
     if (width <= 0 || height <= 0) return;
     if (width === this.width && height === this.height) return;
@@ -92,8 +95,9 @@ export class WebGLRenderer {
    * レイヤー配列を受け取って GPU 合成 & 描画
    * @param layers 並び順：0 が最背面
    */
-  public render(layers: Layer[]): void {
+  public render(layers: Layer[] | Layer): void {
     if (this.width === 0 || this.height === 0) return;
+    if (!Array.isArray(layers)) layers = [layers];
 
     layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);

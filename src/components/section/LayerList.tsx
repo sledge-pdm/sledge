@@ -1,8 +1,9 @@
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer_list/LayerListController';
+import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer/LayerListController';
 
 import { setLayerProp } from '~/controllers/layer/LayerController';
+import { LabelMode } from '~/models/config/ConfigComponents';
 import { BlendMode } from '~/models/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
@@ -10,8 +11,8 @@ import { vars } from '~/styles/global.css';
 import { layerList } from '~/styles/section/layer.css';
 import { flexRow } from '~/styles/snippets.css';
 import { listenEvent } from '~/utils/TauriUtils';
-import Dropdown from '../common/basics/Dropdown';
-import Slider from '../common/basics/Slider';
+import Dropdown from '../common/control/Dropdown';
+import Slider from '../common/control/Slider';
 import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
 
@@ -89,7 +90,7 @@ const LayerList: Component<{}> = () => {
           }}
         >
           <Dropdown
-            value={activeLayer().mode} // not reactive
+            value={activeLayer().mode}
             options={Object.entries(BlendMode).map((e) => {
               return {
                 label: e[0],
@@ -103,10 +104,11 @@ const LayerList: Component<{}> = () => {
           <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
             <p style={{ width: '36px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
             <Slider
-              value={activeLayer().opacity} // not reactive
+              value={activeLayer().opacity}
               min={0}
               max={1}
               allowFloat={true}
+              labelMode={LabelMode.NONE}
               onChange={(newValue) => {
                 setLayerProp(activeLayer().id, 'opacity', newValue);
               }}

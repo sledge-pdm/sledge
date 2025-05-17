@@ -34,7 +34,7 @@ pub fn run() {
             let future_open = open_window(
                 app_handle,
                 OpenWindowPayload {
-                    kind: SledgeWindowKind::Start,
+                    kind: SledgeWindowKind::Editor,
                     query: None,
                 },
             );

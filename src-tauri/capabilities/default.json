@@ -17,6 +17,7 @@
 
     "fs:allow-open",
     "fs:allow-write",
+    "fs:allow-write-file",
     "fs:allow-read",
     "fs:allow-rename",
     "fs:allow-mkdir",

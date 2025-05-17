@@ -8,10 +8,9 @@ export const titleBarRoot = style([
   {
     background: '#fff',
     pointerEvents: 'all',
-    height: '28px',
+    height: '32px',
     // borderBottom: "1px solid #aaa",
     alignItems: 'center',
-    zIndex: 99999,
   },
 ]);
 
@@ -24,20 +23,12 @@ export const titleBarTitle = style([
     fontSize: vars.text.sm,
     marginRight: 'auto',
     paddingLeft: vars.spacing.lg,
-    pointerEvents: 'none',
   },
 ]);
 
-export const titleBarControls = style([
-  flexRow,
-  h100,
-  {
-    gap: vars.spacing.sm,
-    marginRight: vars.spacing.sm,
-  },
-]);
+export const titleBarControls = style([flexRow, h100, {}]);
 
-export const titleBarControlButton = style([
+const titleBarControlButton = style([
   flexCol,
   h100,
   {
@@ -47,9 +38,9 @@ export const titleBarControlButton = style([
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '24px',
-    ':hover': {
-      backgroundColor: 'transparent',
-    },
+
+    paddingLeft: '18px',
+    paddingRight: '18px',
   },
 ]);
 
@@ -57,7 +48,7 @@ export const titleBarControlMinimizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter: 'invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);', // 青っぽく
+      // backgroundColor: '#0000FF20',
     },
   },
 ]);
@@ -66,7 +57,7 @@ export const titleBarControlMaximizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter: 'invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);', // 緑っぽく
+      // backgroundColor: '#00FF0020',
     },
   },
 ]);
@@ -75,13 +66,46 @@ export const titleBarControlCloseButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      filter: 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%);', // 赤っぽく
+      backgroundColor: '#FF0000B0',
     },
   },
 ]);
 
-export const titleBarControlButtonImg = style({
-  width: '10px',
-  height: '10px',
+const titleBarControlButtonImg = style({
+  width: '12px',
+  height: '12px',
   imageRendering: 'pixelated',
+  pointerEvents: 'none',
 });
+
+export const titleBarControlButtonMinimizeImg = style([
+  titleBarControlButtonImg,
+  {
+    selectors: {
+      [`${titleBarControlButton}:hover &`]: {
+        filter: 'invert(9%) sepia(100%) saturate(6812%) hue-rotate(247deg) brightness(96%) contrast(146%);', // 青っぽく
+      },
+    },
+  },
+]);
+export const titleBarControlButtonMaximizeImg = style([
+  titleBarControlButtonImg,
+  {
+    selectors: {
+      [`${titleBarControlButton}:hover &`]: {
+        filter: 'invert(92%) sepia(20%) saturate(3846%) hue-rotate(112deg) brightness(105%) contrast(102%);', // 緑っぽく
+      },
+    },
+  },
+]);
+
+export const titleBarControlButtonCloseImg = style([
+  titleBarControlButtonImg,
+  {
+    selectors: {
+      [`${titleBarControlButton}:hover &`]: {
+        filter: 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%) drop-shadow(1px, 0, 0,);', // 赤っぽく
+      },
+    },
+  },
+]);

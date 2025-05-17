@@ -1,16 +1,17 @@
+import DiffManager from '~/controllers/layer/image/DiffManager';
+import PixelBufferManager from '~/controllers/layer/image/PixelBufferManager';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
-import DiffManager from '~/models/layer/image/DiffManager';
-import PixelBufferManager from '~/models/layer/image/PixelBuffer';
 import { globalConfig } from '~/stores/GlobalStores';
 import { Size2D } from '~/types/Size';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import TileManager from '../../../models/layer/image/TileManager';
+import TileManager from './TileManager';
 
 export interface ImageChangeEvent {
   newSize?: Size2D;
+  updatePreview?: boolean;
 }
 
 // それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
@@ -68,16 +69,16 @@ export default class LayerImageAgent {
     return this.pbm.buffer;
   }
 
-  setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false) {
+  setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {
     this.pbm.buffer = rawBuffer;
-    if (!silentlySet) this.callOnImageChangeListeners({});
+    if (!silentlySet) this.callOnImageChangeListeners({ updatePreview });
     this.tm.initTile();
   }
 
   changeBufferSize(newSize: Size2D) {
     this.pbm.changeSize(newSize);
     this.tm.setSize(newSize);
-    this.callOnImageChangeListeners({ newSize });
+    this.callOnImageChangeListeners({ newSize, updatePreview: true });
   }
 
   setOnImageChangeListener(key: string, listener: (e: ImageChangeEvent) => void) {
@@ -131,7 +132,7 @@ export default class LayerImageAgent {
     const undoEnd = Date.now();
     setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
-    this.callOnImageChangeListeners({});
+    this.callOnImageChangeListeners({ updatePreview: true });
   }
 
   public redo() {
@@ -152,7 +153,7 @@ export default class LayerImageAgent {
     const redoEnd = Date.now();
     setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
-    this.callOnImageChangeListeners({});
+    this.callOnImageChangeListeners({ updatePreview: true });
   }
 
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {

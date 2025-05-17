@@ -1,7 +1,7 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { ToolArgs, ToolBehavior } from '../../../models/tool/ToolBase';
-import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
+import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
+import { ToolArgs, ToolBehavior } from '../ToolBase';
 
 export class PenTool implements ToolBehavior {
   onStart(agent: LayerImageAgent, args: ToolArgs) {

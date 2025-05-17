@@ -61,7 +61,7 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === 'touch' || interactStore.isCtrlPressed) return false;
+    if (e.pointerType === 'touch' || e.ctrlKey) return false;
     // right=1, left=2, middle=4
     // console.log(e.buttons)
     if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) return false;

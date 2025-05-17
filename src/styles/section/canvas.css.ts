@@ -21,5 +21,5 @@ export const canvasSizeInput = style({
 });
 
 export const canvasSizeButton = style({
-  margin: vars.spacing.sm,
+  margin: `${vars.spacing.sm} 0`,
 });

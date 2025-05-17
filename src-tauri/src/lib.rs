@@ -31,13 +31,7 @@ pub fn run() {
     builder
         .setup(|app| {
             let app_handle = app.handle().clone();
-            let future_open = open_window(
-                app_handle,
-                OpenWindowPayload {
-                    kind: SledgeWindowKind::Editor,
-                    query: None,
-                },
-            );
+            let future_open = open_window(app_handle, SledgeWindowKind::Editor, None);
             let _ = block_on(future_open);
             Ok(())
         })

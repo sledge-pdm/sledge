@@ -33,7 +33,7 @@ export default () => {
   });
 
   onCleanup(() => {
-    if (interact !== undefined) {
+    if (interact !== undefined && !import.meta.hot) {
       interact.removeInteractListeners(wrapper, canvasStack);
     }
   });
@@ -57,11 +57,11 @@ export default () => {
           position: 'absolute',
           top: 0,
           left: 0,
-          padding: 0,
-          margin: 0,
-          width: '100%',
-          height: '100%',
+          bottom: '84px', // hmm
+          right: 0,
           overflow: 'hidden',
+          // 'z-index': 10000,
+          // 'background-color': '#00000030',
           'touch-action': 'none',
         }}
       >

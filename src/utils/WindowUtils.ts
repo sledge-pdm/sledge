@@ -3,8 +3,18 @@ import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { WindowOptions } from '@tauri-apps/api/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
+import { safeInvoke } from './TauriUtils';
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
+
+export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
+
+export function openWindow(kind: WindowKind, query?: string) {
+  return safeInvoke('open_window', {
+    kind,
+    query,
+  });
+}
 
 export async function closeWindowsByLabel(label: string) {
   (await getAllWebviewWindows())

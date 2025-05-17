@@ -58,9 +58,9 @@ export const vars = createGlobalTheme(':root', {
     input_bg: '#fafafa',
   },
   size: {
-    edge_info: '32px',
+    edge_info: '14px',
     side_area: '250px',
-    bottom_bar_margin: '252px',
+    bottom_info: '20px',
   },
   spacing: {
     xs: '4px',

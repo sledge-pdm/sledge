@@ -11,9 +11,7 @@ const EdgeInfo: Component = () => {
           class={edgeInfoText}
           onClick={async () => {
             await safeInvoke('open_window', {
-              payload: {
-                kind: 'settings',
-              },
+              kind: 'settings',
             });
           }}
         >

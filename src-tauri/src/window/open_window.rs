@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use std::path::PathBuf;
 use tauri::{AppHandle, WebviewUrl, WebviewWindowBuilder};
 
 #[derive(Deserialize)]

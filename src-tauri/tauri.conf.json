@@ -10,10 +10,13 @@
     "beforeBuildCommand": "npm run prettier && npm run build"
   },
   "app": {
-    "windows": [
-    ],
+    "windows": [],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["*/**"]
+      }
     }
   },
   "bundle": {

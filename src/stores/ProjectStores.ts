@@ -13,6 +13,7 @@ type ProjectStore = {
   newName: string | undefined;
   name: string | undefined;
   path: string | undefined;
+  thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
 };
 type LayerHistoryStore = Record<string, LayerHistory>;
@@ -25,6 +26,7 @@ const defaultProjectStore: ProjectStore = {
   newName: undefined as string | undefined,
   name: undefined as string | undefined,
   path: undefined as string | undefined,
+  thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
 };
 const defaultCanvasStore: CanvasStore = {

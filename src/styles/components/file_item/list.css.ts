@@ -9,9 +9,10 @@ export const rflThumb = style([
     justifyContent: 'center',
     border: `1px solid ${vars.color.border}`,
     backgroundColor: vars.color.primary,
-    width: `150px`,
-    height: `150px`,
-    opacity: 0.7,
+    maxWidth: `150px`,
+    maxHeight: `150px`,
+    opacity: 0.8,
+    overflow: 'hidden',
   },
 ]);
 

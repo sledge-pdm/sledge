@@ -54,7 +54,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
     const agent = getAgentOf(props.layer.id);
     if (agent) {
-      const preview = thumbnailGen.generateThumbnail(agent, previewWidth, previewHeight);
+      const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
       if (preview) {
         ctx?.putImageData(preview, 0, 0);
       }

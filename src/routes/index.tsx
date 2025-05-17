@@ -2,7 +2,7 @@ import { onMount } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
-import { importProjectFromFileSelection } from '~/io/project/project';
+import { importProjectFromFileSelection } from '~/io/project/importProject';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';

@@ -1,9 +1,10 @@
-import { Component } from 'solid-js';
-import { getBufferOf, layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
-import { listenEvent } from '~/utils/TauriUtils';
+import { Size2D } from '~/types/Size';
 
 interface Props {
   layer: Layer;
@@ -15,59 +16,62 @@ interface Props {
 const LayerPreview: Component<Props> = (props: Props) => {
   let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
+  let renderer: WebGLRenderer;
 
-  const updatePreview = (originalImage: Uint8ClampedArray, targetHeight: number) => {
+  const [previewSize, setPreviewSize] = createSignal<Size2D>({ width: 0, height: 0 });
+
+  onMount(() => {
+    renderer = new WebGLRenderer(canvasRef);
+    updatePreviewSize();
+    updatePreview();
+
+    const agent = layerAgentManager.getAgent(props.layer.id);
+    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
+      updatePreviewSize();
+      updatePreview();
+    });
+  });
+
+  createEffect(() => {
+    canvasStore.canvas.width;
+    canvasStore.canvas.height;
+    updatePreviewSize();
+    updatePreview();
+  });
+
+  const updatePreviewSize = () => {
+    const targetHeight = wrapperRef.clientHeight;
     const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
-
-    // 描画対象キャンバスの解像度とCSSサイズを一致させる
-    canvasRef.width = targetWidth;
-    canvasRef.height = targetHeight;
-
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
     if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
-    canvasRef.style.width = `${targetWidth * zoom}px !important`;
-    canvasRef.style.height = `${targetHeight * zoom}px !important`;
-
-    wrapperRef.style.width = `${targetWidth * zoom}px !important`;
-    wrapperRef.style.height = `${targetHeight * zoom}px !important`;
-
-    const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = canvasStore.canvas.width;
-    tmpCanvas.height = canvasStore.canvas.height;
-    tmpCanvas.getContext('2d')!.putImageData(new ImageData(originalImage, canvasStore.canvas.width, canvasStore.canvas.height), 0, 0);
-
-    const ctx = canvasRef.getContext('2d')!;
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, targetWidth, targetHeight);
-
-    ctx.drawImage(tmpCanvas, 0, 0, canvasStore.canvas.width, canvasStore.canvas.height, 0, 0, targetWidth, targetHeight);
+    setPreviewSize({
+      width: targetWidth * zoom,
+      height: targetHeight * zoom,
+    });
   };
 
-  listenEvent('onProjectLoad', () => {
-    const height = wrapperRef.clientHeight;
-    const currentImage = getBufferOf(props.layer.id);
-
-    let agent = layerAgentManager.getAgent(props.layer.id);
-    if (currentImage) {
-      updatePreview(currentImage, height);
-    }
-
-    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      const img = getBufferOf(props.layer.id);
-      if (img) updatePreview(img, height);
-    });
-  });
+  const updatePreview = () => {
+    canvasRef.width = canvasStore.canvas.width;
+    canvasRef.height = canvasStore.canvas.height;
+    canvasRef.style.width = `${previewSize().width}px !important`;
+    canvasRef.style.height = `${previewSize().height}px !important`;
+    renderer.resize(canvasStore.canvas.width, canvasStore.canvas.height);
+    renderer.render(props.layer);
+  };
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
       <canvas
         class={layerPreviewCanvas}
         ref={(el) => (canvasRef = el)}
+        style={{
+          'image-rendering': 'auto',
+        }}
         onClick={(e) => {
           if (props.onClick) props.onClick();
         }}

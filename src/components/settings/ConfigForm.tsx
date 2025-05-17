@@ -67,7 +67,7 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
     case 'Dropdown':
       return <Dropdown value={value} options={meta.props?.options} onChange={onChange} />;
     case 'Slider':
-      return <Slider value={value} min={meta.props?.min ?? 0} max={meta.props?.max ?? 0} onChange={onChange} {...meta.props} />;
+      return <Slider defaultValue={value} min={meta.props?.min ?? 0} max={meta.props?.max ?? 0} onChange={onChange} {...meta.props} />;
     case 'CheckBox':
       return <Checkbox id={meta.path.toString()} checked={value} onChange={onChange} />;
     case 'RadioButton':

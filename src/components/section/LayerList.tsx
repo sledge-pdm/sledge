@@ -89,7 +89,7 @@ const LayerList: Component<{}> = () => {
           }}
         >
           <Dropdown
-            value={activeLayer().mode} // not reactive
+            value={activeLayer().mode}
             options={Object.entries(BlendMode).map((e) => {
               return {
                 label: e[0],
@@ -103,7 +103,7 @@ const LayerList: Component<{}> = () => {
           <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
             <p style={{ width: '36px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
             <Slider
-              value={activeLayer().opacity} // not reactive
+              value={activeLayer().opacity}
               min={0}
               max={1}
               allowFloat={true}

@@ -15,9 +15,7 @@ const WebGLCanvas: Component = () => {
   let renderer: WebGLRenderer | undefined;
 
   const [updateRender, setUpdateRender] = createSignal(false);
-  const [fps, setFps] = createSignal(60); // will replace this 60 by config store!
-
-  // render loop (update if updateRender flag is true)
+  const [fps, setFps] = createSignal(60);
   const [isRenderLoopRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {

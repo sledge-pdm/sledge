@@ -78,7 +78,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         onClick={onDetClicked}
       >
         <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
-
         <div
           class={[flexRow, w100].join(' ')}
           style={{

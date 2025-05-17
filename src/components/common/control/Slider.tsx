@@ -17,6 +17,7 @@ interface SliderProps {
 const Slider: Component<SliderProps> = (props) => {
   let labelRef: HTMLDivElement;
   let directInputRef: HTMLInputElement;
+  let rootRef: HTMLDivElement;
   let sliderRef: HTMLDivElement;
   const [directInputMode, setDirectInputMode] = createSignal(false);
 
@@ -45,29 +46,26 @@ const Slider: Component<SliderProps> = (props) => {
   const handlePointerDown = () => {
     setDrag(true);
     sliderRef.addEventListener('pointermove', handlePointerMove);
-    sliderRef.addEventListener('pointerout', handlePointerOut);
     sliderRef.addEventListener('pointerup', handlePointerUp);
   };
+
   const handlePointerMove = (e: PointerEvent) => {
-    if (!sliderRef || !isDrag()) return;
+    if (!sliderRef || !isDrag()) {
+      return;
+    }
     const { left, width } = sliderRef.getBoundingClientRect();
     let pos = Math.max(0, Math.min(e.clientX - left, width));
     const raw = props.min + (pos / width) * (props.max - props.min);
     const newValue = props.allowFloat ? raw : Math.round(raw);
     update(newValue);
   };
-  const handlePointerOut = (e: PointerEvent) => {
-    setDrag(false);
-    sliderRef.removeEventListener('pointermove', handlePointerMove);
-    sliderRef.removeEventListener('pointerout', handlePointerOut);
-    sliderRef.removeEventListener('pointerup', handlePointerUp);
-  };
+
   const handlePointerUp = () => {
     setDrag(false);
-    window.removeEventListener('pointermove', handlePointerMove);
-    sliderRef.removeEventListener('pointerout', handlePointerOut);
+    sliderRef.removeEventListener('pointermove', handlePointerMove);
     sliderRef.removeEventListener('pointerup', handlePointerUp);
   };
+
   const onLineClick = (e: MouseEvent) => {
     if (!sliderRef) return;
     const { left, width } = sliderRef.getBoundingClientRect();
@@ -76,6 +74,7 @@ const Slider: Component<SliderProps> = (props) => {
     const newValue = props.allowFloat ? raw : Math.round(raw);
     update(newValue);
   };
+
   const handleClickOutside = (e: MouseEvent) => {
     if (directInputMode() && labelRef && !labelRef.contains(e.target as Node)) {
       update(Number(directInputRef.value));
@@ -128,11 +127,11 @@ const Slider: Component<SliderProps> = (props) => {
   );
 
   return (
-    <div class={styles.sliderRoot} ref={(el) => (sliderRef = el)}>
+    <div class={styles.sliderRoot} ref={(el) => (rootRef = el)}>
       <Show when={props.labelMode === LabelMode.LEFT}>{labelArea}</Show>
 
-      <div class={styles.slider}>
-        <div class={styles.lineHitbox} onPointerDown={handlePointerDown} onClick={onLineClick}>
+      <div class={styles.slider} ref={(el) => (sliderRef = el)} onPointerDown={handlePointerDown} onClick={onLineClick}>
+        <div class={styles.lineHitbox}>
           <div class={styles.line} />
         </div>
         <div style={{ left: `${percent()}%` }} class={styles.handle} />

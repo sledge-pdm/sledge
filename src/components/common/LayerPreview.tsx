@@ -68,7 +68,6 @@ const LayerPreview: Component<Props> = (props: Props) => {
         ref={(el) => {
           canvasRef = el;
           ctx = canvasRef.getContext('2d')!;
-          console.log(ctx);
         }}
         style={{
           'image-rendering': 'pixelated',

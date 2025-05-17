@@ -1,6 +1,6 @@
 import { trackDeep } from '@solid-primitives/deep';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createEffect, createSignal, onCleanup } from 'solid-js';
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
@@ -28,10 +28,6 @@ const WebGLCanvas: Component = () => {
     }, fps)
   );
 
-  listen('tauri://resize', (e) => {
-    adjustZoomToFit();
-  });
-
   listenEvent('onSetup', () => {
     const { width, height } = canvasStore.canvas;
 
@@ -44,6 +40,11 @@ const WebGLCanvas: Component = () => {
     layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
     layerAgentManager.setOnAnyImageChangeListener('webgl_canvas', () => {
       setUpdateRender(true);
+    });
+
+    const window = getCurrentWindow();
+    window.onResized(() => {
+      adjustZoomToFit();
     });
   });
 

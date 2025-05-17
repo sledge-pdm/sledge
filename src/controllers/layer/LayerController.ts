@@ -8,7 +8,6 @@ import { findLayerById } from './LayerListController';
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
-    console.warn("you can't change layer id.");
     return;
   }
   const layer = findLayerById(layerId);

@@ -1,5 +1,5 @@
 import { Component } from 'solid-js';
-import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetAllLayers } from '~/controllers/layer/LayerController';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -8,14 +8,18 @@ import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } fr
 import { Consts } from '~/utils/consts';
 
 const CanvasSettings: Component = () => {
-  const onSizeChange = (type: 'width' | 'height', value: number) => {
-    if (type === 'width') {
-      changeCanvasSize({ width: value, height: canvasStore.canvas.height });
-    } else {
-      changeCanvasSize({ width: canvasStore.canvas.width, height: value });
-    }
+  let widthInputRef: HTMLInputElement;
+  let heightInputRef: HTMLInputElement;
 
-    adjustZoomToFit();
+  const submitSizeChange = () => {
+    const width = Number(widthInputRef.value);
+    const height = Number(heightInputRef.value);
+    const newSize = { width, height };
+
+    if (isValidCanvasSize(newSize)) {
+      changeCanvasSize(newSize);
+      adjustZoomToFit();
+    }
   };
 
   return (
@@ -27,6 +31,7 @@ const CanvasSettings: Component = () => {
           <div>
             <p class={canvasSizeLabel}>width</p>
             <input
+              ref={(el) => (widthInputRef = el)}
               class={canvasSizeInput}
               type='number'
               name='width'
@@ -39,6 +44,7 @@ const CanvasSettings: Component = () => {
           <div>
             <p class={canvasSizeLabel}>height</p>
             <input
+              ref={(el) => (heightInputRef = el)}
               class={canvasSizeInput}
               type='number'
               name='height'
@@ -48,7 +54,13 @@ const CanvasSettings: Component = () => {
               required
             />
           </div>
-          <button class={canvasSizeButton} type='submit'>
+          <button
+            class={canvasSizeButton}
+            onClick={(e) => {
+              e.preventDefault();
+              submitSizeChange();
+            }}
+          >
             change
           </button>
         </div>

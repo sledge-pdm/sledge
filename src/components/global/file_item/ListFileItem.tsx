@@ -39,7 +39,14 @@ const ListFileItem: Component<FileItemProps> = (props) => {
         >
           <Show when={props.thumbnail} fallback={<p>loading...</p>}>
             <Show when={props.thumbnail !== 'failed'} fallback={<p>NO IMAGE</p>}>
-              <img src={props.thumbnail} width={150} height={150} />
+              <img
+                style={{
+                  'max-width': '100%',
+                  height: 'auto',
+                  'object-fit': 'cover',
+                }}
+                src={props.thumbnail}
+              />
             </Show>
           </Show>
         </div>

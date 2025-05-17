@@ -1,6 +1,8 @@
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { getProjectJsonFromPath } from '~/io/project/project';
+import genFileId from '~/io/project/genFileId';
+import { thumbnailDir } from '~/io/project/saveThumbnail';
 import { recentFilesCaption, recentFilesContainerCol } from '~/routes/start.css';
 import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexRow, w100 } from '~/styles/snippets.css';
@@ -12,12 +14,13 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
 
   createEffect(() => {
     props.files.forEach(async (file) => {
-      const json = await getProjectJsonFromPath(file.path + '/' + file.name);
-      if (json.thumbnail) {
-        setThumbnails(file.path + '/' + file.name, json.thumbnail);
-      } else {
-        setThumbnails(file.path + '/' + file.name, 'failed');
-      }
+      // const json = await importProjectJsonFromPath(file.path + '/' + file.name);
+      const path = file.path + '\\' + file.name;
+      const fileId = await genFileId(path);
+      const thumbPath = (await thumbnailDir()) + fileId + '.png';
+      const assetUrl = convertFileSrc(thumbPath);
+
+      setThumbnails(path, assetUrl);
     });
   });
 
@@ -32,9 +35,10 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
         </div>
         <div class={recentFilesContainerCol} style={{ 'margin-bottom': '24px' }}>
           <For each={props.files}>
-            {(item, i) => {
-              const thumbnail = () => thumbnails[item.path + '/' + item.name];
-              return <ListFileItem onClick={props.onClick} thumbnail={thumbnail()} file={item} />;
+            {(file, i) => {
+              const path = file.path + '\\' + file.name;
+              const thumbnail = () => thumbnails[path];
+              return <ListFileItem onClick={props.onClick} thumbnail={thumbnail()} file={file} />;
             }}
           </For>
         </div>

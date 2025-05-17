@@ -1,6 +1,6 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { exportCanvas } from '~/io/image_export/exportCanvas';
-import { saveProject } from '~/io/project/project';
+import { saveProject } from '~/io/project/saveProject';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';

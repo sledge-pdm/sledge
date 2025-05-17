@@ -1,5 +1,6 @@
-import { Component } from 'solid-js';
-import { getBufferOf, layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { Component, onMount } from 'solid-js';
+import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
@@ -15,59 +16,62 @@ interface Props {
 const LayerPreview: Component<Props> = (props: Props) => {
   let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
+  let ctx: CanvasRenderingContext2D;
 
-  const updatePreview = (originalImage: Uint8ClampedArray, targetHeight: number) => {
+  const thumbnailGen = new ThumbnailGenerator();
+
+  onMount(() => {
+    // renderer = new WebGLRenderer(canvasRef); ←！！
+    updatePreview();
+
+    const agent = getAgentOf(props.layer.id);
+    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, (e) => {
+      if (e.updatePreview) updatePreview();
+    });
+
+    listenEvent('onResetAllLayers', () => {
+      updatePreview();
+    });
+  });
+
+  const updatePreview = () => {
+    const targetHeight = wrapperRef.clientHeight;
     const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
-
-    // 描画対象キャンバスの解像度とCSSサイズを一致させる
-    canvasRef.width = targetWidth;
-    canvasRef.height = targetHeight;
-
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
     let zoom = 1;
     if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
     if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
-    canvasRef.style.width = `${targetWidth * zoom}px !important`;
-    canvasRef.style.height = `${targetHeight * zoom}px !important`;
+    const previewWidth = targetWidth * zoom;
+    const previewHeight = targetHeight * zoom;
 
-    wrapperRef.style.width = `${targetWidth * zoom}px !important`;
-    wrapperRef.style.height = `${targetHeight * zoom}px !important`;
+    canvasRef.width = previewWidth;
+    canvasRef.height = previewHeight;
+    canvasRef.style.width = `${targetWidth}px`;
+    canvasRef.style.height = `${targetHeight}px`;
 
-    const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = canvasStore.canvas.width;
-    tmpCanvas.height = canvasStore.canvas.height;
-    tmpCanvas.getContext('2d')!.putImageData(new ImageData(originalImage, canvasStore.canvas.width, canvasStore.canvas.height), 0, 0);
-
-    const ctx = canvasRef.getContext('2d')!;
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, targetWidth, targetHeight);
-
-    ctx.drawImage(tmpCanvas, 0, 0, canvasStore.canvas.width, canvasStore.canvas.height, 0, 0, targetWidth, targetHeight);
-  };
-
-  listenEvent('onProjectLoad', () => {
-    const height = wrapperRef.clientHeight;
-    const currentImage = getBufferOf(props.layer.id);
-
-    let agent = layerAgentManager.getAgent(props.layer.id);
-    if (currentImage) {
-      updatePreview(currentImage, height);
+    const agent = getAgentOf(props.layer.id);
+    if (agent) {
+      const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
+      if (preview) {
+        ctx?.putImageData(preview, 0, 0);
+      }
     }
-
-    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, () => {
-      const img = getBufferOf(props.layer.id);
-      if (img) updatePreview(img, height);
-    });
-  });
+  };
 
   return (
     <div ref={(el) => (wrapperRef = el)}>
       <canvas
         class={layerPreviewCanvas}
-        ref={(el) => (canvasRef = el)}
+        ref={(el) => {
+          canvasRef = el;
+          ctx = canvasRef.getContext('2d')!;
+        }}
+        style={{
+          'image-rendering': 'pixelated',
+        }}
         onClick={(e) => {
           if (props.onClick) props.onClick();
         }}

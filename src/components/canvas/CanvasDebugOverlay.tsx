@@ -1,5 +1,5 @@
 import { makeTimer } from '@solid-primitives/timer';
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, Show } from 'solid-js';
 import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -39,7 +39,11 @@ const CanvasDebugOverlay: Component = (props) => {
     // JS Heap: ${toMiB(jsMemInfo().usedJSHeapSize)} / ${toMiB(jsMemInfo().totalJSHeapSize)}`);
   };
 
-  const disposeInterval = makeTimer(callback, 1000, setInterval);
+  const disposeInterval = makeTimer(callback, 5000, setInterval);
+
+  onCleanup(() => {
+    disposeInterval();
+  });
 
   return (
     <>

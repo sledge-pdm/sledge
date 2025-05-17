@@ -1,9 +1,26 @@
 // src/styles/components/basics/slider.css.ts
 import { style } from '@vanilla-extract/css';
+import { flexCol, flexRow } from '~/styles/snippets.css';
 
-export const sliderRoot = style({
-  width: '100%',
-  height: 'auto',
+export const sliderRoot = style([
+  flexRow,
+  {
+    position: 'relative',
+    width: '100%',
+    height: 'auto',
+  },
+]);
+
+export const valueLabelContainer = style([
+  flexCol,
+  {
+    minWidth: '64px',
+    height: '12px',
+  },
+]);
+export const valueLabelInput = style({
+  width: '52px',
+  letterSpacing: '1px',
 });
 
 export const slider = style({
@@ -13,6 +30,7 @@ export const slider = style({
   overflow: 'visible',
   position: 'relative',
   width: '100%',
+  touchAction: 'none',
 });
 
 export const lineHitbox = style({

@@ -1,10 +1,10 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RGBAColor } from '~/utils/ColorUtils';
-import { EraserTool } from '../../controllers/tool/eraser/EraserTool';
-import { FillTool } from '../../controllers/tool/fill/FillTool';
-import { PenTool } from '../../controllers/tool/pen/PenTool';
-import { Vec2 } from '../../types/Vector';
-import { ToolType } from './Tool';
+import { ToolType } from '../models/tool/Tool';
+import { Vec2 } from '../types/Vector';
+import { EraserTool } from './eraser/EraserTool';
+import { FillTool } from './fill/FillTool';
+import { PenTool } from './pen/PenTool';
 
 export interface ToolBehavior {
   onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean;

@@ -1,9 +1,11 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createEffect, createSignal, onMount } from 'solid-js';
+import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { projectStore } from '~/stores/ProjectStores';
 import {
-  titleBarControlButtonImg,
+  titleBarControlButtonCloseImg,
+  titleBarControlButtonMaximizeImg,
+  titleBarControlButtonMinimizeImg,
   titleBarControlCloseButton,
   titleBarControlMaximizeButton,
   titleBarControlMinimizeButton,
@@ -11,15 +13,16 @@ import {
   titleBarRoot,
   titleBarTitle,
 } from '~/styles/components/globals/title_bar.css';
-import '~/styles/title_bar_region.css';
+
+import '~/styles/tile_bar_region.css';
 
 export default function TitleBar() {
   const window = getCurrentWindow();
   let titleBarNavEl: HTMLElement;
 
-  const [isMaximizable, setIsMaximizable] = createSignal(true);
-  const [isMinimizable, setIsMinimizable] = createSignal(true);
-  const [isClosable, setIsClosable] = createSignal(true);
+  const [isMaximizable, setIsMaximizable] = createSignal(false);
+  const [isMinimizable, setIsMinimizable] = createSignal(false);
+  const [isClosable, setIsClosable] = createSignal(false);
   const [isEditor, setIsEditor] = createSignal(false);
   const [title, setTitle] = createSignal('');
   const [isMaximized, setMaximized] = createSignal(false);
@@ -67,24 +70,53 @@ export default function TitleBar() {
         'border-bottom': shouldShowBorder() ? '1px solid #aaa' : 'none',
       }}
     >
-      <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region='p, button'>
-        <p class={titleBarTitle}>{title()}.</p>
-        <div class={titleBarControls}>
-          {isMinimizable() && (
-            <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
-              <img class={titleBarControlButtonImg} src={'/icons/title_bar/minimize.png'} />
+      <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
+        <p class={titleBarTitle} data-tauri-drag-region-exclude>
+          {title()}.
+        </p>
+        <div class={titleBarControls} data-tauri-drag-region-exclude>
+          <Show when={isMinimizable()}>
+            <button
+              class={titleBarControlMinimizeButton}
+              onClick={async (e) => {
+                e.preventDefault();
+                await window.minimize();
+              }}
+              data-tauri-drag-region-exclude
+            >
+              <img class={titleBarControlButtonMinimizeImg} src={'/icons/title_bar/minimize_2.png'} data-tauri-drag-region-exclude />
             </button>
-          )}
-          {isMaximizable() && (
-            <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
-              <img class={titleBarControlButtonImg} src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/icons/title_bar/maximize.png'} />
+          </Show>
+
+          <Show when={isMaximizable()}>
+            <button
+              class={titleBarControlMaximizeButton}
+              onClick={async (e) => {
+                e.preventDefault();
+                await window.toggleMaximize();
+              }}
+              data-tauri-drag-region-exclude
+            >
+              <img
+                class={titleBarControlButtonMaximizeImg}
+                src={isMaximized() ? '/icons/title_bar/quit_maximize_2.png' : '/icons/title_bar/maximize_2.png'}
+                data-tauri-drag-region-exclude
+              />
             </button>
-          )}
-          {isClosable() && (
-            <button class={titleBarControlCloseButton} onClick={() => window.close()}>
-              <img class={titleBarControlButtonImg} src={'/icons/title_bar/close.png'} />
+          </Show>
+
+          <Show when={isClosable()}>
+            <button
+              class={titleBarControlCloseButton}
+              onClick={async (e) => {
+                e.preventDefault();
+                await window.close();
+              }}
+              data-tauri-drag-region-exclude
+            >
+              <img class={titleBarControlButtonCloseImg} src={'/icons/title_bar/close_2.png'} data-tauri-drag-region-exclude />
             </button>
-          )}
+          </Show>
         </div>
       </nav>
     </header>

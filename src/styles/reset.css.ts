@@ -9,6 +9,7 @@ globalStyle('html, body', {
   display: 'flex',
   flexDirection: 'row',
   userSelect: 'none',
+  WebkitTapHighlightColor: 'transparent',
 });
 
 globalStyle('main', {

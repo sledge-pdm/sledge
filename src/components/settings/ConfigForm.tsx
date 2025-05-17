@@ -24,11 +24,11 @@ import {
 import { accentedButton, vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
-import Checkbox from '../common/basics/Checkbox';
-import Dropdown from '../common/basics/Dropdown';
-import RadioButton from '../common/basics/RadioButton';
-import Slider from '../common/basics/Slider';
-import ToggleSwitch from '../common/basics/ToggleSwitch';
+import Checkbox from '../common/control/Checkbox';
+import Dropdown from '../common/control/Dropdown';
+import RadioButton from '../common/control/RadioButton';
+import Slider from '../common/control/Slider';
+import ToggleSwitch from '../common/control/ToggleSwitch';
 import Light from '../common/Light';
 import KeyConfigSettings from './KeyConfigSettings';
 
@@ -67,7 +67,18 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
     case 'Dropdown':
       return <Dropdown value={value} options={meta.props?.options} onChange={onChange} />;
     case 'Slider':
-      return <Slider value={value} min={meta.props?.min ?? 0} max={meta.props?.max ?? 0} onChange={onChange} {...meta.props} />;
+      return (
+        <Slider
+          defaultValue={value}
+          min={meta.props?.min ?? 0}
+          max={meta.props?.max ?? 0}
+          labelMode={componentProps.get('Slider')?.labelMode ?? LabelMode.LEFT}
+          customFormat={meta.customFormat}
+          allowDirectInput={true}
+          onChange={onChange}
+          {...meta.props}
+        />
+      );
     case 'CheckBox':
       return <Checkbox id={meta.path.toString()} checked={value} onChange={onChange} />;
     case 'RadioButton':
@@ -155,6 +166,9 @@ export default function ConfigForm() {
           <Show when={currentSection() !== Sections.KeyConfig}>
             <For each={grouped.get(currentSection())}>
               {(meta) => {
+                const componentProp = componentProps.get(meta.component);
+                const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === LabelMode.LEFT;
+                const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === LabelMode.RIGHT;
                 return (
                   <div class={configFormFieldItem}>
                     <div class={flexRow}>
@@ -166,13 +180,13 @@ export default function ConfigForm() {
                       </Show>
                     </div>
                     <div class={configFormFieldControlWrapper}>
-                      <Show when={componentProps.get(meta.component)?.labelMode === LabelMode.LEFT}>
+                      <Show when={shouldShowLeftLabel}>
                         <label for={meta.path.toString()} class={configFormFieldControlLabel}>
                           {getParsedValueFromMetaPath(meta)}.
                         </label>
                       </Show>
                       <FieldRenderer meta={meta} onChange={(v) => onFieldChange(meta, v)}></FieldRenderer>
-                      <Show when={componentProps.get(meta.component)?.labelMode === LabelMode.RIGHT}>
+                      <Show when={shouldShowRightLabel}>
                         <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': vars.spacing.sm }}>
                           {getParsedValueFromMetaPath(meta)}.
                         </label>

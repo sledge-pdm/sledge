@@ -5,6 +5,9 @@ import { Vec2 } from '~/types/Vector';
 class CanvasAreaInteract {
   private dragPosition: Vec2 = { x: 0, y: 0 };
 
+  private lastPointX: number = 0;
+  private lastPointY: number = 0;
+
   private lastX: number[] = [0, 0];
   private lastY: number[] = [0, 0];
   private lastDist: number = 0;
@@ -14,6 +17,11 @@ class CanvasAreaInteract {
     if (Math.sign(move0) !== Math.sign(move1)) return 0;
     return Math.min(move1, move0);
   };
+
+  private handlePointerMove(e: PointerEvent) {
+    this.lastPointX = e.clientX;
+    this.lastPointY = e.clientY;
+  }
 
   private handleTouchMove(e: TouchEvent, canvasStack: HTMLDivElement) {
     if (interactStore.isInStroke) return;
@@ -88,8 +96,12 @@ class CanvasAreaInteract {
   }
 
   private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
+    this.zoom(e.deltaY, 1, canvasStack);
+  }
+
+  private zoom(deltaY: number, multiply: number, canvasStack: HTMLDivElement) {
     const referencedZoom = getReferencedZoom() ?? 1;
-    const delta = e.deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep;
+    const delta = (deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep) * multiply;
 
     const zoomOld = interactStore.zoom;
     const zoomNew = Math.round((interactStore.zoom + interactStore.zoom * delta) * 1000) / 1000;
@@ -97,8 +109,8 @@ class CanvasAreaInteract {
     if (zoomNew < interactStore.zoomMin * referencedZoom || interactStore.zoomMax * referencedZoom < zoomNew) return;
 
     const rect = canvasStack.getBoundingClientRect();
-    const canvasX = (e.clientX - rect.left) / zoomOld;
-    const canvasY = (e.clientY - rect.top) / zoomOld;
+    const canvasX = (this.lastPointX - rect.left) / zoomOld;
+    const canvasY = (this.lastPointY - rect.top) / zoomOld;
     setInteractStore('zoom', zoomNew);
     setInteractStore('offset', {
       x: interactStore.offset.x + canvasX * (zoomOld - zoomNew),
@@ -112,14 +124,14 @@ class CanvasAreaInteract {
   }
 
   private handleMouseDown(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && interactStore.isCtrlPressed)) {
+    if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
       setInteractStore('isDragging', true);
       this.dragPosition = { x: e.clientX, y: e.clientY };
     }
   }
 
   private handleMouseMove(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && interactStore.isCtrlPressed)) {
+    if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
       if (interactStore.isDragging) {
         const dx = e.clientX - this.dragPosition.x;
         const dy = e.clientY - this.dragPosition.y;
@@ -136,16 +148,34 @@ class CanvasAreaInteract {
     setInteractStore('isDragging', false);
   }
 
-  private handleKeyDown(e: KeyboardEvent) {
-    if (e.ctrlKey) setInteractStore('isCtrlPressed', true);
+  private KEY_ZOOM_MULT = 1.3;
+
+  private handleKeyDown(e: KeyboardEvent, canvasStack: HTMLDivElement) {
+    if (e.ctrlKey) {
+      if (e.key === '+') {
+        // in
+        this.zoom(-1, this.KEY_ZOOM_MULT, canvasStack);
+      } else if (e.key === '-') {
+        // out
+        this.zoom(1, this.KEY_ZOOM_MULT, canvasStack);
+      }
+    }
   }
 
   private handleKeyUp(e: KeyboardEvent) {
-    if (e.key === 'Control') setInteractStore('isCtrlPressed', false);
+    if (e.ctrlKey) {
+      if (e.key === '+') {
+        // in
+      } else if (e.key === '-') {
+        // out
+      }
+    }
   }
 
   public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
     this.removeInteractListeners(wrapper, canvasStack);
+    wrapper.addEventListener('pointermove', (e) => this.handlePointerMove.bind(this)(e));
+
     wrapper.addEventListener('touchstart', (e) => this.handleTouchStart.bind(this)(e), { passive: true });
     wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack), { passive: true });
     wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
@@ -158,7 +188,7 @@ class CanvasAreaInteract {
     wrapper.addEventListener('mouseleave', this.handleMouseOff.bind(this));
     wrapper.addEventListener('mouseout', this.handleMouseOff.bind(this));
 
-    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    window.addEventListener('keydown', (e) => this.handleKeyDown.bind(this)(e, canvasStack));
     window.addEventListener('keyup', this.handleKeyUp.bind(this));
   }
 
@@ -174,7 +204,7 @@ class CanvasAreaInteract {
     wrapper.removeEventListener('mouseleave', this.handleMouseOff.bind(this));
     wrapper.removeEventListener('mouseout', this.handleMouseOff.bind(this));
 
-    window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+    window.removeEventListener('keydown', (e) => this.handleKeyDown.bind(this)(e, canvasStack));
     window.removeEventListener('keyup', this.handleKeyUp.bind(this));
   }
 }

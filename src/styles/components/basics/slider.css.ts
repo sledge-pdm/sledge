@@ -30,6 +30,7 @@ export const slider = style({
   overflow: 'visible',
   position: 'relative',
   width: '100%',
+  touchAction: 'none',
 });
 
 export const lineHitbox = style({

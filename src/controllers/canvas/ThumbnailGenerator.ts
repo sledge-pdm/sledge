@@ -16,8 +16,9 @@ export class ThumbnailGenerator {
     this.off.height = previewH;
     this.tmp.width = w;
     this.tmp.height = h;
-    const ctx = this.off.getContext('2d')!;
-    const tctx = this.tmp.getContext('2d')!;
+    const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
+
+    const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
 
     const imgData = new ImageData(agent.getBuffer(), w, h);
     tctx?.putImageData(imgData, 0, 0);

@@ -30,10 +30,6 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInput}
               type='number'
               name='width'
-              onChange={(e) => {
-                e.preventDefault();
-                onSizeChange('width', Number(e.target.value));
-              }}
               value={canvasStore.canvas.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
@@ -46,10 +42,6 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInput}
               type='number'
               name='height'
-              onChange={(e) => {
-                e.preventDefault();
-                onSizeChange('height', Number(e.target.value));
-              }}
               value={canvasStore.canvas.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}

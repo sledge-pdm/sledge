@@ -22,7 +22,7 @@ export const titleBarTitle = style([
     fontFamily: ZFB08,
     fontSize: vars.text.sm,
     marginRight: 'auto',
-    paddingLeft: vars.spacing.lg,
+    paddingLeft: '34px',
   },
 ]);
 

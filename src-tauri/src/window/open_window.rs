@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use tauri::{AppHandle, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Theme, WebviewUrl, WebviewWindowBuilder};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -12,18 +12,21 @@ pub enum SledgeWindowKind {
 
 #[derive(Deserialize)]
 pub struct OpenWindowPayload {
-    pub kind: SledgeWindowKind,
-    pub query: Option<String>, // e.g., "id=xyz123"
+    // e.g., "id=xyz123"
 }
 
 const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection";
 
 #[tauri::command]
-pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(), String> {
+pub async fn open_window(
+    app: AppHandle,
+    kind: SledgeWindowKind,
+    query: Option<String>,
+) -> Result<(), String> {
     use SledgeWindowKind::*;
 
     let label;
-    let (_url, mut builder) = match payload.kind {
+    let (_url, mut builder) = match kind {
         Start => {
             label = "start";
             let _url = "/";
@@ -42,7 +45,7 @@ pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(
         Editor => {
             label = "editor";
             let base_url = "/editor";
-            let full_url = match &payload.query {
+            let full_url = match &query {
                 Some(query) => format!("{base_url}?{query}"),
                 None => base_url.to_string(),
             };
@@ -92,7 +95,9 @@ pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(
         }
     };
 
-    builder = builder.additional_browser_args(COMMON_BROWSER_ARGS);
+    builder = builder
+        .theme(Some(Theme::Light))
+        .additional_browser_args(COMMON_BROWSER_ARGS);
 
     builder.build().map_err(|e| e.to_string())?;
 

@@ -60,7 +60,7 @@ export default function TitleBar() {
     }
   });
 
-  const borderWindowLabels: string[] = ['editor', 'settings'];
+  const borderWindowLabels: string[] = ['settings'];
   const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
 
   return (

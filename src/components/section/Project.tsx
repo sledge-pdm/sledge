@@ -3,7 +3,7 @@ import { exportCanvas } from '~/io/image_export/exportCanvas';
 import { saveProject } from '~/io/project/saveProject';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
-import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
 import { projectNameInput } from '~/styles/section/project.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
@@ -40,14 +40,9 @@ const Project: Component = () => {
 
   return (
     <div class={sectionRoot}>
-      {/* <p class={sectionCaption}>project.</p> */}
+      <p class={sectionCaption}>project name.</p>
       <div class={sectionContent}>
-        <div
-          class={flexCol}
-          style={{
-            'margin-top': '8px',
-          }}
-        >
+        <div class={flexCol} style={{}}>
           <Show when={isNameChanged()}>
             <p>{projectStore.name} →</p>
           </Show>

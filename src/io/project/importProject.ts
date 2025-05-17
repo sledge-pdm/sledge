@@ -25,7 +25,7 @@ export async function importProjectFromFileSelection(): Promise<string | undefin
   const jsonText = await readTextFile(file);
   const projectJson = JSON.parse(jsonText);
 
-  await import(projectJson);
+  await importProjectJsonFromPath(projectJson);
 
   return file;
 }

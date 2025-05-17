@@ -3,7 +3,9 @@ import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { projectStore } from '~/stores/ProjectStores';
 import {
-  titleBarControlButtonImg,
+  titleBarControlButtonCloseImg,
+  titleBarControlButtonMaximizeImg,
+  titleBarControlButtonMinimizeImg,
   titleBarControlCloseButton,
   titleBarControlMaximizeButton,
   titleBarControlMinimizeButton,
@@ -17,9 +19,9 @@ export default function TitleBar() {
   const window = getCurrentWindow();
   let titleBarNavEl: HTMLElement;
 
-  const [isMaximizable, setIsMaximizable] = createSignal(true);
-  const [isMinimizable, setIsMinimizable] = createSignal(true);
-  const [isClosable, setIsClosable] = createSignal(true);
+  const [isMaximizable, setIsMaximizable] = createSignal(false);
+  const [isMinimizable, setIsMinimizable] = createSignal(false);
+  const [isClosable, setIsClosable] = createSignal(false);
   const [isEditor, setIsEditor] = createSignal(false);
   const [title, setTitle] = createSignal('');
   const [isMaximized, setMaximized] = createSignal(false);
@@ -71,18 +73,41 @@ export default function TitleBar() {
         <p class={titleBarTitle}>{title()}.</p>
         <div class={titleBarControls}>
           <Show when={isMinimizable()}>
-            <button class={titleBarControlMinimizeButton} onClick={() => window.minimize()}>
-              <img class={titleBarControlButtonImg} src={'/icons/title_bar/minimize.png'} />
+            <button
+              class={titleBarControlMinimizeButton}
+              onClick={async (e) => {
+                e.preventDefault();
+                await window.minimize();
+              }}
+            >
+              <img class={titleBarControlButtonMinimizeImg} src={'/icons/title_bar/minimize_2.png'} />
             </button>
           </Show>
+
           <Show when={isMaximizable()}>
-            <button class={titleBarControlMaximizeButton} onClick={() => window.toggleMaximize()}>
-              <img class={titleBarControlButtonImg} src={isMaximized() ? '/icons/title_bar/leave_maximize.png' : '/icons/title_bar/maximize.png'} />
+            <button
+              class={titleBarControlMaximizeButton}
+              onClick={async (e) => {
+                e.preventDefault();
+                await window.toggleMaximize();
+              }}
+            >
+              <img
+                class={titleBarControlButtonMaximizeImg}
+                src={isMaximized() ? '/icons/title_bar/quit_maximize_2.png' : '/icons/title_bar/maximize_2.png'}
+              />
             </button>
           </Show>
+
           <Show when={isClosable()}>
-            <button class={titleBarControlCloseButton} onClick={() => window.close()}>
-              <img class={titleBarControlButtonImg} src={'/icons/title_bar/close.png'} />
+            <button
+              class={titleBarControlCloseButton}
+              onClick={async (e) => {
+                e.preventDefault();
+                await window.close();
+              }}
+            >
+              <img class={titleBarControlButtonCloseImg} src={'/icons/title_bar/close_2.png'} />
             </button>
           </Show>
         </div>

@@ -1,4 +1,5 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
+import { exportCanvas } from '~/io/image_export/exportCanvas';
 import { saveProject } from '~/io/project/project';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
@@ -81,12 +82,7 @@ const Project: Component = () => {
             placeholder='project name'
             autocomplete='off'
           />
-
-          {/* <p class={styles.project_file_path}>{projectStore.path}</p> */}
         </div>
-        {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
-                        load.
-                    </button> */}
 
         <div
           class={flexRow}
@@ -120,8 +116,21 @@ const Project: Component = () => {
               save (new).
             </button>
           </Show>
-          {/* <button onClick={() => exportWithScale(projectStore.newName || projectStore.name)}>export.</button> */}
-          {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
+          <button
+            onClick={async () => {
+              const name = projectStore.newName || projectStore.name;
+              if (name === undefined) return;
+              await exportCanvas(name, {
+                format: 'png',
+                scale: 100,
+              });
+            }}
+          >
+            export.
+          </button>
+          <Show when={!projectStore.isProjectChangedAfterSave}>
+            <p>{saveLog()}</p>
+          </Show>
         </div>
       </div>
     </div>

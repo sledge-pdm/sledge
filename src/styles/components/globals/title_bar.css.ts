@@ -48,7 +48,7 @@ export const titleBarControlMinimizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      backgroundColor: '#0000FF20',
+      // backgroundColor: '#0000FF20',
     },
   },
 ]);
@@ -57,7 +57,7 @@ export const titleBarControlMaximizeButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      backgroundColor: '#00FF0020',
+      // backgroundColor: '#00FF0020',
     },
   },
 ]);
@@ -66,7 +66,7 @@ export const titleBarControlCloseButton = style([
   titleBarControlButton,
   {
     ':hover': {
-      backgroundColor: '#FF000020',
+      backgroundColor: '#FF0000B0',
     },
   },
 ]);

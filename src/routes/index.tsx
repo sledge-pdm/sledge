@@ -11,8 +11,8 @@ import { closeWindowsByLabel, getExistingProjectSearchParams, getNewProjectSearc
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
 
 export default function Home() {
-  onMount(() => {
-    loadGlobalSettings();
+  onMount(async () => {
+    await loadGlobalSettings();
   });
 
   const openExistingProject = (selectedFile: FileLocation) => {
@@ -62,20 +62,6 @@ export default function Home() {
         <a class={menuItem} style={{ 'margin-left': '2px' }} onClick={(e) => openProject()}>
           &gt;&ensp;open.
         </a>
-        {/* <a
-          class={sideSectionItem}
-          style={{ 'margin-left': '2px' }}
-          onClick={(e) =>
-            safeInvoke('open_window', {
-              payload: {
-                kind: 'settings',
-              },
-            })
-          }
-        >
-          <img src={'/icons/misc/settings.png'} width={16} height={16} />
-          &ensp;settings.
-        </a> */}
       </div>
 
       <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />

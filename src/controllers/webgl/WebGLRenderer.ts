@@ -92,8 +92,9 @@ export class WebGLRenderer {
    * レイヤー配列を受け取って GPU 合成 & 描画
    * @param layers 並び順：0 が最背面
    */
-  public render(layers: Layer[]): void {
+  public render(layers: Layer[] | Layer): void {
     if (this.width === 0 || this.height === 0) return;
+    if (!Array.isArray(layers)) layers = [layers];
 
     layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);

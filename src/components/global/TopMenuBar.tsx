@@ -10,9 +10,12 @@ interface Item {
 const TopMenuBar: Component = () => {
   const leftItems: Item[] = [
     { text: 'IMPORT.', action: () => {} },
-    { text: 'EXPORT.', action: () => {} },
+    { text: 'EXPORT.', action: () => openWindow('export') },
   ];
-  const rightItems: Item[] = [{ text: 'SETTINGS.', action: () => openWindow('settings') }];
+  const rightItems: Item[] = [
+    { text: 'START.', action: () => openWindow('start') },
+    { text: 'SETTINGS.', action: () => openWindow('settings') },
+  ];
 
   return (
     <div class={styles.root}>

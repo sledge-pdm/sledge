@@ -8,11 +8,7 @@ pub enum SledgeWindowKind {
     Editor,
     About,
     Settings,
-}
-
-#[derive(Deserialize)]
-pub struct OpenWindowPayload {
-    // e.g., "id=xyz123"
+    Export,
 }
 
 const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection";
@@ -88,6 +84,22 @@ pub async fn open_window(
                 .closable(true)
                 .accept_first_mouse(true)
                 .skip_taskbar(true)
+                .always_on_top(true)
+                .minimizable(false)
+                .maximizable(false);
+            (_url, builder)
+        }
+
+        Export => {
+            label = "export";
+            let _url = "/io/export_image";
+            let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
+                .title("export")
+                .inner_size(600.0, 400.0)
+                .resizable(false)
+                .decorations(false)
+                .closable(true)
+                .accept_first_mouse(true)
                 .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);

@@ -1,6 +1,8 @@
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { getAgentOf, layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { emitEvent } from '~/utils/TauriUtils';
+import { adjustZoomToFit } from '../canvas/CanvasController';
 import LayerImageAgent from './image/LayerImageAgent';
 import { findLayerById } from './LayerListController';
 
@@ -24,6 +26,14 @@ export function getLayerIndex(layerId: string) {
   return layerListStore.layers.findIndex((l) => l.id === layerId);
 }
 
+export const resetAllLayers = (e: any) => {
+  layerListStore.layers.forEach((l) => {
+    resetLayerImage(l.id, l.dotMagnification);
+  });
+  adjustZoomToFit();
+  emitEvent('onResetAllLayers');
+};
+
 export function resetLayerImage(layerId: string, dotMagnification: number, width?: number, height?: number): LayerImageAgent {
   setLayerHistoryStore(layerId, {
     canUndo: false,
@@ -35,7 +45,7 @@ export function resetLayerImage(layerId: string, dotMagnification: number, width
   // 透明（RGBA＝0,0,0,0）で初期化された Uint8ClampedArray を生成
   const blankBuffer = new Uint8ClampedArray(width * height * 4);
 
-  const agent = layerAgentManager.getAgent(layerId);
+  const agent = getAgentOf(layerId);
   if (agent !== undefined) {
     agent.getTileManager().setAllDirty();
     agent.setBuffer(blankBuffer, false);

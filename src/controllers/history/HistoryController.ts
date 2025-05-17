@@ -1,7 +1,7 @@
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 
 export function undoLayer(layerId: string) {
-  const agent = layerAgentManager.getAgent(layerId);
+  const agent = getAgentOf(layerId);
   if (!agent) {
     console.log(`no agent found for  ${layerId}.`);
     return;
@@ -16,7 +16,7 @@ export function undoLayer(layerId: string) {
 }
 
 export function redoLayer(layerId: string) {
-  const agent = layerAgentManager.getAgent(layerId);
+  const agent = getAgentOf(layerId);
   if (!agent) {
     return;
   }

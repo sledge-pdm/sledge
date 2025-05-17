@@ -3,7 +3,7 @@ import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
@@ -16,7 +16,7 @@ const CanvasStack: Component = () => {
   createEffect(() => {
     const active = activeLayer();
     if (active) {
-      const agent = layerAgentManager.getAgent(active.id);
+      const agent = getAgentOf(active.id);
       if (!agent) return;
       agent.setOnImageChangeListener('stack_dirty_rect', () => {
         setDirtyRects([...getDirtyRects()]);
@@ -27,7 +27,7 @@ const CanvasStack: Component = () => {
   const getDirtyRects = () => {
     const active = activeLayer();
     if (active) {
-      const agent = layerAgentManager.getAgent(active.id);
+      const agent = getAgentOf(active.id);
       return agent?.getTileManager().getDirtyTilesInAction() ?? [];
     }
     return [];

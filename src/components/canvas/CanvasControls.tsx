@@ -1,6 +1,6 @@
 import * as styles from '@styles/components/canvas/canvas_controls.css';
 import { Component } from 'solid-js';
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { canRedo, canUndo } from '~/controllers/layer/LayerController';
 
 import { layerListStore } from '~/stores/ProjectStores';
@@ -18,7 +18,7 @@ const CanvasControls: Component = () => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          layerAgentManager.getAgent(layerListStore.activeLayerId)?.undo();
+          getAgentOf(layerListStore.activeLayerId)?.undo();
         }}
       />
       <img
@@ -31,7 +31,7 @@ const CanvasControls: Component = () => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          layerAgentManager.getAgent(layerListStore.activeLayerId)?.redo();
+          getAgentOf(layerListStore.activeLayerId)?.redo();
         }}
       />
     </div>

@@ -1,4 +1,4 @@
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';
@@ -11,7 +11,7 @@ export function changeCanvasSize(newSize: Size2D): boolean {
   setCanvasStore('canvas', newSize);
 
   allLayers().forEach((layer) => {
-    const agent = layerAgentManager.getAgent(layer.id);
+    const agent = getAgentOf(layer.id);
     agent?.changeBufferSize(newSize);
   });
   return true;

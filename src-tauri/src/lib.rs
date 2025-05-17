@@ -4,7 +4,7 @@ mod window;
 
 use analysis::get_process_memory;
 use commands::emit_global_event;
-use window::{OpenWindowPayload, SledgeWindowKind, open_window};
+use window::{SledgeWindowKind, open_window};
 
 use futures::executor::block_on;
 

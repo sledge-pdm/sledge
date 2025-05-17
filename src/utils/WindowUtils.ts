@@ -7,7 +7,7 @@ import { safeInvoke } from './TauriUtils';
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
 
-export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
+export type WindowKind = 'start' | 'editor' | 'settings' | 'about' | 'export';
 
 export function openWindow(kind: WindowKind, query?: string) {
   return safeInvoke('open_window', {

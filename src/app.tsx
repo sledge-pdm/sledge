@@ -7,6 +7,7 @@ import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';
 
+import ExportImage from './routes/io/export_image';
 import Settings from './routes/settings';
 import { flexCol, h100 } from './styles/snippets.css';
 
@@ -32,6 +33,7 @@ export default function App() {
       <Route path='/editor' component={Editor} />
       <Route path='/settings' component={Settings} />
       <Route path='/about' component={About} />;
+      <Route path='/io/export_image' component={ExportImage} />;
     </Router>
   );
 }

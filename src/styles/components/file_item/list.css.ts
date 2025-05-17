@@ -20,16 +20,15 @@ export const rflItem = style([
   flexCol,
   {
     position: 'relative',
-    gap: '2px',
     width: 'fit-content',
-    padding: `${vars.spacing.xs} ${vars.spacing.sm}`,
+    padding: `${vars.spacing.sm} ${vars.spacing.sm}`,
     marginLeft: `-8px`,
   },
 ]);
 
 export const rflName = style({
   fontFamily: ZFB09,
-  fontSize: '16px',
+  fontSize: '8px',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   color: '#000000AA',

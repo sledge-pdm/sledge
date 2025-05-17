@@ -7,13 +7,13 @@ export const startRoot = style([
   wh100,
   {
     position: 'relative',
-    padding: '50px 42px',
+    padding: '48px 42px',
   },
 ]);
 
 export const startHeader = style({
   fontFamily: ZFB31,
-  fontSize: '42px',
+  fontSize: '36px',
   letterSpacing: '2px',
   marginBottom: '8px',
 });
@@ -66,13 +66,59 @@ export const recentFilesContainerGrid = style([
     marginTop: '12px',
   },
 ]);
+export const recentFilesContainerScroll = style([
+  flexCol,
+  {
+    position: 'relative',
+    marginTop: '12px',
+    maxHeight: '240px',
+    width: '500px',
+  },
+]);
 export const recentFilesContainerCol = style([
   flexCol,
   w100,
   {
-    width: '100%',
+    position: 'relative',
     gap: '8px',
-    marginTop: '12px',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+
+    '::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: 'transparent',
+    },
+    selectors: {
+      '&:hover::-webkit-scrollbar-thumb': {
+        backgroundColor: '#ddd',
+      },
+    },
+  },
+]);
+
+const fadeBase = style({
+  pointerEvents: 'none',
+  position: 'absolute',
+  left: 0,
+  width: '100%',
+  height: '40px',
+});
+
+export const fadeTop = style([
+  fadeBase,
+  {
+    top: 0,
+    background: 'linear-gradient(to bottom, rgb(255, 255, 255), transparent)',
+  },
+]);
+
+export const fadeBottom = style([
+  fadeBase,
+  {
+    bottom: 0,
+    background: 'linear-gradient(to top, rgb(255, 255, 255), transparent)',
   },
 ]);
 

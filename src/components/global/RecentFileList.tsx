@@ -1,9 +1,10 @@
+import { createScrollPosition } from '@solid-primitives/scroll';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { Component, createEffect, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import genFileId from '~/io/project/genFileId';
 import { thumbnailDir } from '~/io/project/saveThumbnail';
-import { recentFilesCaption, recentFilesContainerCol } from '~/routes/start.css';
+import { fadeBottom, fadeTop, recentFilesCaption, recentFilesContainerCol, recentFilesContainerScroll } from '~/routes/start.css';
 import { sectionRoot } from '~/styles/components/globals/section_global.css';
 import { flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
@@ -24,23 +25,53 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
     });
   });
 
+  let scrollRef: HTMLDivElement | undefined;
+  const scroll = createScrollPosition(() => scrollRef);
+
+  const [canScrollTop, setCanScrollTop] = createSignal(false);
+  const [canScrollBottom, setCanScrollBottom] = createSignal(false);
+
+  createEffect(() => {
+    scroll.y;
+    if (scrollRef) {
+      setCanScrollTop(scrollRef.scrollTop > 0);
+      setCanScrollBottom(scrollRef.scrollTop + scrollRef.clientHeight < scrollRef.scrollHeight);
+    }
+  });
+
   return (
     <Show when={props.files.length > 0}>
-      <div class={sectionRoot}>
+      <div
+        class={sectionRoot}
+        style={{
+          'overflow-y': 'hidden',
+        }}
+      >
         <div class={[flexRow, w100].join(' ')}>
           <p class={recentFilesCaption}>recent files.</p>
           {/* <p class={clear} onClick={() => clearRecentFiles()}>
           clear
         </p> */}
         </div>
-        <div class={recentFilesContainerCol} style={{ 'margin-bottom': '24px' }}>
-          <For each={props.files}>
-            {(file, i) => {
-              const path = file.path + '\\' + file.name;
-              const thumbnail = () => thumbnails[path];
-              return <ListFileItem onClick={props.onClick} thumbnail={thumbnail()} file={file} />;
-            }}
-          </For>
+
+        <div class={recentFilesContainerScroll} style={{ 'margin-bottom': '24px' }}>
+          <div ref={(el) => (scrollRef = el)} class={recentFilesContainerCol}>
+            <For each={props.files}>
+              {(file, i) => {
+                const path = file.path + '\\' + file.name;
+                const thumbnail = () => thumbnails[path];
+                return <ListFileItem onClick={props.onClick} thumbnail={thumbnail()} file={file} />;
+              }}
+            </For>
+          </div>
+
+          <Show when={canScrollTop()}>
+            <div class={fadeTop} />
+          </Show>
+
+          <Show when={canScrollBottom()}>
+            <div class={fadeBottom} />
+          </Show>
         </div>
       </div>
     </Show>

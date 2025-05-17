@@ -9,8 +9,6 @@ export const addRecentFile = (fileLocation?: FileLocation) => {
 
   // add to recent
   setGlobalConfig((store) => {
-    console.log('path: ' + path);
-    console.log('name: ' + name);
     if (name && path && store.misc.recentFiles) {
       const oldRecentFiles = store.misc.recentFiles.filter((f) => {
         return f.name !== name || f.path !== path?.toString();

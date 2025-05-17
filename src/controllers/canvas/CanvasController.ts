@@ -1,17 +1,22 @@
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';
 import { Consts } from '~/utils/consts';
-import { allLayers } from '../layer_list/LayerListController';
+import { allLayers } from '../layer/LayerListController';
+
+export function isValidCanvasSize(size: Size2D): boolean {
+  if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;
+  if (size.height < Consts.minCanvasHeight || Consts.maxCanvasHeight < size.height) return false;
+  return true;
+}
 
 export function changeCanvasSize(newSize: Size2D): boolean {
-  if (newSize.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < newSize.width) return false;
-  if (newSize.height < Consts.minCanvasHeight || Consts.maxCanvasHeight < newSize.height) return false;
+  if (!isValidCanvasSize(newSize)) return false;
   setCanvasStore('canvas', newSize);
 
   allLayers().forEach((layer) => {
-    const agent = layerAgentManager.getAgent(layer.id);
+    const agent = getAgentOf(layer.id);
     agent?.changeBufferSize(newSize);
   });
   return true;
@@ -48,6 +53,7 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
   setInteractStore('zoom', referencedZoom);
+
   centeringCanvas();
 };
 

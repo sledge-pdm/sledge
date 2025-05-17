@@ -27,7 +27,6 @@ type InteractStore = {
   offsetOrigin: Vec2;
   offset: Vec2;
 
-  isCtrlPressed: boolean;
   isDragging: boolean;
 };
 type LogStore = {
@@ -60,7 +59,6 @@ const defaultInteractStore: InteractStore = {
   offsetOrigin: { x: 0, y: 0 },
   offset: { x: 0, y: 0 },
 
-  isCtrlPressed: false,
   isDragging: false,
 };
 const defaultLogStore: LogStore = {

@@ -1,20 +1,20 @@
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { Tool } from '../../models/tool/Tool';
-import { getToolInstance } from '../../models/tool/ToolBase';
+import { getToolInstance } from '../../tools/ToolBase';
 import { DrawState } from '../../types/DrawState';
 import { currentColor } from '../color/ColorController';
 import LayerImageAgent from '../layer/image/LayerImageAgent';
-import { findLayerById } from '../layer_list/LayerListController';
+import { getAgentOf } from '../layer/LayerAgentManager';
+import { findLayerById } from '../layer/LayerListController';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
 
   public handleDraw(state: DrawState, position: Vec2, last?: Vec2) {
-    const agent = layerAgentManager.getAgent(this.getLayerIdToDraw());
+    const agent = getAgentOf(this.getLayerIdToDraw());
     if (!agent) return;
     const layer = findLayerById(this.getLayerIdToDraw());
     if (!layer) return;
@@ -27,7 +27,7 @@ export default class LayerCanvasOperator {
     const result = this.useTool(agent, state, image, getCurrentTool(), position, last);
 
     if (result) {
-      agent.callOnImageChangeListeners({});
+      agent.callOnImageChangeListeners({ updatePreview: state === DrawState.end });
       agent.getTileManager().resetDirtyStates();
 
       if (state === DrawState.end) {

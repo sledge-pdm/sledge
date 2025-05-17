@@ -1,5 +1,6 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { saveProject } from '~/io/project/project';
+import { exportCanvas } from '~/io/image_export/exportCanvas';
+import { saveProject } from '~/io/project/saveProject';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
@@ -11,43 +12,27 @@ const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
   const isNameChanged = () => projectStore.name !== projectStore.newName;
   const isOWPossible = () => projectStore.name !== undefined && projectStore.path !== undefined && !isNameChanged();
+  const getNameToSave = () => (isNameChanged() ? projectStore.newName : projectStore.name);
 
   onMount(() => {
     setProjectStore('newName', projectStore.name);
   });
 
-  const save = () => {
-    if (isNameChanged()) {
-      setProjectStore('name', projectStore.newName);
-    }
-    if (isOWPossible()) {
-      // 上書き保存
-      saveProject(`${projectStore.path}`).then(() => {
-        setSaveLog('saved!');
-        setProjectStore('isProjectChangedAfterSave', false);
-      });
-    } else {
-      saveProject().then(() => {
-        setSaveLog('saved!');
-        setProjectStore('isProjectChangedAfterSave', false);
-      });
-    }
-  };
   const OWSave = () => {
-    if (isNameChanged()) {
-      setProjectStore('name', projectStore.newName);
-    }
     // 上書き保存
-    saveProject(`${projectStore.path}`).then(() => {
+    saveProject(getNameToSave(), `${projectStore.path}`).then(() => {
+      if (isNameChanged()) {
+        setProjectStore('name', projectStore.newName);
+      }
       setSaveLog('saved!');
       setProjectStore('isProjectChangedAfterSave', false);
     });
   };
   const forceNewSave = () => {
-    if (isNameChanged()) {
-      setProjectStore('name', projectStore.newName);
-    }
-    saveProject().then(() => {
+    saveProject(getNameToSave()).then(() => {
+      if (isNameChanged()) {
+        setProjectStore('name', projectStore.newName);
+      }
       setSaveLog('saved!');
       setProjectStore('isProjectChangedAfterSave', false);
     });
@@ -81,12 +66,7 @@ const Project: Component = () => {
             placeholder='project name'
             autocomplete='off'
           />
-
-          {/* <p class={styles.project_file_path}>{projectStore.path}</p> */}
         </div>
-        {/* <button class={styles.loadsave_button} onClick={() => importProjectJsonFromFileSelection()}>
-                        load.
-                    </button> */}
 
         <div
           class={flexRow}
@@ -120,8 +100,21 @@ const Project: Component = () => {
               save (new).
             </button>
           </Show>
-          {/* <button onClick={() => exportWithScale(projectStore.newName || projectStore.name)}>export.</button> */}
-          {/*   {!projectStore.isProjectChangedAfterSave && <p class={styles.save_log}>{saveLog()}</p>} */}
+          <button
+            onClick={async () => {
+              const name = projectStore.newName || projectStore.name;
+              if (name === undefined) return;
+              await exportCanvas(name, {
+                format: 'png',
+                scale: 100,
+              });
+            }}
+          >
+            export.
+          </button>
+          <Show when={!projectStore.isProjectChangedAfterSave}>
+            <p>{saveLog()}</p>
+          </Show>
         </div>
       </div>
     </div>

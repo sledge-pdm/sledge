@@ -1,5 +1,5 @@
 import { Component } from 'solid-js';
-import Checkbox from '~/components/common/basics/Checkbox';
+import Checkbox from '~/components/common/control/Checkbox';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 

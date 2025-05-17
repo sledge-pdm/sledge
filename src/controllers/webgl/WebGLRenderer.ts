@@ -21,10 +21,9 @@ export class WebGLRenderer {
     private width: number = 0,
     private height: number = 0
   ) {
-    const gl = canvas.getContext('webgl2');
+    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
     if (!gl) throw new Error('WebGL2 is not supported in this browser');
     this.gl = gl;
-
     // --- シェーダコンパイル & プログラムリンク ---
     const vs = this.compileShader(gl.VERTEX_SHADER, vertexSrc);
     const fs = this.compileShader(gl.FRAGMENT_SHADER, fragmentSrc);
@@ -61,6 +60,10 @@ export class WebGLRenderer {
     this.uLayerCountLoc = this.gl.getUniformLocation(this.program, 'u_layerCount')!;
     this.uOpacitiesLoc = this.gl.getUniformLocation(this.program, 'u_opacities')!;
     this.uBlendModesLoc = this.gl.getUniformLocation(this.program, 'u_blendModes')!;
+  }
+
+  public getCanvasElement(): HTMLCanvasElement {
+    return this.canvas;
   }
 
   public resize(width: number, height: number) {

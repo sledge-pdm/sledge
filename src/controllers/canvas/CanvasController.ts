@@ -48,6 +48,7 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
   setInteractStore('zoom', referencedZoom);
+
   centeringCanvas();
 };
 

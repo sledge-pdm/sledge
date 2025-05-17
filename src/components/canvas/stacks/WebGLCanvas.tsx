@@ -1,6 +1,8 @@
 import { trackDeep } from '@solid-primitives/deep';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
+import { listen } from '@tauri-apps/api/event';
 import { Component, createEffect, createSignal, onCleanup } from 'solid-js';
+import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
@@ -10,28 +12,33 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { listenEvent } from '~/utils/TauriUtils';
 
+export let webGLRenderer: WebGLRenderer | undefined;
+
 const WebGLCanvas: Component = () => {
   let canvasEl!: HTMLCanvasElement;
-  let renderer: WebGLRenderer | undefined;
 
   const [updateRender, setUpdateRender] = createSignal(false);
   const [fps, setFps] = createSignal(60);
-  const [isRenderLoopRunning, startRenderLoop, stopRenderLoop] = createRAF(
+  const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {
-        renderer?.render(allLayers());
+        webGLRenderer?.render(allLayers());
         setUpdateRender(false);
       }
     }, fps)
   );
+
+  listen('tauri://resize', (e) => {
+    adjustZoomToFit();
+  });
 
   listenEvent('onSetup', () => {
     const { width, height } = canvasStore.canvas;
 
     setLogStore('currentRenderMode', RenderMode.WebGL);
     startRenderLoop();
-    renderer = new WebGLRenderer(canvasEl);
-    renderer.resize(width, height);
+    webGLRenderer = new WebGLRenderer(canvasEl);
+    webGLRenderer.resize(width, height);
     setUpdateRender(true);
 
     layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
@@ -42,7 +49,7 @@ const WebGLCanvas: Component = () => {
 
   createEffect(() => {
     const { width, height } = canvasStore.canvas;
-    renderer?.resize(width, height);
+    webGLRenderer?.resize(width, height);
   });
 
   createEffect(() => {

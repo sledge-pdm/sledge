@@ -30,7 +30,7 @@ pub async fn open_window(app: AppHandle, payload: OpenWindowPayload) -> Result<(
             let _url = "/";
             let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
                 .title("sledge")
-                .inner_size(600.0, 400.0)
+                .inner_size(700.0, 500.0)
                 .resizable(false)
                 .decorations(false)
                 .accept_first_mouse(true)

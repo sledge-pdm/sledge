@@ -11,7 +11,6 @@ export const titleBarRoot = style([
     height: '28px',
     // borderBottom: "1px solid #aaa",
     alignItems: 'center',
-    zIndex: 99999,
   },
 ]);
 
@@ -24,7 +23,6 @@ export const titleBarTitle = style([
     fontSize: vars.text.sm,
     marginRight: 'auto',
     paddingLeft: vars.spacing.lg,
-    pointerEvents: 'none',
   },
 ]);
 
@@ -47,6 +45,9 @@ export const titleBarControlButton = style([
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '24px',
+
+    pointerEvents: 'all',
+    zIndex: 100,
     ':hover': {
       backgroundColor: 'transparent',
     },

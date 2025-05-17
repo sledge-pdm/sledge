@@ -3,6 +3,7 @@ import { Component, createEffect, createSignal, For } from 'solid-js';
 import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer/LayerListController';
 
 import { setLayerProp } from '~/controllers/layer/LayerController';
+import { LabelMode } from '~/models/config/ConfigComponents';
 import { BlendMode } from '~/models/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
@@ -10,8 +11,8 @@ import { vars } from '~/styles/global.css';
 import { layerList } from '~/styles/section/layer.css';
 import { flexRow } from '~/styles/snippets.css';
 import { listenEvent } from '~/utils/TauriUtils';
-import Dropdown from '../common/basics/Dropdown';
-import Slider from '../common/basics/Slider';
+import Dropdown from '../common/control/Dropdown';
+import Slider from '../common/control/Slider';
 import LayerItem from './item/LayerItem';
 // 並べ替え用ユーティリティ関数
 
@@ -107,6 +108,7 @@ const LayerList: Component<{}> = () => {
               min={0}
               max={1}
               allowFloat={true}
+              labelMode={LabelMode.NONE}
               onChange={(newValue) => {
                 setLayerProp(activeLayer().id, 'opacity', newValue);
               }}

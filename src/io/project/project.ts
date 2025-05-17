@@ -99,7 +99,7 @@ export const parseCurrentProject = async (thumbnailSize = Consts.projectThumbnai
   });
 };
 
-export async function saveProject(existingPath?: string) {
+export async function saveProject(name?: string, existingPath?: string) {
   let selectedPath: string | null;
   if (existingPath) {
     selectedPath = existingPath;
@@ -116,7 +116,7 @@ export async function saveProject(existingPath?: string) {
     const home = await path.homeDir();
     selectedPath = await save({
       title: 'save sledge project',
-      defaultPath: await path.join(home, `sledge/${projectStore.name}.sledge`),
+      defaultPath: await path.join(home, `sledge/${name ?? projectStore.name}.sledge`),
       filters: [{ name: 'sledge project', extensions: ['sledge'] }],
     });
   }

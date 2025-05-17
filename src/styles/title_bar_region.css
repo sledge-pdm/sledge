@@ -1,7 +1,0 @@
-[data-tauri-drag-region] {
-  -webkit-app-region: drag;
-}
-
-[data-tauri-drag-region-exclude] {
-  -webkit-app-region: no-drag;
-}

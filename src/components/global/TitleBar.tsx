@@ -13,7 +13,6 @@ import {
   titleBarRoot,
   titleBarTitle,
 } from '~/styles/components/globals/title_bar.css';
-import '~/styles/title_bar_region.css';
 
 export default function TitleBar() {
   const window = getCurrentWindow();

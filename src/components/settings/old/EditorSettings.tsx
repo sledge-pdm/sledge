@@ -5,7 +5,7 @@ import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components
 import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { Consts } from '~/utils/consts';
-import Dropdown, { DropdownOption } from '../../common/basics/Dropdown';
+import Dropdown, { DropdownOption } from '../../common/control/Dropdown';
 
 const renderingOptions: DropdownOption<CanvasRenderingMode>[] = [
   { label: 'adaptive', value: 'adaptive' },

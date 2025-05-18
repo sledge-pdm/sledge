@@ -9,7 +9,7 @@ export const root = style([
     position: 'fixed',
     backgroundColor: vars.color.bg,
     borderBottom: '1px solid #999',
-    height: '32px',
+    height: '28px',
     alignItems: 'center',
     zIndex: 20,
   },
@@ -19,7 +19,6 @@ export const menuList = style([
   flexRow,
   wh100,
   {
-    height: '100%',
     alignItems: 'center',
   },
 ]);

@@ -1,30 +1,68 @@
-import { Component, Show } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import CanvasSettings from '../section/CanvasSettings';
 import Color from '../section/Color';
 import LayerList from '../section/LayerList';
 import Project from '../section/Project';
 import ToolConfig from '../section/ToolConfig';
 
+import { createScrollPosition } from '@solid-primitives/scroll';
 import { appearanceStore } from '~/stores/EditorStores';
-import { sideAreaContent, sideAreaMenu, sideAreaRoot } from '~/styles/components/globals/side_sections.css';
+import { sideAreaContent, sideAreaContentWrapper, sideAreaMenu, sideAreaRoot } from '~/styles/components/globals/side_sections.css';
+import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
+import { h100 } from '~/styles/snippets.css';
 import SectionTopMenu from './SectionTopMenu';
 
 const SideSections: Component = () => {
+  let scrollRef: HTMLDivElement | undefined;
+  const scroll = createScrollPosition(() => scrollRef);
+
+  const [canScrollTop, setCanScrollTop] = createSignal(false);
+  const [canScrollBottom, setCanScrollBottom] = createSignal(false);
+
+  createEffect(() => {
+    scroll.y;
+    if (scrollRef) {
+      setCanScrollTop(scrollRef.scrollTop > 0);
+      setCanScrollBottom(scrollRef.scrollTop + scrollRef.clientHeight < scrollRef.scrollHeight);
+    }
+  });
+
   return (
     <div class={sideAreaRoot}>
       <div class={sideAreaMenu}>
         <SectionTopMenu />
       </div>
-      <div class={sideAreaContent}>
-        {/* <a onClick={() => getCurrentWebviewWindow().close()}>&lt; back</a> */}
-        <Show when={appearanceStore.sideAppearanceMode === 'editor'}>
-          <Color />
-          <ToolConfig />
-          <LayerList />
+      <div class={h100} style={{ position: 'relative' }}>
+        <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
+          <div
+            class={sideAreaContent}
+            style={{
+              visibility: appearanceStore.sideAppearanceMode !== 'editor' ? 'hidden' : 'visible',
+              height: appearanceStore.sideAppearanceMode !== 'editor' ? '0' : undefined,
+            }}
+          >
+            <Color />
+            <ToolConfig />
+            <LayerList />
+          </div>
+          <div
+            class={sideAreaContent}
+            style={{
+              visibility: appearanceStore.sideAppearanceMode !== 'project' ? 'hidden' : 'visible',
+              height: appearanceStore.sideAppearanceMode !== 'project' ? '0' : undefined,
+            }}
+          >
+            <Project />
+            <CanvasSettings />
+          </div>
+        </div>
+
+        <Show when={canScrollTop()}>
+          <div class={fadeTop} />
         </Show>
-        <Show when={appearanceStore.sideAppearanceMode === 'project'}>
-          <Project />
-          <CanvasSettings />
+
+        <Show when={canScrollBottom()}>
+          <div class={fadeBottom} />
         </Show>
       </div>
     </div>

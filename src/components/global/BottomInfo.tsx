@@ -2,22 +2,12 @@ import { Component } from 'solid-js';
 import { interactStore, logStore } from '~/stores/EditorStores';
 
 import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/components/globals/bottom_info.css';
-import { safeInvoke } from '~/utils/TauriUtils';
+import { openWindow } from '~/utils/WindowUtils';
 
 const BottomInfo: Component = () => {
   return (
     <div class={bottomInfoRoot}>
-      <a
-        class={bottomInfoTextStyle}
-        style={{ 'pointer-events': 'all', cursor: 'pointer' }}
-        onClick={() =>
-          safeInvoke('open_window', {
-            payload: {
-              kind: 'about',
-            },
-          })
-        }
-      >
+      <a class={bottomInfoTextStyle} style={{ 'pointer-events': 'all', cursor: 'pointer' }} onClick={() => openWindow('about')}>
         sledge.
       </a>
       <p class={bottomInfoTextStyle}>x{interactStore.zoom}</p>

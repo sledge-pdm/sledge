@@ -6,8 +6,7 @@ import { importProjectFromFileSelection } from '~/io/project/importProject';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
-import { safeInvoke } from '~/utils/TauriUtils';
-import { closeWindowsByLabel, getExistingProjectSearchParams, getNewProjectSearchParams } from '~/utils/WindowUtils';
+import { closeWindowsByLabel, getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
 
 export default function Home() {
@@ -16,23 +15,13 @@ export default function Home() {
   });
 
   const openExistingProject = (selectedFile: FileLocation) => {
-    safeInvoke('open_window', {
-      payload: {
-        kind: 'editor',
-        query: getExistingProjectSearchParams(selectedFile),
-      },
-    }).then(() => {
+    openWindow('editor', { query: getExistingProjectSearchParams(selectedFile) }).then(() => {
       closeWindowsByLabel('start');
     });
   };
 
   const createNew = () => {
-    safeInvoke('open_window', {
-      payload: {
-        kind: 'editor',
-        query: getNewProjectSearchParams(),
-      },
-    }).then(() => {
+    openWindow('editor', { query: getNewProjectSearchParams() }).then(() => {
       closeWindowsByLabel('start');
     });
   };
@@ -67,28 +56,8 @@ export default function Home() {
       <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />
 
       <div class={rightBottomArea}>
-        <a
-          onClick={() => {
-            safeInvoke('open_window', {
-              payload: {
-                kind: 'about',
-              },
-            });
-          }}
-        >
-          about.
-        </a>
-        <a
-          onClick={() => {
-            safeInvoke('open_window', {
-              payload: {
-                kind: 'settings',
-              },
-            });
-          }}
-        >
-          settings.
-        </a>
+        <a onClick={() => openWindow('about')}>about.</a>
+        <a onClick={() => openWindow('settings')}>settings.</a>
       </div>
     </div>
   );

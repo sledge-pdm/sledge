@@ -9,10 +9,10 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 
 export type WindowKind = 'start' | 'editor' | 'settings' | 'about' | 'export';
 
-export function openWindow(kind: WindowKind, query?: string) {
+export function openWindow(kind: WindowKind, options?: { query?: string }) {
   return safeInvoke('open_window', {
     kind,
-    query,
+    query: options?.query,
   });
 }
 

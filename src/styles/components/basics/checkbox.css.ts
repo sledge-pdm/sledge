@@ -19,7 +19,6 @@ export const customCheckbox = style({
   height: '10px',
   border: '1px solid #000',
   borderRadius: '0px',
-  marginRight: '8px',
   display: 'inline-block',
   position: 'relative',
   overflow: 'hidden',

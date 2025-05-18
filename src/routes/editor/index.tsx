@@ -5,10 +5,10 @@ import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import EdgeInfo from '~/components/global/EdgeInfo';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
+import TopMenuBar from '~/components/global/TopMenuBar';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
@@ -18,8 +18,8 @@ import { LayerType } from '~/models/layer/Layer';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
-import { emitEvent, listenEvent, safeInvoke } from '~/utils/TauriUtils';
-import { closeWindowsByLabel } from '~/utils/WindowUtils';
+import { flexCol } from '~/styles/snippets.css';
+import { emitEvent, listenEvent } from '~/utils/TauriUtils';
 
 export default function Editor() {
   const window = getCurrentWebviewWindow();
@@ -81,7 +81,6 @@ export default function Editor() {
     });
   };
 
-  const [isCloseRequested, SetIsCloseRequested] = createSignal(false);
   let unlisten: UnlistenFn;
 
   onMount(async () => {
@@ -90,29 +89,14 @@ export default function Editor() {
     });
 
     unlisten = await window.onCloseRequested(async (event) => {
-      if (isCloseRequested()) {
-        event.preventDefault();
-        return;
-      }
-      SetIsCloseRequested(true);
-      event.preventDefault();
       if (projectStore.isProjectChangedAfterSave) {
         const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
           okLabel: 'quit w/o save.',
           cancelLabel: 'cancel.',
         });
-        if (confirmed) {
-          await safeInvoke('open_window', { payload: { kind: 'start' } });
-          closeWindowsByLabel('editor');
-          SetIsCloseRequested(false);
-        } else {
+        if (!confirmed) {
           event.preventDefault();
-          SetIsCloseRequested(false);
         }
-      } else {
-        await safeInvoke('open_window', { payload: { kind: 'start' } });
-        closeWindowsByLabel('editor');
-        SetIsCloseRequested(false);
       }
     });
   });
@@ -123,15 +107,24 @@ export default function Editor() {
 
   return (
     <Show when={!isLoading()} fallback={<Loading />}>
-      <div class={pageRoot}>
-        <EdgeInfo />
-        <SideSections />
-        <div style={{ 'flex-grow': 1 }}>
-          <CanvasArea />
-        </div>
+      <div class={flexCol}>
+        <TopMenuBar />
+        <div
+          class={pageRoot}
+          style={{
+            'margin-top': '28px',
+            height: '100dvh',
+          }}
+        >
+          {/* <EdgeInfo /> */}
+          <SideSections />
+          <div style={{ 'flex-grow': 1 }}>
+            <CanvasArea />
+          </div>
 
-        <KeyListener />
-        {/* <Companion /> */}
+          <KeyListener />
+          {/* <Companion /> */}
+        </div>
       </div>
     </Show>
   );

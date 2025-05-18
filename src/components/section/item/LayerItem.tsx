@@ -2,6 +2,7 @@ import { createSortable, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
 import Light from '~/components/common/Light';
 import { Layer, LayerType } from '~/models/layer/Layer';
+import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import {
   activeLight,
@@ -42,7 +43,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       break;
   }
 
-  const onDetClicked = () => {
+  const onDetClicked = (e: MouseEvent) => {
     setLayerListStore('activeLayerId', props.layer.id);
   };
 
@@ -76,6 +77,10 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
         // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
         onClick={onDetClicked}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          new LayerMenu().show();
+        }}
       >
         <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
         <div

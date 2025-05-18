@@ -1,17 +1,21 @@
+import { pictureDir } from '@tauri-apps/api/path';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { saveBlobViaTauri } from '../saveBlob';
 
+export type exportableFileTypes = 'png' | 'jpg';
+
 export interface CanvasExportOptions {
-  format: 'png' | 'jpeg';
+  format: exportableFileTypes;
   quality?: number; // jpeg 時の品質 0～1, png のときは無視
   scale?: number; // 1（そのまま）～10 など
 }
 
-export async function exportCanvas(name: string, options: CanvasExportOptions): Promise<boolean> {
+export const defaultExportDir = async () => (await pictureDir()) + '\\sledge';
+
+export async function exportCanvas(dirPath: string, fileName: string, options: CanvasExportOptions): Promise<string | undefined> {
   const canvasBlob = await getCanvasBlob(options);
-  if (canvasBlob === undefined) return false;
-  await saveBlobViaTauri(canvasBlob, `${name}.${options.format}`);
-  return true;
+  if (canvasBlob === undefined) return undefined;
+  return await saveBlobViaTauri(canvasBlob, dirPath, `${fileName}.${options.format}`);
 }
 
 export async function getCanvasBlob(options: CanvasExportOptions): Promise<Blob | undefined> {

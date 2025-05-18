@@ -3,7 +3,6 @@ import { Component, createEffect, createSignal, For } from 'solid-js';
 import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer/LayerListController';
 
 import { setLayerProp } from '~/controllers/layer/LayerController';
-import { LabelMode } from '~/models/config/ConfigComponents';
 import { BlendMode } from '~/models/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
@@ -108,7 +107,7 @@ const LayerList: Component<{}> = () => {
               min={0}
               max={1}
               allowFloat={true}
-              labelMode={LabelMode.NONE}
+              labelMode={'none'}
               onChange={(newValue) => {
                 setLayerProp(activeLayer().id, 'opacity', newValue);
               }}

@@ -4,7 +4,7 @@ mod window;
 
 use analysis::get_process_memory;
 use commands::emit_global_event;
-use window::{OpenWindowPayload, SledgeWindowKind, open_window};
+use window::{SledgeWindowKind, open_window};
 
 use futures::executor::block_on;
 
@@ -26,18 +26,13 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_system_info::init());
+        .plugin(tauri_plugin_system_info::init())
+        .plugin(tauri_plugin_opener::init());
 
     builder
         .setup(|app| {
             let app_handle = app.handle().clone();
-            let future_open = open_window(
-                app_handle,
-                OpenWindowPayload {
-                    kind: SledgeWindowKind::Editor,
-                    query: None,
-                },
-            );
+            let future_open = open_window(app_handle, SledgeWindowKind::Editor, None);
             let _ = block_on(future_open);
             Ok(())
         })

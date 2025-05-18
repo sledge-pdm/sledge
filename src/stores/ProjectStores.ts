@@ -1,9 +1,9 @@
 // projectStore.ts
 import { createStore } from 'solid-js/store';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
+import { Layer } from '~/models/canvas/layer/Layer';
+import { fallbackLayerProps } from '~/models/canvas/layer/LayerFactory';
 import { LayerHistory } from '~/models/history/LayerHistory';
-import { Layer } from '~/models/layer/Layer';
-import { fallbackLayerProps } from '~/models/layer/LayerFactory';
 import { Size2D } from '~/types/Size';
 
 type CanvasStore = {

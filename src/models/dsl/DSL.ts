@@ -1,5 +1,5 @@
+import { findLayerById } from '~/controllers/canvas/layer/LayerListController';
 import { SledgeNode } from '~/models/dsl/nodes/DSLNodes';
-import { findLayerById } from '../../controllers/layer/LayerListController';
 import { LayerIn } from './nodes/pass/LayerIn';
 import { LayerOut } from './nodes/pass/LayerOut';
 

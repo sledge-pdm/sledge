@@ -3,8 +3,8 @@ import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { getAgentOf } from '~/controllers/canvas/layer/LayerAgentManager';
+import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import Tile from '~/types/Tile';

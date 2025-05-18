@@ -1,7 +1,7 @@
-import { BlendMode, LayerType } from '~/models/layer/Layer';
-import { createLayer } from '~/models/layer/LayerFactory';
+import { BlendMode, LayerType } from '~/models/canvas/layer/Layer';
+import { createLayer } from '~/models/canvas/layer/LayerFactory';
+import { DSL } from '~/models/dsl/DSL';
 import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
-import { DSL } from '../../models/dsl/DSL';
 
 export const addLayer = async (
   name: string,

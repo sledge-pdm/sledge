@@ -89,7 +89,6 @@ export default function Editor() {
     });
 
     unlisten = await window.onCloseRequested(async (event) => {
-      event.preventDefault();
       if (projectStore.isProjectChangedAfterSave) {
         const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
           okLabel: 'quit w/o save.',

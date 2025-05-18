@@ -1,5 +1,10 @@
 import * as styles from '@styles/components/globals/top_menu_bar.css';
+import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, For } from 'solid-js';
+import { exportCanvas } from '~/io/image_export/exportCanvas';
+import { ExportRequestPayload } from '~/routes/io/export_image';
+import { projectStore } from '~/stores/ProjectStores';
+import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -10,7 +15,24 @@ interface Item {
 const TopMenuBar: Component = () => {
   const leftItems: Item[] = [
     { text: 'IMPORT.', action: () => {} },
-    { text: 'EXPORT.', action: () => openWindow('export') },
+    {
+      text: 'EXPORT.',
+      action: () => {
+        openWindow('export');
+        listenEvent('onExportRequested', async (e) => {
+          const payload = e.payload as ExportRequestPayload;
+          const name = projectStore.newName || projectStore.name;
+          if (name === undefined) return;
+          console.log(payload);
+          if (payload.dirPath) {
+            const result = await exportCanvas(payload.dirPath, name, payload.exportOptions);
+            if (result) {
+              if (payload.showDirAfterSave) await revealItemInDir(result);
+            }
+          }
+        });
+      },
+    },
   ];
   const rightItems: Item[] = [
     { text: 'START.', action: () => openWindow('start') },

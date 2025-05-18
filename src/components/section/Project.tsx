@@ -1,5 +1,4 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { exportCanvas } from '~/io/image_export/exportCanvas';
 import { saveProject } from '~/io/project/saveProject';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
@@ -95,18 +94,6 @@ const Project: Component = () => {
               save (new).
             </button>
           </Show>
-          <button
-            onClick={async () => {
-              const name = projectStore.newName || projectStore.name;
-              if (name === undefined) return;
-              await exportCanvas(name, {
-                format: 'png',
-                scale: 100,
-              });
-            }}
-          >
-            export.
-          </button>
           <Show when={!projectStore.isProjectChangedAfterSave}>
             <p>{saveLog()}</p>
           </Show>

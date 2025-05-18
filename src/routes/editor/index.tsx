@@ -112,7 +112,7 @@ export default function Editor() {
         <div
           class={pageRoot}
           style={{
-            'margin-top': '32px',
+            'margin-top': '28px',
             height: '100dvh',
           }}
         >

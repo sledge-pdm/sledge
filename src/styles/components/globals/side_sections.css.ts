@@ -7,9 +7,25 @@ export const sideAreaRoot = style([
   h100,
   {
     borderRight: '1px solid #aaa',
-    marginLeft: vars.size.edge_info,
-    paddingTop: '10px',
-    height: 'auto',
+  },
+]);
+
+export const sideAreaMenu = style([
+  {
+    paddingTop: '12px',
+    paddingLeft: '36px',
+    paddingRight: '30px',
+  },
+]);
+
+export const sideAreaContentWrapper = style([
+  flexCol,
+  h100,
+  {
+    width: vars.size.side_area,
+    paddingTop: '20px',
+    paddingLeft: '36px',
+    paddingRight: '30px',
     overflowY: 'scroll',
 
     '::-webkit-scrollbar': {
@@ -25,28 +41,12 @@ export const sideAreaRoot = style([
     },
   },
 ]);
-export const sideAreaMenu = style([{ margin: `8px 20px` }]);
 
 export const sideAreaContent = style([
   flexCol,
-  h100,
   {
     gap: '1rem',
     width: vars.size.side_area,
-    padding: '10px 30px 90px 20px',
     height: 'auto',
-    overflowY: 'scroll',
-
-    '::-webkit-scrollbar': {
-      width: '4px',
-    },
-    '::-webkit-scrollbar-thumb': {
-      backgroundColor: 'transparent',
-    },
-    selectors: {
-      '&:hover::-webkit-scrollbar-thumb': {
-        backgroundColor: '#ddd',
-      },
-    },
   },
 ]);

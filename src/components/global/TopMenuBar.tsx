@@ -23,7 +23,6 @@ const TopMenuBar: Component = () => {
           const payload = e.payload as ExportRequestPayload;
           const name = projectStore.newName || projectStore.name;
           if (name === undefined) return;
-          console.log(payload);
           if (payload.dirPath) {
             const result = await exportCanvas(payload.dirPath, name, payload.exportOptions);
             if (result) {

@@ -1,8 +1,4 @@
-export enum LabelMode {
-  NONE,
-  LEFT,
-  RIGHT,
-}
+export type LabelMode = 'none' | 'left' | 'right';
 
 export type ConfigComponentName = 'Dropdown' | 'Slider' | 'CheckBox' | 'RadioButton' | 'ToggleSwitch';
 
@@ -16,35 +12,35 @@ export const componentProps = new Map<ConfigComponentName, ConfigComponentProps>
     'Dropdown',
     {
       labelByComponent: false,
-      labelMode: LabelMode.NONE,
+      labelMode: 'none',
     },
   ],
   [
     'Slider',
     {
       labelByComponent: true,
-      labelMode: LabelMode.LEFT,
+      labelMode: 'left',
     },
   ],
   [
     'CheckBox',
     {
       labelByComponent: false,
-      labelMode: LabelMode.RIGHT,
+      labelMode: 'right',
     },
   ],
   [
     'RadioButton',
     {
       labelByComponent: false,
-      labelMode: LabelMode.RIGHT,
+      labelMode: 'right',
     },
   ],
   [
     'ToggleSwitch',
     {
       labelByComponent: false,
-      labelMode: LabelMode.RIGHT,
+      labelMode: 'right',
     },
   ],
 ]);

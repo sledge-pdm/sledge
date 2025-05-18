@@ -5,9 +5,8 @@ import Checkbox from '~/components/common/control/Checkbox';
 import Dropdown, { DropdownOption } from '~/components/common/control/Dropdown';
 import Slider from '~/components/common/control/Slider';
 import { CanvasExportOptions, defaultExportDir, exportableFileTypes } from '~/io/image_export/exportCanvas';
-import { LabelMode } from '~/models/config/ConfigComponents';
 import { canvasStore } from '~/stores/ProjectStores';
-import { accentedButton } from '~/styles/global.css';
+import { accentedButton, vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
 import * as styles from './export_image.css';
@@ -74,15 +73,36 @@ export default function ExportImage() {
   return (
     <div class={styles.root}>
       <div class={styles.content}>
-        <p class={styles.header}>EXPORT.</p>
+        {/* <p class={styles.header}>EXPORT.</p> */}
 
         <div class={styles.field}>
-          <p class={styles.fieldHeader}>Save Directory.</p>
+          <div class={flexRow} style={{ 'align-items': 'center', gap: '8px', 'margin-bottom': vars.spacing.md }}>
+            <p class={styles.fieldHeader} style={{ 'margin-bottom': 0, 'flex-grow': 1 }}>
+              Output Directory.
+            </p>
+            <Checkbox
+              checked={showDirAfterSave()}
+              onChange={(checked) => setShowDirAfterSave(checked)}
+              label='open dir after save'
+              labelMode='left'
+            />
+          </div>
           <div style={{ 'align-items': 'center', gap: '12px', width: '300px' }} class={flexRow}>
             <p style={{ 'flex-grow': 1, 'text-overflow': 'ellipsis' }}>{saveDir()}</p>
             <button onClick={openDirSelectionDialog}>...</button>
           </div>
         </div>
+
+        <div class={styles.field}>
+          <p class={styles.fieldHeader}>Type.</p>
+          <Dropdown options={fileTypeOptions} value={fileType()} onChange={(e) => setFileType(e)} />
+        </div>
+
+        <div class={fileType() === 'jpg' ? styles.field : styles.fieldDisabled}>
+          <p class={styles.fieldHeader}>Quality.</p>
+          <Slider labelMode={'left'} defaultValue={quality()} value={quality()} min={0} max={100} onChange={(v) => setQuality(v)} />
+        </div>
+
         <div class={styles.field}>
           <p class={styles.fieldHeader}>Scale.</p>
           <div class={flexRow} style={{ 'align-items': 'center', gap: '12px' }}>
@@ -105,23 +125,9 @@ export default function ExportImage() {
             estimated size: {canvasStore.canvas.width * finalScale()} x {canvasStore.canvas.height * finalScale()}
           </p>
         </div>
-
-        <div class={styles.field}>
-          <p class={styles.fieldHeader}>Type.</p>
-          <Dropdown options={fileTypeOptions} value={fileType()} onChange={(e) => setFileType(e)} />
-        </div>
-
-        <div class={fileType() === 'jpg' ? styles.field : styles.fieldDisabled}>
-          <p class={styles.fieldHeader}>Quality.</p>
-          <Slider labelMode={LabelMode.LEFT} defaultValue={quality()} value={quality()} min={0} max={100} onChange={(v) => setQuality(v)} />
-        </div>
       </div>
 
       <div class={styles.controlArea}>
-        <div style={{ 'align-items': 'center', gap: '8px' }} class={flexRow}>
-          <p>open directory</p>
-          <Checkbox checked={showDirAfterSave()} onChange={(checked) => setShowDirAfterSave(checked)} />
-        </div>
         <button class={accentedButton} onClick={requestExport}>
           export!
         </button>

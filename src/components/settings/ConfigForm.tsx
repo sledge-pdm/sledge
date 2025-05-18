@@ -2,7 +2,7 @@ import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createSignal, For, onMount, Show } from 'solid-js';
 import { loadGlobalSettings, resetToDefaultConfig, saveGlobalSettings } from '~/io/global_config/globalSettings';
-import { componentProps, LabelMode } from '~/models/config/ConfigComponents';
+import { componentProps } from '~/models/config/ConfigComponents';
 import { FieldMeta, Sections, settingsMeta } from '~/models/config/GlobalConfig';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import {
@@ -72,7 +72,7 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
           defaultValue={value}
           min={meta.props?.min ?? 0}
           max={meta.props?.max ?? 0}
-          labelMode={componentProps.get('Slider')?.labelMode ?? LabelMode.LEFT}
+          labelMode={componentProps.get('Slider')?.labelMode ?? 'left'}
           customFormat={meta.customFormat}
           allowDirectInput={true}
           onChange={onChange}
@@ -167,8 +167,8 @@ export default function ConfigForm() {
             <For each={grouped.get(currentSection())}>
               {(meta) => {
                 const componentProp = componentProps.get(meta.component);
-                const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === LabelMode.LEFT;
-                const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === LabelMode.RIGHT;
+                const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
+                const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'right';
                 return (
                   <div class={configFormFieldItem}>
                     <div class={flexRow}>

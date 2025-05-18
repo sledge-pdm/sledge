@@ -15,13 +15,13 @@ export default function Home() {
   });
 
   const openExistingProject = (selectedFile: FileLocation) => {
-    openWindow('editor', getExistingProjectSearchParams(selectedFile)).then(() => {
+    openWindow('editor', { query: getExistingProjectSearchParams(selectedFile) }).then(() => {
       closeWindowsByLabel('start');
     });
   };
 
   const createNew = () => {
-    openWindow('editor', getNewProjectSearchParams()).then(() => {
+    openWindow('editor', { query: getNewProjectSearchParams() }).then(() => {
       closeWindowsByLabel('start');
     });
   };

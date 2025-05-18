@@ -95,7 +95,7 @@ pub async fn open_window(
             let _url = "/io/export_image";
             let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
                 .title("export")
-                .inner_size(600.0, 400.0)
+                .inner_size(400.0, 320.0)
                 .resizable(false)
                 .decorations(false)
                 .closable(true)

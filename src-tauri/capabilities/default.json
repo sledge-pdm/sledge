@@ -30,6 +30,9 @@
       "allow": [{ "path": "**" }]
     },
 
+    "opener:allow-open-path",
+    "opener:allow-reveal-item-in-dir",
+
     "core:webview:allow-create-webview-window",
     "core:window:allow-destroy",
     "core:window:allow-show",

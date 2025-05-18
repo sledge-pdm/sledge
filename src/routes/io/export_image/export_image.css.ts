@@ -1,13 +1,12 @@
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB31 } from '~/styles/global.css';
-import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css';
+import { vars, ZFB09, ZFB31 } from '~/styles/global.css';
+import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 
 export const root = style([
   flexRow,
-  wh100,
   {
     position: 'relative',
-    padding: '32px 32px',
+    padding: '16px 34px',
   },
 ]);
 
@@ -16,6 +15,7 @@ export const header = style([
     fontFamily: ZFB31,
     fontSize: vars.text.lg,
     color: vars.color.accent,
+    marginBottom: vars.spacing.md,
   },
 ]);
 
@@ -24,13 +24,50 @@ export const content = style([
   w100,
   {
     flexGrow: 1,
+    gap: vars.spacing.lg,
   },
 ]);
 
-export const previewArea = style([
+export const field = style([
   flexCol,
-  w100,
   {
-    flexGrow: 1,
+    maxWidth: '300px',
+  },
+]);
+
+export const fieldDisabled = style([
+  field,
+  {
+    pointerEvents: 'none',
+    cursor: 'auto',
+    opacity: 0.15,
+  },
+]);
+
+export const fieldHeader = style([
+  {
+    fontFamily: ZFB09,
+    fontSize: vars.text.sm,
+    marginBottom: vars.spacing.sm,
+    textDecoration: 'underline',
+  },
+]);
+
+export const customScaleInput = style([
+  {
+    fontFamily: ZFB09,
+    fontSize: vars.text.md,
+    width: '24px',
+  },
+]);
+
+export const controlArea = style([
+  flexRow,
+  {
+    position: 'absolute',
+    justifyContent: 'center',
+    top: '12px',
+    right: '42px',
+    gap: '4px',
   },
 ]);

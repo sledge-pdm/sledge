@@ -6,7 +6,7 @@ import { flexCol, flexRow } from '~/styles/snippets.css';
 export const dropdownContainer = style({
   position: 'relative',
   display: 'inline-block',
-  width: '100%',
+  width: 'auto',
 });
 
 // トリガーボタン

@@ -60,8 +60,10 @@ export default function TitleBar() {
     }
   });
 
-  const borderWindowLabels: string[] = ['editor', 'settings'];
+  const borderWindowLabels: string[] = ['settings'];
   const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
+  const titleLessWindowLabels: string[] = [];
+  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === window.label);
 
   return (
     <header
@@ -72,8 +74,9 @@ export default function TitleBar() {
     >
       <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
         <p class={titleBarTitle} data-tauri-drag-region-exclude>
-          {title()}.
+          {shouldShowTitle() ? `${title()}.` : ''}
         </p>
+
         <div class={titleBarControls} data-tauri-drag-region-exclude>
           <Show when={isMinimizable()}>
             <button

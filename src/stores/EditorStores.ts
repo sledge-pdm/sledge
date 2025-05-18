@@ -7,6 +7,10 @@ import { createTool } from '~/models/tool/ToolFactory';
 import { Size2D } from '~/types/Size';
 import { Vec2 } from '~/types/Vector';
 
+type SideAppearanceMode = 'editor' | 'project';
+type AppearanceStore = {
+  sideAppearanceMode: SideAppearanceMode;
+};
 type ColorStore = {
   currentPalette: PaletteType;
   primary: string;
@@ -38,6 +42,9 @@ type ToolStore = {
   tools: Tool[];
 };
 
+const defaultAppearanceStore: AppearanceStore = {
+  sideAppearanceMode: 'editor',
+};
 const defaultColorStore: ColorStore = {
   currentPalette: 'primary' as PaletteType,
   primary: '#000000', // 通常の描画色
@@ -71,12 +78,15 @@ const defaultToolStore: ToolStore = {
 };
 
 export const initEditorStore = () => {
+  const [appearanceStore, setAppearanceStore] = createStore<AppearanceStore>(defaultAppearanceStore);
   const [colorStore, setColorStore] = createStore<ColorStore>(defaultColorStore);
   const [interactStore, setInteractStore] = createStore<InteractStore>(defaultInteractStore);
   const [toolStore, setToolStore] = createStore<ToolStore>(defaultToolStore);
   const [logStore, setLogStore] = createStore<LogStore>(defaultLogStore);
 
   return {
+    appearanceStore,
+    setAppearanceStore,
     colorStore,
     setColorStore,
     interactStore,
@@ -89,6 +99,9 @@ export const initEditorStore = () => {
 };
 
 const editorStore = initEditorStore();
+
+export const appearanceStore = editorStore.appearanceStore;
+export const setAppearanceStore = editorStore.setAppearanceStore;
 
 export const colorStore = editorStore.colorStore;
 export const setColorStore = editorStore.setColorStore;

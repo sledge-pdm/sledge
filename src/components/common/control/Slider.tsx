@@ -128,7 +128,7 @@ const Slider: Component<SliderProps> = (props) => {
 
   return (
     <div class={styles.sliderRoot} ref={(el) => (rootRef = el)}>
-      <Show when={props.labelMode === LabelMode.LEFT}>{labelArea}</Show>
+      <Show when={props.labelMode === 'left'}>{labelArea}</Show>
 
       <div class={styles.slider} ref={(el) => (sliderRef = el)} onPointerDown={handlePointerDown} onClick={onLineClick}>
         <div class={styles.lineHitbox}>
@@ -137,7 +137,7 @@ const Slider: Component<SliderProps> = (props) => {
         <div style={{ left: `${percent()}%` }} class={styles.handle} />
       </div>
 
-      <Show when={props.labelMode === LabelMode.RIGHT}>{labelArea}</Show>
+      <Show when={props.labelMode === 'right'}>{labelArea}</Show>
     </div>
   );
 };

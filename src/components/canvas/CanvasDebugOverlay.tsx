@@ -78,7 +78,7 @@ const CanvasDebugOverlay: Component = (props) => {
                 const processInfo = await safeInvoke<TauriMemInfo>('get_process_memory');
                 return processInfo ? processInfo.total_bytes / 1024 / 1024 : undefined;
               }}
-              interval={500}
+              interval={1000}
             />
           </div>
           <div class={flexCol}>
@@ -92,7 +92,7 @@ const CanvasDebugOverlay: Component = (props) => {
               color='#f44336'
               suffix='MiB'
               fetchSample={async () => (performance as any).memory.usedJSHeapSize / 1024 / 1024}
-              interval={500}
+              interval={1000}
             />
           </div>
         </div>

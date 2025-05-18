@@ -32,7 +32,7 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
 
 export type TauriWindowEvent =
   // window/editor
-  'onGlobalStoreLoad' | 'onProjectLoad' | 'onSetup' | 'onResetAllLayers' | 'onLayerHistoryChanged';
+  'onGlobalStoreLoad' | 'onProjectLoad' | 'onSetup' | 'onResetAllLayers' | 'onLayerHistoryChanged' | 'onImagePoolChanged' | 'onImagePoolEntryChanged';
 
 export function emitEvent(event: TauriWindowEvent, msg?: Object) {
   return emit(event, msg);
@@ -44,6 +44,6 @@ export async function emitGlobalEvent(event: TauriGlobalEvent, msg?: Object) {
   return await safeInvoke('emit_global_event', { event, msg });
 }
 
-export function listenEvent(event: TauriWindowEvent | TauriGlobalEvent, handler: EventCallback<unknown>) {
+export function listenEvent(event: TauriWindowEvent | TauriGlobalEvent, handler: EventCallback<any>) {
   return listen(event, handler);
 }

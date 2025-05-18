@@ -1,13 +1,13 @@
 import { style } from '@vanilla-extract/css';
 import { vars, ZFB09, ZFB31 } from '~/styles/global.css';
-import { flexCol, flexRow, wh100 } from '~/styles/snippets.css';
+import { flexCol, flexRow } from '~/styles/snippets.css';
 
 export const root = style([
-  flexRow,
+  flexCol,
   {
     position: 'relative',
     height: '100%',
-    padding: '0px 34px',
+    width: '400px',
   },
 ]);
 
@@ -22,18 +22,15 @@ export const header = style([
 
 export const content = style([
   flexCol,
-  wh100,
   {
-    flexGrow: 1,
     gap: vars.spacing.lg,
-    marginTop: vars.spacing.xl,
   },
 ]);
 
 export const field = style([
   flexCol,
   {
-    maxWidth: '300px',
+    maxWidth: '400px',
   },
 ]);
 

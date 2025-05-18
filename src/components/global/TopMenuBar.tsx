@@ -1,10 +1,6 @@
 import * as styles from '@styles/components/globals/top_menu_bar.css';
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, For } from 'solid-js';
-import { exportCanvas } from '~/io/image_export/exportCanvas';
-import { ExportRequestPayload } from '~/routes/io/export_image';
-import { projectStore } from '~/stores/ProjectStores';
-import { listenEvent } from '~/utils/TauriUtils';
+import { Component, createSignal, For, Show } from 'solid-js';
+import ExportImage from '~/dialogs/io/ExportImage';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -13,23 +9,27 @@ interface Item {
 }
 
 const TopMenuBar: Component = () => {
+  const [isExportShown, setIsExportShown] = createSignal(false);
+
   const leftItems: Item[] = [
     { text: 'IMPORT.', action: () => {} },
     {
       text: 'EXPORT.',
       action: () => {
-        openWindow('export');
-        listenEvent('onExportRequested', async (e) => {
-          const payload = e.payload as ExportRequestPayload;
-          const name = projectStore.newName || projectStore.name;
-          if (name === undefined) return;
-          if (payload.dirPath) {
-            const result = await exportCanvas(payload.dirPath, name, payload.exportOptions);
-            if (result) {
-              if (payload.showDirAfterSave) await revealItemInDir(result);
-            }
-          }
-        });
+        setIsExportShown(true);
+
+        // openWindow('export');
+        // listenEvent('onExportRequested', async (e) => {
+        //   const payload = e.payload as ExportRequestPayload;
+        //   const name = projectStore.newName || projectStore.name;
+        //   if (name === undefined) return;
+        //   if (payload.dirPath) {
+        //     const result = await exportCanvas(payload.dirPath, name, payload.exportOptions);
+        //     if (result) {
+        //       if (payload.showDirAfterSave) await revealItemInDir(result);
+        //     }
+        //   }
+        // });
       },
     },
   ];
@@ -64,6 +64,9 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
+      <Show when={isExportShown()}>
+        <ExportImage open={isExportShown()} onClose={() => setIsExportShown(false)} />
+      </Show>
     </div>
   );
 };

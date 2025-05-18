@@ -3,103 +3,136 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { Vec2 } from '~/types/Vector';
 
 class CanvasAreaInteract {
-  private dragPosition: Vec2 = { x: 0, y: 0 };
+  private pointers = new Map<number, Vec2>();
 
   private lastPointX: number = 0;
   private lastPointY: number = 0;
 
-  private lastX: number[] = [0, 0];
-  private lastY: number[] = [0, 0];
   private lastDist: number = 0;
 
-  private getMutualMove = (move0: number, move1: number) => {
-    // 逆方向なら0
-    if (Math.sign(move0) !== Math.sign(move1)) return 0;
-    return Math.min(move1, move0);
+  private offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
+  private offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
+  private transform = (x: number, y: number, zoom: number) => {
+    return `translate(${x}px, ${y}px) scale(${zoom})`;
   };
+
+  public updateTransform = () => {
+    this.canvasStack.style.transform = this.transform(this.offsetX(), this.offsetY(), interactStore.zoom);
+  };
+
+  constructor(
+    private canvasStack: HTMLDivElement,
+    private wrapperRef: HTMLDivElement
+  ) {}
+
+  private handlePointerDown(e: PointerEvent) {
+    this.lastPointX = e.clientX;
+    this.lastPointY = e.clientY;
+
+    // capture してドラッグ中も動きを取りこぼさない
+    this.wrapperRef.setPointerCapture(e.pointerId);
+    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (e.pointerType === 'touch') {
+      // タッチ
+      if (this.pointers.size === 1) {
+        setInteractStore('isDragging', true);
+      } else if (this.pointers.size === 2) {
+        // ピンチズームの開始時に距離を記録
+        const [p0, p1] = Array.from(this.pointers.values());
+        this.lastDist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+      }
+    } else {
+      // タッチ以外
+      if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
+        setInteractStore('isDragging', true);
+      }
+    }
+  }
 
   private handlePointerMove(e: PointerEvent) {
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
-  }
 
-  private handleTouchMove(e: TouchEvent, canvasStack: HTMLDivElement) {
-    if (interactStore.isInStroke) return;
+    if (!this.pointers.has(e.pointerId)) return;
+    const prev = this.pointers.get(e.pointerId)!;
+    const now = { x: e.clientX, y: e.clientY };
+    this.pointers.set(e.pointerId, now);
 
-    if (e.touches.length === 1) {
-      const xMove0 = e.touches[0].clientX - this.lastX[0];
-      if (xMove0 !== 0 && this.lastX[0] !== 0) {
+    if (e.pointerType === 'touch') {
+      // タッチ
+      if (this.pointers.size === 1 && interactStore.isDragging) {
+        // パン（ドラッグ移動）
+        const dx = now.x - prev.x;
+        const dy = now.y - prev.y;
         setInteractStore('offset', {
-          x: interactStore.offset.x + xMove0,
-          y: interactStore.offset.y,
+          x: interactStore.offset.x + dx,
+          y: interactStore.offset.y + dy,
         });
-      }
-      const yMove0 = e.touches[0].clientY - this.lastY[0];
-      if (yMove0 !== 0 && this.lastY[0] !== 0) {
+        this.updateTransform();
+      } else if (this.pointers.size === 2) {
+        // ピンチズーム or 並進 + ズーム
+        const [p0, p1] = Array.from(this.pointers.values());
+        // 1) ズーム
+        const dist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        const scale = dist / this.lastDist;
+        this.lastDist = dist;
+        // 中心点をキャンバス座標系に変換
+        const midX = (p0.x + p1.x) / 2;
+        const midY = (p0.y + p1.y) / 2;
+        const rect = this.canvasStack.getBoundingClientRect();
+        const canvasX = (midX - rect.left) / interactStore.zoom;
+        const canvasY = (midY - rect.top) / interactStore.zoom;
+        // ズーム更新
+        const newZoom = interactStore.zoom * scale;
+        setInteractStore('zoom', newZoom);
+        // オフセット補正
         setInteractStore('offset', {
-          x: interactStore.offset.x,
-          y: interactStore.offset.y + yMove0,
+          x: interactStore.offset.x + canvasX * (interactStore.zoom - newZoom),
+          y: interactStore.offset.y + canvasY * (interactStore.zoom - newZoom),
         });
+        // 2) 並進
+        // （必要なら二本指の同方向移動分を追加）
+        this.updateTransform();
       }
-      this.lastX[0] = e.touches[0].clientX;
-      this.lastY[0] = e.touches[0].clientY;
-    }
-    if (e.touches.length >= 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx * dx + dy * dy) * interactStore.touchZoomSensitivity;
-      if (this.lastDist !== 0) {
-        const scaleFactor = dist / this.lastDist;
-        const zoomOld = interactStore.zoom;
-        const zoomNew = zoomOld * scaleFactor;
-        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-        const rect = canvasStack.getBoundingClientRect();
-        const canvasX = (midX - rect.left) / zoomOld;
-        const canvasY = (midY - rect.top) / zoomOld;
-        setInteractStore('zoom', zoomNew);
-        setInteractStore('offset', {
-          x: interactStore.offset.x + canvasX * (zoomOld - zoomNew),
-          y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
-        });
+    } else {
+      // タッチ以外
+      if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
+        if (interactStore.isDragging) {
+          const dx = e.clientX - prev.x;
+          const dy = e.clientY - prev.y;
+          setInteractStore('offset', {
+            x: interactStore.offset.x + dx,
+            y: interactStore.offset.y + dy,
+          });
+          this.updateTransform();
+        }
       }
-      const xMove0 = e.touches[0].clientX - this.lastX[0];
-      const xMove1 = e.touches[1].clientX - this.lastX[1];
-      const mutualMoveX = this.getMutualMove(xMove0, xMove1);
-      if (mutualMoveX !== 0 && this.lastX[0] !== 0 && this.lastX[1] !== 0) {
-        setInteractStore('offset', {
-          x: interactStore.offset.x + mutualMoveX,
-          y: interactStore.offset.y,
-        });
-      }
-      const yMove0 = e.touches[0].clientY - this.lastY[0];
-      const yMove1 = e.touches[1].clientY - this.lastY[1];
-      const mutualMoveY = this.getMutualMove(yMove0, yMove1);
-      if (mutualMoveY !== 0 && this.lastY[0] !== 0 && this.lastY[1] !== 0) {
-        setInteractStore('offset', {
-          x: interactStore.offset.x,
-          y: interactStore.offset.y + mutualMoveY,
-        });
-      }
-      this.lastX[0] = e.touches[0].clientX;
-      this.lastX[1] = e.touches[1].clientX;
-      this.lastY[0] = e.touches[0].clientY;
-      this.lastY[1] = e.touches[1].clientY;
-      this.lastDist = dist;
     }
   }
 
-  private handleTouchEnd(e: TouchEvent) {
-    this.lastX = [0, 0];
-    this.lastY = [0, 0];
-    this.lastDist = 0;
+  private handlePointerUp(e: PointerEvent) {
+    this.lastPointX = e.clientX;
+    this.lastPointY = e.clientY;
+
+    this.pointers.delete(e.pointerId);
+    this.wrapperRef.releasePointerCapture(e.pointerId);
+    if (this.pointers.size === 0) {
+      setInteractStore('isDragging', false);
+      this.lastDist = 0;
+    }
   }
 
-  private handleWheel(e: WheelEvent, canvasStack: HTMLDivElement) {
-    this.zoom(e.deltaY, 1, canvasStack);
+  private handlePointerCancel(e: PointerEvent) {
+    // タッチキャンセルなど
+    this.handlePointerUp(e);
   }
 
-  private zoom(deltaY: number, multiply: number, canvasStack: HTMLDivElement) {
+  private handleWheel(e: WheelEvent) {
+    this.zoom(e.deltaY, 1);
+  }
+
+  private zoom(deltaY: number, multiply: number) {
     const referencedZoom = getReferencedZoom() ?? 1;
     const delta = (deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep) * multiply;
 
@@ -108,7 +141,7 @@ class CanvasAreaInteract {
 
     if (zoomNew < interactStore.zoomMin * referencedZoom || interactStore.zoomMax * referencedZoom < zoomNew) return;
 
-    const rect = canvasStack.getBoundingClientRect();
+    const rect = this.canvasStack.getBoundingClientRect();
     const canvasX = (this.lastPointX - rect.left) / zoomOld;
     const canvasY = (this.lastPointY - rect.top) / zoomOld;
     setInteractStore('zoom', zoomNew);
@@ -116,48 +149,20 @@ class CanvasAreaInteract {
       x: interactStore.offset.x + canvasX * (zoomOld - zoomNew),
       y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
     });
-  }
 
-  private handleTouchStart(e: TouchEvent) {
-    setInteractStore('isDragging', true);
-    this.dragPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }
-
-  private handleMouseDown(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
-      setInteractStore('isDragging', true);
-      this.dragPosition = { x: e.clientX, y: e.clientY };
-    }
-  }
-
-  private handleMouseMove(e: MouseEvent) {
-    if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
-      if (interactStore.isDragging) {
-        const dx = e.clientX - this.dragPosition.x;
-        const dy = e.clientY - this.dragPosition.y;
-        setInteractStore('offset', {
-          x: interactStore.offset.x + dx,
-          y: interactStore.offset.y + dy,
-        });
-        this.dragPosition = { x: e.clientX, y: e.clientY };
-      }
-    }
-  }
-
-  private handleMouseOff(e: MouseEvent) {
-    setInteractStore('isDragging', false);
+    this.updateTransform();
   }
 
   private KEY_ZOOM_MULT = 1.3;
 
-  private handleKeyDown(e: KeyboardEvent, canvasStack: HTMLDivElement) {
+  private handleKeyDown(e: KeyboardEvent) {
     if (e.ctrlKey) {
       if (e.key === '+') {
         // in
-        this.zoom(-1, this.KEY_ZOOM_MULT, canvasStack);
+        this.zoom(-1, this.KEY_ZOOM_MULT);
       } else if (e.key === '-') {
         // out
-        this.zoom(1, this.KEY_ZOOM_MULT, canvasStack);
+        this.zoom(1, this.KEY_ZOOM_MULT);
       }
     }
   }
@@ -172,40 +177,34 @@ class CanvasAreaInteract {
     }
   }
 
-  public setInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
-    this.removeInteractListeners(wrapper, canvasStack);
-    wrapper.addEventListener('pointermove', (e) => this.handlePointerMove.bind(this)(e));
+  private onPointerDown = this.handlePointerDown.bind(this);
+  private onPointerMove = this.handlePointerMove.bind(this);
+  private onPointerUp = this.handlePointerUp.bind(this);
+  private onPointerCancel = this.handlePointerCancel.bind(this);
+  private onWheel = this.handleWheel.bind(this);
+  private onKeyDown = this.handleKeyDown.bind(this);
+  private onKeyUp = this.handleKeyUp.bind(this);
 
-    wrapper.addEventListener('touchstart', (e) => this.handleTouchStart.bind(this)(e), { passive: true });
-    wrapper.addEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack), { passive: true });
-    wrapper.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
-
-    wrapper.addEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack), { passive: true });
-
-    wrapper.addEventListener('mousedown', this.handleMouseDown.bind(this));
-    wrapper.addEventListener('mousemove', this.handleMouseMove.bind(this));
-    wrapper.addEventListener('mouseup', this.handleMouseOff.bind(this));
-    wrapper.addEventListener('mouseleave', this.handleMouseOff.bind(this));
-    wrapper.addEventListener('mouseout', this.handleMouseOff.bind(this));
-
-    window.addEventListener('keydown', (e) => this.handleKeyDown.bind(this)(e, canvasStack));
-    window.addEventListener('keyup', this.handleKeyUp.bind(this));
+  public setInteractListeners() {
+    this.wrapperRef.addEventListener('pointerdown', this.onPointerDown);
+    this.wrapperRef.addEventListener('pointermove', this.onPointerMove);
+    this.wrapperRef.addEventListener('pointerup', this.onPointerUp);
+    this.wrapperRef.addEventListener('pointercancel', this.onPointerCancel);
+    // wheel
+    this.wrapperRef.addEventListener('wheel', this.onWheel, { passive: true });
+    // keyboard
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
   }
 
-  public removeInteractListeners(wrapper: HTMLDivElement, canvasStack: HTMLDivElement) {
-    wrapper.removeEventListener('touchmove', (e) => this.handleTouchMove.bind(this)(e, canvasStack));
-    wrapper.removeEventListener('touchend', this.handleTouchEnd.bind(this));
-
-    wrapper.removeEventListener('wheel', (e) => this.handleWheel.bind(this)(e, canvasStack));
-
-    wrapper.removeEventListener('mousedown', this.handleMouseDown.bind(this));
-    wrapper.removeEventListener('mousemove', this.handleMouseMove.bind(this));
-    wrapper.removeEventListener('mouseup', this.handleMouseOff.bind(this));
-    wrapper.removeEventListener('mouseleave', this.handleMouseOff.bind(this));
-    wrapper.removeEventListener('mouseout', this.handleMouseOff.bind(this));
-
-    window.removeEventListener('keydown', (e) => this.handleKeyDown.bind(this)(e, canvasStack));
-    window.removeEventListener('keyup', this.handleKeyUp.bind(this));
+  public removeInteractListeners() {
+    this.wrapperRef.removeEventListener('pointerdown', this.onPointerDown);
+    this.wrapperRef.removeEventListener('pointermove', this.onPointerMove);
+    this.wrapperRef.removeEventListener('pointerup', this.onPointerUp);
+    this.wrapperRef.removeEventListener('pointercancel', this.onPointerCancel);
+    this.wrapperRef.removeEventListener('wheel', this.onWheel);
+    window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('keyup', this.onKeyUp);
   }
 }
 

@@ -1,5 +1,7 @@
 import * as styles from '@styles/components/globals/top_menu_bar.css';
 import { Component, createSignal, For, Show } from 'solid-js';
+import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
+import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
 import ExportImage from '~/dialogs/io/ExportImage';
 import { openWindow } from '~/utils/WindowUtils';
 
@@ -12,24 +14,19 @@ const TopMenuBar: Component = () => {
   const [isExportShown, setIsExportShown] = createSignal(false);
 
   const leftItems: Item[] = [
-    { text: 'IMPORT.', action: () => {} },
+    {
+      text: 'IMPORT.',
+      action: async () => {
+        const path = await openImageImportDialog();
+        if (path !== undefined) {
+          addToImagePool(path);
+        }
+      },
+    },
     {
       text: 'EXPORT.',
       action: () => {
         setIsExportShown(true);
-
-        // openWindow('export');
-        // listenEvent('onExportRequested', async (e) => {
-        //   const payload = e.payload as ExportRequestPayload;
-        //   const name = projectStore.newName || projectStore.name;
-        //   if (name === undefined) return;
-        //   if (payload.dirPath) {
-        //     const result = await exportCanvas(payload.dirPath, name, payload.exportOptions);
-        //     if (result) {
-        //       if (payload.showDirAfterSave) await revealItemInDir(result);
-        //     }
-        //   }
-        // });
       },
     },
   ];

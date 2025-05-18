@@ -25,7 +25,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         'pointer-events': 'none',
         'image-rendering': 'pixelated',
         'shape-rendering': 'geometricPrecision',
-        'z-index': 1000,
+        'z-index': 150,
       }}
     >
       {/* border rect */}

@@ -22,7 +22,7 @@ import { flexCol } from '~/styles/snippets.css';
 import { emitEvent, listenEvent } from '~/utils/TauriUtils';
 
 export default function Editor() {
-  const window = getCurrentWebviewWindow();
+  const wvWindow = getCurrentWebviewWindow();
   const location = useLocation();
 
   createEffect(() => {
@@ -88,7 +88,7 @@ export default function Editor() {
       loadGlobalSettings();
     });
 
-    unlisten = await window.onCloseRequested(async (event) => {
+    unlisten = await wvWindow.onCloseRequested(async (event) => {
       if (projectStore.isProjectChangedAfterSave) {
         const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
           okLabel: 'quit w/o save.',
@@ -103,6 +103,10 @@ export default function Editor() {
 
   onCleanup(() => {
     unlisten();
+
+    if (import.meta.hot) {
+      window.location.reload();
+    }
   });
 
   return (

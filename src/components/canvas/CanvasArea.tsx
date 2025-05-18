@@ -1,10 +1,11 @@
-import { createMemo, onCleanup } from 'solid-js';
+import { onCleanup } from 'solid-js';
 import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
+import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import BottomInfo from '../global/BottomInfo';
@@ -14,35 +15,34 @@ export default () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
-  const interact: CanvasAreaInteract = new CanvasAreaInteract();
+  let interact: CanvasAreaInteract | undefined = undefined;
 
   listenEvent('onSetup', () => {
     setInteractStore('canvasAreaSize', {
       width: wrapper.clientWidth,
       height: wrapper.clientHeight,
     });
-    interact.setInteractListeners(wrapper, canvasStack);
 
     getCurrentWindow().onResized(() => {
       setInteractStore('canvasAreaSize', {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
-      interact.setInteractListeners(wrapper, canvasStack);
+      interact?.setInteractListeners();
     });
+
+    adjustZoomToFit();
+
+    interact = new CanvasAreaInteract(canvasStack, wrapper);
+    interact.setInteractListeners();
+    interact.updateTransform();
   });
 
   onCleanup(() => {
     if (interact !== undefined && !import.meta.hot) {
-      interact.removeInteractListeners(wrapper, canvasStack);
+      console.log('yeah removed, ', import.meta.hot);
+      interact.removeInteractListeners();
     }
-  });
-
-  const offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
-  const offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
-
-  const transform = createMemo(() => {
-    return `translate(${offsetX()}px, ${offsetY()}px) scale(${interactStore.zoom})`;
   });
 
   return (
@@ -73,7 +73,6 @@ export default () => {
             padding: 0,
             margin: 0,
             'transform-origin': '0 0',
-            transform: transform(),
           }}
         >
           <WebGLCanvas />

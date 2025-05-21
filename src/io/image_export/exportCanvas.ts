@@ -40,7 +40,7 @@ export async function getCanvasBlob(options: CanvasExportOptions): Promise<Blob 
         if (blob) resolve(blob);
         else reject(new Error('Canvas toBlob returned null'));
       },
-      `image/${format}`,
+      `image/${format === 'jpg' ? 'jpeg' : format}`,
       quality
     );
   });

@@ -1,27 +1,8 @@
-import { Component, For, onMount } from 'solid-js';
-import { createStore, reconcile } from 'solid-js/store';
-import { imagePoolController } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { canvasStore } from '~/stores/ProjectStores';
-import { listenEvent } from '~/utils/TauriUtils';
+import { Component, For } from 'solid-js';
+import { canvasStore, imagePoolStore } from '~/stores/ProjectStores';
 import Image from './Image';
 
 export const ImagePool: Component = () => {
-  const [state, setState] = createStore<{ entries: Record<string, ImagePoolEntry> }>({
-    entries: {},
-  });
-
-  const sync = () => {
-    const map = imagePoolController.getEntries();
-    const obj = Object.fromEntries(map.entries());
-    setState('entries', reconcile(obj));
-  };
-
-  onMount(() => {
-    sync();
-    listenEvent('onImagePoolChanged', sync);
-  });
-
   return (
     <div
       style={{
@@ -34,9 +15,10 @@ export const ImagePool: Component = () => {
         'pointer-events': 'none',
       }}
     >
-      <For each={Object.values(state.entries)}>
+      <For each={imagePoolStore.entries.values().toArray()}>
         {(entry, i) => {
           if (entry === undefined) return;
+
           return <Image entry={entry} index={i()} />;
         }}
       </For>

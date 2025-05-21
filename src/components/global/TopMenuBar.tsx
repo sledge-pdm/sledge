@@ -1,8 +1,8 @@
 import * as styles from '@styles/components/globals/top_menu_bar.css';
-import { Component, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For } from 'solid-js';
 import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
 import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
-import ExportImage from '~/dialogs/io/ExportImage';
+import ExportImageDialog from '~/dialogs/io/ExportImage';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -12,6 +12,15 @@ interface Item {
 
 const TopMenuBar: Component = () => {
   const [isExportShown, setIsExportShown] = createSignal(false);
+  let dialog = null;
+
+  createEffect(() => {
+    if (isExportShown()) {
+      dialog = <ExportImageDialog open={isExportShown()} onClose={() => setIsExportShown(false)} />;
+    } else {
+      dialog = null;
+    }
+  });
 
   const leftItems: Item[] = [
     {
@@ -61,9 +70,7 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
-      <Show when={isExportShown()}>
-        <ExportImage open={isExportShown()} onClose={() => setIsExportShown(false)} />
-      </Show>
+      {dialog}
     </div>
   );
 };

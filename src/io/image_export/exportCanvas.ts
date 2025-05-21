@@ -7,7 +7,7 @@ export type exportableFileTypes = 'png' | 'jpg';
 export interface CanvasExportOptions {
   format: exportableFileTypes;
   quality?: number; // jpeg 時の品質 0～1, png のときは無視
-  scale?: number; // 1（そのまま）～10 など
+  scale: number; // 1（そのまま）～10 など
 }
 
 export const defaultExportDir = async () => (await pictureDir()) + '\\sledge';

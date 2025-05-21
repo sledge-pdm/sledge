@@ -46,7 +46,8 @@ const Slider: Component<SliderProps> = (props) => {
   const handlePointerDown = () => {
     setDrag(true);
     sliderRef.addEventListener('pointermove', handlePointerMove);
-    sliderRef.addEventListener('pointerup', handlePointerUp);
+    sliderRef.addEventListener('pointerout', cancelHandling);
+    sliderRef.addEventListener('pointerup', cancelHandling);
   };
 
   const handlePointerMove = (e: PointerEvent) => {
@@ -60,10 +61,10 @@ const Slider: Component<SliderProps> = (props) => {
     update(newValue);
   };
 
-  const handlePointerUp = () => {
+  const cancelHandling = () => {
     setDrag(false);
     sliderRef.removeEventListener('pointermove', handlePointerMove);
-    sliderRef.removeEventListener('pointerup', handlePointerUp);
+    sliderRef.removeEventListener('pointerup', cancelHandling);
   };
 
   const onLineClick = (e: MouseEvent) => {

@@ -2,10 +2,13 @@ import * as styles from '@styles/dialogs/export_image.css';
 import { open as openFile } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, onMount, Show } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import Checkbox from '~/components/common/control/Checkbox';
 import Dropdown, { DropdownOption } from '~/components/common/control/Dropdown';
 import Slider from '~/components/common/control/Slider';
+import { saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { CanvasExportOptions, defaultExportDir, exportableFileTypes, exportCanvas } from '~/io/image_export/exportCanvas';
+import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
@@ -23,64 +26,57 @@ const scaleOptions: DropdownOption<number>[] = [
   { label: 'CUSTOM', value: 0 },
 ];
 
-export interface ExportRequestPayload {
+export interface ExportSettings {
   dirPath?: string;
+  fileName?: string;
   exportOptions: CanvasExportOptions;
   showDirAfterSave: boolean;
 }
 
 export interface ExportImageProps extends DialogExternalProps {
-  onExport?: (payload: ExportRequestPayload) => void;
+  onExport?: (payload: ExportSettings) => void;
 }
 
-const ExportImage: Component<ExportImageProps> = (props) => {
-  const [fileType, setFileType] = createSignal(fileTypeOptions[0].value);
-  const [scale, setScale] = createSignal(scaleOptions[0].value);
-  const [customScale, setCustomScale] = createSignal<number | undefined>(undefined);
-  const [quality, setQuality] = createSignal<number>(95);
-  const [saveDir, setSaveDir] = createSignal<string | undefined>();
-  const [showDirAfterSave, setShowDirAfterSave] = createSignal<boolean>(true);
+const ExportImageDialog: Component<ExportImageProps> = (props) => {
+  const [settings, setSettings] = createStore<ExportSettings>({
+    ...lastSettingsStore.exportSettings,
+    fileName: projectStore.newName ?? projectStore.name,
+  });
+  const [customScale, setCustomScale] = createSignal(1);
 
-  const finalScale = () => (scale() !== 0 ? scale() : customScale()) ?? 1;
+  const finalScale = () => (settings.exportOptions.scale !== 0 ? settings.exportOptions.scale : customScale()) ?? 1;
 
   onMount(async () => {
-    setSaveDir(await defaultExportDir());
+    if (settings.dirPath === '') setSettings('dirPath', await defaultExportDir());
   });
 
   const openDirSelectionDialog = async () => {
     const dir = await openFile({
       multiple: false,
       directory: true,
-      defaultPath: saveDir(),
+      defaultPath: settings.dirPath,
       canCreateDirectories: true,
     });
 
-    if (dir) setSaveDir(dir);
+    if (dir) setSettings('dirPath', dir);
   };
 
   const requestExport = async () => {
-    if (scale() === 0) return;
+    if (settings.exportOptions.scale === 0) return;
 
-    const payload = {
-      dirPath: saveDir(),
-      exportOptions: {
-        format: fileType(),
-        quality: quality(),
-        scale: finalScale(),
-      },
-      showDirAfterSave: showDirAfterSave(),
-    };
-    props.onExport?.(payload);
+    props.onExport?.(settings);
 
-    const name = projectStore.newName || projectStore.name;
+    const name = settings.fileName;
     if (name === undefined) return;
-    if (payload.dirPath) {
-      const result = await exportCanvas(payload.dirPath, name, payload.exportOptions);
+    if (settings.dirPath) {
+      const result = await exportCanvas(settings.dirPath, name, settings.exportOptions);
       if (result) {
-        if (payload.showDirAfterSave) await revealItemInDir(result);
+        if (settings.showDirAfterSave) await revealItemInDir(result);
       }
     }
 
+    setLastSettingsStore('exportSettings', settings);
+    await saveGlobalSettings();
     props.onClose();
   };
 
@@ -113,38 +109,51 @@ const ExportImage: Component<ExportImageProps> = (props) => {
           {/* <p class={styles.header}>EXPORT.</p> */}
 
           <div class={styles.field}>
-            <div class={flexRow} style={{ 'align-items': 'center', gap: '8px', 'margin-bottom': vars.spacing.md }}>
+            <div class={flexRow} style={{ 'align-items': 'center', gap: '8px', 'margin-bottom': vars.spacing.sm }}>
               <p class={styles.fieldHeader} style={{ 'margin-bottom': 0, 'flex-grow': 1 }}>
                 Output Directory.
               </p>
               <Checkbox
-                checked={showDirAfterSave()}
-                onChange={(checked) => setShowDirAfterSave(checked)}
+                checked={settings.showDirAfterSave}
+                onChange={(checked) => setSettings('showDirAfterSave', checked)}
                 label='open dir after save'
                 labelMode='left'
               />
             </div>
             <div style={{ 'align-items': 'center', gap: '12px', width: '300px' }} class={flexRow}>
-              <p style={{ 'flex-grow': 1, 'text-overflow': 'ellipsis' }}>{saveDir()}</p>
+              <p style={{ 'flex-grow': 1, 'text-overflow': 'ellipsis' }}>{settings.dirPath}</p>
               <button onClick={openDirSelectionDialog}>...</button>
             </div>
+
+            <input style={{ 'font-size': '16px' }} value={settings.fileName} onChange={(e) => setSettings('fileName', e.target.value)} />
           </div>
 
           <div class={styles.field}>
             <p class={styles.fieldHeader}>Type.</p>
-            <Dropdown options={fileTypeOptions} value={fileType()} onChange={(e) => setFileType(e)} />
+            <Dropdown options={fileTypeOptions} value={settings.exportOptions.format} onChange={(e) => setSettings('exportOptions', 'format', e)} />
           </div>
 
-          <div class={fileType() === 'jpg' ? styles.field : styles.fieldDisabled}>
+          <div class={settings.exportOptions.format === 'jpg' ? styles.field : styles.fieldDisabled}>
             <p class={styles.fieldHeader}>Quality.</p>
-            <Slider labelMode={'left'} defaultValue={quality()} value={quality()} min={0} max={100} onChange={(v) => setQuality(v)} />
+            <Slider
+              labelMode={'left'}
+              defaultValue={settings.exportOptions.quality}
+              value={settings.exportOptions.quality}
+              min={0}
+              max={100}
+              onChange={(v) => setSettings('exportOptions', 'quality', v)}
+            />
           </div>
 
           <div class={styles.field}>
             <p class={styles.fieldHeader}>Scale.</p>
             <div class={flexRow} style={{ 'align-items': 'center', gap: '12px' }}>
-              <Dropdown options={scaleOptions} value={scale()} onChange={(e) => setScale(e)} />
-              <Show when={scale() === 0}>
+              <Dropdown
+                options={scaleOptions}
+                value={settings.exportOptions.scale ?? 1}
+                onChange={(e) => setSettings('exportOptions', 'scale', Number(e))}
+              />
+              <Show when={settings.exportOptions.scale === 0}>
                 <div style={{ 'align-items': 'center' }} class={flexRow}>
                   <p>x</p>
                   <input
@@ -167,4 +176,4 @@ const ExportImage: Component<ExportImageProps> = (props) => {
     </Dialog>
   );
 };
-export default ExportImage;
+export default ExportImageDialog;

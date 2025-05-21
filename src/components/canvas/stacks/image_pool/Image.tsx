@@ -12,9 +12,7 @@ import { flexRow } from '~/styles/snippets.css';
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({
     selected: false,
-    x: 0,
-    y: 0,
-    scale: 0,
+    visible: props.entry.visible,
   });
 
   let containerRef: HTMLDivElement;
@@ -88,7 +86,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   });
 
   const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
-    const size = () => (props.size ?? 5) / interactStore.zoom;
+    const size = () => (props.size ?? 8) / interactStore.zoom;
     return (
       <rect
         x={props.x}
@@ -97,7 +95,9 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         data-pos={props['data-pos']}
         width={size()}
         height={size()}
-        fill='black'
+        stroke='black'
+        fill='white'
+        stroke-width={1 / interactStore.zoom}
         pointer-events='all'
         shape-rendering='geometricPrecision'
         style={{
@@ -169,7 +169,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         }}
       >
         {/* border rect */}
-        <rect width={'100%'} height={'100%'} fill='none' stroke='black' stroke-width={1 / interactStore.zoom} shape-rendering='geometricPrecision' />
+        <rect class={'border-rect'} width={'100%'} height={'100%'} fill='none' stroke='black' stroke-width={1 / interactStore.zoom} />
         {/* 四隅 */}
         <Handle x={'0'} y={'0'} data-pos='nw' />
         <Handle x={'100%'} y={'0'} data-pos='ne' />
@@ -188,13 +188,12 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           position: 'absolute',
           top: '4px',
           right: '4px',
-          width: 'fit-content',
-          height: 'fit-content',
-          gap: '12px',
-          padding: '4px',
+          gap: '8px',
+          padding: '2px',
           'margin-bottom': '12px',
           'pointer-events': 'none',
-          'background-color': '#FFFFFF',
+          'background-color': '#EEE',
+          'image-rendering': 'auto',
           border: '1px solid black',
           visibility: stateStore.selected ? 'visible' : 'collapse',
           'transform-origin': '100% 0',
@@ -203,39 +202,48 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         }}
       >
         <img
-          src='/icons/misc/invisible.png'
-          onClick={() => {
-            setLocalEntry((le) => {
-              le.visible = !le.visible;
-              return le;
-            });
-            setEntry(props.entry.id, localEntry());
+          src={stateStore.visible ? '/icons/image_pool/hide.png' : '/icons/image_pool/show.png'}
+          onClick={(e) => {
+            let le = localEntry();
+            le.visible = le.visible ? false : true;
+            setLocalEntry(le);
+            setStateStore('visible', le.visible);
+            setEntry(props.entry.id, le);
           }}
+          width={12}
+          height={12}
           style={{
             width: '12px',
             height: '12px',
+            margin: '2px',
             'pointer-events': 'all',
             cursor: 'pointer',
           }}
         />
         <img
-          src='/icons/misc/burndown.png'
+          src='/icons/image_pool/burndown.png'
           onClick={() => {}}
+          width={12}
+          height={12}
           style={{
             width: '12px',
             height: '12px',
+            margin: '2px',
             'pointer-events': 'all',
             cursor: 'pointer',
           }}
         />
         <img
-          src='/icons/misc/garbage.png'
+          src='/icons/image_pool/remove.png'
           onClick={() => {
             removeEntry(props.entry.id);
           }}
+          width={12}
+          height={12}
           style={{
             width: '12px',
             height: '12px',
+            margin: '2px',
             'pointer-events': 'all',
             cursor: 'pointer',
           }}

@@ -28,16 +28,20 @@ class CanvasAreaInteract {
   private handlePointerDown(e: PointerEvent) {
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
-
-    // capture してドラッグ中も動きを取りこぼさない
-    this.wrapperRef.setPointerCapture(e.pointerId);
+    // this.wrapperRef.setPointerCapture(e.pointerId); ←前まで
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (e.pointerType === 'touch') {
       // タッチ
       if (this.pointers.size === 1) {
+        this.wrapperRef.setPointerCapture(e.pointerId);
         setInteractStore('isDragging', true);
       } else if (this.pointers.size === 2) {
+        for (const id of this.pointers.keys()) {
+          this.wrapperRef.setPointerCapture(id);
+        }
+        this.wrapperRef.setPointerCapture(e.pointerId);
+        this.wrapperRef.setPointerCapture(e.pointerId);
         // ピンチズームの開始時に距離を記録
         const [p0, p1] = Array.from(this.pointers.values());
         this.lastDist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
@@ -45,6 +49,7 @@ class CanvasAreaInteract {
     } else {
       // タッチ以外
       if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
+        this.wrapperRef.setPointerCapture(e.pointerId);
         setInteractStore('isDragging', true);
       }
     }
@@ -124,7 +129,6 @@ class CanvasAreaInteract {
   }
 
   private handlePointerCancel(e: PointerEvent) {
-    // タッチキャンセルなど
     this.handlePointerUp(e);
   }
 

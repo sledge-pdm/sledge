@@ -6,4 +6,5 @@ export type ImagePoolEntry = {
   y: number;
   scale: number;
   opacity: number;
+  visible: boolean;
 };

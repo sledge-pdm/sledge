@@ -20,7 +20,7 @@ export const wrapper = style({
   borderRadius: vars.size.dialog_radius,
   boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
   zIndex: 1001,
-  overflow: 'hidden',
+  overflow: 'visible',
 });
 
 export const header = style({

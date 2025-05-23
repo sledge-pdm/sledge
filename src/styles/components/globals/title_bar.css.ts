@@ -8,7 +8,7 @@ export const titleBarRoot = style([
   {
     background: '#fff',
     pointerEvents: 'all',
-    height: '32px',
+    height: '26px',
     // borderBottom: "1px solid #aaa",
     alignItems: 'center',
   },
@@ -22,7 +22,7 @@ export const titleBarTitle = style([
     fontFamily: ZFB08,
     fontSize: vars.text.sm,
     marginRight: 'auto',
-    paddingLeft: '34px',
+    paddingLeft: '36px',
   },
 ]);
 

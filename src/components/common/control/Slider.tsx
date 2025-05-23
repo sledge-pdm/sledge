@@ -46,7 +46,7 @@ const Slider: Component<SliderProps> = (props) => {
   const handlePointerDown = () => {
     setDrag(true);
     sliderRef.addEventListener('pointermove', handlePointerMove);
-    sliderRef.addEventListener('pointerout', cancelHandling);
+    sliderRef.addEventListener('pointercancel', cancelHandling);
     sliderRef.addEventListener('pointerup', cancelHandling);
   };
 
@@ -64,6 +64,7 @@ const Slider: Component<SliderProps> = (props) => {
   const cancelHandling = () => {
     setDrag(false);
     sliderRef.removeEventListener('pointermove', handlePointerMove);
+    sliderRef.removeEventListener('pointercancel', cancelHandling);
     sliderRef.removeEventListener('pointerup', cancelHandling);
   };
 

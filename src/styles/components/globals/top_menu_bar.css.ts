@@ -29,7 +29,7 @@ export const menuListLeft = style([
     flexGrow: 1,
     alignItems: 'center',
     gap: vars.spacing.xl,
-    paddingLeft: '34px',
+    paddingLeft: '36px',
   },
 ]);
 

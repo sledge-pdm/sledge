@@ -3,6 +3,7 @@ import { copyFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import genFileId from '~/io/project/genFileId';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { setImagePoolStore } from '~/stores/ProjectStores';
+import { loadImageMeta } from '~/utils/DataUtils';
 
 export function setEntry(id: string, entry: ImagePoolEntry) {
   setImagePoolStore((store) => {
@@ -30,6 +31,8 @@ async function createResource(originalPath: string) {
   const destPath = await join(imagesDir, 'pool-images', destName);
   await copyFile(originalPath, destPath);
 
+  const { width, height, blobUrl } = await loadImageMeta(destPath);
+
   const entry: ImagePoolEntry = {
     id,
     originalPath,
@@ -37,6 +40,8 @@ async function createResource(originalPath: string) {
     x: 0,
     y: 0,
     scale: 1,
+    width,
+    height,
     opacity: 1,
     visible: true,
   };

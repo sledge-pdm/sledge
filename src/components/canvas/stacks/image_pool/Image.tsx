@@ -2,7 +2,9 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
 import { Component, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
+import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
 import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { ImagePoolEntryMenu } from '~/models/menu/ImagePoolEntryMenu';
 import { interactStore } from '~/stores/EditorStores';
@@ -19,7 +21,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   let imageRef: HTMLImageElement;
   let svgRef: SVGSVGElement;
 
-  let origEntry = props.entry;
   let [localEntry, setLocalEntry] = createSignal(imagePoolStore.entries.get(props.entry.id)!);
 
   onMount(() => {
@@ -29,23 +30,22 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           edges: { top: true, left: true, bottom: true, right: true },
           allowFrom: '.resize-handle',
           listeners: {
-            start(event) {
-              origEntry = imagePoolStore.entries.get(props.entry.id)!;
-              setLocalEntry(origEntry);
-            },
             move(event) {
+              const entry = imagePoolStore.entries.get(props.entry.id)!;
               const zoom = interactStore.zoom;
               const newWidth = event.rect.width / zoom;
               const newHeight = event.rect.height / zoom;
-              const newScale = event.scale * origEntry.scale;
+              const newScale = event.rect.width / entry.width;
 
-              containerRef.style.width = newWidth + 'px';
-              containerRef.style.height = newHeight + 'px';
+              imageRef.style.width = newWidth + 'px';
+              imageRef.style.height = newHeight + 'px';
+              svgRef.style.width = newWidth + 'px';
+              svgRef.style.height = newHeight + 'px';
 
               setLocalEntry((le) => {
                 le.x += event.deltaRect.left / zoom;
                 le.y += event.deltaRect.top / zoom;
-                le.scale = newScale;
+                le.scale = newScale / zoom;
                 return le;
               });
               setEntry(props.entry.id, localEntry());
@@ -80,10 +80,28 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           },
         });
 
-      containerRef.style.width = imageRef.clientWidth + 'px';
-      containerRef.style.height = imageRef.clientHeight + 'px';
+      imageRef.style.width = imageRef.clientWidth + 'px';
+      imageRef.style.height = imageRef.clientHeight + 'px';
+      svgRef.style.width = imageRef.clientWidth + 'px';
+      svgRef.style.height = imageRef.clientHeight + 'px';
     };
   });
+
+  const handleBurndown = async () => {
+    const active = activeLayer(); // いま選択中のレイヤー
+    if (!active) return;
+
+    try {
+      await burndownToLayer({
+        entry: props.entry,
+        targetLayerId: active.id,
+      });
+      removeEntry(props.entry.id); // ImagePool から削除
+    } catch (e) {
+      console.error(e);
+      // TODO: ユーザ通知
+    }
+  };
 
   const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
     const size = () => (props.size ?? 8) / interactStore.zoom;
@@ -139,11 +157,13 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       <img
         ref={(el) => (imageRef = el)}
         src={convertFileSrc(props.entry.resourcePath)}
+        width={props.entry.width}
+        height={props.entry.height}
         style={{
-          width: '100%',
-          height: 'fit-content',
           margin: 0,
           padding: 0,
+          width: `${props.entry.width}px`,
+          height: `${props.entry.height}px`,
           opacity: localEntry().visible ? 1 : 0.2,
           'z-index': 2,
           'pointer-events': 'none',
@@ -157,8 +177,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
           margin: 0,
           padding: 0,
           'pointer-events': 'none',
@@ -222,7 +240,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         />
         <img
           src='/icons/image_pool/burndown.png'
-          onClick={() => {}}
+          onClick={handleBurndown}
           width={12}
           height={12}
           style={{

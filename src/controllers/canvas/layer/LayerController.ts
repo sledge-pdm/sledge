@@ -25,6 +25,13 @@ export function getLayerIndex(layerId: string) {
   return layerListStore.layers.findIndex((l) => l.id === layerId);
 }
 
+export function setImagePoolActive(active: boolean) {
+  setLayerListStore('isImagePoolActive', active);
+}
+export function isImagePoolActive() {
+  return layerListStore.isImagePoolActive;
+}
+
 export const resetAllLayers = (e: any) => {
   layerListStore.layers.forEach((l) => {
     resetLayerImage(l.id, l.dotMagnification);

@@ -25,6 +25,7 @@ type LayerHistoryStore = Record<string, LayerHistory>;
 type LayerListStore = {
   layers: Layer[];
   activeLayerId: string;
+  isImagePoolActive: boolean;
 };
 
 const defaultCanvasStore: CanvasStore = {
@@ -47,6 +48,7 @@ const defaultLayerHistoryStore: LayerHistoryStore = {};
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),
   activeLayerId: '',
+  isImagePoolActive: false,
 };
 
 export const initProjectStore = () => {

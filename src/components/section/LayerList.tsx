@@ -11,6 +11,7 @@ import { flexRow } from '~/styles/snippets.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import Dropdown from '../common/control/Dropdown';
 import Slider from '../common/control/Slider';
+import ImagePoolItem from './item/ImagePoolItem';
 import LayerItem from './item/LayerItem';
 
 const LayerList: Component<{}> = () => {
@@ -123,7 +124,12 @@ const LayerList: Component<{}> = () => {
           <DragDropSensors>
             <div class={layerList}>
               <SortableProvider ids={ids()}>
-                <For each={items()}>{(layer, index) => <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />}</For>
+                <ImagePoolItem />
+                <For each={items()}>
+                  {(layer, index) => {
+                    return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
+                  }}
+                </For>
               </SortableProvider>
             </div>
             {/* <DragOverlay>

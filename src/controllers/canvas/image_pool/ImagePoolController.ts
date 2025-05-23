@@ -2,7 +2,7 @@ import { appCacheDir, basename, join } from '@tauri-apps/api/path';
 import { copyFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import genFileId from '~/io/project/genFileId';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { setImagePoolStore } from '~/stores/ProjectStores';
+import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageMeta } from '~/utils/DataUtils';
 
 export function setEntry(id: string, entry: ImagePoolEntry) {
@@ -33,13 +33,15 @@ async function createResource(originalPath: string) {
 
   const { width, height, blobUrl } = await loadImageMeta(destPath);
 
+  console.log(width, canvasStore.canvas.width, Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height));
+
   const entry: ImagePoolEntry = {
     id,
     originalPath,
     resourcePath: destPath,
     x: 0,
     y: 0,
-    scale: 1,
+    scale: Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height),
     width,
     height,
     opacity: 1,

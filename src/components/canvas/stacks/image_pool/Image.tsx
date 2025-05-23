@@ -80,10 +80,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           },
         });
 
-      imageRef.style.width = imageRef.clientWidth + 'px';
-      imageRef.style.height = imageRef.clientHeight + 'px';
-      svgRef.style.width = imageRef.clientWidth + 'px';
-      svgRef.style.height = imageRef.clientHeight + 'px';
+      imageRef.style.width = props.entry.width * props.entry.scale + 'px';
+      imageRef.style.height = props.entry.height * props.entry.scale + 'px';
+      svgRef.style.width = props.entry.width * props.entry.scale + 'px';
+      svgRef.style.height = props.entry.height * props.entry.scale + 'px';
     };
   });
 
@@ -164,7 +164,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           padding: 0,
           width: `${props.entry.width}px`,
           height: `${props.entry.height}px`,
-          opacity: localEntry().visible ? 1 : 0.2,
+          opacity: localEntry().visible ? 1 : 0.6,
           'z-index': 2,
           'pointer-events': 'none',
         }}

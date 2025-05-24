@@ -32,6 +32,7 @@ export const bottomInfoContainerRight = style([
     alignItems: 'center',
     justifyContent: 'end',
     gap: vars.spacing.md,
+    paddingRight: vars.spacing.xs,
   },
 ]);
 

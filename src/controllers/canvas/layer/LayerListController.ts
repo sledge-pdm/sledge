@@ -1,18 +1,35 @@
+import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
+import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
 import { BlendMode, LayerType } from '~/models/canvas/layer/Layer';
 import { createLayer } from '~/models/canvas/layer/LayerFactory';
 import { DSL } from '~/models/dsl/DSL';
 import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { emitEvent } from '~/utils/TauriUtils';
 
 export const addLayer = async (
-  name: string,
-  type: LayerType = LayerType.Dot,
-  enabled: boolean = true,
-  dotMagnification: number = 1,
-  opacity: number = 1,
-  mode: BlendMode = BlendMode.normal,
-  dsl?: DSL
+  layer: {
+    name?: string;
+    type?: LayerType;
+    enabled?: boolean;
+    dotMagnification?: number;
+    opacity?: number;
+    mode?: BlendMode;
+    dsl?: DSL;
+  },
+  initImage?: Uint8ClampedArray
 ) => {
-  const newLayer = createLayer({ name, type, enabled, dotMagnification, opacity, mode, dsl });
+  const { name = 'layer', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal, dsl } = layer;
+
+  const newLayer = createLayer({
+    name,
+    type,
+    enabled,
+    dotMagnification,
+    opacity,
+    mode,
+    dsl,
+    initImage,
+  });
 
   const layers = [...allLayers()];
   layers.push(newLayer);
@@ -21,6 +38,29 @@ export const addLayer = async (
   setLayerListStore('activeLayerId', newLayer.id);
 
   return layers;
+};
+
+export function getActiveLayerIndex(): number {
+  return getLayerIndex(layerListStore.activeLayerId);
+}
+
+export function getLayerIndex(layerId: string) {
+  return layerListStore.layers.findIndex((l) => l.id === layerId);
+}
+
+export function setImagePoolActive(active: boolean) {
+  setLayerListStore('isImagePoolActive', active);
+}
+export function isImagePoolActive() {
+  return layerListStore.isImagePoolActive;
+}
+
+export const resetAllLayers = (e: any) => {
+  layerListStore.layers.forEach((l) => {
+    resetLayerImage(l.id, l.dotMagnification);
+  });
+  adjustZoomToFit();
+  emitEvent('onResetAllLayers');
 };
 
 export const removeLayer = (layerId?: string) => {

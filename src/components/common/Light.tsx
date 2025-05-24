@@ -28,7 +28,7 @@ const Light: Component<LightProps> = (props: LightProps) => {
           style={{
             filter: `drop-shadow(0 0 ${props.on ? '1px' : '0'} ${props.color ?? vars.color.active})`,
             opacity: props.on ? 1 : 0,
-            transition: props.on ? 'opacity 1s ease' : 'none',
+            transition: props.on ? 'opacity 0.2s ease' : 'none',
           }}
         >
           <circle cx={width / 2} cy={height / 2} r={radius} fill={props.color ?? vars.color.active} />

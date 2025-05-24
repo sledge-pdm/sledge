@@ -1,5 +1,15 @@
 import { For, JSX, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
-import { dropdownContainer, itemText, menuDirection, menuItem, menuStyle, triggerButton } from '~/styles/components/basics/dropdown.css';
+import Icon from '~/components/common/Icon';
+import {
+  dropdownContainer,
+  itemText,
+  menuDirection,
+  menuItem,
+  menuStyle,
+  triggerButton,
+  triggerButtonNoBG,
+} from '~/styles/components/basics/dropdown.css';
+import { vars } from '~/styles/global.css';
 
 export type DropdownOption<T extends string | number> = {
   label: string;
@@ -11,6 +21,7 @@ interface Props<T extends string | number = string> {
   onChange?: (value: T) => void;
   options: DropdownOption<T>[];
   props?: JSX.HTMLAttributes<HTMLDivElement>;
+  noBackground?: boolean;
 }
 
 const Dropdown = <T extends string | number>(p: Props<T>) => {
@@ -65,9 +76,15 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
 
   return (
     <div class={dropdownContainer} ref={containerRef} {...p.props}>
-      <button type='button' class={triggerButton} onClick={toggle} aria-haspopup='listbox' aria-expanded={open()}>
+      <button
+        type='button'
+        class={p.noBackground ? triggerButtonNoBG : triggerButton}
+        onClick={toggle}
+        aria-haspopup='listbox'
+        aria-expanded={open()}
+      >
         <p class={itemText}>{getAdjustedLabel(selectedLabel())}</p>
-        <img src={'/icons/misc/dropdown_caret.png'} width={9} height={9}></img>
+        <Icon src={'/icons/misc/dropdown_caret.png'} base={9} color={vars.color.onBackground} />
       </button>
       <Show when={open()}>
         <ul ref={menuRef} class={`${menuStyle} ${menuDirection[dir()]}`} role='listbox'>

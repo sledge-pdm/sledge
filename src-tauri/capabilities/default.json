@@ -7,12 +7,13 @@
     "core:default",
     "dialog:default",
     "fs:default",
+    "core:path:default",
+    "core:path:allow-resolve-directory",
 
     "system-info:allow-all",
 
     "dialog:allow-save",
     "dialog:allow-open",
-
     "shell:allow-open",
 
     "fs:allow-open",
@@ -29,7 +30,7 @@
     "fs:read-all",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "**" }]
+      "allow": [{ "path": "**" }, { "path": "$RESOURCE/**" }]
     },
 
     "opener:allow-open-path",

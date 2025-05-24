@@ -61,7 +61,7 @@ const LayerList: Component<{}> = () => {
         <div class={flexRow} style={{ gap: '4px' }}>
           <button
             onClick={async () => {
-              await addLayer('dot1');
+              await addLayer({ name: 'dot1' });
               setItems(allLayers());
             }}
           >
@@ -87,18 +87,26 @@ const LayerList: Component<{}> = () => {
             'margin-bottom': vars.spacing.sm,
           }}
         >
-          <Dropdown
-            value={activeLayer().mode}
-            options={Object.entries(BlendMode).map((e) => {
-              return {
-                label: e[0],
-                value: e[1],
-              };
-            })}
-            onChange={(e) => {
-              setLayerProp(activeLayer().id, 'mode', e);
+          <div
+            class={flexRow}
+            style={{
+              width: '120px',
+              height: 'auto',
             }}
-          />
+          >
+            <Dropdown
+              value={activeLayer().mode}
+              options={Object.entries(BlendMode).map((e) => {
+                return {
+                  label: e[0],
+                  value: e[1],
+                };
+              })}
+              onChange={(e) => {
+                setLayerProp(activeLayer().id, 'mode', e);
+              }}
+            />
+          </div>
           <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
             <p style={{ width: '36px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
             <Slider

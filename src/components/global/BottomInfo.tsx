@@ -28,6 +28,7 @@ const BottomInfo: Component = () => {
           <Dropdown
             value={globalConfig.appearance.theme}
             options={themeOptions}
+            noBackground={true}
             onChange={(v) => {
               setGlobalConfig('appearance', 'theme', v as Theme);
               saveGlobalSettings();

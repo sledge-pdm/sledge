@@ -48,7 +48,7 @@ export default function Editor() {
       setCanvasStore('canvas', 'width', Number(sp.get('width')));
       setCanvasStore('canvas', 'height', Number(sp.get('height')));
     }
-    addLayer('dot', LayerType.Dot, true, 1).then(() => {
+    addLayer({ name: 'dot', type: LayerType.Dot, enabled: true, dotMagnification: 1 }).then(() => {
       onProjectLoad();
     });
   }

@@ -7,7 +7,6 @@ export const bottomInfoRoot = style([
   w100,
   {
     position: 'fixed',
-    backgroundColor: vars.color.bg,
     borderTop: '1px solid #aaa',
     height: '20px',
     alignItems: 'center',

@@ -34,17 +34,72 @@ export const k12x8 = fontFace({
   src: 'url("/fonts/k12x8/k12x8.ttf")',
 });
 
+// export const vars = createGlobalTheme(':root', {
+//   color: {
+//     primary: '#111',
+//     secondary: '#222',
+//     text: '#EEE',
+//     control: '#EEE',
+//     danger: '#ff0000',
+//     muted: '#00000030',
+
+//     accent: '#ffff00',
+
+//     border: '#aaa',
+
+//     root_bg: '#333',
+
+//     bg: '#555',
+//     bg_canvas_area: '#222',
+
+//     bg_canvas: '#eee',
+
+//     surface: '#444',
+
+//     button: '#222',
+//     button_hover: '#444',
+//     button_pressed: '#444',
+
+//     input_bg: '#fafafa',
+//   },
+//   size: {
+//     edge_info: '14px',
+//     side_area: '250px',
+//     bottom_info: '20px',
+
+//     dialog_radius: '6px',
+//   },
+//   spacing: {
+//     xs: '4px',
+//     sm: '8px',
+//     md: '12px',
+//     lg: '16px',
+//     xl: '24px',
+//   },
+//   text: {
+//     xs: '6px',
+//     sm: '8px',
+//     md: '10px',
+//     lg: '12px',
+//     xl: '16px',
+//   },
+//   font: {
+//     body: `${ZFB08}, ${k8x12}`,
+//   },
+// });
 export const vars = createGlobalTheme(':root', {
   color: {
     primary: '#ffffff',
     secondary: '#f0f0f0',
-    text: '#111111',
+    text: '#000000DE',
     danger: '#ff0000',
     muted: '#00000030',
 
     accent: '#0000ff',
 
     border: '#aaa',
+
+    root_bg: '#ffffff',
 
     bg: '#ffffff',
     bg_canvas_area: '#fefefe',
@@ -83,6 +138,10 @@ export const vars = createGlobalTheme(':root', {
   },
 });
 
+globalStyle('body', {
+  backgroundColor: vars.color.root_bg,
+});
+
 globalStyle('button, p, a, input, label', {
   fontFamily: `${ZFB08}, ${k12x8}`,
   color: vars.color.text,
@@ -115,13 +174,13 @@ globalStyle('button:active', {
 
 export const accentedButton = style({
   width: 'fit-content',
-  borderColor: 'blue',
+  borderColor: vars.color.accent,
   background: vars.color.button,
-  color: 'blue',
+  color: vars.color.accent,
   pointerEvents: 'all',
   ':hover': {
     color: 'white',
-    background: 'blue',
+    background: vars.color.accent,
   },
   ':disabled': {
     color: '#bbb',

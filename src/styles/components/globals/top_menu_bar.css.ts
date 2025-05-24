@@ -7,7 +7,6 @@ export const root = style([
   w100,
   {
     position: 'fixed',
-    backgroundColor: vars.color.bg,
     borderBottom: '1px solid #999',
     height: '28px',
     alignItems: 'center',

@@ -14,7 +14,6 @@ export const triggerButton = style([
   flexRow,
   {
     backgroundColor: vars.color.primary,
-    color: vars.color.text,
     border: `1px solid ${vars.color.border}`,
     padding: '3px 11px 4px 11px',
     width: 'fit-content',
@@ -63,5 +62,6 @@ export const menuItem = style({
 
 export const itemText = style({
   whiteSpace: 'break-spaces',
+  color: vars.color.text,
   width: '100%',
 });

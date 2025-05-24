@@ -210,7 +210,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           padding: '2px',
           'margin-bottom': '12px',
           'pointer-events': 'none',
-          'background-color': '#EEE',
           'image-rendering': 'auto',
           border: '1px solid black',
           visibility: stateStore.selected ? 'visible' : 'collapse',

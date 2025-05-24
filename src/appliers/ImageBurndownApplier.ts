@@ -87,7 +87,6 @@ export async function burndownToLayer({ entry, targetLayerId }: ImageBurndownPar
       dstBuf[dstOff] = ((r * a + dstBuf[dstOff] * inv + 127) * 257) >> 16;
       dstBuf[dstOff + 1] = ((g * a + dstBuf[dstOff + 1] * inv + 127) * 257) >> 16;
       dstBuf[dstOff + 2] = ((b * a + dstBuf[dstOff + 2] * inv + 127) * 257) >> 16;
-      console.log(`a:${a} res:${dstBuf[dstOff + 3] * inv} -> result:${(a + dstBuf[dstOff + 3] * inv) >> 8}`);
       dstBuf[dstOff + 3] = Math.min(255, a + (((dstBuf[dstOff + 3] * inv + 127) * 257) >> 16));
       dstOff += 4;
     }

@@ -33,8 +33,6 @@ async function createResource(originalPath: string) {
 
   const { width, height, blobUrl } = await loadImageMeta(destPath);
 
-  console.log(width, canvasStore.canvas.width, Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height));
-
   const entry: ImagePoolEntry = {
     id,
     originalPath,

@@ -41,7 +41,6 @@ export default () => {
 
   onCleanup(() => {
     if (interact !== undefined && !import.meta.hot) {
-      console.log('yeah removed, ', import.meta.hot);
       interact.removeInteractListeners();
     }
   });

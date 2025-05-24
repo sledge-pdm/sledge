@@ -1,11 +1,11 @@
 import { path } from '@tauri-apps/api';
 import { save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, mkdir, writeTextFile } from '@tauri-apps/plugin-fs';
+import { getAgentOf } from '~/controllers/canvas/layer/LayerAgentManager';
+import { findLayerById } from '~/controllers/canvas/layer/LayerListController';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { findLayerById } from '~/controllers/layer/LayerListController';
-import { canvasStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore, imagePoolStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl } from '~/utils/DataUtils';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import genFileId from './genFileId';
@@ -57,8 +57,9 @@ export async function saveProject(name?: string, existingPath?: string) {
 
 export const parseCurrentProject = async (): Promise<string> => {
   const base = {
-    project: projectStore,
     canvas: canvasStore.canvas,
+    project: projectStore,
+    imagePool: imagePoolStore,
     images: Object.fromEntries(
       Object.entries(layerHistoryStore).map(([id, state]) => {
         const agent = getAgentOf(id);

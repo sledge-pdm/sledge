@@ -10,11 +10,11 @@ import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
 import TopMenuBar from '~/components/global/TopMenuBar';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { addLayer } from '~/controllers/layer/LayerListController';
+import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
+import { addLayer } from '~/controllers/canvas/layer/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
 import { importProjectFromPath } from '~/io/project/importProject';
-import { LayerType } from '~/models/layer/Layer';
+import { LayerType } from '~/models/canvas/layer/Layer';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
@@ -22,7 +22,7 @@ import { flexCol } from '~/styles/snippets.css';
 import { emitEvent, listenEvent } from '~/utils/TauriUtils';
 
 export default function Editor() {
-  const window = getCurrentWebviewWindow();
+  const wvWindow = getCurrentWebviewWindow();
   const location = useLocation();
 
   createEffect(() => {
@@ -88,7 +88,7 @@ export default function Editor() {
       loadGlobalSettings();
     });
 
-    unlisten = await window.onCloseRequested(async (event) => {
+    unlisten = await wvWindow.onCloseRequested(async (event) => {
       if (projectStore.isProjectChangedAfterSave) {
         const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
           okLabel: 'quit w/o save.',
@@ -103,6 +103,10 @@ export default function Editor() {
 
   onCleanup(() => {
     unlisten();
+
+    if (import.meta.hot) {
+      window.location.reload();
+    }
   });
 
   return (

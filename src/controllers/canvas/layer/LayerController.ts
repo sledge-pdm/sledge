@@ -1,9 +1,9 @@
-import { getAgentOf, layerAgentManager } from '~/controllers/layer/LayerAgentManager';
-import { Layer } from '~/models/layer/Layer';
+import { Layer } from '~/models/canvas/layer/Layer';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
 import { emitEvent } from '~/utils/TauriUtils';
-import { adjustZoomToFit } from '../canvas/CanvasController';
+import { adjustZoomToFit } from '../CanvasController';
 import LayerImageAgent from './image/LayerImageAgent';
+import { getAgentOf, layerAgentManager } from './LayerAgentManager';
 import { findLayerById } from './LayerListController';
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
@@ -23,6 +23,13 @@ export function getActiveLayerIndex(): number {
 
 export function getLayerIndex(layerId: string) {
   return layerListStore.layers.findIndex((l) => l.id === layerId);
+}
+
+export function setImagePoolActive(active: boolean) {
+  setLayerListStore('isImagePoolActive', active);
+}
+export function isImagePoolActive() {
+  return layerListStore.isImagePoolActive;
 }
 
 export const resetAllLayers = (e: any) => {

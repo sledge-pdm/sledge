@@ -6,9 +6,9 @@ import { Tool } from '../../models/tool/Tool';
 import { getToolInstance } from '../../tools/ToolBase';
 import { DrawState } from '../../types/DrawState';
 import { currentColor } from '../color/ColorController';
-import LayerImageAgent from '../layer/image/LayerImageAgent';
-import { getAgentOf } from '../layer/LayerAgentManager';
-import { findLayerById } from '../layer/LayerListController';
+import LayerImageAgent from './layer/image/LayerImageAgent';
+import { getAgentOf } from './layer/LayerAgentManager';
+import { findLayerById } from './layer/LayerListController';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}

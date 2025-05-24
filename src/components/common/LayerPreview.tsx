@@ -1,7 +1,7 @@
 import { Component, onMount } from 'solid-js';
+import { getAgentOf } from '~/controllers/canvas/layer/LayerAgentManager';
 import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { Layer } from '~/models/layer/Layer';
+import { Layer } from '~/models/canvas/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
 import { listenEvent } from '~/utils/TauriUtils';

@@ -18,9 +18,9 @@ export const wrapper = style({
   maxWidth: '90vw',
   background: vars.color.primary,
   borderRadius: vars.size.dialog_radius,
-  boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+  boxShadow: '0 2px 16px #FFFFFF20',
   zIndex: 1001,
-  overflow: 'hidden',
+  overflow: 'visible',
 });
 
 export const header = style({

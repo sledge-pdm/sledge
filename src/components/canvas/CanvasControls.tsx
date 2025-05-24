@@ -1,16 +1,20 @@
 import * as styles from '@styles/components/canvas/canvas_controls.css';
 import { Component } from 'solid-js';
 import { getAgentOf } from '~/controllers/canvas/layer/LayerAgentManager';
-import { canRedo, canUndo } from '~/controllers/canvas/layer/LayerController';
+import { canUndo } from '~/controllers/canvas/layer/LayerController';
 
 import { layerListStore } from '~/stores/ProjectStores';
+import { vars } from '~/styles/global.css';
+import Icon from '../common/Icon';
 
 const CanvasControls: Component = () => {
   return (
     <div class={styles.topRightNav}>
-      <img
+      <Icon
         class={styles.undoRedo}
-        src='/icons/misc/undo.png'
+        src={'/icons/misc/undo.png'}
+        base={12}
+        color={vars.color.onBackground}
         style={{
           opacity: canUndo() ? '1.0' : '0.3',
           cursor: canUndo() ? 'pointer' : 'unset',
@@ -21,12 +25,14 @@ const CanvasControls: Component = () => {
           getAgentOf(layerListStore.activeLayerId)?.undo();
         }}
       />
-      <img
+      <Icon
         class={styles.undoRedo}
         src='/icons/misc/redo.png'
+        base={12}
+        color={vars.color.onBackground}
         style={{
-          opacity: canRedo() ? '1.0' : '0.3',
-          cursor: canRedo() ? 'pointer' : 'unset',
+          opacity: canUndo() ? '1.0' : '0.3',
+          cursor: canUndo() ? 'pointer' : 'unset',
         }}
         onClick={(e) => {
           e.preventDefault();

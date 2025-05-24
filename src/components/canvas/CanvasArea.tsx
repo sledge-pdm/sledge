@@ -70,7 +70,7 @@ export default () => {
           style={{
             width: 'fit-content',
             height: 'fit-content',
-            'background-color': vars.color.bg_canvas,
+            'background-color': vars.color.canvas,
             padding: 0,
             margin: 0,
             'transform-origin': '0 0',

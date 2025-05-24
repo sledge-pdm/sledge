@@ -28,7 +28,7 @@ export const toggleTrack = style({
   width: `${globalWidth}px`,
   height: `${globalHeight}px`,
   backgroundColor: vars.color.muted,
-  border: '1px solid black',
+  border: `1px solid ${vars.color.button.border}`,
   borderRadius: '0px',
   position: 'relative',
   transition: 'background-color 0.05s',
@@ -41,8 +41,8 @@ export const toggleThumb = style({
   left: '-1px',
   width: `${thumbWidth - thumbPadding}px`,
   height: `${globalHeight}px`,
-  backgroundColor: vars.color.button.bg,
-  border: '1px solid black',
+  backgroundColor: 'white',
+  border: `1px solid ${vars.color.button.border}`,
   borderRadius: '0px',
   transition: 'transform 0.02s',
 });
@@ -51,7 +51,7 @@ export const toggleThumb = style({
 
 /* input が :checked のとき隣接する track を赤系へ */
 globalStyle(`${toggleInput}:checked + ${toggleTrack}`, {
-  backgroundColor: vars.color.error,
+  backgroundColor: vars.color.active,
 });
 
 /* さらに thumb を右へスライド */

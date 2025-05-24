@@ -1,5 +1,6 @@
 import { Component } from 'solid-js';
 import { currentColor } from '~/controllers/color/ColorController';
+import { vars } from '~/styles/global.css';
 
 interface ColorBoxProps {
   class?: string;
@@ -31,7 +32,7 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
           'justify-content': 'center',
           cursor: 'pointer',
           'background-color': props.color,
-          border: isWhiteOrNone() || isSelected() ? '0.05rem solid black' : '0.05rem solid transparent',
+          border: isWhiteOrNone() || isSelected() ? `0.05rem solid ${vars.color.onBackground}` : '0.05rem solid transparent',
         }}
         onClick={() => {
           onColorClicked(props.color);

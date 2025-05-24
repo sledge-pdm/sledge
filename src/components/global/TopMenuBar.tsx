@@ -1,4 +1,4 @@
-import * as styles from '@styles/components/globals/top_menu_bar.css';
+import * as styles from '@styles/globals/top_menu_bar.css';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
 import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';

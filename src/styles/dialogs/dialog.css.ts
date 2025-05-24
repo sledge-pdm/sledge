@@ -1,6 +1,7 @@
 // src/components/common/Dialog.css.ts
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB31 } from '~/styles/global.css';
+import { ZFB31 } from '~/styles/global.css';
+import { vars } from '../global.css';
 import { flexRow, w100 } from '../snippets.css';
 
 export const overlay = style({
@@ -18,7 +19,7 @@ export const wrapper = style({
   maxWidth: '90vw',
   background: vars.color.background,
   borderRadius: vars.size.dialogRadius,
-  boxShadow: '0 2px 16px #FFFFFF20',
+  boxShadow: '0 2px 24px #FFFFFF20',
   zIndex: 1001,
   overflow: 'visible',
 });

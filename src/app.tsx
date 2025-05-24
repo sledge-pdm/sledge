@@ -8,7 +8,7 @@ import About from './routes/about';
 import Editor from './routes/editor';
 
 import Settings from './routes/settings';
-import { theme } from './stores/Theme';
+import { getTheme } from './stores/Theme';
 import { flexCol, h100 } from './styles/snippets.css';
 
 export default function App() {
@@ -17,7 +17,7 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <div class={[flexCol, h100, theme()].join(' ')}>
+          <div class={[flexCol, h100, getTheme()].join(' ')}>
             <TitleBar />
 
             <Suspense>

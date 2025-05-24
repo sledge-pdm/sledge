@@ -1,22 +1,19 @@
-import { createEffect, createSignal } from 'solid-js';
 import { darkTheme, lightTheme } from '~/styles/global.css';
 import { globalConfig } from './GlobalStores';
-export const [theme, setTheme] = createSignal<string>(lightTheme);
 
-createEffect(() => {
+export const getTheme = () => {
   const storeTheme = globalConfig.misc.theme;
-  switch (globalConfig.misc.theme) {
+  switch (storeTheme) {
     case 'os':
       // OS設定を初期値に
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      setTheme(mq.matches ? darkTheme : lightTheme);
-      mq.addEventListener('change', (e) => setTheme(e.matches ? 'dark' : 'light'));
+      return mq.matches ? darkTheme : lightTheme;
       break;
     case 'light':
-      setTheme(lightTheme);
+      return lightTheme;
       break;
     case 'dark':
-      setTheme(darkTheme);
+      return darkTheme;
       break;
   }
-});
+};

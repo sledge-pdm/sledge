@@ -75,7 +75,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       {/* <DSLButton /> */}
       <div
         class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
-        // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
         onClick={onDetClicked}
         onContextMenu={(e) => {
           e.preventDefault();

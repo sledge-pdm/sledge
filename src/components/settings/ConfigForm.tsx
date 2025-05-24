@@ -54,7 +54,7 @@ function getParsedValueFromMetaPath(meta: FieldMeta) {
 function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) {
   const { meta } = props;
 
-  const value = getValueFromMetaPath(meta);
+  const value = () => getValueFromMetaPath(meta);
 
   // ─┬─ setGlobalConfig の呼び出し
   //  └─ path タプルを any[] にキャストしてから spread
@@ -69,7 +69,7 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
     case 'Slider':
       return (
         <Slider
-          defaultValue={value}
+          defaultValue={value()}
           min={meta.props?.min ?? 0}
           max={meta.props?.max ?? 0}
           labelMode={componentProps.get('Slider')?.labelMode ?? 'left'}
@@ -80,11 +80,11 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
         />
       );
     case 'CheckBox':
-      return <Checkbox id={meta.path.toString()} checked={value} onChange={onChange} />;
+      return <Checkbox id={meta.path.toString()} checked={value()} onChange={onChange} />;
     case 'RadioButton':
-      return <RadioButton id={meta.path.toString()} value={value} onChange={onChange} {...meta.props} />;
+      return <RadioButton id={meta.path.toString()} value={value()} onChange={onChange} {...meta.props} />;
     case 'ToggleSwitch':
-      return <ToggleSwitch id={meta.path.toString()} checked={value} onChange={onChange} />;
+      return <ToggleSwitch id={meta.path.toString()} checked={value()} onChange={onChange} />;
   }
 }
 

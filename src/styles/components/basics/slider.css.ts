@@ -45,7 +45,7 @@ export const lineHitbox = style({
 });
 
 export const line = style({
-  backgroundColor: vars.color.control,
+  backgroundColor: vars.color.onBackground,
   display: 'flex',
   height: '1px',
   pointerEvents: 'none', // イベントは親に任せる
@@ -53,7 +53,7 @@ export const line = style({
 });
 
 export const handle = style({
-  backgroundColor: vars.color.control,
+  backgroundColor: vars.color.onBackground,
   height: '8px',
   left: '50%',
   pointerEvents: 'none',

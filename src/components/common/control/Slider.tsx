@@ -45,16 +45,12 @@ const Slider: Component<SliderProps> = (props) => {
 
   const handlePointerDown = () => {
     setDrag(true);
-    console.log('down');
   };
 
   const handlePointerMove = (e: PointerEvent) => {
     if (!sliderRef || !isDrag()) {
       setDrag(false);
-      console.log('move but cancel');
-      return;
     } else {
-      console.log('move accept');
       const { left, width } = sliderRef.getBoundingClientRect();
       let pos = Math.max(0, Math.min(e.clientX - left, width));
       const raw = props.min + (pos / width) * (props.max - props.min);
@@ -64,7 +60,6 @@ const Slider: Component<SliderProps> = (props) => {
   };
 
   const cancelHandling = () => {
-    console.log(' cancel');
     setDrag(false);
   };
 

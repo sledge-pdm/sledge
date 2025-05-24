@@ -91,7 +91,7 @@ export const activeLight = style([
 
 export const dropPlaceholder = style([
   {
-    border: '2px dashed #aaa',
+    border: `2px dashed ${vars.color.border}`,
     borderRadius: vars.spacing.md,
     height: '32px',
     margin: `${vars.spacing.xs}px 0`,

@@ -5,7 +5,7 @@ import Palette from './item/Palette';
 
 import { setCurrentColor } from '~/controllers/color/ColorController';
 import { colorStore } from '~/stores/EditorStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { swatchContainer } from '~/styles/section/color.css';
 import { flexCol } from '~/styles/snippets.css';
 

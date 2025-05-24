@@ -5,7 +5,7 @@ import { flexCol } from '../../snippets.css';
 export const canvasArea = style([
   flexCol,
   {
-    backgroundColor: vars.color.bg_canvas_area,
+    backgroundColor: vars.color.canvasArea,
     display: 'flex',
     position: 'relative',
     height: '100%',

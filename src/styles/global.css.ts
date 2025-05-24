@@ -10,6 +10,12 @@ export const ZFB03B = fontFace({ src: 'url("/fonts/04B/04B_03B_.ttf")' });
 export const ZFB08 = fontFace({ src: 'url("/fonts/04B/04B_08__.ttf")' });
 export const ZFB09 = fontFace({ src: 'url("/fonts/04B/04B_09__.ttf")' });
 export const ZFB11 = fontFace({ src: 'url("/fonts/04B/04B_11__.ttf")' });
+export const ZFB19 = fontFace({ src: 'url("/fonts/04B/04B_19__.ttf")' });
+export const ZFB20 = fontFace({ src: 'url("/fonts/04B/04B_20__.ttf")' });
+export const ZFB21 = fontFace({ src: 'url("/fonts/04B/04B_21__.ttf")' });
+export const ZFB24 = fontFace({ src: 'url("/fonts/04B/04B_24__.ttf")' });
+export const ZFB25 = fontFace({ src: 'url("/fonts/04B/04B_25__.ttf")' });
+export const ZFB30 = fontFace({ src: 'url("/fonts/04B/04B_30__.ttf")' });
 export const ZFB31 = fontFace({ src: 'url("/fonts/04B/04B_31__.ttf")' });
 export const Terminus = fontFace({ src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")' });
 export const k8x12 = fontFace({ src: 'url("/fonts/k8x12/k8x12.ttf")' });
@@ -32,6 +38,7 @@ export const vars = createThemeContract({
     onBackground: null,
     border: null,
     accent: null,
+    active: null,
     muted: null,
     error: null,
     button: {
@@ -110,6 +117,7 @@ export const lightTheme = createTheme(vars, {
     onBackground: '#000000DE',
     border: '#aaaaaa',
     accent: '#0000ff',
+    active: '#ff0000',
     muted: 'rgba(0,0,0,0.19)',
     error: '#ff0000',
     button: {
@@ -132,6 +140,7 @@ export const darkTheme = createTheme(vars, {
     onBackground: '#eeeeee',
     border: '#666666',
     accent: '#ffff00',
+    active: '#00ff00',
     muted: 'rgba(255,255,255,0.30)',
     error: '#ff5f5f',
     button: {
@@ -204,7 +213,8 @@ export const accentedButton = style({
     background: vars.color.accent,
   },
   ':disabled': {
-    color: '#bbbbbb',
+    color: vars.color.muted,
+    border: `1px solid ${vars.color.muted}`,
     pointerEvents: 'none',
   },
 });

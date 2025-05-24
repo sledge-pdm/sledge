@@ -1,6 +1,6 @@
 import { Component } from 'solid-js';
 
-import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/components/globals/edge_info.css';
+import { edgeInfoItem, edgeInfoRoot, edgeInfoText } from '~/styles/globals/edge_info.css';
 import { safeInvoke } from '~/utils/TauriUtils';
 
 const EdgeInfo: Component = () => {

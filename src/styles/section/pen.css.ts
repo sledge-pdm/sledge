@@ -16,6 +16,8 @@ export const toolConfigRowClickable = style([
     gap: vars.spacing.md,
     alignItems: 'center',
     width: '35%',
+    pointerEvents: 'all',
+    cursor: 'pointer',
   },
 ]);
 
@@ -23,7 +25,6 @@ export const toolConfigRowName = style({
   cursor: 'pointer',
   fontSize: vars.text.sm,
   padding: `${vars.spacing.md} 0`,
-  pointerEvents: 'all',
 });
 
 export const toolConfigRowIcon = style({

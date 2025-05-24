@@ -2,19 +2,17 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { projectStore } from '~/stores/ProjectStores';
+import { vars } from '~/styles/global.css';
 import {
-  titleBarControlButtonCloseImg,
-  titleBarControlButtonMaximizeImg,
-  titleBarControlButtonMinimizeImg,
-  titleBarControlCloseButton,
-  titleBarControlMaximizeButton,
-  titleBarControlMinimizeButton,
+  titleBarControlButtonContainer,
+  titleBarControlButtonImg,
+  titleBarControlCloseButtonContainer,
   titleBarControls,
   titleBarRoot,
   titleBarTitle,
-} from '~/styles/components/globals/title_bar.css';
-
+} from '~/styles/globals/title_bar.css';
 import '~/styles/tile_bar_region.css';
+import Icon from '../common/Icon';
 
 export default function TitleBar() {
   const window = getCurrentWindow();
@@ -69,7 +67,7 @@ export default function TitleBar() {
     <header
       style={{
         'pointer-events': 'all',
-        'border-bottom': shouldShowBorder() ? '1px solid #aaa' : 'none',
+        'border-bottom': shouldShowBorder() ? `1px solid ${vars.color.border}` : 'none',
       }}
     >
       <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
@@ -79,46 +77,51 @@ export default function TitleBar() {
 
         <div class={titleBarControls} data-tauri-drag-region-exclude>
           <Show when={isMinimizable()}>
-            <button
-              class={titleBarControlMinimizeButton}
-              onClick={async (e) => {
-                e.preventDefault();
-                await window.minimize();
-              }}
-              data-tauri-drag-region-exclude
-            >
-              <img class={titleBarControlButtonMinimizeImg} src={'/icons/title_bar/minimize_2.png'} data-tauri-drag-region-exclude />
-            </button>
+            <div class={titleBarControlButtonContainer}>
+              <Icon
+                class={titleBarControlButtonImg}
+                src={'/icons/title_bar/minimize_2.png'}
+                color={vars.color.onBackground}
+                base={12}
+                data-tauri-drag-region-exclude
+                onClick={async (e) => {
+                  e.preventDefault();
+                  await window.minimize();
+                }}
+              />
+            </div>
           </Show>
 
           <Show when={isMaximizable()}>
-            <button
-              class={titleBarControlMaximizeButton}
-              onClick={async (e) => {
-                e.preventDefault();
-                await window.toggleMaximize();
-              }}
-              data-tauri-drag-region-exclude
-            >
-              <img
-                class={titleBarControlButtonMaximizeImg}
+            <div class={titleBarControlButtonContainer}>
+              <Icon
+                class={titleBarControlButtonImg}
                 src={isMaximized() ? '/icons/title_bar/quit_maximize_2.png' : '/icons/title_bar/maximize_2.png'}
+                color={vars.color.onBackground}
+                base={12}
                 data-tauri-drag-region-exclude
+                onClick={async (e) => {
+                  e.preventDefault();
+                  await window.toggleMaximize();
+                }}
               />
-            </button>
+            </div>
           </Show>
 
           <Show when={isClosable()}>
-            <button
-              class={titleBarControlCloseButton}
-              onClick={async (e) => {
-                e.preventDefault();
-                await window.close();
-              }}
-              data-tauri-drag-region-exclude
-            >
-              <img class={titleBarControlButtonCloseImg} src={'/icons/title_bar/close_2.png'} data-tauri-drag-region-exclude />
-            </button>
+            <div class={titleBarControlCloseButtonContainer}>
+              <Icon
+                class={titleBarControlButtonImg}
+                src={'/icons/title_bar/close_2.png'}
+                color={vars.color.onBackground}
+                base={12}
+                data-tauri-drag-region-exclude
+                onClick={async (e) => {
+                  e.preventDefault();
+                  await window.close();
+                }}
+              />
+            </div>
           </Show>
         </div>
       </nav>

@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
-import { vars } from '../../global.css';
-import { flexRow, w100 } from '../../snippets.css';
+import { vars } from '../global.css';
+import { flexRow, w100 } from '../snippets.css';
 
 export const bottomInfoRoot = style([
   flexRow,

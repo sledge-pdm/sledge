@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { k12x8, Terminus, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css';
+import { k12x8, Terminus, ZFB03, ZFB31 } from '~/styles/global.css';
 import { flexCol } from '~/styles/snippets.css';
 
 export const aaContainer = style([
@@ -53,12 +53,12 @@ export const aboutSubTitle = style({
 });
 
 export const aboutDev = style({
-  fontFamily: ZFB08,
+  fontFamily: ZFB03,
   fontSize: '8px',
 });
 
 export const aboutContent = style({
-  fontFamily: ZFB08,
+  fontFamily: ZFB03,
   fontSize: '8px',
   lineHeight: 1.6,
 });

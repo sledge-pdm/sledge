@@ -10,7 +10,7 @@ import { saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { CanvasExportOptions, defaultExportDir, exportableFileTypes, exportCanvas } from '~/io/image_export/exportCanvas';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
-import { vars } from '~/styles/global.css';
+import { vars, ZFB08 } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { Dialog, DialogExternalProps } from '../Dialog';
 
@@ -47,7 +47,7 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
   const finalScale = () => (settings.exportOptions.scale !== 0 ? settings.exportOptions.scale : customScale()) ?? 1;
 
   onMount(async () => {
-    if (settings.dirPath === '') setSettings('dirPath', await defaultExportDir());
+    if (settings.dirPath === '' || !settings.dirPath) setSettings('dirPath', await defaultExportDir());
   });
 
   const openDirSelectionDialog = async () => {
@@ -109,7 +109,7 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
           {/* <p class={styles.header}>EXPORT.</p> */}
 
           <div class={styles.field}>
-            <div class={flexRow} style={{ 'align-items': 'center', gap: '8px', 'margin-bottom': vars.spacing.sm }}>
+            <div class={flexRow} style={{ 'align-items': 'center', gap: '8px', 'margin-bottom': '8px' }}>
               <p class={styles.fieldHeader} style={{ 'margin-bottom': 0, 'flex-grow': 1 }}>
                 Output Directory.
               </p>
@@ -120,14 +120,22 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
                 labelMode='left'
               />
             </div>
-            <div style={{ 'align-items': 'center', gap: '12px', width: '300px' }} class={flexRow}>
+            <div style={{ 'align-items': 'center', gap: '12px' }} class={flexRow}>
               <p style={{ 'flex-grow': 1, 'text-overflow': 'ellipsis' }}>{settings.dirPath}</p>
               <button onClick={openDirSelectionDialog}>...</button>
             </div>
 
-            <input style={{ 'font-size': '16px' }} value={settings.fileName} onChange={(e) => setSettings('fileName', e.target.value)} />
+            <div class={flexRow} style={{ 'align-items': 'end', 'margin-bottom': vars.spacing.sm }}>
+              <p class={styles.fileName}>\</p>
+              <input
+                class={styles.fileName}
+                style={{ 'field-sizing': 'content' }}
+                value={settings.fileName}
+                onChange={(e) => setSettings('fileName', e.target.value)}
+              />
+              <p style={{ 'font-size': vars.text.md, 'font-family': ZFB08 }}>.{settings.exportOptions.format}</p>
+            </div>
           </div>
-
           <div class={styles.field}>
             <p class={styles.fieldHeader}>Type.</p>
             <Dropdown options={fileTypeOptions} value={settings.exportOptions.format} onChange={(e) => setSettings('exportOptions', 'format', e)} />

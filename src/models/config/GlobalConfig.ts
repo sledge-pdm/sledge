@@ -1,3 +1,4 @@
+import { FileLocation } from '~/types/FileLocation';
 import { Consts } from '~/utils/consts';
 import { CanvasRenderingMode } from '../canvas/Canvas';
 import { ConfigComponentName } from './ConfigComponents';
@@ -5,6 +6,7 @@ import { Theme } from './config_type/Theme';
 
 export type GlobalConfig = {
   misc: {
+    recentFiles: FileLocation[];
     theme: Theme;
   };
   newProject: {
@@ -21,6 +23,7 @@ export type GlobalConfig = {
 };
 export const defaultConfig: GlobalConfig = {
   misc: {
+    recentFiles: [],
     theme: 'os',
   },
   newProject: {

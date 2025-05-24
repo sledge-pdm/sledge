@@ -1,7 +1,7 @@
 import { Component } from 'solid-js';
 import { interactStore, logStore } from '~/stores/EditorStores';
 
-import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/components/globals/bottom_info.css';
+import { bottomInfoRoot, bottomInfoText as bottomInfoTextStyle } from '~/styles/globals/bottom_info.css';
 import { openWindow } from '~/utils/WindowUtils';
 
 const BottomInfo: Component = () => {

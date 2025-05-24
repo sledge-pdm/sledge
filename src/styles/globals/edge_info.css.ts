@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
-import { vars } from '../../global.css';
-import { flexCol, flexRow } from '../../snippets.css';
+import { vars } from '../global.css';
+import { flexCol, flexRow } from '../snippets.css';
 
 export const edgeInfoRoot = style([
   flexCol,
@@ -12,7 +12,7 @@ export const edgeInfoRoot = style([
     gap: '10px',
     paddingTop: '32px',
     paddingBottom: '16px',
-    width: vars.size.edge_info,
+    width: vars.size.edgeInfo,
     justifyContent: 'end',
     alignItems: 'center',
   },

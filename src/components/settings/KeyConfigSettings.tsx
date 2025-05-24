@@ -11,8 +11,8 @@ import {
 import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { keyConfigName } from '~/styles/components/config/key_config_settings.css';
-import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
+import { sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { KeyConfigCommands } from '~/utils/consts';
 

@@ -2,7 +2,7 @@
 import * as styles from '@styles/dialogs/dialog.css';
 import { For, JSX, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
-import { theme } from '~/stores/Theme';
+import { getTheme } from '~/stores/Theme';
 import { accentedButton } from '~/styles/global.css';
 
 export interface DialogExternalProps {
@@ -35,7 +35,7 @@ export function Dialog(props: DialogInternalProps) {
 
   return (
     <Portal>
-      <div class={theme()}>
+      <div class={getTheme()}>
         <div
           class={styles.overlay}
           onClick={(e) => {

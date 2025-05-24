@@ -1,6 +1,7 @@
 import * as styles from '@styles/section/section_top_menu.css';
 import { Component, For, Show } from 'solid-js';
 import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
+import { vars } from '~/styles/global.css';
 
 interface Item {
   text: string;
@@ -34,7 +35,7 @@ const SectionTopMenu: Component = () => {
             return (
               <>
                 <div ref={(el) => (containerRef = el)} class={styles.menuItem}>
-                  <a onClick={(e) => item.action()} style={{ color: item.isActive() ? 'blue' : undefined }}>
+                  <a onClick={(e) => item.action()} style={{ color: item.isActive() ? vars.color.accent : undefined }}>
                     {item.text}
                   </a>
                 </div>

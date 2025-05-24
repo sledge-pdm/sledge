@@ -18,6 +18,8 @@
     "fs:allow-open",
     "fs:allow-write",
     "fs:allow-write-file",
+    "fs:allow-app-read",
+    "fs:allow-app-write",
     "fs:allow-read",
     "fs:allow-rename",
     "fs:allow-mkdir",

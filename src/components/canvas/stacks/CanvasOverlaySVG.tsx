@@ -1,5 +1,5 @@
 import { Component, For } from 'solid-js';
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -25,7 +25,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         'pointer-events': 'none',
         'image-rendering': 'pixelated',
         'shape-rendering': 'geometricPrecision',
-        'z-index': 1000,
+        'z-index': 150,
       }}
     >
       {/* border rect */}

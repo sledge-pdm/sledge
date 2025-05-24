@@ -7,7 +7,6 @@ export const root = style([
   w100,
   {
     position: 'fixed',
-    backgroundColor: vars.color.bg,
     borderBottom: '1px solid #999',
     height: '28px',
     alignItems: 'center',
@@ -29,7 +28,7 @@ export const menuListLeft = style([
     flexGrow: 1,
     alignItems: 'center',
     gap: vars.spacing.xl,
-    paddingLeft: '34px',
+    paddingLeft: '36px',
   },
 ]);
 

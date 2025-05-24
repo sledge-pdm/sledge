@@ -6,7 +6,6 @@ export const titleBarRoot = style([
   flexRow,
   w100,
   {
-    background: '#fff',
     pointerEvents: 'all',
     height: '26px',
     // borderBottom: "1px solid #aaa",

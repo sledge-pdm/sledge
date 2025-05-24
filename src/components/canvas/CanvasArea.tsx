@@ -7,6 +7,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
+import { vars } from '~/styles/global.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
@@ -70,6 +71,7 @@ export default () => {
           style={{
             width: 'fit-content',
             height: 'fit-content',
+            'background-color': vars.color.bg_canvas,
             padding: 0,
             margin: 0,
             'transform-origin': '0 0',

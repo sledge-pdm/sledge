@@ -14,7 +14,7 @@ export const customRadio = style({
   width: '10px',
   height: '10px',
   border: '1px solid #000',
-  borderRadius: '0px', // 今は四角、丸くしたかったら '50%' にするだけ
+  borderRadius: '0px',
   marginLeft: '8px',
   display: 'inline-block',
   position: 'relative',

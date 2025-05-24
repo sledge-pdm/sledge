@@ -1,12 +1,11 @@
-import { FileLocation } from '~/types/FileLocation';
 import { Consts } from '~/utils/consts';
 import { CanvasRenderingMode } from '../canvas/Canvas';
 import { ConfigComponentName } from './ConfigComponents';
+import { Theme } from './config_type/Theme';
 
 export type GlobalConfig = {
   misc: {
-    maxRecentFiles: number;
-    recentFiles: FileLocation[];
+    theme: Theme;
   };
   newProject: {
     canvasSize: { width: number; height: number };
@@ -22,8 +21,7 @@ export type GlobalConfig = {
 };
 export const defaultConfig: GlobalConfig = {
   misc: {
-    maxRecentFiles: 8,
-    recentFiles: [],
+    theme: 'os',
   },
   newProject: {
     canvasSize: { width: 1000, height: 1000 },
@@ -58,11 +56,17 @@ export type FieldMeta = {
 export const settingsMeta = [
   {
     section: Sections.General,
-    path: ['misc', 'maxRecentFiles'],
-    label: 'max recent files count',
-    component: 'Slider',
-    props: { min: 1, max: 20, step: 1 },
-    tips: 'the max count of "recently opened files" history.',
+    path: ['misc', 'theme'],
+    label: 'global theme',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: 'os theme', value: 'os' },
+        { label: 'light', value: 'light' },
+        { label: 'dark', value: 'dark' },
+      ],
+    },
+    tips: 'global theme of sledge.',
   },
 
   {

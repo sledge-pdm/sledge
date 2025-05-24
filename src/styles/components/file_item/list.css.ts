@@ -8,7 +8,7 @@ export const rflThumb = style([
     alignItems: 'center',
     justifyContent: 'center',
     border: `1px solid ${vars.color.border}`,
-    backgroundColor: vars.color.primary,
+    backgroundColor: vars.color.background,
     maxWidth: `150px`,
     maxHeight: `150px`,
     opacity: 0.8,

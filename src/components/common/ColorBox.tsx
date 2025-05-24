@@ -1,6 +1,5 @@
 import { Component } from 'solid-js';
 import { currentColor } from '~/controllers/color/ColorController';
-import { sayRandomQuote } from './companion/QuotePool';
 
 interface ColorBoxProps {
   class?: string;
@@ -17,7 +16,6 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
   const isWhiteOrNone = () => props.color === 'none' || props.color.toLowerCase() === '#ffffff';
 
   const onColorClicked = (color: string) => {
-    sayRandomQuote('color-pick', { color: color });
     if (props.onClick) props.onClick(color);
   };
 

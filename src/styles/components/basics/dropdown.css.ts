@@ -13,7 +13,7 @@ export const dropdownContainer = style({
 export const triggerButton = style([
   flexRow,
   {
-    backgroundColor: vars.color.primary,
+    backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
     padding: '3px 11px 4px 11px',
     width: 'fit-content',
@@ -26,8 +26,8 @@ export const triggerButton = style([
       transform: 'none',
     },
     selectors: {
-      '&:hover': { backgroundColor: vars.color.button_hover },
-      '&:active': { backgroundColor: vars.color.button_pressed },
+      '&:hover': { backgroundColor: vars.color.button.hover },
+      '&:active': { backgroundColor: vars.color.button.hover },
     },
   },
 ]);
@@ -40,7 +40,7 @@ export const menuStyle = style([
     top: '100%',
     left: 0,
     zIndex: 10,
-    backgroundColor: vars.color.primary,
+    backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
     marginTop: '0px',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
@@ -62,6 +62,6 @@ export const menuItem = style({
 
 export const itemText = style({
   whiteSpace: 'break-spaces',
-  color: vars.color.text,
+  color: vars.color.onBackground,
   width: '100%',
 });

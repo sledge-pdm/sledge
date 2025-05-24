@@ -17,6 +17,7 @@ globalStyle('main', {
   height: '100%',
   width: '100vw',
   userSelect: 'none',
+  backgroundColor: vars.color.background,
 });
 
 globalStyle('p, a, label', {
@@ -38,7 +39,7 @@ globalStyle('input', {
   border: 'none',
   outline: 'none',
   background: 'none',
-  borderBottom: `1px solid ${vars.color.control}`,
+  borderBottom: `1px solid ${vars.color.onBackground}`,
   fontSize: '0.5rem',
   userSelect: 'initial',
   WebkitUserSelect: 'initial',

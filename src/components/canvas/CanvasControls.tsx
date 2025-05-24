@@ -10,36 +10,38 @@ import Icon from '../common/Icon';
 const CanvasControls: Component = () => {
   return (
     <div class={styles.topRightNav}>
-      <Icon
-        class={styles.undoRedo}
-        src={'/icons/misc/undo.png'}
-        base={12}
-        color={vars.color.onBackground}
-        style={{
-          opacity: canUndo() ? '1.0' : '0.3',
-          cursor: canUndo() ? 'pointer' : 'unset',
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          getAgentOf(layerListStore.activeLayerId)?.undo();
-        }}
-      />
-      <Icon
-        class={styles.undoRedo}
-        src='/icons/misc/redo.png'
-        base={12}
-        color={vars.color.onBackground}
-        style={{
-          opacity: canUndo() ? '1.0' : '0.3',
-          cursor: canUndo() ? 'pointer' : 'unset',
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          getAgentOf(layerListStore.activeLayerId)?.redo();
-        }}
-      />
+      <div class={styles.undoRedo}>
+        <Icon
+          src={'/icons/misc/undo.png'}
+          base={24}
+          color={vars.color.onBackground}
+          style={{
+            opacity: canUndo() ? '1.0' : '0.3',
+            cursor: canUndo() ? 'pointer' : 'unset',
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            getAgentOf(layerListStore.activeLayerId)?.undo();
+          }}
+        />
+      </div>
+      <div class={styles.undoRedo}>
+        <Icon
+          src='/icons/misc/redo.png'
+          base={24}
+          color={vars.color.onBackground}
+          style={{
+            opacity: canUndo() ? '1.0' : '0.3',
+            cursor: canUndo() ? 'pointer' : 'unset',
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            getAgentOf(layerListStore.activeLayerId)?.redo();
+          }}
+        />
+      </div>
     </div>
   );
 };

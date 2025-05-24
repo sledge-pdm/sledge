@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/canvas/layer/image/LayerImageAgent';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
 import { ToolArgs, ToolBehavior } from '../ToolBase';

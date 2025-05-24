@@ -2,11 +2,13 @@ import { FileLocation } from '~/types/FileLocation';
 import { Consts } from '~/utils/consts';
 import { CanvasRenderingMode } from '../canvas/Canvas';
 import { ConfigComponentName } from './ConfigComponents';
-import { Theme } from './config_type/Theme';
+import { Theme } from './types/Theme';
 
 export type GlobalConfig = {
   misc: {
     recentFiles: FileLocation[];
+  };
+  appearance: {
     theme: Theme;
   };
   newProject: {
@@ -24,6 +26,8 @@ export type GlobalConfig = {
 export const defaultConfig: GlobalConfig = {
   misc: {
     recentFiles: [],
+  },
+  appearance: {
     theme: 'os',
   },
   newProject: {
@@ -56,18 +60,21 @@ export type FieldMeta = {
   customFormat?: string; // format: [value] => value
 };
 
+export const themeOptions = [
+  { label: 'os theme', value: 'os' },
+  { label: 'light', value: 'light' },
+  { label: 'dark', value: 'dark' },
+  { label: 'dark-gy-flip', value: 'dark-gy-flip' },
+];
+
 export const settingsMeta = [
   {
     section: Sections.General,
-    path: ['misc', 'theme'],
+    path: ['appearance', 'theme'],
     label: 'global theme',
     component: 'Dropdown',
     props: {
-      options: [
-        { label: 'os theme', value: 'os' },
-        { label: 'light', value: 'light' },
-        { label: 'dark', value: 'dark' },
-      ],
+      options: themeOptions,
     },
     tips: 'global theme of sledge.',
   },

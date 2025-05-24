@@ -15,7 +15,6 @@ import '~/styles/tile_bar_region.css';
 import Icon from '../common/Icon';
 
 export default function TitleBar() {
-  const window = getCurrentWindow();
   let titleBarNavEl: HTMLElement;
 
   const [isMaximizable, setIsMaximizable] = createSignal(false);
@@ -26,6 +25,7 @@ export default function TitleBar() {
   const [isMaximized, setMaximized] = createSignal(false);
 
   onMount(async () => {
+    const window = getCurrentWindow();
     setIsMaximizable(await window.isMaximizable());
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
@@ -39,8 +39,8 @@ export default function TitleBar() {
     // }
   });
 
-  window.onResized(async (handler) => {
-    setMaximized(await window.isMaximized());
+  getCurrentWindow().onResized(async (handler) => {
+    setMaximized(await getCurrentWindow().isMaximized());
   });
 
   createEffect(() => {
@@ -59,9 +59,9 @@ export default function TitleBar() {
   });
 
   const borderWindowLabels: string[] = ['settings'];
-  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === getCurrentWindow().label);
   const titleLessWindowLabels: string[] = [];
-  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === window.label);
+  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === getCurrentWindow().label);
 
   return (
     <header
@@ -86,7 +86,7 @@ export default function TitleBar() {
                 data-tauri-drag-region-exclude
                 onClick={async (e) => {
                   e.preventDefault();
-                  await window.minimize();
+                  await getCurrentWindow().minimize();
                 }}
               />
             </div>
@@ -102,7 +102,7 @@ export default function TitleBar() {
                 data-tauri-drag-region-exclude
                 onClick={async (e) => {
                   e.preventDefault();
-                  await window.toggleMaximize();
+                  await getCurrentWindow().toggleMaximize();
                 }}
               />
             </div>
@@ -118,7 +118,7 @@ export default function TitleBar() {
                 data-tauri-drag-region-exclude
                 onClick={async (e) => {
                   e.preventDefault();
-                  await window.close();
+                  await getCurrentWindow().close();
                 }}
               />
             </div>

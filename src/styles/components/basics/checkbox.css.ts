@@ -32,7 +32,7 @@ export const customCheckbox = style({
       top: '50%',
       width: '14px', // √2倍ちょい弱くらい
       height: '1px',
-      backgroundColor: 'red',
+      backgroundColor: vars.color.active,
       opacity: 0,
       transform: 'translate(-50%, -50%) rotate(45deg)',
       transformOrigin: 'center center',
@@ -45,7 +45,7 @@ export const customCheckbox = style({
       top: '50%',
       width: '14px',
       height: '1px',
-      backgroundColor: 'red',
+      backgroundColor: vars.color.active,
       opacity: 0,
       transform: 'translate(-50%, -50%) rotate(-45deg)',
       transformOrigin: 'center center',

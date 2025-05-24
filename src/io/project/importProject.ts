@@ -3,7 +3,7 @@ import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { readTextFile } from '@tauri-apps/plugin-fs';
 import { loadStoreFromProjectJson } from '~/stores/ProjectStores';
 
-export async function importProjectFromFileSelection(): Promise<string | undefined> {
+export async function openProjectFile(): Promise<string | undefined> {
   const home = await path.homeDir();
   const file = await dialogOpen({
     multiple: false,
@@ -21,11 +21,6 @@ export async function importProjectFromFileSelection(): Promise<string | undefin
     console.log('file not selected');
     return undefined;
   }
-
-  const jsonText = await readTextFile(file);
-  const projectJson = JSON.parse(jsonText);
-
-  await importProjectJsonFromPath(projectJson);
 
   return file;
 }

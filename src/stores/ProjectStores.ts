@@ -96,9 +96,11 @@ export const loadStoreFromProjectJson = async (projectJson: any) => {
     setCanvasStore('canvas', 'height', height);
   }
 
-  if (projectJson.imagePool) {
+  if (projectJson.imagePool.entries) {
+    console.log(projectJson.imagePool.entries);
     let entries: ReactiveMap<string, ImagePoolEntry> = new ReactiveMap(projectJson.imagePool.entries);
     setImagePoolStore('entries', entries);
+    console.log(entries);
   }
 
   if (projectJson.project) {
@@ -118,6 +120,7 @@ export const loadStoreFromProjectJson = async (projectJson: any) => {
 
     setLayerListStore('layers', layers);
     setLayerListStore('activeLayerId', projectJson.layer.activeLayerId);
+    setLayerListStore('isImagePoolActive', projectJson.layer.isImagePoolActive);
   }
 
   if (projectJson.images) {

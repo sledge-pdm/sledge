@@ -2,12 +2,12 @@ import { onMount } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
-import { importProjectFromFileSelection } from '~/io/project/importProject';
+import { openProjectFile } from '~/io/project/importProject';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { getTheme } from '~/stores/Theme';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
-import { closeWindowsByLabel, getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
+import { getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
 
 export default function Home() {
@@ -16,19 +16,21 @@ export default function Home() {
   });
 
   const openExistingProject = (selectedFile: FileLocation) => {
+    console.log(selectedFile);
     openWindow('editor', { query: getExistingProjectSearchParams(selectedFile) }).then(() => {
-      closeWindowsByLabel('start');
+      // closeWindowsByLabel('start');
     });
   };
 
   const createNew = () => {
     openWindow('editor', { query: getNewProjectSearchParams() }).then(() => {
-      closeWindowsByLabel('start');
+      // closeWindowsByLabel('start');
     });
   };
 
   const openProject = () => {
-    importProjectFromFileSelection().then((file: string | undefined) => {
+    openProjectFile().then((file: string | undefined) => {
+      console.log(file);
       if (file !== undefined) {
         const loc = getFileNameAndPath(file);
         if (!loc) return;

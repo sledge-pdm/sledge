@@ -8,7 +8,7 @@ import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { canvasStore, imagePoolStore, layerHistoryStore, layerListStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl } from '~/utils/DataUtils';
 import { getFileNameAndPath } from '~/utils/PathUtils';
-import genFileId from './genFileId';
+import getFileId from './getFileId';
 import { saveThumbnailExternal } from './saveThumbnail';
 
 export async function saveProject(name?: string, existingPath?: string) {
@@ -37,7 +37,7 @@ export async function saveProject(name?: string, existingPath?: string) {
   if (typeof selectedPath === 'string') {
     setProjectStore('path', selectedPath);
 
-    const fileId = await genFileId(selectedPath);
+    const fileId = await getFileId(selectedPath);
     const { width, height } = canvasStore.canvas;
     const thumbSize = calcThumbnailSize(width, height);
     const thumbnailBlob = await new ThumbnailGenerator().generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
@@ -59,7 +59,9 @@ export const parseCurrentProject = async (): Promise<string> => {
   const base = {
     canvas: canvasStore.canvas,
     project: projectStore,
-    imagePool: imagePoolStore,
+    imagePool: {
+      entries: imagePoolStore.entries.entries().toArray(),
+    },
     images: Object.fromEntries(
       Object.entries(layerHistoryStore).map(([id, state]) => {
         const agent = getAgentOf(id);
@@ -81,6 +83,7 @@ export const parseCurrentProject = async (): Promise<string> => {
         dsl: undefined,
       })),
       activeLayerId: layerListStore.activeLayerId,
+      isImagePoolActive: layerListStore.isImagePoolActive,
     },
   };
 

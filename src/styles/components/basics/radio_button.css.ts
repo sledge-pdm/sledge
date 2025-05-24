@@ -28,7 +28,7 @@ export const customRadio = style({
       top: '2px',
       width: '6px',
       height: '6px',
-      backgroundColor: 'red',
+      backgroundColor: vars.color.active,
       opacity: 0,
       transition: 'opacity 0.1s',
     },

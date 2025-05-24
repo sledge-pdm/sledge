@@ -1,4 +1,3 @@
-import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createSignal, For, onMount, Show } from 'solid-js';
 import { loadGlobalSettings, resetToDefaultConfig, saveGlobalSettings } from '~/io/global_config/globalSettings';
@@ -127,20 +126,6 @@ export default function ConfigForm() {
 
   onMount(async () => {
     await loadGlobalSettings();
-    getCurrentWebviewWindow().onCloseRequested(async (e) => {
-      if (isDirty()) {
-        const confirmed = await confirm('there are unsaved changes.\nsure to quit w/o save?', {
-          kind: 'warning',
-          okLabel: 'quit w/o save.',
-          cancelLabel: 'cancel.',
-          title: 'confirmation',
-        });
-
-        if (!confirmed) {
-          e.preventDefault();
-        }
-      }
-    });
   });
 
   return (

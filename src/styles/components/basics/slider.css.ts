@@ -1,5 +1,6 @@
 // src/styles/components/basics/slider.css.ts
 import { style } from '@vanilla-extract/css';
+import { vars } from '~/styles/global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
 export const sliderRoot = style([
@@ -44,7 +45,7 @@ export const lineHitbox = style({
 });
 
 export const line = style({
-  backgroundColor: 'black',
+  backgroundColor: vars.color.control,
   display: 'flex',
   height: '1px',
   pointerEvents: 'none', // イベントは親に任せる
@@ -52,7 +53,7 @@ export const line = style({
 });
 
 export const handle = style({
-  backgroundColor: 'black',
+  backgroundColor: vars.color.control,
   height: '8px',
   left: '50%',
   pointerEvents: 'none',

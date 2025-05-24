@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css';
 import { flexRow } from '~/styles/snippets.css';
 
 const transparent_bg_size = 10;
-const transparent_bg_color = '#0000000A';
+const transparent_bg_color = '#00000013';
 
 export const canvasStack = style([
   flexRow,

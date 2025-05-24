@@ -1,13 +1,18 @@
 // projectStore.ts
+import { ReactiveMap } from '@solid-primitives/map';
 import { createStore } from 'solid-js/store';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
+import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { Layer } from '~/models/canvas/layer/Layer';
+import { fallbackLayerProps } from '~/models/canvas/layer/LayerFactory';
 import { LayerHistory } from '~/models/history/LayerHistory';
-import { Layer } from '~/models/layer/Layer';
-import { fallbackLayerProps } from '~/models/layer/LayerFactory';
 import { Size2D } from '~/types/Size';
 
 type CanvasStore = {
   canvas: Size2D;
+};
+type ImagePoolStore = {
+  entries: ReactiveMap<string, ImagePoolEntry>;
 };
 type ProjectStore = {
   newName: string | undefined;
@@ -20,8 +25,18 @@ type LayerHistoryStore = Record<string, LayerHistory>;
 type LayerListStore = {
   layers: Layer[];
   activeLayerId: string;
+  isImagePoolActive: boolean;
 };
 
+const defaultCanvasStore: CanvasStore = {
+  canvas: {
+    width: 400,
+    height: 400,
+  },
+};
+const defaultImagePoolStore: ImagePoolStore = {
+  entries: new ReactiveMap(),
+};
 const defaultProjectStore: ProjectStore = {
   newName: undefined as string | undefined,
   name: undefined as string | undefined,
@@ -29,20 +44,16 @@ const defaultProjectStore: ProjectStore = {
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
 };
-const defaultCanvasStore: CanvasStore = {
-  canvas: {
-    width: 400,
-    height: 400,
-  },
-};
 const defaultLayerHistoryStore: LayerHistoryStore = {};
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),
   activeLayerId: '',
+  isImagePoolActive: false,
 };
 
 export const initProjectStore = () => {
   const [canvasStore, setCanvasStore] = createStore<CanvasStore>(defaultCanvasStore);
+  const [imagePoolStore, setImagePoolStore] = createStore<ImagePoolStore>(defaultImagePoolStore);
   const [projectStore, setProjectStore] = createStore<ProjectStore>(defaultProjectStore);
   const [layerHistoryStore, setLayerHistoryStore] = createStore<LayerHistoryStore>(defaultLayerHistoryStore);
   const [layerListStore, setLayerListStore] = createStore<LayerListStore>(defaultLayerListStore);
@@ -50,6 +61,8 @@ export const initProjectStore = () => {
   return {
     canvasStore,
     setCanvasStore,
+    imagePoolStore,
+    setImagePoolStore,
     layerListStore,
     setLayerListStore,
     layerHistoryStore,
@@ -64,6 +77,9 @@ const projectRootStore = initProjectStore();
 export const canvasStore = projectRootStore.canvasStore;
 export const setCanvasStore = projectRootStore.setCanvasStore;
 
+export const imagePoolStore = projectRootStore.imagePoolStore;
+export const setImagePoolStore = projectRootStore.setImagePoolStore;
+
 export const layerListStore = projectRootStore.layerListStore;
 export const setLayerListStore = projectRootStore.setLayerListStore;
 
@@ -74,15 +90,20 @@ export const projectStore = projectRootStore.projectStore;
 export const setProjectStore = projectRootStore.setProjectStore;
 
 export const loadStoreFromProjectJson = async (projectJson: any) => {
-  if (projectJson.project) {
-    setProjectStore('name', projectJson.project.name || undefined);
-    setProjectStore('path', projectJson.project.path || undefined);
-  }
-
   if (projectJson.canvas) {
     const { width, height } = projectJson.canvas;
     setCanvasStore('canvas', 'width', width);
     setCanvasStore('canvas', 'height', height);
+  }
+
+  if (projectJson.imagePool) {
+    let entries: ReactiveMap<string, ImagePoolEntry> = new ReactiveMap(projectJson.imagePool.entries);
+    setImagePoolStore('entries', entries);
+  }
+
+  if (projectJson.project) {
+    setProjectStore('name', projectJson.project.name || undefined);
+    setProjectStore('path', projectJson.project.path || undefined);
   }
 
   if (projectJson.layer && projectJson.layer.layers && Array.isArray(projectJson.layer.layers)) {

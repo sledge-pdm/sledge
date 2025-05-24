@@ -32,3 +32,5 @@ repomix-output.txt
 repomix-output.xml
 
 /.vscode
+
+*.heapprofile

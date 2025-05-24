@@ -1,4 +1,5 @@
 import { globalStyle } from '@vanilla-extract/css';
+import { vars } from './global.css';
 
 globalStyle('html, body', {
   height: '100vh',
@@ -36,7 +37,8 @@ globalStyle('a', {
 globalStyle('input', {
   border: 'none',
   outline: 'none',
-  borderBottom: '1px solid black',
+  background: 'none',
+  borderBottom: `1px solid ${vars.color.control}`,
   fontSize: '0.5rem',
   userSelect: 'initial',
   WebkitUserSelect: 'initial',

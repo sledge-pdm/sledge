@@ -1,9 +1,8 @@
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer/LayerListController';
-
-import { setLayerProp } from '~/controllers/layer/LayerController';
-import { BlendMode } from '~/models/layer/Layer';
+import { setLayerProp } from '~/controllers/canvas/layer/LayerController';
+import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/canvas/layer/LayerListController';
+import { BlendMode } from '~/models/canvas/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
@@ -12,8 +11,8 @@ import { flexRow } from '~/styles/snippets.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import Dropdown from '../common/control/Dropdown';
 import Slider from '../common/control/Slider';
+import ImagePoolItem from './item/ImagePoolItem';
 import LayerItem from './item/LayerItem';
-// 並べ替え用ユーティリティ関数
 
 const LayerList: Component<{}> = () => {
   const [items, setItems] = createSignal(allLayers());
@@ -125,7 +124,12 @@ const LayerList: Component<{}> = () => {
           <DragDropSensors>
             <div class={layerList}>
               <SortableProvider ids={ids()}>
-                <For each={items()}>{(layer, index) => <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />}</For>
+                <ImagePoolItem />
+                <For each={items()}>
+                  {(layer, index) => {
+                    return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
+                  }}
+                </For>
               </SortableProvider>
             </div>
             {/* <DragOverlay>

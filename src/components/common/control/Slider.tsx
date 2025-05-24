@@ -45,25 +45,22 @@ const Slider: Component<SliderProps> = (props) => {
 
   const handlePointerDown = () => {
     setDrag(true);
-    sliderRef.addEventListener('pointermove', handlePointerMove);
-    sliderRef.addEventListener('pointerup', handlePointerUp);
   };
 
   const handlePointerMove = (e: PointerEvent) => {
     if (!sliderRef || !isDrag()) {
-      return;
+      setDrag(false);
+    } else {
+      const { left, width } = sliderRef.getBoundingClientRect();
+      let pos = Math.max(0, Math.min(e.clientX - left, width));
+      const raw = props.min + (pos / width) * (props.max - props.min);
+      const newValue = props.allowFloat ? raw : Math.round(raw);
+      update(newValue);
     }
-    const { left, width } = sliderRef.getBoundingClientRect();
-    let pos = Math.max(0, Math.min(e.clientX - left, width));
-    const raw = props.min + (pos / width) * (props.max - props.min);
-    const newValue = props.allowFloat ? raw : Math.round(raw);
-    update(newValue);
   };
 
-  const handlePointerUp = () => {
+  const cancelHandling = () => {
     setDrag(false);
-    sliderRef.removeEventListener('pointermove', handlePointerMove);
-    sliderRef.removeEventListener('pointerup', handlePointerUp);
   };
 
   const onLineClick = (e: MouseEvent) => {
@@ -84,9 +81,15 @@ const Slider: Component<SliderProps> = (props) => {
 
   onMount(() => {
     document.addEventListener('click', handleClickOutside);
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', cancelHandling);
+    document.addEventListener('pointercancel', cancelHandling);
   });
   onCleanup(() => {
     document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('pointermove', handlePointerMove);
+    document.removeEventListener('pointerup', cancelHandling);
+    document.removeEventListener('pointercancel', cancelHandling);
   });
 
   const labelArea = (

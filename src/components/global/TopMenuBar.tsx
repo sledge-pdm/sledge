@@ -1,6 +1,8 @@
 import * as styles from '@styles/components/globals/top_menu_bar.css';
-import { Component, createSignal, For, Show } from 'solid-js';
-import ExportImage from '~/dialogs/io/ExportImage';
+import { Component, createEffect, createSignal, For } from 'solid-js';
+import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
+import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
+import ExportImageDialog from '~/dialogs/io/ExportImage';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -10,26 +12,30 @@ interface Item {
 
 const TopMenuBar: Component = () => {
   const [isExportShown, setIsExportShown] = createSignal(false);
+  let dialog = null;
+
+  createEffect(() => {
+    if (isExportShown()) {
+      dialog = <ExportImageDialog open={isExportShown()} onClose={() => setIsExportShown(false)} />;
+    } else {
+      dialog = null;
+    }
+  });
 
   const leftItems: Item[] = [
-    { text: 'IMPORT.', action: () => {} },
+    {
+      text: 'IMPORT.',
+      action: async () => {
+        const path = await openImageImportDialog();
+        if (path !== undefined) {
+          addToImagePool(path);
+        }
+      },
+    },
     {
       text: 'EXPORT.',
       action: () => {
         setIsExportShown(true);
-
-        // openWindow('export');
-        // listenEvent('onExportRequested', async (e) => {
-        //   const payload = e.payload as ExportRequestPayload;
-        //   const name = projectStore.newName || projectStore.name;
-        //   if (name === undefined) return;
-        //   if (payload.dirPath) {
-        //     const result = await exportCanvas(payload.dirPath, name, payload.exportOptions);
-        //     if (result) {
-        //       if (payload.showDirAfterSave) await revealItemInDir(result);
-        //     }
-        //   }
-        // });
       },
     },
   ];
@@ -64,9 +70,7 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
-      <Show when={isExportShown()}>
-        <ExportImage open={isExportShown()} onClose={() => setIsExportShown(false)} />
-      </Show>
+      {dialog}
     </div>
   );
 };

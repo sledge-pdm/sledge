@@ -1,8 +1,8 @@
 import { v4 } from 'uuid';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
+import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
+import { DSL } from '~/models/dsl/DSL';
 import { layerListStore } from '~/stores/ProjectStores';
-import { DSL } from '../../models/dsl/DSL';
+import { BlendMode, Layer, LayerType } from './Layer';
 
 type createLayerProps = Omit<Layer, 'id' | 'typeDescription' | 'dsl'> & {
   dsl: DSL | undefined;

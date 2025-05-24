@@ -1,9 +1,9 @@
 import { Component, onCleanup, onMount } from 'solid-js';
+import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
 import { ToolType } from '~/models/tool/Tool';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';
 import { redoLayer, undoLayer } from '../../controllers/history/HistoryController';
-import { activeLayer } from '../../controllers/layer/LayerListController';
 import { switchToolType } from '../../controllers/tool/ToolController';
 
 const KeyListener: Component = () => {

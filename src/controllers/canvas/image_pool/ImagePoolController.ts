@@ -1,6 +1,6 @@
 import { appCacheDir, basename, join } from '@tauri-apps/api/path';
 import { copyFile, exists, mkdir } from '@tauri-apps/plugin-fs';
-import genFileId from '~/io/project/genFileId';
+import getFileId from '~/io/project/getFileId';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageMeta } from '~/utils/DataUtils';
@@ -20,7 +20,7 @@ export function removeEntry(id: string) {
 }
 
 async function createResource(originalPath: string) {
-  const id = await genFileId(originalPath);
+  const id = await getFileId(originalPath);
 
   const imagesDir = await appCacheDir(); // e.g. src-tauri/…/app
   const destName = `${id}-${await basename(originalPath)}`;

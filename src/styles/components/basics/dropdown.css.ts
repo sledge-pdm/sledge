@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '~/styles/global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
@@ -50,6 +50,21 @@ export const menuStyle = style([
     width: 'fit-content',
   },
 ]);
+
+export const menuDirection = styleVariants({
+  down: {
+    top: '100%', // 従来どおり下に
+    bottom: 'auto',
+    marginTop: '0px',
+    boxShadow: '0 2px 8px rgba(0,0,0,.1)',
+  },
+  up: {
+    top: 'auto',
+    bottom: '100%', // トリガーの上に配置
+    marginBottom: '0px',
+    boxShadow: '0 -2px 8px rgba(0,0,0,.1)',
+  },
+});
 
 // メニューアイテム
 export const menuItem = style({

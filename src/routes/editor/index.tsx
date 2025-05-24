@@ -1,7 +1,6 @@
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
-import { UnlistenFn } from '@tauri-apps/api/event';
-import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
@@ -22,7 +21,6 @@ import { flexCol } from '~/styles/snippets.css';
 import { emitEvent, listenEvent } from '~/utils/TauriUtils';
 
 export default function Editor() {
-  const wvWindow = getCurrentWebviewWindow();
   const location = useLocation();
 
   createEffect(() => {
@@ -81,29 +79,25 @@ export default function Editor() {
     });
   };
 
-  let unlisten: UnlistenFn;
-
   onMount(async () => {
     listenEvent('onSettingsSaved', () => {
       loadGlobalSettings();
     });
+  });
 
-    unlisten = await wvWindow.onCloseRequested(async (event) => {
-      if (projectStore.isProjectChangedAfterSave) {
-        const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
-          okLabel: 'quit w/o save.',
-          cancelLabel: 'cancel.',
-        });
-        if (!confirmed) {
-          event.preventDefault();
-        }
+  getCurrentWindow().onCloseRequested(async (event) => {
+    if (!isLoading() && projectStore.isProjectChangedAfterSave) {
+      const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
+        okLabel: 'quit w/o save.',
+        cancelLabel: 'cancel.',
+      });
+      if (!confirmed) {
+        event.preventDefault();
       }
-    });
+    }
   });
 
   onCleanup(() => {
-    unlisten();
-
     if (import.meta.hot) {
       window.location.reload();
     }

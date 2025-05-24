@@ -31,11 +31,10 @@ export const rflName = style({
   fontSize: '8px',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  color: '#000000AA',
 });
 
 export const rflPath = style({
   fontFamily: ZFB03B,
   fontSize: vars.text.md,
-  color: '#00000030',
+  opacity: 0.4,
 });

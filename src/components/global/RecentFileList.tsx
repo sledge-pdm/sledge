@@ -2,7 +2,7 @@ import { createScrollPosition } from '@solid-primitives/scroll';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import genFileId from '~/io/project/genFileId';
+import getFileId from '~/io/project/getFileId';
 import { thumbnailDir } from '~/io/project/saveThumbnail';
 import { recentFilesCaption, recentFilesContainerCol, recentFilesContainerScroll } from '~/routes/start.css';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
@@ -18,7 +18,7 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
     props.files.forEach(async (file) => {
       // const json = await importProjectJsonFromPath(file.path + '/' + file.name);
       const path = file.path + '\\' + file.name;
-      const fileId = await genFileId(path);
+      const fileId = await getFileId(path);
       const thumbPath = (await thumbnailDir()) + fileId + '.png';
       const assetUrl = convertFileSrc(thumbPath);
 

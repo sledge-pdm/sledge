@@ -131,25 +131,35 @@ export const lightTheme = createTheme(vars, {
   ...shared,
 });
 
+const darkThemeColorBase = {
+  background: '#252525',
+  surface: '#404040',
+  canvasArea: '#1B1B1B',
+  canvas: '#eeeeee',
+  onBackground: '#eeeeee',
+  border: '#666666',
+  accent: '#ffff00',
+  active: '#00ff00',
+  muted: 'rgba(255,255,255,0.30)',
+  error: '#ff5f5f',
+  button: {
+    bg: '#222222',
+    hover: '#444444',
+    active: '#555555',
+    text: '#eeeeee',
+    border: '#eeeeee',
+  },
+};
 export const darkTheme = createTheme(vars, {
+  color: darkThemeColorBase,
+  ...shared,
+});
+
+export const darkThemeGYFlip = createTheme(vars, {
   color: {
-    background: '#333333',
-    surface: '#444444',
-    canvasArea: '#222222',
-    canvas: '#eeeeee',
-    onBackground: '#eeeeee',
-    border: '#666666',
-    accent: '#ffff00',
-    active: '#00ff00',
-    muted: 'rgba(255,255,255,0.30)',
-    error: '#ff5f5f',
-    button: {
-      bg: '#222222',
-      hover: '#444444',
-      active: '#555555',
-      text: '#eeeeee',
-      border: '#eeeeee',
-    },
+    ...darkThemeColorBase,
+    accent: darkThemeColorBase.active,
+    active: darkThemeColorBase.accent,
   },
   ...shared,
 });

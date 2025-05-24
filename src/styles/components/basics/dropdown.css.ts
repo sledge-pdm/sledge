@@ -18,7 +18,31 @@ export const triggerButton = style([
     padding: '3px 11px 4px 11px',
     width: 'fit-content',
     textAlign: 'left',
-    minWidth: '120px',
+    minWidth: '100px',
+    alignItems: 'center',
+    gap: '6px',
+    cursor: 'pointer',
+    ':hover': {
+      transform: 'none',
+    },
+    selectors: {
+      '&:hover': { backgroundColor: vars.color.button.hover },
+      '&:active': { backgroundColor: vars.color.button.hover },
+    },
+  },
+]);
+
+export const triggerButtonNoBG = style([
+  flexRow,
+  triggerButton,
+  {
+    background: 'none',
+    backgroundColor: 'none',
+    border: `none`,
+    padding: '3px 11px 4px 11px',
+    width: 'fit-content',
+    textAlign: 'left',
+    minWidth: '100px',
     alignItems: 'center',
     gap: '6px',
     cursor: 'pointer',
@@ -45,7 +69,7 @@ export const menuStyle = style([
     marginTop: '0px',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
     maxHeight: '200px',
-    minWidth: '120px',
+    minWidth: '100px',
     overflowY: 'auto',
     width: 'fit-content',
   },

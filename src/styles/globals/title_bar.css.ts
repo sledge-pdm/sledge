@@ -10,7 +10,6 @@ export const titleBarRoot = style([
     pointerEvents: 'all',
     height: '26px',
     backgroundColor: vars.color.background,
-    // borderBottom: "1px solid #aaa",
     alignItems: 'center',
   },
 ]);

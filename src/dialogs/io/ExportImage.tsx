@@ -129,6 +129,7 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
               <p class={styles.fileName}>\</p>
               <input
                 class={styles.fileName}
+                // @ts-expect-error
                 style={{ 'field-sizing': 'content' }}
                 value={settings.fileName}
                 onChange={(e) => setSettings('fileName', e.target.value)}

@@ -1,10 +1,8 @@
 import { Layer } from '~/models/canvas/layer/Layer';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
-import { emitEvent } from '~/utils/TauriUtils';
-import { adjustZoomToFit } from '../CanvasController';
 import LayerImageAgent from './image/LayerImageAgent';
-import { getAgentOf, layerAgentManager } from './LayerAgentManager';
-import { findLayerById } from './LayerListController';
+import { getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
+import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
@@ -17,49 +15,40 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   setLayerListStore('layers', idx, propName, newValue);
 }
 
-export function getActiveLayerIndex(): number {
-  return getLayerIndex(layerListStore.activeLayerId);
+export function duplicateLayer(layerId: string) {
+  const layer = findLayerById(layerId);
+  addLayer(
+    {
+      ...layer,
+    },
+    getBufferOf(layerId)
+  );
 }
 
-export function getLayerIndex(layerId: string) {
-  return layerListStore.layers.findIndex((l) => l.id === layerId);
-}
-
-export function setImagePoolActive(active: boolean) {
-  setLayerListStore('isImagePoolActive', active);
-}
-export function isImagePoolActive() {
-  return layerListStore.isImagePoolActive;
-}
-
-export const resetAllLayers = (e: any) => {
-  layerListStore.layers.forEach((l) => {
-    resetLayerImage(l.id, l.dotMagnification);
-  });
-  adjustZoomToFit();
-  emitEvent('onResetAllLayers');
-};
-
-export function resetLayerImage(layerId: string, dotMagnification: number, width?: number, height?: number): LayerImageAgent {
+export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): LayerImageAgent {
   setLayerHistoryStore(layerId, {
     canUndo: false,
     canRedo: false,
   });
-  width = width ?? Math.round(canvasStore.canvas.width / dotMagnification);
-  height = height ?? Math.round(canvasStore.canvas.height / dotMagnification);
-
-  // 透明（RGBA＝0,0,0,0）で初期化された Uint8ClampedArray を生成
-  const blankBuffer = new Uint8ClampedArray(width * height * 4);
+  let width = Math.round(canvasStore.canvas.width / dotMagnification);
+  let height = Math.round(canvasStore.canvas.height / dotMagnification);
+  let buffer: Uint8ClampedArray;
+  if (initImage) {
+    buffer = new Uint8ClampedArray(initImage);
+  } else {
+    // 透明（RGBA＝0,0,0,0）で初期化された Uint8ClampedArray を生成
+    buffer = new Uint8ClampedArray(width * height * 4);
+  }
 
   const agent = getAgentOf(layerId);
   if (agent !== undefined) {
     agent.getTileManager().setAllDirty();
-    agent.setBuffer(blankBuffer, false);
+    agent.setBuffer(buffer, false, true);
     return agent;
   } else {
-    return layerAgentManager.registerAgent(layerId, blankBuffer, width, height);
+    return layerAgentManager.registerAgent(layerId, buffer, width, height);
   }
 }
 
-export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.canUndo;
-export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId]?.canRedo;
+export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId].canUndo;
+export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId].canRedo;

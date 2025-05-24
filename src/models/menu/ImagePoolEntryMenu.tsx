@@ -20,8 +20,8 @@ export class ImagePoolEntryMenu extends RightClickMenu {
       ],
     });
 
-    const fruit = new ImagePoolEntryMenu(menu);
+    const instance = new ImagePoolEntryMenu(menu);
 
-    return fruit;
+    return instance;
   }
 }

@@ -6,6 +6,8 @@ import { BlendMode, Layer, LayerType } from './Layer';
 
 type createLayerProps = Omit<Layer, 'id' | 'typeDescription' | 'dsl'> & {
   dsl: DSL | undefined;
+
+  initImage: Uint8ClampedArray | undefined;
 };
 
 export const fallbackLayerProps: createLayerProps = {
@@ -16,13 +18,15 @@ export const fallbackLayerProps: createLayerProps = {
   enabled: true,
   dotMagnification: 1,
   dsl: undefined,
+
+  initImage: undefined,
 };
 
 export const createLayer = (props: createLayerProps): Layer => {
   const name = getNumberUniqueLayerName(props.name);
 
   const id = v4();
-  resetLayerImage(id, props.dotMagnification);
+  resetLayerImage(id, props.dotMagnification, props.initImage);
 
   return {
     id,

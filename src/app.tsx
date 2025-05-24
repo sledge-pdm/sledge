@@ -18,9 +18,8 @@ export default function App() {
         <MetaProvider>
           <title>Sledge</title>
           <div class={[flexCol, h100, getTheme()].join(' ')}>
-            <TitleBar />
-
             <Suspense>
+              <TitleBar />
               <main>{props.children}</main>
             </Suspense>
 

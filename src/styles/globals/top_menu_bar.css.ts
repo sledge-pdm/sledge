@@ -7,7 +7,7 @@ export const root = style([
   w100,
   {
     position: 'fixed',
-    borderBottom: '1px solid #999',
+    borderBottom: `1px solid ${vars.color.border}`,
     height: '28px',
     alignItems: 'center',
     zIndex: 20,

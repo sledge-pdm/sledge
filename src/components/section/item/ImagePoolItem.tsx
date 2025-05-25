@@ -1,6 +1,6 @@
 import * as styles from '@styles/section/item/image_pool_item.css';
 import { Component } from 'solid-js';
-import { isImagePoolActive, setImagePoolActive } from '~/controllers/canvas/layer/LayerListController';
+import { isImagePoolActive, setImagePoolActive } from '~/controllers/layer/LayerListController';
 import { flexRow, w100 } from '~/styles/snippets.css';
 
 const ImagePoolItem: Component<{}> = (props) => {

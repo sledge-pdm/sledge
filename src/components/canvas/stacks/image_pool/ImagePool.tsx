@@ -1,5 +1,5 @@
 import { Component, For } from 'solid-js';
-import { isImagePoolActive } from '~/controllers/canvas/layer/LayerListController';
+import { isImagePoolActive } from '~/controllers/layer/LayerListController';
 import { canvasStore, imagePoolStore } from '~/stores/ProjectStores';
 import Image from './Image';
 

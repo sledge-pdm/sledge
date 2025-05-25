@@ -1,4 +1,4 @@
-import { getAgentOf } from '../canvas/layer/LayerAgentManager';
+import { getAgentOf } from '../layer/LayerAgentManager';
 
 export function undoLayer(layerId: string) {
   const agent = getAgentOf(layerId);

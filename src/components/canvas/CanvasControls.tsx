@@ -1,7 +1,7 @@
 import * as styles from '@styles/components/canvas/canvas_controls.css';
 import { Component } from 'solid-js';
-import { getAgentOf } from '~/controllers/canvas/layer/LayerAgentManager';
-import { canRedo, canUndo } from '~/controllers/canvas/layer/LayerController';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
+import { canRedo, canUndo } from '~/controllers/layer/LayerController';
 
 import { layerListStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';

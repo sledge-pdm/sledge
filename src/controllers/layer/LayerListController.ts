@@ -1,8 +1,8 @@
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
-import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
-import { BlendMode, LayerType } from '~/models/canvas/layer/Layer';
-import { createLayer } from '~/models/canvas/layer/LayerFactory';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { DSL } from '~/models/dsl/DSL';
+import { BlendMode, LayerType } from '~/models/layer/Layer';
+import { createLayer } from '~/models/layer/LayerFactory';
 import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
 import { emitEvent } from '~/utils/TauriUtils';
 

@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { DSL } from '~/models/dsl/DSL';
 import { layerListStore } from '~/stores/ProjectStores';
 import { BlendMode, Layer, LayerType } from './Layer';

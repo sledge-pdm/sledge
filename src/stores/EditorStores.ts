@@ -1,7 +1,7 @@
 // editorStore.tsx
 import { createStore } from 'solid-js/store';
-import { RenderMode } from '~/models/canvas/layer/RenderMode';
 import { PaletteType } from '~/models/color/PaletteType';
+import { RenderMode } from '~/models/layer/RenderMode';
 import { Tool, ToolType } from '~/models/tool/Tool';
 import { createTool } from '~/models/tool/ToolFactory';
 import { Size2D } from '~/types/Size';

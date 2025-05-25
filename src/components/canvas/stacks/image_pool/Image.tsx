@@ -4,7 +4,7 @@ import { Component, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
 import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { ImagePoolEntryMenu } from '~/models/menu/ImagePoolEntryMenu';
 import { interactStore } from '~/stores/EditorStores';

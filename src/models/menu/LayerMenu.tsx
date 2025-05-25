@@ -1,7 +1,7 @@
 import { IconMenuItem, Menu } from '@tauri-apps/api/menu';
 import { resolveResource } from '@tauri-apps/api/path';
-import { duplicateLayer, resetLayerImage } from '~/controllers/canvas/layer/LayerController';
-import { findLayerById, removeLayer } from '~/controllers/canvas/layer/LayerListController';
+import { duplicateLayer, resetLayerImage } from '~/controllers/layer/LayerController';
+import { findLayerById, removeLayer } from '~/controllers/layer/LayerListController';
 import { emitEvent } from '~/utils/TauriUtils';
 import RightClickMenu from './RightClickMenu';
 

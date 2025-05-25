@@ -1,9 +1,10 @@
 import { Component } from 'solid-js';
-import { sayRandomQuote } from '~/components/common/companion/QuotePool';
 import Slider from '~/components/common/control/Slider';
+import Icon from '~/components/common/Icon';
 import { Tool, ToolType } from '~/models/tool/Tool';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { toolConfigRow, toolConfigRowClickable, toolConfigRowIcon, toolConfigRowName } from '~/styles/section/pen.css';
+import { vars } from '~/styles/global.css';
+import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/pen.css';
 import { Consts } from '~/utils/consts';
 
 interface Props {
@@ -33,20 +34,11 @@ const ToolItem: Component<Props> = (props: Props) => {
           setToolStore({ usingIndex: toolStore.tools.indexOf(props.tool) });
         }}
       >
-        <img
-          class={toolConfigRowIcon}
-          style={{
-            'image-rendering': 'pixelated',
-            filter: props.isInUse ? 'invert(11%) sepia(92%) saturate(7351%) hue-rotate(0deg) brightness(99%) contrast(109%)' : 'none',
-          }}
-          src={src}
-          width={20}
-          height={20}
-        />
+        <Icon src={src} base={20} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
         <p
           class={toolConfigRowName}
           style={{
-            color: props.isInUse ? 'red' : 'unset',
+            color: props.isInUse ? vars.color.active : vars.color.onBackground,
           }}
         >
           {props.tool.name}.
@@ -61,7 +53,6 @@ const ToolItem: Component<Props> = (props: Props) => {
               max={Consts.maxPenSize}
               value={props.tool.size}
               onChange={(newValue) => {
-                sayRandomQuote('pen-resize');
                 const penIndex = toolStore.tools.findIndex((p) => p.id === props.tool.id);
                 setToolStore('tools', penIndex, 'size', newValue);
               }}

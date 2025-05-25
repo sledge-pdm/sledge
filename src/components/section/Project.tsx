@@ -1,9 +1,9 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { saveProject } from '~/io/project/saveProject';
+import { saveProject } from '~/io/project/save';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { projectNameInput } from '~/styles/section/project.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 

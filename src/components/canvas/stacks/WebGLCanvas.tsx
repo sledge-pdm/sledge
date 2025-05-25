@@ -3,11 +3,12 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createEffect, createSignal, onCleanup } from 'solid-js';
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
-import { layerAgentManager } from '~/controllers/canvas/layer/LayerAgentManager';
-import { allLayers } from '~/controllers/canvas/layer/LayerListController';
+import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
-import { RenderMode } from '~/models/canvas/layer/RenderMode';
-import { setLogStore } from '~/stores/EditorStores';
+import { RenderMode } from '~/models/layer/RenderMode';
+import { interactStore, setLogStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { listenEvent } from '~/utils/TauriUtils';
@@ -65,13 +66,20 @@ const WebGLCanvas: Component = () => {
     }
   });
 
+  const imageRendering = () => {
+    if (globalConfig.editor.canvasRenderingMode === 'adaptive') {
+      return interactStore.zoom > 1 ? 'pixelated' : 'auto';
+    }
+    return globalConfig.editor.canvasRenderingMode;
+  };
+
   return (
     <canvas
       ref={(el) => (canvasEl = el!)}
       class={layerCanvas}
       style={{
         position: 'absolute',
-        'image-rendering': 'pixelated',
+        'image-rendering': imageRendering(),
       }}
     />
   );

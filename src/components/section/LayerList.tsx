@@ -1,11 +1,11 @@
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { setLayerProp } from '~/controllers/canvas/layer/LayerController';
-import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/canvas/layer/LayerListController';
-import { BlendMode } from '~/models/canvas/layer/Layer';
+import { setLayerProp } from '~/controllers/layer/LayerController';
+import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer/LayerListController';
+import { BlendMode } from '~/models/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
 import { vars } from '~/styles/global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { layerList } from '~/styles/section/layer.css';
 import { flexRow } from '~/styles/snippets.css';
 import { listenEvent } from '~/utils/TauriUtils';
@@ -61,7 +61,7 @@ const LayerList: Component<{}> = () => {
         <div class={flexRow} style={{ gap: '4px' }}>
           <button
             onClick={async () => {
-              await addLayer('dot1');
+              await addLayer({ name: 'dot1' });
               setItems(allLayers());
             }}
           >
@@ -87,18 +87,26 @@ const LayerList: Component<{}> = () => {
             'margin-bottom': vars.spacing.sm,
           }}
         >
-          <Dropdown
-            value={activeLayer().mode}
-            options={Object.entries(BlendMode).map((e) => {
-              return {
-                label: e[0],
-                value: e[1],
-              };
-            })}
-            onChange={(e) => {
-              setLayerProp(activeLayer().id, 'mode', e);
+          <div
+            class={flexRow}
+            style={{
+              width: '120px',
+              height: 'auto',
             }}
-          />
+          >
+            <Dropdown
+              value={activeLayer().mode}
+              options={Object.entries(BlendMode).map((e) => {
+                return {
+                  label: e[0],
+                  value: e[1],
+                };
+              })}
+              onChange={(e) => {
+                setLayerProp(activeLayer().id, 'mode', e);
+              }}
+            />
+          </div>
           <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
             <p style={{ width: '36px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
             <Slider

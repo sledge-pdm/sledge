@@ -1,6 +1,6 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, Show } from 'solid-js';
-import { RenderMode } from '~/models/canvas/layer/RenderMode';
+import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';

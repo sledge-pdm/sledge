@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { vars } from '~/styles/global.css';
 
 export const checkboxWrapper = style({
   display: 'inline-flex',
@@ -17,7 +18,7 @@ export const hiddenCheckbox = style({
 export const customCheckbox = style({
   width: '10px',
   height: '10px',
-  border: '1px solid #000',
+  border: `1px solid ${vars.color.button.border}`,
   borderRadius: '0px',
   display: 'inline-block',
   position: 'relative',
@@ -31,7 +32,7 @@ export const customCheckbox = style({
       top: '50%',
       width: '14px', // √2倍ちょい弱くらい
       height: '1px',
-      backgroundColor: 'red',
+      backgroundColor: vars.color.active,
       opacity: 0,
       transform: 'translate(-50%, -50%) rotate(45deg)',
       transformOrigin: 'center center',
@@ -44,7 +45,7 @@ export const customCheckbox = style({
       top: '50%',
       width: '14px',
       height: '1px',
-      backgroundColor: 'red',
+      backgroundColor: vars.color.active,
       opacity: 0,
       transform: 'translate(-50%, -50%) rotate(-45deg)',
       transformOrigin: 'center center',

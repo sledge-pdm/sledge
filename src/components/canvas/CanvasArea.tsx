@@ -57,8 +57,8 @@ export default () => {
           position: 'absolute',
           top: 0,
           left: 0,
-          bottom: '84px', // hmm
           right: 0,
+          bottom: '40px',
           overflow: 'hidden',
           // 'z-index': 10000,
           // 'background-color': '#00000030',
@@ -70,7 +70,7 @@ export default () => {
           style={{
             width: 'fit-content',
             height: 'fit-content',
-            'background-color': vars.color.bg_canvas,
+            'background-color': vars.color.canvas,
             padding: 0,
             margin: 0,
             'transform-origin': '0 0',

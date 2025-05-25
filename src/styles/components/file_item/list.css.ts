@@ -8,7 +8,7 @@ export const rflThumb = style([
     alignItems: 'center',
     justifyContent: 'center',
     border: `1px solid ${vars.color.border}`,
-    backgroundColor: vars.color.primary,
+    backgroundColor: vars.color.background,
     maxWidth: `150px`,
     maxHeight: `150px`,
     opacity: 0.8,
@@ -31,11 +31,10 @@ export const rflName = style({
   fontSize: '8px',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  color: '#000000AA',
 });
 
 export const rflPath = style({
   fontFamily: ZFB03B,
   fontSize: vars.text.md,
-  color: '#00000030',
+  opacity: 0.4,
 });

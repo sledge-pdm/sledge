@@ -36,7 +36,7 @@ export const headerItem = style([
     alignItems: 'center',
     justifyContent: 'center',
     ':hover': {
-      color: 'red',
+      color: vars.color.active,
     },
   },
 ]);
@@ -52,7 +52,7 @@ export const clear = style({
   fontFamily: ZFB03,
   fontSize: '15px',
   ':hover': {
-    color: 'red',
+    color: vars.color.active,
   },
 });
 

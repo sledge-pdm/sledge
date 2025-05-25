@@ -1,6 +1,6 @@
 import { Component, For } from 'solid-js';
 import { toolStore } from '~/stores/EditorStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import ToolItem from './item/ToolItem';
 
 const ToolConfig: Component = () => {

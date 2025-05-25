@@ -1,5 +1,5 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ToolType } from '~/models/tool/Tool';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';

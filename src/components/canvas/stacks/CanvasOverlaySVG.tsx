@@ -1,16 +1,41 @@
-import { Component, For } from 'solid-js';
-import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
+import { Component, createEffect, createSignal, For } from 'solid-js';
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { vars } from '~/styles/global.css';
 import Tile from '~/types/Tile';
+
+interface Area {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
   const borderWidth = () => canvasStore.canvas.width * interactStore.zoom;
   const borderHeight = () => canvasStore.canvas.height * interactStore.zoom;
 
-  const zoomedPenSize = () => getCurrentTool().size * interactStore.zoom;
+  const [areaPenWrite, setAreaPenWrite] = createSignal<Area>();
+  createEffect(() => {
+    const half = Math.floor(getCurrentTool().size / 2);
+    let x = Math.floor(interactStore.lastMouseOnCanvas.x) - half;
+    let y = Math.floor(interactStore.lastMouseOnCanvas.y) - half;
+    let size = 1 + half * 2; // -half ~ half
+
+    x *= interactStore.zoom;
+    y *= interactStore.zoom;
+    size *= interactStore.zoom;
+
+    setAreaPenWrite({
+      x,
+      y,
+      width: size,
+      height: size,
+    });
+  });
 
   const dirtyRects = () => (globalConfig.debug.showDirtyRects ? props.dirtyRects : []);
 
@@ -23,8 +48,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         top: 0,
         left: 0,
         'pointer-events': 'none',
-        'image-rendering': 'pixelated',
-        'shape-rendering': 'geometricPrecision',
+        'shape-rendering': 'auto',
         'z-index': 150,
       }}
     >
@@ -33,12 +57,12 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
 
       {/* pen hover preview */}
       <rect
-        width={zoomedPenSize()}
-        height={zoomedPenSize()}
-        x={Math.round(interactStore.lastMouseOnCanvas.x * interactStore.zoom) - zoomedPenSize() / 2}
-        y={Math.round(interactStore.lastMouseOnCanvas.y * interactStore.zoom) - zoomedPenSize() / 2}
+        width={areaPenWrite()?.width}
+        height={areaPenWrite()?.height}
+        x={areaPenWrite()?.x}
+        y={areaPenWrite()?.y}
         fill='none'
-        stroke='black'
+        stroke={vars.color.border}
         stroke-width={1}
         pointer-events='none'
       />

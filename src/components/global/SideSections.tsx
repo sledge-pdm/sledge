@@ -7,8 +7,8 @@ import ToolConfig from '../section/ToolConfig';
 
 import { createScrollPosition } from '@solid-primitives/scroll';
 import { appearanceStore } from '~/stores/EditorStores';
-import { sideAreaContent, sideAreaContentWrapper, sideAreaMenu, sideAreaRoot } from '~/styles/components/globals/side_sections.css';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
+import { sideAreaContent, sideAreaContentWrapper, sideAreaMenu, sideAreaRoot } from '~/styles/globals/side_sections.css';
 import { h100 } from '~/styles/snippets.css';
 import SectionTopMenu from './SectionTopMenu';
 

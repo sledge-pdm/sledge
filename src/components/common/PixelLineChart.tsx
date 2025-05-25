@@ -1,4 +1,5 @@
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { vars } from '~/styles/global.css';
 
 interface PixelLineChartProps {
   /** 横ピクセル数＝バッファ長 */
@@ -75,7 +76,7 @@ export const PixelLineChart: Component<PixelLineChartProps> = (props) => {
         width: `${props.width}px`,
         height: `${props.height}px`,
         background: '#00000017',
-        border: '1px solid #aaa',
+        border: `1px solid ${vars.color.border}`,
       }}
     >
       <canvas

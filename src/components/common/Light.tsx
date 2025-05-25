@@ -1,4 +1,5 @@
 import { Component, Show } from 'solid-js';
+import { vars } from '~/styles/global.css';
 
 interface LightProps {
   class?: string;
@@ -25,12 +26,12 @@ const Light: Component<LightProps> = (props: LightProps) => {
       <Show when={true}>
         <g
           style={{
-            filter: `drop-shadow(0 0 ${props.on ? '1px' : '0'} ${props.color ?? 'red'})`,
+            filter: `drop-shadow(0 0 ${props.on ? '1px' : '0'} ${props.color ?? vars.color.active})`,
             opacity: props.on ? 1 : 0,
-            transition: props.on ? 'opacity 1s ease' : 'none',
+            transition: props.on ? 'opacity 0.2s ease' : 'none',
           }}
         >
-          <circle cx={width / 2} cy={height / 2} r={radius} fill={props.color ?? 'red'} />
+          <circle cx={width / 2} cy={height / 2} r={radius} fill={props.color ?? vars.color.active} />
         </g>
       </Show>
     </svg>

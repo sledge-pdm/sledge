@@ -4,7 +4,7 @@ import { Component, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
 import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { activeLayer } from '~/controllers/canvas/layer/LayerListController';
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { ImagePoolEntryMenu } from '~/models/menu/ImagePoolEntryMenu';
 import { interactStore } from '~/stores/EditorStores';
@@ -21,7 +21,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   let imageRef: HTMLImageElement;
   let svgRef: SVGSVGElement;
 
-  let [localEntry, setLocalEntry] = createSignal(imagePoolStore.entries.get(props.entry.id)!);
+  let [localEntry, setLocalEntry] = createSignal<ImagePoolEntry>(props.entry);
 
   onMount(() => {
     imageRef.onload = () => {
@@ -84,6 +84,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       imageRef.style.height = props.entry.height * props.entry.scale + 'px';
       svgRef.style.width = props.entry.width * props.entry.scale + 'px';
       svgRef.style.height = props.entry.height * props.entry.scale + 'px';
+      containerRef.style.transform = `translate(${props.entry.x}px, ${props.entry.y}px)`;
     };
   });
 

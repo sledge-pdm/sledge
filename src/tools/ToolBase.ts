@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/controllers/canvas/layer/image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { ToolType } from '../models/tool/Tool';
 import { Vec2 } from '../types/Vector';

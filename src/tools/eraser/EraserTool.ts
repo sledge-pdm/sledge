@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/controllers/canvas/layer/image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { transparent } from '~/utils/ColorUtils';
 import { ToolArgs } from '../ToolBase';
 import { PenTool } from '../pen/PenTool';

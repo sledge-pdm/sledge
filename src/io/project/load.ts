@@ -1,5 +1,5 @@
-import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
-import { Layer } from '~/models/canvas/layer/Layer';
+import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { Layer } from '~/models/layer/Layer';
 import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 import { mapReviver } from './jsonTyped';
 

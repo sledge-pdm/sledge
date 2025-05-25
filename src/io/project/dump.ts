@@ -1,4 +1,4 @@
-import { getAgentOf } from '~/controllers/canvas/layer/LayerAgentManager';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { mapReplacer } from '~/io/project/jsonTyped';
 import { canvasStore, imagePoolStore, layerListStore, projectStore } from '~/stores/ProjectStores';
 

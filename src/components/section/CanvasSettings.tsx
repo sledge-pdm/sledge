@@ -1,6 +1,6 @@
 import { Component } from 'solid-js';
 import { adjustZoomToFit, changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
-import { resetAllLayers } from '~/controllers/canvas/layer/LayerListController';
+import { resetAllLayers } from '~/controllers/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';

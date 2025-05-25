@@ -1,4 +1,4 @@
-import { Layer } from '~/models/canvas/layer/Layer';
+import { Layer } from '~/models/layer/Layer';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
 import LayerImageAgent from './image/LayerImageAgent';
 import { getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';

@@ -66,43 +66,54 @@ class CanvasAreaInteract {
     if (!this.pointers.has(e.pointerId)) return;
     const prev = this.pointers.get(e.pointerId)!;
     const now = { x: e.clientX, y: e.clientY };
-    this.pointers.set(e.pointerId, now);
 
     if (e.pointerType === 'touch') {
       // タッチ
       if (this.pointers.size === 1 && interactStore.isDragging) {
-        // パン（ドラッグ移動）
-        const dx = now.x - prev.x;
-        const dy = now.y - prev.y;
+        // 一本指のパン
+        this.pointers.set(e.pointerId, now);
+        const dx = now.x - prev.x,
+          dy = now.y - prev.y;
         setInteractStore('offset', {
           x: interactStore.offset.x + dx,
           y: interactStore.offset.y + dy,
         });
         this.updateTransform();
       } else if (this.pointers.size === 2) {
-        // ピンチズーム or 並進 + ズーム
-        const [p0, p1] = Array.from(this.pointers.values());
-        // 1) ズーム
-        const dist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
-        const scale = dist / this.lastDist;
-        this.lastDist = dist;
-        // 中心点をキャンバス座標系に変換
+        // 2 本指: まず旧指位置をコピーしてから更新
+        const prevPointers = new Map(this.pointers);
+        this.pointers.set(e.pointerId, now);
+        const oldPts = Array.from(prevPointers.values());
+        const newPts = Array.from(this.pointers.values());
+        const prevMidX = (oldPts[0].x + oldPts[1].x) / 2;
+        const prevMidY = (oldPts[0].y + oldPts[1].y) / 2;
+        const [p0, p1] = newPts;
+
+        // (3) ズーム
+        const zoomOld = interactStore.zoom;
+        const distNew = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        const scaleFact = distNew / this.lastDist;
+        this.lastDist = distNew;
+        const newZoom = zoomOld * scaleFact;
+
+        // (4) 中点のキャンバス座標
         const midX = (p0.x + p1.x) / 2;
         const midY = (p0.y + p1.y) / 2;
         const rect = this.canvasStack.getBoundingClientRect();
-        const canvasX = (midX - rect.left) / interactStore.zoom;
-        const canvasY = (midY - rect.top) / interactStore.zoom;
-        // ズーム更新
-        const newZoom = interactStore.zoom * scale;
+        const canvasMidX = (midX - rect.left) / zoomOld;
+        const canvasMidY = (midY - rect.top) / zoomOld;
+
+        // (5) 並進量（画面上の中点移動をキャンバス座標に）
+        const dxCanvas = (midX - prevMidX) / zoomOld;
+        const dyCanvas = (midY - prevMidY) / zoomOld;
+
+        // (6) 適用
         setInteractStore('zoom', newZoom);
-        // オフセット補正
         setInteractStore('offset', {
-          x: interactStore.offset.x + canvasX * (interactStore.zoom - newZoom),
-          y: interactStore.offset.y + canvasY * (interactStore.zoom - newZoom),
+          x: interactStore.offset.x + canvasMidX * (zoomOld - newZoom) + dxCanvas,
+          y: interactStore.offset.y + canvasMidY * (zoomOld - newZoom) + dyCanvas,
         });
-        // 2) 並進
-        // （必要なら二本指の同方向移動分を追加）
-        this.updateTransform();
+        +this.updateTransform();
       }
     } else {
       // タッチ以外

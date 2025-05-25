@@ -1,3 +1,4 @@
+import { Theme } from '~/models/config/types/Theme';
 import { FileLocation } from '~/types/FileLocation';
 import { Consts } from '~/utils/consts';
 import { CanvasRenderingMode } from '../canvas/Canvas';
@@ -5,8 +6,10 @@ import { ConfigComponentName } from './ConfigComponents';
 
 export type GlobalConfig = {
   misc: {
-    maxRecentFiles: number;
     recentFiles: FileLocation[];
+  };
+  appearance: {
+    theme: Theme;
   };
   newProject: {
     canvasSize: { width: number; height: number };
@@ -22,8 +25,10 @@ export type GlobalConfig = {
 };
 export const defaultConfig: GlobalConfig = {
   misc: {
-    maxRecentFiles: 8,
     recentFiles: [],
+  },
+  appearance: {
+    theme: 'os',
   },
   newProject: {
     canvasSize: { width: 1000, height: 1000 },
@@ -55,14 +60,24 @@ export type FieldMeta = {
   customFormat?: string; // format: [value] => value
 };
 
+export const themeOptions = [
+  { label: 'os theme', value: 'os' },
+  { label: 'light', value: 'light' },
+  { label: 'dark', value: 'dark' },
+  { label: 'dark-gy-flip', value: 'dark-gy-flip' },
+  { label: 'black', value: 'black' },
+];
+
 export const settingsMeta = [
   {
     section: Sections.General,
-    path: ['misc', 'maxRecentFiles'],
-    label: 'max recent files count',
-    component: 'Slider',
-    props: { min: 1, max: 20, step: 1 },
-    tips: 'the max count of "recently opened files" history.',
+    path: ['appearance', 'theme'],
+    label: 'global theme',
+    component: 'Dropdown',
+    props: {
+      options: themeOptions,
+    },
+    tips: 'global theme of sledge.',
   },
 
   {
@@ -74,7 +89,7 @@ export const settingsMeta = [
       options: [
         { label: 'adaptive', value: 'adaptive' },
         { label: 'pixelated', value: 'pixelated' },
-        { label: 'crispEdges', value: 'crispEdges' },
+        { label: 'crispEdges', value: 'crisp-edges' },
       ],
     },
     tips: `determines rendering mode of canvas.

@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { ZFB03B, ZFB09 } from '~/styles/global.css';
+import { vars, ZFB03B, ZFB09 } from '~/styles/global.css';
 import { flexCol, w100 } from '~/styles/snippets.css';
 import { Consts } from '~/utils/consts';
 
@@ -34,7 +34,7 @@ export const rfsThumb = style([
   {
     alignItems: 'center',
     justifyContent: 'center',
-    border: '1px solid #aaa',
+    border: `1px solid ${vars.color.border}`,
     width: `${Consts.projectThumbnailSize}px`,
     height: `${Consts.projectThumbnailSize}px`,
   },

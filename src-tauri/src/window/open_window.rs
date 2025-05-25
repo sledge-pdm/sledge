@@ -1,5 +1,6 @@
 use serde::Deserialize;
-use tauri::{AppHandle, Theme, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, Theme, WebviewUrl, WebviewWindowBuilder};
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -11,6 +12,19 @@ pub enum SledgeWindowKind {
 }
 
 const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection";
+
+fn next_editor_label(app: &AppHandle) -> String {
+    loop {
+        // 例: "editor-31d15a92"
+        let label = format!(
+            "editor-{}",
+            Uuid::new_v4().simple().to_string()[..8].to_owned()
+        );
+        if app.get_webview_window(&label).is_none() {
+            return label;
+        }
+    }
+}
 
 #[tauri::command]
 pub async fn open_window(
@@ -38,12 +52,13 @@ pub async fn open_window(
         }
 
         Editor => {
-            label = "editor";
+            let label = next_editor_label(&app);
+
             let base_url = "/editor";
-            let full_url = match &query {
-                Some(query) => format!("{base_url}?{query}"),
-                None => base_url.to_string(),
-            };
+            let full_url = query
+                .as_ref()
+                .map(|q| format!("{base_url}?{q}"))
+                .unwrap_or_else(|| base_url.to_string());
             let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(full_url.into()))
                 .inner_size(1200.0, 750.0)
                 .resizable(true)
@@ -91,6 +106,7 @@ pub async fn open_window(
     };
 
     builder = builder
+        .focused(true)
         .theme(Some(Theme::Light))
         .additional_browser_args(COMMON_BROWSER_ARGS);
 

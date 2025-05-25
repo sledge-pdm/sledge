@@ -1,4 +1,4 @@
-import * as styles from '@styles/components/globals/top_menu_bar.css';
+import * as styles from '@styles/globals/top_menu_bar.css';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
 import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
@@ -52,7 +52,10 @@ const TopMenuBar: Component = () => {
             let containerRef: HTMLDivElement;
             return (
               <div ref={(el) => (containerRef = el)} class={styles.menuItem}>
-                <a onClick={(e) => item.action()}>{item.text}</a>
+                <a class={styles.menuItemText} onClick={(e) => item.action()}>
+                  {item.text}
+                </a>
+                <div class={styles.menuItemBackground} />
               </div>
             );
           }}
@@ -64,7 +67,10 @@ const TopMenuBar: Component = () => {
             let containerRef: HTMLDivElement;
             return (
               <div ref={(el) => (containerRef = el)} class={styles.menuItem}>
-                <a onClick={(e) => item.action()}>{item.text}</a>
+                <a class={styles.menuItemText} onClick={(e) => item.action()}>
+                  {item.text}
+                </a>
+                <div class={styles.menuItemBackground} />
               </div>
             );
           }}

@@ -1,20 +1,11 @@
 import { createSortable, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
 import Light from '~/components/common/Light';
-import { Layer, LayerType } from '~/models/canvas/layer/Layer';
+import { Layer, LayerType } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import {
-  activeLight,
-  dotMagnifContainer,
-  dotMagnifText,
-  layerItem,
-  layerItemDisabled,
-  layerItemIndex,
-  layerItemName,
-  layerItemType,
-} from '~/styles/section/layer.css';
-import { flexRow, w100 } from '~/styles/snippets.css';
+import { activeLight, layerItem, layerItemDisabled, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
+import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { getNextMagnification } from '~/utils/LayerUtils';
 import LayerPreview from '../../common/LayerPreview';
 
@@ -75,31 +66,23 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       {/* <DSLButton /> */}
       <div
         class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
-        // style={{ 'border-bottom': props.isLast ? 'none' : '1px solid #333' }}
         onClick={onDetClicked}
-        onContextMenu={(e) => {
+        onContextMenu={async (e) => {
           e.preventDefault();
-          new LayerMenu().show();
+          const menu = await LayerMenu.create(props.layer.id);
+          menu.show();
         }}
       >
         <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
         <div
-          class={[flexRow, w100].join(' ')}
+          class={`${flexCol} ${w100}`}
           style={{
-            'align-items': 'center',
-            position: 'relative',
+            'margin-left': '6px',
+            'justify-content': 'center',
+            gap: '1px',
           }}
         >
-          <div
-            class={flexRow}
-            style={{
-              top: '2px',
-              right: 0,
-              left: 0,
-              'margin-left': '6px',
-              position: 'absolute',
-            }}
-          >
+          <div class={flexRow}>
             <p class={layerItemIndex}>{props.index}.</p>
             <p class={layerItemType}>
               {Math.ceil(props.layer.opacity * 100)}%, {props.layer.mode}
@@ -107,7 +90,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           </div>
 
           <p class={layerItemName}> {props.layer.name}</p>
-          <div
+          {/* <div
             class={dotMagnifContainer}
             onClick={(e) => {
               e.stopPropagation();
@@ -116,9 +99,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             onMouseOver={(e) => e.stopPropagation()}
           >
             <p class={dotMagnifText}>x{props.layer.dotMagnification}</p>
-          </div>
-          <Light class={activeLight} on={isActive()} />
+          </div> */}
         </div>
+        <Light class={activeLight} on={isActive()} />
       </div>
     </div>
   );

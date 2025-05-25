@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '~/styles/global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
@@ -13,12 +13,12 @@ export const dropdownContainer = style({
 export const triggerButton = style([
   flexRow,
   {
-    backgroundColor: vars.color.primary,
+    backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
     padding: '3px 11px 4px 11px',
     width: 'fit-content',
     textAlign: 'left',
-    minWidth: '120px',
+    minWidth: '100px',
     alignItems: 'center',
     gap: '6px',
     cursor: 'pointer',
@@ -26,8 +26,32 @@ export const triggerButton = style([
       transform: 'none',
     },
     selectors: {
-      '&:hover': { backgroundColor: vars.color.button_hover },
-      '&:active': { backgroundColor: vars.color.button_pressed },
+      '&:hover': { backgroundColor: vars.color.button.hover },
+      '&:active': { backgroundColor: vars.color.button.hover },
+    },
+  },
+]);
+
+export const triggerButtonNoBG = style([
+  flexRow,
+  triggerButton,
+  {
+    background: 'none',
+    backgroundColor: 'none',
+    border: `none`,
+    padding: '3px 11px 4px 11px',
+    width: 'fit-content',
+    textAlign: 'left',
+    minWidth: '100px',
+    alignItems: 'center',
+    gap: '6px',
+    cursor: 'pointer',
+    ':hover': {
+      transform: 'none',
+    },
+    selectors: {
+      '&:hover': { backgroundColor: vars.color.button.hover },
+      '&:active': { backgroundColor: vars.color.button.hover },
     },
   },
 ]);
@@ -40,16 +64,31 @@ export const menuStyle = style([
     top: '100%',
     left: 0,
     zIndex: 10,
-    backgroundColor: vars.color.primary,
+    backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
     marginTop: '0px',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
     maxHeight: '200px',
-    minWidth: '120px',
+    minWidth: '100px',
     overflowY: 'auto',
     width: 'fit-content',
   },
 ]);
+
+export const menuDirection = styleVariants({
+  down: {
+    top: '100%', // 従来どおり下に
+    bottom: 'auto',
+    marginTop: '0px',
+    boxShadow: '0 2px 8px rgba(0,0,0,.1)',
+  },
+  up: {
+    top: 'auto',
+    bottom: '100%', // トリガーの上に配置
+    marginBottom: '0px',
+    boxShadow: '0 -2px 8px rgba(0,0,0,.1)',
+  },
+});
 
 // メニューアイテム
 export const menuItem = style({
@@ -62,6 +101,6 @@ export const menuItem = style({
 
 export const itemText = style({
   whiteSpace: 'break-spaces',
-  color: vars.color.text,
+  color: vars.color.onBackground,
   width: '100%',
 });

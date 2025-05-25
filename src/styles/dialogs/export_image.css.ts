@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB09, ZFB31 } from '~/styles/global.css';
+import { ZFB09, ZFB31 } from '~/styles/global.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
+import { vars } from '../global.css';
 
 export const root = style([
   flexCol,
@@ -49,6 +50,15 @@ export const fieldHeader = style([
     fontSize: vars.text.sm,
     marginBottom: vars.spacing.sm,
     textDecoration: 'underline',
+  },
+]);
+
+export const fileName = style([
+  flexCol,
+  {
+    fontSize: '16px',
+    width: 'fit-content',
+    border: 'none',
   },
 ]);
 

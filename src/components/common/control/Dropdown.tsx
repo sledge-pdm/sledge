@@ -1,5 +1,15 @@
 import { For, JSX, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
-import { dropdownContainer, itemText, menuItem, menuStyle, triggerButton } from '~/styles/components/basics/dropdown.css';
+import Icon from '~/components/common/Icon';
+import {
+  dropdownContainer,
+  itemText,
+  menuDirection,
+  menuItem,
+  menuStyle,
+  triggerButton,
+  triggerButtonNoBG,
+} from '~/styles/components/basics/dropdown.css';
+import { vars } from '~/styles/global.css';
 
 export type DropdownOption<T extends string | number> = {
   label: string;
@@ -11,12 +21,16 @@ interface Props<T extends string | number = string> {
   onChange?: (value: T) => void;
   options: DropdownOption<T>[];
   props?: JSX.HTMLAttributes<HTMLDivElement>;
+  noBackground?: boolean;
 }
 
 const Dropdown = <T extends string | number>(p: Props<T>) => {
   let containerRef: HTMLDivElement | undefined;
+  let menuRef: HTMLUListElement | undefined;
 
   const [open, setOpen] = createSignal(false);
+  const [dir, setDir] = createSignal<'down' | 'up'>('down');
+
   const getValue = () => (typeof p.value === 'function' ? (p.value as () => T)() : p.value);
   const selectedLabel = createMemo(() => {
     const opt = p.options.find((o) => o.value === (typeof p.value === 'function' ? p.value() : p.value));
@@ -26,7 +40,10 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
   const getLongestLabel = () => Math.max(...p.options.map((o) => o.label.length));
   const getAdjustedLabel = (label?: string) => label?.padEnd(getLongestLabel());
 
-  const toggle = () => setOpen(!open());
+  const toggle = () => {
+    setOpen(!open());
+    if (open()) decideDirection();
+  };
   const select = (option: DropdownOption<T>) => {
     p.onChange?.(option.value);
     setOpen(false);
@@ -45,14 +62,32 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
     document.removeEventListener('click', handleClickOutside);
   });
 
+  // メニューを開く直前に上下どちらに出すか判定
+  const decideDirection = () => {
+    if (!containerRef) return;
+    const rect = containerRef.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+    // menuRef がまだ無い＝初回は最大高さ(200)で概算
+    const menuH = menuRef ? Math.min(menuRef.scrollHeight, 200) : 200;
+    setDir(spaceBelow < menuH && spaceAbove > spaceBelow ? 'up' : 'down');
+  };
+
   return (
     <div class={dropdownContainer} ref={containerRef} {...p.props}>
-      <button type='button' class={triggerButton} onClick={toggle} aria-haspopup='listbox' aria-expanded={open()}>
+      <button
+        type='button'
+        class={p.noBackground ? triggerButtonNoBG : triggerButton}
+        onClick={toggle}
+        aria-haspopup='listbox'
+        aria-expanded={open()}
+      >
         <p class={itemText}>{getAdjustedLabel(selectedLabel())}</p>
-        <img src={'/icons/misc/dropdown_caret.png'} width={9} height={9}></img>
+        <Icon src={'/icons/misc/dropdown_caret.png'} base={9} color={vars.color.onBackground} />
       </button>
       <Show when={open()}>
-        <ul class={menuStyle} role='listbox'>
+        <ul ref={menuRef} class={`${menuStyle} ${menuDirection[dir()]}`} role='listbox'>
           <For each={p.options} fallback={<li>選択肢がありません</li>}>
             {(option) => (
               <li class={menuItem} role='option' aria-selected={option.value === getValue()} onClick={() => select(option)}>

@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { checkboxWrapper } from '~/styles/components/basics/checkbox.css';
+import { vars } from '~/styles/global.css';
 
 export const radioWrapper = checkboxWrapper; // チェックボックスと共通でOK！
 
@@ -13,7 +14,7 @@ export const hiddenRadio = style({
 export const customRadio = style({
   width: '10px',
   height: '10px',
-  border: '1px solid #000',
+  border: `1px solid ${vars.color.button.border}`,
   borderRadius: '0px',
   marginLeft: '8px',
   display: 'inline-block',
@@ -27,7 +28,7 @@ export const customRadio = style({
       top: '2px',
       width: '6px',
       height: '6px',
-      backgroundColor: 'red',
+      backgroundColor: vars.color.active,
       opacity: 0,
       transition: 'opacity 0.1s',
     },

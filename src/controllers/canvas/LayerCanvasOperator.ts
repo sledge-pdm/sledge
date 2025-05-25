@@ -1,3 +1,6 @@
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
+import { findLayerById } from '~/controllers/layer/LayerListController';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/types/Vector';
@@ -6,9 +9,6 @@ import { Tool } from '../../models/tool/Tool';
 import { getToolInstance } from '../../tools/ToolBase';
 import { DrawState } from '../../types/DrawState';
 import { currentColor } from '../color/ColorController';
-import LayerImageAgent from './layer/image/LayerImageAgent';
-import { getAgentOf } from './layer/LayerAgentManager';
-import { findLayerById } from './layer/LayerListController';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}

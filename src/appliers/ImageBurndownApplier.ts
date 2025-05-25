@@ -1,7 +1,7 @@
 // src/appliers/ImageBurndownApplier.ts
-import LayerImageAgent from '~/controllers/canvas/layer/image/LayerImageAgent';
-import { getAgentOf } from '~/controllers/canvas/layer/LayerAgentManager';
-import { findLayerById } from '~/controllers/canvas/layer/LayerListController';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
+import { findLayerById } from '~/controllers/layer/LayerListController';
 import { loadLocalImage } from '~/utils/DataUtils';
 
 export interface ImageBurndownParams {

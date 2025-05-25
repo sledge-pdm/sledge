@@ -11,9 +11,7 @@ export const topRightNav = style({
 
 export const undoRedo = style({
   cursor: 'pointer',
-  height: '24px',
   imageRendering: 'pixelated',
   padding: '8px',
   pointerEvents: 'all',
-  width: '24px',
 });

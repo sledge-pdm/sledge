@@ -1,9 +1,9 @@
+import { allLayers } from '~/controllers/layer/LayerListController';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';
 import { Consts } from '~/utils/consts';
-import { getAgentOf } from '../canvas/layer/LayerAgentManager';
-import { allLayers } from './layer/LayerListController';
+import { getAgentOf } from '../layer/LayerAgentManager';
 
 export function isValidCanvasSize(size: Size2D): boolean {
   if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;

@@ -10,10 +10,10 @@ import {
 } from '~/controllers/config/KeyConfigController';
 import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { keyConfigName } from '~/styles/components/config/key_config_settings.css';
-import { sectionContent, sectionRoot } from '~/styles/components/globals/section_global.css';
+import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components/config/key_config_settings.css';
 import { vars } from '~/styles/global.css';
-import { flexRow } from '~/styles/snippets.css';
+import { sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
+import { flexCol } from '~/styles/snippets.css';
 import { KeyConfigCommands } from '~/utils/consts';
 
 const KeyConfigSettings: Component = () => {
@@ -58,25 +58,38 @@ const KeyConfigSettings: Component = () => {
 
   return (
     <div class={sectionRoot}>
-      <div class={sectionContent} style={{ gap: '12px', 'margin-left': '8px' }}>
-        <p style={{ 'margin-bottom': '12px' }}>click key to record new &gt; enter to confirm,</p>
+      <div class={sectionContent}>
+        <p style={{ 'margin-bottom': '16px' }}>
+          <span style={{ color: vars.color.accent }}>enter</span> to confirm.&nbsp;
+          <span style={{ color: vars.color.accent }}>esc</span> to abort.
+        </p>
         <For each={Object.entries(keyConfigStore)}>
           {([name, entry]) => {
             const isRecording = () => name === recordingName();
             return (
-              <div class={flexRow}>
-                <p class={keyConfigName}>{name}</p>
-                <a
-                  onClick={(e) => {
-                    if (!isRecording()) startRecord(name as KeyConfigCommands);
-                  }}
+              <div class={flexCol}>
+                <div class={keyConfigRow}>
+                  <p class={keyConfigName}>{name}</p>
+                  <a
+                    class={keyConfigValue}
+                    onClick={(e) => {
+                      if (!isRecording()) startRecord(name as KeyConfigCommands);
+                    }}
+                    style={{
+                      color: isRecording() ? vars.color.active : vars.color.onBackground,
+                      'pointer-events': isRecording() ? 'none' : 'all',
+                    }}
+                  >
+                    {name === recordingName() ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'press any keys'}]` : parseKeyConfigEntry(entry[0])}
+                  </a>
+                </div>
+                <div
                   style={{
-                    color: isRecording() ? vars.color.accent : 'inherit',
-                    'pointer-events': isRecording() ? 'none' : 'all',
+                    height: '1px',
+                    'background-color': vars.color.border,
+                    'margin-right': vars.spacing.xl,
                   }}
-                >
-                  {name === recordingName() ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'enter any key'}]` : parseKeyConfigEntry(entry[0])}
-                </a>
+                />
               </div>
             );
           }}

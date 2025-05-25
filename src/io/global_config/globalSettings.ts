@@ -1,5 +1,6 @@
 import { BaseDirectory, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import { getGlobalRootStore, initGlobalStore, loadGlobalStore } from '~/stores/GlobalStores';
+import { defaultConfig } from '~/models/config/GlobalConfig';
+import { defaultLastSettingsStore, getGlobalRootStore, initGlobalStore, loadGlobalStore, makeDefaultKeyConfigStore } from '~/stores/GlobalStores';
 
 const FILE_NAME = 'global.sledgeconfig';
 
@@ -34,7 +35,16 @@ export async function loadGlobalSettings() {
     });
     const data = JSON.parse(json);
 
-    loadGlobalStore(data);
+    loadGlobalStore(
+      Object.assign(
+        {
+          globalConfigStore: defaultConfig,
+          keyConfigStore: makeDefaultKeyConfigStore(),
+          lastSettingsStore: defaultLastSettingsStore,
+        },
+        data
+      )
+    );
 
     console.log('global settings load done.', data);
   } catch (e) {

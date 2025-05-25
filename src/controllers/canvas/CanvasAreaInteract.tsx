@@ -25,6 +25,10 @@ class CanvasAreaInteract {
     private wrapperRef: HTMLDivElement
   ) {}
 
+  static isDraggable(e: PointerEvent) {
+    return e.buttons === 4 || (e.buttons === 1 && e.ctrlKey);
+  }
+
   private handlePointerDown(e: PointerEvent) {
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
@@ -48,7 +52,7 @@ class CanvasAreaInteract {
       }
     } else {
       // タッチ以外
-      if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
+      if (CanvasAreaInteract.isDraggable(e)) {
         this.wrapperRef.setPointerCapture(e.pointerId);
         setInteractStore('isDragging', true);
       }
@@ -102,7 +106,7 @@ class CanvasAreaInteract {
       }
     } else {
       // タッチ以外
-      if (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey)) {
+      if (CanvasAreaInteract.isDraggable(e)) {
         if (interactStore.isDragging) {
           const dx = e.clientX - prev.x;
           const dy = e.clientY - prev.y;

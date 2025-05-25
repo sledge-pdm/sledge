@@ -19,7 +19,7 @@ export const layerItem = style([
     flexGrow: 1,
     cursor: 'pointer',
     backgroundColor: vars.color.surface,
-    borderLeft: '3px solid #333',
+    borderLeft: `3px solid ${vars.color.onBackground}`,
 
     ':hover': {
       filter: 'brightness(0.94)',
@@ -36,22 +36,24 @@ export const layerItemDisabled = style({
 
 export const layerItemIndex = style([
   {
-    flexGrow: 1,
+    whiteSpace: 'nowrap',
     fontSize: vars.text.sm,
+    opacity: 0.2,
+    width: '16px',
   },
 ]);
 
 export const layerItemType = style({
   whiteSpace: 'nowrap',
   fontSize: vars.text.sm,
-  opacity: 0.4,
+  opacity: 0.6,
 });
 
 export const layerItemName = style([
   {
     fontSize: vars.text.xl,
     fontFamily: ZFB03B,
-    margin: `${vars.spacing.md} 0 0 ${vars.spacing.lg}`,
+    marginLeft: '16px',
   },
 ]);
 
@@ -62,8 +64,6 @@ export const dotMagnifContainer = style([
     // borderRadius: vars.spacing.xs,
     cursor: 'pointer',
     marginTop: vars.spacing.sm,
-    marginLeft: 'auto',
-    marginRight: 0,
     padding: `2px ${vars.spacing.xs}`,
     pointerEvents: 'all',
 
@@ -91,7 +91,7 @@ export const activeLight = style([
 
 export const dropPlaceholder = style([
   {
-    border: '2px dashed #aaa',
+    border: `2px dashed ${vars.color.border}`,
     borderRadius: vars.spacing.md,
     height: '32px',
     margin: `${vars.spacing.xs}px 0`,

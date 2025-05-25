@@ -14,7 +14,7 @@ export const configFormSections = style([
   flexCol,
   h100,
   {
-    borderRight: '1px solid #aaa',
+    borderRight: `1px solid ${vars.color.border}`,
     minWidth: '170px',
     paddingTop: vars.spacing.lg,
   },
@@ -30,7 +30,7 @@ export const configFormSectionItem = style([
     cursor: 'pointer',
     pointerEvents: 'all',
     ':hover': {
-      backgroundColor: vars.color.secondary,
+      backgroundColor: vars.color.surface,
     },
   },
 ]);
@@ -40,7 +40,7 @@ export const configFormSectionLabel = style({
   fontSize: '8px',
   whiteSpace: 'nowrap',
   ':hover': {
-    color: vars.color.text,
+    color: vars.color.onBackground,
   },
 });
 

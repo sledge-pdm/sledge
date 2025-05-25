@@ -2,22 +2,19 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { projectStore } from '~/stores/ProjectStores';
+import { vars } from '~/styles/global.css';
 import {
-  titleBarControlButtonCloseImg,
-  titleBarControlButtonMaximizeImg,
-  titleBarControlButtonMinimizeImg,
-  titleBarControlCloseButton,
-  titleBarControlMaximizeButton,
-  titleBarControlMinimizeButton,
+  titleBarControlButtonContainer,
+  titleBarControlButtonImg,
+  titleBarControlCloseButtonContainer,
   titleBarControls,
   titleBarRoot,
   titleBarTitle,
-} from '~/styles/components/globals/title_bar.css';
-
+} from '~/styles/globals/title_bar.css';
 import '~/styles/tile_bar_region.css';
+import Icon from '../common/Icon';
 
 export default function TitleBar() {
-  const window = getCurrentWindow();
   let titleBarNavEl: HTMLElement;
 
   const [isMaximizable, setIsMaximizable] = createSignal(false);
@@ -28,6 +25,7 @@ export default function TitleBar() {
   const [isMaximized, setMaximized] = createSignal(false);
 
   onMount(async () => {
+    const window = getCurrentWindow();
     setIsMaximizable(await window.isMaximizable());
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
@@ -41,8 +39,8 @@ export default function TitleBar() {
     // }
   });
 
-  window.onResized(async (handler) => {
-    setMaximized(await window.isMaximized());
+  getCurrentWindow().onResized(async (handler) => {
+    setMaximized(await getCurrentWindow().isMaximized());
   });
 
   createEffect(() => {
@@ -61,15 +59,15 @@ export default function TitleBar() {
   });
 
   const borderWindowLabels: string[] = ['settings'];
-  const shouldShowBorder = () => borderWindowLabels.find((l) => l === window.label);
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === getCurrentWindow().label);
   const titleLessWindowLabels: string[] = [];
-  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === window.label);
+  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === getCurrentWindow().label);
 
   return (
     <header
       style={{
         'pointer-events': 'all',
-        'border-bottom': shouldShowBorder() ? '1px solid #aaa' : 'none',
+        'border-bottom': shouldShowBorder() ? `1px solid ${vars.color.border}` : 'none',
       }}
     >
       <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
@@ -79,46 +77,60 @@ export default function TitleBar() {
 
         <div class={titleBarControls} data-tauri-drag-region-exclude>
           <Show when={isMinimizable()}>
-            <button
-              class={titleBarControlMinimizeButton}
+            <div
+              class={titleBarControlButtonContainer}
               onClick={async (e) => {
                 e.preventDefault();
-                await window.minimize();
+                await getCurrentWindow().minimize();
               }}
               data-tauri-drag-region-exclude
             >
-              <img class={titleBarControlButtonMinimizeImg} src={'/icons/title_bar/minimize_2.png'} data-tauri-drag-region-exclude />
-            </button>
+              <Icon
+                class={titleBarControlButtonImg}
+                src={'/icons/title_bar/minimize_2.png'}
+                color={vars.color.onBackground}
+                base={12}
+                data-tauri-drag-region-exclude
+              />
+            </div>
           </Show>
 
           <Show when={isMaximizable()}>
-            <button
-              class={titleBarControlMaximizeButton}
+            <div
+              class={titleBarControlButtonContainer}
               onClick={async (e) => {
                 e.preventDefault();
-                await window.toggleMaximize();
+                await getCurrentWindow().toggleMaximize();
               }}
               data-tauri-drag-region-exclude
             >
-              <img
-                class={titleBarControlButtonMaximizeImg}
+              <Icon
+                class={titleBarControlButtonImg}
                 src={isMaximized() ? '/icons/title_bar/quit_maximize_2.png' : '/icons/title_bar/maximize_2.png'}
+                color={vars.color.onBackground}
+                base={12}
                 data-tauri-drag-region-exclude
               />
-            </button>
+            </div>
           </Show>
 
           <Show when={isClosable()}>
-            <button
-              class={titleBarControlCloseButton}
+            <div
+              class={titleBarControlCloseButtonContainer}
               onClick={async (e) => {
                 e.preventDefault();
-                await window.close();
+                await getCurrentWindow().close();
               }}
               data-tauri-drag-region-exclude
             >
-              <img class={titleBarControlButtonCloseImg} src={'/icons/title_bar/close_2.png'} data-tauri-drag-region-exclude />
-            </button>
+              <Icon
+                class={titleBarControlButtonImg}
+                src={'/icons/title_bar/close_2.png'}
+                color={vars.color.onBackground}
+                base={12}
+                data-tauri-drag-region-exclude
+              />
+            </div>
           </Show>
         </div>
       </nav>

@@ -77,9 +77,6 @@ export class WebGLRenderer {
 
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
-    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
     gl.texImage3D(
       gl.TEXTURE_2D_ARRAY,
       0, // level
@@ -108,9 +105,6 @@ export class WebGLRenderer {
     const { gl, program, vao } = this;
     gl.useProgram(program);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
-    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
     activeLayers.forEach((layer, i) => {
       const buf = getBufferOf(layer.id)!;
       gl.texSubImage3D(

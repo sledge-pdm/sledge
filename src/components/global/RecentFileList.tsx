@@ -2,13 +2,13 @@ import { createScrollPosition } from '@solid-primitives/scroll';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import getFileId from '~/io/project/getFileId';
-import { thumbnailDir } from '~/io/project/saveThumbnail';
+import { thumbnailDir } from '~/io/project/thumbnail';
 import { recentFilesCaption, recentFilesContainerCol, recentFilesContainerScroll } from '~/routes/start.css';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sectionRoot } from '~/styles/globals/section_global.css';
 import { flexRow, w100 } from '~/styles/snippets.css';
 import { FileLocation } from '~/types/FileLocation';
+import getFileId from '~/utils/getFileId';
 import ListFileItem from './file_item/ListFileItem';
 
 const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLocation) => void }> = (props) => {

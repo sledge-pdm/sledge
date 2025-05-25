@@ -1,5 +1,5 @@
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { saveProject } from '~/io/project/saveProject';
+import { saveProject } from '~/io/project/save';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { vars } from '~/styles/global.css';

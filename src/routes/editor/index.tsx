@@ -13,7 +13,7 @@ import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasCo
 import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
 import { addLayer } from '~/controllers/canvas/layer/LayerListController';
 import { loadGlobalSettings } from '~/io/global_config/globalSettings';
-import { importProjectFromPath } from '~/io/project/importProject';
+import { importProjectFromPath } from '~/io/project/import';
 import { LayerType } from '~/models/canvas/layer/Layer';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';

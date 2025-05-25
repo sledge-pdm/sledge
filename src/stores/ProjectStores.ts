@@ -1,10 +1,8 @@
 // projectStore.ts
 import { ReactiveMap } from '@solid-primitives/map';
 import { createStore } from 'solid-js/store';
-import { resetLayerImage } from '~/controllers/canvas/layer/LayerController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Layer } from '~/models/canvas/layer/Layer';
-import { fallbackLayerProps } from '~/models/canvas/layer/LayerFactory';
 import { LayerHistory } from '~/models/history/LayerHistory';
 import { Size2D } from '~/types/Size';
 
@@ -88,47 +86,3 @@ export const setLayerHistoryStore = projectRootStore.setLayerHistoryStore;
 
 export const projectStore = projectRootStore.projectStore;
 export const setProjectStore = projectRootStore.setProjectStore;
-
-export const loadStoreFromProjectJson = async (projectJson: any) => {
-  if (projectJson.canvas) {
-    const { width, height } = projectJson.canvas;
-    setCanvasStore('canvas', 'width', width);
-    setCanvasStore('canvas', 'height', height);
-  }
-
-  if (projectJson.imagePool.entries) {
-    console.log(projectJson.imagePool.entries);
-    let entries: ReactiveMap<string, ImagePoolEntry> = new ReactiveMap(projectJson.imagePool.entries);
-    setImagePoolStore('entries', entries);
-    console.log(entries);
-  }
-
-  if (projectJson.project) {
-    setProjectStore('name', projectJson.project.name || undefined);
-    setProjectStore('path', projectJson.project.path || undefined);
-  }
-
-  if (projectJson.layer && projectJson.layer.layers && Array.isArray(projectJson.layer.layers)) {
-    const layers: Layer[] = [];
-    projectJson.layer.layers.map((l: any) => {
-      layers.push({
-        ...fallbackLayerProps,
-        ...l,
-        dsl: undefined,
-      } as Layer);
-    });
-
-    setLayerListStore('layers', layers);
-    setLayerListStore('activeLayerId', projectJson.layer.activeLayerId);
-    setLayerListStore('isImagePoolActive', projectJson.layer.isImagePoolActive);
-  }
-
-  if (projectJson.images) {
-    setLayerHistoryStore({});
-    Object.keys(projectJson.images).forEach((id) => {
-      const data = projectJson.images[id];
-      const agent = resetLayerImage(id, Number(data.dotMagnification || 1), data.width, data.height);
-      agent.setBuffer(Uint8ClampedArray.from(data.current));
-    });
-  }
-};

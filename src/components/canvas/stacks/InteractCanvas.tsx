@@ -90,7 +90,6 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     if (!isDrawableClick(e)) return;
 
-    console.log('d');
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
       setTemporaryOut(false);
@@ -105,7 +104,7 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
-    if (isDrawableClick(e)) props.operator.handleDraw(DrawState.end, position, lastPos());
+    props.operator.handleDraw(DrawState.end, position, lastPos());
     if (interactStore.isInStroke) endStroke(position);
   }
 

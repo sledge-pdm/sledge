@@ -112,7 +112,7 @@ export const lightTheme = createTheme(vars, {
   color: {
     background: '#ffffff',
     surface: '#f2f2f2',
-    canvasArea: '#fefefe',
+    canvasArea: '#fafafa',
     canvas: '#ffffff',
     onBackground: '#000000DE',
     border: '#aaaaaa',
@@ -150,6 +150,7 @@ const darkThemeColorBase = {
     border: '#eeeeee',
   },
 };
+
 export const darkTheme = createTheme(vars, {
   color: darkThemeColorBase,
   ...shared,
@@ -161,6 +162,31 @@ export const darkThemeGYFlip = createTheme(vars, {
     accent: darkThemeColorBase.active,
     active: darkThemeColorBase.accent,
   },
+  ...shared,
+});
+
+const blackThemeColorBase = {
+  background: '#000000',
+  surface: '#101010',
+  canvasArea: '#000000',
+  canvas: '#eeeeee',
+  onBackground: '#eeeeee',
+  border: '#3A3A3A',
+  accent: '#ff00ff',
+  active: '#ff00ff',
+  muted: 'rgba(255,255,255,0.30)',
+  error: '#ff5f5f',
+  button: {
+    bg: '#222222',
+    hover: '#444444',
+    active: '#555555',
+    text: '#eeeeee',
+    border: '#eeeeee',
+  },
+};
+
+export const blackTheme = createTheme(vars, {
+  color: blackThemeColorBase,
   ...shared,
 });
 

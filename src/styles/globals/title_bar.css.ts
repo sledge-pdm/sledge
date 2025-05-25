@@ -39,9 +39,10 @@ export const titleBarControlButtonContainer = style([
     minWidth: '24px',
     paddingLeft: '12px',
     paddingRight: '12px',
+    pointerEvents: 'all',
 
     ':hover': {
-      backgroundColor: '#000000B0',
+      backgroundColor: '#00000020',
     },
   },
 ]);

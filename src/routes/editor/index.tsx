@@ -1,5 +1,6 @@
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
+import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -79,25 +80,30 @@ export default function Editor() {
     });
   };
 
+  let unlisten: UnlistenFn;
+
   onMount(async () => {
     listenEvent('onSettingsSaved', () => {
       loadGlobalSettings();
     });
-  });
 
-  getCurrentWindow().onCloseRequested(async (event) => {
-    if (!isLoading() && projectStore.isProjectChangedAfterSave) {
-      const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
-        okLabel: 'quit w/o save.',
-        cancelLabel: 'cancel.',
-      });
-      if (!confirmed) {
-        event.preventDefault();
+    unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
+      if (!isLoading() && projectStore.isProjectChangedAfterSave) {
+        const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
+          okLabel: 'quit w/o save.',
+          cancelLabel: 'cancel.',
+        });
+        if (!confirmed) {
+          event.preventDefault();
+          return;
+        }
       }
-    }
+    });
   });
 
   onCleanup(() => {
+    unlisten();
+
     if (import.meta.hot) {
       window.location.reload();
     }

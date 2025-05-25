@@ -3,5 +3,5 @@ export type Canvas = {
   height: number;
 };
 
-export type ImageRenderingAttribute = 'auto' | 'pixelated' | 'crispEdges';
-export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crispEdges';
+export type ImageRenderingAttribute = 'auto' | 'pixelated' | 'crisp-edges';
+export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crisp-edges';

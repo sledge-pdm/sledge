@@ -1,4 +1,4 @@
-import { darkTheme, darkThemeGYFlip, lightTheme } from '~/styles/global.css';
+import { blackTheme, darkTheme, darkThemeGYFlip, lightTheme } from '~/styles/global.css';
 import { globalConfig } from './GlobalStores';
 
 export const getTheme = () => {
@@ -14,5 +14,7 @@ export const getTheme = () => {
       return darkTheme;
     case 'dark-gy-flip':
       return darkThemeGYFlip;
+    case 'black':
+      return blackTheme;
   }
 };

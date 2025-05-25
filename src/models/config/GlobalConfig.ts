@@ -1,8 +1,8 @@
+import { Theme } from '~/models/config/types/Theme';
 import { FileLocation } from '~/types/FileLocation';
 import { Consts } from '~/utils/consts';
 import { CanvasRenderingMode } from '../canvas/Canvas';
 import { ConfigComponentName } from './ConfigComponents';
-import { Theme } from './types/Theme';
 
 export type GlobalConfig = {
   misc: {
@@ -65,6 +65,7 @@ export const themeOptions = [
   { label: 'light', value: 'light' },
   { label: 'dark', value: 'dark' },
   { label: 'dark-gy-flip', value: 'dark-gy-flip' },
+  { label: 'black', value: 'black' },
 ];
 
 export const settingsMeta = [
@@ -88,7 +89,7 @@ export const settingsMeta = [
       options: [
         { label: 'adaptive', value: 'adaptive' },
         { label: 'pixelated', value: 'pixelated' },
-        { label: 'crispEdges', value: 'crispEdges' },
+        { label: 'crispEdges', value: 'crisp-edges' },
       ],
     },
     tips: `determines rendering mode of canvas.

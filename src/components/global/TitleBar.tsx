@@ -77,49 +77,58 @@ export default function TitleBar() {
 
         <div class={titleBarControls} data-tauri-drag-region-exclude>
           <Show when={isMinimizable()}>
-            <div class={titleBarControlButtonContainer}>
+            <div
+              class={titleBarControlButtonContainer}
+              onClick={async (e) => {
+                e.preventDefault();
+                await getCurrentWindow().minimize();
+              }}
+              data-tauri-drag-region-exclude
+            >
               <Icon
                 class={titleBarControlButtonImg}
                 src={'/icons/title_bar/minimize_2.png'}
                 color={vars.color.onBackground}
                 base={12}
                 data-tauri-drag-region-exclude
-                onClick={async (e) => {
-                  e.preventDefault();
-                  await getCurrentWindow().minimize();
-                }}
               />
             </div>
           </Show>
 
           <Show when={isMaximizable()}>
-            <div class={titleBarControlButtonContainer}>
+            <div
+              class={titleBarControlButtonContainer}
+              onClick={async (e) => {
+                e.preventDefault();
+                await getCurrentWindow().toggleMaximize();
+              }}
+              data-tauri-drag-region-exclude
+            >
               <Icon
                 class={titleBarControlButtonImg}
                 src={isMaximized() ? '/icons/title_bar/quit_maximize_2.png' : '/icons/title_bar/maximize_2.png'}
                 color={vars.color.onBackground}
                 base={12}
                 data-tauri-drag-region-exclude
-                onClick={async (e) => {
-                  e.preventDefault();
-                  await getCurrentWindow().toggleMaximize();
-                }}
               />
             </div>
           </Show>
 
           <Show when={isClosable()}>
-            <div class={titleBarControlCloseButtonContainer}>
+            <div
+              class={titleBarControlCloseButtonContainer}
+              onClick={async (e) => {
+                e.preventDefault();
+                await getCurrentWindow().close();
+              }}
+              data-tauri-drag-region-exclude
+            >
               <Icon
                 class={titleBarControlButtonImg}
                 src={'/icons/title_bar/close_2.png'}
                 color={vars.color.onBackground}
                 base={12}
                 data-tauri-drag-region-exclude
-                onClick={async (e) => {
-                  e.preventDefault();
-                  await getCurrentWindow().close();
-                }}
               />
             </div>
           </Show>

@@ -52,7 +52,10 @@ const TopMenuBar: Component = () => {
             let containerRef: HTMLDivElement;
             return (
               <div ref={(el) => (containerRef = el)} class={styles.menuItem}>
-                <a onClick={(e) => item.action()}>{item.text}</a>
+                <a class={styles.menuItemText} onClick={(e) => item.action()}>
+                  {item.text}
+                </a>
+                <div class={styles.menuItemBackground} />
               </div>
             );
           }}
@@ -64,7 +67,10 @@ const TopMenuBar: Component = () => {
             let containerRef: HTMLDivElement;
             return (
               <div ref={(el) => (containerRef = el)} class={styles.menuItem}>
-                <a onClick={(e) => item.action()}>{item.text}</a>
+                <a class={styles.menuItemText} onClick={(e) => item.action()}>
+                  {item.text}
+                </a>
+                <div class={styles.menuItemBackground} />
               </div>
             );
           }}

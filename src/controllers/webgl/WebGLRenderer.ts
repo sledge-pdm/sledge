@@ -218,4 +218,27 @@ export class WebGLRenderer {
 
     return new Uint8ClampedArray(pixels.buffer);
   }
+
+  public readPixelsFlipped(): Uint8ClampedArray {
+    const gl = this.gl;
+    const w = this.width;
+    const h = this.height;
+
+    // (1) フルアップデート → ピクセル読み取り
+    this.render(allLayers(), false);
+    const raw = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
+
+    // (2) 上下反転して Uint8ClampedArray を作る
+    const flipped = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) {
+      const srcRow = y;
+      const dstRow = h - 1 - y;
+      const srcStart = srcRow * w * 4;
+      const dstStart = dstRow * w * 4;
+      flipped.set(raw.subarray(srcStart, srcStart + w * 4), dstStart);
+    }
+
+    return flipped;
+  }
 }

@@ -24,23 +24,14 @@ export async function getImageBlob(options: CanvasExportOptions): Promise<Blob |
   const { format, quality = 0.92, scale = 1 } = options;
   const { width, height } = canvasStore.canvas;
 
-  let buffer = webGLRenderer.readPixelsAsBuffer();
+  const buffer = webGLRenderer.readPixelsFlipped();
 
   const offscreen = document.createElement('canvas');
   offscreen.width = width;
   offscreen.height = height;
   const ctx2d = offscreen.getContext('2d')!;
-  // 先に上下反転行列をセット
-  ctx2d.save();
-  ctx2d.scale(1, -1);
-  const tmp = document.createElement('canvas');
-  tmp.width = width;
-  tmp.height = height;
-  const tmpCtx = tmp.getContext('2d')!;
   const imgData = new ImageData(buffer, width, height);
-  tmpCtx.putImageData(imgData, 0, 0);
-  ctx2d.drawImage(tmp, 0, -height, width, height);
-  ctx2d.restore();
+  ctx2d.putImageData(imgData, 0, 0);
 
   let target = offscreen;
   if (scale !== 1) {

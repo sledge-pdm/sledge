@@ -7,7 +7,7 @@ import Checkbox from '~/components/common/control/Checkbox';
 import Dropdown, { DropdownOption } from '~/components/common/control/Dropdown';
 import Slider from '~/components/common/control/Slider';
 import { saveGlobalSettings } from '~/io/global_config/globalSettings';
-import { CanvasExportOptions, defaultExportDir, exportableFileTypes, exportCanvas } from '~/io/image_export/exportCanvas';
+import { CanvasExportOptions, defaultExportDir, exportableFileTypes, exportImage } from '~/io/image_export/imageExport';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
 import { vars, ZFB08 } from '~/styles/global.css';
@@ -69,7 +69,7 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
     const name = settings.fileName;
     if (name === undefined) return;
     if (settings.dirPath) {
-      const result = await exportCanvas(settings.dirPath, name, settings.exportOptions);
+      const result = await exportImage(settings.dirPath, name, settings.exportOptions);
       if (result) {
         if (settings.showDirAfterSave) await revealItemInDir(result);
       }

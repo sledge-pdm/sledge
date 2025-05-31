@@ -21,7 +21,7 @@ const BottomInfo: Component = () => {
         <p class={bottomInfoTextStyle}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
           {/* <p class={bottomInfoTextStyle}>theme</p> */}
-          <ThemeToggle />
+          <ThemeToggle noBackground={true} />
         </div>
       </div>
     </div>

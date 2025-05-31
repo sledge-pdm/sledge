@@ -157,9 +157,8 @@ class CanvasAreaInteract {
     const delta = (deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep) * multiply;
 
     const zoomOld = interactStore.zoom;
-    const zoomNew = Math.round((interactStore.zoom + interactStore.zoom * delta) * 1000) / 1000;
-
-    if (zoomNew < interactStore.zoomMin * referencedZoom || interactStore.zoomMax * referencedZoom < zoomNew) return;
+    let zoomNew = Math.round((interactStore.zoom + interactStore.zoom * delta) * 1000) / 1000;
+    zoomNew = Math.min(Math.max(zoomNew, interactStore.zoomMin * referencedZoom), interactStore.zoomMax * referencedZoom);
 
     const rect = this.canvasStack.getBoundingClientRect();
     const canvasX = (this.lastPointX - rect.left) / zoomOld;

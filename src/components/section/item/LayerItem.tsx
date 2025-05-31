@@ -1,3 +1,4 @@
+import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSortable, transformStyle, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
 import Icon from '~/components/common/Icon';
@@ -72,7 +73,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         onContextMenu={async (e) => {
           e.preventDefault();
           const menu = await LayerMenu.create(props.layer.id);
-          menu.show();
+          menu.show(new LogicalPosition(e.clientX, e.clientY));
         }}
       >
         <div class={`${layerItemHandle} handle`} {...sortable.dragActivators}>

@@ -133,7 +133,7 @@ export const lightTheme = createTheme(vars, {
 
 const darkThemeColorBase = {
   background: '#252525',
-  surface: '#404040',
+  surface: '#353535',
   canvasArea: '#1B1B1B',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',
@@ -167,7 +167,7 @@ export const darkThemeGYFlip = createTheme(vars, {
 
 const blackThemeColorBase = {
   background: '#000000',
-  surface: '#101010',
+  surface: '#202020',
   canvasArea: '#000000',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',

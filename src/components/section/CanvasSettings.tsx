@@ -1,5 +1,5 @@
 import { Component } from 'solid-js';
-import { changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetAllLayers } from '~/controllers/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -18,6 +18,7 @@ const CanvasSettings: Component = () => {
 
     if (isValidCanvasSize(newSize)) {
       changeCanvasSize(newSize);
+      adjustZoomToFit();
     }
   };
 

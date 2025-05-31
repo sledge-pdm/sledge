@@ -28,6 +28,7 @@ export default class TileManager {
   }
 
   initTile() {
+    this.tiles = [];
     const tileRowCount = Math.ceil(this.height / this.TILE_SIZE);
     const tileColumnCount = Math.ceil(this.width / this.TILE_SIZE);
     for (let row = 0; row < tileRowCount; row++) {

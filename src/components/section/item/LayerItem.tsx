@@ -1,10 +1,12 @@
-import { createSortable, useDragDropContext } from '@thisbeyond/solid-dnd';
+import { createSortable, transformStyle, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
+import Icon from '~/components/common/Icon';
 import Light from '~/components/common/Light';
 import { Layer, LayerType } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { activeLight, layerItem, layerItemDisabled, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
+import { vars } from '~/styles/global.css';
+import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { getNextMagnification } from '~/utils/LayerUtils';
 import LayerPreview from '../../common/LayerPreview';
@@ -60,8 +62,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         'opacity-50': sortable.isActiveDraggable,
         'transition-transform': state && !!state.active.draggable,
       }}
-      style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1 }}
-      ref={sortable}
+      style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1, ...transformStyle(sortable.transform) }}
+      ref={sortable.ref}
     >
       {/* <DSLButton /> */}
       <div
@@ -73,13 +75,17 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           menu.show();
         }}
       >
+        <div class={`${layerItemHandle} handle`} {...sortable.dragActivators}>
+          <Icon src='/icons/misc/handle.png' base={8} color={vars.color.background} />
+        </div>
         <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
         <div
           class={`${flexCol} ${w100}`}
           style={{
-            'margin-left': '6px',
+            'padding-left': '6px',
             'justify-content': 'center',
             gap: '1px',
+            'border-left': `1px solid ${vars.color.border}`,
           }}
         >
           <div class={flexRow}>

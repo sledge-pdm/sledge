@@ -138,8 +138,8 @@ const LayerList: Component<{}> = () => {
               </SortableProvider>
             </div>
             {/* <DragOverlay>
-                                    <div class="sortable"><LayerItem layer={activeItemLayer()} /></div>
-                                </DragOverlay> */}
+                    <div class="sortable"><LayerItem layer={activeItemLayer()} /></div>
+                </DragOverlay> */}
           </DragDropSensors>
         </DragDropProvider>
       </div>

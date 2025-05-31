@@ -77,6 +77,7 @@ export default class LayerImageAgent {
     if (emitEvent) {
       this.tm.setAllDirty();
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+      eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
     // this.callOnImageChangeListeners({ newSize, updatePreview: true });
   }

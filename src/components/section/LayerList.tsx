@@ -1,5 +1,5 @@
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
-import { Component, createEffect, createSignal, For } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode } from '~/models/layer/Layer';
@@ -47,6 +47,20 @@ const LayerList: Component<{}> = () => {
       }
     }
   };
+
+  const cancelDrag = (e: PointerEvent) => {
+    setActiveItem(null);
+  };
+
+  onMount(() => {
+    window.addEventListener('pointercancel', cancelDrag);
+    window.addEventListener('pointerup', cancelDrag);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('pointercancel', cancelDrag);
+    window.removeEventListener('pointerup', cancelDrag);
+  });
 
   return (
     <div class={sectionRoot}>
@@ -128,8 +142,8 @@ const LayerList: Component<{}> = () => {
         >
           <DragDropSensors>
             <div class={layerList}>
+              <ImagePoolItem />
               <SortableProvider ids={ids()}>
-                <ImagePoolItem />
                 <For each={items()}>
                   {(layer, index) => {
                     return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;

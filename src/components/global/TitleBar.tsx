@@ -71,9 +71,7 @@ export default function TitleBar() {
       }}
     >
       <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
-        <p class={titleBarTitle} data-tauri-drag-region-exclude>
-          {shouldShowTitle() ? `${title()}.` : ''}
-        </p>
+        <p class={titleBarTitle}>{shouldShowTitle() ? `${title()}.` : ''}</p>
 
         <div class={titleBarControls} data-tauri-drag-region-exclude>
           <Show when={isMinimizable()}>

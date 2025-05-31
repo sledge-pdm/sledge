@@ -31,6 +31,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           allowFrom: '.resize-handle',
           listeners: {
             move(event) {
+              if (!stateStore.selected) return;
+
               const entry = imagePoolStore.entries.get(props.entry.id)!;
               const zoom = interactStore.zoom;
               const newWidth = event.rect.width / zoom;
@@ -52,6 +54,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
               containerRef.style.transform = `translate(${localEntry().x}px, ${localEntry().y}px)`;
             },
             end(event) {
+              if (!stateStore.selected) return;
               setEntry(props.entry.id, localEntry());
             },
           },
@@ -63,8 +66,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         })
         .draggable({
           listeners: {
-            start(event) {},
             move(event) {
+              if (!stateStore.selected) return;
               setLocalEntry((le) => {
                 le.x += event.dx / interactStore.zoom;
                 le.y += event.dy / interactStore.zoom;
@@ -75,6 +78,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
               containerRef.style.transform = `translate(${localEntry().x}px, ${localEntry().y}px)`;
             },
             end(event) {
+              if (!stateStore.selected) return;
               setEntry(props.entry.id, localEntry());
             },
           },

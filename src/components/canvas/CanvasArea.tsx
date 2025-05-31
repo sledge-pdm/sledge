@@ -40,9 +40,7 @@ export default () => {
   });
 
   onCleanup(() => {
-    if (interact !== undefined && !import.meta.hot) {
-      interact.removeInteractListeners();
-    }
+    interact?.removeInteractListeners();
   });
 
   return (

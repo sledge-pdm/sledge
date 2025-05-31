@@ -57,7 +57,7 @@ export function isImagePoolActive() {
   return layerListStore.isImagePoolActive;
 }
 
-export const resetAllLayers = (e: any) => {
+export const resetAllLayers = () => {
   layerListStore.layers.forEach((l) => {
     resetLayerImage(l.id, l.dotMagnification);
   });

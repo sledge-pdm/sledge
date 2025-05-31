@@ -1,7 +1,5 @@
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { Component, createSignal, onCleanup } from 'solid-js';
-import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
 import { RenderMode } from '~/models/layer/RenderMode';
@@ -55,14 +53,9 @@ const WebGLCanvas: Component = () => {
     // layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
     // layerAgentManager.setOnAnyImageChangeListener('webgl_canvas', () => {
     //   setUpdateRender(true); // rise flag
-    // });
+    // }); ここもmittイベントになった
     eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
     eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
-
-    const window = getCurrentWebviewWindow();
-    window.onResized(() => {
-      adjustZoomToFit();
-    });
   });
   onCleanup(() => {
     stopRenderLoop();

@@ -30,10 +30,14 @@ export default () => {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
-      interact?.updateTransform();
+      // adjustZoomToFit();
     });
 
     eventBus.on('canvas:sizeChanged', (e) => {
+      interact?.updateTransform();
+    });
+
+    eventBus.on('canvas:onAdjusted', (e) => {
       interact?.updateTransform();
     });
 

@@ -5,12 +5,12 @@ import { saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { themeOptions } from '~/models/config/GlobalConfig';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
-const ThemeToggle: Component<{}> = (props) => {
+const ThemeToggle: Component<{ noBackground?: boolean }> = (props) => {
   return (
     <Dropdown
       value={globalConfig.appearance.theme}
       options={themeOptions}
-      noBackground={true}
+      noBackground={props.noBackground}
       onChange={(v) => {
         setGlobalConfig('appearance', 'theme', v as Theme);
         saveGlobalSettings();

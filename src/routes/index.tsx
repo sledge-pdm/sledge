@@ -63,7 +63,7 @@ export default function Home() {
         <div class={rightBottomArea}>
           <a onClick={() => openWindow('about')}>about.</a>
           <a onClick={() => openWindow('settings')}>settings.</a>
-          <ThemeToggle />
+          <ThemeToggle noBackground={false} />
         </div>
       </div>
     </div>

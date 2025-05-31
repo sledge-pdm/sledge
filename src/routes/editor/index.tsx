@@ -19,6 +19,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
 import { flexCol } from '~/styles/snippets.css';
+import { eventBus } from '~/utils/EventBus';
 import { emitEvent, listenEvent } from '~/utils/TauriUtils';
 
 export default function Editor() {
@@ -46,8 +47,11 @@ export default function Editor() {
     // create new
     setProjectStore('name', 'new project');
     if (sp.has('width') && sp.has('height')) {
-      setCanvasStore('canvas', 'width', Number(sp.get('width')));
-      setCanvasStore('canvas', 'height', Number(sp.get('height')));
+      const width = Number(sp.get('width'));
+      const height = Number(sp.get('height'));
+      setCanvasStore('canvas', 'width', width);
+      setCanvasStore('canvas', 'height', height);
+      eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
     }
     addLayer({ name: 'dot', type: LayerType.Dot, enabled: true, dotMagnification: 1 }).then(() => {
       onProjectLoad();

@@ -3,6 +3,7 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';
 import { Consts } from '~/utils/consts';
+import { eventBus } from '~/utils/EventBus';
 import { getAgentOf } from '../layer/LayerAgentManager';
 
 export function isValidCanvasSize(size: Size2D): boolean {
@@ -17,8 +18,9 @@ export function changeCanvasSize(newSize: Size2D): boolean {
 
   allLayers().forEach((layer) => {
     const agent = getAgentOf(layer.id);
-    agent?.changeBufferSize(newSize);
+    agent?.changeBufferSize(newSize, false);
   });
+  eventBus.emit('canvas:sizeChanged', { newSize });
   return true;
 }
 

@@ -103,10 +103,10 @@ export class WebGLRenderer {
     activeLayers.forEach((layer, i) => {
       const agent = getAgentOf(layer.id)!;
       const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
-      if (onlyDirty) {
-        const dirtyTiles = agent.getTileManager().getDirtyTiles();
-        if (dirtyTiles.length === 0) return;
 
+      const dirtyTiles = agent.getTileManager().getDirtyTiles();
+      if (onlyDirty && dirtyTiles.length !== 0) {
+        // dirtyなタイルがなければフォールバック
         dirtyTiles.forEach((tile) => {
           // 差分アップデート
           const { x: ox, y: oy } = tile.getOffset();

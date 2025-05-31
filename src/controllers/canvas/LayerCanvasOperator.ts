@@ -5,6 +5,7 @@ import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
+import { eventBus } from '~/utils/EventBus';
 import { Tool } from '../../models/tool/Tool';
 import { getToolInstance } from '../../tools/ToolBase';
 import { DrawState } from '../../types/DrawState';
@@ -27,8 +28,10 @@ export default class LayerCanvasOperator {
     const result = this.useTool(agent, state, image, getCurrentTool(), position, last);
 
     if (result) {
-      agent.callOnImageChangeListeners({ updatePreview: state === DrawState.end });
+      // agent.callOnImageChangeListeners({ updatePreview: state === DrawState.end });
+      eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
       if (state === DrawState.end) {
+        eventBus.emit('preview:requestUpdate', { layerId: layer.id });
         agent.registerToHistory();
       }
     }

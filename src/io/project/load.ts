@@ -1,6 +1,7 @@
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { Layer } from '~/models/layer/Layer';
 import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
+import { eventBus } from '~/utils/EventBus';
 import { mapReviver } from './jsonTyped';
 
 export const loadProjectJson = (text: string) => {
@@ -10,6 +11,7 @@ export const loadProjectJson = (text: string) => {
     const { width, height } = data.canvasStore.canvas;
     setCanvasStore('canvas', 'width', width);
     setCanvasStore('canvas', 'height', height);
+    eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
   }
 
   if (data.projectStore) {

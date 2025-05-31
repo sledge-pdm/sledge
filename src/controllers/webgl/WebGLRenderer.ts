@@ -1,4 +1,5 @@
 // src/renderer/WebGLRenderer.ts
+import { allLayers } from '~/controllers/layer/LayerListController';
 import { BlendMode, Layer } from '~/models/layer/Layer';
 import fragmentSrc from '~/shaders/blend.frag.glsl';
 import vertexSrc from '~/shaders/fullscreen.vert.glsl';
@@ -21,7 +22,7 @@ export class WebGLRenderer {
     private width: number = 0,
     private height: number = 0
   ) {
-    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
+    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: false });
     if (!gl) throw new Error('WebGL2 is not supported in this browser');
     this.gl = gl;
     // --- シェーダコンパイル & プログラムリンク ---
@@ -60,10 +61,6 @@ export class WebGLRenderer {
     this.uLayerCountLoc = this.gl.getUniformLocation(this.program, 'u_layerCount')!;
     this.uOpacitiesLoc = this.gl.getUniformLocation(this.program, 'u_opacities')!;
     this.uBlendModesLoc = this.gl.getUniformLocation(this.program, 'u_blendModes')!;
-  }
-
-  public getCanvasElement(): HTMLCanvasElement {
-    return this.canvas;
   }
 
   public resize(width: number, height: number) {
@@ -198,5 +195,27 @@ export class WebGLRenderer {
 
     gl.bindVertexArray(null);
     return vao;
+  }
+
+  readPixelsAsBuffer(): Uint8ClampedArray {
+    const gl = this.gl;
+
+    this.render(allLayers(), false); // フルアップデート
+
+    // ① WebGL の描画バッファが現在の描画結果を保持している前提で、
+    //    gl.readPixels() ですぐにピクセルデータを取得する。
+    //    （※たとえば export ボタンを押した直後に呼べば、次のクリア前の状態を取れる）
+    const pixels = new Uint8Array(this.width * this.height * 4);
+    gl.readPixels(
+      0, // x
+      0, // y
+      this.width,
+      this.height,
+      gl.RGBA, // フォーマット
+      gl.UNSIGNED_BYTE,
+      pixels // 読み取り先バッファ
+    );
+
+    return new Uint8ClampedArray(pixels.buffer);
   }
 }

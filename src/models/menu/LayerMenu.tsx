@@ -2,7 +2,6 @@ import { IconMenuItem, Menu } from '@tauri-apps/api/menu';
 import { resolveResource } from '@tauri-apps/api/path';
 import { duplicateLayer, resetLayerImage } from '~/controllers/layer/LayerController';
 import { findLayerById, removeLayer } from '~/controllers/layer/LayerListController';
-import { emitEvent } from '~/utils/TauriUtils';
 import RightClickMenu from './RightClickMenu';
 
 export class LayerMenu extends RightClickMenu {
@@ -19,7 +18,6 @@ export class LayerMenu extends RightClickMenu {
       icon: await resolveResource(dir + '/clear.png'),
       action: () => {
         resetLayerImage(layerId, findLayerById(layerId)?.dotMagnification ?? 1);
-        emitEvent('onResetAllLayers');
       },
     });
 

@@ -1,11 +1,8 @@
-import { Component, createEffect, createSignal, For } from 'solid-js';
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { Component, createEffect, createSignal } from 'solid-js';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
-import Tile from '~/types/Tile';
 
 interface Area {
   x: number;
@@ -14,7 +11,7 @@ interface Area {
   height: number;
 }
 
-const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
+const CanvasOverlaySVG: Component = (props) => {
   const borderWidth = () => canvasStore.canvas.width * interactStore.zoom;
   const borderHeight = () => canvasStore.canvas.height * interactStore.zoom;
 
@@ -36,8 +33,6 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
       height: size,
     });
   });
-
-  const dirtyRects = () => (globalConfig.debug.showDirtyRects ? props.dirtyRects : []);
 
   return (
     <svg
@@ -66,7 +61,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
         stroke-width={1}
         pointer-events='none'
       />
-
+      {/* 
       <For each={dirtyRects()}>
         {(dirtyRect) => {
           return (
@@ -81,7 +76,7 @@ const CanvasOverlaySVG: Component<{ dirtyRects?: Tile[] }> = (props) => {
             />
           );
         }}
-      </For>
+      </For> */}
     </svg>
   );
 };

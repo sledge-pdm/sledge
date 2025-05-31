@@ -118,6 +118,7 @@ class CanvasAreaInteract {
     } else {
       // タッチ以外
       if (CanvasAreaInteract.isDraggable(e)) {
+        this.pointers.set(e.pointerId, now);
         if (interactStore.isDragging) {
           const dx = e.clientX - prev.x;
           const dy = e.clientY - prev.y;

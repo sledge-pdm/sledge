@@ -19,12 +19,15 @@ const WebGLCanvas: Component = () => {
   let canvasEl!: HTMLCanvasElement;
 
   const [updateRender, setUpdateRender] = createSignal(false);
+  const [requestFullUpdate, setRequestFullUpdate] = createSignal(false);
+
   const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {
-        webGLRenderer?.render(allLayers());
+        webGLRenderer?.render(allLayers(), !requestFullUpdate());
         setUpdateRender(false);
+        setRequestFullUpdate(false);
       }
     }, fps)
   );
@@ -36,11 +39,11 @@ const WebGLCanvas: Component = () => {
     startRenderLoop();
     webGLRenderer = new WebGLRenderer(canvasEl);
     webGLRenderer.resize(width, height);
-    setUpdateRender(true);
+    setUpdateRender(true); // rise flag
 
     layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
     layerAgentManager.setOnAnyImageChangeListener('webgl_canvas', () => {
-      setUpdateRender(true);
+      setUpdateRender(true); // rise flag
     });
 
     const window = getCurrentWindow();
@@ -51,19 +54,21 @@ const WebGLCanvas: Component = () => {
 
   createEffect(() => {
     const { width, height } = canvasStore.canvas;
+
     webGLRenderer?.resize(width, height);
+    setUpdateRender(true);
+    setRequestFullUpdate(true);
   });
 
   createEffect(() => {
     trackDeep(allLayers());
     setUpdateRender(true);
+    setRequestFullUpdate(true);
   });
 
   onCleanup(() => {
-    if (!import.meta.hot) {
-      stopRenderLoop();
-      layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
-    }
+    stopRenderLoop();
+    layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
   });
 
   const imageRendering = () => {

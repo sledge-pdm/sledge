@@ -29,7 +29,7 @@ const CanvasStack: Component = () => {
     const active = activeLayer();
     if (active) {
       const agent = getAgentOf(active.id);
-      return agent?.getTileManager().getDirtyTilesInAction() ?? [];
+      return agent?.getTileManager().getDirtyTiles() ?? [];
     }
     return [];
   };

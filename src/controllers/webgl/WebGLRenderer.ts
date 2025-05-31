@@ -2,7 +2,7 @@
 import { BlendMode, Layer } from '~/models/layer/Layer';
 import fragmentSrc from '~/shaders/blend.frag.glsl';
 import vertexSrc from '~/shaders/fullscreen.vert.glsl';
-import { getBufferOf } from '../layer/LayerAgentManager';
+import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 
 const MAX_LAYERS = 16;
 
@@ -85,41 +85,67 @@ export class WebGLRenderer {
       height,
       MAX_LAYERS, // depth = レイヤー数
       0, // border (must be 0)
-      gl.RGBA, // format
+      gl.RGBA,
       gl.UNSIGNED_BYTE,
-      null // null で空領域確保
+      null
     );
   }
 
-  /**
-   * レイヤー配列を受け取って GPU 合成 & 描画
-   * @param layers 並び順：0 が最背面
-   */
-  public render(layers: Layer[] | Layer): void {
+  public render(layers: Layer[] | Layer, onlyDirty?: boolean): void {
     if (this.width === 0 || this.height === 0) return;
     if (!Array.isArray(layers)) layers = [layers];
 
     layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);
 
-    const { gl, program, vao } = this;
+    const { gl, program } = this;
     gl.useProgram(program);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
+
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     activeLayers.forEach((layer, i) => {
-      const buf = getBufferOf(layer.id)!;
-      gl.texSubImage3D(
-        gl.TEXTURE_2D_ARRAY,
-        0,
-        0,
-        0,
-        i, // x, y, layer index
-        this.width,
-        this.height,
-        1, // depth = 1 (１レイヤー分)
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        buf
-      );
+      const agent = getAgentOf(layer.id)!;
+      const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
+      if (onlyDirty) {
+        const dirtyTiles = agent.getTileManager().getDirtyTiles();
+        if (dirtyTiles.length === 0) return;
+
+        dirtyTiles.forEach((tile) => {
+          // 差分アップデート
+          const { x: ox, y: oy } = tile.getOffset();
+          const w = Math.min(this.width - ox, tile.globalTileSize);
+          const h = Math.min(this.height - oy, tile.globalTileSize);
+
+          const tileByteLength = w * h * 4;
+          const tileBuffer = new Uint8Array(tileByteLength);
+          for (let dy = 0; dy < h; dy++) {
+            const srcStart = ((oy + dy) * this.width + ox) * 4;
+            const dstStart = dy * w * 4;
+            tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
+          }
+          gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
+          tile.isDirty = false;
+
+          tile.isDirty = false;
+        });
+      } else {
+        // フルアップデート
+        gl.texSubImage3D(
+          gl.TEXTURE_2D_ARRAY,
+          0,
+          0,
+          0,
+          i, // x, y, layer index
+          this.width,
+          this.height,
+          1, // depth = 1 (１レイヤー分)
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          buf
+        );
+
+        agent.getTileManager().resetDirtyStates();
+      }
     });
 
     const opacities = new Float32Array(MAX_LAYERS);

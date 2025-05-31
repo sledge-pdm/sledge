@@ -163,7 +163,6 @@ export default class LayerImageAgent {
     if (result !== undefined) {
       const tileIndex = this.tm.getTileIndex(position);
       this.tm.tiles[tileIndex.row][tileIndex.column].isDirty = true;
-      this.tm.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true;
 
       const tile = this.tm.getTile(tileIndex);
       if (tile.isUniform && tile.uniformColor !== undefined && !colorMatch(tile.uniformColor, color)) {

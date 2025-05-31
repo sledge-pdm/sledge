@@ -46,7 +46,9 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
     agent.setBuffer(buffer, false, true);
     return agent;
   } else {
-    return layerAgentManager.registerAgent(layerId, buffer, width, height);
+    const newAgent = layerAgentManager.registerAgent(layerId, buffer, width, height);
+    newAgent.getTileManager().setAllDirty();
+    return newAgent;
   }
 }
 

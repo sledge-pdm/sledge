@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -146,14 +146,6 @@ export const InteractCanvas: Component<Props> = (props) => {
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointercancel', handlePointerCancel);
     window.removeEventListener('wheel', handleWheel);
-  });
-
-  createEffect(() => {
-    if (canvasRef)
-      setInteractStore('canvasElementSize', {
-        width: canvasRef.clientWidth,
-        height: canvasRef.clientHeight,
-      });
   });
 
   return (

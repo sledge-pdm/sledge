@@ -1,8 +1,9 @@
 // src/renderer/WebGLRenderer.ts
+import { allLayers } from '~/controllers/layer/LayerListController';
 import { BlendMode, Layer } from '~/models/layer/Layer';
 import fragmentSrc from '~/shaders/blend.frag.glsl';
 import vertexSrc from '~/shaders/fullscreen.vert.glsl';
-import { getBufferOf } from '../layer/LayerAgentManager';
+import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 
 const MAX_LAYERS = 16;
 
@@ -21,7 +22,7 @@ export class WebGLRenderer {
     private width: number = 0,
     private height: number = 0
   ) {
-    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
+    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: false });
     if (!gl) throw new Error('WebGL2 is not supported in this browser');
     this.gl = gl;
     // --- シェーダコンパイル & プログラムリンク ---
@@ -62,10 +63,6 @@ export class WebGLRenderer {
     this.uBlendModesLoc = this.gl.getUniformLocation(this.program, 'u_blendModes')!;
   }
 
-  public getCanvasElement(): HTMLCanvasElement {
-    return this.canvas;
-  }
-
   public resize(width: number, height: number) {
     if (width <= 0 || height <= 0) return;
     if (width === this.width && height === this.height) return;
@@ -85,41 +82,67 @@ export class WebGLRenderer {
       height,
       MAX_LAYERS, // depth = レイヤー数
       0, // border (must be 0)
-      gl.RGBA, // format
+      gl.RGBA,
       gl.UNSIGNED_BYTE,
-      null // null で空領域確保
+      null
     );
   }
 
-  /**
-   * レイヤー配列を受け取って GPU 合成 & 描画
-   * @param layers 並び順：0 が最背面
-   */
-  public render(layers: Layer[] | Layer): void {
+  public render(layers: Layer[] | Layer, onlyDirty?: boolean): void {
     if (this.width === 0 || this.height === 0) return;
     if (!Array.isArray(layers)) layers = [layers];
 
     layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);
 
-    const { gl, program, vao } = this;
+    const { gl, program } = this;
     gl.useProgram(program);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
+
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     activeLayers.forEach((layer, i) => {
-      const buf = getBufferOf(layer.id)!;
-      gl.texSubImage3D(
-        gl.TEXTURE_2D_ARRAY,
-        0,
-        0,
-        0,
-        i, // x, y, layer index
-        this.width,
-        this.height,
-        1, // depth = 1 (１レイヤー分)
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        buf
-      );
+      const agent = getAgentOf(layer.id)!;
+      const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
+
+      const dirtyTiles = agent.getTileManager().getDirtyTiles();
+      if (onlyDirty && dirtyTiles.length !== 0) {
+        // dirtyなタイルがなければフォールバック
+        dirtyTiles.forEach((tile) => {
+          // 差分アップデート
+          const { x: ox, y: oy } = tile.getOffset();
+          const w = Math.min(this.width - ox, tile.globalTileSize);
+          const h = Math.min(this.height - oy, tile.globalTileSize);
+
+          const tileByteLength = w * h * 4;
+          const tileBuffer = new Uint8Array(tileByteLength);
+          for (let dy = 0; dy < h; dy++) {
+            const srcStart = ((oy + dy) * this.width + ox) * 4;
+            const dstStart = dy * w * 4;
+            tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
+          }
+          gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
+          tile.isDirty = false;
+
+          tile.isDirty = false;
+        });
+      } else {
+        // フルアップデート
+        gl.texSubImage3D(
+          gl.TEXTURE_2D_ARRAY,
+          0,
+          0,
+          0,
+          i, // x, y, layer index
+          this.width,
+          this.height,
+          1, // depth = 1 (１レイヤー分)
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          buf
+        );
+
+        agent.getTileManager().resetDirtyStates();
+      }
     });
 
     const opacities = new Float32Array(MAX_LAYERS);
@@ -172,5 +195,50 @@ export class WebGLRenderer {
 
     gl.bindVertexArray(null);
     return vao;
+  }
+
+  readPixelsAsBuffer(): Uint8ClampedArray {
+    const gl = this.gl;
+
+    this.render(allLayers(), false); // フルアップデート
+
+    // ① WebGL の描画バッファが現在の描画結果を保持している前提で、
+    //    gl.readPixels() ですぐにピクセルデータを取得する。
+    //    （※たとえば export ボタンを押した直後に呼べば、次のクリア前の状態を取れる）
+    const pixels = new Uint8Array(this.width * this.height * 4);
+    gl.readPixels(
+      0, // x
+      0, // y
+      this.width,
+      this.height,
+      gl.RGBA, // フォーマット
+      gl.UNSIGNED_BYTE,
+      pixels // 読み取り先バッファ
+    );
+
+    return new Uint8ClampedArray(pixels.buffer);
+  }
+
+  public readPixelsFlipped(): Uint8ClampedArray {
+    const gl = this.gl;
+    const w = this.width;
+    const h = this.height;
+
+    // (1) フルアップデート → ピクセル読み取り
+    this.render(allLayers(), false);
+    const raw = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
+
+    // (2) 上下反転して Uint8ClampedArray を作る
+    const flipped = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) {
+      const srcRow = y;
+      const dstRow = h - 1 - y;
+      const srcStart = srcRow * w * 4;
+      const dstStart = dstRow * w * 4;
+      flipped.set(raw.subarray(srcStart, srcStart + w * 4), dstStart);
+    }
+
+    return flipped;
   }
 }

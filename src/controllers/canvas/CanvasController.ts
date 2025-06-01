@@ -3,6 +3,7 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { Size2D } from '~/types/Size';
 import { Consts } from '~/utils/consts';
+import { eventBus } from '~/utils/EventBus';
 import { getAgentOf } from '../layer/LayerAgentManager';
 
 export function isValidCanvasSize(size: Size2D): boolean {
@@ -13,12 +14,14 @@ export function isValidCanvasSize(size: Size2D): boolean {
 
 export function changeCanvasSize(newSize: Size2D): boolean {
   if (!isValidCanvasSize(newSize)) return false;
-  setCanvasStore('canvas', newSize);
 
   allLayers().forEach((layer) => {
     const agent = getAgentOf(layer.id);
-    agent?.changeBufferSize(newSize);
+    agent?.changeBufferSize(newSize, false);
   });
+
+  setCanvasStore('canvas', newSize);
+  eventBus.emit('canvas:sizeChanged', { newSize });
   return true;
 }
 
@@ -70,4 +73,6 @@ export const centeringCanvas = () => {
     x: 0,
     y: 0,
   });
+
+  eventBus.emit('canvas:onAdjusted', {});
 };

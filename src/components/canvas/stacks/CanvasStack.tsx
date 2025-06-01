@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal } from 'solid-js';
+import { Component, createEffect } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
@@ -7,32 +7,17 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
-import Tile from '~/types/Tile';
 import { ImagePool } from './image_pool/ImagePool';
 import WebGLCanvas from './WebGLCanvas';
 
 const CanvasStack: Component = () => {
-  const [dirtyRects, setDirtyRects] = createSignal<Tile[]>();
-
   createEffect(() => {
     const active = activeLayer();
     if (active) {
       const agent = getAgentOf(active.id);
       if (!agent) return;
-      agent.setOnImageChangeListener('stack_dirty_rect', () => {
-        setDirtyRects([...getDirtyRects()]);
-      });
     }
   });
-
-  const getDirtyRects = () => {
-    const active = activeLayer();
-    if (active) {
-      const agent = getAgentOf(active.id);
-      return agent?.getTileManager().getDirtyTilesInAction() ?? [];
-    }
-    return [];
-  };
 
   return (
     <div
@@ -54,7 +39,7 @@ const CanvasStack: Component = () => {
         <WebGLCanvas />
       </div>
 
-      <CanvasOverlaySVG dirtyRects={dirtyRects()} />
+      <CanvasOverlaySVG />
     </div>
   );
 };

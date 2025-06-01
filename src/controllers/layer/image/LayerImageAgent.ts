@@ -5,14 +5,10 @@ import { Size2D } from '~/types/Size';
 import { TileIndex } from '~/types/Tile';
 import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
+import { eventBus } from '~/utils/EventBus';
 import DiffManager from './DiffManager';
 import PixelBufferManager from './PixelBufferManager';
 import TileManager from './TileManager';
-
-export interface ImageChangeEvent {
-  newSize?: Size2D;
-  updatePreview?: boolean;
-}
 
 // それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
 export default class LayerImageAgent {
@@ -20,10 +16,6 @@ export default class LayerImageAgent {
   protected tm: TileManager;
   protected dm: DiffManager;
   protected hm: HistoryManager;
-
-  protected onImageChangedListeners: {
-    [key: string]: (e: ImageChangeEvent) => void;
-  } = {};
 
   getPixelBufferManager() {
     return this.pbm;
@@ -71,24 +63,23 @@ export default class LayerImageAgent {
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {
     this.pbm.buffer = rawBuffer;
-    if (!silentlySet) this.callOnImageChangeListeners({ updatePreview });
-    this.tm.initTile();
+    // if (!silentlySet) this.callOnImageChangeListeners({ updatePreview });
+    this.tm.setAllDirty();
+    if (!silentlySet) {
+      eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+      if (updatePreview) eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+    }
   }
 
-  changeBufferSize(newSize: Size2D) {
+  changeBufferSize(newSize: Size2D, emitEvent?: boolean) {
     this.pbm.changeSize(newSize);
     this.tm.setSize(newSize);
-    this.callOnImageChangeListeners({ newSize, updatePreview: true });
-  }
-
-  setOnImageChangeListener(key: string, listener: (e: ImageChangeEvent) => void) {
-    this.onImageChangedListeners[key] = listener;
-  }
-  removeOnImageChangeListener(key: string) {
-    delete this.onImageChangedListeners[key];
-  }
-  callOnImageChangeListeners(e: ImageChangeEvent) {
-    Object.values(this.onImageChangedListeners).forEach((listener) => listener(e));
+    if (emitEvent) {
+      this.tm.setAllDirty();
+      eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+      eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+    }
+    // this.callOnImageChangeListeners({ newSize, updatePreview: true });
   }
 
   protected undoTileDiff(tileDiff: TileDiff): void {
@@ -132,7 +123,9 @@ export default class LayerImageAgent {
     const undoEnd = Date.now();
     setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
-    this.callOnImageChangeListeners({ updatePreview: true });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+    // this.callOnImageChangeListeners({ updatePreview: true });
   }
 
   public redo() {
@@ -153,7 +146,9 @@ export default class LayerImageAgent {
     const redoEnd = Date.now();
     setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
-    this.callOnImageChangeListeners({ updatePreview: true });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+    // this.callOnImageChangeListeners({ updatePreview: true });
   }
 
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {
@@ -163,7 +158,6 @@ export default class LayerImageAgent {
     if (result !== undefined) {
       const tileIndex = this.tm.getTileIndex(position);
       this.tm.tiles[tileIndex.row][tileIndex.column].isDirty = true;
-      this.tm.tiles[tileIndex.row][tileIndex.column].isDirtyThroughAction = true;
 
       const tile = this.tm.getTile(tileIndex);
       if (tile.isUniform && tile.uniformColor !== undefined && !colorMatch(tile.uniformColor, color)) {

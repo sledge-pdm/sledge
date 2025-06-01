@@ -1,4 +1,5 @@
 import { onMount } from 'solid-js';
+import ThemeToggle from '~/components/common/ThemeToggle';
 import RecentFileList from '~/components/global/RecentFileList';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
 import { openProjectFile } from '~/io/file_actions/open';
@@ -62,6 +63,7 @@ export default function Home() {
         <div class={rightBottomArea}>
           <a onClick={() => openWindow('about')}>about.</a>
           <a onClick={() => openWindow('settings')}>settings.</a>
+          <ThemeToggle noBackground={false} />
         </div>
       </div>
     </div>

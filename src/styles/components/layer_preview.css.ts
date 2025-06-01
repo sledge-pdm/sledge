@@ -5,6 +5,5 @@ export const layerPreviewCanvas = style([
   wh100,
   {
     imageRendering: 'crisp-edges',
-    borderRight: '1px solid black',
   },
 ]);

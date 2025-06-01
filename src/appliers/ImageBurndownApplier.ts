@@ -93,4 +93,5 @@ export async function burndownToLayer({ entry, targetLayerId }: ImageBurndownPar
   }
 
   agent.setBuffer(dstBuf, false, true);
+  agent.getTileManager().setAllDirty();
 }

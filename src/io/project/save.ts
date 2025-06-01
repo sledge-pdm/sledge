@@ -1,9 +1,9 @@
 import { path } from '@tauri-apps/api';
 import { save } from '@tauri-apps/plugin-dialog';
-import { BaseDirectory, mkdir, writeTextFile } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
-import { dumpProject } from '~/io/project/dump';
+import { dumpProject2 } from '~/io/project/dump';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl } from '~/utils/DataUtils';
 import { getFileNameAndPath } from '~/utils/PathUtils';
@@ -50,8 +50,10 @@ export async function saveProject(name?: string, existingPath?: string) {
     setProjectStore('path', selectedPath);
     const thumbpath = await saveThumbnailData(selectedPath);
 
-    const data = await dumpProject();
-    await writeTextFile(selectedPath, data);
+    // const data = await dumpProject();
+    // await writeTextFile(selectedPath, data);
+    const data = await dumpProject2();
+    await writeFile(selectedPath, data);
     console.log('project saved to:', selectedPath);
 
     setProjectStore('isProjectChangedAfterSave', false);

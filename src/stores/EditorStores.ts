@@ -19,7 +19,6 @@ type ColorStore = {
 };
 type InteractStore = {
   canvasAreaSize: Size2D;
-  canvasElementSize: Size2D;
   lastMouseWindow: Vec2;
   lastMouseOnCanvas: Vec2;
   isInStroke: boolean;
@@ -53,7 +52,6 @@ const defaultColorStore: ColorStore = {
 };
 const defaultInteractStore: InteractStore = {
   canvasAreaSize: { width: 0, height: 0 },
-  canvasElementSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
   isInStroke: false,

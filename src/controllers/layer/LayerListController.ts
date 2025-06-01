@@ -4,7 +4,7 @@ import { DSL } from '~/models/dsl/DSL';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';
 import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
-import { emitEvent } from '~/utils/TauriUtils';
+import { eventBus } from '~/utils/EventBus';
 
 export const addLayer = async (
   layer: {
@@ -37,6 +37,8 @@ export const addLayer = async (
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', newLayer.id);
 
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+
   return layers;
 };
 
@@ -55,12 +57,19 @@ export function isImagePoolActive() {
   return layerListStore.isImagePoolActive;
 }
 
-export const resetAllLayers = (e: any) => {
+export const resetAllLayers = () => {
   layerListStore.layers.forEach((l) => {
     resetLayerImage(l.id, l.dotMagnification);
   });
   adjustZoomToFit();
-  emitEvent('onResetAllLayers');
+};
+
+export const moveLayer = (fromIndex: number, targetIndex: number) => {
+  const updated = [...layerListStore.layers];
+  const [moved] = updated.splice(fromIndex, 1);
+  updated.splice(targetIndex, 0, moved);
+  setLayerListStore('layers', updated);
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
 };
 
 export const removeLayer = (layerId?: string) => {
@@ -78,6 +87,8 @@ export const removeLayer = (layerId?: string) => {
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
   setLayerHistoryStore(histories);
+
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
 };
 
 export const allLayers = () => layerListStore.layers;

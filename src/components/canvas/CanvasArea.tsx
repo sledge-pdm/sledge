@@ -8,6 +8,7 @@ import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { vars } from '~/styles/global.css';
+import { eventBus } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
@@ -29,7 +30,15 @@ export default () => {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
-      interact?.setInteractListeners();
+      // adjustZoomToFit();
+    });
+
+    eventBus.on('canvas:sizeChanged', (e) => {
+      interact?.updateTransform();
+    });
+
+    eventBus.on('canvas:onAdjusted', (e) => {
+      interact?.updateTransform();
     });
 
     adjustZoomToFit();
@@ -40,9 +49,7 @@ export default () => {
   });
 
   onCleanup(() => {
-    if (interact !== undefined && !import.meta.hot) {
-      interact.removeInteractListeners();
-    }
+    interact?.removeInteractListeners();
   });
 
   return (

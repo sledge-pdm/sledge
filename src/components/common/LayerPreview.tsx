@@ -1,10 +1,10 @@
-import { Component, onMount } from 'solid-js';
+import { Component, onCleanup, onMount } from 'solid-js';
 import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
-import { listenEvent } from '~/utils/TauriUtils';
+import { eventBus, Events } from '~/utils/EventBus';
 
 interface Props {
   layer: Layer;
@@ -20,18 +20,19 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
   const thumbnailGen = new ThumbnailGenerator();
 
-  onMount(() => {
-    // renderer = new WebGLRenderer(canvasRef); ←！！
-    updatePreview();
-
-    const agent = getAgentOf(props.layer.id);
-    agent?.setOnImageChangeListener('layer_prev_' + props.layer.id, (e) => {
-      if (e.updatePreview) updatePreview();
-    });
-
-    listenEvent('onResetAllLayers', () => {
+  const handleUpdateReqEvent = (e: Events['preview:requestUpdate']) => {
+    if (e.layerId === props.layer.id) {
       updatePreview();
-    });
+    }
+  };
+
+  onMount(() => {
+    updatePreview();
+    eventBus.on('preview:requestUpdate', handleUpdateReqEvent);
+  });
+
+  onCleanup(() => {
+    eventBus.off('preview:requestUpdate', handleUpdateReqEvent);
   });
 
   const updatePreview = () => {

@@ -9,16 +9,15 @@ export function calcThumbnailSize(origW: number, origH: number): Size2D {
 }
 
 function calcFitSize(origW: number, origH: number, maxW: number, maxH: number): Size2D {
-  // 枠内に収まる最大の拡大縮小率
   const scale = Math.min(maxW / origW, maxH / origH);
   return { width: Math.round(origW * scale), height: Math.round(origH * scale) };
 }
 
 export class ThumbnailGenerator {
-  private off!: OffscreenCanvas;
-  private tmp!: OffscreenCanvas;
+  private off: OffscreenCanvas;
+  private tmp: OffscreenCanvas;
+
   constructor() {
-    // 初期化時に一度だけ
     this.off = new OffscreenCanvas(1, 1);
     this.tmp = new OffscreenCanvas(1, 1);
   }
@@ -30,40 +29,56 @@ export class ThumbnailGenerator {
     this.off.height = height;
     this.tmp.width = w;
     this.tmp.height = h;
-    const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
 
+    const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
     const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
 
     const imgData = new ImageData(agent.getBuffer(), w, h);
-    tctx?.putImageData(imgData, 0, 0);
-    ctx?.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
+    tctx.putImageData(imgData, 0, 0);
+    ctx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
 
-    const imageData = ctx?.getImageData(0, 0, width, height);
-
-    return imageData;
+    return ctx.getImageData(0, 0, width, height);
   }
 
   generateCanvasThumbnail(width: number, height: number): ImageData {
-    const w = canvasStore.canvas.width;
-    const h = canvasStore.canvas.height;
+    const srcW = canvasStore.canvas.width;
+    const srcH = canvasStore.canvas.height;
     this.off.width = width;
     this.off.height = height;
+    this.tmp.width = srcW;
+    this.tmp.height = srcH;
+
     const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
-    ctx?.drawImage(webGLRenderer?.getCanvasElement()!, 0, 0, w, h, 0, 0, width, height);
+    const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
+
+    const buffer = webGLRenderer!.readPixelsFlipped();
+    const imgData = new ImageData(buffer, srcW, srcH);
+    tctx.putImageData(imgData, 0, 0);
+
     ctx.imageSmoothingEnabled = false;
-    const imageData = ctx?.getImageData(0, 0, width, height);
-    return imageData;
+    ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
+
+    return ctx.getImageData(0, 0, width, height);
   }
 
   generateCanvasThumbnailBlob(width: number, height: number): Promise<Blob> {
-    const w = canvasStore.canvas.width;
-    const h = canvasStore.canvas.height;
+    const srcW = canvasStore.canvas.width;
+    const srcH = canvasStore.canvas.height;
     this.off.width = width;
     this.off.height = height;
+    this.tmp.width = srcW;
+    this.tmp.height = srcH;
+
     const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
+    const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
+
+    const buffer = webGLRenderer!.readPixelsFlipped();
+    const imgData = new ImageData(buffer, srcW, srcH);
+    tctx.putImageData(imgData, 0, 0);
+
     ctx.imageSmoothingEnabled = false;
-    ctx?.drawImage(webGLRenderer?.getCanvasElement()!, 0, 0, w, h, 0, 0, width, height);
-    const imageData = ctx?.getImageData(0, 0, width, height);
+    ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
+
     return this.off.convertToBlob();
   }
 }

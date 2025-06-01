@@ -28,6 +28,7 @@ export default class TileManager {
   }
 
   initTile() {
+    this.tiles = [];
     const tileRowCount = Math.ceil(this.height / this.TILE_SIZE);
     const tileColumnCount = Math.ceil(this.width / this.TILE_SIZE);
     for (let row = 0; row < tileRowCount; row++) {
@@ -95,22 +96,8 @@ export default class TileManager {
     });
   }
 
-  public resetAllDirtyStates() {
-    this.tiles = this.tiles.map((tR) => {
-      tR = tR.map((t) => {
-        t.isDirty = false;
-        t.isDirtyThroughAction = false;
-        return t;
-      });
-      return tR;
-    });
-  }
-
   public getDirtyTiles(): Tile[] {
     return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirty));
-  }
-  public getDirtyTilesInAction(): Tile[] {
-    return this.tiles.flatMap((tR) => tR.filter((t) => t.isDirtyThroughAction));
   }
 
   fillWholeTile(index: TileIndex, color: RGBAColor, collectDiff = true) {
@@ -141,7 +128,6 @@ export default class TileManager {
 
     // 状態更新
     tile.isDirty = true;
-    tile.isDirtyThroughAction = true;
     tile.isUniform = true;
     tile.uniformColor = color;
   }

@@ -1,9 +1,9 @@
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
-import { Component, createEffect, createSignal, For } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { setLayerProp } from '~/controllers/layer/LayerController';
-import { activeLayer, addLayer, allLayers, removeLayer } from '~/controllers/layer/LayerListController';
+import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode } from '~/models/layer/Layer';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { layerListStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { layerList } from '~/styles/section/layer.css';
@@ -29,14 +29,11 @@ const LayerList: Component<{}> = () => {
 
   const onDragStart = ({ draggable }: { draggable: any }) => setActiveItem(draggable.id);
 
-  function moveLayer(draggedId: string, targetIndex: number) {
+  function handleMove(draggedId: string, targetIndex: number) {
     const fromIndex = layerListStore.layers.findIndex((l) => l.id === draggedId);
     if (fromIndex === -1 || fromIndex === targetIndex) return;
 
-    const updated = [...layerListStore.layers];
-    const [moved] = updated.splice(fromIndex, 1);
-    updated.splice(targetIndex, 0, moved);
-    setLayerListStore('layers', updated);
+    moveLayer(fromIndex, targetIndex);
     setItems(allLayers());
   }
 
@@ -46,10 +43,24 @@ const LayerList: Component<{}> = () => {
       const fromIndex = currentItems.indexOf(draggable.id);
       const toIndex = currentItems.indexOf(droppable.id);
       if (fromIndex !== toIndex) {
-        moveLayer(draggable.id, toIndex);
+        handleMove(draggable.id, toIndex);
       }
     }
   };
+
+  const cancelDrag = (e: PointerEvent) => {
+    setActiveItem(null);
+  };
+
+  onMount(() => {
+    window.addEventListener('pointercancel', cancelDrag);
+    window.addEventListener('pointerup', cancelDrag);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('pointercancel', cancelDrag);
+    window.removeEventListener('pointerup', cancelDrag);
+  });
 
   return (
     <div class={sectionRoot}>
@@ -131,8 +142,8 @@ const LayerList: Component<{}> = () => {
         >
           <DragDropSensors>
             <div class={layerList}>
+              <ImagePoolItem />
               <SortableProvider ids={ids()}>
-                <ImagePoolItem />
                 <For each={items()}>
                   {(layer, index) => {
                     return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
@@ -141,8 +152,8 @@ const LayerList: Component<{}> = () => {
               </SortableProvider>
             </div>
             {/* <DragOverlay>
-                                    <div class="sortable"><LayerItem layer={activeItemLayer()} /></div>
-                                </DragOverlay> */}
+                    <div class="sortable"><LayerItem layer={activeItemLayer()} /></div>
+                </DragOverlay> */}
           </DragDropSensors>
         </DragDropProvider>
       </div>

@@ -1,8 +1,11 @@
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/LayerImageAgent';
 import { getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
 import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
+
+const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dsl', 'dotMagnification'];
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
@@ -13,6 +16,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
 
   const idx = getLayerIndex(layerId);
   setLayerListStore('layers', idx, propName, newValue);
+  if (propNamesToUpdate.indexOf(propName) !== -1) eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
 }
 
 export function duplicateLayer(layerId: string) {
@@ -23,6 +27,7 @@ export function duplicateLayer(layerId: string) {
     },
     getBufferOf(layerId)
   );
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
 }
 
 export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): LayerImageAgent {
@@ -43,10 +48,16 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
   const agent = getAgentOf(layerId);
   if (agent !== undefined) {
     agent.getTileManager().setAllDirty();
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('preview:requestUpdate', { layerId: layerId });
     agent.setBuffer(buffer, false, true);
     return agent;
   } else {
-    return layerAgentManager.registerAgent(layerId, buffer, width, height);
+    const newAgent = layerAgentManager.registerAgent(layerId, buffer, width, height);
+    newAgent.getTileManager().setAllDirty();
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('preview:requestUpdate', { layerId: layerId });
+    return newAgent;
   }
 }
 

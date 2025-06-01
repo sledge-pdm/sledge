@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars, ZFB03B } from '../global.css';
-import { flexCol, flexRow, w100 } from '../snippets.css';
+import { flexCol, flexRow, h100, w100 } from '../snippets.css';
 
 export const layerList = style([
   flexCol,
@@ -19,7 +19,6 @@ export const layerItem = style([
     flexGrow: 1,
     cursor: 'pointer',
     backgroundColor: vars.color.surface,
-    borderLeft: `3px solid ${vars.color.onBackground}`,
 
     ':hover': {
       filter: 'brightness(0.94)',
@@ -27,6 +26,18 @@ export const layerItem = style([
     ':active': {
       transform: 'translate(0, 1px)',
     },
+  },
+]);
+
+export const layerItemHandle = style([
+  flexCol,
+  h100,
+  {
+    width: '12px',
+    borderRight: `1px solid ${vars.color.border}`,
+    backgroundColor: vars.color.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 ]);
 

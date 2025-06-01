@@ -1,10 +1,6 @@
 import { Component } from 'solid-js';
-import Dropdown from '~/components/common/control/Dropdown';
-import { saveGlobalSettings } from '~/io/global_config/globalSettings';
-import { themeOptions } from '~/models/config/GlobalConfig';
-import { Theme } from '~/models/config/types/Theme';
+import ThemeToggle from '~/components/common/ThemeToggle';
 import { interactStore, logStore } from '~/stores/EditorStores';
-import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 import {
   bottomInfoContainer,
@@ -25,15 +21,7 @@ const BottomInfo: Component = () => {
         <p class={bottomInfoTextStyle}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
           {/* <p class={bottomInfoTextStyle}>theme</p> */}
-          <Dropdown
-            value={globalConfig.appearance.theme}
-            options={themeOptions}
-            noBackground={true}
-            onChange={(v) => {
-              setGlobalConfig('appearance', 'theme', v as Theme);
-              saveGlobalSettings();
-            }}
-          />
+          <ThemeToggle noBackground={true} />
         </div>
       </div>
     </div>

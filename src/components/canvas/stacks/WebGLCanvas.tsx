@@ -1,9 +1,5 @@
-import { trackDeep } from '@solid-primitives/deep';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { Component, createEffect, createSignal, onCleanup } from 'solid-js';
-import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { Component, createSignal, onCleanup } from 'solid-js';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
 import { RenderMode } from '~/models/layer/RenderMode';
@@ -11,6 +7,7 @@ import { interactStore, setLogStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
+import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 
 export let webGLRenderer: WebGLRenderer | undefined;
@@ -19,15 +16,30 @@ const WebGLCanvas: Component = () => {
   let canvasEl!: HTMLCanvasElement;
 
   const [updateRender, setUpdateRender] = createSignal(false);
+  const [onlyDirtyUpdate, setOnlyDirtyUpdate] = createSignal(false);
+
   const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {
-        webGLRenderer?.render(allLayers());
+        webGLRenderer?.render(allLayers(), onlyDirtyUpdate());
         setUpdateRender(false);
+        setOnlyDirtyUpdate(false);
       }
     }, fps)
   );
+
+  const handleCanvasSizeChangedEvent = (e: Events['canvas:sizeChanged']) => {
+    const { width, height } = e.newSize;
+    webGLRenderer?.resize(width, height);
+    setUpdateRender(true);
+    setOnlyDirtyUpdate(true);
+  };
+
+  const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
+    setUpdateRender(true);
+    setOnlyDirtyUpdate(e.onlyDirty);
+  };
 
   listenEvent('onSetup', () => {
     const { width, height } = canvasStore.canvas;
@@ -36,34 +48,20 @@ const WebGLCanvas: Component = () => {
     startRenderLoop();
     webGLRenderer = new WebGLRenderer(canvasEl);
     webGLRenderer.resize(width, height);
-    setUpdateRender(true);
+    setUpdateRender(true); // rise flag for init render
 
-    layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
-    layerAgentManager.setOnAnyImageChangeListener('webgl_canvas', () => {
-      setUpdateRender(true);
-    });
-
-    const window = getCurrentWindow();
-    window.onResized(() => {
-      adjustZoomToFit();
-    });
+    // layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
+    // layerAgentManager.setOnAnyImageChangeListener('webgl_canvas', () => {
+    //   setUpdateRender(true); // rise flag
+    // }); ここもmittイベントになった
+    eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+    eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
   });
-
-  createEffect(() => {
-    const { width, height } = canvasStore.canvas;
-    webGLRenderer?.resize(width, height);
-  });
-
-  createEffect(() => {
-    trackDeep(allLayers());
-    setUpdateRender(true);
-  });
-
   onCleanup(() => {
-    if (!import.meta.hot) {
-      stopRenderLoop();
-      layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
-    }
+    stopRenderLoop();
+    // layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
+    eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+    eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
   });
 
   const imageRendering = () => {

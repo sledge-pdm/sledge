@@ -16,17 +16,11 @@ const CanvasControls: Component = () => {
           opacity: canUndo() ? '1.0' : '0.3',
           cursor: canUndo() ? 'pointer' : 'unset',
         }}
+        onClick={(e) => {
+          getAgentOf(layerListStore.activeLayerId)?.undo();
+        }}
       >
-        <Icon
-          src={'/icons/misc/undo.png'}
-          base={24}
-          color={vars.color.onBackground}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            getAgentOf(layerListStore.activeLayerId)?.undo();
-          }}
-        />
+        <Icon src={'/icons/misc/undo.png'} base={24} color={vars.color.onBackground} />
       </div>
       <div
         class={styles.undoRedo}
@@ -34,17 +28,11 @@ const CanvasControls: Component = () => {
           opacity: canRedo() ? '1.0' : '0.3',
           cursor: canRedo() ? 'pointer' : 'unset',
         }}
+        onClick={(e) => {
+          getAgentOf(layerListStore.activeLayerId)?.redo();
+        }}
       >
-        <Icon
-          src='/icons/misc/redo.png'
-          base={24}
-          color={vars.color.onBackground}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            getAgentOf(layerListStore.activeLayerId)?.redo();
-          }}
-        />
+        <Icon src='/icons/misc/redo.png' base={24} color={vars.color.onBackground} />
       </div>
     </div>
   );

@@ -12,22 +12,28 @@ interface IconProps extends JSX.HTMLAttributes<HTMLDivElement> {
   scale?: number;
   /** 元PNG のドット数（正方形前提）。省略時 16 */
   base?: number;
+
+  filter?: string;
 }
 
 const Icon: Component<IconProps> = (props) => {
-  const [local, rest] = splitProps(props, ['src', 'color', 'hoverColor', 'scale', 'base']);
+  const [local, rest] = splitProps(props, ['src', 'color', 'hoverColor', 'scale', 'base', 'filter']);
   const px = () => (local.base ?? 16) * (local.scale ?? 1);
 
   return (
     <div
       {...rest}
       class={`${styles.icon}`}
-      style={assignInlineVars({
-        [styles.pxVar]: `${px()}px`, // ユニット付き
-        [styles.fillVar]: local.color ?? 'currentColor',
-        [styles.hoverFillVar]: local.hoverColor ?? local.color ?? 'currentColor',
-        [styles.urlVar]: `url("${local.src}")`,
-      })}
+      style={{
+        filter: local.filter,
+        '-webkit-filter': local.filter,
+        ...assignInlineVars({
+          [styles.pxVar]: `${px()}px`, // ユニット付き
+          [styles.fillVar]: local.color ?? 'currentColor',
+          [styles.hoverFillVar]: local.hoverColor ?? local.color ?? 'currentColor',
+          [styles.urlVar]: `url("${local.src}")`,
+        }),
+      }}
     />
   );
 };

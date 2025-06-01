@@ -1,10 +1,12 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { RectSelection } from '~/tools/selection/rect/RectSelection';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { ToolType } from '../models/tool/Tool';
 import { Vec2 } from '../types/Vector';
 import { EraserTool } from './eraser/EraserTool';
 import { FillTool } from './fill/FillTool';
 import { PenTool } from './pen/PenTool';
+import { MoveTool } from '~/tools/move/MoveTool';
 
 export interface ToolBehavior {
   onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean;
@@ -19,6 +21,7 @@ export interface ToolArgs {
   lastPosition?: Vec2;
   color: RGBAColor; // RGBA
   size?: number;
+  event?: PointerEvent;
   // TODO: pressure, tilt, ...
 }
 
@@ -30,6 +33,10 @@ export const getToolInstance = (toolType: ToolType) => {
       return new EraserTool();
     case ToolType.Fill:
       return new FillTool();
+    case ToolType.RectSelection:
+      return new RectSelection();
+    case ToolType.Move:
+      return new MoveTool();
 
     default:
       return new PenTool();

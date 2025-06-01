@@ -4,6 +4,7 @@ import { Size2D } from '~/types/Size';
 export type Events = {
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
+  'selection:changed': { commit: boolean };
   'webgl:requestUpdate': { onlyDirty: boolean };
   'preview:requestUpdate': { layerId?: string };
 };

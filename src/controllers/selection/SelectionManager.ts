@@ -44,6 +44,19 @@ class SelectionManager {
     return this.moveOffset;
   }
 
+  public move(delta: Vec2) {
+    this.moveOffset.x += delta.x;
+    this.moveOffset.y += delta.y;
+    eventBus.emit('selection:moved', { newOffset: this.moveOffset });
+    return this.moveOffset;
+  }
+
+  public moveTo(pos: Vec2) {
+    this.moveOffset = pos;
+    eventBus.emit('selection:moved', { newOffset: this.moveOffset });
+    return this.moveOffset;
+  }
+
   // 「確定済み」のマスク
   private selectionMask: SelectionMask;
   // プレビュー専用マスク (onMove/preview 用)
@@ -82,9 +95,19 @@ class SelectionManager {
     return this.selectionMask;
   }
 
+  isMaskOverlap(pos: Vec2, withMoveOffset?: boolean) {
+    if (withMoveOffset) {
+      pos.x -= this.moveOffset.x;
+      pos.y -= this.moveOffset.y;
+    }
+    return this.selectionMask.get(pos) === 1;
+  }
+
   /** 「プレビュー開始時」に呼ぶ */
   beginPreview(mode: SelectionEditMode) {
     this.currentMode = mode;
+    this.moveOffset = { x: 0, y: 0 };
+    eventBus.emit('selection:moved', { newOffset: this.moveOffset });
     if (mode === 'replace') {
       // Replace なら確定済みをクリアしてから新しい previewMask
       this.selectionMask.clear();
@@ -181,6 +204,8 @@ class SelectionManager {
     this.selectionMask.clear();
     eventBus.emit('selection:changed', { commit: false });
   }
+
+  public forEachMaskPixels(fn: (position: Vec2) => void, withMoveOffset?: boolean) {}
 
   public updateBoundingBox(): BoundBox | undefined {
     this.boundBox = undefined;

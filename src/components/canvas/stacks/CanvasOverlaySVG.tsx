@@ -78,7 +78,7 @@ const CanvasOverlaySVG: Component = (props) => {
   const updateOutline = () => {
     const combinedMask = getCombinedMask();
     const { width, height } = canvasStore.canvas;
-    const d = traceAllBoundaries(combinedMask, width, height, interactStore.zoom);
+    const d = traceAllBoundaries(combinedMask, width, height, selectionManager.getMoveOffset(), interactStore.zoom);
     setPathD(d);
   };
 
@@ -86,10 +86,35 @@ const CanvasOverlaySVG: Component = (props) => {
     setSelectionChanged(true);
     setCommitted(e.commit);
   };
+  const onSelectionMovedHandler = (e: Events['selection:moved']) => {
+    setSelectionChanged(true);
+    setCommitted(true);
+  };
+
+  const tempKeyMove = (e: KeyboardEvent) => {
+    console.log(e.key)
+    switch (e.key) {
+      case 'ArrowLeft':
+        selectionManager.move({ x: -1, y: 0 });
+        console.log("hello!")
+        break;
+      case 'ArrowRight':
+        selectionManager.move({ x: 1, y: 0 });
+        break;
+      case 'ArrowUp':
+        selectionManager.move({ x: 0, y: -1 });
+        break;
+      case 'ArrowDown':
+        selectionManager.move({ x: 0, y: 1 });
+        break;
+    }
+  };
 
   onMount(() => {
     startRenderLoop();
     eventBus.on('selection:changed', onSelectionChangedHandler);
+    eventBus.on('selection:moved', onSelectionMovedHandler);
+    window.addEventListener('keydown', tempKeyMove);
     setSelectionChanged(true);
   });
   createEffect(() => {
@@ -98,7 +123,9 @@ const CanvasOverlaySVG: Component = (props) => {
   });
   onCleanup(() => {
     eventBus.off('selection:changed', onSelectionChangedHandler);
+    eventBus.off('selection:moved', onSelectionMovedHandler);
     disposeInterval();
+    window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();
   });
 

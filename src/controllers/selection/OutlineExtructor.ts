@@ -15,7 +15,6 @@ const mooreDirs: Array<{ dx: number; dy: number }> = [
   { dx: 1, dy: 0 }, // E
   { dx: 1, dy: -1 }, // NE
 ];
-// OutlineExtractor.ts
 
 /**
  * mask: Uint8Array (長さ = W*H), width, height: マスクのサイズ

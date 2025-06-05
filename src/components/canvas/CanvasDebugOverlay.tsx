@@ -1,5 +1,6 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, Show } from 'solid-js';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -58,6 +59,9 @@ const CanvasDebugOverlay: Component = (props) => {
           </p>
           <p>
             offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)})
+          </p>
+          <p>
+            selection offset:({selectionManager.getMoveOffset().x}, {selectionManager.getMoveOffset().y})
           </p>
           <p>canvas render mode: {RenderMode[logStore.currentRenderMode]}</p>
         </div>

@@ -51,15 +51,16 @@ export default class LayerCanvasOperator {
       lastPosition: last,
       size: tool.size,
       color: hexToRGBA(currentColor()),
-      event: originalEvent
+      event: originalEvent,
     };
     const startTime = Date.now();
     let isDrawnAction;
     switch (state) {
       case DrawState.start:
-        const isDrawnActionInStart = tool.behavior.onStart(agent, toolArgs);
-        const isDrawnActionInMove = tool.behavior.onMove(agent, toolArgs);
-        isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
+        isDrawnAction = tool.behavior.onStart(agent, toolArgs);
+        // const isDrawnActionInStart = tool.behavior.onStart(agent, toolArgs);
+        // const isDrawnActionInMove = tool.behavior.onMove(agent, toolArgs);
+        // isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
         break;
       case DrawState.move:
         isDrawnAction = tool.behavior.onMove(agent, toolArgs);

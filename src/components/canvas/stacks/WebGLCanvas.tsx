@@ -22,8 +22,8 @@ const WebGLCanvas: Component = () => {
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {
-        webGLRenderer?.render(allLayers(), onlyDirtyUpdate());
         setUpdateRender(false);
+        webGLRenderer?.render(allLayers(), onlyDirtyUpdate());
         setOnlyDirtyUpdate(false);
       }
     }, fps)

@@ -12,7 +12,7 @@ export function deletePixelInSelection(layerId?: string): boolean {
   const agent = getAgentOf(layerId ?? activeLayer().id);
   if (!agent) return false;
 
-  let box = selectionManager.getBoundBox();
+  let box = selectionManager.getBoundBox(true);
   if (!box) return false;
 
   const dm = agent.getDiffManager();

@@ -1,5 +1,7 @@
 // Outline tracer: Moore-Neighbor tracing
 
+import { Vec2 } from '~/types/Vector';
+
 /**
  * 8 近傍方向ベクトル (dx,dy) の定義順序。
  * Moore tracing では通常「反時計回り (W→NW→N→NE→E→SE→S→SW)」の順で探索しますが、
@@ -34,6 +36,7 @@ export function traceBoundaryFrom(
   height: number,
   x0: number,
   y0: number,
+  offset: Vec2,
   zoom: number
 ): { path: string; points: Array<{ x: number; y: number }> } {
   function isFilled(x: number, y: number): boolean {
@@ -81,8 +84,8 @@ export function traceBoundaryFrom(
   const cmds: string[] = [];
   for (let i = 0; i < boundaryPoints.length; i++) {
     const p = boundaryPoints[i];
-    const px = p.x * zoom;
-    const py = p.y * zoom;
+    const px = (p.x + offset.x) * zoom;
+    const py = (p.y + offset.y) * zoom;
     if (i === 0) {
       cmds.push(`M ${px} ${py}`);
     } else {
@@ -103,7 +106,7 @@ export function traceBoundaryFrom(
  *
  * @returns 複数領域がある場合は "M…Z M…Z M…Z" のようにスペースでつないだ文字列。
  */
-export function traceAllBoundaries(mask: Uint8Array, width: number, height: number, zoom: number): string {
+export function traceAllBoundaries(mask: Uint8Array, width: number, height: number, offset: Vec2, zoom: number): string {
   function isFilled(x: number, y: number): boolean {
     return x >= 0 && x < width && y >= 0 && y < height && mask[y * width + x] === 1;
   }
@@ -127,7 +130,7 @@ export function traceAllBoundaries(mask: Uint8Array, width: number, height: numb
       if (!isBoundaryPixel(x, y)) continue;
 
       // (x,y) が「未訪問の外周ピクセル」ならここが新しい領域のスタート
-      const { path, points } = traceBoundaryFrom(mask, width, height, x, y, zoom);
+      const { path, points } = traceBoundaryFrom(mask, width, height, x, y, offset, zoom);
       if (path) {
         pathList.push(path);
 

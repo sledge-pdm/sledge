@@ -12,12 +12,9 @@ export function deletePixelInSelection(layerId?: string): boolean {
   const agent = getAgentOf(layerId ?? activeLayer().id);
   if (!agent) return false;
 
-  let box = selectionManager.getBoundBox(true);
-  if (!box) return false;
-
   const dm = agent.getDiffManager();
-  for (let x = box.left; x < box.right; x++) {
-    for (let y = box.top; y < box.bottom; y++) {
+  for (let x = 0; x < selection.getWidth(); x++) {
+    for (let y = 0; y < selection.getHeight(); y++) {
       if (selectionManager.isMaskOverlap({ x, y }, true)) {
         const diff = agent?.setPixel({ x, y }, transparent, true);
         if (diff !== undefined) dm.add(diff);

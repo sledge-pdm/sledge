@@ -1,15 +1,13 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { flexCol } from '~/styles/snippets.css';
+import { eventBus, Events } from '~/utils/EventBus';
 import { safeInvoke } from '~/utils/TauriUtils';
 import { PixelLineChart } from '../common/PixelLineChart';
-import { eventBus, Events } from '~/utils/EventBus';
-import { reconcile } from 'solid-js/store';
 
 interface TauriMemInfo {
   total_bytes: number;
@@ -43,18 +41,18 @@ const CanvasDebugOverlay: Component = (props) => {
   };
 
   const disposeInterval = makeTimer(callback, 5000, setInterval);
-  
-    const [offsetX, setOffsetX]= createSignal(0)
-    const [offsetY, setOffsetY]= createSignal(0)
 
-    const onSelectionMoved = (e: Events["selection:moved"]) => {
-      setOffsetX(e.newOffset.x)
-      setOffsetY(e.newOffset.y)
-    }
+  const [offsetX, setOffsetX] = createSignal(0);
+  const [offsetY, setOffsetY] = createSignal(0);
+
+  const onSelectionMoved = (e: Events['selection:moved']) => {
+    setOffsetX(e.newOffset.x);
+    setOffsetY(e.newOffset.y);
+  };
 
   onMount(() => {
     eventBus.on('selection:moved', onSelectionMoved);
-  })
+  });
 
   onCleanup(() => {
     eventBus.off('selection:moved', onSelectionMoved);

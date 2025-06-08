@@ -52,33 +52,16 @@ const CanvasOverlaySVG: Component = (props) => {
     }, fps)
   );
 
-  // 「active + preview」の合成マスク
-  function getCombinedMask(): Uint8Array {
-    const mask = selectionManager.getSelectionMask().getMask();
-    const previewMaskObj = (selectionManager as any).previewMask as any;
-    if (!previewMaskObj) {
-      return mask;
-    }
-    const previewMask = previewMaskObj.getMask();
-    const combined = mask.slice();
-    const size = combined.length;
-    // OR 合成 (Add/Replace) または AND NOT (Subtract)
-    if ((selectionManager as any).currentMode === 'subtract') {
-      for (let i = 0; i < size; i++) {
-        combined[i] = combined[i] && previewMask[i] ^ 1;
-      }
-    } else {
-      for (let i = 0; i < size; i++) {
-        combined[i] = combined[i] || previewMask[i];
-      }
-    }
-    return combined;
-  }
-
   const updateOutline = () => {
-    const combinedMask = getCombinedMask();
     const { width, height } = canvasStore.canvas;
-    const d = traceAllBoundaries(combinedMask, width, height, selectionManager.getMoveOffset(), interactStore.zoom);
+    const d = traceAllBoundaries(
+      selectionManager.getSelectionMask().getMask(),
+      selectionManager.getPreviewMask()?.getMask(),
+      width,
+      height,
+      selectionManager.getMoveOffset(),
+      interactStore.zoom
+    );
     setPathD(d);
   };
 
@@ -92,11 +75,9 @@ const CanvasOverlaySVG: Component = (props) => {
   };
 
   const tempKeyMove = (e: KeyboardEvent) => {
-    console.log(e.key)
     switch (e.key) {
       case 'ArrowLeft':
         selectionManager.move({ x: -1, y: 0 });
-        console.log("hello!")
         break;
       case 'ArrowRight':
         selectionManager.move({ x: 1, y: 0 });

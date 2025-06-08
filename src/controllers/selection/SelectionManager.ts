@@ -35,6 +35,9 @@ export type SelectionEditMode = 'add' | 'subtract' | 'replace';
 
 class SelectionManager {
   private currentMode: SelectionEditMode = 'replace';
+  public getCurrentMode() {
+    return this.currentMode;
+  }
 
   private moveOffset: Vec2 = { x: 0, y: 0 };
   public setMoveOffset(moveOffset: Vec2) {
@@ -61,6 +64,10 @@ class SelectionManager {
   private selectionMask: SelectionMask;
   // プレビュー専用マスク (onMove/preview 用)
   private previewMask?: SelectionMask;
+  public getPreviewMask() {
+    return this.previewMask;
+  }
+
   private boundBox: BoundBox | undefined;
 
   public getBoundBox(withMoveOffset: boolean): BoundBox | undefined {

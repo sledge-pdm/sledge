@@ -2,8 +2,10 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import Icon from '~/components/common/Icon';
-import { traceAllBoundaries } from '~/controllers/selection/OutlineExtructor';
-import { BoundBox, selectionManager } from '~/controllers/selection/SelectionManager';
+import { maskToPath } from '~/controllers/selection/OutlineExtructor';
+import { PathCmdList } from '~/controllers/selection/PathCommand';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { BoundBox } from '~/controllers/selection/SelectionMask';
 import { cancelSelection, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
@@ -38,7 +40,7 @@ const CanvasOverlaySVG: Component = (props) => {
 
   const [selectionChanged, setSelectionChanged] = createSignal<boolean>(false);
   const [committed, setCommitted] = createSignal<boolean>(true);
-  const [pathD, setPathD] = createSignal<string>('');
+  const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
   const [outlineBoundBox, setOutlineBoundBox] = createSignal<BoundBox>();
   const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
@@ -46,23 +48,24 @@ const CanvasOverlaySVG: Component = (props) => {
       if (selectionChanged()) {
         updateOutline();
         setSelectionChanged(false);
-        const box = selectionManager.getBoundBox(true);
+        const box = selectionManager.getSelectionMask().getBoundBox();
         if (box) setOutlineBoundBox(box);
       }
     }, fps)
   );
 
+  const isFilled = (idx: number): number => {
+    const a = selectionManager.getSelectionMask().getMask()[idx];
+    const previewMask = selectionManager.getPreviewMask();
+    if (!previewMask) return a;
+    const b = previewMask.getMask()[idx];
+    return selectionManager.getCurrentMode() === 'subtract' ? a & (b ^ 1) : a | b;
+  };
+
   const updateOutline = () => {
     const { width, height } = canvasStore.canvas;
-    const d = traceAllBoundaries(
-      selectionManager.getSelectionMask().getMask(),
-      selectionManager.getPreviewMask()?.getMask(),
-      width,
-      height,
-      selectionManager.getMoveOffset(),
-      interactStore.zoom
-    );
-    setPathD(d);
+    const pathCmds = maskToPath(isFilled, width, height, selectionManager.getMoveOffset());
+    setPathCmdList(pathCmds);
   };
 
   const onSelectionChangedHandler = (e: Events['selection:changed']) => {
@@ -96,10 +99,6 @@ const CanvasOverlaySVG: Component = (props) => {
     eventBus.on('selection:changed', onSelectionChangedHandler);
     eventBus.on('selection:moved', onSelectionMovedHandler);
     window.addEventListener('keydown', tempKeyMove);
-    setSelectionChanged(true);
-  });
-  createEffect(() => {
-    const z = interactStore.zoom;
     setSelectionChanged(true);
   });
   onCleanup(() => {
@@ -159,7 +158,7 @@ const CanvasOverlaySVG: Component = (props) => {
 
         <path
           ref={(el) => (outlineRef = el)}
-          d={pathD()}
+          d={pathCmdList().toString(interactStore.zoom)}
           fill='none'
           stroke={vars.color.border}
           stroke-width='1'
@@ -189,9 +188,9 @@ const CanvasOverlaySVG: Component = (props) => {
       <div
         style={{
           position: 'absolute',
-          left: `${outlineBoundBox()?.left}px`,
-          top: `${outlineBoundBox()?.bottom}px`,
-          visibility: pathD() !== '' && committed() ? 'visible' : 'collapse',
+          left: `${outlineBoundBox()?.left! + selectionManager.getMoveOffset().x}px`,
+          top: `${outlineBoundBox()?.bottom! + selectionManager.getMoveOffset().y + 1}px`,
+          visibility: pathCmdList().getList().length > 0 && committed() ? 'visible' : 'collapse',
           'transform-origin': '0 0',
           'image-rendering': 'auto',
           'pointer-events': 'all',

@@ -46,7 +46,6 @@ export class RectSelection implements ToolBehavior {
     newRect.startPosition.y = y0;
     newRect.width = Math.abs(px - sx) + 1;
     newRect.height = Math.abs(py - sy) + 1;
-    console.log(newRect);
 
     selectionManager.setPreviewFragment(newRect);
     return false;

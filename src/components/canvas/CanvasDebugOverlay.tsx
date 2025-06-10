@@ -1,5 +1,6 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
 import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -44,17 +45,28 @@ const CanvasDebugOverlay: Component = (props) => {
 
   const [offsetX, setOffsetX] = createSignal(0);
   const [offsetY, setOffsetY] = createSignal(0);
+  const [selectionWidth, setSelectionWidth] = createSignal(0);
+  const [selectionHeight, setSelectionHeight] = createSignal(0);
 
   const onSelectionMoved = (e: Events['selection:moved']) => {
     setOffsetX(e.newOffset.x);
     setOffsetY(e.newOffset.y);
   };
+  const onSelectionChanged = (e: Events['selection:changed']) => {
+    const box = getCurrentSelection().getBoundBox();
+    if (box) {
+      setSelectionWidth(box.right - box.left + 1);
+      setSelectionHeight(box.bottom - box.top + 1);
+    }
+  };
 
   onMount(() => {
+    eventBus.on('selection:changed', onSelectionChanged);
     eventBus.on('selection:moved', onSelectionMoved);
   });
 
   onCleanup(() => {
+    eventBus.on('selection:changed', onSelectionChanged);
     eventBus.off('selection:moved', onSelectionMoved);
     disposeInterval();
   });
@@ -75,6 +87,9 @@ const CanvasDebugOverlay: Component = (props) => {
           </p>
           <p>
             selection offset:({offsetX()}, {offsetY()})
+          </p>
+          <p>
+            selection size:({selectionWidth()}, {selectionHeight()})
           </p>
           <p>canvas render mode: {RenderMode[logStore.currentRenderMode]}</p>
         </div>

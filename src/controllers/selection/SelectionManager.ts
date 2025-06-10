@@ -23,13 +23,6 @@ export type TileFragment = {
   index: TileIndex;
 };
 
-export interface BoundBox {
-  top: number;
-  left: number;
-  bottom: number;
-  right: number;
-}
-
 export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace';
 
@@ -64,30 +57,19 @@ class SelectionManager {
   private selectionMask: SelectionMask;
   // プレビュー専用マスク (onMove/preview 用)
   private previewMask?: SelectionMask;
-  public getPreviewMask() {
-    return this.previewMask;
+
+  public getSelectionMask() {
+    return this.selectionMask;
   }
 
-  private boundBox: BoundBox | undefined;
-
-  public getBoundBox(withMoveOffset: boolean): BoundBox | undefined {
-    if (withMoveOffset && this.boundBox) {
-      return {
-        top: this.boundBox.top + this.moveOffset.y,
-        bottom: this.boundBox.bottom + this.moveOffset.y,
-        left: this.boundBox.left + this.moveOffset.x,
-        right: this.boundBox.right + this.moveOffset.x,
-      };
-    } else {
-      return this.boundBox;
-    }
+  public getPreviewMask() {
+    return this.previewMask;
   }
 
   constructor() {
     // キャンバスサイズが不明な段階では (0,0) で初期化
     this.selectionMask = new SelectionMask(0, 0);
     this.previewMask = undefined;
-    this.boundBox = undefined;
 
     // キャンバスサイズ変更が来たら、両方のマスクをリサイズ
     eventBus.on('canvas:sizeChanged', (e: any) => {
@@ -96,10 +78,6 @@ class SelectionManager {
         this.previewMask.changeSize(e.newSize);
       }
     });
-  }
-
-  getSelectionMask() {
-    return this.selectionMask;
   }
 
   isMaskOverlap(pos: Vec2, withMoveOffset?: boolean) {
@@ -193,8 +171,6 @@ class SelectionManager {
       this.selectionMask.setMask(activeMask);
     }
 
-    this.updateBoundingBox();
-
     // プレビューをクリア
     this.previewMask = undefined;
     eventBus.emit('selection:changed', { commit: true });
@@ -206,6 +182,25 @@ class SelectionManager {
     eventBus.emit('selection:changed', { commit: false });
   }
 
+  public getCombinedMask(): Uint8Array {
+    if (!this.previewMask) return this.selectionMask.getMask();
+
+    const combined = new Uint8Array(this.selectionMask.getMask());
+
+    const modeSub = selectionManager.getCurrentMode() === 'subtract';
+
+    for (let y = 0; y < this.selectionMask.getHeight(); y++) {
+      for (let x = 0; x < this.selectionMask.getWidth(); x++) {
+        const i = y * this.selectionMask.getWidth() + x;
+        combined[i] = modeSub
+          ? combined[i] & (this.previewMask.getMask()[i] ^ 1) // NAND
+          : combined[i] | this.previewMask.getMask()[i]; // OR
+      }
+    }
+
+    return combined;
+  }
+
   clear() {
     this.previewMask = undefined;
     this.selectionMask.clear();
@@ -213,37 +208,6 @@ class SelectionManager {
   }
 
   public forEachMaskPixels(fn: (position: Vec2) => void, withMoveOffset?: boolean) {}
-
-  public updateBoundingBox(): BoundBox | undefined {
-    this.boundBox = undefined;
-    // 初期値として「未検出」を表すものをセットしておく
-    let minX = this.selectionMask.getWidth(); // x の最小値：最初は w より大きい値（必ず更新されるように）
-    let maxX = -1; // x の最大値：最初は -1（必ず更新されるように）
-    let minY = this.selectionMask.getHeight(); // y の最小値：最初は h
-    let maxY = -1; // y の最大値：最初は -1
-
-    // (x, y) を手動でインクリメントしながら全要素を１回走査する
-    let idx = 0; // フラグ配列のインデックス
-    for (let y = 0; y < this.selectionMask.getHeight(); y++) {
-      for (let x = 0; x < this.selectionMask.getWidth(); x++, idx++) {
-        // flags[idx] が 1 なら座標 (x, y) が対象となる
-        if (this.selectionMask.getMask()[idx]) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
-
-    // もし maxX が -1 のままだったら、1 の立っている点が一度もなかったことを示す
-    if (maxX < 0) {
-      return undefined;
-    }
-
-    this.boundBox = { left: minX, right: maxX, top: minY, bottom: maxY };
-    return this.boundBox;
-  }
 }
 
 export const selectionManager = new SelectionManager();

@@ -40,7 +40,6 @@ export const getToolInstance = (toolType: ToolType) => {
       return new RectSelection();
     case ToolType.Move:
       return new MoveTool();
-
     default:
       return new PenTool();
   }

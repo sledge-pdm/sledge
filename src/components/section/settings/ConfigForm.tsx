@@ -23,12 +23,12 @@ import {
 import { accentedButton, vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
-import Checkbox from '../common/control/Checkbox';
-import Dropdown from '../common/control/Dropdown';
-import RadioButton from '../common/control/RadioButton';
-import Slider from '../common/control/Slider';
-import ToggleSwitch from '../common/control/ToggleSwitch';
-import Light from '../common/Light';
+import Checkbox from '../../common/control/Checkbox';
+import Dropdown from '../../common/control/Dropdown';
+import RadioButton from '../../common/control/RadioButton';
+import Slider from '../../common/control/Slider';
+import ToggleSwitch from '../../common/control/ToggleSwitch';
+import Light from '../../common/Light';
 import KeyConfigSettings from './KeyConfigSettings';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;

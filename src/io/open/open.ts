@@ -1,7 +1,7 @@
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 
-export async function openProjectFile(): Promise<string | undefined> {
+export async function openNewFile(): Promise<string | undefined> {
   const home = await path.homeDir();
   const file = await dialogOpen({
     multiple: false,
@@ -9,8 +9,16 @@ export async function openProjectFile(): Promise<string | undefined> {
     defaultPath: await path.join(home, 'sledge'),
     filters: [
       {
-        name: 'sledge files',
+        name: 'all files.',
+        extensions: ['sledge', 'jpg', 'png'],
+      },
+      {
+        name: 'sledge files.',
         extensions: ['sledge'],
+      },
+      {
+        name: 'image files.',
+        extensions: ['jpg', 'png'],
       },
     ],
   });

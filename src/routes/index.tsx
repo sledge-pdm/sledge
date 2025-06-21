@@ -1,15 +1,15 @@
 import { onMount } from 'solid-js';
 import ThemeToggle from '~/components/common/ThemeToggle';
 import RecentFileList from '~/components/global/RecentFileList';
+import { addRecentFile } from '~/controllers/config/RecentFileController';
 import loadGlobalSettings from '~/io/config/in/load';
-import { openProjectFile } from '~/io/project/open/open';
+import { openNewFile } from '~/io/open/open';
 import { FileLocation } from '~/models/types/FileLocation';
 import { globalConfig } from '~/stores/GlobalStores';
 import { getTheme } from '~/stores/Theme';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import { getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
-import { addRecentFile } from '~/controllers/config/RecentFileController';
 
 export default function Home() {
   onMount(async () => {
@@ -30,7 +30,7 @@ export default function Home() {
   };
 
   const openProject = () => {
-    openProjectFile().then((file: string | undefined) => {
+    openNewFile().then((file: string | undefined) => {
       console.log(file);
       if (file !== undefined) {
         const loc = getFileNameAndPath(file);

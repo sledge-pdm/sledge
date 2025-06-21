@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createSignal, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
@@ -9,29 +9,21 @@ import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
-  const isNameChanged = () => projectStore.name !== projectStore.newName;
+  const [newName, setNewName] = createSignal<string | undefined>(projectStore.name);
+  const isNameChanged = () => projectStore.name !== newName();
   const isOWPossible = () => projectStore.name !== undefined && projectStore.path !== undefined && !isNameChanged();
-  const getNameToSave = () => (isNameChanged() ? projectStore.newName : projectStore.name);
-
-  onMount(() => {
-    setProjectStore('newName', projectStore.name);
-  });
 
   const OWSave = () => {
+    setProjectStore('name', newName() ?? projectStore.name);
     // 上書き保存
-    saveProject(getNameToSave(), `${projectStore.path}`).then(() => {
-      if (isNameChanged()) {
-        setProjectStore('name', projectStore.newName);
-      }
+    saveProject(projectStore.name, `${projectStore.path}`).then(() => {
       setSaveLog('saved!');
       setProjectStore('isProjectChangedAfterSave', false);
     });
   };
   const forceNewSave = () => {
-    saveProject(getNameToSave()).then(() => {
-      if (isNameChanged()) {
-        setProjectStore('name', projectStore.newName);
-      }
+    setProjectStore('name', newName() ?? projectStore.name);
+    saveProject(projectStore.name).then(() => {
       setSaveLog('saved!');
       setProjectStore('isProjectChangedAfterSave', false);
     });
@@ -51,10 +43,10 @@ const Project: Component = () => {
             type='text'
             name='height'
             onInput={(e) => {
-              if (e.target.value) setProjectStore('newName', e.target.value);
+              if (e.target.value) setNewName(e.target.value);
             }}
             onChange={(e) => {
-              if (e.target.value) setProjectStore('newName', e.target.value);
+              if (e.target.value) setNewName(e.target.value);
             }}
             value={projectStore.name}
             placeholder='project name'

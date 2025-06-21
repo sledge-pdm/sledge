@@ -1,6 +1,5 @@
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createSignal, For, onMount, Show } from 'solid-js';
-import { loadGlobalSettings, resetToDefaultConfig, saveGlobalSettings } from '~/io/global_config/globalSettings';
 import { componentProps } from '~/models/config/ConfigComponents';
 import { FieldMeta, Sections, settingsMeta } from '~/models/config/GlobalConfig';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
@@ -30,6 +29,9 @@ import Slider from '../../common/control/Slider';
 import ToggleSwitch from '../../common/control/ToggleSwitch';
 import Light from '../../common/Light';
 import KeyConfigSettings from './KeyConfigSettings';
+import { saveGlobalSettings } from '~/io/config/out/save';
+import { resetToDefaultConfig } from '~/io/config/out/reset';
+import loadGlobalSettings from '~/io/config/in/load';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
 

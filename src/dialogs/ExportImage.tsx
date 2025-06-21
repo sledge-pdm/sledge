@@ -6,15 +6,15 @@ import { createStore } from 'solid-js/store';
 import Checkbox from '~/components/common/control/Checkbox';
 import Dropdown, { DropdownOption } from '~/components/common/control/Dropdown';
 import Slider from '~/components/common/control/Slider';
-import { saveGlobalSettings } from '~/io/global_config/globalSettings';
-import { CanvasExportOptions, defaultExportDir, exportableFileTypes, exportImage } from '~/io/image/imageExport';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
 import { vars, ZFB08 } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { Dialog, DialogExternalProps } from './Dialog';
+import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
+import { saveGlobalSettings } from '~/io/config/out/save';
 
-const fileTypeOptions: DropdownOption<exportableFileTypes>[] = [
+const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
   { label: 'png', value: 'png' },
   { label: 'jpeg', value: 'jpg' },
 ];

@@ -1,7 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars, ZFB03B, ZFB09 } from '~/styles/global.css';
 import { flexCol, w100 } from '~/styles/snippets.css';
-import { Consts } from '~/utils/consts';
+import { Consts } from '~/utils/Consts';
 
 export const rfsCaption = style({
   fontFamily: ZFB03B,

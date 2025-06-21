@@ -1,12 +1,12 @@
 import { pictureDir } from '@tauri-apps/api/path';
+import { writeFile } from '@tauri-apps/plugin-fs';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { canvasStore } from '~/stores/ProjectStores';
-import { saveBlobViaTauri } from '../saveBlob';
 
-export type exportableFileTypes = 'png' | 'jpg';
+export type ExportableFileTypes = 'png' | 'jpg';
 
 export interface CanvasExportOptions {
-  format: exportableFileTypes;
+  format: ExportableFileTypes;
   quality?: number; // jpeg 時の品質 0～1, png のときは無視
   scale: number; // 1（そのまま）～10 など
 }
@@ -54,4 +54,12 @@ export async function getImageBlob(options: CanvasExportOptions): Promise<Blob |
       quality
     );
   });
+}
+
+export async function saveBlobViaTauri(blob: Blob, dirPath: string, defaultName = 'export.png') {
+  const buf = new Uint8Array(await blob.arrayBuffer());
+  dirPath.replaceAll('/', '\\');
+  dirPath = dirPath.endsWith('\\') ? dirPath : dirPath + '\\';
+  await writeFile(dirPath + defaultName, buf, {});
+  return dirPath + defaultName;
 }

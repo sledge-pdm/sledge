@@ -14,7 +14,7 @@ import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components
 import { vars } from '~/styles/global.css';
 import { sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { flexCol } from '~/styles/snippets.css';
-import { KeyConfigCommands } from '~/utils/consts';
+import { KeyConfigCommands } from '~/utils/Consts';
 
 const KeyConfigSettings: Component = () => {
   const [recordingName, setRecordingName] = createSignal<KeyConfigCommands | undefined>(undefined);

@@ -66,7 +66,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1, ...transformStyle(sortable.transform) }}
       ref={sortable.ref}
     >
-      {/* <DSLButton /> */}
       <div
         class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
         onClick={onDetClicked}

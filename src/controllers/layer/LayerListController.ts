@@ -1,6 +1,5 @@
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { DSL } from '~/models/dsl/DSL';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -14,11 +13,10 @@ export const addLayer = async (
     dotMagnification?: number;
     opacity?: number;
     mode?: BlendMode;
-    dsl?: DSL;
   },
   initImage?: Uint8ClampedArray
 ) => {
-  const { name = 'layer', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal, dsl } = layer;
+  const { name = 'layer', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal } = layer;
 
   const newLayer = createLayer({
     name,
@@ -27,7 +25,6 @@ export const addLayer = async (
     dotMagnification,
     opacity,
     mode,
-    dsl,
     initImage,
   });
 

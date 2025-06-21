@@ -18,7 +18,7 @@ export default class Tile {
   constructor(
     public readonly row: number,
     public readonly column: number,
-    public readonly globalTileSize: number
+    public readonly size: number
   ) {
     this.isDirty = false;
   }
@@ -33,12 +33,12 @@ export default class Tile {
 
   public getOffset(): Vec2 {
     return {
-      x: this.column * this.globalTileSize,
-      y: this.row * this.globalTileSize,
+      x: this.column * this.size,
+      y: this.row * this.size,
     };
   }
 
   public isInBounds(positionInTile: Vec2) {
-    return positionInTile.x >= 0 && positionInTile.x < this.globalTileSize && positionInTile.y >= 0 && positionInTile.y < this.globalTileSize;
+    return positionInTile.x >= 0 && positionInTile.x < this.size && positionInTile.y >= 0 && positionInTile.y < this.size;
   }
 }

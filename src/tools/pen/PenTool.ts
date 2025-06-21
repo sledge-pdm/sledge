@@ -5,7 +5,8 @@ import { ToolArgs, ToolBehavior } from '../ToolBase';
 
 export class PenTool implements ToolBehavior {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    return false;
+    // return false;
+    return this.draw(agent, args, args.color);
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {

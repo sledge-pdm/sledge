@@ -17,8 +17,25 @@ export function hexToRGBA(hex: string): RGBAColor {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   let a = parseInt(hex.slice(7, 9), 16);
-  if (!a) a = 255; // ここがなかったので a=NaN となり、塗る際にエラー？
+  if (!a) a = 255;
   return [r, g, b, a];
+}
+
+// "#rrggbb" -> r/g/b
+export function RGBToHex(color: RGBColor): string {
+  const rHex = color[0].toString(16).padStart(2, '0');
+  const gHex = color[1].toString(16).padStart(2, '0');
+  const bHex = color[2].toString(16).padStart(2, '0');
+  return `${rHex}${gHex}${bHex}`;
+}
+
+// "#rrggbbaa" -> r/g/b/a
+export function RGBAToHex(color: RGBAColor): string {
+  const rHex = color[0].toString(16).padStart(2, '0');
+  const gHex = color[1].toString(16).padStart(2, '0');
+  const bHex = color[2].toString(16).padStart(2, '0');
+  const aHex = color[3].toString(16).padStart(2, '0');
+  return `${rHex}${gHex}${bHex}${aHex}`;
 }
 
 export function colorMatch(a: RGBAColor, b: RGBAColor): boolean {

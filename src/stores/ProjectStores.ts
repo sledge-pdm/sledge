@@ -6,21 +6,21 @@ import { LayerHistory } from '~/models/history/LayerHistory';
 import { Layer } from '~/models/layer/Layer';
 import { Size2D } from '~/types/Size';
 
-type CanvasStore = {
+export type CanvasStore = {
   canvas: Size2D;
 };
-type ImagePoolStore = {
+export type ImagePoolStore = {
   entries: ReactiveMap<string, ImagePoolEntry>;
 };
-type ProjectStore = {
+export type ProjectStore = {
   newName: string | undefined;
   name: string | undefined;
   path: string | undefined;
   thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
 };
-type LayerHistoryStore = Record<string, LayerHistory>;
-type LayerListStore = {
+export type LayerHistoryStore = Record<string, LayerHistory>;
+export type LayerListStore = {
   layers: Layer[];
   activeLayerId: string;
   isImagePoolActive: boolean;

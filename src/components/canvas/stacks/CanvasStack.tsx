@@ -23,6 +23,8 @@ const CanvasStack: Component = () => {
     <div
       style={{
         position: 'relative',
+        width: `${canvasStore.canvas.width}px`,
+        height: `${canvasStore.canvas.height}px`,
       }}
     >
       <div

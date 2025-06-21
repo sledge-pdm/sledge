@@ -5,7 +5,7 @@ import { createLayer } from '~/models/layer/LayerFactory';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
-export const addLayer = async (
+export const addLayer = (
   layer: {
     name?: string;
     type?: LayerType;
@@ -36,7 +36,7 @@ export const addLayer = async (
 
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
 
-  return layers;
+  return newLayer;
 };
 
 export function getActiveLayerIndex(): number {

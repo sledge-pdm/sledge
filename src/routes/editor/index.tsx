@@ -13,6 +13,7 @@ import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasCo
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import loadGlobalSettings from '~/io/config/in/load';
+import { initProjectWithNewImage } from '~/io/image/in/open';
 import { importProjectFromPath } from '~/io/project/in/import';
 import { LayerType } from '~/models/layer/Layer';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -33,29 +34,6 @@ export default function Editor() {
 
   const isNewProject = location.search === '';
   const [isLoading, setIsLoading] = createSignal(true);
-  const sp = new URLSearchParams(location.search);
-
-  if (location.search && sp.get('new') !== 'true') {
-    const fileName = sp.get('name');
-    const filePath = sp.get('path');
-    const path = `${filePath}\\${fileName}`;
-    importProjectFromPath(path).then(() => {
-      onProjectLoad();
-    });
-  } else {
-    // create new
-    setProjectStore('name', 'new project');
-    if (sp.has('width') && sp.has('height')) {
-      const width = Number(sp.get('width'));
-      const height = Number(sp.get('height'));
-      setCanvasStore('canvas', 'width', width);
-      setCanvasStore('canvas', 'height', height);
-      eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
-    }
-    addLayer({ name: 'dot', type: LayerType.Dot, enabled: true, dotMagnification: 1 }).then(() => {
-      onProjectLoad();
-    });
-  }
 
   const onProjectLoad = async () => {
     await emitEvent('onProjectLoad');
@@ -82,6 +60,38 @@ export default function Editor() {
       loadGlobalSettings();
     });
   };
+
+  const sp = new URLSearchParams(location.search);
+
+  if (location.search && sp.get('new') !== 'true') {
+    const fileName = sp.get('name');
+    const filePath = sp.get('path');
+    if (!fileName || !filePath) return;
+    const path = `${filePath}\\${fileName}`;
+    if (fileName?.endsWith('.sledge')) {
+      importProjectFromPath(path).then(() => {
+        onProjectLoad();
+      });
+    } else {
+      // 画像データ
+      setProjectStore('name', fileName);
+      initProjectWithNewImage(filePath, fileName).then(() => {
+        onProjectLoad();
+      });
+    }
+  } else {
+    // create new
+    setProjectStore('name', 'new project');
+    if (sp.has('width') && sp.has('height')) {
+      const width = Number(sp.get('width'));
+      const height = Number(sp.get('height'));
+      setCanvasStore('canvas', 'width', width);
+      setCanvasStore('canvas', 'height', height);
+      eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
+    }
+    addLayer({ name: 'dot', type: LayerType.Dot, enabled: true, dotMagnification: 1 });
+    onProjectLoad();
+  }
 
   let unlisten: UnlistenFn;
 

@@ -1,15 +1,14 @@
 import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSortable, transformStyle, useDragDropContext } from '@thisbeyond/solid-dnd';
-import { Component } from 'solid-js';
+import { Component, onMount } from 'solid-js';
 import Icon from '~/components/common/Icon';
 import Light from '~/components/common/Light';
-import { Layer, LayerType } from '~/models/layer/Layer';
+import { Layer } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
 import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
-import { getNextMagnification } from '~/utils/LayerUtils';
 import LayerPreview from '../../common/LayerPreview';
 
 interface LayerItemProps {
@@ -20,22 +19,11 @@ interface LayerItemProps {
 }
 
 const LayerItem: Component<LayerItemProps> = (props) => {
+  let nameParagraphRef: HTMLParagraphElement | undefined;
+
   const sortable = createSortable(props.layer.id);
   const context = useDragDropContext();
   const state = context?.[0];
-
-  let detClass: 'dot' | 'image' | 'automate' | undefined;
-  switch (props.layer.type) {
-    case LayerType.Dot:
-      detClass = 'dot';
-      break;
-    case LayerType.Image:
-      detClass = 'image';
-      break;
-    case LayerType.Automate:
-      detClass = 'automate';
-      break;
-  }
 
   const onDetClicked = (e: MouseEvent) => {
     setLayerListStore('activeLayerId', props.layer.id);
@@ -47,12 +35,13 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     }
   };
 
-  const onMagnifClicked = () => {
-    const next = getNextMagnification(props.layer.dotMagnification);
-    if (props.index !== -1) {
-      setLayerListStore('layers', props.index, 'dotMagnification', next);
+  onMount(() => {
+    if (nameParagraphRef) {
+      const size = 16 / Math.floor(nameParagraphRef?.scrollHeight / 24);
+
+      nameParagraphRef.style.fontSize = `${size}px`;
     }
-  };
+  });
 
   const isActive = () => layerListStore.activeLayerId === props.layer.id;
 
@@ -95,17 +84,15 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             </p>
           </div>
 
-          <p class={layerItemName}> {props.layer.name}</p>
-          {/* <div
-            class={dotMagnifContainer}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMagnifClicked();
+          <p
+            ref={(ref) => {
+              nameParagraphRef = ref;
             }}
-            onMouseOver={(e) => e.stopPropagation()}
+            class={layerItemName}
+            style={{ 'font-size': '16px' }}
           >
-            <p class={dotMagnifText}>x{props.layer.dotMagnification}</p>
-          </div> */}
+            {props.layer.name}
+          </p>
         </div>
         <Light class={activeLight} on={isActive()} />
       </div>

@@ -1,5 +1,6 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { MoveTool } from '~/tools/move/MoveTool';
+import { PipetteTool } from '~/tools/pipette/PipetteTool';
 import { RectSelection } from '~/tools/selection/rect/RectSelection';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { ToolType } from '../models/tool/Tool';
@@ -33,6 +34,8 @@ export const getToolInstance = (toolType: ToolType) => {
       return new EraserTool();
     case ToolType.Fill:
       return new FillTool();
+    case ToolType.Pipette:
+      return new PipetteTool();
     case ToolType.RectSelection:
       return new RectSelection();
     case ToolType.Move:

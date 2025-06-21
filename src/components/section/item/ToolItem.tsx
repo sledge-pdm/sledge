@@ -19,10 +19,19 @@ const ToolItem: Component<Props> = (props: Props) => {
       src = '/icons/tool/pen.png';
       break;
     case ToolType.Eraser:
-      src = '/icons/tool/eraser_b.png';
+      src = '/icons/tool/eraser.png';
       break;
     case ToolType.Fill:
-      src = '/icons/tool/fill_G_x10.png';
+      src = '/icons/tool/fill.png';
+      break;
+    case ToolType.Pipette:
+      src = '/icons/tool/pipette.png';
+      break;
+    case ToolType.RectSelection:
+      src = '/icons/tool/rectselect.png';
+      break;
+    case ToolType.Move:
+      src = '/icons/tool/move.png';
       break;
   }
   return (
@@ -34,7 +43,7 @@ const ToolItem: Component<Props> = (props: Props) => {
           setToolStore({ usingIndex: toolStore.tools.indexOf(props.tool) });
         }}
       >
-        <Icon src={src} base={20} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
+        <Icon src={src} base={10} scale={2} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
         <p
           class={toolConfigRowName}
           style={{

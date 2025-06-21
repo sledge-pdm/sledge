@@ -4,6 +4,7 @@ export enum ToolType {
   Pen = 'pen',
   Eraser = 'eraser',
   Fill = 'fill',
+  Pipette = 'pipette',
   RectSelection = 'rectSelection',
   Move = 'move',
 }

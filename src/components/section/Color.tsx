@@ -7,7 +7,7 @@ import { currentColor, setCurrentColor } from '~/controllers/color/ColorControll
 import { colorStore } from '~/stores/EditorStores';
 import { vars, ZFB11 } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
-import { swatchContainer } from '~/styles/section/color.css';
+import { colorElemDescription, swatchContainer } from '~/styles/section/color.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Color: Component = () => {
@@ -26,9 +26,9 @@ const Color: Component = () => {
             {(item, index) => <ColorBox color={item} sizePx={8} onClick={(color) => onColorClicked(color, index())} enableUsingSelection={true} />}
           </For>
         </div>
-        {/* <div class={descriptionContainer}>
+        <div>
           <p class={colorElemDescription}>picker.</p>
-        </div> */}
+        </div>
         <div class={flexCol}>
           <ColorPicker width={150} />
           <div class={flexRow} style={{ 'align-items': 'center' }}>

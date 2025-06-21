@@ -1,8 +1,8 @@
 import { Layer } from '~/models/layer/Layer';
-import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/LayerImageAgent';
-import { getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
+import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
 import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dsl', 'dotMagnification'];
@@ -31,10 +31,6 @@ export function duplicateLayer(layerId: string) {
 }
 
 export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): LayerImageAgent {
-  setLayerHistoryStore(layerId, {
-    canUndo: false,
-    canRedo: false,
-  });
   let width = Math.round(canvasStore.canvas.width / dotMagnification);
   let height = Math.round(canvasStore.canvas.height / dotMagnification);
   let buffer: Uint8ClampedArray;
@@ -61,5 +57,5 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
   }
 }
 
-export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId].canUndo;
-export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId].canRedo;
+export const canUndo = (): boolean => getActiveAgent()?.canUndo() ?? false;
+export const canRedo = (): boolean => getActiveAgent()?.canRedo() ?? false;

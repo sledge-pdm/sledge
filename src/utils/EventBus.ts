@@ -5,9 +5,14 @@ import { Vec2 } from '~/types/Vector';
 export type Events = {
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
+
+  'layerHistory:changed': {};
+
   'selection:changed': { commit: boolean };
   'selection:moved': { newOffset: Vec2 };
+
   'webgl:requestUpdate': { onlyDirty: boolean };
+
   'preview:requestUpdate': { layerId?: string };
 };
 

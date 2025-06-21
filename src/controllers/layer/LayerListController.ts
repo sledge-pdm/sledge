@@ -3,7 +3,7 @@ import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { DSL } from '~/models/dsl/DSL';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';
-import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export const addLayer = async (
@@ -81,13 +81,9 @@ export const removeLayer = (layerId?: string) => {
   if (index !== 0) newActiveIndex = index - 1;
 
   layers.splice(index, 1);
-  const histories = Object.assign({}, layerHistoryStore);
-  delete histories[layerId];
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
-  setLayerHistoryStore(histories);
-
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
 };
 

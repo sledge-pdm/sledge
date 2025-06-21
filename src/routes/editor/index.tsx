@@ -16,7 +16,7 @@ import loadGlobalSettings from '~/io/config/in/load';
 import { importProjectFromPath } from '~/io/project/in/import';
 import { LayerType } from '~/models/layer/Layer';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerHistoryStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { pageRoot } from '~/styles/global.css';
 import { flexCol } from '~/styles/snippets.css';
 import { eventBus } from '~/utils/EventBus';
@@ -27,7 +27,6 @@ export default function Editor() {
 
   createEffect(() => {
     trackStore(canvasStore.canvas);
-    trackStore(layerHistoryStore);
     trackStore(layerListStore);
     setProjectStore('isProjectChangedAfterSave', true);
   });

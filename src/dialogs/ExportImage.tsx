@@ -40,7 +40,7 @@ export interface ExportImageProps extends DialogExternalProps {
 const ExportImageDialog: Component<ExportImageProps> = (props) => {
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
-    fileName: projectStore.newName ?? projectStore.name,
+    fileName: projectStore.name,
   });
   const [customScale, setCustomScale] = createSignal(1);
 

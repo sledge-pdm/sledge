@@ -1,6 +1,6 @@
-import { setLayerHistoryStore } from '~/stores/ProjectStores';
 import { TileIndex } from '~/types/Tile';
 import { RGBAColor } from '~/utils/ColorUtils';
+import { eventBus } from '~/utils/EventBus';
 import { Vec2 } from '../../types/Vector';
 
 export type PixelDiff = {
@@ -64,7 +64,7 @@ export class HistoryManager {
     // clear redo history
     this.redoActionsStack = [];
 
-    this.syncStores();
+    eventBus.emit('layerHistory:changed', {});
   }
 
   public undo(): DiffAction | undefined {
@@ -77,7 +77,8 @@ export class HistoryManager {
       this.redoActionsStack.pop();
     }
 
-    this.syncStores();
+    eventBus.emit('layerHistory:changed', {});
+
     return undoedAction;
   }
 
@@ -91,15 +92,8 @@ export class HistoryManager {
       this.undoActionsStack.shift();
     }
 
-    this.syncStores();
-    return redoedAction;
-  }
+    eventBus.emit('layerHistory:changed', {});
 
-  /**
-   * Synchronize the undo/redo stacks with the SolidJS store
-   */
-  private syncStores() {
-    setLayerHistoryStore(this.layerId, 'canUndo', this.canUndo());
-    setLayerHistoryStore(this.layerId, 'canRedo', this.canRedo());
+    return redoedAction;
   }
 }

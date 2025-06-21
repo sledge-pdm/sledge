@@ -2,7 +2,6 @@
 import { ReactiveMap } from '@solid-primitives/map';
 import { createStore } from 'solid-js/store';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { LayerHistory } from '~/models/history/LayerHistory';
 import { Layer } from '~/models/layer/Layer';
 import { Size2D } from '~/types/Size';
 
@@ -18,7 +17,6 @@ export type ProjectStore = {
   thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
 };
-export type LayerHistoryStore = Record<string, LayerHistory>;
 export type LayerListStore = {
   layers: Layer[];
   activeLayerId: string;
@@ -40,7 +38,6 @@ const defaultProjectStore: ProjectStore = {
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
 };
-const defaultLayerHistoryStore: LayerHistoryStore = {};
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),
   activeLayerId: '',
@@ -51,7 +48,6 @@ export const initProjectStore = () => {
   const [canvasStore, setCanvasStore] = createStore<CanvasStore>(defaultCanvasStore);
   const [imagePoolStore, setImagePoolStore] = createStore<ImagePoolStore>(defaultImagePoolStore);
   const [projectStore, setProjectStore] = createStore<ProjectStore>(defaultProjectStore);
-  const [layerHistoryStore, setLayerHistoryStore] = createStore<LayerHistoryStore>(defaultLayerHistoryStore);
   const [layerListStore, setLayerListStore] = createStore<LayerListStore>(defaultLayerListStore);
 
   return {
@@ -61,8 +57,6 @@ export const initProjectStore = () => {
     setImagePoolStore,
     layerListStore,
     setLayerListStore,
-    layerHistoryStore,
-    setLayerHistoryStore,
     projectStore,
     setProjectStore,
   };
@@ -78,9 +72,6 @@ export const setImagePoolStore = projectRootStore.setImagePoolStore;
 
 export const layerListStore = projectRootStore.layerListStore;
 export const setLayerListStore = projectRootStore.setLayerListStore;
-
-export const layerHistoryStore = projectRootStore.layerHistoryStore;
-export const setLayerHistoryStore = projectRootStore.setLayerHistoryStore;
 
 export const projectStore = projectRootStore.projectStore;
 export const setProjectStore = projectRootStore.setProjectStore;

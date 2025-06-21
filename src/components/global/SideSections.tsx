@@ -9,7 +9,7 @@ import { createScrollPosition } from '@solid-primitives/scroll';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaMenu, sideAreaRoot } from '~/styles/globals/side_sections.css';
-import { h100 } from '~/styles/snippets.css';
+import { flexCol } from '~/styles/snippets.css';
 import SectionTopMenu from './SectionTopMenu';
 
 const SideSections: Component = () => {
@@ -33,27 +33,30 @@ const SideSections: Component = () => {
         <Project />
         <SectionTopMenu />
       </div>
-      <div class={h100} style={{ position: 'relative' }}>
+      <div class={flexCol} style={{ position: 'relative', 'flex-grow': 1,  }}>
         <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
-          <div
-            class={sideAreaContent}
-            style={{
-              visibility: appearanceStore.sideAppearanceMode !== 'editor' ? 'hidden' : 'visible',
-              height: appearanceStore.sideAppearanceMode !== 'editor' ? '0' : undefined,
-            }}
-          >
-            <Color />
-            <ToolConfig />
-            <LayerList />
-          </div>
-          <div
-            class={sideAreaContent}
-            style={{
-              visibility: appearanceStore.sideAppearanceMode !== 'project' ? 'hidden' : 'visible',
-              height: appearanceStore.sideAppearanceMode !== 'project' ? '0' : undefined,
-            }}
-          >
-            <CanvasSettings />
+          <div class={flexCol}>
+            <div
+              class={sideAreaContent}
+              style={{
+                visibility: appearanceStore.sideAppearanceMode !== 'editor' ? 'hidden' : 'visible',
+                height: appearanceStore.sideAppearanceMode !== 'editor' ? '0' : undefined,
+              }}
+            >
+              <Color />
+              <ToolConfig />
+              <LayerList />
+            </div>
+
+            <div
+              class={sideAreaContent}
+              style={{
+                visibility: appearanceStore.sideAppearanceMode !== 'project' ? 'hidden' : 'visible',
+                height: appearanceStore.sideAppearanceMode !== 'project' ? '0' : undefined,
+              }}
+            >
+              <CanvasSettings />
+            </div>
           </div>
         </div>
 

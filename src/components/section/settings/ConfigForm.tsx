@@ -1,7 +1,10 @@
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createSignal, For, onMount, Show } from 'solid-js';
+import loadGlobalSettings from '~/io/config/in/load';
+import { resetToDefaultConfig } from '~/io/config/out/reset';
+import { saveGlobalSettings } from '~/io/config/out/save';
 import { componentProps } from '~/models/config/ConfigComponents';
-import { FieldMeta, Sections, settingsMeta } from '~/models/config/GlobalConfig';
+import { FieldMeta, GlobalConfig, Sections, settingsMeta } from '~/models/config/GlobalConfig';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import {
   configFormFieldControlLabel,
@@ -29,9 +32,6 @@ import Slider from '../../common/control/Slider';
 import ToggleSwitch from '../../common/control/ToggleSwitch';
 import Light from '../../common/Light';
 import KeyConfigSettings from './KeyConfigSettings';
-import { saveGlobalSettings } from '~/io/config/out/save';
-import { resetToDefaultConfig } from '~/io/config/out/reset';
-import loadGlobalSettings from '~/io/config/in/load';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
 
@@ -101,6 +101,8 @@ export default function ConfigForm() {
   const [isSaved, setIsSaved] = createSignal(false);
   const [isDirty, setIsDirty] = createSignal(false);
 
+  let originalConfig: GlobalConfig | undefined;
+
   const manualSave = async () => {
     await saveGlobalSettings();
     await emitGlobalEvent('onSettingsSaved');
@@ -123,11 +125,16 @@ export default function ConfigForm() {
   };
 
   const onFieldChange = (meta: FieldMeta, v: any) => {
-    setIsDirty(true);
+    if (JSON.stringify(originalConfig) !== JSON.stringify(globalConfig)) {
+      setIsDirty(true);
+    } else {
+      setIsDirty(false);
+    }
   };
 
   onMount(async () => {
     await loadGlobalSettings();
+    originalConfig = JSON.parse(JSON.stringify(globalConfig));
   });
 
   return (

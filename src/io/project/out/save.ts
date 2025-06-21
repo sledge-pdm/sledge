@@ -1,14 +1,14 @@
 import { path } from '@tauri-apps/api';
 import { save } from '@tauri-apps/plugin-dialog';
-import { BaseDirectory, mkdir, writeFile } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
-import { dumpProject2 } from '~/io/project/dump';
+import { dumpProject } from '~/io/project/out/dump';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
-import { blobToDataUrl } from '~/utils/DataUtils';
+import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { getFileNameAndPath } from '~/utils/PathUtils';
-import getFileId from '../../utils/getFileId';
-import { saveThumbnailExternal } from './thumbnail';
+import getFileId from '../../../utils/getFileId';
+import { appDataDir } from '@tauri-apps/api/path';
 
 async function folderSelection(name?: string) {
   try {
@@ -52,7 +52,7 @@ export async function saveProject(name?: string, existingPath?: string) {
 
     // const data = await dumpProject();
     // await writeTextFile(selectedPath, data);
-    const data = await dumpProject2();
+    const data = await dumpProject();
     await writeFile(selectedPath, data);
     console.log('project saved to:', selectedPath);
 
@@ -61,4 +61,18 @@ export async function saveProject(name?: string, existingPath?: string) {
   } else {
     console.log('save cancelled');
   }
+}
+
+export const thumbnailDir = async () => (await appDataDir()) + '\\sledge\\thumbnails\\';
+export const thumbnailPath = async (fileId: string) => (await appDataDir()) + '\\sledge\\thumbnails\\' + fileId;
+
+export async function saveThumbnailExternal(fileId: string, dataUrl: string): Promise<string> {
+  const dir = (await appDataDir()) + '\\sledge\\thumbnails\\';
+  if (!(await exists(dir))) {
+    await mkdir(dir, { recursive: true });
+  }
+  const path = `${dir}${fileId}.png`;
+  const bytes = dataUrlToBytes(dataUrl);
+  await writeFile(path, bytes);
+  return path;
 }

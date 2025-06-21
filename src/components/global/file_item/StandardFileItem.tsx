@@ -1,7 +1,7 @@
 import { Component, Show } from 'solid-js';
 import { rfsItem, rfsName, rfsPath, rfsThumb } from '~/styles/components/file_item/standard.css';
 import { flexRow } from '~/styles/snippets.css';
-import { Consts } from '~/utils/consts';
+import { Consts } from '~/utils/Consts';
 import { FileItemProps } from './FileItemBase';
 
 const StandardFileItem: Component<FileItemProps> = (props) => {

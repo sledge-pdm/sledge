@@ -1,7 +1,7 @@
 import { readFile } from '@tauri-apps/plugin-fs';
 import { Packr } from 'msgpackr';
-import { Project } from '~/io/project/dump';
-import { loadProjectJson2 } from '~/io/project/load';
+import { loadProjectJson } from '~/io/project/in/load';
+import { Project } from '~/io/project/out/dump';
 
 // called when projectstore load
 export async function importProjectFromPath(filePath: string) {
@@ -18,5 +18,5 @@ export async function importProjectFromPath(filePath: string) {
   const project = packr.unpack(projectBin) as Project;
   // project.imagePoolStore.entries = new ReactiveMap(Object.entries(project.imagePoolStore.entries));
   // project.layerBuffers = new Map(Object.entries(project.layerBuffers));
-  loadProjectJson2(project);
+  loadProjectJson(project);
 }

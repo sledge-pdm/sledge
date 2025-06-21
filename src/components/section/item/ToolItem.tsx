@@ -5,7 +5,7 @@ import { setActiveToolType, setToolSize } from '~/controllers/tool/ToolControlle
 import { vars } from '~/styles/global.css';
 import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/pen.css';
 import { Tool, ToolType } from '~/tools/Tools';
-import { Consts } from '~/utils/consts';
+import { Consts } from '~/utils/Consts';
 
 interface Props {
   toolType: ToolType;

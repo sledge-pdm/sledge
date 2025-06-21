@@ -8,6 +8,8 @@ export const Consts = {
   maxLayerSize: 64,
 
   projectThumbnailSize: 500,
+
+  globalConfigFileName: 'global.sledgeconfig'
 };
 
 export type KeyConfigCommands = 'undo' | 'redo' | 'pen' | 'eraser' | 'fill';

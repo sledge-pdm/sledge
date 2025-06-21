@@ -1,7 +1,7 @@
 import { Theme } from '@tauri-apps/api/window';
 import { Component } from 'solid-js';
 import Dropdown from '~/components/common/control/Dropdown';
-import { saveGlobalSettings } from '~/io/global_config/globalSettings';
+import { saveGlobalSettings } from '~/io/config/out/save';
 import { themeOptions } from '~/models/config/GlobalConfig';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 

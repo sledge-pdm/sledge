@@ -1,5 +1,7 @@
-import { readTextFile } from '@tauri-apps/plugin-fs';
-import { loadProjectJson } from '~/io/project/load';
+import { readFile } from '@tauri-apps/plugin-fs';
+import { Packr } from 'msgpackr';
+import { Project } from '~/io/project/dump';
+import { loadProjectJson2 } from '~/io/project/load';
 
 // called when projectstore load
 export async function importProjectFromPath(filePath: string) {
@@ -7,7 +9,14 @@ export async function importProjectFromPath(filePath: string) {
     console.log('file not selected');
     return;
   }
-  const jsonText = await readTextFile(filePath);
+  // const jsonText = await readTextFile(filePath);
 
-  loadProjectJson(jsonText);
+  // loadProjectJson(jsonText);
+
+  const projectBin = await readFile(filePath);
+  let packr = new Packr({ useRecords: true, mapsAsObjects: false });
+  const project = packr.unpack(projectBin) as Project;
+  // project.imagePoolStore.entries = new ReactiveMap(Object.entries(project.imagePoolStore.entries));
+  // project.layerBuffers = new Map(Object.entries(project.layerBuffers));
+  loadProjectJson2(project);
 }

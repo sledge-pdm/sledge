@@ -12,7 +12,7 @@ export const sideAreaRoot = style([
 
 export const sideAreaMenu = style([
   {
-    paddingTop: '12px',
+    paddingTop: '36px',
     paddingLeft: '36px',
     paddingRight: '30px',
   },

@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { vars } from '~/styles/global.css';
 
 const fadeBase = style({
   pointerEvents: 'none',
@@ -12,7 +13,7 @@ export const fadeTop = style([
   fadeBase,
   {
     top: 0,
-    background: 'linear-gradient(to bottom, rgb(255, 255, 255), transparent)',
+    background: `linear-gradient(to bottom, ${vars.color.background}, transparent)`,
   },
 ]);
 
@@ -20,6 +21,6 @@ export const fadeBottom = style([
   fadeBase,
   {
     bottom: 0,
-    background: 'linear-gradient(to top, rgb(255, 255, 255), transparent)',
+    background: `linear-gradient(to top, ${vars.color.background}, transparent)`,
   },
 ]);

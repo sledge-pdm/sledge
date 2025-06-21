@@ -1,3 +1,4 @@
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from './image/LayerImageAgent';
 
 export class LayerAgentManager {
@@ -16,5 +17,6 @@ export class LayerAgentManager {
 
 export const layerAgentManager = new LayerAgentManager();
 
+export const getActiveAgent = () => layerAgentManager.getAgent(activeLayer().id);
 export const getAgentOf = (layerId: string) => layerAgentManager.getAgent(layerId);
 export const getBufferOf = (layerId: string) => layerAgentManager.getAgent(layerId)?.getBuffer();

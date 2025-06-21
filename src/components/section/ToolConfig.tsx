@@ -1,6 +1,7 @@
 import { Component, For } from 'solid-js';
 import { toolStore } from '~/stores/EditorStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
+import { ToolType } from '~/tools/Tools';
 import ToolItem from './item/ToolItem';
 
 const ToolConfig: Component = () => {
@@ -8,7 +9,9 @@ const ToolConfig: Component = () => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>tools.</p>
       <div class={sectionContent}>
-        <For each={toolStore.tools}>{(item, index) => <ToolItem tool={item} isInUse={index() === toolStore.usingIndex} />}</For>
+        <For each={Object.entries(toolStore.tools)}>
+          {([toolType, tool], index) => <ToolItem toolType={toolType as ToolType} tool={tool} isInUse={toolType === toolStore.activeType} />}
+        </For>
       </div>
     </div>
   );

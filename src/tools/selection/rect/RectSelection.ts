@@ -1,6 +1,7 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RectFragment, SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionManager';
-import { ToolArgs, ToolBehavior } from '~/tools/ToolBase';
+import ToolArgs from '~/tools/ToolArgs';
+import ToolBehavior from '~/tools/ToolBehavior';
 import { Vec2 } from '~/types/Vector';
 
 export class RectSelection implements ToolBehavior {

@@ -1,7 +1,8 @@
 import { setCurrentColor } from '~/controllers/color/ColorController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import ToolArgs from '~/tools/ToolArgs';
+import ToolBehavior from '~/tools/ToolBehavior';
 import { RGBAColor, RGBToHex, transparent } from '~/utils/ColorUtils';
-import { ToolArgs, ToolBehavior } from '../ToolBase';
 
 export class PipetteTool implements ToolBehavior {
   private color: RGBAColor = transparent;

@@ -110,7 +110,9 @@ const CanvasOverlaySVG: Component = (props) => {
   });
 
   createEffect(() => {
-    const half = Math.floor(getCurrentTool().size / 2);
+    const currentTool = getCurrentTool();
+    const toolSize = currentTool.size ?? 0 
+    const half = Math.floor(toolSize / 2);
     let x = Math.floor(interactStore.lastMouseOnCanvas.x) - half;
     let y = Math.floor(interactStore.lastMouseOnCanvas.y) - half;
     let size = 1 + half * 2; // -half ~ half

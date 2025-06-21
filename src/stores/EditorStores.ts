@@ -2,8 +2,7 @@
 import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
 import { RenderMode } from '~/models/layer/RenderMode';
-import { Tool, ToolType } from '~/models/tool/Tool';
-import { createTool } from '~/models/tool/ToolFactory';
+import { defaultTools, Tool, ToolType } from '~/tools/Tools';
 import { Size2D } from '~/types/Size';
 import { Vec2 } from '~/types/Vector';
 
@@ -36,9 +35,9 @@ type LogStore = {
   currentRenderMode: RenderMode;
   bottomBarText: string;
 };
-type ToolStore = {
-  usingIndex: number;
-  tools: Tool[];
+export type ToolStore = {
+  tools: { [toolType: string]: Tool };
+  activeType: ToolType;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
@@ -71,15 +70,8 @@ const defaultLogStore: LogStore = {
   bottomBarText: '',
 };
 const defaultToolStore: ToolStore = {
-  usingIndex: 0,
-  tools: [
-    createTool(ToolType.Pen, 'pen', 1),
-    createTool(ToolType.Eraser, 'eraser', 1),
-    createTool(ToolType.Fill, 'fill', 1),
-    createTool(ToolType.Pipette, 'pipette', 1),
-    createTool(ToolType.RectSelection, 'rect select', 1),
-    createTool(ToolType.Move, 'move', 1),
-  ],
+  tools: defaultTools,
+  activeType: ToolType.Pen,
 };
 
 export const initEditorStore = () => {

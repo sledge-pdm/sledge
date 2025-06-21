@@ -24,6 +24,8 @@ export async function burndownToLayer({ entry, targetLayerId }: ImageBurndownPar
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(bitmap, 0, 0, w, h);
 
+  bitmap.close();
+
   const { data: srcBuf } = ctx.getImageData(0, 0, w, h);
 
   /* 2) レイヤーピクセルバッファへ行コピー */

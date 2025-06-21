@@ -13,6 +13,7 @@ export const initProjectWithNewImage = async (filePath: string, fileName: string
   });
 
   const imageBuffer = await loadImageBuffer(imageBitmap); // ここで画像のバッファを読み込み
+  imageBitmap.close();
 
   const initLayer = addLayer({
     enabled: true,
@@ -24,5 +25,5 @@ export const initProjectWithNewImage = async (filePath: string, fileName: string
   });
 
   const agent = getAgentOf(initLayer.id);
-  agent?.setBuffer(new Uint8ClampedArray(imageBuffer), false, true);
+  agent?.setBuffer(Uint8ClampedArray.from(imageBuffer), false, true);
 };

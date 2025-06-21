@@ -1,7 +1,7 @@
-import { TileIndex } from '~/types/Tile';
+import { TileIndex } from '~/models/types/Tile';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
-import { Vec2 } from '../../types/Vector';
+import { Vec2 } from '../types/Vector';
 
 export type PixelDiff = {
   kind: 'pixel';

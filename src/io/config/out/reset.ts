@@ -1,6 +1,6 @@
 import { BaseDirectory, mkdir, writeTextFile } from '@tauri-apps/plugin-fs';
+import { Consts } from '~/models/Consts';
 import { initGlobalStore } from '~/stores/GlobalStores';
-import { Consts } from '~/utils/Consts';
 
 export async function resetToDefaultConfig() {
   try {

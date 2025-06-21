@@ -1,6 +1,6 @@
-import { Size2D } from '~/types/Size';
-import Tile, { TileIndex } from '~/types/Tile';
-import { Vec2 } from '~/types/Vector';
+import { Size2D } from '~/models/types/Size';
+import Tile, { TileIndex } from '~/models/types/Tile';
+import { Vec2 } from '~/models/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 
 export default class TileManager {

@@ -2,14 +2,14 @@ import { onMount } from 'solid-js';
 import ThemeToggle from '~/components/common/ThemeToggle';
 import RecentFileList from '~/components/global/RecentFileList';
 import { addRecentFile } from '~/controllers/config/GlobalConfigController';
+import loadGlobalSettings from '~/io/config/in/load';
 import { openProjectFile } from '~/io/project/open/open';
+import { FileLocation } from '~/models/types/FileLocation';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { getTheme } from '~/stores/Theme';
-import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import { getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
-import loadGlobalSettings from '~/io/config/in/load';
 
 export default function Home() {
   onMount(async () => {

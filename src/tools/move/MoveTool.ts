@@ -1,8 +1,7 @@
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
-import ToolArgs from '~/tools/ToolArgs';
-import ToolBehavior from '~/tools/ToolBehavior';
-import { Vec2 } from '~/types/Vector';
+import { Vec2 } from '~/models/types/Vector';
+import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class MoveTool implements ToolBehavior {
   private startOffset: Vec2 = { x: 0, y: 0 };

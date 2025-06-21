@@ -1,6 +1,6 @@
-import { BaseDirectory, mkdir, writeTextFile } from "@tauri-apps/plugin-fs";
-import { getGlobalRootStore } from "~/stores/GlobalStores";
-import { Consts } from "~/utils/Consts";
+import { BaseDirectory, mkdir, writeTextFile } from '@tauri-apps/plugin-fs';
+import { Consts } from '~/models/Consts';
+import { getGlobalRootStore } from '~/stores/GlobalStores';
 
 export async function saveGlobalSettings() {
   try {

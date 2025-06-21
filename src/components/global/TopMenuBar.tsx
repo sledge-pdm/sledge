@@ -1,8 +1,8 @@
 import * as styles from '@styles/globals/top_menu_bar.css';
 import { Component, createEffect, createSignal, For } from 'solid-js';
+import ExportImageDialog from '~/components/dialogs/ExportImage';
 import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
 import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
-import ExportImageDialog from '~/dialogs/ExportImage';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {

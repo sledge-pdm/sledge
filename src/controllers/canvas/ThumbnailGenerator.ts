@@ -1,8 +1,8 @@
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import { Consts } from '~/models/Consts';
+import { Size2D } from '~/models/types/Size';
 import { canvasStore } from '~/stores/ProjectStores';
-import { Size2D } from '~/types/Size';
-import { Consts } from '~/utils/Consts';
 
 export function calcThumbnailSize(origW: number, origH: number): Size2D {
   return calcFitSize(origW, origH, Consts.projectThumbnailSize, Consts.projectThumbnailSize);

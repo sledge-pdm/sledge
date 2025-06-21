@@ -26,7 +26,7 @@ export const menuListLeft = style([
   flexRow,
   {
     flexGrow: 1,
-    paddingLeft: '24px',
+    paddingLeft: '26px',
     gap: vars.spacing.xs,
   },
 ]);
@@ -45,7 +45,7 @@ export const menuItem = style([
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '24px',
+    height: '26px',
   },
 ]);
 
@@ -58,7 +58,7 @@ export const menuItemText = style([
     alignContent: 'center',
     textAlign: 'center',
     width: '100%',
-    height: '28px',
+    height: '30px',
     marginLeft: '12px',
     marginRight: '12px',
   },
@@ -71,7 +71,7 @@ export const menuItemBackground = style([
     alignItems: 'center',
     left: 0,
     right: 0,
-    height: '24px',
+    height: '26px',
     // opacity: 0.1,
     // backgroundColor: vars.color.accent,
     zIndex: -1,

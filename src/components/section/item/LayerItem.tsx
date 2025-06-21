@@ -1,6 +1,6 @@
 import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSortable, transformStyle, useDragDropContext } from '@thisbeyond/solid-dnd';
-import { Component, onMount } from 'solid-js';
+import { Component } from 'solid-js';
 import Icon from '~/components/common/Icon';
 import Light from '~/components/common/Light';
 import { Layer } from '~/models/layer/Layer';
@@ -34,15 +34,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
   };
-
-  onMount(() => {
-    if (nameParagraphRef) {
-      const size = 16 / Math.floor(nameParagraphRef?.scrollHeight / 24);
-
-      nameParagraphRef.style.fontSize = `${size}px`;
-    }
-  });
-
   const isActive = () => layerListStore.activeLayerId === props.layer.id;
 
   return (
@@ -89,7 +80,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               nameParagraphRef = ref;
             }}
             class={layerItemName}
-            style={{ 'font-size': '16px' }}
           >
             {props.layer.name}
           </p>

@@ -1,6 +1,6 @@
 import { saveGlobalSettings } from '~/io/config/out/save';
+import { FileLocation } from '~/models/types/FileLocation';
 import { setGlobalConfig } from '~/stores/GlobalStores';
-import { FileLocation } from '~/types/FileLocation';
 
 export const addRecentFile = (fileLocation?: FileLocation) => {
   if (!fileLocation) return;

@@ -1,7 +1,7 @@
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
 import { PixelDiff } from '~/models/history/HistoryManager';
-import { TileIndex } from '~/types/Tile';
-import { Vec2 } from '~/types/Vector';
+import { TileIndex } from '~/models/types/Tile';
+import { Vec2 } from '~/models/types/Vector';
 import { colorMatch } from '~/utils/ColorUtils';
 import { Fill, FillProps } from './FillTool';
 

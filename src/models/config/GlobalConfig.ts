@@ -1,6 +1,6 @@
 import { Theme } from '~/models/config/types/Theme';
-import { FileLocation } from '~/types/FileLocation';
-import { Consts } from '~/utils/Consts';
+import { Consts } from '~/models/Consts';
+import { FileLocation } from '~/models/types/FileLocation';
 import { CanvasRenderingMode } from '../canvas/Canvas';
 import { ConfigComponentName } from './ConfigComponents';
 

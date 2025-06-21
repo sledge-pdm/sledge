@@ -1,7 +1,7 @@
-import { BaseDirectory, readTextFile } from "@tauri-apps/plugin-fs";
-import { defaultConfig } from "~/models/config/GlobalConfig";
-import { defaultLastSettingsStore, loadGlobalStore, makeDefaultKeyConfigStore } from "~/stores/GlobalStores";
-import { Consts } from "~/utils/Consts";
+import { BaseDirectory, readTextFile } from '@tauri-apps/plugin-fs';
+import { defaultConfig } from '~/models/config/GlobalConfig';
+import { Consts } from '~/models/Consts';
+import { defaultLastSettingsStore, loadGlobalStore, makeDefaultKeyConfigStore } from '~/stores/GlobalStores';
 
 export default async function loadGlobalSettings() {
   try {

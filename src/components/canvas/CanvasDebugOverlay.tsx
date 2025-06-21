@@ -1,8 +1,7 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
-import { RenderMode } from '~/models/layer/RenderMode';
-import { interactStore, logStore } from '~/stores/EditorStores';
+import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { flexCol } from '~/styles/snippets.css';
@@ -91,7 +90,6 @@ const CanvasDebugOverlay: Component = (props) => {
           <p>
             selection size:({selectionWidth()}, {selectionHeight()})
           </p>
-          <p>canvas render mode: {RenderMode[logStore.currentRenderMode]}</p>
         </div>
       </div>
 

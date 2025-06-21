@@ -1,6 +1,6 @@
 import { getReferencedZoom } from '~/controllers/canvas/CanvasController';
+import { Vec2 } from '~/models/types/Vector';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { Vec2 } from '~/types/Vector';
 
 class CanvasAreaInteract {
   private pointers = new Map<number, Vec2>();

@@ -1,13 +1,13 @@
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
+import { Size2D } from '~/models/types/Size';
+import { TileIndex } from '~/models/types/Tile';
+import { Vec2 } from '~/models/types/Vector';
 import { globalConfig } from '~/stores/GlobalStores';
-import { Size2D } from '~/types/Size';
-import { TileIndex } from '~/types/Tile';
-import { Vec2 } from '~/types/Vector';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
+import PixelBufferManager from '../PixelBufferManager';
 import DiffManager from './DiffManager';
-import PixelBufferManager from './PixelBufferManager';
 import TileManager from './TileManager';
 
 // それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス

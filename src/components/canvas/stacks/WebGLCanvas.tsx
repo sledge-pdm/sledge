@@ -2,7 +2,6 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createSignal, onCleanup } from 'solid-js';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
-import { RenderMode } from '~/models/layer/RenderMode';
 import { interactStore, setLogStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -44,7 +43,6 @@ const WebGLCanvas: Component = () => {
   listenEvent('onSetup', () => {
     const { width, height } = canvasStore.canvas;
 
-    setLogStore('currentRenderMode', RenderMode.WebGL);
     startRenderLoop();
     webGLRenderer = new WebGLRenderer(canvasEl);
     webGLRenderer.resize(width, height);

@@ -1,4 +1,4 @@
-import { FileLocation } from '~/types/FileLocation';
+import { FileLocation } from '~/models/types/FileLocation';
 
 export interface FileItemProps {
   thumbnail: string;

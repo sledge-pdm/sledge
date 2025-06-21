@@ -1,10 +1,9 @@
 // editorStore.tsx
 import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
-import { RenderMode } from '~/models/layer/RenderMode';
+import { Size2D } from '~/models/types/Size';
+import { Vec2 } from '~/models/types/Vector';
 import { defaultTools, Tool, ToolType } from '~/tools/Tools';
-import { Size2D } from '~/types/Size';
-import { Vec2 } from '~/types/Vector';
 
 type SideAppearanceMode = 'editor' | 'project';
 type AppearanceStore = {
@@ -32,7 +31,6 @@ type InteractStore = {
   isDragging: boolean;
 };
 type LogStore = {
-  currentRenderMode: RenderMode;
   bottomBarText: string;
 };
 export type ToolStore = {
@@ -66,7 +64,6 @@ const defaultInteractStore: InteractStore = {
   isDragging: false,
 };
 const defaultLogStore: LogStore = {
-  currentRenderMode: RenderMode.None,
   bottomBarText: '',
 };
 const defaultToolStore: ToolStore = {

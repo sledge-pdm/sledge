@@ -1,13 +1,13 @@
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
+import { Vec2 } from '~/models/types/Vector';
 import { ToolArgs } from '~/tools/ToolBehavior';
-import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
-import { DrawState } from '../../types/DrawState';
+import { DrawState } from '../../models/types/DrawState';
 import { currentColor } from '../color/ColorController';
 import { Tool } from '../tool/Tool';
 

@@ -1,7 +1,7 @@
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import LayerImageAgent from './image/LayerImageAgent';
+import LayerImageAgent from './image/managers/LayerImageAgent';
 import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
 import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 

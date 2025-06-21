@@ -1,5 +1,5 @@
 import { Diff, DiffAction, getDiffHash } from '~/models/history/HistoryManager';
-import { Vec2 } from '~/types/Vector';
+import { Vec2 } from '~/models/types/Vector';
 
 export default class DiffManager {
   private currentDiffAction: DiffAction;

@@ -3,7 +3,7 @@ import { ReactiveMap } from '@solid-primitives/map';
 import { createStore } from 'solid-js/store';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Layer } from '~/models/layer/Layer';
-import { Size2D } from '~/types/Size';
+import { Size2D } from '~/models/types/Size';
 
 export type CanvasStore = {
   canvas: Size2D;

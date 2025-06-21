@@ -2,8 +2,8 @@
 
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import SelectionMask from '~/controllers/selection/SelectionMask';
-import { TileIndex } from '~/types/Tile';
-import { Vec2 } from '~/types/Vector';
+import { TileIndex } from '~/models/types/Tile';
+import { Vec2 } from '~/models/types/Vector';
 import { eventBus } from '~/utils/EventBus';
 
 export type PixelFragment = {

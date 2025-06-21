@@ -11,7 +11,7 @@ import {
   titleBarRoot,
   titleBarTitle,
 } from '~/styles/globals/title_bar.css';
-import '~/styles/tile_bar_region.css';
+import '~/styles/globals/title_bar_region.css';
 import Icon from '../common/Icon';
 
 export default function TitleBar() {

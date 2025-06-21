@@ -95,7 +95,7 @@ const CanvasDebugOverlay: Component = (props) => {
 
       <Show when={globalConfig.debug.showPerfMonitor}>
         <div class={canvasDebugOverlayBottomLeft}>
-          <div class={flexCol}>
+          <div class={flexCol} style={{ gap: '1px' }}>
             <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>
             <p>CHILDREN: {toMiB(processMemInfo()?.children_bytes)}</p>
             <p>TOTAL: {toMiB(processMemInfo()?.total_bytes)}</p>
@@ -111,7 +111,7 @@ const CanvasDebugOverlay: Component = (props) => {
               interval={1000}
             />
           </div>
-          <div class={flexCol}>
+          <div class={flexCol} style={{ gap: '1px' }}>
             <p>
               JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
             </p>

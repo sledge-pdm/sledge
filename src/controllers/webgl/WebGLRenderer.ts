@@ -110,8 +110,8 @@ export class WebGLRenderer {
         dirtyTiles.forEach((tile) => {
           // 差分アップデート
           const { x: ox, y: oy } = tile.getOffset();
-          const w = Math.min(this.width - ox, tile.globalTileSize);
-          const h = Math.min(this.height - oy, tile.globalTileSize);
+          const w = Math.min(this.width - ox, tile.size);
+          const h = Math.min(this.height - oy, tile.size);
 
           const tileByteLength = w * h * 4;
           const tileBuffer = new Uint8Array(tileByteLength);

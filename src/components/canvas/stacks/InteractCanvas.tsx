@@ -73,7 +73,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (!isDrawableClick(e)) return;
 
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.start, position, lastPos());
+    props.operator.handleDraw(DrawState.start, e, position, lastPos());
     setInteractStore('isInStroke', true);
     setLastPos(position);
   }
@@ -98,13 +98,13 @@ export const InteractCanvas: Component<Props> = (props) => {
     }
     if (!interactStore.isInStroke || !lastPos()) return;
 
-    props.operator.handleDraw(DrawState.move, position, lastPos());
+    props.operator.handleDraw(DrawState.move, e, position, lastPos());
     setLastPos(position);
   }
 
   function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.end, position, lastPos());
+    props.operator.handleDraw(DrawState.end, e, position, lastPos());
     if (interactStore.isInStroke) endStroke(position);
   }
 
@@ -116,7 +116,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     if (interactStore.isDragging && isDrawableClick(e)) {
       const position = getCanvasMousePosition(e);
-      props.operator.handleDraw(DrawState.move, position, lastPos());
+      props.operator.handleDraw(DrawState.move, e, position, lastPos());
       setTemporaryOut(true);
     }
   }

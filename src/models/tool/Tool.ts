@@ -1,7 +1,12 @@
+import { ToolBehavior } from '~/tools/ToolBase';
+
 export enum ToolType {
   Pen = 'pen',
   Eraser = 'eraser',
   Fill = 'fill',
+  Pipette = 'pipette',
+  RectSelection = 'rectSelection',
+  Move = 'move',
 }
 
 export type Tool = {
@@ -9,4 +14,6 @@ export type Tool = {
   id: string;
   name: string;
   size: number;
+
+  behavior: ToolBehavior;
 };

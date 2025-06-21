@@ -30,6 +30,7 @@ const SideSections: Component = () => {
   return (
     <div class={sideAreaRoot}>
       <div class={sideAreaMenu}>
+        <Project />
         <SectionTopMenu />
       </div>
       <div class={h100} style={{ position: 'relative' }}>
@@ -52,7 +53,6 @@ const SideSections: Component = () => {
               height: appearanceStore.sideAppearanceMode !== 'project' ? '0' : undefined,
             }}
           >
-            <Project />
             <CanvasSettings />
           </div>
         </div>

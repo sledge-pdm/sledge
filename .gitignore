@@ -34,3 +34,5 @@ repomix-output.xml
 /.vscode
 
 *.heapprofile
+
+*.sledge

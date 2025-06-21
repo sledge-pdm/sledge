@@ -6,6 +6,7 @@ export const toolConfigRow = style([
   flexRow,
   w100,
   {
+    height: '32px',
     gap: vars.spacing.md,
     alignItems: 'center',
   },
@@ -23,6 +24,7 @@ export const toolConfigRowClickable = style([
 
 export const toolConfigRowName = style({
   cursor: 'pointer',
+  width: '50px',
   fontSize: vars.text.sm,
   padding: `${vars.spacing.md} 0`,
 });

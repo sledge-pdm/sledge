@@ -3,18 +3,18 @@ import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
+import { ToolArgs } from '~/tools/ToolBase';
 import { Vec2 } from '~/types/Vector';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import { Tool } from '../../models/tool/Tool';
-import { getToolInstance } from '../../tools/ToolBase';
 import { DrawState } from '../../types/DrawState';
 import { currentColor } from '../color/ColorController';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
 
-  public handleDraw(state: DrawState, position: Vec2, last?: Vec2) {
+  public handleDraw(state: DrawState, originalEvent: PointerEvent, position: Vec2, last?: Vec2) {
     const agent = getAgentOf(this.getLayerIdToDraw());
     if (!agent) return;
     const layer = findLayerById(this.getLayerIdToDraw());
@@ -25,7 +25,7 @@ export default class LayerCanvasOperator {
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
-    const result = this.useTool(agent, state, image, getCurrentTool(), position, last);
+    const result = this.useTool(agent, state, originalEvent, image, getCurrentTool(), position, last);
 
     if (result) {
       // agent.callOnImageChangeListeners({ updatePreview: state === DrawState.end });
@@ -37,28 +37,36 @@ export default class LayerCanvasOperator {
     }
   }
 
-  private useTool(agent: LayerImageAgent, state: DrawState, image: Uint8ClampedArray, tool: Tool, position: Vec2, last?: Vec2) {
-    const toolInstance = getToolInstance(tool.type);
-    const toolArgs = {
-      image,
+  private useTool(
+    agent: LayerImageAgent,
+    state: DrawState,
+    originalEvent: PointerEvent,
+    image: Uint8ClampedArray,
+    tool: Tool,
+    position: Vec2,
+    last?: Vec2
+  ) {
+    const toolArgs: ToolArgs = {
       position,
       lastPosition: last,
       size: tool.size,
       color: hexToRGBA(currentColor()),
+      event: originalEvent,
     };
     const startTime = Date.now();
     let isDrawnAction;
     switch (state) {
       case DrawState.start:
-        const isDrawnActionInStart = toolInstance.onStart(agent, toolArgs);
-        const isDrawnActionInMove = toolInstance.onMove(agent, toolArgs);
-        isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
+        isDrawnAction = tool.behavior.onStart(agent, toolArgs);
+        // const isDrawnActionInStart = tool.behavior.onStart(agent, toolArgs);
+        // const isDrawnActionInMove = tool.behavior.onMove(agent, toolArgs);
+        // isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
         break;
       case DrawState.move:
-        isDrawnAction = toolInstance.onMove(agent, toolArgs);
+        isDrawnAction = tool.behavior.onMove(agent, toolArgs);
         break;
       case DrawState.end:
-        isDrawnAction = toolInstance.onEnd(agent, toolArgs);
+        isDrawnAction = tool.behavior.onEnd(agent, toolArgs);
         break;
     }
     const endTime = Date.now();

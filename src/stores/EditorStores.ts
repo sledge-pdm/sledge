@@ -72,7 +72,14 @@ const defaultLogStore: LogStore = {
 };
 const defaultToolStore: ToolStore = {
   usingIndex: 0,
-  tools: [createTool(ToolType.Pen, 'pen', 1), createTool(ToolType.Eraser, 'eraser', 1), createTool(ToolType.Fill, 'fill', 1)],
+  tools: [
+    createTool(ToolType.Pen, 'pen', 1),
+    createTool(ToolType.Eraser, 'eraser', 1),
+    createTool(ToolType.Fill, 'fill', 1),
+    createTool(ToolType.Pipette, 'pipette', 1),
+    createTool(ToolType.RectSelection, 'rect select', 1),
+    createTool(ToolType.Move, 'move', 1),
+  ],
 };
 
 export const initEditorStore = () => {

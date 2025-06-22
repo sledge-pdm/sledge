@@ -1,5 +1,5 @@
-import { FieldMeta } from "~/models/config/GlobalConfig";
-import { Sections } from "~/models/config/Sections";
+import { FieldMeta } from '~/models/config/GlobalConfig';
+import { Sections } from '~/models/config/Sections';
 
 export const editorMetas: FieldMeta[] = [
   {

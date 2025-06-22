@@ -5,6 +5,7 @@ import { resetToDefaultConfig } from '~/io/config/out/reset';
 import { saveGlobalSettings } from '~/io/config/out/save';
 import { componentProps } from '~/models/config/ConfigComponents';
 import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
+import { Sections } from '~/models/config/Sections';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import {
   configFormFieldControlLabel,
@@ -32,7 +33,6 @@ import Slider from '../../common/control/Slider';
 import ToggleSwitch from '../../common/control/ToggleSwitch';
 import Light from '../../common/Light';
 import KeyConfigSettings from './KeyConfigSettings';
-import { Sections } from '~/models/config/Sections';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
 

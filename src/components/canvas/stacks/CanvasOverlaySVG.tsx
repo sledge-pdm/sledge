@@ -4,7 +4,6 @@ import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 
 import { maskToPath } from '~/controllers/selection/OutlineExtructor';
 import { PathCmdList } from '~/controllers/selection/PathCommand';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
-import { BoundBox } from '~/controllers/selection/SelectionMask';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';

@@ -1,4 +1,3 @@
-
 import { FieldMeta } from '~/models/config/GlobalConfig';
 import { Sections } from '~/models/config/Sections';
 import { themeOptions } from '~/models/config/types/Theme';

@@ -4,6 +4,7 @@ import { PaletteType } from '~/models/color/PaletteType';
 import { Size2D } from '~/models/types/Size';
 import { Vec2 } from '~/models/types/Vector';
 import { defaultTools, Tool, ToolType } from '~/tools/Tools';
+import { RGBAColor } from '~/utils/ColorUtils';
 
 type SideAppearanceMode = 'editor' | 'project';
 type AppearanceStore = {
@@ -19,6 +20,7 @@ type InteractStore = {
   canvasAreaSize: Size2D;
   lastMouseWindow: Vec2;
   lastMouseOnCanvas: Vec2;
+  isMouseOnCanvas: boolean;
   isInStroke: boolean;
   zoom: number;
   zoomMin: number;
@@ -27,7 +29,6 @@ type InteractStore = {
   wheelZoomStep: number;
   offsetOrigin: Vec2;
   offset: Vec2;
-
   isDragging: boolean;
 };
 type LogStore = {
@@ -36,6 +37,7 @@ type LogStore = {
 export type ToolStore = {
   tools: { [toolType: string]: Tool };
   activeType: ToolType;
+  prevActiveType: ToolType | undefined;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
@@ -51,6 +53,7 @@ const defaultInteractStore: InteractStore = {
   canvasAreaSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
+  isMouseOnCanvas: false,
   isInStroke: false,
   zoom: 1,
   zoomMin: 0.5,
@@ -69,6 +72,7 @@ const defaultLogStore: LogStore = {
 const defaultToolStore: ToolStore = {
   tools: defaultTools,
   activeType: ToolType.Pen,
+  prevActiveType: undefined,
 };
 
 export const initEditorStore = () => {

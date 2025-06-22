@@ -4,12 +4,13 @@ import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent'
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/models/types/Vector';
+import { interactStore } from '~/stores/EditorStores';
 import { ToolArgs } from '~/tools/ToolBehavior';
+import { Tool } from '~/tools/Tools';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import { DrawState } from '../../models/types/DrawState';
 import { currentColor } from '../color/ColorController';
-import { Tool } from '../tool/Tool';
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
@@ -24,6 +25,9 @@ export default class LayerCanvasOperator {
 
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
+
+    const tool = getCurrentTool();
+    if (tool.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
 
     const result = this.useTool(agent, state, originalEvent, image, getCurrentTool(), position, last);
 
@@ -71,7 +75,9 @@ export default class LayerCanvasOperator {
     }
     const endTime = Date.now();
     if (isDrawnAction) {
-      setBottomBarText(`${tool.type} finished. ${endTime - startTime} ms. (updated ${agent?.getTileManager().getDirtyTiles().length} dirty tiles)`);
+      setBottomBarText(
+        `${tool.familiarName} finished. ${endTime - startTime} ms. (updated ${agent?.getTileManager().getDirtyTiles().length} dirty tiles)`
+      );
     }
     return image;
   }

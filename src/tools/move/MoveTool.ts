@@ -4,6 +4,8 @@ import { Vec2 } from '~/models/types/Vector';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class MoveTool implements ToolBehavior {
+  onlyOnCanvas = false;
+  
   private startOffset: Vec2 = { x: 0, y: 0 };
   private startPosition: Vec2 = { x: 0, y: 0 };
 

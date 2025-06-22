@@ -18,6 +18,7 @@
     "@msgpack/msgpack": "^3.1.2",
     "@solid-primitives/deep": "^0.3.1",
     "@solid-primitives/map": "^0.7.1",
+    "@solid-primitives/mouse": "^2.1.2",
     "@solid-primitives/raf": "^2.3.1",
     "@solid-primitives/scheduled": "^1.5.1",
     "@solid-primitives/scroll": "^2.1.1",

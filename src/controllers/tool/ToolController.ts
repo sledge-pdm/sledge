@@ -1,9 +1,17 @@
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { defaultTools, Tool, ToolType } from '~/tools/Tools';
+import { defaultTools, ToolType } from '~/tools/Tools';
 
 export const getCurrentTool = () => toolStore.tools[toolStore.activeType] ?? defaultTools['pen'];
 
+export function getActiveToolType(): ToolType {
+  return toolStore.activeType;
+}
+export function getPrevActiveToolType(): ToolType | undefined {
+  return toolStore.prevActiveType;
+}
+
 export function setActiveToolType(toolType: ToolType) {
+  setToolStore('prevActiveType', toolStore.activeType);
   setToolStore('activeType', toolType);
 }
 

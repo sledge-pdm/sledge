@@ -2,13 +2,16 @@ import { Component, For } from 'solid-js';
 import ColorPicker from '~/components/section/item/ColorPicker';
 import ColorBox from '../common/ColorBox';
 
+import Icon from '~/components/common/Icon';
 import Palette from '~/components/section/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
+import { getActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
 import { vars, ZFB11 } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { colorElemDescription, swatchContainer } from '~/styles/section/color.css';
 import { flexCol, flexRow } from '~/styles/snippets.css';
+import { ToolType } from '~/tools/Tools';
 
 const Color: Component = () => {
   let hexInputRef: HTMLInputElement;
@@ -29,36 +32,56 @@ const Color: Component = () => {
         <div>
           <p class={colorElemDescription}>picker.</p>
         </div>
-        <div class={flexCol}>
-          <ColorPicker width={150} />
-          <div class={flexRow} style={{ 'align-items': 'center' }}>
-            <Palette />
-            <div class={flexCol} style={{ 'margin-left': vars.spacing.lg, gap: '1px', width: '100%', 'margin-top': vars.spacing.xs }}>
-              {/* <p style={{ 'font-family': ZFB11, 'font-size': '8px', opacity: 0.4 }}>color code.</p> */}
-              <div class={flexRow} style={{ height: 'fit-content', width: '100%', opacity: 0.9 }}>
-                <p style={{ 'font-size': vars.text.md }}>#</p>
-                <input
-                  ref={(el) => (hexInputRef = el)}
-                  // @ts-expect-error
-                  style={{ 'font-family': ZFB11, 'font-size': vars.text.md, 'field-sizing': 'content' }}
-                  maxLength={6}
-                  value={currentColor().substring(1)}
-                  onChange={(e) => {
-                    const s = e.target.value.toUpperCase();
-                    if (isValidHex(s)) {
-                      setCurrentColor(`#${s}`);
-                    }
-                  }}
-                  onInput={(e) => {
-                    const currentPosition = hexInputRef.selectionStart;
-                    hexInputRef.value = hexInputRef.value.toUpperCase();
-                    hexInputRef.selectionStart = currentPosition;
-                    hexInputRef.selectionEnd = currentPosition;
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+
+        <ColorPicker width={150} />
+      </div>
+
+      <div class={flexRow} style={{ 'align-items': 'center' }}>
+        <Palette />
+        {/* <p style={{ 'font-family': ZFB11, 'font-size': '8px', opacity: 0.4 }}>color code.</p> */}
+
+        <div class={flexRow} style={{ height: 'fit-content', 'margin-left': vars.spacing.lg, opacity: 0.9 }}>
+          <p style={{ 'font-size': vars.text.md }}>#</p>
+          <input
+            ref={(el) => (hexInputRef = el)}
+            // @ts-expect-error
+            style={{ 'font-family': ZFB11, 'font-size': vars.text.md, 'field-sizing': 'content' }}
+            maxLength={6}
+            value={currentColor().substring(1)}
+            onChange={(e) => {
+              const s = e.target.value.toUpperCase();
+              if (isValidHex(s)) {
+                setCurrentColor(`#${s}`);
+              }
+            }}
+            onInput={(e) => {
+              const currentPosition = hexInputRef.selectionStart;
+              hexInputRef.value = hexInputRef.value.toUpperCase();
+              hexInputRef.selectionStart = currentPosition;
+              hexInputRef.selectionEnd = currentPosition;
+            }}
+          />
+        </div>
+
+        <div
+          class={flexCol}
+          style={{
+            width: '20px',
+            height: '20px',
+            'margin-left': vars.spacing.sm,
+            'align-items': 'center',
+            'justify-content': 'center',
+            cursor: 'pointer',
+            'pointer-events': 'all',
+          }}
+          onClick={() => setActiveToolType(ToolType.Pipette)}
+        >
+          <Icon
+            src={'/icons/tool/pipette.png'}
+            base={10}
+            scale={2}
+            color={getActiveToolType() === ToolType.Pipette ? vars.color.active : vars.color.onBackground}
+          />
         </div>
       </div>
     </div>

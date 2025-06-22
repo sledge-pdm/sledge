@@ -4,17 +4,24 @@ import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/se
 import { ToolType } from '~/tools/Tools';
 import ToolItem from './item/ToolItem';
 
-const ToolConfig: Component = () => {
+const showingTools: ToolType[] = [ToolType.Pen, ToolType.Eraser];
+
+const ToolList: Component = () => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>tools.</p>
       <div class={sectionContent}>
         <For each={Object.entries(toolStore.tools)}>
-          {([toolType, tool], index) => <ToolItem toolType={toolType as ToolType} tool={tool} isInUse={toolType === toolStore.activeType} />}
+          {([type, tool], index) => {
+            let toolType = type as ToolType;
+            if (showingTools.includes(toolType)) {
+              return <ToolItem toolType={toolType} tool={tool} isInUse={toolType === toolStore.activeType} />;
+            }
+          }}
         </For>
       </div>
     </div>
   );
 };
 
-export default ToolConfig;
+export default ToolList;

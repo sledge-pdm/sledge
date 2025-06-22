@@ -102,7 +102,7 @@ const Slider: Component<SliderProps> = (props) => {
         when={directInputMode()}
         fallback={
           <p
-          class={styles.valueLabel}
+            class={styles.valueLabel}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

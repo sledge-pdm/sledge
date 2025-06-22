@@ -1,4 +1,4 @@
-import { FieldMeta,} from '~/models/config/GlobalConfig';
+import { FieldMeta } from '~/models/config/GlobalConfig';
 import { Sections } from '~/models/config/Sections';
 
 export const performanceMetas: FieldMeta[] = [

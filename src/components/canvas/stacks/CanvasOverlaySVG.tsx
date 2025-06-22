@@ -140,7 +140,7 @@ const CanvasOverlaySVG: Component = (props) => {
           left: 0,
           'pointer-events': 'none',
           'shape-rendering': 'auto',
-          'z-index': 150,
+          'z-index': 450,
         }}
       >
         {/* border rect */}
@@ -196,7 +196,7 @@ const CanvasOverlaySVG: Component = (props) => {
           'transform-origin': '0 0',
           'image-rendering': 'auto',
           'pointer-events': 'all',
-          'z-index': 1000,
+          'z-index': 500,
           transform: `scale(${1 / interactStore.zoom})`,
         }}
       >
@@ -236,7 +236,7 @@ const CanvasOverlaySVG: Component = (props) => {
               'pointer-events': 'all',
               cursor: 'pointer',
             }}
-            onClick={() => {
+            onClick={(e) => {
               deletePixelInSelection();
             }}
           >

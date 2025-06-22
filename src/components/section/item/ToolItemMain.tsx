@@ -4,7 +4,7 @@ import Icon from '~/components/common/Icon';
 import { setActiveToolType, setToolSize } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { vars } from '~/styles/global.css';
-import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/pen.css';
+import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/tools.css';
 import { Tool, ToolType } from '~/tools/Tools';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
   isInUse: boolean;
 }
 
-const ToolItem: Component<Props> = (props: Props) => {
+const ToolItemMain: Component<Props> = (props: Props) => {
   return (
     <div class={toolConfigRow}>
       {/* <Light on={props.isInUse} /> */}
@@ -50,4 +50,4 @@ const ToolItem: Component<Props> = (props: Props) => {
   );
 };
 
-export default ToolItem;
+export default ToolItemMain;

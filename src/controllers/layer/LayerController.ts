@@ -67,8 +67,8 @@ export function getCurrentPointingColorHex(): string | undefined {
   if (!interactStore.lastMouseOnCanvas) return undefined;
   const agent = getActiveAgent();
   const color = agent?.getPixelBufferManager().getPixel({
-    x: Math.round(interactStore.lastMouseOnCanvas.x),
-    y: Math.round(interactStore.lastMouseOnCanvas.y),
+    x: Math.floor(interactStore.lastMouseOnCanvas.x),
+    y: Math.floor(interactStore.lastMouseOnCanvas.y),
   });
   if (color !== undefined) return `#${RGBAToHex(color)}`;
 

@@ -5,7 +5,7 @@ import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class RectSelection implements ToolBehavior {
   onlyOnCanvas = false;
-  
+
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   getMode(e?: PointerEvent) {

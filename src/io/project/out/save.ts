@@ -1,14 +1,14 @@
 import { path } from '@tauri-apps/api';
+import { appDataDir } from '@tauri-apps/api/path';
 import { save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
+import { addRecentFile } from '~/controllers/config/RecentFileController';
 import { dumpProject } from '~/io/project/out/dump';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import getFileId from '../../../utils/getFileId';
-import { appDataDir } from '@tauri-apps/api/path';
-import { addRecentFile } from '~/controllers/config/RecentFileController';
 
 async function folderSelection(name?: string) {
   try {

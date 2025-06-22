@@ -13,7 +13,6 @@ import { listenEvent } from '~/utils/TauriUtils';
 import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
-import { createPositionToElement, useMousePosition } from '@solid-primitives/mouse';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 
 export default () => {
@@ -90,7 +89,6 @@ export default () => {
         </div>
 
         <CanvasAreaOverlay />
-
       </div>
 
       <CanvasDebugOverlay />

@@ -9,7 +9,7 @@ export const Consts = {
 
   projectThumbnailSize: 500,
 
-  globalConfigFileName: 'global.sledgeconfig'
+  globalConfigFileName: 'global.sledgeconfig',
 };
 
 export type KeyConfigCommands = 'undo' | 'redo' | 'pen' | 'eraser' | 'fill';

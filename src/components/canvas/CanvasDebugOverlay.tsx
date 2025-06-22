@@ -72,18 +72,20 @@ const CanvasDebugOverlay: Component = (props) => {
 
   return (
     <>
-      <div class={canvasDebugOverlayTopLeft}>
-        <p>
-          canvas. <br />
-          ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y}) <br />
-          ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)}) <br />
-          offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)}) <br />
-          selection offset:({offsetX()}, {offsetY()}) <br />
-          selection size:({selectionWidth()}, {selectionHeight()}) <br />
-        </p>
-      </div>
+      <Show when={globalConfig.debug.showCanvasDebugOverlay}>
+        <div class={canvasDebugOverlayTopLeft}>
+          <p>
+            canvas. <br />
+            ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y}) <br />
+            ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)}) <br />
+            offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)}) <br />
+            selection offset:({offsetX()}, {offsetY()}) <br />
+            selection size:({selectionWidth()}, {selectionHeight()}) <br />
+          </p>
+        </div>
+      </Show>
 
-      <Show when={globalConfig.debug.showPerfMonitor}>
+      <Show when={globalConfig.debug.showPerformanceMonitor}>
         <div class={canvasDebugOverlayBottomLeft}>
           <div class={flexCol} style={{ gap: '1px' }}>
             <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>

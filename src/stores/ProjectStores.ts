@@ -41,7 +41,7 @@ const defaultProjectStore: ProjectStore = {
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),
   activeLayerId: '',
-  isImagePoolActive: false,
+  isImagePoolActive: true,
 };
 
 export const initProjectStore = () => {

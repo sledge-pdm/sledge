@@ -5,6 +5,10 @@ import { PenTool } from '../pen/PenTool';
 
 export class EraserTool extends PenTool {
   onlyOnCanvas = true;
+  
+  onStart(agent: LayerImageAgent, args: ToolArgs) {
+    return super.draw(agent, args, transparent);
+  }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
     return super.draw(agent, args, transparent);

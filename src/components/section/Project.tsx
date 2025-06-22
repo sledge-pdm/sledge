@@ -29,6 +29,10 @@ const Project: Component = () => {
     });
   };
 
+  const commitNewName = () => {
+    setProjectStore('name', newName());
+  };
+
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>project name.</p>
@@ -48,6 +52,9 @@ const Project: Component = () => {
             onChange={(e) => {
               if (e.target.value) setNewName(e.target.value);
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitNewName();
+            }}
             value={projectStore.name}
             placeholder='project name'
             autocomplete='off'
@@ -63,6 +70,9 @@ const Project: Component = () => {
             gap: vars.spacing.sm,
           }}
         >
+          <Show when={isNameChanged()}>
+            <button onClick={() => commitNewName()}>change name.</button>
+          </Show>
           <Show when={isOWPossible()}>
             <button
               onClick={() => OWSave()}

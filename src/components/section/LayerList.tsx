@@ -61,7 +61,7 @@ const LayerList: Component<{}> = () => {
     window.removeEventListener('pointercancel', cancelDrag);
     window.removeEventListener('pointerup', cancelDrag);
   });
-
+  
   return (
     <div class={sectionRoot}>
       <div class={flexRow} style={{ 'margin-bottom': '6px' }}>
@@ -142,7 +142,9 @@ const LayerList: Component<{}> = () => {
         >
           <DragDropSensors>
             <div class={layerList}>
+
               <ImagePoolItem />
+
               <SortableProvider ids={ids()}>
                 <For each={items()}>
                   {(layer, index) => {

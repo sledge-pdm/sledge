@@ -19,7 +19,7 @@ export const wrapper = style({
   maxWidth: '90vw',
   background: vars.color.background,
   borderRadius: vars.size.dialogRadius,
-  boxShadow: '0 2px 24px #FFFFFF20',
+  // boxShadow: '0 2px 24px #FFFFFF20',
   zIndex: 1001,
   overflow: 'visible',
 });

@@ -1,9 +1,9 @@
 // src/renderer/WebGLRenderer.ts
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { BlendMode, Layer } from '~/models/layer/Layer';
-import fragmentSrc from '~/shaders/blend.frag.glsl';
-import vertexSrc from '~/shaders/fullscreen.vert.glsl';
 import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
+import fragmentSrc from './shaders/blend.frag.glsl';
+import vertexSrc from './shaders/fullscreen.vert.glsl';
 
 const MAX_LAYERS = 16;
 

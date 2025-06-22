@@ -1,10 +1,20 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { ToolArgs } from '~/tools/ToolBehavior';
 import { transparent } from '~/utils/ColorUtils';
-import { ToolArgs } from '../ToolBase';
 import { PenTool } from '../pen/PenTool';
 
 export class EraserTool extends PenTool {
+  onlyOnCanvas = true;
+
+  onStart(agent: LayerImageAgent, args: ToolArgs) {
+    return super.draw(agent, args, transparent);
+  }
+
   onMove(agent: LayerImageAgent, args: ToolArgs) {
     return super.draw(agent, args, transparent);
+  }
+
+  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    return super.onEnd(agent, args);
   }
 }

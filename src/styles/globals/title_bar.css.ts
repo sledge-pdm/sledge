@@ -8,7 +8,6 @@ export const titleBarRoot = style([
   w100,
   {
     pointerEvents: 'all',
-    height: '26px',
     backgroundColor: vars.color.background,
     alignItems: 'center',
   },
@@ -33,7 +32,7 @@ export const titleBarControlButtonContainer = style([
   h100,
   {
     border: 'none',
-    height: '26px',
+    height: '28px',
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '24px',
@@ -42,7 +41,7 @@ export const titleBarControlButtonContainer = style([
     pointerEvents: 'all',
 
     ':hover': {
-      backgroundColor: '#00000020',
+      backgroundColor: '#00000030',
     },
   },
 ]);

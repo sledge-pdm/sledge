@@ -3,13 +3,13 @@ import { createSortable, transformStyle, useDragDropContext } from '@thisbeyond/
 import { Component } from 'solid-js';
 import Icon from '~/components/common/Icon';
 import Light from '~/components/common/Light';
-import { Layer, LayerType } from '~/models/layer/Layer';
+import { Layer } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
 import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
-import { getNextMagnification } from '~/utils/LayerUtils';
+import { eventBus } from '~/utils/EventBus';
 import LayerPreview from '../../common/LayerPreview';
 
 interface LayerItemProps {
@@ -20,40 +20,23 @@ interface LayerItemProps {
 }
 
 const LayerItem: Component<LayerItemProps> = (props) => {
+  let nameParagraphRef: HTMLParagraphElement | undefined;
+
   const sortable = createSortable(props.layer.id);
   const context = useDragDropContext();
   const state = context?.[0];
 
-  let detClass: 'dot' | 'image' | 'automate' | undefined;
-  switch (props.layer.type) {
-    case LayerType.Dot:
-      detClass = 'dot';
-      break;
-    case LayerType.Image:
-      detClass = 'image';
-      break;
-    case LayerType.Automate:
-      detClass = 'automate';
-      break;
-  }
-
   const onDetClicked = (e: MouseEvent) => {
     setLayerListStore('activeLayerId', props.layer.id);
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false }); //一応
   };
 
   const onPreviewClicked = () => {
     if (props.index !== -1) {
       setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
   };
-
-  const onMagnifClicked = () => {
-    const next = getNextMagnification(props.layer.dotMagnification);
-    if (props.index !== -1) {
-      setLayerListStore('layers', props.index, 'dotMagnification', next);
-    }
-  };
-
   const isActive = () => layerListStore.activeLayerId === props.layer.id;
 
   return (
@@ -66,7 +49,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       style={{ opacity: props.draggingId === props.layer.id ? 0.4 : 1, ...transformStyle(sortable.transform) }}
       ref={sortable.ref}
     >
-      {/* <DSLButton /> */}
       <div
         class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
         onClick={onDetClicked}
@@ -96,17 +78,14 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             </p>
           </div>
 
-          <p class={layerItemName}> {props.layer.name}</p>
-          {/* <div
-            class={dotMagnifContainer}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMagnifClicked();
+          <p
+            ref={(ref) => {
+              nameParagraphRef = ref;
             }}
-            onMouseOver={(e) => e.stopPropagation()}
+            class={layerItemName}
           >
-            <p class={dotMagnifText}>x{props.layer.dotMagnification}</p>
-          </div> */}
+            {props.layer.name}
+          </p>
         </div>
         <Light class={activeLight} on={isActive()} />
       </div>

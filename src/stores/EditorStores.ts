@@ -1,11 +1,9 @@
 // editorStore.tsx
 import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
-import { RenderMode } from '~/models/layer/RenderMode';
-import { Tool, ToolType } from '~/models/tool/Tool';
-import { createTool } from '~/models/tool/ToolFactory';
-import { Size2D } from '~/types/Size';
-import { Vec2 } from '~/types/Vector';
+import { Size2D } from '~/models/types/Size';
+import { Vec2 } from '~/models/types/Vector';
+import { defaultTools, Tool, ToolType } from '~/tools/Tools';
 
 type SideAppearanceMode = 'editor' | 'project';
 type AppearanceStore = {
@@ -21,6 +19,7 @@ type InteractStore = {
   canvasAreaSize: Size2D;
   lastMouseWindow: Vec2;
   lastMouseOnCanvas: Vec2;
+  isMouseOnCanvas: boolean;
   isInStroke: boolean;
   zoom: number;
   zoomMin: number;
@@ -29,16 +28,15 @@ type InteractStore = {
   wheelZoomStep: number;
   offsetOrigin: Vec2;
   offset: Vec2;
-
   isDragging: boolean;
 };
 type LogStore = {
-  currentRenderMode: RenderMode;
   bottomBarText: string;
 };
-type ToolStore = {
-  usingIndex: number;
-  tools: Tool[];
+export type ToolStore = {
+  tools: { [toolType: string]: Tool };
+  activeType: ToolType;
+  prevActiveType: ToolType | undefined;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
@@ -54,6 +52,7 @@ const defaultInteractStore: InteractStore = {
   canvasAreaSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
+  isMouseOnCanvas: false,
   isInStroke: false,
   zoom: 1,
   zoomMin: 0.5,
@@ -67,19 +66,12 @@ const defaultInteractStore: InteractStore = {
   isDragging: false,
 };
 const defaultLogStore: LogStore = {
-  currentRenderMode: RenderMode.None,
   bottomBarText: '',
 };
 const defaultToolStore: ToolStore = {
-  usingIndex: 0,
-  tools: [
-    createTool(ToolType.Pen, 'pen', 1),
-    createTool(ToolType.Eraser, 'eraser', 1),
-    createTool(ToolType.Fill, 'fill', 1),
-    createTool(ToolType.Pipette, 'pipette', 1),
-    createTool(ToolType.RectSelection, 'rect select', 1),
-    createTool(ToolType.Move, 'move', 1),
-  ],
+  tools: defaultTools,
+  activeType: ToolType.Pen,
+  prevActiveType: undefined,
 };
 
 export const initEditorStore = () => {

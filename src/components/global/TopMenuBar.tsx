@@ -1,8 +1,7 @@
 import * as styles from '@styles/globals/top_menu_bar.css';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
-import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
-import ExportImageDialog from '~/dialogs/ExportImage';
+import ExportImageDialog from '~/components/dialogs/ExportImage';
+import { createNew, openProject } from '~/controllers/project/window';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -23,24 +22,16 @@ const TopMenuBar: Component = () => {
   });
 
   const leftItems: Item[] = [
-    {
-      text: 'IMPORT.',
-      action: async () => {
-        const path = await openImageImportDialog();
-        if (path !== undefined) {
-          addToImagePool(path);
-        }
-      },
-    },
+    { text: '> OPEN.', action: () => openProject() },
+    { text: '+ NEW.', action: () => createNew() },
+  ];
+  const rightItems: Item[] = [
     {
       text: 'EXPORT.',
       action: () => {
         setIsExportShown(true);
       },
     },
-  ];
-  const rightItems: Item[] = [
-    { text: 'START.', action: () => openWindow('start') },
     { text: 'SETTINGS.', action: () => openWindow('settings') },
   ];
 

@@ -1,8 +1,8 @@
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { WindowOptions } from '@tauri-apps/api/window';
+import { FileLocation } from '~/models/types/FileLocation';
 import { globalConfig } from '~/stores/GlobalStores';
-import { FileLocation } from '~/types/FileLocation';
 import { safeInvoke } from './TauriUtils';
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
@@ -28,8 +28,8 @@ export async function closeWindowsByLabel(label: string) {
 export const getNewProjectSearchParams = (): string => {
   const sp = new URLSearchParams();
   sp.append('new', 'true');
-  sp.append('width', globalConfig.newProject.canvasSize.width.toString());
-  sp.append('height', globalConfig.newProject.canvasSize.height.toString());
+  sp.append('width', globalConfig.default.canvasSize.width.toString());
+  sp.append('height', globalConfig.default.canvasSize.height.toString());
   return sp.toString();
 };
 

@@ -7,6 +7,7 @@ interface ColorBoxProps {
   enableUsingSelection?: boolean;
   sizePx?: number;
   color: string;
+  forceBorderColor?: string;
   onClick?: (color: string) => void;
 }
 
@@ -15,6 +16,8 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
 
   const isSelected = () => props.enableUsingSelection && currentColor() === props.color;
   const isWhiteOrNone = () => props.color === 'none' || props.color.toLowerCase() === '#ffffff';
+
+  const preferedBorder = () => (isWhiteOrNone() || isSelected() ? `0.05rem solid ${vars.color.onBackground}` : '0.05rem solid transparent');
 
   const onColorClicked = (color: string) => {
     if (props.onClick) props.onClick(color);
@@ -32,7 +35,7 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
           'justify-content': 'center',
           cursor: 'pointer',
           'background-color': props.color,
-          border: isWhiteOrNone() || isSelected() ? `0.05rem solid ${vars.color.onBackground}` : '0.05rem solid transparent',
+          border: props.forceBorderColor ? `1px solid ${props.forceBorderColor}` : preferedBorder(),
         }}
         onClick={() => {
           onColorClicked(props.color);

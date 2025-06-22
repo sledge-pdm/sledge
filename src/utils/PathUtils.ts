@@ -1,4 +1,4 @@
-import { FileLocation } from '~/types/FileLocation';
+import { FileLocation } from '~/models/types/FileLocation';
 
 export const getFileNameAndPath = (fullPath: string): FileLocation | undefined => {
   const filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'));

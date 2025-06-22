@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB03B } from '../global.css';
+import { k8x12, vars, ZFB03B } from '../global.css';
 import { flexCol, flexRow, h100, w100 } from '../snippets.css';
 
 export const layerList = style([
@@ -15,7 +15,7 @@ export const layerItem = style([
   flexRow,
   w100,
   {
-    height: '36px',
+    height: '40px',
     flexGrow: 1,
     cursor: 'pointer',
     backgroundColor: vars.color.surface,
@@ -62,9 +62,14 @@ export const layerItemType = style({
 
 export const layerItemName = style([
   {
-    fontSize: vars.text.xl,
-    fontFamily: ZFB03B,
+    fontFamily: `${ZFB03B}, ${k8x12}`,
+    fontSize: '16px',
     marginLeft: '16px',
+    display: '-webkit-box',
+    WebkitBoxOrient: 'vertical',
+    WebkitLineClamp: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 ]);
 

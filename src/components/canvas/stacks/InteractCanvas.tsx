@@ -1,9 +1,9 @@
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
+import { DrawState } from '~/models/types/DrawState';
+import { Vec2 } from '~/models/types/Vector';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { DrawState } from '~/types/DrawState';
-import { Vec2 } from '~/types/Vector';
 
 interface Props {
   operator: LayerCanvasOperator;
@@ -83,6 +83,9 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerMove(e: PointerEvent) {
+    const onCanvas = !!canvasRef?.contains(e.target as Node);
+    setInteractStore('isMouseOnCanvas', onCanvas);
+
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
     setInteractStore('lastMouseWindow', windowPosition);
@@ -162,6 +165,7 @@ export const InteractCanvas: Component<Props> = (props) => {
         width: `${styleWidth()}px`,
         height: `${styleHeight()}px`,
         'pointer-events': 'all',
+        cursor: 'none',
         'z-index': '100', // どのレイヤーよりも上だが、image poolよりも下
       }}
     />

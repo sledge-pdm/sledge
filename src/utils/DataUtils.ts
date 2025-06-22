@@ -25,16 +25,13 @@ export async function loadLocalImage(path: string): Promise<ImageBitmap> {
   return bitmap;
 }
 
-export async function loadImageMeta(path: string): Promise<{
-  width: number;
-  height: number;
-  blobUrl: string; // ImagePool サムネ用
-}> {
-  const bytes = await readFile(path);
-  const blob = new Blob([bytes]);
-  const bitmap = await createImageBitmap(blob);
-  const { width, height } = bitmap;
-  bitmap.close(); // GPU テクスチャ解放
-  const blobUrl = URL.createObjectURL(blob); // 同一オリジン
-  return { width, height, blobUrl };
+export async function loadImageBuffer(bitmap: ImageBitmap) {
+  const offscreen = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const ctx = offscreen.getContext('2d');
+  if (!ctx) throw new Error('Canvas context unavailable');
+
+  ctx.drawImage(bitmap, 0, 0);
+  const imageData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+
+  return imageData.data;
 }

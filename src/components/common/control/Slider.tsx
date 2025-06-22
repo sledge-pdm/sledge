@@ -79,6 +79,10 @@ const Slider: Component<SliderProps> = (props) => {
     }
   };
 
+  const cancelDirectInput = () => {
+    setDirectInputMode(false);
+  };
+
   onMount(() => {
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('pointermove', handlePointerMove);
@@ -98,6 +102,7 @@ const Slider: Component<SliderProps> = (props) => {
         when={directInputMode()}
         fallback={
           <p
+          class={styles.valueLabel}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -116,6 +121,7 @@ const Slider: Component<SliderProps> = (props) => {
           onSubmit={(e) => {
             setDirectInputMode(false);
           }}
+          onFocusOut={cancelDirectInput}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               update(Number(directInputRef.value));

@@ -23,7 +23,7 @@ const Color: Component = () => {
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>color.</p>
-      <div class={sectionContent} style={{ 'flex-direction': 'row', margin: '8px 0' }}>
+      <div class={sectionContent} style={{ 'flex-direction': 'row', 'margin-top': '6px', 'margin-bottom': '4px' }}>
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
             {(item, index) => <ColorBox color={item} sizePx={8} onClick={(color) => onColorClicked(color, index())} enableUsingSelection={true} />}
@@ -36,11 +36,11 @@ const Color: Component = () => {
         <ColorPicker width={150} />
       </div>
 
-      <div class={flexRow} style={{ 'align-items': 'center' }}>
+      <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': '12px' }}>
         <Palette />
         {/* <p style={{ 'font-family': ZFB11, 'font-size': '8px', opacity: 0.4 }}>color code.</p> */}
 
-        <div class={flexRow} style={{ height: 'fit-content', 'margin-left': vars.spacing.lg, opacity: 0.9 }}>
+        <div class={flexRow} style={{ height: 'fit-content', 'margin-left': vars.spacing.lg, opacity: 0.9, 'min-width': '90px' }}>
           <p style={{ 'font-size': vars.text.md }}>#</p>
           <input
             ref={(el) => (hexInputRef = el)}
@@ -66,8 +66,6 @@ const Color: Component = () => {
         <div
           class={flexCol}
           style={{
-            width: '20px',
-            height: '20px',
             'margin-left': vars.spacing.sm,
             'align-items': 'center',
             'justify-content': 'center',
@@ -77,7 +75,7 @@ const Color: Component = () => {
           onClick={() => setActiveToolType(ToolType.Pipette)}
         >
           <Icon
-            src={'/icons/tool/pipette.png'}
+            src={'/icons/misc/pipette.png'}
             base={10}
             scale={2}
             color={getActiveToolType() === ToolType.Pipette ? vars.color.active : vars.color.onBackground}

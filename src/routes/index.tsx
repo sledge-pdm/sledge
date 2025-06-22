@@ -10,35 +10,12 @@ import { getTheme } from '~/stores/Theme';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import { getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
+import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 
 export default function Home() {
   onMount(async () => {
     await loadGlobalSettings();
   });
-
-  const openExistingProject = (selectedFile: FileLocation) => {
-    openWindow('editor', { query: getExistingProjectSearchParams(selectedFile) }).then(() => {
-      // closeWindowsByLabel('start');
-    });
-  };
-
-  const createNew = () => {
-    openWindow('editor', { query: getNewProjectSearchParams() }).then(() => {
-      // closeWindowsByLabel('start');
-    });
-  };
-
-  const openProject = () => {
-    openNewFile().then((file: string | undefined) => {
-      console.log(file);
-      if (file !== undefined) {
-        const loc = getFileNameAndPath(file);
-        if (!loc) return;
-        addRecentFile(loc);
-        openExistingProject(loc);
-      }
-    });
-  };
 
   return (
     <div class={getTheme()}>

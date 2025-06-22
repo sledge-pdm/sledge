@@ -165,7 +165,7 @@ export const InteractCanvas: Component<Props> = (props) => {
         width: `${styleWidth()}px`,
         height: `${styleHeight()}px`,
         'pointer-events': 'all',
-        cursor: "none",
+        cursor: 'none',
         'z-index': '100', // どのレイヤーよりも上だが、image poolよりも下
       }}
     />

@@ -1,6 +1,7 @@
 import * as styles from '@styles/globals/top_menu_bar.css';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import ExportImageDialog from '~/components/dialogs/ExportImage';
+import { createNew, openProject } from '~/controllers/project/window';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -21,8 +22,8 @@ const TopMenuBar: Component = () => {
   });
 
   const leftItems: Item[] = [
-    { text: 'START.', action: () => openWindow('start') },
-    { text: 'SETTINGS.', action: () => openWindow('settings') },
+    { text: '> OPEN.', action: () => openProject() },
+    { text: '+ CREATE.', action: () => createNew() },
   ];
   const rightItems: Item[] = [
     {
@@ -31,6 +32,7 @@ const TopMenuBar: Component = () => {
         setIsExportShown(true);
       },
     },
+    { text: 'SETTINGS.', action: () => openWindow('settings') },
   ];
 
   return (

@@ -59,8 +59,8 @@ export const menuItemText = style([
     textAlign: 'center',
     width: '100%',
     height: '30px',
-    marginLeft: '12px',
-    marginRight: '12px',
+    marginLeft: '8px',
+    marginRight: '8px',
   },
 ]);
 

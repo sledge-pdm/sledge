@@ -5,7 +5,7 @@ import { canvasStore } from '~/stores/ProjectStores';
 
 import { Consts } from '~/models/Consts';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
-import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel } from '~/styles/section/canvas.css';
+import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeResetAllLayerButton, canvasSizeTimes } from '~/styles/section/canvas.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
@@ -41,6 +41,9 @@ const CanvasSettings: Component = () => {
               required
             />
           </div>
+
+          <p class={canvasSizeTimes}>x</p>
+
           <div>
             <p class={canvasSizeLabel}>height</p>
             <input
@@ -66,7 +69,7 @@ const CanvasSettings: Component = () => {
         </div>
       </form>
 
-      <button class={canvasSizeButton} onClick={resetAllLayers}>
+      <button class={canvasSizeResetAllLayerButton} onClick={resetAllLayers}>
         RESET ALL LAYERS
       </button>
     </div>

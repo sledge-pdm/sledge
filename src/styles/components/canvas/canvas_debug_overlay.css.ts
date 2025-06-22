@@ -16,11 +16,10 @@ export const canvasDebugOverlayTopLeft = style([
 export const canvasDebugOverlayBottomLeft = style([
   flexRow,
   {
-    // gap: vars.spacing.xs,
     position: 'absolute',
     left: vars.spacing.sm,
     bottom: 0,
-    transform: 'translateY(-100%)',
+    transform: 'translateY(-50%)',
     alignItems: 'end',
     gap: vars.spacing.md,
     pointerEvents: 'none',

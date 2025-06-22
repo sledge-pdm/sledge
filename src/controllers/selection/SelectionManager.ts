@@ -66,6 +66,10 @@ class SelectionManager {
     return this.previewMask;
   }
 
+  public isSelected() {
+    return !this.selectionMask.isCleared();
+  }
+
   constructor() {
     // キャンバスサイズが不明な段階では (0,0) で初期化
     this.selectionMask = new SelectionMask(0, 0);

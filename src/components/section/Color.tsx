@@ -75,8 +75,8 @@ const Color: Component = () => {
           onClick={() => setActiveToolType(ToolType.Pipette)}
         >
           <Icon
-            src={'/icons/misc/pipette.png'}
-            base={10}
+            src={'/icons/misc/pipette9.png'}
+            base={8}
             scale={2}
             color={getActiveToolType() === ToolType.Pipette ? vars.color.active : vars.color.onBackground}
           />

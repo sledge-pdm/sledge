@@ -46,6 +46,10 @@ export default class SelectionMask {
     this.updateBoundingBox();
   }
 
+  public isCleared() {
+    return this.minX === Infinity && this.maxX === -1 && this.minY === Infinity && this.maxY === -1;
+  }
+
   public clear() {
     this.mask.fill(0);
     this.colCnt.fill(0);

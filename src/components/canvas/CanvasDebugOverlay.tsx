@@ -73,24 +73,14 @@ const CanvasDebugOverlay: Component = (props) => {
   return (
     <>
       <div class={canvasDebugOverlayTopLeft}>
-        <div class={flexCol}>
-          <p>canvas.</p>
-          <p>
-            ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y})
-          </p>
-          <p>
-            ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)})
-          </p>
-          <p>
-            offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)})
-          </p>
-          <p>
-            selection offset:({offsetX()}, {offsetY()})
-          </p>
-          <p>
-            selection size:({selectionWidth()}, {selectionHeight()})
-          </p>
-        </div>
+        <p>
+          canvas. <br />
+          ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y}) <br />
+          ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)}) <br />
+          offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)}) <br />
+          selection offset:({offsetX()}, {offsetY()}) <br />
+          selection size:({selectionWidth()}, {selectionHeight()}) <br />
+        </p>
       </div>
 
       <Show when={globalConfig.debug.showPerfMonitor}>

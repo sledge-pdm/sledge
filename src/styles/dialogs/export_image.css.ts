@@ -40,7 +40,7 @@ export const fieldDisabled = style([
   {
     pointerEvents: 'none',
     cursor: 'auto',
-    opacity: 0.15,
+    opacity: 0.4,
   },
 ]);
 

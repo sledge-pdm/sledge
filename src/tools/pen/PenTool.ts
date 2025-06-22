@@ -1,9 +1,11 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
-import { ToolArgs, ToolBehavior } from '../ToolBase';
 
 export class PenTool implements ToolBehavior {
+  onlyOnCanvas = true;
+
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     // return false;
     return this.draw(agent, args, args.color);

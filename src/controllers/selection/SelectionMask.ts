@@ -1,5 +1,5 @@
-import { Size2D } from '~/types/Size';
-import { Vec2 } from '~/types/Vector';
+import { Size2D } from '~/models/types/Size';
+import { Vec2 } from '~/models/types/Vector';
 
 export interface BoundBox {
   top: number;
@@ -44,6 +44,10 @@ export default class SelectionMask {
   public setMask(mask: Uint8Array) {
     this.mask = mask;
     this.updateBoundingBox();
+  }
+
+  public isCleared() {
+    return this.minX === Infinity && this.maxX === -1 && this.minY === Infinity && this.maxY === -1;
   }
 
   public clear() {

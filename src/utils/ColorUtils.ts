@@ -30,14 +30,22 @@ export function RGBToHex(color: RGBColor): string {
 }
 
 // "#rrggbbaa" -> r/g/b/a
-export function RGBAToHex(color: RGBAColor): string {
+export function RGBAToHex(color: RGBAColor, excludeAlpha?: boolean): string {
   const rHex = color[0].toString(16).padStart(2, '0');
   const gHex = color[1].toString(16).padStart(2, '0');
   const bHex = color[2].toString(16).padStart(2, '0');
-  const aHex = color[3].toString(16).padStart(2, '0');
-  return `${rHex}${gHex}${bHex}${aHex}`;
+  if (excludeAlpha) {
+    return `${rHex}${gHex}${bHex}`;
+  } else {
+    const aHex = color[3].toString(16).padStart(2, '0');
+    return `${rHex}${gHex}${bHex}${aHex}`;
+  }
 }
 
 export function colorMatch(a: RGBAColor, b: RGBAColor): boolean {
   return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
+}
+
+export function isTransparent(a: RGBAColor): boolean {
+  return a[3] === 0 || a[3] === undefined;
 }

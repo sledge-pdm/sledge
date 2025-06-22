@@ -20,12 +20,18 @@ export const sideAreaMenu = style([
 
 export const sideAreaContentWrapper = style([
   flexCol,
-  h100,
   {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
     width: vars.size.sideArea,
     paddingTop: '20px',
     paddingLeft: '36px',
     paddingRight: '30px',
+
+    overflowX: 'hidden',
     overflowY: 'scroll',
 
     '::-webkit-scrollbar': {
@@ -47,6 +53,5 @@ export const sideAreaContent = style([
   {
     gap: '1rem',
     width: vars.size.sideArea,
-    height: 'auto',
   },
 ]);

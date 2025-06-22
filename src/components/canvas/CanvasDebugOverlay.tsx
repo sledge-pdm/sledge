@@ -1,8 +1,7 @@
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
-import { RenderMode } from '~/models/layer/RenderMode';
-import { interactStore, logStore } from '~/stores/EditorStores';
+import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { flexCol } from '~/styles/snippets.css';
@@ -74,30 +73,19 @@ const CanvasDebugOverlay: Component = (props) => {
   return (
     <>
       <div class={canvasDebugOverlayTopLeft}>
-        <div class={flexCol}>
-          <p>canvas.</p>
-          <p>
-            ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y})
-          </p>
-          <p>
-            ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)})
-          </p>
-          <p>
-            offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)})
-          </p>
-          <p>
-            selection offset:({offsetX()}, {offsetY()})
-          </p>
-          <p>
-            selection size:({selectionWidth()}, {selectionHeight()})
-          </p>
-          <p>canvas render mode: {RenderMode[logStore.currentRenderMode]}</p>
-        </div>
+        <p>
+          canvas. <br />
+          ON WINDOW. ({lastMouseWindow().x}, {lastMouseWindow().y}) <br />
+          ON CANVAS. ({Math.round(lastMouseOnCanvas().x)}, {Math.round(lastMouseOnCanvas().y)}) <br />
+          offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)}) <br />
+          selection offset:({offsetX()}, {offsetY()}) <br />
+          selection size:({selectionWidth()}, {selectionHeight()}) <br />
+        </p>
       </div>
 
       <Show when={globalConfig.debug.showPerfMonitor}>
         <div class={canvasDebugOverlayBottomLeft}>
-          <div class={flexCol}>
+          <div class={flexCol} style={{ gap: '1px' }}>
             <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>
             <p>CHILDREN: {toMiB(processMemInfo()?.children_bytes)}</p>
             <p>TOTAL: {toMiB(processMemInfo()?.total_bytes)}</p>
@@ -113,7 +101,7 @@ const CanvasDebugOverlay: Component = (props) => {
               interval={1000}
             />
           </div>
-          <div class={flexCol}>
+          <div class={flexCol} style={{ gap: '1px' }}>
             <p>
               JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
             </p>

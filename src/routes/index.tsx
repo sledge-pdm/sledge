@@ -1,49 +1,21 @@
 import { onMount } from 'solid-js';
 import ThemeToggle from '~/components/common/ThemeToggle';
 import RecentFileList from '~/components/global/RecentFileList';
-import { addRecentFile } from '~/controllers/config/GlobalConfigController';
-import { openProjectFile } from '~/io/file_actions/open';
-import { loadGlobalSettings } from '~/io/global_config/globalSettings';
-import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
+import { addRecentFile } from '~/controllers/config/RecentFileController';
+import loadGlobalSettings from '~/io/config/in/load';
+import { openNewFile } from '~/io/open/open';
+import { FileLocation } from '~/models/types/FileLocation';
+import { globalConfig } from '~/stores/GlobalStores';
 import { getTheme } from '~/stores/Theme';
-import { FileLocation } from '~/types/FileLocation';
 import { getFileNameAndPath } from '~/utils/PathUtils';
 import { getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
+import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 
 export default function Home() {
   onMount(async () => {
     await loadGlobalSettings();
   });
-
-  const openExistingProject = (selectedFile: FileLocation) => {
-    console.log(selectedFile);
-    openWindow('editor', { query: getExistingProjectSearchParams(selectedFile) }).then(() => {
-      // closeWindowsByLabel('start');
-    });
-  };
-
-  const createNew = () => {
-    openWindow('editor', { query: getNewProjectSearchParams() }).then(() => {
-      // closeWindowsByLabel('start');
-    });
-  };
-
-  const openProject = () => {
-    openProjectFile().then((file: string | undefined) => {
-      console.log(file);
-      if (file !== undefined) {
-        const loc = getFileNameAndPath(file);
-        if (!loc) return;
-        addRecentFile(loc);
-        openExistingProject(loc);
-      }
-    });
-  };
-
-  const clearRecentFiles = () => {
-    setGlobalConfig('misc', 'recentFiles', []);
-  };
 
   return (
     <div class={getTheme()}>

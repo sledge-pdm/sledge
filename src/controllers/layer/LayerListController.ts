@@ -1,12 +1,11 @@
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { DSL } from '~/models/dsl/DSL';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';
-import { layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
-export const addLayer = async (
+export const addLayer = (
   layer: {
     name?: string;
     type?: LayerType;
@@ -14,11 +13,10 @@ export const addLayer = async (
     dotMagnification?: number;
     opacity?: number;
     mode?: BlendMode;
-    dsl?: DSL;
   },
   initImage?: Uint8ClampedArray
 ) => {
-  const { name = 'layer', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal, dsl } = layer;
+  const { name = 'layer', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal } = layer;
 
   const newLayer = createLayer({
     name,
@@ -27,7 +25,6 @@ export const addLayer = async (
     dotMagnification,
     opacity,
     mode,
-    dsl,
     initImage,
   });
 
@@ -39,7 +36,7 @@ export const addLayer = async (
 
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
 
-  return layers;
+  return newLayer;
 };
 
 export function getActiveLayerIndex(): number {
@@ -81,13 +78,9 @@ export const removeLayer = (layerId?: string) => {
   if (index !== 0) newActiveIndex = index - 1;
 
   layers.splice(index, 1);
-  const histories = Object.assign({}, layerHistoryStore);
-  delete histories[layerId];
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
-  setLayerHistoryStore(histories);
-
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
 };
 

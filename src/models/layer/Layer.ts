@@ -1,5 +1,3 @@
-import { DSL } from '~/models/dsl/DSL';
-
 export enum LayerType {
   Dot,
   Image,
@@ -20,5 +18,4 @@ export type Layer = {
   opacity: number;
   mode: BlendMode;
   dotMagnification: number;
-  dsl: DSL;
 };

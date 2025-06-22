@@ -1,8 +1,8 @@
 import { allLayers } from '~/controllers/layer/LayerListController';
+import { Consts } from '~/models/Consts';
+import { Size2D } from '~/models/types/Size';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
-import { Size2D } from '~/types/Size';
-import { Consts } from '~/utils/consts';
 import { eventBus } from '~/utils/EventBus';
 import { getAgentOf } from '../layer/LayerAgentManager';
 

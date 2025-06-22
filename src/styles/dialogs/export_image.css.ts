@@ -24,7 +24,7 @@ export const header = style([
 export const content = style([
   flexCol,
   {
-    gap: vars.spacing.lg,
+    gap: vars.spacing.xl,
   },
 ]);
 
@@ -49,7 +49,18 @@ export const fieldHeader = style([
     fontFamily: ZFB09,
     fontSize: vars.text.sm,
     marginBottom: vars.spacing.sm,
-    textDecoration: 'underline',
+    color: vars.color.onBackground,
+    verticalAlign: 'middle',
+    // textDecoration: 'underline',
+    ':before': {
+      content: '■',
+      fontSize: vars.text.xs,
+      display: 'inline-block',
+      textDecoration: 'none',
+      marginRight: '6px',
+      // filter: 'brightness(80%)',
+      color: vars.color.accent,
+    },
   },
 ]);
 

@@ -4,7 +4,7 @@ import { MoveTool } from '~/tools/move/MoveTool';
 import { PenTool } from '~/tools/pen/PenTool';
 import { PipetteTool } from '~/tools/pipette/PipetteTool';
 import { RectSelection } from '~/tools/selection/rect/RectSelection';
-import ToolBehavior from '~/tools/ToolBehavior';
+import { ToolBehavior } from '~/tools/ToolBehavior';
 
 export enum ToolType {
   Pen = 'pen',

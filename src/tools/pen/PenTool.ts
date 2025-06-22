@@ -4,6 +4,8 @@ import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
 
 export class PenTool implements ToolBehavior {
+  onlyOnCanvas = true;
+
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     // return false;
     return this.draw(agent, args, args.color);

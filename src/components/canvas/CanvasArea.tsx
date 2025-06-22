@@ -13,6 +13,9 @@ import { listenEvent } from '~/utils/TauriUtils';
 import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
+import { createPositionToElement, useMousePosition } from '@solid-primitives/mouse';
+import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
+
 export default () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
@@ -85,6 +88,9 @@ export default () => {
         >
           <WebGLCanvas />
         </div>
+
+        <CanvasAreaOverlay />
+
       </div>
 
       <CanvasDebugOverlay />

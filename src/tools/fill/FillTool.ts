@@ -14,6 +14,8 @@ export interface Fill {
 }
 
 export class FillTool implements ToolBehavior {
+  onlyOnCanvas = true;
+  
   onStart(agent: LayerImageAgent, { position, lastPosition, color }: ToolArgs) {
     const fill = new TileFloodFill();
 

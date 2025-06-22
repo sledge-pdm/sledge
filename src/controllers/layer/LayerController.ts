@@ -1,11 +1,13 @@
 import { Layer } from '~/models/layer/Layer';
+import { interactStore } from '~/stores/EditorStores';
 import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
+import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/managers/LayerImageAgent';
 import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
 import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 
-const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dsl', 'dotMagnification'];
+const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
@@ -55,6 +57,22 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
     eventBus.emit('preview:requestUpdate', { layerId: layerId });
     return newAgent;
   }
+}
+
+export function getCurrentPointingColor(): RGBAColor | undefined {
+  const agent = getActiveAgent();
+  return agent?.getPixelBufferManager().getPixel(interactStore.lastMouseOnCanvas);
+}
+export function getCurrentPointingColorHex(): string | undefined {
+  if (!interactStore.lastMouseOnCanvas) return undefined;
+  const agent = getActiveAgent();
+  const color = agent?.getPixelBufferManager().getPixel({
+    x: Math.round(interactStore.lastMouseOnCanvas.x),
+    y: Math.round(interactStore.lastMouseOnCanvas.y),
+  });
+  if (color !== undefined) return `#${RGBAToHex(color)}`;
+
+  return undefined;
 }
 
 export const canUndo = (): boolean => getActiveAgent()?.canUndo() ?? false;

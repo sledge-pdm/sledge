@@ -13,7 +13,7 @@ export default class PixelBufferManager {
 
   public getPixel(position: Vec2): RGBAColor {
     const i = (position.y * this.width + position.x) * 4;
-    return [this.buffer[i], this.buffer[i + 1], this.buffer[i + 2], this.buffer[i + 3]];
+    return [this.buffer[i] ?? 0, this.buffer[i + 1] ?? 0, this.buffer[i + 2] ?? 0, this.buffer[i + 3] ?? 0];
   }
 
   public setRawPixel(position: Vec2, color: RGBAColor): PixelDiff | undefined {

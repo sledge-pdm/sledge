@@ -18,7 +18,7 @@ const ImagePoolItem: Component<{}> = (props) => {
         }}
       >
         <p class={styles.name} style={{ 'text-decoration': isImagePoolActive() ? 'none' : 'line-through' }}>
-          IMAGE POOL.{isImagePoolActive() ? '' : ''}
+          IMAGE POOL.
         </p>
       </div>
     </div>

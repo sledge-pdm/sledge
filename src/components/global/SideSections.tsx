@@ -3,7 +3,7 @@ import CanvasSettings from '../section/CanvasSettings';
 import Color from '../section/Color';
 import LayerList from '../section/LayerList';
 import Project from '../section/Project';
-import ToolConfig from '../section/ToolConfig';
+import ToolList from '../section/ToolList';
 
 import { createScrollPosition } from '@solid-primitives/scroll';
 import { appearanceStore } from '~/stores/EditorStores';
@@ -33,7 +33,7 @@ const SideSections: Component = () => {
         <Project />
         <SectionTopMenu />
       </div>
-      <div class={flexCol} style={{ position: 'relative', 'flex-grow': 1,  }}>
+      <div class={flexCol} style={{ position: 'relative', 'flex-grow': 1 }}>
         <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
           <div class={flexCol}>
             <div
@@ -44,7 +44,7 @@ const SideSections: Component = () => {
               }}
             >
               <Color />
-              <ToolConfig />
+              <ToolList />
               <LayerList />
             </div>
 

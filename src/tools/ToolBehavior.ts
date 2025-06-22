@@ -3,6 +3,8 @@ import { Vec2 } from '~/models/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
 
 export interface ToolBehavior {
+  onlyOnCanvas?: boolean;
+
   onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean;
 
   onMove: (agent: LayerImageAgent, args: ToolArgs) => boolean;

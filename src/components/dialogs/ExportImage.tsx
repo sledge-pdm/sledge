@@ -109,23 +109,15 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
           {/* <p class={styles.header}>EXPORT.</p> */}
 
           <div class={styles.field}>
-            <div class={flexRow} style={{ 'align-items': 'center', gap: '8px', 'margin-bottom': '8px' }}>
-              <p class={styles.fieldHeader} style={{ 'margin-bottom': 0, 'flex-grow': 1 }}>
-                Output Directory.
-              </p>
-              <Checkbox
-                checked={settings.showDirAfterSave}
-                onChange={(checked) => setSettings('showDirAfterSave', checked)}
-                label='open dir after save'
-                labelMode='left'
-              />
-            </div>
-            <div style={{ 'align-items': 'center', gap: '12px' }} class={flexRow}>
+            <p class={styles.fieldHeader} style={{ 'flex-grow': 1 }}>
+              Output Directory.
+            </p>
+            <div style={{ 'align-items': 'center', gap: '12px', 'margin-left': '12px' }} class={flexRow}>
               <p style={{ 'flex-grow': 1, 'text-overflow': 'ellipsis' }}>{settings.dirPath}</p>
               <button onClick={openDirSelectionDialog}>...</button>
             </div>
 
-            <div class={flexRow} style={{ 'align-items': 'end', 'margin-bottom': vars.spacing.sm }}>
+            <div class={flexRow} style={{ 'align-items': 'end', 'margin-left': '12px', 'margin-bottom': vars.spacing.sm }}>
               <p class={styles.fileName}>\</p>
               <input
                 class={styles.fileName}
@@ -137,26 +129,39 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
               <p style={{ 'font-size': vars.text.md, 'font-family': ZFB08 }}>.{settings.exportOptions.format}</p>
             </div>
           </div>
-          <div class={styles.field}>
-            <p class={styles.fieldHeader}>Type.</p>
-            <Dropdown options={fileTypeOptions} value={settings.exportOptions.format} onChange={(e) => setSettings('exportOptions', 'format', e)} />
-          </div>
+          <div class={flexRow} style={{ gap: vars.spacing.md }}>
+            <div class={styles.field}>
+              <p class={styles.fieldHeader}>Type.</p>
+              <div class={flexRow} style={{ 'margin-left': '12px' }}>
+                <Dropdown
+                  options={fileTypeOptions}
+                  value={settings.exportOptions.format}
+                  onChange={(e) => setSettings('exportOptions', 'format', e)}
+                />
+              </div>
+            </div>
 
-          <div class={settings.exportOptions.format === 'jpg' ? styles.field : styles.fieldDisabled}>
-            <p class={styles.fieldHeader}>Quality.</p>
-            <Slider
-              labelMode={'left'}
-              defaultValue={settings.exportOptions.quality}
-              value={settings.exportOptions.quality}
-              min={0}
-              max={100}
-              onChange={(v) => setSettings('exportOptions', 'quality', v)}
-            />
+            <div class={settings.exportOptions.format === 'jpg' ? styles.field : styles.fieldDisabled} style={{ 'flex-grow': 1 }}>
+              <p class={styles.fieldHeader} style={{ 'padding-bottom': '4px' }}>
+                Quality.
+              </p>
+              <div class={flexRow} style={{ 'margin-left': '12px' }}>
+                <Slider
+                  labelMode={'left'}
+                  defaultValue={settings.exportOptions.quality}
+                  value={settings.exportOptions.quality}
+                  allowDirectInput={true}
+                  min={0}
+                  max={100}
+                  onChange={(v) => setSettings('exportOptions', 'quality', v)}
+                />
+              </div>
+            </div>
           </div>
 
           <div class={styles.field}>
             <p class={styles.fieldHeader}>Scale.</p>
-            <div class={flexRow} style={{ 'align-items': 'center', gap: '12px' }}>
+            <div class={flexRow} style={{ 'align-items': 'center', gap: '12px', 'margin-left': '12px' }}>
               <Dropdown
                 options={scaleOptions}
                 value={settings.exportOptions.scale ?? 1}
@@ -180,6 +185,14 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
               estimated size: {canvasStore.canvas.width * finalScale()} x {canvasStore.canvas.height * finalScale()}
             </p>
           </div>
+        </div>
+        <div class={flexRow} style={{ width: '100%', 'justify-content': 'end', 'align-items': 'center', gap: '8px', 'margin-bottom': '8px' }}>
+          <Checkbox
+            checked={settings.showDirAfterSave}
+            onChange={(checked) => setSettings('showDirAfterSave', checked)}
+            label='open dir after save'
+            labelMode='left'
+          />
         </div>
       </div>
     </Dialog>

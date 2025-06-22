@@ -74,7 +74,8 @@ export default function Editor() {
       });
     } else {
       // 画像データ
-      setProjectStore('name', fileName);
+      const fileNameWithoutExtension = fileName.replace(/\.[^/.]+$/, '');
+      setProjectStore('name', fileNameWithoutExtension);
       initProjectWithNewImage(filePath, fileName).then(() => {
         onProjectLoad();
       });

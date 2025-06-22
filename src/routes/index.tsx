@@ -17,7 +17,6 @@ export default function Home() {
   });
 
   const openExistingProject = (selectedFile: FileLocation) => {
-    console.log(selectedFile);
     openWindow('editor', { query: getExistingProjectSearchParams(selectedFile) }).then(() => {
       // closeWindowsByLabel('start');
     });

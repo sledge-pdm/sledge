@@ -1,8 +1,8 @@
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { Vec2 } from '~/models/types/Vector';
+import { TileFloodFill } from '~/tools/fill/TileFloodFill';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { RGBAColor } from '~/utils/ColorUtils';
-import { TileFloodFill } from './TileFloodFill';
 
 export interface FillProps {
   agent: LayerImageAgent;
@@ -16,9 +16,8 @@ export interface Fill {
 export class FillTool implements ToolBehavior {
   onlyOnCanvas = true;
 
-  onStart(agent: LayerImageAgent, { position, lastPosition, color }: ToolArgs) {
+  onStart(agent: LayerImageAgent, { position, color }: ToolArgs) {
     const fill = new TileFloodFill();
-
     fill.fill({ agent, color, position });
 
     return true;

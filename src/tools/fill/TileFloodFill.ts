@@ -1,13 +1,9 @@
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { PixelDiff } from '~/models/history/HistoryManager';
 import { TileIndex } from '~/models/types/Tile';
 import { Vec2 } from '~/models/types/Vector';
 import { colorMatch } from '~/utils/ColorUtils';
 import { Fill, FillProps } from './FillTool';
-
-interface FillPassProps {
-  index: TileIndex;
-}
 
 export class TileFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {

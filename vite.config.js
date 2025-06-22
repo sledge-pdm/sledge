@@ -1,9 +1,9 @@
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
+import path from 'path';
 import { defineConfig } from 'vite';
+import glsl from 'vite-plugin-glsl';
 import solidPlugin from 'vite-plugin-solid';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import path from 'path';
-import glsl from 'vite-plugin-glsl';
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 
 export default defineConfig({
   plugins: [vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths(), glsl()],
@@ -17,5 +17,9 @@ export default defineConfig({
   },
   alias: {
     '~': path.resolve(__dirname, 'src'),
+  },
+  worker: {
+    format: 'es',
+    plugins: [],
   },
 });

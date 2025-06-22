@@ -6,9 +6,9 @@ import { Vec2 } from '~/models/types/Vector';
 import { globalConfig } from '~/stores/GlobalStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
-import PixelBufferManager from '../PixelBufferManager';
-import DiffManager from './DiffManager';
-import TileManager from './TileManager';
+import PixelBufferManager from './managers/PixelBufferManager';
+import DiffManager from './managers/DiffManager';
+import TileManager from './managers/TileManager';
 
 // それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
 export default class LayerImageAgent {

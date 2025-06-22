@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { Vec2 } from '~/models/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
 

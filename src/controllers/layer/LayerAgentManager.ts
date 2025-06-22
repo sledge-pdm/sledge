@@ -1,5 +1,5 @@
 import { activeLayer } from '~/controllers/layer/LayerListController';
-import LayerImageAgent from './image/managers/LayerImageAgent';
+import LayerImageAgent from './image/LayerImageAgent';
 
 export class LayerAgentManager {
   private agents: Map<string, LayerImageAgent> = new Map();

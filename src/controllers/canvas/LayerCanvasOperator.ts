@@ -1,6 +1,6 @@
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { Vec2 } from '~/models/types/Vector';

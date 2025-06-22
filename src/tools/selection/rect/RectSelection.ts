@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RectFragment, SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionManager';
 import { Vec2 } from '~/models/types/Vector';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';

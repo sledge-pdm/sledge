@@ -1,5 +1,5 @@
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { Consts } from '~/models/Consts';
 import { Size2D } from '~/models/types/Size';
 import { canvasStore } from '~/stores/ProjectStores';

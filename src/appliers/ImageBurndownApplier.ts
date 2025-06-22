@@ -1,5 +1,5 @@
 // src/appliers/ImageBurndownApplier.ts
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import { loadLocalImage } from '~/utils/DataUtils';

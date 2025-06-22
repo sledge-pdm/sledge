@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { ToolArgs } from '~/tools/ToolBehavior';
 import { transparent } from '~/utils/ColorUtils';
 import { PenTool } from '../pen/PenTool';

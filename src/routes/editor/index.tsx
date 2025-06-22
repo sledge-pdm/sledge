@@ -100,7 +100,6 @@ export default function Editor() {
     listenEvent('onSettingsSaved', () => {
       loadGlobalSettings();
     });
-
     unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
       if (!isLoading() && projectStore.isProjectChangedAfterSave) {
         const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {

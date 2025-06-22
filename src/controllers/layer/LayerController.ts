@@ -3,7 +3,7 @@ import { interactStore } from '~/stores/EditorStores';
 import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
 import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
-import LayerImageAgent from './image/managers/LayerImageAgent';
+import LayerImageAgent from './image/LayerImageAgent';
 import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
 import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 

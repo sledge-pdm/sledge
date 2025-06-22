@@ -15,7 +15,7 @@ const ToolList: Component = () => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>tools.</p>
       <div class={sectionContent}>
-        <div class={flexCol} style={{ 'margin-bottom': vars.spacing.sm }}>
+        <div class={flexCol} style={{ 'margin-bottom': vars.spacing.xs }}>
           <For each={mainTools}>
             {(type, index) => {
               const tool = toolStore.tools[type];

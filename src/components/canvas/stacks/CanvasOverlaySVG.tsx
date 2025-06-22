@@ -1,6 +1,6 @@
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
-import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Icon from '~/components/common/Icon';
 import { maskToPath } from '~/controllers/selection/OutlineExtructor';
 import { PathCmdList } from '~/controllers/selection/PathCommand';
@@ -9,6 +9,7 @@ import { BoundBox } from '~/controllers/selection/SelectionMask';
 import { cancelSelection, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
@@ -147,16 +148,18 @@ const CanvasOverlaySVG: Component = (props) => {
         <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={1} pointer-events='none' />
 
         {/* pen hover preview */}
-        <rect
-          width={areaPenWrite()?.width}
-          height={areaPenWrite()?.height}
-          x={areaPenWrite()?.x}
-          y={areaPenWrite()?.y}
-          fill='none'
-          stroke={vars.color.border}
-          stroke-width={1}
-          pointer-events='none'
-        />
+        <Show when={globalConfig.editor.showPointedPixel}>
+          <rect
+            width={areaPenWrite()?.width}
+            height={areaPenWrite()?.height}
+            x={areaPenWrite()?.x}
+            y={areaPenWrite()?.y}
+            fill='none'
+            stroke={vars.color.border}
+            stroke-width={1}
+            pointer-events='none'
+          />
+        </Show>
 
         <path
           ref={(el) => (outlineRef = el)}
@@ -168,23 +171,6 @@ const CanvasOverlaySVG: Component = (props) => {
           stroke-dashoffset={borderOffset()}
           pointer-events='none'
         />
-
-        {/* 
-      <For each={dirtyRects()}>
-        {(dirtyRect) => {
-          return (
-            <rect
-              width={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * interactStore.zoom}
-              height={dirtyRect.globalTileSize * activeLayer()?.dotMagnification * interactStore.zoom}
-              x={dirtyRect.getOffset().x * activeLayer()?.dotMagnification * interactStore.zoom}
-              y={dirtyRect.getOffset().y * activeLayer()?.dotMagnification * interactStore.zoom}
-              fill={dirtyRect.isDirty ? '#ff000060' : '#00ffff60'}
-              stroke='none'
-              pointer-events='none'
-            />
-          );
-        }}
-      </For> */}
       </svg>
 
       <div

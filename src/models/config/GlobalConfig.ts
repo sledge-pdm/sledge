@@ -1,3 +1,4 @@
+import { Cursor } from '~/models/config/types/Cursor';
 import { Theme } from '~/models/config/types/Theme';
 import { Consts } from '~/models/Consts';
 import { FileLocation } from '~/models/types/FileLocation';
@@ -17,6 +18,9 @@ export type GlobalConfig = {
   editor: {
     canvasRenderingMode: CanvasRenderingMode;
     skipMeaninglessAction: boolean;
+
+    cursor: Cursor;
+    showPointedPixel: boolean;
   };
   debug: {
     showPerfMonitor: boolean;
@@ -36,6 +40,9 @@ export const defaultConfig: GlobalConfig = {
   editor: {
     canvasRenderingMode: 'adaptive',
     skipMeaninglessAction: false,
+
+    cursor: 'pixel',
+    showPointedPixel: false,
   },
   debug: {
     showPerfMonitor: false,
@@ -103,6 +110,27 @@ export const settingsMeta = [
     label: 'skip meaningless action',
     component: 'ToggleSwitch',
     tips: `prevent to add change that doesn't affects image to the history.`,
+  },
+  {
+    section: Sections.Editor,
+    path: ['editor', 'cursor'],
+    label: 'cursor',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: 'none', value: 'none' },
+        { label: 'pixel', value: 'pixel' },
+        { label: 'cross', value: 'cross' },
+      ],
+    },
+    tips: `cursor type.`,
+  },
+  {
+    section: Sections.Editor,
+    path: ['editor', 'showPointedPixel'],
+    label: 'show pointed pixel',
+    component: 'ToggleSwitch',
+    tips: `whether if shows pointed pixel as rect.`,
   },
 
   {

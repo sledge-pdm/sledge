@@ -10,7 +10,7 @@ import { saveGlobalSettings } from '~/io/config/out/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
-import { vars, ZFB08 } from '~/styles/global.css';
+import { vars, ZFB03, ZFB08 } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { Dialog, DialogExternalProps } from './Dialog';
 
@@ -113,12 +113,11 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
               Output Directory.
             </p>
             <div style={{ 'align-items': 'center', gap: '12px', 'margin-left': '12px' }} class={flexRow}>
-              <p style={{ 'flex-grow': 1, 'text-overflow': 'ellipsis' }}>{settings.dirPath}</p>
-              <button onClick={openDirSelectionDialog}>...</button>
+              <p style={{ 'font-family': ZFB03, 'font-size': '8px', 'flex-grow': 1, 'text-overflow': 'ellipsis' }}>{settings.dirPath}\</p>
+              <button onClick={openDirSelectionDialog}>change</button>
             </div>
-
-            <div class={flexRow} style={{ 'align-items': 'end', 'margin-left': '12px', 'margin-bottom': vars.spacing.sm }}>
-              <p class={styles.fileName}>\</p>
+            <div class={flexRow} style={{ 'align-items': 'end', 'margin-left': '12px' }}>
+              {/* <p class={styles.fileName}>\</p> */}
               <input
                 class={styles.fileName}
                 // @ts-expect-error
@@ -126,7 +125,7 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
                 value={settings.fileName}
                 onChange={(e) => setSettings('fileName', e.target.value)}
               />
-              <p style={{ 'font-size': vars.text.md, 'font-family': ZFB08 }}>.{settings.exportOptions.format}</p>
+              <p style={{ 'font-size': vars.text.sm, 'margin-bottom': '2px', 'font-family': ZFB08 }}>.{settings.exportOptions.format}</p>
             </div>
           </div>
           <div class={flexRow} style={{ gap: vars.spacing.md }}>

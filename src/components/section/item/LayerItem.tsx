@@ -9,6 +9,7 @@ import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
 import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
 import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
+import { eventBus } from '~/utils/EventBus';
 import LayerPreview from '../../common/LayerPreview';
 
 interface LayerItemProps {
@@ -27,12 +28,14 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   const onDetClicked = (e: MouseEvent) => {
     setLayerListStore('activeLayerId', props.layer.id);
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false }); //一応
   };
 
   const onPreviewClicked = () => {
     if (props.index !== -1) {
       setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
   };
   const isActive = () => layerListStore.activeLayerId === props.layer.id;
 

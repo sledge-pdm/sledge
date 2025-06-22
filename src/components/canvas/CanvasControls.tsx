@@ -21,7 +21,7 @@ const CanvasControls: Component = () => {
 
   createEffect(() => {
     layerListStore.activeLayerId;
-    
+
     setActiveCanUndo(canUndo());
     setActiveCanRedo(canRedo());
   });

@@ -4,7 +4,6 @@ import { PaletteType } from '~/models/color/PaletteType';
 import { Size2D } from '~/models/types/Size';
 import { Vec2 } from '~/models/types/Vector';
 import { defaultTools, Tool, ToolType } from '~/tools/Tools';
-import { RGBAColor } from '~/utils/ColorUtils';
 
 type SideAppearanceMode = 'editor' | 'project';
 type AppearanceStore = {

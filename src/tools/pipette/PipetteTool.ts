@@ -2,7 +2,7 @@ import { setCurrentColor } from '~/controllers/color/ColorController';
 import LayerImageAgent from '~/controllers/layer/image/managers/LayerImageAgent';
 import { getPrevActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
-import { colorMatch, isTransparent, RGBAColor, RGBToHex, transparent } from '~/utils/ColorUtils';
+import { isTransparent, RGBAColor, RGBToHex, transparent } from '~/utils/ColorUtils';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;

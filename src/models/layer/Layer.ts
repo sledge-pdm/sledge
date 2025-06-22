@@ -1,4 +1,3 @@
-
 export enum LayerType {
   Dot,
   Image,

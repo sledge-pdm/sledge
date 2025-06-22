@@ -32,7 +32,8 @@ export type GlobalConfig = {
     targetFPS: FPS;
   };
   debug: {
-    showPerfMonitor: boolean;
+    showPerformanceMonitor: boolean;
+    showCanvasDebugOverlay: boolean;
     showDirtyRects: boolean;
   };
 };
@@ -58,7 +59,8 @@ export const defaultConfig: GlobalConfig = {
     targetFPS: '60',
   },
   debug: {
-    showPerfMonitor: false,
+    showPerformanceMonitor: false,
+    showCanvasDebugOverlay: false,
     showDirtyRects: false,
   },
 };

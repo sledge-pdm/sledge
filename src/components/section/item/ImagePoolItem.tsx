@@ -28,12 +28,13 @@ const ImagePoolItem: Component<{}> = (props) => {
       <div
         class={flexCol}
         style={{
+          width: '16px',
+          height: '16px',
           'justify-content': 'center',
           'align-items': 'center',
           gap: vars.spacing.md,
           'margin-left': vars.spacing.xs,
-          'margin-right': vars.spacing.sm,
-          'padding-bottom': '5px',
+          'margin-right': vars.spacing.xs,
           cursor: 'pointer',
           'pointer-events': isImagePoolActive() ? 'all' : 'none',
         }}
@@ -41,7 +42,9 @@ const ImagePoolItem: Component<{}> = (props) => {
         <Icon
           src={'/icons/misc/add_image.png'}
           base={16}
+          color={vars.color.onBackground}
           onClick={async (e) => {
+            e.stopImmediatePropagation();
             e.stopPropagation();
             e.preventDefault();
             const path = await openImageImportDialog();

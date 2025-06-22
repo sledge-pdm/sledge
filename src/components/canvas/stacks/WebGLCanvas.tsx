@@ -63,10 +63,10 @@ const WebGLCanvas: Component = () => {
   });
 
   const imageRendering = () => {
-    if (globalConfig.editor.canvasRenderingMode === 'adaptive') {
+    if (globalConfig.performance.canvasRenderingMode === 'adaptive') {
       return interactStore.zoom > 1 ? 'pixelated' : 'auto';
     }
-    return globalConfig.editor.canvasRenderingMode;
+    return globalConfig.performance.canvasRenderingMode;
   };
 
   return (

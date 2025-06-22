@@ -45,8 +45,8 @@ export default function Editor() {
     setIsLoading(false);
 
     if (isNewProject) {
-      changeCanvasSize(globalConfig.newProject.canvasSize);
-      setCanvasStore('canvas', globalConfig.newProject.canvasSize);
+      changeCanvasSize(globalConfig.default.canvasSize);
+      setCanvasStore('canvas', globalConfig.default.canvasSize);
 
       layerListStore.layers.forEach((layer) => {
         resetLayerImage(layer.id, 1);

@@ -28,8 +28,8 @@ export async function closeWindowsByLabel(label: string) {
 export const getNewProjectSearchParams = (): string => {
   const sp = new URLSearchParams();
   sp.append('new', 'true');
-  sp.append('width', globalConfig.newProject.canvasSize.width.toString());
-  sp.append('height', globalConfig.newProject.canvasSize.height.toString());
+  sp.append('width', globalConfig.default.canvasSize.width.toString());
+  sp.append('height', globalConfig.default.canvasSize.height.toString());
   return sp.toString();
 };
 

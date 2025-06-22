@@ -23,7 +23,7 @@ const TopMenuBar: Component = () => {
 
   const leftItems: Item[] = [
     { text: '> OPEN.', action: () => openProject() },
-    { text: '+ CREATE.', action: () => createNew() },
+    { text: '+ NEW.', action: () => createNew() },
   ];
   const rightItems: Item[] = [
     {

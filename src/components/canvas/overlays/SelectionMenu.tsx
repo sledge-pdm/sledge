@@ -2,10 +2,10 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import Icon from '~/components/common/Icon';
+import { getRelativeCanvasAreaPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { BoundBox } from '~/controllers/selection/SelectionMask';
 import { cancelSelection, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
-import { interactStore } from '~/stores/EditorStores';
 import { vars } from '~/styles/global.css';
 import { flexRow } from '~/styles/snippets.css';
 import { eventBus, Events } from '~/utils/EventBus';
@@ -60,17 +60,18 @@ const SelectionMenu: Component<{}> = (props) => {
     stopRenderLoop();
   });
 
-  const offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
-  const offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
-  const selectionMenuX = () => offsetX() + (outlineBoundBox()?.left! + selectionManager.getMoveOffset().x) * interactStore.zoom;
-  const selectionMenuY = () => offsetY() + (outlineBoundBox()?.bottom! + selectionManager.getMoveOffset().y + 1) * interactStore.zoom;
+  const selectionMenuPos = () =>
+    getRelativeCanvasAreaPosition({
+      x: outlineBoundBox()?.left! + selectionManager.getMoveOffset().x,
+      y: outlineBoundBox()?.bottom! + selectionManager.getMoveOffset().y + 1,
+    });
 
   return (
     <div
       style={{
         position: 'absolute',
-        left: `${selectionMenuX()}px`,
-        top: `${selectionMenuY()}px`,
+        left: `${selectionMenuPos().x}px`,
+        top: `${selectionMenuPos().y}px`,
         visibility: committed() && outlineBoundBox() ? 'visible' : 'collapse',
         'image-rendering': 'auto',
         'pointer-events': 'all',

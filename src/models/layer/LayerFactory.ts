@@ -1,12 +1,9 @@
 import { v4 } from 'uuid';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { DSL } from '~/models/dsl/DSL';
 import { layerListStore } from '~/stores/ProjectStores';
 import { BlendMode, Layer, LayerType } from './Layer';
 
-type createLayerProps = Omit<Layer, 'id' | 'typeDescription' | 'dsl'> & {
-  dsl: DSL | undefined;
-
+type createLayerProps = Omit<Layer, 'id' | 'typeDescription'> & {
   initImage: Uint8ClampedArray | undefined;
 };
 
@@ -17,7 +14,6 @@ export const fallbackLayerProps: createLayerProps = {
   mode: BlendMode.normal,
   enabled: true,
   dotMagnification: 1,
-  dsl: undefined,
 
   initImage: undefined,
 };
@@ -37,7 +33,6 @@ export const createLayer = (props: createLayerProps): Layer => {
     mode: props.mode,
     enabled: props.enabled,
     dotMagnification: props.dotMagnification,
-    dsl: props.dsl ?? new DSL(id, id),
   };
 };
 

@@ -143,6 +143,7 @@ const LayerList: Component<{}> = () => {
           <DragDropSensors>
             <div class={layerList}>
               <ImagePoolItem />
+
               <SortableProvider ids={ids()}>
                 <For each={items()}>
                   {(layer, index) => {

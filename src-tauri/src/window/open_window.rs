@@ -15,7 +15,6 @@ const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRe
 
 fn next_editor_label(app: &AppHandle) -> String {
     loop {
-        // 例: "editor-31d15a92"
         let label = format!(
             "editor-{}",
             Uuid::new_v4().simple().to_string()[..8].to_owned()
@@ -32,14 +31,40 @@ pub async fn open_window(
     kind: SledgeWindowKind,
     query: Option<String>,
 ) -> Result<(), String> {
-    use SledgeWindowKind::*;
+    // 1. 開く先の `label` を決定
+    let (label, url) = match kind {
+        SledgeWindowKind::Start => ("start".into(), "/".into()),
+        SledgeWindowKind::About => ("about".into(), "/about".into()),
+        SledgeWindowKind::Settings => ("settings".into(), "/settings".into()),
+        SledgeWindowKind::Editor => {
+            let lbl = next_editor_label(&app);
+            let base = "/editor";
+            let full = query
+                .as_ref()
+                .map(|q| format!("{base}?{q}"))
+                .unwrap_or_else(|| base.to_string());
+            (lbl, full)
+        }
+    };
 
-    let label;
-    let (_url, mut builder) = match kind {
-        Start => {
-            label = "start";
-            let _url = "/";
-            let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
+    // 2. 既存ウィンドウがあれば再利用
+    if let Some(existing) = app.get_webview_window(&label) {
+        // ウィンドウを最前面に表示
+        existing.show().map_err(|e| e.to_string())?;
+        existing.set_focus().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    // 3. 新規ビルダー作成
+    let mut builder = WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(url.into()))
+        .focused(true)
+        .theme(Some(Theme::Light))
+        .additional_browser_args(COMMON_BROWSER_ARGS);
+
+    // 各種設定（サイズや装飾など）をここで上書き
+    match kind {
+        SledgeWindowKind::Start => {
+            builder = builder
                 .title("sledge")
                 .inner_size(700.0, 500.0)
                 .resizable(false)
@@ -48,18 +73,9 @@ pub async fn open_window(
                 .closable(true)
                 .maximizable(true)
                 .minimizable(true);
-            (_url, builder)
         }
-
-        Editor => {
-            let label = next_editor_label(&app);
-
-            let base_url = "/editor";
-            let full_url = query
-                .as_ref()
-                .map(|q| format!("{base_url}?{q}"))
-                .unwrap_or_else(|| base_url.to_string());
-            let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(full_url.into()))
+        SledgeWindowKind::Editor => {
+            builder = builder
                 .inner_size(1200.0, 750.0)
                 .resizable(true)
                 .decorations(false)
@@ -67,50 +83,34 @@ pub async fn open_window(
                 .closable(true)
                 .maximizable(true)
                 .minimizable(true);
-            (base_url, builder)
         }
-
-        About => {
-            label = "about";
-            let _url = "/about";
-            let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
+        SledgeWindowKind::About => {
+            builder = builder
                 .title("about")
                 .inner_size(400.0, 290.0)
                 .resizable(false)
                 .decorations(false)
                 .closable(true)
-                .accept_first_mouse(true)
                 .skip_taskbar(true)
                 .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);
-            (_url, builder)
         }
-
-        Settings => {
-            label = "settings";
-            let _url = "/settings";
-            let builder = WebviewWindowBuilder::new(&app, label, WebviewUrl::App(_url.into()))
+        SledgeWindowKind::Settings => {
+            builder = builder
                 .title("settings")
                 .inner_size(600.0, 400.0)
                 .resizable(false)
                 .decorations(false)
                 .closable(true)
-                .accept_first_mouse(true)
                 .skip_taskbar(true)
                 .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);
-            (_url, builder)
         }
-    };
+    }
 
-    builder = builder
-        .focused(true)
-        .theme(Some(Theme::Light))
-        .additional_browser_args(COMMON_BROWSER_ARGS);
-
+    // 4. ウィンドウ生成
     builder.build().map_err(|e| e.to_string())?;
-
     Ok(())
 }

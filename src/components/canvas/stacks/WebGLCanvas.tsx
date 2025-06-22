@@ -2,8 +2,7 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createSignal, onCleanup } from 'solid-js';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
-import { RenderMode } from '~/models/layer/RenderMode';
-import { interactStore, setLogStore } from '~/stores/EditorStores';
+import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
@@ -44,7 +43,6 @@ const WebGLCanvas: Component = () => {
   listenEvent('onSetup', () => {
     const { width, height } = canvasStore.canvas;
 
-    setLogStore('currentRenderMode', RenderMode.WebGL);
     startRenderLoop();
     webGLRenderer = new WebGLRenderer(canvasEl);
     webGLRenderer.resize(width, height);
@@ -65,10 +63,10 @@ const WebGLCanvas: Component = () => {
   });
 
   const imageRendering = () => {
-    if (globalConfig.editor.canvasRenderingMode === 'adaptive') {
+    if (globalConfig.performance.canvasRenderingMode === 'adaptive') {
       return interactStore.zoom > 1 ? 'pixelated' : 'auto';
     }
-    return globalConfig.editor.canvasRenderingMode;
+    return globalConfig.performance.canvasRenderingMode;
   };
 
   return (

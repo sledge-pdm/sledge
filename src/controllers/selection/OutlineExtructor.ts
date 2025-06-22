@@ -1,4 +1,4 @@
-import { Vec2 } from '~/types/Vector';
+import { Vec2 } from '~/models/types/Vector';
 import { PathCmd, PathCmdList } from './PathCommand';
 
 // 座標型

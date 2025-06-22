@@ -1,11 +1,13 @@
 import { Layer } from '~/models/layer/Layer';
-import { canvasStore, layerHistoryStore, layerListStore, setLayerHistoryStore, setLayerListStore } from '~/stores/ProjectStores';
+import { interactStore } from '~/stores/EditorStores';
+import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
+import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/LayerImageAgent';
-import { getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
+import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
 import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 
-const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dsl', 'dotMagnification'];
+const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
@@ -31,10 +33,6 @@ export function duplicateLayer(layerId: string) {
 }
 
 export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): LayerImageAgent {
-  setLayerHistoryStore(layerId, {
-    canUndo: false,
-    canRedo: false,
-  });
   let width = Math.round(canvasStore.canvas.width / dotMagnification);
   let height = Math.round(canvasStore.canvas.height / dotMagnification);
   let buffer: Uint8ClampedArray;
@@ -61,5 +59,25 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
   }
 }
 
-export const canUndo = (): boolean => layerHistoryStore[layerListStore.activeLayerId].canUndo;
-export const canRedo = (): boolean => layerHistoryStore[layerListStore.activeLayerId].canRedo;
+export function getCurrentPointingColor(): RGBAColor | undefined {
+  const agent = getActiveAgent();
+  return agent?.getPixelBufferManager().getPixel({
+    x: Math.floor(interactStore.lastMouseOnCanvas.x),
+    y: Math.floor(interactStore.lastMouseOnCanvas.y),
+  });
+}
+
+export function getCurrentPointingColorHex(): string | undefined {
+  if (!interactStore.lastMouseOnCanvas) return undefined;
+  const agent = getActiveAgent();
+  const color = agent?.getPixelBufferManager().getPixel({
+    x: Math.floor(interactStore.lastMouseOnCanvas.x),
+    y: Math.floor(interactStore.lastMouseOnCanvas.y),
+  });
+  if (color !== undefined) return `#${RGBAToHex(color, false)}`;
+
+  return undefined;
+}
+
+export const canUndo = (): boolean => getActiveAgent()?.canUndo() ?? false;
+export const canRedo = (): boolean => getActiveAgent()?.canRedo() ?? false;

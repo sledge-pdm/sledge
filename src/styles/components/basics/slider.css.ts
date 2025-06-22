@@ -1,7 +1,7 @@
 // src/styles/components/basics/slider.css.ts
 import { style } from '@vanilla-extract/css';
 import { vars } from '~/styles/global.css';
-import { flexCol, flexRow } from '~/styles/snippets.css';
+import { flexRow } from '~/styles/snippets.css';
 
 export const sliderRoot = style([
   flexRow,
@@ -13,12 +13,14 @@ export const sliderRoot = style([
 ]);
 
 export const valueLabelContainer = style([
-  flexCol,
+  flexRow,
   {
     minWidth: '64px',
-    height: '12px',
   },
 ]);
+export const valueLabel = style({
+  width: '52px',
+});
 export const valueLabelInput = style({
   width: '52px',
   letterSpacing: '1px',

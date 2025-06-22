@@ -15,6 +15,7 @@ export const ImagePool: Component = () => {
         visibility: !isImagePoolActive() ? 'collapse' : 'visible',
         'z-index': '200',
         'pointer-events': 'none',
+        'touch-action': 'none',
       }}
     >
       <For each={imagePoolStore.entries.values().toArray()}>

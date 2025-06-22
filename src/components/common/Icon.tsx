@@ -14,10 +14,11 @@ interface IconProps extends JSX.HTMLAttributes<HTMLDivElement> {
   base?: number;
 
   filter?: string;
+  backdropFilter?: string;
 }
 
 const Icon: Component<IconProps> = (props) => {
-  const [local, rest] = splitProps(props, ['src', 'color', 'hoverColor', 'scale', 'base', 'filter']);
+  const [local, rest] = splitProps(props, ['src', 'color', 'hoverColor', 'scale', 'base', 'filter', 'backdropFilter']);
   const px = () => (local.base ?? 16) * (local.scale ?? 1);
 
   return (
@@ -27,6 +28,8 @@ const Icon: Component<IconProps> = (props) => {
       style={{
         filter: local.filter,
         '-webkit-filter': local.filter,
+        'backdrop-filter': local.backdropFilter,
+        '-webkit-backdrop-filter': local.backdropFilter,
         ...assignInlineVars({
           [styles.pxVar]: `${px()}px`, // ユニット付き
           [styles.fillVar]: local.color ?? 'currentColor',

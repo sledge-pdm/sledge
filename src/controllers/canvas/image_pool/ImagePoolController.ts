@@ -2,7 +2,7 @@ import { appCacheDir, basename, join } from '@tauri-apps/api/path';
 import { copyFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
-import { loadImageMeta } from '~/utils/DataUtils';
+import { loadLocalImage } from '~/utils/DataUtils';
 import getFileId from '~/utils/getFileId';
 
 export function setEntry(id: string, entry: ImagePoolEntry) {
@@ -31,7 +31,7 @@ async function createResource(originalPath: string) {
   const destPath = await join(imagesDir, 'pool-images', destName);
   await copyFile(originalPath, destPath);
 
-  const { width, height, blobUrl } = await loadImageMeta(destPath);
+  const { width, height } = await loadLocalImage(destPath);
 
   const entry: ImagePoolEntry = {
     id,

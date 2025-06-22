@@ -89,9 +89,9 @@ export default () => {
         </div>
 
         <CanvasAreaOverlay />
-      </div>
 
-      <CanvasDebugOverlay />
+        <CanvasDebugOverlay />
+      </div>
       <CanvasControls />
       <BottomInfo />
     </div>

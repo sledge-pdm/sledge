@@ -1,18 +1,15 @@
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import Icon from '~/components/common/Icon';
 import { maskToPath } from '~/controllers/selection/OutlineExtructor';
 import { PathCmdList } from '~/controllers/selection/PathCommand';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { BoundBox } from '~/controllers/selection/SelectionMask';
-import { cancelSelection, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { vars } from '~/styles/global.css';
-import { flexRow } from '~/styles/snippets.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {
@@ -40,17 +37,13 @@ const CanvasOverlaySVG: Component = (props) => {
   );
 
   const [selectionChanged, setSelectionChanged] = createSignal<boolean>(false);
-  const [committed, setCommitted] = createSignal<boolean>(true);
   const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
-  const [outlineBoundBox, setOutlineBoundBox] = createSignal<BoundBox>();
   const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (selectionChanged()) {
         updateOutline();
         setSelectionChanged(false);
-        const box = selectionManager.getSelectionMask().getBoundBox();
-        if (box) setOutlineBoundBox(box);
       }
     }, fps)
   );
@@ -71,11 +64,9 @@ const CanvasOverlaySVG: Component = (props) => {
 
   const onSelectionChangedHandler = (e: Events['selection:changed']) => {
     setSelectionChanged(true);
-    setCommitted(e.commit);
   };
   const onSelectionMovedHandler = (e: Events['selection:moved']) => {
     setSelectionChanged(true);
-    setCommitted(true);
   };
 
   const tempKeyMove = (e: KeyboardEvent) => {
@@ -172,64 +163,6 @@ const CanvasOverlaySVG: Component = (props) => {
           pointer-events='none'
         />
       </svg>
-
-      <div
-        style={{
-          position: 'absolute',
-          left: `${outlineBoundBox()?.left! + selectionManager.getMoveOffset().x}px`,
-          top: `${outlineBoundBox()?.bottom! + selectionManager.getMoveOffset().y + 1}px`,
-          visibility: pathCmdList().getList().length > 0 && committed() ? 'visible' : 'collapse',
-          'transform-origin': '0 0',
-          'image-rendering': 'auto',
-          'pointer-events': 'all',
-          'z-index': 500,
-          transform: `scale(${1 / interactStore.zoom})`,
-        }}
-      >
-        <div
-          class={flexRow}
-          style={{
-            'margin-top': '8px',
-            'background-color': vars.color.surface,
-            border: `1px solid ${vars.color.onBackground}`,
-            'pointer-events': 'all',
-          }}
-        >
-          <div
-            style={{
-              margin: '6px',
-              'pointer-events': 'all',
-              cursor: 'pointer',
-            }}
-            onClick={() => {
-              cancelSelection();
-            }}
-          >
-            <Icon src='/icons/misc/clear.png' color={vars.color.onBackground} base={16} scale={1} />
-          </div>
-          <div
-            style={{
-              margin: '6px',
-              'pointer-events': 'all',
-              cursor: 'pointer',
-            }}
-          >
-            <Icon src='/icons/misc/duplicate.png' color={vars.color.onBackground} base={16} scale={1} />
-          </div>
-          <div
-            style={{
-              margin: '6px',
-              'pointer-events': 'all',
-              cursor: 'pointer',
-            }}
-            onClick={(e) => {
-              deletePixelInSelection();
-            }}
-          >
-            <Icon src='/icons/misc/garbage.png' color={vars.color.onBackground} base={16} scale={1} />
-          </div>
-        </div>
-      </div>
     </>
   );
 };

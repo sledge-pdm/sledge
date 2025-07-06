@@ -1,4 +1,4 @@
-import { Component, createEffect } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
@@ -7,10 +7,29 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
+import { eventBus } from '~/utils/EventBus';
 import { ImagePool } from './image_pool/ImagePool';
 import WebGLCanvas from './WebGLCanvas';
 
 const CanvasStack: Component = () => {
+  const [gridSize, setGridSize] = createSignal(10);
+
+  const updateGridSize = (width: number, height: number) => {
+    const shorter = width > height ? height : width;
+    let canvasStoreOrder = Math.floor(Math.log10(shorter));
+    canvasStoreOrder -= 1;
+
+    let gridSize = Math.pow(10, canvasStoreOrder) / 2;
+    setGridSize(gridSize);
+  };
+
+  onMount(() => {
+    eventBus.on('canvas:sizeChanged', ({ newSize }) => {
+      const { width, height } = newSize;
+      updateGridSize(width, height);
+    });
+  });
+
   createEffect(() => {
     const active = activeLayer();
     if (active) {
@@ -32,6 +51,8 @@ const CanvasStack: Component = () => {
         style={{
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
+          'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
+          'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
       >
         <InteractCanvas operator={new LayerCanvasOperator(() => activeLayer().id)} />

@@ -6,8 +6,8 @@
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run prettier && npm run build"
+    "beforeDevCommand": "pnpm vite:dev",
+    "beforeBuildCommand": "pnpm prettier && pnpm vite:build"
   },
   "app": {
     "windows": [],

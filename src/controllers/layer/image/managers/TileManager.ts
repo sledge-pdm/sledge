@@ -1,7 +1,6 @@
-import { Size2D } from '~/models/types/Size';
-import Tile, { TileIndex } from '~/models/types/Tile';
-import { Vec2 } from '~/models/types/Vector';
+import { Size2D, Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
+import Tile, { TileIndex } from './Tile';
 
 export default class TileManager {
   readonly TILE_SIZE = 32;

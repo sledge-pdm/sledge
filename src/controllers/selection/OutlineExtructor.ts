@@ -1,4 +1,4 @@
-import { Vec2 } from '~/models/types/Vector';
+import { Vec2 } from '@sledge/core';
 import { PathCmd, PathCmdList } from './PathCommand';
 
 // 座標型

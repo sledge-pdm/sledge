@@ -1,6 +1,6 @@
+import { flexRow, w100 } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '../global.css';
-import { flexRow, w100 } from '../snippets.css';
 
 export const toolConfigRow = style([
   flexRow,

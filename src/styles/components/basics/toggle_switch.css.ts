@@ -1,5 +1,5 @@
+import { vars } from '@sledge/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { vars } from '~/styles/global.css';
 
 const globalWidth = 16;
 const thumbWidth = 10;

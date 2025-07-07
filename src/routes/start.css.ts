@@ -1,6 +1,6 @@
+import { flexCol, flexRow, w100, wh100 } from '@sledge/core';
+import { vars, ZFB03, ZFB08, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB03, ZFB08, ZFB31 } from '~/styles/global.css';
-import { flexCol, flexRow, w100, wh100 } from '~/styles/snippets.css';
 
 export const startRoot = style([
   flexCol,

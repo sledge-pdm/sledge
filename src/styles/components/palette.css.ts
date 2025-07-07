@@ -1,5 +1,5 @@
+import { flexRow } from '@sledge/core';
 import { style } from '@vanilla-extract/css';
-import { flexRow } from '../snippets.css';
 
 export const paletteRoot = style([
   flexRow,

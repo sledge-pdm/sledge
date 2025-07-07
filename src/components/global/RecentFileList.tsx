@@ -1,13 +1,12 @@
+import { FileLocation, flexRow, w100 } from '@sledge/core';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { thumbnailDir } from '~/io/project/out/save';
-import { FileLocation } from '~/models/types/FileLocation';
 import { recentFilesCaption, recentFilesContainerCol, recentFilesContainerScroll } from '~/routes/start.css';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sectionRoot } from '~/styles/globals/section_global.css';
-import { flexRow, w100 } from '~/styles/snippets.css';
 import getFileId from '~/utils/getFileId';
 import ListFileItem from './file_item/ListFileItem';
 

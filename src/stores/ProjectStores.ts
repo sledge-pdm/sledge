@@ -1,15 +1,14 @@
 // projectStore.ts
+import { Size2D } from '@sledge/core';
 import { ReactiveMap } from '@solid-primitives/map';
 import { createStore } from 'solid-js/store';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Layer } from '~/models/layer/Layer';
-import { Size2D } from '~/models/types/Size';
 
 export type CanvasStore = {
   canvas: Size2D;
 };
 export type ImagePoolStore = {
-  entries: ReactiveMap<string, ImagePoolEntry>;
+  entries: ReactiveMap;
 };
 export type ProjectStore = {
   name: string | undefined;

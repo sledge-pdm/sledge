@@ -1,16 +1,15 @@
+import { flexCol, flexRow, w100 } from '@sledge/core';
+import { vars } from '@sledge/theme';
+import { Icon, Light } from '@sledge/ui';
 import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSortable, transformStyle, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
-import Icon from '~/components/common/Icon';
-import Light from '~/components/common/Light';
 import { Layer } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { vars } from '~/styles/global.css';
 import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
-import { flexCol, flexRow, w100 } from '~/styles/snippets.css';
 import { eventBus } from '~/utils/EventBus';
-import LayerPreview from '../../common/LayerPreview';
+import LayerPreview from '../../global/LayerPreview';
 
 interface LayerItemProps {
   index: number;

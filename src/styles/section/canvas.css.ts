@@ -1,6 +1,6 @@
+import { flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '../global.css';
-import { flexRow } from '../snippets.css';
 
 export const canvasSizeForm = style([
   flexRow,

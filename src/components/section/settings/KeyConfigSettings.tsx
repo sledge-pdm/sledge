@@ -1,3 +1,5 @@
+import { flexCol } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import {
   isRecordEndWithoutSave as isRecordAbortKey,
@@ -12,9 +14,7 @@ import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { KeyConfigCommands } from '~/models/Consts';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components/config/key_config_settings.css';
-import { vars } from '~/styles/global.css';
 import { sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
-import { flexCol } from '~/styles/snippets.css';
 
 const KeyConfigSettings: Component = () => {
   const [recordingName, setRecordingName] = createSignal<KeyConfigCommands | undefined>(undefined);

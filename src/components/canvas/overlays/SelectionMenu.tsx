@@ -1,13 +1,13 @@
+import { flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
-import Icon from '~/components/common/Icon';
 import { getRelativeCanvasAreaPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { BoundBox } from '~/controllers/selection/SelectionMask';
 import { cancelSelection, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
-import { vars } from '~/styles/global.css';
-import { flexRow } from '~/styles/snippets.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 const SelectionMenu: Component<{}> = (props) => {

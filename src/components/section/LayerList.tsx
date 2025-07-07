@@ -1,16 +1,15 @@
+import { flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
+import { Dropdown, Slider } from '@sledge/ui';
 import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode } from '~/models/layer/Layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { vars } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { layerList } from '~/styles/section/layer.css';
-import { flexRow } from '~/styles/snippets.css';
 import { listenEvent } from '~/utils/TauriUtils';
-import Dropdown from '../common/control/Dropdown';
-import Slider from '../common/control/Slider';
 import ImagePoolItem from './item/ImagePoolItem';
 import LayerItem from './item/LayerItem';
 

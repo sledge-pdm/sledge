@@ -1,17 +1,16 @@
+import { flexRow } from '@sledge/core';
+import { vars, ZFB03, ZFB08 } from '@sledge/theme';
+import { Checkbox, Dropdown, Slider } from '@sledge/ui';
+import { DropdownOption } from '@sledge/ui/src/components/control/Dropdown';
 import * as styles from '@styles/dialogs/export_image.css';
 import { open as openFile } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import Checkbox from '~/components/common/control/Checkbox';
-import Dropdown, { DropdownOption } from '~/components/common/control/Dropdown';
-import Slider from '~/components/common/control/Slider';
 import { saveGlobalSettings } from '~/io/config/out/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
-import { vars, ZFB03, ZFB08 } from '~/styles/global.css';
-import { flexRow } from '~/styles/snippets.css';
 import { Dialog, DialogExternalProps } from './Dialog';
 
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [

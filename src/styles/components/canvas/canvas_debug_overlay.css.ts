@@ -1,6 +1,6 @@
+import { flexCol, flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '~/styles/global.css';
-import { flexCol, flexRow } from '~/styles/snippets.css';
 
 export const canvasDebugOverlayTopLeft = style([
   flexCol,

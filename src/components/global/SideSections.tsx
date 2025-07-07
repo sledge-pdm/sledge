@@ -5,11 +5,11 @@ import LayerList from '../section/LayerList';
 import Project from '../section/Project';
 import ToolList from '../section/ToolList';
 
+import { flexCol } from '@sledge/core';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaMenu, sideAreaRoot } from '~/styles/globals/side_sections.css';
-import { flexCol } from '~/styles/snippets.css';
 import SectionTopMenu from './SectionTopMenu';
 
 const SideSections: Component = () => {

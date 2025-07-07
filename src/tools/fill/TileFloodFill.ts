@@ -1,7 +1,6 @@
+import { TileIndex, Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { PixelDiff } from '~/models/history/HistoryManager';
-import { TileIndex } from '~/models/types/Tile';
-import { Vec2 } from '~/models/types/Vector';
 import { colorMatch } from '~/utils/ColorUtils';
 import { Fill, FillProps } from './FillTool';
 

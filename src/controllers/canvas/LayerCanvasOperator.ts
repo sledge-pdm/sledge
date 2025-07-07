@@ -1,16 +1,21 @@
+import { Vec2 } from '@sledge/core';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
-import { Vec2 } from '~/models/types/Vector';
 import { interactStore } from '~/stores/EditorStores';
 import { ToolArgs } from '~/tools/ToolBehavior';
 import { Tool } from '~/tools/Tools';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
-import { DrawState } from '../../models/types/DrawState';
 import { currentColor } from '../color/ColorController';
+
+export enum DrawState {
+  start,
+  move,
+  end,
+}
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}

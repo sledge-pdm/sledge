@@ -1,7 +1,6 @@
+import { Vec2 } from '@sledge/core';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
-import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
-import { DrawState } from '~/models/types/DrawState';
-import { Vec2 } from '~/models/types/Vector';
+import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 

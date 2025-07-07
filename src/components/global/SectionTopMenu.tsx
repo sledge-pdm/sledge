@@ -1,7 +1,7 @@
+import { vars } from '@sledge/theme';
 import * as styles from '@styles/section/section_top_menu.css';
 import { Component, For, Show } from 'solid-js';
 import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
-import { vars } from '~/styles/global.css';
 
 interface Item {
   text: string;

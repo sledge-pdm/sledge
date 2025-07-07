@@ -1,4 +1,4 @@
-import { blackTheme, darkTheme, darkThemeGYFlip, lightTheme } from '~/styles/global.css';
+import { blackTheme, darkTheme, darkThemeGYFlip, lightTheme } from '@sledge/theme';
 import { globalConfig } from './GlobalStores';
 
 export const getTheme = () => {

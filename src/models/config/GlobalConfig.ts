@@ -1,3 +1,4 @@
+import { FileLocation } from '@sledge/core';
 import { debugMetas } from '~/models/config/meta/Debug';
 import { editorMetas } from '~/models/config/meta/Editor';
 import { generalMetas } from '~/models/config/meta/General';
@@ -7,7 +8,6 @@ import { Sections } from '~/models/config/Sections';
 import { Cursor } from '~/models/config/types/Cursor';
 import { FPS } from '~/models/config/types/FPS';
 import { Theme } from '~/models/config/types/Theme';
-import { FileLocation } from '~/models/types/FileLocation';
 import { CanvasRenderingMode } from '../canvas/Canvas';
 import { ConfigComponentName } from './ConfigComponents';
 

@@ -1,5 +1,5 @@
+import { Vec2 } from '@sledge/core';
 import { getReferencedZoom } from '~/controllers/canvas/CanvasController';
-import { Vec2 } from '~/models/types/Vector';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 
 class CanvasAreaInteract {

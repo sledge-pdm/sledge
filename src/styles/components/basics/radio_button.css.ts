@@ -1,6 +1,6 @@
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 import { checkboxWrapper } from '~/styles/components/basics/checkbox.css';
-import { vars } from '~/styles/global.css';
 
 export const radioWrapper = checkboxWrapper; // チェックボックスと共通でOK！
 

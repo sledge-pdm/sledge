@@ -1,6 +1,6 @@
+import { flexRow } from '@sledge/core';
+import { ZFB03B, ZFB08 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { ZFB03B, ZFB08 } from '~/styles/global.css';
-import { flexRow } from '~/styles/snippets.css';
 
 export const keyConfigRow = style([
   flexRow,

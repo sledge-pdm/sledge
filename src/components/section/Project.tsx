@@ -1,11 +1,11 @@
+import { flexCol, flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { Component, createSignal, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
-import { vars } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { projectNameInput } from '~/styles/section/project.css';
-import { flexCol, flexRow } from '~/styles/snippets.css';
 
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);

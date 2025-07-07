@@ -11,11 +11,12 @@
     "strict": true,
     "noEmit": true,
     "isolatedModules": true,
+    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*", "./dist-tcm/*"],
-      "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"]
+      "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"],
+      "@sledge/*": ["../../packages/*"]
     },
-    "rootDirs": ["src", "dist-tcm"],
-    "types": ["vite-plugin-glsl/ext"]
+    "rootDirs": ["src", "dist-tcm"]
   }
 }

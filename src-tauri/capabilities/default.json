@@ -16,6 +16,8 @@
     "dialog:allow-open",
     "shell:allow-open",
 
+    "log:allow-log",
+
     "fs:allow-open",
     "fs:allow-write",
     "fs:allow-write-file",

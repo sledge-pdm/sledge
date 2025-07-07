@@ -1,7 +1,7 @@
+import { vars } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
 import { Component } from 'solid-js';
-import Icon from '~/components/common/Icon';
 import { setActiveToolType } from '~/controllers/tool/ToolController';
-import { vars } from '~/styles/global.css';
 import { toolConfigRow, toolConfigRowClickable } from '~/styles/section/tools.css';
 import { Tool, ToolType } from '~/tools/Tools';
 

@@ -1,4 +1,4 @@
-import { Vec2 } from '~/models/types/Vector';
+import { Vec2 } from '@sledge/core';
 import { interactStore } from '~/stores/EditorStores';
 
 export function getRelativeCanvasAreaPosition(canvasPos: Vec2) {

@@ -1,16 +1,15 @@
 import { Component, For } from 'solid-js';
 import ColorPicker from '~/components/section/item/ColorPicker';
-import ColorBox from '../common/ColorBox';
 
-import Icon from '~/components/common/Icon';
+import { flexCol, flexRow } from '@sledge/core';
+import { vars, ZFB11 } from '@sledge/theme';
+import { ColorBox, Icon } from '@sledge/ui';
 import Palette from '~/components/section/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 import { getActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
-import { vars, ZFB11 } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { colorElemDescription, swatchContainer } from '~/styles/section/color.css';
-import { flexCol, flexRow } from '~/styles/snippets.css';
 import { ToolType } from '~/tools/Tools';
 
 const Color: Component = () => {
@@ -26,7 +25,15 @@ const Color: Component = () => {
       <div class={sectionContent} style={{ 'flex-direction': 'row', 'margin-top': '6px', 'margin-bottom': '4px' }}>
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
-            {(item, index) => <ColorBox color={item} sizePx={8} onClick={(color) => onColorClicked(color, index())} enableUsingSelection={true} />}
+            {(item, index) => (
+              <ColorBox
+                color={item}
+                sizePx={8}
+                onClick={(color) => onColorClicked(color, index())}
+                enableUsingSelection={true}
+                currentColor={currentColor}
+              />
+            )}
           </For>
         </div>
         <div>

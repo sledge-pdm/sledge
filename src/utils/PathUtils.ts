@@ -1,8 +1,11 @@
-import { FileLocation } from '~/models/types/FileLocation';
+import { FileLocation } from '@sledge/core';
 
-export const getFileNameAndPath = (fullPath: string): FileLocation | undefined => {
+export const PathToFileLocation = (fullPath: string): FileLocation | undefined => {
+  fullPath = fullPath.replace(/\//g, '\\'); // Normalize path format for Windows
   const filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'));
-  const fileName = fullPath.split('\\').pop()?.split('/').pop();
+  const fileName = fullPath.split('\\').pop()?.split('\\').pop();
+
+  console.log('PathToFileLocation', fullPath, filePath, fileName);
 
   if (filePath === undefined || fileName === undefined) return undefined;
   else {

@@ -1,8 +1,6 @@
+import { Size2D, TileIndex, Vec2 } from '@sledge/core';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
-import { Size2D } from '~/models/types/Size';
-import { TileIndex } from '~/models/types/Tile';
-import { Vec2 } from '~/models/types/Vector';
 import { globalConfig } from '~/stores/GlobalStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';

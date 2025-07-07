@@ -1,6 +1,6 @@
+import { flexCol } from '@sledge/core';
+import { vars, ZFB03 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB03 } from '../global.css';
-import { flexCol } from '../snippets.css';
 
 export const swatchContainer = style([
   flexCol,

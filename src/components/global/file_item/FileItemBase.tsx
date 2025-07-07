@@ -1,4 +1,4 @@
-import { FileLocation } from '~/models/types/FileLocation';
+import { FileLocation } from '@sledge/core';
 
 export interface FileItemProps {
   thumbnail: string;

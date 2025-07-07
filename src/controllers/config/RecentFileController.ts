@@ -1,5 +1,5 @@
+import { FileLocation } from '@sledge/core';
 import { saveGlobalSettings } from '~/io/config/out/save';
-import { FileLocation } from '~/models/types/FileLocation';
 import { setGlobalConfig } from '~/stores/GlobalStores';
 
 export const setRecentFile = (fileLocations: FileLocation[]) => {

@@ -1,7 +1,6 @@
 // src/styles/components/basics/slider.css.ts
+import { flexRow, vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '~/styles/global.css';
-import { flexRow } from '~/styles/snippets.css';
 
 export const sliderRoot = style([
   flexRow,

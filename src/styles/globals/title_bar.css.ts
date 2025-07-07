@@ -1,7 +1,6 @@
+import { flexCol, flexRow, h100, w100 } from '@sledge/core';
+import { vars, ZFB08 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '~/styles/global.css';
-import { ZFB08 } from '../global.css';
-import { flexCol, flexRow, h100, w100 } from '../snippets.css';
 
 export const titleBarRoot = style([
   flexRow,

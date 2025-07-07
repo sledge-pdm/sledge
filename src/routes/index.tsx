@@ -1,6 +1,6 @@
 import { onMount } from 'solid-js';
-import ThemeToggle from '~/components/common/ThemeToggle';
 import RecentFileList from '~/components/global/RecentFileList';
+import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import loadGlobalSettings from '~/io/config/in/load';
 import { globalConfig } from '~/stores/GlobalStores';

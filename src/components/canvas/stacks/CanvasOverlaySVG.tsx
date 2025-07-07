@@ -1,3 +1,4 @@
+import { vars } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -8,7 +9,6 @@ import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { vars } from '~/styles/global.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {

@@ -1,6 +1,6 @@
+import { ColorBox } from '@sledge/ui';
 import { Component } from 'solid-js';
-import ColorBox from '~/components/common/ColorBox';
-import { selectPalette } from '~/controllers/color/ColorController';
+import { currentColor, selectPalette } from '~/controllers/color/ColorController';
 import { PaletteType } from '~/models/color/PaletteType';
 import { colorStore } from '~/stores/EditorStores';
 import { paletteRoot } from '~/styles/components/palette.css';
@@ -13,12 +13,14 @@ const Palette: Component = () => {
         sizePx={28}
         onClick={(color) => selectPalette(PaletteType.primary)}
         enableUsingSelection={colorStore.currentPalette === PaletteType.primary}
+        currentColor={currentColor}
       />
       <ColorBox
         color={colorStore.secondary}
         sizePx={28}
         onClick={(color) => selectPalette(PaletteType.secondary)}
         enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
+        currentColor={currentColor}
       />
     </div>
   );

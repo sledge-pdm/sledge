@@ -1,7 +1,7 @@
+import { Size2D } from '@sledge/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { Consts } from '~/models/Consts';
-import { Size2D } from '~/models/types/Size';
 import { canvasStore } from '~/stores/ProjectStores';
 
 export function calcThumbnailSize(origW: number, origH: number): Size2D {
@@ -61,7 +61,7 @@ export class ThumbnailGenerator {
     return ctx.getImageData(0, 0, width, height);
   }
 
-  generateCanvasThumbnailBlob(width: number, height: number): Promise<Blob> {
+  generateCanvasThumbnailBlob(width: number, height: number): Promise {
     const srcW = canvasStore.canvas.width;
     const srcH = canvasStore.canvas.height;
     this.off.width = width;

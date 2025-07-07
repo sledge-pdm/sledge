@@ -1,7 +1,7 @@
+import { FileLocation } from '@sledge/core';
 import { addRecentFile } from '~/controllers/config/RecentFileController';
 import { openNewFile } from '~/io/open/open';
-import { FileLocation } from '~/models/types/FileLocation';
-import { getFileNameAndPath } from '~/utils/PathUtils';
+import { PathToFileLocation } from '~/utils/PathUtils';
 import { getExistingProjectSearchParams, getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 
 export const createNew = () => {
@@ -20,7 +20,7 @@ export const openProject = () => {
   openNewFile().then((file: string | undefined) => {
     console.log(file);
     if (file !== undefined) {
-      const loc = getFileNameAndPath(file);
+      const loc = PathToFileLocation(file);
       if (!loc) return;
       addRecentFile(loc);
       openExistingProject(loc);

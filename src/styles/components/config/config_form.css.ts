@@ -1,6 +1,6 @@
+import { flexCol, flexRow, h100, wh100 } from '@sledge/core';
+import { vars, ZFB08, ZFB09, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB08, ZFB09, ZFB31 } from '~/styles/global.css';
-import { flexCol, flexRow, h100, wh100 } from '~/styles/snippets.css';
 
 export const configFormRoot = style([
   flexRow,

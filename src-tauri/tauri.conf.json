@@ -23,7 +23,8 @@
     "fileAssociations": [
       {
         "ext": ["sledge"],
-        "description": "Sledge Project File"
+        "description": "Sledge Project File",
+        "rank": "Owner"
       }
     ],
     "resources": ["resources/**/*"],

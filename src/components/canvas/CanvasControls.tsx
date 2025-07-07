@@ -3,10 +3,10 @@ import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { canRedo, canUndo } from '~/controllers/layer/LayerController';
 
+import { vars } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
 import { layerListStore } from '~/stores/ProjectStores';
-import { vars } from '~/styles/global.css';
 import { eventBus } from '~/utils/EventBus';
-import Icon from '../common/Icon';
 
 const CanvasControls: Component = () => {
   const [activeCanUndo, setActiveCanUndo] = createSignal(canUndo());

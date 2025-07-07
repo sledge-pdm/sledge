@@ -1,6 +1,6 @@
+import { flexCol, w100 } from '@sledge/core';
+import { vars, ZFB11 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB11 } from '~/styles/global.css';
-import { flexCol, w100 } from '~/styles/snippets.css';
 
 export const sectionRoot = style([
   flexCol,

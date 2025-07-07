@@ -1,9 +1,11 @@
+import { componentProps, flexRow } from '@sledge/core';
+import { accentedButton, vars } from '@sledge/theme';
+import { Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createSignal, For, onMount, Show } from 'solid-js';
 import loadGlobalSettings from '~/io/config/in/load';
 import { resetToDefaultConfig } from '~/io/config/out/reset';
 import { saveGlobalSettings } from '~/io/config/out/save';
-import { componentProps } from '~/models/config/ConfigComponents';
 import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
 import { Sections } from '~/models/config/Sections';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
@@ -23,15 +25,7 @@ import {
   configFormSectionLabel,
   configFormSections,
 } from '~/styles/components/config/config_form.css';
-import { accentedButton, vars } from '~/styles/global.css';
-import { flexRow } from '~/styles/snippets.css';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
-import Checkbox from '../../common/control/Checkbox';
-import Dropdown from '../../common/control/Dropdown';
-import RadioButton from '../../common/control/RadioButton';
-import Slider from '../../common/control/Slider';
-import ToggleSwitch from '../../common/control/ToggleSwitch';
-import Light from '../../common/Light';
 import KeyConfigSettings from './KeyConfigSettings';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;

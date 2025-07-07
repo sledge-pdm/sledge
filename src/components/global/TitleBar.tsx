@@ -1,8 +1,9 @@
+import { vars } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { projectStore } from '~/stores/ProjectStores';
-import { vars } from '~/styles/global.css';
 import {
   titleBarControlButtonContainer,
   titleBarControlButtonImg,
@@ -12,7 +13,6 @@ import {
   titleBarTitle,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
-import Icon from '../common/Icon';
 
 export default function TitleBar() {
   let titleBarNavEl: HTMLElement;

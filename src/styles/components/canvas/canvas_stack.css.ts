@@ -1,6 +1,6 @@
 'background-image';
+import { flexRow } from '@sledge/core';
 import { style } from '@vanilla-extract/css';
-import { flexRow } from '~/styles/snippets.css';
 
 const transparent_bg_color = '#00000010';
 

@@ -1,6 +1,6 @@
+import { flexCol } from '@sledge/core';
+import { k12x8, Terminus, ZFB03, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { k12x8, Terminus, ZFB03, ZFB31 } from '~/styles/global.css';
-import { flexCol } from '~/styles/snippets.css';
 
 export const aaContainer = style([
   flexCol,

@@ -1,6 +1,6 @@
+import { flexCol } from '@sledge/core';
+import { vars, ZFB03B, ZFB09 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars, ZFB03B, ZFB09 } from '~/styles/global.css';
-import { flexCol } from '~/styles/snippets.css';
 
 export const rflThumb = style([
   flexCol,

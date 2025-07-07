@@ -1,5 +1,5 @@
+import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { Vec2 } from '~/models/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
 
 export interface ToolBehavior {

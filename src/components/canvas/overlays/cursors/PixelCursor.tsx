@@ -1,11 +1,11 @@
+import { Vec2 } from '@sledge/core';
 import { Component } from 'solid-js';
-import { Vec2 } from '~/models/types/Vector';
 
 interface Props {
   mousePos: Vec2;
 }
 
-const PixelCursor: Component<Props> = (props: Props) => {
+const PixelCursor: Component = (props: Props) => {
   return (
     <div
       style={{

@@ -1,6 +1,6 @@
+import { flexRow, w100, wh100 } from '@sledge/core';
+import { accentedButton, pageRoot } from '@sledge/theme';
 import { open } from '@tauri-apps/plugin-shell';
-import { accentedButton, pageRoot } from '~/styles/global.css';
-import { flexRow, w100, wh100 } from '~/styles/snippets.css';
 import { aaContainer, aaText, aboutContent, aboutFeedback, aboutLink, aboutSubTitle, aboutTitle, contentContainer } from './about.css';
 
 const About = () => {

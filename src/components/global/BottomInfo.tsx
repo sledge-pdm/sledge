@@ -1,5 +1,5 @@
 import { Component } from 'solid-js';
-import ThemeToggle from '~/components/common/ThemeToggle';
+import ThemeToggle from '~/components/global/ThemeToggle';
 import { interactStore, logStore } from '~/stores/EditorStores';
 
 import {

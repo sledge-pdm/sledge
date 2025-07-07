@@ -1,9 +1,9 @@
+import { flexCol, w100 } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { Component, For } from 'solid-js';
 import ToolItemSub from '~/components/section/item/ToolItemSub';
 import { toolStore } from '~/stores/EditorStores';
-import { vars } from '~/styles/global.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
-import { flexCol, w100 } from '~/styles/snippets.css';
 import { ToolType } from '~/tools/Tools';
 import ToolItemMain from './item/ToolItemMain';
 

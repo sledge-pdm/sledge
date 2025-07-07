@@ -1,9 +1,9 @@
 // src/components/common/Dialog.tsx
+import { accentedButton } from '@sledge/theme';
 import * as styles from '@styles/dialogs/dialog.css';
 import { For, JSX, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { getTheme } from '~/stores/Theme';
-import { accentedButton } from '~/styles/global.css';
 
 export interface DialogExternalProps {
   open: boolean;

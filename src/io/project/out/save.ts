@@ -7,7 +7,7 @@ import { addRecentFile } from '~/controllers/config/RecentFileController';
 import { dumpProject } from '~/io/project/out/dump';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
-import { getFileNameAndPath } from '~/utils/PathUtils';
+import { PathToFileLocation } from '~/utils/PathUtils';
 import getFileId from '../../../utils/getFileId';
 
 async function folderSelection(name?: string) {
@@ -57,7 +57,7 @@ export async function saveProject(name?: string, existingPath?: string) {
     console.log('project saved to:', selectedPath);
 
     setProjectStore('isProjectChangedAfterSave', false);
-    addRecentFile(getFileNameAndPath(selectedPath));
+    addRecentFile(PathToFileLocation(selectedPath));
   } else {
     console.log('save cancelled');
   }

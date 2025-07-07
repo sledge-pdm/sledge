@@ -1,7 +1,5 @@
+import { Point, Size2D, Vec2 } from '@sledge/core';
 import { PixelDiff } from '~/models/history/HistoryManager';
-import { Point } from '~/models/types/Point';
-import { Size2D } from '~/models/types/Size';
-import { Vec2 } from '~/models/types/Vector';
 import { RGBAColor } from '~/utils/ColorUtils';
 
 export default class PixelBufferManager {

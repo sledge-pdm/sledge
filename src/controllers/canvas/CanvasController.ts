@@ -1,6 +1,6 @@
+import { Size2D } from '@sledge/core';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { Consts } from '~/models/Consts';
-import { Size2D } from '~/models/types/Size';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';

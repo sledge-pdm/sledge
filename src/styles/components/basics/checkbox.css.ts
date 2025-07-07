@@ -1,5 +1,5 @@
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '~/styles/global.css';
 
 export const checkboxWrapper = style({
   display: 'inline-flex',

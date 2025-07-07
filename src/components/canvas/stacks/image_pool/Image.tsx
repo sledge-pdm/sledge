@@ -1,3 +1,4 @@
+import { flexRow } from '@sledge/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
 import { Component, createSignal, onMount } from 'solid-js';
@@ -9,7 +10,6 @@ import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { ImagePoolEntryMenu } from '~/models/menu/ImagePoolEntryMenu';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
-import { flexRow } from '~/styles/snippets.css';
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({

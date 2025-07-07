@@ -1,6 +1,5 @@
+import { flexCol, flexRow, vars } from '@sledge/theme';
 import { style, styleVariants } from '@vanilla-extract/css';
-import { vars } from '~/styles/global.css';
-import { flexCol, flexRow } from '~/styles/snippets.css';
 
 // コンテナ要素
 export const dropdownContainer = style({

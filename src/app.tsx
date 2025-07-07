@@ -7,9 +7,9 @@ import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';
 
+import { flexCol, h100 } from '@sledge/core';
 import Settings from './routes/settings';
 import { getTheme } from './stores/Theme';
-import { flexCol, h100 } from './styles/snippets.css';
 
 export default function App() {
   return (

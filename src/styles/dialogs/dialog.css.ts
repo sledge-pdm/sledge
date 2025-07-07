@@ -1,8 +1,7 @@
 // src/components/common/Dialog.css.ts
+import { flexRow, w100 } from '@sledge/core';
+import { vars, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { ZFB31 } from '~/styles/global.css';
-import { vars } from '../global.css';
-import { flexRow, w100 } from '../snippets.css';
 
 export const overlay = style({
   position: 'fixed',

@@ -1,6 +1,6 @@
+import { flexCol, h100 } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '../global.css';
-import { flexCol, h100 } from '../snippets.css';
 
 export const sideAreaRoot = style([
   flexCol,

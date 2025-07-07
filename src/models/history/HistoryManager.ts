@@ -1,7 +1,7 @@
-import { TileIndex } from '~/models/types/Tile';
+import { TileIndex } from '@sledge/core';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
-import { Vec2 } from '../types/Vector';
+import { Vec2 } from '../../../../../packages/core/src/Vector';
 
 export type PixelDiff = {
   kind: 'pixel';
@@ -29,7 +29,7 @@ export const getDiffHash = (diff: Diff) => {
 };
 
 export type DiffAction = {
-  diffs: Map<string, Diff>;
+  diffs: Map;
 };
 
 export class HistoryManager {

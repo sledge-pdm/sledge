@@ -1,6 +1,6 @@
+import { flexCol, flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '../global.css';
-import { flexCol, flexRow } from '../snippets.css';
 
 export const edgeInfoRoot = style([
   flexCol,

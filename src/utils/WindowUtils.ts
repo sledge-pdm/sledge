@@ -1,7 +1,7 @@
+import { FileLocation } from '@sledge/core';
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { WindowOptions } from '@tauri-apps/api/window';
-import { FileLocation } from '~/models/types/FileLocation';
 import { globalConfig } from '~/stores/GlobalStores';
 import { safeInvoke } from './TauriUtils';
 

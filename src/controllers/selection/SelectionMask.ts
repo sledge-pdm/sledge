@@ -1,5 +1,4 @@
-import { Size2D } from '~/models/types/Size';
-import { Vec2 } from '~/models/types/Vector';
+import { Size2D, Vec2 } from '@sledge/core';
 
 export interface BoundBox {
   top: number;

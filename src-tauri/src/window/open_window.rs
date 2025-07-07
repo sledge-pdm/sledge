@@ -30,6 +30,7 @@ pub async fn open_window(
     app: AppHandle,
     kind: SledgeWindowKind,
     query: Option<String>,
+    initialization_script: Option<String>,
 ) -> Result<(), String> {
     // 1. 開く先の `label` を決定
     let (label, url) = match kind {
@@ -57,6 +58,7 @@ pub async fn open_window(
 
     // 3. 新規ビルダー作成
     let mut builder = WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(url.into()))
+        .initialization_script(initialization_script.unwrap_or_default())
         .focused(true)
         .theme(Some(Theme::Light))
         .additional_browser_args(COMMON_BROWSER_ARGS);

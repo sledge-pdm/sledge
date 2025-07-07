@@ -3,11 +3,11 @@ import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
 
+import { vars } from '@sledge/theme';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
-import { vars } from '~/styles/global.css';
 import { eventBus } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 import BottomInfo from '../global/BottomInfo';

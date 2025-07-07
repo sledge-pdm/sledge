@@ -1,6 +1,6 @@
+import { flexCol } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { vars } from '~/styles/global.css';
-import { flexCol } from '../../snippets.css';
 
 export const canvasArea = style([
   flexCol,

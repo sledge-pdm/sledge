@@ -36,11 +36,9 @@ pub async fn open_window(
     kind: SledgeWindowKind,
     query: Option<String>,
 ) -> Result<(), String> {
-    println!("🚀 [PERF] open_window started");
 
     // 1. スプラッシュスクリーンを即座に表示
     let splash_closer = if matches!(kind, SledgeWindowKind::Start | SledgeWindowKind::Editor) {
-        println!("💫 [PERF] Showing native splash screen");
         Some(splash::show_splash_screen())
     } else {
         None
@@ -149,8 +147,6 @@ pub async fn open_window(
         .build()
         .map_err(|e| e.to_string())?;
 
-    println!("🏗️ [PERF] Window built (hidden)");
-
     // スプラッシュクローザーをアプリの状態として保存
     if let Some(closer) = splash_closer {
         app.manage(closer);
@@ -161,8 +157,6 @@ pub async fn open_window(
 
 #[tauri::command]
 pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<(), String> {
-    println!("🎯 [PERF] Showing main window and closing native splash");
-
     // スプラッシュスクリーンを閉じる
     if let Some(splash_closer) = app.try_state::<Arc<AtomicBool>>() {
         splash::close_splash_screen(splash_closer.inner().clone());
@@ -176,6 +170,5 @@ pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<()
         window.set_focus().map_err(|e| e.to_string())?;
     }
 
-    println!("✨ [PERF] Native transition complete");
     Ok(())
 }

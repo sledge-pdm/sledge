@@ -1,4 +1,4 @@
-import { saveGlobalSettings } from '~/io/config/out/save';
+import { saveGlobalSettings } from '~/io/config/save';
 import { FileLocation } from '~/models/types/FileLocation';
 import { setGlobalConfig } from '~/stores/GlobalStores';
 

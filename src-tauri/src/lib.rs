@@ -1,10 +1,10 @@
 mod analysis;
-mod commands;
+mod config;
+mod global_event;
+mod splash;
 mod window;
 
-use analysis::get_process_memory;
-use commands::emit_global_event;
-use window::{SledgeWindowKind, open_window};
+use window::SledgeWindowKind;
 
 use futures::executor::block_on;
 
@@ -12,9 +12,13 @@ use futures::executor::block_on;
 pub fn run() {
     let builder = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            get_process_memory,
-            open_window,
-            emit_global_event
+            analysis::get_process_memory,
+            window::open_window,
+            window::show_main_window,
+            global_event::emit_global_event,
+            config::load_global_config,
+            config::save_global_config,
+            config::reset_global_config
         ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
@@ -25,8 +29,9 @@ pub fn run() {
     builder
         .setup(|app| {
             let app_handle = app.handle().clone();
-            let future_open = open_window(app_handle, SledgeWindowKind::Editor, None);
+            let future_open = window::open_window(app_handle, SledgeWindowKind::Editor, None);
             let _ = block_on(future_open);
+
             Ok(())
         })
         .run(tauri::generate_context!())

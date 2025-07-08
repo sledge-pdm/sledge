@@ -12,7 +12,7 @@ export default defineConfig({
     outDir: 'dist',
   },
   server: {
-    host: true,
+    host: false,
     port: 5173,
   },
   alias: {

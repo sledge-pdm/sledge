@@ -6,7 +6,7 @@ import { createStore } from 'solid-js/store';
 import Checkbox from '~/components/common/control/Checkbox';
 import Dropdown, { DropdownOption } from '~/components/common/control/Dropdown';
 import Slider from '~/components/common/control/Slider';
-import { saveGlobalSettings } from '~/io/config/out/save';
+import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';

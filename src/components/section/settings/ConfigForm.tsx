@@ -1,8 +1,7 @@
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createSignal, For, onMount, Show } from 'solid-js';
-import loadGlobalSettings from '~/io/config/in/load';
-import { resetToDefaultConfig } from '~/io/config/out/reset';
-import { saveGlobalSettings } from '~/io/config/out/save';
+import { resetToDefaultConfig } from '~/io/config/reset';
+import { saveGlobalSettings } from '~/io/config/save';
 import { componentProps } from '~/models/config/ConfigComponents';
 import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
 import { Sections } from '~/models/config/Sections';
@@ -106,7 +105,6 @@ export default function ConfigForm() {
 
   const manualSave = async () => {
     await saveGlobalSettings();
-    await emitGlobalEvent('onSettingsSaved');
     setIsSaved(true);
     setIsDirty(false);
   };
@@ -134,7 +132,6 @@ export default function ConfigForm() {
   };
 
   onMount(async () => {
-    await loadGlobalSettings();
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
   });
 

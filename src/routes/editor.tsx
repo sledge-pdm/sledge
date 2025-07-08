@@ -12,7 +12,6 @@ import TopMenuBar from '~/components/global/TopMenuBar';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
-import loadGlobalSettings from '~/io/config/in/load';
 import { initProjectWithNewImage } from '~/io/image/in/open';
 import { importProjectFromPath } from '~/io/project/in/import';
 import { LayerType } from '~/models/layer/Layer';
@@ -21,7 +20,7 @@ import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectSt
 import { pageRoot } from '~/styles/global.css';
 import { flexCol } from '~/styles/snippets.css';
 import { eventBus } from '~/utils/EventBus';
-import { emitEvent, listenEvent } from '~/utils/TauriUtils';
+import { emitEvent, listenEvent, safeInvoke } from '~/utils/TauriUtils';
 
 export default function Editor() {
   const location = useLocation();
@@ -37,17 +36,12 @@ export default function Editor() {
 
   const onProjectLoad = async () => {
     await emitEvent('onProjectLoad');
-
     setProjectStore('isProjectChangedAfterSave', false);
-    await loadGlobalSettings();
-
-    await emitEvent('onGlobalStoreLoad');
     setIsLoading(false);
 
     if (isNewProject) {
       changeCanvasSize(globalConfig.default.canvasSize);
       setCanvasStore('canvas', globalConfig.default.canvasSize);
-
       layerListStore.layers.forEach((layer) => {
         resetLayerImage(layer.id, 1);
       });
@@ -55,10 +49,6 @@ export default function Editor() {
 
     await emitEvent('onSetup');
     adjustZoomToFit();
-
-    listenEvent('onSettingsSaved', () => {
-      loadGlobalSettings();
-    });
   };
 
   const sp = new URLSearchParams(location.search);
@@ -97,9 +87,6 @@ export default function Editor() {
   let unlisten: UnlistenFn;
 
   onMount(async () => {
-    listenEvent('onSettingsSaved', () => {
-      loadGlobalSettings();
-    });
     unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
       if (!isLoading() && projectStore.isProjectChangedAfterSave) {
         const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {

@@ -51,6 +51,7 @@
     "@tauri-apps/cli": "^2.5.0",
     "@vanilla-extract/vite-plugin": "^5.0.1",
     "patch-package": "^8.0.0",
+    "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.1.0",
     "solid-refresh": "^0.7.5",
     "stylelint": "^16.18.0",

@@ -1,7 +1,7 @@
 import { Dropdown } from '@sledge/ui';
 import { Theme } from '@tauri-apps/api/window';
 import { Component } from 'solid-js';
-import { saveGlobalSettings } from '~/io/config/out/save';
+import { saveGlobalSettings } from '~/io/config/save';
 import { themeOptions } from '~/models/config/types/Theme';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 

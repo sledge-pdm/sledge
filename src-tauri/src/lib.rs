@@ -1,13 +1,13 @@
 mod analysis;
-mod commands;
+mod config;
+mod global_event;
+mod splash;
 mod window;
 
-use analysis::get_process_memory;
-use commands::emit_global_event;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_fs::FsExt;
-use window::{SledgeWindowKind, open_window};
+use window::{SledgeWindowKind};
 
 use futures::executor::block_on;
 
@@ -36,7 +36,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
         .collect::<Vec<_>>()
         .join(",");
 
-    let future_open = open_window(
+    let future_open = window::open_window(
         app,
         SledgeWindowKind::Editor,
         None,
@@ -49,9 +49,13 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 pub fn run() {
     let builder = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            get_process_memory,
-            open_window,
-            emit_global_event
+            analysis::get_process_memory,
+            window::open_window,
+            window::show_main_window,
+            global_event::emit_global_event,
+            config::load_global_config,
+            config::save_global_config,
+            config::reset_global_config
         ])
         .plugin(
             tauri_plugin_log::Builder::new()

@@ -1,17 +1,49 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import { Suspense } from 'solid-js';
+import { onMount, Suspense } from 'solid-js';
 import TitleBar from './components/global/TitleBar';
 import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';
 
 import { flexCol, h100 } from '@sledge/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import loadGlobalSettings from './io/config/load';
+import setGlobalSettings from './io/config/set';
 import Settings from './routes/settings';
 import { getTheme } from './stores/Theme';
+import { listenEvent, safeInvoke } from './utils/TauriUtils';
 
 export default function App() {
+  onMount(async () => {
+    if (window instanceof Window) {
+      const globalConfig = (window as any).__CONFIG__;
+      if (globalConfig) {
+        // Load global config from window object
+        await setGlobalSettings(globalConfig);
+        console.log('global settings loaded from window object:', globalConfig);
+      } else {
+        // Fallback to loading from Rust?
+      }
+    }
+
+    // ネイティブスプラッシュを閉じてWebViewを表示
+    try {
+      const windowLabel = getCurrentWindow().label;
+      await safeInvoke('show_main_window', { windowLabel });
+      console.log('🌐 [PERF] Window transition completed');
+    } catch (error) {
+      console.error('Failed to transition from native splash:', error);
+      // フォールバック
+      getCurrentWindow().show();
+    }
+  });
+
+  listenEvent('onSettingsSaved', () => {
+    loadGlobalSettings();
+  });
+
   return (
     <Router
       root={(props) => (

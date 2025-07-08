@@ -1,18 +1,12 @@
-import { onMount } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
-import loadGlobalSettings from '~/io/config/in/load';
 import { globalConfig } from '~/stores/GlobalStores';
 import { getTheme } from '~/stores/Theme';
 import { openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
 
 export default function Home() {
-  onMount(async () => {
-    await loadGlobalSettings();
-  });
-
   return (
     <div class={getTheme()}>
       <div class={startRoot}>

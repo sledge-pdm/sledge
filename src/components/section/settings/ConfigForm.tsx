@@ -3,9 +3,8 @@ import { accentedButton, vars } from '@sledge/theme';
 import { Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createSignal, For, onMount, Show } from 'solid-js';
-import loadGlobalSettings from '~/io/config/in/load';
-import { resetToDefaultConfig } from '~/io/config/out/reset';
-import { saveGlobalSettings } from '~/io/config/out/save';
+import { resetToDefaultConfig } from '~/io/config/reset';
+import { saveGlobalSettings } from '~/io/config/save';
 import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
 import { Sections } from '~/models/config/Sections';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
@@ -25,7 +24,6 @@ import {
   configFormSectionLabel,
   configFormSections,
 } from '~/styles/components/config/config_form.css';
-import { emitGlobalEvent } from '~/utils/TauriUtils';
 import KeyConfigSettings from './KeyConfigSettings';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
@@ -100,7 +98,6 @@ export default function ConfigForm() {
 
   const manualSave = async () => {
     await saveGlobalSettings();
-    await emitGlobalEvent('onSettingsSaved');
     setIsSaved(true);
     setIsDirty(false);
   };
@@ -128,7 +125,6 @@ export default function ConfigForm() {
   };
 
   onMount(async () => {
-    await loadGlobalSettings();
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
   });
 

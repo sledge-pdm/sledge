@@ -10,7 +10,6 @@
     "beforeBuildCommand": "pnpm prettier && pnpm vite:build"
   },
   "app": {
-    "windows": [],
     "security": {
       "csp": null,
       "assetProtocol": {

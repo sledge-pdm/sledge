@@ -7,7 +7,7 @@ import { open as openFile } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { saveGlobalSettings } from '~/io/config/out/save';
+import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';

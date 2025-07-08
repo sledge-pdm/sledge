@@ -107,7 +107,6 @@ fn setup_custom_fonts(ctx: &egui::Context) {
             );
 
             ctx.set_fonts(fonts.clone());
-            println!("💫 [PERF] Custom font 04B_08 loaded from {}", path_str);
             font_loaded = true;
             break;
         }
@@ -127,14 +126,13 @@ fn setup_custom_fonts(ctx: &egui::Context) {
                 );
 
                 ctx.set_fonts(fonts);
-                println!("💫 [PERF] Custom font 04B_08 loaded from {:?}", path);
                 font_loaded = true;
             }
         }
     }
 
     if !font_loaded {
-        println!("⚠️ [PERF] Failed to load custom font, using default");
+        println!("Failed to load custom font, using default");
     }
 }
 
@@ -157,14 +155,14 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
             viewport: ViewportBuilder::default()
                 .with_inner_size([280.0, 160.0])
                 .with_decorations(false)
+                .with_taskbar(false)
                 .with_always_on_top()
                 .with_resizable(false),
             event_loop_builder,
             centered: true,
+
             ..Default::default()
         };
-
-        println!("💫 [PERF] Native splash screen starting");
 
         let _ = eframe::run_native(
             "Loading Sledge",
@@ -175,8 +173,6 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
                 Ok(Box::new(SplashScreen::new(should_close_clone)))
             }),
         );
-
-        println!("💫 [PERF] Native splash screen closed");
     });
 
     should_close
@@ -184,5 +180,4 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
 
 pub fn close_splash_screen(closer: Arc<AtomicBool>) {
     closer.store(true, Ordering::Relaxed);
-    println!("💫 [PERF] Splash screen close signal sent");
 }

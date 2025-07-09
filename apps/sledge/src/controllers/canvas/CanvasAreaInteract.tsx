@@ -206,8 +206,8 @@ class CanvasAreaInteract {
 
   public setInteractListeners() {
     this.wrapperRef.addEventListener('pointerdown', this.onPointerDown);
-    this.wrapperRef.addEventListener('pointermove', this.onPointerMove);
-    this.wrapperRef.addEventListener('pointerup', this.onPointerUp);
+    window.addEventListener('pointermove', this.onPointerMove);
+    window.addEventListener('pointerup', this.onPointerUp);
     this.wrapperRef.addEventListener('pointercancel', this.onPointerCancel);
     // wheel
     this.wrapperRef.addEventListener('wheel', this.onWheel, { passive: true });
@@ -218,8 +218,8 @@ class CanvasAreaInteract {
 
   public removeInteractListeners() {
     this.wrapperRef.removeEventListener('pointerdown', this.onPointerDown);
-    this.wrapperRef.removeEventListener('pointermove', this.onPointerMove);
-    this.wrapperRef.removeEventListener('pointerup', this.onPointerUp);
+    window.removeEventListener('pointermove', this.onPointerMove);
+    window.removeEventListener('pointerup', this.onPointerUp);
     this.wrapperRef.removeEventListener('pointercancel', this.onPointerCancel);
     this.wrapperRef.removeEventListener('wheel', this.onWheel);
     window.removeEventListener('keydown', this.onKeyDown);

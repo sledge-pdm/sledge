@@ -1,7 +1,19 @@
 import { flexRow } from '@sledge/core';
 import { vars, ZFB03B } from '@sledge/theme';
 import ThemeToggle from '~/components/ThemeToggle';
-import { content, greetText, mainButton, rightBottomArea, startHeader, startIcon, startRoot, startText, themeArea } from '~/routes/start.css';
+import {
+  content,
+  description,
+  greetText,
+  mainButton,
+  rightBottomArea,
+  startHeader,
+  startIcon,
+  startImage,
+  startRoot,
+  startText,
+  themeArea,
+} from '~/routes/start.css';
 import { globalStore } from '~/store/GlobalStore';
 
 export default function Home() {
@@ -15,31 +27,35 @@ export default function Home() {
       </a>
 
       <div class={content}>
-        <p class={greetText}>HELLO.</p>
-        <p class={startText}>
-          i'm sledge.
-          <br />
-          simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
-        </p>
+        <div class={description}>
+          <p class={greetText}>HELLO.</p>
+          <p class={startText}>
+            i'm sledge.
+            <br />
+            simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
+          </p>
 
-        <div style={{ display: 'flex', 'flex-direction': 'row', gap: '2rem', 'flex-wrap': 'wrap' }}>
-          <button
-            onClick={() => {
-              alert('OOPS Sorry Wait for the desktop app to be released!');
-            }}
-            class={mainButton}
-          >
-            DOWNLOAD.
-          </button>
-          <button
-            onClick={() => {
-              window.open('https://gitlab.com/Innsbluck/sledge', '_blank')?.focus();
-            }}
-            class={mainButton}
-          >
-            LOOK INSIDE.
-          </button>
+          <div style={{ display: 'flex', 'flex-direction': 'row', gap: '2rem', 'flex-wrap': 'wrap' }}>
+            <button
+              onClick={() => {
+                alert('OOPS Sorry Wait for the desktop app to be released!');
+              }}
+              class={mainButton}
+            >
+              DOWNLOAD.
+            </button>
+            <button
+              onClick={() => {
+                window.open('https://gitlab.com/Innsbluck/sledge', '_blank')?.focus();
+              }}
+              class={mainButton}
+            >
+              LOOK INSIDE.
+            </button>
+          </div>
         </div>
+
+        <img class={startImage} src={isLight() ? '/window_dark.png' : "window_light.png"} />
       </div>
 
       <div class={themeArea}>

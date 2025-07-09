@@ -4,7 +4,7 @@ import { transparent } from '~/utils/ColorUtils';
 import { PenTool } from '../pen/PenTool';
 
 export class EraserTool extends PenTool {
-  onlyOnCanvas = true;
+  onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     return super.draw(agent, args, transparent);

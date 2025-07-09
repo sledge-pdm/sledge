@@ -1,14 +1,6 @@
-import { For, type JSX, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
-import {
-  dropdownContainer,
-  itemText,
-  menuDirection,
-  menuItem,
-  menuStyle,
-  triggerButton,
-  triggerButtonNoBG,
-} from '@styles/control/dropdown.css';
 import { vars } from '@sledge/theme';
+import { dropdownContainer, itemText, menuDirection, menuItem, menuStyle, triggerButton, triggerButtonNoBG } from '@styles/control/dropdown.css';
+import { For, type JSX, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
 import Icon from 'src/components/Icon';
 
 export type DropdownOption<T extends string | number> = {
@@ -22,6 +14,7 @@ interface Props<T extends string | number = string> {
   options: DropdownOption<T>[];
   props?: JSX.HTMLAttributes<HTMLDivElement>;
   noBackground?: boolean;
+  wheelSpin?: boolean;
 }
 
 const Dropdown = <T extends string | number>(p: Props<T>) => {
@@ -74,8 +67,24 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
     setDir(spaceBelow < menuH && spaceAbove > spaceBelow ? 'up' : 'down');
   };
 
+  const spin = (isUp: boolean) => {
+    console.log('hi');
+    const currentIndex = p.options.findIndex((option) => option.value === getValue());
+    const nextIndex = isUp ? (currentIndex + 1) % p.options.length : (currentIndex - 1 + p.options.length) % p.options.length;
+    const next = p.options[nextIndex].value as T;
+
+    p.onChange?.(next);
+  };
+
   return (
-    <div class={dropdownContainer} ref={containerRef} {...p.props}>
+    <div
+      class={dropdownContainer}
+      ref={containerRef}
+      {...p.props}
+      onWheel={(e) => {
+        if (p.wheelSpin === undefined || p.wheelSpin) spin(e.deltaY > 0);
+      }}
+    >
       <button
         type='button'
         class={p.noBackground ? triggerButtonNoBG : triggerButton}

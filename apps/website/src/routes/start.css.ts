@@ -8,6 +8,7 @@ export const startRoot = style([
   {
     overflow: 'hidden',
     padding: '48px 42px',
+    boxSizing: 'border-box',
     userSelect: 'text',
     '@media': {
       '(max-width: 768px)': {
@@ -70,7 +71,7 @@ export const startText = style({
   marginBottom: '2rem',
   '@media': {
     '(max-width: 768px)': {
-      fontSize: '16px',
+      fontSize: '18px',
     },
   },
 });

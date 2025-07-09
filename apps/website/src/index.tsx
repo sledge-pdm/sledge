@@ -2,7 +2,7 @@
 import { render } from 'solid-js/web';
 import App from './App';
 
-import './themeAnim.css';
+import './global.css';
 
 const root = document.getElementById('root');
 

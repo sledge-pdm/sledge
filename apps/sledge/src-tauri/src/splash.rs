@@ -1,6 +1,6 @@
 use eframe::egui;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Instant;
 #[cfg(target_os = "windows")]
 use winit::platform::windows::EventLoopBuilderExtWindows;
@@ -41,29 +41,36 @@ impl eframe::App for SplashScreen {
                         .size(32.0)
                         .color(egui::Color32::WHITE);
 
+                    // シンプルなローディングテキスト
+                    let elapsed = self.start_time.elapsed().as_secs_f32();
+                    let dots = ".".repeat(((elapsed * 2.0) as usize % 3) + 1);
+
+                    let loading_text = egui::RichText::new(format!("Loading{}", dots))
+                        .size(8.0)
+                        .color(egui::Color32::from_gray(180));
+
                     // カスタムフォントが利用可能かチェック
-                    let logo_text = if ctx.fonts(|f| {
+                    let (logo_text, loading_text) = if ctx.fonts(|f| {
                         f.families()
                             .contains(&egui::FontFamily::Name("04B_08".into()))
                     }) {
-                        logo_text.family(egui::FontFamily::Name("04B_08".into()))
+                        (
+                            logo_text.family(egui::FontFamily::Name("04B_08".into())),
+                            loading_text.family(egui::FontFamily::Name("04B_08".into())),
+                        )
                     } else {
-                        logo_text.family(egui::FontFamily::Monospace) // フォールバック
+                        // フォールバック
+                        (
+                            logo_text.family(egui::FontFamily::Monospace),
+                            loading_text.family(egui::FontFamily::Monospace),
+                        )
                     };
 
                     ui.label(logo_text);
 
                     ui.add_space(15.0);
 
-                    // シンプルなローディングテキスト
-                    let elapsed = self.start_time.elapsed().as_secs_f32();
-                    let dots = ".".repeat(((elapsed * 2.0) as usize % 4) + 1);
-
-                    ui.label(
-                        egui::RichText::new(format!("Loading{}", dots))
-                            .size(12.0)
-                            .color(egui::Color32::from_gray(180)),
-                    );
+                    ui.label(loading_text);
                 });
             });
 

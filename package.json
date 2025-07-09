@@ -1,6 +1,10 @@
 {
   "private": true,
   "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "dev": "pnpm -F sledge dev",
+    "build": "pnpm -F sledge build"
+  },
   "dependencies": {
     "@vanilla-extract/css": "^1.13.3",
     "@vanilla-extract/dynamic": "^2.1.3",

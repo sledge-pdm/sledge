@@ -10,7 +10,7 @@
       "request": "launch",
       // change the exe name to your actual exe name
       // (to debug release builds, change `target/debug` to `release/debug`)
-      "program": "${workspaceRoot}/src-tauri/target/debug/sledge.exe",
+      "program": "${workspaceRoot}/apps/sledge/src-tauri/target/debug/sledge.exe",
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "dev",
       "postDebugTask": "ui:dev:stop",

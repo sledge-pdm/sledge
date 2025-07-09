@@ -1,0 +1,6 @@
+body.theme-fade,
+body.theme-fade * {
+  transition:
+    background-color 0.3s,
+    color 0.3s !important;
+}

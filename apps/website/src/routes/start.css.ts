@@ -1,10 +1,10 @@
-import { flexCol, wh100 } from '@sledge/core';
+import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars, ZFB08, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const startRoot = style([
   flexCol,
-  wh100,
+  w100,
   {
     overflow: 'hidden',
     padding: '48px 42px',
@@ -38,19 +38,49 @@ export const startHeader = style({
     },
   },
 });
-
 export const content = style([
-  flexCol,
+  flexRow,
   {
-    margin: '6rem 5rem',
-    gap: '2rem',
+    flexWrap: 'wrap',
+    width: '100%',
+    padding: '5rem 5rem',
+    boxSizing: 'border-box',
     '@media': {
+      '(max-width: 1600px)': {
+        gap: '5rem',
+      },
       '(max-width: 768px)': {
-        margin: `3rem ${vars.spacing.lg}`,
+        padding: `3rem 1rem`,
       },
     },
   },
 ]);
+
+export const description = style([
+  flexCol,
+  {
+    width: '50%',
+    padding: '3rem 0',
+    gap: '3rem',
+    '@media': {
+      '(max-width: 1600px)': {
+        width: '100%',
+        padding: 0,
+      },
+    },
+  },
+]);
+
+export const startImage = style({
+  width: '50%',
+  filter: 'drop-shadow(0 0 10px rgba(0, 0, 0, 0.5))',
+  '@media': {
+    '(max-width: 1600px)': {
+      width: '100%',
+      height: 'auto',
+    },
+  },
+});
 
 export const greetText = style({
   fontFamily: ZFB31,
@@ -85,6 +115,12 @@ export const mainButton = style({
     borderColor: vars.color.accent,
     color: vars.color.background,
   },
+  '@media': {
+    '(max-width: 768px)': {
+      borderWidth: '2px',
+      padding: '12px 24px',
+    },
+  },
 });
 
 export const themeArea = style([
@@ -115,6 +151,7 @@ export const rightBottomArea = style([
     bottom: vars.spacing.xl,
     right: vars.spacing.xl,
     gap: vars.spacing.md,
+    marginRight: '1rem',
     alignItems: 'end',
   },
 ]);

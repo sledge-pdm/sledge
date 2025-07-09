@@ -4,7 +4,7 @@ import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
 
 export class PenTool implements ToolBehavior {
-  onlyOnCanvas = true;
+  onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     // return false;

@@ -1,0 +1,17 @@
+{
+  "name": "@sledge/theme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "@sledge/core": "workspace:^"
+  },
+  "scripts": {
+    "dev": "",
+    "build": ""
+  }
+}

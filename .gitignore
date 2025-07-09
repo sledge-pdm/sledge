@@ -11,7 +11,7 @@ app.config.timestamp_*.js
 .env*.local
 
 # dependencies
-/node_modules
+node_modules
 
 # IDEs and editors
 /.idea
@@ -31,8 +31,7 @@ Thumbs.db
 repomix-output.txt
 repomix-output.xml
 
-/.vscode
-
 *.heapprofile
 
 *.sledge
+node_modules

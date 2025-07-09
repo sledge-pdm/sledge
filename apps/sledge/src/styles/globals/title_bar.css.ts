@@ -1,0 +1,61 @@
+import { flexCol, flexRow, h100, w100 } from '@sledge/core';
+import { vars, ZFB08 } from '@sledge/theme';
+import { style } from '@vanilla-extract/css';
+
+export const titleBarRoot = style([
+  flexRow,
+  w100,
+  {
+    pointerEvents: 'all',
+    backgroundColor: vars.color.background,
+    alignItems: 'center',
+  },
+]);
+
+export const titleBarTitle = style([
+  flexRow,
+  w100,
+  {
+    width: 'fit-content',
+    fontFamily: ZFB08,
+    fontSize: vars.text.sm,
+    marginRight: 'auto',
+    paddingLeft: '36px',
+  },
+]);
+
+export const titleBarControls = style([flexRow]);
+
+export const titleBarControlButtonContainer = style([
+  flexCol,
+  h100,
+  {
+    border: 'none',
+    height: '28px',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '24px',
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    pointerEvents: 'all',
+
+    ':hover': {
+      backgroundColor: '#00000030',
+    },
+  },
+]);
+export const titleBarControlCloseButtonContainer = style([
+  titleBarControlButtonContainer,
+  {
+    ':hover': {
+      backgroundColor: '#FF0000B0',
+    },
+  },
+]);
+
+export const titleBarControlButtonImg = style([
+  {
+    border: 'none',
+    imageRendering: 'pixelated',
+  },
+]);

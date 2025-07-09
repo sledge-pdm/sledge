@@ -1,0 +1,34 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch App Debug",
+      "type": "cppvsdbg",
+      "request": "launch",
+      // change the exe name to your actual exe name
+      // (to debug release builds, change `target/debug` to `release/debug`)
+      "program": "${workspaceRoot}/src-tauri/target/debug/sledge.exe",
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": "dev",
+      "postDebugTask": "ui:dev:stop",
+      "environment": [{ "name": "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "value": "--remote-debugging-port=1422" }]
+    },
+    {
+      "name": "Attach to Webview",
+      "port": 1422,
+      "request": "attach",
+      "timeout": 300000,
+      "type": "msedge",
+      "webRoot": "${workspaceFolder}"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Tauri Dev All",
+      "configurations": ["Launch App Debug", "Attach to Webview"]
+    }
+  ]
+}

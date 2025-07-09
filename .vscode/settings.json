@@ -1,0 +1,14 @@
+{
+  "editor.formatOnSave": true,
+  "workbench.tree.indent": 25,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "eslint.lintTask.enable": true,
+
+  "rust-analyzer.linkedProjects": ["apps/sledge/src-tauri/Cargo.toml", "apps/sledge/src-tauri/src/main.rs"],
+  "rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
+  "rust-analyzer.cargo.buildScripts.rebuildOnSave": true,
+  "rust-analyzer.cargo.autoreload": true
+}

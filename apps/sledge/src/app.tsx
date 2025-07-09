@@ -9,10 +9,11 @@ import Editor from './routes/editor';
 
 import { flexCol, h100 } from '@sledge/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { globalConfig } from '~/stores/GlobalStores';
+import { getTheme } from '../../../packages/theme/src/Theme';
 import loadGlobalSettings from './io/config/load';
 import setGlobalSettings from './io/config/set';
 import Settings from './routes/settings';
-import { getTheme } from './stores/Theme';
 import { listenEvent, safeInvoke } from './utils/TauriUtils';
 
 export default function App() {
@@ -49,7 +50,7 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <div class={[flexCol, h100, getTheme()].join(' ')}>
+          <div class={[flexCol, h100, getTheme(globalConfig.appearance.theme)].join(' ')}>
             <Suspense>
               <TitleBar />
               <main>{props.children}</main>

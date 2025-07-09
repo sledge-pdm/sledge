@@ -1,14 +1,14 @@
+import { getTheme } from '@sledge/theme';
 import RecentFileList from '~/components/global/RecentFileList';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
-import { getTheme } from '~/stores/Theme';
 import { openWindow } from '~/utils/WindowUtils';
 import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
 
 export default function Home() {
   return (
-    <div class={getTheme()}>
+    <div class={getTheme(globalConfig.appearance.theme)}>
       <div class={startRoot}>
         <p class={startHeader}>HELLO.</p>
         <div class={menuContainer}>

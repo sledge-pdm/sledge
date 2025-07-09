@@ -1,8 +1,10 @@
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [solidPlugin()],
+  plugins: [vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths()],
   server: {
     port: 3000,
   },

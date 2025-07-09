@@ -151,6 +151,7 @@ export const rightBottomArea = style([
     bottom: vars.spacing.xl,
     right: vars.spacing.xl,
     gap: vars.spacing.md,
+    marginRight: '1rem',
     alignItems: 'end',
   },
 ]);

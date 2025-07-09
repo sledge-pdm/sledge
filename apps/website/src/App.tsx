@@ -6,16 +6,6 @@ import Home from '~/routes';
 import { globalStore } from '~/store/GlobalStore';
 
 const App: Component = () => {
-  {
-    /* <header>
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a href='https://github.com/solidjs/solid' target='_blank' rel='noopener noreferrer'>
-          Learn Solid
-        </a>
-      </header> */
-  }
   return (
     <Router
       root={(props) => (

@@ -7,6 +7,10 @@ main {
   height: 100vh;
 }
 
+main {
+  overflow-y: auto;
+}
+
 body.theme-fade,
 body.theme-fade * {
   transition:

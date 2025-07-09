@@ -5,7 +5,7 @@ interface Props {
   mousePos: Vec2;
 }
 
-const CrossCursor: Component = (props: Props) => {
+const CrossCursor: Component<Props> = (props: Props) => {
   return (
     <div
       style={{

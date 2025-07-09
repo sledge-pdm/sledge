@@ -1,0 +1,59 @@
+{
+  "name": "sledge",
+  "type": "module",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "patch-package",
+    "vite:dev": "vite",
+    "vite:build": "vite build",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "debug": "nest start --debug --watch",
+    "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config ../../.prettierrc",
+    "stylelint": "stylelint -c .\\.stylelintrc.json \"src/**/*.css\" --fix"
+  },
+  "dependencies": {
+    "@jaames/iro": "^5.5.2",
+    "@modular-forms/solid": "^0.25.1",
+    "@msgpack/msgpack": "^3.1.2",
+    "@solid-primitives/deep": "^0.3.1",
+    "@solid-primitives/map": "^0.7.1",
+    "@solid-primitives/mouse": "^2.1.2",
+    "@solid-primitives/raf": "^2.3.1",
+    "@solid-primitives/scheduled": "^1.5.1",
+    "@solid-primitives/scroll": "^2.1.1",
+    "@solid-primitives/timer": "^1.4.0",
+    "@solidjs/meta": "^0.29.4",
+    "@solidjs/router": "^0.15.0",
+    "@tauri-apps/api": "^2.4.1",
+    "@tauri-apps/plugin-deep-link": "^2.4.0",
+    "@tauri-apps/plugin-dialog": "^2.2.1",
+    "@tauri-apps/plugin-fs": "^2.2.1",
+    "@tauri-apps/plugin-log": "^2.6.0",
+    "@tauri-apps/plugin-opener": "^2.2.6",
+    "@tauri-apps/plugin-shell": "^2.2.1",
+    "@thisbeyond/solid-dnd": "^0.7.5",
+    "comlink": "^4.4.2",
+    "interactjs": "^1.10.27",
+    "mitt": "^3.0.1",
+    "msgpackr": "^1.11.4",
+    "solid-js": "^1.9.5",
+    "solidjs-use": "^2.3.0",
+    "tauri-plugin-system-info-api": "^2.0.10",
+    "uuid": "^11.1.0",
+    "vite-plugin-glsl": "^1.4.1",
+    "vite-plugin-ssr": "^0.4.142"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.5.0",
+    "@vanilla-extract/vite-plugin": "^5.0.1",
+    "patch-package": "^8.0.0",
+    "solid-refresh": "^0.7.5",
+    "vite": "^6.3.3",
+    "vite-plugin-solid": "^2.11.6",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}

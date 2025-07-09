@@ -1,0 +1,19 @@
+{
+  "name": "@sledge/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "@sledge/core": "workspace:^",
+    "@sledge/theme": "workspace:^",
+    "solid-js": "^1.9.7"
+  },
+  "scripts": {
+    "dev": "",
+    "build": ""
+  }
+}

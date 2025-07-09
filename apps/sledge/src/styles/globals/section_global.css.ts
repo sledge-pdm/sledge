@@ -1,0 +1,18 @@
+import { flexCol, w100 } from '@sledge/core';
+import { vars, ZFB11 } from '@sledge/theme';
+import { style } from '@vanilla-extract/css';
+
+export const sectionRoot = style([
+  flexCol,
+  {
+    // border: '1px solid black',
+  },
+]);
+
+export const sectionCaption = style({
+  fontFamily: ZFB11,
+  fontSize: vars.text.sm,
+  marginBottom: vars.spacing.sm,
+});
+
+export const sectionContent = style([flexCol, w100]);

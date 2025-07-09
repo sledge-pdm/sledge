@@ -217,7 +217,7 @@ globalStyle('button', {
   border: `1px solid ${vars.color.button.border}`,
   borderRadius: vars.size.buttonRadius,
   cursor: 'pointer',
-  fontSize: '0.5rem',
+  fontSize: '8px',
   height: 'fit-content',
   padding: '2px 6px',
   pointerEvents: 'all',

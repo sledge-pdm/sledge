@@ -6,6 +6,7 @@ import {
   description,
   greetText,
   mainButton,
+  mainButtonContainer,
   rightBottomArea,
   startHeader,
   startIcon,
@@ -35,7 +36,7 @@ export default function Home() {
             simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
           </p>
 
-          <div style={{ display: 'flex', 'flex-direction': 'row', gap: '2rem', 'flex-wrap': 'wrap' }}>
+          <div class={mainButtonContainer}>
             <button
               onClick={() => {
                 alert('OOPS Sorry Wait for the desktop app to be released!');

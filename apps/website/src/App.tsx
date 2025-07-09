@@ -1,26 +1,36 @@
-import type { Component } from 'solid-js';
-
-import logo from './logo.svg';
-import styles from './App.module.css';
+import { getTheme } from '@sledge/theme';
+import { MetaProvider } from '@solidjs/meta';
+import { Route, Router } from '@solidjs/router';
+import { Suspense, type Component } from 'solid-js';
+import Home from '~/routes';
+import { globalStore } from '~/store/GlobalStore';
 
 const App: Component = () => {
-  return (
-    <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
+  {
+    /* <header>
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href='https://github.com/solidjs/solid' target='_blank' rel='noopener noreferrer'>
           Learn Solid
         </a>
-      </header>
-    </div>
+      </header> */
+  }
+  return (
+    <Router
+      root={(props) => (
+        <MetaProvider>
+          <title>Sledge</title>
+          <Suspense>
+            <main class={getTheme(globalStore.theme)}>{props.children}</main>
+          </Suspense>
+
+          {/* <p class={sledgeLogo}>sledge.</p> */}
+        </MetaProvider>
+      )}
+    >
+      <Route path='/' component={Home} />
+    </Router>
   );
 };
 

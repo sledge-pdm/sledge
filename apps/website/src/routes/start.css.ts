@@ -7,7 +7,7 @@ export const startRoot = style([
   w100,
   {
     overflow: 'hidden',
-    padding: '48px 42px',
+    padding: '42px 42px',
     boxSizing: 'border-box',
     userSelect: 'text',
     '@media': {
@@ -38,19 +38,20 @@ export const startHeader = style({
     },
   },
 });
+
 export const content = style([
   flexRow,
   {
     flexWrap: 'wrap',
     width: '100%',
-    padding: '5rem 5rem',
+    padding: '5rem 1rem',
     boxSizing: 'border-box',
     '@media': {
       '(max-width: 1600px)': {
         gap: '5rem',
       },
       '(max-width: 768px)': {
-        padding: `3rem 1rem`,
+        padding: `4rem 1rem`,
       },
     },
   },
@@ -60,7 +61,8 @@ export const description = style([
   flexCol,
   {
     width: '50%',
-    padding: '3rem 0',
+    padding: '3rem 2rem',
+    boxSizing: 'border-box',
     gap: '3rem',
     '@media': {
       '(max-width: 1600px)': {

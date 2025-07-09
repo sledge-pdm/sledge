@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    "strict": true,
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "allowJs": true,
+    "strict": true,
     "noEmit": true,
     "isolatedModules": true,
+    "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*", "./dist-tcm/*"],
+      "~/*": ["./src/*"],
       "@sledge/*": ["../../packages/*"]
     }
   }

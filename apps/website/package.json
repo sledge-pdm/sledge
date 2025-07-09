@@ -10,12 +10,16 @@
     "serve": "vite preview"
   },
   "license": "MIT",
+  "dependencies": {
+    "solid-js": "^1.9.5",
+    "@solidjs/meta": "^0.29.4",
+    "@solidjs/router": "^0.15.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
   "devDependencies": {
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
-    "vite-plugin-solid": "^2.11.6"
-  },
-  "dependencies": {
-    "solid-js": "^1.9.5"
+    "vite-plugin-solid": "^2.11.6",
+    "@vanilla-extract/vite-plugin": "^5.0.1"
   }
 }

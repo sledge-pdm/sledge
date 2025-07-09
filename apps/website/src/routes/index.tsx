@@ -1,10 +1,10 @@
-import { flexRow } from '@sledge/core';
 import { vars, ZFB03B } from '@sledge/theme';
 import ThemeToggle from '~/components/ThemeToggle';
 import {
   content,
   description,
   greetText,
+  header,
   mainButton,
   mainButtonContainer,
   rightBottomArea,
@@ -22,7 +22,7 @@ export default function Home() {
 
   return (
     <div class={startRoot}>
-      <a href={'/'} class={flexRow} style={{ gap: '1rem', 'align-items': 'center', 'text-decoration': 'none' }}>
+      <a href={'/'} class={header}>
         <img class={startIcon} src={isLight() ? '/companion.png' : '/companion_light.png'} width={56} height={56} />
         <p class={startHeader}>SLEDGE.</p>
       </a>
@@ -56,7 +56,7 @@ export default function Home() {
           </div>
         </div>
 
-        <img class={startImage} src={isLight() ? '/window_dark.png' : "window_light.png"} />
+        <img class={startImage} src={isLight() ? '/window_dark.png' : 'window_light.png'} />
       </div>
 
       <div class={themeArea}>

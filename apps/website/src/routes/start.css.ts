@@ -7,7 +7,7 @@ export const startRoot = style([
   w100,
   {
     overflow: 'hidden',
-    padding: '48px 42px',
+    padding: '42px 42px',
     boxSizing: 'border-box',
     userSelect: 'text',
     '@media': {
@@ -17,6 +17,16 @@ export const startRoot = style([
     },
   },
 ]);
+
+export const header = style([
+  flexRow,
+  {
+    gap: '1rem',
+    alignItems: 'center',
+    textDecoration: 'none',
+  },
+]);
+
 export const startIcon = style({
   width: '56px',
   height: '56px',
@@ -38,19 +48,20 @@ export const startHeader = style({
     },
   },
 });
+
 export const content = style([
   flexRow,
   {
     flexWrap: 'wrap',
     width: '100%',
-    padding: '5rem 5rem',
+    padding: '5rem 3rem',
     boxSizing: 'border-box',
     '@media': {
       '(max-width: 1600px)': {
-        gap: '5rem',
+        gap: '4rem',
       },
       '(max-width: 768px)': {
-        padding: `3rem 1rem`,
+        padding: `4rem 1rem`,
       },
     },
   },
@@ -59,8 +70,9 @@ export const content = style([
 export const description = style([
   flexCol,
   {
-    width: '50%',
-    padding: '3rem 0',
+    width: '45%',
+    padding: '3rem 2rem',
+    boxSizing: 'border-box',
     gap: '3rem',
     '@media': {
       '(max-width: 1600px)': {
@@ -73,7 +85,7 @@ export const description = style([
 ]);
 
 export const startImage = style({
-  width: '50%',
+  width: '55%',
   filter: 'drop-shadow(0 0 10px rgba(0, 0, 0, 0.5))',
   '@media': {
     '(max-width: 1600px)': {

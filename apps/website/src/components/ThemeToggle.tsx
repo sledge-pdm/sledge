@@ -1,5 +1,4 @@
-import { flexCol } from '@sledge/core';
-import { Theme, themeOptions, vars, ZFB03B } from '@sledge/theme';
+import { Theme, themeOptions } from '@sledge/theme';
 import { Dropdown } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { globalStore, setGlobalStore } from '~/store/GlobalStore';
@@ -34,6 +33,7 @@ const ThemeToggle: Component<{ noBackground?: boolean }> = (props) => {
         value={globalStore.theme}
         options={omittedThemeOptions}
         noBackground={props.noBackground}
+        wheelSpin={false}
         onChange={(v) => {
           setGlobalStore('theme', v as Theme);
           animateThemeChange();

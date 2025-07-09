@@ -10,11 +10,11 @@ import Editor from './routes/editor';
 import { flexCol, h100 } from '@sledge/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { globalConfig } from '~/stores/GlobalStores';
-import { getTheme } from '../../../packages/theme/src/Theme';
 import loadGlobalSettings from './io/config/load';
 import setGlobalSettings from './io/config/set';
 import Settings from './routes/settings';
 import { listenEvent, safeInvoke } from './utils/TauriUtils';
+import { getTheme } from '@sledge/theme';
 
 export default function App() {
   onMount(async () => {

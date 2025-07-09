@@ -1,9 +1,9 @@
 // src/components/common/Dialog.tsx
-import { accentedButton } from '@sledge/theme';
+import { accentedButton, getTheme } from '@sledge/theme';
 import * as styles from '@styles/dialogs/dialog.css';
 import { For, JSX, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
-import { getTheme } from '~/stores/Theme';
+import { globalConfig } from '~/stores/GlobalStores';
 
 export interface DialogExternalProps {
   open: boolean;
@@ -35,7 +35,7 @@ export function Dialog(props: DialogInternalProps) {
 
   return (
     <Portal>
-      <div class={getTheme()}>
+      <div class={getTheme(globalConfig.appearance.theme)}>
         <div
           class={styles.overlay}
           onClick={(e) => {

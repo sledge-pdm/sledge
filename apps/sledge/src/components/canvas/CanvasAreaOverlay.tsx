@@ -10,7 +10,7 @@ import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { ToolType } from '~/tools/Tools';
 
-const CanvasAreaOverlay: Component<{}> = (props) => {
+const CanvasAreaOverlay: Component = () => {
   const pos = useMousePosition();
 
   return (

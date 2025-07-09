@@ -5,7 +5,7 @@ interface Props {
   mousePos: Vec2;
 }
 
-const PipetteCursor: Component = (props: Props) => {
+const PipetteCursor: Component<Props> = (props: Props) => {
   return (
     // <div
     //   style={{

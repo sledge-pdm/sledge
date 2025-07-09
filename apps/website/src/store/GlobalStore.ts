@@ -4,5 +4,5 @@ import { createStore } from 'solid-js/store';
 export const [globalStore, setGlobalStore] = createStore<{
   theme: Theme;
 }>({
-  theme: 'light',
+  theme: (localStorage.getItem('theme') as Theme) || 'light',
 });

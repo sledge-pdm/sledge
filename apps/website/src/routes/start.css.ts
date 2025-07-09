@@ -22,8 +22,8 @@ export const startIcon = style({
   height: '56px',
   '@media': {
     '(max-width: 768px)': {
-      width: '42px',
-      height: '42px',
+      width: '36px',
+      height: '36px',
     },
   },
 });
@@ -66,6 +66,7 @@ export const description = style([
       '(max-width: 1600px)': {
         width: '100%',
         padding: 0,
+        gap: '2rem',
       },
     },
   },
@@ -101,10 +102,24 @@ export const startText = style({
   marginBottom: '2rem',
   '@media': {
     '(max-width: 768px)': {
-      fontSize: '18px',
+      fontSize: '12px',
+      marginBottom: '1rem',
     },
   },
 });
+
+export const mainButtonContainer = style([
+  flexRow,
+  {
+    gap: '2rem',
+    flexWrap: 'wrap',
+    '@media': {
+      '(max-width: 768px)': {
+        gap: '1rem',
+      },
+    },
+  },
+]);
 
 export const mainButton = style({
   fontSize: '16px',
@@ -153,5 +168,10 @@ export const rightBottomArea = style([
     gap: vars.spacing.md,
     marginRight: '1rem',
     alignItems: 'end',
+    '@media': {
+      '(max-width: 768px)': {
+        marginRight: 0,
+      },
+    },
   },
 ]);

@@ -1,4 +1,7 @@
 import { vars, ZFB03B } from '@sledge/theme';
+import { Button } from '@sledge/ui';
+import { createSignal } from 'solid-js';
+import FadingImage from '~/components/FadingImage';
 import ThemeToggle from '~/components/ThemeToggle';
 import {
   content,
@@ -11,6 +14,7 @@ import {
   startHeader,
   startIcon,
   startImage,
+  startImageContainer,
   startRoot,
   startText,
   themeArea,
@@ -19,6 +23,13 @@ import { globalStore } from '~/store/GlobalStore';
 
 export default function Home() {
   const isLight = () => globalStore.theme === 'light';
+
+  const downloadFlavorTexts = ['Take This!'];
+
+  const [downloadFlavor, setDownloadFlavor] = createSignal(downloadFlavorTexts[Math.floor(Math.random() * downloadFlavorTexts.length)]);
+  const changeDownloadFlavor = () => {
+    setDownloadFlavor(downloadFlavorTexts[Math.floor(Math.random() * downloadFlavorTexts.length)]);
+  };
 
   return (
     <div class={startRoot}>
@@ -35,28 +46,38 @@ export default function Home() {
             <br />
             simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
           </p>
-
           <div class={mainButtonContainer}>
-            <button
+            <Button
               onClick={() => {
                 alert('OOPS Sorry Wait for the desktop app to be released!');
               }}
+              onPointerEnter={() => {
+                changeDownloadFlavor();
+              }}
+              hoverContent={downloadFlavor()}
               class={mainButton}
             >
               DOWNLOAD.
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 window.open('https://gitlab.com/Innsbluck/sledge', '_blank')?.focus();
               }}
+              hoverContent='and join us.'
               class={mainButton}
             >
               LOOK INSIDE.
-            </button>
+            </Button>
           </div>
         </div>
-
-        <img class={startImage} src={isLight() ? '/window_dark.png' : 'window_light.png'} />
+        <div
+          class={startImageContainer}
+          style={{
+            filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'})`,
+          }}
+        >
+          <FadingImage class={startImage} src={isLight() ? '/window_dark.png' : '/window_light.png'} />
+        </div>
       </div>
 
       <div class={themeArea}>

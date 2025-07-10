@@ -84,9 +84,8 @@ export const description = style([
   },
 ]);
 
-export const startImage = style({
+export const startImageContainer = style({
   width: '55%',
-  filter: 'drop-shadow(0 0 10px rgba(0, 0, 0, 0.5))',
   '@media': {
     '(max-width: 1600px)': {
       width: '100%',
@@ -94,6 +93,8 @@ export const startImage = style({
     },
   },
 });
+
+export const startImage = style({});
 
 export const greetText = style({
   fontFamily: ZFB31,
@@ -134,9 +135,11 @@ export const mainButtonContainer = style([
 ]);
 
 export const mainButton = style({
+  minWidth: '180px',
   fontSize: '16px',
   padding: '16px 28px',
   borderWidth: '2px',
+  borderRadius: '4px',
   ':hover': {
     backgroundColor: vars.color.accent,
     borderColor: vars.color.accent,

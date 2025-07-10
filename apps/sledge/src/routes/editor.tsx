@@ -15,7 +15,8 @@ import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasCo
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { initProjectWithNewImage } from '~/io/image/in/open';
-import { importProjectFromPath } from '~/io/project/in/import';
+import { readProjectDataFromWindow } from '~/io/project/in/import';
+import { loadProjectJson } from '~/io/project/in/load';
 import { LayerType } from '~/models/layer/Layer';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
@@ -51,6 +52,9 @@ export default function Editor() {
     adjustZoomToFit();
   };
 
+  // プロジェクトデータがRust側で既に読み込まれているかチェック
+  const preloadedProject = readProjectDataFromWindow();
+
   let openedFile: FileLocation | undefined = undefined;
   if ((window as any).openedFiles && Array.isArray((window as any).openedFiles)) {
     const files = (window as any).openedFiles as string[];
@@ -58,18 +62,20 @@ export default function Editor() {
   }
 
   const sp = new URLSearchParams(location.search);
-  if (location.search && sp.get('new') !== 'true') {
-    const fileName = sp.get('name');
-    const filePath = sp.get('path');
-    if (fileName && filePath) openedFile = { name: fileName, path: filePath };
-  }
 
-  if (openedFile) {
+  if (preloadedProject) {
+    // Rust側で既に読み込まれたプロジェクトデータを使用
+    console.log('Using preloaded project data from Rust');
+
+    // 既存のloadProjectJsonを使用
+    loadProjectJson(preloadedProject);
+
+    onProjectLoad(false);
+  } else if (openedFile) {
     const path = `${openedFile.path}\\${openedFile.name}`;
     if (openedFile.name.endsWith('.sledge')) {
-      importProjectFromPath(path).then(() => {
-        onProjectLoad(false);
-      });
+      // .sledgeファイルはRust側で読み込まれるべき
+      console.error('Project file not preloaded by Rust', `${openedFile.path}\\${openedFile.name}`);
     } else {
       // 画像データ
       const fileNameWithoutExtension = openedFile.name.replace(/\.[^/.]+$/, '');

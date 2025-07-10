@@ -1,4 +1,3 @@
-import { FileLocation } from '@sledge/core';
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { WindowOptions } from '@tauri-apps/api/window';
@@ -9,10 +8,14 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 
 export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
 
-export function openWindow(kind: WindowKind, options?: { query?: string }) {
+export function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
   return safeInvoke('open_window', {
     kind,
-    query: options?.query,
+    options: {
+      query: options?.query,
+      open_path: options?.openPath,
+      initialization_script: options?.initializationScript,
+    },
   });
 }
 
@@ -30,12 +33,5 @@ export const getNewProjectSearchParams = (): string => {
   sp.append('new', 'true');
   sp.append('width', globalConfig.default.canvasSize.width.toString());
   sp.append('height', globalConfig.default.canvasSize.height.toString());
-  return sp.toString();
-};
-
-export const getExistingProjectSearchParams = (fileLocation: FileLocation): string => {
-  const sp = new URLSearchParams();
-  sp.append('name', fileLocation.name);
-  sp.append('path', fileLocation.path);
   return sp.toString();
 };

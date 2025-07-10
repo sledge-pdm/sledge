@@ -37,18 +37,22 @@ futures = "0.3.31"
 uuid = { version = "1.17.0", features = ["v4"] }
 url = "2"
 urlencoding = "2.1"
-tokio = { version = "1.46.1", features = ["rt", "macros", "time"] }
+tokio = { version = "1.46.1", features = ["full"] }
 eframe = "0.29"
 egui = "0.29"
 winit = "0.30"
 tauri-plugin-log = "2.6.0"
+chrono = { version = "0.4", features = ["serde"] }
+rmp-serde = "1.1"
+base64 = "0.21"
+rmp = "0.8"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
 
 [profile.release]
 codegen-units = 1 # Allows LLVM to perform better optimization.
-lto = true      # Enables link-time-optimizations.
-opt-level = "s" # Prioritizes small binary size. Use `3` if you prefer speed.
-panic = "abort" # Higher performance by disabling panic handlers.
-strip = true    # Ensures debug symbols are removed.
+lto = true        # Enables link-time-optimizations.
+opt-level = "s"   # Prioritizes small binary size. Use `3` if you prefer speed.
+panic = "abort"   # Higher performance by disabling panic handlers.
+strip = true      # Ensures debug symbols are removed.

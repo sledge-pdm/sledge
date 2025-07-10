@@ -7,7 +7,7 @@ mod window;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_fs::FsExt;
-use window::{SledgeWindowKind};
+use window::SledgeWindowKind;
 
 use futures::executor::block_on;
 

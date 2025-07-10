@@ -1,15 +1,14 @@
 mod analysis;
 mod config;
 mod global_event;
+mod project;
 mod splash;
 mod window;
 
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_fs::FsExt;
-use window::SledgeWindowKind;
-
-use futures::executor::block_on;
+use window::{SledgeWindowKind, WindowOpenOptions};
 
 fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
     // This requires the `fs` tauri plugin and is required to make the plugin's frontend work:
@@ -19,30 +18,46 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
     // This is for the `asset:` protocol to work:
     let asset_protocol_scope = app.asset_protocol_scope();
 
+    if files.is_empty() {
+        // Tokioランタイムを作成して非同期関数を実行
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let future_open = window::open_window(
+            app,
+            SledgeWindowKind::Editor,
+            Some(WindowOpenOptions {
+                query: None,
+                initialization_script: None,
+                open_path: Some(
+                    "C:\\Users\\n4505\\Documents\\sledge\\newproject.sledge".to_string(),
+                ),
+            }),
+        );
+        let _ = rt.block_on(future_open);
+        return;
+    }
+
     for file in &files {
         // This requires the `fs` plugin:
         let _ = fs_scope.allow_file(file);
 
         // This is for the `asset:` protocol:
         let _ = asset_protocol_scope.allow_file(file);
+
+        // Tokioランタイムを作成して非同期関数を実行
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let future_open = window::open_window(
+            app.clone(),
+            SledgeWindowKind::Editor,
+            Some(WindowOpenOptions {
+                query: None,
+                initialization_script: None,
+                open_path: Some(
+                    "C:\\Users\\n4505\\Documents\\sledge\\newproject.sledge".to_string(),
+                ),
+            }),
+        );
+        let _ = rt.block_on(future_open);
     }
-
-    let files = files
-        .into_iter()
-        .map(|f| {
-            let file = f.to_string_lossy().replace('\\', "\\\\"); // escape backslash
-            format!("\"{file}\"",) // wrap in quotes for JS array
-        })
-        .collect::<Vec<_>>()
-        .join(",");
-
-    let future_open = window::open_window(
-        app,
-        SledgeWindowKind::Editor,
-        None,
-        format!("window.openedFiles = [{files}]").into(),
-    );
-    let _ = block_on(future_open);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -55,7 +70,9 @@ pub fn run() {
             global_event::emit_global_event,
             config::load_global_config,
             config::save_global_config,
-            config::reset_global_config
+            config::reset_global_config,
+            project::load_project_complete,
+            project::load_project_complete_sync,
         ])
         .plugin(
             tauri_plugin_log::Builder::new()

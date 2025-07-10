@@ -48,14 +48,14 @@ const WebGLCanvas: Component = () => {
     webGLRenderer.resize(width, height);
     setUpdateRender(true); // rise flag for init render
 
-    // layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
-    // layerAgentManager.setOnAnyImageChangeListener('webgl_canvas', () => {
-    //   setUpdateRender(true); // rise flag
-    // }); ここもmittイベントになった
     eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
     eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
   });
+
   onCleanup(() => {
+    if (import.meta.hot) return;
+    webGLRenderer?.dispose();
+    webGLRenderer = undefined;
     stopRenderLoop();
     // layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
     eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);

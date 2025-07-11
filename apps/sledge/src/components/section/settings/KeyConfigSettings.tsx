@@ -14,7 +14,7 @@ import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { KeyConfigCommands } from '~/models/Consts';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components/config/key_config_settings.css';
-import { sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
+import { sectionContent, sectionRoot } from '~/styles/section/section.css';
 
 const KeyConfigSettings: Component = () => {
   const [recordingName, setRecordingName] = createSignal<KeyConfigCommands | undefined>(undefined);

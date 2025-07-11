@@ -33,19 +33,15 @@ tauri-plugin-shell = "2.2.1"
 tauri-plugin-system-info = "2.0.9"
 tauri-plugin-opener = "2.2.6"
 dirs = "6.0.0"
-futures = "0.3.31"
 uuid = { version = "1.17.0", features = ["v4"] }
 url = "2"
-urlencoding = "2.1"
 tokio = { version = "1.46.1", features = ["full"] }
 eframe = "0.29"
 egui = "0.29"
 winit = "0.30"
 tauri-plugin-log = "2.6.0"
 chrono = { version = "0.4", features = ["serde"] }
-rmp-serde = "1.1"
 base64 = "0.21"
-rmp = "0.8"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

@@ -13,6 +13,7 @@ export const sectionCaption = style({
   fontFamily: ZFB11,
   fontSize: vars.text.sm,
   marginBottom: vars.spacing.sm,
+  opacity: 0.5,
 });
 
 export const sectionContent = style([flexCol, w100]);

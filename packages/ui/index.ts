@@ -1,3 +1,4 @@
+export { default as Button } from './src/components/Button';
 export { default as ColorBox } from './src/components/ColorBox';
 export { default as Checkbox } from './src/components/control/Checkbox';
 export { default as Dropdown } from './src/components/control/Dropdown';

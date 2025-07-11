@@ -47,6 +47,7 @@
     "core:window:allow-maximize",
     "core:window:allow-close",
     "core:window:allow-toggle-maximize",
-    "core:window:allow-start-dragging"
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-title"
   ]
 }

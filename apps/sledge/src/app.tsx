@@ -1,20 +1,21 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import { onMount, Suspense } from 'solid-js';
+import { onCleanup, onMount, Suspense } from 'solid-js';
 import TitleBar from './components/global/TitleBar';
 import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';
 
 import { flexCol, h100 } from '@sledge/core';
+import { getTheme } from '@sledge/theme';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { globalConfig } from '~/stores/GlobalStores';
 import loadGlobalSettings from './io/config/load';
 import setGlobalSettings from './io/config/set';
 import Settings from './routes/settings';
 import { listenEvent, safeInvoke } from './utils/TauriUtils';
-import { getTheme } from '@sledge/theme';
 
 export default function App() {
   onMount(async () => {
@@ -38,6 +39,12 @@ export default function App() {
       console.error('Failed to transition from native splash:', error);
       // フォールバック
       getCurrentWindow().show();
+    }
+  });
+
+  onCleanup(() => {
+    if (!import.meta.hot) {
+      webGLRenderer?.dispose();
     }
   });
 

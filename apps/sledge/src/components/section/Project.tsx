@@ -4,8 +4,8 @@ import { Component, createSignal, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import { projectNameInput } from '~/styles/section/project.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section.css';
 
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);

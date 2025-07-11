@@ -2,7 +2,7 @@ import { flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB08 } from '@sledge/theme';
 import { Checkbox, Dropdown, Slider } from '@sledge/ui';
 import { DropdownOption } from '@sledge/ui/src/components/control/Dropdown';
-import * as styles from '@styles/dialogs/export_image.css';
+import * as styles from '@styles/dialogs/export_dialog.css';
 import { open as openFile } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, onMount, Show } from 'solid-js';
@@ -36,7 +36,7 @@ export interface ExportImageProps extends DialogExternalProps {
   onExport?: (payload: ExportSettings) => void;
 }
 
-const ExportImageDialog: Component<ExportImageProps> = (props) => {
+const ExportDialog: Component<ExportImageProps> = (props) => {
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
     fileName: projectStore.name,
@@ -196,4 +196,4 @@ const ExportImageDialog: Component<ExportImageProps> = (props) => {
     </Dialog>
   );
 };
-export default ExportImageDialog;
+export default ExportDialog;

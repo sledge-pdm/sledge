@@ -8,7 +8,6 @@ export const loadProjectJson = (project: Project) => {
   setImagePoolStore('entries', new ReactiveMap(project.imagePoolStore.entries));
   setLayerListStore(project.layerListStore);
   setProjectStore(project.projectStore);
-  console.log(project.layerBuffers);
 
   project.layerListStore.layers.forEach((layer) => {
     // Uncaught (in promise) TypeError: project.layerBuffers?.get is not a function

@@ -15,7 +15,7 @@ export const triggerButton = style([
   {
     backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
-    padding: '3px 11px 4px 11px',
+    padding: '4px 11px 4px 11px',
     width: 'fit-content',
     textAlign: 'left',
     minWidth: '100px',
@@ -39,7 +39,7 @@ export const triggerButtonNoBG = style([
     background: 'none',
     backgroundColor: 'none',
     border: `none`,
-    padding: '3px 11px 4px 11px',
+    padding: '4px 11px 4px 11px',
     width: 'fit-content',
     textAlign: 'left',
     minWidth: '100px',

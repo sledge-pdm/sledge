@@ -1,4 +1,5 @@
-import { FileLocation } from '@sledge/core';
+import { ConfigComponentName, FileLocation } from '@sledge/core';
+import { Theme } from '@sledge/theme';
 import { debugMetas } from '~/models/config/meta/Debug';
 import { editorMetas } from '~/models/config/meta/Editor';
 import { generalMetas } from '~/models/config/meta/General';
@@ -7,9 +8,7 @@ import { defaultMetas } from '~/models/config/meta/ProjectDefaults';
 import { Sections } from '~/models/config/Sections';
 import { Cursor } from '~/models/config/types/Cursor';
 import { FPS } from '~/models/config/types/FPS';
-import { Theme } from '~/models/config/types/Theme';
 import { CanvasRenderingMode } from '../canvas/Canvas';
-import { ConfigComponentName } from './ConfigComponents';
 
 export type GlobalConfig = {
   misc: {
@@ -23,8 +22,8 @@ export type GlobalConfig = {
   };
   editor: {
     cursor: Cursor;
+    centerCanvasWhenWindowResized: boolean;
     showPointedPixel: boolean;
-
     skipMeaninglessAction: boolean;
   };
   performance: {
@@ -50,8 +49,8 @@ export const defaultConfig: GlobalConfig = {
   },
   editor: {
     cursor: 'pixel',
+    centerCanvasWhenWindowResized: true,
     showPointedPixel: false,
-
     skipMeaninglessAction: false,
   },
   performance: {

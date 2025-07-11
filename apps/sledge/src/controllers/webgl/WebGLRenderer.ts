@@ -12,10 +12,13 @@ export class WebGLRenderer {
   private program: WebGLProgram;
   private vao: WebGLVertexArrayObject;
   private texArray!: WebGLTexture;
+  private fullscreenQuadBuffer?: WebGLBuffer; // バッファの参照を保持
+  private currentTextureDepth: number = 0; // 現在のテクスチャ配列の深度を追跡
 
   private uLayerCountLoc!: WebGLUniformLocation;
   private uOpacitiesLoc!: WebGLUniformLocation;
   private uBlendModesLoc!: WebGLUniformLocation;
+  private disposed: boolean = false;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -64,36 +67,41 @@ export class WebGLRenderer {
   }
 
   public resize(width: number, height: number) {
+    this.checkDisposed();
     if (width <= 0 || height <= 0) return;
     if (width === this.width && height === this.height) return;
+
+    // 前回のメモリ使用量をログ出力
+    if (this.currentTextureDepth > 0) {
+      const oldMemory = this.width * this.height * this.currentTextureDepth * 4;
+      console.log(`🔄 Releasing texture memory: ${(oldMemory / 1024 / 1024).toFixed(2)} MB`);
+    }
+
     this.width = width;
     this.height = height;
     this.canvas.width = width;
     this.canvas.height = height;
     this.gl.viewport(0, 0, width, height);
 
-    const gl = this.gl;
-    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
-    gl.texImage3D(
-      gl.TEXTURE_2D_ARRAY,
-      0, // level
-      gl.RGBA8, // 内部フォーマット（WebGL2）
-      width,
-      height,
-      MAX_LAYERS, // depth = レイヤー数
-      0, // border (must be 0)
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null
-    );
+    // 実際に使用するレイヤー数のみ確保（最小1レイヤー）
+    const activeLayers = allLayers().filter((l) => l.enabled);
+    const requiredDepth = Math.max(1, Math.min(activeLayers.length, MAX_LAYERS));
+
+    // テクスチャ配列のサイズを更新
+    this.updateTextureArraySize(requiredDepth);
   }
 
   public render(layers: Layer[] | Layer, onlyDirty?: boolean): void {
+    this.checkDisposed();
     if (this.width === 0 || this.height === 0) return;
     if (!Array.isArray(layers)) layers = [layers];
 
     layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);
+
+    // テクスチャ配列のサイズを動的に調整
+    const requiredDepth = Math.max(1, activeLayers.length);
+    this.updateTextureArraySize(requiredDepth);
 
     const { gl, program } = this;
     gl.useProgram(program);
@@ -184,6 +192,10 @@ export class WebGLRenderer {
     const vertices = new Float32Array([-1, -1, 3, -1, -1, 3]);
     const buf = gl.createBuffer();
     if (!buf) throw new Error('Failed to create buffer');
+
+    // バッファの参照を保持してdisposeで削除できるようにする
+    this.fullscreenQuadBuffer = buf;
+
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
@@ -240,5 +252,80 @@ export class WebGLRenderer {
     }
 
     return flipped;
+  }
+
+  /**
+   * WebGLリソースを適切に開放する
+   */
+  public dispose(): void {
+    if (this.disposed) return;
+
+    const gl = this.gl;
+
+    // テクスチャを削除
+    if (this.texArray) {
+      gl.deleteTexture(this.texArray);
+      console.log('WebGL texture array disposed');
+    }
+
+    // プログラムを削除
+    if (this.program) {
+      gl.deleteProgram(this.program);
+      console.log('WebGL program disposed');
+    }
+
+    // VAOを削除
+    if (this.vao) {
+      gl.deleteVertexArray(this.vao);
+      console.log('WebGL VAO disposed');
+    }
+
+    // バッファを削除
+    if (this.fullscreenQuadBuffer) {
+      gl.deleteBuffer(this.fullscreenQuadBuffer);
+      console.log('WebGL buffer disposed');
+    }
+
+    this.disposed = true;
+    console.log('WebGL renderer disposed completely');
+  }
+
+  /**
+   * disposeされているかチェックし、disposeされていたら例外を投げる
+   */
+  private checkDisposed(): void {
+    if (this.disposed) {
+      throw new Error('WebGLRenderer has been disposed');
+    }
+  }
+
+  /**
+   * テクスチャ配列のサイズを動的に調整する
+   */
+  private updateTextureArraySize(requiredDepth: number): void {
+    if (requiredDepth === this.currentTextureDepth) return;
+
+    const oldMemory = this.width * this.height * this.currentTextureDepth * 4;
+    const newMemory = this.width * this.height * requiredDepth * 4;
+
+    console.log(`🔄 Resizing texture array from ${this.currentTextureDepth} to ${requiredDepth} layers`);
+    console.log(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);
+
+    this.currentTextureDepth = requiredDepth;
+
+    const gl = this.gl;
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
+    gl.texImage3D(
+      gl.TEXTURE_2D_ARRAY,
+      0, // level
+      gl.RGBA8, // 内部フォーマット（WebGL2）
+      this.width,
+      this.height,
+      this.currentTextureDepth, // 新しいレイヤー数
+      0, // border (must be 0)
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null
+    );
   }
 }

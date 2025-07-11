@@ -3,7 +3,7 @@ import { vars } from '@sledge/theme';
 import { Component, For } from 'solid-js';
 import ToolItemSub from '~/components/section/item/ToolItemSub';
 import { toolStore } from '~/stores/EditorStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section.css';
 import { ToolType } from '~/tools/Tools';
 import ToolItemMain from './item/ToolItemMain';
 

@@ -15,8 +15,8 @@ export const configFormSections = style([
   h100,
   {
     borderRight: `1px solid ${vars.color.border}`,
-    minWidth: '170px',
-    paddingTop: vars.spacing.lg,
+    minWidth: '150px',
+    paddingTop: vars.spacing.md,
   },
 ]);
 

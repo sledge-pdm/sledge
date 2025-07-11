@@ -1,11 +1,12 @@
-use serde::Deserialize;
+use crate::config;
+use crate::image;
+use crate::project;
+use crate::splash;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use tauri::{AppHandle, Manager, Theme, WebviewUrl, WebviewWindowBuilder};
 use uuid::Uuid;
-
-use crate::config;
-use crate::splash;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -30,14 +31,19 @@ fn next_editor_label(app: &AppHandle) -> String {
     }
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct WindowOpenOptions {
+    pub query: Option<String>,
+    pub initialization_script: Option<String>,
+    pub open_path: Option<String>,
+}
+
 #[tauri::command]
 pub async fn open_window(
     app: AppHandle,
     kind: SledgeWindowKind,
-    query: Option<String>,
-    initialization_script: Option<String>,
+    options: Option<WindowOpenOptions>,
 ) -> Result<(), String> {
-
     // 1. スプラッシュスクリーンを即座に表示
     let splash_closer = if matches!(kind, SledgeWindowKind::Start | SledgeWindowKind::Editor) {
         Some(splash::show_splash_screen())
@@ -58,10 +64,100 @@ pub async fn open_window(
         }
     };
 
-    let initialization_script = initialization_script.unwrap_or_default() + ";" + &format!(
+    // 3. プロジェクトデータ読み込み（エディターかつopen_pathがある場合）
+    let project_data = if matches!(kind, SledgeWindowKind::Editor) {
+        if let Some(options) = &options {
+            if let Some(open_path) = &options.open_path {
+                // .sledgeファイルかどうかチェック
+                if open_path.ends_with(".sledge") {
+                    println!("Loading project from: {}", open_path);
+                    match project::load_project_complete_internal_sync(open_path) {
+                        Ok(data) => Some(data),
+                        Err(e) => {
+                            eprintln!("Failed to load project: {}", e);
+                            None
+                        }
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    let image_data: Option<_> = if matches!(kind, SledgeWindowKind::Editor) {
+        if let Some(options) = &options {
+            if let Some(open_path) = &options.open_path {
+                // .sledgeファイルかどうかチェック
+                if open_path.ends_with(".png")
+                    || open_path.ends_with(".jpg")
+                    || open_path.ends_with(".jpeg")
+                {
+                    // 画像ファイルを読み込む
+                    println!("Loading Image from: {}", open_path);
+                    match image::load_image_data(open_path) {
+                        Ok(data) => Some(data),
+                        Err(e) => {
+                            eprintln!("Failed to load project: {}", e);
+                            None
+                        }
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    // 5. initialization_script構築
+    let config_script = format!(
         "window.__CONFIG__={};",
         serde_json::to_string(&config).unwrap_or_default()
     );
+    let project_script = if let Some(project) = project_data {
+        format!(
+            "window.__PROJECT__={};",
+            serde_json::to_string(&project).unwrap_or_default()
+        )
+    } else {
+        String::new()
+    };
+    let image_data_script = if let Some(project) = image_data {
+        format!(
+            "window.__IMAGE__={};",
+            serde_json::to_string(&project).unwrap_or_default()
+        )
+    } else {
+        String::new()
+    };
+
+    let custom_script = options
+        .as_ref()
+        .and_then(|opts| opts.initialization_script.as_ref())
+        .cloned()
+        .unwrap_or_default();
+
+    let initialization_script = format!(
+        "{}{}{}{}",
+        config_script, project_script, image_data_script, custom_script
+    );
+
+    // 6. クエリパラメータの生成（必要に応じて）
+    let query = options
+        .as_ref()
+        .and_then(|opts| opts.query.as_ref())
+        .cloned();
 
     // 1. 開く先の `label` を決定
     let (label, url) = match kind {
@@ -97,7 +193,7 @@ pub async fn open_window(
     match kind {
         SledgeWindowKind::Start => {
             builder = builder
-                .title("sledge")
+                .title("sledge.")
                 .inner_size(700.0, 500.0)
                 .resizable(false)
                 .decorations(false)
@@ -108,6 +204,7 @@ pub async fn open_window(
         }
         SledgeWindowKind::Editor => {
             builder = builder
+                .title("sledge.")
                 .inner_size(1200.0, 750.0)
                 .resizable(true)
                 .decorations(false)
@@ -118,7 +215,7 @@ pub async fn open_window(
         }
         SledgeWindowKind::About => {
             builder = builder
-                .title("about")
+                .title("about.")
                 .inner_size(400.0, 290.0)
                 .resizable(false)
                 .decorations(false)
@@ -130,7 +227,7 @@ pub async fn open_window(
         }
         SledgeWindowKind::Settings => {
             builder = builder
-                .title("settings")
+                .title("settings.")
                 .inner_size(600.0, 400.0)
                 .resizable(false)
                 .decorations(false)

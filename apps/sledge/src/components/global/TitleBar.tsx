@@ -34,9 +34,6 @@ export default function TitleBar() {
     titleBarNavEl.addEventListener('pointerdown', (e: PointerEvent) => {
       setBottomBarText(e.buttons.toString() + ' ' + e.pointerType + ' ' + Date.now());
     });
-    // if (isEditor()) {
-    //   setTitle(`${projectStore.name} - ${projectStore.path}`);
-    // }
   });
 
   getCurrentWindow().onResized(async (handler) => {
@@ -54,7 +51,8 @@ export default function TitleBar() {
         pathText += '(not saved yet)';
       }
 
-      setTitle(`${projectStore.name} ${pathText} `);
+      setTitle(`${projectStore.name} ${pathText}`);
+      getCurrentWindow().setTitle(`${projectStore.name} ${pathText}`);
     }
   });
 

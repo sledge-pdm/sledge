@@ -6,7 +6,7 @@ import { style } from '@vanilla-extract/css';
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  backgroundColor: vars.color.overlay,
   zIndex: 1000,
 });
 
@@ -22,7 +22,7 @@ export const wrapper = style({
   maxWidth: '90vw',
   background: vars.color.background,
   borderRadius: vars.size.dialogRadius,
-  // boxShadow: '0 2px 24px #FFFFFF20',
+  // boxShadow: '0 0px 30px #FFFFFF50',
   zIndex: 1001,
   overflow: 'visible',
 });
@@ -39,12 +39,7 @@ export const header = style({
 
 export const body = style({
   maxHeight: '70vh',
-  overflowY: 'auto',
-  marginTop: vars.spacing.sm,
-  marginBottom: vars.spacing.xl,
-  marginLeft: vars.spacing.xl,
-  marginRight: vars.spacing.xl,
-  overflow: 'visible',
+  overflowY: 'hidden',
 });
 
 export const footer = style([
@@ -53,6 +48,9 @@ export const footer = style([
     display: 'flex',
     justifyContent: 'flex-end',
     marginTop: vars.spacing.md,
+    marginBottom: vars.spacing.xl,
+    marginLeft: vars.spacing.xl,
+    marginRight: vars.spacing.xl,
     overflow: 'visible',
   },
 ]);

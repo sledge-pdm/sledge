@@ -41,6 +41,7 @@ export const vars = createThemeContract({
     active: null,
     muted: null,
     error: null,
+    overlay: null,
     button: {
       bg: null,
       hover: null,
@@ -120,6 +121,7 @@ export const lightTheme = createTheme(vars, {
     active: '#ff0000',
     muted: 'rgba(0,0,0,0.19)',
     error: '#ff0000',
+    overlay: 'rgba(0, 0, 0, 0.5)',
     button: {
       bg: '#ffffff',
       hover: '#f0f0f0',
@@ -142,6 +144,7 @@ const darkThemeColorBase = {
   active: '#00ff00',
   muted: 'rgba(255,255,255,0.30)',
   error: '#ff5f5f',
+  overlay: 'rgba(255, 255, 255, 0.5)',
   button: {
     bg: '#222222',
     hover: '#444444',
@@ -176,6 +179,7 @@ const blackThemeColorBase = {
   active: '#ff00ff',
   muted: 'rgba(255,255,255,0.30)',
   error: '#ff5f5f',
+  overlay: 'rgba(255, 255, 255, 0.320)',
   button: {
     bg: '#222222',
     hover: '#444444',

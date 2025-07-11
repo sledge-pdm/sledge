@@ -20,7 +20,7 @@ export const titleBarTitle = style([
     fontFamily: ZFB08,
     fontSize: vars.text.sm,
     marginRight: 'auto',
-    paddingLeft: '36px',
+    paddingLeft: '32px',
   },
 ]);
 
@@ -31,7 +31,7 @@ export const titleBarControlButtonContainer = style([
   h100,
   {
     border: 'none',
-    height: '28px',
+    height: '36px',
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '24px',

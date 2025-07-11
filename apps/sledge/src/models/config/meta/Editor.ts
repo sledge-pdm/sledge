@@ -18,12 +18,18 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: Sections.Editor,
+    path: ['editor', 'centerCanvasWhenWindowResized'],
+    label: 'centering canvas when window resized',
+    component: 'ToggleSwitch',
+    tips: `centering canvas when window resized.`,
+  },
+  {
+    section: Sections.Editor,
     path: ['editor', 'showPointedPixel'],
     label: 'show pointed pixel',
     component: 'ToggleSwitch',
     tips: `whether if shows pointed pixel as rect.`,
   },
-
   {
     section: Sections.Editor,
     path: ['editor', 'skipMeaninglessAction'],

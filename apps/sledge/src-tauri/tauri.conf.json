@@ -23,7 +23,12 @@
       {
         "ext": ["sledge"],
         "description": "Sledge Project File",
-        "rank": "Owner"
+        "rank": "Default"
+      },
+      {
+        "ext": ["png", "jpg", "jpeg"],
+        "description": "Image File",
+        "rank": "Alternate"
       }
     ],
     "resources": ["resources/**/*"],

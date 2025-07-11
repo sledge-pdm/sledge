@@ -35,3 +35,5 @@ repomix-output.xml
 
 *.sledge
 node_modules
+
+*.lnk

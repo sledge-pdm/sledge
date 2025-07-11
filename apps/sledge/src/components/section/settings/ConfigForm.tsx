@@ -2,7 +2,7 @@ import { componentProps, flexRow } from '@sledge/core';
 import { accentedButton, vars } from '@sledge/theme';
 import { Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { resetToDefaultConfig } from '~/io/config/reset';
 import { saveGlobalSettings } from '~/io/config/save';
 import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
@@ -82,7 +82,11 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
   }
 }
 
-export default function ConfigForm() {
+interface Props {
+  onClose?: () => void;
+}
+
+const ConfigForm: Component<Props> = (props) => {
   const grouped = settingsMeta.reduce((map, field) => {
     const arr = map.get(field.section) ?? [];
     arr.push(field);
@@ -190,8 +194,9 @@ export default function ConfigForm() {
           <p>SAVED!</p>
         </Show>
         <button class={accentedButton} disabled={!isDirty()} onClick={manualSave}>
-          {isDirty() ? 'save' : 'no changes'}
+          {isDirty() ? 'save' : 'no changes'}.
         </button>
+        {/* <button onClick={() => props.onClose?.()}>cancel.</button> */}
       </div>
 
       <div class={configFormInfoAreaBottom}>
@@ -201,4 +206,6 @@ export default function ConfigForm() {
       </div>
     </div>
   );
-}
+};
+
+export default ConfigForm;

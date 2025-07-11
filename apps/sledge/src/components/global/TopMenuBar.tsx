@@ -1,6 +1,7 @@
 import * as styles from '@styles/globals/top_menu_bar.css';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import ExportImageDialog from '~/components/dialogs/ExportImage';
+import ExportDialog from '~/components/dialogs/ExportDialog';
+import SettingDialog from '~/components/dialogs/SettingDialog';
 import { createNew, openProject } from '~/controllers/project/window';
 import { openWindow } from '~/utils/WindowUtils';
 
@@ -11,13 +12,23 @@ interface Item {
 
 const TopMenuBar: Component = () => {
   const [isExportShown, setIsExportShown] = createSignal(false);
-  let dialog = null;
+  const [isSettingShown, setIsSettingShown] = createSignal(false);
+  let exportDialog = null;
+  let settingDialog = null;
 
   createEffect(() => {
     if (isExportShown()) {
-      dialog = <ExportImageDialog open={isExportShown()} onClose={() => setIsExportShown(false)} />;
+      exportDialog = <ExportDialog open={isExportShown()} onClose={() => setIsExportShown(false)} />;
     } else {
-      dialog = null;
+      exportDialog = null;
+    }
+  });
+
+  createEffect(() => {
+    if (isSettingShown()) {
+      settingDialog = <SettingDialog open={isSettingShown()} onClose={() => setIsSettingShown(false)} />;
+    } else {
+      settingDialog = null;
     }
   });
 
@@ -32,7 +43,13 @@ const TopMenuBar: Component = () => {
         setIsExportShown(true);
       },
     },
-    { text: 'SETTINGS.', action: () => openWindow('settings') },
+    {
+      text: 'SETTINGS.',
+      action: () => {
+        openWindow('settings');
+        // setIsSettingShown(true);
+      },
+    },
   ];
 
   return (
@@ -67,7 +84,7 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
-      {dialog}
+      {exportDialog}
     </div>
   );
 };

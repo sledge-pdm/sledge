@@ -48,6 +48,9 @@ export const footer = style([
     display: 'flex',
     justifyContent: 'flex-end',
     marginTop: vars.spacing.md,
+    marginBottom: vars.spacing.xl,
+    marginLeft: vars.spacing.xl,
+    marginRight: vars.spacing.xl,
     overflow: 'visible',
   },
 ]);

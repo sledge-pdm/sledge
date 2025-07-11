@@ -8,6 +8,9 @@ export const root = style([
     position: 'relative',
     height: '100%',
     width: '400px',
+    marginTop: vars.spacing.sm,
+    marginLeft: vars.spacing.xl,
+    marginRight: vars.spacing.xl,
   },
 ]);
 

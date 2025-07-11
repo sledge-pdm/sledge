@@ -14,7 +14,7 @@ import TopMenuBar from '~/components/global/TopMenuBar';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
-import { initProjectWithNewImage } from '~/io/image/in/open';
+import { importImageFromWindow } from '~/io/image/in/import';
 import { readProjectDataFromWindow } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';
 import { LayerType } from '~/models/layer/Layer';
@@ -37,9 +37,6 @@ export default function Editor() {
 
   const onProjectLoad = async (isNewProject: boolean) => {
     await emitEvent('onProjectLoad');
-    setProjectStore('isProjectChangedAfterSave', false);
-    setIsLoading(false);
-
     if (isNewProject) {
       changeCanvasSize(globalConfig.default.canvasSize);
       setCanvasStore('canvas', globalConfig.default.canvasSize);
@@ -47,13 +44,13 @@ export default function Editor() {
         resetLayerImage(layer.id, 1);
       });
     }
+    setProjectStore('isProjectChangedAfterSave', false);
+
+    setIsLoading(false);
 
     await emitEvent('onSetup');
     adjustZoomToFit();
   };
-
-  // プロジェクトデータがRust側で既に読み込まれているかチェック
-  const preloadedProject = readProjectDataFromWindow();
 
   let openedFile: FileLocation | undefined = undefined;
   if ((window as any).openedFiles && Array.isArray((window as any).openedFiles)) {
@@ -61,8 +58,7 @@ export default function Editor() {
     if (files.length > 0) openedFile = PathToFileLocation(files[0]);
   }
 
-  const sp = new URLSearchParams(location.search);
-
+  const preloadedProject = readProjectDataFromWindow();
   if (preloadedProject) {
     // Rust側で既に読み込まれたプロジェクトデータを使用
     console.log('Using preloaded project data from Rust');
@@ -71,20 +67,10 @@ export default function Editor() {
     loadProjectJson(preloadedProject);
 
     onProjectLoad(false);
-  } else if (openedFile) {
-    const path = `${openedFile.path}\\${openedFile.name}`;
-    if (openedFile.name.endsWith('.sledge')) {
-      // .sledgeファイルはRust側で読み込まれるべき
-      console.error('Project file not preloaded by Rust', `${openedFile.path}\\${openedFile.name}`);
-    } else {
-      // 画像データ
-      const fileNameWithoutExtension = openedFile.name.replace(/\.[^/.]+$/, '');
-      setProjectStore('name', fileNameWithoutExtension);
-      initProjectWithNewImage(openedFile.path, openedFile.name).then(() => {
-        onProjectLoad(false);
-      });
-    }
+  } else if (importImageFromWindow()) {
+    onProjectLoad(false);
   } else {
+    const sp = new URLSearchParams(location.search);
     // create new
     setProjectStore('name', 'new project');
     if (sp.has('width') && sp.has('height')) {

@@ -25,13 +25,13 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "2.5.1", features = [
     "devtools",
     "protocol-asset",
-    "image-png",
 ] }
 tauri-plugin-dialog = "2.2.1"
 tauri-plugin-fs = "2.2.1"
 tauri-plugin-shell = "2.2.1"
 tauri-plugin-system-info = "2.0.9"
 tauri-plugin-opener = "2.2.6"
+image = "0.25.6"
 dirs = "6.0.0"
 uuid = { version = "1.17.0", features = ["v4"] }
 url = "2"
@@ -42,6 +42,7 @@ winit = "0.30"
 tauri-plugin-log = "2.6.0"
 chrono = { version = "0.4", features = ["serde"] }
 base64 = "0.21"
+profiling-procmacros = "1.0.16"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

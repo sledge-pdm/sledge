@@ -111,8 +111,8 @@ pub fn load_project_as_base64_sync(file_path: &str) -> Result<String, String> {
     let path = Path::new(file_path);
 
     // msgpackファイルを読み込み
-    let project_data = std::fs::read(path)
-        .map_err(|e| format!("Failed to read project file: {}", e))?;
+    let project_data =
+        std::fs::read(path).map_err(|e| format!("Failed to read project file: {}", e))?;
 
     println!("Project file size: {} bytes", project_data.len());
 

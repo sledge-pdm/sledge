@@ -14,6 +14,7 @@ import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
+import { globalConfig } from '~/stores/GlobalStores';
 
 export default () => {
   let wrapper: HTMLDivElement;
@@ -32,7 +33,9 @@ export default () => {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
-      // adjustZoomToFit();
+      if (globalConfig.editor.centerCanvasWhenWindowResized) {
+        adjustZoomToFit();
+      }
     });
 
     eventBus.on('canvas:sizeChanged', (e) => {
@@ -51,7 +54,7 @@ export default () => {
   });
 
   onCleanup(() => {
-    interact?.removeInteractListeners();
+    if (!import.meta.hot) interact?.removeInteractListeners();
   });
 
   return (

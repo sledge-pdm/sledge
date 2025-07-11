@@ -1,4 +1,4 @@
-import { changeCanvasSize as setCanvasSize } from '~/controllers/canvas/CanvasController';
+import { changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
@@ -7,7 +7,7 @@ import { loadImageBuffer, loadLocalImage } from '~/utils/DataUtils';
 export const initProjectWithNewImage = async (filePath: string, fileName: string) => {
   const imagePath = `${filePath}\\${fileName}`;
   const imageBitmap = await loadLocalImage(imagePath);
-  setCanvasSize({
+  changeCanvasSize({
     width: imageBitmap.width,
     height: imageBitmap.height,
   });

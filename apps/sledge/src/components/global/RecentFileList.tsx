@@ -6,7 +6,7 @@ import { createStore } from 'solid-js/store';
 import { thumbnailDir } from '~/io/project/out/save';
 import { recentFilesCaption, recentFilesContainerCol, recentFilesContainerScroll } from '~/routes/start.css';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
-import { sectionRoot } from '~/styles/globals/section_global.css';
+import { sectionRoot } from '~/styles/section/section.css';
 import getFileId from '~/utils/getFileId';
 import ListFileItem from './file_item/ListFileItem';
 

@@ -27,9 +27,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
             Some(WindowOpenOptions {
                 query: None,
                 initialization_script: None,
-                open_path: Some(
-                    "C:\\Users\\n4505\\Documents\\sledge\\newproject.sledge".to_string(),
-                ),
+                open_path: Some("C:\\Users\\innsb\\sledge\\new project.sledge".to_string()),
             }),
         );
         let _ = rt.block_on(future_open);
@@ -51,9 +49,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
             Some(WindowOpenOptions {
                 query: None,
                 initialization_script: None,
-                open_path: Some(
-                    "C:\\Users\\n4505\\Documents\\sledge\\newproject.sledge".to_string(),
-                ),
+                open_path: Some("C:\\Users\\innsb\\sledge\\new project.sledge".to_string()),
             }),
         );
         let _ = rt.block_on(future_open);
@@ -76,12 +72,10 @@ pub fn run() {
         ])
         .plugin(
             tauri_plugin_log::Builder::new()
-                .target(tauri_plugin_log::Target::new(
-                    tauri_plugin_log::TargetKind::Stdout,
-                ))
-                .target(tauri_plugin_log::Target::new(
-                    tauri_plugin_log::TargetKind::Webview,
-                ))
+                .level_for("eframe", log::LevelFilter::Warn)
+                .level_for("egui", log::LevelFilter::Warn)
+                .level_for("egui_glow", log::LevelFilter::Warn)
+                .level_for("egui_winit", log::LevelFilter::Warn)
                 .build(),
         )
         .plugin(tauri_plugin_fs::init())

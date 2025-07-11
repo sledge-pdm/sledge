@@ -4,7 +4,6 @@ import { resetAllLayers } from '~/controllers/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { Consts } from '~/models/Consts';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/globals/section_global.css';
 import {
   canvasSizeButton,
   canvasSizeForm,
@@ -13,6 +12,7 @@ import {
   canvasSizeResetAllLayerButton,
   canvasSizeTimes,
 } from '~/styles/section/canvas.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;

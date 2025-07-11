@@ -1,6 +1,7 @@
 mod analysis;
 mod config;
 mod global_event;
+mod image;
 mod project;
 mod splash;
 mod window;
@@ -27,7 +28,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
             Some(WindowOpenOptions {
                 query: None,
                 initialization_script: None,
-                open_path: Some("C:\\Users\\innsb\\sledge\\new project.sledge".to_string()),
+                open_path: None,
             }),
         );
         let _ = rt.block_on(future_open);
@@ -49,7 +50,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
             Some(WindowOpenOptions {
                 query: None,
                 initialization_script: None,
-                open_path: Some("C:\\Users\\innsb\\sledge\\new project.sledge".to_string()),
+                open_path: Some(file.to_string_lossy().into_owned()),
             }),
         );
         let _ = rt.block_on(future_open);

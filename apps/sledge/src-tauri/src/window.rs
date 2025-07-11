@@ -30,37 +30,6 @@ fn next_editor_label(app: &AppHandle) -> String {
     }
 }
 
-fn generate_test_data(size_kb: usize) -> String {
-    let size_bytes = size_kb * 1024;
-    let chunk = "a".repeat(1024); // 1KB chunk
-    let mut data = String::with_capacity(size_bytes);
-
-    for i in 0..(size_bytes / 1024) {
-        data.push_str(&format!("chunk_{:06}:", i));
-        data.push_str(&chunk[..1024 - 13]); // 13 chars for "chunk_xxxxxx:"
-    }
-
-    // Handle remaining bytes
-    let remaining = size_bytes % 1024;
-    if remaining > 0 {
-        data.push_str(&"b".repeat(remaining));
-    }
-
-    data
-}
-
-fn create_test_object(size_kb: usize) -> serde_json::Value {
-    serde_json::json!({
-        "test_size_kb": size_kb,
-        "test_data": generate_test_data(size_kb),
-        "metadata": {
-            "created_at": chrono::Utc::now().timestamp(),
-            "test_id": Uuid::new_v4().to_string(),
-            "description": format!("Test data with {} KB", size_kb)
-        }
-    })
-}
-
 #[derive(Deserialize, Serialize)]
 pub struct WindowOpenOptions {
     pub query: Option<String>,
@@ -94,12 +63,10 @@ pub async fn open_window(
         }
     };
 
-    println!("Check Path: start");
     // 3. プロジェクトデータ読み込み（エディターかつopen_pathがある場合）
     let project_data = if matches!(kind, SledgeWindowKind::Editor) {
         if let Some(options) = &options {
             if let Some(open_path) = &options.open_path {
-                    println!("Check Path: {}", open_path);
                 // .sledgeファイルかどうかチェック
                 if open_path.ends_with(".sledge") {
                     println!("Loading project from: {}", open_path);
@@ -110,6 +77,13 @@ pub async fn open_window(
                             None
                         }
                     }
+                } else if open_path.ends_with(".png")
+                    || open_path.ends_with(".jpg")
+                    || open_path.ends_with(".jpeg")
+                {
+                    // 画像ファイルを読み込む
+                    println!("Loading Image from: {}", open_path);
+                    None
                 } else {
                     None
                 }
@@ -123,30 +97,33 @@ pub async fn open_window(
         None
     };
 
-    // 4. テストデータ生成（固定サイズ）
-    let test_size_kb = 0; // ここを変更してテスト
-    let test_data_object = create_test_object(test_size_kb);
-    println!("Generating test data: {} KB", test_size_kb);
-
     // 5. initialization_script構築
-    let config_script = format!("window.__CONFIG__={};", serde_json::to_string(&config).unwrap_or_default());
-    let test_script = format!("window.__TEST_DATA__={};", serde_json::to_string(&test_data_object).unwrap_or_default());
-    
+    let config_script = format!(
+        "window.__CONFIG__={};",
+        serde_json::to_string(&config).unwrap_or_default()
+    );
     let project_script = if let Some(project) = project_data {
-        format!("window.__PROJECT__={};", serde_json::to_string(&project).unwrap_or_default())
+        format!(
+            "window.__PROJECT__={};",
+            serde_json::to_string(&project).unwrap_or_default()
+        )
     } else {
         String::new()
     };
-    
-    let custom_script = options.as_ref()
+
+    let custom_script = options
+        .as_ref()
         .and_then(|opts| opts.initialization_script.as_ref())
         .cloned()
         .unwrap_or_default();
-    
-    let initialization_script = format!("{}{}{}{}", config_script, test_script, project_script, custom_script);
+
+    let initialization_script = format!("{}{}{}", config_script, project_script, custom_script);
 
     // 6. クエリパラメータの生成（必要に応じて）
-    let query = options.as_ref().and_then(|opts| opts.query.as_ref()).cloned();
+    let query = options
+        .as_ref()
+        .and_then(|opts| opts.query.as_ref())
+        .cloned();
 
     // 1. 開く先の `label` を決定
     let (label, url) = match kind {

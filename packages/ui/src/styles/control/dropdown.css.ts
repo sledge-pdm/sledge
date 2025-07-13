@@ -1,4 +1,4 @@
-import { flexCol, flexRow  } from '@sledge/core';
+import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style, styleVariants } from '@vanilla-extract/css';
 

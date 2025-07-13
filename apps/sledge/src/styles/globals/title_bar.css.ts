@@ -41,7 +41,7 @@ export const titleBarControlButtonContainer = style([
     pointerEvents: 'all',
 
     ':hover': {
-      backgroundColor: '#00000030',
+      backgroundColor: vars.color.button.hover,
     },
   },
 ]);

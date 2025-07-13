@@ -51,6 +51,7 @@ export default function App() {
   listenEvent('onSettingsSaved', () => {
     loadGlobalSettings();
   });
+
   return (
     <Router
       root={(props) => (

@@ -152,6 +152,8 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   onMount(() => {
+    canvasRef!.addEventListener('pointerdown', handlePointerDown);
+    canvasRef!.addEventListener('pointerout', handlePointerOut);
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointercancel', handlePointerCancel);
@@ -159,6 +161,9 @@ export const InteractCanvas: Component<Props> = (props) => {
   });
 
   onCleanup(() => {
+    if (import.meta.hot) return;
+    canvasRef!.removeEventListener('pointerdown', handlePointerDown);
+    canvasRef!.removeEventListener('pointerout', handlePointerOut);
     window.removeEventListener('pointerup', handlePointerUp);
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointercancel', handlePointerCancel);
@@ -172,8 +177,6 @@ export const InteractCanvas: Component<Props> = (props) => {
       }}
       width={canvasStore.canvas.width}
       height={canvasStore.canvas.height}
-      onPointerDown={handlePointerDown}
-      onPointerOut={handlePointerOut}
       style={{
         'touch-action': 'none',
         width: `${styleWidth()}px`,

@@ -52,7 +52,6 @@ export const vars = createThemeContract({
   },
   size: {
     edgeInfo: null,
-    sideArea: null,
     bottomInfo: null,
     dialogRadius: null,
     buttonRadius: null,
@@ -80,7 +79,6 @@ export const vars = createThemeContract({
 const shared = {
   size: {
     edgeInfo: '14px',
-    sideArea: '250px',
     bottomInfo: '20px',
     dialogRadius: '6px',
     buttonRadius: '2px',
@@ -263,7 +261,7 @@ export const pageRoot = style({
   display: 'flex',
   flexDirection: 'row',
   height: '100%',
-  width: '100vw',
+  width: '100%',
   userSelect: 'none',
   backgroundColor: vars.color.background,
 });

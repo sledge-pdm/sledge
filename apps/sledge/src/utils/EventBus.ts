@@ -13,6 +13,8 @@ export type Events = {
   'webgl:requestUpdate': { onlyDirty: boolean };
 
   'preview:requestUpdate': { layerId?: string };
+
+  'window:sideSectionSideChanged': {};
 };
 
 export const eventBus = mitt<Events>();

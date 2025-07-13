@@ -6,6 +6,7 @@ export const titleBarRoot = style([
   flexRow,
   w100,
   {
+    position: 'relative',
     pointerEvents: 'all',
     backgroundColor: vars.color.background,
     alignItems: 'center',

@@ -28,6 +28,7 @@ export default class LayerCanvasOperator {
     const image = agent.getBuffer();
     if (!image) return;
 
+
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
@@ -67,9 +68,6 @@ export default class LayerCanvasOperator {
     switch (state) {
       case DrawState.start:
         isDrawnAction = tool.behavior.onStart(agent, toolArgs);
-        // const isDrawnActionInStart = tool.behavior.onStart(agent, toolArgs);
-        // const isDrawnActionInMove = tool.behavior.onMove(agent, toolArgs);
-        // isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
         break;
       case DrawState.move:
         isDrawnAction = tool.behavior.onMove(agent, toolArgs);

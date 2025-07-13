@@ -6,8 +6,8 @@ export const root = style([
   flexRow,
   w100,
   {
-    position: 'fixed',
     borderBottom: `1px solid ${vars.color.border}`,
+    backgroundColor: vars.color.background,
     height: '28px',
     alignItems: 'end',
     zIndex: 20,

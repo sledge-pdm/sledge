@@ -10,7 +10,6 @@ import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { eventBus } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
-import BottomInfo from '../global/BottomInfo';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
@@ -23,12 +22,16 @@ export default () => {
   let interact: CanvasAreaInteract | undefined = undefined;
 
   listenEvent('onSetup', () => {
-    setInteractStore('canvasAreaSize', {
-      width: wrapper.clientWidth,
-      height: wrapper.clientHeight,
-    });
-
     getCurrentWindow().onResized(() => {
+      setInteractStore('canvasAreaSize', {
+        width: wrapper.clientWidth,
+        height: wrapper.clientHeight,
+      });
+      if (globalConfig.editor.centerCanvasWhenWindowResized) {
+        adjustZoomToFit();
+      }
+    });
+    eventBus.on('window:sideSectionSideChanged', (e) => {
       setInteractStore('canvasAreaSize', {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
@@ -46,6 +49,10 @@ export default () => {
       interact?.updateTransform();
     });
 
+    setInteractStore('canvasAreaSize', {
+      width: wrapper.clientWidth,
+      height: wrapper.clientHeight,
+    });
     adjustZoomToFit();
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
@@ -70,7 +77,7 @@ export default () => {
           top: 0,
           left: 0,
           right: 0,
-          bottom: '40px',
+          bottom: 0,
           overflow: 'hidden',
           // 'z-index': 10000,
           // 'background-color': '#00000030',
@@ -95,8 +102,8 @@ export default () => {
 
         <CanvasDebugOverlay />
       </div>
+
       <CanvasControls />
-      <BottomInfo />
     </div>
   );
 };

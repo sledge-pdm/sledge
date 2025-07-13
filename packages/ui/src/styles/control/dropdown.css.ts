@@ -6,6 +6,7 @@ import { style, styleVariants } from '@vanilla-extract/css';
 export const dropdownContainer = style({
   position: 'relative',
   display: 'inline-block',
+  boxSizing: 'border-box',
   width: 'auto',
 });
 
@@ -15,7 +16,7 @@ export const triggerButton = style([
   {
     backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
-    padding: '4px 11px 4px 11px',
+    padding: '5px 11px 5px 11px',
     width: 'fit-content',
     textAlign: 'left',
     minWidth: '100px',
@@ -39,20 +40,6 @@ export const triggerButtonNoBG = style([
     background: 'none',
     backgroundColor: 'none',
     border: `none`,
-    padding: '4px 11px 4px 11px',
-    width: 'fit-content',
-    textAlign: 'left',
-    minWidth: '100px',
-    alignItems: 'center',
-    gap: '6px',
-    cursor: 'pointer',
-    ':hover': {
-      transform: 'none',
-    },
-    selectors: {
-      '&:hover': { backgroundColor: vars.color.button.hover },
-      '&:active': { backgroundColor: vars.color.button.hover },
-    },
   },
 ]);
 
@@ -92,7 +79,7 @@ export const menuDirection = styleVariants({
 
 // メニューアイテム
 export const menuItem = style({
-  padding: '6px 10px 7px 10px',
+  padding: '8px 10px 8px 10px',
   cursor: 'pointer',
   selectors: {
     '&:hover': { backgroundColor: vars.color.surface },
@@ -100,7 +87,8 @@ export const menuItem = style({
 });
 
 export const itemText = style({
-  whiteSpace: 'break-spaces',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
   color: vars.color.onBackground,
   width: '100%',
 });

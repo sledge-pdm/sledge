@@ -1,20 +1,10 @@
 import { flexCol } from '@sledge/core';
-import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const sideAreaRoot = style([
   flexCol,
   {
-    borderRight: `1px solid ${vars.color.border}`,
-    paddingLeft: '40px',
     boxSizing: 'border-box',
-  },
-]);
-
-export const sideAreaMenu = style([
-  {
-    paddingTop: '36px',
-    paddingRight: '30px',
   },
 ]);
 
@@ -26,7 +16,8 @@ export const sideAreaContentWrapper = style([
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: '20px',
+    paddingTop: '48px',
+    paddingLeft: '32px',
     paddingRight: '30px',
 
     overflowX: 'hidden',

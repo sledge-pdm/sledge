@@ -1,5 +1,5 @@
 import { FileLocation } from '@sledge/core';
-import { pageRoot } from '@sledge/theme';
+import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
@@ -109,14 +109,32 @@ export default function Editor() {
     }
   });
 
+  const divider = () => (
+    <div
+      style={{
+        width: '1px',
+        height: '100%',
+        'background-color': vars.color.border,
+      }}
+    />
+  );
+
   return (
     <Show when={!isLoading()} fallback={<Loading />}>
       <div class={pageRoot}>
-        <SideSections />
+        <SideSections side='leftSide' />
+
+        {divider()}
+
         <div style={{ 'flex-grow': 1, position: 'relative' }}>
           <CanvasArea />
           <BottomInfo />
         </div>
+{/* 
+        {divider()}
+
+        <SideSections side='rightSide' /> */}
+
         <KeyListener />
         {/* <Companion /> */}
       </div>

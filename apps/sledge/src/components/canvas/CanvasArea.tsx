@@ -5,7 +5,7 @@ import WebGLCanvas from './stacks/CanvasStack';
 
 import { vars } from '@sledge/theme';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { eventBus } from '~/utils/EventBus';
@@ -28,7 +28,7 @@ export default () => {
         height: wrapper.clientHeight,
       });
       if (globalConfig.editor.centerCanvasWhenWindowResized) {
-        adjustZoomToFit();
+        centeringCanvas();
       }
     });
     eventBus.on('window:sideSectionSideChanged', (e) => {
@@ -37,7 +37,7 @@ export default () => {
         height: wrapper.clientHeight,
       });
       if (globalConfig.editor.centerCanvasWhenWindowResized) {
-        adjustZoomToFit();
+        centeringCanvas();
       }
     });
 

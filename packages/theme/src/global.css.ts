@@ -52,7 +52,6 @@ export const vars = createThemeContract({
     },
   },
   size: {
-    edgeInfo: null,
     bottomInfo: null,
     dialogRadius: null,
     buttonRadius: null,
@@ -79,7 +78,6 @@ export const vars = createThemeContract({
 /** Shared (非テーマ依存) トークン値 */
 const shared = {
   size: {
-    edgeInfo: '14px',
     bottomInfo: '20px',
     dialogRadius: '6px',
     buttonRadius: '2px',

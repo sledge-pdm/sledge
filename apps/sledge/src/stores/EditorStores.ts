@@ -6,7 +6,14 @@ import { defaultTools, Tool, ToolType } from '~/tools/Tools';
 
 type SideAppearanceMode = 'editor' | 'project';
 type AppearanceStore = {
-  sideAppearanceMode: SideAppearanceMode;
+  leftSide: {
+    shown: boolean;
+    selected: SideAppearanceMode;
+  };
+  rightSide: {
+    shown: boolean;
+    selected: SideAppearanceMode;
+  };
 };
 type ColorStore = {
   currentPalette: PaletteType;
@@ -39,7 +46,14 @@ export type ToolStore = {
 };
 
 const defaultAppearanceStore: AppearanceStore = {
-  sideAppearanceMode: 'editor',
+  leftSide: {
+    shown: true,
+    selected: 'editor' as SideAppearanceMode,
+  },
+  rightSide: {
+    shown: true,
+    selected: 'editor' as SideAppearanceMode,
+  },
 };
 const defaultColorStore: ColorStore = {
   currentPalette: 'primary' as PaletteType,

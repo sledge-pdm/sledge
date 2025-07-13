@@ -28,7 +28,6 @@ export default class LayerCanvasOperator {
     const image = agent.getBuffer();
     if (!image) return;
 
-
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 

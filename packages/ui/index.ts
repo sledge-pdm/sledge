@@ -8,4 +8,4 @@ export { default as ToggleSwitch } from './src/components/control/ToggleSwitch';
 export { default as Icon } from './src/components/Icon';
 export { default as Light } from './src/components/Light';
 export { default as MenuList, type MenuListOption } from './src/components/MenuList';
-export { PixelLineChart } from './src/components/PixelLineChart';
+export { SparkLine } from './src/components/SparkLine';

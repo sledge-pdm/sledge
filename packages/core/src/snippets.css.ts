@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
 export const flexCol = style({
+  height: 'auto',
   display: 'flex',
   flexDirection: 'column',
 });

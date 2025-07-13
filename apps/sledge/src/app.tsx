@@ -7,7 +7,6 @@ import Home from './routes';
 import About from './routes/about';
 import Editor from './routes/editor';
 
-import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
@@ -16,6 +15,7 @@ import loadGlobalSettings from './io/config/load';
 import setGlobalSettings from './io/config/set';
 import Settings from './routes/settings';
 import { listenEvent, safeInvoke } from './utils/TauriUtils';
+import { flexCol, h100 } from '@sledge/core';
 
 export default function App() {
   onMount(async () => {
@@ -51,7 +51,6 @@ export default function App() {
   listenEvent('onSettingsSaved', () => {
     loadGlobalSettings();
   });
-
   return (
     <Router
       root={(props) => (
@@ -65,6 +64,8 @@ export default function App() {
 
             {/* <p class={sledgeLogo}>sledge.</p> */}
           </div>
+
+          {/* <p class={sledgeLogo}>sledge.</p> */}
         </MetaProvider>
       )}
     >

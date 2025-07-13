@@ -145,6 +145,9 @@ importers:
       vite-plugin-solid:
         specifier: ^2.11.6
         version: 2.11.7(solid-js@1.9.7)(vite@6.3.5(@types/node@24.0.10)(yaml@2.8.0))
+      vite-plugin-wasm:
+        specifier: ^3.5.0
+        version: 3.5.0(vite@6.3.5(@types/node@24.0.10)(yaml@2.8.0))
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.8.3)(vite@6.3.5(@types/node@24.0.10)(yaml@2.8.0))
@@ -178,6 +181,8 @@ importers:
         version: 2.11.7(solid-js@1.9.7)(vite@6.3.5(@types/node@24.0.10)(yaml@2.8.0))
 
   packages/core: {}
+
+  packages/hello-wasm/pkg: {}
 
   packages/theme:
     dependencies:
@@ -2005,6 +2010,11 @@ packages:
       react-streaming:
         optional: true
 
+  vite-plugin-wasm@3.5.0:
+    resolution: {integrity: sha512-X5VWgCnqiQEGb+omhlBVsvTfxikKtoOgAzQ95+BZ8gQ+VfMHIjSHr0wyvXFQCa0eKQ0fKyaL0kWcEnYqBac4lQ==}
+    peerDependencies:
+      vite: ^2 || ^3 || ^4 || ^5 || ^6 || ^7
+
   vite-tsconfig-paths@5.1.4:
     resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
     peerDependencies:
@@ -3806,6 +3816,10 @@ snapshots:
       fast-glob: 3.3.3
       sirv: 2.0.4
       source-map-support: 0.5.21
+      vite: 6.3.5(@types/node@24.0.10)(yaml@2.8.0)
+
+  vite-plugin-wasm@3.5.0(vite@6.3.5(@types/node@24.0.10)(yaml@2.8.0)):
+    dependencies:
       vite: 6.3.5(@types/node@24.0.10)(yaml@2.8.0)
 
   vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@6.3.5(@types/node@24.0.10)(yaml@2.8.0)):

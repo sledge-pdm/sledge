@@ -2,10 +2,13 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, createSignal, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
-import { projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 
+import { apply_gaussian_blur, convert_to_grayscale } from '@sledge/wasm';
+import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { projectNameInput } from '~/styles/section/project.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section.css';
+import { eventBus } from '~/utils/EventBus';
 
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
@@ -101,6 +104,33 @@ const Project: Component = () => {
           </Show>
         </div>
       </div>
+      <button
+        onClick={() => {
+          const agent = getActiveAgent();
+          if (agent) {
+            const imageBuffer = agent.getBuffer();
+            // 独自の型定義により、Uint8ClampedArrayが直接使用可能
+            convert_to_grayscale(imageBuffer, canvasStore.canvas.width, canvasStore.canvas.height);
+            agent.setBuffer(imageBuffer);
+            eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+          }
+        }}
+      >
+        greeeeet!
+      </button>
+      <button
+        onClick={() => {
+          const agent = getActiveAgent();
+          if (agent) {
+            const imageBuffer = agent.getBuffer();
+            apply_gaussian_blur(imageBuffer as unknown as Uint8Array, canvasStore.canvas.width, canvasStore.canvas.height, 500);
+            agent.setBuffer(imageBuffer);
+            eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+          }
+        }}
+      >
+        blurrrrrrr!
+      </button>
     </div>
   );
 };

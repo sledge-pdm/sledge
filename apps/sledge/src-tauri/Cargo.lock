@@ -5396,6 +5396,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tauri-plugin-shell",
  "tauri-plugin-system-info",
+ "tauri-wasm",
  "tokio",
  "url",
  "uuid",
@@ -6087,6 +6088,17 @@ dependencies = [
  "urlpattern",
  "uuid",
  "walkdir",
+]
+
+[[package]]
+name = "tauri-wasm"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2af91192dc064428d4514e028c02701f8583c2fbb11f4e314e332959bcd37f4"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

@@ -1,8 +1,7 @@
-
+import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import { Vec2 } from '../../../../../packages/core/src/Vector';
-import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 
 export type PixelDiff = {
   kind: 'pixel';

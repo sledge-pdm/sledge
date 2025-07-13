@@ -130,7 +130,7 @@ export default function Editor() {
           <CanvasArea />
           <BottomInfo />
         </div>
-{/* 
+        {/* 
         {divider()}
 
         <SideSections side='rightSide' /> */}

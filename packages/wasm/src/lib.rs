@@ -1,5 +1,8 @@
 use wasm_bindgen::prelude::*;
 
+// WebGL関連のモジュールを追加
+pub mod webgl;
+
 #[wasm_bindgen]
 extern "C" {
     pub fn alert(s: &str);

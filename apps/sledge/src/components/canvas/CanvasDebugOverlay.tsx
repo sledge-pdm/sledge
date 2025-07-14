@@ -82,7 +82,6 @@ const CanvasDebugOverlay: Component = (props) => {
             offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)}) <br />
             selection offset:({offsetX()}, {offsetY()}) <br />
             selection size:({selectionWidth()}, {selectionHeight()}) <br />
-            grid factor: {interactStore.zoom / canvasStore.canvas.height} <br />
           </p>
         </div>
       </Show>

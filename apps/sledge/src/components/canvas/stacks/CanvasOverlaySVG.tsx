@@ -1,9 +1,9 @@
 import { vars } from '@sledge/theme';
+import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { maskToPath } from '~/controllers/selection/OutlineExtructor';
-import { PathCmdList } from '~/controllers/selection/PathCommand';
+import { PathCmd, PathCmdList } from '~/controllers/selection/PathCommand';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
@@ -37,14 +37,13 @@ const CanvasOverlaySVG: Component = (props) => {
 
   const [selectionChanged, setSelectionChanged] = createSignal<boolean>(false);
   const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
-  const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (selectionChanged()) {
         updateOutline();
         setSelectionChanged(false);
       }
-    }, fps)
+    }, Number(globalConfig.performance.targetFPS))
   );
 
   const isFilled = (idx: number): number => {
@@ -57,7 +56,36 @@ const CanvasOverlaySVG: Component = (props) => {
 
   const updateOutline = () => {
     const { width, height } = canvasStore.canvas;
-    const pathCmds = maskToPath(isFilled, width, height, selectionManager.getMoveOffset());
+    const offset = selectionManager.getMoveOffset();
+
+    // 合成されたマスクを取得
+    const combinedMask = selectionManager.getCombinedMask();
+
+    // wasmでSVGパス文字列を生成
+    const pathString = mask_to_path(combinedMask, width, height, offset.x, offset.y);
+
+    // パス文字列をPathCmdListに変換
+    const pathCmds = new PathCmdList();
+    if (pathString.trim()) {
+      // 簡易的なパース（将来的にはより堅牢にする）
+      const commands = pathString.split(/(?=[MLZ])/);
+      commands.forEach((cmd) => {
+        const trimmed = cmd.trim();
+        if (!trimmed) return;
+
+        const parts = trimmed.split(/\s+/);
+        const command = parts[0];
+
+        if (command === 'M' || command === 'L') {
+          const x = parseFloat(parts[1]);
+          const y = parseFloat(parts[2]);
+          pathCmds.add(new PathCmd(command, x, y));
+        } else if (command === 'Z') {
+          pathCmds.add(new PathCmd(command));
+        }
+      });
+    }
+
     setPathCmdList(pathCmds);
   };
 

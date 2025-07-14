@@ -1,5 +1,6 @@
 import { EraserTool } from '~/tools/eraser/EraserTool';
 import { FillTool } from '~/tools/fill/FillTool';
+import { SelectionMoveTool } from '~/tools/instants/selection_move/SelectionMoveTool';
 import { MoveTool } from '~/tools/move/MoveTool';
 import { PenTool } from '~/tools/pen/PenTool';
 import { PipetteTool } from '~/tools/pipette/PipetteTool';
@@ -12,6 +13,7 @@ export enum ToolType {
   Fill = 'fill',
   Pipette = 'pipette',
   RectSelection = 'rectSelection',
+  SelectionMove = 'selectionMove',
   Move = 'move',
 }
 
@@ -49,6 +51,11 @@ export const defaultTools = {
     familiarName: 'Rect Selection',
     iconSrc: '/icons/tool/rectselect.png',
     behavior: new RectSelection(),
+  },
+  [ToolType.SelectionMove]: {
+    familiarName: 'Selection Move',
+    iconSrc: '/icons/tool/move.png',
+    behavior: new SelectionMoveTool(),
   },
   [ToolType.Move]: {
     familiarName: 'Move',

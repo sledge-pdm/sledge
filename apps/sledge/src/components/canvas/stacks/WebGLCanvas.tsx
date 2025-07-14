@@ -44,9 +44,15 @@ const WebGLCanvas: Component = () => {
     const { width, height } = canvasStore.canvas;
 
     startRenderLoop();
-    webGLRenderer = new WebGLRenderer(canvasEl);
-    webGLRenderer.resize(width, height);
-    setUpdateRender(true); // rise flag for init render
+    console.log('WebGLCanvas: Starting render loop');
+    try {
+      webGLRenderer = new WebGLRenderer(canvasEl);
+      webGLRenderer.resize(width, height);
+      setUpdateRender(true); // rise flag for init render
+    } catch (error) {
+      console.error('WebGLCanvas: Failed to initialize WebGLRenderer', error);
+      webGLRenderer = undefined;
+    }
 
     eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
     eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);

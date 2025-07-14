@@ -33,7 +33,7 @@ export default class LayerImageAgent {
   getHeight = (): number => this.pbm.height;
 
   constructor(
-    private layerId: string,
+    public layerId: string,
     buffer: Uint8ClampedArray,
     width: number,
     height: number

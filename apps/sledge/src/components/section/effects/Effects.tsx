@@ -19,6 +19,7 @@ const Effects: Component = () => {
               const imageBuffer = agent.getNonClampedBuffer();
               convert_to_grayscale(imageBuffer, canvasStore.canvas.width, canvasStore.canvas.height);
               eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+              eventBus.emit('preview:requestUpdate', { layerId: agent.layerId });
               agent.getTileManager().setAllDirty();
               agent.getTileManager().scanAllTilesUniformity();
             }
@@ -34,6 +35,7 @@ const Effects: Component = () => {
               const imageBuffer = agent.getNonClampedBuffer();
               apply_gaussian_blur(imageBuffer, canvasStore.canvas.width, canvasStore.canvas.height, 1000);
               eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+              eventBus.emit('preview:requestUpdate', { layerId: agent.layerId });
               agent.getTileManager().setAllDirty();
               agent.getTileManager().scanAllTilesUniformity();
             }

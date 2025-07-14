@@ -6,6 +6,9 @@ description = "wasm module for sledge"
 license = "MIT/Apache-2.0"
 edition = "2021"
 
+[package.metadata.wasm-pack.output]
+name = "@sledge/wasm"
+
 [lib]
 crate-type = ["cdylib"]
 

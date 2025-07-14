@@ -1,6 +1,7 @@
 // controllers/layer/SelectionManager.ts
 
-import { TileIndex, Vec2 } from '@sledge/core';
+import { Vec2 } from '@sledge/core';
+import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import SelectionMask from '~/controllers/selection/SelectionMask';
 import { eventBus } from '~/utils/EventBus';

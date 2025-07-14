@@ -1,10 +1,9 @@
-import { flexRow, w100 } from '@sledge/core';
+import { flexRow } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const item = style([
   flexRow,
-  w100,
   {
     height: '20px',
     cursor: 'pointer',
@@ -22,7 +21,6 @@ export const item = style([
 ]);
 
 export const name = style([
-  w100,
   {
     fontFamily: ZFB11,
     fontSize: '10px',

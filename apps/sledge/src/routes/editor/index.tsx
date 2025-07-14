@@ -1,5 +1,5 @@
-import { FileLocation, flexCol } from '@sledge/core';
-import { pageRoot } from '@sledge/theme';
+import { FileLocation } from '@sledge/core';
+import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
@@ -7,10 +7,10 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
+import BottomInfo from '~/components/global/BottomInfo';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSections from '~/components/global/SideSections';
-import TopMenuBar from '~/components/global/TopMenuBar';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
@@ -109,26 +109,34 @@ export default function Editor() {
     }
   });
 
+  const divider = () => (
+    <div
+      style={{
+        width: '1px',
+        height: '100%',
+        'background-color': vars.color.border,
+      }}
+    />
+  );
+
   return (
     <Show when={!isLoading()} fallback={<Loading />}>
-      <div class={flexCol}>
-        <TopMenuBar />
-        <div
-          class={pageRoot}
-          style={{
-            'margin-top': '28px',
-            height: '100dvh',
-          }}
-        >
-          {/* <EdgeInfo /> */}
-          <SideSections />
-          <div style={{ 'flex-grow': 1 }}>
-            <CanvasArea />
-          </div>
+      <div class={pageRoot}>
+        <SideSections side='leftSide' />
 
-          <KeyListener />
-          {/* <Companion /> */}
+        {divider()}
+
+        <div style={{ 'flex-grow': 1, position: 'relative' }}>
+          <CanvasArea />
+          <BottomInfo />
         </div>
+        {/* 
+        {divider()}
+
+        <SideSections side='rightSide' /> */}
+
+        <KeyListener />
+        {/* <Companion /> */}
       </div>
     </Show>
   );

@@ -5,7 +5,7 @@ use crate::splash;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use tauri::{AppHandle, Manager, Theme, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use uuid::Uuid;
 
 #[derive(Deserialize)]
@@ -65,60 +65,33 @@ pub async fn open_window(
     };
 
     // 3. プロジェクトデータ読み込み（エディターかつopen_pathがある場合）
-    let project_data = if matches!(kind, SledgeWindowKind::Editor) {
-        if let Some(options) = &options {
-            if let Some(open_path) = &options.open_path {
-                // .sledgeファイルかどうかチェック
-                if open_path.ends_with(".sledge") {
-                    println!("Loading project from: {}", open_path);
-                    match project::load_project_complete_internal_sync(open_path) {
-                        Ok(data) => Some(data),
-                        Err(e) => {
-                            eprintln!("Failed to load project: {}", e);
-                            None
-                        }
-                    }
-                } else {
+    let project_data = options
+        .as_ref()
+        .and_then(|opts| opts.open_path.as_ref())
+        .filter(|open_path| open_path.ends_with(".sledge"))
+        .and_then(|open_path| {
+            println!("Loading project from: {}", open_path);
+            project::load_project_complete_internal_sync(open_path).ok()
+        });
+    // 3. プロジェクトデータ読み込み（エディターかつopen_pathがある場合）
+    let image_data = options
+        .as_ref()
+        .and_then(|opts| opts.open_path.as_ref())
+        .filter(|open_path| {
+            open_path.ends_with(".png")
+                || open_path.ends_with(".jpg")
+                || open_path.ends_with(".jpeg")
+        })
+        .and_then(|open_path| {
+            println!("Loading Image from: {}", open_path);
+            match image::load_image_data(open_path) {
+                Ok(data) => Some(data),
+                Err(e) => {
+                    eprintln!("Failed to load project: {}", e);
                     None
                 }
-            } else {
-                None
             }
-        } else {
-            None
-        }
-    } else {
-        None
-    };
-    let image_data: Option<_> = if matches!(kind, SledgeWindowKind::Editor) {
-        if let Some(options) = &options {
-            if let Some(open_path) = &options.open_path {
-                // .sledgeファイルかどうかチェック
-                if open_path.ends_with(".png")
-                    || open_path.ends_with(".jpg")
-                    || open_path.ends_with(".jpeg")
-                {
-                    // 画像ファイルを読み込む
-                    println!("Loading Image from: {}", open_path);
-                    match image::load_image_data(open_path) {
-                        Ok(data) => Some(data),
-                        Err(e) => {
-                            eprintln!("Failed to load project: {}", e);
-                            None
-                        }
-                    }
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    } else {
-        None
-    };
+        });
 
     // 5. initialization_script構築
     let config_script = format!(
@@ -185,7 +158,6 @@ pub async fn open_window(
     // 3. 新規ビルダー作成
     let mut builder = WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(url.into()))
         .focused(true)
-        .theme(Some(Theme::Light))
         .additional_browser_args(COMMON_BROWSER_ARGS)
         .initialization_script(initialization_script);
 

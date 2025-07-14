@@ -14,6 +14,7 @@ export class MoveTool implements ToolBehavior {
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
+    if (!selectionManager.isSelected()) return false;
     selectionManager.commit();
     selectionManager.commitOffset(); // かならずコミットしておく
     this.startPosition = args.position;
@@ -22,6 +23,7 @@ export class MoveTool implements ToolBehavior {
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
+    if (!selectionManager.isSelected()) return false;
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
 
@@ -38,7 +40,7 @@ export class MoveTool implements ToolBehavior {
         agent.getWidth(),
         agent.getHeight()
       );
-      agent.setBuffer(new Uint8ClampedArray(previewBuffer), false, true); // silentlySet=true
+      agent.setBuffer(new Uint8ClampedArray(previewBuffer), true, true);
     } catch (error) {
       console.error('Move preview failed:', error);
       return false;
@@ -48,6 +50,7 @@ export class MoveTool implements ToolBehavior {
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    if (!selectionManager.isSelected()) return false;
     agent.getDiffManager().add({
       kind: 'whole',
       before: new Uint8ClampedArray(this.originalBuffer!),
@@ -58,7 +61,7 @@ export class MoveTool implements ToolBehavior {
     // 移動を確定（選択範囲の位置を更新）
     selectionManager.commitOffset();
     selectionManager.clear();
-    
+
     return true;
   }
 

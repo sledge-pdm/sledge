@@ -4,8 +4,8 @@ import { BlendMode, Layer } from '~/models/layer/Layer';
 import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 import fragmentSrc from './shaders/blend.frag.glsl';
 import vertexSrc from './shaders/fullscreen.vert.glsl';
-// WASM関数をインポート（一時的にコメントアウト - 初期化問題のため）
-// import { calculate_texture_memory_usage, extract_tile_buffer, flip_pixels_vertically } from '@sledge/wasm';
+// WASM関数をインポート
+import { calculate_texture_memory_usage, extract_tile_buffer, flip_pixels_vertically } from '@sledge/wasm';
 
 const MAX_LAYERS = 16;
 
@@ -73,9 +73,9 @@ export class WebGLRenderer {
     if (width <= 0 || height <= 0) return;
     if (width === this.width && height === this.height) return;
 
-    // 前回のメモリ使用量をログ出力（一時的にJavaScript実装）
+    // 前回のメモリ使用量をログ出力
     if (this.currentTextureDepth > 0) {
-      const oldMemory = this.width * this.height * this.currentTextureDepth * 4;
+      const oldMemory = calculate_texture_memory_usage(this.width, this.height, this.currentTextureDepth);
       console.log(`🔄 Releasing texture memory: ${(oldMemory / 1024 / 1024).toFixed(2)} MB`);
     }
 
@@ -85,12 +85,11 @@ export class WebGLRenderer {
     this.canvas.height = height;
     this.gl.viewport(0, 0, width, height);
 
-    // 実際に使用するレイヤー数のみ確保（最小1レイヤー）
+    // // 実際に使用するレイヤー数のみ確保（最小1レイヤー）
     const activeLayers = allLayers().filter((l) => l.enabled);
     const requiredDepth = Math.max(1, Math.min(activeLayers.length, MAX_LAYERS));
-
-    // テクスチャ配列のサイズを更新
-    this.updateTextureArraySize(requiredDepth);
+    // // テクスチャ配列のサイズを更新
+    this.updateTextureArraySize(requiredDepth, true);
   }
 
   public render(layers: Layer[] | Layer, onlyDirty?: boolean): void {
@@ -139,14 +138,8 @@ export class WebGLRenderer {
           const h = Math.min(this.height - oy, tile.size);
 
           try {
-            // 一時的にJavaScript実装に戻す（WASM初期化問題のため）
-            const tileByteLength = w * h * 4;
-            const tileBuffer = new Uint8Array(tileByteLength);
-            for (let dy = 0; dy < h; dy++) {
-              const srcStart = ((oy + dy) * this.width + ox) * 4;
-              const dstStart = dy * w * 4;
-              tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
-            }
+            // WASM関数を使った高速なタイル抽出
+            const tileBuffer = extract_tile_buffer(new Uint8Array(buf), this.width, this.height, ox, oy, w, h);
 
             console.log(`🧩 Tile ${ox},${oy} (${w}x${h}): buffer length=${tileBuffer.length}`);
 
@@ -291,17 +284,11 @@ export class WebGLRenderer {
     const raw = new Uint8Array(w * h * 4);
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
 
-    // (2) 一時的にJavaScript実装に戻す（WASM初期化問題のため）
-    const flipped = new Uint8ClampedArray(w * h * 4);
-    for (let y = 0; y < h; y++) {
-      const srcRow = y;
-      const dstRow = h - 1 - y;
-      const srcStart = srcRow * w * 4;
-      const dstStart = dstRow * w * 4;
-      flipped.set(raw.subarray(srcStart, srcStart + w * 4), dstStart);
-    }
+    // (2) WASM関数を使った高速な上下反転
+    const flipped = new Uint8Array(raw);
+    flip_pixels_vertically(flipped, w, h);
 
-    return flipped;
+    return new Uint8ClampedArray(flipped.buffer);
   }
 
   /**
@@ -352,16 +339,9 @@ export class WebGLRenderer {
   /**
    * テクスチャ配列のサイズを動的に調整する
    */
-  private updateTextureArraySize(requiredDepth: number): void {
-    if (requiredDepth === this.currentTextureDepth) return;
-
-    // 一時的にJavaScript実装に戻す（WASM初期化問題のため）
-    const oldMemory = this.width * this.height * this.currentTextureDepth * 4;
-    const newMemory = this.width * this.height * requiredDepth * 4;
-
-    console.log(`🔄 Resizing texture array from ${this.currentTextureDepth} to ${requiredDepth} layers`);
-    console.log(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);
-
+  private updateTextureArraySize(requiredDepth: number, force?: boolean): void {
+    if (requiredDepth === this.currentTextureDepth && !force) return;
+    let oldDepth = this.currentTextureDepth;
     this.currentTextureDepth = requiredDepth;
 
     const gl = this.gl;
@@ -378,5 +358,12 @@ export class WebGLRenderer {
       gl.UNSIGNED_BYTE,
       null
     );
+
+    // WASM関数を使ったメモリ使用量計算
+    const oldMemory = calculate_texture_memory_usage(this.width, this.height, oldDepth);
+    const newMemory = calculate_texture_memory_usage(this.width, this.height, requiredDepth);
+
+    console.log(`🔄 Resizing texture array from ${oldDepth} to ${requiredDepth} layers`);
+    console.log(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);
   }
 }

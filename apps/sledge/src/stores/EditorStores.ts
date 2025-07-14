@@ -4,7 +4,7 @@ import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
 import { defaultTools, Tool, ToolType } from '~/tools/Tools';
 
-type SideAppearanceMode = 'editor' | 'project';
+type SideAppearanceMode = 'editor' | 'project' | 'effects';
 type AppearanceStore = {
   leftSide: {
     shown: boolean;

@@ -1,6 +1,6 @@
 import * as styles from '@styles/dialogs/setting_dialog.css';
 import { Component } from 'solid-js';
-import ConfigForm from '~/components/section/settings/ConfigForm';
+import ConfigForm from '~/components/config/ConfigForm';
 import { Dialog, DialogExternalProps } from './Dialog';
 
 export interface ExportImageProps extends DialogExternalProps {

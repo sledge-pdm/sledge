@@ -16,7 +16,7 @@
       "~/*": ["./src/*", "./dist-tcm/*"],
       "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"],
       "@sledge/*": ["../../packages/*"],
-      "@sledge/wasm": ["../../packages/hello-wasm/pkg/hello_wasm.js"]
+      "@sledge/wasm": ["../../packages/wasm/pkg/sledge_wasm.js"]
     },
     "rootDirs": ["src", "dist-tcm"]
   }

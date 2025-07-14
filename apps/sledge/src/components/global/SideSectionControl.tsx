@@ -65,6 +65,25 @@ const SideSectionControl: Component<Props> = (props) => {
           project.
         </a>
       </div>
+      <div class={edgeInfoItem}>
+        <a
+          class={appearanceStore[props.side].selected === 'effects' ? edgeInfoTextActive : edgeInfoText}
+          onClick={async () => {
+            if (!appearanceStore[props.side].shown) {
+              setAppearanceStore(props.side, 'shown', true);
+            } else {
+              if (appearanceStore[props.side].selected === 'effects') {
+                setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
+              } else {
+                setAppearanceStore(props.side, 'shown', true);
+              }
+            }
+            setAppearanceStore(props.side, 'selected', 'effects');
+          }}
+        >
+          effects.
+        </a>
+      </div>
       {/* <p class={sideAreaEdgeText}>{projectStore.name || "name N/A"}</p> */}
     </div>
   );

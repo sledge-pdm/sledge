@@ -49,7 +49,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@sledge/wasm': path.resolve(__dirname, '../../packages/hello-wasm/pkg/hello_wasm'),
+      '@sledge/wasm': path.resolve(__dirname, '../../packages/wasm/pkg/sledge_wasm'),
     },
   },
 });

@@ -62,8 +62,6 @@ export default function App() {
               <TitleBar />
               <main>{props.children}</main>
             </Suspense>
-
-            {/* <p class={sledgeLogo}>sledge.</p> */}
           </div>
         </MetaProvider>
       )}

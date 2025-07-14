@@ -1,8 +1,11 @@
+import { getTheme } from '@sledge/theme';
+import { MenuList, MenuListOption } from '@sledge/ui';
 import * as styles from '@styles/globals/top_menu_bar.css';
-import { Component, createEffect, createSignal, For } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import ExportDialog from '~/components/dialogs/ExportDialog';
 import SettingDialog from '~/components/dialogs/SettingDialog';
 import { createNew, openProject } from '~/controllers/project/window';
+import { globalConfig } from '~/stores/GlobalStores';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -11,6 +14,8 @@ interface Item {
 }
 
 const TopMenuBar: Component = () => {
+  const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
+
   const [isExportShown, setIsExportShown] = createSignal(false);
   const [isSettingShown, setIsSettingShown] = createSignal(false);
   let exportDialog = null;
@@ -33,8 +38,13 @@ const TopMenuBar: Component = () => {
   });
 
   const leftItems: Item[] = [
-    { text: '> OPEN.', action: () => openProject() },
-    { text: '+ NEW.', action: () => createNew() },
+    {
+      text: '> OPEN.',
+      action: () => {
+        setIsOpenMenuShown(true);
+      },
+    },
+    // { text: '+ NEW.', action: () => createNew() },
   ];
   const rightItems: Item[] = [
     {
@@ -52,8 +62,32 @@ const TopMenuBar: Component = () => {
     },
   ];
 
+  const openMenu: MenuListOption[] = [
+    {
+      label: '+ new project.',
+      onSelect: () => {
+        setIsOpenMenuShown(false);
+        createNew();
+      },
+    },
+    {
+      label: '> existing project.',
+      onSelect: () => {
+        setIsOpenMenuShown(false);
+        openProject();
+      },
+    },
+    // {
+    //   label: '■ image as layer.',
+    //   onSelect: () => {
+    //     setIsOpenMenuShown(false);
+    //     console.log('recent');
+    //   },
+    // },
+  ];
+
   return (
-    <div class={styles.root}>
+    <div class={[getTheme(globalConfig.appearance.theme), styles.root].join(' ')}>
       <div class={styles.menuListLeft}>
         <For each={leftItems}>
           {(item, i) => {
@@ -64,6 +98,9 @@ const TopMenuBar: Component = () => {
                   {item.text}
                 </a>
                 <div class={styles.menuItemBackground} />
+                <Show when={item.text === '> OPEN.' && isOpenMenuShown()}>
+                  <MenuList options={openMenu} onClose={() => setIsOpenMenuShown(false)} />
+                </Show>
               </div>
             );
           }}

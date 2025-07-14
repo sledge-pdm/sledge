@@ -1,7 +1,7 @@
 import { vars } from '@sledge/theme';
 import { type Component, createSignal, onCleanup, onMount } from 'solid-js';
 
-interface PixelLineChartProps {
+interface SparkLineProps {
   /** 横ピクセル数＝バッファ長 */
   width: number;
   /** 縦ピクセル数 */
@@ -16,7 +16,7 @@ interface PixelLineChartProps {
   initialMaxValue?: number;
 }
 
-export const PixelLineChart: Component<PixelLineChartProps> = (props) => {
+export const SparkLine: Component<SparkLineProps> = (props) => {
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
   // width ピクセル分のバッファをゼロ埋め

@@ -7,7 +7,7 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "eslint.lintTask.enable": true,
 
-  "rust-analyzer.linkedProjects": ["apps/sledge/src-tauri/Cargo.toml"],
+  "rust-analyzer.linkedProjects": ["apps/sledge/src-tauri/Cargo.toml", "packages/wasm/Cargo.toml"],
   "rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
   "rust-analyzer.cargo.buildScripts.rebuildOnSave": true,
   "rust-analyzer.cargo.autoreload": true

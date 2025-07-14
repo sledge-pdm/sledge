@@ -30,6 +30,7 @@ export const k12x8 = fontFace({ src: 'url("/fonts/k12x8/k12x8.ttf")' });
  * ---------------------------------------------------------------------------
  */
 export const vars = createThemeContract({
+  themeStyle: 'light' as 'light' | 'dark' | 'black',
   color: {
     background: null,
     surface: null,
@@ -51,8 +52,6 @@ export const vars = createThemeContract({
     },
   },
   size: {
-    edgeInfo: null,
-    sideArea: null,
     bottomInfo: null,
     dialogRadius: null,
     buttonRadius: null,
@@ -79,8 +78,6 @@ export const vars = createThemeContract({
 /** Shared (非テーマ依存) トークン値 */
 const shared = {
   size: {
-    edgeInfo: '14px',
-    sideArea: '250px',
     bottomInfo: '20px',
     dialogRadius: '6px',
     buttonRadius: '2px',
@@ -110,6 +107,7 @@ const shared = {
  * ---------------------------------------------------------------------------
  */
 export const lightTheme = createTheme(vars, {
+  themeStyle: 'light',
   color: {
     background: '#ffffff',
     surface: '#f2f2f2',
@@ -124,7 +122,7 @@ export const lightTheme = createTheme(vars, {
     overlay: 'rgba(0, 0, 0, 0.5)',
     button: {
       bg: '#ffffff',
-      hover: '#f0f0f0',
+      hover: '#e5e5e5',
       active: '#e0e0e0',
       text: '#000000DE',
       border: '#000000DE',
@@ -155,11 +153,13 @@ const darkThemeColorBase = {
 };
 
 export const darkTheme = createTheme(vars, {
+  themeStyle: 'dark',
   color: darkThemeColorBase,
   ...shared,
 });
 
 export const darkThemeGYFlip = createTheme(vars, {
+  themeStyle: 'dark',
   color: {
     ...darkThemeColorBase,
     accent: darkThemeColorBase.active,
@@ -190,6 +190,7 @@ const blackThemeColorBase = {
 };
 
 export const blackTheme = createTheme(vars, {
+  themeStyle: 'black',
   color: blackThemeColorBase,
   ...shared,
 });
@@ -263,7 +264,7 @@ export const pageRoot = style({
   display: 'flex',
   flexDirection: 'row',
   height: '100%',
-  width: '100vw',
+  width: '100%',
   userSelect: 'none',
   backgroundColor: vars.color.background,
 });

@@ -59,6 +59,17 @@ export const InteractCanvas: Component<Props> = (props) => {
     };
   }
 
+  function isIgnoreClick(e: PointerEvent): boolean {
+    // "ignore-draw"のIDがついている要素は無視する
+    const target = e.target as HTMLElement;
+    if (target.id === 'ignore-draw') {
+      console.log('ignore draw on', target);
+      return true;
+    }
+
+    return false;
+  }
+
   function isDrawableClick(e: PointerEvent): boolean {
     if (e.pointerType === 'touch' || e.ctrlKey) return false;
     // right=1, left=2, middle=4
@@ -69,6 +80,7 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerDown(e: PointerEvent) {
+    if (isIgnoreClick(e)) return;
     if (!isDrawableClick(e)) return;
 
     const position = getCanvasMousePosition(e);
@@ -78,10 +90,12 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerCancel(e: PointerEvent) {
+    if (isIgnoreClick(e)) return;
     endStroke(getCanvasMousePosition(e));
   }
 
   function handlePointerMove(e: PointerEvent) {
+    if (isIgnoreClick(e)) return;
     const onCanvas = !!canvasRef?.contains(e.target as Node);
     setInteractStore('isMouseOnCanvas', onCanvas);
 
@@ -105,6 +119,7 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerUp(e: PointerEvent) {
+    if (isIgnoreClick(e)) return;
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.end, e, position, lastPos());
     if (interactStore.isInStroke) endStroke(position);
@@ -137,6 +152,8 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   onMount(() => {
+    canvasRef!.addEventListener('pointerdown', handlePointerDown);
+    canvasRef!.addEventListener('pointerout', handlePointerOut);
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointercancel', handlePointerCancel);
@@ -144,6 +161,9 @@ export const InteractCanvas: Component<Props> = (props) => {
   });
 
   onCleanup(() => {
+    if (import.meta.hot) return;
+    canvasRef!.removeEventListener('pointerdown', handlePointerDown);
+    canvasRef!.removeEventListener('pointerout', handlePointerOut);
     window.removeEventListener('pointerup', handlePointerUp);
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointercancel', handlePointerCancel);
@@ -157,8 +177,6 @@ export const InteractCanvas: Component<Props> = (props) => {
       }}
       width={canvasStore.canvas.width}
       height={canvasStore.canvas.height}
-      onPointerDown={handlePointerDown}
-      onPointerOut={handlePointerOut}
       style={{
         'touch-action': 'none',
         width: `${styleWidth()}px`,

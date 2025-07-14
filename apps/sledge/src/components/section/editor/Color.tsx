@@ -1,10 +1,10 @@
 import { Component, For } from 'solid-js';
-import ColorPicker from '~/components/section/item/ColorPicker';
+import ColorPicker from '~/components/section/editor/item/ColorPicker';
 
 import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
 import { ColorBox, Icon } from '@sledge/ui';
-import Palette from '~/components/section/item/Palette';
+import Palette from '~/components/section/editor/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 import { getActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';

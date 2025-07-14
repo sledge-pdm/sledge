@@ -14,4 +14,5 @@ export const undoRedo = style({
   imageRendering: 'pixelated',
   padding: '8px',
   pointerEvents: 'all',
+  zIndex: 1000,
 });

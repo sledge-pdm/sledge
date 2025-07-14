@@ -8,15 +8,14 @@ export const layerList = style([
   {
     position: 'relative',
     gap: vars.spacing.xs,
+    width: '100%',
   },
 ]);
 
 export const layerItem = style([
   flexRow,
-  w100,
   {
     height: '40px',
-    flexGrow: 1,
     cursor: 'pointer',
     backgroundColor: vars.color.surface,
 

@@ -8,7 +8,8 @@ export const canvasArea = style([
     backgroundColor: vars.color.canvasArea,
     display: 'flex',
     position: 'relative',
-    height: '100%',
+    height: 'calc(100% - 20px)', // Adjust for bottom info height
+    width: '100%',
     overflow: 'hidden',
   },
 ]);

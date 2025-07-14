@@ -5,11 +5,14 @@ import { style } from '@vanilla-extract/css';
 export const bottomInfoRoot = style([
   flexRow,
   {
-    position: 'fixed',
+    position: 'absolute',
     backgroundColor: vars.color.background,
     borderTop: `1px solid ${vars.color.border}`,
     height: '20px',
-    margin: 0,
+    width: '100%',
+    left: 0,
+    right: 0,
+    zIndex: 1000,
     bottom: 0,
   },
 ]);
@@ -35,7 +38,6 @@ export const bottomInfoContainerRight = style([
     alignItems: 'center',
     justifyContent: 'end',
     gap: vars.spacing.md,
-    paddingRight: vars.spacing.xs,
   },
 ]);
 

@@ -1,4 +1,4 @@
-import ConfigForm from '~/components/section/settings/ConfigForm';
+import ConfigForm from '~/components/config/ConfigForm';
 
 export default function Settings() {
   return <ConfigForm />;

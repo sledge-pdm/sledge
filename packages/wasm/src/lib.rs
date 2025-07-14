@@ -2,6 +2,8 @@ use wasm_bindgen::prelude::*;
 
 // WebGL関連のモジュールを追加
 pub mod webgl;
+// 選択範囲関連のモジュールを追加
+pub mod selection;
 
 #[wasm_bindgen]
 extern "C" {

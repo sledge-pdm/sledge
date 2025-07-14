@@ -74,6 +74,11 @@ export default class LayerImageAgent {
     }
   }
 
+  forceUpdate() {
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+  }
+
   changeBufferSize(newSize: Size2D, emitEvent?: boolean) {
     this.pbm.changeSize(newSize);
     this.tm.setSize(newSize);
@@ -121,6 +126,9 @@ export default class LayerImageAgent {
         case 'tile':
           this.undoTileDiff(diff);
           break;
+        case 'whole':
+          this.setBuffer(diff.before, true, true);
+          break;
       }
     });
     const undoEnd = Date.now();
@@ -143,6 +151,9 @@ export default class LayerImageAgent {
           break;
         case 'tile':
           this.redoTileDiff(diff);
+          break;
+        case 'whole':
+          this.setBuffer(diff.after, true, true);
           break;
       }
     });

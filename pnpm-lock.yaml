@@ -182,8 +182,6 @@ importers:
 
   packages/core: {}
 
-  packages/hello-wasm/pkg: {}
-
   packages/theme:
     dependencies:
       '@sledge/core':

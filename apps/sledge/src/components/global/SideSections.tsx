@@ -1,14 +1,15 @@
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
-import CanvasSettings from '../section/CanvasSettings';
-import Color from '../section/Color';
-import LayerList from '../section/LayerList';
-import Project from '../section/Project';
-import ToolList from '../section/ToolList';
+import Color from '../section/editor/Color';
+import LayerList from '../section/editor/LayerList';
+import ToolList from '../section/editor/ToolList';
+import CanvasSettings from '../section/project/CanvasSettings';
+import Project from '../section/project/Project';
 
 import { flexCol } from '@sledge/core';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import interact from 'interactjs';
-import SideSectionControl from '~/components/global/EdgeInfo';
+import SideSectionControl from '~/components/global/SideSectionControl';
+import Effects from '~/components/section/effects/Effects';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/globals/side_sections.css';
@@ -95,6 +96,16 @@ const SideSections: Component<Props> = (props) => {
                 >
                   <Project />
                   <CanvasSettings />
+                </div>
+
+                <div
+                  class={sideAreaContent}
+                  style={{
+                    visibility: appearanceStore[props.side].selected !== 'effects' ? 'hidden' : 'visible',
+                    height: appearanceStore[props.side].selected !== 'effects' ? '0' : undefined,
+                  }}
+                >
+                  <Effects />
                 </div>
               </div>
             </div>

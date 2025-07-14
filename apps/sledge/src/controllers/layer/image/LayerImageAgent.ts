@@ -56,8 +56,12 @@ export default class LayerImageAgent {
     this.hm = new HistoryManager(layerId);
   }
 
-  getBuffer() {
+  getBuffer(): Uint8ClampedArray {
     return this.pbm.buffer;
+  }
+
+  getNonClampedBuffer(): Uint8Array {
+    return new Uint8Array(this.pbm.buffer.buffer, this.pbm.buffer.byteOffset, this.pbm.buffer.byteLength);
   }
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {

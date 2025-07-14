@@ -5,11 +5,11 @@ import { style } from '@vanilla-extract/css';
 export const edgeInfoRoot = style([
   flexCol,
   {
-    gap: '16px',
+    gap: '20px',
     paddingTop: '16px',
     paddingBottom: '16px',
-    paddingLeft: '6px',
-    paddingRight: '6px',
+    paddingLeft: '8px',
+    paddingRight: '4px',
     width: '24px',
     justifyContent: 'start',
     alignItems: 'center',

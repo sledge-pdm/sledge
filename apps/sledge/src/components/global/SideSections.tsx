@@ -71,7 +71,7 @@ const SideSections: Component<Props> = (props) => {
       <SideSectionControl side={props.side} />
 
       <Show when={appearanceStore[props.side].shown}>
-        <div id='side_sections' class={sideAreaRoot} style={{ width: '330px' }}>
+        <div id='side_sections' class={sideAreaRoot} style={{ width: '300px' }}>
           <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
             <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
               <div class={flexCol}>

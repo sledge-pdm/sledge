@@ -5,7 +5,7 @@ import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 import fragmentSrc from './shaders/blend.frag.glsl';
 import vertexSrc from './shaders/fullscreen.vert.glsl';
 // WASM関数をインポート
-import { calculate_texture_memory_usage, extract_tile_buffer, flip_pixels_vertically } from '@sledge/wasm';
+import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
 
 const MAX_LAYERS = 16;
 
@@ -137,27 +137,16 @@ export class WebGLRenderer {
           const w = Math.min(this.width - ox, tile.size);
           const h = Math.min(this.height - oy, tile.size);
 
-          try {
-            // WASM関数を使った高速なタイル抽出
-            const tileBuffer = extract_tile_buffer(new Uint8Array(buf), this.width, this.height, ox, oy, w, h);
-
-            console.log(`🧩 Tile ${ox},${oy} (${w}x${h}): buffer length=${tileBuffer.length}`);
-
-            gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
-            tile.isDirty = false;
-          } catch (error) {
-            console.error('❌ WASM tile extraction failed:', error);
-            // フォールバック: 元のJavaScript実装
-            const tileByteLength = w * h * 4;
-            const tileBuffer = new Uint8Array(tileByteLength);
-            for (let dy = 0; dy < h; dy++) {
-              const srcStart = ((oy + dy) * this.width + ox) * 4;
-              const dstStart = dy * w * 4;
-              tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
-            }
-            gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
-            tile.isDirty = false;
+          // フォールバック: 元のJavaScript実装
+          const tileByteLength = w * h * 4;
+          const tileBuffer = new Uint8Array(tileByteLength);
+          for (let dy = 0; dy < h; dy++) {
+            const srcStart = ((oy + dy) * this.width + ox) * 4;
+            const dstStart = dy * w * 4;
+            tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
           }
+          gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
+          tile.isDirty = false;
         });
       } else {
         console.log(`📤 Full upload for layer ${i}`);

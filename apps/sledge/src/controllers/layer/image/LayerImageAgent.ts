@@ -126,7 +126,7 @@ export default class LayerImageAgent {
           this.undoTileDiff(diff);
           break;
         case 'whole':
-          this.setBuffer(diff.before, true, true);
+          this.setBuffer(diff.before, true, false);
           break;
       }
     });
@@ -152,7 +152,7 @@ export default class LayerImageAgent {
           this.redoTileDiff(diff);
           break;
         case 'whole':
-          this.setBuffer(diff.after, true, true);
+          this.setBuffer(diff.after, true, false);
           break;
       }
     });

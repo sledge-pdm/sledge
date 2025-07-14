@@ -25,6 +25,7 @@ export class MoveTool implements ToolBehavior {
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
 
+    if (dx === 0 && dy === 0) return false;
     selectionManager.setMoveOffset({ x: dx, y: dy });
     eventBus.emit('selection:moved', { newOffset: selectionManager.getMoveOffset() });
 
@@ -43,7 +44,7 @@ export class MoveTool implements ToolBehavior {
       return false;
     }
 
-    return false;
+    return true;
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
@@ -57,7 +58,8 @@ export class MoveTool implements ToolBehavior {
     // 移動を確定（選択範囲の位置を更新）
     selectionManager.commitOffset();
     selectionManager.clear();
-    return false;
+    
+    return true;
   }
 
   // キャンセル処理　後で追加

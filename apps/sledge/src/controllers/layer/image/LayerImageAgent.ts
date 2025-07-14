@@ -66,7 +66,6 @@ export default class LayerImageAgent {
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {
     this.pbm.buffer = rawBuffer;
-    // if (!silentlySet) this.callOnImageChangeListeners({ updatePreview });
     this.tm.setAllDirty();
     if (!silentlySet) {
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true });

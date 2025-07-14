@@ -3,12 +3,13 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
 import solidPlugin from 'vite-plugin-solid';
+import wasmPlugin from 'vite-plugin-wasm';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths(), glsl()],
+  plugins: [wasmPlugin(), vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths(), glsl()],
   build: {
     // target: 'esnext',
     outDir: 'dist',
@@ -45,5 +46,10 @@ export default defineConfig({
   },
   worker: {
     format: 'es',
+  },
+  resolve: {
+    alias: {
+      '@sledge/wasm': path.resolve(__dirname, '../../packages/wasm/pkg/sledge_wasm'),
+    },
   },
 });

@@ -7,14 +7,11 @@ globalStyle('html, body', {
   margin: 0,
   overflow: 'hidden',
   padding: 0,
-  display: 'flex',
-  flexDirection: 'row',
   userSelect: 'none',
   WebkitTapHighlightColor: 'transparent',
 });
 
 globalStyle('main', {
-  height: '100%',
   width: '100vw',
   userSelect: 'none',
   backgroundColor: vars.color.background,

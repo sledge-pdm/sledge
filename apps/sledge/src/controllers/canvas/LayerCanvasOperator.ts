@@ -67,9 +67,6 @@ export default class LayerCanvasOperator {
     switch (state) {
       case DrawState.start:
         isDrawnAction = tool.behavior.onStart(agent, toolArgs);
-        // const isDrawnActionInStart = tool.behavior.onStart(agent, toolArgs);
-        // const isDrawnActionInMove = tool.behavior.onMove(agent, toolArgs);
-        // isDrawnAction = isDrawnActionInStart || isDrawnActionInMove;
         break;
       case DrawState.move:
         isDrawnAction = tool.behavior.onMove(agent, toolArgs);

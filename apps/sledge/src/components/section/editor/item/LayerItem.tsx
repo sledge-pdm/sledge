@@ -9,7 +9,7 @@ import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
 import { eventBus } from '~/utils/EventBus';
-import LayerPreview from '../../global/LayerPreview';
+import LayerPreview from '../../../global/LayerPreview';
 
 interface LayerItemProps {
   index: number;

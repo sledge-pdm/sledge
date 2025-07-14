@@ -6,6 +6,7 @@ export const titleBarRoot = style([
   flexRow,
   w100,
   {
+    position: 'relative',
     pointerEvents: 'all',
     backgroundColor: vars.color.background,
     alignItems: 'center',
@@ -40,7 +41,7 @@ export const titleBarControlButtonContainer = style([
     pointerEvents: 'all',
 
     ':hover': {
-      backgroundColor: '#00000030',
+      backgroundColor: vars.color.button.hover,
     },
   },
 ]);

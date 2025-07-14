@@ -1,5 +1,5 @@
 import { flexCol } from '@sledge/core';
-import { PixelLineChart } from '@sledge/ui';
+import { SparkLine } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
@@ -93,7 +93,7 @@ const CanvasDebugOverlay: Component = (props) => {
             <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>
             <p>CHILDREN: {toMiB(processMemInfo()?.children_bytes)}</p>
             <p>TOTAL: {toMiB(processMemInfo()?.total_bytes)}</p>
-            <PixelLineChart
+            <SparkLine
               width={120}
               height={60}
               color='#00ca00'
@@ -110,7 +110,7 @@ const CanvasDebugOverlay: Component = (props) => {
               JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
             </p>
 
-            <PixelLineChart
+            <SparkLine
               width={120}
               height={60}
               color='#f44336'

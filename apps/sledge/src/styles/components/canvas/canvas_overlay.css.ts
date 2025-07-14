@@ -1,10 +1,10 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 
 const marchingAnts = keyframes({
-  'from': {
+  from: {
     strokeDashoffset: '0',
   },
-  'to': {
+  to: {
     strokeDashoffset: '12', // borderDash * 2 = 6 * 2 = 12
   },
 });

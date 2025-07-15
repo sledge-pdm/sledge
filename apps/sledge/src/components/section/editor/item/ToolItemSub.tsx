@@ -2,7 +2,7 @@ import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { setActiveToolType } from '~/controllers/tool/ToolController';
-import { toolConfigRow, toolConfigRowClickable } from '~/styles/section/tools.css';
+import { toolConfigRow, toolConfigRowClickable } from '~/styles/section/editor/tools.css';
 import { Tool, ToolType } from '~/tools/Tools';
 
 interface Props {

@@ -3,7 +3,7 @@ import { Icon, Slider } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { setActiveToolType, setToolSize } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
-import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/tools.css';
+import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/editor/tools.css';
 import { Tool, ToolType } from '~/tools/Tools';
 
 interface Props {

@@ -1,4 +1,4 @@
-import { mask_to_path } from '@sledge/wasm';
+import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
@@ -84,8 +84,8 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
 
   const buffer = webGLRenderer.readPixelsFlipped();
 
-  // 不透明部分のマスクを作成
-  const mask = createOpacityMask(new Uint8Array(buffer.buffer), width, height);
+  // wasmを使って不透明部分のマスクを作成
+  const mask = create_opacity_mask(new Uint8Array(buffer.buffer), width, height);
 
   // wasmを使ってSVGパスを生成
   const svgPath = mask_to_path(mask, width, height, 0, 0);
@@ -97,25 +97,13 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
   // SVGドキュメントを作成（viewBoxは元のサイズ、width/heightはスケール適用）
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+  <clipPath id="clipPath">
+  <path d="${svgPath}" fill="black" />
+  </clipPath>
   <path d="${svgPath}" fill="black" />
 </svg>`;
 
   return new Blob([svgContent], { type: 'image/svg+xml' });
-}
-
-// 不透明部分のマスクを作成する関数
-function createOpacityMask(buffer: Uint8Array, width: number, height: number): Uint8Array {
-  const mask = new Uint8Array(width * height);
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const index = (y * width + x) * 4; // RGBA
-      const alpha = buffer[index + 3]; // アルファチャンネル
-      mask[y * width + x] = alpha > 0 ? 1 : 0; // 不透明部分を1、透明部分を0
-    }
-  }
-
-  return mask;
 }
 
 export async function saveBlobViaTauri(blob: Blob, dirPath: string, defaultName = 'export.png') {

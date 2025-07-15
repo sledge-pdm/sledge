@@ -33,6 +33,26 @@ export function duplicateLayer(layerId: string) {
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) duplicated` });
 }
 
+export function clearLayer(layerId: string) {
+  const agent = getAgentOf(layerId);
+  if (!agent) return;
+  const originalBuffer = agent.getBuffer().buffer;
+  // clear current buffer
+  let width = (canvasStore.canvas.width);
+  let height = (canvasStore.canvas.height);
+  const newBuffer = new Uint8ClampedArray(width * height * 4);
+
+  agent.setBuffer(newBuffer, true, true);
+
+  agent.getDiffManager().add({
+    kind: 'whole',
+    before: new Uint8ClampedArray(originalBuffer),
+    after: new Uint8ClampedArray(newBuffer.buffer),
+  });
+  agent.registerToHistory();
+  agent.forceUpdate();
+}
+
 export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): LayerImageAgent {
   let width = Math.round(canvasStore.canvas.width / dotMagnification);
   let height = Math.round(canvasStore.canvas.height / dotMagnification);

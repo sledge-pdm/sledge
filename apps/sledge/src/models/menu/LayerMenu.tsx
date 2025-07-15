@@ -1,7 +1,7 @@
 import { IconMenuItem, Menu } from '@tauri-apps/api/menu';
 import { resolveResource } from '@tauri-apps/api/path';
-import { duplicateLayer, resetLayerImage } from '~/controllers/layer/LayerController';
-import { findLayerById, removeLayer } from '~/controllers/layer/LayerListController';
+import { clearLayer, duplicateLayer } from '~/controllers/layer/LayerController';
+import { removeLayer } from '~/controllers/layer/LayerListController';
 import RightClickMenu from './RightClickMenu';
 
 export class LayerMenu extends RightClickMenu {
@@ -17,7 +17,7 @@ export class LayerMenu extends RightClickMenu {
       text: 'clear.',
       icon: await resolveResource(dir + '/clear.png'),
       action: () => {
-        resetLayerImage(layerId, findLayerById(layerId)?.dotMagnification ?? 1);
+        clearLayer(layerId);
       },
     });
 

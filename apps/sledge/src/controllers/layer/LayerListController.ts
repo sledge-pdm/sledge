@@ -29,7 +29,7 @@ export const addLayer = (
   });
 
   const layers = [...allLayers()];
-  layers.push(newLayer);
+  layers.unshift(newLayer);
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', newLayer.id);

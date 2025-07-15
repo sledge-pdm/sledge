@@ -1,5 +1,6 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import mitt from 'mitt';
+import { SelectionState } from '~/controllers/selection/SelectionManager';
 
 export type Events = {
   'canvas:sizeChanged': { newSize: Size2D };
@@ -7,8 +8,9 @@ export type Events = {
 
   'layerHistory:changed': {};
 
-  'selection:changed': { commit: boolean };
+  'selection:areaChanged': { commit: boolean };
   'selection:moved': { newOffset: Vec2 };
+  'selection:stateChanged': { newState: SelectionState };
 
   'webgl:requestUpdate': { onlyDirty: boolean; context: string };
 

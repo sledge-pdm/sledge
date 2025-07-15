@@ -26,11 +26,21 @@ export type TileFragment = {
 
 export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace';
+export type SelectionState = 'idle' | 'selected' | 'move';
 
 class SelectionManager {
-  private currentMode: SelectionEditMode = 'replace';
-  public getCurrentMode() {
-    return this.currentMode;
+  private editMode: SelectionEditMode = 'replace';
+  private state: SelectionState = 'idle';
+
+  public getEditMode() {
+    return this.editMode;
+  }
+  public getState() {
+    return this.state;
+  }
+  public setState(state: SelectionState) {
+    this.state = state;
+    eventBus.emit('selection:stateChanged', { newState: state });
   }
 
   private moveOffset: Vec2 = { x: 0, y: 0 };
@@ -94,12 +104,14 @@ class SelectionManager {
 
   /** 「プレビュー開始時」に呼ぶ */
   beginPreview(mode: SelectionEditMode) {
-    this.currentMode = mode;
+    this.editMode = mode;
     this.moveOffset = { x: 0, y: 0 };
     eventBus.emit('selection:moved', { newOffset: this.moveOffset });
     if (mode === 'replace') {
       // Replace なら確定済みをクリアしてから新しい previewMask
       this.selectionMask.clear();
+      // クリア後は状態をidleに更新
+      this.setState('idle');
     }
     // プレビュー用マスクを作り直し (activeMask には影響しない)
     this.previewMask = new SelectionMask(this.selectionMask.getWidth(), this.selectionMask.getHeight());
@@ -145,7 +157,7 @@ class SelectionManager {
     }
 
     // 毎回プレビュー更新イベント
-    if (changed) eventBus.emit('selection:changed', { commit: false });
+    if (changed) eventBus.emit('selection:areaChanged', { commit: false });
   }
 
   /** onEnd で呼ぶ */
@@ -156,13 +168,13 @@ class SelectionManager {
 
     let resultMask: Uint8Array;
 
-    if (this.currentMode === 'replace') {
+    if (this.editMode === 'replace') {
       // まるごと差し替え
       resultMask = new Uint8Array(combine_masks_replace(preview));
-    } else if (this.currentMode === 'add') {
+    } else if (this.editMode === 'add') {
       // OR 合成: wasmで高速処理
       resultMask = new Uint8Array(combine_masks_add(activeMask, preview));
-    } else if (this.currentMode === 'subtract') {
+    } else if (this.editMode === 'subtract') {
       // AND NOT: wasmで高速処理
       resultMask = new Uint8Array(combine_masks_subtract(activeMask, preview));
     } else {
@@ -173,13 +185,21 @@ class SelectionManager {
 
     // プレビューをクリア
     this.previewMask = undefined;
-    eventBus.emit('selection:changed', { commit: true });
+
+    // 状態を更新: 選択範囲があればselected、なければidle
+    this.updateStateBasedOnSelection();
+
+    eventBus.emit('selection:areaChanged', { commit: true });
   }
 
   /** プレビューをキャンセル */
   cancelPreview() {
     this.previewMask = undefined;
-    eventBus.emit('selection:changed', { commit: false });
+
+    // 状態を更新: キャンセル後は選択状況に基づいて状態を決定
+    this.updateStateBasedOnSelection();
+
+    eventBus.emit('selection:areaChanged', { commit: false });
   }
 
   public getCombinedMask(): Uint8Array {
@@ -189,7 +209,7 @@ class SelectionManager {
     const previewMask = this.previewMask.getMask();
 
     // wasmで高速合成
-    if (this.currentMode === 'subtract') {
+    if (this.editMode === 'subtract') {
       return new Uint8Array(combine_masks_subtract(baseMask, previewMask));
     } else {
       // add または replace の場合は OR 合成
@@ -213,13 +233,36 @@ class SelectionManager {
 
     this.selectionMask.setMask(newMask);
     this.setMoveOffset({ x: 0, y: 0 }); // オフセットをリセット
-    eventBus.emit('selection:changed', { commit: true });
+
+    // 状態を更新: 移動完了後はselected状態に戻す
+    if (this.state === 'move') {
+      this.setState('selected');
+    }
+
+    eventBus.emit('selection:areaChanged', { commit: true });
   }
 
   clear() {
     this.previewMask = undefined;
     this.selectionMask.clear();
-    eventBus.emit('selection:changed', { commit: false });
+    this.setState('idle');
+    eventBus.emit('selection:areaChanged', { commit: false });
+  }
+
+  /**
+   * 現在の選択状況に基づいてstateを更新する
+   */
+  private updateStateBasedOnSelection() {
+    if (this.state === 'move') {
+      // move状態の場合は変更しない（移動中）
+      return;
+    }
+
+    if (this.isSelected()) {
+      this.setState('selected');
+    } else {
+      this.setState('idle');
+    }
   }
 
   public forEachMaskPixels(fn: (position: Vec2) => void, withMoveOffset?: boolean) {}

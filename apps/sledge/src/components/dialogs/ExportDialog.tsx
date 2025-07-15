@@ -4,8 +4,9 @@ import { Checkbox, Dropdown, Slider } from '@sledge/ui';
 import { DropdownOption } from '@sledge/ui/src/components/control/Dropdown';
 import * as styles from '@styles/dialogs/export_dialog.css';
 import { open as openFile } from '@tauri-apps/plugin-dialog';
+import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
@@ -16,6 +17,7 @@ import { Dialog, DialogExternalProps } from './Dialog';
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
   { label: 'png', value: 'png' },
   { label: 'jpeg', value: 'jpg' },
+  { label: 'svg', value: 'svg' },
 ];
 const scaleOptions: DropdownOption<number>[] = [
   { label: 'x1', value: 1 },
@@ -47,6 +49,13 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
 
   onMount(async () => {
     if (settings.dirPath === '' || !settings.dirPath) setSettings('dirPath', await defaultExportDir());
+  });
+
+  createEffect(async () => {
+    const dir = settings.dirPath;
+    if (dir && !(await exists(dir))) {
+      await mkdir(dir, { recursive: true });
+    }
   });
 
   const openDirSelectionDialog = async () => {

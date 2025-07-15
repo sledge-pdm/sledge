@@ -1,9 +1,10 @@
+import { mask_to_path } from '@sledge/wasm';
 import { pictureDir } from '@tauri-apps/api/path';
-import { writeFile } from '@tauri-apps/plugin-fs';
+import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
-export type ExportableFileTypes = 'png' | 'jpg';
+export type ExportableFileTypes = 'png' | 'jpg' | 'svg';
 
 export interface CanvasExportOptions {
   format: ExportableFileTypes;
@@ -11,11 +12,25 @@ export interface CanvasExportOptions {
   scale: number; // 1（そのまま）～10 など
 }
 
-export const defaultExportDir = async () => (await pictureDir()) + '\\sledge';
+export const defaultExportDir = async () => {
+  const dir = (await pictureDir()) + '\\sledge';
+  if (!exists(dir)) {
+    await mkdir(dir, { recursive: true });
+  }
+
+  return dir;
+};
 
 export async function exportImage(dirPath: string, fileName: string, options: CanvasExportOptions): Promise<string | undefined> {
-  const canvasBlob = await getImageBlob(options);
+  let canvasBlob: Blob | undefined;
+  if (options.format === 'svg') {
+    canvasBlob = await getSVGBlob(options);
+  } else {
+    canvasBlob = await getImageBlob(options);
+  }
+
   if (canvasBlob === undefined) return undefined;
+
   return await saveBlobViaTauri(canvasBlob, dirPath, `${fileName}.${options.format}`);
 }
 
@@ -54,6 +69,48 @@ export async function getImageBlob(options: CanvasExportOptions): Promise<Blob |
       quality
     );
   });
+}
+
+export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | undefined> {
+  if (webGLRenderer === undefined) return undefined;
+  const { width, height } = canvasStore.canvas;
+
+  // 64x64以内の制限チェック
+  if (width > 64 || height > 64) {
+    console.warn('SVG export is only supported for images 64x64 or smaller');
+    return undefined;
+  }
+
+  const buffer = webGLRenderer.readPixelsFlipped();
+
+  // 不透明部分のマスクを作成
+  const mask = createOpacityMask(new Uint8Array(buffer.buffer), width, height);
+
+  // wasmを使ってSVGパスを生成
+  const svgPath = mask_to_path(mask, width, height, 0, 0);
+
+  // SVGドキュメントを作成
+  const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+  <path d="${svgPath}" fill="black" />
+</svg>`;
+
+  return new Blob([svgContent], { type: 'image/svg+xml' });
+}
+
+// 不透明部分のマスクを作成する関数
+function createOpacityMask(buffer: Uint8Array, width: number, height: number): Uint8Array {
+  const mask = new Uint8Array(width * height);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = (y * width + x) * 4; // RGBA
+      const alpha = buffer[index + 3]; // アルファチャンネル
+      mask[y * width + x] = alpha > 0 ? 1 : 0; // 不透明部分を1、透明部分を0
+    }
+  }
+
+  return mask;
 }
 
 export async function saveBlobViaTauri(blob: Blob, dirPath: string, defaultName = 'export.png') {

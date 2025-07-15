@@ -10,7 +10,7 @@ import CanvasArea from '~/components/canvas/CanvasArea';
 import BottomInfo from '~/components/global/BottomInfo';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
-import SideSections from '~/components/global/SideSections';
+import SideSections from '~/components/section/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
@@ -130,10 +130,10 @@ export default function Editor() {
           <CanvasArea />
           <BottomInfo />
         </div>
-        {/* 
+
         {divider()}
 
-        <SideSections side='rightSide' /> */}
+        <SideSections side='rightSide' />
 
         <KeyListener />
         {/* <Companion /> */}

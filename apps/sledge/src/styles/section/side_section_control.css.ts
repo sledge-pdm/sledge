@@ -2,20 +2,18 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
-export const edgeInfoRoot = style([
+export const sideSectionControlRoot = style([
   flexCol,
   {
-    gap: '16px',
-    paddingTop: '16px',
+    gap: '20px',
+    paddingTop: '20px',
     paddingBottom: '16px',
-    paddingLeft: '6px',
-    paddingRight: '6px',
     width: '24px',
     justifyContent: 'start',
     alignItems: 'center',
   },
 ]);
-export const edgeInfoItem = style([
+export const sideSectionControlItem = style([
   flexRow,
   {
     justifyContent: 'center',
@@ -23,17 +21,24 @@ export const edgeInfoItem = style([
   },
 ]);
 
-export const edgeInfoText = style({
+export const sideSectionControlToggle = style({
+  fontFamily: ZFB11,
+  fontSize: '8px',
+  cursor: 'pointer',
+});
+
+export const sideSectionControlText = style({
   fontFamily: ZFB11,
   fontSize: '8px',
   letterSpacing: '1px',
   whiteSpace: 'nowrap',
   writingMode: 'vertical-lr',
+  color: vars.color.muted,
 });
 
-export const edgeInfoTextActive = style([
-  edgeInfoText,
+export const sideSectionControlTextActive = style([
+  sideSectionControlText,
   {
-    color: vars.color.accent,
+    color: vars.color.onBackground,
   },
 ]);

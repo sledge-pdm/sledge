@@ -33,7 +33,7 @@ export default class LayerImageAgent {
   getHeight = (): number => this.pbm.height;
 
   constructor(
-    private layerId: string,
+    public layerId: string,
     buffer: Uint8ClampedArray,
     width: number,
     height: number
@@ -66,12 +66,16 @@ export default class LayerImageAgent {
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {
     this.pbm.buffer = rawBuffer;
-    // if (!silentlySet) this.callOnImageChangeListeners({ updatePreview });
     this.tm.setAllDirty();
     if (!silentlySet) {
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
       if (updatePreview) eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
+  }
+
+  forceUpdate() {
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
   }
 
   changeBufferSize(newSize: Size2D, emitEvent?: boolean) {
@@ -121,6 +125,9 @@ export default class LayerImageAgent {
         case 'tile':
           this.undoTileDiff(diff);
           break;
+        case 'whole':
+          this.setBuffer(diff.before, true, false);
+          break;
       }
     });
     const undoEnd = Date.now();
@@ -143,6 +150,9 @@ export default class LayerImageAgent {
           break;
         case 'tile':
           this.redoTileDiff(diff);
+          break;
+        case 'whole':
+          this.setBuffer(diff.after, true, false);
           break;
       }
     });

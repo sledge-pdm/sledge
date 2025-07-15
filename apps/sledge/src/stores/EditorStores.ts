@@ -4,15 +4,17 @@ import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
 import { defaultTools, Tool, ToolType } from '~/tools/Tools';
 
-type SideAppearanceMode = 'editor' | 'project' | 'effects';
+export type SectionTab = 'editor' | 'project' | 'effects';
 type AppearanceStore = {
   leftSide: {
     shown: boolean;
-    selected: SideAppearanceMode;
+    tabs: SectionTab[];
+    selectedIndex: number;
   };
   rightSide: {
     shown: boolean;
-    selected: SideAppearanceMode;
+    tabs: SectionTab[];
+    selectedIndex: number;
   };
 };
 type ColorStore = {
@@ -48,11 +50,13 @@ export type ToolStore = {
 const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: true,
-    selected: 'editor' as SideAppearanceMode,
+    tabs: ['editor', 'effects'],
+    selectedIndex: 0,
   },
   rightSide: {
-    shown: true,
-    selected: 'editor' as SideAppearanceMode,
+    shown: false,
+    tabs: ['project'],
+    selectedIndex: 0,
   },
 };
 const defaultColorStore: ColorStore = {

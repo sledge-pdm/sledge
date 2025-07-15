@@ -51,7 +51,7 @@ const CanvasDebugOverlay: Component = (props) => {
     setOffsetX(e.newOffset.x);
     setOffsetY(e.newOffset.y);
   };
-  const onSelectionChanged = (e: Events['selection:changed']) => {
+  const onSelectionChanged = (e: Events['selection:areaChanged']) => {
     const box = getCurrentSelection().getBoundBox();
     if (box) {
       setSelectionWidth(box.right - box.left + 1);
@@ -60,12 +60,12 @@ const CanvasDebugOverlay: Component = (props) => {
   };
 
   onMount(() => {
-    eventBus.on('selection:changed', onSelectionChanged);
+    eventBus.on('selection:areaChanged', onSelectionChanged);
     eventBus.on('selection:moved', onSelectionMoved);
   });
 
   onCleanup(() => {
-    eventBus.on('selection:changed', onSelectionChanged);
+    eventBus.on('selection:areaChanged', onSelectionChanged);
     eventBus.off('selection:moved', onSelectionMoved);
     disposeInterval();
   });

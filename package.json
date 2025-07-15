@@ -2,10 +2,12 @@
   "private": true,
   "packageManager": "pnpm@10.12.4",
   "scripts": {
+    "install": "pnpm -F sledge install",
     "dev": "pnpm -F sledge dev",
     "build": "pnpm -F sledge build",
     "site:dev": "pnpm -F sledge-website dev",
-    "site:build": "pnpm -F sledge-website build"
+    "site:build": "pnpm -F sledge-website build",
+    "wasm:build": "cd packages/wasm && wasm-pack build --target bundler"
   },
   "dependencies": {
     "@vanilla-extract/css": "^1.13.3",

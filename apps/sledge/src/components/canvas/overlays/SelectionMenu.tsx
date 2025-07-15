@@ -3,12 +3,33 @@ import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { getRelativeCanvasAreaPosition } from '~/controllers/canvas/CanvasPositionCalculator';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager, SelectionState } from '~/controllers/selection/SelectionManager';
 import { BoundBox } from '~/controllers/selection/SelectionMask';
-import { cancelSelection, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
+import { cancelMove, cancelSelection, commitMove, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
+import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus, Events } from '~/utils/EventBus';
+
+interface ItemProps {
+  src: string;
+  onClick?: () => void;
+}
+
+const Item: Component<ItemProps> = (props) => {
+  return (
+    <div
+      style={{
+        margin: '6px',
+        'pointer-events': 'all',
+        cursor: 'pointer',
+      }}
+      onClick={props.onClick}
+    >
+      <Icon src={props.src} color={vars.color.onBackground} base={16} scale={1} />
+    </div>
+  );
+};
 
 const SelectionMenu: Component<{}> = (props) => {
   const borderDash = 6;
@@ -23,8 +44,8 @@ const SelectionMenu: Component<{}> = (props) => {
 
   const [selectionChanged, setSelectionChanged] = createSignal<boolean>(false);
   const [committed, setCommitted] = createSignal<boolean>(true);
+  const [selectionState, setSelectionState] = createSignal<SelectionState>(selectionManager.getState());
   const [outlineBoundBox, setOutlineBoundBox] = createSignal<BoundBox | undefined>();
-  const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (!selectionManager.isSelected) {
@@ -35,10 +56,10 @@ const SelectionMenu: Component<{}> = (props) => {
           if (box) setOutlineBoundBox(box);
         }
       }
-    }, fps)
+    }, Number(globalConfig.performance.targetFPS))
   );
 
-  const onSelectionChangedHandler = (e: Events['selection:changed']) => {
+  const onSelectionChangedHandler = (e: Events['selection:areaChanged']) => {
     setSelectionChanged(true);
     setCommitted(e.commit);
   };
@@ -46,16 +67,20 @@ const SelectionMenu: Component<{}> = (props) => {
     setSelectionChanged(true);
     setCommitted(true);
   };
+  const onStateChangedHandler = (e: Events['selection:stateChanged']) => {
+    setSelectionState(e.newState);
+  };
 
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:changed', onSelectionChangedHandler);
+    eventBus.on('selection:areaChanged', onSelectionChangedHandler);
     eventBus.on('selection:moved', onSelectionMovedHandler);
-    setSelectionChanged(true);
+    eventBus.on('selection:stateChanged', onStateChangedHandler);
   });
   onCleanup(() => {
-    eventBus.off('selection:changed', onSelectionChangedHandler);
+    eventBus.off('selection:areaChanged', onSelectionChangedHandler);
     eventBus.off('selection:moved', onSelectionMovedHandler);
+    eventBus.off('selection:stateChanged', onStateChangedHandler);
     disposeInterval();
     stopRenderLoop();
   });
@@ -88,39 +113,35 @@ const SelectionMenu: Component<{}> = (props) => {
           'pointer-events': 'all',
         }}
       >
-        <div
-          style={{
-            margin: '6px',
-            'pointer-events': 'all',
-            cursor: 'pointer',
-          }}
-          onClick={() => {
-            cancelSelection();
-          }}
-        >
-          <Icon src='/icons/misc/clear.png' color={vars.color.onBackground} base={16} scale={1} />
-        </div>
-        <div
-          style={{
-            margin: '6px',
-            'pointer-events': 'all',
-            cursor: 'pointer',
-          }}
-        >
-          <Icon src='/icons/misc/duplicate.png' color={vars.color.onBackground} base={16} scale={1} />
-        </div>
-        <div
-          style={{
-            margin: '6px',
-            'pointer-events': 'all',
-            cursor: 'pointer',
-          }}
-          onClick={(e) => {
-            deletePixelInSelection();
-          }}
-        >
-          <Icon src='/icons/misc/garbage.png' color={vars.color.onBackground} base={16} scale={1} />
-        </div>
+        <Show when={selectionState() === 'move'}>
+          <Item
+            src='/icons/misc/check.png'
+            onClick={() => {
+              commitMove();
+            }}
+          />
+          <Item
+            src='/icons/misc/clear.png'
+            onClick={() => {
+              cancelMove();
+            }}
+          />
+        </Show>
+        <Show when={selectionState() === 'selected'}>
+          <Item
+            src='/icons/misc/clear.png'
+            onClick={() => {
+              cancelSelection();
+            }}
+          />
+          {/* <Item src='/icons/misc/duplicate.png' onClick={() => {}} /> */}
+          <Item
+            src='/icons/misc/garbage.png'
+            onClick={() => {
+              deletePixelInSelection();
+            }}
+          />
+        </Show>
       </div>
     </div>
   );

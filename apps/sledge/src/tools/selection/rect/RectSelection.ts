@@ -41,7 +41,7 @@ export class RectSelection implements ToolBehavior {
     const py = Math.max(0, args.position.y);
     const sx = Math.max(0, this.startPosition.x);
     const sy = Math.max(0, this.startPosition.y);
-    
+
     const newRect: RectFragment = {
       kind: 'rect',
       startPosition: { x: 0, y: 0 },

@@ -1,7 +1,6 @@
 import * as styles from '@styles/components/canvas/canvas_controls.css';
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { redoLayer, undoLayer } from '~/controllers/history/HistoryController';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { canRedo, canUndo } from '~/controllers/layer/LayerController';
 
 import { layerListStore } from '~/stores/ProjectStores';

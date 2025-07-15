@@ -1,4 +1,4 @@
-import { onCleanup } from 'solid-js';
+import { Component, onCleanup } from 'solid-js';
 import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
@@ -15,7 +15,7 @@ import CanvasDebugOverlay from './CanvasDebugOverlay';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 import { globalConfig } from '~/stores/GlobalStores';
 
-export default () => {
+const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
@@ -107,3 +107,5 @@ export default () => {
     </div>
   );
 };
+
+export default CanvasArea;

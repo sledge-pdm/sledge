@@ -26,7 +26,7 @@ export const menuListLeft = style([
   flexRow,
   {
     flexGrow: 1,
-    paddingLeft: '26px',
+    paddingLeft: '16px',
     gap: vars.spacing.xs,
   },
 ]);
@@ -34,7 +34,6 @@ export const menuListLeft = style([
 export const menuListRight = style([
   flexRow,
   {
-    paddingRight: vars.spacing.sm,
     gap: vars.spacing.xs,
   },
 ]);

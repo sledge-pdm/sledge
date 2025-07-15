@@ -7,7 +7,15 @@ import { Component } from 'solid-js';
 import { Layer } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
+import {
+  activeLight,
+  layerItem,
+  layerItemDisabled,
+  layerItemHandle,
+  layerItemIndex,
+  layerItemName,
+  layerItemType,
+} from '~/styles/section/editor/layer.css';
 import { eventBus } from '~/utils/EventBus';
 import LayerPreview from '../../../global/LayerPreview';
 

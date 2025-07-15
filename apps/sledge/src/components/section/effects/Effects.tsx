@@ -3,7 +3,7 @@ import { AlphaBlurMode, gaussian_blur, GaussianBlurOption, grayscale } from '@sl
 import { Component } from 'solid-js';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
-import { sectionCaption, sectionRoot } from '~/styles/section/section.css';
+import { sectionCaption, sectionRoot } from '~/styles/section/section_item.css';
 
 const Effects: Component = () => {
   return (

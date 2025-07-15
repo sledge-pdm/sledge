@@ -11,8 +11,8 @@ import {
   canvasSizeLabel,
   canvasSizeResetAllLayerButton,
   canvasSizeTimes,
-} from '~/styles/section/canvas.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section.css';
+} from '~/styles/section/project/canvas.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;

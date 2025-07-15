@@ -39,6 +39,7 @@ const MenuList: Component<Props> = (props) => {
             role='option'
             onClick={() => {
               option.onSelect?.();
+              props.onClose?.();
             }}
           >
             <p class={itemText}>{option.label}</p>

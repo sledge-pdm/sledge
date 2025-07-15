@@ -17,20 +17,27 @@ const WebGLCanvas: Component = () => {
   const [updateRender, setUpdateRender] = createSignal(false);
   const [onlyDirtyUpdate, setOnlyDirtyUpdate] = createSignal(false);
 
-  const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {
         setUpdateRender(false);
-        webGLRenderer?.render(allLayers(), onlyDirtyUpdate());
+        try {
+          webGLRenderer?.render(allLayers(), onlyDirtyUpdate());
+        } catch (error) {
+          console.error('WebGLCanvas: Failed to resize WebGLRenderer', error);
+        }
         setOnlyDirtyUpdate(false);
       }
-    }, fps)
+    }, Number(globalConfig.performance.targetFPS))
   );
 
   const handleCanvasSizeChangedEvent = (e: Events['canvas:sizeChanged']) => {
     const { width, height } = e.newSize;
-    webGLRenderer?.resize(width, height);
+    try {
+      webGLRenderer?.resize(width, height);
+    } catch (error) {
+      console.error('WebGLCanvas: Failed to resize WebGLRenderer', error);
+    }
     setUpdateRender(true);
     setOnlyDirtyUpdate(true);
   };
@@ -44,9 +51,15 @@ const WebGLCanvas: Component = () => {
     const { width, height } = canvasStore.canvas;
 
     startRenderLoop();
-    webGLRenderer = new WebGLRenderer(canvasEl);
-    webGLRenderer.resize(width, height);
-    setUpdateRender(true); // rise flag for init render
+    console.log('WebGLCanvas: Starting render loop');
+    try {
+      webGLRenderer = new WebGLRenderer(canvasEl);
+      webGLRenderer.resize(width, height);
+      setUpdateRender(true); // rise flag for init render
+    } catch (error) {
+      console.error('WebGLCanvas: Failed to initialize WebGLRenderer', error);
+      webGLRenderer = undefined;
+    }
 
     eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
     eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);

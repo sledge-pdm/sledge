@@ -1,14 +1,14 @@
 import { vars } from '@sledge/theme';
+import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { maskToPath } from '~/controllers/selection/OutlineExtructor';
-import { PathCmdList } from '~/controllers/selection/PathCommand';
+import { PathCmd, PathCmdList } from '~/controllers/selection/PathCommand';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { marchingAntsAnimation } from '~/styles/components/canvas/canvas_overlay.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {
@@ -26,38 +26,50 @@ const CanvasOverlaySVG: Component = (props) => {
 
   const [areaPenWrite, setAreaPenWrite] = createSignal<Area>();
   const borderDash = 6;
-  const [borderOffset, setBorderOffset] = createSignal<number>(0);
-  const disposeInterval = makeTimer(
-    () => {
-      setBorderOffset((borderOffset() + 1) % (borderDash * 2));
-    },
-    100,
-    setInterval
-  );
 
   const [selectionChanged, setSelectionChanged] = createSignal<boolean>(false);
   const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
-  const [fps, setFps] = createSignal(60);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (selectionChanged()) {
         updateOutline();
         setSelectionChanged(false);
       }
-    }, fps)
+    }, Number(globalConfig.performance.targetFPS))
   );
-
-  const isFilled = (idx: number): number => {
-    const a = selectionManager.getSelectionMask().getMask()[idx];
-    const previewMask = selectionManager.getPreviewMask();
-    if (!previewMask) return a;
-    const b = previewMask.getMask()[idx];
-    return selectionManager.getCurrentMode() === 'subtract' ? a & (b ^ 1) : a | b;
-  };
 
   const updateOutline = () => {
     const { width, height } = canvasStore.canvas;
-    const pathCmds = maskToPath(isFilled, width, height, selectionManager.getMoveOffset());
+    const offset = selectionManager.getMoveOffset();
+
+    // 合成されたマスクを取得
+    const combinedMask = selectionManager.getCombinedMask();
+
+    // wasmでSVGパス文字列を生成
+    const pathString = mask_to_path(combinedMask, width, height, offset.x, offset.y);
+
+    // パス文字列をPathCmdListに変換
+    const pathCmds = new PathCmdList();
+    if (pathString.trim()) {
+      // 簡易的なパース（将来的にはより堅牢にする）
+      const commands = pathString.split(/(?=[MLZ])/);
+      commands.forEach((cmd) => {
+        const trimmed = cmd.trim();
+        if (!trimmed) return;
+
+        const parts = trimmed.split(/\s+/);
+        const command = parts[0];
+
+        if (command === 'M' || command === 'L') {
+          const x = parseFloat(parts[1]);
+          const y = parseFloat(parts[2]);
+          pathCmds.add(new PathCmd(command, x, y));
+        } else if (command === 'Z') {
+          pathCmds.add(new PathCmd(command));
+        }
+      });
+    }
+
     setPathCmdList(pathCmds);
   };
 
@@ -95,7 +107,6 @@ const CanvasOverlaySVG: Component = (props) => {
   onCleanup(() => {
     eventBus.off('selection:changed', onSelectionChangedHandler);
     eventBus.off('selection:moved', onSelectionMovedHandler);
-    disposeInterval();
     window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();
   });
@@ -158,8 +169,8 @@ const CanvasOverlaySVG: Component = (props) => {
           stroke={vars.color.border}
           stroke-width='1'
           stroke-dasharray={`${borderDash} ${borderDash}`}
-          stroke-dashoffset={borderOffset()}
           pointer-events='none'
+          class={marchingAntsAnimation}
         />
       </svg>
     </>

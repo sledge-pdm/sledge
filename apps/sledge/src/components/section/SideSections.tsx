@@ -1,18 +1,13 @@
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
-import Color from '../section/editor/Color';
-import LayerList from '../section/editor/LayerList';
-import ToolList from '../section/editor/ToolList';
-import CanvasSettings from '../section/project/CanvasSettings';
-import Project from '../section/project/Project';
 
 import { flexCol } from '@sledge/core';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import interact from 'interactjs';
-import SideSectionControl from '~/components/global/SideSectionControl';
-import Effects from '~/components/section/effects/Effects';
-import { appearanceStore } from '~/stores/EditorStores';
+import { EditorTab, EffectsTab, ProjectTab } from '~/components/section/SectionTabs';
+import SideSectionControl from '~/components/section/SideSectionControl';
+import { appearanceStore, SectionTab } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
-import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/globals/side_sections.css';
+import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
 import { eventBus } from '~/utils/EventBus';
 
 interface Props {
@@ -66,48 +61,30 @@ const SideSections: Component<Props> = (props) => {
     });
   });
 
+  const tabContent = (tab: SectionTab) => {
+    switch (tab) {
+      case 'editor':
+        return <EditorTab />;
+      case 'project':
+        return <ProjectTab />;
+      case 'effects':
+        return <EffectsTab />;
+      default:
+        return null;
+    }
+  };
+
+  const selectedTab = () => appearanceStore[props.side].tabs[appearanceStore[props.side].selectedIndex];
+
   return (
     <div style={{ display: 'flex', 'flex-direction': props.side === 'leftSide' ? 'row' : 'row-reverse' }}>
       <SideSectionControl side={props.side} />
 
       <Show when={appearanceStore[props.side].shown}>
-        <div id='side_sections' class={sideAreaRoot} style={{ width: '330px' }}>
+        <div id='side_sections' class={sideAreaRoot} style={{ width: '300px' }}>
           <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
             <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
-              <div class={flexCol}>
-                <div
-                  class={sideAreaContent}
-                  style={{
-                    visibility: appearanceStore[props.side].selected !== 'editor' ? 'hidden' : 'visible',
-                    height: appearanceStore[props.side].selected !== 'editor' ? '0' : undefined,
-                  }}
-                >
-                  <Color />
-                  <ToolList />
-                  <LayerList />
-                </div>
-
-                <div
-                  class={sideAreaContent}
-                  style={{
-                    visibility: appearanceStore[props.side].selected !== 'project' ? 'hidden' : 'visible',
-                    height: appearanceStore[props.side].selected !== 'project' ? '0' : undefined,
-                  }}
-                >
-                  <Project />
-                  <CanvasSettings />
-                </div>
-
-                <div
-                  class={sideAreaContent}
-                  style={{
-                    visibility: appearanceStore[props.side].selected !== 'effects' ? 'hidden' : 'visible',
-                    height: appearanceStore[props.side].selected !== 'effects' ? '0' : undefined,
-                  }}
-                >
-                  <Effects />
-                </div>
-              </div>
+              <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
             </div>
 
             <Show when={canScrollTop()}>

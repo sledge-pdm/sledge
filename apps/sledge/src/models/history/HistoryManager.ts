@@ -17,7 +17,13 @@ export type TileDiff = {
   afterColor: RGBAColor;
 };
 
-export type Diff = PixelDiff | TileDiff;
+export type WholeDiff = {
+  kind: 'whole';
+  before: Uint8ClampedArray;
+  after: Uint8ClampedArray;
+};
+
+export type Diff = PixelDiff | TileDiff | WholeDiff;
 
 export const getDiffHash = (diff: Diff) => {
   switch (diff.kind) {
@@ -25,6 +31,8 @@ export const getDiffHash = (diff: Diff) => {
       return `px:${diff.position.x},${diff.position.y}`;
     case 'tile':
       return `tile:${diff.index.row},${diff.index.column}`;
+    case 'whole':
+      return `whole`; // whole以外には存在しないはず
   }
 };
 

@@ -3,13 +3,14 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
 import solidPlugin from 'vite-plugin-solid';
+import topLevelAwait from "vite-plugin-top-level-await";
 import wasmPlugin from 'vite-plugin-wasm';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [wasmPlugin(), vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths(), glsl()],
+  plugins: [wasmPlugin(), vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths(), glsl(), topLevelAwait()],
   build: {
     // target: 'esnext',
     outDir: 'dist',
@@ -45,7 +46,12 @@ export default defineConfig({
     '~': path.resolve(__dirname, 'src'),
   },
   worker: {
+    // Not needed with vite-plugin-top-level-await >= 1.3.0
     format: 'es',
+    plugins: () => [
+      wasmPlugin(),
+      topLevelAwait()
+    ]
   },
   resolve: {
     alias: {

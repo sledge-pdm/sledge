@@ -46,6 +46,6 @@ export class PenTool implements ToolBehavior {
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    return false;
+    return true;
   }
 }

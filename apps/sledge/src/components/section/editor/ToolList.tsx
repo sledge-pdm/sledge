@@ -8,7 +8,7 @@ import { ToolType } from '~/tools/Tools';
 import ToolItemMain from './item/ToolItemMain';
 
 const mainTools: ToolType[] = [ToolType.Pen, ToolType.Eraser];
-const subTools: ToolType[] = [ToolType.Fill, ToolType.RectSelection, ToolType.Move];
+const subTools: ToolType[] = [ToolType.Fill, ToolType.RectSelection, ToolType.SelectionMove, ToolType.Move];
 
 const ToolList: Component = () => {
   return (

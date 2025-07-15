@@ -29,6 +29,12 @@ version = "0.0.0"
 dependencies = [
  "compiler_builtins",
  "core",
+]
+
+[[package]]
+name = "alloctests"
+version = "0.0.0"
+dependencies = [
  "rand",
  "rand_xorshift",
 ]
@@ -53,9 +59,9 @@ dependencies = [
 
 [[package]]
 name = "compiler_builtins"
-version = "0.1.146"
+version = "0.1.158"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a97117b1434b79833f39a5fabdf82f890bd98c1988334dea1cb67f7e627fa311"
+checksum = "164cdc689e4c6d69417f77a5f48be240c291e84fbef0b1281755dc754b19c809"
 dependencies = [
  "cc",
  "rustc-std-workspace-core",
@@ -139,11 +145,10 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.4.0"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc"
+checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
 dependencies = [
- "compiler_builtins",
  "rustc-std-workspace-alloc",
  "rustc-std-workspace-core",
 ]
@@ -217,6 +222,7 @@ name = "proc_macro"
 version = "0.0.0"
 dependencies = [
  "core",
+ "rustc-literal-escaper",
  "std",
 ]
 
@@ -229,21 +235,19 @@ dependencies = [
 
 [[package]]
 name = "r-efi"
-version = "4.5.0"
+version = "5.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9e935efc5854715dfc0a4c9ef18dc69dee0ec3bf9cc3ab740db831c0fdd86a3"
+checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 dependencies = [
- "compiler_builtins",
  "rustc-std-workspace-core",
 ]
 
 [[package]]
 name = "r-efi-alloc"
-version = "1.0.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31d6f09fe2b6ad044bc3d2c34ce4979796581afd2f1ebc185837e02421e02fd7"
+checksum = "dc2f58ef3ca9bb0f9c44d9aa8537601bcd3df94cc9314a40178cadf7d4466354"
 dependencies = [
- "compiler_builtins",
  "r-efi",
  "rustc-std-workspace-core",
 ]
@@ -279,6 +283,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "989e6739f80c4ad5b13e0fd7fe89531180375b18520cc8c82080e4dc4035b84f"
 dependencies = [
  "rustc-std-workspace-core",
+]
+
+[[package]]
+name = "rustc-literal-escaper"
+version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0041b6238913c41fe704213a4a9329e2f685a156d1781998128b4149c230ad04"
+dependencies = [
+ "rustc-std-workspace-std",
 ]
 
 [[package]]

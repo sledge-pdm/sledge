@@ -157,7 +157,6 @@ pub async fn open_window(
 
     // 3. 新規ビルダー作成
     let mut builder = WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(url.into()))
-        .focused(true)
         .additional_browser_args(COMMON_BROWSER_ARGS)
         .initialization_script(initialization_script);
 

@@ -5,7 +5,6 @@ import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore } from '~/stores/ProjectStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { eventBus, Events } from '~/utils/EventBus';
 import { safeInvoke } from '~/utils/TauriUtils';
@@ -82,7 +81,6 @@ const CanvasDebugOverlay: Component = (props) => {
             offset:({Math.round(interactStore.offset.x)}, {Math.round(interactStore.offset.y)}) <br />
             selection offset:({offsetX()}, {offsetY()}) <br />
             selection size:({selectionWidth()}, {selectionHeight()}) <br />
-            grid factor: {interactStore.zoom / canvasStore.canvas.height} <br />
           </p>
         </div>
       </Show>

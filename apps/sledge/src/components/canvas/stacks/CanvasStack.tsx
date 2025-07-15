@@ -19,7 +19,12 @@ const CanvasStack: Component = () => {
     let canvasStoreOrder = Math.floor(Math.log10(shorter));
     canvasStoreOrder -= 1;
 
-    let gridSize = Math.pow(10, canvasStoreOrder) / 2;
+    let gridSize = Math.pow(10, canvasStoreOrder);
+    if (gridSize < 1) {
+      gridSize = 1;
+    } else if (gridSize > 100) {
+      gridSize = 100;
+    }
     setGridSize(gridSize);
   };
 

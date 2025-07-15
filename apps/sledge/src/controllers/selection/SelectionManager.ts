@@ -1,6 +1,7 @@
 // controllers/layer/SelectionManager.ts
 
 import { Vec2 } from '@sledge/core';
+import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask } from '@sledge/wasm';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import SelectionMask from '~/controllers/selection/SelectionMask';
@@ -46,7 +47,6 @@ class SelectionManager {
     eventBus.emit('selection:moved', { newOffset: this.moveOffset });
     return this.moveOffset;
   }
-
   public moveTo(pos: Vec2) {
     this.moveOffset = pos;
     eventBus.emit('selection:moved', { newOffset: this.moveOffset });
@@ -135,14 +135,11 @@ class SelectionManager {
       case 'rect': {
         const sx = frag.startPosition.x;
         const sy = frag.startPosition.y;
-        const ex = sx + frag.width;
-        const ey = sy + frag.height;
-        for (let y = sy; y < ey; y++) {
-          for (let x = sx; x < ex; x++) {
-            this.previewMask.setFlag({ x, y }, 1);
-            changed = true;
-          }
-        }
+
+        // wasmで矩形を高速描画
+        const mask = this.previewMask.getMask();
+        fill_rect_mask(mask, this.previewMask.getWidth(), this.previewMask.getHeight(), sx, sy, frag.width, frag.height);
+        changed = true;
         break;
       }
     }
@@ -154,26 +151,25 @@ class SelectionManager {
   /** onEnd で呼ぶ */
   commit() {
     if (!this.previewMask) return;
-    const size = this.selectionMask.getWidth() * this.selectionMask.getHeight();
     const activeMask = this.selectionMask.getMask(); // Uint8Array
     const preview = this.previewMask.getMask();
 
+    let resultMask: Uint8Array;
+
     if (this.currentMode === 'replace') {
       // まるごと差し替え
-      this.selectionMask.setMask(preview); // ※SelectionMask 側に setMask(buf:Uint8Array) を用意しておく
+      resultMask = new Uint8Array(combine_masks_replace(preview));
     } else if (this.currentMode === 'add') {
-      // OR 合成: activeMask |= preview
-      for (let i = 0; i < size; i++) {
-        activeMask[i] = activeMask[i] || preview[i];
-      }
-      this.selectionMask.setMask(activeMask);
+      // OR 合成: wasmで高速処理
+      resultMask = new Uint8Array(combine_masks_add(activeMask, preview));
     } else if (this.currentMode === 'subtract') {
-      // AND NOT: activeMask &= !preview
-      for (let i = 0; i < size; i++) {
-        activeMask[i] = activeMask[i] && preview[i] ^ 1;
-      }
-      this.selectionMask.setMask(activeMask);
+      // AND NOT: wasmで高速処理
+      resultMask = new Uint8Array(combine_masks_subtract(activeMask, preview));
+    } else {
+      resultMask = activeMask;
     }
+
+    this.selectionMask.setMask(resultMask);
 
     // プレビューをクリア
     this.previewMask = undefined;
@@ -189,20 +185,35 @@ class SelectionManager {
   public getCombinedMask(): Uint8Array {
     if (!this.previewMask) return this.selectionMask.getMask();
 
-    const combined = new Uint8Array(this.selectionMask.getMask());
+    const baseMask = this.selectionMask.getMask();
+    const previewMask = this.previewMask.getMask();
 
-    const modeSub = selectionManager.getCurrentMode() === 'subtract';
-
-    for (let y = 0; y < this.selectionMask.getHeight(); y++) {
-      for (let x = 0; x < this.selectionMask.getWidth(); x++) {
-        const i = y * this.selectionMask.getWidth() + x;
-        combined[i] = modeSub
-          ? combined[i] & (this.previewMask.getMask()[i] ^ 1) // NAND
-          : combined[i] | this.previewMask.getMask()[i]; // OR
-      }
+    // wasmで高速合成
+    if (this.currentMode === 'subtract') {
+      return new Uint8Array(combine_masks_subtract(baseMask, previewMask));
+    } else {
+      // add または replace の場合は OR 合成
+      return new Uint8Array(combine_masks_add(baseMask, previewMask));
     }
+  }
 
-    return combined;
+  /**
+   * moveOffsetで見せかけていた選択範囲の移動を、実際のselectionMaskに反映する
+   */
+  commitOffset() {
+    const offset = this.getMoveOffset();
+    if (offset.x === 0 && offset.y === 0) return;
+
+    const width = this.selectionMask.getWidth();
+    const height = this.selectionMask.getHeight();
+    const oldMask = this.selectionMask.getMask();
+
+    // wasmで高速オフセット適用
+    const newMask = new Uint8Array(apply_mask_offset(oldMask, width, height, offset.x, offset.y));
+
+    this.selectionMask.setMask(newMask);
+    this.setMoveOffset({ x: 0, y: 0 }); // オフセットをリセット
+    eventBus.emit('selection:changed', { commit: true });
   }
 
   clear() {

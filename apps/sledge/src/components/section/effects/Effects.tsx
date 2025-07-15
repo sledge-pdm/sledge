@@ -4,7 +4,6 @@ import { Component } from 'solid-js';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionRoot } from '~/styles/section/section.css';
-import { eventBus } from '~/utils/EventBus';
 
 const Effects: Component = () => {
   return (
@@ -16,11 +15,16 @@ const Effects: Component = () => {
           onClick={() => {
             const agent = getActiveAgent();
             if (agent) {
-              const imageBuffer = agent.getNonClampedBuffer();
-              convert_to_grayscale(imageBuffer, canvasStore.canvas.width, canvasStore.canvas.height);
-              eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
-              agent.getTileManager().setAllDirty();
-              agent.getTileManager().scanAllTilesUniformity();
+              const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
+              convert_to_grayscale(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height);
+              agent.forceUpdate();
+
+              agent.getDiffManager().add({
+                kind: 'whole',
+                before: originalBuffer,
+                after: agent.getBuffer(),
+              });
+              agent.registerToHistory();
             }
           }}
         >
@@ -31,11 +35,16 @@ const Effects: Component = () => {
           onClick={() => {
             const agent = getActiveAgent();
             if (agent) {
-              const imageBuffer = agent.getNonClampedBuffer();
-              apply_gaussian_blur(imageBuffer, canvasStore.canvas.width, canvasStore.canvas.height, 1000);
-              eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
-              agent.getTileManager().setAllDirty();
-              agent.getTileManager().scanAllTilesUniformity();
+              const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
+              apply_gaussian_blur(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height, 1000);
+              agent.forceUpdate();
+
+              agent.getDiffManager().add({
+                kind: 'whole',
+                before: originalBuffer,
+                after: agent.getBuffer(),
+              });
+              agent.registerToHistory();
             }
           }}
         >

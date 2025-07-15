@@ -68,13 +68,13 @@ export default class LayerImageAgent {
     this.pbm.buffer = rawBuffer;
     this.tm.setAllDirty();
     if (!silentlySet) {
-      eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+      eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) buffer set` });
       if (updatePreview) eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
   }
 
   forceUpdate() {
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${this.layerId}) force update` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
   }
 
@@ -83,7 +83,7 @@ export default class LayerImageAgent {
     this.tm.setSize(newSize);
     if (emitEvent) {
       this.tm.setAllDirty();
-      eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+      eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) buffer size changed` });
       eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
     // this.callOnImageChangeListeners({ newSize, updatePreview: true });
@@ -133,7 +133,7 @@ export default class LayerImageAgent {
     const undoEnd = Date.now();
     setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) undo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     // this.callOnImageChangeListeners({ updatePreview: true });
   }
@@ -159,7 +159,7 @@ export default class LayerImageAgent {
     const redoEnd = Date.now();
     setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) redo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     // this.callOnImageChangeListeners({ updatePreview: true });
   }

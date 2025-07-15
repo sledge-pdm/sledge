@@ -29,12 +29,12 @@ export const addLayer = (
   });
 
   const layers = [...allLayers()];
-  layers.push(newLayer);
+  layers.unshift(newLayer);
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', newLayer.id);
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${newLayer.id}) added` });
 
   return newLayer;
 };
@@ -66,7 +66,7 @@ export const moveLayer = (fromIndex: number, targetIndex: number) => {
   const [moved] = updated.splice(fromIndex, 1);
   updated.splice(targetIndex, 0, moved);
   setLayerListStore('layers', updated);
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer moved from ${fromIndex} to ${targetIndex}` });
 };
 
 export const removeLayer = (layerId?: string) => {
@@ -81,7 +81,7 @@ export const removeLayer = (layerId?: string) => {
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) removed` });
 };
 
 export const allLayers = () => layerListStore.layers;

@@ -2,14 +2,19 @@ import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RGBAColor } from '~/utils/ColorUtils';
 
+export interface ToolResult {
+  shouldUpdate: boolean;
+  shouldRegisterToHistory: boolean;
+}
+
 export interface ToolBehavior {
   onlyOnCanvas?: boolean;
 
-  onStart: (agent: LayerImageAgent, args: ToolArgs) => boolean;
+  onStart: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 
-  onMove: (agent: LayerImageAgent, args: ToolArgs) => boolean;
+  onMove: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 
-  onEnd: (agent: LayerImageAgent, args: ToolArgs) => boolean;
+  onEnd: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 }
 
 export interface ToolArgs {

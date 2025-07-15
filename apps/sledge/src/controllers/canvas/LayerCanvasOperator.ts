@@ -5,7 +5,7 @@ import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
-import { ToolArgs } from '~/tools/ToolBehavior';
+import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
 import { Tool } from '~/tools/Tools';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
@@ -35,10 +35,11 @@ export default class LayerCanvasOperator {
     const result = this.useTool(agent, state, originalEvent, getCurrentTool(), position, last);
 
     if (result) {
-      // agent.callOnImageChangeListeners({ updatePreview: state === DrawState.end });
-      eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
-      if (state === DrawState.end) {
+      if (result.shouldUpdate) {
+        eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });
+      }
+      if (result.shouldRegisterToHistory) {
         agent.registerToHistory();
       }
     }
@@ -53,7 +54,7 @@ export default class LayerCanvasOperator {
       event: originalEvent,
     };
     const startTime = Date.now();
-    let update;
+    let update: ToolResult | undefined = undefined;
     switch (state) {
       case DrawState.start:
         update = tool.behavior.onStart(agent, toolArgs);

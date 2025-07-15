@@ -29,10 +29,12 @@ const LayerPreview: Component<Props> = (props: Props) => {
   onMount(() => {
     updatePreview();
     eventBus.on('preview:requestUpdate', handleUpdateReqEvent);
+    eventBus.on('canvas:sizeChanged', updatePreview);
   });
 
   onCleanup(() => {
     eventBus.off('preview:requestUpdate', handleUpdateReqEvent);
+    eventBus.off('canvas:sizeChanged', updatePreview);
   });
 
   const updatePreview = () => {

@@ -25,10 +25,13 @@ const CanvasStack: Component = () => {
     } else if (gridSize > 100) {
       gridSize = 100;
     }
+
     setGridSize(gridSize);
   };
 
   onMount(() => {
+    const { width, height } = canvasStore.canvas;
+    updateGridSize(width, height);
     eventBus.on('canvas:sizeChanged', ({ newSize }) => {
       const { width, height } = newSize;
       updateGridSize(width, height);

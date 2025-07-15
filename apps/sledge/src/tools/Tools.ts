@@ -54,7 +54,7 @@ export const defaultTools = {
   },
   [ToolType.SelectionMove]: {
     familiarName: 'Selection Move',
-    iconSrc: '/icons/tool/move.png',
+    iconSrc: '/icons/tool/move_area.png',
     behavior: new SelectionMoveTool(),
   },
   [ToolType.Move]: {

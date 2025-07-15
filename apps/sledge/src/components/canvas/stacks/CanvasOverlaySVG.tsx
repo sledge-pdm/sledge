@@ -2,13 +2,13 @@ import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { PathCmd, PathCmdList } from '~/controllers/selection/PathCommand';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { marchingAntsAnimation } from '~/styles/components/canvas/canvas_overlay.css';
+import { marchingAntsAnimation } from '~/styles/misc/marching_ants.css';
+import { PathCmd, PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {
@@ -73,7 +73,7 @@ const CanvasOverlaySVG: Component = (props) => {
     setPathCmdList(pathCmds);
   };
 
-  const onSelectionChangedHandler = (e: Events['selection:changed']) => {
+  const onSelectionChangedHandler = (e: Events['selection:areaChanged']) => {
     setSelectionChanged(true);
   };
   const onSelectionMovedHandler = (e: Events['selection:moved']) => {
@@ -99,13 +99,13 @@ const CanvasOverlaySVG: Component = (props) => {
 
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:changed', onSelectionChangedHandler);
+    eventBus.on('selection:areaChanged', onSelectionChangedHandler);
     eventBus.on('selection:moved', onSelectionMovedHandler);
     window.addEventListener('keydown', tempKeyMove);
     setSelectionChanged(true);
   });
   onCleanup(() => {
-    eventBus.off('selection:changed', onSelectionChangedHandler);
+    eventBus.off('selection:areaChanged', onSelectionChangedHandler);
     eventBus.off('selection:moved', onSelectionMovedHandler);
     window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();

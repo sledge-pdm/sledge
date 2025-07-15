@@ -39,7 +39,7 @@ export const header = style({
 
 export const body = style({
   maxHeight: '70vh',
-  overflowY: 'hidden',
+  overflow: 'visible',
 });
 
 export const footer = style([

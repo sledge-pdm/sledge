@@ -6,19 +6,21 @@ export const aaContainer = style([
   flexCol,
   {
     position: 'absolute',
-    top: '32px',
-    right: '40px',
+    top: '48px',
+    right: '72px',
     width: '200px',
     height: '100%',
-    alignItems: 'center',
     pointerEvents: 'none',
   },
 ]);
 
 export const aaText = style({
   fontFamily: Terminus,
-  fontSize: '22px',
-  opacity: 0.4,
+  textRendering: 'geometricPrecision',
+  fontSize: '32px',
+  lineHeight: 1.0,
+  letterSpacing: 0,
+  opacity: 0.25,
 });
 
 export const contentContainer = style([
@@ -26,14 +28,14 @@ export const contentContainer = style([
   {
     width: '100%',
     margin: '0 30px',
-    marginTop: '8px',
+    marginTop: '16px',
     pointerEvents: 'none',
   },
 ]);
 
 export const aboutLink = style({
   pointerEvents: 'all',
-  borderBottom: '1px solid black',
+  // borderBottom: '1px solid black',
   paddingBottom: '1px',
   ':hover': {
     borderBottom: 'none',
@@ -60,12 +62,12 @@ export const aboutDev = style({
 export const aboutContent = style({
   fontFamily: ZFB03,
   fontSize: '8px',
-  lineHeight: 1.6,
+  lineHeight: 2.2,
 });
 
 export const aboutFeedback = style({
   fontFamily: k12x8,
   fontSize: '8px',
-  marginRight: '50px',
+  marginRight: '42px',
   lineHeight: 1.5,
 });

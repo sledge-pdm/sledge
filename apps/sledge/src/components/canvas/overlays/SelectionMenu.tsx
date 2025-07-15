@@ -107,7 +107,7 @@ const SelectionMenu: Component<{}> = (props) => {
         'image-rendering': 'auto',
         'pointer-events': 'all',
         'transform-origin': '0 0',
-        transform: "translateX(-100%)",
+        transform: 'translateX(-100%)',
         'z-index': 500,
       }}
     >

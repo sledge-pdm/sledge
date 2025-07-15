@@ -38,8 +38,8 @@ export function clearLayer(layerId: string) {
   if (!agent) return;
   const originalBuffer = agent.getBuffer().buffer;
   // clear current buffer
-  let width = (canvasStore.canvas.width);
-  let height = (canvasStore.canvas.height);
+  let width = canvasStore.canvas.width;
+  let height = canvasStore.canvas.height;
   const newBuffer = new Uint8ClampedArray(width * height * 4);
 
   agent.setBuffer(newBuffer, true, true);

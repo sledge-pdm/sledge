@@ -77,8 +77,8 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
   const { scale = 1 } = options;
 
   // 64x64以内の制限チェック
-  if (width > 64 || height > 64) {
-    console.warn('SVG export is only supported for images 64x64 or smaller');
+  if (width > 128 || height > 128) {
+    console.warn('SVG export is only supported for images 128x128 or smaller');
     return undefined;
   }
 
@@ -98,7 +98,7 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
   <clipPath id="clipPath">
-  <path d="${svgPath}" fill="black" />
+    <path d="${svgPath}" fill="black" />
   </clipPath>
   <path d="${svgPath}" fill="black" />
 </svg>`;

@@ -27,14 +27,20 @@ export class RectSelection implements ToolBehavior {
       height: 1,
     };
     selectionManager.setPreviewFragment(newRect);
-    return false;
+
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
     selectionManager.beginPreview(this.getMode(args.event));
 
-    const { x: px, y: py } = args.position;
-    const { x: sx, y: sy } = this.startPosition;
+    const px = Math.max(0, args.position.x);
+    const py = Math.max(0, args.position.y);
+    const sx = Math.max(0, this.startPosition.x);
+    const sy = Math.max(0, this.startPosition.y);
 
     const newRect: RectFragment = {
       kind: 'rect',
@@ -49,12 +55,20 @@ export class RectSelection implements ToolBehavior {
     newRect.width = Math.abs(px - sx) + 1;
     newRect.height = Math.abs(py - sy) + 1;
 
+    console.log(newRect);
+
     selectionManager.setPreviewFragment(newRect);
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
     selectionManager.commit();
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 }

@@ -1,9 +1,17 @@
+import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { cancelMove } from '~/controllers/selection/SelectionOperator';
 import { getAgentOf } from '../layer/LayerAgentManager';
 
 export function undoLayer(layerId: string) {
   const agent = getAgentOf(layerId);
   if (!agent) {
     console.log(`no agent found for  ${layerId}.`);
+    return;
+  }
+
+  // If the selection is in move state, cancel the move
+  if (selectionManager.getState() === 'move') {
+    cancelMove();
     return;
   }
 
@@ -19,6 +27,11 @@ export function redoLayer(layerId: string) {
   const agent = getAgentOf(layerId);
   if (!agent) {
     return;
+  }
+
+  // If the selection is in move state, cancel the move
+  if (selectionManager.getState() === 'move') {
+    cancelMove();
   }
 
   if (agent.canRedo()) {

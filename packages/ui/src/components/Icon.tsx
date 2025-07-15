@@ -24,7 +24,7 @@ const Icon: Component<IconProps> = (props) => {
   return (
     <div
       {...rest}
-      class={`${styles.icon}`}
+      class={styles.icon}
       style={{
         filter: local.filter,
         '-webkit-filter': local.filter,

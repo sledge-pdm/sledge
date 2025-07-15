@@ -38,7 +38,7 @@ pub fn fill_rect_mask(
     rect_height: u32,
 ) {
     let w = width as usize;
-    let h = height as usize;
+    let _h = height as usize;
     
     for y in start_y..(start_y + rect_height).min(height) {
         for x in start_x..(start_x + rect_width).min(width) {

@@ -9,6 +9,14 @@ import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/
 
 const MAX_LAYERS = 16;
 
+const DEBUG = false;
+
+function debugLog(...log: any) {
+  if (DEBUG) {
+    console.log(...log);
+  }
+}
+
 export class WebGLRenderer {
   private gl: WebGL2RenderingContext;
   private program: WebGLProgram;
@@ -76,7 +84,7 @@ export class WebGLRenderer {
     // 前回のメモリ使用量をログ出力
     if (this.currentTextureDepth > 0) {
       const oldMemory = calculate_texture_memory_usage(this.width, this.height, this.currentTextureDepth);
-      console.log(`🔄 Releasing texture memory: ${(oldMemory / 1024 / 1024).toFixed(2)} MB`);
+      debugLog(`🔄 Releasing texture memory: ${(oldMemory / 1024 / 1024).toFixed(2)} MB`);
     }
 
     this.width = width;
@@ -97,7 +105,7 @@ export class WebGLRenderer {
     if (this.width === 0 || this.height === 0) return;
     if (!Array.isArray(layers)) layers = [layers];
 
-    console.log('🎨 WebGLRenderer.render() called:', {
+    debugLog('🎨 WebGLRenderer.render() called:', {
       layerCount: layers.length,
       onlyDirty,
       dimensions: `${this.width}x${this.height}`,
@@ -106,7 +114,7 @@ export class WebGLRenderer {
     layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);
 
-    console.log('🔍 Active layers:', activeLayers.length);
+    debugLog('🔍 Active layers:', activeLayers.length);
 
     // テクスチャ配列のサイズを動的に調整
     const requiredDepth = Math.max(1, activeLayers.length);
@@ -116,20 +124,20 @@ export class WebGLRenderer {
     gl.useProgram(program);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
 
-    console.log('🖼️ Starting texture upload for', activeLayers.length, 'layers');
+    debugLog('🖼️ Starting texture upload for', activeLayers.length, 'layers');
 
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     activeLayers.forEach((layer, i) => {
-      console.log(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
+      debugLog(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
 
       const agent = getAgentOf(layer.id)!;
       const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
 
-      console.log(`📊 Buffer info: length=${buf.length}, expected=${this.width * this.height * 4}`);
+      debugLog(`📊 Buffer info: length=${buf.length}, expected=${this.width * this.height * 4}`);
 
       const dirtyTiles = agent.getTileManager().getDirtyTiles();
       if (onlyDirty && dirtyTiles.length !== 0) {
-        console.log(`🔧 Processing ${dirtyTiles.length} dirty tiles for layer ${i}`);
+        debugLog(`🔧 Processing ${dirtyTiles.length} dirty tiles for layer ${i}`);
         // dirtyなタイルがなければフォールバック
         dirtyTiles.forEach((tile) => {
           // 差分アップデート - WASM関数を使って高速化
@@ -149,7 +157,7 @@ export class WebGLRenderer {
           tile.isDirty = false;
         });
       } else {
-        console.log(`📤 Full upload for layer ${i}`);
+        debugLog(`📤 Full upload for layer ${i}`);
         // フルアップデート
         gl.texSubImage3D(
           gl.TEXTURE_2D_ARRAY,
@@ -176,7 +184,7 @@ export class WebGLRenderer {
       blendModes[i] = layer.mode === BlendMode.multiply ? 1 : 0;
     });
 
-    console.log('🎛️ Setting uniforms:', {
+    debugLog('🎛️ Setting uniforms:', {
       layerCount: activeLayers.length,
       opacities: Array.from(opacities.slice(0, activeLayers.length)),
       blendModes: Array.from(blendModes.slice(0, activeLayers.length)),
@@ -187,7 +195,7 @@ export class WebGLRenderer {
     gl.uniform1iv(this.uBlendModesLoc, blendModes);
 
     // フルスクリーンクワッドを描画
-    console.log('🖌️ Drawing fullscreen quad...');
+    debugLog('🖌️ Drawing fullscreen quad...');
     gl.bindVertexArray(this.vao);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
@@ -196,8 +204,12 @@ export class WebGLRenderer {
     if (error !== gl.NO_ERROR) {
       console.error('❌ WebGL Error:', error);
     } else {
-      console.log('✅ Render completed successfully');
+      debugLog('✅ Render completed successfully');
     }
+  }
+
+  public isDisposed(): boolean {
+    return this.disposed;
   }
 
   /** シェーダをコンパイルするユーティリティ */
@@ -352,7 +364,7 @@ export class WebGLRenderer {
     const oldMemory = calculate_texture_memory_usage(this.width, this.height, oldDepth);
     const newMemory = calculate_texture_memory_usage(this.width, this.height, requiredDepth);
 
-    console.log(`🔄 Resizing texture array from ${oldDepth} to ${requiredDepth} layers`);
-    console.log(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);
+    debugLog(`🔄 Resizing texture array from ${oldDepth} to ${requiredDepth} layers`);
+    debugLog(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);
   }
 }

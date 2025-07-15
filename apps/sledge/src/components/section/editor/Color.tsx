@@ -8,8 +8,8 @@ import Palette from '~/components/section/editor/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 import { getActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
-import { colorElemDescription, swatchContainer } from '~/styles/section/color.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section.css';
+import { colorElemDescription, swatchContainer } from '~/styles/section/editor/color.css';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 import { ToolType } from '~/tools/Tools';
 
 const Color: Component = () => {

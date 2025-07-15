@@ -1,22 +1,24 @@
 import { flexCol } from '@sledge/core';
-import { apply_gaussian_blur, convert_to_grayscale } from '@sledge/wasm';
-import { Component } from 'solid-js';
+import { Slider, ToggleSwitch } from '@sledge/ui';
+import { AlphaBlurMode, gaussian_blur, GaussianBlurOption, grayscale } from '@sledge/wasm';
+import { Component, createSignal } from 'solid-js';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
-import { sectionCaption, sectionRoot } from '~/styles/section/section.css';
+import { sectionCaption, sectionRoot } from '~/styles/section/section_item.css';
 
 const Effects: Component = () => {
+  const [blurOptions, setBlurOptions] = createSignal<GaussianBlurOption>(new GaussianBlurOption(1000, AlphaBlurMode.Blur));
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>effects.</p>
 
-      <div class={flexCol} style={{ gap: '8px' }}>
+      <div class={flexCol} style={{ 'margin-top': '16px', gap: '16px' }}>
         <button
           onClick={() => {
             const agent = getActiveAgent();
             if (agent) {
               const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
-              convert_to_grayscale(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height);
+              grayscale(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height);
               agent.forceUpdate();
 
               agent.getDiffManager().add({
@@ -30,26 +32,56 @@ const Effects: Component = () => {
         >
           grayscale
         </button>
+        <div>
+          <button
+            onClick={() => {
+              const agent = getActiveAgent();
+              if (agent) {
+                const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
+                gaussian_blur(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height, blurOptions());
+                agent.forceUpdate();
 
-        <button
-          onClick={() => {
-            const agent = getActiveAgent();
-            if (agent) {
-              const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
-              apply_gaussian_blur(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height, 1000);
-              agent.forceUpdate();
+                agent.getDiffManager().add({
+                  kind: 'whole',
+                  before: originalBuffer,
+                  after: agent.getBuffer(),
+                });
+                agent.registerToHistory();
+              }
+            }}
+            style={{ 'margin-bottom': '8px' }}
+          >
+            gaussian blur
+          </button>
 
-              agent.getDiffManager().add({
-                kind: 'whole',
-                before: originalBuffer,
-                after: agent.getBuffer(),
-              });
-              agent.registerToHistory();
-            }
-          }}
-        >
-          gaussian blur
-        </button>
+          <div class={flexCol} style={{ gap: '8px', 'margin-bottom': '8px', 'margin-left': '16px' }}>
+            <p>radius.</p>
+            <div style={{ 'margin-left': '16px' }}>
+              <Slider
+                labelMode='left'
+                value={blurOptions().radius}
+                min={0}
+                max={1000}
+                allowFloat={false}
+                onChange={(value) => {
+                  setBlurOptions((prev) => new GaussianBlurOption(value, prev.alpha_mode));
+                }}
+              />
+            </div>
+          </div>
+
+          <div class={flexCol} style={{ gap: '2px', 'margin-left': '16px' }}>
+            <p>alpha erosion.</p>
+            <div style={{ 'margin-left': '16px' }}>
+              <ToggleSwitch
+                checked={blurOptions().alpha_mode === AlphaBlurMode.Blur}
+                onChange={(value) => {
+                  setBlurOptions((prev) => new GaussianBlurOption(prev.radius, value ? AlphaBlurMode.Blur : AlphaBlurMode.Skip));
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -4,12 +4,20 @@ import { Icon, Light } from '@sledge/ui';
 import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSortable, transformStyle, useDragDropContext } from '@thisbeyond/solid-dnd';
 import { Component } from 'solid-js';
+import LayerPreview from '~/components/global/LayerPreview';
 import { Layer } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { activeLight, layerItem, layerItemDisabled, layerItemHandle, layerItemIndex, layerItemName, layerItemType } from '~/styles/section/layer.css';
+import {
+  activeLight,
+  layerItem,
+  layerItemDisabled,
+  layerItemHandle,
+  layerItemIndex,
+  layerItemName,
+  layerItemType,
+} from '~/styles/section/editor/layer.css';
 import { eventBus } from '~/utils/EventBus';
-import LayerPreview from '../../../global/LayerPreview';
 
 interface LayerItemProps {
   index: number;
@@ -27,14 +35,14 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   const onDetClicked = (e: MouseEvent) => {
     setLayerListStore('activeLayerId', props.layer.id);
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false }); //一応
+    // eventBus.emit('webgl:requestUpdate', { onlyDirty: false }); //一応
   };
 
   const onPreviewClicked = () => {
     if (props.index !== -1) {
       setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'layer deactivated from layeritem' });
   };
   const isActive = () => layerListStore.activeLayerId === props.layer.id;
 

@@ -60,7 +60,7 @@ export default function TitleBar() {
 
   const borderWindowLabels: string[] = ['settings'];
   const shouldShowBorder = () => borderWindowLabels.find((l) => l === getCurrentWindow().label);
-  const titleLessWindowLabels: string[] = [];
+  const titleLessWindowLabels: string[] = ['about'];
   const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === getCurrentWindow().label);
 
   return (

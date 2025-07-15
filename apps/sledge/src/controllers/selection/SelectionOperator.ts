@@ -1,9 +1,23 @@
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { getCurrentSelection, selectionManager } from '~/controllers/selection/SelectionManager';
+import { toolStore } from '~/stores/EditorStores';
+import { MoveTool } from '~/tools/move/MoveTool';
 import { transparent } from '~/utils/ColorUtils';
 
+export function commitMove() {
+  const moveTool = toolStore.tools.move.behavior as MoveTool;
+  moveTool.commit();
+}
+export function cancelMove() {
+  const moveTool = toolStore.tools.move.behavior as MoveTool;
+  moveTool.cancel();
+}
+
 export function cancelSelection() {
+  if (selectionManager.getState() === 'move') {
+    cancelMove();
+  }
   selectionManager.clear();
 }
 
@@ -23,6 +37,7 @@ export function deletePixelInSelection(layerId?: string): boolean {
   }
 
   agent.registerToHistory();
+  agent.forceUpdate();
 
   return true;
 }

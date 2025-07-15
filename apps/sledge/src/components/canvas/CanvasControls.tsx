@@ -3,8 +3,6 @@ import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { canRedo, canUndo } from '~/controllers/layer/LayerController';
 
-import { vars } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
 import { layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -29,10 +27,8 @@ const CanvasControls: Component = () => {
   return (
     <div class={styles.topRightNav}>
       <div
-        id='ignore-draw'
-        class={styles.undoRedo}
+        class={styles.undoRedoContainer}
         style={{
-          opacity: activeCanUndo() ? '1.0' : '0.3',
           cursor: activeCanUndo() ? 'pointer' : 'unset',
         }}
         onClick={(e) => {
@@ -42,13 +38,16 @@ const CanvasControls: Component = () => {
           getAgentOf(layerListStore.activeLayerId)?.undo();
         }}
       >
-        <Icon id='ignore-draw' src={'/icons/misc/undo.png'} base={24} color={vars.color.onBackground} />
+        <div
+          class={styles.undoIcon}
+          style={{
+            opacity: activeCanUndo() ? '1.0' : '0.3',
+          }}
+        />
       </div>
       <div
-        id='ignore-draw'
-        class={styles.undoRedo}
+        class={styles.undoRedoContainer}
         style={{
-          opacity: activeCanRedo() ? '1.0' : '0.3',
           cursor: activeCanRedo() ? 'pointer' : 'unset',
         }}
         onClick={(e) => {
@@ -58,7 +57,12 @@ const CanvasControls: Component = () => {
           getAgentOf(layerListStore.activeLayerId)?.redo();
         }}
       >
-        <Icon id='ignore-draw' src='/icons/misc/redo.png' base={24} color={vars.color.onBackground} />
+        <div
+          class={styles.redoIcon}
+          style={{
+            opacity: activeCanRedo() ? '1.0' : '0.3',
+          }}
+        />
       </div>
     </div>
   );

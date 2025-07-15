@@ -10,7 +10,7 @@ export class LayerMenu extends RightClickMenu {
   }
 
   public static async create(layerId: string): Promise<LayerMenu> {
-    const dir = 'resources/icons/menu/layer/';
+    const dir = 'resources/icons/menu/layer';
 
     const clear = await IconMenuItem.new({
       id: 'clear',

@@ -1,18 +1,50 @@
+import { flexCol } from '@sledge/core';
 import { style } from '@vanilla-extract/css';
 
 export const topRightNav = style({
   display: 'flex',
   flexDirection: 'row',
-  gap: '25px',
+  gap: '36px',
+  padding: '36px',
   position: 'absolute',
-  right: '30px',
-  top: '30px',
+  right: '0px',
+  top: '0px',
 });
 
-export const undoRedo = style({
-  cursor: 'pointer',
-  imageRendering: 'pixelated',
-  padding: '8px',
-  pointerEvents: 'all',
-  zIndex: 1000,
-});
+export const undoRedoContainer = style([
+  flexCol,
+  {
+    alignContent: 'center',
+    alignItems: 'center',
+    padding: '12px',
+    zIndex: 1000,
+  },
+]);
+
+export const undoIcon = style([
+  flexCol,
+  {
+    width: '12px',
+    height: '12px',
+    imageRendering: 'pixelated',
+    alignContent: 'center',
+    alignItems: 'center',
+    backdropFilter: 'invert()',
+    clipPath: 'url(/icons/misc/undo_12.svg#clipPath)',
+    scale: 2,
+  },
+]);
+
+export const redoIcon = style([
+  flexCol,
+  {
+    width: '12px',
+    height: '12px',
+    imageRendering: 'pixelated',
+    alignContent: 'center',
+    alignItems: 'center',
+    backdropFilter: 'invert()',
+    clipPath: 'url(/icons/misc/redo_12.svg#clipPath)',
+    scale: 2,
+  },
+]);

@@ -1,5 +1,5 @@
 import { flexCol } from '@sledge/core';
-import { apply_gaussian_blur, convert_to_grayscale } from '@sledge/wasm';
+import { gaussian_blur, grayscale } from '@sledge/wasm';
 import { Component } from 'solid-js';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -16,7 +16,7 @@ const Effects: Component = () => {
             const agent = getActiveAgent();
             if (agent) {
               const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
-              convert_to_grayscale(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height);
+              grayscale(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height);
               agent.forceUpdate();
 
               agent.getDiffManager().add({
@@ -36,7 +36,7 @@ const Effects: Component = () => {
             const agent = getActiveAgent();
             if (agent) {
               const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
-              apply_gaussian_blur(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height, 1000);
+              gaussian_blur(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height, 1000);
               agent.forceUpdate();
 
               agent.getDiffManager().add({

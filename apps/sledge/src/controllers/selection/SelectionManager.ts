@@ -192,6 +192,14 @@ class SelectionManager {
     eventBus.emit('selection:areaChanged', { commit: true });
   }
 
+  selectAll() {
+    this.selectionMask.selectAll();
+
+    this.previewMask = undefined;
+    this.updateStateBasedOnSelection();
+    eventBus.emit('selection:areaChanged', { commit: true });
+  }
+
   /** プレビューをキャンセル */
   cancelPreview() {
     this.previewMask = undefined;

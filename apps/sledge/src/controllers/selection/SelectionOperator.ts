@@ -37,6 +37,7 @@ export function deletePixelInSelection(layerId?: string): boolean {
   }
 
   agent.registerToHistory();
+  agent.forceUpdate();
 
   return true;
 }

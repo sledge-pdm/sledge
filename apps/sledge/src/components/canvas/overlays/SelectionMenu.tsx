@@ -53,7 +53,7 @@ const SelectionMenu: Component<{}> = (props) => {
       } else {
         if (selectionChanged()) {
           const box = selectionManager.getSelectionMask().getBoundBox();
-          if (box) setOutlineBoundBox(box);
+          setOutlineBoundBox(box);
         }
       }
     }, Number(globalConfig.performance.targetFPS))

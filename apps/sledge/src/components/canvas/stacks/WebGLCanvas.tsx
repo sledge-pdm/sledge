@@ -1,5 +1,6 @@
+import { flexCol } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createSignal, onCleanup } from 'solid-js';
+import { Component, createSignal, onCleanup, Show } from 'solid-js';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
 import { interactStore } from '~/stores/EditorStores';
@@ -38,24 +39,32 @@ const WebGLCanvas: Component = () => {
     } catch (error) {
       console.error('WebGLCanvas: Failed to resize WebGLRenderer', error);
     }
+    console.log('[WebGLCanvas] Canvas size changed:', width, height);
     setUpdateRender(true);
     setOnlyDirtyUpdate(true);
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
+    console.log('[WebGLCanvas] Requesting update:', e.context);
     setUpdateRender(true);
     setOnlyDirtyUpdate(e.onlyDirty);
   };
 
-  listenEvent('onSetup', () => {
-    const { width, height } = canvasStore.canvas;
+  const init = () => {
+    if (webGLRenderer) {
+      webGLRenderer.dispose();
+      webGLRenderer = undefined;
+    }
 
+    const { width, height } = canvasStore.canvas;
     startRenderLoop();
     console.log('WebGLCanvas: Starting render loop');
     try {
       webGLRenderer = new WebGLRenderer(canvasEl);
       webGLRenderer.resize(width, height);
+      console.log('[WebGLCanvas] initialize:', true);
       setUpdateRender(true); // rise flag for init render
+      setOnlyDirtyUpdate(false);
     } catch (error) {
       console.error('WebGLCanvas: Failed to initialize WebGLRenderer', error);
       webGLRenderer = undefined;
@@ -63,6 +72,10 @@ const WebGLCanvas: Component = () => {
 
     eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
     eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
+  };
+
+  listenEvent('onSetup', () => {
+    init();
   });
 
   onCleanup(() => {
@@ -70,7 +83,6 @@ const WebGLCanvas: Component = () => {
     webGLRenderer?.dispose();
     webGLRenderer = undefined;
     stopRenderLoop();
-    // layerAgentManager.removeOnAnyImageChangeListener('webgl_canvas');
     eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
     eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
   });
@@ -83,14 +95,46 @@ const WebGLCanvas: Component = () => {
   };
 
   return (
-    <canvas
-      ref={(el) => (canvasEl = el!)}
-      class={layerCanvas}
-      style={{
-        position: 'absolute',
-        'image-rendering': imageRendering(),
-      }}
-    />
+    <>
+      <canvas
+        ref={(el) => (canvasEl = el!)}
+        class={layerCanvas}
+        style={{
+          position: 'absolute',
+          'image-rendering': imageRendering(),
+        }}
+      />
+
+      <Show when={!isRunning()}>
+        <div
+          style={{
+            position: 'absolute',
+            width: `${canvasStore.canvas.width}px`,
+            height: `${canvasStore.canvas.height}px`,
+            'background-color': '#00000050',
+            'z-index': 10000,
+          }}
+        >
+          <div
+            class={flexCol}
+            style={{
+              width: `${canvasStore.canvas.width}px`,
+              height: `${canvasStore.canvas.height}px`,
+              gap: '8px',
+              'align-items': 'center',
+              'justify-content': 'center',
+              // 'transform-origin': '0 0',
+              transform: `scale(${2 / interactStore.zoom})`,
+            }}
+          >
+            <p style={{ 'white-space': 'nowrap' }}>Render Paused.</p>
+            <button onClick={init} style={{ 'white-space': 'nowrap' }}>
+              RESTART
+            </button>
+          </div>
+        </div>
+      </Show>
+    </>
   );
 };
 

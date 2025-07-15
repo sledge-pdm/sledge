@@ -12,7 +12,10 @@ export class SelectionMoveTool implements ToolBehavior {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     this.startOffset = selectionManager.getMoveOffset();
     this.startPosition = args.position;
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
@@ -22,12 +25,18 @@ export class SelectionMoveTool implements ToolBehavior {
       x: this.startOffset.x + dx,
       y: this.startOffset.y + dy,
     });
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
     selectionManager.commitOffset();
     console.log('committed. offset:', selectionManager.getMoveOffset());
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 }

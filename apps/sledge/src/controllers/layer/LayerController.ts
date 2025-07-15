@@ -18,7 +18,8 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
 
   const idx = getLayerIndex(layerId);
   setLayerListStore('layers', idx, propName, newValue);
-  if (propNamesToUpdate.indexOf(propName) !== -1) eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
+  if (propNamesToUpdate.indexOf(propName) !== -1)
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${layerId}) prop updated(${propName})` });
 }
 
 export function duplicateLayer(layerId: string) {
@@ -29,7 +30,7 @@ export function duplicateLayer(layerId: string) {
     },
     getBufferOf(layerId)
   );
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) duplicated` });
 }
 
 export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): LayerImageAgent {
@@ -46,14 +47,14 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
   const agent = getAgentOf(layerId);
   if (agent !== undefined) {
     agent.getTileManager().setAllDirty();
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) image reset` });
     eventBus.emit('preview:requestUpdate', { layerId: layerId });
     agent.setBuffer(buffer, false, true);
     return agent;
   } else {
     const newAgent = layerAgentManager.registerAgent(layerId, buffer, width, height);
     newAgent.getTileManager().setAllDirty();
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) image reset` });
     eventBus.emit('preview:requestUpdate', { layerId: layerId });
     return newAgent;
   }

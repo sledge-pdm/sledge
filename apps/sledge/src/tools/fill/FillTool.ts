@@ -20,14 +20,23 @@ export class FillTool implements ToolBehavior {
     const fill = new TileFloodFill();
     fill.fill({ agent, color, position });
 
-    return true;
+    return {
+      shouldUpdate: true,
+      shouldRegisterToHistory: true,
+    };
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    return true;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 }

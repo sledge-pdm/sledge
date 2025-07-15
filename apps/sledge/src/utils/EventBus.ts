@@ -10,7 +10,7 @@ export type Events = {
   'selection:changed': { commit: boolean };
   'selection:moved': { newOffset: Vec2 };
 
-  'webgl:requestUpdate': { onlyDirty: boolean };
+  'webgl:requestUpdate': { onlyDirty: boolean; context: string };
 
   'preview:requestUpdate': { layerId?: string };
 

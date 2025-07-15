@@ -61,7 +61,7 @@ export class ThumbnailGenerator {
     return ctx.getImageData(0, 0, width, height);
   }
 
-  generateCanvasThumbnailBlob(width: number, height: number): Promise {
+  generateCanvasThumbnailBlob(width: number, height: number): Promise<Blob> {
     const srcW = canvasStore.canvas.width;
     const srcH = canvasStore.canvas.height;
     this.off.width = width;

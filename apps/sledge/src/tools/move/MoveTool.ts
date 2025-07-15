@@ -14,20 +14,35 @@ export class MoveTool implements ToolBehavior {
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    if (!selectionManager.isSelected()) return false;
+    if (!selectionManager.isSelected())
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
     selectionManager.commit();
     selectionManager.commitOffset(); // かならずコミットしておく
     this.startPosition = args.position;
     this.originalBuffer = agent.getNonClampedBuffer().slice();
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
-    if (!selectionManager.isSelected()) return false;
+    if (!selectionManager.isSelected())
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
 
-    if (dx === 0 && dy === 0) return false;
+    if (dx === 0 && dy === 0)
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
     selectionManager.setMoveOffset({ x: dx, y: dy });
     eventBus.emit('selection:moved', { newOffset: selectionManager.getMoveOffset() });
 
@@ -43,14 +58,25 @@ export class MoveTool implements ToolBehavior {
       agent.setBuffer(new Uint8ClampedArray(previewBuffer), true, true);
     } catch (error) {
       console.error('Move preview failed:', error);
-      return false;
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
     }
 
-    return true;
+    return {
+      shouldUpdate: true,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    if (!selectionManager.isSelected()) return false;
+    if (!selectionManager.isSelected())
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
+
     agent.getDiffManager().add({
       kind: 'whole',
       before: new Uint8ClampedArray(this.originalBuffer!),
@@ -62,7 +88,10 @@ export class MoveTool implements ToolBehavior {
     selectionManager.commitOffset();
     selectionManager.clear();
 
-    return true;
+    return {
+      shouldUpdate: true,
+      shouldRegisterToHistory: true,
+    };
   }
 
   // キャンセル処理　後で追加

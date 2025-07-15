@@ -14,7 +14,10 @@ export class PipetteTool implements ToolBehavior {
     if (!isTransparent(color)) {
       this.color = color;
     }
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
@@ -22,20 +25,26 @@ export class PipetteTool implements ToolBehavior {
     if (!isTransparent(color)) {
       this.color = color;
     }
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    if (isTransparent(this.color)) return false;
+    if (!isTransparent(this.color)) {
+      setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
 
-    setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
-
-    // Shiftが押されていなければ前のツールに戻る
-    const prevTool = getPrevActiveToolType();
-    if (!args.event?.shiftKey && prevTool) {
-      setActiveToolType(prevTool);
+      // Shiftが押されていなければ前のツールに戻る
+      const prevTool = getPrevActiveToolType();
+      if (!args.event?.shiftKey && prevTool) {
+        setActiveToolType(prevTool);
+      }
     }
 
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 }

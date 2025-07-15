@@ -1,5 +1,5 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
+import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
 
@@ -15,8 +15,8 @@ export class PenTool implements ToolBehavior {
     return this.draw(agent, args, args.color);
   }
 
-  draw(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs, color: RGBAColor) {
-    if (!size) return false;
+  draw(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs, color: RGBAColor): ToolResult {
+    if (!size) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
@@ -42,10 +42,16 @@ export class PenTool implements ToolBehavior {
         });
       });
     }
-    return true;
+    return {
+      shouldUpdate: dm.getCurrent().diffs.size > 0 ? true : false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    return true;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: true,
+    };
   }
 }

@@ -27,7 +27,10 @@ export class RectSelection implements ToolBehavior {
       height: 1,
     };
     selectionManager.setPreviewFragment(newRect);
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
@@ -50,11 +53,17 @@ export class RectSelection implements ToolBehavior {
     newRect.height = Math.abs(py - sy) + 1;
 
     selectionManager.setPreviewFragment(newRect);
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
     selectionManager.commit();
-    return false;
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+    };
   }
 }

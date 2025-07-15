@@ -11,7 +11,7 @@ import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
-import { canvasStore, projectStore } from '~/stores/ProjectStores';
+import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { Dialog, DialogExternalProps } from './Dialog';
 
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
@@ -83,6 +83,9 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
       }
     }
 
+    if (projectStore.name === 'new project' && settings.fileName !== projectStore.name) {
+      setProjectStore('name', settings.fileName);
+    }
     setLastSettingsStore('exportSettings', settings);
     await saveGlobalSettings();
     props.onClose();

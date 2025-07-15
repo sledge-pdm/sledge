@@ -9,7 +9,6 @@ import { eventBus } from '~/utils/EventBus';
 export class MoveTool implements ToolBehavior {
   onlyOnCanvas = false;
 
-  private mode: 'layer' | 'selection' = 'selection';
   private layerId: string | undefined = undefined;
   private originalBuffer: Uint8Array | undefined = undefined;
 
@@ -17,11 +16,9 @@ export class MoveTool implements ToolBehavior {
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    if (!selectionManager.isSelected())
-      return {
-        shouldUpdate: false,
-        shouldRegisterToHistory: false,
-      };
+    if (!selectionManager.isSelected()) {
+      selectionManager.selectAll();
+    }
     this.layerId = agent.layerId;
 
     selectionManager.commit();

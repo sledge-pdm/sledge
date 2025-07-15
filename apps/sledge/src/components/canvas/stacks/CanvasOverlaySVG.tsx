@@ -7,7 +7,7 @@ import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { marchingAntsAnimation } from '~/styles/components/canvas/canvas_overlay.css';
+import { marchingAntsAnimation } from '~/styles/misc/marching_ants.css';
 import { PathCmd, PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 

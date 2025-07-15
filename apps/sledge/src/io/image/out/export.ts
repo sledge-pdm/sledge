@@ -74,6 +74,7 @@ export async function getImageBlob(options: CanvasExportOptions): Promise<Blob |
 export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | undefined> {
   if (webGLRenderer === undefined) return undefined;
   const { width, height } = canvasStore.canvas;
+  const { scale = 1 } = options;
 
   // 64x64以内の制限チェック
   if (width > 64 || height > 64) {
@@ -89,9 +90,13 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
   // wasmを使ってSVGパスを生成
   const svgPath = mask_to_path(mask, width, height, 0, 0);
 
-  // SVGドキュメントを作成
+  // スケールを適用したサイズ
+  const scaledWidth = Math.round(width * scale);
+  const scaledHeight = Math.round(height * scale);
+
+  // SVGドキュメントを作成（viewBoxは元のサイズ、width/heightはスケール適用）
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+<svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
   <path d="${svgPath}" fill="black" />
 </svg>`;
 

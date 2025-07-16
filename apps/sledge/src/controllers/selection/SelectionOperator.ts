@@ -10,12 +10,18 @@ export function commitMove() {
   moveTool.commit();
 }
 export function cancelMove() {
+  const isLayerMove = selectionManager.getState() === 'move_layer';
   const moveTool = toolStore.tools.move.behavior as MoveTool;
   moveTool.cancel();
+
+  // レイヤーの場合移動キャンセルで選択解除まで行う
+  if (isLayerMove) {
+    selectionManager.clear();
+  }
 }
 
 export function cancelSelection() {
-  if (selectionManager.getState() === 'move') {
+  if (selectionManager.isMoveMode()) {
     cancelMove();
   }
   selectionManager.clear();

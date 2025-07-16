@@ -48,8 +48,9 @@ export class MoveTool implements ToolBehavior {
       };
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
+    const offset = selectionManager.getMoveOffset();
 
-    if (dx === 0 && dy === 0)
+    if (dx === offset.x && dy === offset.y)
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,

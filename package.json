@@ -2,7 +2,6 @@
   "private": true,
   "packageManager": "pnpm@10.12.4",
   "scripts": {
-    "install": "pnpm -F sledge install",
     "dev": "pnpm -F sledge dev",
     "build": "pnpm -F sledge build",
     "site:dev": "pnpm -F sledge-website dev",

@@ -1,4 +1,4 @@
-import { FileLocation } from '@sledge/core';
+import { FileLocation, flexCol } from '@sledge/core';
 import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
@@ -126,8 +126,10 @@ export default function Editor() {
 
         {divider()}
 
-        <div style={{ 'flex-grow': 1, position: 'relative' }}>
-          <CanvasArea />
+        <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
+          <div style={{ 'flex-grow': 1 }}>
+            <CanvasArea />
+          </div>
           <BottomInfo />
         </div>
 

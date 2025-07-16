@@ -19,10 +19,11 @@ import '~/styles/globals/title_bar_region.css';
 export default function TitleBar() {
   let titleBarNavEl: HTMLElement;
 
+  const isEditor = () => location.pathname.startsWith('/editor');
+
   const [isMaximizable, setIsMaximizable] = createSignal(false);
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
-  const [isEditor, setIsEditor] = createSignal(false);
   const [title, setTitle] = createSignal('');
   const [isMaximized, setMaximized] = createSignal(false);
 
@@ -32,7 +33,6 @@ export default function TitleBar() {
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
     setTitle(await window.title());
-    setIsEditor(window.label.startsWith('editor'));
     titleBarNavEl.addEventListener('pointerdown', (e: PointerEvent) => {
       setBottomBarText(e.buttons.toString() + ' ' + e.pointerType + ' ' + Date.now());
     });

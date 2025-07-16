@@ -67,6 +67,7 @@ const CanvasArea: Component = () => {
   return (
     <div class={canvasArea}>
       <div
+      
         id='zoompan-wrapper'
         ref={(el) => {
           wrapper = el;

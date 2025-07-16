@@ -1,17 +1,17 @@
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { getCurrentSelection, selectionManager } from '~/controllers/selection/SelectionManager';
-import { toolStore } from '~/stores/EditorStores';
+import { getToolCategory } from '~/controllers/tool/ToolController';
 import { MoveTool } from '~/tools/move/MoveTool';
 import { transparent } from '~/utils/ColorUtils';
 
 export function commitMove() {
-  const moveTool = toolStore.tools.move.behavior as MoveTool;
+  const moveTool = getToolCategory('move').behavior as MoveTool;
   moveTool.commit();
 }
 export function cancelMove() {
   const isLayerMove = selectionManager.getState() === 'move_layer';
-  const moveTool = toolStore.tools.move.behavior as MoveTool;
+  const moveTool = getToolCategory('move').behavior as MoveTool;
   moveTool.cancel();
 
   // レイヤーの場合移動キャンセルで選択解除まで行う
@@ -21,7 +21,7 @@ export function cancelMove() {
 }
 
 export function cancelSelection() {
-  if (selectionManager.isMoveMode()) {
+  if (selectionManager.isMoveState()) {
     cancelMove();
   }
   selectionManager.clear();

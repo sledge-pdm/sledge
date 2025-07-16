@@ -3,7 +3,7 @@ import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
-import { getCurrentTool } from '~/controllers/tool/ToolController';
+import { getCurrentToolPreset } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -121,8 +121,8 @@ const CanvasOverlaySVG: Component = (props) => {
   });
 
   createEffect(() => {
-    const currentTool = getCurrentTool();
-    const toolSize = currentTool.size ?? 0;
+    const preset = getCurrentToolPreset();
+    const toolSize = preset?.size ?? 0;
     const half = Math.floor(toolSize / 2);
     let x = Math.floor(interactStore.lastMouseOnCanvas.x) - half;
     let y = Math.floor(interactStore.lastMouseOnCanvas.y) - half;

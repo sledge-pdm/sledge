@@ -5,17 +5,16 @@ import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
 import PixelCursor from '~/components/canvas/overlays/cursors/PixelCursor';
 import PipetteDetail from '~/components/canvas/overlays/PipetteDetail';
 import SelectionMenu from '~/components/canvas/overlays/SelectionMenu';
-import { getActiveToolType } from '~/controllers/tool/ToolController';
+import { getActiveToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { ToolType } from '~/tools/Tools';
 
 const CanvasAreaOverlay: Component = () => {
   const pos = useMousePosition();
 
   return (
     <>
-      <Show when={getActiveToolType() !== ToolType.Pipette}>
+      <Show when={getActiveToolCategory() !== 'pipette'}>
         <Show when={interactStore.isMouseOnCanvas && globalConfig.editor.cursor === 'pixel'}>
           <PixelCursor mousePos={{ x: pos.x, y: pos.y }} />
         </Show>
@@ -25,7 +24,7 @@ const CanvasAreaOverlay: Component = () => {
         </Show>
       </Show>
 
-      <Show when={interactStore.isMouseOnCanvas && getActiveToolType() === ToolType.Pipette}>
+      <Show when={interactStore.isMouseOnCanvas && getActiveToolCategory() === 'pipette'}>
         <PipetteCursor mousePos={{ x: pos.x, y: pos.y }} />
         <PipetteDetail />
       </Show>

@@ -1,6 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { TileFloodFill } from '~/tools/fill/TileFloodFill';
+import { TileFloodFill } from '~/tools/draw/fill/TileFloodFill';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { RGBAColor } from '~/utils/ColorUtils';
 

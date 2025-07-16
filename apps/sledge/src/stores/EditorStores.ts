@@ -2,7 +2,7 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
-import { defaultTools, Tool, ToolType } from '~/tools/Tools';
+import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
 export type SectionTab = 'editor' | 'project' | 'effects';
 type AppearanceStore = {
@@ -42,9 +42,9 @@ type LogStore = {
   bottomBarText: string;
 };
 export type ToolStore = {
-  tools: { [toolType: string]: Tool };
-  activeType: ToolType;
-  prevActiveType: ToolType | undefined;
+  tools: Record<ToolCategoryId, ToolCategory>;
+  activeToolCategory: ToolCategoryId;
+  prevActiveCategory: ToolCategoryId | undefined;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
@@ -86,9 +86,9 @@ const defaultLogStore: LogStore = {
   bottomBarText: '',
 };
 const defaultToolStore: ToolStore = {
-  tools: defaultTools,
-  activeType: ToolType.Pen,
-  prevActiveType: undefined,
+  tools: toolCategories,
+  activeToolCategory: 'pen',
+  prevActiveCategory: undefined,
 };
 
 export const initEditorStore = () => {

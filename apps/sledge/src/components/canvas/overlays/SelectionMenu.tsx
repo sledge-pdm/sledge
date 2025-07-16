@@ -102,7 +102,7 @@ const SelectionMenu: Component<{}> = (props) => {
       x: boundBox.right + selectionManager.getMoveOffset().x + 1 - menuWidth / interactStore.zoom,
       y: boundBox.bottom + selectionManager.getMoveOffset().y + 1,
     });
-    
+
     const canvasArea = document.getElementById('zoompan-wrapper') as HTMLElement;
     if (canvasArea) {
       const canvasRect = canvasArea.getBoundingClientRect();

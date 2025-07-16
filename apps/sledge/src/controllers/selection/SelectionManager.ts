@@ -26,7 +26,7 @@ export type TileFragment = {
 
 export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace';
-export type SelectionState = 'idle' | 'selected' | 'move';
+export type SelectionState = 'idle' | 'selected' | 'move_selection' | 'move_layer';
 
 class SelectionManager {
   private editMode: SelectionEditMode = 'replace';
@@ -35,12 +35,17 @@ class SelectionManager {
   public getEditMode() {
     return this.editMode;
   }
+
   public getState() {
     return this.state;
   }
   public setState(state: SelectionState) {
     this.state = state;
     eventBus.emit('selection:stateChanged', { newState: state });
+  }
+
+  public isMoveMode() {
+    return this.state === 'move_selection' || this.state === 'move_layer';
   }
 
   private moveOffset: Vec2 = { x: 0, y: 0 };
@@ -243,7 +248,7 @@ class SelectionManager {
     this.setMoveOffset({ x: 0, y: 0 }); // オフセットをリセット
 
     // 状態を更新: 移動完了後はselected状態に戻す
-    if (this.state === 'move') {
+    if (this.isMoveMode()) {
       this.setState('selected');
     }
 
@@ -261,7 +266,7 @@ class SelectionManager {
    * 現在の選択状況に基づいてstateを更新する
    */
   private updateStateBasedOnSelection() {
-    if (this.state === 'move') {
+    if (this.isMoveMode()) {
       // move状態の場合は変更しない（移動中）
       return;
     }

@@ -80,6 +80,13 @@ const CanvasOverlaySVG: Component = (props) => {
     setSelectionChanged(true);
   };
 
+  const [selectionState, setSelectionState] = createSignal(selectionManager.getState());
+  const onSelectionStateChangedHandler = (e: Events['selection:stateChanged']) => {
+    setSelectionChanged(true);
+    console.log('Selection state changed:', e.newState);
+    setSelectionState(e.newState);
+  };
+
   const tempKeyMove = (e: KeyboardEvent) => {
     switch (e.key) {
       case 'ArrowLeft':
@@ -101,12 +108,14 @@ const CanvasOverlaySVG: Component = (props) => {
     startRenderLoop();
     eventBus.on('selection:areaChanged', onSelectionChangedHandler);
     eventBus.on('selection:moved', onSelectionMovedHandler);
+    eventBus.on('selection:stateChanged', onSelectionStateChangedHandler);
     window.addEventListener('keydown', tempKeyMove);
     setSelectionChanged(true);
   });
   onCleanup(() => {
     eventBus.off('selection:areaChanged', onSelectionChangedHandler);
     eventBus.off('selection:moved', onSelectionMovedHandler);
+    eventBus.off('selection:stateChanged', onSelectionStateChangedHandler);
     window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();
   });
@@ -142,11 +151,12 @@ const CanvasOverlaySVG: Component = (props) => {
           left: 0,
           'pointer-events': 'none',
           'shape-rendering': 'auto',
+          overflow: 'visible',
           'z-index': 450,
         }}
       >
         {/* border rect */}
-        <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={1} pointer-events='none' />
+        <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={0.2} pointer-events='none' />
 
         {/* pen hover preview */}
         <Show when={globalConfig.editor.showPointedPixel}>
@@ -166,7 +176,7 @@ const CanvasOverlaySVG: Component = (props) => {
           ref={(el) => (outlineRef = el)}
           d={pathCmdList().toString(interactStore.zoom)}
           fill='none'
-          stroke={vars.color.border}
+          stroke={selectionState() === 'move_layer' ? '#FF0000' : vars.color.border}
           stroke-width='1'
           stroke-dasharray={`${borderDash} ${borderDash}`}
           pointer-events='none'

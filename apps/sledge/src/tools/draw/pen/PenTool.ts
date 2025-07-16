@@ -1,7 +1,9 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { getPresetOf } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
+import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
+import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
@@ -15,8 +17,12 @@ export class PenTool implements ToolBehavior {
     return this.draw(agent, args, args.color);
   }
 
-  draw(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs, color: RGBAColor): ToolResult {
-    if (!size) return { shouldUpdate: false, shouldRegisterToHistory: false };
+  protected categoryId: ToolCategoryId = 'pen';
+
+  draw(agent: LayerImageAgent, { position, lastPosition, presetName }: ToolArgs, color: RGBAColor): ToolResult {
+    if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
+
+    const size = getPresetOf(this.categoryId, presetName)?.size ?? 1;
 
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();

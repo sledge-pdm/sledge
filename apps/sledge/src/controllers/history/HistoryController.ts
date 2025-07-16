@@ -10,7 +10,7 @@ export function undoLayer(layerId: string) {
   }
 
   // If the selection is in move state, cancel the move
-  if (selectionManager.getState() === 'move') {
+  if (selectionManager.isMoveState()) {
     cancelMove();
     return;
   }
@@ -30,7 +30,7 @@ export function redoLayer(layerId: string) {
   }
 
   // If the selection is in move state, cancel the move
-  if (selectionManager.getState() === 'move') {
+  if (selectionManager.isMoveState()) {
     cancelMove();
   }
 

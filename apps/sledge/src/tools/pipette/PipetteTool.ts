@@ -1,6 +1,6 @@
 import { setCurrentColor } from '~/controllers/color/ColorController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { getPrevActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
+import { getPrevActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { isTransparent, RGBAColor, RGBToHex, transparent } from '~/utils/ColorUtils';
 
@@ -36,9 +36,9 @@ export class PipetteTool implements ToolBehavior {
       setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
 
       // Shiftが押されていなければ前のツールに戻る
-      const prevTool = getPrevActiveToolType();
+      const prevTool = getPrevActiveToolCategory();
       if (!args.event?.shiftKey && prevTool) {
-        setActiveToolType(prevTool);
+        setActiveToolCategory(prevTool);
       }
     }
 

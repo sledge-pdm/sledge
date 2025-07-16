@@ -1,8 +1,7 @@
 import { Component, onCleanup, onMount } from 'solid-js';
 import { activeLayer } from '~/controllers/layer/LayerListController';
-import { setActiveToolType } from '~/controllers/tool/ToolController';
+import { setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { ToolType } from '~/tools/Tools';
 import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';
 import { redoLayer, undoLayer } from '../../controllers/history/HistoryController';
 
@@ -16,9 +15,9 @@ const KeyListener: Component = () => {
       const active = activeLayer();
       if (active) redoLayer(active.id);
     }
-    if (isKeyMatchesToEntry(e, keyConfigStore['pen'])) setActiveToolType(ToolType.Pen);
-    if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) setActiveToolType(ToolType.Eraser);
-    if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) setActiveToolType(ToolType.Fill);
+    if (isKeyMatchesToEntry(e, keyConfigStore['pen'])) setActiveToolCategory('pen');
+    if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) setActiveToolCategory('eraser');
+    if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) setActiveToolCategory('fill');
   };
   onMount(() => window.addEventListener('keydown', handleKey));
   onCleanup(() => window.removeEventListener('keydown', handleKey));

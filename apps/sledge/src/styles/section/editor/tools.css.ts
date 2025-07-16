@@ -7,6 +7,7 @@ export const toolConfigRow = style([
   w100,
   {
     height: '32px',
+    width: 'auto',
     gap: vars.spacing.md,
     alignItems: 'center',
   },
@@ -16,7 +17,6 @@ export const toolConfigRowClickable = style([
   {
     gap: vars.spacing.md,
     alignItems: 'center',
-    width: '35%',
     pointerEvents: 'all',
     cursor: 'pointer',
   },

@@ -3,10 +3,9 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
-import { getCurrentTool } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
-import { Tool } from '~/tools/Tools';
+import { ToolCategory } from '~/tools/Tools';
 import { hexToRGBA } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import { currentColor } from '../color/ColorController';
@@ -20,7 +19,7 @@ export enum DrawState {
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
 
-  public handleDraw(state: DrawState, originalEvent: PointerEvent, position: Vec2, last?: Vec2) {
+  public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2, last?: Vec2) {
     const agent = getAgentOf(this.getLayerIdToDraw());
     if (!agent) return;
     const layer = findLayerById(this.getLayerIdToDraw());
@@ -29,10 +28,9 @@ export default class LayerCanvasOperator {
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
-    const tool = getCurrentTool();
-    if (tool.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
+    if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
 
-    const result = this.useTool(agent, state, originalEvent, getCurrentTool(), position, last);
+    const result = this.useTool(agent, state, originalEvent, toolCategory, position, last);
 
     if (result) {
       if (result.shouldUpdate) {
@@ -45,11 +43,11 @@ export default class LayerCanvasOperator {
     }
   }
 
-  private useTool(agent: LayerImageAgent, state: DrawState, originalEvent: PointerEvent, tool: Tool, position: Vec2, last?: Vec2) {
+  private useTool(agent: LayerImageAgent, state: DrawState, originalEvent: PointerEvent, tool: ToolCategory, position: Vec2, last?: Vec2) {
     const toolArgs: ToolArgs = {
       position,
       lastPosition: last,
-      size: tool.size,
+      presetName: tool.presets?.selected,
       color: hexToRGBA(currentColor()),
       event: originalEvent,
     };
@@ -68,9 +66,7 @@ export default class LayerCanvasOperator {
     }
     const endTime = Date.now();
     if (update) {
-      setBottomBarText(
-        `${tool.familiarName} finished. ${endTime - startTime} ms. (updated ${agent?.getTileManager().getDirtyTiles().length} dirty tiles)`
-      );
+      setBottomBarText(`${tool.name} finished. ${endTime - startTime} ms. (updated ${agent?.getTileManager().getDirtyTiles().length} dirty tiles)`);
     }
     return update;
   }

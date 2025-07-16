@@ -1,6 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
+import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -84,7 +85,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (!isDrawableClick(e)) return;
 
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.start, e, position, lastPos());
+    props.operator.handleDraw(DrawState.start, e, getCurrentToolCategory(), position, lastPos());
     setInteractStore('isInStroke', true);
     setLastPos(position);
   }
@@ -114,14 +115,14 @@ export const InteractCanvas: Component<Props> = (props) => {
     }
     if (!interactStore.isInStroke || !lastPos()) return;
 
-    props.operator.handleDraw(DrawState.move, e, position, lastPos());
+    props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
     setLastPos(position);
   }
 
   function handlePointerUp(e: PointerEvent) {
     if (isIgnoreClick(e)) return;
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.end, e, position, lastPos());
+    props.operator.handleDraw(DrawState.end, e, getCurrentToolCategory(), position, lastPos());
     if (interactStore.isInStroke) endStroke(position);
   }
 
@@ -133,7 +134,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     if (interactStore.isDragging && isDrawableClick(e)) {
       const position = getCanvasMousePosition(e);
-      props.operator.handleDraw(DrawState.move, e, position, lastPos());
+      props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
       setTemporaryOut(true);
     }
   }

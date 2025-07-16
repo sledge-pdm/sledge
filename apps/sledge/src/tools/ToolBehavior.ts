@@ -21,7 +21,7 @@ export interface ToolArgs {
   position: Vec2;
   lastPosition?: Vec2;
   color: RGBAColor; // RGBA
-  size?: number;
+  presetName?: string;
   event?: PointerEvent;
   // TODO: pressure, tilt, ...
 }

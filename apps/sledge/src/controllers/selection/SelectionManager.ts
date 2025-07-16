@@ -44,7 +44,7 @@ class SelectionManager {
     eventBus.emit('selection:stateChanged', { newState: state });
   }
 
-  public isMoveMode() {
+  public isMoveState() {
     return this.state === 'move_selection' || this.state === 'move_layer';
   }
 
@@ -248,7 +248,7 @@ class SelectionManager {
     this.setMoveOffset({ x: 0, y: 0 }); // オフセットをリセット
 
     // 状態を更新: 移動完了後はselected状態に戻す
-    if (this.isMoveMode()) {
+    if (this.isMoveState()) {
       this.setState('selected');
     }
 
@@ -266,7 +266,7 @@ class SelectionManager {
    * 現在の選択状況に基づいてstateを更新する
    */
   private updateStateBasedOnSelection() {
-    if (this.isMoveMode()) {
+    if (this.isMoveState()) {
       // move状態の場合は変更しない（移動中）
       return;
     }

@@ -141,7 +141,7 @@ const SelectionMenu: Component<{}> = (props) => {
       }}
     >
       <div ref={(ref) => (containerRef = ref)} class={styles.container}>
-        <Show when={selectionState() === 'move'}>
+        <Show when={selectionState() === 'move_layer' || selectionState() === 'move_selection'}>
           <Item
             src='/icons/selection/commit_10.png'
             onClick={() => {

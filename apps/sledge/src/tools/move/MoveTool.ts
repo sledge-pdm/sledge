@@ -16,14 +16,15 @@ export class MoveTool implements ToolBehavior {
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    if (!selectionManager.isSelected()) {
+    const isLayerMove = selectionManager.getState() === 'move_layer' || !selectionManager.isSelected();
+    if (isLayerMove) {
       selectionManager.selectAll();
     }
     this.layerId = agent.layerId;
 
     selectionManager.commit();
 
-    if (selectionManager.getState() !== 'move') {
+    if (!selectionManager.isMoveMode()) {
       selectionManager.commitOffset();
       this.startOffset = selectionManager.getMoveOffset();
       this.startPosition = args.position;
@@ -32,7 +33,7 @@ export class MoveTool implements ToolBehavior {
       // sequential move
     }
 
-    selectionManager.setState('move');
+    selectionManager.setState(isLayerMove ? 'move_layer' : 'move_selection');
 
     return {
       shouldUpdate: false,
@@ -104,6 +105,8 @@ export class MoveTool implements ToolBehavior {
     agent.registerToHistory();
     agent.forceUpdate();
 
+    selectionManager.commit();
+    selectionManager.commitOffset();
     selectionManager.clear();
   }
 

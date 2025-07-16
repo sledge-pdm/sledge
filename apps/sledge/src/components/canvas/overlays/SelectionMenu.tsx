@@ -2,7 +2,7 @@ import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { makeTimer } from '@solid-primitives/timer';
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { getRelativeCanvasAreaPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import { selectionManager, SelectionState } from '~/controllers/selection/SelectionManager';
 import { BoundBox } from '~/controllers/selection/SelectionMask';
@@ -11,6 +11,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
+import { interactStore } from '~/stores/EditorStores';
 import * as styles from '~/styles/components/canvas/overlays/selection_menu.css';
 
 interface ItemProps {
@@ -33,6 +34,7 @@ const Divider: Component = () => {
 
 const SelectionMenu: Component<{}> = (props) => {
   let menuRef: HTMLDivElement;
+  let containerRef: HTMLDivElement;
   const borderDash = 6;
   const [borderOffset, setBorderOffset] = createSignal<number>(0);
   const disposeInterval = makeTimer(
@@ -57,6 +59,7 @@ const SelectionMenu: Component<{}> = (props) => {
           setOutlineBoundBox(box);
         }
       }
+      setSelectionChanged(false);
     }, Number(globalConfig.performance.targetFPS))
   );
 
@@ -86,15 +89,44 @@ const SelectionMenu: Component<{}> = (props) => {
     stopRenderLoop();
   });
 
-  const selectionMenuPos = (): Vec2 => {
+  const selectionMenuPos = createMemo<Vec2>((prev) => {
     const boundBox = outlineBoundBox();
-    if (!boundBox) return { x: 0, y: 0 };
-    const pos = getRelativeCanvasAreaPosition({
-      x: boundBox.right + selectionManager.getMoveOffset().x,
+    if (!boundBox || !menuRef) return prev ?? { x: 0, y: 0 };
+
+    const menuRect = menuRef.getBoundingClientRect();
+    const menuWidth = menuRect.width;
+    const menuHeight = menuRect.height;
+
+    // 基本位置：選択範囲の右下
+    let basePos = getRelativeCanvasAreaPosition({
+      x: boundBox.right + selectionManager.getMoveOffset().x + 1 - menuWidth / interactStore.zoom,
       y: boundBox.bottom + selectionManager.getMoveOffset().y + 1,
     });
-    return pos;
-  };
+
+    const canvasArea = document.getElementById('zoompan-wrapper') as HTMLElement;
+    if (canvasArea) {
+      const canvasRect = canvasArea.getBoundingClientRect();
+      const canvasRight = canvasRect.width;
+      const canvasBottom = canvasRect.height;
+
+      const originalBasePos = { ...basePos };
+
+      // 画面外に出る場合は画面内に収める
+      basePos.x = Math.min(Math.max(0, basePos.x), canvasRight - menuWidth);
+      basePos.y = Math.min(Math.max(0, basePos.y), canvasBottom - menuHeight);
+
+      // 画面外に出た場合
+      if (basePos.x !== originalBasePos.x || basePos.y !== originalBasePos.y) {
+        containerRef.style.margin = '8px';
+        containerRef.style.opacity = '0.85';
+      } else {
+        containerRef.style.margin = '8px 0 0 0';
+        containerRef.style.opacity = '1';
+      }
+    }
+
+    return basePos;
+  });
 
   return (
     <div
@@ -106,13 +138,11 @@ const SelectionMenu: Component<{}> = (props) => {
         visibility: committed() && outlineBoundBox() ? 'visible' : 'collapse',
         'image-rendering': 'auto',
         'pointer-events': 'all',
-        'transform-origin': '0 0',
-        transform: 'translateX(-100%)',
         'z-index': 500,
       }}
     >
-      <div class={styles.container}>
-        <Show when={selectionState() === 'move'}>
+      <div ref={(ref) => (containerRef = ref)} class={styles.container}>
+        <Show when={selectionState() === 'move_layer' || selectionState() === 'move_selection'}>
           <Item
             src='/icons/selection/commit_10.png'
             onClick={() => {

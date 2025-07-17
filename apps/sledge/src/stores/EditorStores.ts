@@ -128,3 +128,20 @@ export const setLogStore = editorStore.setLogStore;
 
 export const toolStore = editorStore.toolStore;
 export const setToolStore = editorStore.setToolStore;
+
+// プリセット関連のヘルパー関数
+export const updateToolPresetConfig = (toolId: ToolCategoryId, presetName: string, key: string, value: any) => {
+  setToolStore('tools', toolId, 'presets', 'options', presetName, key, value);
+};
+
+export const setActiveToolPreset = (toolId: ToolCategoryId, presetName: string) => {
+  setToolStore('tools', toolId, 'presets', 'selected', presetName);
+};
+
+export const getCurrentPresetConfig = (toolId: ToolCategoryId) => {
+  const tool = toolStore.tools[toolId];
+  if (!tool?.presets) return undefined;
+
+  const selectedPreset = tool.presets.selected;
+  return tool.presets.options[selectedPreset];
+};

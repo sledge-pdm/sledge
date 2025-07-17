@@ -28,6 +28,7 @@ const Item: Component<ItemProps> = (props) => {
     </div>
   );
 };
+
 const Divider: Component = () => {
   return <div class={styles.divider} />;
 };
@@ -160,15 +161,6 @@ const SelectionMenu: Component<{}> = (props) => {
           />
         </Show>
         <Show when={selectionState() === 'selected'}>
-          {/* <Item src='/icons/misc/duplicate.png' onClick={() => {}} /> */}
-          {/* <Item
-            src='/icons/selection/delete_10.png'
-            onClick={() => {
-              deletePixelInSelection();
-            }}
-            label='delete.'
-          />
-          <Divider /> */}
           <Item
             src='/icons/selection/cancel_10.png'
             onClick={() => {
@@ -176,6 +168,20 @@ const SelectionMenu: Component<{}> = (props) => {
             }}
             label='cancel.'
           />
+          {/* <Divider />
+          <Item
+            src='/icons/tool/move_area.png'
+            onClick={() => {
+              cancelSelection();
+            }}
+          />
+          <Divider />
+          <Item
+            src='/icons/tool/move.png'
+            onClick={() => {
+              cancelSelection();
+            }}
+          /> */}
         </Show>
       </div>
     </div>

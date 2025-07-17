@@ -21,27 +21,46 @@ export const TOOL_CATEGORIES = {
 
 export type ToolCategoryId = (typeof TOOL_CATEGORIES)[keyof typeof TOOL_CATEGORIES];
 
-export type ToolCategory = {
+export type ToolCategory<TPresetConfig = any> = {
   id: ToolCategoryId;
   name: string;
   iconSrc?: string;
   behavior: ToolBehavior;
-  presets?: ToolPresets; // プリセットが必要なカテゴリのみ
+  presets?: ToolPresets<TPresetConfig>; // プリセットが必要なカテゴリのみ
 };
 
 // プリセット関連の型
-export type ToolPresets = {
+export type ToolPresets<TConfig = any> = {
   selected: string;
-  options: Record<string, PresetConfig>;
+  options: Record<string, TConfig>;
 };
 
-export type PresetConfig = {
+// 基本のプリセット設定（共通プロパティ）
+export type BasePresetConfig = {
   size?: number;
-  // 将来的に他のパラメータも追加可能
 };
+
+// ツール別のプリセット設定型
+export type PenPresetConfig = BasePresetConfig & {
+  shape?: 'circle' | 'square';
+  opacity?: number;
+};
+
+export type EraserPresetConfig = BasePresetConfig & {
+  shape?: 'circle' | 'square';
+  hardness?: number;
+};
+
+export type FillPresetConfig = BasePresetConfig & {
+  threshold?: number;
+  antialias?: boolean;
+};
+
+// 旧型との互換性のため
+export type PresetConfig = BasePresetConfig;
 
 // ツールカテゴリの定義
-export const toolCategories: Record<ToolCategoryId, ToolCategory> = {
+export const toolCategories = {
   [TOOL_CATEGORIES.PEN]: {
     id: TOOL_CATEGORIES.PEN,
     name: 'Pen',
@@ -50,10 +69,13 @@ export const toolCategories: Record<ToolCategoryId, ToolCategory> = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1 },
+        [DEFAULT_PRESET]: { size: 1, shape: 'circle', opacity: 1.0 } as PenPresetConfig,
+        fine: { size: 1, shape: 'circle', opacity: 1.0 } as PenPresetConfig,
+        thick: { size: 5, shape: 'circle', opacity: 1.0 } as PenPresetConfig,
+        square: { size: 3, shape: 'square', opacity: 1.0 } as PenPresetConfig,
       },
     },
-  },
+  } as ToolCategory<PenPresetConfig>,
   [TOOL_CATEGORIES.ERASER]: {
     id: TOOL_CATEGORIES.ERASER,
     name: 'Eraser',
@@ -62,10 +84,12 @@ export const toolCategories: Record<ToolCategoryId, ToolCategory> = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1 },
+        [DEFAULT_PRESET]: { size: 1, shape: 'circle', hardness: 1.0 } as EraserPresetConfig,
+        soft: { size: 3, shape: 'circle', hardness: 0.5 } as EraserPresetConfig,
+        hard: { size: 3, shape: 'circle', hardness: 1.0 } as EraserPresetConfig,
       },
     },
-  },
+  } as ToolCategory<EraserPresetConfig>,
   [TOOL_CATEGORIES.FILL]: {
     id: TOOL_CATEGORIES.FILL,
     name: 'Fill',
@@ -74,36 +98,38 @@ export const toolCategories: Record<ToolCategoryId, ToolCategory> = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1 },
+        [DEFAULT_PRESET]: { threshold: 0, antialias: false } as FillPresetConfig,
+        precise: { threshold: 0, antialias: false } as FillPresetConfig,
+        tolerant: { threshold: 10, antialias: true } as FillPresetConfig,
       },
     },
-  },
+  } as ToolCategory<FillPresetConfig>,
   [TOOL_CATEGORIES.PIPETTE]: {
     id: TOOL_CATEGORIES.PIPETTE,
     name: 'Pipette',
     iconSrc: '/icons/tool/pipette.png',
     behavior: new PipetteTool(),
     // プリセット不要
-  },
+  } as ToolCategory,
   [TOOL_CATEGORIES.RECT_SELECTION]: {
     id: TOOL_CATEGORIES.RECT_SELECTION,
     name: 'Rect Selection',
     iconSrc: '/icons/tool/rectselect.png',
     behavior: new RectSelection(),
     // プリセット不要
-  },
+  } as ToolCategory,
   [TOOL_CATEGORIES.SELECTION_MOVE]: {
     id: TOOL_CATEGORIES.SELECTION_MOVE,
     name: 'Selection Move',
     iconSrc: '/icons/tool/move_area.png',
     behavior: new SelectionMoveTool(),
     // プリセット不要
-  },
+  } as ToolCategory,
   [TOOL_CATEGORIES.MOVE]: {
     id: TOOL_CATEGORIES.MOVE,
     name: 'Move',
     iconSrc: '/icons/tool/move.png',
     behavior: new MoveTool(),
     // プリセット不要
-  },
-};
+  } as ToolCategory,
+} as const;

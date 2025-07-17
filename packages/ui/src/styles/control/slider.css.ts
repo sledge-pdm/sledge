@@ -15,7 +15,7 @@ export const sliderRoot = style([
 export const valueLabelContainer = style([
   flexRow,
   {
-    minWidth: '64px',
+    minWidth: '52px',
   },
 ]);
 export const valueLabel = style({

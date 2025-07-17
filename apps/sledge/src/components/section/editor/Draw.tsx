@@ -1,7 +1,7 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, For, Show } from 'solid-js';
-import PresetEditor from '~/components/section/editor/item/PresetEditor';
+import ToolPresetManager from '~/components/tool/ToolPresetManager';
 import { toolStore } from '~/stores/EditorStores';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 import { ToolCategoryId } from '~/tools/Tools';
@@ -19,8 +19,7 @@ const Draw: Component = () => {
             {(categoryId) => {
               const isInUse = () => categoryId === toolStore.activeToolCategory;
               return (
-                <div style={{ 'flex-grow': isInUse() ? 1 : 0 }}>
-                  {/**, order: isInUse() ? 0 : 1  */}
+                <div>
                   <ToolItem categoryId={categoryId} withLabel='inUse' isInUse={isInUse()} />
                 </div>
               );
@@ -29,9 +28,7 @@ const Draw: Component = () => {
         </div>
 
         <Show when={mainTools.includes(toolStore.activeToolCategory)}>
-          <div style={{ margin: '12px 4px' }}>
-            <PresetEditor categoryId={toolStore.activeToolCategory} presetId={toolStore.tools[toolStore.activeToolCategory].presets?.selected} />
-          </div>
+          <ToolPresetManager toolId={toolStore.tools[toolStore.activeToolCategory].id} />
         </Show>
       </div>
     </div>

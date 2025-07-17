@@ -1,13 +1,28 @@
-import { flexCol, flexRow, w100, wh100 } from '@sledge/core';
+import { flexCol, flexRow, wh100 } from '@sledge/core';
 import { vars, ZFB03, ZFB08, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const startRoot = style([
   flexCol,
-  wh100,
   {
+    width: '100%',
+    height: '100%',
     position: 'relative',
-    padding: '48px 42px',
+    overflow: 'hidden',
+  },
+]);
+export const startContent = style([
+  flexCol,
+  {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    padding: '40px',
+    overflow: 'hidden',
   },
 ]);
 
@@ -22,7 +37,7 @@ export const header = style([
   flexRow,
   {
     gap: '24px',
-    paddingBottom: '36px',
+    paddingBottom: '48px',
     paddingTop: '12px',
   },
 ]);
@@ -45,7 +60,7 @@ export const recentFilesCaption = style({
   fontFamily: ZFB08,
   fontSize: '8px',
   color: '#777',
-  marginBottom: '4px',
+  marginBottom: '8px',
 });
 
 export const clear = style({
@@ -57,32 +72,28 @@ export const clear = style({
 });
 
 export const recentFilesContainerGrid = style([
-  w100,
   {
     width: '100%',
+    bottom: 0,
     display: 'grid',
     gridTemplateColumns: 'repeat(3, auto)',
     gap: '8px',
+    flexGrow: 1,
+    height: 0,
     marginTop: '12px',
   },
 ]);
 export const recentFilesContainerScroll = style([
   flexCol,
+  wh100,
   {
-    position: 'relative',
-    marginTop: '12px',
-    maxHeight: '240px',
-    width: '500px',
-  },
-]);
-export const recentFilesContainerCol = style([
-  flexCol,
-  w100,
-  {
-    position: 'relative',
-    gap: '8px',
-    overflowX: 'hidden',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     overflowY: 'auto',
+    flexGrow: 1,
 
     '::-webkit-scrollbar': {
       width: '4px',
@@ -97,13 +108,22 @@ export const recentFilesContainerCol = style([
     },
   },
 ]);
+export const recentFilesContainerCol = style([
+  flexCol,
+  wh100,
+  {
+    gap: '2px',
+  },
+]);
 
-export const rightBottomArea = style([
+export const rightTopArea = style([
   flexCol,
   {
-    position: 'fixed',
-    bottom: vars.spacing.xl,
-    right: vars.spacing.xl,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    margin: vars.spacing.xl,
+    boxSizing: 'border-box',
     gap: vars.spacing.md,
     alignItems: 'end',
   },

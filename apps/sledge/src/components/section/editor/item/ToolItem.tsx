@@ -1,9 +1,9 @@
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { Component, Show } from 'solid-js';
+import { Component } from 'solid-js';
 import { setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
-import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/editor/tools.css';
+import { toolConfigRow, toolConfigRowClickable } from '~/styles/section/editor/tools.css';
 import { ToolCategoryId } from '~/tools/Tools';
 
 interface Props {
@@ -22,7 +22,7 @@ const ToolItem: Component<Props> = (props: Props) => {
       {/* <Light on={props.isInUse} /> */}
       <div class={toolConfigRowClickable} onClick={() => setActiveToolCategory(category.id)}>
         <Icon src={category.iconSrc ?? ''} base={10} scale={2} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
-        <Show when={shouldShowLabel()}>
+        {/* <Show when={shouldShowLabel()}>
           <p
             class={toolConfigRowName}
             style={{
@@ -31,7 +31,7 @@ const ToolItem: Component<Props> = (props: Props) => {
           >
             {category.name}.
           </p>
-        </Show>
+        </Show> */}
       </div>
     </div>
   );

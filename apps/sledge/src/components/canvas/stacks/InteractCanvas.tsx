@@ -1,6 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -72,7 +73,14 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === 'touch' || e.ctrlKey) return false;
+    if (e.pointerType === 'touch') return false;
+
+    if (e.ctrlKey) {
+      if (selectionManager.isSelected())
+        return true; // [1] 選択移動の操作だけ特例
+      else return false; // それ以外はこれまで同様ゆるさない
+    }
+
     // right=1, left=2, middle=4
     // console.log(e.buttons)
     if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) return false;
@@ -92,6 +100,9 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   function handlePointerCancel(e: PointerEvent) {
     if (isIgnoreClick(e)) return;
+
+    const position = getCanvasMousePosition(e);
+    props.operator.handleDraw(DrawState.cancel, e, getCurrentToolCategory(), position, lastPos());
     endStroke(getCanvasMousePosition(e));
   }
 

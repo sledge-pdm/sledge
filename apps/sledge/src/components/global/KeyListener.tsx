@@ -22,7 +22,6 @@ const KeyListener: Component = () => {
       if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) setActiveToolCategory('fill');
 
       if (isKeyMatchesToEntry(e, keyConfigStore['pipette'])) setActiveToolCategory('pipette');
-      if (isKeyMatchesToEntry(e, keyConfigStore['selection move'])) setActiveToolCategory('selectionMove');
     }
   };
   const handleKeyUp = (e: KeyboardEvent) => {

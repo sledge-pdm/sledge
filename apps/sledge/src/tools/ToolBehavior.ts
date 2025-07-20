@@ -10,7 +10,7 @@ export interface ToolResult {
 
 export interface ToolBehavior {
   onlyOnCanvas?: boolean;
-  isInstantTool?: boolean;
+　  isInstantTool?: boolean;
 
   onStart: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 

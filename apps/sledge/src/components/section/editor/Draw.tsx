@@ -7,7 +7,7 @@ import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/se
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolItem from './item/ToolItem';
 
-const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill'];
+const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'move'];
 
 const Draw: Component = () => {
   return (

@@ -25,7 +25,7 @@ export type TileFragment = {
 };
 
 export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
-export type SelectionEditMode = 'add' | 'subtract' | 'replace';
+export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type SelectionState = 'idle' | 'selected' | 'move_selection' | 'move_layer';
 
 class SelectionManager {
@@ -83,6 +83,12 @@ class SelectionManager {
 
   public isSelected() {
     return !this.selectionMask.isCleared();
+  }
+
+  public isPointInSelection(pos: Vec2) {
+    if (!this.isSelected()) return false;
+    // return this.selectionMask.get(pos) === 1;
+    return true;
   }
 
   constructor() {

@@ -1,3 +1,5 @@
+import { layerCanvasOperator } from '~/components/canvas/stacks/CanvasStack';
+import { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { PresetConfig, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 

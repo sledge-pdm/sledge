@@ -36,8 +36,8 @@ export const titleBarControlButtonContainer = style([
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '24px',
-    paddingLeft: '12px',
-    paddingRight: '12px',
+    paddingLeft: '14px',
+    paddingRight: '14px',
     pointerEvents: 'all',
 
     ':hover': {

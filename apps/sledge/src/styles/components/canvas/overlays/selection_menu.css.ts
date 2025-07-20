@@ -17,7 +17,7 @@ export const item = style([
     alignItems: 'center',
     pointerEvents: 'all',
     cursor: 'pointer',
-    padding: '4px',
+    padding: '6px',
     gap: '6px',
     backgroundColor: vars.color.surface,
     ':hover': {

@@ -5,10 +5,12 @@ import { RGBAColor } from '~/utils/ColorUtils';
 export interface ToolResult {
   shouldUpdate: boolean;
   shouldRegisterToHistory: boolean;
+  shouldReturnToPrevTool?: boolean;
 }
 
 export interface ToolBehavior {
   onlyOnCanvas?: boolean;
+  isInstantTool?: boolean;
 
   onStart: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 

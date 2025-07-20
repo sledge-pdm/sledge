@@ -3,6 +3,7 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
+import { getPrevActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategory } from '~/tools/Tools';
@@ -40,6 +41,11 @@ export default class LayerCanvasOperator {
       if (result.shouldRegisterToHistory) {
         agent.registerToHistory();
       }
+
+      if (result.shouldReturnToPrevTool) {
+        const prevTool = getPrevActiveToolCategory();
+        if (prevTool) setActiveToolCategory(prevTool);
+      }
     }
   }
 
@@ -52,23 +58,23 @@ export default class LayerCanvasOperator {
       event: originalEvent,
     };
     const startTime = Date.now();
-    let update: ToolResult | undefined = undefined;
+    let result: ToolResult | undefined = undefined;
     switch (state) {
       case DrawState.start:
-        update = tool.behavior.onStart(agent, toolArgs);
+        result = tool.behavior.onStart(agent, toolArgs);
         break;
       case DrawState.move:
-        update = tool.behavior.onMove(agent, toolArgs);
+        result = tool.behavior.onMove(agent, toolArgs);
         break;
       case DrawState.end:
-        update = tool.behavior.onEnd(agent, toolArgs);
+        result = tool.behavior.onEnd(agent, toolArgs);
         break;
     }
     const endTime = Date.now();
-    if (update) {
+    if (result) {
       setBottomBarText(`${tool.name} finished. ${endTime - startTime} ms. (updated ${agent?.getTileManager().getDirtyTiles().length} dirty tiles)`);
     }
-    return update;
+    return result;
   }
 
   private getMagnificatedPosition(position: Vec2, dotMagnification: number) {

@@ -4,6 +4,8 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
+  "typescript.suggestionActions.enabled": true,
+  "typescript.experimental.useTsgo": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
   // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
 

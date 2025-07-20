@@ -131,6 +131,14 @@ export class FillTool implements ToolBehavior {
     // 最終結果を記録
     addDebugImage(finalBuffer, width, height, '6. Final Result', sessionId);
 
+    // バッファ全体の差分を履歴に記録
+    const dm = agent.getDiffManager();
+    dm.add({
+      kind: 'whole',
+      before: sourceBuffer,
+      after: finalBuffer.slice(),
+    });
+
     // 最終結果を設定
     // new Uint8Array(currentBuffer).set(finalBuffer); 前の
     currentBuffer.set(finalBuffer);
@@ -207,15 +215,23 @@ export class FillTool implements ToolBehavior {
     for (let i = 0; i < selectionMask.length; i++) {
       const isInSelection = selectionMask[i] === 1;
       const shouldFill = (limitMode === 'inside' && isInSelection) || (limitMode === 'outside' && !isInSelection);
-      
+
       if (shouldFill) {
         const bufferIndex = i * 4;
-        currentBuffer[bufferIndex] = color[0];     // R
+        currentBuffer[bufferIndex] = color[0]; // R
         currentBuffer[bufferIndex + 1] = color[1]; // G
         currentBuffer[bufferIndex + 2] = color[2]; // B
         currentBuffer[bufferIndex + 3] = color[3]; // A
       }
     }
+
+    // バッファ全体の差分を履歴に記録
+    const dm = agent.getDiffManager();
+    dm.add({
+      kind: 'whole',
+      before: sourceBuffer,
+      after: currentBuffer.slice(),
+    });
 
     // 結果を記録
     addDebugImage(currentBuffer.slice(), width, height, '3. Area Fill Result', sessionId);

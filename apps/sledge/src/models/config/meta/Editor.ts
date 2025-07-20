@@ -30,11 +30,4 @@ export const editorMetas: FieldMeta[] = [
     component: 'ToggleSwitch',
     tips: `whether if shows pointed pixel as rect.`,
   },
-  {
-    section: Sections.Editor,
-    path: ['editor', 'skipMeaninglessAction'],
-    label: 'skip meaningless action',
-    component: 'ToggleSwitch',
-    tips: `prevent to add change that doesn't affects image to the history.`,
-  },
 ];

@@ -15,6 +15,7 @@ export enum DrawState {
   start,
   move,
   end,
+  cancel,
 }
 
 export default class LayerCanvasOperator {

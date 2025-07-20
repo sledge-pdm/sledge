@@ -11,6 +11,8 @@ import { eventBus } from '~/utils/EventBus';
 import { ImagePool } from './image_pool/ImagePool';
 import WebGLCanvas from './WebGLCanvas';
 
+export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);
+
 const CanvasStack: Component = () => {
   const [gridSize, setGridSize] = createSignal(10);
 
@@ -63,7 +65,7 @@ const CanvasStack: Component = () => {
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
       >
-        <InteractCanvas operator={new LayerCanvasOperator(() => activeLayer().id)} />
+        <InteractCanvas operator={layerCanvasOperator} />
 
         <ImagePool />
 

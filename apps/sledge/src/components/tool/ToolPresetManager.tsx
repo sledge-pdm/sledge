@@ -35,15 +35,6 @@ const ToolPresetManager: Component<Props> = (props) => {
     updateToolPresetConfig(props.toolId, selectedPreset()!, key, value);
   };
 
-  // プリセットが存在しないツールの場合
-  if (!presets()) {
-    return (
-      <div class={configFormFields}>
-        <p class={configFormFieldHeader}>No presets available for this tool.</p>
-      </div>
-    );
-  }
-
   return (
     <div class={flexCol}>
       {/* プリセット選択 */}

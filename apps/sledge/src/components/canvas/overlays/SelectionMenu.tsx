@@ -170,14 +170,14 @@ const SelectionMenu: Component<{}> = (props) => {
           />
           {/* <Divider />
           <Item
-            src='/icons/tool/move_area.png'
+            src='/icons/tool_bar/tool/move_area.png'
             onClick={() => {
               cancelSelection();
             }}
           />
           <Divider />
           <Item
-            src='/icons/tool/move.png'
+            src='/icons/tool_bar/tool/move.png'
             onClick={() => {
               cancelSelection();
             }}

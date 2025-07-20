@@ -41,10 +41,14 @@ type InteractStore = {
 type LogStore = {
   bottomBarText: string;
 };
+export type SelectionLimitMode = 'none' | 'outside' | 'inside';
+export type SelectionFillMode = 'global' | 'boundary' | 'area'; // global: 全体参照, boundary: 範囲制限, area: 選択範囲塗りつぶし
 export type ToolStore = {
   tools: Record<ToolCategoryId, ToolCategory>;
   activeToolCategory: ToolCategoryId;
   prevActiveCategory: ToolCategoryId | undefined;
+  selectionLimitMode: SelectionLimitMode;
+  selectionFillMode: SelectionFillMode;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
@@ -89,6 +93,8 @@ const defaultToolStore: ToolStore = {
   tools: toolCategories,
   activeToolCategory: 'pen',
   prevActiveCategory: undefined,
+  selectionLimitMode: 'none',
+  selectionFillMode: 'global', // デフォルトは現在の動作（全体参照）
 };
 
 export const initEditorStore = () => {
@@ -128,4 +134,3 @@ export const setLogStore = editorStore.setLogStore;
 
 export const toolStore = editorStore.toolStore;
 export const setToolStore = editorStore.setToolStore;
-

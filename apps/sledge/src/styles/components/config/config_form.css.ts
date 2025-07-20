@@ -82,7 +82,7 @@ export const configFormFieldLabelTooltip = style({
 export const configFormFieldLabel = style({
   width: 'fit-content',
   fontFamily: ZFB09,
-  textDecoration: 'underline',
+  // textDecoration: 'underline',
   alignSelf: 'center',
   marginRight: '8px',
 });

@@ -16,22 +16,24 @@ export const sideAreaContentWrapper = style([
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: '38px',
-    paddingLeft: '32px',
+    paddingTop: '32px',
+    paddingBottom: '48px',
+    paddingLeft: '28px',
     paddingRight: '28px',
 
     overflowX: 'hidden',
     overflowY: 'scroll',
 
     '::-webkit-scrollbar': {
-      width: '4px',
+      width: '2px',
+      backgroundColor: 'transparent',
     },
     '::-webkit-scrollbar-thumb': {
       backgroundColor: 'transparent',
     },
     selectors: {
       '&:hover::-webkit-scrollbar-thumb': {
-        backgroundColor: '#ddd',
+        backgroundColor: '#888',
       },
     },
   },
@@ -40,6 +42,6 @@ export const sideAreaContentWrapper = style([
 export const sideAreaContent = style([
   flexCol,
   {
-    gap: '1rem',
+    gap: '1.5rem',
   },
 ]);

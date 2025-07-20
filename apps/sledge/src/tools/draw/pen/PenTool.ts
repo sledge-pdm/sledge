@@ -1,4 +1,5 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategoryId } from '~/tools/Tools';
@@ -28,6 +29,9 @@ export class PenTool implements ToolBehavior {
     const dm = agent.getDiffManager();
 
     drawSquarePixel(position, size, (px, py) => {
+      if (!selectionManager.isDrawingAllowed({ x: px, y: py })) {
+        return; // 描画制限により描画しない
+      }
       if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
         const diff = agent.setPixel({ x: px, y: py }, color, true);
         if (diff !== undefined) {
@@ -39,6 +43,9 @@ export class PenTool implements ToolBehavior {
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
+          if (!selectionManager.isDrawingAllowed({ x: px, y: py })) {
+            return; // 描画制限により描画しない
+          }
           if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
             const diff = agent.setPixel({ x: px, y: py }, color, true);
             if (diff !== undefined) {

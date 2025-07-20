@@ -28,7 +28,13 @@ const Draw: Component = () => {
         </div>
 
         <Show when={mainTools.includes(toolStore.activeToolCategory)}>
-          <ToolPresetManager toolId={toolStore.tools[toolStore.activeToolCategory].id} />
+          <div
+            style={{
+              'min-height': '100px',
+            }}
+          >
+            <ToolPresetManager toolId={toolStore.tools[toolStore.activeToolCategory].id} />
+          </div>
         </Show>
       </div>
     </div>

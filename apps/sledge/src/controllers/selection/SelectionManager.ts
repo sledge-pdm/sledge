@@ -5,6 +5,7 @@ import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_ma
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import SelectionMask from '~/controllers/selection/SelectionMask';
+import { SelectionFillMode, SelectionLimitMode, toolStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 
 export type PixelFragment = {
@@ -111,6 +112,51 @@ class SelectionManager {
       pos.y -= this.moveOffset.y;
     }
     return this.selectionMask.get(pos) === 1;
+  }
+
+  /**
+   * 描画制限モードに基づいて描画可能な位置かチェック
+   * @param pos チェックする位置
+   * @returns 描画可能な場合true、制限により描画不可の場合false
+   */
+  isDrawingAllowed(pos: Vec2): boolean {
+    const limitMode = toolStore.selectionLimitMode;
+
+    if (limitMode === 'none') {
+      // 制限なし：常に描画可能
+      return true;
+    }
+
+    if (!this.isSelected()) {
+      // 選択範囲がない場合：制限なしとして扱う
+      return true;
+    }
+
+    const isInSelection = this.isMaskOverlap(pos, true);
+
+    if (limitMode === 'inside') {
+      // 選択範囲内のみ描画可能
+      return isInSelection;
+    } else if (limitMode === 'outside') {
+      // 選択範囲外のみ描画可能
+      return !isInSelection;
+    }
+
+    return true;
+  }
+
+  /**
+   * 現在の選択範囲制限モードを取得
+   */
+  getSelectionLimitMode(): SelectionLimitMode {
+    return toolStore.selectionLimitMode;
+  }
+
+  /**
+   * 現在の選択範囲フィルモードを取得
+   */
+  getSelectionFillMode(): SelectionFillMode {
+    return toolStore.selectionFillMode;
   }
 
   /** 「プレビュー開始時」に呼ぶ */

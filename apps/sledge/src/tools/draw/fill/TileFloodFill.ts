@@ -5,6 +5,14 @@ import { PixelDiff } from '~/models/history/HistoryManager';
 import { colorMatch } from '~/utils/ColorUtils';
 import { Fill, FillProps } from './FillTool';
 
+export interface MaskFillProps {
+  agent: LayerImageAgent;
+  color: [number, number, number, number];
+  position: Vec2;
+  selectionMask: Uint8Array;
+  limitMode: 'inside' | 'outside';
+}
+
 export class TileFloodFill implements Fill {
   fill({ agent, color, position }: FillProps) {
     const pbm = agent.getPixelBufferManager();
@@ -69,6 +77,7 @@ export class TileFloodFill implements Fill {
     while (pixelQueue.length > 0) {
       const p = pixelQueue.pop()!;
       if (!pbm.isInBounds(p)) continue;
+
       const idx = pxIndex(p);
       if (visitedPx[idx]) continue;
       visitedPx[idx] = 1;
@@ -129,6 +138,71 @@ export class TileFloodFill implements Fill {
       if (diff) pxDiffs.push(diff);
     }
     if (pxDiffs.length > 0) dm.add(pxDiffs);
+  }
+
+  fillWithMask({ agent, color, position, selectionMask, limitMode }: MaskFillProps) {
+    const pbm = agent.getPixelBufferManager();
+    const dm = agent.getDiffManager();
+    const width = agent.getWidth();
+
+    const targetColor = pbm.getPixel(position);
+    if (colorMatch(targetColor, color)) return false;
+
+    // 選択範囲制限チェック関数
+    const isAllowedPosition = (pos: Vec2) => {
+      const maskIndex = pos.y * width + pos.x;
+      const isInSelection = selectionMask[maskIndex] === 1;
+
+      if (limitMode === 'inside') {
+        return isInSelection; // 選択範囲内のみ許可
+      } else {
+        return !isInSelection; // 選択範囲外のみ許可
+      }
+    };
+
+    // 開始位置が制限に違反していないかチェック
+    if (!isAllowedPosition(position)) {
+      return false;
+    }
+
+    // シンプルなピクセル単位FloodFill（選択範囲制限付き）
+    const pixelQueue: Vec2[] = [position];
+    const pixelsFilled: Vec2[] = [];
+    const visitedPx = new Uint8Array(width * agent.getHeight());
+    const pxIndex = (p: Vec2) => p.y * width + p.x;
+
+    while (pixelQueue.length > 0) {
+      const p = pixelQueue.pop()!;
+      if (!pbm.isInBounds(p)) continue;
+
+      const idx = pxIndex(p);
+      if (visitedPx[idx]) continue;
+      visitedPx[idx] = 1;
+
+      // 色のチェック
+      if (!colorMatch(pbm.getPixel(p), targetColor)) continue;
+
+      // 選択範囲制限チェック
+      if (!isAllowedPosition(p)) continue;
+
+      pixelsFilled.push(p);
+
+      // 隣接ピクセルを追加
+      pixelQueue.push({ x: p.x + 1, y: p.y });
+      pixelQueue.push({ x: p.x - 1, y: p.y });
+      pixelQueue.push({ x: p.x, y: p.y + 1 });
+      pixelQueue.push({ x: p.x, y: p.y - 1 });
+    }
+
+    // ピクセルを塗りつぶし
+    const pxDiffs: PixelDiff[] = [];
+    for (const p of pixelsFilled) {
+      const diff = agent.setPixel(p, color, false);
+      if (diff) pxDiffs.push(diff);
+    }
+    if (pxDiffs.length > 0) dm.add(pxDiffs);
+
+    console.log(`boundary-constrained fill finished: ${pixelsFilled.length} pixels`);
   }
 
   collectEdgePixels(agent: LayerImageAgent, filled: TileIndex[]): Vec2[] {

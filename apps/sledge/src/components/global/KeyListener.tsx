@@ -2,6 +2,7 @@ import { Component, onCleanup, onMount } from 'solid-js';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { getActiveToolCategory, getPrevActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { keyConfigStore } from '~/stores/GlobalStores';
+import { openDebugViewer } from '~/utils/DebugViewer';
 import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';
 import { redoLayer, undoLayer } from '../../controllers/history/HistoryController';
 
@@ -14,6 +15,12 @@ const KeyListener: Component = () => {
     if (isKeyMatchesToEntry(e, keyConfigStore['redo'])) {
       const active = activeLayer();
       if (active) redoLayer(active.id);
+    }
+
+    // デバッグビューア用ショートカット (Ctrl+Shift+D)
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      e.preventDefault();
+      openDebugViewer();
     }
 
     if (!e.repeat) {

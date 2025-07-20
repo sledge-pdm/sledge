@@ -113,7 +113,7 @@ export const toolCategories = {
   } as ToolCategory,
   [TOOL_CATEGORIES.RECT_SELECTION]: {
     id: TOOL_CATEGORIES.RECT_SELECTION,
-    name: 'Rect Selection',
+    name: 'Rect Select',
     iconSrc: '/icons/tool_bar/tool/rectselect.png',
     behavior: new RectSelection(),
     // プリセット不要

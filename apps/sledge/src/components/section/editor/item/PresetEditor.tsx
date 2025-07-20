@@ -1,7 +1,7 @@
 import { flexCol, flexRow } from '@sledge/core';
 import { Slider } from '@sledge/ui';
 import { Component } from 'solid-js';
-import { setToolSize } from '~/controllers/tool/ToolController';
+import { updateToolPresetConfig } from '~/controllers/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
 import { DEFAULT_PRESET, ToolCategoryId } from '~/tools/Tools';
 
@@ -25,7 +25,7 @@ const PresetEditor: Component<Props> = (props: Props) => {
           allowFloat={false}
           value={preset()?.size ?? 0}
           onChange={(v) => {
-            setToolSize(props.categoryId, props.presetId ?? DEFAULT_PRESET, v);
+            updateToolPresetConfig(props.categoryId, props.presetId ?? DEFAULT_PRESET, 'size', v);
           }}
         />
       </div>

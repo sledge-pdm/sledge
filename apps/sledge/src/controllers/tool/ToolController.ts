@@ -35,10 +35,24 @@ export function getPrevActiveToolCategory(): ToolCategoryId | undefined {
 }
 
 export function setActiveToolCategory(toolCategory: ToolCategoryId) {
+  if (toolStore.activeToolCategory === toolCategory) return;
+  console.log(`tool changed ${toolStore.activeToolCategory} -> ${toolCategory}`);
   setToolStore('prevActiveCategory', toolStore.activeToolCategory);
   setToolStore('activeToolCategory', toolCategory);
 }
 
-export function setToolSize(categoryId: ToolCategoryId, presetName: string, size: number) {
-  setToolStore('tools', categoryId, 'presets', 'options', presetName, 'size', size);
-}
+export const updateToolPresetConfig = (toolId: ToolCategoryId, presetName: string, key: string, value: any) => {
+  setToolStore('tools', toolId, 'presets', 'options', presetName, key, value);
+};
+
+export const setActiveToolPreset = (toolId: ToolCategoryId, presetName: string) => {
+  setToolStore('tools', toolId, 'presets', 'selected', presetName);
+};
+
+export const getCurrentPresetConfig = (toolId: ToolCategoryId) => {
+  const tool = toolStore.tools[toolId];
+  if (!tool?.presets) return undefined;
+
+  const selectedPreset = tool.presets.selected;
+  return tool.presets.options[selectedPreset];
+};

@@ -1,5 +1,3 @@
-import { layerCanvasOperator } from '~/components/canvas/stacks/CanvasStack';
-import { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { PresetConfig, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
@@ -51,7 +49,7 @@ export const setActiveToolPreset = (toolId: ToolCategoryId, presetName: string) 
   setToolStore('tools', toolId, 'presets', 'selected', presetName);
 };
 
-export const getCurrentPresetConfig = (toolId: ToolCategoryId) => {
+export const getCurrentPresetConfig = (toolId: ToolCategoryId): Record<string, any> | undefined => {
   const tool = toolStore.tools[toolId];
   if (!tool?.presets) return undefined;
 

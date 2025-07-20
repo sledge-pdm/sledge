@@ -6,7 +6,7 @@ import { Component, createMemo, createSignal, onCleanup, onMount, Show } from 's
 import { getRelativeCanvasAreaPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import { selectionManager, SelectionState } from '~/controllers/selection/SelectionManager';
 import { BoundBox } from '~/controllers/selection/SelectionMask';
-import { cancelMove, cancelSelection, commitMove } from '~/controllers/selection/SelectionOperator';
+import { cancelMove, cancelSelection, commitMove, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -24,7 +24,9 @@ const Item: Component<ItemProps> = (props) => {
   return (
     <div class={styles.item} onClick={props.onClick}>
       <Icon src={props.src} color={vars.color.onBackground} base={10} scale={1} />
-      <p>{props.label}</p>
+      <Show when={props.label}>
+        <p>{props.label}</p>
+      </Show>
     </div>
   );
 };
@@ -168,20 +170,13 @@ const SelectionMenu: Component<{}> = (props) => {
             }}
             label='cancel.'
           />
-          {/* <Divider />
-          <Item
-            src='/icons/tool_bar/tool/move_area.png'
-            onClick={() => {
-              cancelSelection();
-            }}
-          />
           <Divider />
           <Item
-            src='/icons/tool_bar/tool/move.png'
+            src='/icons/selection/delete_10.png'
             onClick={() => {
-              cancelSelection();
+              deletePixelInSelection();
             }}
-          /> */}
+          />
         </Show>
       </div>
     </div>

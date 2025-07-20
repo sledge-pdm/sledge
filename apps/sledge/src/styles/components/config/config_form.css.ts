@@ -1,5 +1,5 @@
 import { flexCol, flexRow, h100, wh100 } from '@sledge/core';
-import { vars, ZFB08, ZFB09, ZFB31 } from '@sledge/theme';
+import { vars, ZFB08, ZFB09 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const configFormRoot = style([
@@ -57,11 +57,10 @@ export const configFormFields = style([
 
 export const configFormFieldHeader = style([
   {
-    fontFamily: ZFB31,
-    fontSize: vars.text.lg,
     marginTop: vars.spacing.xl,
     marginBottom: vars.spacing.sm,
-    color: vars.color.accent,
+    color: vars.color.muted,
+    alignSelf: 'center',
   },
 ]);
 
@@ -80,11 +79,13 @@ export const configFormFieldLabelTooltip = style({
 });
 
 export const configFormFieldLabel = style({
-  width: 'fit-content',
+  width: '100%',
   fontFamily: ZFB09,
   // textDecoration: 'underline',
-  alignSelf: 'center',
-  marginRight: '8px',
+  verticalAlign: 'middle',
+  marginBottom: '-1px',
+  textAlign: 'left',
+  marginRight: '16px',
 });
 
 export const configFormFieldControlWrapper = style([

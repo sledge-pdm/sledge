@@ -2,7 +2,7 @@ import { flexCol } from '@sledge/core';
 import { Component, Show } from 'solid-js';
 import { getCurrentPresetConfig, setActiveToolPreset, updateToolPresetConfig } from '~/controllers/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
-import { configFormFieldHeader } from '~/styles/components/config/config_form.css';
+import { configFormFieldHeader, configFormNoPreset } from '~/styles/components/config/config_form.css';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolPresetConfigForm from './ToolPresetConfigForm';
 
@@ -38,7 +38,7 @@ const ToolPresetManager: Component<Props> = (props) => {
   return (
     <div class={flexCol}>
       {/* プリセット設定フォーム */}
-      <Show when={currentPresetConfig()} fallback={<p class={configFormFieldHeader}>no preset.</p>}>
+      <Show when={currentPresetConfig()} fallback={<p class={configFormNoPreset}>no preset.</p>}>
         <div class={flexCol} style={{ gap: '8px', 'margin-top': '8px' }}>
           <ToolPresetConfigForm toolId={props.toolId} presetConfig={currentPresetConfig()!} onConfigChange={handleConfigChange} />
         </div>

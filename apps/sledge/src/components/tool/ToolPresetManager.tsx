@@ -2,7 +2,7 @@ import { flexCol } from '@sledge/core';
 import { Component, Show } from 'solid-js';
 import { getCurrentPresetConfig, setActiveToolPreset, updateToolPresetConfig } from '~/controllers/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
-import { configFormFieldHeader, configFormNoPreset } from '~/styles/components/config/config_form.css';
+import { configFormNoPreset } from '~/styles/components/config/config_form.css';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolPresetConfigForm from './ToolPresetConfigForm';
 

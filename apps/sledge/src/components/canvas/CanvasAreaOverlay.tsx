@@ -15,16 +15,16 @@ const CanvasAreaOverlay: Component = () => {
   return (
     <>
       <Show when={getActiveToolCategory() !== 'pipette'}>
-        <Show when={interactStore.isMouseOnCanvas && globalConfig.editor.cursor === 'pixel'}>
+        <Show when={interactStore.isMouseOnCanvas && !interactStore.isPenOut && globalConfig.editor.cursor === 'pixel'}>
           <PixelCursor mousePos={{ x: pos.x, y: pos.y }} />
         </Show>
 
-        <Show when={interactStore.isMouseOnCanvas && globalConfig.editor.cursor === 'cross'}>
+        <Show when={interactStore.isMouseOnCanvas && !interactStore.isPenOut && globalConfig.editor.cursor === 'cross'}>
           <CrossCursor mousePos={{ x: pos.x, y: pos.y }} />
         </Show>
       </Show>
 
-      <Show when={interactStore.isMouseOnCanvas && getActiveToolCategory() === 'pipette'}>
+      <Show when={interactStore.isMouseOnCanvas && !interactStore.isPenOut && getActiveToolCategory() === 'pipette'}>
         <PipetteCursor mousePos={{ x: pos.x, y: pos.y }} />
         <PipetteDetail />
       </Show>

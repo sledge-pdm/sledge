@@ -159,7 +159,7 @@ const CanvasOverlaySVG: Component = (props) => {
         <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={0.2} pointer-events='none' />
 
         {/* pen hover preview */}
-        <Show when={globalConfig.editor.showPointedPixel}>
+        <Show when={globalConfig.editor.showPointedPixel && !interactStore.isPenOut}>
           <rect
             width={areaPenWrite()?.width}
             height={areaPenWrite()?.height}

@@ -48,92 +48,94 @@ const Selection: Component = () => {
 
   return (
     <div class={sectionRoot}>
-      <p class={sectionCaption}>selection.</p>
-      <div class={sectionContent}>
-        <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '12px', 'margin-bottom': vars.spacing.md, 'margin-top': vars.spacing.sm }}>
-          <div
-            class={flexRow}
-            style={{
-              width: 'fit-content',
-            }}
-          >
-            <Show when={mode() === 'outside'}>
-              <img
-                src='/icons/tool_bar/config/outside2.png'
-                style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px' }}
-                width={16}
-                height={16}
-              />
-            </Show>
-            <Show when={mode() === 'inside'}>
-              <img
-                src='/icons/tool_bar/config/inside2.png'
-                style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px' }}
-                width={16}
-                height={16}
-              />
-            </Show>
-            <Show when={mode() === 'none'}>
-              <img
-                src='/icons/tool_bar/config/none.png'
-                style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px ' }}
-                width={16}
-                height={16}
-              />
-            </Show>
-          </div>
+      <Show when={selectionManager.isSelected()}>
+        <p class={sectionCaption}>selection.</p>
+        <div class={sectionContent}>
+          <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '12px', 'margin-bottom': vars.spacing.md, 'margin-top': vars.spacing.sm }}>
+            <div
+              class={flexRow}
+              style={{
+                width: 'fit-content',
+              }}
+            >
+              <Show when={mode() === 'outside'}>
+                <img
+                  src='/icons/tool_bar/config/outside2.png'
+                  style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px' }}
+                  width={16}
+                  height={16}
+                />
+              </Show>
+              <Show when={mode() === 'inside'}>
+                <img
+                  src='/icons/tool_bar/config/inside2.png'
+                  style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px' }}
+                  width={16}
+                  height={16}
+                />
+              </Show>
+              <Show when={mode() === 'none'}>
+                <img
+                  src='/icons/tool_bar/config/none.png'
+                  style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px ' }}
+                  width={16}
+                  height={16}
+                />
+              </Show>
+            </div>
 
-          <div class={flexCol}>
-            <p style={{ 'margin-bottom': '6px' }}>Selection Limiting</p>
-            <Dropdown
-              options={[
-                { label: 'Inside', value: 'inside' },
-                { label: 'None', value: 'none' },
-                { label: 'Outside', value: 'outside' },
-              ]}
-              value={mode()}
-              onChange={(e) => setMode(e as SelectionLimitMode)}
-            />
-          </div>
-
-          <Show when={mode() !== 'none'}>
             <div class={flexCol}>
-              <p style={{ 'margin-bottom': '6px' }}>Fill Mode</p>
+              <p style={{ 'margin-bottom': '6px' }}>Selection Limiting</p>
               <Dropdown
                 options={[
-                  { label: 'Global (with islands)', value: 'global' },
-                  { label: 'Boundary (strict)', value: 'boundary' },
-                  { label: 'Area Fill (entire selection)', value: 'area' },
+                  { label: 'Inside', value: 'inside' },
+                  { label: 'None', value: 'none' },
+                  { label: 'Outside', value: 'outside' },
                 ]}
-                value={fillMode()}
-                onChange={(e) => setFillMode(e as SelectionFillMode)}
+                value={mode()}
+                onChange={(e) => setMode(e as SelectionLimitMode)}
               />
             </div>
-          </Show>
-        </div>
 
-        <div class={flexRow} style={{ 'flex-wrap': 'wrap', 'row-gap': '2px' }}>
-          <p>
-            {mode()}
-            &nbsp;/&nbsp;
-          </p>
-          <p>
-            {selectionStatus.state}
-            &nbsp;/&nbsp;
-          </p>
-          <p>
-            {selectionStatus.status}
-            &nbsp;/&nbsp;
-          </p>
-          <p>
-            {selectionStatus.size.width} x {selectionStatus.size.height}
-            &nbsp;/&nbsp;
-          </p>
-          <p>
-            Offset: {selectionStatus.offset.x}, {selectionStatus.offset.y}
-          </p>
+            <Show when={mode() !== 'none'}>
+              <div class={flexCol}>
+                <p style={{ 'margin-bottom': '6px' }}>Fill Mode</p>
+                <Dropdown
+                  options={[
+                    { label: 'Global (with islands)', value: 'global' },
+                    { label: 'Boundary (strict)', value: 'boundary' },
+                    { label: 'Area Fill (entire selection)', value: 'area' },
+                  ]}
+                  value={fillMode()}
+                  onChange={(e) => setFillMode(e as SelectionFillMode)}
+                />
+              </div>
+            </Show>
+          </div>
+
+          <div class={flexRow} style={{ 'flex-wrap': 'wrap', 'row-gap': '2px' }}>
+            <p>
+              {mode()}
+              &nbsp;/&nbsp;
+            </p>
+            <p>
+              {selectionStatus.state}
+              &nbsp;/&nbsp;
+            </p>
+            <p>
+              {selectionStatus.status}
+              &nbsp;/&nbsp;
+            </p>
+            <p>
+              {selectionStatus.size.width} x {selectionStatus.size.height}
+              &nbsp;/&nbsp;
+            </p>
+            <p>
+              Offset: {selectionStatus.offset.x}, {selectionStatus.offset.y}
+            </p>
+          </div>
         </div>
-      </div>
+      </Show>
     </div>
   );
 };

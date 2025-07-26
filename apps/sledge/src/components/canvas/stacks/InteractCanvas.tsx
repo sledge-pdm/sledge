@@ -92,6 +92,8 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (isIgnoreClick(e)) return;
     if (!isDrawableClick(e)) return;
 
+    setInteractStore('isPenOut', false);
+
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.start, e, getCurrentToolCategory(), position, lastPos());
     setInteractStore('isInStroke', true);
@@ -147,6 +149,10 @@ export const InteractCanvas: Component<Props> = (props) => {
       const position = getCanvasMousePosition(e);
       props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
       setTemporaryOut(true);
+    }
+
+    if (e.pointerType === 'pen') {
+      setInteractStore('isPenOut', true);
     }
   }
 

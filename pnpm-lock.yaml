@@ -185,8 +185,6 @@ importers:
 
   packages/core: {}
 
-  packages/hello-wasm/pkg: {}
-
   packages/theme:
     dependencies:
       '@sledge/core':
@@ -204,6 +202,10 @@ importers:
       solid-js:
         specifier: ^1.9.7
         version: 1.9.7
+    devDependencies:
+      '@vanilla-extract/css':
+        specifier: ^1.17.4
+        version: 1.17.4
 
 packages:
 

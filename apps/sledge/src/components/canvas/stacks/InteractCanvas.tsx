@@ -1,6 +1,8 @@
 import { Vec2 } from '@sledge/core';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -71,7 +73,14 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
-    if (e.pointerType === 'touch' || e.ctrlKey) return false;
+    if (e.pointerType === 'touch') return false;
+
+    if (e.ctrlKey) {
+      if (selectionManager.isSelected())
+        return true; // [1] 選択移動の操作だけ特例
+      else return false; // それ以外はこれまで同様ゆるさない
+    }
+
     // right=1, left=2, middle=4
     // console.log(e.buttons)
     if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) return false;
@@ -83,14 +92,19 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (isIgnoreClick(e)) return;
     if (!isDrawableClick(e)) return;
 
+    setInteractStore('isPenOut', false);
+
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.start, e, position, lastPos());
+    props.operator.handleDraw(DrawState.start, e, getCurrentToolCategory(), position, lastPos());
     setInteractStore('isInStroke', true);
     setLastPos(position);
   }
 
   function handlePointerCancel(e: PointerEvent) {
     if (isIgnoreClick(e)) return;
+
+    const position = getCanvasMousePosition(e);
+    props.operator.handleDraw(DrawState.cancel, e, getCurrentToolCategory(), position, lastPos());
     endStroke(getCanvasMousePosition(e));
   }
 
@@ -114,14 +128,14 @@ export const InteractCanvas: Component<Props> = (props) => {
     }
     if (!interactStore.isInStroke || !lastPos()) return;
 
-    props.operator.handleDraw(DrawState.move, e, position, lastPos());
+    props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
     setLastPos(position);
   }
 
   function handlePointerUp(e: PointerEvent) {
     if (isIgnoreClick(e)) return;
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.end, e, position, lastPos());
+    props.operator.handleDraw(DrawState.end, e, getCurrentToolCategory(), position, lastPos());
     if (interactStore.isInStroke) endStroke(position);
   }
 
@@ -133,8 +147,12 @@ export const InteractCanvas: Component<Props> = (props) => {
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     if (interactStore.isDragging && isDrawableClick(e)) {
       const position = getCanvasMousePosition(e);
-      props.operator.handleDraw(DrawState.move, e, position, lastPos());
+      props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
       setTemporaryOut(true);
+    }
+
+    if (e.pointerType === 'pen') {
+      setInteractStore('isPenOut', true);
     }
   }
 

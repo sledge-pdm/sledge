@@ -35,3 +35,49 @@ export async function loadImageBuffer(bitmap: ImageBitmap) {
 
   return imageData.data;
 }
+
+export async function downloadBufferAsPNG(
+  buffer: Uint8Array | Uint8ClampedArray,
+  width: number,
+  height: number,
+  filename: string = 'debug-buffer.png'
+): Promise<string> {
+  // OffscreenCanvasを使ってバッファから画像を作成
+  const canvas = new OffscreenCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context unavailable');
+
+  // ImageDataを作成
+  const imageData = new ImageData(new Uint8ClampedArray(buffer), width, height);
+  ctx.putImageData(imageData, 0, 0);
+
+  // Blobに変換
+  const blob = await canvas.convertToBlob({ type: 'image/png' });
+
+  // ダウンロード用のリンクを作成
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+
+  // ダウンロード実行
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // URLをクリーンアップ
+  URL.revokeObjectURL(url);
+
+  return url;
+}
+
+/**
+ * デバッグ用：バッファを即座にPNGとしてダウンロード
+ */
+export function debugDownloadBuffer(buffer: Uint8Array | Uint8ClampedArray, width: number, height: number, label: string = 'debug') {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `${label}-${timestamp}.png`;
+
+  downloadBufferAsPNG(buffer, width, height, filename).catch(console.error);
+  console.log(`Debug: Downloaded buffer as ${filename} (${width}x${height})`);
+}

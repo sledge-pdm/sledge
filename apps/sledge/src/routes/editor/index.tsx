@@ -73,7 +73,7 @@ export default function Editor() {
     const sp = new URLSearchParams(location.search);
     // create new
     setFileStore('location', {
-      name: 'new project',
+      name: undefined,
       path: undefined,
     });
 

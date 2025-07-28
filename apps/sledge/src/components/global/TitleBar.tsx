@@ -2,6 +2,7 @@ import { getTheme, vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
+import SaveSection from '~/components/global/SaveSection';
 import TopMenuBar from '~/components/global/TopMenuBar';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { fileStore } from '~/stores/EditorStores';
@@ -13,6 +14,7 @@ import {
   titleBarControlCloseButtonContainer,
   titleBarControls,
   titleBarRoot,
+  titleBarSaveSection,
   titleBarTitle,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
@@ -50,11 +52,11 @@ export default function TitleBar() {
         pathText += projectStore.isProjectChangedAfterSave ? '(unsaved)' : '';
         pathText += ' - ' + fileStore.location.path;
       } else {
-        pathText += '(not saved yet)';
+        pathText += '(unsaved)';
       }
 
-      setTitle(`${fileStore.location.name} ${pathText}`);
-      getCurrentWindow().setTitle(`${fileStore.location.name} ${pathText}`);
+      setTitle(`${fileStore.location.name ?? '< new project >'} ${pathText}`);
+      getCurrentWindow().setTitle(`${fileStore.location.name ?? '< new project >'} ${pathText}`);
     }
   });
 
@@ -72,6 +74,10 @@ export default function TitleBar() {
       >
         <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
           <p class={titleBarTitle}>{shouldShowTitle() ? `${title()}` : ''}</p>
+
+          <div class={titleBarSaveSection} data-tauri-drag-region-exclude>
+            <SaveSection />
+          </div>
 
           <div class={titleBarControls} data-tauri-drag-region-exclude>
             <Show when={isMinimizable()}>

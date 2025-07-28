@@ -4,6 +4,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import TopMenuBar from '~/components/global/TopMenuBar';
 import { setBottomBarText } from '~/controllers/log/LogController';
+import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/ProjectStores';
 import {
@@ -45,16 +46,15 @@ export default function TitleBar() {
   createEffect(() => {
     if (isEditor()) {
       let pathText = '';
-      let isSavedText = '';
-      if (projectStore.path !== undefined && projectStore.path !== '') {
+      if (fileStore.location.path !== undefined && fileStore.location.path !== '') {
         pathText += projectStore.isProjectChangedAfterSave ? '(unsaved)' : '';
-        pathText += ' - ' + projectStore.path;
+        pathText += ' - ' + fileStore.location.path;
       } else {
         pathText += '(not saved yet)';
       }
 
-      setTitle(`${projectStore.name} ${pathText}`);
-      getCurrentWindow().setTitle(`${projectStore.name} ${pathText}`);
+      setTitle(`${fileStore.location.name} ${pathText}`);
+      getCurrentWindow().setTitle(`${fileStore.location.name} ${pathText}`);
     }
   });
 

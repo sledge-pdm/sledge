@@ -64,7 +64,6 @@ pub async fn open_window(
         }
     };
 
-    // 3. プロジェクトデータ読み込み（エディターかつopen_pathがある場合）
     let project_data = options
         .as_ref()
         .and_then(|opts| opts.open_path.as_ref())
@@ -73,7 +72,9 @@ pub async fn open_window(
             println!("Loading project from: {}", open_path);
             project::load_project_complete_internal_sync(open_path).ok()
         });
-    // 3. プロジェクトデータ読み込み（エディターかつopen_pathがある場合）
+
+    let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
+
     let image_data = options
         .as_ref()
         .and_then(|opts| opts.open_path.as_ref())
@@ -92,8 +93,11 @@ pub async fn open_window(
                 }
             }
         });
-
     // 5. initialization_script構築
+    let path_script = format!(
+        "window.__PATH__={};",
+        serde_json::to_string(&open_path.unwrap_or_default()).unwrap_or_default()
+    );
     let config_script = format!(
         "window.__CONFIG__={};",
         serde_json::to_string(&config).unwrap_or_default()
@@ -122,8 +126,8 @@ pub async fn open_window(
         .unwrap_or_default();
 
     let initialization_script = format!(
-        "{}{}{}{}",
-        config_script, project_script, image_data_script, custom_script
+        "{}{}{}{}{}",
+        config_script, project_script, image_data_script, path_script, custom_script
     );
 
     // 6. クエリパラメータの生成（必要に応じて）

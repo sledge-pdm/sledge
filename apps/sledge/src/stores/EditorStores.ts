@@ -1,10 +1,11 @@
 // editorStore.tsx
-import { Size2D, Vec2 } from '@sledge/core';
+import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
 export type SectionTab = 'editor' | 'project' | 'effects';
+
 type AppearanceStore = {
   leftSide: {
     shown: boolean;
@@ -22,6 +23,9 @@ type ColorStore = {
   primary: string;
   secondary: string;
   swatches: string[];
+};
+type FileStore = {
+  location: FileLocation;
 };
 type InteractStore = {
   canvasAreaSize: Size2D;
@@ -70,6 +74,12 @@ const defaultColorStore: ColorStore = {
   secondary: '#ffffff', // 背景・消しゴムなど
   swatches: ['#000000', '#FFFFFF', '#ffff00', '#00ffff', '#00ff00', '#ff00ff', '#ff0000', '#0000ff', '#000080', '#400080'],
 };
+const defaultFileStore: FileStore = {
+  location: {
+    name: 'new project',
+    path: '',
+  },
+};
 const defaultInteractStore: InteractStore = {
   canvasAreaSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
@@ -102,6 +112,7 @@ const defaultToolStore: ToolStore = {
 export const initEditorStore = () => {
   const [appearanceStore, setAppearanceStore] = createStore<AppearanceStore>(defaultAppearanceStore);
   const [colorStore, setColorStore] = createStore<ColorStore>(defaultColorStore);
+  const [fileStore, setFileStore] = createStore<FileStore>(defaultFileStore);
   const [interactStore, setInteractStore] = createStore<InteractStore>(defaultInteractStore);
   const [toolStore, setToolStore] = createStore<ToolStore>(defaultToolStore);
   const [logStore, setLogStore] = createStore<LogStore>(defaultLogStore);
@@ -111,6 +122,8 @@ export const initEditorStore = () => {
     setAppearanceStore,
     colorStore,
     setColorStore,
+    fileStore,
+    setFileStore,
     interactStore,
     setInteractStore,
     logStore,
@@ -127,6 +140,9 @@ export const setAppearanceStore = editorStore.setAppearanceStore;
 
 export const colorStore = editorStore.colorStore;
 export const setColorStore = editorStore.setColorStore;
+
+export const fileStore = editorStore.fileStore;
+export const setFileStore = editorStore.setFileStore;
 
 export const interactStore = editorStore.interactStore;
 export const setInteractStore = editorStore.setInteractStore;

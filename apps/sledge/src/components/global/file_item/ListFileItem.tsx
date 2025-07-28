@@ -22,7 +22,7 @@ const ListFileItem: Component<FileItemProps> = (props) => {
         }}
         onMouseLeave={() => setHovered(false)}
       >
-        {props.file.name.substring(0, props.file.name.lastIndexOf('.'))}
+        {props.file.name?.substring(0, props.file.name.lastIndexOf('.'))}
       </a>
       <p class={rflPath}>{props.file.path}</p>
       <Show when={hovered()}>

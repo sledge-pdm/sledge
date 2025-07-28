@@ -17,7 +17,7 @@ globalStyle('main', {
   backgroundColor: vars.color.background,
 });
 
-globalStyle('p, a, label, span', {
+globalStyle('p, a, label', {
   fontSize: '0.5rem',
   letterSpacing: '1px',
   margin: 0,

@@ -2,6 +2,7 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, createSignal, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
+import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 import { projectNameInput } from '~/styles/section/project/project.css';
@@ -9,28 +10,28 @@ import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/se
 
 const Project: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
-  const [newName, setNewName] = createSignal<string | undefined>(projectStore.name);
-  const isNameChanged = () => projectStore.name !== newName();
-  const isOWPossible = () => projectStore.name !== undefined && projectStore.path !== undefined && !isNameChanged();
+  const [newName, setNewName] = createSignal<string | undefined>(fileStore.location.name);
+  const isNameChanged = () => fileStore.location.name !== newName();
+  const isOWPossible = () => fileStore.location.name !== undefined && fileStore.location.path !== undefined && !isNameChanged();
 
   const OWSave = () => {
-    setProjectStore('name', newName() ?? projectStore.name);
+    setFileStore('location', 'name', newName() ?? fileStore.location.name);
     // 上書き保存
-    saveProject(projectStore.name, `${projectStore.path}`).then(() => {
+    saveProject(fileStore.location.name, `${fileStore.location.path}`).then(() => {
       setSaveLog('saved!');
       setProjectStore('isProjectChangedAfterSave', false);
     });
   };
   const forceNewSave = () => {
-    setProjectStore('name', newName() ?? projectStore.name);
-    saveProject(projectStore.name).then(() => {
+    setFileStore('location', 'name', newName() ?? fileStore.location.name);
+    saveProject(fileStore.location.name).then(() => {
       setSaveLog('saved!');
       setProjectStore('isProjectChangedAfterSave', false);
     });
   };
 
   const commitNewName = () => {
-    setProjectStore('name', newName());
+    setFileStore('location', 'name', newName());
   };
 
   return (
@@ -39,7 +40,7 @@ const Project: Component = () => {
       <div class={sectionContent}>
         <div class={flexCol} style={{}}>
           <Show when={isNameChanged()}>
-            <p>{projectStore.name} →</p>
+            <p>{fileStore.location.name} →</p>
           </Show>
 
           <input
@@ -55,7 +56,7 @@ const Project: Component = () => {
             onKeyDown={(e) => {
               if (e.key === 'Enter') commitNewName();
             }}
-            value={projectStore.name}
+            value={fileStore.location.name}
             placeholder='project name'
             autocomplete='off'
           />

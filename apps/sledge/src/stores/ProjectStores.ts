@@ -12,8 +12,6 @@ export type ImagePoolStore = {
   entries: ReactiveMap<string, ImagePoolEntry>;
 };
 export type ProjectStore = {
-  name: string | undefined;
-  path: string | undefined;
   thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
 };
@@ -33,8 +31,6 @@ const defaultImagePoolStore: ImagePoolStore = {
   entries: new ReactiveMap(),
 };
 const defaultProjectStore: ProjectStore = {
-  name: undefined as string | undefined,
-  path: undefined as string | undefined,
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
 };

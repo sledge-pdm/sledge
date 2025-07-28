@@ -5,7 +5,8 @@ import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { addRecentFile } from '~/controllers/config/RecentFileController';
 import { dumpProject } from '~/io/project/out/dump';
-import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { PathToFileLocation } from '~/utils/PathUtils';
 import getFileId from '../../../utils/getFileId';
@@ -23,7 +24,7 @@ async function folderSelection(name?: string) {
   const home = await path.homeDir();
   return await save({
     title: 'save sledge project',
-    defaultPath: await path.join(home, `sledge/${name ?? projectStore.name ?? 'untitled'}.sledge`),
+    defaultPath: await path.join(home, `sledge/${name ?? fileStore.location.name ?? 'untitled'}.sledge`),
     filters: [{ name: 'sledge project', extensions: ['sledge'] }],
   });
 }
@@ -47,7 +48,7 @@ export async function saveProject(name?: string, existingPath?: string) {
   }
 
   if (typeof selectedPath === 'string') {
-    setProjectStore('path', selectedPath);
+    setFileStore('location', 'path', selectedPath);
     const thumbpath = await saveThumbnailData(selectedPath);
 
     // const data = await dumpProject();

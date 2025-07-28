@@ -8,7 +8,7 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
 
-  "rust-analyzer.linkedProjects": ["./packages/wasm/Cargo.toml"],
+  "rust-analyzer.linkedProjects": ["./packages/wasm/Cargo.toml", "./apps/sledge/src-tauri/Cargo.toml"],
   "rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
   "rust-analyzer.cargo.buildScripts.rebuildOnSave": true,
   "rust-analyzer.cargo.autoreload": true

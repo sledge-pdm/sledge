@@ -6,11 +6,10 @@ import { vars, ZFB11 } from '@sledge/theme';
 import { ColorBox, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
-import { getActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
+import { getActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
 import { colorElemDescription, swatchContainer } from '~/styles/section/editor/color.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
-import { ToolType } from '~/tools/Tools';
 
 const Color: Component = () => {
   let hexInputRef: HTMLInputElement;
@@ -79,13 +78,13 @@ const Color: Component = () => {
             cursor: 'pointer',
             'pointer-events': 'all',
           }}
-          onClick={() => setActiveToolType(ToolType.Pipette)}
+          onClick={() => setActiveToolCategory('pipette')}
         >
           <Icon
             src={'/icons/misc/pipette9.png'}
             base={8}
             scale={2}
-            color={getActiveToolType() === ToolType.Pipette ? vars.color.active : vars.color.onBackground}
+            color={getActiveToolCategory() === 'pipette' ? vars.color.active : vars.color.onBackground}
           />
         </div>
       </div>

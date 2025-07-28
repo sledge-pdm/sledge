@@ -165,7 +165,7 @@ pub async fn open_window(
         SledgeWindowKind::Start => {
             builder = builder
                 .title("sledge.")
-                .inner_size(700.0, 500.0)
+                .inner_size(500.0, 400.0)
                 .resizable(false)
                 .decorations(false)
                 .accept_first_mouse(true)

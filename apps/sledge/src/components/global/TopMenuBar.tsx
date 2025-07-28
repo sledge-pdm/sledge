@@ -40,7 +40,7 @@ const TopMenuBar: Component = () => {
 
   const leftItems: Item[] = [
     {
-      text: 'SLEDGE.',
+      text: 'START.',
       action: () => {
         openWindow('start');
       },
@@ -149,7 +149,7 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
-      <div class={styles.menuItem} style={{ padding: '0 6px' }}>
+      <div class={styles.menuItem} style={{ 'padding-right': '6px' }}>
         <a
           class={styles.menuItemText}
           style={{ 'font-family': ZFB09, 'font-size': '8px', opacity: 0.5 }}

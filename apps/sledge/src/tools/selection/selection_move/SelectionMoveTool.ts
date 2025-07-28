@@ -5,6 +5,7 @@ import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class SelectionMoveTool implements ToolBehavior {
   onlyOnCanvas = false;
+  isInstantTool = true;
 
   private startOffset: Vec2 = { x: 0, y: 0 };
   private startPosition: Vec2 = { x: 0, y: 0 };
@@ -33,10 +34,13 @@ export class SelectionMoveTool implements ToolBehavior {
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
     selectionManager.commitOffset();
+
     console.log('committed. offset:', selectionManager.getMoveOffset());
+
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
+      shouldReturnToPrevTool: !args.event?.shiftKey,
     };
   }
 }

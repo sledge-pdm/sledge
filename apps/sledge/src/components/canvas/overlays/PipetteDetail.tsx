@@ -50,7 +50,7 @@ const PipetteDetail: Component = (props: {}) => {
               gap: vars.spacing.sm,
             }}
           >
-            {/* <Icon src='/icons/tool/pipette.png' base={10} scale={1} color={vars.color.onBackground} /> */}
+            {/* <Icon src='/icons/tool_bar/tool/pipette.png' base={10} scale={1} color={vars.color.onBackground} /> */}
             <p
               style={{
                 'font-family': ZFB08,

@@ -5,10 +5,12 @@ import { RGBAColor } from '~/utils/ColorUtils';
 export interface ToolResult {
   shouldUpdate: boolean;
   shouldRegisterToHistory: boolean;
+  shouldReturnToPrevTool?: boolean;
 }
 
 export interface ToolBehavior {
   onlyOnCanvas?: boolean;
+  isInstantTool?: boolean;
 
   onStart: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 
@@ -21,7 +23,7 @@ export interface ToolArgs {
   position: Vec2;
   lastPosition?: Vec2;
   color: RGBAColor; // RGBA
-  size?: number;
+  presetName?: string;
   event?: PointerEvent;
   // TODO: pressure, tilt, ...
 }

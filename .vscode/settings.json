@@ -4,7 +4,9 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
+  "typescript.suggestionActions.enabled": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
+  // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
 
   "rust-analyzer.linkedProjects": ["./packages/wasm/Cargo.toml"],
   "rust-analyzer.cargo.buildScripts.useRustcWrapper": true,

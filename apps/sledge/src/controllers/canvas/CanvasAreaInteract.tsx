@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { getReferencedZoom } from '~/controllers/canvas/CanvasController';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 
 class CanvasAreaInteract {
@@ -26,7 +27,7 @@ class CanvasAreaInteract {
   ) {}
 
   static isDraggable(e: PointerEvent) {
-    return e.buttons === 4 || (e.buttons === 1 && e.ctrlKey);
+    return e.buttons === 4 || (e.buttons === 1 && e.ctrlKey && !selectionManager.isSelected()); // [2]
   }
 
   private handlePointerDown(e: PointerEvent) {
@@ -44,7 +45,6 @@ class CanvasAreaInteract {
         for (const id of this.pointers.keys()) {
           this.wrapperRef.setPointerCapture(id);
         }
-        this.wrapperRef.setPointerCapture(e.pointerId);
         this.wrapperRef.setPointerCapture(e.pointerId);
         // ピンチズームの開始時に距離を記録
         const [p0, p1] = Array.from(this.pointers.values());

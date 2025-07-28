@@ -41,6 +41,12 @@ const CanvasArea: Component = () => {
       }
     });
 
+    setInteractStore('canvasAreaSize', {
+      width: wrapper.clientWidth,
+      height: wrapper.clientHeight,
+    });
+    adjustZoomToFit();
+
     eventBus.on('canvas:sizeChanged', (e) => {
       interact?.updateTransform();
     });
@@ -48,12 +54,6 @@ const CanvasArea: Component = () => {
     eventBus.on('canvas:onAdjusted', (e) => {
       interact?.updateTransform();
     });
-
-    setInteractStore('canvasAreaSize', {
-      width: wrapper.clientWidth,
-      height: wrapper.clientHeight,
-    });
-    adjustZoomToFit();
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();

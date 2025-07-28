@@ -24,7 +24,6 @@ export type GlobalConfig = {
     cursor: Cursor;
     centerCanvasWhenWindowResized: boolean;
     showPointedPixel: boolean;
-    skipMeaninglessAction: boolean;
   };
   performance: {
     canvasRenderingMode: CanvasRenderingMode;
@@ -51,7 +50,6 @@ export const defaultConfig: GlobalConfig = {
     cursor: 'pixel',
     centerCanvasWhenWindowResized: true,
     showPointedPixel: false,
-    skipMeaninglessAction: false,
   },
   performance: {
     canvasRenderingMode: 'adaptive',

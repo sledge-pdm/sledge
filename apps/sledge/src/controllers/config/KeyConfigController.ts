@@ -48,9 +48,12 @@ export function restoreDefaultKeyConfig() {
   setKeyConfigStore(reconcile(makeDefaultKeyConfigStore()));
 }
 
-export function isKeyMatchesToEntry(e: KeyboardEvent, entries: KeyConfigEntry[]): boolean {
+export function isKeyMatchesToEntry(e: KeyboardEvent | PointerEvent, entries: KeyConfigEntry[]): boolean {
   return entries.some((entry) => {
-    if (entry.key.toLowerCase() !== e.key.toLowerCase()) return false;
+    if (e instanceof KeyboardEvent) {
+      if (entry.key !== undefined && entry.key.toLowerCase() !== e.key?.toLowerCase()) return false;
+    }
+
     if ((entry.ctrl ?? false) !== e.ctrlKey) return false;
     if ((entry.alt ?? false) !== e.altKey) return false;
     if ((entry.meta ?? false) !== e.metaKey) return false;

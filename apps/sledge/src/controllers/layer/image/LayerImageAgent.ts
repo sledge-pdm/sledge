@@ -2,7 +2,6 @@ import { Size2D, Vec2 } from '@sledge/core';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
-import { globalConfig } from '~/stores/GlobalStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import DiffManager from './managers/DiffManager';
@@ -99,9 +98,7 @@ export default class LayerImageAgent {
 
   public registerToHistory() {
     let shouldAddAction = true;
-    if (globalConfig.editor.skipMeaninglessAction) {
-      if (this.dm.getCurrent().diffs.size === 0) shouldAddAction = false; // meaningless action
-    }
+    if (this.dm.getCurrent().diffs.size === 0) shouldAddAction = false; // meaningless action
 
     if (shouldAddAction) {
       this.hm.addAction(this.dm.getCurrent());

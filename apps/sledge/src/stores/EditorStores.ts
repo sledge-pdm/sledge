@@ -2,7 +2,7 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { PaletteType } from '~/models/color/PaletteType';
-import { defaultTools, Tool, ToolType } from '~/tools/Tools';
+import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
 export type SectionTab = 'editor' | 'project' | 'effects';
 type AppearanceStore = {
@@ -29,6 +29,7 @@ type InteractStore = {
   lastMouseOnCanvas: Vec2;
   isMouseOnCanvas: boolean;
   isInStroke: boolean;
+  isPenOut: boolean;
   zoom: number;
   zoomMin: number;
   zoomMax: number;
@@ -41,10 +42,14 @@ type InteractStore = {
 type LogStore = {
   bottomBarText: string;
 };
+export type SelectionLimitMode = 'none' | 'outside' | 'inside';
+export type SelectionFillMode = 'global' | 'boundary' | 'area'; // global: 全体参照, boundary: 範囲制限, area: 選択範囲塗りつぶし
 export type ToolStore = {
-  tools: { [toolType: string]: Tool };
-  activeType: ToolType;
-  prevActiveType: ToolType | undefined;
+  tools: Record<ToolCategoryId, ToolCategory>;
+  activeToolCategory: ToolCategoryId;
+  prevActiveCategory: ToolCategoryId | undefined;
+  selectionLimitMode: SelectionLimitMode;
+  selectionFillMode: SelectionFillMode;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
@@ -70,6 +75,7 @@ const defaultInteractStore: InteractStore = {
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
   isMouseOnCanvas: false,
+  isPenOut: false,
   isInStroke: false,
   zoom: 1,
   zoomMin: 0.5,
@@ -86,9 +92,11 @@ const defaultLogStore: LogStore = {
   bottomBarText: '',
 };
 const defaultToolStore: ToolStore = {
-  tools: defaultTools,
-  activeType: ToolType.Pen,
-  prevActiveType: undefined,
+  tools: toolCategories,
+  activeToolCategory: 'pen',
+  prevActiveCategory: undefined,
+  selectionLimitMode: 'none',
+  selectionFillMode: 'global', // デフォルトは現在の動作（全体参照）
 };
 
 export const initEditorStore = () => {

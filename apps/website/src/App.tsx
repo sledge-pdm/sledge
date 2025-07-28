@@ -1,12 +1,12 @@
 import { getTheme } from '@sledge/theme';
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import { createEffect, Suspense, type Component } from 'solid-js';
+import { onMount, Suspense, type Component } from 'solid-js';
 import Home from '~/routes';
 import { globalStore } from '~/store/GlobalStore';
 
 const App: Component = () => {
-  createEffect(() => {
+  onMount(() => {
     localStorage.setItem('theme', globalStore.theme);
   });
 

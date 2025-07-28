@@ -1,16 +1,44 @@
+import { flexCol } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
+import { createScrollPosition } from '@solid-primitives/scroll';
+import { createEffect, createSignal, Show } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
+import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { openWindow } from '~/utils/WindowUtils';
-import { header as menuContainer, headerItem as menuItem, rightBottomArea, startHeader, startRoot } from './start.css';
+import {
+  header as menuContainer,
+  headerItem as menuItem,
+  recentFilesCaption,
+  recentFilesContainerScroll,
+  rightTopArea,
+  startContent,
+  startHeader,
+  startRoot,
+} from './start.css';
 
 export default function Home() {
+  let scrollRef: HTMLDivElement | undefined;
+  const scroll = createScrollPosition(() => scrollRef);
+
+  const [canScrollTop, setCanScrollTop] = createSignal(false);
+  const [canScrollBottom, setCanScrollBottom] = createSignal(false);
+
+  createEffect(() => {
+    if (scrollRef) {
+      setCanScrollTop(scroll.y > 0);
+      console.log(scroll.y, scrollRef.clientHeight, scrollRef.scrollHeight);
+      setCanScrollBottom(scroll.y + scrollRef.clientHeight < scrollRef.scrollHeight);
+    }
+  });
+
   return (
-    <div class={getTheme(globalConfig.appearance.theme)}>
-      <div class={startRoot}>
+    <div class={`${startRoot} ${getTheme(globalConfig.appearance.theme)}`}>
+      <div class={startContent}>
         <p class={startHeader}>HELLO.</p>
+
         <div class={menuContainer}>
           <a class={menuItem} onClick={() => createNew()}>
             +&ensp;new.
@@ -19,14 +47,26 @@ export default function Home() {
             &gt;&ensp;open.
           </a>
         </div>
+        <p class={recentFilesCaption}>recent files.</p>
 
-        <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />
+        <div class={flexCol} style={{ position: 'relative', 'flex-grow': 1 }}>
+          <div ref={(el) => (scrollRef = el)} class={recentFilesContainerScroll}>
+            <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />
+          </div>
 
-        <div class={rightBottomArea}>
-          <a onClick={() => openWindow('about')}>about.</a>
-          <a onClick={() => openWindow('settings')}>settings.</a>
-          <ThemeToggle noBackground={false} />
+          <Show when={canScrollTop()}>
+            <div class={fadeTop} />
+          </Show>
+
+          <Show when={canScrollBottom()}>
+            <div class={fadeBottom} />
+          </Show>
         </div>
+      </div>
+      <div class={rightTopArea}>
+        <ThemeToggle noBackground={false} />
+        <a onClick={() => openWindow('about')}>about.</a>
+        <a onClick={() => openWindow('settings')}>settings.</a>
       </div>
     </div>
   );

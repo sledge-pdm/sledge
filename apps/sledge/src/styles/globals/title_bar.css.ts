@@ -25,6 +25,17 @@ export const titleBarTitle = style([
   },
 ]);
 
+export const titleBarSaveSection = style([
+  flexRow,
+  {
+    width: 'fit-content',
+    height: '100%',
+    alignItems: 'center',
+
+    margin: '0 12px',
+  },
+]);
+
 export const titleBarControls = style([flexRow]);
 
 export const titleBarControlButtonContainer = style([

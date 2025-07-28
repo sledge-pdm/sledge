@@ -76,8 +76,8 @@ const defaultColorStore: ColorStore = {
 };
 const defaultFileStore: FileStore = {
   location: {
-    name: 'new project',
-    path: '',
+    name: undefined,
+    path: undefined,
   },
 };
 const defaultInteractStore: InteractStore = {

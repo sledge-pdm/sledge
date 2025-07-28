@@ -1,7 +1,10 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { getPresetOf } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
+import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { drawCompletionLine, drawSquarePixel } from '../../utils/DrawUtils';
+import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
@@ -15,13 +18,20 @@ export class PenTool implements ToolBehavior {
     return this.draw(agent, args, args.color);
   }
 
-  draw(agent: LayerImageAgent, { position, lastPosition, size }: ToolArgs, color: RGBAColor): ToolResult {
-    if (!size) return { shouldUpdate: false, shouldRegisterToHistory: false };
+  protected categoryId: ToolCategoryId = 'pen';
+
+  draw(agent: LayerImageAgent, { position, lastPosition, presetName }: ToolArgs, color: RGBAColor): ToolResult {
+    if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
+
+    const size = getPresetOf(this.categoryId, presetName)?.size ?? 1;
 
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
 
     drawSquarePixel(position, size, (px, py) => {
+      if (!selectionManager.isDrawingAllowed({ x: px, y: py })) {
+        return; // 描画制限により描画しない
+      }
       if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
         const diff = agent.setPixel({ x: px, y: py }, color, true);
         if (diff !== undefined) {
@@ -33,6 +43,9 @@ export class PenTool implements ToolBehavior {
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
+          if (!selectionManager.isDrawingAllowed({ x: px, y: py })) {
+            return; // 描画制限により描画しない
+          }
           if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
             const diff = agent.setPixel({ x: px, y: py }, color, true);
             if (diff !== undefined) {

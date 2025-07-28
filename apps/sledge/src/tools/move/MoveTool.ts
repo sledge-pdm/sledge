@@ -24,7 +24,7 @@ export class MoveTool implements ToolBehavior {
 
     selectionManager.commit();
 
-    if (!selectionManager.isMoveMode()) {
+    if (!selectionManager.isMoveState()) {
       selectionManager.commitOffset();
       this.startOffset = selectionManager.getMoveOffset();
       this.startPosition = args.position;

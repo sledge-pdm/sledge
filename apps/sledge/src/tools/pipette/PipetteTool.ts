@@ -1,11 +1,11 @@
 import { setCurrentColor } from '~/controllers/color/ColorController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { getPrevActiveToolType, setActiveToolType } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { isTransparent, RGBAColor, RGBToHex, transparent } from '~/utils/ColorUtils';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;
+  isInstantTool = true;
 
   private color: RGBAColor = transparent;
 
@@ -34,17 +34,12 @@ export class PipetteTool implements ToolBehavior {
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
     if (!isTransparent(this.color)) {
       setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
-
-      // Shiftが押されていなければ前のツールに戻る
-      const prevTool = getPrevActiveToolType();
-      if (!args.event?.shiftKey && prevTool) {
-        setActiveToolType(prevTool);
-      }
     }
 
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
+      shouldReturnToPrevTool: true,
     };
   }
 }

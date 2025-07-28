@@ -208,7 +208,11 @@ globalStyle('html, body', {
   fontFamily: vars.font.body,
 });
 
-globalStyle('button, p, a, input, label', {
+globalStyle('div', {
+  boxSizing: 'border-box',
+});
+
+globalStyle('button, p, a, input, label, span', {
   fontFamily: vars.font.body,
   color: vars.color.onBackground,
 });

@@ -8,6 +8,7 @@ interface SliderProps {
   defaultValue?: number;
   value?: number;
   allowFloat?: boolean;
+  floatSignificantDigits?: number;
   labelMode: LabelMode;
   customFormat?: string;
   allowDirectInput?: boolean;
@@ -54,8 +55,7 @@ const Slider: Component<SliderProps> = (props) => {
       const { left, width } = sliderRef.getBoundingClientRect();
       let pos = Math.max(0, Math.min(e.clientX - left, width));
       const raw = props.min + (pos / width) * (props.max - props.min);
-      const newValue = props.allowFloat ? raw : Math.round(raw);
-      update(newValue);
+      update(getFixedValue(raw));
     }
   };
 
@@ -68,8 +68,21 @@ const Slider: Component<SliderProps> = (props) => {
     const { left, width } = sliderRef.getBoundingClientRect();
     let pos = Math.max(0, Math.min(e.clientX - left, width));
     const raw = props.min + (pos / width) * (props.max - props.min);
-    const newValue = props.allowFloat ? raw : Math.round(raw);
-    update(newValue);
+    update(getFixedValue(raw));
+  };
+
+  const getFixedValue = (raw: number): number => {
+    let newValue = raw;
+    if (props.allowFloat) {
+      if (props.floatSignificantDigits) {
+        newValue = parseFloat(raw.toFixed(props.floatSignificantDigits));
+      } else {
+        newValue = raw;
+      }
+    } else {
+      newValue = Math.round(raw);
+    }
+    return newValue;
   };
 
   const handleClickOutside = (e: MouseEvent) => {

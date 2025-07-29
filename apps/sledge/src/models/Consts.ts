@@ -12,4 +12,4 @@ export const Consts = {
   globalConfigFileName: 'global.sledgeconfig',
 };
 
-export type KeyConfigCommands = 'undo' | 'redo' | 'pen' | 'eraser' | 'fill' | 'sizeIncrease' | 'sizeDecrease' | 'pipette' | 'selection move';
+export type KeyConfigCommands = 'save' | 'undo' | 'redo' | 'pen' | 'eraser' | 'fill' | 'sizeIncrease' | 'sizeDecrease' | 'pipette' | 'selection move';

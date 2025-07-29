@@ -8,6 +8,7 @@ import { dumpProject } from '~/io/project/out/dump';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
+import { eventBus } from '~/utils/EventBus';
 import { PathToFileLocation as pathToFileLocation } from '~/utils/PathUtils';
 import getFileId from '../../../utils/getFileId';
 
@@ -23,7 +24,8 @@ async function folderSelection(name?: string) {
 
   const home = await path.homeDir();
 
-  const nameWithoutExtension = fileStore.location.name?.replace(/\.sledge$/, '') ?? 'untitled';
+  const nameWithoutExtension = fileStore.location.name?.replace(/\.sledge$/, '') ?? 'new project';
+
   return await save({
     title: 'save sledge project',
     defaultPath: await path.join(home, `sledge/${nameWithoutExtension}.sledge`),
@@ -41,10 +43,11 @@ async function saveThumbnailData(selectedPath: string) {
 }
 
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
+  console.log(name, existingPath);
   let selectedPath: string | null;
 
   if (existingPath) {
-    selectedPath = existingPath;
+    selectedPath = `${existingPath}\\${name}`;
   } else {
     selectedPath = await folderSelection(name);
   }
@@ -56,8 +59,6 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       const data = await dumpProject();
       await writeFile(selectedPath, data);
       console.log('project saved to:', selectedPath);
-
-      setProjectStore('isProjectChangedAfterSave', false);
       addRecentFile(pathToFileLocation(selectedPath));
 
       const location = pathToFileLocation(selectedPath);
@@ -65,12 +66,20 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       // @ts-ignore
       window.__PATH__ = selectedPath;
 
+      setProjectStore('lastSavedAt', new Date());
+      eventBus.emit('project:saved', { path: selectedPath });
+
+      setProjectStore('isProjectChangedAfterSave', false);
+
       return true;
     } catch (error) {
       console.error('Error saving project:', error);
+      eventBus.emit('project:saveFailed', { error: error });
+      return false;
     }
   }
 
+  eventBus.emit('project:saveCancelled', {});
   return false;
 }
 

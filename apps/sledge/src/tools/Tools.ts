@@ -35,29 +35,23 @@ export type ToolPresets<TConfig = any> = {
   options: Record<string, TConfig>;
 };
 
-// 基本のプリセット設定（共通プロパティ）
-export type BasePresetConfig = {
-  size?: number;
-};
-
 // ツール別のプリセット設定型
-export type PenPresetConfig = BasePresetConfig & {
-  shape?: 'circle' | 'square';
-  opacity?: number;
+export type PenPresetConfig = {
+  size?: number;
+  // shape?: 'circle' | 'square';
+  // opacity?: number;
 };
 
-export type EraserPresetConfig = BasePresetConfig & {
-  shape?: 'circle' | 'square';
-  hardness?: number;
+export type EraserPresetConfig = {
+  size?: number;
+  // shape?: 'circle' | 'square';
+  // hardness?: number;
 };
 
-export type FillPresetConfig = BasePresetConfig & {
-  threshold?: number;
-  antialias?: boolean;
+export type FillPresetConfig = {
+  // threshold?: number;
+  // antialias?: boolean;
 };
-
-// 旧型との互換性のため
-export type PresetConfig = BasePresetConfig;
 
 // ツールカテゴリの定義
 export const toolCategories = {
@@ -69,10 +63,10 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1, shape: 'circle', opacity: 1.0 } as PenPresetConfig,
-        fine: { size: 1, shape: 'circle', opacity: 1.0 } as PenPresetConfig,
-        thick: { size: 5, shape: 'circle', opacity: 1.0 } as PenPresetConfig,
-        square: { size: 3, shape: 'square', opacity: 1.0 } as PenPresetConfig,
+        [DEFAULT_PRESET]: { size: 1 } as PenPresetConfig,
+        fine: { size: 1 } as PenPresetConfig,
+        thick: { size: 5 } as PenPresetConfig,
+        square: { size: 3 } as PenPresetConfig,
       },
     },
   } as ToolCategory<PenPresetConfig>,
@@ -84,9 +78,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1, shape: 'circle', hardness: 1.0 } as EraserPresetConfig,
-        soft: { size: 3, shape: 'circle', hardness: 0.5 } as EraserPresetConfig,
-        hard: { size: 3, shape: 'circle', hardness: 1.0 } as EraserPresetConfig,
+        [DEFAULT_PRESET]: { size: 1 } as EraserPresetConfig,
       },
     },
   } as ToolCategory<EraserPresetConfig>,
@@ -98,9 +90,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { threshold: 0, antialias: false } as FillPresetConfig,
-        precise: { threshold: 0, antialias: false } as FillPresetConfig,
-        tolerant: { threshold: 10, antialias: true } as FillPresetConfig,
+        [DEFAULT_PRESET]: {} as FillPresetConfig,
       },
     },
   } as ToolCategory<FillPresetConfig>,

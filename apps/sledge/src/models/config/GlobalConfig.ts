@@ -47,9 +47,9 @@ export const defaultConfig: GlobalConfig = {
     canvasSize: { width: 1000, height: 1000 },
   },
   editor: {
-    cursor: 'pixel',
+    cursor: 'cross',
     centerCanvasWhenWindowResized: true,
-    showPointedPixel: false,
+    showPointedPixel: true,
   },
   performance: {
     canvasRenderingMode: 'adaptive',

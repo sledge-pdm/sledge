@@ -14,6 +14,7 @@ export type ImagePoolStore = {
 export type ProjectStore = {
   thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
+  lastSavedAt: Date | undefined;
 };
 export type LayerListStore = {
   layers: Layer[];
@@ -33,6 +34,7 @@ const defaultImagePoolStore: ImagePoolStore = {
 const defaultProjectStore: ProjectStore = {
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
+  lastSavedAt: undefined as Date | undefined,
 };
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),

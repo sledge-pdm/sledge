@@ -83,17 +83,9 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
                 <label class={configFormFieldLabel} for={fieldMeta.key}>
                   {fieldMeta.label}
                 </label>
-                {/* {fieldMeta.tips && (
-                  <span class={configFormFieldLabelTooltip} title={fieldMeta.tips}>
-                    ?
-                  </span>
-                )} */}
               </div>
               <div class={flexRow} style={{ 'flex-grow': 1, 'justify-content': 'end' }}>
                 <FieldRenderer meta={fieldMeta} value={value} onChange={onChange} />
-                {/* <label class={configFormFieldControlLabel} for={fieldMeta.key}>
-                  {fieldMeta.customFormat ? fieldMeta.customFormat.replaceAll('[value]', value()) : value()}
-                </label> */}
               </div>
             </div>
           );

@@ -40,9 +40,11 @@ export interface ExportImageProps extends DialogExternalProps {
 }
 
 const ExportDialog: Component<ExportImageProps> = (props) => {
+  const nameWithoutExtension = () => fileStore.location.name?.replace(/\.sledge$/, '');
+
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
-    fileName: fileStore.location.name,
+    fileName: nameWithoutExtension() ?? 'new project',
   });
   const [customScale, setCustomScale] = createSignal(1);
 

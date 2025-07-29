@@ -18,6 +18,8 @@ const KEY_CONFIG_TEMPLATE: Readonly<KeyConfigStore> = {
   pen: [{ key: 'p' }],
   eraser: [{ key: 'e' }],
   fill: [{ key: 'f' }],
+  sizeIncrease: [{ key: ']' }],
+  sizeDecrease: [{ key: '[' }],
   pipette: [{ alt: true }],
   'selection move': [{ shift: true }],
 } as const;

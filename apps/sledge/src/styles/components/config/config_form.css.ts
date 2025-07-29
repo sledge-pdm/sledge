@@ -57,8 +57,7 @@ export const configFormFields = style([
 
 export const configFormNoPreset = style([
   {
-    marginTop: vars.spacing.xl,
-    marginBottom: vars.spacing.sm,
+    marginTop: vars.spacing.lg,
     color: vars.color.muted,
     alignSelf: 'center',
   },

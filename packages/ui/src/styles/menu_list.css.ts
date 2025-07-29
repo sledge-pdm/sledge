@@ -8,7 +8,6 @@ export const menuStyle = style([
   {
     position: 'absolute',
     top: '100%',
-    left: 0,
     zIndex: 10,
     backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
@@ -41,7 +40,6 @@ export const menuItem = style({
 });
 
 export const itemText = style({
-  margin: '8px 10px 8px 10px',
+  margin: '6px 10px 6px 10px',
   whiteSpace: 'nowrap',
-  color: vars.color.onBackground,
 });

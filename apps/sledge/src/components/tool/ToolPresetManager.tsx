@@ -35,10 +35,11 @@ const ToolPresetManager: Component<Props> = (props) => {
     updateToolPresetConfig(props.toolId, selectedPreset()!, key, value);
   };
 
+  console.log(currentPresetConfig());
   return (
     <div class={flexCol}>
       {/* プリセット設定フォーム */}
-      <Show when={currentPresetConfig()} fallback={<p class={configFormNoPreset}>no preset.</p>}>
+      <Show when={currentPresetConfig() && Object.keys(currentPresetConfig()!).length > 0} fallback={<p class={configFormNoPreset}>no preset.</p>}>
         <div class={flexCol} style={{ gap: '8px', 'margin-top': '8px' }}>
           <ToolPresetConfigForm toolId={props.toolId} presetConfig={currentPresetConfig()!} onConfigChange={handleConfigChange} />
         </div>

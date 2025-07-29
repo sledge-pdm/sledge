@@ -105,7 +105,7 @@ const defaultToolStore: ToolStore = {
   tools: toolCategories,
   activeToolCategory: 'pen',
   prevActiveCategory: undefined,
-  selectionLimitMode: 'none',
+  selectionLimitMode: 'inside',
   selectionFillMode: 'global', // デフォルトは現在の動作（全体参照）
 };
 

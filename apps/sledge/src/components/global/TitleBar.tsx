@@ -75,10 +75,13 @@ export default function TitleBar() {
         <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
           <p class={titleBarTitle}>{shouldShowTitle() ? `${title()}` : ''}</p>
 
-          <div class={titleBarSaveSection} data-tauri-drag-region-exclude>
-            <SaveSection />
-          </div>
+          <Show when={isEditor()}>
+            <div class={titleBarSaveSection}>
+              <SaveSection />
+            </div>
 
+            <div style={{ height: '20px', width: '1px', 'background-color': vars.color.border, 'margin-left': '2px', 'margin-right': '12px' }} />
+          </Show>
           <div class={titleBarControls} data-tauri-drag-region-exclude>
             <Show when={isMinimizable()}>
               <div

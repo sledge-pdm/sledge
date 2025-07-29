@@ -1,6 +1,13 @@
 import { Component, onCleanup, onMount } from 'solid-js';
 import { activeLayer } from '~/controllers/layer/LayerListController';
-import { getActiveToolCategory, getPrevActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
+import {
+  getActiveToolCategory,
+  getCurrentPresetConfig,
+  getPrevActiveToolCategory,
+  setActiveToolCategory,
+  updateToolPresetConfig,
+} from '~/controllers/tool/ToolController';
+import { toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { openDebugViewer } from '~/utils/DebugViewer';
 import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';
@@ -21,6 +28,30 @@ const KeyListener: Component = () => {
     if (e.ctrlKey && e.shiftKey && e.key === 'D') {
       e.preventDefault();
       openDebugViewer();
+    }
+
+    if (isKeyMatchesToEntry(e, keyConfigStore['sizeIncrease'])) {
+      const currentToolId = getActiveToolCategory();
+      const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
+      if (selectedPreset !== undefined) {
+        const presetConfig = getCurrentPresetConfig(currentToolId);
+        const currentSize = presetConfig?.size;
+        if (currentSize !== undefined) {
+          updateToolPresetConfig(currentToolId, selectedPreset, 'size', currentSize + 1);
+        }
+      }
+    }
+
+    if (isKeyMatchesToEntry(e, keyConfigStore['sizeDecrease'])) {
+      const currentToolId = getActiveToolCategory();
+      const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
+      if (selectedPreset !== undefined) {
+        const presetConfig = getCurrentPresetConfig(currentToolId);
+        const currentSize = presetConfig?.size;
+        if (currentSize !== undefined && currentSize > 1) {
+          updateToolPresetConfig(currentToolId, selectedPreset, 'size', currentSize - 1);
+        }
+      }
     }
 
     if (!e.repeat) {

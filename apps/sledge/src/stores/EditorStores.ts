@@ -1,10 +1,10 @@
 // editorStore.tsx
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
+import { SectionTab } from '~/components/section/SectionTabs';
 import { PaletteType } from '~/models/color/PaletteType';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
-export type SectionTab = 'editor' | 'project' | 'effects';
 
 type AppearanceStore = {
   leftSide: {
@@ -64,7 +64,7 @@ const defaultAppearanceStore: AppearanceStore = {
   },
   rightSide: {
     shown: false,
-    tabs: ['project'],
+    tabs: ['project', "perilous"],
     selectedIndex: 0,
   },
 };

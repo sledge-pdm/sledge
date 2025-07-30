@@ -3,9 +3,9 @@ import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { flexCol } from '@sledge/core';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import interact from 'interactjs';
-import { EditorTab, EffectsTab, ProjectTab } from '~/components/section/SectionTabs';
+import { EditorTab, EffectsTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import SideSectionControl from '~/components/section/SideSectionControl';
-import { appearanceStore, SectionTab } from '~/stores/EditorStores';
+import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
 import { eventBus } from '~/utils/EventBus';
@@ -65,10 +65,12 @@ const SideSections: Component<Props> = (props) => {
     switch (tab) {
       case 'editor':
         return <EditorTab />;
-      case 'project':
-        return <ProjectTab />;
       case 'effects':
         return <EffectsTab />;
+      case 'project':
+        return <ProjectTab />;
+      case 'perilous':
+        return <PerilousTab />;
       default:
         return null;
     }

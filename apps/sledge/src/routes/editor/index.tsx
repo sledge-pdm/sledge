@@ -14,6 +14,7 @@ import SideSections from '~/components/section/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
+import { AutoSaveManager } from '~/io/autosave/AutoSaveManager';
 import { importImageFromWindow } from '~/io/image/in/import';
 import { readProjectDataFromWindow } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';
@@ -105,7 +106,16 @@ export default function Editor() {
     });
   });
 
+  createEffect(() => {
+    if (projectStore.autoSaveEnabled && projectStore.autoSaveInterval) {
+      const manager = AutoSaveManager.getInstance();
+      if (projectStore.autoSaveInterval === manager.getCurrentInterval()) return;
+      manager.startAutoSave(projectStore.autoSaveInterval);
+    }
+  });
+
   onCleanup(() => {
+    AutoSaveManager.getInstance().stopAutoSave();
     unlisten();
 
     if (import.meta.hot) {

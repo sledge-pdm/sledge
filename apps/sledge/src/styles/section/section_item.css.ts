@@ -13,14 +13,14 @@ export const sectionCaption = style({
   fontFamily: ZFB11,
   fontSize: vars.text.sm,
   marginBottom: vars.spacing.sm,
-  opacity: 0.5,
+  opacity: 0.8,
 });
 
 export const sectionSubCaption = style({
   fontFamily: ZFB08,
   fontSize: vars.text.sm,
-  marginTop: vars.spacing.lg,
-  marginBottom: vars.spacing.sm,
+  marginTop: vars.spacing.sm,
+  marginBottom: vars.spacing.xs,
   opacity: 0.6,
 });
 

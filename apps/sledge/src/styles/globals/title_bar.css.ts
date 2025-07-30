@@ -13,15 +13,20 @@ export const titleBarRoot = style([
   },
 ]);
 
-export const titleBarTitle = style([
+export const titleBarTitleContainer = style([
   flexRow,
   w100,
+  {
+    marginRight: 'auto',
+    paddingLeft: '24px',
+  },
+]);
+export const titleBarTitle = style([
   {
     width: 'fit-content',
     fontFamily: ZFB08,
     fontSize: vars.text.sm,
-    marginRight: 'auto',
-    paddingLeft: '24px',
+    whiteSpace: 'pre',
   },
 ]);
 

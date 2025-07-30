@@ -42,9 +42,12 @@ const SaveSection: Component = () => {
       }
       interval = seconds / 60;
       if (interval > 1) {
-        return Math.floor(interval / 10) * 10 + ' min ago';
+        return Math.floor(Math.floor(interval) / 10) * 10 + ' min ago';
       }
-      return Math.floor(seconds / 10) * 10 + ' sec ago';
+      if (seconds < 10) {
+        return 'just now';
+      }
+      return Math.floor(Math.floor(seconds) / 10) * 10 + ' sec ago';
     }
     return 'not saved yet.';
   };
@@ -90,8 +93,48 @@ const SaveSection: Component = () => {
 
   const saveMenu: MenuListOption[] = [
     { label: 'Save As...', onSelect: () => save(true), color: vars.color.onBackground },
-    { label: 'Save As Layers', onSelect: () => save(true), color: vars.color.onBackground },
+    // { label: 'Save As Layers', onSelect: () => save(true), color: vars.color.onBackground },
   ];
+
+  const [iconSrc, setIconSrc] = createSignal<string | undefined>(undefined);
+
+  onMount(() => {
+    makeTimer(
+      () => {
+        if (!projectStore.autoSaveInterval || !projectStore.lastSavedAt) return;
+        const diffSec = (new Date().getTime() - projectStore.lastSavedAt.getTime()) / 1000;
+        console.log('diffSec:', diffSec, 'interval:', projectStore.autoSaveInterval);
+
+        if (diffSec < 3) {
+          setIconSrc('/icons/progress/circle_check.png');
+          return;
+        }
+
+        const intervalRatio = diffSec / projectStore.autoSaveInterval;
+        console.log('intervalRatio:', intervalRatio);
+
+        if (intervalRatio < 1 / 8) {
+          setIconSrc('/icons/progress/circle_0.png');
+        } else if (intervalRatio < 2 / 8) {
+          setIconSrc('/icons/progress/circle_1.png');
+        } else if (intervalRatio < 3 / 8) {
+          setIconSrc('/icons/progress/circle_2.png');
+        } else if (intervalRatio < 4 / 8) {
+          setIconSrc('/icons/progress/circle_3.png');
+        } else if (intervalRatio < 5 / 8) {
+          setIconSrc('/icons/progress/circle_4.png');
+        } else if (intervalRatio < 6 / 8) {
+          setIconSrc('/icons/progress/circle_5.png');
+        } else if (intervalRatio < 7 / 8) {
+          setIconSrc('/icons/progress/circle_6.png');
+        } else if (intervalRatio < 8 / 8) {
+          setIconSrc('/icons/progress/circle_7.png');
+        } 
+      },
+      500,
+      setInterval
+    );
+  });
 
   return (
     <div
@@ -100,11 +143,13 @@ const SaveSection: Component = () => {
         position: 'relative',
         'align-items': 'center',
         overflow: 'visible',
+        gap: '8px',
       }}
     >
-      <p style={{ opacity: 0.6 }}>{saveTimeText()}</p>
-      <p style={{ margin: '0 8px' }}>{saveLog()}</p>
-
+      <p style={{ 'white-space': 'nowrap', opacity: 0.6 }}>{saveTimeText()}</p>
+      <Show when={saveLog()}>
+        <p style={{ 'white-space': 'nowrap' }}>{saveLog()}</p>
+      </Show>
       <div class={saveButtonRoot} data-tauri-drag-region-exclude>
         <div class={saveButtonMainButton} onClick={() => save(!isOWPossible())}>
           <p
@@ -134,6 +179,12 @@ const SaveSection: Component = () => {
           />
         </Show>
       </div>
+
+      <Show when={projectStore.autoSaveEnabled && fileStore.location.name && fileStore.location.path && projectStore.lastSavedAt}>
+        <div style={{ opacity: 0.3 }}>
+          <Icon src={iconSrc() ?? ''} color={vars.color.onBackground} base={12} scale={1} />
+        </div>
+      </Show>
     </div>
   );
 };

@@ -15,6 +15,9 @@ export type ProjectStore = {
   thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
   lastSavedAt: Date | undefined;
+
+  autoSaveEnabled?: boolean;
+  autoSaveInterval?: number; // in seconds
 };
 export type LayerListStore = {
   layers: Layer[];
@@ -35,6 +38,8 @@ const defaultProjectStore: ProjectStore = {
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
   lastSavedAt: undefined as Date | undefined,
+  autoSaveEnabled: true,
+  autoSaveInterval: 60,
 };
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),

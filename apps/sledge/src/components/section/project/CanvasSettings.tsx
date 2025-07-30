@@ -1,17 +1,9 @@
 import { Component } from 'solid-js';
 import { adjustZoomToFit, changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
-import { resetAllLayers } from '~/controllers/layer/LayerListController';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { Consts } from '~/models/Consts';
-import {
-  canvasSizeButton,
-  canvasSizeForm,
-  canvasSizeInput,
-  canvasSizeLabel,
-  canvasSizeResetAllLayerButton,
-  canvasSizeTimes,
-} from '~/styles/section/project/canvas.css';
+import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
@@ -33,7 +25,7 @@ const CanvasSettings: Component = () => {
     <div class={sectionRoot}>
       <p class={sectionCaption}>canvas.</p>
 
-      <form class={sectionContent} onSubmit={(e) => e.preventDefault()}>
+      <form class={sectionContent} style={{ 'padding-left': '8px', gap: '6px', 'margin-bottom': '8px' }} onSubmit={(e) => e.preventDefault()}>
         <div class={canvasSizeForm}>
           <div>
             <p class={canvasSizeLabel}>width</p>
@@ -75,10 +67,6 @@ const CanvasSettings: Component = () => {
           </button>
         </div>
       </form>
-
-      <button class={canvasSizeResetAllLayerButton} onClick={resetAllLayers}>
-        RESET ALL LAYERS
-      </button>
     </div>
   );
 };

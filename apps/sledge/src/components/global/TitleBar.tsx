@@ -16,6 +16,7 @@ import {
   titleBarRoot,
   titleBarSaveSection,
   titleBarTitle,
+  titleBarTitleContainer,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
 
@@ -27,7 +28,6 @@ export default function TitleBar() {
   const [isMaximizable, setIsMaximizable] = createSignal(false);
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
-  const [title, setTitle] = createSignal('');
   const [isMaximized, setMaximized] = createSignal(false);
 
   onMount(async () => {
@@ -35,7 +35,6 @@ export default function TitleBar() {
     setIsMaximizable(await window.isMaximizable());
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
-    setTitle(await window.title());
     titleBarNavEl.addEventListener('pointerdown', (e: PointerEvent) => {
       setBottomBarText(e.buttons.toString() + ' ' + e.pointerType + ' ' + Date.now());
     });
@@ -47,16 +46,9 @@ export default function TitleBar() {
 
   createEffect(() => {
     if (isEditor()) {
-      let pathText = '';
-      if (fileStore.location.path !== undefined && fileStore.location.path !== '') {
-        pathText += projectStore.isProjectChangedAfterSave ? '(unsaved)' : '';
-        pathText += ' - ' + fileStore.location.path;
-      } else {
-        pathText += '(unsaved)';
-      }
-
-      setTitle(`${fileStore.location.name ?? '< new project >'} ${pathText}`);
-      getCurrentWindow().setTitle(`${fileStore.location.name ?? '< new project >'} ${pathText}`);
+      getCurrentWindow().setTitle(
+        `${projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'} ${fileStore.location.path ? `(${fileStore.location.path})` : ''}`
+      );
     }
   });
 
@@ -73,7 +65,14 @@ export default function TitleBar() {
         }}
       >
         <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
-          <p class={titleBarTitle}>{shouldShowTitle() ? `${title()}` : ''}</p>
+          <Show when={shouldShowTitle()}>
+            <div class={titleBarTitleContainer}>
+              <p class={titleBarTitle} style={{ opacity: 0.5 }}>
+                {projectStore.lastSavedAt && `${fileStore.location.path}\\`}
+              </p>
+              <p class={titleBarTitle}>{projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'}</p>
+            </div>
+          </Show>
 
           <Show when={isEditor()}>
             <div class={titleBarSaveSection}>

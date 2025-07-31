@@ -5,7 +5,6 @@ import { SectionTab } from '~/components/section/SectionTabs';
 import { PaletteType } from '~/models/color/PaletteType';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
-
 type AppearanceStore = {
   leftSide: {
     shown: boolean;
@@ -64,7 +63,7 @@ const defaultAppearanceStore: AppearanceStore = {
   },
   rightSide: {
     shown: false,
-    tabs: ['project', "perilous"],
+    tabs: ['project', 'perilous'],
     selectedIndex: 0,
   },
 };

@@ -129,7 +129,7 @@ const SaveSection: Component = () => {
           setIconSrc('/icons/progress/circle_6.png');
         } else if (intervalRatio < 8 / 8) {
           setIconSrc('/icons/progress/circle_7.png');
-        } 
+        }
       },
       500,
       setInterval

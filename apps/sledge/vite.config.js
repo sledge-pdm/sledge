@@ -3,14 +3,14 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
 import solidPlugin from 'vite-plugin-solid';
-import topLevelAwait from "vite-plugin-top-level-await";
+import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [wasmPlugin(), vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), tsconfigPaths(), glsl(), topLevelAwait()],
+  plugins: [wasmPlugin(), tsconfigPaths(), vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), glsl(), topLevelAwait()],
   build: {
     // target: 'esnext',
     outDir: 'dist',
@@ -48,13 +48,13 @@ export default defineConfig({
   worker: {
     // Not needed with vite-plugin-top-level-await >= 1.3.0
     format: 'es',
-    plugins: () => [
-      wasmPlugin(),
-      topLevelAwait()
-    ]
+    plugins: () => [wasmPlugin(), topLevelAwait()],
   },
   resolve: {
     alias: {
+      '@sledge/core': path.resolve(__dirname, '../../packages/core'),
+      '@sledge/theme': path.resolve(__dirname, '../../packages/theme'),
+      '@sledge/ui': path.resolve(__dirname, '../../packages/ui'),
       '@sledge/wasm': path.resolve(__dirname, '../../packages/wasm/pkg/sledge_wasm'),
     },
   },

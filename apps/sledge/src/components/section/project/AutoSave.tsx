@@ -1,10 +1,18 @@
-import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { ToggleSwitch } from '@sledge/ui';
+import Dropdown, { DropdownOption } from '@sledge/ui/src/components/control/Dropdown';
 import { Component, Show } from 'solid-js';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { sectionCaption, sectionContent, sectionRoot, sectionSubCaption } from '~/styles/section/section_item.css';
+
+const autoSaveIntervalOptions: DropdownOption<number>[] = [
+  { label: '15 sec', value: 15 },
+  { label: '30 sec', value: 30 },
+  { label: '1 min', value: 60 },
+  { label: '5 min', value: 300 },
+  { label: '10 min', value: 600 },
+];
 
 const AutoSave: Component = () => {
   return (
@@ -29,7 +37,17 @@ const AutoSave: Component = () => {
           </p>
         </Show>
         <p class={sectionSubCaption}>interval. (15 - 300 sec)</p>
-        <div
+
+        <Dropdown
+          options={autoSaveIntervalOptions}
+          value={projectStore.autoSaveInterval ?? 15}
+          wheelSpin={false}
+          onChange={(value) => {
+            setProjectStore('autoSaveInterval', value);
+          }}
+        />
+
+        {/* <div
           class={flexRow}
           style={{
             'align-items': 'baseline',
@@ -53,7 +71,7 @@ const AutoSave: Component = () => {
             }}
           />
           <p>seconds</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

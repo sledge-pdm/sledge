@@ -98,6 +98,8 @@ const SaveSection: Component = () => {
 
   const [iconSrc, setIconSrc] = createSignal<string | undefined>(undefined);
 
+  const [autoSaveIntervalRatio, setAutoSaveIntervalRatio] = createSignal<number>(0);
+
   onMount(() => {
     makeTimer(
       () => {
@@ -111,6 +113,7 @@ const SaveSection: Component = () => {
         }
 
         const intervalRatio = diffSec / projectStore.autoSaveInterval;
+        setAutoSaveIntervalRatio(intervalRatio);
         console.log('intervalRatio:', intervalRatio);
 
         if (intervalRatio < 1 / 8) {
@@ -131,7 +134,7 @@ const SaveSection: Component = () => {
           setIconSrc('/icons/progress/circle_7.png');
         }
       },
-      500,
+      100,
       setInterval
     );
   });
@@ -169,22 +172,37 @@ const SaveSection: Component = () => {
             <Icon src={'/icons/misc/triangle_5.png'} color={vars.color.onBackground} base={5} scale={1} />
           </div>
         </div>
-
-        <Show when={isSaveMenuShown()}>
-          <MenuList
-            options={saveMenu}
-            onClose={() => setIsSaveMenuShown(false)}
-            align={'right'}
-            style={{ 'margin-top': '4px', 'border-color': vars.color.onBackground, 'border-radius': '4px' }}
-          />
-        </Show>
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: `${autoSaveIntervalRatio() * 100}%`,
+            height: '100%',
+            'background-color': vars.color.accent,
+            opacity: 0.1,
+          }}
+        />
       </div>
 
-      <Show when={projectStore.autoSaveEnabled && fileStore.location.name && fileStore.location.path && projectStore.lastSavedAt}>
+      <Show when={isSaveMenuShown()}>
+        <MenuList
+          options={saveMenu}
+          onClose={() => setIsSaveMenuShown(false)}
+          align={'right'}
+          style={{
+            'margin-top': '4px',
+            'border-color': vars.color.onBackground,
+            'border-radius': '4px',
+          }}
+        />
+      </Show>
+
+      {/* <Show when={projectStore.autoSaveEnabled && fileStore.location.name && fileStore.location.path && projectStore.lastSavedAt}>
         <div style={{ opacity: 0.3 }}>
           <Icon src={iconSrc() ?? ''} color={vars.color.onBackground} base={12} scale={1} />
         </div>
-      </Show>
+      </Show> */}
     </div>
   );
 };

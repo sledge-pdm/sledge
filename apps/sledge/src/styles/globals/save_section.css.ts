@@ -5,6 +5,7 @@ import { style } from '@vanilla-extract/css';
 export const saveButtonRoot = style([
   flexRow,
   {
+    position: 'relative',
     borderRadius: '4px',
     border: `1px solid ${vars.color.accent}`,
     overflow: 'hidden',

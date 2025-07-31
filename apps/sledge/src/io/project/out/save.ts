@@ -43,7 +43,6 @@ async function saveThumbnailData(selectedPath: string) {
 }
 
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
-  console.log(name, existingPath);
   let selectedPath: string | null;
 
   if (existingPath) {
@@ -62,7 +61,10 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       addRecentFile(pathToFileLocation(selectedPath));
 
       const location = pathToFileLocation(selectedPath);
-      if (location) setFileStore('location', location);
+      if (location) {
+        setFileStore('location', location);
+        // setLastSettingsStore('exportSettings', 'dirPath', location.path);
+      }
       // @ts-ignore
       window.__PATH__ = selectedPath;
 

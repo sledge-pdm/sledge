@@ -40,8 +40,10 @@ export const vars = createThemeContract({
     border: null,
     accent: null,
     active: null,
+    enabled: null,
     muted: null,
     error: null,
+    warn: null,
     overlay: null,
     button: {
       bg: null,
@@ -117,8 +119,10 @@ export const lightTheme = createTheme(vars, {
     border: '#aaaaaa',
     accent: '#0000ff',
     active: '#ff0000',
+    enabled: '#00ff00',
     muted: 'rgba(0,0,0,0.19)',
     error: '#ff0000',
+    warn: '#ffcc00',
     overlay: 'rgba(0, 0, 0, 0.5)',
     button: {
       bg: '#ffffff',
@@ -140,15 +144,17 @@ const darkThemeColorBase = {
   border: '#666666',
   accent: '#ffff00',
   active: '#00ff00',
+  enabled: '#00ff00',
   muted: 'rgba(255,255,255,0.30)',
   error: '#ff5f5f',
+  warn: '#fffb00',
   overlay: 'rgba(255, 255, 255, 0.5)',
   button: {
     bg: '#222222',
     hover: '#444444',
     active: '#555555',
     text: '#eeeeee',
-    border: '#eeeeee',
+    border: '#bbbbbb',
   },
 };
 
@@ -177,15 +183,17 @@ const blackThemeColorBase = {
   border: '#3A3A3A',
   accent: '#ff00ff',
   active: '#ff00ff',
+  enabled: '#00ff00',
   muted: 'rgba(255,255,255,0.30)',
   error: '#ff5f5f',
+  warn: '#fffb00',
   overlay: 'rgba(255, 255, 255, 0.320)',
   button: {
     bg: '#222222',
     hover: '#444444',
     active: '#555555',
     text: '#eeeeee',
-    border: '#eeeeee',
+    border: '#aaaaaa',
   },
 };
 

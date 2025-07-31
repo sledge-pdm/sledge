@@ -84,11 +84,15 @@ export const configFormFieldItem = style([
 export const configFormFieldLabelTooltip = style({
   width: 'fit-content',
   fontFamily: ZFB09,
-  color: '#aaa',
+  color: vars.color.muted,
+  cursor: 'help',
+  ':hover': {
+    color: vars.color.active,
+  },
 });
 
 export const configFormFieldLabel = style({
-  width: '100%',
+  // width: '100%',
   fontFamily: ZFB09,
   // textDecoration: 'underline',
   verticalAlign: 'middle',

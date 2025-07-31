@@ -53,6 +53,15 @@ export default function App() {
     loadGlobalSettings();
   });
 
+  if (import.meta.hot) {
+    import.meta.hot.accept((newModule) => {
+      if (newModule) {
+        // SyntaxError が発生したときに newModule は undefined です
+        console.log('updated: count is now ', newModule.count);
+      }
+    });
+  }
+
   return (
     <Router
       root={(props) => (

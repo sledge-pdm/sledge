@@ -22,10 +22,10 @@ const AutoSave: Component = () => {
           Enable Auto Save
         </ToggleSwitch>
         <Show when={projectStore.autoSaveEnabled && (fileStore.location.name === undefined || fileStore.location.path === undefined)}>
-          <p style={{ color: 'yellow', 'margin-top': '8px' }}>
-            autosave stopped.
+          <p style={{ color: vars.color.warn, 'margin-top': '8px', 'line-height': 1.1 }}>
+            autosave stops.
             <br />
-            save first to start autosave.
+            save to start autosave.
           </p>
         </Show>
         <p class={sectionSubCaption}>interval. (15 - 300 sec)</p>

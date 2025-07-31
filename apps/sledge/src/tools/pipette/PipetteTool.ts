@@ -39,7 +39,7 @@ export class PipetteTool implements ToolBehavior {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
-      shouldReturnToPrevTool: true,
+      shouldReturnToPrevTool: false,
     };
   }
 }

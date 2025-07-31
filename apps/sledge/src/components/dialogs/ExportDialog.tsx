@@ -80,9 +80,10 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
     const name = settings.fileName;
     if (name === undefined) return;
     if (settings.dirPath) {
-      const result = await exportImage(settings.dirPath, name, settings.exportOptions);
-      if (result) {
-        if (settings.showDirAfterSave) await revealItemInDir(result);
+      const location = await exportImage(settings.dirPath, name, settings.exportOptions);
+      if (location) {
+        // setLastSettingsStore('exportSettings', 'dirPath', location.path);
+        if (settings.showDirAfterSave) await revealItemInDir(`${location.path}\\${location.name}`);
       }
     }
 

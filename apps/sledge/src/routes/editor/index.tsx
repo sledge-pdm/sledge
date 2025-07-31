@@ -14,7 +14,7 @@ import SideSections from '~/components/section/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
-import { AutoSaveManager } from '~/io/autosave/AutoSaveManager';
+import { AutoSaveManager } from '~/controllers/project/AutoSaveManager';
 import { importImageFromWindow } from '~/io/image/in/import';
 import { readProjectDataFromWindow } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';

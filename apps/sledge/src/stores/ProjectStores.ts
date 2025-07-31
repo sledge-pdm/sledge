@@ -39,7 +39,7 @@ const defaultProjectStore: ProjectStore = {
   isProjectChangedAfterSave: false,
   lastSavedAt: undefined as Date | undefined,
   autoSaveEnabled: true,
-  autoSaveInterval: 60,
+  autoSaveInterval: 30,
 };
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),

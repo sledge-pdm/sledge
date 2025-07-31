@@ -60,7 +60,7 @@ const SaveSection: Component = () => {
       () => {
         setSaveLog(undefined);
       },
-      5000,
+      3000,
       setTimeout
     );
   };
@@ -107,14 +107,14 @@ const SaveSection: Component = () => {
         const diffSec = (new Date().getTime() - projectStore.lastSavedAt.getTime()) / 1000;
         console.log('diffSec:', diffSec, 'interval:', projectStore.autoSaveInterval);
 
+        const intervalRatio = diffSec / projectStore.autoSaveInterval;
+        setAutoSaveIntervalRatio(intervalRatio);
+        console.log('intervalRatio:', intervalRatio);
+
         if (diffSec < 3) {
           setIconSrc('/icons/progress/circle_check.png');
           return;
         }
-
-        const intervalRatio = diffSec / projectStore.autoSaveInterval;
-        setAutoSaveIntervalRatio(intervalRatio);
-        console.log('intervalRatio:', intervalRatio);
 
         if (intervalRatio < 1 / 8) {
           setIconSrc('/icons/progress/circle_0.png');
@@ -149,8 +149,7 @@ const SaveSection: Component = () => {
         gap: '8px',
       }}
     >
-      <p style={{ 'white-space': 'nowrap', opacity: 0.6 }}>{saveTimeText()}</p>
-      <Show when={saveLog()}>
+      <Show when={saveLog()} fallback={<p style={{ 'white-space': 'nowrap', opacity: 0.6 }}>{saveTimeText()}</p>}>
         <p style={{ 'white-space': 'nowrap' }}>{saveLog()}</p>
       </Show>
       <div class={saveButtonRoot} data-tauri-drag-region-exclude>

@@ -29,12 +29,14 @@ export default function TitleBar() {
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
   const [isMaximized, setMaximized] = createSignal(false);
+  const [windowTitle, setWindowTitle] = createSignal('');
 
   onMount(async () => {
     const window = getCurrentWindow();
     setIsMaximizable(await window.isMaximizable());
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
+    setWindowTitle(await window.title());
     titleBarNavEl.addEventListener('pointerdown', (e: PointerEvent) => {
       setBottomBarText(e.buttons.toString() + ' ' + e.pointerType + ' ' + Date.now());
     });
@@ -65,14 +67,16 @@ export default function TitleBar() {
         }}
       >
         <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
-          <Show when={shouldShowTitle()}>
-            <div class={titleBarTitleContainer}>
+          <div class={titleBarTitleContainer}>
+            <Show when={shouldShowTitle()}>
               <p class={titleBarTitle} style={{ opacity: 0.5 }}>
                 {projectStore.lastSavedAt && `${fileStore.location.path}\\`}
               </p>
-              <p class={titleBarTitle}>{projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'}</p>
-            </div>
-          </Show>
+              <Show when={isEditor()} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
+                <p class={titleBarTitle}>{projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'}</p>
+              </Show>
+            </Show>
+          </div>
 
           <Show when={isEditor()}>
             <div class={titleBarSaveSection}>

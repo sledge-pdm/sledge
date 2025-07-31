@@ -67,7 +67,7 @@ export const configFormFieldHeader = style([
   {
     marginTop: vars.spacing.xl,
     marginBottom: vars.spacing.sm,
-    fontSize: '20px',
+    fontSize: '19px',
     fontFamily: ZFB31,
     color: vars.color.accent,
   },

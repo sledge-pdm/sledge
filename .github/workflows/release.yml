@@ -2,8 +2,8 @@ name: release
 
 on:
   push:
-    # branches:
-    #   - test/test-actions
+    branches:
+      - main
     tags: ['*v*.*.*'] # バージョンタグ push 時のみ
   workflow_dispatch: {} # 手動トリガも可
 
@@ -56,6 +56,7 @@ jobs:
           appName: 'sledge'
           appVersion: '__VERSION__'
           projectPath: './apps/sledge'
+          releaseId: 'sledge-__VERSION__'
           releaseName: 'sledge-__VERSION__'
           releaseDraft: true
           prerelease: true

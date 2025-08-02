@@ -3,7 +3,7 @@ import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/controllers/selection/SelectionManager';
 import { cancelMove, cancelSelection, commitMove, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
@@ -47,22 +47,24 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }, Number(globalConfig.performance.targetFPS))
   );
 
-  const handleOnSelectionChange = () => {
-    setSelectionState(selectionManager.getState());
+  const handleAreaChanged = (e: Events['selection:areaChanged']) => setUpdatePosition(true);
+  const handleMoved = (e: Events['selection:moved']) => setUpdatePosition(true);
+  const handleStateChanged = (e: Events['selection:stateChanged']) => {
+    setSelectionState(e.newState);
     setUpdatePosition(true);
   };
 
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:areaChanged', handleOnSelectionChange);
-    eventBus.on('selection:moved', handleOnSelectionChange);
-    eventBus.on('selection:stateChanged', handleOnSelectionChange);
+    eventBus.on('selection:areaChanged', handleAreaChanged);
+    eventBus.on('selection:moved', handleMoved);
+    eventBus.on('selection:stateChanged', handleStateChanged);
   });
   onCleanup(() => {
     stopRenderLoop();
-    eventBus.off('selection:areaChanged', handleOnSelectionChange);
-    eventBus.off('selection:moved', handleOnSelectionChange);
-    eventBus.off('selection:stateChanged', handleOnSelectionChange);
+    eventBus.off('selection:areaChanged', handleAreaChanged);
+    eventBus.off('selection:moved', handleMoved);
+    eventBus.off('selection:stateChanged', handleStateChanged);
   });
 
   createEffect(() => {

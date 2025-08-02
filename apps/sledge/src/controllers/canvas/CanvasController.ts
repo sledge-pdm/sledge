@@ -55,7 +55,7 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
-  setInteractStore('zoom', referencedZoom);
+  setZoom(referencedZoom);
 
   centeringCanvas();
 };
@@ -69,10 +69,26 @@ export const centeringCanvas = () => {
     x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
     y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
   });
-  setInteractStore('offset', {
+  setOffset({
     x: 0,
     y: 0,
   });
 
   eventBus.emit('canvas:onAdjusted', {});
+};
+
+export const setZoom = (zoom: number) => {
+  zoom = Math.round(zoom * 100) / 100;
+  if (zoom <= 0) return;
+  if (zoom !== interactStore.zoom) setInteractStore('zoom', zoom);
+};
+
+export const setOffset = (offset: { x: number; y: number }) => {
+  if (offset.x !== interactStore.offset.x || offset.y !== interactStore.offset.y) {
+    setInteractStore('offset', offset);
+  }
+};
+
+export const setRotation = (rotation: number) => {
+  if (rotation !== interactStore.rotation) setInteractStore('rotation', Math.round(rotation % 360));
 };

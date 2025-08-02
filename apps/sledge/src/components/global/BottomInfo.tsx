@@ -2,7 +2,8 @@ import { flexRow } from '@sledge/core';
 import { Slider } from '@sledge/ui';
 import { Component } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
-import { interactStore, logStore, setInteractStore } from '~/stores/EditorStores';
+import { setRotation } from '~/controllers/canvas/CanvasController';
+import { interactStore, logStore } from '~/stores/EditorStores';
 
 import {
   bottomInfoContainer,
@@ -31,13 +32,13 @@ const BottomInfo: Component = () => {
               max={180}
               allowFloat={false}
               customFormat='[value]°'
-              onChange={(v) => setInteractStore('rotation', v)}
+              onChange={(v) => setRotation(v)}
               onPointerDownOnValidArea={(e) => {
                 if (e.ctrlKey) {
                   e.preventDefault();
                   e.stopPropagation();
                   e.stopImmediatePropagation();
-                  setInteractStore('rotation', 0);
+                  setRotation(0);
                   return false;
                 }
                 return true;

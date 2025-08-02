@@ -51,17 +51,6 @@ export const InteractCanvas: Component<Props> = (props) => {
     });
   }
 
-  function isIgnoreClick(e: PointerEvent): boolean {
-    // "ignore-draw"のIDがついている要素は無視する
-    const target = e.target as HTMLElement;
-    if (target.id === 'ignore-draw') {
-      console.log('ignore draw on', target);
-      return true;
-    }
-
-    return false;
-  }
-
   function isDrawableClick(e: PointerEvent): boolean {
     if (e.pointerType === 'touch') return false;
 
@@ -79,7 +68,6 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerDown(e: PointerEvent) {
-    if (isIgnoreClick(e)) return;
     if (!isDrawableClick(e)) return;
 
     setInteractStore('isPenOut', false);
@@ -91,15 +79,12 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerCancel(e: PointerEvent) {
-    if (isIgnoreClick(e)) return;
-
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.cancel, e, getCurrentToolCategory(), position, lastPos());
     endStroke(getCanvasMousePosition(e));
   }
 
   function handlePointerMove(e: PointerEvent) {
-    if (isIgnoreClick(e)) return;
     const onCanvas = !!canvasRef?.contains(e.target as Node);
     setInteractStore('isMouseOnCanvas', onCanvas);
 
@@ -123,7 +108,6 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerUp(e: PointerEvent) {
-    if (isIgnoreClick(e)) return;
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.end, e, getCurrentToolCategory(), position, lastPos());
     endStroke(position);

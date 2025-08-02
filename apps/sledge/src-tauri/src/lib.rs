@@ -119,6 +119,21 @@ pub fn run() {
             }
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        // you can replace the following for the default stuff if you don't need macos/ios support
+        .build(tauri::generate_context!())
+        .expect("error building tauri application")
+        .run(
+            #[allow(unused_variables)]
+            |app, event| {
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                if let tauri::RunEvent::Opened { urls } = event {
+                    let files = urls
+                        .into_iter()
+                        .filter_map(|url| url.to_file_path().ok())
+                        .collect::<Vec<_>>();
+
+                    handle_file_associations(app.clone(), files);
+                }
+            },
+        );
 }

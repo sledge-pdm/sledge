@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         platform: [macos-latest, windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.platform }}
@@ -53,4 +54,4 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseDraft: false
           prerelease: false
-          args: "--target ${{ matrix.platform == 'ubuntu-latest' && 'x86_64-unknown-linux-gnu' || '' }}"
+          args: "${{ matrix.platform == 'ubuntu-latest' && '--target x86_64-unknown-linux-gnu' || '' }}"

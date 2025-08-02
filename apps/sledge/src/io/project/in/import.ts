@@ -42,7 +42,6 @@ export function readProjectDataFromWindow(): Project | null {
   } else {
     // 従来形式（既に解析済み）
     console.log('Project data found:', {
-      name: projectData.projectStore?.name,
       layers: projectData.layerListStore?.layers?.length,
       canvas_size: `${projectData.canvasStore?.canvas?.width}x${projectData.canvasStore?.canvas?.height}`,
     });
@@ -59,10 +58,12 @@ export function importProjectFromWindow() {
   const startTime = performance.now();
   const projectData = readProjectDataFromWindow();
   const endTime = performance.now();
+  // @ts-ignore
+  const openPath = window.__PATH__;
 
   if (projectData) {
     console.log(`Project data loaded in ${endTime - startTime}ms`);
-    console.log(`Project name: ${projectData.projectStore.name}`);
+    console.log(`Project name: ${openPath.name}`);
     console.log(`Canvas size: ${projectData.canvasStore.canvas.width}x${projectData.canvasStore.canvas.height}`);
     console.log(`Layer count: ${projectData.layerListStore.layers.length}`);
     console.log(`Layer buffers: ${projectData.layerBuffers?.size || 0}`);

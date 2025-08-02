@@ -5,8 +5,6 @@ export const PathToFileLocation = (fullPath: string): FileLocation | undefined =
   const filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'));
   const fileName = fullPath.split('\\').pop()?.split('\\').pop();
 
-  console.log('PathToFileLocation', fullPath, filePath, fileName);
-
   if (filePath === undefined || fileName === undefined) return undefined;
   else {
     return {

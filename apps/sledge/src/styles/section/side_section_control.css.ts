@@ -24,6 +24,7 @@ export const sideSectionControlItem = style([
 export const sideSectionControlToggle = style({
   fontFamily: ZFB11,
   fontSize: '8px',
+  padding: '2px',
   cursor: 'pointer',
 });
 

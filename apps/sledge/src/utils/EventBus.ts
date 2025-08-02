@@ -3,6 +3,10 @@ import mitt from 'mitt';
 import { SelectionState } from '~/controllers/selection/SelectionManager';
 
 export type Events = {
+  'project:saved': { path: string };
+  'project:saveFailed': { error: any };
+  'project:saveCancelled': {};
+
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
 

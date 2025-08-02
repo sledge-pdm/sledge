@@ -38,8 +38,6 @@ pub struct Size2D {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectStore {
-    pub name: Option<String>,
-    pub path: Option<String>,
     #[serde(rename = "thumbnailPath")]
     pub thumbnail_path: Option<String>,
     #[serde(rename = "isProjectChangedAfterSave")]

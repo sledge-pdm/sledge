@@ -1,7 +1,9 @@
+import { FileLocation } from '@sledge/core';
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { WindowOptions } from '@tauri-apps/api/window';
 import { globalConfig } from '~/stores/GlobalStores';
+import { PathToFileLocation } from '~/utils/PathUtils';
 import { safeInvoke } from './TauriUtils';
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
@@ -35,3 +37,9 @@ export const getNewProjectSearchParams = (): string => {
   sp.append('height', globalConfig.default.canvasSize.height.toString());
   return sp.toString();
 };
+
+export function getOpenLocation(): FileLocation | undefined {
+  // @ts-ignore
+  const openPath = window.__PATH__;
+  return PathToFileLocation(openPath);
+}

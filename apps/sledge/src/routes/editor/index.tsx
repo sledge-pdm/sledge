@@ -14,15 +14,18 @@ import SideSections from '~/components/section/SideSections';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
+import { AutoSaveManager } from '~/controllers/project/AutoSaveManager';
 import { importImageFromWindow } from '~/io/image/in/import';
 import { readProjectDataFromWindow } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';
 import { LayerType } from '~/models/layer/Layer';
+import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { PathToFileLocation } from '~/utils/PathUtils';
 import { emitEvent } from '~/utils/TauriUtils';
+import { getOpenLocation } from '~/utils/WindowUtils';
 
 export default function Editor() {
   const location = useLocation();
@@ -59,20 +62,22 @@ export default function Editor() {
   }
 
   const preloadedProject = readProjectDataFromWindow();
-  if (preloadedProject) {
-    // Rust側で既に読み込まれたプロジェクトデータを使用
-    console.log('Using preloaded project data from Rust');
-
-    // 既存のloadProjectJsonを使用
+  const fileLocation = getOpenLocation();
+  if (preloadedProject && fileLocation) {
+    setFileStore('location', fileLocation);
     loadProjectJson(preloadedProject);
-
     onProjectLoad(false);
-  } else if (importImageFromWindow()) {
+  } else if (importImageFromWindow() && fileLocation) {
+    setFileStore('location', fileLocation);
     onProjectLoad(false);
   } else {
     const sp = new URLSearchParams(location.search);
     // create new
-    setProjectStore('name', 'new project');
+    setFileStore('location', {
+      name: undefined,
+      path: undefined,
+    });
+
     if (sp.has('width') && sp.has('height')) {
       const width = Number(sp.get('width'));
       const height = Number(sp.get('height'));
@@ -101,7 +106,16 @@ export default function Editor() {
     });
   });
 
+  createEffect(() => {
+    if (projectStore.autoSaveEnabled && projectStore.autoSaveInterval) {
+      const manager = AutoSaveManager.getInstance();
+      if (projectStore.autoSaveInterval === manager.getCurrentInterval()) return;
+      manager.startAutoSave(projectStore.autoSaveInterval);
+    }
+  });
+
   onCleanup(() => {
+    AutoSaveManager.getInstance().stopAutoSave();
     unlisten();
 
     if (import.meta.hot) {

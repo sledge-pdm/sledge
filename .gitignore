@@ -42,3 +42,5 @@ node_modules
 # .vscode
 
 target
+
+post_build.bat

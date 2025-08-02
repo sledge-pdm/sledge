@@ -6,7 +6,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgb(0 0 0 / 80%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,7 +16,7 @@
 .debug-viewer-modal {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
   width: 90vw;
   height: 90vh;
   max-width: 1200px;
@@ -155,11 +155,11 @@
 }
 
 .btn-remove:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgb(0 0 0 / 10%);
 }
 
 .session-item.selected .btn-remove:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 20%);
 }
 
 .debug-images {

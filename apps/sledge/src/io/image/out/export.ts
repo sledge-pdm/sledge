@@ -1,3 +1,4 @@
+import { FileLocation } from '@sledge/core';
 import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
@@ -21,7 +22,7 @@ export const defaultExportDir = async () => {
   return dir;
 };
 
-export async function exportImage(dirPath: string, fileName: string, options: CanvasExportOptions): Promise<string | undefined> {
+export async function exportImage(dirPath: string, fileName: string, options: CanvasExportOptions): Promise<FileLocation | undefined> {
   let canvasBlob: Blob | undefined;
   if (options.format === 'svg') {
     canvasBlob = await getSVGBlob(options);
@@ -106,10 +107,13 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
   return new Blob([svgContent], { type: 'image/svg+xml' });
 }
 
-export async function saveBlobViaTauri(blob: Blob, dirPath: string, defaultName = 'export.png') {
+export async function saveBlobViaTauri(blob: Blob, dirPath: string, fileName = 'export.png'): Promise<FileLocation> {
   const buf = new Uint8Array(await blob.arrayBuffer());
   dirPath.replaceAll('/', '\\');
-  dirPath = dirPath.endsWith('\\') ? dirPath : dirPath + '\\';
-  await writeFile(dirPath + defaultName, buf, {});
-  return dirPath + defaultName;
+  // dirPath = dirPath.endsWith('\\') ? dirPath : dirPath + '\\';
+  await writeFile(`${dirPath}\\${fileName}`, buf, {});
+  return {
+    path: dirPath,
+    name: fileName,
+  };
 }

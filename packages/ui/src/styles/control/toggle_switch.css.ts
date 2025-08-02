@@ -43,6 +43,7 @@ export const toggleThumb = style({
   height: `${globalHeight}px`,
   backgroundColor: 'white',
   border: `1px solid ${vars.color.button.border}`,
+  // border: "1px solid white",
   borderRadius: '0px',
   transition: 'transform 0.02s',
 });
@@ -51,7 +52,7 @@ export const toggleThumb = style({
 
 /* input が :checked のとき隣接する track を赤系へ */
 globalStyle(`${toggleInput}:checked + ${toggleTrack}`, {
-  backgroundColor: vars.color.active,
+  backgroundColor: vars.color.enabled,
 });
 
 /* さらに thumb を右へスライド */

@@ -10,8 +10,9 @@ import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
+import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
-import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import { Dialog, DialogExternalProps } from './Dialog';
 
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
@@ -39,9 +40,11 @@ export interface ExportImageProps extends DialogExternalProps {
 }
 
 const ExportDialog: Component<ExportImageProps> = (props) => {
+  const nameWithoutExtension = () => fileStore.location.name?.replace(/\.sledge$/, '');
+
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
-    fileName: projectStore.name,
+    fileName: nameWithoutExtension() ?? 'new project',
   });
   const [customScale, setCustomScale] = createSignal(1);
 
@@ -77,14 +80,15 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
     const name = settings.fileName;
     if (name === undefined) return;
     if (settings.dirPath) {
-      const result = await exportImage(settings.dirPath, name, settings.exportOptions);
-      if (result) {
-        if (settings.showDirAfterSave) await revealItemInDir(result);
+      const location = await exportImage(settings.dirPath, name, settings.exportOptions);
+      if (location) {
+        // setLastSettingsStore('exportSettings', 'dirPath', location.path);
+        if (settings.showDirAfterSave) await revealItemInDir(`${location.path}\\${location.name}`);
       }
     }
 
-    if (projectStore.name === 'new project' && settings.fileName !== projectStore.name) {
-      setProjectStore('name', settings.fileName);
+    if (fileStore.location.name === 'new project' && settings.fileName !== fileStore.location.name && settings.fileName) {
+      setFileStore('location', 'name', settings.fileName);
     }
     setLastSettingsStore('exportSettings', settings);
     await saveGlobalSettings();

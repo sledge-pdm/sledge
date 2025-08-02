@@ -22,6 +22,7 @@ const Button: Component<ButtonProps> = (props) => {
       <span
         style={{
           visibility: isHovered() && props.hoverContent !== undefined ? 'hidden' : 'visible',
+          ...(typeof props.style === 'object' ? props.style : {}),
         }}
       >
         {props.children as any}
@@ -37,6 +38,7 @@ const Button: Component<ButtonProps> = (props) => {
             transform: 'translate(-50%, -50%)',
             width: '100%',
             'text-align': 'center',
+            ...(typeof props.style === 'object' ? props.style : {}),
           }}
         >
           {props.hoverContent}

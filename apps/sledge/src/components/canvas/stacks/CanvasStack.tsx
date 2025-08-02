@@ -3,8 +3,11 @@ import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
+import { vars } from '@sledge/theme';
+import { OnCanvasSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
+import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import { eventBus } from '~/utils/EventBus';
@@ -54,6 +57,9 @@ const CanvasStack: Component = () => {
         position: 'relative',
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,
+        'background-color': vars.color.canvas,
+        'transform-origin': 'center center',
+        transform: `rotate(${interactStore.rotation}deg)`,
       }}
     >
       <div
@@ -71,6 +77,7 @@ const CanvasStack: Component = () => {
 
         <WebGLCanvas />
       </div>
+      <OnCanvasSelectionMenu />
 
       <CanvasOverlaySVG />
     </div>

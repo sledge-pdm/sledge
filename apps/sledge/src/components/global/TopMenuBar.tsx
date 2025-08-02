@@ -69,7 +69,7 @@ const TopMenuBar: Component = () => {
   const recentFiles = globalConfig.misc.recentFiles.slice(0, 5);
 
   const recentFilesMenuOptions = recentFiles.map((file) => ({
-    label: file.name,
+    label: file.name || '[error]',
     onSelect: () => {
       openExistingProject(file);
       setIsRecentMenuShown(false);

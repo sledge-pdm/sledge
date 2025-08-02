@@ -1,0 +1,70 @@
+name: release
+
+on:
+  push:
+    branches:
+      - test/test-actions
+    # tags: ['v*.*.*'] # バージョンタグ push 時のみ
+  workflow_dispatch: {} # 手動トリガも可
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node & Rust 環境セットアップ
+      - uses: actions/setup-node@v4
+        with: { node-version: 'latest' }
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v4
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
+        # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
+
+      - name: Run sccache-cache
+        env:
+          SCCACHE_GHA_ENABLED: 'true'
+          RUSTC_WRAPPER: 'sccache'
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      # - uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ~/.cargo/registry
+      #       ~/.cargo/git
+      #       node_modules
+      #     key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.json') }}
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: build wasm
+        run: pnpm wasm:build
+
+      - name: install frontend dependencies
+        run: pnpm install
+
+      # Tauri Build + Release Upload
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCCACHE_GHA_ENABLED: 'true'
+          RUSTC_WRAPPER: 'sccache'
+        with:
+          releaseName: 'sledge-actions-test-0.0.1'
+          appName: 'sledge'
+          appVersion: 'actions-test-0.0.1'
+          projectPath: './apps/sledge'
+          releaseDraft: false
+          prerelease: false
+          args: "${{ matrix.platform == 'ubuntu-latest' && '--target x86_64-unknown-linux-gnu' || '' }}"

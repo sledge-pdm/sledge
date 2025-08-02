@@ -37,10 +37,12 @@ repomix-output.xml
 node_modules
 
 *.lnk
-.github
+.github/instructions
 .repomix
 # .vscode
 
 target
 
 post_build.bat
+
+apps\sledge\src-tauri\.cargo\config.toml

@@ -1,9 +1,18 @@
 use eframe::egui;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
+
 #[cfg(target_os = "windows")]
 use winit::platform::windows::EventLoopBuilderExtWindows;
+
+#[cfg(target_os = "macos")]
+use winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
+
+#[cfg(target_os = "linux")]
+use winit::platform::wayland::EventLoopBuilderExtWayland;
+// #[cfg(target_os = "linux")]
+// use winit::platform::x11::EventLoopBuilderExtX11;
 
 pub struct SplashScreen {
     start_time: Instant,
@@ -151,12 +160,31 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
         use eframe::egui::ViewportBuilder;
 
         // Windowsで任意のスレッドからイベントループを作成
-        #[cfg(target_os = "windows")]
+        #[cfg(any(target_os = "windows"))]
         let event_loop_builder: Option<
             Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
         > = Some(Box::new(|builder| {
             builder.with_any_thread(true);
         }));
+
+        #[cfg(target_os = "linux")]
+        let event_loop_builder: Option<
+            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
+        > = Some(Box::new(|builder| {
+            builder.with_any_thread(true);
+        }));
+
+        #[cfg(target_os = "macos")]
+        let event_loop_builder: Option<
+            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
+        > = Some(Box::new(|builder| {
+            builder.with_activation_policy(ActivationPolicy::Regular);
+        }));
+
+        #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
+        let event_loop_builder: Option<
+            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
+        > = None;
 
         let options = eframe::NativeOptions {
             viewport: ViewportBuilder::default()

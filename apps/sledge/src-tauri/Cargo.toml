@@ -1,10 +1,10 @@
 [package]
-name = "sledge"
-version = "0.1.0"
-description = "A playful pixel drawing tool"
+name = "sledge-prealpha"
+version = "0.0.1"
+description = "Simply destructive drawing tool."
 authors = ["innsbluck"]
 license = ""
-repository = ""
+repository = "https://github.com/Innsbluck-rh/sledge"
 edition = "2024"
 rust-version = "1.86.0"
 

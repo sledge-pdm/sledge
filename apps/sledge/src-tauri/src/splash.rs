@@ -10,7 +10,11 @@ use winit::platform::windows::EventLoopBuilderExtWindows;
 use winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
 
 #[cfg(target_os = "linux")]
-use winit::platform::unix::EventLoopBuilderExtUnix;
+use tao::platform::unix::EventLoopBuilderExtUnix;
+#[cfg(target_os = "linux")]
+use winit::platform::wayland::EventLoopBuilderExtWayland;
+#[cfg(target_os = "linux")]
+use winit::platform::x11::EventLoopBuilderExtX11;
 
 pub struct SplashScreen {
     start_time: Instant,

@@ -2,8 +2,10 @@ import { getTheme, vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
+import SaveSection from '~/components/global/SaveSection';
 import TopMenuBar from '~/components/global/TopMenuBar';
 import { setBottomBarText } from '~/controllers/log/LogController';
+import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/ProjectStores';
 import {
@@ -12,7 +14,9 @@ import {
   titleBarControlCloseButtonContainer,
   titleBarControls,
   titleBarRoot,
+  titleBarSaveSection,
   titleBarTitle,
+  titleBarTitleContainer,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
 
@@ -24,15 +28,15 @@ export default function TitleBar() {
   const [isMaximizable, setIsMaximizable] = createSignal(false);
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
-  const [title, setTitle] = createSignal('');
   const [isMaximized, setMaximized] = createSignal(false);
+  const [windowTitle, setWindowTitle] = createSignal('');
 
   onMount(async () => {
     const window = getCurrentWindow();
     setIsMaximizable(await window.isMaximizable());
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
-    setTitle(await window.title());
+    setWindowTitle(await window.title());
     titleBarNavEl.addEventListener('pointerdown', (e: PointerEvent) => {
       setBottomBarText(e.buttons.toString() + ' ' + e.pointerType + ' ' + Date.now());
     });
@@ -44,17 +48,9 @@ export default function TitleBar() {
 
   createEffect(() => {
     if (isEditor()) {
-      let pathText = '';
-      let isSavedText = '';
-      if (projectStore.path !== undefined && projectStore.path !== '') {
-        pathText += projectStore.isProjectChangedAfterSave ? '(unsaved)' : '';
-        pathText += ' - ' + projectStore.path;
-      } else {
-        pathText += '(not saved yet)';
-      }
-
-      setTitle(`${projectStore.name} ${pathText}`);
-      getCurrentWindow().setTitle(`${projectStore.name} ${pathText}`);
+      getCurrentWindow().setTitle(
+        `${projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'} ${fileStore.location.path ? `(${fileStore.location.path})` : ''}`
+      );
     }
   });
 
@@ -71,8 +67,24 @@ export default function TitleBar() {
         }}
       >
         <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
-          <p class={titleBarTitle}>{shouldShowTitle() ? `${title()}` : ''}</p>
+          <div class={titleBarTitleContainer}>
+            <Show when={shouldShowTitle()}>
+              <p class={titleBarTitle} style={{ opacity: 0.5 }}>
+                {projectStore.lastSavedAt && `${fileStore.location.path}\\`}
+              </p>
+              <Show when={isEditor()} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
+                <p class={titleBarTitle}>{projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'}</p>
+              </Show>
+            </Show>
+          </div>
 
+          <Show when={isEditor()}>
+            <div class={titleBarSaveSection}>
+              <SaveSection />
+            </div>
+
+            <div style={{ height: '20px', width: '1px', 'background-color': vars.color.border, 'margin-left': '2px', 'margin-right': '12px' }} />
+          </Show>
           <div class={titleBarControls} data-tauri-drag-region-exclude>
             <Show when={isMinimizable()}>
               <div

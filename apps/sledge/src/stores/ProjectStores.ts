@@ -12,10 +12,12 @@ export type ImagePoolStore = {
   entries: ReactiveMap<string, ImagePoolEntry>;
 };
 export type ProjectStore = {
-  name: string | undefined;
-  path: string | undefined;
   thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
+  lastSavedAt: Date | undefined;
+
+  autoSaveEnabled?: boolean;
+  autoSaveInterval?: number; // in seconds
 };
 export type LayerListStore = {
   layers: Layer[];
@@ -33,10 +35,11 @@ const defaultImagePoolStore: ImagePoolStore = {
   entries: new ReactiveMap(),
 };
 const defaultProjectStore: ProjectStore = {
-  name: undefined as string | undefined,
-  path: undefined as string | undefined,
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
+  lastSavedAt: undefined as Date | undefined,
+  autoSaveEnabled: true,
+  autoSaveInterval: 30,
 };
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),

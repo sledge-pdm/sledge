@@ -27,10 +27,3 @@ export const canvasSizeInput = style({
 export const canvasSizeButton = style({
   margin: `${vars.spacing.xs} 0`,
 });
-
-export const canvasSizeResetAllLayerButton = style({
-  borderColor: vars.color.error,
-  color: vars.color.error,
-
-  marginTop: vars.spacing.lg,
-});

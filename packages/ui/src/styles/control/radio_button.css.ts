@@ -1,6 +1,6 @@
 import { vars } from '@sledge/theme';
-import { style } from '@vanilla-extract/css';
 import { checkboxWrapper } from '@styles/control/checkbox.css';
+import { style } from '@vanilla-extract/css';
 
 export const radioWrapper = checkboxWrapper; // チェックボックスと共通でOK！
 
@@ -28,7 +28,7 @@ export const customRadio = style({
       top: '2px',
       width: '6px',
       height: '6px',
-      backgroundColor: vars.color.active,
+      backgroundColor: vars.color.enabled,
       opacity: 0,
       transition: 'opacity 0.1s',
     },

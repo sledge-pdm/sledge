@@ -173,6 +173,7 @@ const CanvasOverlaySVG: Component = (props) => {
         </Show>
 
         <path
+          id='selection-outline'
           ref={(el) => (outlineRef = el)}
           d={pathCmdList().toString(interactStore.zoom)}
           fill='none'

@@ -13,11 +13,14 @@ type LastSettingsStore = {
 };
 
 const KEY_CONFIG_TEMPLATE: Readonly<KeyConfigStore> = {
+  save: [{ ctrl: true, key: 's' }],
   undo: [{ ctrl: true, key: 'z' }],
   redo: [{ ctrl: true, key: 'y' }],
   pen: [{ key: 'p' }],
   eraser: [{ key: 'e' }],
   fill: [{ key: 'f' }],
+  sizeIncrease: [{ key: ']' }],
+  sizeDecrease: [{ key: '[' }],
   pipette: [{ alt: true }],
   'selection move': [{ shift: true }],
 } as const;

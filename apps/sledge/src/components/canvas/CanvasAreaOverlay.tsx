@@ -4,7 +4,6 @@ import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
 import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
 import PixelCursor from '~/components/canvas/overlays/cursors/PixelCursor';
 import PipetteDetail from '~/components/canvas/overlays/PipetteDetail';
-import SelectionMenu from '~/components/canvas/overlays/SelectionMenu';
 import { getActiveToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -28,8 +27,6 @@ const CanvasAreaOverlay: Component = () => {
         <PipetteCursor mousePos={{ x: pos.x, y: pos.y }} />
         <PipetteDetail />
       </Show>
-
-      <SelectionMenu />
     </>
   );
 };

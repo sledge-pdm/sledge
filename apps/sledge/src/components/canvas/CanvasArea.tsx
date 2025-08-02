@@ -3,7 +3,6 @@ import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
 
-import { vars } from '@sledge/theme';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
 import { setInteractStore } from '~/stores/EditorStores';
@@ -13,6 +12,7 @@ import { listenEvent } from '~/utils/TauriUtils';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
+import { OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CanvasArea: Component = () => {
@@ -89,7 +89,6 @@ const CanvasArea: Component = () => {
           style={{
             width: 'fit-content',
             height: 'fit-content',
-            'background-color': vars.color.canvas,
             padding: 0,
             margin: 0,
             'transform-origin': '0 0',
@@ -99,9 +98,9 @@ const CanvasArea: Component = () => {
         </div>
 
         <CanvasAreaOverlay />
-
         <CanvasDebugOverlay />
       </div>
+      <OuterSelectionMenu />
 
       <CanvasControls />
     </div>

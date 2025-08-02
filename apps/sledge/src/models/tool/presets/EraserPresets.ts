@@ -15,32 +15,32 @@ export const eraserPresetFields: PresetFieldMeta[] = [
     tips: 'Eraser brush size',
     customFormat: '[value]px',
   },
-  {
-    key: 'shape',
-    label: 'Shape',
-    component: 'Dropdown',
-    props: {
-      options: [
-        { value: 'circle', label: 'Circle' },
-        { value: 'square', label: 'Square' },
-      ],
-    },
-    tips: 'Eraser brush shape',
-  },
-  {
-    key: 'hardness',
-    label: 'Hardness',
-    component: 'Slider',
-    props: {
-      min: 0.0,
-      max: 1.0,
-      step: 0.1,
-      allowFloat: true,
-      floatSignificantDigits: 2,
-    },
-    tips: 'Eraser edge hardness',
-    customFormat: '[value]%',
-  },
+  // {
+  //   key: 'shape',
+  //   label: 'Shape',
+  //   component: 'Dropdown',
+  //   props: {
+  //     options: [
+  //       { value: 'circle', label: 'Circle' },
+  //       { value: 'square', label: 'Square' },
+  //     ],
+  //   },
+  //   tips: 'Eraser brush shape',
+  // },
+  // {
+  //   key: 'hardness',
+  //   label: 'Hardness',
+  //   component: 'Slider',
+  //   props: {
+  //     min: 0.0,
+  //     max: 1.0,
+  //     step: 0.1,
+  //     allowFloat: true,
+  //     floatSignificantDigits: 2,
+  //   },
+  //   tips: 'Eraser edge hardness',
+  //   customFormat: '[value]%',
+  // },
 ];
 
 export const eraserPresetMeta: ToolPresetMeta = {

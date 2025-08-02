@@ -22,8 +22,9 @@ export type GlobalConfig = {
   };
   editor: {
     cursor: Cursor;
-    centerCanvasWhenWindowResized: boolean;
+    rotateDegreePerWheelScroll: number;
     showPointedPixel: boolean;
+    centerCanvasWhenWindowResized: boolean;
   };
   performance: {
     canvasRenderingMode: CanvasRenderingMode;
@@ -47,9 +48,10 @@ export const defaultConfig: GlobalConfig = {
     canvasSize: { width: 1000, height: 1000 },
   },
   editor: {
-    cursor: 'pixel',
+    cursor: 'cross',
+    rotateDegreePerWheelScroll: 1,
     centerCanvasWhenWindowResized: true,
-    showPointedPixel: false,
+    showPointedPixel: true,
   },
   performance: {
     canvasRenderingMode: 'adaptive',

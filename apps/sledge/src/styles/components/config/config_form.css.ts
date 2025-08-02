@@ -57,8 +57,7 @@ export const configFormFields = style([
 
 export const configFormNoPreset = style([
   {
-    marginTop: vars.spacing.xl,
-    marginBottom: vars.spacing.sm,
+    marginTop: vars.spacing.lg,
     color: vars.color.muted,
     alignSelf: 'center',
   },
@@ -68,7 +67,7 @@ export const configFormFieldHeader = style([
   {
     marginTop: vars.spacing.xl,
     marginBottom: vars.spacing.sm,
-    fontSize: '20px',
+    fontSize: '19px',
     fontFamily: ZFB31,
     color: vars.color.accent,
   },
@@ -85,11 +84,15 @@ export const configFormFieldItem = style([
 export const configFormFieldLabelTooltip = style({
   width: 'fit-content',
   fontFamily: ZFB09,
-  color: '#aaa',
+  color: vars.color.muted,
+  cursor: 'help',
+  ':hover': {
+    color: vars.color.active,
+  },
 });
 
 export const configFormFieldLabel = style({
-  width: '100%',
+  // width: '100%',
   fontFamily: ZFB09,
   // textDecoration: 'underline',
   verticalAlign: 'middle',

@@ -1,7 +1,7 @@
 import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown } from '@sledge/ui';
-import { Component, onMount, Show } from 'solid-js';
+import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
@@ -46,9 +46,18 @@ const Selection: Component = () => {
     setToolStore('selectionFillMode', newMode);
   };
 
+  const [isSelected, setIsSelected] = createSignal(selectionManager.isSelected());
+
+  onMount(() => {
+    setIsSelected(selectionManager.isSelected());
+    eventBus.on('selection:stateChanged', () => {
+      setIsSelected(selectionManager.isSelected());
+    });
+  });
+
   return (
     <div class={sectionRoot}>
-      <Show when={selectionManager.isSelected()}>
+      <Show when={isSelected()}>
         <p class={sectionCaption}>selection.</p>
         <div class={sectionContent}>
           <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '12px', 'margin-bottom': vars.spacing.md, 'margin-top': vars.spacing.sm }}>
@@ -113,7 +122,7 @@ const Selection: Component = () => {
             </Show>
           </div>
 
-          <div class={flexRow} style={{ 'flex-wrap': 'wrap', 'row-gap': '2px' }}>
+          {/* <div class={flexRow} style={{ 'flex-wrap': 'wrap', 'row-gap': '2px' }}>
             <p>
               {mode()}
               &nbsp;/&nbsp;
@@ -133,7 +142,7 @@ const Selection: Component = () => {
             <p>
               Offset: {selectionStatus.offset.x}, {selectionStatus.offset.y}
             </p>
-          </div>
+          </div> */}
         </div>
       </Show>
     </div>

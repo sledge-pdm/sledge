@@ -5,9 +5,11 @@ import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { addRecentFile } from '~/controllers/config/RecentFileController';
 import { dumpProject } from '~/io/project/out/dump';
-import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
-import { PathToFileLocation } from '~/utils/PathUtils';
+import { eventBus } from '~/utils/EventBus';
+import { PathToFileLocation as pathToFileLocation } from '~/utils/PathUtils';
 import getFileId from '../../../utils/getFileId';
 
 async function folderSelection(name?: string) {
@@ -21,9 +23,12 @@ async function folderSelection(name?: string) {
   }
 
   const home = await path.homeDir();
+
+  const nameWithoutExtension = fileStore.location.name?.replace(/\.sledge$/, '') ?? 'new project';
+
   return await save({
     title: 'save sledge project',
-    defaultPath: await path.join(home, `sledge/${name ?? projectStore.name ?? 'untitled'}.sledge`),
+    defaultPath: await path.join(home, `sledge/${nameWithoutExtension}.sledge`),
     filters: [{ name: 'sledge project', extensions: ['sledge'] }],
   });
 }
@@ -37,30 +42,47 @@ async function saveThumbnailData(selectedPath: string) {
   return await saveThumbnailExternal(fileId, thumbnailDataUrl);
 }
 
-export async function saveProject(name?: string, existingPath?: string) {
+export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
   let selectedPath: string | null;
 
   if (existingPath) {
-    selectedPath = existingPath;
+    selectedPath = `${existingPath}\\${name}`;
   } else {
     selectedPath = await folderSelection(name);
   }
 
   if (typeof selectedPath === 'string') {
-    setProjectStore('path', selectedPath);
-    const thumbpath = await saveThumbnailData(selectedPath);
+    try {
+      const thumbpath = await saveThumbnailData(selectedPath);
 
-    // const data = await dumpProject();
-    // await writeTextFile(selectedPath, data);
-    const data = await dumpProject();
-    await writeFile(selectedPath, data);
-    console.log('project saved to:', selectedPath);
+      const data = await dumpProject();
+      await writeFile(selectedPath, data);
+      console.log('project saved to:', selectedPath);
+      addRecentFile(pathToFileLocation(selectedPath));
 
-    setProjectStore('isProjectChangedAfterSave', false);
-    addRecentFile(PathToFileLocation(selectedPath));
-  } else {
-    console.log('save cancelled');
+      const location = pathToFileLocation(selectedPath);
+      if (location) {
+        setFileStore('location', location);
+        // setLastSettingsStore('exportSettings', 'dirPath', location.path);
+      }
+      // @ts-ignore
+      window.__PATH__ = selectedPath;
+
+      setProjectStore('lastSavedAt', new Date());
+      eventBus.emit('project:saved', { path: selectedPath });
+
+      setProjectStore('isProjectChangedAfterSave', false);
+
+      return true;
+    } catch (error) {
+      console.error('Error saving project:', error);
+      eventBus.emit('project:saveFailed', { error: error });
+      return false;
+    }
   }
+
+  eventBus.emit('project:saveCancelled', {});
+  return false;
 }
 
 export const thumbnailDir = async () => (await appDataDir()) + '\\sledge\\thumbnails\\';

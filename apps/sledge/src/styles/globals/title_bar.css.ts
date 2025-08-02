@@ -13,15 +13,31 @@ export const titleBarRoot = style([
   },
 ]);
 
-export const titleBarTitle = style([
+export const titleBarTitleContainer = style([
   flexRow,
   w100,
+  {
+    marginRight: 'auto',
+    paddingLeft: '24px',
+  },
+]);
+export const titleBarTitle = style([
   {
     width: 'fit-content',
     fontFamily: ZFB08,
     fontSize: vars.text.sm,
-    marginRight: 'auto',
-    paddingLeft: '24px',
+    whiteSpace: 'pre',
+  },
+]);
+
+export const titleBarSaveSection = style([
+  flexRow,
+  {
+    width: 'fit-content',
+    height: '100%',
+    alignItems: 'center',
+
+    margin: '0 12px',
   },
 ]);
 
@@ -36,8 +52,8 @@ export const titleBarControlButtonContainer = style([
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '24px',
-    paddingLeft: '14px',
-    paddingRight: '14px',
+    paddingLeft: '16px',
+    paddingRight: '16px',
     pointerEvents: 'all',
 
     ':hover': {

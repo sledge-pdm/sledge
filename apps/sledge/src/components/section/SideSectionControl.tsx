@@ -1,5 +1,6 @@
 import { Component, For } from 'solid-js';
-import { appearanceStore, SectionTab, setAppearanceStore } from '~/stores/EditorStores';
+import { SectionTab } from '~/components/section/SectionTabs';
+import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
 
 import {
   sideSectionControlItem,
@@ -15,11 +16,15 @@ interface ItemProps {
   index: number;
 }
 const ControlItem: Component<ItemProps> = (props) => {
-  const selected = () => appearanceStore[props.side].selectedIndex === props.index;
+  const selected = () => appearanceStore[props.side].selectedIndex === props.index && appearanceStore[props.side].shown;
   return (
-    <div class={sideSectionControlItem}>
+    <div
+      class={sideSectionControlItem}
+      style={{ 'margin-top': props.tab === 'perilous' ? 'auto' : undefined, 'margin-bottom': props.tab === 'perilous' ? '16px' : undefined }}
+    >
       <a
         class={selected() ? sideSectionControlTextActive : sideSectionControlText}
+        style={{ color: props.tab === 'perilous' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
         onClick={() => {
           if (!appearanceStore[props.side].shown) {
             setAppearanceStore(props.side, 'shown', true);
@@ -55,8 +60,8 @@ const SideSectionControl: Component<Props> = (props) => {
     <div
       class={sideSectionControlRoot}
       style={{
-        'padding-left': props.side === 'leftSide' ? '6px' : '2px',
-        'padding-right': props.side === 'leftSide' ? '2px' : '6px',
+        'padding-left': props.side === 'leftSide' ? '5px' : '3px',
+        'padding-right': props.side === 'leftSide' ? '3px' : '5px',
       }}
     >
       <p

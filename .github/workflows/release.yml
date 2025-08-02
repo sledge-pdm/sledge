@@ -31,11 +31,11 @@ jobs:
             node_modules
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
+      - name: build wasm
+        run: pnpm approve-builds && pnpm wasm:build
+
       - name: install frontend dependencies
         run: pnpm install
-
-      - name: build wasm
-        run: pnpm wasm:build
 
       # Tauri Build + Release Upload
       - uses: tauri-apps/tauri-action@v0

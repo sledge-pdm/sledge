@@ -2,8 +2,6 @@ name: release
 
 on:
   push:
-    branches:
-      - main
     tags: ['*v*.*.*'] # バージョンタグ push 時のみ
   workflow_dispatch: {} # 手動トリガも可
 
@@ -53,11 +51,11 @@ jobs:
           SCCACHE_GHA_ENABLED: 'true'
           RUSTC_WRAPPER: 'sccache'
         with:
+          releaseId: 'sledge-__VERSION__-prealpha'
           appName: 'sledge'
-          appVersion: '__VERSION__'
+          appVersion: '__VERSION__-prealpha'
           projectPath: './apps/sledge'
-          releaseId: 'sledge-__VERSION__'
-          releaseName: 'sledge-__VERSION__'
-          releaseDraft: true
+          releaseName: 'sledge-__VERSION__-prealpha'
+          releaseDraft: false
           prerelease: true
           args: "${{ matrix.platform == 'ubuntu-latest' && '--target x86_64-unknown-linux-gnu' || '' }}"

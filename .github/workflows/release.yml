@@ -4,7 +4,7 @@ on:
   push:
     # branches:
     #   - test/test-actions
-    tags: ['v*.*.*'] # バージョンタグ push 時のみ
+    tags: ['*v*.*.*'] # バージョンタグ push 時のみ
   workflow_dispatch: {} # 手動トリガも可
 
 jobs:

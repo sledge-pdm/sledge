@@ -6,7 +6,7 @@ export const container = style([
   flexRow,
   {
     position: 'fixed',
-    // border: `1px solid ${vars.color.onBackground}`,
+    border: `1px solid ${vars.color.onBackground}`,
     backgroundColor: vars.color.surface,
     pointerEvents: 'all',
   },

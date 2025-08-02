@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { getReferencedZoom } from '~/controllers/canvas/CanvasController';
+import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/controllers/canvas/CanvasController';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -77,7 +77,7 @@ class CanvasAreaInteract {
         this.pointers.set(e.pointerId, now);
         const dx = now.x - prev.x,
           dy = now.y - prev.y;
-        setInteractStore('offset', {
+        setOffset({
           x: interactStore.offset.x + dx,
           y: interactStore.offset.y + dy,
         });
@@ -114,15 +114,15 @@ class CanvasAreaInteract {
         const deltaRad = angleNew - this.lastAngle;
         this.lastAngle = angleNew;
         const rotOldDeg = interactStore.rotation;
-        const rotNewDeg = rotOldDeg + (deltaRad * 180) / Math.PI;
+        const rotNewDeg = Math.round(rotOldDeg + (deltaRad * 180) / Math.PI) % 360;
 
         // (6) 適用
-        setInteractStore('zoom', newZoom);
-        setInteractStore('offset', {
+        setZoom(newZoom);
+        setOffset({
           x: interactStore.offset.x + canvasMidX * (zoomOld - newZoom) + dxCanvas,
           y: interactStore.offset.y + canvasMidY * (zoomOld - newZoom) + dyCanvas,
         });
-        setInteractStore('rotation', rotNewDeg);
+        setRotation(rotNewDeg);
 
         this.updateTransform();
       }
@@ -133,7 +133,7 @@ class CanvasAreaInteract {
         if (interactStore.isDragging) {
           const dx = e.clientX - prev.x;
           const dy = e.clientY - prev.y;
-          setInteractStore('offset', {
+          setOffset({
             x: interactStore.offset.x + dx,
             y: interactStore.offset.y + dy,
           });
@@ -163,9 +163,9 @@ class CanvasAreaInteract {
     if (e.shiftKey) {
       const amount = globalConfig.editor.rotateDegreePerWheelScroll;
       if (e.deltaY > 0) {
-        setInteractStore('rotation', interactStore.rotation + amount);
+        setRotation(interactStore.rotation + amount);
       } else {
-        setInteractStore('rotation', interactStore.rotation - amount);
+        setRotation(interactStore.rotation - amount);
       }
       return;
     }
@@ -183,8 +183,8 @@ class CanvasAreaInteract {
     const rect = this.canvasStack.getBoundingClientRect();
     const canvasX = (this.lastPointX - rect.left) / zoomOld;
     const canvasY = (this.lastPointY - rect.top) / zoomOld;
-    setInteractStore('zoom', zoomNew);
-    setInteractStore('offset', {
+    setZoom(zoomNew);
+    setOffset({
       x: interactStore.offset.x + canvasX * (zoomOld - zoomNew),
       y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
     });

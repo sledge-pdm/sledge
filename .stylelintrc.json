@@ -19,6 +19,8 @@
           "justify-self": ["anchor-center"]
         }
       }
-    ]
+    ],
+
+    "shorthand-property-no-redundant-values": null
   }
 }

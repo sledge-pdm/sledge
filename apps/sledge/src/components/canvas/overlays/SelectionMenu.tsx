@@ -6,7 +6,9 @@ import { cancelMove, cancelSelection, commitMove, deletePixelInSelection } from 
 import { eventBus } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
+import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { interactStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import * as styles from '~/styles/components/canvas/overlays/selection_menu.css';
 
 interface ItemProps {
@@ -36,18 +38,28 @@ const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefin
 
 export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   let containerRef: HTMLDivElement;
+  const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
+  const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
+    targetFPS((timeStamp) => {
+      if (!updatePosition()) return;
+      updateMenuPos();
+      setUpdatePosition(false);
+    }, Number(globalConfig.performance.targetFPS))
+  );
 
   const handleOnSelectionChange = () => {
     setSelectionState(selectionManager.getState());
-    updateSelectionMenuPos();
+    setUpdatePosition(true);
   };
 
   onMount(() => {
+    startRenderLoop();
     eventBus.on('selection:areaChanged', handleOnSelectionChange);
     eventBus.on('selection:moved', handleOnSelectionChange);
     eventBus.on('selection:stateChanged', handleOnSelectionChange);
   });
   onCleanup(() => {
+    stopRenderLoop();
     eventBus.off('selection:areaChanged', handleOnSelectionChange);
     eventBus.off('selection:moved', handleOnSelectionChange);
     eventBus.off('selection:stateChanged', handleOnSelectionChange);
@@ -58,12 +70,12 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     interactStore.rotation;
     interactStore.offset.x;
     interactStore.offset.y;
-    updateSelectionMenuPos();
+    setUpdatePosition(true);
   });
 
   const [selectionMenuPos, setSelectionMenuPos] = createSignal<Vec2>({ x: 0, y: 0 });
 
-  const updateSelectionMenuPos = () => {
+  const updateMenuPos = () => {
     const outlineBound = selectionManager.getSelectionMask().getBoundBox();
     if (!outlineBound) return;
 

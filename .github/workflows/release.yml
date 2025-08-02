@@ -40,7 +40,7 @@ jobs:
           version: 'latest'
 
       - name: build wasm
-        run: pnpm approve-builds && pnpm wasm:build
+        run: pnpm wasm:build
 
       - name: install frontend dependencies
         run: pnpm install

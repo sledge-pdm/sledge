@@ -1,9 +1,12 @@
 use eframe::egui;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 #[cfg(target_os = "windows")]
 use winit::platform::windows::EventLoopBuilderExtWindows;
+
+#[cfg(target_os = "macos")]
+use winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
 
 pub struct SplashScreen {
     start_time: Instant,
@@ -151,11 +154,42 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
         use eframe::egui::ViewportBuilder;
 
         // Windowsで任意のスレッドからイベントループを作成
-        #[cfg(target_os = "windows")]
+        #[cfg(any(target_os = "windows"))]
         let event_loop_builder: Option<
             Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
         > = Some(Box::new(|builder| {
             builder.with_any_thread(true);
+        }));
+
+        #[cfg(target_os = "linux")]
+        match env::var("XDG_SESSION_TYPE") {
+            Ok(session_type) => {
+                if session_type == "wayland" {
+                    use winit::platform::wayland::EventLoopBuilderExtWayland;
+                } else if session_type == "x11" {
+                    use winit::platform::x11::EventLoopBuilderExtX11;
+                } else {
+                    println!("Unknown XDG_SESSION_TYPE: {}", session_type);
+                }
+            }
+            Err(_) => {
+                // If XDG_SESSION_TYPE is not set, it's likely X11,
+                // or a non-standard desktop environment.
+                // You can also check for WAYLAND_DISPLAY for more certainty.
+                match env::var("WAYLAND_DISPLAY") {
+                    Ok(_) => println!("Running on Wayland (WAYLAND_DISPLAY found)."),
+                    Err(_) => println!(
+                        "Could not determine display server (XDG_SESSION_TYPE not set, WAYLAND_DISPLAY not found). Likely X11."
+                    ),
+                }
+            }
+        }
+
+        #[cfg(target_os = "macos")]
+        let event_loop_builder: Option<
+            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
+        > = Some(Box::new(|builder| {
+            builder.with_activation_policy(ActivationPolicy::Regular);
         }));
 
         let options = eframe::NativeOptions {

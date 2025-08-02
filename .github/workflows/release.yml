@@ -53,10 +53,10 @@ jobs:
           SCCACHE_GHA_ENABLED: 'true'
           RUSTC_WRAPPER: 'sccache'
         with:
-          releaseName: 'sledge-__VERSION__'
           appName: 'sledge'
           appVersion: '__VERSION__'
           projectPath: './apps/sledge'
-          releaseDraft: false
-          prerelease: false
+          releaseName: 'sledge-__VERSION__'
+          releaseDraft: true
+          prerelease: true
           args: "${{ matrix.platform == 'ubuntu-latest' && '--target x86_64-unknown-linux-gnu' || '' }}"

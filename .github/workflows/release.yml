@@ -18,7 +18,7 @@ jobs:
 
       # Node & Rust 環境セットアップ
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: 'latest' }
       - uses: dtolnay/rust-toolchain@stable
       - uses: pnpm/action-setup@v4
 

@@ -5373,8 +5373,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04dc19736151f35336d325007ac991178d504a119863a2fcb3758cdb5e52c50d"
 
 [[package]]
-name = "sledge"
-version = "0.1.0"
+name = "sledge-prealpha"
+version = "0.0.1"
 dependencies = [
  "base64 0.21.7",
  "chrono",

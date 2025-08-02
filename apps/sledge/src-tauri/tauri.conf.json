@@ -1,8 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "sledge",
-  "version": "0.1.0",
-  "identifier": "com.innsbluck",
+  "identifier": "com.innsbluck.sledge-prealpha",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",

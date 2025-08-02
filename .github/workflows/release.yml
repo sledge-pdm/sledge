@@ -53,9 +53,9 @@ jobs:
           SCCACHE_GHA_ENABLED: 'true'
           RUSTC_WRAPPER: 'sccache'
         with:
-          releaseName: 'sledge-actions-test-0.0.1'
+          releaseName: 'sledge-__VERSION__'
           appName: 'sledge'
-          appVersion: 'actions-test-0.0.1'
+          appVersion: '__VERSION__'
           projectPath: './apps/sledge'
           releaseDraft: false
           prerelease: false

@@ -7,6 +7,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -52,10 +54,8 @@ jobs:
           RUSTC_WRAPPER: 'sccache'
         with:
           releaseId: 'sledge-__VERSION__-prealpha'
-          appName: 'sledge'
-          appVersion: '__VERSION__-prealpha'
           projectPath: './apps/sledge'
           releaseName: 'sledge-__VERSION__-prealpha'
           releaseDraft: false
-          prerelease: true
+          prerelease: false
           args: "${{ matrix.platform == 'ubuntu-latest' && '--target x86_64-unknown-linux-gnu' || '' }}"

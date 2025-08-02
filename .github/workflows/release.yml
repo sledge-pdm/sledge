@@ -1,0 +1,48 @@
+name: release
+
+on:
+  push:
+    branches:
+      - test/test-actions
+    # tags: ['v*.*.*'] # バージョンタグ push 時のみ
+  workflow_dispatch: {} # 手動トリガも可
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node & Rust 環境セットアップ
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: dtolnay/rust-toolchain@stable
+
+      # キャッシュ (npm, cargo)
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: install frontend dependencies
+        run: pnpm install
+
+      - name: build wasm
+        run: pnpm wasm:build
+
+      # Tauri Build + Release Upload
+      - uses: tauri-apps/tauri-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: './apps/sledge'
+          tagName: ${{ github.ref_name }}
+          releaseDraft: false
+          prerelease: false
+          args: "--target ${{ matrix.platform == 'ubuntu-latest' && 'x86_64-unknown-linux-gnu' || '' }}"

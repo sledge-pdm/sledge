@@ -37,7 +37,7 @@ repomix-output.xml
 node_modules
 
 *.lnk
-.github
+.github/instructions
 .repomix
 # .vscode
 

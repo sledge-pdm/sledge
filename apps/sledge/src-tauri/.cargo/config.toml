@@ -1,2 +1,0 @@
-[build]
-rustc-wrapper="c:/Users/innsb/scoop/apps/sccache/0.10.0/sccache.exe"

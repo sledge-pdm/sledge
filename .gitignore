@@ -44,3 +44,5 @@ node_modules
 target
 
 post_build.bat
+
+apps\sledge\src-tauri\.cargo\config.toml

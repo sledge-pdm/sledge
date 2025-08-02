@@ -7,9 +7,6 @@ export const canvasArea = style([
   {
     backgroundColor: vars.color.canvasArea,
     display: 'flex',
-    position: 'relative',
-    height: '100%',
-    width: '100%',
     overflow: 'hidden',
     margin: 0,
     padding: 0,

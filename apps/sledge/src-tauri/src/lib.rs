@@ -87,7 +87,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init());
 
     builder
-        .setup(|app| {
+        .setup(
+            #[allow(unused_variables)]
+            |app| {
             #[cfg(any(windows, target_os = "linux"))]
             {
                 let mut files = Vec::new();

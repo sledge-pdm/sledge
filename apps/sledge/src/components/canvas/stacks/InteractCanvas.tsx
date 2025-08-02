@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
@@ -40,25 +41,14 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function getCanvasMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
-    const offset = getOffset();
+    // pointer 座標
+    const clientX = 'clientX' in e ? e.clientX : e.touches[0].clientX;
+    const clientY = 'clientY' in e ? e.clientY : e.touches[0].clientY;
 
-    let x = 0;
-    let y = 0;
-
-    if ('clientX' in e && 'clientY' in e) {
-      x = e.clientX;
-      y = e.clientY;
-    } else if ('touches' in e && e.touches.length > 0) {
-      x = e.touches[0].clientX;
-      y = e.touches[0].clientY;
-    }
-
-    const zoom = interactStore.zoom;
-
-    return {
-      x: (x - offset.x) / zoom,
-      y: (y - offset.y) / zoom,
-    };
+    return clientPositionToCanvasPosition({
+      x: clientX,
+      y: clientY,
+    });
   }
 
   function isIgnoreClick(e: PointerEvent): boolean {
@@ -136,7 +126,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (isIgnoreClick(e)) return;
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.end, e, getCurrentToolCategory(), position, lastPos());
-    if (interactStore.isInStroke) endStroke(position);
+    endStroke(position);
   }
 
   function handlePointerOut(e: PointerEvent) {
@@ -179,7 +169,6 @@ export const InteractCanvas: Component<Props> = (props) => {
   });
 
   onCleanup(() => {
-    if (import.meta.hot) return;
     canvasRef!.removeEventListener('pointerdown', handlePointerDown);
     canvasRef!.removeEventListener('pointerout', handlePointerOut);
     window.removeEventListener('pointerup', handlePointerUp);
@@ -190,6 +179,7 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   return (
     <canvas
+      id='interact-canvas'
       ref={(el) => {
         canvasRef = el;
       }}

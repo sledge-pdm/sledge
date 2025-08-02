@@ -2,13 +2,11 @@ import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 
 import { flexCol } from '@sledge/core';
 import { createScrollPosition } from '@solid-primitives/scroll';
-import interact from 'interactjs';
 import { EditorTab, EffectsTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
-import { eventBus } from '~/utils/EventBus';
 
 interface Props {
   side: 'leftSide' | 'rightSide';
@@ -30,35 +28,32 @@ const SideSections: Component<Props> = (props) => {
   });
 
   onMount(() => {
-    interact('#side_sections').resizable({
-      edges: { right: true, left: true },
-      modifiers: [
-        interact.modifiers.restrictSize({
-          min: { width: 280, height: -1 },
-          max: { width: 600, height: -1 },
-        }),
-      ],
-      listeners: {
-        start: function (event) {
-          event.stopPropagation();
-          Object.assign(event.target.style, {
-            width: `${event.rect.width}px`,
-          });
-        },
-        move: function (event) {
-          event.stopPropagation();
-          let { x, y } = event.target.dataset;
-
-          x = (parseFloat(x) || 0) + event.deltaRect.left;
-
-          Object.assign(event.target.style, {
-            width: `${event.rect.width}px`,
-          });
-
-          eventBus.emit('window:sideSectionSideChanged', {});
-        },
-      },
-    });
+    // interact('#side_sections').resizable({
+    //   edges: { right: true, left: true },
+    //   modifiers: [
+    //     interact.modifiers.restrictSize({
+    //       min: { width: 280, height: -1 },
+    //       max: { width: 600, height: -1 },
+    //     }),
+    //   ],
+    //   listeners: {
+    //     start: function (event) {
+    //       event.stopPropagation();
+    //       Object.assign(event.target.style, {
+    //         width: `${event.rect.width}px`,
+    //       });
+    //     },
+    //     move: function (event) {
+    //       event.stopPropagation();
+    //       let { x, y } = event.target.dataset;
+    //       x = (parseFloat(x) || 0) + event.deltaRect.left;
+    //       Object.assign(event.target.style, {
+    //         width: `${event.rect.width}px`,
+    //       });
+    //       eventBus.emit('window:sideSectionSideChanged', {});
+    //     },
+    //   },
+    // });
   });
 
   const tabContent = (tab: SectionTab) => {

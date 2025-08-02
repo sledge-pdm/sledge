@@ -41,6 +41,7 @@ type InteractStore = {
   offsetOrigin: Vec2;
   offset: Vec2;
   isDragging: boolean;
+  rotation: number;
 };
 type LogStore = {
   bottomBarText: string;
@@ -94,6 +95,8 @@ const defaultInteractStore: InteractStore = {
   // オフセットの初期値
   offsetOrigin: { x: 0, y: 0 },
   offset: { x: 0, y: 0 },
+
+  rotation: 0,
 
   isDragging: false,
 };

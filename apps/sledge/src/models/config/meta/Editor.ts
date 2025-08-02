@@ -18,10 +18,16 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: Sections.Editor,
-    path: ['editor', 'centerCanvasWhenWindowResized'],
-    label: 'centering canvas when window resized',
-    component: 'ToggleSwitch',
-    tips: `centering canvas when window resized.`,
+    path: ['editor', 'rotateDegreePerWheelScroll'],
+    label: 'rotate degree per wheel',
+    component: 'Slider',
+    props: {
+      min: 1,
+      max: 45,
+      step: 1,
+      customFormat: '[value]°',
+    },
+    tips: `the amount of rotation per wheel scroll.`,
   },
   {
     section: Sections.Editor,
@@ -29,5 +35,12 @@ export const editorMetas: FieldMeta[] = [
     label: 'show pointed pixel',
     component: 'ToggleSwitch',
     tips: `whether if shows pointed pixel as rect.`,
+  },
+  {
+    section: Sections.Editor,
+    path: ['editor', 'centerCanvasWhenWindowResized'],
+    label: 'centering canvas when window resized',
+    component: 'ToggleSwitch',
+    tips: `centering canvas when window resized.`,
   },
 ];

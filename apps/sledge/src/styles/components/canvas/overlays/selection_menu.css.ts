@@ -5,7 +5,8 @@ import { style } from '@vanilla-extract/css';
 export const container = style([
   flexRow,
   {
-    border: `1px solid ${vars.color.onBackground}`,
+    position: 'fixed',
+    // border: `1px solid ${vars.color.onBackground}`,
     backgroundColor: vars.color.surface,
     pointerEvents: 'all',
   },

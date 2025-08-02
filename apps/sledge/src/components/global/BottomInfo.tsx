@@ -1,6 +1,8 @@
+import { flexRow } from '@sledge/core';
+import { Slider } from '@sledge/ui';
 import { Component } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
-import { interactStore, logStore } from '~/stores/EditorStores';
+import { interactStore, logStore, setInteractStore } from '~/stores/EditorStores';
 
 import {
   bottomInfoContainer,
@@ -21,6 +23,27 @@ const BottomInfo: Component = () => {
           {logStore.bottomBarText}
         </p>
         <div class={bottomInfoContainerRight}>
+          <div class={flexRow} style={{ width: '200px' }}>
+            <Slider
+              labelMode='left'
+              value={interactStore.rotation}
+              min={-180}
+              max={180}
+              allowFloat={false}
+              customFormat='[value]°'
+              onChange={(v) => setInteractStore('rotation', v)}
+              onPointerDownOnValidArea={(e) => {
+                if (e.ctrlKey) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                  setInteractStore('rotation', 0);
+                  return false;
+                }
+                return true;
+              }}
+            />
+          </div>
           {/* <p class={bottomInfoTextStyle}>theme</p> */}
           <ThemeToggle noBackground={true} />
         </div>

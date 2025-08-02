@@ -13,6 +13,7 @@ interface SliderProps {
   customFormat?: string;
   allowDirectInput?: boolean;
   onChange?: (newValue: number) => void;
+  onPointerDownOnValidArea?: (e: PointerEvent | MouseEvent) => boolean;
 }
 
 const Slider: Component<SliderProps> = (props) => {
@@ -32,6 +33,8 @@ const Slider: Component<SliderProps> = (props) => {
     // format (like "[value]px" -> "1200px")
     if (props.customFormat !== undefined) {
       formatted = props.customFormat.replaceAll('[value]', formatted);
+    } else {
+      formatted = `${value}.`;
     }
     return formatted;
   };
@@ -44,8 +47,17 @@ const Slider: Component<SliderProps> = (props) => {
     props.onChange?.(newValue);
   };
 
-  const handlePointerDown = () => {
-    setDrag(true);
+  const onPointerDownOnValidArea = (e: PointerEvent | MouseEvent): boolean => {
+    if (props.onPointerDownOnValidArea) {
+      return props.onPointerDownOnValidArea(e);
+    }
+    return true;
+  };
+
+  const handlePointerDown = (e: PointerEvent) => {
+    const shouldStartDrag = onPointerDownOnValidArea(e);
+    if (shouldStartDrag) setDrag(true);
+    else setDrag(false);
   };
 
   const handlePointerMove = (e: PointerEvent) => {
@@ -64,7 +76,8 @@ const Slider: Component<SliderProps> = (props) => {
   };
 
   const onLineClick = (e: MouseEvent) => {
-    if (!sliderRef) return;
+    const shouldStartDrag = onPointerDownOnValidArea(e);
+    if (!sliderRef || !shouldStartDrag) return;
     const { left, width } = sliderRef.getBoundingClientRect();
     let pos = Math.max(0, Math.min(e.clientX - left, width));
     const raw = props.min + (pos / width) * (props.max - props.min);
@@ -124,7 +137,7 @@ const Slider: Component<SliderProps> = (props) => {
               directInputRef.select();
             }}
           >
-            {getFormattedValue(value())}.
+            {getFormattedValue(value())}
           </p>
         }
       >

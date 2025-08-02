@@ -55,6 +55,7 @@ jobs:
         with:
           releaseId: ${{ github.ref_name }}
           tagName: ${{ github.ref_name }}
+          releaseName: ${{ github.ref_name }}
           projectPath: './apps/sledge'
           releaseDraft: false
           prerelease: false

@@ -58,8 +58,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          appName: "sledge"
-          appVersion: "actions-test-0.0.1"
+          releaseName: 'sledge-actions-test-0.0.1'
+          appName: 'sledge'
+          appVersion: 'actions-test-0.0.1'
           projectPath: './apps/sledge'
           tagName: ${{ github.ref_name }}
           releaseDraft: false

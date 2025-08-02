@@ -1,4 +1,3 @@
-use std::env;
 use eframe::egui;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -162,8 +161,8 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
             builder.with_any_thread(true);
         }));
 
-        #[cfg(target_os = "linux")]
-        match env::var("XDG_SESSION_TYPE") {
+        #[cfg(any(target_os = "linux"))]
+        match std::env::var("XDG_SESSION_TYPE") {
             Ok(session_type) => {
                 if session_type == "wayland" {
                     use winit::platform::wayland::EventLoopBuilderExtWayland;
@@ -177,14 +176,22 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
                 // If XDG_SESSION_TYPE is not set, it's likely X11,
                 // or a non-standard desktop environment.
                 // You can also check for WAYLAND_DISPLAY for more certainty.
-                match env::var("WAYLAND_DISPLAY") {
-                    Ok(_) => println!("Running on Wayland (WAYLAND_DISPLAY found)."),
-                    Err(_) => println!(
-                        "Could not determine display server (XDG_SESSION_TYPE not set, WAYLAND_DISPLAY not found). Likely X11."
-                    ),
+                match std::env::var("WAYLAND_DISPLAY") {
+                    Ok(_) => {
+                        use winit::platform::wayland::EventLoopBuilderExtWayland;
+                    }
+                    Err(_) => {
+                        use winit::platform::x11::EventLoopBuilderExtX11;
+                    }
                 }
             }
         }
+        #[cfg(target_os = "linux")]
+        let event_loop_builder: Option<
+            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
+        > = Some(Box::new(|builder| {
+            builder.with_any_thread(true);
+        }));
 
         #[cfg(target_os = "macos")]
         let event_loop_builder: Option<

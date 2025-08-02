@@ -65,7 +65,6 @@ jobs:
           appName: 'sledge'
           appVersion: 'actions-test-0.0.1'
           projectPath: './apps/sledge'
-          tagName: ${{ github.ref_name }}
           releaseDraft: false
           prerelease: false
           args: "${{ matrix.platform == 'ubuntu-latest' && '--target x86_64-unknown-linux-gnu' || '' }}"

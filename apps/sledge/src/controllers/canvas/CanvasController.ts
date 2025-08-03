@@ -73,6 +73,7 @@ export const centeringCanvas = () => {
     x: 0,
     y: 0,
   });
+  setRotation(0);
 
   eventBus.emit('canvas:onAdjusted', {});
 };

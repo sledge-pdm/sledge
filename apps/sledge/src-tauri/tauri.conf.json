@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "sledge (prealpha)",
+  "productName": "sledge",
   "identifier": "com.innsbluck.sledge",
   "build": {
     "frontendDist": "../dist",

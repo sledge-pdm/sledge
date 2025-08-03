@@ -1,10 +1,12 @@
 use crate::{config, image, project, splash};
-use gtk::prelude::GtkWindowExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use uuid::Uuid;
+
+#[cfg(target_os = "linux")]
+use gtk::prelude::GtkWindowExt;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -223,7 +225,7 @@ pub async fn open_window(
     #[cfg(target_os = "linux")]
     {
         let gtk_window = window.gtk_window();
-        gtk_window.set_titlebar(Option::<&gtk::Widget>::None);
+        gtk_window?.set_titlebar(Option::<&gtk::Widget>::None);
     }
 
     // スプラッシュクローザーをアプリの状態として保存

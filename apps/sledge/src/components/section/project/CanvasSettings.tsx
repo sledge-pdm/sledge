@@ -37,6 +37,9 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
+              onBlur={(e) => {
+                e.target.value = canvasStore.canvas.width.toString();
+              }}
               required
             />
           </div>
@@ -53,6 +56,9 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
+              onBlur={(e) => {
+                e.target.value = canvasStore.canvas.height.toString();
+              }}
               required
             />
           </div>

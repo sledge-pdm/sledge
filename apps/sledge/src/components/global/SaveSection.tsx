@@ -2,6 +2,7 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
+import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
@@ -93,6 +94,15 @@ const SaveSection: Component = () => {
 
   const saveMenu: MenuListOption[] = [
     { label: 'Save As...', onSelect: () => save(true), color: vars.color.onBackground },
+    {
+      label: 'Open Saved Folder',
+      onSelect: () => {
+        if (!fileStore.location.path || !fileStore.location.name) return;
+        revealItemInDir(fileStore.location.path + '\\' + fileStore.location.name);
+      },
+      disabled: !fileStore.location.path || !fileStore.location.name,
+      color: vars.color.onBackground,
+    },
     // { label: 'Save As Layers', onSelect: () => save(true), color: vars.color.onBackground },
   ];
 
@@ -105,34 +115,32 @@ const SaveSection: Component = () => {
       () => {
         if (!projectStore.autoSaveInterval || !projectStore.lastSavedAt) return;
         const diffSec = (new Date().getTime() - projectStore.lastSavedAt.getTime()) / 1000;
-        console.log('diffSec:', diffSec, 'interval:', projectStore.autoSaveInterval);
 
         const intervalRatio = diffSec / projectStore.autoSaveInterval;
         setAutoSaveIntervalRatio(intervalRatio);
-        console.log('intervalRatio:', intervalRatio);
 
-        if (diffSec < 3) {
-          setIconSrc('/icons/progress/circle_check.png');
-          return;
-        }
+        //     if (diffSec < 3) {
+        //       setIconSrc('/icons/progress/circle_check.png');
+        //       return;
+        //     }
 
-        if (intervalRatio < 1 / 8) {
-          setIconSrc('/icons/progress/circle_0.png');
-        } else if (intervalRatio < 2 / 8) {
-          setIconSrc('/icons/progress/circle_1.png');
-        } else if (intervalRatio < 3 / 8) {
-          setIconSrc('/icons/progress/circle_2.png');
-        } else if (intervalRatio < 4 / 8) {
-          setIconSrc('/icons/progress/circle_3.png');
-        } else if (intervalRatio < 5 / 8) {
-          setIconSrc('/icons/progress/circle_4.png');
-        } else if (intervalRatio < 6 / 8) {
-          setIconSrc('/icons/progress/circle_5.png');
-        } else if (intervalRatio < 7 / 8) {
-          setIconSrc('/icons/progress/circle_6.png');
-        } else if (intervalRatio < 8 / 8) {
-          setIconSrc('/icons/progress/circle_7.png');
-        }
+        //     if (intervalRatio < 1 / 8) {
+        //       setIconSrc('/icons/progress/circle_0.png');
+        //     } else if (intervalRatio < 2 / 8) {
+        //       setIconSrc('/icons/progress/circle_1.png');
+        //     } else if (intervalRatio < 3 / 8) {
+        //       setIconSrc('/icons/progress/circle_2.png');
+        //     } else if (intervalRatio < 4 / 8) {
+        //       setIconSrc('/icons/progress/circle_3.png');
+        //     } else if (intervalRatio < 5 / 8) {
+        //       setIconSrc('/icons/progress/circle_4.png');
+        //     } else if (intervalRatio < 6 / 8) {
+        //       setIconSrc('/icons/progress/circle_5.png');
+        //     } else if (intervalRatio < 7 / 8) {
+        //       setIconSrc('/icons/progress/circle_6.png');
+        //     } else if (intervalRatio < 8 / 8) {
+        //       setIconSrc('/icons/progress/circle_7.png');
+        //     }
       },
       100,
       setInterval
@@ -147,7 +155,9 @@ const SaveSection: Component = () => {
         'align-items': 'center',
         overflow: 'visible',
         gap: '8px',
+        'pointer-events': 'all',
       }}
+      data-tauri-drag-region-exclude
     >
       <Show when={saveLog()} fallback={<p style={{ 'white-space': 'nowrap', opacity: 0.6 }}>{saveTimeText()}</p>}>
         <p style={{ 'white-space': 'nowrap' }}>{saveLog()}</p>

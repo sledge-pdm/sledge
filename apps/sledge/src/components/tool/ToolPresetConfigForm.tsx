@@ -45,6 +45,7 @@ function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v:
           max={meta.props?.max ?? 0}
           labelMode={componentProps.get('Slider')?.labelMode ?? 'left'}
           customFormat={meta.customFormat}
+          wheelSpin={meta.props?.wheelSpin ?? true}
           allowDirectInput={true}
           allowFloat={meta.props?.allowFloat ?? false}
           floatSignificantDigits={meta.props?.floatSignificantDigits}

@@ -90,37 +90,38 @@ pub fn run() {
         .setup(
             #[allow(unused_variables)]
             |app| {
-            #[cfg(any(windows, target_os = "linux"))]
-            {
-                let mut files = Vec::new();
+                #[cfg(any(windows, target_os = "linux"))]
+                {
+                    let mut files = Vec::new();
 
-                // NOTICE: `args` may include URL protocol (`your-app-protocol://`)
-                // or arguments (`--`) if your app supports them.
-                // files may aslo be passed as `file://path/to/file`
+                    // NOTICE: `args` may include URL protocol (`your-app-protocol://`)
+                    // or arguments (`--`) if your app supports them.
+                    // files may aslo be passed as `file://path/to/file`
 
-                for maybe_file in std::env::args().skip(1) {
-                    // skip the first argument which is the executable path
-                    // skip flags like -f or --flag
-                    if maybe_file.starts_with('-') {
-                        continue;
-                    }
-
-                    let raw_maybe_file = format!(r"{}", maybe_file);
-                    // handle `file://` path urls and skip other urls
-                    if let Ok(url) = url::Url::parse(&raw_maybe_file) {
-                        if let Ok(path) = url.to_file_path() {
-                            files.push(path);
-                        } else {
-                            files.push(PathBuf::from(&raw_maybe_file));
+                    for maybe_file in std::env::args().skip(1) {
+                        // skip the first argument which is the executable path
+                        // skip flags like -f or --flag
+                        if maybe_file.starts_with('-') {
+                            continue;
                         }
-                    } else {
-                        files.push(PathBuf::from(&raw_maybe_file))
+
+                        let raw_maybe_file = format!(r"{}", maybe_file);
+                        // handle `file://` path urls and skip other urls
+                        if let Ok(url) = url::Url::parse(&raw_maybe_file) {
+                            if let Ok(path) = url.to_file_path() {
+                                files.push(path);
+                            } else {
+                                files.push(PathBuf::from(&raw_maybe_file));
+                            }
+                        } else {
+                            files.push(PathBuf::from(&raw_maybe_file))
+                        }
                     }
+                    handle_file_associations(app.handle().clone(), files);
                 }
-                handle_file_associations(app.handle().clone(), files);
-            }
-            Ok(())
-        })
+                Ok(())
+            },
+        )
         // you can replace the following for the default stuff if you don't need macos/ios support
         .build(tauri::generate_context!())
         .expect("error building tauri application")

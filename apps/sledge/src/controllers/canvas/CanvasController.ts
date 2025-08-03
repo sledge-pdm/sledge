@@ -62,12 +62,15 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 
 export const centeringCanvas = () => {
   const canvasSize = canvasStore.canvas;
-  const canvasArea = interactStore.canvasAreaSize;
+  // const canvasArea = interactStore.canvasAreaSize;
+  const sectionBetweenArea = document.getElementById('sections-between-area');
+  if (!sectionBetweenArea) return;
+  const areaBound = sectionBetweenArea.getBoundingClientRect();
   const zoom = interactStore.zoom;
 
   setInteractStore('offsetOrigin', {
-    x: canvasArea.width / 2 - (canvasSize.width * zoom) / 2,
-    y: canvasArea.height / 2 - (canvasSize.height * zoom) / 2,
+    x: areaBound.x + areaBound.width / 2 - (canvasSize.width * zoom) / 2,
+    y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
   });
   setOffset({
     x: 0,

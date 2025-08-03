@@ -15,8 +15,8 @@ import { flexRow } from '@sledge/core';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 import { OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
-import { globalConfig } from '~/stores/GlobalStores';
 import BottomInfo from '~/components/global/BottomInfo';
+import { globalConfig } from '~/stores/GlobalStores';
 
 const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;
@@ -112,7 +112,7 @@ const CanvasArea: Component = () => {
       >
         <SideSectionsOverlay side='leftSide' />
         {/* content between side sections */}
-        <div class={flexRow} style={{ 'flex-grow': 1, position: 'relative' }}>
+        <div id='sections-between-area' class={flexRow} style={{ 'flex-grow': 1, position: 'relative', 'pointer-events': 'none' }}>
           <CanvasControls />
           <OuterSelectionMenu />
           <CanvasDebugOverlay />

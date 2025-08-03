@@ -46,3 +46,4 @@ target
 post_build.bat
 
 .cargo
+.tauri

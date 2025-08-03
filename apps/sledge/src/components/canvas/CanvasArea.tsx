@@ -112,7 +112,7 @@ const CanvasArea: Component = () => {
       >
         <SideSectionsOverlay side='leftSide' />
         {/* content between side sections */}
-        <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative', 'pointer-events': 'none' }}>
+        <div class={flexCol} style={{ position: 'relative', 'flex-grow': 1, width: 0, 'pointer-events': 'none' }}>
           <div id='sections-between-area' class={flexRow} style={{ 'flex-grow': 1, position: 'relative', 'pointer-events': 'none' }}>
             <CanvasControls />
             <OuterSelectionMenu />

@@ -7,6 +7,7 @@ interface SliderProps {
   max: number;
   defaultValue?: number;
   value?: number;
+  wheelSpin?: boolean;
   allowFloat?: boolean;
   floatSignificantDigits?: number;
   labelMode: LabelMode;
@@ -95,6 +96,9 @@ const Slider: Component<SliderProps> = (props) => {
     } else {
       newValue = Math.round(raw);
     }
+
+    newValue = Math.max(props.min, Math.min(newValue, props.max));
+
     return newValue;
   };
 
@@ -107,6 +111,13 @@ const Slider: Component<SliderProps> = (props) => {
 
   const cancelDirectInput = () => {
     setDirectInputMode(false);
+  };
+
+  const handleOnWheel = (e: WheelEvent) => {
+    if (props.wheelSpin) {
+      const newValue = getFixedValue(value() + (e.deltaY < 0 ? 1 : -1));
+      update(getFixedValue(newValue));
+    }
   };
 
   onMount(() => {
@@ -123,7 +134,7 @@ const Slider: Component<SliderProps> = (props) => {
   });
 
   const labelArea = (
-    <div ref={(el) => (labelRef = el)} class={styles.valueLabelContainer}>
+    <div ref={(el) => (labelRef = el)} class={styles.valueLabelContainer} onWheel={handleOnWheel}>
       <Show
         when={directInputMode()}
         fallback={
@@ -166,7 +177,7 @@ const Slider: Component<SliderProps> = (props) => {
       <Show when={props.labelMode === 'left'}>{labelArea}</Show>
 
       <div class={styles.slider} ref={(el) => (sliderRef = el)} onPointerDown={handlePointerDown} onClick={onLineClick}>
-        <div class={styles.lineHitbox}>
+        <div class={styles.lineHitbox} onWheel={handleOnWheel}>
           <div class={styles.line} />
         </div>
         <div style={{ left: `${percent()}%` }} class={styles.handle} />

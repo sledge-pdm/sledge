@@ -64,6 +64,7 @@ export default function TitleBar() {
       <div
         style={{
           'border-bottom': shouldShowBorder() ? `1px solid ${vars.color.border}` : 'none',
+          'pointer-events': 'all',
         }}
       >
         <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>

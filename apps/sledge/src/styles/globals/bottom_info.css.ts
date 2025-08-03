@@ -11,6 +11,7 @@ export const bottomInfoRoot = style([
     height: '20px',
     zIndex: 1000,
     pointerEvents: 'all',
+    overflow: 'hidden',
   },
 ]);
 

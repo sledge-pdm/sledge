@@ -20,8 +20,6 @@ const ProjectName: Component = () => {
     setError(undefined);
   };
 
-  const nameWithoutExtension = () => fileStore.location.name?.replace(/\.sledge$/, '');
-
   return (
     <div class={flexCol}>
       <div class={flexRow} style={{ 'align-items': 'baseline', gap: '4px' }}>
@@ -38,16 +36,16 @@ const ProjectName: Component = () => {
             commitNewName(e.target.value);
           }}
           onFocus={(e) => {
-            e.target.value = nameWithoutExtension() ?? '';
+            e.target.value = fileStore.location.name?.replace(/\.sledge$/, '') || '';
             setInputName(e.target.value);
             commitNewName(e.target.value);
           }}
           onBlur={(e) => {
-            e.target.value = nameWithoutExtension() ?? '';
+            e.target.value = fileStore.location.name?.replace(/\.sledge$/, '') || '';
             setInputName(e.target.value);
             commitNewName(e.target.value);
           }}
-          value={nameWithoutExtension() ?? ''}
+          value={fileStore.location.name?.replace(/\.sledge$/, '') || ''}
           placeholder='project name'
           autocomplete='off'
         />

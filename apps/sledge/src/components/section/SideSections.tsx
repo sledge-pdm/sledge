@@ -1,12 +1,8 @@
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 
-import { flexCol } from '@sledge/core';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import { EditorTab, EffectsTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
-import SideSectionControl from '~/components/section/SideSectionControl';
 import { appearanceStore } from '~/stores/EditorStores';
-import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
-import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
 
 interface Props {
   side: 'leftSide' | 'rightSide';
@@ -73,29 +69,7 @@ const SideSections: Component<Props> = (props) => {
 
   const selectedTab = () => appearanceStore[props.side].tabs[appearanceStore[props.side].selectedIndex];
 
-  return (
-    <div style={{ display: 'flex', 'flex-direction': props.side === 'leftSide' ? 'row' : 'row-reverse' }}>
-      <SideSectionControl side={props.side} />
-
-      <Show when={appearanceStore[props.side].shown}>
-        <div id='side_sections' class={sideAreaRoot} style={{ width: '300px' }}>
-          <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
-            <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
-              <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
-            </div>
-
-            <Show when={canScrollTop()}>
-              <div class={fadeTop} />
-            </Show>
-
-            <Show when={canScrollBottom()}>
-              <div class={fadeBottom} />
-            </Show>
-          </div>
-        </div>
-      </Show>
-    </div>
-  );
+  return <div style={{ display: 'flex', 'flex-direction': props.side === 'leftSide' ? 'row' : 'row-reverse' }}></div>;
 };
 
 export default SideSections;

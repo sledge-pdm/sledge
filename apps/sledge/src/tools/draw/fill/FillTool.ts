@@ -2,7 +2,7 @@ import { Vec2 } from '@sledge/core';
 import { filter_by_selection_mask } from '@sledge/wasm';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
-import { TileFloodFill } from '~/tools/draw/fill/TileFloodFill';
+import { WasmFloodFill } from '~/tools/draw/fill/WasmFloodFill';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { addDebugImage, endDebugSession, startDebugSession, visualizeSelectionMask } from '~/utils/DebugViewer';
@@ -31,8 +31,8 @@ export class FillTool implements ToolBehavior {
     const limitMode = selectionManager.getSelectionLimitMode();
 
     if (limitMode === 'none' || !selectionManager.isSelected()) {
-      // 制限なしの場合は通常のFloodFill
-      const fill = new TileFloodFill();
+      // 制限なしの場合はWASM FloodFill
+      const fill = new WasmFloodFill();
       fill.fill({ agent, color, position });
     } else {
       // 選択範囲制限がある場合
@@ -52,7 +52,7 @@ export class FillTool implements ToolBehavior {
 
     // 選択範囲がない、または制限モードがnoneの場合は通常のフラッドフィル
     if (!selectionMask || limitMode === 'none') {
-      const fill = new TileFloodFill();
+      const fill = new WasmFloodFill();
       fill.fill({ agent, color, position });
       return;
     }
@@ -90,7 +90,7 @@ export class FillTool implements ToolBehavior {
       addDebugImage(maskVisualization, width, height, '2. Selection Mask', sessionId);
     }
 
-    const fill = new TileFloodFill();
+    const fill = new WasmFloodFill();
     fill.fill({ agent, color, position });
 
     const currentBuffer = bufferManager.buffer;
@@ -171,7 +171,7 @@ export class FillTool implements ToolBehavior {
       addDebugImage(maskVisualization, width, height, '2. Selection Mask', sessionId);
     }
 
-    const fill = new TileFloodFill();
+    const fill = new WasmFloodFill();
     fill.fillWithMask({
       agent,
       color,

@@ -7,10 +7,9 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import BottomInfo from '~/components/global/BottomInfo';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
-import SideSections from '~/components/section/SideSections';
+import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
@@ -136,20 +135,15 @@ export default function Editor() {
   return (
     <Show when={!isLoading()} fallback={<Loading />}>
       <div class={pageRoot}>
-        <SideSections side='leftSide' />
-
-        {divider()}
+        <SideSectionControl side='leftSide' />
 
         <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
           <div style={{ 'flex-grow': 1 }}>
             <CanvasArea />
           </div>
-          <BottomInfo />
         </div>
 
-        {divider()}
-
-        <SideSections side='rightSide' />
+        <SideSectionControl side='rightSide' />
 
         <KeyListener />
         {/* <Companion /> */}

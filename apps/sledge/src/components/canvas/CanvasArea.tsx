@@ -11,8 +11,11 @@ import { eventBus } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
+import { flexRow } from '@sledge/core';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 import { OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
+import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
+import BottomInfo from '~/components/global/BottomInfo';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CanvasArea: Component = () => {
@@ -96,11 +99,27 @@ const CanvasArea: Component = () => {
         </div>
 
         <CanvasAreaOverlay />
-        <CanvasDebugOverlay />
       </div>
-      <OuterSelectionMenu />
-
-      <CanvasControls />
+      <div
+        style={{
+          display: 'flex',
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+          'pointer-events': 'none',
+        }}
+      >
+        <SideSectionsOverlay side='leftSide' />
+        {/* content between side sections */}
+        <div id='sections-between-area' class={flexRow} style={{ 'flex-grow': 1, position: 'relative', 'pointer-events': 'none' }}>
+          <CanvasControls />
+          <OuterSelectionMenu />
+          <CanvasDebugOverlay />
+          <BottomInfo />
+        </div>
+        <SideSectionsOverlay side='rightSide' />
+      </div>
     </div>
   );
 };

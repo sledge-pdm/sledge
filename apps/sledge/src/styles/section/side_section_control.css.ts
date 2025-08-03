@@ -5,10 +5,11 @@ import { style } from '@vanilla-extract/css';
 export const sideSectionControlRoot = style([
   flexCol,
   {
+    boxSizing: 'content-box',
     gap: '20px',
     paddingTop: '20px',
     paddingBottom: '16px',
-    width: '24px',
+    width: '19px',
     justifyContent: 'start',
     alignItems: 'center',
   },

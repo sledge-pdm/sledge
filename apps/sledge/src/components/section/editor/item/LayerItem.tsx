@@ -54,7 +54,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   // レイヤー移動時のハイライト効果
   const highlightLayer = () => {
     setIsHighlighted(true);
-    setTimeout(() => setIsHighlighted(false), 300); // 1.5秒間ハイライト
+    setTimeout(() => setIsHighlighted(false), 400);
   };
 
   const handleMoveUp = (e: MouseEvent) => {
@@ -82,9 +82,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     <>
       <style>
         {`
-          @keyframes yellowBlink {
-            0%, 100% { background-color: transparent; }
-            50%, 100% { background-color: rgba(255, 255, 0, 0.3); }
+          @keyframes blink {
+            0% { background-color: transparent; }
+            50%, 100% { background-color: rgba(255, 255, 0, 0.35); }
           }
         `}
       </style>
@@ -103,7 +103,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             menu.show(new LogicalPosition(e.clientX, e.clientY));
           }}
           style={{
-            animation: isHighlighted() ? 'yellowBlink 0.1s ease-in-out 0s 3' : 'none',
+            animation: isHighlighted() ? 'blink 0.2s ease-in-out 0s 2' : 'none',
           }}
         >
           {/* <div class={`${layerItemHandle} handle`} {...sortable.dragActivators}>

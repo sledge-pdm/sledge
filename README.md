@@ -8,32 +8,40 @@
 
 <div align="center">
 
-<img alt="SLEDGEHAMMER." src="./apps/sledge/assets/companion_light.png" width=250 height=250 />
+<br/>
+
+<img src="FCHS.png" alt="F.C.H.S." width=500 />
+
+<br/>
 
 Sledge is a drawing tool.
 
-**1. Simple.**
-
-**2. Fast.**
-
-**3. Destructive.**
+**Simple.**&nbsp;&nbsp;&nbsp;**Fast.**&nbsp;&nbsp;&nbsp;**Destructive.**
 
 </div>
 
-## Visual
-
-![alt text](FCHS.png)
+<br />
 
 ## Install
 
 > note that this app is prealpha version!\
 > Also note that I currently do testing on **Windows only**.
 
+<div align="center">
+
+<br/>
+
+<img src="install_1.png" alt="download suitable installer." width=500 />
+
+<br/>
+
+</div>
+
 1. Go to [Release](https://github.com/Innsbluck-rh/sledge/releases) page and install suitable installer.
 2. Run installer and complete install.
 3. Run sledge.
 
-## Feature roadmap
+## Features
 
 ### Interacts
 
@@ -49,12 +57,14 @@ Sledge is a drawing tool.
 - [x] Color Picker
 - [x] Selection
 - [ ] Selection Editing (copy, paste)
+- [ ] Shape drawing (line, circle, rect)
 
 ### Composites / Effects
 
 - [x] Layer Composite (normal / multiply)
 - [ ] Effects
 - [ ] Copy/Paste Selection
+- [ ] Animation Support
 
 ### I/O
 
@@ -75,7 +85,7 @@ Sledge is a drawing tool.
 
 ### Image Processing / Layer Composite
 
-- [WASM](https://developer.mozilla.org/ja/docs/WebAssembly) ([wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen), [wasm-pack](https://github.com/drager/wasm-pack), [tauri-wasm](https://github.com/nanoqsh/tauri-wasm))
+- [WASM](https://developer.mozilla.org/ja/docs/WebAssembly) ([wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen) / [wasm-pack](https://github.com/drager/wasm-pack) / [tauri-wasm](https://github.com/nanoqsh/tauri-wasm))
 - [WebGL](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API)
 
 ### Project File Format

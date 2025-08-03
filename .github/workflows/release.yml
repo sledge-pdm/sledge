@@ -2,7 +2,12 @@ name: release
 
 on:
   push:
-    tags: ['v*.*.*'] # バージョンタグ push 時のみ
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-prealpha'
+
+      - '!v*.*.*-dev.*'
+      - '!v*.*.*-*-dev.*'
   workflow_dispatch: {} # 手動トリガも可
 
 jobs:
@@ -55,11 +60,4 @@ jobs:
               matrix.platform == 'macos-latest' && './src-tauri/tauri.macos.conf.json' ||
               matrix.platform == 'windows-latest' && './src-tauri/tauri.windows.conf.json' ||
               './src-tauri/tauri.conf.json'
-            }}
-          args: >-
-            ${{
-              matrix.platform == 'ubuntu-latest' && '--target x86_64-unknown-linux-gnu' ||
-              matrix.platform == 'macos-latest' && '--target x86_64-apple-darwin --target aarch64-apple-darwin' ||
-              matrix.platform == 'windows-latest' && '--target x86_64-pc-windows-msvc' ||
-              ''
             }}

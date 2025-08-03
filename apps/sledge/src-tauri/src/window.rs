@@ -1,7 +1,5 @@
-use crate::config;
-use crate::image;
-use crate::project;
-use crate::splash;
+use crate::{config, image, project, splash};
+use gtk::prelude::GtkWindowExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -216,12 +214,17 @@ pub async fn open_window(
     {
         builder = builder.decorations(false);
     }
-
     // 4. ウィンドウ生成（非表示で）
-    let _window = builder
+    let window = builder
         .visible(false) // App.tsx側でshowするまでは非表示
         .build()
         .map_err(|e| e.to_string())?;
+
+    #[cfg(target_os = "linux")]
+    {
+        let gtk_window = window.gtk_window();
+        gtk_window.set_titlebar(Option::<&gtk::Widget>::None);
+    }
 
     // スプラッシュクローザーをアプリの状態として保存
     if let Some(closer) = splash_closer {

@@ -44,6 +44,7 @@ tauri-plugin-log = "2.6.0"
 chrono = { version = "0.4", features = ["serde"] }
 base64 = "0.21"
 tauri-wasm = "0.2.0"
+gtk = "0.18.2"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

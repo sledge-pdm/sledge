@@ -171,7 +171,6 @@ pub async fn open_window(
                 .title("sledge.")
                 .inner_size(500.0, 400.0)
                 .resizable(false)
-                .decorations(false)
                 .accept_first_mouse(true)
                 .closable(true)
                 .maximizable(true)
@@ -182,7 +181,6 @@ pub async fn open_window(
                 .title("sledge.")
                 .inner_size(1200.0, 750.0)
                 .resizable(true)
-                .decorations(false)
                 .accept_first_mouse(true)
                 .closable(true)
                 .maximizable(true)
@@ -193,7 +191,6 @@ pub async fn open_window(
                 .title("about.")
                 .inner_size(400.0, 280.0)
                 .resizable(false)
-                .decorations(false)
                 .closable(true)
                 .skip_taskbar(true)
                 .always_on_top(true)
@@ -205,13 +202,19 @@ pub async fn open_window(
                 .title("settings.")
                 .inner_size(600.0, 400.0)
                 .resizable(false)
-                .decorations(false)
                 .closable(true)
                 .skip_taskbar(true)
                 .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);
         }
+    }
+
+    builder = builder.zoom_hotkeys_enabled(true);
+
+    #[cfg(target_os = "windows")]
+    {
+        builder = builder.decorations(false);
     }
 
     // 4. ウィンドウ生成（非表示で）

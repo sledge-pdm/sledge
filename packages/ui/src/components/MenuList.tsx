@@ -51,6 +51,10 @@ const MenuList: Component<Props> = (props) => {
           <li
             class={menuItem}
             role='option'
+            style={{
+              'pointer-events': option.disabled ? 'none' : 'all',
+              opacity: option.disabled ? 0.5 : 1,
+            }}
             onClick={() => {
               option.onSelect?.();
               props.onClose?.();

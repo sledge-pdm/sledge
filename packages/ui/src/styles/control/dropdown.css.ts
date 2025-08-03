@@ -50,7 +50,7 @@ export const menuStyle = style([
     position: 'absolute',
     top: '100%',
     left: 0,
-    zIndex: 10,
+    zIndex: 10000,
     backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
     marginTop: '0px',

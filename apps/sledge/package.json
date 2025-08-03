@@ -3,7 +3,6 @@
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "patch-package",
     "vite:dev": "vite",
     "vite:build": "vite build",
     "dev": "tauri dev",
@@ -30,7 +29,6 @@
     "@tauri-apps/plugin-log": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2.2.6",
     "@tauri-apps/plugin-shell": "^2.2.1",
-    "@thisbeyond/solid-dnd": "^0.7.5",
     "interactjs": "^1.10.27",
     "mitt": "^3.0.1",
     "msgpackr": "^1.11.5",
@@ -45,7 +43,6 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.7.1",
     "@vanilla-extract/vite-plugin": "^5.1.1",
-    "patch-package": "^8.0.0",
     "solid-refresh": "^0.7.5",
     "vite": "^7.0.6 ",
     "vite-plugin-glsl": "^1.4.1",

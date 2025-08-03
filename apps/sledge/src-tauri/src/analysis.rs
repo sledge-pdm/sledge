@@ -1,4 +1,3 @@
-
 use serde::Serialize;
 use sysinfo::{ProcessesToUpdate, System, get_current_pid};
 

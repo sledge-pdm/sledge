@@ -18,6 +18,7 @@ export const undoRedoContainer = style([
     alignItems: 'center',
     padding: '12px',
     zIndex: 1000,
+    pointerEvents: 'auto',
   },
 ]);
 

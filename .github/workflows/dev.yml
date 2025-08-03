@@ -1,14 +1,9 @@
-name: release
+name: dev
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
-      - 'v*.*.*-prealpha'
-
-      - '!v*.*.*-dev.*'
-      - '!v*.*.*-*-dev.*'
-  workflow_dispatch: {} # 手動トリガも可
+    tags: ['v*.*.*-dev.*']
+  workflow_dispatch: {}
 
 jobs:
   build:
@@ -34,6 +29,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Setup Rust cache environment
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+        shell: bash
+
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
@@ -47,13 +51,15 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCCACHE_GHA_ENABLED: 'true'
+          RUSTC_WRAPPER: 'sccache'
         with:
-          releaseId: ${{ github.ref_name }}
           tagName: ${{ github.ref_name }}
-          releaseName: ${{ github.ref_name }}
+          releaseName: 'Development Build ${{ github.ref_name }}'
+          releaseBody: 'This is a development build. Use at your own risk.'
+          releaseDraft: true # 開発版はドラフトとして作成
+          prerelease: true # プレリリースとしてマーク
           projectPath: './apps/sledge'
-          releaseDraft: true
-          prerelease: false
           configPath: >-
             ${{
               matrix.platform == 'ubuntu-latest' && './src-tauri/tauri.linux.conf.json' ||
@@ -61,3 +67,12 @@ jobs:
               matrix.platform == 'windows-latest' && './src-tauri/tauri.windows.conf.json' ||
               './src-tauri/tauri.conf.json'
             }}
+
+      - name: Upload dev artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sledge-dev-${{ matrix.platform }}
+          path: |
+            apps/sledge/src-tauri/target/release/bundle/
+          retention-days: 7 # 開発版は7日間保持

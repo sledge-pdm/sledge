@@ -1,3 +1,4 @@
+import { vars } from '@sledge/theme';
 import { Component, For } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
 import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
@@ -62,6 +63,9 @@ const SideSectionControl: Component<Props> = (props) => {
       style={{
         'padding-left': props.side === 'leftSide' ? '5px' : '3px',
         'padding-right': props.side === 'leftSide' ? '3px' : '5px',
+
+        'border-right': props.side === 'leftSide' && appearanceStore[props.side].shown ? 'none' : `1px solid ${vars.color.border}`,
+        'border-left': props.side === 'rightSide' && appearanceStore[props.side].shown ? 'none' : `1px solid ${vars.color.border}`,
       }}
     >
       <p

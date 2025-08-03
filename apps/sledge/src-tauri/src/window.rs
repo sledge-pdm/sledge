@@ -1,12 +1,12 @@
-use crate::config;
-use crate::image;
-use crate::project;
-use crate::splash;
+use crate::{config, image, project, splash};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use uuid::Uuid;
+
+#[cfg(target_os = "linux")]
+use gtk::prelude::GtkWindowExt;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -171,7 +171,6 @@ pub async fn open_window(
                 .title("sledge.")
                 .inner_size(500.0, 400.0)
                 .resizable(false)
-                .decorations(false)
                 .accept_first_mouse(true)
                 .closable(true)
                 .maximizable(true)
@@ -182,7 +181,6 @@ pub async fn open_window(
                 .title("sledge.")
                 .inner_size(1200.0, 750.0)
                 .resizable(true)
-                .decorations(false)
                 .accept_first_mouse(true)
                 .closable(true)
                 .maximizable(true)
@@ -193,7 +191,6 @@ pub async fn open_window(
                 .title("about.")
                 .inner_size(400.0, 280.0)
                 .resizable(false)
-                .decorations(false)
                 .closable(true)
                 .skip_taskbar(true)
                 .always_on_top(true)
@@ -205,7 +202,6 @@ pub async fn open_window(
                 .title("settings.")
                 .inner_size(600.0, 400.0)
                 .resizable(false)
-                .decorations(false)
                 .closable(true)
                 .skip_taskbar(true)
                 .always_on_top(true)
@@ -214,11 +210,27 @@ pub async fn open_window(
         }
     }
 
+    builder = builder.zoom_hotkeys_enabled(true).shadow(true);
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        // Windowsでは装飾を無効化
+        builder = builder.decorations(false);
+    }
+
     // 4. ウィンドウ生成（非表示で）
-    let _window = builder
+    #[allow(unused_variables)]
+    let window = builder
         .visible(false) // App.tsx側でshowするまでは非表示
         .build()
         .map_err(|e| e.to_string())?;
+
+    #[cfg(target_os = "linux")]
+    {
+        if let Ok(gtk_window) = window.gtk_window() {
+            gtk_window.set_titlebar(Option::<&gtk::Widget>::None);
+        }
+    }
 
     // スプラッシュクローザーをアプリの状態として保存
     if let Some(closer) = splash_closer {

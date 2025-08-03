@@ -5,13 +5,14 @@ import { style } from '@vanilla-extract/css';
 export const bottomInfoRoot = style([
   flexRow,
   {
+    boxSizing: 'content-box',
     flexWrap: 'wrap',
     backgroundColor: vars.color.background,
     borderTop: `1px solid ${vars.color.border}`,
     height: '20px',
-    zIndex: 1000,
+    zIndex: 10000,
     pointerEvents: 'all',
-    overflow: 'hidden',
+    overflowY: 'visible',
   },
 ]);
 

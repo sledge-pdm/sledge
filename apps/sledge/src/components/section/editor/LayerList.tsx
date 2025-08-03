@@ -1,7 +1,6 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
-import { closestCenter, DragDropProvider, DragDropSensors, SortableProvider } from '@thisbeyond/solid-dnd';
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
@@ -71,7 +70,7 @@ const LayerList: Component<{}> = () => {
         <div class={flexRow} style={{ gap: '4px' }}>
           <button
             onClick={async () => {
-              await addLayer({ name: 'dot1' });
+              await addLayer({ name: 'layer1' });
               setItems(allLayers());
             }}
           >
@@ -132,30 +131,14 @@ const LayerList: Component<{}> = () => {
           </div>
         </div>
 
-        <DragDropProvider
-          onDragStart={onDragStart}
-          onDragEnd={(e) => {
-            onDragEnd({ draggable: e.draggable, droppable: e.droppable });
-          }}
-          collisionDetector={closestCenter}
-        >
-          <DragDropSensors>
-            <div class={layerList}>
-              <ImagePoolItem />
-
-              <SortableProvider ids={ids()}>
-                <For each={items()}>
-                  {(layer, index) => {
-                    return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
-                  }}
-                </For>
-              </SortableProvider>
-            </div>
-            {/* <DragOverlay>
-                    <div class="sortable"><LayerItem layer={activeItemLayer()} /></div>
-                </DragOverlay> */}
-          </DragDropSensors>
-        </DragDropProvider>
+        <div class={layerList}>
+          <ImagePoolItem />
+          <For each={items()}>
+            {(layer, index) => {
+              return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
+            }}
+          </For>
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 import { flexCol } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const sideAreaRoot = style([
   flexCol,
   {
     boxSizing: 'border-box',
+    backgroundColor: vars.color.background,
   },
 ]);
 

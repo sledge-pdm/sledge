@@ -224,8 +224,9 @@ pub async fn open_window(
 
     #[cfg(target_os = "linux")]
     {
-        let gtk_window = window.gtk_window();
-        gtk_window?.set_titlebar(Option::<&gtk::Widget>::None);
+        if let Ok(gtk_window) = window.gtk_window() {
+            gtk_window.set_titlebar(Option::<&gtk::Widget>::None);
+        }
     }
 
     // スプラッシュクローザーをアプリの状態として保存

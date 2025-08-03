@@ -128,7 +128,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         position: 'fixed',
         left: `${selectionMenuPos().x}px`,
         top: `${selectionMenuPos().y}px`,
-        visibility: outerPosition() === undefined ? 'visible' : 'collapse',
+        visibility: outerPosition() === undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
         'pointer-events': 'all',
         'z-index': 500,
         'transform-origin': '0 0',

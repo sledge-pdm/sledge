@@ -5,6 +5,7 @@ import { style } from '@vanilla-extract/css';
 export const bottomInfoRoot = style([
   flexRow,
   {
+    position: 'absolute',
     backgroundColor: vars.color.background,
     borderTop: `1px solid ${vars.color.border}`,
     height: '20px',
@@ -13,6 +14,7 @@ export const bottomInfoRoot = style([
     right: 0,
     zIndex: 1000,
     bottom: 0,
+    pointerEvents: 'all',
   },
 ]);
 

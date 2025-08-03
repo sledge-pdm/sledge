@@ -84,7 +84,7 @@ export default function Editor() {
       setCanvasStore('canvas', 'height', height);
       eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
     }
-    addLayer({ name: 'dot', type: LayerType.Dot, enabled: true, dotMagnification: 1 });
+    addLayer({ name: 'layer1', type: LayerType.Dot, enabled: true, dotMagnification: 1 });
     onProjectLoad(true);
   }
 

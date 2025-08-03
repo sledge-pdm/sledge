@@ -71,7 +71,7 @@ const LayerList: Component<{}> = () => {
         <div class={flexRow} style={{ gap: '4px' }}>
           <button
             onClick={async () => {
-              await addLayer({ name: 'dot1' });
+              await addLayer({ name: 'layer1' });
               setItems(allLayers());
             }}
           >

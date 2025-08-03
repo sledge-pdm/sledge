@@ -1,6 +1,6 @@
 [package]
 name = "sledge"
-version = "0.0.1-prealpha"
+version = "0.0.2-prealpha"
 description = "Simply destructive drawing tool."
 authors = ["innsbluck"]
 license = ""

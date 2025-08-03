@@ -2,7 +2,6 @@ import { Component, createEffect, createSignal, onMount } from 'solid-js';
 
 import { createScrollPosition } from '@solid-primitives/scroll';
 import { EditorTab, EffectsTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
-import SideSectionControl from '~/components/section/SideSectionControl';
 import { appearanceStore } from '~/stores/EditorStores';
 
 interface Props {
@@ -70,10 +69,7 @@ const SideSections: Component<Props> = (props) => {
 
   const selectedTab = () => appearanceStore[props.side].tabs[appearanceStore[props.side].selectedIndex];
 
-  return (
-    <div style={{ display: 'flex', 'flex-direction': props.side === 'leftSide' ? 'row' : 'row-reverse' }}>
-    </div>
-  );
+  return <div style={{ display: 'flex', 'flex-direction': props.side === 'leftSide' ? 'row' : 'row-reverse' }}></div>;
 };
 
 export default SideSections;

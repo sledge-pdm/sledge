@@ -210,9 +210,13 @@ pub async fn open_window(
         }
     }
 
-    builder = builder.zoom_hotkeys_enabled(true).decorations(false);
+    builder = builder
+        .zoom_hotkeys_enabled(true)
+        .decorations(false)
+        .shadow(true);
 
     // 4. ウィンドウ生成（非表示で）
+    #[allow(unused_variables)]
     let window = builder
         .visible(false) // App.tsx側でshowするまでは非表示
         .build()

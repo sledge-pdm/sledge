@@ -1,5 +1,5 @@
 [package]
-name = "sledge-prealpha"
+name = "sledge"
 version = "0.0.1-prealpha"
 description = "Simply destructive drawing tool."
 authors = ["innsbluck"]
@@ -44,6 +44,8 @@ tauri-plugin-log = "2.6.0"
 chrono = { version = "0.4", features = ["serde"] }
 base64 = "0.21"
 tauri-wasm = "0.2.0"
+
+[target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18.2"
 
 [profile.dev]

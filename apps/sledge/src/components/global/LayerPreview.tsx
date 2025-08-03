@@ -58,8 +58,9 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const agent = getAgentOf(props.layer.id);
     if (agent) {
       const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
-      if (preview) {
-        ctx?.putImageData(preview, 0, 0);
+      if (preview && ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.putImageData(preview, 0, 0);
       }
     }
   };
@@ -73,7 +74,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
           ctx = canvasRef.getContext('2d')!;
         }}
         style={{
-          'image-rendering': 'pixelated',
+          'image-rendering': 'crisp-edges',
         }}
         onClick={(e) => {
           if (props.onClick) props.onClick();

@@ -8,11 +8,11 @@
 
 <div align="center">
 
-<br/>
+<br>
 
 <img src="FCHS.png" alt="F.C.H.S." width=500 />
 
-<br/>
+<br>
 
 Sledge is a drawing tool.
 
@@ -20,7 +20,7 @@ Sledge is a drawing tool.
 
 </div>
 
-<br />
+<br>
 
 ## Install
 
@@ -29,11 +29,11 @@ Sledge is a drawing tool.
 
 <div align="center">
 
-<br/>
+<br>
 
 <img src="install_1.png" alt="download suitable installer." width=500 />
 
-<br/>
+<br>
 
 </div>
 

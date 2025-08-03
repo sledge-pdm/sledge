@@ -48,10 +48,10 @@
     "patch-package": "^8.0.0",
     "solid-refresh": "^0.7.5",
     "vite": "^7.0.6 ",
-    "vite-plugin-solid": "^2.11.8",
-    "vite-plugin-wasm": "^3.5.0",
-    "vite-tsconfig-paths": "^5.1.4",
     "vite-plugin-glsl": "^1.4.1",
-    "vite-plugin-top-level-await": "^1.6.0"
+    "vite-plugin-solid": "^2.11.8",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

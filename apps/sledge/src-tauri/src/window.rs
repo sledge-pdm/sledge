@@ -210,10 +210,13 @@ pub async fn open_window(
         }
     }
 
-    builder = builder
-        .zoom_hotkeys_enabled(true)
-        .decorations(false)
-        .shadow(true);
+    builder = builder.zoom_hotkeys_enabled(true).shadow(true);
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        // Windowsでは装飾を無効化
+        builder = builder.decorations(false);
+    }
 
     // 4. ウィンドウ生成（非表示で）
     #[allow(unused_variables)]

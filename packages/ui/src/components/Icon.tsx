@@ -13,12 +13,13 @@ interface IconProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** 元PNG のドット数（正方形前提）。省略時 16 */
   base?: number;
 
+  transform?: string;
   filter?: string;
   backdropFilter?: string;
 }
 
 const Icon: Component<IconProps> = (props) => {
-  const [local, rest] = splitProps(props, ['src', 'color', 'hoverColor', 'scale', 'base', 'filter', 'backdropFilter']);
+  const [local, rest] = splitProps(props, ['src', 'color', 'hoverColor', 'scale', 'base', 'transform', 'filter', 'backdropFilter']);
   const px = () => (local.base ?? 16) * (local.scale ?? 1);
 
   return (
@@ -26,6 +27,8 @@ const Icon: Component<IconProps> = (props) => {
       {...rest}
       class={styles.icon}
       style={{
+        transform: local.transform,
+        '-webkit-transform': local.transform,
         filter: local.filter,
         '-webkit-filter': local.filter,
         'backdrop-filter': local.backdropFilter,

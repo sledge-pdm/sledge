@@ -16,9 +16,6 @@ const BottomInfo: Component = () => {
   return (
     <div class={bottomInfoRoot} style={{}}>
       <div class={bottomInfoContainer}>
-        {/* <a class={bottomInfoTextStyle} style={{ 'pointer-events': 'all', cursor: 'pointer' }} onClick={() => openWindow('about')}>
-          sledge.
-        </a> */}
         <p class={bottomInfoTextStyle}>x{interactStore.zoom}</p>
         <p class={bottomInfoTextStyle} style={{ overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>
           {logStore.bottomBarText}

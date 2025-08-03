@@ -5381,6 +5381,7 @@ dependencies = [
  "dirs",
  "eframe",
  "egui",
+ "gtk",
  "image",
  "log",
  "serde",

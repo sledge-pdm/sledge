@@ -24,12 +24,13 @@ const BottomInfo: Component = () => {
           {logStore.bottomBarText}
         </p>
         <div class={bottomInfoContainerRight}>
-          <div class={flexRow} style={{ width: '200px' }}>
+          <div class={flexRow} style={{ width: '150px' }}>
             <Slider
               labelMode='left'
               value={interactStore.rotation}
               min={-180}
               max={180}
+              wheelSpin={true}
               allowFloat={false}
               customFormat='[value]°'
               onChange={(v) => setRotation(v)}

@@ -10,7 +10,7 @@ interface Props {
   layer: Layer;
   maxWidth?: number;
   maxHeight?: number;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent) => void;
 }
 
 const LayerPreview: Component<Props> = (props: Props) => {
@@ -77,7 +77,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
           'image-rendering': 'crisp-edges',
         }}
         onClick={(e) => {
-          if (props.onClick) props.onClick();
+          if (props.onClick) props.onClick(e);
         }}
       />
     </div>

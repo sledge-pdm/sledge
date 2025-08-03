@@ -17,13 +17,12 @@ export const layerItem = style([
   {
     height: '40px',
     cursor: 'pointer',
-    backgroundColor: vars.color.surface,
 
     ':hover': {
       filter: 'brightness(0.94)',
     },
     ':active': {
-      transform: 'translate(0, 1px)',
+      // transform: 'translate(0, 1px)',
     },
   },
 ]);
@@ -33,10 +32,20 @@ export const layerItemHandle = style([
   h100,
   {
     width: '12px',
-    borderRight: `1px solid ${vars.color.border}`,
+    // borderRight: `1px solid ${vars.color.border}`,
     backgroundColor: vars.color.border,
+  },
+]);
+
+export const layerItemSpinner = style([
+  flexCol,
+  {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    ':hover': {
+      backgroundColor: '#666',
+    },
   },
 ]);
 
@@ -61,6 +70,7 @@ export const layerItemType = style({
 
 export const layerItemName = style([
   {
+    pointerEvents: 'all',
     fontFamily: `${ZFB03B}, ${k8x12}`,
     fontSize: '16px',
     marginLeft: '16px',

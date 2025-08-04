@@ -78,9 +78,9 @@ www.sledge-rules.app
 - [SolidJS](https://github.com/solidjs/solid)
 - [Vite](https://github.com/vitejs/vite)
 
-### Backend (platform-specific)
+### Backend
 
-- [Tauri v2](https://github.com/tauri-apps/tauri)
+- [Tauri](https://github.com/tauri-apps/tauri)
 
 ### Image Processing / Layer Composite
 
@@ -90,6 +90,7 @@ www.sledge-rules.app
 ### Project File Format
 
 - [msgpack](https://msgpack.org/ja.html)
+
 
 
 

@@ -59,15 +59,17 @@ export const startHeader = style({
 export const content = style([
   flexRow,
   {
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     width: '100%',
     padding: '5rem 3rem',
     boxSizing: 'border-box',
     '@media': {
       '(max-width: 1600px)': {
-        gap: '4rem',
+        gap: '3rem',
+        padding: `5rem 1rem`,
       },
       '(max-width: 768px)': {
+        flexWrap: 'wrap',
         gap: '3rem',
         padding: `4rem 1rem`,
       },
@@ -83,7 +85,8 @@ export const description = style([
     boxSizing: 'border-box',
     gap: '3rem',
     '@media': {
-      '(max-width: 1600px)': {
+      '(max-width: 1600px)': {},
+      '(max-width: 768px)': {
         width: '100%',
         padding: 0,
         gap: '1rem',
@@ -96,13 +99,20 @@ export const startImageContainer = style({
   width: '55%',
   '@media': {
     '(max-width: 1600px)': {
+      padding: 0,
+      width: '55%',
+    },
+    '(max-width: 768px)': {
       width: '100%',
-      height: 'auto',
+      gap: '1rem',
     },
   },
 });
 
-export const startImage = style({});
+export const startImage = style({
+  objectFit: 'contain',
+  width: '100%',
+});
 
 export const greetText = style({
   fontFamily: ZFB31,
@@ -122,7 +132,7 @@ export const startText = style({
   lineHeight: '1.5',
   marginBottom: '2rem',
   '@media': {
-    '(max-width: 1600px)': {
+    '(max-width: 768px)': {
       fontSize: '16px',
       marginBottom: '0.25rem',
     },

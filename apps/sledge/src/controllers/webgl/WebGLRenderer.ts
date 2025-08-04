@@ -9,7 +9,7 @@ import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/
 
 const MAX_LAYERS = 16;
 
-const DEBUG = true;
+const DEBUG = import.meta.env.DEV;
 
 function debugLog(...log: any) {
   if (DEBUG) {
@@ -18,12 +18,14 @@ function debugLog(...log: any) {
 }
 
 function checkGLError(gl: WebGL2RenderingContext, operation: string) {
-  const error = gl.getError();
-  if (error !== gl.NO_ERROR) {
-    console.error(`❌ WebGL Error: ${operation} - ${error}`);
-    return false;
+  if (DEBUG) {
+    const error = gl.getError();
+    if (error !== gl.NO_ERROR) {
+      console.error(`❌ WebGL Error: ${operation} - ${error}`);
+      return false;
+    }
+    return true;
   }
-  return true;
 }
 
 export class WebGLRenderer {

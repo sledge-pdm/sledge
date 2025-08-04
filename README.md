@@ -4,6 +4,8 @@
 &nbsp;
 [![dev](https://github.com/Innsbluck-rh/sledge/actions/workflows/dev.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/dev.yml)
 &nbsp;
+![Vercel Deploy](https://deploy-badge.vercel.app/vercel/sledge-gold)
+&nbsp;
 ![GitHub Release](https://img.shields.io/github/v/release/Innsbluck-rh/sledge)
 
 <div align="center">
@@ -12,6 +14,7 @@
 
 <img src="FCHS.png" alt="F.C.H.S." width=500 />
 
+<br>
 <br>
 
 Sledge is a drawing tool.
@@ -22,10 +25,14 @@ Sledge is a drawing tool.
 
 <br>
 
-## Install
+## Platform Support
 
-> note that this app is prealpha version!\
-> Also note that I currently do testing on **Windows only**.
+- :white_check_mark: **Windows**
+- :ballot_box_with_check: **MacOS**
+- :ballot_box_with_check: **Linux**
+- :x: **Mobile**
+
+## Install
 
 <div align="center">
 
@@ -33,9 +40,9 @@ Sledge is a drawing tool.
 
 <img src="install_1.png" alt="download suitable installer." width=500 />
 
-<br>
-
 </div>
+
+<br>
 
 1. Go to [Release](https://github.com/Innsbluck-rh/sledge/releases) page and install suitable installer.
 2. Run installer and complete install.
@@ -61,6 +68,7 @@ Sledge is a drawing tool.
 
 ### Composites / Effects
 
+- [x] Layer Opacity
 - [x] Layer Composite (normal / multiply)
 - [ ] Effects
 - [ ] Copy/Paste Selection
@@ -85,9 +93,10 @@ Sledge is a drawing tool.
 
 ### Image Processing / Layer Composite
 
-- [WASM](https://developer.mozilla.org/ja/docs/WebAssembly) ([wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen) / [wasm-pack](https://github.com/drager/wasm-pack) / [tauri-wasm](https://github.com/nanoqsh/tauri-wasm))
+- [WASM](https://developer.mozilla.org/ja/docs/WebAssembly) ([wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen) / [wasm-pack](https://github.com/drager/wasm-pack))
 - [WebGL](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API)
 
 ### Project File Format
 
 - [msgpack](https://msgpack.org/ja.html)
+

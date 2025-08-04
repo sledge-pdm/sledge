@@ -12,7 +12,7 @@
 
 <br>
 
-<img src="FCHS.png" alt="F.C.H.S." width=500 />
+<img src="FCHS.png" alt="F.C.H.S." width=600 />
 
 <br>
 <br>
@@ -21,7 +21,7 @@ Sledge is a drawing tool.
 
 **Simple.**&nbsp;&nbsp;&nbsp;**Fast.**&nbsp;&nbsp;&nbsp;**Destructive.**
 
-https://www.sledge-rules.app/
+www.sledge-rules.app
 
 </div>
 
@@ -36,7 +36,7 @@ https://www.sledge-rules.app/
 
 ## Install
 
-1. Visit [website](https://www.sledge-rules.app/) and download installer.
+1. Visit [www.sledge-rules.app](https://www.sledge-rules.app/) and download installer.
 2. Run the installer and complete install.
 3. Run sledge.
 
@@ -47,7 +47,7 @@ https://www.sledge-rules.app/
 - [x] Mouse
 - [x] Pen
 - [x] Touch
-- [ ] Touch pads
+- [ ] Touchpads
 
 ### Tools
 
@@ -63,7 +63,6 @@ https://www.sledge-rules.app/
 - [x] Layer Opacity
 - [x] Layer Composite (normal / multiply)
 - [ ] Effects
-- [ ] Copy/Paste Selection
 - [ ] Animation Support
 
 ### I/O
@@ -91,5 +90,6 @@ https://www.sledge-rules.app/
 ### Project File Format
 
 - [msgpack](https://msgpack.org/ja.html)
+
 
 

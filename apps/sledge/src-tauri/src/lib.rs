@@ -1,8 +1,6 @@
 mod analysis;
 mod config;
 mod global_event;
-mod image;
-mod project;
 mod splash;
 mod window;
 
@@ -71,8 +69,6 @@ pub fn run() {
             config::load_global_config,
             config::save_global_config,
             config::reset_global_config,
-            project::load_project_complete,
-            project::load_project_complete_sync,
         ])
         .plugin(
             tauri_plugin_log::Builder::new()

@@ -3,6 +3,7 @@ import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
+import { join } from '@tauri-apps/api/path';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -14,8 +15,8 @@ import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasCo
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { AutoSaveManager } from '~/controllers/project/AutoSaveManager';
-import { importImageFromWindow } from '~/io/image/in/import';
-import { readProjectDataFromWindow } from '~/io/project/in/import';
+import { importImageFromPath } from '~/io/image/in/import';
+import { readProjectFromPath } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';
 import { LayerType } from '~/models/layer/Layer';
 import { setFileStore } from '~/stores/EditorStores';
@@ -60,15 +61,36 @@ export default function Editor() {
     if (files.length > 0) openedFile = PathToFileLocation(files[0]);
   }
 
-  const preloadedProject = readProjectDataFromWindow();
+  // const preloadedProject = readProjectDataFromWindow();
   const fileLocation = getOpenLocation();
-  if (preloadedProject && fileLocation) {
-    setFileStore('location', fileLocation);
-    loadProjectJson(preloadedProject);
-    onProjectLoad(false);
-  } else if (importImageFromWindow() && fileLocation) {
-    setFileStore('location', fileLocation);
-    onProjectLoad(false);
+  if (fileLocation && fileLocation.path && fileLocation.name) {
+    if (fileLocation.name?.endsWith('.sledge')) {
+      setFileStore('location', fileLocation);
+      join(fileLocation.path, fileLocation.name).then((path) => {
+        readProjectFromPath(path)
+          .then((projectFile) => {
+            if (!projectFile) {
+              console.error('Failed to read project from path:', path);
+              return;
+            }
+            loadProjectJson(projectFile);
+            onProjectLoad(false);
+          })
+          .catch((error) => {
+            console.error('Failed to read project:', error);
+          });
+      });
+    } else {
+      // image file
+      importImageFromPath(fileLocation).then((success) => {
+        if (success) {
+          setFileStore('location', fileLocation);
+          onProjectLoad(false);
+        } else {
+          console.error('Failed to import image from path:', fileLocation);
+        }
+      });
+    }
   } else {
     const sp = new URLSearchParams(location.search);
     // create new

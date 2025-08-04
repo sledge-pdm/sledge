@@ -2,7 +2,7 @@ import { changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
-import { loadImageBuffer, loadLocalImage } from '~/utils/DataUtils';
+import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 
 export const initProjectWithNewImage = async (filePath: string, fileName: string) => {
   const imagePath = `${filePath}\\${fileName}`;
@@ -12,7 +12,7 @@ export const initProjectWithNewImage = async (filePath: string, fileName: string
     height: imageBitmap.height,
   });
 
-  const imageBuffer = await loadImageBuffer(imageBitmap); // ここで画像のバッファを読み込み
+  const imageData = await loadImageData(imageBitmap); // ここで画像のバッファを読み込み
   imageBitmap.close();
 
   const initLayer = addLayer({
@@ -25,5 +25,5 @@ export const initProjectWithNewImage = async (filePath: string, fileName: string
   });
 
   const agent = getAgentOf(initLayer.id);
-  agent?.setBuffer(Uint8ClampedArray.from(imageBuffer), false, true);
+  agent?.setBuffer(Uint8ClampedArray.from(imageData.data), false, true);
 };

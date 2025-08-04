@@ -154,61 +154,89 @@ fn setup_custom_fonts(ctx: &egui::Context) {
 
 pub fn show_splash_screen() -> Arc<AtomicBool> {
     let should_close = Arc::new(AtomicBool::new(false));
-    let should_close_clone = should_close.clone();
 
-    std::thread::spawn(move || {
-        use eframe::egui::ViewportBuilder;
+    #[cfg(target_os = "macos")]
+    {
+        // macOSでは視覚的なスプラッシュスクリーンは表示しないが、
+        // 初期化処理のための遅延を提供する
+        println!("macOS: Using delayed initialization instead of splash screen");
+        let should_close_clone = should_close.clone();
 
-        // Windowsで任意のスレッドからイベントループを作成
-        #[cfg(any(target_os = "windows"))]
-        let event_loop_builder: Option<
-            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
-        > = Some(Box::new(|builder| {
-            builder.with_any_thread(true);
-        }));
+        std::thread::spawn(move || {
+            // 最低限の初期化時間を確保（2秒）
+            std::thread::sleep(std::time::Duration::from_millis(2000));
+            // 外部から閉じる指示があるまで待機
+            while !should_close_clone.load(std::sync::atomic::Ordering::Relaxed) {
+                std::thread::sleep(std::time::Duration::from_millis(100));
+            }
+        });
+    }
 
-        #[cfg(target_os = "linux")]
-        let event_loop_builder: Option<
-            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
-        > = Some(Box::new(|builder| {
-            builder.with_any_thread(true);
-        }));
+    #[cfg(not(target_os = "macos"))]
+    {
+        let should_close_clone = should_close.clone();
 
-        #[cfg(target_os = "macos")]
-        let event_loop_builder: Option<
-            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
-        > = Some(Box::new(|builder| {
-            builder.with_activation_policy(ActivationPolicy::Regular);
-        }));
+        std::thread::spawn(move || {
+            use eframe::egui::ViewportBuilder;
 
-        #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
-        let event_loop_builder: Option<
-            Box<dyn for<'a> FnOnce(&'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>)>,
-        > = None;
+            // Windowsで任意のスレッドからイベントループを作成
+            #[cfg(any(target_os = "windows"))]
+            let event_loop_builder: Option<
+                Box<
+                    dyn for<'a> FnOnce(
+                        &'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>,
+                    ),
+                >,
+            > = Some(Box::new(|builder| {
+                builder.with_any_thread(true);
+            }));
 
-        let options = eframe::NativeOptions {
-            viewport: ViewportBuilder::default()
-                .with_inner_size([280.0, 160.0])
-                .with_decorations(false)
-                .with_taskbar(false)
-                .with_always_on_top()
-                .with_resizable(false),
-            event_loop_builder,
-            centered: true,
+            #[cfg(target_os = "linux")]
+            let event_loop_builder: Option<
+                Box<
+                    dyn for<'a> FnOnce(
+                        &'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>,
+                    ),
+                >,
+            > = Some(Box::new(|builder| {
+                builder.with_any_thread(true);
+            }));
 
-            ..Default::default()
-        };
+            #[cfg(not(any(target_os = "windows", target_os = "linux")))]
+            let event_loop_builder: Option<
+                Box<
+                    dyn for<'a> FnOnce(
+                        &'a mut winit::event_loop::EventLoopBuilder<eframe::UserEvent>,
+                    ),
+                >,
+            > = None;
 
-        let _ = eframe::run_native(
-            "Loading Sledge",
-            options,
-            Box::new(|cc| {
-                // カスタムフォントを読み込み
-                setup_custom_fonts(&cc.egui_ctx);
-                Ok(Box::new(SplashScreen::new(should_close_clone)))
-            }),
-        );
-    });
+            let options = eframe::NativeOptions {
+                viewport: ViewportBuilder::default()
+                    .with_inner_size([280.0, 160.0])
+                    .with_decorations(false)
+                    .with_always_on_top()
+                    .with_resizable(false)
+                    .with_visible(true),
+                event_loop_builder,
+                centered: true,
+                follow_system_theme: false,
+                default_theme: eframe::Theme::Dark,
+
+                ..Default::default()
+            };
+
+            let _ = eframe::run_native(
+                "Loading Sledge",
+                options,
+                Box::new(|cc| {
+                    // カスタムフォントを読み込み
+                    setup_custom_fonts(&cc.egui_ctx);
+                    Ok(Box::new(SplashScreen::new(should_close_clone)))
+                }),
+            );
+        });
+    }
 
     should_close
 }

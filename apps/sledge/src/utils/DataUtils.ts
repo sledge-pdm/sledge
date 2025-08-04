@@ -25,7 +25,7 @@ export async function loadLocalImage(path: string): Promise<ImageBitmap> {
   return bitmap;
 }
 
-export async function loadImageBuffer(bitmap: ImageBitmap) {
+export async function loadImageData(bitmap: ImageBitmap): Promise<ImageData> {
   const offscreen = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = offscreen.getContext('2d');
   if (!ctx) throw new Error('Canvas context unavailable');
@@ -33,7 +33,7 @@ export async function loadImageBuffer(bitmap: ImageBitmap) {
   ctx.drawImage(bitmap, 0, 0);
   const imageData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
 
-  return imageData.data;
+  return imageData;
 }
 
 export async function downloadBufferAsPNG(

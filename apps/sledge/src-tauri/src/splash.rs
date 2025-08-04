@@ -216,6 +216,7 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
                     .with_inner_size([280.0, 160.0])
                     .with_decorations(false)
                     .with_always_on_top()
+                    .with_taskbar(false)
                     .with_resizable(false)
                     .with_visible(true),
                 event_loop_builder,

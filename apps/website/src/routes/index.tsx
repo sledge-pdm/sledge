@@ -93,11 +93,9 @@ export default function Home() {
     const response = await fetch(releaseApiUrl);
     const data = await response.json();
 
-    console.log(data);
     setReleaseData(data);
 
     const userAgent = navigator.userAgent;
-    console.log('User Agent:', userAgent);
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       setUserOS('sp');
     } else if (userAgent.includes('Mac OS X')) {

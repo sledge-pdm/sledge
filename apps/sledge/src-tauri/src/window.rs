@@ -8,7 +8,7 @@ use uuid::Uuid;
 #[cfg(target_os = "linux")]
 use gtk::prelude::GtkWindowExt;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum SledgeWindowKind {
     Start,
@@ -44,8 +44,10 @@ pub async fn open_window(
     kind: SledgeWindowKind,
     options: Option<WindowOpenOptions>,
 ) -> Result<(), String> {
+    println!("open_window called with kind: {:?}", kind);
     // 1. スプラッシュスクリーンを即座に表示
     let splash_closer = if matches!(kind, SledgeWindowKind::Start | SledgeWindowKind::Editor) {
+        println!("Showing splash screen");
         Some(splash::show_splash_screen())
     } else {
         None
@@ -243,7 +245,7 @@ pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<()
     if let Some(splash_closer) = app.try_state::<Arc<AtomicBool>>() {
         splash::close_splash_screen(splash_closer.inner().clone());
         // 少し待ってからメインウィンドウを表示
-        // tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+        tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
     }
 
     // メインウィンドウを表示

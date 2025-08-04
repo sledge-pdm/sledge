@@ -18,7 +18,7 @@ export const ImagePool: Component = () => {
         'touch-action': 'none',
       }}
     >
-      <For each={imagePoolStore.entries.values().toArray()}>
+      <For each={Array.isArray(imagePoolStore.entries.values()) ? imagePoolStore.entries.values().toArray() : []}>
         {(entry, i) => {
           if (entry === undefined) return;
 

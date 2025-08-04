@@ -9,12 +9,21 @@ import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/
 
 const MAX_LAYERS = 16;
 
-const DEBUG = false;
+const DEBUG = true;
 
 function debugLog(...log: any) {
   if (DEBUG) {
     console.log(...log);
   }
+}
+
+function checkGLError(gl: WebGL2RenderingContext, operation: string) {
+  const error = gl.getError();
+  if (error !== gl.NO_ERROR) {
+    console.error(`❌ WebGL Error: ${operation} - ${error}`);
+    return false;
+  }
+  return true;
 }
 
 export class WebGLRenderer {
@@ -35,9 +44,24 @@ export class WebGLRenderer {
     private width: number = 0,
     private height: number = 0
   ) {
-    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: false });
+    const contextOptions: WebGLContextAttributes = {
+      preserveDrawingBuffer: false,
+      antialias: true,
+      alpha: true,
+      desynchronized: false,
+      depth: true,
+      stencil: false,
+      premultipliedAlpha: true,
+      failIfMajorPerformanceCaveat: false,
+      powerPreference: 'high-performance',
+    };
+
+    const gl = canvas.getContext('webgl2', contextOptions);
     if (!gl) throw new Error('WebGL2 is not supported in this browser');
     this.gl = gl;
+
+    this.checkWebGLCapabilities(gl);
+
     // --- シェーダコンパイル & プログラムリンク ---
     const vs = this.compileShader(gl.VERTEX_SHADER, vertexSrc);
     const fs = this.compileShader(gl.FRAGMENT_SHADER, fragmentSrc);
@@ -61,10 +85,15 @@ export class WebGLRenderer {
 
     this.texArray = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
+
+    checkGLError(gl, 'texture creation and binding');
+
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    checkGLError(gl, 'texture parameter setup');
 
     // --- フルスクリーンクワッド用 VAO ---
     this.vao = this.createFullscreenQuad();
@@ -122,7 +151,12 @@ export class WebGLRenderer {
 
     const { gl, program } = this;
     gl.useProgram(program);
+
+    // テクスチャユニット0をアクティブにしてテクスチャ配列をバインド
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
+
+    checkGLError(gl, 'texture binding and activation');
 
     debugLog('🖼️ Starting texture upload for', activeLayers.length, 'layers');
 
@@ -153,11 +187,24 @@ export class WebGLRenderer {
             const dstStart = dy * w * 4;
             tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
           }
+
+          // macOSでのWebGLエラーをチェック
+          checkGLError(gl, `before texSubImage3D tile upload layer ${i}`);
+
           gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
+
+          if (!checkGLError(gl, `texSubImage3D tile upload layer ${i}, pos(${ox},${oy}), size(${w},${h})`)) {
+            console.error(`Tile upload failed: layer=${i}, offset=(${ox},${oy}), size=(${w},${h}), buffer.length=${tileBuffer.length}`);
+          }
+
           tile.isDirty = false;
         });
       } else {
         debugLog(`📤 Full upload for layer ${i}`);
+
+        // macOSでのWebGLエラーをチェック
+        checkGLError(gl, `before full texSubImage3D upload layer ${i}`);
+
         // フルアップデート
         gl.texSubImage3D(
           gl.TEXTURE_2D_ARRAY,
@@ -172,6 +219,10 @@ export class WebGLRenderer {
           gl.UNSIGNED_BYTE,
           buf
         );
+
+        if (!checkGLError(gl, `full texSubImage3D upload layer ${i}, size(${this.width},${this.height})`)) {
+          console.error(`Full upload failed: layer=${i}, size=(${this.width},${this.height}), buffer.length=${buf.length}`);
+        }
 
         agent.getTileManager().resetDirtyStates();
       }
@@ -190,14 +241,27 @@ export class WebGLRenderer {
       blendModes: Array.from(blendModes.slice(0, activeLayers.length)),
     });
 
+    checkGLError(gl, 'before setting uniforms');
+
     gl.uniform1i(this.uLayerCountLoc, activeLayers.length);
+    checkGLError(gl, 'after setting layer count uniform');
+
     gl.uniform1fv(this.uOpacitiesLoc, opacities);
+    checkGLError(gl, 'after setting opacities uniform');
+
     gl.uniform1iv(this.uBlendModesLoc, blendModes);
+    checkGLError(gl, 'after setting blend modes uniform');
 
     // フルスクリーンクワッドを描画
     debugLog('🖌️ Drawing fullscreen quad...');
+
+    checkGLError(gl, 'before binding VAO');
     gl.bindVertexArray(this.vao);
+    checkGLError(gl, 'after binding VAO');
+
+    checkGLError(gl, 'before drawArrays');
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+    checkGLError(gl, 'after drawArrays');
 
     // WebGLエラーをチェック
     const error = gl.getError();
@@ -233,7 +297,26 @@ export class WebGLRenderer {
     gl.bindVertexArray(vao);
 
     // クリップ空間上で全画面を覆う三角形１つ（最適化版）
-    const vertices = new Float32Array([-1, -1, 3, -1, -1, 3]);
+    // const vertices = new Float32Array([-1, -1, 3, -1, -1, 3]); erro 1282 in macos
+
+    // フルスクリーンクワッド（2つの三角形で構成）
+    const vertices = new Float32Array([
+      // 1つ目の三角形
+      -1,
+      -1, // 左下
+      1,
+      -1, // 右下
+      -1,
+      1, // 左上
+      // 2つ目の三角形
+      1,
+      -1, // 右下
+      1,
+      1, // 右上
+      -1,
+      1, // 左上
+    ]);
+
     const buf = gl.createBuffer();
     if (!buf) throw new Error('Failed to create buffer');
 
@@ -247,7 +330,11 @@ export class WebGLRenderer {
     if (posLoc >= 0) {
       gl.enableVertexAttribArray(posLoc);
       gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+    } else {
+      console.warn('Attribute a_pos not found in shader program');
     }
+
+    checkGLError(gl, 'fullscreen quad VAO setup');
 
     gl.bindVertexArray(null);
     return vao;
@@ -347,6 +434,9 @@ export class WebGLRenderer {
 
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
+
+    checkGLError(gl, `before texImage3D resize to depth ${requiredDepth}`);
+
     gl.texImage3D(
       gl.TEXTURE_2D_ARRAY,
       0, // level
@@ -360,11 +450,33 @@ export class WebGLRenderer {
       null
     );
 
+    if (!checkGLError(gl, `texImage3D resize to depth ${requiredDepth}, size(${this.width},${this.height})`)) {
+      console.error(`Texture array resize failed: depth=${requiredDepth}, size=(${this.width},${this.height})`);
+    }
+
     // WASM関数を使ったメモリ使用量計算
     const oldMemory = calculate_texture_memory_usage(this.width, this.height, oldDepth);
     const newMemory = calculate_texture_memory_usage(this.width, this.height, requiredDepth);
 
     debugLog(`🔄 Resizing texture array from ${oldDepth} to ${requiredDepth} layers`);
     debugLog(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);
+  }
+
+  private checkWebGLCapabilities(gl: WebGL2RenderingContext): void {
+    console.log('🔍 WebGL2 Capabilities Check:');
+    console.log('Vendor:', gl.getParameter(gl.VENDOR));
+    console.log('Renderer:', gl.getParameter(gl.RENDERER));
+    console.log('Version:', gl.getParameter(gl.VERSION));
+    console.log('GLSL Version:', gl.getParameter(gl.SHADING_LANGUAGE_VERSION));
+
+    // テクスチャ配列の制限をチェック
+    const maxTextureLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
+    const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    console.log('Max Array Texture Layers:', maxTextureLayers);
+    console.log('Max Texture Size:', maxTextureSize);
+
+    if (maxTextureLayers < MAX_LAYERS) {
+      console.warn(`⚠️ System supports only ${maxTextureLayers} texture layers, but we need ${MAX_LAYERS}`);
+    }
   }
 }

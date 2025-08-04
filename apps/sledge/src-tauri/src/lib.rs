@@ -12,6 +12,7 @@ use tauri_plugin_fs::FsExt;
 use window::{SledgeWindowKind, WindowOpenOptions};
 
 fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
+    println!("handle_file_associations called with {} files", files.len());
     // This requires the `fs` tauri plugin and is required to make the plugin's frontend work:
     // use tauri_plugin_fs::FsExt;
     let fs_scope = app.fs_scope();
@@ -20,6 +21,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
     let asset_protocol_scope = app.asset_protocol_scope();
 
     if files.is_empty() {
+        println!("No files, opening editor window");
         // Tokioランタイムを作成して非同期関数を実行
         let rt = tokio::runtime::Runtime::new().unwrap();
         let future_open = window::open_window(
@@ -31,7 +33,8 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
                 open_path: None,
             }),
         );
-        let _ = rt.block_on(future_open);
+        let result = rt.block_on(future_open);
+        println!("Window open result: {:?}", result);
         return;
     }
 
@@ -90,14 +93,15 @@ pub fn run() {
         .setup(
             #[allow(unused_variables)]
             |app| {
-                #[cfg(any(windows, target_os = "linux"))]
+                println!("Tauri setup started");
+                let files = Vec::new();
+
+                // NOTICE: `args` may include URL protocol (`your-app-protocol://`)
+                // or arguments (`--`) if your app supports them.
+                // files may aslo be passed as `file://path/to/file`
+
+                #[cfg(not(target_os = "macos"))]
                 {
-                    let mut files = Vec::new();
-
-                    // NOTICE: `args` may include URL protocol (`your-app-protocol://`)
-                    // or arguments (`--`) if your app supports them.
-                    // files may aslo be passed as `file://path/to/file`
-
                     for maybe_file in std::env::args().skip(1) {
                         // skip the first argument which is the executable path
                         // skip flags like -f or --flag
@@ -117,8 +121,12 @@ pub fn run() {
                             files.push(PathBuf::from(&raw_maybe_file))
                         }
                     }
-                    handle_file_associations(app.handle().clone(), files);
                 }
+
+                // macOSでも初期ウィンドウを開く
+                println!("About to handle file associations");
+                handle_file_associations(app.handle().clone(), files);
+                println!("Setup completed");
                 Ok(())
             },
         )

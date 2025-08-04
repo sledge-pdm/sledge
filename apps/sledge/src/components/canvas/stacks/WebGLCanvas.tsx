@@ -75,6 +75,7 @@ const WebGLCanvas: Component = () => {
   };
 
   listenEvent('onSetup', () => {
+    console.log('[WebGLCanvas] onSetup event received');
     init();
   });
 

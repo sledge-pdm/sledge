@@ -6,6 +6,7 @@ export const startRoot = style([
   flexCol,
   w100,
   {
+    height: '100dvh',
     overflow: 'hidden',
     padding: '42px 42px',
     boxSizing: 'border-box',
@@ -21,15 +22,22 @@ export const startRoot = style([
 export const header = style([
   flexRow,
   {
-    gap: '1rem',
+    height: '56px',
+    gap: '2rem',
     alignItems: 'center',
     textDecoration: 'none',
+    '@media': {
+      '(max-width: 768px)': {
+        height: '36px',
+      },
+    },
   },
 ]);
 
 export const startIcon = style({
   width: '56px',
   height: '56px',
+  imageRendering: 'pixelated',
   '@media': {
     '(max-width: 768px)': {
       width: '36px',
@@ -52,15 +60,18 @@ export const startHeader = style({
 export const content = style([
   flexRow,
   {
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     width: '100%',
     padding: '5rem 3rem',
     boxSizing: 'border-box',
     '@media': {
       '(max-width: 1600px)': {
-        gap: '4rem',
+        gap: '3rem',
+        padding: `5rem 1rem`,
       },
       '(max-width: 768px)': {
+        flexWrap: 'wrap',
+        gap: '3rem',
         padding: `4rem 1rem`,
       },
     },
@@ -75,10 +86,11 @@ export const description = style([
     boxSizing: 'border-box',
     gap: '3rem',
     '@media': {
-      '(max-width: 1600px)': {
+      '(max-width: 1600px)': {},
+      '(max-width: 768px)': {
         width: '100%',
         padding: 0,
-        gap: '2rem',
+        gap: '1rem',
       },
     },
   },
@@ -88,13 +100,20 @@ export const startImageContainer = style({
   width: '55%',
   '@media': {
     '(max-width: 1600px)': {
+      padding: 0,
+      width: '55%',
+    },
+    '(max-width: 768px)': {
       width: '100%',
-      height: 'auto',
+      gap: '1rem',
     },
   },
 });
 
-export const startImage = style({});
+export const startImage = style({
+  objectFit: 'contain',
+  width: '100%',
+});
 
 export const greetText = style({
   fontFamily: ZFB31,
@@ -115,8 +134,24 @@ export const startText = style({
   marginBottom: '2rem',
   '@media': {
     '(max-width: 768px)': {
-      fontSize: '12px',
-      marginBottom: '1rem',
+      fontSize: '16px',
+      marginBottom: '0.25rem',
+    },
+  },
+});
+
+export const ButtonAreaContainer = style([
+  flexCol,
+  {
+    gap: '1rem',
+  },
+]);
+
+export const versionInfoText = style({
+  fontSize: '16px',
+  '@media': {
+    '(max-width: 768px)': {
+      fontSize: '8px',
     },
   },
 });
@@ -124,6 +159,7 @@ export const startText = style({
 export const mainButtonContainer = style([
   flexRow,
   {
+    marginTop: '0.5rem',
     gap: '2rem',
     flexWrap: 'wrap',
     '@media': {
@@ -138,6 +174,23 @@ export const mainButton = style({
   minWidth: '180px',
   fontSize: '16px',
   padding: '16px 28px',
+  borderWidth: '2px',
+  borderRadius: '4px',
+  ':hover': {
+    backgroundColor: vars.color.accent,
+    borderColor: vars.color.accent,
+    color: vars.color.background,
+  },
+  '@media': {
+    '(max-width: 768px)': {
+      borderWidth: '2px',
+      padding: '12px 24px',
+    },
+  },
+});
+export const subButton = style({
+  fontSize: '8px',
+  padding: '8px 14px',
   borderWidth: '2px',
   borderRadius: '4px',
   ':hover': {

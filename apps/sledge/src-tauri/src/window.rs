@@ -210,11 +210,8 @@ pub async fn open_window(
         }
     }
 
-    builder = builder.zoom_hotkeys_enabled(true).shadow(true);
-
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(target_os = "windows")]
     {
-        // Windowsでは装飾を無効化
         builder = builder.decorations(false);
     }
 

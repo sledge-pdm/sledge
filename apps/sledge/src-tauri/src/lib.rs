@@ -94,7 +94,9 @@ pub fn run() {
             #[allow(unused_variables)]
             |app| {
                 println!("Tauri setup started");
-                let files = Vec::new();
+
+                #[allow(unused_mut)]
+                let mut files = Vec::new();
 
                 // NOTICE: `args` may include URL protocol (`your-app-protocol://`)
                 // or arguments (`--`) if your app supports them.

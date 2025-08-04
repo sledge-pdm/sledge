@@ -220,8 +220,6 @@ pub fn show_splash_screen() -> Arc<AtomicBool> {
                     .with_visible(true),
                 event_loop_builder,
                 centered: true,
-                follow_system_theme: false,
-                default_theme: eframe::Theme::Dark,
 
                 ..Default::default()
             };

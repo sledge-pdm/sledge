@@ -6,8 +6,8 @@ use std::time::Instant;
 #[cfg(target_os = "windows")]
 use winit::platform::windows::EventLoopBuilderExtWindows;
 
-#[cfg(target_os = "macos")]
-use winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
+// #[cfg(target_os = "macos")]
+// use winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
 
 #[cfg(target_os = "linux")]
 use winit::platform::wayland::EventLoopBuilderExtWayland;
@@ -20,6 +20,7 @@ pub struct SplashScreen {
 }
 
 impl SplashScreen {
+    #[allow(dead_code)]
     pub fn new(should_close: Arc<AtomicBool>) -> Self {
         Self {
             start_time: Instant::now(),
@@ -88,6 +89,7 @@ impl eframe::App for SplashScreen {
     }
 }
 
+#[allow(dead_code)]
 fn setup_custom_fonts(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
 

@@ -4,6 +4,7 @@ import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { CanvasStore, canvasStore, imagePoolStore, LayerListStore, layerListStore, ProjectStore, projectStore } from '~/stores/ProjectStores';
+import { packr } from '~/utils/msgpackr';
 
 export interface Project {
   canvasStore: CanvasStore;
@@ -33,6 +34,5 @@ export const dumpProject = async (): Promise<Uint8Array> => {
     layerListStore: layerListStore,
     layerBuffers: getLayerBuffers(),
   };
-  let packr = new Packr({ useRecords: true, mapsAsObjects: false });
   return packr.pack(project);
 };

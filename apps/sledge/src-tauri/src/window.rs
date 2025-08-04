@@ -1,4 +1,4 @@
-use crate::{config, image, project, splash};
+use crate::{config, image, splash};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -66,14 +66,14 @@ pub async fn open_window(
         }
     };
 
-    let project_data = options
-        .as_ref()
-        .and_then(|opts| opts.open_path.as_ref())
-        .filter(|open_path| open_path.ends_with(".sledge"))
-        .and_then(|open_path| {
-            println!("Loading project from: {}", open_path);
-            project::load_project_complete_internal_sync(open_path).ok()
-        });
+    // let project_data = options
+    //     .as_ref()
+    //     .and_then(|opts| opts.open_path.as_ref())
+    //     .filter(|open_path| open_path.ends_with(".sledge"))
+    //     .and_then(|open_path| {
+    //         println!("Loading project from: {}", open_path);
+    //         project::load_project_complete_internal_sync(open_path).ok()
+    //     });
 
     let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
 
@@ -104,14 +104,14 @@ pub async fn open_window(
         "window.__CONFIG__={};",
         serde_json::to_string(&config).unwrap_or_default()
     );
-    let project_script = if let Some(project) = project_data {
-        format!(
-            "window.__PROJECT__={};",
-            serde_json::to_string(&project).unwrap_or_default()
-        )
-    } else {
-        String::new()
-    };
+    // let project_script = if let Some(project) = project_data {
+    //     format!(
+    //         "window.__PROJECT__={};",
+    //         serde_json::to_string(&project).unwrap_or_default()
+    //     )
+    // } else {
+    //     String::new()
+    // };
     let image_data_script = if let Some(project) = image_data {
         format!(
             "window.__IMAGE__={};",
@@ -128,8 +128,8 @@ pub async fn open_window(
         .unwrap_or_default();
 
     let initialization_script = format!(
-        "{}{}{}{}{}",
-        config_script, project_script, image_data_script, path_script, custom_script
+        "{}{}{}{}",
+        config_script, image_data_script, path_script, custom_script
     );
 
     // 6. クエリパラメータの生成（必要に応じて）

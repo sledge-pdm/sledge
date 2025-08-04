@@ -9,6 +9,7 @@
     "beforeBuildCommand": "pnpm prettier && pnpm vite:build"
   },
   "app": {
+    "macOSPrivateApi": true,
     "security": {
       "csp": null,
       "assetProtocol": {

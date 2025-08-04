@@ -21,6 +21,8 @@ Sledge is a drawing tool.
 
 **Simple.**&nbsp;&nbsp;&nbsp;**Fast.**&nbsp;&nbsp;&nbsp;**Destructive.**
 
+https://www.sledge-rules.app/
+
 </div>
 
 <br>
@@ -34,18 +36,8 @@ Sledge is a drawing tool.
 
 ## Install
 
-<div align="center">
-
-<br>
-
-<img src="install_1.png" alt="download suitable installer." width=500 />
-
-</div>
-
-<br>
-
-1. Go to [Release](https://github.com/Innsbluck-rh/sledge/releases) page and install suitable installer.
-2. Run installer and complete install.
+1. Visit [website](https://www.sledge-rules.app/) and download installer.
+2. Run the installer and complete install.
 3. Run sledge.
 
 ## Features
@@ -99,4 +91,5 @@ Sledge is a drawing tool.
 ### Project File Format
 
 - [msgpack](https://msgpack.org/ja.html)
+
 

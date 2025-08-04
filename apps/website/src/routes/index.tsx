@@ -60,12 +60,25 @@ export default function Home() {
   const [userOS, setUserOS] = createSignal<os>('none');
   const [releaseData, setReleaseData] = createSignal<ReleaseData | null>(null);
 
-  const availableAssets = (): Asset[] => {
+  const availableAssets = (): {
+    asset: Asset;
+    extension: string;
+  }[] => {
     if (userOS() === 'none' || !releaseData()) return [];
 
     const availableExtensions = options[userOS()].extensions;
 
-    return releaseData()!.assets.filter((asset) => availableExtensions.some((ext) => asset.name.endsWith(`.${ext}`)));
+    return releaseData()!
+      .assets.map((asset) => {
+        const ext = availableExtensions.find((ext) => asset.name.endsWith(`.${ext}`));
+        if (ext) {
+          return {
+            asset,
+            extension: ext,
+          };
+        }
+      })
+      .filter((item): item is { asset: Asset; extension: string } => item !== undefined);
   };
 
   const releaseApiUrl =
@@ -101,8 +114,8 @@ export default function Home() {
   const DownloadButtons = () => {
     const assets = availableAssets();
 
-    return assets.map((asset) => {
-      const extension = asset.name.split('.').pop() || '';
+    return assets.map((item) => {
+      const { asset, extension } = item;
       const text = `DOWNLOAD (.${extension})`;
       return (
         <Button
@@ -121,7 +134,7 @@ export default function Home() {
 
   return (
     <div class={startRoot}>
-      <a href={'https://github.com/Innsbluck-rh/sledge'} target='_blank' class={header}>
+      <a href={'https://github.com/Innsbluck-rh/sledge'} target='_blank' class={header} style={{ width: 'fit-content' }}>
         <img class={startIcon} src={isLight() ? '/companion.png' : '/companion_light.png'} width={56} height={56} />
         {/* <p class={startHeader}>SLEDGE.</p> */}
       </a>

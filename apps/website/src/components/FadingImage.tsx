@@ -23,7 +23,7 @@ const FadingImage: Component<JSX.IntrinsicElements['img']> = (props) => {
           opacity: isTransitioning() ? 0 : 1,
           width: '100%',
           height: '100%',
-          'object-fit': 'cover',
+          'object-fit': 'contain',
         }}
         src={currentSrc()}
       />
@@ -41,7 +41,7 @@ const FadingImage: Component<JSX.IntrinsicElements['img']> = (props) => {
             left: 0,
             width: '100%',
             height: '100%',
-            'object-fit': 'cover',
+            'object-fit': 'contain',
           }}
           src={nextSrc()!}
           onLoad={() => {

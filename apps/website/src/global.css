@@ -7,6 +7,10 @@ main {
   height: 100vh;
 }
 
+/* * {
+  user-select: none;
+} */
+
 main {
   overflow-y: auto;
 }

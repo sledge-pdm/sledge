@@ -13,6 +13,7 @@
     "solid-js": "^1.9.7"
   },
   "devDependencies": {
+    "@vanilla-extract/css": "^1.17.4"
   },
   "scripts": {
     "dev": "",

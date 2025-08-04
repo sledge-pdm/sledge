@@ -6,6 +6,7 @@ export const startRoot = style([
   flexCol,
   w100,
   {
+    height: '100dvh',
     overflow: 'hidden',
     padding: '42px 42px',
     boxSizing: 'border-box',

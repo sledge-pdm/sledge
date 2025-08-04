@@ -1,5 +1,4 @@
 import { ReactiveMap } from '@solid-primitives/map';
-import { Packr } from 'msgpackr';
 import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';

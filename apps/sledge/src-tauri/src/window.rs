@@ -1,4 +1,4 @@
-use crate::{config, image, splash};
+use crate::{config, splash};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -66,35 +66,8 @@ pub async fn open_window(
         }
     };
 
-    // let project_data = options
-    //     .as_ref()
-    //     .and_then(|opts| opts.open_path.as_ref())
-    //     .filter(|open_path| open_path.ends_with(".sledge"))
-    //     .and_then(|open_path| {
-    //         println!("Loading project from: {}", open_path);
-    //         project::load_project_complete_internal_sync(open_path).ok()
-    //     });
-
     let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
 
-    let image_data = options
-        .as_ref()
-        .and_then(|opts| opts.open_path.as_ref())
-        .filter(|open_path| {
-            open_path.ends_with(".png")
-                || open_path.ends_with(".jpg")
-                || open_path.ends_with(".jpeg")
-        })
-        .and_then(|open_path| {
-            println!("Loading Image from: {}", open_path);
-            match image::load_image_data(open_path) {
-                Ok(data) => Some(data),
-                Err(e) => {
-                    eprintln!("Failed to load project: {}", e);
-                    None
-                }
-            }
-        });
     // 5. initialization_script構築
     let path_script = format!(
         "window.__PATH__={};",
@@ -104,22 +77,6 @@ pub async fn open_window(
         "window.__CONFIG__={};",
         serde_json::to_string(&config).unwrap_or_default()
     );
-    // let project_script = if let Some(project) = project_data {
-    //     format!(
-    //         "window.__PROJECT__={};",
-    //         serde_json::to_string(&project).unwrap_or_default()
-    //     )
-    // } else {
-    //     String::new()
-    // };
-    let image_data_script = if let Some(project) = image_data {
-        format!(
-            "window.__IMAGE__={};",
-            serde_json::to_string(&project).unwrap_or_default()
-        )
-    } else {
-        String::new()
-    };
 
     let custom_script = options
         .as_ref()
@@ -127,10 +84,7 @@ pub async fn open_window(
         .cloned()
         .unwrap_or_default();
 
-    let initialization_script = format!(
-        "{}{}{}{}",
-        config_script, image_data_script, path_script, custom_script
-    );
+    let initialization_script = format!("{}{}{}", config_script, path_script, custom_script);
 
     // 6. クエリパラメータの生成（必要に応じて）
     let query = options

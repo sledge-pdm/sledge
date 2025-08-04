@@ -15,7 +15,7 @@ import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasCo
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { AutoSaveManager } from '~/controllers/project/AutoSaveManager';
-import { importImageFromWindow } from '~/io/image/in/import';
+import { importImageFromPath } from '~/io/image/in/import';
 import { readProjectFromPath } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';
 import { LayerType } from '~/models/layer/Layer';
@@ -63,25 +63,34 @@ export default function Editor() {
 
   // const preloadedProject = readProjectDataFromWindow();
   const fileLocation = getOpenLocation();
-  if (fileLocation && fileLocation.path && fileLocation.name && fileLocation.name?.endsWith('.sledge')) {
-    setFileStore('location', fileLocation);
-    join(fileLocation.path, fileLocation.name).then((path) => {
-      readProjectFromPath(path)
-        .then((projectFile) => {
-          if (!projectFile) {
-            console.error('Failed to read project from path:', path);
-            return;
-          }
-          loadProjectJson(projectFile);
+  if (fileLocation && fileLocation.path && fileLocation.name) {
+    if (fileLocation.name?.endsWith('.sledge')) {
+      setFileStore('location', fileLocation);
+      join(fileLocation.path, fileLocation.name).then((path) => {
+        readProjectFromPath(path)
+          .then((projectFile) => {
+            if (!projectFile) {
+              console.error('Failed to read project from path:', path);
+              return;
+            }
+            loadProjectJson(projectFile);
+            onProjectLoad(false);
+          })
+          .catch((error) => {
+            console.error('Failed to read project:', error);
+          });
+      });
+    } else {
+      // image file
+      importImageFromPath(fileLocation).then((success) => {
+        if (success) {
+          setFileStore('location', fileLocation);
           onProjectLoad(false);
-        })
-        .catch((error) => {
-          console.error('Failed to read project:', error);
-        });
-    });
-  } else if (importImageFromWindow() && fileLocation && fileLocation.path && fileLocation.name) {
-    setFileStore('location', fileLocation);
-    onProjectLoad(false);
+        } else {
+          console.error('Failed to import image from path:', fileLocation);
+        }
+      });
+    }
   } else {
     const sp = new URLSearchParams(location.search);
     // create new

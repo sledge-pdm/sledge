@@ -21,15 +21,22 @@ export const startRoot = style([
 export const header = style([
   flexRow,
   {
-    gap: '1rem',
+    height: '56px',
+    gap: '2rem',
     alignItems: 'center',
     textDecoration: 'none',
+    '@media': {
+      '(max-width: 768px)': {
+        height: '36px',
+      },
+    },
   },
 ]);
 
 export const startIcon = style({
   width: '56px',
   height: '56px',
+  imageRendering: 'pixelated',
   '@media': {
     '(max-width: 768px)': {
       width: '36px',
@@ -61,6 +68,7 @@ export const content = style([
         gap: '4rem',
       },
       '(max-width: 768px)': {
+        gap: '3rem',
         padding: `4rem 1rem`,
       },
     },
@@ -78,7 +86,7 @@ export const description = style([
       '(max-width: 1600px)': {
         width: '100%',
         padding: 0,
-        gap: '2rem',
+        gap: '1rem',
       },
     },
   },
@@ -115,8 +123,24 @@ export const startText = style({
   marginBottom: '2rem',
   '@media': {
     '(max-width: 768px)': {
-      fontSize: '12px',
-      marginBottom: '1rem',
+      fontSize: '16px',
+      marginBottom: '0.25rem',
+    },
+  },
+});
+
+export const ButtonAreaContainer = style([
+  flexCol,
+  {
+    gap: '1rem',
+  },
+]);
+
+export const versionInfoText = style({
+  fontSize: '16px',
+  '@media': {
+    '(max-width: 768px)': {
+      fontSize: '8px',
     },
   },
 });
@@ -124,6 +148,7 @@ export const startText = style({
 export const mainButtonContainer = style([
   flexRow,
   {
+    marginTop: '0.5rem',
     gap: '2rem',
     flexWrap: 'wrap',
     '@media': {
@@ -138,6 +163,23 @@ export const mainButton = style({
   minWidth: '180px',
   fontSize: '16px',
   padding: '16px 28px',
+  borderWidth: '2px',
+  borderRadius: '4px',
+  ':hover': {
+    backgroundColor: vars.color.accent,
+    borderColor: vars.color.accent,
+    color: vars.color.background,
+  },
+  '@media': {
+    '(max-width: 768px)': {
+      borderWidth: '2px',
+      padding: '12px 24px',
+    },
+  },
+});
+export const subButton = style({
+  fontSize: '8px',
+  padding: '8px 14px',
   borderWidth: '2px',
   borderRadius: '4px',
   ':hover': {

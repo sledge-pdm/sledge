@@ -39,6 +39,8 @@ export class WebGLRenderer {
   private uBlendModesLoc!: WebGLUniformLocation;
   private disposed: boolean = false;
 
+  private isChromium: boolean = false;
+
   constructor(
     private canvas: HTMLCanvasElement,
     private width: number = 0,
@@ -46,7 +48,7 @@ export class WebGLRenderer {
   ) {
     const contextOptions: WebGLContextAttributes = {
       preserveDrawingBuffer: false,
-      antialias: true,
+      antialias: false,
       alpha: true,
       desynchronized: false,
       depth: true,
@@ -61,6 +63,8 @@ export class WebGLRenderer {
     this.gl = gl;
 
     this.checkWebGLCapabilities(gl);
+
+    this.isChromium = gl.getParameter(gl.VERSION).includes('Chromium');
 
     // --- シェーダコンパイル & プログラムリンク ---
     const vs = this.compileShader(gl.VERTEX_SHADER, vertexSrc);
@@ -296,26 +300,13 @@ export class WebGLRenderer {
     if (!vao) throw new Error('Failed to create VAO');
     gl.bindVertexArray(vao);
 
-    // クリップ空間上で全画面を覆う三角形１つ（最適化版）
-    // const vertices = new Float32Array([-1, -1, 3, -1, -1, 3]); erro 1282 in macos
-
-    // フルスクリーンクワッド（2つの三角形で構成）
-    const vertices = new Float32Array([
-      // 1つ目の三角形
-      -1,
-      -1, // 左下
-      1,
-      -1, // 右下
-      -1,
-      1, // 左上
-      // 2つ目の三角形
-      1,
-      -1, // 右下
-      1,
-      1, // 右上
-      -1,
-      1, // 左上
-    ]);
+    let vertices: Float32Array;
+    if (this.isChromium) {
+      // Chromium系ブラウザでは最適化されたフルスクリーンクワッドを使用
+      vertices = new Float32Array([-1, -1, 3, -1, -1, 3]);
+    } else {
+      vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1]);
+    }
 
     const buf = gl.createBuffer();
     if (!buf) throw new Error('Failed to create buffer');

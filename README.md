@@ -12,7 +12,7 @@
 
 <br>
 
-<img src="FCHS.png" alt="F.C.H.S." width=600 />
+<img src="assets/FCHS.png" alt="F.C.H.S." width=600 />
 
 <br>
 <br>

@@ -1,9 +1,11 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "app": {
-    "macOSPrivateApi": true
-  },
+  "identifier": "com.innsbluck.sledge",
   "bundle": {
-    "targets": "all"
+    "targets": "all",
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "10.13"
+    }
   }
 }

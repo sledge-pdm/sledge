@@ -35,20 +35,22 @@ export type ToolPresets<TConfig = any> = {
   options: Record<string, TConfig>;
 };
 
+export type PresetConfig = {};
+
 // ツール別のプリセット設定型
-export type PenPresetConfig = {
+export type PenPresetConfig = PresetConfig & {
   size?: number;
   // shape?: 'circle' | 'square';
   // opacity?: number;
 };
 
-export type EraserPresetConfig = {
+export type EraserPresetConfig = PresetConfig & {
   size?: number;
   // shape?: 'circle' | 'square';
   // hardness?: number;
 };
 
-export type FillPresetConfig = {
+export type FillPresetConfig = PresetConfig & {
   // threshold?: number;
   // antialias?: boolean;
 };

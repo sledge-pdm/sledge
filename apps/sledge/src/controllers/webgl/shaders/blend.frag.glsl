@@ -1,7 +1,7 @@
 #version 300 es
-precision mediump float;
-precision mediump sampler2DArray;
-precision mediump int;
+precision highp float;
+precision highp sampler2DArray;
+precision highp int;
 
 in  vec2 v_uv;
 out vec4 outColor;

@@ -122,7 +122,7 @@ export const startText = style({
   lineHeight: '1.5',
   marginBottom: '2rem',
   '@media': {
-    '(max-width: 768px)': {
+    '(max-width: 1600px)': {
       fontSize: '16px',
       marginBottom: '0.25rem',
     },

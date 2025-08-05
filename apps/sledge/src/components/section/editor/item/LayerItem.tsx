@@ -121,9 +121,11 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           <div
             class={`${flexCol} ${w100}`}
             style={{
+              'flex-grow': 1,
               'padding-left': '6px',
               'justify-content': 'center',
               gap: '1px',
+              overflow: 'hidden',
               'border-left': `1px solid ${vars.color.border}`,
             }}
           >
@@ -161,7 +163,13 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                 }}
               />
             ) : (
-              <p class={layerItemName} ondblclick={() => setNameChanging(true)}>
+              <p
+                class={layerItemName}
+                ondblclick={() => {
+                  setNameChanging(true);
+                  inputRef?.focus();
+                }}
+              >
                 {props.layer.name}
               </p>
             )}

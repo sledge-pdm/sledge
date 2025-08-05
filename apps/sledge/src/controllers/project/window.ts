@@ -1,7 +1,7 @@
 import { FileLocation } from '@sledge/core';
 import { addRecentFile } from '~/controllers/config/RecentFileController';
 import { openNewFile } from '~/io/open/open';
-import { PathToFileLocation } from '~/utils/PathUtils';
+import { join, PathToFileLocation } from '~/utils/PathUtils';
 import { getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';
 
 export const createNew = () => {
@@ -11,7 +11,8 @@ export const createNew = () => {
 };
 
 export const openExistingProject = (selectedFile: FileLocation) => {
-  openWindow('editor', { openPath: selectedFile.path + '\\' + selectedFile.name }).then(() => {
+  if (!selectedFile.path || !selectedFile.name) return;
+  openWindow('editor', { openPath: join(selectedFile.path, selectedFile.name) }).then(() => {
     // closeWindowsByLabel('start');
   });
 };

@@ -3,7 +3,6 @@ import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
-import { join } from '@tauri-apps/api/path';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -23,7 +22,7 @@ import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { PathToFileLocation } from '~/utils/PathUtils';
+import { join, PathToFileLocation } from '~/utils/PathUtils';
 import { emitEvent } from '~/utils/TauriUtils';
 import { getOpenLocation } from '~/utils/WindowUtils';
 
@@ -64,13 +63,13 @@ export default function Editor() {
   // const preloadedProject = readProjectDataFromWindow();
   const fileLocation = getOpenLocation();
   if (fileLocation && fileLocation.path && fileLocation.name) {
+  const fullPath = join(fileLocation.path, fileLocation.name)
     if (fileLocation.name?.endsWith('.sledge')) {
       setFileStore('location', fileLocation);
-      join(fileLocation.path, fileLocation.name).then((path) => {
-        readProjectFromPath(path)
+        readProjectFromPath(fullPath)
           .then((projectFile) => {
             if (!projectFile) {
-              console.error('Failed to read project from path:', path);
+              console.error('Failed to read project from path:', fullPath);
               return;
             }
             loadProjectJson(projectFile);
@@ -79,7 +78,6 @@ export default function Editor() {
           .catch((error) => {
             console.error('Failed to read project:', error);
           });
-      });
     } else {
       // image file
       importImageFromPath(fileLocation).then((success) => {

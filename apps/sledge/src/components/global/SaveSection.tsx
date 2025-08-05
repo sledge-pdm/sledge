@@ -9,6 +9,7 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { saveButtonMainButton, saveButtonRoot, saveButtonSide } from '~/styles/globals/save_section.css';
 import { eventBus } from '~/utils/EventBus';
+import { join } from '~/utils/PathUtils';
 
 const SaveSection: Component = () => {
   const [isSaveMenuShown, setIsSaveMenuShown] = createSignal(false);
@@ -98,7 +99,7 @@ const SaveSection: Component = () => {
       label: 'Open Saved Folder',
       onSelect: () => {
         if (!fileStore.location.path || !fileStore.location.name) return;
-        revealItemInDir(fileStore.location.path + '\\' + fileStore.location.name);
+        revealItemInDir(join(fileStore.location.path, fileStore.location.name));
       },
       disabled: !fileStore.location.path || !fileStore.location.name,
       color: vars.color.onBackground,

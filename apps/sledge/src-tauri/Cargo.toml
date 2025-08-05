@@ -42,6 +42,7 @@ tokio = { version = "1.46.1", features = ["full"] }
 eframe = "0.29"
 egui = "0.29"
 winit = "0.30"
+tauri-plugin-os = "2"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18.2"

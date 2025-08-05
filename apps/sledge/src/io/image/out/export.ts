@@ -4,6 +4,7 @@ import { pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { canvasStore } from '~/stores/ProjectStores';
+import { join } from '~/utils/PathUtils';
 
 export type ExportableFileTypes = 'png' | 'jpg' | 'svg';
 
@@ -14,7 +15,7 @@ export interface CanvasExportOptions {
 }
 
 export const defaultExportDir = async () => {
-  const dir = (await pictureDir()) + '\\sledge';
+  const dir = join(await pictureDir(), 'sledge');
   if (!exists(dir)) {
     await mkdir(dir, { recursive: true });
   }
@@ -109,9 +110,7 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
 
 export async function saveBlobViaTauri(blob: Blob, dirPath: string, fileName = 'export.png'): Promise<FileLocation> {
   const buf = new Uint8Array(await blob.arrayBuffer());
-  dirPath.replaceAll('/', '\\');
-  // dirPath = dirPath.endsWith('\\') ? dirPath : dirPath + '\\';
-  await writeFile(`${dirPath}\\${fileName}`, buf, {});
+  await writeFile(join(dirPath, fileName), buf, {});
   return {
     path: dirPath,
     name: fileName,

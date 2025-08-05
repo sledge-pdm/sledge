@@ -13,6 +13,7 @@ import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { join } from '~/utils/PathUtils';
 import { Dialog, DialogExternalProps } from './Dialog';
 
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
@@ -83,7 +84,9 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
       const location = await exportImage(settings.dirPath, name, settings.exportOptions);
       if (location) {
         // setLastSettingsStore('exportSettings', 'dirPath', location.path);
-        if (settings.showDirAfterSave) await revealItemInDir(`${location.path}\\${location.name}`);
+        if (settings.showDirAfterSave && location.path && location.name) {
+          await revealItemInDir(join(location.path, location.name));
+        }
       }
     }
 

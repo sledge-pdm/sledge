@@ -19,6 +19,7 @@ import {
   titleBarTitleContainer,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
+import { join } from '~/utils/PathUtils';
 
 export default function TitleBar() {
   let titleBarNavEl: HTMLElement;
@@ -74,11 +75,11 @@ export default function TitleBar() {
           <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
             <div class={titleBarTitleContainer}>
               <Show when={shouldShowTitle()}>
-                <p class={titleBarTitle} style={{ opacity: 0.5 }}>
-                  {projectStore.lastSavedAt && `${fileStore.location.path}\\`}
-                </p>
                 <Show when={isEditor()} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
-                  <p class={titleBarTitle}>{projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'}</p>
+                  <p class={titleBarTitle} style={{ opacity: 0.5 }}>
+                    {fileStore.location.path ?? ''}
+                  </p>
+                  <p class={titleBarTitle}>{fileStore.location.name ? join('', fileStore.location.name) : '< new project >'}</p>
                 </Show>
               </Show>
             </div>

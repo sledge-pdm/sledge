@@ -1,6 +1,6 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
-import { Icon, Light } from '@sledge/ui';
+import { FieldSizingInput, Icon, Light } from '@sledge/ui';
 import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
@@ -136,9 +136,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               </p>
             </div>
             {isNameChanging() ? (
-              <input
+              <FieldSizingInput
+                inputId={'layer-item-name-' + props.index}
                 ref={(ref) => (inputRef = ref)}
-                type='text'
                 class={layerItemName}
                 style={{
                   outline: 'none',
@@ -147,7 +147,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                   width: 'fit-content',
                   'border-bottom': `1px solid ${vars.color.onBackground}`,
                   // @ts-ignore
-                  'field-sizing': 'content',
                 }}
                 value={props.layer.name}
                 onInput={(e) => setLayerListStore('layers', props.index, 'name', e.currentTarget.value)}

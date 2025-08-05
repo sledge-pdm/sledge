@@ -2,8 +2,7 @@ name: dev
 
 on:
   push:
-    tags: ['v*.*.*-dev.*']
-  workflow_dispatch: {}
+    branches: ['dev']
 
 jobs:
   build:
@@ -47,18 +46,13 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
-      # Tauri Build + Release Upload
+      # Tauri Build Only
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SCCACHE_GHA_ENABLED: 'true'
           RUSTC_WRAPPER: 'sccache'
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Development Build ${{ github.ref_name }}'
-          releaseBody: 'This is a development build. Use at your own risk.'
-          releaseDraft: true # 開発版はドラフトとして作成
-          prerelease: true # プレリリースとしてマーク
           projectPath: './apps/sledge'
           configPath: >-
             ${{
@@ -67,12 +61,3 @@ jobs:
               matrix.platform == 'windows-latest' && './src-tauri/tauri.windows.conf.json' ||
               './src-tauri/tauri.conf.json'
             }}
-
-      - name: Upload dev artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: sledge-dev-${{ matrix.platform }}
-          path: |
-            apps/sledge/src-tauri/target/release/bundle/
-          retention-days: 7 # 開発版は7日間保持

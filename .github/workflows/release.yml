@@ -8,7 +8,6 @@ on:
 
       - '!v*.*.*-dev.*'
       - '!v*.*.*-*-dev.*'
-  workflow_dispatch: {} # 手動トリガも可
 
 jobs:
   build:

@@ -1,0 +1,78 @@
+name: dev-build
+
+on:
+  push:
+    tags: ['v*.*.*-dev.*']
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node & Rust 環境セットアップ
+      - uses: actions/setup-node@v4
+        with: { node-version: 'latest' }
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v4
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Setup Rust cache environment
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: build wasm
+        run: pnpm wasm:build
+
+      - name: install frontend dependencies
+        run: pnpm install
+
+      # Tauri Build + Release Upload
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCCACHE_GHA_ENABLED: 'true'
+          RUSTC_WRAPPER: 'sccache'
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Development Build ${{ github.ref_name }}'
+          releaseBody: 'This is a development build. Use at your own risk.'
+          releaseDraft: true # 開発版はドラフトとして作成
+          prerelease: true # プレリリースとしてマーク
+          projectPath: './apps/sledge'
+          configPath: >-
+            ${{
+              matrix.platform == 'ubuntu-latest' && './src-tauri/tauri.linux.conf.json' ||
+              matrix.platform == 'macos-latest' && './src-tauri/tauri.macos.conf.json' ||
+              matrix.platform == 'windows-latest' && './src-tauri/tauri.windows.conf.json' ||
+              './src-tauri/tauri.conf.json'
+            }}
+
+      - name: Upload dev artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sledge-dev-${{ matrix.platform }}
+          path: |
+            apps/sledge/src-tauri/target/release/bundle/
+          retention-days: 7 # 開発版は7日間保持

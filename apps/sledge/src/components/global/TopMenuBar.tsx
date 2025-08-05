@@ -1,20 +1,32 @@
-import { getTheme, ZFB09 } from '@sledge/theme';
+import { getLatestVersion } from '@sledge/core';
+import { getTheme, vars, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import * as styles from '@styles/globals/top_menu_bar.css';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { open } from '@tauri-apps/plugin-shell';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import ExportDialog from '~/components/dialogs/ExportDialog';
 import SettingDialog from '~/components/dialogs/SettingDialog';
 import SaveSection from '~/components/global/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
+import { addSkippedVersion, isNewVersionAvailable } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
   text: string;
   action: () => void;
 }
+
 const TopMenuBar: Component = () => {
+  const releaseApiUrl =
+    import.meta.env.VITE_GITHUB_REST_API_URL +
+    '/repos/' +
+    import.meta.env.VITE_GITHUB_OWNER +
+    '/' +
+    import.meta.env.VITE_GITHUB_REPO +
+    '/releases/latest';
+
   const [isRecentMenuShown, setIsRecentMenuShown] = createSignal(false);
   const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
 
@@ -24,8 +36,13 @@ const TopMenuBar: Component = () => {
   let settingDialog = null;
 
   const [isDecorated, setIsDecorated] = createSignal(true);
+  const [latestVersion, setLatestVersion] = createSignal<string | undefined>();
+  const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
   onMount(async () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
+    setLatestVersion((await getLatestVersion(releaseApiUrl)) ?? undefined);
+    const isAvailable = await isNewVersionAvailable(true);
+    setNewVersionAvailable(true);
   });
 
   createEffect(() => {
@@ -159,10 +176,51 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
-      <div class={styles.menuItem} style={{ 'padding-right': '6px' }}>
+      <Show when={newVersionAvailable()}>
+        <div class={styles.menuItem}>
+          <a
+            class={styles.menuItemText}
+            style={{
+              'font-family': ZFB09,
+              'font-size': '8px',
+              opacity: 1,
+              'white-space': 'nowrap',
+              color: vars.color.active,
+            }}
+            onClick={(e) => {
+              // open(`https://github.com/Innsbluck-rh/sledge/releases/tag/${latestVersion()}`);
+              open('https://www.sledge-rules.app');
+            }}
+          >
+            ! update available
+          </a>
+          <div class={styles.menuItemBackground} />
+        </div>
+        <div class={styles.menuItem} style={{ 'margin-right': '6px' }}>
+          <a
+            class={styles.menuItemText}
+            style={{
+              'font-family': ZFB09,
+              'font-size': '8px',
+              opacity: 1,
+              'white-space': 'nowrap',
+              color: vars.color.muted,
+            }}
+            onClick={(e) => {
+              addSkippedVersion(latestVersion()!);
+              setNewVersionAvailable(false);
+              setLatestVersion(undefined);
+            }}
+          >
+            [skip]
+          </a>
+          <div class={styles.menuItemBackground} />
+        </div>
+      </Show>
+      <div class={styles.menuItem} style={{ 'margin-right': '6px' }}>
         <a
           class={styles.menuItemText}
-          style={{ 'font-family': ZFB09, 'font-size': '8px', opacity: 0.5 }}
+          style={{ 'font-family': ZFB09, 'font-size': '8px', opacity: 0.5, width: 'fit-content' }}
           onClick={(e) => {
             openWindow('about');
           }}

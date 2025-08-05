@@ -1,6 +1,6 @@
-import { componentProps, flexRow } from '@sledge/core';
+import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { accentedButton, vars } from '@sledge/theme';
-import { Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
+import { Button, Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { resetToDefaultConfig } from '~/io/config/reset';
@@ -79,6 +79,15 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
       return <RadioButton id={meta.path.toString()} value={value()} onChange={onChange} {...meta.props} />;
     case 'ToggleSwitch':
       return <ToggleSwitch id={meta.path.toString()} checked={value()} onChange={onChange} />;
+    case 'Button':
+      return (
+        <div class={flexCol} style={{ gap: '8px' }}>
+          <p style={{ 'white-space': 'pre', 'white-space-trim': 'none' }}>{meta.props?.preContent?.()}</p>
+          <Button id={meta.path.toString()} onClick={meta.props?.onClick} style={{ padding: '4px 4px' }}>
+            {meta.props?.content}
+          </Button>
+        </div>
+      );
   }
 }
 

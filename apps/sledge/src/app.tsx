@@ -12,6 +12,7 @@ import { getTheme } from '@sledge/theme';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import DebugViewer from '~/components/debug/DebugViewer';
+import { defaultConfig } from '~/models/config/GlobalConfig';
 import { globalConfig } from '~/stores/GlobalStores';
 import loadGlobalSettings from './io/config/load';
 import setGlobalSettings from './io/config/set';

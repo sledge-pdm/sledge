@@ -1,6 +1,6 @@
 import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
-import { Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
+import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, For } from 'solid-js';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/models/tool/presets';
 import { configFormFieldLabel } from '~/styles/components/config/config_form.css';
@@ -57,6 +57,15 @@ function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v:
       return <Checkbox id={meta.key} checked={value()} onChange={onChange} />;
     case 'ToggleSwitch':
       return <ToggleSwitch id={meta.key} checked={value()} onChange={onChange} />;
+    case 'Button':
+      return (
+        <div class={flexCol} style={{ gap: '8px' }}>
+          <p style={{ 'white-space': 'pre', 'white-space-trim': 'none' }}>{meta.props?.preContent?.()}</p>
+          <Button id={meta.key} onClick={meta.props?.onClick}>
+            {meta.props?.content}
+          </Button>
+        </div>
+      );
     default:
       return <div>Unsupported component: {meta.component}</div>;
   }

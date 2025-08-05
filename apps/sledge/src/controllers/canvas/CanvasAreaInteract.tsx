@@ -23,7 +23,7 @@ class CanvasAreaInteract {
     this.canvasStack.style.transform = this.transform(this.offsetX(), this.offsetY(), interactStore.zoom);
   };
 
-  public updateCursor = (cursor: 'auto' | 'default' | 'grab' | 'grabbing') => {
+  public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
     this.canvasStack.style.cursor = cursor;
     this.wrapperRef.style.cursor = cursor;
   };
@@ -143,9 +143,9 @@ class CanvasAreaInteract {
             y: interactStore.offset.y + dy,
           });
           this.updateTransform();
-          this.updateCursor('grabbing');
+          this.updateCursor('move');
         } else {
-          this.updateCursor('grab');
+          this.updateCursor('auto');
         }
       } else {
         this.updateCursor('auto');

@@ -42,7 +42,7 @@ const TopMenuBar: Component = () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
     setLatestVersion((await getLatestVersion(releaseApiUrl)) ?? undefined);
     const isAvailable = await isNewVersionAvailable(true);
-    setNewVersionAvailable(true);
+    setNewVersionAvailable(isAvailable ?? false);
   });
 
   createEffect(() => {

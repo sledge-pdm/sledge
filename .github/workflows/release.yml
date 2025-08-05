@@ -50,10 +50,10 @@ jobs:
           projectPath: './apps/sledge'
           releaseDraft: true
           prerelease: false
-          configPath: >-
+          args: >-
             ${{
-              matrix.platform == 'ubuntu-latest' && './src-tauri/tauri.linux.conf.json' ||
-              matrix.platform == 'macos-latest' && './src-tauri/tauri.macos.conf.json' ||
-              matrix.platform == 'windows-latest' && './src-tauri/tauri.windows.conf.json' ||
-              './src-tauri/tauri.conf.json'
+              matrix.platform == 'ubuntu-latest' && '--config ./src-tauri/tauri.linux.conf.json' ||
+              matrix.platform == 'macos-latest' && '--config ./src-tauri/tauri.macos.conf.json' ||
+              matrix.platform == 'windows-latest' && '--config ./src-tauri/tauri.windows.conf.json' ||
+              '--config ./src-tauri/tauri.conf.json'
             }}

@@ -35,7 +35,6 @@ const ToolPresetManager: Component<Props> = (props) => {
     updateToolPresetConfig(props.toolId, selectedPreset()!, key, value);
   };
 
-  console.log(currentPresetConfig());
   return (
     <div class={flexCol}>
       {/* プリセット設定フォーム */}

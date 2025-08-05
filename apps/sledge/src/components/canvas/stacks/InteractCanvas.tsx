@@ -81,6 +81,7 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   function handlePointerCancel(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
+    setInteractStore('isMouseOnCanvas', false);
     props.operator.handleDraw(DrawState.cancel, e, getCurrentToolCategory(), position, lastPos());
     endStroke(getCanvasMousePosition(e));
   }
@@ -118,16 +119,13 @@ export const InteractCanvas: Component<Props> = (props) => {
     // 出た時点でストロークを切る場合
     // const position = getCanvasMousePosition(e);
     // if (interactStore.isInStroke) endStroke(position);
+    setInteractStore('isMouseOnCanvas', false);
 
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     if (interactStore.isDragging && isDrawableClick(e)) {
       const position = getCanvasMousePosition(e);
       props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
       setTemporaryOut(true);
-    }
-
-    if (e.pointerType === 'pen') {
-      setInteractStore('isPenOut', true);
     }
   }
 

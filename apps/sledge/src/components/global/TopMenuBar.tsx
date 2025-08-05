@@ -1,9 +1,11 @@
+import { flexRow } from '@sledge/core';
 import { getTheme, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import * as styles from '@styles/globals/top_menu_bar.css';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import ExportDialog from '~/components/dialogs/ExportDialog';
 import SettingDialog from '~/components/dialogs/SettingDialog';
+import SaveSection from '~/components/global/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { openWindow } from '~/utils/WindowUtils';
@@ -13,7 +15,11 @@ interface Item {
   action: () => void;
 }
 
-const TopMenuBar: Component = () => {
+interface Props {
+  isDecorated: boolean;
+}
+
+const TopMenuBar: Component<Props> = ({ isDecorated }) => {
   const [isRecentMenuShown, setIsRecentMenuShown] = createSignal(false);
   const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
 
@@ -136,6 +142,10 @@ const TopMenuBar: Component = () => {
         </For>
       </div>
       <div class={styles.menuListRight}>
+        <Show when={isDecorated}>
+            <SaveSection />
+            <div style={{width: '8px'}} />
+        </Show>
         <For each={rightItems}>
           {(item, i) => {
             return (

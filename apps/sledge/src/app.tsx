@@ -67,13 +67,13 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <div class={[flexCol, h100, getTheme(globalConfig.appearance.theme)].join(' ')}>
-            <Suspense>
+          <Suspense>
+            <div class={[flexCol, h100, getTheme(globalConfig.appearance.theme)].join(' ')}>
               <TitleBar />
               <main>{props.children}</main>
-            </Suspense>
-            <DebugViewer />
-          </div>
+              <DebugViewer />
+            </div>
+          </Suspense>
         </MetaProvider>
       )}
     >

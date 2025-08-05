@@ -1,5 +1,5 @@
 import { flexCol } from '@sledge/core';
-import { k12x8, Terminus, ZFB03, ZFB31 } from '@sledge/theme';
+import { k12x8, Terminus, vars, ZFB03, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const aaContainer = style([
@@ -50,8 +50,16 @@ export const aboutTitle = style({
 
 export const aboutSubTitle = style({
   fontFamily: ZFB03,
-  fontSize: '9px',
+  fontSize: '8px',
   color: '#777',
+});
+
+export const newVersionText = style({
+  width: 'fit-content',
+  fontFamily: ZFB03,
+  fontSize: '8px',
+  color: vars.color.accent,
+  pointerEvents: 'all',
 });
 
 export const aboutDev = style({

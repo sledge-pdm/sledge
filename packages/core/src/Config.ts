@@ -1,6 +1,6 @@
 export type LabelMode = 'none' | 'left' | 'right';
 
-export type ConfigComponentName = 'Dropdown' | 'Slider' | 'CheckBox' | 'RadioButton' | 'ToggleSwitch';
+export type ConfigComponentName = 'Dropdown' | 'Slider' | 'CheckBox' | 'RadioButton' | 'ToggleSwitch' | 'Button';
 
 export type ConfigComponentProps = {
   labelByComponent: boolean;
@@ -41,6 +41,13 @@ export const componentProps = new Map<ConfigComponentName, ConfigComponentProps>
     {
       labelByComponent: false,
       labelMode: 'right',
+    },
+  ],
+  [
+    'Button',
+    {
+      labelByComponent: true,
+      labelMode: 'none',
     },
   ],
 ]);

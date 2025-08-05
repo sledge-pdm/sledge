@@ -13,9 +13,11 @@ import { CanvasRenderingMode } from '../canvas/Canvas';
 export type GlobalConfig = {
   misc: {
     recentFiles: FileLocation[];
+    skippedVersions: string[];
   };
   appearance: {
     theme: Theme;
+    resetSkippedVersions: string;
   };
   default: {
     canvasSize: { width: number; height: number };
@@ -40,9 +42,11 @@ export type GlobalConfig = {
 export const defaultConfig: GlobalConfig = {
   misc: {
     recentFiles: [],
+    skippedVersions: [],
   },
   appearance: {
     theme: 'os',
+    resetSkippedVersions: '',
   },
   default: {
     canvasSize: { width: 1000, height: 1000 },

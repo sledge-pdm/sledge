@@ -3,7 +3,7 @@ import ColorPicker from '~/components/section/editor/item/ColorPicker';
 
 import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
-import { ColorBox, Icon } from '@sledge/ui';
+import { ColorBox, FieldSizingInput, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 import { getActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
@@ -48,10 +48,10 @@ const Color: Component = () => {
 
         <div class={flexRow} style={{ height: 'fit-content', 'margin-left': vars.spacing.lg, opacity: 0.9, 'min-width': '90px' }}>
           <p style={{ 'font-size': vars.text.md }}>#</p>
-          <input
+          <FieldSizingInput
+            inputId='color-hex-input'
             ref={(el) => (hexInputRef = el)}
-            // @ts-expect-error
-            style={{ 'font-family': ZFB11, 'font-size': vars.text.md, 'field-sizing': 'content' }}
+            style={{ 'font-family': ZFB11, 'font-size': vars.text.md }}
             maxLength={6}
             value={currentColor().substring(1)}
             onChange={(e) => {

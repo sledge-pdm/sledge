@@ -3,6 +3,7 @@ import { createSignal, onCleanup, onMount, type Component, type JSX } from 'soli
 interface Props extends JSX.HTMLAttributes<HTMLInputElement> {
   inputId: string; // needs id because don't want to use ref
   value?: string;
+  maxLength?: number;
   autocomplete?: string;
   onInputChange?: (e: Event & { target: HTMLInputElement }) => void; // onChange is used for input events
 }
@@ -30,7 +31,7 @@ const FieldSizingInput: Component<Props> = (props) => {
       const computedStyle = getComputedStyle(inputElement);
 
       // calculate inner width based on content
-      const content = inputElement.value || inputElement.placeholder || '';
+      const content = (inputElement.value || inputElement.placeholder || '').slice(0, props.maxLength || 0);
 
       // 最小幅として1文字分を保証（field-sizing: contentの挙動に合わせる）
       const minContent = content || 'M'; // Mは一般的に最も幅が広い文字の一つ

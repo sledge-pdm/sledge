@@ -27,11 +27,15 @@ export function changeCanvasSize(newSize: Size2D): boolean {
 
 const referenceLengthRatio = 0.75;
 const referenceLength = () => {
-  const canvasAreaSize = interactStore.canvasAreaSize;
-  if (canvasAreaSize.width < canvasAreaSize.height) {
-    return canvasAreaSize.width * referenceLengthRatio;
+  const sectionBetweenArea = document.getElementById('sections-between-area')!;
+  const areaBound = sectionBetweenArea.getBoundingClientRect();
+  const width = areaBound.width;
+  const height = areaBound.height;
+
+  if (width < height) {
+    return width * referenceLengthRatio;
   } else {
-    return canvasAreaSize.height * referenceLengthRatio;
+    return height * referenceLengthRatio;
   }
 };
 

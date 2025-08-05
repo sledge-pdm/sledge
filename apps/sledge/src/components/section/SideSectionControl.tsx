@@ -67,7 +67,7 @@ const SideSectionControl: Component<Props> = (props) => {
 
         'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
         'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
-        
+
         'z-index': Consts.zIndex.sideSection,
       }}
     >

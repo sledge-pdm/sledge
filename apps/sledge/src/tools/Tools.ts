@@ -35,8 +35,7 @@ export type ToolPresets<TConfig = any> = {
   options: Record<string, TConfig>;
 };
 
-export type PresetConfig = {
-};
+export type PresetConfig = {};
 
 export type SizedPresetConfig = PresetConfig & {
   size?: number;

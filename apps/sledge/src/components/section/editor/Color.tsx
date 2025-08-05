@@ -60,7 +60,7 @@ const Color: Component = () => {
                 setCurrentColor(`#${s}`);
               }
             }}
-            onInput={(e) => {
+            onInputChange={(e: Event & { target: HTMLInputElement; currentTarget?: HTMLInputElement }) => {
               const currentPosition = hexInputRef.selectionStart;
               hexInputRef.value = hexInputRef.value.toUpperCase();
               hexInputRef.selectionStart = currentPosition;

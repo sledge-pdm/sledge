@@ -149,7 +149,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                   // @ts-ignore
                 }}
                 value={props.layer.name}
-                onInput={(e) => setLayerListStore('layers', props.index, 'name', e.currentTarget.value)}
+                onInputChange={(e: Event & { target: HTMLInputElement; currentTarget?: HTMLInputElement }) => setLayerListStore('layers', props.index, 'name', e.currentTarget.value)}
                 onBlur={(e) => {
                   setNameChanging(false);
                   e.target.selectionStart = 0;

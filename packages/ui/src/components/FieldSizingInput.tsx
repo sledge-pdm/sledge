@@ -1,11 +1,11 @@
 import { createSignal, onCleanup, onMount, type Component, type JSX } from 'solid-js';
 
-interface Props extends JSX.HTMLAttributes<HTMLInputElement> {
+interface Props extends Omit<JSX.HTMLAttributes<HTMLInputElement>, 'onInput'> {
   inputId: string; // needs id because don't want to use ref
   value?: string;
   maxLength?: number;
   autocomplete?: string;
-  onInputChange?: (e: Event & { target: HTMLInputElement }) => void; // onChange is used for input events
+  onInputChange?: (e: Event & { target: HTMLInputElement; currentTarget?: HTMLInputElement }) => void; // onChange is used for input events
 }
 
 // polyfill for field-sizing: content input
@@ -89,7 +89,7 @@ const FieldSizingInput: Component<Props> = (props) => {
       onInput={(e) => {
         calculateSize();
         if (props.onInputChange && e.target instanceof HTMLInputElement) {
-          props.onInputChange(e as Event & { target: HTMLInputElement });
+          props.onInputChange(e as Event & { target: HTMLInputElement; currentTarget?: HTMLInputElement });
         }
       }}
     />

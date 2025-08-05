@@ -1,3 +1,4 @@
+import { Consts } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, For } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
@@ -66,6 +67,8 @@ const SideSectionControl: Component<Props> = (props) => {
 
         'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
         'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
+        
+        'z-index': Consts.zIndex.sideSection,
       }}
     >
       <p

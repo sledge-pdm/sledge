@@ -1,6 +1,6 @@
 import { flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB08 } from '@sledge/theme';
-import { Checkbox, Dropdown, Slider } from '@sledge/ui';
+import { Checkbox, Dropdown, FieldSizingInput, Slider } from '@sledge/ui';
 import { DropdownOption } from '@sledge/ui/src/components/control/Dropdown';
 import * as styles from '@styles/dialogs/export_dialog.css';
 import { open as openFile } from '@tauri-apps/plugin-dialog';
@@ -133,12 +133,12 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
             </div>
             <div class={flexRow} style={{ 'align-items': 'end', 'margin-left': '12px' }}>
               {/* <p class={styles.fileName}>\</p> */}
-              <input
+              <FieldSizingInput
+                inputId='export-dialog-file-name'
                 class={styles.fileName}
-                // @ts-expect-error
-                style={{ 'field-sizing': 'content' }}
                 value={settings.fileName}
-                onChange={(e) => setSettings('fileName', e.target.value)}
+                autocomplete='off'
+                onInputChange={(e) => setSettings('fileName', e.target.value)}
               />
               <p style={{ 'font-size': vars.text.sm, 'margin-bottom': '2px', 'font-family': ZFB08 }}>.{settings.exportOptions.format}</p>
             </div>

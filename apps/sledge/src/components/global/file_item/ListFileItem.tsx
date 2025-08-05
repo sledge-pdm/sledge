@@ -34,7 +34,6 @@ const ListFileItem: Component<FileItemProps> = (props) => {
             left: `${pos().x}px`,
             'image-rendering': 'pixelated',
             'pointer-events': 'none',
-            'z-index': '9999',
           }}
         >
           <Show when={props.thumbnail} fallback={<p>loading...</p>}>

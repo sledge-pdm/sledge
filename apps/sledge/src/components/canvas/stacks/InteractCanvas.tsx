@@ -4,6 +4,7 @@ import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPosit
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
+import { Consts } from '~/models/Consts';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -175,7 +176,7 @@ export const InteractCanvas: Component<Props> = (props) => {
         height: `${styleHeight()}px`,
         'pointer-events': 'all',
         cursor: 'none',
-        'z-index': '100', // どのレイヤーよりも上だが、image poolよりも下
+        'z-index': Consts.zIndex.interactCanvas,
       }}
     />
   );

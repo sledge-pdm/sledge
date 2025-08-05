@@ -1,4 +1,8 @@
+import { Consts as CoreConfig } from '@sledge/core';
+
 export const Consts = {
+  ...CoreConfig,
+
   maxPenSize: 20,
   minCanvasWidth: 1,
   maxCanvasWidth: 3000,

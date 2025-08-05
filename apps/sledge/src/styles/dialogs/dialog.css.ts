@@ -2,12 +2,13 @@
 import { flexRow, w100 } from '@sledge/core';
 import { vars, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const overlay = style({
   position: 'fixed',
   inset: 0,
   backgroundColor: vars.color.overlay,
-  zIndex: 1000,
+  zIndex: Consts.zIndex.modalDialog,
 });
 
 export const wrapper = style({
@@ -23,7 +24,7 @@ export const wrapper = style({
   background: vars.color.background,
   borderRadius: vars.size.dialogRadius,
   // boxShadow: '0 0px 30px #FFFFFF50',
-  zIndex: 1001,
+  zIndex: Consts.zIndex.modalDialog + 1,
   overflow: 'visible',
 });
 

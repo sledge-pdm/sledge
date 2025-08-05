@@ -7,6 +7,7 @@ import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
 import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { Consts } from '~/models/Consts';
 import { ImagePoolEntryMenu } from '~/models/menu/ImagePoolEntryMenu';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
@@ -126,7 +127,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         style={{
           transform: `translate(-${size() / 2}px, -${size() / 2}px)`,
           position: 'absolute',
-          'z-index': 400,
+          'z-index': Consts.zIndex.imagePoolHandle,
         }}
       />
     );
@@ -170,7 +171,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           width: `${props.entry.width}px`,
           height: `${props.entry.height}px`,
           opacity: localEntry().visible ? 1 : 0.6,
-          'z-index': 2,
+          'z-index': Consts.zIndex.imagePool,
           'pointer-events': 'none',
         }}
       />
@@ -192,7 +193,17 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         }}
       >
         {/* border rect */}
-        <rect class={'border-rect'} width={'100%'} height={'100%'} fill='none' stroke='black' stroke-width={1 / interactStore.zoom} />
+        <rect
+          class={'border-rect'}
+          width={'100%'}
+          height={'100%'}
+          fill='none'
+          stroke='black'
+          stroke-width={1 / interactStore.zoom}
+          style={{
+            'z-index': Consts.zIndex.imagePoolBorder,
+          }}
+        />
         {/* 四隅 */}
         <Handle x={'0'} y={'0'} data-pos='nw' />
         <Handle x={'100%'} y={'0'} data-pos='ne' />
@@ -220,7 +231,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           visibility: stateStore.selected ? 'visible' : 'collapse',
           'transform-origin': '100% 0',
           transform: `scale(${1 / interactStore.zoom})`,
-          'z-index': 1000,
+          'z-index': Consts.zIndex.imagePoolMenu,
         }}
       >
         <img

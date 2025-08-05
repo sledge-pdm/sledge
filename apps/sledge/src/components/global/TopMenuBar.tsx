@@ -1,8 +1,8 @@
-import { flexRow } from '@sledge/core';
 import { getTheme, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import * as styles from '@styles/globals/top_menu_bar.css';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import ExportDialog from '~/components/dialogs/ExportDialog';
 import SettingDialog from '~/components/dialogs/SettingDialog';
 import SaveSection from '~/components/global/SaveSection';
@@ -14,12 +14,7 @@ interface Item {
   text: string;
   action: () => void;
 }
-
-interface Props {
-  isDecorated: boolean;
-}
-
-const TopMenuBar: Component<Props> = ({ isDecorated }) => {
+const TopMenuBar: Component = () => {
   const [isRecentMenuShown, setIsRecentMenuShown] = createSignal(false);
   const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
 
@@ -27,6 +22,11 @@ const TopMenuBar: Component<Props> = ({ isDecorated }) => {
   const [isSettingShown, setIsSettingShown] = createSignal(false);
   let exportDialog = null;
   let settingDialog = null;
+
+  const [isDecorated, setIsDecorated] = createSignal(true);
+  onMount(async () => {
+    setIsDecorated(await getCurrentWindow().isDecorated());
+  });
 
   createEffect(() => {
     if (isExportShown()) {
@@ -142,9 +142,9 @@ const TopMenuBar: Component<Props> = ({ isDecorated }) => {
         </For>
       </div>
       <div class={styles.menuListRight}>
-        <Show when={isDecorated}>
-            <SaveSection />
-            <div style={{width: '8px'}} />
+        <Show when={isDecorated()}>
+          <SaveSection />
+          <div style={{ width: '8px' }} />
         </Show>
         <For each={rightItems}>
           {(item, i) => {

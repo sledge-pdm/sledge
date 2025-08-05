@@ -1,5 +1,6 @@
 import { flexCol } from '@sledge/core';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const topRightNav = style({
   display: 'flex',
@@ -17,7 +18,7 @@ export const undoRedoContainer = style([
     alignContent: 'center',
     alignItems: 'center',
     padding: '12px',
-    zIndex: 1000,
+    zIndex: Consts.zIndex.canvasOverlay,
     pointerEvents: 'auto',
   },
 ]);

@@ -10,6 +10,7 @@ import {
   type DebugSession,
 } from '~/utils/DebugViewer';
 import './DebugViewer.css';
+import { Consts } from '~/models/Consts';
 
 const DebugViewer: Component = () => {
   const [selectedSession, setSelectedSession] = createSignal<string | null>(null);
@@ -46,7 +47,9 @@ const DebugViewer: Component = () => {
 
   return (
     <Show when={isOpen()}>
-      <div class='debug-viewer-overlay' onClick={handleClose}>
+      <div class='debug-viewer-overlay' onClick={handleClose} style={{
+        "z-index": Consts.zIndex.debugMenu
+      }}>
         <div class='debug-viewer-modal' onClick={(e) => e.stopPropagation()}>
           <div class='debug-viewer-header'>
             <h2>Debug Image Viewer</h2>

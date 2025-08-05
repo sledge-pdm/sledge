@@ -152,7 +152,7 @@ export default function TitleBar() {
         </Show>
 
         <Show when={isEditor()}>
-          <TopMenuBar isDecorated={isDecorated()} />
+          <TopMenuBar />
         </Show>
       </div>
     </header>

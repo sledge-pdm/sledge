@@ -1,6 +1,7 @@
 import { flexRow, w100, wh100 } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const root = style([
   flexRow,
@@ -10,7 +11,7 @@ export const root = style([
     backgroundColor: vars.color.background,
     height: '28px',
     alignItems: 'end',
-    zIndex: 20,
+    zIndex: Consts.zIndex.titleBar,
   },
 ]);
 

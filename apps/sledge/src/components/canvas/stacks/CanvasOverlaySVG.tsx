@@ -4,6 +4,7 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolPreset } from '~/controllers/tool/ToolController';
+import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -122,7 +123,7 @@ const CanvasOverlaySVG: Component = (props) => {
 
   createEffect(() => {
     const preset = getCurrentToolPreset();
-    const toolSize = preset?.size ?? 0;
+    const toolSize = (preset as any).size ?? 0;
     const half = Math.floor(toolSize / 2);
     let x = Math.floor(interactStore.lastMouseOnCanvas.x) - half;
     let y = Math.floor(interactStore.lastMouseOnCanvas.y) - half;
@@ -152,14 +153,14 @@ const CanvasOverlaySVG: Component = (props) => {
           'pointer-events': 'none',
           'shape-rendering': 'auto',
           overflow: 'visible',
-          'z-index': 450,
+          'z-index': Consts.zIndex.canvasOverlay,
         }}
       >
         {/* border rect */}
         <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={0.2} pointer-events='none' />
 
         {/* pen hover preview */}
-        <Show when={globalConfig.editor.showPointedPixel && !interactStore.isPenOut}>
+        <Show when={globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
           <rect
             width={areaPenWrite()?.width}
             height={areaPenWrite()?.height}

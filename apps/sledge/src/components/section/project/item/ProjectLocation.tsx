@@ -2,6 +2,7 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB09 } from '@sledge/theme';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
+import { join } from '~/utils/PathUtils';
 import { getOpenLocation } from '~/utils/WindowUtils';
 
 const ProjectLocation: Component = () => {
@@ -27,7 +28,7 @@ const ProjectLocation: Component = () => {
             href='#'
             onClick={(e) => {
               if (!location || !location.path || !location.name) return;
-              revealItemInDir(location.path + '\\' + location.name);
+              revealItemInDir(join(location.path, location.name));
             }}
             style={{ color: vars.color.muted, 'padding-bottom': '2px' }}
           >

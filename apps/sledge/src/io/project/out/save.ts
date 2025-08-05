@@ -9,7 +9,7 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { PathToFileLocation as pathToFileLocation } from '~/utils/PathUtils';
+import { join, PathToFileLocation as pathToFileLocation } from '~/utils/PathUtils';
 import getFileId from '../../../utils/getFileId';
 
 async function folderSelection(name?: string) {
@@ -45,8 +45,8 @@ async function saveThumbnailData(selectedPath: string) {
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
   let selectedPath: string | null;
 
-  if (existingPath) {
-    selectedPath = `${existingPath}\\${name}`;
+  if (existingPath && name) {
+    selectedPath = join(existingPath, name);
   } else {
     selectedPath = await folderSelection(name);
   }
@@ -85,15 +85,15 @@ export async function saveProject(name?: string, existingPath?: string): Promise
   return false;
 }
 
-export const thumbnailDir = async () => (await appDataDir()) + '\\sledge\\thumbnails\\';
-export const thumbnailPath = async (fileId: string) => (await appDataDir()) + '\\sledge\\thumbnails\\' + fileId;
+export const thumbnailDir = async () => join(await appDataDir(), 'sledge', 'thumbnails');
+export const thumbnailPath = async (fileId: string) => join(await appDataDir(), 'sledge', 'thumbnails', fileId);
 
 export async function saveThumbnailExternal(fileId: string, dataUrl: string): Promise<string> {
-  const dir = (await appDataDir()) + '\\sledge\\thumbnails\\';
+  const dir = await thumbnailDir();
   if (!(await exists(dir))) {
     await mkdir(dir, { recursive: true });
   }
-  const path = `${dir}${fileId}.png`;
+  const path = join(dir, `${fileId}.png`);
   const bytes = dataUrlToBytes(dataUrl);
   await writeFile(path, bytes);
   return path;

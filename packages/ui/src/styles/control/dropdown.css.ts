@@ -1,4 +1,4 @@
-import { flexCol, flexRow } from '@sledge/core';
+import { Consts, flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style, styleVariants } from '@vanilla-extract/css';
 
@@ -50,7 +50,7 @@ export const menuStyle = style([
     position: 'absolute',
     top: '100%',
     left: 0,
-    zIndex: 10000,
+    zIndex: Consts.zIndex.dropdownMenu,
     backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
     marginTop: '0px',

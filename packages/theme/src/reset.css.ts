@@ -8,12 +8,14 @@ globalStyle('html, body', {
   overflow: 'hidden',
   padding: 0,
   userSelect: 'none',
+  WebkitUserSelect: 'none',
   WebkitTapHighlightColor: 'transparent',
 });
 
 globalStyle('main', {
   width: '100vw',
   userSelect: 'none',
+  WebkitUserSelect: 'none',
   backgroundColor: vars.color.background,
 });
 

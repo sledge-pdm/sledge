@@ -14,14 +14,14 @@ import {
 
 const BottomInfo: Component = () => {
   return (
-    <div class={bottomInfoRoot} style={{}}>
+    <div class={bottomInfoRoot}>
       <div class={bottomInfoContainer}>
         <p class={bottomInfoTextStyle}>x{interactStore.zoom}</p>
         <p class={bottomInfoTextStyle} style={{ overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>
           {logStore.bottomBarText}
         </p>
         <div class={bottomInfoContainerRight}>
-          <div class={flexRow} style={{ width: '150px' }}>
+          <div class={flexRow} style={{ width: '150px', overflow: 'visible' }}>
             <Slider
               labelMode='left'
               value={interactStore.rotation}

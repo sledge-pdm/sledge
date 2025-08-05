@@ -63,26 +63,25 @@ export default function Editor() {
   // const preloadedProject = readProjectDataFromWindow();
   const fileLocation = getOpenLocation();
   if (fileLocation && fileLocation.path && fileLocation.name) {
-  const fullPath = join(fileLocation.path, fileLocation.name)
+    const fullPath = join(fileLocation.path, fileLocation.name);
     if (fileLocation.name?.endsWith('.sledge')) {
       setFileStore('location', fileLocation);
-        readProjectFromPath(fullPath)
-          .then((projectFile) => {
-            if (!projectFile) {
-              console.error('Failed to read project from path:', fullPath);
-              return;
-            }
-            loadProjectJson(projectFile);
-            onProjectLoad(false);
-          })
-          .catch((error) => {
-            console.error('Failed to read project:', error);
-          });
+      readProjectFromPath(fullPath)
+        .then((projectFile) => {
+          if (!projectFile) {
+            console.error('Failed to read project from path:', fullPath);
+            return;
+          }
+          loadProjectJson(projectFile);
+          onProjectLoad(false);
+        })
+        .catch((error) => {
+          console.error('Failed to read project:', error);
+        });
     } else {
       // image file
       importImageFromPath(fileLocation).then((success) => {
         if (success) {
-          setFileStore('location', fileLocation);
           onProjectLoad(false);
         } else {
           console.error('Failed to import image from path:', fileLocation);

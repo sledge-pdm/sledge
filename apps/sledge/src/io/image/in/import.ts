@@ -17,7 +17,8 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
   const imageData = await loadImageData(bitmap);
 
   const fileNameWithoutExt = location.name.split('.').slice(0, -1).join('.');
-  setFileStore('location', 'path', fileNameWithoutExt);
+  setFileStore('location', 'path', location.path);
+  setFileStore('location', 'name', fileNameWithoutExt);
 
   changeCanvasSize({
     width: imageData.width,

@@ -1,23 +1,24 @@
 import { FileLocation } from '@sledge/core';
-import { join } from '@tauri-apps/api/path';
 import { changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
+import { join } from '~/utils/PathUtils';
 
 export async function importImageFromPath(location: FileLocation): Promise<boolean> {
   if (!location || !location.path || !location.name) {
     console.log('Invalid file location');
     return false;
   }
-  const path = await join(location.path, location.name);
+  const path = join(location.path, location.name);
   const bitmap = await loadLocalImage(path);
   const imageData = await loadImageData(bitmap);
 
   const fileNameWithoutExt = location.name.split('.').slice(0, -1).join('.');
-  setFileStore('location', 'path', fileNameWithoutExt);
+  setFileStore('location', 'path', location.path);
+  setFileStore('location', 'name', fileNameWithoutExt);
 
   changeCanvasSize({
     width: imageData.width,

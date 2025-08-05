@@ -1,6 +1,7 @@
 import { flexRow, h100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const bottomInfoRoot = style([
   flexRow,
@@ -10,7 +11,7 @@ export const bottomInfoRoot = style([
     backgroundColor: vars.color.background,
     borderTop: `1px solid ${vars.color.border}`,
     height: '20px',
-    zIndex: 10000,
+    zIndex: Consts.zIndex.bottomInfo,
     pointerEvents: 'all',
     overflowY: 'visible',
   },
@@ -37,6 +38,7 @@ export const bottomInfoContainerRight = style([
     alignItems: 'center',
     justifyContent: 'end',
     gap: vars.spacing.md,
+    overflow: 'visible',
   },
 ]);
 

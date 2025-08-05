@@ -2,8 +2,7 @@ name: dev
 
 on:
   push:
-    tags: ['v*.*.*-dev.*']
-  workflow_dispatch: {}
+    branches: ['develop']
 
 jobs:
   build:
@@ -47,32 +46,49 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
-      # Tauri Build + Release Upload
+      # Tauri Build Only
       - uses: tauri-apps/tauri-action@v0
+        id: tauri-build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SCCACHE_GHA_ENABLED: 'true'
           RUSTC_WRAPPER: 'sccache'
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Development Build ${{ github.ref_name }}'
-          releaseBody: 'This is a development build. Use at your own risk.'
-          releaseDraft: true # 開発版はドラフトとして作成
-          prerelease: true # プレリリースとしてマーク
           projectPath: './apps/sledge'
-          configPath: >-
+          args: >-
             ${{
-              matrix.platform == 'ubuntu-latest' && './src-tauri/tauri.linux.conf.json' ||
-              matrix.platform == 'macos-latest' && './src-tauri/tauri.macos.conf.json' ||
-              matrix.platform == 'windows-latest' && './src-tauri/tauri.windows.conf.json' ||
-              './src-tauri/tauri.conf.json'
+              matrix.platform == 'ubuntu-latest' && '--config ./src-tauri/tauri.linux.conf.json' ||
+              matrix.platform == 'macos-latest' && '--config ./src-tauri/tauri.macos.conf.json' ||
+              matrix.platform == 'windows-latest' && '--config ./src-tauri/tauri.windows.conf.json' ||
+              '--config ./src-tauri/tauri.conf.json'
             }}
 
       - name: Upload dev artifacts
         uses: actions/upload-artifact@v4
-        if: always()
+        if: matrix.platform == 'ubuntu-latest'
         with:
-          name: sledge-dev-${{ matrix.platform }}
+          name: binaries-linux
           path: |
-            apps/sledge/src-tauri/target/release/bundle/
-          retention-days: 7 # 開発版は7日間保持
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.deb
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.rpm
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.AppImage
+          retention-days: 3
+
+      - name: Upload dev artifacts
+        uses: actions/upload-artifact@v4
+        if: matrix.platform == 'macos-latest'
+        with:
+          name: binaries-macos
+          path: |
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.dmg
+          retention-days: 3
+
+      - name: Upload dev artifacts
+        uses: actions/upload-artifact@v4
+        if: matrix.platform == 'windows-latest'
+        with:
+          name: binaries-windows
+          path: |
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.exe
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.msi
+          retention-days: 3

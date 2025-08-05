@@ -2,22 +2,24 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
-  "windows": ["start", "editor-*", "about", "settings", "loading"],
+  "windows": [
+    "start",
+    "editor-*",
+    "about",
+    "settings",
+    "loading"
+  ],
   "permissions": [
     "core:default",
     "dialog:default",
     "fs:default",
     "core:path:default",
     "core:path:allow-resolve-directory",
-
     "system-info:allow-all",
-
     "dialog:allow-save",
     "dialog:allow-open",
     "shell:allow-open",
-
     "log:allow-log",
-
     "fs:allow-open",
     "fs:allow-write",
     "fs:allow-write-file",
@@ -32,12 +34,17 @@
     "fs:read-all",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "**" }, { "path": "$RESOURCE/**" }]
+      "allow": [
+        {
+          "path": "**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
     },
-
     "opener:allow-open-path",
     "opener:allow-reveal-item-in-dir",
-
     "core:webview:allow-create-webview-window",
     "core:window:allow-destroy",
     "core:window:allow-show",
@@ -48,6 +55,7 @@
     "core:window:allow-close",
     "core:window:allow-toggle-maximize",
     "core:window:allow-start-dragging",
-    "core:window:allow-set-title"
+    "core:window:allow-set-title",
+    "os:default"
   ]
 }

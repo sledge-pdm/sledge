@@ -1,9 +1,10 @@
-import { appCacheDir, basename, join } from '@tauri-apps/api/path';
+import { appCacheDir, basename } from '@tauri-apps/api/path';
 import { copyFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';
 import getFileId from '~/utils/getFileId';
+import { join } from '~/utils/PathUtils';
 
 export function setEntry(id: string, entry: ImagePoolEntry) {
   setImagePoolStore((store) => {
@@ -24,11 +25,11 @@ async function createResource(originalPath: string) {
 
   const imagesDir = await appCacheDir(); // e.g. src-tauri/…/app
   const destName = `${id}-${await basename(originalPath)}`;
-  const destFolder = await join(imagesDir, 'pool-images');
+  const destFolder = join(imagesDir, 'pool-images');
   if (!(await exists(destFolder))) {
     await mkdir(destFolder);
   }
-  const destPath = await join(imagesDir, 'pool-images', destName);
+  const destPath = join(imagesDir, 'pool-images', destName);
   await copyFile(originalPath, destPath);
 
   const { width, height } = await loadLocalImage(destPath);

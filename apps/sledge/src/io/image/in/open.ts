@@ -3,9 +3,10 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
+import { join } from '~/utils/PathUtils';
 
 export const initProjectWithNewImage = async (filePath: string, fileName: string) => {
-  const imagePath = `${filePath}\\${fileName}`;
+  const imagePath = join(filePath, fileName);
   const imageBitmap = await loadLocalImage(imagePath);
   changeCanvasSize({
     width: imageBitmap.width,

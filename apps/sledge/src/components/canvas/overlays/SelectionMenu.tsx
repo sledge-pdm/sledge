@@ -7,6 +7,7 @@ import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
+import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import * as styles from '~/styles/components/canvas/overlays/selection_menu.css';
@@ -130,7 +131,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         top: `${selectionMenuPos().y}px`,
         visibility: outerPosition() === undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
         'pointer-events': 'all',
-        'z-index': 500,
+        'z-index': Consts.zIndex.canvasOverlay,
         'transform-origin': '0 0',
         transform: `scale(${1 / interactStore.zoom})`,
       }}
@@ -157,7 +158,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         top: `${outerPosition()?.y ?? 0}px`,
         opacity: 0.8,
         'pointer-events': 'all',
-        'z-index': 1000,
+        'z-index': Consts.zIndex.canvasOverlay,
         visibility: outerPosition() ? 'visible' : 'collapse',
       }}
     >

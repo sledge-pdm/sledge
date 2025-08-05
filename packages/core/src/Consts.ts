@@ -1,0 +1,21 @@
+export const Consts = {
+  zIndex: {
+    webGLcanvas: 300,
+    interactCanvas: 500,
+    imagePool: 600,
+    imagePoolBorder: 610,
+    imagePoolHandle: 620,
+    imagePoolMenu: 650,
+    canvasOverlay: 800,
+    canvasErrorOverlay: 999,
+    titleBar: 1000,
+    sideSection: 1000,
+    bottomInfo: 1100,
+    dialog: 2000,
+    dropdownMenu: 2500,
+    contextMenu: 3000,
+    modalDialog: 4000,
+    tooltip: 5000,
+    debugMenu: 7000,
+  },
+};

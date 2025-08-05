@@ -23,6 +23,11 @@ class CanvasAreaInteract {
     this.canvasStack.style.transform = this.transform(this.offsetX(), this.offsetY(), interactStore.zoom);
   };
 
+  public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
+    this.canvasStack.style.cursor = cursor;
+    this.wrapperRef.style.cursor = cursor;
+  };
+
   constructor(
     private canvasStack: HTMLDivElement,
     private wrapperRef: HTMLDivElement
@@ -138,7 +143,12 @@ class CanvasAreaInteract {
             y: interactStore.offset.y + dy,
           });
           this.updateTransform();
+          this.updateCursor('move');
+        } else {
+          this.updateCursor('auto');
         }
+      } else {
+        this.updateCursor('auto');
       }
     }
   }

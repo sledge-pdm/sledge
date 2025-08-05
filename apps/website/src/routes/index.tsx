@@ -1,3 +1,4 @@
+import { Asset, getReleaseData, os, osExtensions, ReleaseData } from '@sledge/core';
 import { vars, ZFB03B } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { createSignal, onMount, Show } from 'solid-js';
@@ -21,33 +22,16 @@ import {
   versionInfoText,
 } from '~/routes/start.css';
 import { globalStore } from '~/store/GlobalStore';
-import { Asset, ReleaseData } from '~/types/release';
-
-type os = 'sp' | 'macOS' | 'windows' | 'linux' | 'none';
-const options: { [key in os]: { name: string; extensions: string[] } } = {
-  sp: {
-    name: 'sp',
-    extensions: [],
-  },
-  none: {
-    name: 'None',
-    extensions: [],
-  },
-  macOS: {
-    name: 'macOS',
-    extensions: ['dmg', 'tar.gz'],
-  },
-  windows: {
-    name: 'Windows',
-    extensions: ['msi', 'exe'],
-  },
-  linux: {
-    name: 'Linux',
-    extensions: ['rpm', 'AppImage', 'deb'],
-  },
-};
 
 export default function Home() {
+  const releaseApiUrl =
+    import.meta.env.VITE_GITHUB_REST_API_URL +
+    '/repos/' +
+    import.meta.env.VITE_GITHUB_OWNER +
+    '/' +
+    import.meta.env.VITE_GITHUB_REPO +
+    '/releases/latest';
+
   const isLight = () => globalStore.theme === 'light';
 
   const downloadFlavorTexts = ['Take This!'];
@@ -66,7 +50,7 @@ export default function Home() {
   }[] => {
     if (userOS() === 'none' || !releaseData()) return [];
 
-    const availableExtensions = options[userOS()].extensions;
+    const availableExtensions = osExtensions[userOS()].extensions;
 
     return releaseData()!
       .assets.map((asset) => {
@@ -81,18 +65,12 @@ export default function Home() {
       .filter((item): item is { asset: Asset; extension: string } => item !== undefined);
   };
 
-  const releaseApiUrl =
-    import.meta.env.VITE_GITHUB_REST_API_URL +
-    '/repos/' +
-    import.meta.env.VITE_GITHUB_OWNER +
-    '/' +
-    import.meta.env.VITE_GITHUB_REPO +
-    '/releases/latest';
-
   onMount(async () => {
-    const response = await fetch(releaseApiUrl);
-    const data = await response.json();
-
+    const data = await getReleaseData(releaseApiUrl);
+    if (!data) {
+      console.error('Failed to fetch release data');
+      return;
+    }
     setReleaseData(data);
 
     const userAgent = navigator.userAgent;

@@ -80,8 +80,6 @@ const CanvasArea: Component = () => {
           width: '100%',
           height: '100%',
           overflow: 'hidden',
-          // 'z-index': 0,
-          // 'background-color': '#00000030',
           'touch-action': 'none',
         }}
       >
@@ -106,7 +104,7 @@ const CanvasArea: Component = () => {
           position: 'absolute',
           width: '100%',
           height: '100%',
-          overflow: 'hidden',
+          overflow: 'visible',
           'pointer-events': 'none',
         }}
       >

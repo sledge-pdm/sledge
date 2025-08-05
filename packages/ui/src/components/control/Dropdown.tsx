@@ -68,7 +68,6 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
   };
 
   const spin = (isUp: boolean) => {
-    console.log('hi');
     const currentIndex = p.options.findIndex((option) => option.value === getValue());
     const nextIndex = isUp ? (currentIndex + 1) % p.options.length : (currentIndex - 1 + p.options.length) % p.options.length;
     const next = p.options[nextIndex].value as T;

@@ -5,6 +5,7 @@ import { createStore } from 'solid-js/store';
 import { thumbnailDir } from '~/io/project/out/save';
 import { recentFilesContainerCol } from '~/routes/start.css';
 import getFileId from '~/utils/getFileId';
+import { join } from '~/utils/PathUtils';
 import ListFileItem from './file_item/ListFileItem';
 
 const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLocation) => void }> = (props) => {
@@ -13,7 +14,8 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
   createEffect(() => {
     props.files.forEach(async (file) => {
       // const json = await importProjectJsonFromPath(file.path + '/' + file.name);
-      const path = file.path + '\\' + file.name;
+      if (!file.path || !file.name) return;
+      const path = join(file.path, file.name);
       const fileId = await getFileId(path);
       const thumbPath = (await thumbnailDir()) + fileId + '.png';
       const assetUrl = convertFileSrc(thumbPath);
@@ -26,7 +28,8 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
     <div class={recentFilesContainerCol}>
       <For each={props.files}>
         {(file, i) => {
-          const path = file.path + '\\' + file.name;
+          if (!file.path || !file.name) return null;
+          const path = join(file.path, file.name);
           const thumbnail = () => thumbnails[path];
           return <ListFileItem onClick={props.onClick} thumbnail={thumbnail()} file={file} />;
         }}

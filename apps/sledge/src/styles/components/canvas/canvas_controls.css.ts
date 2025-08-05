@@ -1,5 +1,6 @@
 import { flexCol } from '@sledge/core';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const topRightNav = style({
   display: 'flex',
@@ -17,7 +18,7 @@ export const undoRedoContainer = style([
     alignContent: 'center',
     alignItems: 'center',
     padding: '12px',
-    zIndex: 1000,
+    zIndex: Consts.zIndex.canvasOverlay,
     pointerEvents: 'auto',
   },
 ]);
@@ -28,6 +29,7 @@ export const undoIcon = style([
     width: '12px',
     height: '12px',
     imageRendering: 'pixelated',
+    shapeRendering: 'geometricPrecision',
     alignContent: 'center',
     alignItems: 'center',
     backdropFilter: 'invert()',
@@ -42,6 +44,7 @@ export const redoIcon = style([
     width: '12px',
     height: '12px',
     imageRendering: 'pixelated',
+    shapeRendering: 'geometricPrecision',
     alignContent: 'center',
     alignItems: 'center',
     backdropFilter: 'invert()',

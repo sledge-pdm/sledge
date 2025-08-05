@@ -1,13 +1,37 @@
-import { flexRow, w100, wh100 } from '@sledge/core';
+import { flexCol, flexRow, getLatestVersion, w100, wh100 } from '@sledge/core';
 import { accentedButton, pageRoot } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { open } from '@tauri-apps/plugin-shell';
-import { aaContainer, aaText, aboutContent, aboutFeedback, aboutLink, aboutSubTitle, aboutTitle, contentContainer } from './about.css';
+import { createSignal, onMount } from 'solid-js';
+import { getCurrentVersion, getReleaseApiUrl, isNewVersionAvailable } from '~/utils/VersionUtils';
+import {
+  aaContainer,
+  aaText,
+  aboutContent,
+  aboutFeedback,
+  aboutLink,
+  aboutSubTitle,
+  aboutTitle,
+  contentContainer,
+  newVersionText,
+} from './about.css';
 
 const About = () => {
   const openLink = (url: string) => {
     open(url);
   };
+
+  const [version, setVersion] = createSignal('');
+  const [latestVersion, setLatestVersion] = createSignal('');
+  const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
+
+  onMount(async () => {
+    setVersion(await getCurrentVersion());
+    setLatestVersion((await getLatestVersion(getReleaseApiUrl())) ?? '');
+
+    const isAvailable = await isNewVersionAvailable(false);
+    setNewVersionAvailable(isAvailable ?? false);
+  });
 
   return (
     <div class={pageRoot}>
@@ -37,17 +61,23 @@ const About = () => {
           </p>
         </div>
         <div class={`${contentContainer} ${w100}`}>
-          <div class={`${flexRow}`} style={{ width: '360px' }}>
+          <div class={flexRow} style={{ width: '360px' }}>
             <p class={aboutTitle}>SLEDGE.</p>
             {/* <p class={aboutDev} style={{ 'margin-top': '3px' }}>
               by alphendp
             </p> */}
           </div>
-          <p class={aboutSubTitle} style={{ 'margin-bottom': '16px' }}>
-            pre-alpha v0.1
-          </p>
+          <div class={flexCol} style={{ 'margin-bottom': '16px', gap: '4px' }}>
+            <p class={aboutSubTitle} style={{ 'margin-right': '12px' }}>
+              v{version()}
+            </p>
+            {/* 'https://github.com/Innsbluck-rh/sledge/releases/' */}
+            <a class={newVersionText} onClick={(e) => openLink(`https://github.com/Innsbluck-rh/sledge/releases/tag/${latestVersion()}`)} href='#'>
+              {newVersionAvailable() ? `> ${latestVersion()} available.` : ''}
+            </a>
+          </div>
           <div style={{ 'margin-left': '16px' }}>
-            <p class={aboutContent} style={{ 'margin-bottom': '46px' }}>
+            <p class={aboutContent} style={{ 'margin-bottom': '36px' }}>
               made with much <span style={{ color: 'magenta' }}>love</span> for:
               <br />-{' '}
               <a class={aboutLink} onClick={(e) => openLink('https://www.sojamo.de/libraries/controlP5/')}>

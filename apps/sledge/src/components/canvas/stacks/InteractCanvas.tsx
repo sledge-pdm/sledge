@@ -4,6 +4,7 @@ import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPosit
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
+import { Consts } from '~/models/Consts';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -80,6 +81,7 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   function handlePointerCancel(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
+    setInteractStore('isMouseOnCanvas', false);
     props.operator.handleDraw(DrawState.cancel, e, getCurrentToolCategory(), position, lastPos());
     endStroke(getCanvasMousePosition(e));
   }
@@ -117,16 +119,13 @@ export const InteractCanvas: Component<Props> = (props) => {
     // 出た時点でストロークを切る場合
     // const position = getCanvasMousePosition(e);
     // if (interactStore.isInStroke) endStroke(position);
+    setInteractStore('isMouseOnCanvas', false);
 
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     if (interactStore.isDragging && isDrawableClick(e)) {
       const position = getCanvasMousePosition(e);
       props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
       setTemporaryOut(true);
-    }
-
-    if (e.pointerType === 'pen') {
-      setInteractStore('isPenOut', true);
     }
   }
 
@@ -175,7 +174,7 @@ export const InteractCanvas: Component<Props> = (props) => {
         height: `${styleHeight()}px`,
         'pointer-events': 'all',
         cursor: 'none',
-        'z-index': '100', // どのレイヤーよりも上だが、image poolよりも下
+        'z-index': Consts.zIndex.interactCanvas,
       }}
     />
   );

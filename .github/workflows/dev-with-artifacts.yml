@@ -1,4 +1,4 @@
-name: dev-build
+name: dev-with-artifacts
 
 on:
   push:
@@ -49,6 +49,7 @@ jobs:
 
       # Tauri Build + Release Upload
       - uses: tauri-apps/tauri-action@v0
+        id: tauri-build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SCCACHE_GHA_ENABLED: 'true'
@@ -57,7 +58,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'Development Build ${{ github.ref_name }}'
           releaseBody: 'This is a development build. Use at your own risk.'
-          releaseDraft: true # 開発版はドラフトとして作成
+          releaseDraft: false # Don't care because it's a dev build
           prerelease: true # プレリリースとしてマーク
           projectPath: './apps/sledge'
           configPath: >-
@@ -73,6 +74,5 @@ jobs:
         if: always()
         with:
           name: sledge-dev-${{ matrix.platform }}
-          path: |
-            apps/sledge/src-tauri/target/release/bundle/
+          path: ${{ steps.tauri-build.outputs.artifactPaths }}
           retention-days: 7 # 開発版は7日間保持

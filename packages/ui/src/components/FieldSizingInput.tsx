@@ -1,4 +1,4 @@
-import { createSignal, onMount, onCleanup, type Component, type JSX } from 'solid-js';
+import { createSignal, onCleanup, onMount, type Component, type JSX } from 'solid-js';
 
 interface Props extends JSX.HTMLAttributes<HTMLInputElement> {
   inputId: string; // needs id because don't want to use ref
@@ -14,11 +14,11 @@ const FieldSizingInput: Component<Props> = (props) => {
 
   onMount(() => {
     calculateSize();
-    
+
     // ウィンドウリサイズやフォント変更時の再計算
     const handleResize = () => calculateSize();
     window.addEventListener('resize', handleResize);
-    
+
     onCleanup(() => {
       window.removeEventListener('resize', handleResize);
     });
@@ -28,10 +28,10 @@ const FieldSizingInput: Component<Props> = (props) => {
     const inputElement = document.getElementById(props.inputId) as HTMLInputElement;
     if (inputElement) {
       const computedStyle = getComputedStyle(inputElement);
-      
+
       // calculate inner width based on content
       const content = inputElement.value || inputElement.placeholder || '';
-      
+
       // 最小幅として1文字分を保証（field-sizing: contentの挙動に合わせる）
       const minContent = content || 'M'; // Mは一般的に最も幅が広い文字の一つ
 
@@ -41,7 +41,7 @@ const FieldSizingInput: Component<Props> = (props) => {
       const verticalBorder = parseFloat(computedStyle.borderTopWidth) + parseFloat(computedStyle.borderBottomWidth);
 
       const span = document.createElement('span');
-      
+
       // より包括的なスタイルコピー
       span.style.position = 'absolute';
       span.style.visibility = 'hidden';
@@ -55,9 +55,9 @@ const FieldSizingInput: Component<Props> = (props) => {
       span.style.wordSpacing = computedStyle.wordSpacing;
       span.style.lineHeight = computedStyle.lineHeight;
       span.style.textTransform = computedStyle.textTransform;
-      
+
       span.textContent = minContent;
-      
+
       document.body.appendChild(span);
       const spanRect = span.getBoundingClientRect();
       document.body.removeChild(span); // メモリリーク防止

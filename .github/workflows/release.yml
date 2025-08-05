@@ -6,9 +6,6 @@ on:
       - 'v*.*.*'
       - 'v*.*.*-prealpha'
 
-      - '!v*.*.*-dev.*'
-      - '!v*.*.*-*-dev.*'
-
 jobs:
   build:
     permissions:

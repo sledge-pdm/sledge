@@ -2,7 +2,7 @@ name: dev
 
 on:
   push:
-    branches: ['dev']
+    branches: ['develop']
 
 jobs:
   build:
@@ -48,6 +48,7 @@ jobs:
 
       # Tauri Build Only
       - uses: tauri-apps/tauri-action@v0
+        id: tauri-build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SCCACHE_GHA_ENABLED: 'true'
@@ -61,3 +62,11 @@ jobs:
               matrix.platform == 'windows-latest' && './src-tauri/tauri.windows.conf.json' ||
               './src-tauri/tauri.conf.json'
             }}
+
+      - name: Upload dev artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sledge-dev-${{ matrix.platform }}
+          path: ${{ steps.tauri-build.outputs.artifactPaths }}
+          retention-days: 7 # 開発版は7日間保持

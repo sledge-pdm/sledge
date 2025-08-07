@@ -3,7 +3,7 @@ mod global_event;
 mod window;
 
 use std::path::PathBuf;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, async_runtime::block_on};
 use tauri_plugin_fs::FsExt;
 use window::{SledgeWindowKind, WindowOpenOptions};
 
@@ -17,10 +17,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
     let asset_protocol_scope = app.asset_protocol_scope();
 
     if files.is_empty() {
-        println!("No files, opening editor window");
-        // Tokioランタイムを作成して非同期関数を実行
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let future_open = window::open_window(
+        let future = window::open_window(
             app,
             SledgeWindowKind::Editor,
             Some(WindowOpenOptions {
@@ -29,8 +26,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
                 open_path: None,
             }),
         );
-        let result = rt.block_on(future_open);
-        println!("Window open result: {:?}", result);
+        let _ = block_on(future);
         return;
     }
 
@@ -40,10 +36,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 
         // This is for the `asset:` protocol:
         let _ = asset_protocol_scope.allow_file(file);
-
-        // Tokioランタイムを作成して非同期関数を実行
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let future_open = window::open_window(
+        let future = window::open_window(
             app.clone(),
             SledgeWindowKind::Editor,
             Some(WindowOpenOptions {
@@ -52,7 +45,8 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
                 open_path: Some(file.to_string_lossy().into_owned()),
             }),
         );
-        let _ = rt.block_on(future_open);
+
+        let _ = block_on(future);
     }
 }
 

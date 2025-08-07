@@ -2,6 +2,7 @@ import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
+import Inspect from 'vite-plugin-inspect';
 import solidPlugin from 'vite-plugin-solid';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
@@ -14,11 +15,10 @@ export default defineConfig({
     vanillaExtractPlugin({
       devStyleRuntime: 'vanilla-extract',
     }),
-    solidPlugin({
-      extensions: ['.tsx'],
-    }),
+    solidPlugin(),
     glsl(),
     topLevelAwait(),
+    Inspect(),
   ],
   build: {
     outDir: 'dist',
@@ -46,8 +46,7 @@ export default defineConfig({
       : undefined,
 
     watch: {
-      // tell vite to ignore watching `src-tauri`
-      ignored: ['**/src-tauri/**'],
+      ignored: ['**/src-tauri/**', '**/.vite-inspect/**'],
     },
   },
   worker: {

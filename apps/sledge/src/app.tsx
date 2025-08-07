@@ -1,7 +1,7 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import { onCleanup } from 'solid-js';
+import { onCleanup, onMount } from 'solid-js';
 import TitleBar from './components/global/TitleBar';
 import About from './routes/about/index';
 import Editor from './routes/editor/index';
@@ -17,6 +17,10 @@ import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
 export default function App() {
+  onMount(async () => {
+    await loadGlobalSettings();
+  });
+
   onCleanup(() => {
     if (!import.meta.hot) {
       webGLRenderer?.dispose();
@@ -26,15 +30,6 @@ export default function App() {
   listenEvent('onSettingsSaved', () => {
     loadGlobalSettings();
   });
-
-  if (import.meta.hot) {
-    import.meta.hot.accept((newModule) => {
-      if (newModule) {
-        // SyntaxError が発生したときに newModule は undefined です
-        console.log('updated: count is now ', newModule.count);
-      }
-    });
-  }
 
   return (
     <Router
@@ -49,7 +44,7 @@ export default function App() {
         </MetaProvider>
       )}
     >
-      <Route path='/' component={Home} />
+      <Route path='/start' component={Home} />
       <Route path='/editor' component={Editor} />
       <Route path='/settings' component={Settings} />
       <Route path='/about' component={About} />;

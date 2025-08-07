@@ -1,7 +1,7 @@
 import { BaseDirectory } from '@tauri-apps/api/path';
 import { readTextFile } from '@tauri-apps/plugin-fs';
-import { setGlobalSettings } from '~/io/config/set';
 import { Consts } from '~/models/Consts';
+import { loadConfigToGlobalStore } from '~/stores/GlobalStores';
 
 export async function loadGlobalSettings() {
   const configData = await readTextFile(Consts.globalConfigFileName, {
@@ -15,7 +15,7 @@ export async function loadGlobalSettings() {
     console.warn('No global settings found, using default values.');
   }
 
-  await setGlobalSettings(configJson);
+  await loadConfigToGlobalStore(configJson);
 
   return configJson;
 }

@@ -9,6 +9,21 @@ import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
 
+export function setLayerName(layerId: string, newName: string): boolean {
+  if (!newName || newName.trim() === '') {
+    console.warn('Layer name cannot be empty');
+    return false;
+  }
+
+  const layer = findLayerById(layerId);
+  if (!layer) return false;
+
+  const idx = getLayerIndex(layerId);
+  setLayerListStore('layers', idx, 'name', newName);
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${layerId}) name updated` });
+  return true;
+}
+
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
   if (propName === 'id') {
     return;

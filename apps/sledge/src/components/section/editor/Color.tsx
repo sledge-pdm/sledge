@@ -3,7 +3,7 @@ import ColorPicker from '~/components/section/editor/item/ColorPicker';
 
 import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
-import { ColorBox, FieldSizingInput, Icon } from '@sledge/ui';
+import { ColorBox, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 import { getActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
@@ -48,10 +48,9 @@ const Color: Component = () => {
 
         <div class={flexRow} style={{ height: 'fit-content', 'margin-left': vars.spacing.lg, opacity: 0.9, 'min-width': '90px' }}>
           <p style={{ 'font-size': vars.text.md }}>#</p>
-          <FieldSizingInput
-            inputId='color-hex-input'
+          <input
             ref={(el) => (hexInputRef = el)}
-            style={{ 'font-family': ZFB11, 'font-size': vars.text.md }}
+            style={{ 'font-family': ZFB11, 'font-size': vars.text.md, width: '56px' }}
             maxLength={6}
             value={currentColor().substring(1)}
             onChange={(e) => {
@@ -60,7 +59,7 @@ const Color: Component = () => {
                 setCurrentColor(`#${s}`);
               }
             }}
-            onInputChange={(e: Event & { target: HTMLInputElement; currentTarget?: HTMLInputElement }) => {
+            onInput={(e) => {
               const currentPosition = hexInputRef.selectionStart;
               hexInputRef.value = hexInputRef.value.toUpperCase();
               hexInputRef.selectionStart = currentPosition;

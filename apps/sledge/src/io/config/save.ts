@@ -1,6 +1,7 @@
 import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/models/Consts';
 import { getGlobalRootStore } from '~/stores/GlobalStores';
+import { emitGlobalEvent } from '~/utils/TauriUtils';
 
 export async function saveGlobalSettings() {
   try {
@@ -8,9 +9,10 @@ export async function saveGlobalSettings() {
     const configData = await writeTextFile(Consts.globalConfigFileName, JSON.stringify(config), {
       baseDir: BaseDirectory.AppConfig,
     });
-    console.log('global settings save done (via Rust).');
+    await emitGlobalEvent('onSettingsSaved', { config: configData });
+    console.log('global settings saved:', configData);
   } catch (e) {
-    console.error('global settings save failed (via Rust).', e);
+    console.error('global settings save failed.', e);
     throw e;
   }
 }

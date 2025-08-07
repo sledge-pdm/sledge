@@ -5,7 +5,6 @@ export { default as Dropdown, type DropdownOption } from './src/components/contr
 export { default as RadioButton } from './src/components/control/RadioButton';
 export { default as Slider } from './src/components/control/Slider';
 export { default as ToggleSwitch } from './src/components/control/ToggleSwitch';
-export { default as FieldSizingInput } from './src/components/FieldSizingInput';
 export { default as Icon } from './src/components/Icon';
 export { default as Light } from './src/components/Light';
 export { MenuList, type MenuListOption } from './src/components/MenuList';

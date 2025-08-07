@@ -14,7 +14,9 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "@sledge/*": ["../../packages/*"]
+      "@sledge/ui": ["../../packages/ui"],
+      "@sledge/theme": ["../../packages/theme"],
+      "@sledge/core": ["../../packages/core"]
     }
   }
 }

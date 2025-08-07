@@ -30,14 +30,10 @@
     "@tauri-apps/plugin-opener": "^2.2.6",
     "@tauri-apps/plugin-os": "~2.3.0",
     "@tauri-apps/plugin-shell": "^2.2.1",
-    "@sledge/core": "workspace:^",
-    "@sledge/theme": "workspace:^",
-    "@sledge/ui": "workspace:^",
     "interactjs": "^1.10.27",
     "mitt": "^3.0.1",
     "msgpackr": "^1.11.5",
     "solid-js": "^1.9.5",
-    "solidjs-use": "^2.3.0",
     "uuid": "^11.1.0"
   },
   "engines": {

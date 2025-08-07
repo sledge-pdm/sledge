@@ -2,7 +2,6 @@ import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
-import Inspect from 'vite-plugin-inspect';
 import solidPlugin from 'vite-plugin-solid';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
@@ -14,20 +13,12 @@ export default defineConfig({
     wasmPlugin(),
     vanillaExtractPlugin({
       devStyleRuntime: 'vanilla-extract',
-      // 開発時のCSSキャッシュを有効化
-      cache: true,
-      // CSSの並列処理を有効化
-      parallel: true,
     }),
     solidPlugin({
       extensions: ['.tsx'],
     }),
     glsl(),
     topLevelAwait(),
-    Inspect({
-      build: true,
-      outputDir: '.vite-inspect',
-    }),
   ],
   build: {
     outDir: 'dist',
@@ -66,9 +57,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: [
-      '@sledge/core',
-      '@sledge/theme',
-      '@sledge/ui',
       // Tauri APIs - 個別にpre-bundlingして高速化
       '@tauri-apps/api/app',
       '@tauri-apps/api/core',
@@ -77,8 +65,6 @@ export default defineConfig({
       // '@tauri-apps/api/fs',
       // '@tauri-apps/api/dialog',
       // Tauri プラグイン
-      '@tauri-apps/plugin-dialog',
-      '@tauri-apps/plugin-fs',
       '@tauri-apps/plugin-os',
       // 外部ライブラリ
       'mitt',
@@ -90,7 +76,6 @@ export default defineConfig({
       '@solid-primitives/map',
       '@solid-primitives/mouse',
       '@solid-primitives/timer',
-      'solidjs-use',
     ],
     exclude: [
       '@solid-primitives/raf',
@@ -104,9 +89,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '~': path.join(__dirname, 'src'),
-      // '@sledge/core': path.join(__dirname, '../../packages/core'),
-      // '@sledge/theme': path.join(__dirname, '../../packages/theme'),
-      // '@sledge/ui': path.join(__dirname, '../../packages/ui'),
+      '@sledge/core': path.join(__dirname, '../../packages/core'),
+      '@sledge/theme': path.join(__dirname, '../../packages/theme'),
+      '@sledge/ui': path.join(__dirname, '../../packages/ui'),
       '@sledge/wasm': path.join(__dirname, '../../packages/wasm/pkg/sledge_wasm.js'),
     },
   },

@@ -13,9 +13,9 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      // "@sledge/ui": ["../../packages/ui"],
-      // "@sledge/theme": ["../../packages/theme"],
-      // "@sledge/core": ["../../packages/core"],
+      "@sledge/ui": ["../../packages/ui"],
+      "@sledge/theme": ["../../packages/theme"],
+      "@sledge/core": ["../../packages/core"],
       "@sledge/wasm": ["../../packages/wasm/pkg/sledge_wasm.js"]
     },
     "rootDirs": ["src"]

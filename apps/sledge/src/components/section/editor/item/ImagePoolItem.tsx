@@ -1,11 +1,11 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { item, name } from '@styles/section/editor/item/image_pool_item.css';
 import { Component } from 'solid-js';
 import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
 import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { isImagePoolActive, setImagePoolActive } from '~/controllers/layer/LayerListController';
+import { item, name } from '~/styles/section/editor/item/image_pool_item.css';
 
 const ImagePoolItem: Component = () => {
   const onDetClicked = (e: MouseEvent) => {

@@ -1,10 +1,10 @@
 import { flexCol } from '@sledge/core';
 import { Slider, ToggleSwitch } from '@sledge/ui';
 import { AlphaBlurMode, gaussian_blur, GaussianBlurOption, grayscale } from '@sledge/wasm';
-import { sectionCaption, sectionRoot } from '@styles/section/section_item.css';
 import { Component, createSignal } from 'solid-js';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
+import { sectionCaption, sectionRoot } from '~/styles/section/section_item.css';
 
 const Effects: Component = () => {
   const [blurOptions, setBlurOptions] = createSignal<GaussianBlurOption>(new GaussianBlurOption(1000, AlphaBlurMode.Blur));

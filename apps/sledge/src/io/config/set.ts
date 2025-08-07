@@ -12,7 +12,19 @@ function deepObjectAssign(target: any, ...sources: any[]) {
   return target;
 }
 
-export default async function setGlobalSettings(data: any) {
+export async function getDefaultSettings() {
+  const globalConfigStore = deepObjectAssign({}, defaultConfig);
+  const keyConfigStore = deepObjectAssign({}, makeDefaultKeyConfigStore());
+  const lastSettingsStore = deepObjectAssign({}, defaultLastSettingsStore);
+
+  return {
+    globalConfigStore,
+    keyConfigStore,
+    lastSettingsStore,
+  };
+}
+
+export async function setGlobalSettings(data: any) {
   const globalConfigStore = deepObjectAssign({}, defaultConfig, data.globalConfigStore);
   const keyConfigStore = deepObjectAssign({}, makeDefaultKeyConfigStore(), data.keyConfigStore);
   const lastSettingsStore = deepObjectAssign({}, defaultLastSettingsStore, data.lastSettingsStore);

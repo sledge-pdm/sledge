@@ -7,10 +7,10 @@ import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import {container, divider, item} from '@styles/components/canvas/overlays/selection_menu.css';
 import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
+import { container, divider, item } from '~/styles/components/canvas/overlays/selection_menu.css';
 
 interface ItemProps {
   src: string;

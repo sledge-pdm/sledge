@@ -1,7 +1,7 @@
-import { sectionCaption, sectionContent, sectionRoot, sectionSubCaption } from '@styles/section/section_item.css';
 import { Component } from 'solid-js';
 import ProjectLocation from '~/components/section/project/item/ProjectLocation';
 import ProjectName from '~/components/section/project/item/ProjectName';
+import { sectionCaption, sectionContent, sectionRoot, sectionSubCaption } from '~/styles/section/section_item.css';
 
 const Project: Component = () => {
   return (

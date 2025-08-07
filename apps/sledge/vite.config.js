@@ -13,11 +13,14 @@ export default defineConfig({
   plugins: [
     wasmPlugin(),
     vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }),
-    solidPlugin(),
+    solidPlugin({
+      extensions: ['.tsx'],
+    }),
     glsl(),
     topLevelAwait(),
     Inspect({
-      build: false,
+      build: true,
+      outputDir: '.vite-inspect',
     }),
   ],
   build: {
@@ -55,11 +58,39 @@ export default defineConfig({
     format: 'es',
     plugins: () => [wasmPlugin(), topLevelAwait()],
   },
-  optimizeDeps: {},
+  optimizeDeps: {
+    include: [
+      // Tauri APIs - 個別にpre-bundlingして高速化
+      '@tauri-apps/api/app',
+      '@tauri-apps/api/core',
+      '@tauri-apps/api/event',
+      '@tauri-apps/api/path',
+      // '@tauri-apps/api/fs',
+      // '@tauri-apps/api/dialog',
+      // Tauri プラグイン
+      '@tauri-apps/plugin-dialog',
+      '@tauri-apps/plugin-fs',
+      '@tauri-apps/plugin-os',
+      // 外部ライブラリ
+      'mitt',
+      'uuid',
+      'interactjs',
+      '@msgpack/msgpack',
+      'msgpackr',
+      // SolidJS関連（よく使用されるもの）
+      '@solid-primitives/map',
+      '@solid-primitives/mouse',
+      '@solid-primitives/timer',
+      'solidjs-use',
+    ],
+    exclude: [
+      // WASMモジュールはpre-bundlingから除外
+      '@sledge/wasm',
+    ],
+  },
   resolve: {
     alias: {
       '~': path.join(__dirname, 'src'),
-      '@styles': path.join(__dirname, 'src/styles'),
       '@sledge/core': path.join(__dirname, '../../packages/core'),
       '@sledge/theme': path.join(__dirname, '../../packages/theme'),
       '@sledge/ui': path.join(__dirname, '../../packages/ui'),

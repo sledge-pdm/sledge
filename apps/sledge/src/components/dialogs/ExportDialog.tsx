@@ -1,15 +1,6 @@
 import { flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB08 } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, FieldSizingInput, Slider } from '@sledge/ui';
-import {
-  exportDialogContent,
-  exportDialogCustomScaleInput,
-  exportDialogField,
-  exportDialogFieldDisabled,
-  exportDialogFieldHeader,
-  exportDialogFileName,
-  exportDialogRoot,
-} from '@styles/dialogs/export_dialog.css';
 import { open as openFile } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
@@ -20,6 +11,15 @@ import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import {
+  exportDialogContent,
+  exportDialogCustomScaleInput,
+  exportDialogField,
+  exportDialogFieldDisabled,
+  exportDialogFieldHeader,
+  exportDialogFileName,
+  exportDialogRoot,
+} from '~/styles/dialogs/export_dialog.css';
 import { join } from '~/utils/PathUtils';
 import { Dialog, DialogExternalProps } from './Dialog';
 

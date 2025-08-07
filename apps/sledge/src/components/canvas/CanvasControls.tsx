@@ -1,7 +1,7 @@
-import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '@styles/components/canvas/canvas_controls.css';
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { redoLayer, undoLayer } from '~/controllers/history/HistoryController';
 import { canRedo, canUndo } from '~/controllers/layer/LayerController';
+import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
 import { layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';

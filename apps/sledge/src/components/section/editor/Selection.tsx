@@ -1,11 +1,11 @@
 import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown } from '@sledge/ui';
-import { sectionCaption, sectionContent, sectionRoot } from '@styles/section/section_item.css';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 const Selection: Component = () => {

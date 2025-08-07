@@ -1,9 +1,9 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
-import { sectionCaption, sectionContent, sectionRoot } from '@styles/section/section_item.css';
 import { Component, For, Show } from 'solid-js';
 import ToolPresetManager from '~/components/tool/ToolPresetManager';
 import { toolStore } from '~/stores/EditorStores';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolItem from './item/ToolItem';
 

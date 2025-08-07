@@ -1,5 +1,5 @@
-import { rflItem, rflName, rflPath, rflThumb } from '@styles/components/file_item/list.css';
 import { Component, createSignal, Show } from 'solid-js';
+import { rflItem, rflName, rflPath, rflThumb } from '~/styles/components/file_item/list.css';
 import { FileItemProps } from './FileItemBase';
 
 const ListFileItem: Component<FileItemProps> = (props) => {

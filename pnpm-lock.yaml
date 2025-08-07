@@ -105,9 +105,6 @@ importers:
       solidjs-use:
         specifier: ^2.3.0
         version: 2.3.0
-      tauri-plugin-system-info-api:
-        specifier: ^2.0.10
-        version: 2.0.10(typescript@5.8.3)
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -2091,9 +2088,6 @@ packages:
     resolution: {integrity: sha512-9kY+CygyYM6j02t5YFHbNz2FN5QmYGv9zAjVp4lCDjlCw7amdckXlEt/bjMhUIfj4ThGRE4gCUH5+yGnNuPo5A==}
     engines: {node: '>=10.0.0'}
 
-  tauri-plugin-system-info-api@2.0.10:
-    resolution: {integrity: sha512-QalL92OgjARjyBoK4RFMV1+JRdWKyWBqv+kMi2Y7rnLkIGQUvsMQwvyCcbjdV3qoDbeAdU97G7qu7uPoO+c+OQ==}
-
   timers-browserify@2.0.12:
     resolution: {integrity: sha512-9phl76Cqm6FhSX9Xe1ZUAMLtm1BLkKj2Qd5ApyWkXzsMRaA7dgr81kf4wJmQf/hAvg8EEyJxDo3du/0KlhPiKQ==}
     engines: {node: '>=0.6.0'}
@@ -2169,14 +2163,6 @@ packages:
   uuid@11.1.0:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
-
-  valibot@1.1.0:
-    resolution: {integrity: sha512-Nk8lX30Qhu+9txPYTwM0cFlWLdPFsFr6LblzqIySfbZph9+BFsAHsNvHOymEviUepeIW6KFHzpX8TKhbptBXXw==}
-    peerDependencies:
-      typescript: '>=5'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   validate-html-nesting@1.2.3:
     resolution: {integrity: sha512-kdkWdCl6eCeLlRShJKbjVOU2kFKxMF8Ghu50n+crEoyx+VKm3FxAxF9z4DCy6+bbTOqNW0+jcIYRnjoIRzigRw==}
@@ -4349,13 +4335,6 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
 
-  tauri-plugin-system-info-api@2.0.10(typescript@5.8.3):
-    dependencies:
-      '@tauri-apps/api': 2.7.0
-      valibot: 1.1.0(typescript@5.8.3)
-    transitivePeerDependencies:
-      - typescript
-
   timers-browserify@2.0.12:
     dependencies:
       setimmediate: 1.0.5
@@ -4424,10 +4403,6 @@ snapshots:
   uuid@10.0.0: {}
 
   uuid@11.1.0: {}
-
-  valibot@1.1.0(typescript@5.8.3):
-    optionalDependencies:
-      typescript: 5.8.3
 
   validate-html-nesting@1.2.3: {}
 

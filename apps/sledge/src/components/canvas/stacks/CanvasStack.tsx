@@ -4,12 +4,12 @@ import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
 import { vars } from '@sledge/theme';
-import { canvasStack } from '@styles/components/canvas/canvas_stack.css';
 import { OnCanvasSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import { eventBus } from '~/utils/EventBus';
 import { ImagePool } from './image_pool/ImagePool';
 import WebGLCanvas from './WebGLCanvas';

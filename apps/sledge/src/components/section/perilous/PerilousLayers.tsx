@@ -1,10 +1,10 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Button, Icon } from '@sledge/ui';
-import { sectionCaption, sectionContent, sectionRoot } from '@styles/section/section_item.css';
 import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
 import { resetAllLayers } from '~/controllers/layer/LayerListController';
+import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const RESET_ALL_MSG = 'Sure to RESET ALL LAYERS?';
 const PerilousLayers: Component = () => {

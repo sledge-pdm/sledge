@@ -1,7 +1,6 @@
 import { getLatestVersion } from '@sledge/core';
 import { getTheme, vars, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
-import {menuItem, menuItemBackground,menuItemText,menuList,menuListLeft,menuListRight, root} from '@styles/globals/top_menu_bar.css';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-shell';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
@@ -10,6 +9,7 @@ import SettingDialog from '~/components/dialogs/SettingDialog';
 import SaveSection from '~/components/global/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
+import { menuItem, menuItemBackground, menuItemText, menuListLeft, menuListRight, root } from '~/styles/globals/top_menu_bar.css';
 import { addSkippedVersion, isNewVersionAvailable } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
 

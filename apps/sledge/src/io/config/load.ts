@@ -1,6 +1,6 @@
 import { BaseDirectory } from '@tauri-apps/api/path';
 import { readTextFile } from '@tauri-apps/plugin-fs';
-import setGlobalSettings from '~/io/config/set';
+import { setGlobalSettings } from '~/io/config/set';
 import { Consts } from '~/models/Consts';
 
 export async function loadGlobalSettings() {

@@ -20,7 +20,7 @@ interface IconProps extends JSX.HTMLAttributes<HTMLDivElement> {
 
 const Icon: Component<IconProps> = (props) => {
   const [local, rest] = splitProps(props, ['src', 'color', 'hoverColor', 'scale', 'base', 'transform', 'filter', 'backdropFilter']);
-  const px = () => (local.base ?? 16) * (local.scale ?? 1);
+  const px = (local.base ?? 16) * (local.scale ?? 1);
 
   return (
     <div
@@ -34,7 +34,7 @@ const Icon: Component<IconProps> = (props) => {
         'backdrop-filter': local.backdropFilter,
         '-webkit-backdrop-filter': local.backdropFilter,
         ...assignInlineVars({
-          [pxVar]: `${px()}px`, // ユニット付き
+          [pxVar]: `${px}px`, // ユニット付き
           [fillVar]: local.color ?? 'currentColor',
           [hoverFillVar]: local.hoverColor ?? local.color ?? 'currentColor',
           [urlVar]: `url("${local.src}")`,

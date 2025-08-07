@@ -1,11 +1,11 @@
 import { flexCol } from '@sledge/core';
 import { SparkLine } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
-import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '@styles/components/canvas/canvas_debug_overlay.css';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
+import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { eventBus, Events } from '~/utils/EventBus';
 import { safeInvoke } from '~/utils/TauriUtils';
 

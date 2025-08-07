@@ -1,12 +1,12 @@
 import { flexCol } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
 import { createScrollPosition } from '@solid-primitives/scroll';
-import { fadeBottom, fadeTop } from '@styles/components/scroll_fade.css';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
+import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { openWindow } from '~/utils/WindowUtils';
 import {
   header as menuContainer,

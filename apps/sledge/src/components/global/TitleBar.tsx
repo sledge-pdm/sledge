@@ -1,5 +1,13 @@
 import { getTheme, vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { createEffect, createSignal, onMount, Show } from 'solid-js';
+import SaveSection from '~/components/global/SaveSection';
+import TopMenuBar from '~/components/global/TopMenuBar';
+import { setBottomBarText } from '~/controllers/log/LogController';
+import { fileStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
+import { projectStore } from '~/stores/ProjectStores';
 import {
   titleBarControlButtonContainer,
   titleBarControlButtonImg,
@@ -9,16 +17,8 @@ import {
   titleBarSaveSection,
   titleBarTitle,
   titleBarTitleContainer,
-} from '@styles/globals/title_bar.css';
-import '@styles/globals/title_bar_region.css';
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createEffect, createSignal, onMount, Show } from 'solid-js';
-import SaveSection from '~/components/global/SaveSection';
-import TopMenuBar from '~/components/global/TopMenuBar';
-import { setBottomBarText } from '~/controllers/log/LogController';
-import { fileStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
-import { projectStore } from '~/stores/ProjectStores';
+} from '~/styles/globals/title_bar.css';
+import '~/styles/globals/title_bar_region.css';
 import { join } from '~/utils/PathUtils';
 
 export default function TitleBar() {

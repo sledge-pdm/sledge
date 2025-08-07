@@ -1,8 +1,8 @@
 import { flexCol, flexRow } from '@sledge/core';
-import { projectNameInput } from '@styles/section/project/project.css';
 import { Component, createSignal } from 'solid-js';
 import ErrorText from '~/components/global/ErrorText';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { projectNameInput } from '~/styles/section/project/project.css';
 
 const ProjectName: Component = () => {
   const [inputName, setInputName] = createSignal<string | undefined>(undefined);

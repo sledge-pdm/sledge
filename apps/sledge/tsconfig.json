@@ -13,7 +13,6 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "@styles/*": ["./src/styles/*"],
       "@sledge/ui": ["../../packages/ui"],
       "@sledge/theme": ["../../packages/theme"],
       "@sledge/core": ["../../packages/core"],

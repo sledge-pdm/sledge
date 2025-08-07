@@ -1,6 +1,6 @@
 import { pageRoot } from '@sledge/theme';
-import { loadingText } from '@styles/globals/loading.css';
 import { Component } from 'solid-js';
+import { loadingText } from '~/styles/globals/loading.css';
 
 const Loading: Component = (props) => {
   return (

@@ -22,8 +22,6 @@ import '~/styles/globals/title_bar_region.css';
 import { join } from '~/utils/PathUtils';
 
 export default function TitleBar() {
-  let titleBarNavEl: HTMLElement;
-
   const [isMaximizable, setIsMaximizable] = createSignal(false);
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
@@ -39,9 +37,6 @@ export default function TitleBar() {
     setMaximized(await window.isMaximized());
     setIsDecorated(await window.isDecorated());
     setWindowTitle(await window.title());
-    titleBarNavEl.addEventListener('pointerdown', (e: PointerEvent) => {
-      setBottomBarText(e.buttons.toString() + ' ' + e.pointerType + ' ' + Date.now());
-    });
   });
 
   getCurrentWindow().onResized(async () => {
@@ -70,7 +65,7 @@ export default function TitleBar() {
         }}
       >
         <Show when={!isDecorated()}>
-          <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
+          <nav class={titleBarRoot} data-tauri-drag-region>
             <div class={titleBarTitleContainer}>
               <Show when={shouldShowTitle()}>
                 <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>

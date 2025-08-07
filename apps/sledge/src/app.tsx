@@ -1,7 +1,7 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import { onCleanup, Suspense } from 'solid-js';
+import { onCleanup } from 'solid-js';
 import TitleBar from './components/global/TitleBar';
 import About from './routes/about/index';
 import Editor from './routes/editor/index';
@@ -41,13 +41,11 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <Suspense>
-            <div class={[flexCol, h100, getTheme(globalConfig.appearance.theme)].join(' ')}>
-              <TitleBar />
-              <main>{props.children}</main>
-              <DebugViewer />
-            </div>
-          </Suspense>
+          <div class={[flexCol, h100, getTheme(globalConfig.appearance.theme)].join(' ')}>
+            <TitleBar />
+            <main>{props.children}</main>
+            <DebugViewer />
+          </div>
         </MetaProvider>
       )}
     >

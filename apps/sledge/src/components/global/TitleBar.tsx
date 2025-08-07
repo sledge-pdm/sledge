@@ -24,8 +24,6 @@ import { join } from '~/utils/PathUtils';
 export default function TitleBar() {
   let titleBarNavEl: HTMLElement;
 
-  const isEditor = () => location.pathname.startsWith('/editor');
-
   const [isMaximizable, setIsMaximizable] = createSignal(false);
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
@@ -51,7 +49,7 @@ export default function TitleBar() {
   });
 
   createEffect(() => {
-    if (isEditor()) {
+    if (location.pathname.startsWith('/editor')) {
       getCurrentWindow().setTitle(
         `${projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'} ${fileStore.location.path ? `(${fileStore.location.path})` : ''}`
       );
@@ -75,7 +73,7 @@ export default function TitleBar() {
           <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
             <div class={titleBarTitleContainer}>
               <Show when={shouldShowTitle()}>
-                <Show when={isEditor()} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
+                <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
                   <p class={titleBarTitle} style={{ opacity: 0.5 }}>
                     {fileStore.location.path ?? ''}
                   </p>
@@ -84,7 +82,7 @@ export default function TitleBar() {
               </Show>
             </div>
 
-            <Show when={isEditor()}>
+            <Show when={location.pathname.startsWith('/editor')}>
               <div class={titleBarSaveSection}>
                 <SaveSection />
               </div>
@@ -152,7 +150,7 @@ export default function TitleBar() {
           </nav>
         </Show>
 
-        <Show when={isEditor()}>
+        <Show when={location.pathname.startsWith('/editor')}>
           <TopMenuBar />
         </Show>
       </div>

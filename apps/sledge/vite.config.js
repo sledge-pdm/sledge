@@ -12,7 +12,13 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
   plugins: [
     wasmPlugin(),
-    vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }),
+    vanillaExtractPlugin({
+      devStyleRuntime: 'vanilla-extract',
+      // 開発時のCSSキャッシュを有効化
+      cache: true,
+      // CSSの並列処理を有効化
+      parallel: true,
+    }),
     solidPlugin({
       extensions: ['.tsx'],
     }),
@@ -60,6 +66,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: [
+      '@sledge/core',
+      '@sledge/theme',
+      '@sledge/ui',
       // Tauri APIs - 個別にpre-bundlingして高速化
       '@tauri-apps/api/app',
       '@tauri-apps/api/core',
@@ -84,16 +93,20 @@ export default defineConfig({
       'solidjs-use',
     ],
     exclude: [
+      '@solid-primitives/raf',
       // WASMモジュールはpre-bundlingから除外
       '@sledge/wasm',
+      // VanillaExtractのランタイムをpre-bundlingから除外（処理速度向上）
+      '@vanilla-extract/css',
+      '@vanilla-extract/dynamic',
     ],
   },
   resolve: {
     alias: {
       '~': path.join(__dirname, 'src'),
-      '@sledge/core': path.join(__dirname, '../../packages/core'),
-      '@sledge/theme': path.join(__dirname, '../../packages/theme'),
-      '@sledge/ui': path.join(__dirname, '../../packages/ui'),
+      // '@sledge/core': path.join(__dirname, '../../packages/core'),
+      // '@sledge/theme': path.join(__dirname, '../../packages/theme'),
+      // '@sledge/ui': path.join(__dirname, '../../packages/ui'),
       '@sledge/wasm': path.join(__dirname, '../../packages/wasm/pkg/sledge_wasm.js'),
     },
   },

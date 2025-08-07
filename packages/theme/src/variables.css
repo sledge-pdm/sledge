@@ -1,0 +1,155 @@
+/* フォント定義 */
+@font-face {
+  font-family: '04B_03';
+  src: url('/fonts/04B/04B_03__.ttf');
+}
+
+@font-face {
+  font-family: '04B_08';
+  src: url('/fonts/04B/04B_08__.ttf');
+}
+
+@font-face {
+  font-family: 'k8x12';
+  src: url('/fonts/k8x12/k8x12.ttf');
+}
+
+@font-face {
+  font-family: 'Terminus';
+  src: url('/fonts/terminus/TerminusTTF-4.49.3.ttf');
+}
+
+/* 共通変数 */
+:root {
+  /* サイズ */
+  --size-bottom-info: 20px;
+  --size-dialog-radius: 6px;
+  --size-button-radius: 2px;
+  
+  /* スペーシング */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  
+  /* テキストサイズ */
+  --text-xs: 6px;
+  --text-sm: 8px;
+  --text-md: 10px;
+  --text-lg: 12px;
+  --text-xl: 16px;
+  
+  /* フォント */
+  --font-body: '04B_08', 'k8x12', monospace;
+}
+
+/* ライトテーマ */
+:root,
+[data-theme="light"] {
+  --color-background: #ffffff;
+  --color-surface: #f2f2f2;
+  --color-canvas-area: #fafafa;
+  --color-canvas: #ffffff;
+  --color-on-background: #000000D9;
+  --color-border: #aaaaaa;
+  --color-accent: #0000ff;
+  --color-active: #ff0000;
+  --color-enabled: #00ff00;
+  --color-muted: rgba(0,0,0,0.19);
+  --color-error: #ff0000;
+  --color-warn: #ffcc00;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-button-bg: #ffffff;
+  --color-button-hover: #e5e5e5;
+  --color-button-active: #e0e0e0;
+  --color-button-text: #000000DE;
+  --color-button-border: #000000DE;
+}
+
+/* ダークテーマ */
+[data-theme="dark"] {
+  --color-background: #252525;
+  --color-surface: #353535;
+  --color-canvas-area: #1B1B1B;
+  --color-canvas: #eeeeee;
+  --color-on-background: #eeeeee;
+  --color-border: #666666;
+  --color-accent: #ffff00;
+  --color-active: #00ff00;
+  --color-enabled: #00ff00;
+  --color-muted: rgba(255,255,255,0.30);
+  --color-error: #ff5f5f;
+  --color-warn: #fffb00;
+  --color-overlay: rgba(255, 255, 255, 0.5);
+  --color-button-bg: #222222;
+  --color-button-hover: #444444;
+  --color-button-active: #555555;
+  --color-button-text: #eeeeee;
+  --color-button-border: #bbbbbb;
+}
+
+/* ブラックテーマ */
+[data-theme="black"] {
+  --color-background: #000000;
+  --color-surface: #202020;
+  --color-canvas-area: #000000;
+  --color-canvas: #eeeeee;
+  --color-on-background: #eeeeee;
+  --color-border: #3A3A3A;
+  --color-accent: #ff00ff;
+  --color-active: #ff00ff;
+  --color-enabled: #00ff00;
+  --color-muted: rgba(255,255,255,0.30);
+  --color-error: #ff5f5f;
+  --color-warn: #fffb00;
+  --color-overlay: rgba(255, 255, 255, 0.320);
+  --color-button-bg: #222222;
+  --color-button-hover: #444444;
+  --color-button-active: #555555;
+  --color-button-text: #eeeeee;
+  --color-button-border: #aaaaaa;
+}
+
+/* グローバルスタイル */
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  font-family: var(--font-body);
+}
+
+div {
+  box-sizing: border-box;
+}
+
+button, p, a, input, label, span {
+  font-family: var(--font-body);
+  color: var(--color-on-background);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+button {
+  background: var(--color-button-bg);
+  border: 1px solid var(--color-button-border);
+  border-radius: var(--size-button-radius);
+  cursor: pointer;
+  font-size: 8px;
+  height: fit-content;
+  padding: 2px 6px;
+  pointer-events: all;
+  width: fit-content;
+}
+
+button:hover {
+  background: var(--color-button-hover);
+}
+
+button:active {
+  background: var(--color-button-active);
+  transform: translateY(1px);
+}

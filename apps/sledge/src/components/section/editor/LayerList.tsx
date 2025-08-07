@@ -1,13 +1,13 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
+import { layerList } from '@styles/section/editor/layer.css';
+import { sectionCaption, sectionContent, sectionRoot } from '@styles/section/section_item.css';
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode } from '~/models/layer/Layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { layerList } from '~/styles/section/editor/layer.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import ImagePoolItem from './item/ImagePoolItem';
 import LayerItem from './item/LayerItem';

@@ -1,13 +1,6 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { FieldSizingInput, Icon, Light } from '@sledge/ui';
-import { LogicalPosition } from '@tauri-apps/api/dpi';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
-import LayerPreview from '~/components/global/LayerPreview';
-import { moveLayer } from '~/controllers/layer/LayerListController';
-import { Layer } from '~/models/layer/Layer';
-import { LayerMenu } from '~/models/menu/LayerMenu';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import {
   activeLight,
   layerItem,
@@ -17,7 +10,14 @@ import {
   layerItemName,
   layerItemSpinner,
   layerItemType,
-} from '~/styles/section/editor/layer.css';
+} from '@styles/section/editor/layer.css';
+import { LogicalPosition } from '@tauri-apps/api/dpi';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import LayerPreview from '~/components/global/LayerPreview';
+import { moveLayer } from '~/controllers/layer/LayerListController';
+import { Layer } from '~/models/layer/Layer';
+import { LayerMenu } from '~/models/menu/LayerMenu';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 interface LayerItemProps {

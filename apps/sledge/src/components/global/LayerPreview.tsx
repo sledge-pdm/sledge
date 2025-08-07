@@ -1,9 +1,9 @@
+import { layerPreviewCanvas } from '@styles/components/layer_preview.css';
 import { Component, onCleanup, onMount } from 'solid-js';
 import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
-import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Props {

@@ -1,9 +1,9 @@
 import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
+import { configFormFieldLabel } from '@styles/components/config/config_form.css';
 import { Component, For } from 'solid-js';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/models/tool/presets';
-import { configFormFieldLabel } from '~/styles/components/config/config_form.css';
 import { ToolCategoryId } from '~/tools/Tools';
 
 interface Props {

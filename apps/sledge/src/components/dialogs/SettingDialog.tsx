@@ -1,4 +1,4 @@
-import * as styles from '@styles/dialogs/setting_dialog.css';
+import { settingDialogRoot } from '@styles/dialogs/setting_dialog.css';
 import { Component } from 'solid-js';
 import ConfigForm from '~/components/config/ConfigForm';
 import { Dialog, DialogExternalProps } from './Dialog';
@@ -14,7 +14,7 @@ const SettingDialog: Component<ExportImageProps> = (props) => {
 
   return (
     <Dialog open={props.open} onClose={props.onClose} title={'settings'} closeByOutsideClick={false} leftButtons={[]} rightButtons={[]}>
-      <div class={styles.root}>
+      <div class={settingDialogRoot}>
         <ConfigForm onClose={() => close()} />
       </div>
     </Dialog>

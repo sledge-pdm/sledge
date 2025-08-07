@@ -7,7 +7,6 @@ import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { layerCanvas } from '~/styles/components/canvas/layer_canvas.css';
 import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 
@@ -100,7 +99,6 @@ const WebGLCanvas: Component = () => {
     <>
       <canvas
         ref={(el) => (canvasEl = el!)}
-        class={layerCanvas}
         style={{
           position: 'absolute',
           'image-rendering': imageRendering(),

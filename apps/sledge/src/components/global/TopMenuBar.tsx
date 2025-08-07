@@ -1,7 +1,7 @@
 import { getLatestVersion } from '@sledge/core';
 import { getTheme, vars, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
-import * as styles from '@styles/globals/top_menu_bar.css';
+import {menuItem, menuItemBackground,menuItemText,menuList,menuListLeft,menuListRight, root} from '@styles/globals/top_menu_bar.css';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-shell';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
@@ -136,17 +136,17 @@ const TopMenuBar: Component = () => {
   ];
 
   return (
-    <div class={[getTheme(globalConfig.appearance.theme), styles.root].join(' ')}>
-      <div class={styles.menuListLeft}>
+    <div class={[getTheme(globalConfig.appearance.theme), root].join(' ')}>
+      <div class={menuListLeft}>
         <For each={leftItems}>
           {(item, i) => {
             let containerRef: HTMLDivElement;
             return (
-              <div ref={(el) => (containerRef = el)} class={styles.menuItem}>
-                <a class={styles.menuItemText} onClick={(e) => item.action()}>
+              <div ref={(el) => (containerRef = el)} class={menuItem}>
+                <a class={menuItemText} onClick={(e) => item.action()}>
                   {item.text}
                 </a>
-                <div class={styles.menuItemBackground} />
+                <div class={menuItemBackground} />
                 <Show when={item.text === 'RECENT.' && isRecentMenuShown()}>
                   <MenuList options={startMenu} onClose={() => setIsRecentMenuShown(false)} />
                 </Show>
@@ -158,7 +158,7 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
-      <div class={styles.menuListRight}>
+      <div class={menuListRight}>
         <Show when={isDecorated()}>
           <SaveSection />
           <div style={{ width: '8px' }} />
@@ -166,20 +166,20 @@ const TopMenuBar: Component = () => {
         <For each={rightItems}>
           {(item, i) => {
             return (
-              <div class={styles.menuItem}>
-                <a class={styles.menuItemText} onClick={(e) => item.action()}>
+              <div class={menuItem}>
+                <a class={menuItemText} onClick={(e) => item.action()}>
                   {item.text}
                 </a>
-                <div class={styles.menuItemBackground} />
+                <div class={menuItemBackground} />
               </div>
             );
           }}
         </For>
       </div>
       <Show when={newVersionAvailable()}>
-        <div class={styles.menuItem}>
+        <div class={menuItem}>
           <a
-            class={styles.menuItemText}
+            class={menuItemText}
             style={{
               'font-family': ZFB09,
               'font-size': '8px',
@@ -194,11 +194,11 @@ const TopMenuBar: Component = () => {
           >
             ! update available
           </a>
-          <div class={styles.menuItemBackground} />
+          <div class={menuItemBackground} />
         </div>
-        <div class={styles.menuItem} style={{ 'margin-right': '6px' }}>
+        <div class={menuItem} style={{ 'margin-right': '6px' }}>
           <a
-            class={styles.menuItemText}
+            class={menuItemText}
             style={{
               'font-family': ZFB09,
               'font-size': '8px',
@@ -214,12 +214,12 @@ const TopMenuBar: Component = () => {
           >
             [skip]
           </a>
-          <div class={styles.menuItemBackground} />
+          <div class={menuItemBackground} />
         </div>
       </Show>
-      <div class={styles.menuItem} style={{ 'margin-right': '6px' }}>
+      <div class={menuItem} style={{ 'margin-right': '6px' }}>
         <a
-          class={styles.menuItemText}
+          class={menuItemText}
           style={{ 'font-family': ZFB09, 'font-size': '8px', opacity: 0.5, width: 'fit-content' }}
           onClick={(e) => {
             openWindow('about');
@@ -227,7 +227,7 @@ const TopMenuBar: Component = () => {
         >
           ?
         </a>
-        <div class={styles.menuItemBackground} />
+        <div class={menuItemBackground} />
       </div>
       {exportDialog}
     </div>

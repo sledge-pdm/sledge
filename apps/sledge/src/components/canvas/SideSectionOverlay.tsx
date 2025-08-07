@@ -3,10 +3,10 @@ import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { createScrollPosition } from '@solid-primitives/scroll';
+import { fadeBottom, fadeTop } from '@styles/components/scroll_fade.css';
+import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '@styles/section/side_sections.css';
 import { EditorTab, EffectsTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { appearanceStore } from '~/stores/EditorStores';
-import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
-import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
 
 interface Props {
   side: 'leftSide' | 'rightSide';

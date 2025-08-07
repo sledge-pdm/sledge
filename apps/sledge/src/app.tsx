@@ -1,11 +1,11 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import { createEffect, createSignal, onCleanup, onMount, Suspense } from 'solid-js';
+import { onCleanup, Suspense } from 'solid-js';
 import TitleBar from './components/global/TitleBar';
-import Home from './routes';
-import About from './routes/about';
-import Editor from './routes/editor';
+import About from './routes/about/index';
+import Editor from './routes/editor/index';
+import Home from './routes/start/index';
 
 import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
@@ -13,38 +13,13 @@ import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import DebugViewer from '~/components/debug/DebugViewer';
 import { loadGlobalSettings } from '~/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
-import { eventBus } from '~/utils/EventBus';
-import { showMainWindow } from '~/utils/WindowUtils';
-import Settings from './routes/settings';
+import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
 export default function App() {
-  const [appReady, setAppReady] = createSignal(false);
-  const [routeReady, setRouteReady] = createSignal(false);
-
-  onMount(async () => {
-    await loadGlobalSettings();
-
-    eventBus.emit('window:appReady', { ready: true });
-  });
-
-  eventBus.on('window:appReady', () => {
-    setAppReady(true);
-  });
-
-  eventBus.on('window:routeReady', () => {
-    setRouteReady(true);
-  });
-
   onCleanup(() => {
     if (!import.meta.hot) {
       webGLRenderer?.dispose();
-    }
-  });
-
-  createEffect(() => {
-    if (appReady() && routeReady()) {
-      showMainWindow();
     }
   });
 

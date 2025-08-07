@@ -1,7 +1,7 @@
 export { default as Button } from './src/components/Button';
 export { default as ColorBox } from './src/components/ColorBox';
 export { default as Checkbox } from './src/components/control/Checkbox';
-export { default as Dropdown } from './src/components/control/Dropdown';
+export { default as Dropdown, type DropdownOption } from './src/components/control/Dropdown';
 export { default as RadioButton } from './src/components/control/RadioButton';
 export { default as Slider } from './src/components/control/Slider';
 export { default as ToggleSwitch } from './src/components/control/ToggleSwitch';

@@ -1,6 +1,7 @@
 import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
+import { marchingAntsAnimation } from '@styles/misc/marching_ants.css';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolPreset } from '~/controllers/tool/ToolController';
@@ -8,7 +9,6 @@ import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { marchingAntsAnimation } from '~/styles/misc/marching_ants.css';
 import { PathCmd, PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 

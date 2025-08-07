@@ -7,7 +7,6 @@ import RecentFileList from '~/components/global/RecentFileList';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
-import { eventBus } from '~/utils/EventBus';
 import { openWindow } from '~/utils/WindowUtils';
 import {
   header as menuContainer,
@@ -35,9 +34,7 @@ export default function Home() {
     }
   });
 
-  onMount(() => {
-    eventBus.emit('window:routeReady', { ready: true });
-  });
+  onMount(() => {});
 
   return (
     <div class={`${startRoot} ${getTheme(globalConfig.appearance.theme)}`}>

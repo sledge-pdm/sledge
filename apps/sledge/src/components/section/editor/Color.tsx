@@ -4,12 +4,12 @@ import ColorPicker from '~/components/section/editor/item/ColorPicker';
 import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
 import { ColorBox, FieldSizingInput, Icon } from '@sledge/ui';
+import { colorElemDescription, swatchContainer } from '@styles/section/editor/color.css';
+import { sectionCaption, sectionContent, sectionRoot } from '@styles/section/section_item.css';
 import Palette from '~/components/section/editor/item/Palette';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 import { getActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
-import { colorElemDescription, swatchContainer } from '~/styles/section/editor/color.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const Color: Component = () => {
   let hexInputRef: HTMLInputElement;

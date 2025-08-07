@@ -5,10 +5,10 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '@sledge/core';
 import { ZFB03 } from '@sledge/theme';
 import { Button } from '@sledge/ui';
+import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '@styles/section/project/canvas.css';
+import { sectionCaption, sectionContent, sectionRoot } from '@styles/section/section_item.css';
 import { activeLayer, allLayers } from '~/controllers/layer/LayerListController';
 import { Consts } from '~/models/Consts';
-import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;

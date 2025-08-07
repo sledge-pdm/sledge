@@ -10,7 +10,7 @@ import {
   sideSectionControlText,
   sideSectionControlTextActive,
   sideSectionControlToggle,
-} from '~/styles/section/side_section_control.css';
+} from '@styles/section/side_section_control.css';
 
 interface ItemProps {
   side: 'leftSide' | 'rightSide';

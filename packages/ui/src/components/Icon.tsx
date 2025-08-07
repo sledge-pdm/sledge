@@ -1,6 +1,6 @@
-import * as styles from '@styles/icon.css';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import { type Component, type JSX, splitProps } from 'solid-js';
+import { fillVar, hoverFillVar, icon, pxVar, urlVar } from '../styles/icon.css';
 
 interface IconProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** 透明背景 + 白(255,255,255) で描いた αマスク PNG */
@@ -25,7 +25,7 @@ const Icon: Component<IconProps> = (props) => {
   return (
     <div
       {...rest}
-      class={styles.icon}
+      class={icon}
       style={{
         transform: local.transform,
         '-webkit-transform': local.transform,
@@ -34,10 +34,10 @@ const Icon: Component<IconProps> = (props) => {
         'backdrop-filter': local.backdropFilter,
         '-webkit-backdrop-filter': local.backdropFilter,
         ...assignInlineVars({
-          [styles.pxVar]: `${px()}px`, // ユニット付き
-          [styles.fillVar]: local.color ?? 'currentColor',
-          [styles.hoverFillVar]: local.hoverColor ?? local.color ?? 'currentColor',
-          [styles.urlVar]: `url("${local.src}")`,
+          [pxVar]: `${px()}px`, // ユニット付き
+          [fillVar]: local.color ?? 'currentColor',
+          [hoverFillVar]: local.hoverColor ?? local.color ?? 'currentColor',
+          [urlVar]: `url("${local.src}")`,
         }),
       }}
     />

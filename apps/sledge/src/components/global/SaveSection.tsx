@@ -2,12 +2,12 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
+import { saveButtonMainButton, saveButtonRoot, saveButtonSide } from '@styles/globals/save_section.css';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
-import { saveButtonMainButton, saveButtonRoot, saveButtonSide } from '~/styles/globals/save_section.css';
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/PathUtils';
 

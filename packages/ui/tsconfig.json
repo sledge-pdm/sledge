@@ -2,20 +2,17 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler",        // ← ここがポイント
+    "moduleResolution": "bundler", // ← ここがポイント
 
-    "allowImportingTsExtensions": true,   // .css.ts など拡張子付き import を許可
+    "allowImportingTsExtensions": true, // .css.ts など拡張子付き import を許可
     "noEmit": true,
-    "verbatimModuleSyntax": true,         // 任意：import/export をそのまま残す
+    "verbatimModuleSyntax": true, // 任意：import/export をそのまま残す
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "allowJs": true,
     "strict": true,
     "isolatedModules": true,
-    "baseUrl": ".",
-    "paths": {
-      "@styles/*": ["./src/styles/*"],
-    },
+    "baseUrl": "."
   }
 }

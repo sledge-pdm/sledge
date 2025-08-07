@@ -1,6 +1,6 @@
 import { createVar, style } from '@vanilla-extract/css';
 
-export const pxVar = createVar(); // ← ユニット付けない
+export const pxVar = createVar();
 export const fillVar = createVar();
 export const hoverFillVar = createVar();
 export const urlVar = createVar();

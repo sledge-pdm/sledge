@@ -1,9 +1,9 @@
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
+import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '@styles/section/editor/tools.css';
 import { Component, Show } from 'solid-js';
 import { setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
-import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/editor/tools.css';
 import { ToolCategoryId } from '~/tools/Tools';
 
 interface Props {

@@ -1,11 +1,11 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
+import { item, name } from '@styles/section/editor/item/image_pool_item.css';
 import { Component } from 'solid-js';
 import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
 import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { isImagePoolActive, setImagePoolActive } from '~/controllers/layer/LayerListController';
-import * as styles from '~/styles/section/editor/item/image_pool_item.css';
 
 const ImagePoolItem: Component = () => {
   const onDetClicked = (e: MouseEvent) => {
@@ -13,7 +13,7 @@ const ImagePoolItem: Component = () => {
   };
 
   return (
-    <div class={styles.item} style={{ opacity: isImagePoolActive() ? 1 : 0.3 }} onClick={onDetClicked}>
+    <div class={item} style={{ opacity: isImagePoolActive() ? 1 : 0.3 }} onClick={onDetClicked}>
       <div
         class={[flexRow, w100].join(' ')}
         style={{
@@ -21,7 +21,7 @@ const ImagePoolItem: Component = () => {
           position: 'relative',
         }}
       >
-        <p class={styles.name} style={{ 'text-decoration': isImagePoolActive() ? 'none' : 'line-through' }}>
+        <p class={name} style={{ 'text-decoration': isImagePoolActive() ? 'none' : 'line-through' }}>
           IMAGE POOL.
         </p>
       </div>

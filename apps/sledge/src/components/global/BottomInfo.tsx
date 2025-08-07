@@ -10,7 +10,7 @@ import {
   bottomInfoContainerRight,
   bottomInfoRoot,
   bottomInfoText as bottomInfoTextStyle,
-} from '~/styles/globals/bottom_info.css';
+} from '@styles/globals/bottom_info.css';
 
 const BottomInfo: Component = () => {
   return (

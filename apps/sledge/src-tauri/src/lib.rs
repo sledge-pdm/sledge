@@ -1,6 +1,5 @@
 mod analysis;
 mod global_event;
-mod splash;
 mod window;
 
 use std::path::PathBuf;
@@ -118,7 +117,6 @@ pub fn run() {
                     }
                 }
 
-                // macOSでも初期ウィンドウを開く
                 println!("About to handle file associations");
                 handle_file_associations(app.handle().clone(), files);
                 println!("Setup completed");

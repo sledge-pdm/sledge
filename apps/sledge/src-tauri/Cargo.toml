@@ -34,18 +34,12 @@ tauri-plugin-shell = "2.2.1"
 tauri-plugin-system-info = "2.0.9"
 tauri-plugin-opener = "2.2.6"
 tauri-plugin-log = "2.6.0"
+tauri-plugin-os = "2"
 image = "0.25.6"
 dirs = "6.0.0"
 uuid = { version = "1.17.0", features = ["v4"] }
 url = "2"
 tokio = { version = "1.46.1", features = ["full"] }
-eframe = "0.29"
-egui = "0.29"
-winit = "0.30"
-tauri-plugin-os = "2"
-
-[target.'cfg(target_os = "linux")'.dependencies]
-gtk = "0.18.2"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

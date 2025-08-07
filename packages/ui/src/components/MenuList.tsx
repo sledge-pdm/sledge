@@ -1,5 +1,5 @@
 import { vars } from '@sledge/theme';
-import { itemText, menuDirection, menuItem, menuStyle } from '@styles/menu_list.css';
+import { itemText, menuDirection, menuItem, menuStyle } from '../styles/menu_list.css';
 import { type Component, For, type JSX, onCleanup, onMount } from 'solid-js';
 
 export interface MenuListOption {

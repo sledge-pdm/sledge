@@ -1,6 +1,6 @@
 // src/components/common/Dialog.tsx
 import { accentedButton, getTheme } from '@sledge/theme';
-import * as styles from '@styles/dialogs/dialog.css';
+import { body, footer, footerLeft, footerRight, header, overlay, wrapper } from '@styles/dialogs/dialog.css';
 import { For, JSX, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -37,7 +37,7 @@ export function Dialog(props: DialogInternalProps) {
     <Portal>
       <div class={getTheme(globalConfig.appearance.theme)}>
         <div
-          class={styles.overlay}
+          class={overlay}
           onClick={(e) => {
             if (props.closeByOutsideClick) props.onClose();
             else {
@@ -46,13 +46,13 @@ export function Dialog(props: DialogInternalProps) {
             }
           }}
         />
-        <div class={styles.wrapper} onClick={(e) => e.stopPropagation()}>
-          {props.title && <div class={styles.header}>{props.title.toUpperCase()}</div>}
-          <div class={styles.body}>
+        <div class={wrapper} onClick={(e) => e.stopPropagation()}>
+          {props.title && <div class={header}>{props.title.toUpperCase()}</div>}
+          <div class={body}>
             {props.children}
             <Show when={showButton()}>
-              <div class={styles.footer}>
-                <div class={styles.footerLeft}>
+              <div class={footer}>
+                <div class={footerLeft}>
                   <For each={props.leftButtons}>
                     {(item, i) => {
                       return (
@@ -63,7 +63,7 @@ export function Dialog(props: DialogInternalProps) {
                     }}
                   </For>
                 </div>
-                <div class={styles.footerRight}>
+                <div class={footerRight}>
                   <For each={props.rightButtons}>
                     {(item, i) => {
                       return (

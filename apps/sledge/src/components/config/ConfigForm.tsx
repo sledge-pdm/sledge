@@ -1,13 +1,6 @@
 import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { accentedButton, vars } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
-import { confirm } from '@tauri-apps/plugin-dialog';
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
-import { resetToDefaultConfig } from '~/io/config/reset';
-import { saveGlobalSettings } from '~/io/config/save';
-import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
-import { Sections } from '~/models/config/Sections';
-import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import {
   configFormFieldControlLabel,
   configFormFieldControlWrapper,
@@ -23,7 +16,14 @@ import {
   configFormSectionItem,
   configFormSectionLabel,
   configFormSections,
-} from '~/styles/components/config/config_form.css';
+} from '@styles/components/config/config_form.css';
+import { confirm } from '@tauri-apps/plugin-dialog';
+import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { resetToDefaultConfig } from '~/io/config/reset';
+import { saveGlobalSettings } from '~/io/config/save';
+import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
+import { Sections } from '~/models/config/Sections';
+import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import KeyConfigSettings from './KeyConfigSettings';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;

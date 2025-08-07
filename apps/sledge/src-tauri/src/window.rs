@@ -1,12 +1,6 @@
-use crate::splash;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use uuid::Uuid;
-
-#[cfg(target_os = "linux")]
-use gtk::prelude::GtkWindowExt;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
@@ -17,7 +11,10 @@ pub enum SledgeWindowKind {
     Settings,
 }
 
-const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-extensions --disable-plugins --disable-dev-shm-usage";
+// const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-extensions --disable-plugins --disable-dev-shm-usage";
+
+const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection";
+
 
 fn next_editor_label(app: &AppHandle) -> String {
     loop {
@@ -45,7 +42,7 @@ pub async fn open_window(
     options: Option<WindowOpenOptions>,
 ) -> Result<(), String> {
     println!("open_window called with kind: {:?}", kind);
-    let splash_closer = Some(splash::show_splash_screen());
+    // let splash_closer = Some(splash::show_splash_screen());
 
     let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
 
@@ -69,7 +66,7 @@ pub async fn open_window(
 
     // 1. 開く先の `label` を決定
     let (label, url) = match kind {
-        SledgeWindowKind::Start => ("start".into(), "/".into()),
+        SledgeWindowKind::Start => ("start".into(), "/start".into()),
         SledgeWindowKind::About => ("about".into(), "/about".into()),
         SledgeWindowKind::Settings => ("settings".into(), "/settings".into()),
         SledgeWindowKind::Editor => {
@@ -82,6 +79,7 @@ pub async fn open_window(
             (lbl, full)
         }
     };
+
     // 2. 既存ウィンドウがあれば再利用
     if let Some(existing) = app.get_webview_window(&label) {
         // ウィンドウを最前面に表示
@@ -124,7 +122,6 @@ pub async fn open_window(
                 .resizable(false)
                 .closable(true)
                 .skip_taskbar(true)
-                .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);
         }
@@ -135,7 +132,6 @@ pub async fn open_window(
                 .resizable(false)
                 .closable(true)
                 .skip_taskbar(true)
-                .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);
         }
@@ -149,32 +145,15 @@ pub async fn open_window(
     // 4. ウィンドウ生成（非表示で）
     #[allow(unused_variables)]
     let window = builder
-        .visible(false) // App.tsx側でshowするまでは非表示
+        // .visible(false) // App.tsx側でshowするまでは非表示
         .build()
         .map_err(|e| e.to_string())?;
-
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(gtk_window) = window.gtk_window() {
-            gtk_window.set_titlebar(Option::<&gtk::Widget>::None);
-        }
-    }
-
-    // スプラッシュクローザーをアプリの状態として保存
-    if let Some(closer) = splash_closer {
-        app.manage(closer);
-    }
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<(), String> {
-    // スプラッシュスクリーンを閉じる
-    if let Some(splash_closer) = app.try_state::<Arc<AtomicBool>>() {
-        splash::close_splash_screen(splash_closer.inner().clone());
-    }
-
     // メインウィンドウを表示
     if let Some(window) = app.get_webview_window(&window_label) {
         window.show().map_err(|e| e.to_string())?;

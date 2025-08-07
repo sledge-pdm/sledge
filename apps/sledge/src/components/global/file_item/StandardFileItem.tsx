@@ -26,7 +26,7 @@ const StandardFileItem: Component<FileItemProps> = (props) => {
             if (props.onClick) props.onClick(props.file);
           }}
         >
-          {props.file.name.substring(0, props.file.name.lastIndexOf('.'))}
+          {props.file.name?.substring(0, props.file.name.lastIndexOf('.'))}
         </a>
       </div>
       <p class={rfsPath}>{props.file.path}</p>

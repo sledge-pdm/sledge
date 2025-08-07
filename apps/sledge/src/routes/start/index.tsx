@@ -5,9 +5,10 @@ import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
+import { loadGlobalSettings } from '~/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
-import { openWindow } from '~/utils/WindowUtils';
+import { openWindow, showMainWindow } from '~/utils/WindowUtils';
 import {
   header as menuContainer,
   headerItem as menuItem,
@@ -34,7 +35,10 @@ export default function Home() {
     }
   });
 
-  onMount(() => {});
+  onMount(async () => {
+    await loadGlobalSettings();
+    await showMainWindow();
+  });
 
   return (
     <div class={`${startRoot} ${getTheme(globalConfig.appearance.theme)}`}>

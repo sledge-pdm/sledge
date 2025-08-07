@@ -55,6 +55,7 @@ export default defineConfig({
     plugins: () => [wasmPlugin(), topLevelAwait()],
   },
   optimizeDeps: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
     include: [
       // Tauri APIs - 個別にpre-bundlingして高速化
       '@tauri-apps/api/app',
@@ -69,7 +70,6 @@ export default defineConfig({
       'mitt',
       'uuid',
       'interactjs',
-      '@msgpack/msgpack',
       'msgpackr',
       // SolidJS関連（よく使用されるもの）
       '@solid-primitives/map',

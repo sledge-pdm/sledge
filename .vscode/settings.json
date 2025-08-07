@@ -6,7 +6,8 @@
   },
   "typescript.suggestionActions.enabled": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
-  // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.workspaceSymbols.excludeLibrarySymbols": true,
 
   "rust-analyzer.linkedProjects": ["./packages/wasm/Cargo.toml", "./apps/sledge/src-tauri/Cargo.toml"],
   "rust-analyzer.cargo.buildScripts.useRustcWrapper": true,

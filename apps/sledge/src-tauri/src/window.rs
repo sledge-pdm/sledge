@@ -153,7 +153,7 @@ pub async fn open_window(
     // 4. ウィンドウ生成（非表示で）
     #[allow(unused_variables)]
     let window = builder
-        // .visible(false) // App.tsx側でshowするまでは非表示
+        .visible(false) // App.tsx側でshowするまでは非表示
         .build()
         .map_err(|e| e.to_string())?;
 
@@ -165,7 +165,7 @@ pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<()
     // メインウィンドウを表示
     if let Some(window) = app.get_webview_window(&window_label) {
         window.show().map_err(|e| e.to_string())?;
-        window.set_focus().map_err(|e| e.to_string())?;
+        // window.set_focus().map_err(|e| e.to_string())?;
     }
 
     Ok(())

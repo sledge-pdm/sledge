@@ -1,4 +1,4 @@
-import { FileLocation, flexCol } from '@sledge/core';
+import { flexCol } from '@sledge/core';
 import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
@@ -7,6 +7,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
+import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
@@ -14,6 +15,7 @@ import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasCo
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { AutoSaveManager } from '~/controllers/project/AutoSaveManager';
+import { loadGlobalSettings } from '~/io/config/load';
 import { importImageFromPath } from '~/io/image/in/import';
 import { readProjectFromPath } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';
@@ -22,9 +24,9 @@ import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { join, PathToFileLocation } from '~/utils/PathUtils';
+import { join } from '~/utils/PathUtils';
 import { emitEvent } from '~/utils/TauriUtils';
-import { getOpenLocation } from '~/utils/WindowUtils';
+import { getOpenLocation, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Editor() {
   const location = useLocation();
@@ -35,10 +37,19 @@ export default function Editor() {
     setProjectStore('isProjectChangedAfterSave', true);
   });
 
+  onCleanup(() => {
+    if (!import.meta.hot) {
+      webGLRenderer?.dispose();
+    }
+  });
+
   const [isLoading, setIsLoading] = createSignal(true);
 
   const onProjectLoad = async (isNewProject: boolean) => {
     await emitEvent('onProjectLoad');
+
+    await loadGlobalSettings();
+
     if (isNewProject) {
       changeCanvasSize(globalConfig.default.canvasSize);
       setCanvasStore('canvas', globalConfig.default.canvasSize);
@@ -52,13 +63,9 @@ export default function Editor() {
 
     await emitEvent('onSetup');
     adjustZoomToFit();
-  };
 
-  let openedFile: FileLocation | undefined = undefined;
-  if ((window as any).openedFiles && Array.isArray((window as any).openedFiles)) {
-    const files = (window as any).openedFiles as string[];
-    if (files.length > 0) openedFile = PathToFileLocation(files[0]);
-  }
+    await showMainWindow();
+  };
 
   // const preloadedProject = readProjectDataFromWindow();
   const fileLocation = getOpenLocation();

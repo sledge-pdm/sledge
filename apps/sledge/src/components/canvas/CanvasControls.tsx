@@ -1,7 +1,7 @@
-import * as styles from '@styles/components/canvas/canvas_controls.css';
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { redoLayer, undoLayer } from '~/controllers/history/HistoryController';
 import { canRedo, canUndo } from '~/controllers/layer/LayerController';
+import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
 import { layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -25,7 +25,7 @@ const CanvasControls: Component = () => {
   });
 
   return (
-    <div class={styles.topRightNav}>
+    <div class={topRightNav}>
       <svg width='0' height='0'>
         <defs>
           <clipPath id='clipPath-undo'>
@@ -44,7 +44,7 @@ const CanvasControls: Component = () => {
         </defs>
       </svg>
       <div
-        class={styles.undoRedoContainer}
+        class={undoRedoContainer}
         style={{
           cursor: activeCanUndo() ? 'pointer' : 'unset',
         }}
@@ -56,7 +56,7 @@ const CanvasControls: Component = () => {
         }}
       >
         <div
-          class={styles.undoIcon}
+          class={undoIcon}
           style={{
             'clip-path': 'url(#clipPath-undo)',
             opacity: activeCanUndo() ? '1.0' : '0.3',
@@ -64,7 +64,7 @@ const CanvasControls: Component = () => {
         />
       </div>
       <div
-        class={styles.undoRedoContainer}
+        class={undoRedoContainer}
         style={{
           cursor: activeCanRedo() ? 'pointer' : 'unset',
         }}
@@ -76,7 +76,7 @@ const CanvasControls: Component = () => {
         }}
       >
         <div
-          class={styles.redoIcon}
+          class={redoIcon}
           style={{
             'clip-path': 'url(#clipPath-redo)',
             opacity: activeCanRedo() ? '1.0' : '0.3',

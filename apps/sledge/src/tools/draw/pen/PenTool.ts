@@ -23,7 +23,7 @@ export class PenTool implements ToolBehavior {
   draw(agent: LayerImageAgent, { position, lastPosition, presetName }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
-    const size = getPresetOf(this.categoryId, presetName)?.size ?? 1;
+    const size = (getPresetOf(this.categoryId, presetName) as any)?.size ?? 1;
 
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();

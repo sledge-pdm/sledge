@@ -2,7 +2,7 @@ import { flexCol, flexRow } from '@sledge/core';
 import { Component, createSignal } from 'solid-js';
 import ErrorText from '~/components/global/ErrorText';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
-import { projectNameInput } from '~/styles/section/project/project.css';
+import '~/styles/section/project/project.css';
 
 const ProjectName: Component = () => {
   const [inputName, setInputName] = createSignal<string | undefined>(undefined);
@@ -24,7 +24,7 @@ const ProjectName: Component = () => {
     <div class={flexCol}>
       <div class={flexRow} style={{ 'align-items': 'baseline', gap: '4px' }}>
         <input
-          class={projectNameInput}
+          class='project-name-input'
           type='text'
           name='project_name'
           onInput={(e) => {

@@ -50,8 +50,7 @@ const Color: Component = () => {
           <p style={{ 'font-size': vars.text.md }}>#</p>
           <input
             ref={(el) => (hexInputRef = el)}
-            // @ts-expect-error
-            style={{ 'font-family': ZFB11, 'font-size': vars.text.md, 'field-sizing': 'content' }}
+            style={{ 'font-family': ZFB11, 'font-size': vars.text.md, width: '56px' }}
             maxLength={6}
             value={currentColor().substring(1)}
             onChange={(e) => {

@@ -1,5 +1,5 @@
 import type { LabelMode } from '@sledge/core';
-import { checkboxWrapper, customCheckbox, hiddenCheckbox } from '@styles/control/checkbox.css';
+import { checkboxWrapper, customCheckbox, hiddenCheckbox } from '../../styles/control/checkbox.css';
 import { type Component, Show } from 'solid-js';
 
 const Checkbox: Component<{

@@ -1,6 +1,6 @@
 import type { LabelMode } from '@sledge/core';
-import * as styles from '@styles/control/slider.css';
 import { type Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { handle, line, lineHitbox, slider, sliderRoot, valueLabel, valueLabelContainer, valueLabelInput } from '../../styles/control/slider.css';
 
 interface SliderProps {
   min: number;
@@ -134,12 +134,12 @@ const Slider: Component<SliderProps> = (props) => {
   });
 
   const labelArea = (
-    <div ref={(el) => (labelRef = el)} class={styles.valueLabelContainer} onWheel={handleOnWheel}>
+    <div ref={(el) => (labelRef = el)} class={valueLabelContainer} onWheel={handleOnWheel}>
       <Show
         when={directInputMode()}
         fallback={
           <p
-            class={styles.valueLabel}
+            class={valueLabel}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -153,7 +153,7 @@ const Slider: Component<SliderProps> = (props) => {
         }
       >
         <input
-          class={styles.valueLabelInput}
+          class={valueLabelInput}
           ref={(el) => (directInputRef = el)}
           onSubmit={(e) => {
             setDirectInputMode(false);
@@ -173,14 +173,14 @@ const Slider: Component<SliderProps> = (props) => {
   );
 
   return (
-    <div class={styles.sliderRoot} ref={(el) => (rootRef = el)}>
+    <div class={sliderRoot} ref={(el) => (rootRef = el)}>
       <Show when={props.labelMode === 'left'}>{labelArea}</Show>
 
-      <div class={styles.slider} ref={(el) => (sliderRef = el)} onPointerDown={handlePointerDown} onClick={onLineClick}>
-        <div class={styles.lineHitbox} onWheel={handleOnWheel}>
-          <div class={styles.line} />
+      <div class={slider} ref={(el) => (sliderRef = el)} onPointerDown={handlePointerDown} onClick={onLineClick}>
+        <div class={lineHitbox} onWheel={handleOnWheel}>
+          <div class={line} />
         </div>
-        <div style={{ left: `${percent()}%` }} class={styles.handle} />
+        <div style={{ left: `${percent()}%` }} class={handle} />
       </div>
 
       <Show when={props.labelMode === 'right'}>{labelArea}</Show>

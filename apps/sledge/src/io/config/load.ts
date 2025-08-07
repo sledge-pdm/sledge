@@ -1,39 +1,21 @@
-import { invoke } from '@tauri-apps/api/core';
-import { defaultConfig } from '~/models/config/GlobalConfig';
-import { defaultLastSettingsStore, loadGlobalStore, makeDefaultKeyConfigStore } from '~/stores/GlobalStores';
+import { BaseDirectory } from '@tauri-apps/api/path';
+import { readTextFile } from '@tauri-apps/plugin-fs';
+import { Consts } from '~/models/Consts';
+import { loadConfigToGlobalStore } from '~/stores/GlobalStores';
 
-export default async function loadGlobalSettings() {
-  try {
-    const data = await invoke('load_global_config');
+export async function loadGlobalSettings() {
+  const configData = await readTextFile(Consts.globalConfigFileName, {
+    baseDir: BaseDirectory.AppConfig,
+  });
 
-    // 空のJSONの場合はデフォルト値を使用
-    if (!data || Object.keys(data).length === 0) {
-      loadGlobalStore({
-        globalConfigStore: defaultConfig,
-        keyConfigStore: makeDefaultKeyConfigStore(),
-        lastSettingsStore: defaultLastSettingsStore,
-      });
-    } else {
-      loadGlobalStore(
-        Object.assign(
-          {
-            globalConfigStore: defaultConfig,
-            keyConfigStore: makeDefaultKeyConfigStore(),
-            lastSettingsStore: defaultLastSettingsStore,
-          },
-          data
-        )
-      );
-    }
+  let configJson = JSON.parse(configData);
+  console.log('json data loaded from file:', configJson);
 
-    console.log('global settings load done (via Rust).', data);
-  } catch (e) {
-    console.error('global settings load failed (via Rust).', e);
-    // フォールバック: デフォルト値を読み込み
-    loadGlobalStore({
-      globalConfigStore: defaultConfig,
-      keyConfigStore: makeDefaultKeyConfigStore(),
-      lastSettingsStore: defaultLastSettingsStore,
-    });
+  if (!configJson || Object.keys(configJson).length === 0) {
+    console.warn('No global settings found, using default values.');
   }
+
+  await loadConfigToGlobalStore(configJson);
+
+  return configJson;
 }

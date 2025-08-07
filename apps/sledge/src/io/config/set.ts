@@ -1,5 +1,5 @@
 import { defaultConfig } from '~/models/config/GlobalConfig';
-import { defaultLastSettingsStore, loadGlobalStore, makeDefaultKeyConfigStore } from '~/stores/GlobalStores';
+import { defaultLastSettingsStore, makeDefaultKeyConfigStore } from '~/stores/GlobalStores';
 
 function deepObjectAssign(target: any, ...sources: any[]) {
   sources.forEach((source) => {
@@ -12,14 +12,14 @@ function deepObjectAssign(target: any, ...sources: any[]) {
   return target;
 }
 
-export default async function setGlobalSettings(data: any) {
-  const globalConfigStore = deepObjectAssign({}, defaultConfig, data.globalConfigStore);
-  const keyConfigStore = deepObjectAssign({}, makeDefaultKeyConfigStore(), data.keyConfigStore);
-  const lastSettingsStore = deepObjectAssign({}, defaultLastSettingsStore, data.lastSettingsStore);
+export async function getDefaultSettings() {
+  const globalConfigStore = deepObjectAssign({}, defaultConfig);
+  const keyConfigStore = deepObjectAssign({}, makeDefaultKeyConfigStore());
+  const lastSettingsStore = deepObjectAssign({}, defaultLastSettingsStore);
 
-  loadGlobalStore({
+  return {
     globalConfigStore,
     keyConfigStore,
     lastSettingsStore,
-  });
+  };
 }

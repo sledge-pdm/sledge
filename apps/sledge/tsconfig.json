@@ -3,7 +3,6 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
@@ -13,11 +12,12 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*", "./dist-tcm/*"],
-      "@styles/*": ["./src/styles/*", "./dist-tcm/styles/*"],
-      "@sledge/*": ["../../packages/*"],
+      "~/*": ["./src/*"],
+      "@sledge/ui": ["../../packages/ui"],
+      "@sledge/theme": ["../../packages/theme"],
+      "@sledge/core": ["../../packages/core"],
       "@sledge/wasm": ["../../packages/wasm/pkg/sledge_wasm.js"]
     },
-    "rootDirs": ["src", "dist-tcm"]
+    "rootDirs": ["src"]
   }
 }

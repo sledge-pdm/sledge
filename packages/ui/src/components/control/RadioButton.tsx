@@ -1,4 +1,4 @@
-import { customRadio, hiddenRadio, radioWrapper } from '@styles/control/radio_button.css';
+import { customRadio, hiddenRadio, radioWrapper } from '../../styles/control/radio_button.css';
 import { type Component } from 'solid-js';
 
 const RadioButton: Component<{

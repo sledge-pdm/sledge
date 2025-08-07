@@ -96,13 +96,6 @@ interface Props {
 }
 
 const ConfigForm: Component<Props> = (props) => {
-  const grouped = settingsMeta.reduce((map, field) => {
-    const arr = map.get(field.section) ?? [];
-    arr.push(field);
-    map.set(field.section, arr);
-    return map;
-  }, new Map<Sections, FieldMeta[]>());
-
   const [currentSection, setSection] = createSignal<Sections>(Sections.General);
   const [isSaved, setIsSaved] = createSignal(false);
   const [isDirty, setIsDirty] = createSignal(false);
@@ -137,8 +130,18 @@ const ConfigForm: Component<Props> = (props) => {
     }
   };
 
+  const [grouped, setGrouped] = createSignal<Map<Sections, FieldMeta[]>>(new Map());
+
   onMount(async () => {
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
+
+    const grouped = settingsMeta.reduce((map, field) => {
+      const arr = map.get(field.section) ?? [];
+      arr.push(field);
+      map.set(field.section, arr);
+      return map;
+    }, new Map<Sections, FieldMeta[]>());
+    setGrouped(grouped);
   });
 
   return (
@@ -162,7 +165,7 @@ const ConfigForm: Component<Props> = (props) => {
             <KeyConfigSettings />
           </Show>
           <Show when={currentSection() !== Sections.KeyConfig}>
-            <For each={grouped.get(currentSection())}>
+            <For each={grouped().get(currentSection())}>
               {(meta) => {
                 const componentProp = componentProps.get(meta.component);
                 const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';

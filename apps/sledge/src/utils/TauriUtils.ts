@@ -1,5 +1,5 @@
 import { getTauriVersion } from '@tauri-apps/api/app';
-import { invoke as tauriInvoke } from '@tauri-apps/api/core';
+import { invoke } from '@tauri-apps/api/core';
 import { emit, EventCallback, listen } from '@tauri-apps/api/event';
 
 let _isTauri: boolean | null = null;
@@ -22,7 +22,7 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
   }
 
   try {
-    const result = await tauriInvoke<T>(cmd, args);
+    const result = await invoke<T>(cmd, args);
     return result;
   } catch (e) {
     console.error(`[safeInvoke] '${cmd}' failed:`, e);

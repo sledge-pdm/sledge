@@ -1,8 +1,12 @@
 import { vars } from '@sledge/theme';
-import { checkboxWrapper } from '@styles/control/checkbox.css';
 import { style } from '@vanilla-extract/css';
 
-export const radioWrapper = checkboxWrapper; // チェックボックスと共通でOK！
+export const radioWrapper = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  cursor: 'pointer',
+  position: 'relative',
+});
 
 export const hiddenRadio = style({
   opacity: 0,

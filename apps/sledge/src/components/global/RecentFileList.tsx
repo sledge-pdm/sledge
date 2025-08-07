@@ -3,7 +3,7 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, For } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { thumbnailDir } from '~/io/project/out/save';
-import { recentFilesContainerCol } from '~/routes/start.css';
+import { recentFilesContainerCol } from '~/routes/start/start.css';
 import getFileId from '~/utils/getFileId';
 import { join } from '~/utils/PathUtils';
 import ListFileItem from './file_item/ListFileItem';

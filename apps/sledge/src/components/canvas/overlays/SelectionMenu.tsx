@@ -10,7 +10,7 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import * as styles from '~/styles/components/canvas/overlays/selection_menu.css';
+import { container, divider, item } from '~/styles/components/canvas/overlays/selection_menu.css';
 
 interface ItemProps {
   src: string;
@@ -20,7 +20,7 @@ interface ItemProps {
 
 const Item: Component<ItemProps> = (props) => {
   return (
-    <div class={styles.item} onClick={props.onClick}>
+    <div class={item} onClick={props.onClick}>
       <Icon src={props.src} color={vars.color.onBackground} base={10} scale={1} />
       <Show when={props.label}>
         <p>{props.label}</p>
@@ -30,7 +30,7 @@ const Item: Component<ItemProps> = (props) => {
 };
 
 const Divider: Component = () => {
-  return <div class={styles.divider} />;
+  return <div class={divider} />;
 };
 
 const [selectionState, setSelectionState] = createSignal<SelectionState>(selectionManager.getState());
@@ -138,7 +138,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     >
       <div
         ref={(ref) => (containerRef = ref)}
-        class={styles.container}
+        class={container}
         style={{
           translate: '-100% 0',
         }}
@@ -162,7 +162,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         visibility: outerPosition() ? 'visible' : 'collapse',
       }}
     >
-      <div class={styles.container}>{MenuContent()}</div>
+      <div class={container}>{MenuContent()}</div>
     </div>
   );
 };

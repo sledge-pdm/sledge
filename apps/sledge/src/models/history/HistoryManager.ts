@@ -1,7 +1,7 @@
+import { Vec2 } from '@sledge/core';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
-import { Vec2 } from '../../../../../packages/core/src/Vector';
 
 export type PixelDiff = {
   kind: 'pixel';

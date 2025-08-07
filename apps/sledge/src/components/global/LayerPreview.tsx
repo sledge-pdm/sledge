@@ -3,7 +3,7 @@ import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
-import { layerPreviewCanvas } from '~/styles/components/layer_preview.css';
+import '~/styles/components/layer_preview.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Props {
@@ -68,7 +68,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
   return (
     <div ref={(el) => (wrapperRef = el)}>
       <canvas
-        class={layerPreviewCanvas}
+        class='layer-preview-canvas'
         ref={(el) => {
           canvasRef = el;
           ctx = canvasRef.getContext('2d')!;

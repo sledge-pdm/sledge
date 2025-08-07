@@ -4,6 +4,7 @@ dist
 .vercel
 .netlify
 .vinxi
+.vite-inspect
 app.config.timestamp_*.js
 
 # Environment

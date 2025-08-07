@@ -1,10 +1,9 @@
 import { getTheme, vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createEffect, createSignal, onMount, Show } from 'solid-js';
+import { createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/SaveSection';
 import TopMenuBar from '~/components/global/TopMenuBar';
-import { setBottomBarText } from '~/controllers/log/LogController';
 import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/ProjectStores';
@@ -22,10 +21,6 @@ import '~/styles/globals/title_bar_region.css';
 import { join } from '~/utils/PathUtils';
 
 export default function TitleBar() {
-  let titleBarNavEl: HTMLElement;
-
-  const isEditor = () => location.pathname.startsWith('/editor');
-
   const [isMaximizable, setIsMaximizable] = createSignal(false);
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
@@ -41,22 +36,17 @@ export default function TitleBar() {
     setMaximized(await window.isMaximized());
     setIsDecorated(await window.isDecorated());
     setWindowTitle(await window.title());
-    titleBarNavEl.addEventListener('pointerdown', (e: PointerEvent) => {
-      setBottomBarText(e.buttons.toString() + ' ' + e.pointerType + ' ' + Date.now());
-    });
   });
 
   getCurrentWindow().onResized(async () => {
     setMaximized(await getCurrentWindow().isMaximized());
   });
 
-  createEffect(() => {
-    if (isEditor()) {
-      getCurrentWindow().setTitle(
-        `${projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'} ${fileStore.location.path ? `(${fileStore.location.path})` : ''}`
-      );
-    }
-  });
+  if (location.pathname.startsWith('/editor')) {
+    getCurrentWindow().setTitle(
+      `${projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'} ${fileStore.location.path ? `(${fileStore.location.path})` : ''}`
+    );
+  }
 
   const borderWindowLabels: string[] = ['settings'];
   const shouldShowBorder = () => borderWindowLabels.find((l) => l === getCurrentWindow().label);
@@ -72,10 +62,10 @@ export default function TitleBar() {
         }}
       >
         <Show when={!isDecorated()}>
-          <nav ref={(el) => (titleBarNavEl = el)} class={titleBarRoot} data-tauri-drag-region>
+          <nav class={titleBarRoot} data-tauri-drag-region>
             <div class={titleBarTitleContainer}>
               <Show when={shouldShowTitle()}>
-                <Show when={isEditor()} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
+                <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
                   <p class={titleBarTitle} style={{ opacity: 0.5 }}>
                     {fileStore.location.path ?? ''}
                   </p>
@@ -84,7 +74,7 @@ export default function TitleBar() {
               </Show>
             </div>
 
-            <Show when={isEditor()}>
+            <Show when={location.pathname.startsWith('/editor')}>
               <div class={titleBarSaveSection}>
                 <SaveSection />
               </div>
@@ -152,7 +142,7 @@ export default function TitleBar() {
           </nav>
         </Show>
 
-        <Show when={isEditor()}>
+        <Show when={location.pathname.startsWith('/editor')}>
           <TopMenuBar />
         </Show>
       </div>

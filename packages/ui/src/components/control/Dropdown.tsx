@@ -1,7 +1,7 @@
 import { vars } from '@sledge/theme';
-import { dropdownContainer, itemText, menuDirection, menuItem, menuStyle, triggerButton, triggerButtonNoBG } from '@styles/control/dropdown.css';
 import { For, type JSX, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
-import Icon from 'src/components/Icon';
+import { dropdownContainer, itemText, menuDirection, menuItem, menuStyle, triggerButton, triggerButtonNoBG } from '../../styles/control/dropdown.css';
+import Icon from '../Icon';
 
 export type DropdownOption<T extends string | number> = {
   label: string;

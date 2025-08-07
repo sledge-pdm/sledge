@@ -22,4 +22,10 @@ export default async function setGlobalSettings(data: any) {
     keyConfigStore,
     lastSettingsStore,
   });
+
+  return {
+    globalConfigStore,
+    keyConfigStore,
+    lastSettingsStore,
+  };
 }

@@ -3,6 +3,7 @@ import { accentedButton, pageRoot } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { open } from '@tauri-apps/plugin-shell';
 import { createSignal, onMount } from 'solid-js';
+import { eventBus } from '~/utils/EventBus';
 import { getCurrentVersion, getReleaseApiUrl, isNewVersionAvailable } from '~/utils/VersionUtils';
 import {
   aaContainer,
@@ -31,6 +32,8 @@ const About = () => {
 
     const isAvailable = await isNewVersionAvailable(false);
     setNewVersionAvailable(isAvailable ?? false);
+
+    eventBus.emit('window:routeReady', { ready: true });
   });
 
   return (

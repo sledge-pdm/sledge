@@ -146,10 +146,11 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                   'letter-spacing': '1px',
                   width: 'fit-content',
                   'border-bottom': `1px solid ${vars.color.onBackground}`,
-                  // @ts-ignore
                 }}
                 value={props.layer.name}
-                onInputChange={(e: Event & { target: HTMLInputElement; currentTarget?: HTMLInputElement }) => setLayerListStore('layers', props.index, 'name', e.currentTarget.value)}
+                onInputChange={(e: Event & { target: HTMLInputElement; currentTarget?: HTMLInputElement }) =>
+                  setLayerListStore('layers', props.index, 'name', e.currentTarget.value)
+                }
                 onBlur={(e) => {
                   setNameChanging(false);
                   e.target.selectionStart = 0;

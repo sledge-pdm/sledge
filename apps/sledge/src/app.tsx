@@ -1,7 +1,7 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import { onCleanup, onMount, Suspense } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount, Suspense } from 'solid-js';
 import TitleBar from './components/global/TitleBar';
 import Home from './routes';
 import About from './routes/about';
@@ -9,43 +9,42 @@ import Editor from './routes/editor';
 
 import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import DebugViewer from '~/components/debug/DebugViewer';
+import { loadGlobalSettings } from '~/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
-import loadGlobalSettings from './io/config/load';
-import setGlobalSettings from './io/config/set';
+import { eventBus } from '~/utils/EventBus';
+import { showMainWindow } from '~/utils/WindowUtils';
 import Settings from './routes/settings';
-import { listenEvent, safeInvoke } from './utils/TauriUtils';
+import { listenEvent } from './utils/TauriUtils';
 
 export default function App() {
-  onMount(async () => {
-    if (window instanceof Window) {
-      const globalConfig = (window as any).__CONFIG__;
-      if (globalConfig) {
-        // Load global config from window object
-        await setGlobalSettings(globalConfig);
-        console.log('global settings loaded from window object:', globalConfig);
-      } else {
-        // Fallback to loading from Rust?
-      }
-    }
+  const [appReady, setAppReady] = createSignal(false);
+  const [routeReady, setRouteReady] = createSignal(false);
 
-    // ネイティブスプラッシュを閉じてWebViewを表示
-    try {
-      const windowLabel = getCurrentWindow().label;
-      await safeInvoke('show_main_window', { windowLabel });
-      console.log('🌐 [PERF] Window transition completed');
-    } catch (error) {
-      console.error('Failed to transition from native splash:', error);
-      // フォールバック
-      getCurrentWindow().show();
-    }
+  onMount(async () => {
+    await loadGlobalSettings();
+
+    eventBus.emit('window:appReady', { ready: true });
+  });
+
+  eventBus.on('window:appReady', () => {
+    setAppReady(true);
+  });
+
+  eventBus.on('window:routeReady', () => {
+    setRouteReady(true);
   });
 
   onCleanup(() => {
     if (!import.meta.hot) {
       webGLRenderer?.dispose();
+    }
+  });
+
+  createEffect(() => {
+    if (appReady() && routeReady()) {
+      showMainWindow();
     }
   });
 

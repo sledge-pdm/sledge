@@ -3,6 +3,10 @@ import mitt from 'mitt';
 import { SelectionState } from '~/controllers/selection/SelectionManager';
 
 export type Events = {
+  // EventBusはウィンドウごとに独立
+  'window:appReady': { ready: boolean };
+  'window:routeReady': { ready: boolean };
+
   'project:saved': { path: string };
   'project:saveFailed': { error: any };
   'project:saveCancelled': {};

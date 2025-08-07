@@ -1,4 +1,4 @@
-use crate::{config, splash};
+use crate::splash;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -45,37 +45,13 @@ pub async fn open_window(
     options: Option<WindowOpenOptions>,
 ) -> Result<(), String> {
     println!("open_window called with kind: {:?}", kind);
-    // 1. スプラッシュスクリーンを即座に表示
-    let splash_closer = if matches!(kind, SledgeWindowKind::Start | SledgeWindowKind::Editor) {
-        println!("Showing splash screen");
-        Some(splash::show_splash_screen())
-    } else {
-        None
-    };
-
-    // 2. 設定読み込み
-    let config = match config::load_global_config(app.clone()).await {
-        Ok(config) => {
-            // println!("Loaded global config: {:?}", config);
-            config
-        }
-        Err(e) => {
-            eprintln!("Failed to load global config: {}", e);
-            // エラー時は空のJSONオブジェクトを使用
-            serde_json::Value::Object(Default::default())
-        }
-    };
+    let splash_closer = Some(splash::show_splash_screen());
 
     let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
 
-    // 5. initialization_script構築
     let path_script = format!(
         "window.__PATH__={};",
         serde_json::to_string(&open_path.unwrap_or_default()).unwrap_or_default()
-    );
-    let config_script = format!(
-        "window.__CONFIG__={};",
-        serde_json::to_string(&config).unwrap_or_default()
     );
 
     let custom_script = options
@@ -84,9 +60,8 @@ pub async fn open_window(
         .cloned()
         .unwrap_or_default();
 
-    let initialization_script = format!("{}{}{}", config_script, path_script, custom_script);
+    let initialization_script = format!("{}{}", path_script, custom_script);
 
-    // 6. クエリパラメータの生成（必要に応じて）
     let query = options
         .as_ref()
         .and_then(|opts| opts.query.as_ref())
@@ -198,8 +173,6 @@ pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<()
     // スプラッシュスクリーンを閉じる
     if let Some(splash_closer) = app.try_state::<Arc<AtomicBool>>() {
         splash::close_splash_screen(splash_closer.inner().clone());
-        // 少し待ってからメインウィンドウを表示
-        tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
     }
 
     // メインウィンドウを表示

@@ -50,6 +50,7 @@ export default function Editor() {
 
     setIsLoading(false);
 
+    eventBus.emit('window:routeReady', { ready: true });
     await emitEvent('onSetup');
     adjustZoomToFit();
   };

@@ -1,12 +1,13 @@
 import { flexCol } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
 import { createScrollPosition } from '@solid-primitives/scroll';
-import { createEffect, createSignal, Show } from 'solid-js';
+import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
+import { eventBus } from '~/utils/EventBus';
 import { openWindow } from '~/utils/WindowUtils';
 import {
   header as menuContainer,
@@ -32,6 +33,10 @@ export default function Home() {
       console.log(scroll.y, scrollRef.clientHeight, scrollRef.scrollHeight);
       setCanScrollBottom(scroll.y + scrollRef.clientHeight < scrollRef.scrollHeight);
     }
+  });
+
+  onMount(() => {
+    eventBus.emit('window:routeReady', { ready: true });
   });
 
   return (

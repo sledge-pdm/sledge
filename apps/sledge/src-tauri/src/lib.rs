@@ -1,5 +1,4 @@
 mod analysis;
-mod config;
 mod global_event;
 mod splash;
 mod window;
@@ -67,9 +66,6 @@ pub fn run() {
             window::open_window,
             window::show_main_window,
             global_event::emit_global_event,
-            config::load_global_config,
-            config::save_global_config,
-            config::reset_global_config,
         ])
         .plugin(
             tauri_plugin_log::Builder::new()

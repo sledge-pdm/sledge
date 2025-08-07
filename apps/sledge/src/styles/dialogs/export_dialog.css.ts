@@ -2,7 +2,7 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB09, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
-export const root = style([
+export const exportDialogRoot = style([
   flexCol,
   {
     position: 'relative',
@@ -14,7 +14,7 @@ export const root = style([
   },
 ]);
 
-export const header = style([
+export const exportDialogHeader = style([
   {
     fontFamily: ZFB31,
     fontSize: vars.text.lg,
@@ -23,22 +23,22 @@ export const header = style([
   },
 ]);
 
-export const content = style([
+export const exportDialogContent = style([
   flexCol,
   {
     gap: vars.spacing.xl,
   },
 ]);
 
-export const field = style([
+export const exportDialogField = style([
   flexCol,
   {
     maxWidth: '400px',
   },
 ]);
 
-export const fieldDisabled = style([
-  field,
+export const exportDialogFieldDisabled = style([
+  exportDialogField,
   {
     pointerEvents: 'none',
     cursor: 'auto',
@@ -46,7 +46,7 @@ export const fieldDisabled = style([
   },
 ]);
 
-export const fieldHeader = style([
+export const exportDialogFieldHeader = style([
   {
     fontFamily: ZFB09,
     fontSize: vars.text.sm,
@@ -66,7 +66,7 @@ export const fieldHeader = style([
   },
 ]);
 
-export const fileName = style([
+export const exportDialogFileName = style([
   flexCol,
   {
     fontSize: '16px',
@@ -75,7 +75,7 @@ export const fileName = style([
   },
 ]);
 
-export const customScaleInput = style([
+export const exportDialogCustomScaleInput = style([
   {
     fontFamily: ZFB09,
     fontSize: vars.text.md,
@@ -83,7 +83,7 @@ export const customScaleInput = style([
   },
 ]);
 
-export const controlArea = style([
+export const exportDialogControlArea = style([
   flexRow,
   {
     position: 'absolute',

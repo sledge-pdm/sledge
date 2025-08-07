@@ -1,4 +1,4 @@
-import { Vec2 } from '../../../../packages/core/src/Vector';
+import { Vec2 } from '@sledge/core';
 
 export function drawSquarePixel(p: Vec2, size: number, drawFn: (x: number, y: number) => void) {
   const half = Math.floor(size / 2);

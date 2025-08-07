@@ -19,4 +19,7 @@ export const h100 = style({
   height: '100%',
 });
 
-export const wh100 = style([w100, h100]);
+export const wh100 = style({
+  width: '100%',
+  height: '100%',
+});

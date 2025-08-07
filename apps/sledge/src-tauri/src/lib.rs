@@ -1,11 +1,9 @@
 mod analysis;
-mod config;
 mod global_event;
-mod splash;
 mod window;
 
 use std::path::PathBuf;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, async_runtime::block_on};
 use tauri_plugin_fs::FsExt;
 use window::{SledgeWindowKind, WindowOpenOptions};
 
@@ -19,10 +17,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
     let asset_protocol_scope = app.asset_protocol_scope();
 
     if files.is_empty() {
-        println!("No files, opening editor window");
-        // Tokioランタイムを作成して非同期関数を実行
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let future_open = window::open_window(
+        let future = window::open_window(
             app,
             SledgeWindowKind::Editor,
             Some(WindowOpenOptions {
@@ -31,8 +26,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
                 open_path: None,
             }),
         );
-        let result = rt.block_on(future_open);
-        println!("Window open result: {:?}", result);
+        let _ = block_on(future);
         return;
     }
 
@@ -42,10 +36,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 
         // This is for the `asset:` protocol:
         let _ = asset_protocol_scope.allow_file(file);
-
-        // Tokioランタイムを作成して非同期関数を実行
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let future_open = window::open_window(
+        let future = window::open_window(
             app.clone(),
             SledgeWindowKind::Editor,
             Some(WindowOpenOptions {
@@ -54,7 +45,8 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
                 open_path: Some(file.to_string_lossy().into_owned()),
             }),
         );
-        let _ = rt.block_on(future_open);
+
+        let _ = block_on(future);
     }
 }
 
@@ -67,9 +59,6 @@ pub fn run() {
             window::open_window,
             window::show_main_window,
             global_event::emit_global_event,
-            config::load_global_config,
-            config::save_global_config,
-            config::reset_global_config,
         ])
         .plugin(
             tauri_plugin_log::Builder::new()
@@ -83,7 +72,6 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_system_info::init())
         .plugin(tauri_plugin_opener::init());
 
     builder
@@ -122,7 +110,6 @@ pub fn run() {
                     }
                 }
 
-                // macOSでも初期ウィンドウを開く
                 println!("About to handle file associations");
                 handle_file_associations(app.handle().clone(), files);
                 println!("Setup completed");

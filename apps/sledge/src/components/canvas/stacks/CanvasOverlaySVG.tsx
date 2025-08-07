@@ -8,7 +8,7 @@ import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { marchingAntsAnimation } from '~/styles/misc/marching_ants.css';
+import '~/styles/misc/marching_ants.css';
 import { PathCmd, PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -182,7 +182,7 @@ const CanvasOverlaySVG: Component = (props) => {
           stroke-width='1'
           stroke-dasharray={`${borderDash} ${borderDash}`}
           pointer-events='none'
-          class={marchingAntsAnimation}
+          class='marching-ants-animation'
         />
       </svg>
     </>

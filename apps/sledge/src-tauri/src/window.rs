@@ -1,12 +1,10 @@
-use crate::{config, splash};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
-use uuid::Uuid;
 
-#[cfg(target_os = "linux")]
-use gtk::prelude::GtkWindowExt;
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
+
+use uuid::Uuid;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
@@ -17,7 +15,9 @@ pub enum SledgeWindowKind {
     Settings,
 }
 
-const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-extensions --disable-plugins --disable-dev-shm-usage";
+// const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-extensions --disable-plugins --disable-dev-shm-usage";
+
+const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection";
 
 fn next_editor_label(app: &AppHandle) -> String {
     loop {
@@ -45,37 +45,13 @@ pub async fn open_window(
     options: Option<WindowOpenOptions>,
 ) -> Result<(), String> {
     println!("open_window called with kind: {:?}", kind);
-    // 1. スプラッシュスクリーンを即座に表示
-    let splash_closer = if matches!(kind, SledgeWindowKind::Start | SledgeWindowKind::Editor) {
-        println!("Showing splash screen");
-        Some(splash::show_splash_screen())
-    } else {
-        None
-    };
-
-    // 2. 設定読み込み
-    let config = match config::load_global_config(app.clone()).await {
-        Ok(config) => {
-            // println!("Loaded global config: {:?}", config);
-            config
-        }
-        Err(e) => {
-            eprintln!("Failed to load global config: {}", e);
-            // エラー時は空のJSONオブジェクトを使用
-            serde_json::Value::Object(Default::default())
-        }
-    };
+    // let splash_closer = Some(splash::show_splash_screen());
 
     let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
 
-    // 5. initialization_script構築
     let path_script = format!(
         "window.__PATH__={};",
         serde_json::to_string(&open_path.unwrap_or_default()).unwrap_or_default()
-    );
-    let config_script = format!(
-        "window.__CONFIG__={};",
-        serde_json::to_string(&config).unwrap_or_default()
     );
 
     let custom_script = options
@@ -84,9 +60,8 @@ pub async fn open_window(
         .cloned()
         .unwrap_or_default();
 
-    let initialization_script = format!("{}{}{}", config_script, path_script, custom_script);
+    let initialization_script = format!("{}{}", path_script, custom_script);
 
-    // 6. クエリパラメータの生成（必要に応じて）
     let query = options
         .as_ref()
         .and_then(|opts| opts.query.as_ref())
@@ -94,7 +69,7 @@ pub async fn open_window(
 
     // 1. 開く先の `label` を決定
     let (label, url) = match kind {
-        SledgeWindowKind::Start => ("start".into(), "/".into()),
+        SledgeWindowKind::Start => ("start".into(), "/start".into()),
         SledgeWindowKind::About => ("about".into(), "/about".into()),
         SledgeWindowKind::Settings => ("settings".into(), "/settings".into()),
         SledgeWindowKind::Editor => {
@@ -107,6 +82,7 @@ pub async fn open_window(
             (lbl, full)
         }
     };
+
     // 2. 既存ウィンドウがあれば再利用
     if let Some(existing) = app.get_webview_window(&label) {
         // ウィンドウを最前面に表示
@@ -149,7 +125,6 @@ pub async fn open_window(
                 .resizable(false)
                 .closable(true)
                 .skip_taskbar(true)
-                .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);
         }
@@ -160,7 +135,6 @@ pub async fn open_window(
                 .resizable(false)
                 .closable(true)
                 .skip_taskbar(true)
-                .always_on_top(true)
                 .minimizable(false)
                 .maximizable(false);
         }
@@ -171,6 +145,11 @@ pub async fn open_window(
         builder = builder.decorations(false);
     }
 
+    #[cfg(target_os = "macos")]
+    {
+        builder = builder.title_bar_style(TitleBarStyle::Transparent);
+    }
+
     // 4. ウィンドウ生成（非表示で）
     #[allow(unused_variables)]
     let window = builder
@@ -178,34 +157,15 @@ pub async fn open_window(
         .build()
         .map_err(|e| e.to_string())?;
 
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(gtk_window) = window.gtk_window() {
-            gtk_window.set_titlebar(Option::<&gtk::Widget>::None);
-        }
-    }
-
-    // スプラッシュクローザーをアプリの状態として保存
-    if let Some(closer) = splash_closer {
-        app.manage(closer);
-    }
-
     Ok(())
 }
 
 #[tauri::command]
 pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<(), String> {
-    // スプラッシュスクリーンを閉じる
-    if let Some(splash_closer) = app.try_state::<Arc<AtomicBool>>() {
-        splash::close_splash_screen(splash_closer.inner().clone());
-        // 少し待ってからメインウィンドウを表示
-        tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-    }
-
     // メインウィンドウを表示
     if let Some(window) = app.get_webview_window(&window_label) {
         window.show().map_err(|e| e.to_string())?;
-        window.set_focus().map_err(|e| e.to_string())?;
+        // window.set_focus().map_err(|e| e.to_string())?;
     }
 
     Ok(())

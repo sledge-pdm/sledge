@@ -1,4 +1,5 @@
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
+import path from 'path';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import solidPlugin from 'vite-plugin-solid';
@@ -16,5 +17,12 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+  },
+  resolve: {
+    alias: {
+      '@sledge/core': path.join(__dirname, '../../packages/core'),
+      '@sledge/theme': path.join(__dirname, '../../packages/theme'),
+      '@sledge/ui': path.join(__dirname, '../../packages/ui'),
+    },
   },
 });

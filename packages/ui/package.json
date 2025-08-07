@@ -8,8 +8,6 @@
     ".": "./index.ts"
   },
   "dependencies": {
-    "@sledge/core": "workspace:^",
-    "@sledge/theme": "workspace:^",
     "solid-js": "^1.9.7"
   },
   "devDependencies": {

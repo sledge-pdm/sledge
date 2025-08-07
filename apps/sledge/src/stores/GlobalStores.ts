@@ -58,7 +58,11 @@ export const setKeyConfigStore = globalRootStore.setKeyConfigStore;
 export const lastSettingsStore = globalRootStore.lastSettingsStore;
 export const setLastSettingsStore = globalRootStore.setLastSettingsStore;
 
-export const loadGlobalStore = (store: { globalConfigStore: GlobalConfig; keyConfigStore: KeyConfigStore; lastSettingsStore: LastSettingsStore }) => {
+export const loadConfigToGlobalStore = (store: {
+  globalConfigStore: GlobalConfig;
+  keyConfigStore: KeyConfigStore;
+  lastSettingsStore: LastSettingsStore;
+}) => {
   setGlobalConfig(store.globalConfigStore);
   setKeyConfigStore(store.keyConfigStore);
   setLastSettingsStore(store.lastSettingsStore);

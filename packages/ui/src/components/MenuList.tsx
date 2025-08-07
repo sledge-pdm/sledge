@@ -1,6 +1,6 @@
 import { vars } from '@sledge/theme';
-import { itemText, menuDirection, menuItem, menuStyle } from '@styles/menu_list.css';
 import { type Component, For, type JSX, onCleanup, onMount } from 'solid-js';
+import { itemText, menuDirection, menuItem, menuStyle } from '../styles/menu_list.css';
 
 export interface MenuListOption {
   label: string;
@@ -17,7 +17,7 @@ interface Props extends Omit<JSX.HTMLAttributes<HTMLUListElement>, 'onClick'> {
   onClose?: () => void; // メニューが閉じるときのコールバック
 }
 
-const MenuList: Component<Props> = (props) => {
+export const MenuList: Component<Props> = (props) => {
   let containerRef: HTMLUListElement | undefined;
   const dir = props.menuDir ?? 'down';
 
@@ -69,5 +69,3 @@ const MenuList: Component<Props> = (props) => {
     </ul>
   );
 };
-
-export default MenuList;

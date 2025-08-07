@@ -1,8 +1,6 @@
 import { flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB08 } from '@sledge/theme';
-import { Checkbox, Dropdown, FieldSizingInput, Slider } from '@sledge/ui';
-import { DropdownOption } from '@sledge/ui/src/components/control/Dropdown';
-import * as styles from '@styles/dialogs/export_dialog.css';
+import { Checkbox, Dropdown, DropdownOption, Slider } from '@sledge/ui';
 import { open as openFile } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
@@ -13,6 +11,15 @@ import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import {
+  exportDialogContent,
+  exportDialogCustomScaleInput,
+  exportDialogField,
+  exportDialogFieldDisabled,
+  exportDialogFieldHeader,
+  exportDialogFileName,
+  exportDialogRoot,
+} from '~/styles/dialogs/export_dialog.css';
 import { join } from '~/utils/PathUtils';
 import { Dialog, DialogExternalProps } from './Dialog';
 
@@ -122,12 +129,12 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
         },
       ]}
     >
-      <div class={styles.root}>
-        <div class={styles.content}>
-          {/* <p class={styles.header}>EXPORT.</p> */}
+      <div class={exportDialogRoot}>
+        <div class={exportDialogContent}>
+          {/* <p class={exportDialogHeader}>EXPORT.</p> */}
 
-          <div class={styles.field}>
-            <p class={styles.fieldHeader} style={{ 'flex-grow': 1 }}>
+          <div class={exportDialogFieldHeader}>
+            <p class={exportDialogFieldHeader} style={{ 'flex-grow': 1 }}>
               Output Directory.
             </p>
             <div style={{ 'align-items': 'center', gap: '12px', 'margin-left': '12px' }} class={flexRow}>
@@ -135,20 +142,18 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
               <button onClick={openDirSelectionDialog}>change</button>
             </div>
             <div class={flexRow} style={{ 'align-items': 'end', 'margin-left': '12px' }}>
-              {/* <p class={styles.fileName}>\</p> */}
-              <FieldSizingInput
-                inputId='export-dialog-file-name'
-                class={styles.fileName}
+              <input
+                class={exportDialogFileName}
                 value={settings.fileName}
                 autocomplete='off'
-                onInputChange={(e) => setSettings('fileName', e.target.value)}
+                onInput={(e) => setSettings('fileName', e.target.value)}
               />
               <p style={{ 'font-size': vars.text.sm, 'margin-bottom': '2px', 'font-family': ZFB08 }}>.{settings.exportOptions.format}</p>
             </div>
           </div>
           <div class={flexRow} style={{ gap: vars.spacing.md }}>
-            <div class={styles.field}>
-              <p class={styles.fieldHeader}>Type.</p>
+            <div class={exportDialogField}>
+              <p class={exportDialogFieldHeader}>Type.</p>
               <div class={flexRow} style={{ 'margin-left': '12px' }}>
                 <Dropdown
                   options={fileTypeOptions}
@@ -158,8 +163,8 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
               </div>
             </div>
 
-            <div class={settings.exportOptions.format === 'jpg' ? styles.field : styles.fieldDisabled} style={{ 'flex-grow': 1 }}>
-              <p class={styles.fieldHeader} style={{ 'padding-bottom': '4px' }}>
+            <div class={settings.exportOptions.format === 'jpg' ? exportDialogField : exportDialogFieldDisabled} style={{ 'flex-grow': 1 }}>
+              <p class={exportDialogFieldHeader} style={{ 'padding-bottom': '4px' }}>
                 Quality.
               </p>
               <div class={flexRow} style={{ 'margin-left': '12px' }}>
@@ -176,8 +181,8 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
             </div>
           </div>
 
-          <div class={styles.field}>
-            <p class={styles.fieldHeader}>Scale.</p>
+          <div class={exportDialogField}>
+            <p class={exportDialogFieldHeader}>Scale.</p>
             <div class={flexRow} style={{ 'align-items': 'center', gap: '12px', 'margin-left': '12px' }}>
               <Dropdown
                 options={scaleOptions}
@@ -188,7 +193,7 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
                 <div style={{ 'align-items': 'center' }} class={flexRow}>
                   <p>x</p>
                   <input
-                    class={styles.customScaleInput}
+                    class={exportDialogCustomScaleInput}
                     type='number'
                     onInput={(e) => setCustomScale(Number(e.target.value))}
                     min={0.1}

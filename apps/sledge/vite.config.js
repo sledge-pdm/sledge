@@ -2,17 +2,25 @@ import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
+import Inspect from 'vite-plugin-inspect';
 import solidPlugin from 'vite-plugin-solid';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [wasmPlugin(), tsconfigPaths(), vanillaExtractPlugin({ devStyleRuntime: 'vanilla-extract' }), solidPlugin(), glsl(), topLevelAwait()],
+  plugins: [
+    wasmPlugin(),
+    vanillaExtractPlugin({
+      devStyleRuntime: 'vanilla-extract',
+    }),
+    solidPlugin(),
+    glsl(),
+    topLevelAwait(),
+    Inspect(),
+  ],
   build: {
-    // target: 'esnext',
     outDir: 'dist',
     // Tauri uses Chromium on Windows and WebKit on macOS and Linux
     target: process.env.TAURI_ENV_PLATFORM == 'windows' ? 'chrome105' : 'safari13',
@@ -38,24 +46,52 @@ export default defineConfig({
       : undefined,
 
     watch: {
-      // tell vite to ignore watching `src-tauri`
-      ignored: ['**/src-tauri/**'],
+      ignored: ['**/src-tauri/**', '**/.vite-inspect/**'],
     },
-  },
-  alias: {
-    '~': path.resolve(__dirname, 'src'),
   },
   worker: {
     // Not needed with vite-plugin-top-level-await >= 1.3.0
     format: 'es',
     plugins: () => [wasmPlugin(), topLevelAwait()],
   },
+  optimizeDeps: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    include: [
+      // Tauri APIs - 個別にpre-bundlingして高速化
+      '@tauri-apps/api/app',
+      '@tauri-apps/api/core',
+      '@tauri-apps/api/event',
+      '@tauri-apps/api/path',
+      // '@tauri-apps/api/fs',
+      // '@tauri-apps/api/dialog',
+      // Tauri プラグイン
+      '@tauri-apps/plugin-os',
+      // 外部ライブラリ
+      'mitt',
+      'uuid',
+      'interactjs',
+      'msgpackr',
+      // SolidJS関連（よく使用されるもの）
+      '@solid-primitives/map',
+      '@solid-primitives/mouse',
+      '@solid-primitives/timer',
+    ],
+    exclude: [
+      '@solid-primitives/raf',
+      // WASMモジュールはpre-bundlingから除外
+      '@sledge/wasm',
+      // VanillaExtractのランタイムをpre-bundlingから除外（処理速度向上）
+      '@vanilla-extract/css',
+      '@vanilla-extract/dynamic',
+    ],
+  },
   resolve: {
     alias: {
-      '@sledge/core': path.resolve(__dirname, '../../packages/core'),
-      '@sledge/theme': path.resolve(__dirname, '../../packages/theme'),
-      '@sledge/ui': path.resolve(__dirname, '../../packages/ui'),
-      '@sledge/wasm': path.resolve(__dirname, '../../packages/wasm/pkg/sledge_wasm'),
+      '~': path.join(__dirname, 'src'),
+      '@sledge/core': path.join(__dirname, '../../packages/core'),
+      '@sledge/theme': path.join(__dirname, '../../packages/theme'),
+      '@sledge/ui': path.join(__dirname, '../../packages/ui'),
+      '@sledge/wasm': path.join(__dirname, '../../packages/wasm/pkg/sledge_wasm.js'),
     },
   },
 });

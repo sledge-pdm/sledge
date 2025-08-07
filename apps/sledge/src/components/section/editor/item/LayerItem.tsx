@@ -1,9 +1,10 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
-import { FieldSizingInput, Icon, Light } from '@sledge/ui';
+import { Icon, Light } from '@sledge/ui';
 import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
+import { setLayerName } from '~/controllers/layer/LayerController';
 import { moveLayer } from '~/controllers/layer/LayerListController';
 import { Layer } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
@@ -29,6 +30,7 @@ interface LayerItemProps {
 const LayerItem: Component<LayerItemProps> = (props) => {
   let inputRef: HTMLInputElement | undefined;
   const [isNameChanging, setNameChanging] = createSignal(false);
+  const [originalName, setOriginalName] = createSignal(props.layer.name);
   const [isHighlighted, setIsHighlighted] = createSignal(false);
 
   const onDetClicked = (e: MouseEvent) => {
@@ -136,20 +138,20 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               </p>
             </div>
             {isNameChanging() ? (
-              <FieldSizingInput
-                inputId={'layer-item-name-' + props.index}
+              <input
                 ref={(ref) => (inputRef = ref)}
                 class={layerItemName}
                 style={{
                   outline: 'none',
                   border: 'none',
                   'letter-spacing': '1px',
-                  width: 'fit-content',
                   'border-bottom': `1px solid ${vars.color.onBackground}`,
-                  // @ts-ignore
                 }}
                 value={props.layer.name}
-                onInput={(e) => setLayerListStore('layers', props.index, 'name', e.currentTarget.value)}
+                onInput={(e) => {
+                  const result = setLayerName(props.layer.id, e.target.value);
+                  if (!result) setLayerName(props.layer.id, originalName());
+                }}
                 onBlur={(e) => {
                   setNameChanging(false);
                   e.target.selectionStart = 0;
@@ -166,6 +168,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                 class={layerItemName}
                 ondblclick={() => {
                   setNameChanging(true);
+                  setOriginalName(props.layer.name);
                   inputRef?.focus();
                 }}
               >

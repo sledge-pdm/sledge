@@ -15,7 +15,6 @@
     "fs:default",
     "core:path:default",
     "core:path:allow-resolve-directory",
-    "system-info:allow-all",
     "dialog:allow-save",
     "dialog:allow-open",
     "shell:allow-open",

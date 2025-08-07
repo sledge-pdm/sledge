@@ -1,7 +1,7 @@
 import { FileLocation } from '@sledge/core';
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
-import { WindowOptions } from '@tauri-apps/api/window';
+import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { PathToFileLocation } from '~/utils/PathUtils';
 import { safeInvoke } from './TauriUtils';
@@ -42,4 +42,17 @@ export function getOpenLocation(): FileLocation | undefined {
   // @ts-ignore
   const openPath = window.__PATH__;
   return PathToFileLocation(openPath);
+}
+
+export async function showMainWindow() {
+  // ネイティブスプラッシュを閉じてWebViewを表示
+  try {
+    const windowLabel = getCurrentWindow().label;
+    await safeInvoke('show_main_window', { windowLabel });
+    console.log('🌐 [PERF] Window transition completed');
+  } catch (error) {
+    console.error('Failed to transition from native splash:', error);
+    // フォールバック
+    getCurrentWindow().show();
+  }
 }

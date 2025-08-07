@@ -1,13 +1,17 @@
-import { safeInvoke } from '~/utils/TauriUtils';
+import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
+import { getDefaultSettings } from '~/io/config/set';
+import { Consts } from '~/models/Consts';
 
 export async function resetToDefaultConfig() {
   try {
-    // デフォルト値をストアに読み込み
-    const res = await safeInvoke('reset_global_config');
+    const defaultConfig = getDefaultSettings();
+    await writeTextFile(Consts.globalConfigFileName, JSON.stringify(defaultConfig), {
+      baseDir: BaseDirectory.AppConfig,
+    });
 
-    console.log('global settings reset done (via Rust).');
+    console.log('global settings reset done.');
   } catch (e) {
-    console.error('global settings reset failed (via Rust).', e);
+    console.error('global settings reset failed.', e);
     throw e;
   }
 }

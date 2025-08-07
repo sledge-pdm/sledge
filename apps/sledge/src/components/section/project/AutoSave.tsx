@@ -1,6 +1,5 @@
 import { vars } from '@sledge/theme';
-import { ToggleSwitch } from '@sledge/ui';
-import Dropdown, { DropdownOption } from '@sledge/ui/src/components/control/Dropdown';
+import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge/ui';
 import { Component, Show } from 'solid-js';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';

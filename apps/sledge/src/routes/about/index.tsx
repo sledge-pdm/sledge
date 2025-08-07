@@ -3,7 +3,9 @@ import { accentedButton, pageRoot } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { open } from '@tauri-apps/plugin-shell';
 import { createSignal, onMount } from 'solid-js';
+import { loadGlobalSettings } from '~/io/config/load';
 import { getCurrentVersion, getReleaseApiUrl, isNewVersionAvailable } from '~/utils/VersionUtils';
+import { showMainWindow } from '~/utils/WindowUtils';
 import {
   aaContainer,
   aaText,
@@ -26,11 +28,14 @@ const About = () => {
   const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
 
   onMount(async () => {
+    await loadGlobalSettings();
     setVersion(await getCurrentVersion());
     setLatestVersion((await getLatestVersion(getReleaseApiUrl())) ?? '');
 
     const isAvailable = await isNewVersionAvailable(false);
     setNewVersionAvailable(isAvailable ?? false);
+
+    await showMainWindow();
   });
 
   return (

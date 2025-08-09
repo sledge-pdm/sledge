@@ -3,6 +3,7 @@ import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
+import { appDataDir } from '@tauri-apps/api/path';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -65,6 +66,7 @@ export default function Editor() {
     adjustZoomToFit();
 
     await showMainWindow();
+    console.log(await appDataDir());
   };
 
   // const preloadedProject = readProjectDataFromWindow();

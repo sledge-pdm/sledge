@@ -18,7 +18,7 @@ export function dataUrlToBytes(dataUrl: string): Uint8Array {
 /** ローカル画像を安全に ImageBitmap へ変換 */
 export async function loadLocalImage(path: string): Promise<ImageBitmap> {
   const bytes = await readFile(path);
-  const blob = new Blob([bytes]);
+  const blob = new Blob([bytes.slice()]);
   const url = URL.createObjectURL(blob);
   const bitmap = await createImageBitmap(blob);
   URL.revokeObjectURL(url);

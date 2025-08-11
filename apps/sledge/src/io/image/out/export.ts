@@ -47,7 +47,7 @@ export async function getImageBlob(options: CanvasExportOptions): Promise<Blob |
   offscreen.width = width;
   offscreen.height = height;
   const ctx2d = offscreen.getContext('2d')!;
-  const imgData = new ImageData(buffer, width, height);
+  const imgData = new ImageData(buffer.slice(), width, height);
   ctx2d.putImageData(imgData, 0, 0);
 
   let target = offscreen;

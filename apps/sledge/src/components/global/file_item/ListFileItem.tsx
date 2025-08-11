@@ -1,3 +1,4 @@
+import { vars } from '@sledge/theme';
 import { Component, createSignal, Show } from 'solid-js';
 import { rflItem, rflName, rflPath, rflThumb } from '~/styles/components/file_item/list.css';
 import { FileItemProps } from './FileItemBase';
@@ -5,6 +6,9 @@ import { FileItemProps } from './FileItemBase';
 const ListFileItem: Component<FileItemProps> = (props) => {
   const [hovered, setHovered] = createSignal(false);
   const [pos, setPos] = createSignal({ x: 0, y: 0 });
+
+  const transparent_bg_color = '#00000010';
+  const gridSize = () => 10;
 
   return (
     <div class={rflItem}>
@@ -34,20 +38,31 @@ const ListFileItem: Component<FileItemProps> = (props) => {
             left: `${pos().x}px`,
             'image-rendering': 'pixelated',
             'pointer-events': 'none',
+            'background-color': vars.color.canvas,
           }}
         >
-          <Show when={props.thumbnail} fallback={<p>loading...</p>}>
-            <Show when={props.thumbnail !== 'failed'} fallback={<p>NO IMAGE</p>}>
-              <img
-                style={{
-                  'max-width': '100%',
-                  height: 'auto',
-                  'object-fit': 'cover',
-                }}
-                src={props.thumbnail}
-              />
+          <div
+            style={{
+              'background-image':
+                `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
+                `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%)`,
+              'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
+              'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
+            }}
+          >
+            <Show when={props.thumbnail} fallback={<p>loading...</p>}>
+              <Show when={props.thumbnail !== 'failed'} fallback={<p>NO IMAGE</p>}>
+                <img
+                  style={{
+                    'max-width': '100%',
+                    height: 'auto',
+                    'object-fit': 'cover',
+                  }}
+                  src={props.thumbnail}
+                />
+              </Show>
             </Show>
-          </Show>
+          </div>
         </div>
       </Show>
     </div>

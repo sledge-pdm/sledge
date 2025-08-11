@@ -54,6 +54,7 @@ export async function saveProject(name?: string, existingPath?: string): Promise
   if (typeof selectedPath === 'string') {
     try {
       const thumbpath = await saveThumbnailData(selectedPath);
+      console.log(thumbpath);
 
       const data = await dumpProject();
       await writeFile(selectedPath, data);
@@ -85,8 +86,8 @@ export async function saveProject(name?: string, existingPath?: string): Promise
   return false;
 }
 
-export const thumbnailDir = async () => join(await appDataDir(), 'sledge', 'thumbnails');
-export const thumbnailPath = async (fileId: string) => join(await appDataDir(), 'sledge', 'thumbnails', fileId);
+export const thumbnailDir = async () => join(await appDataDir(), 'thumbnails');
+export const thumbnailPath = async (fileId: string) => join(await appDataDir(), 'thumbnails', fileId);
 
 export async function saveThumbnailExternal(fileId: string, dataUrl: string): Promise<string> {
   const dir = await thumbnailDir();

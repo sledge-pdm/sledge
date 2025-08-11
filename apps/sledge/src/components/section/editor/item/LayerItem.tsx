@@ -5,7 +5,7 @@ import { LogicalPosition } from '@tauri-apps/api/dpi';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
 import { setLayerName } from '~/controllers/layer/LayerController';
-import { moveLayer } from '~/controllers/layer/LayerListController';
+import { allLayers, moveLayer } from '~/controllers/layer/LayerListController';
 import { Layer } from '~/models/layer/Layer';
 import { LayerMenu } from '~/models/menu/LayerMenu';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -132,7 +132,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
           >
             <div class={flexRow}>
-              <p class={layerItemIndex}>{props.index}.</p>
+              <p class={layerItemIndex}>{allLayers().length - props.index - 1}.</p>
               <p class={layerItemType}>
                 {Math.ceil(props.layer.opacity * 100)}%, {props.layer.mode}
               </p>

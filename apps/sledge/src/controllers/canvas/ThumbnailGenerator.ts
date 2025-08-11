@@ -33,7 +33,7 @@ export class ThumbnailGenerator {
     const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
     const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
 
-    const imgData = new ImageData(agent.getBuffer(), w, h);
+    const imgData = new ImageData(agent.getBuffer().slice(), w, h);
     tctx.putImageData(imgData, 0, 0);
     ctx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
 
@@ -52,7 +52,7 @@ export class ThumbnailGenerator {
     const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
 
     const buffer = webGLRenderer!.readPixelsFlipped();
-    const imgData = new ImageData(buffer, srcW, srcH);
+    const imgData = new ImageData(buffer.slice(), srcW, srcH);
     tctx.putImageData(imgData, 0, 0);
 
     ctx.imageSmoothingEnabled = false;
@@ -73,7 +73,7 @@ export class ThumbnailGenerator {
     const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
 
     const buffer = webGLRenderer!.readPixelsFlipped();
-    const imgData = new ImageData(buffer, srcW, srcH);
+    const imgData = new ImageData(buffer.slice(), srcW, srcH);
     tctx.putImageData(imgData, 0, 0);
 
     ctx.imageSmoothingEnabled = false;

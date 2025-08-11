@@ -3,6 +3,7 @@ import { Size2D } from '@sledge/core';
 import { ReactiveMap } from '@solid-primitives/map';
 import { createStore } from 'solid-js/store';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { BaseLayer, createBaseLayer } from '~/models/layer/BaseLayer';
 import { Layer } from '~/models/layer/Layer';
 
 export type CanvasStore = {
@@ -21,6 +22,7 @@ export type ProjectStore = {
 };
 export type LayerListStore = {
   layers: Layer[];
+  baseLayer: BaseLayer;
   activeLayerId: string;
   isImagePoolActive: boolean;
 };
@@ -42,7 +44,10 @@ const defaultProjectStore: ProjectStore = {
   autoSaveInterval: 30,
 };
 const defaultLayerListStore: LayerListStore = {
-  layers: new Array<Layer>(),
+  layers: new Array<Layer>(
+  ),
+  baseLayer: 
+    createBaseLayer('transparent'),
   activeLayerId: '',
   isImagePoolActive: true,
 };

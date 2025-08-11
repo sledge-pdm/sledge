@@ -20,6 +20,7 @@ export const saveButtonMainButton = style([
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
+    pointerEvents: 'all',
     ':hover': {
       backgroundColor: vars.color.button.hover,
     },

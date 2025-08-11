@@ -13,11 +13,11 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
 
   createEffect(() => {
     props.files.forEach(async (file) => {
-      // const json = await importProjectJsonFromPath(file.path + '/' + file.name);
       if (!file.path || !file.name) return;
       const path = join(file.path, file.name);
       const fileId = await getFileId(path);
-      const thumbPath = (await thumbnailDir()) + fileId + '.png';
+      const fileName = fileId + '.png';
+      const thumbPath = join(await thumbnailDir(), fileName);
       const assetUrl = convertFileSrc(thumbPath);
 
       setThumbnails(path, assetUrl);

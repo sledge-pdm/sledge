@@ -1,6 +1,6 @@
 // src/renderer/WebGLRenderer.ts
 import { allLayers } from '~/controllers/layer/LayerListController';
-import { BlendMode, Layer } from '~/models/layer/Layer';
+import { getBlendModeId, Layer } from '~/models/layer/Layer';
 import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 import fragmentSrc from './shaders/blend.frag.glsl';
 import vertexSrc from './shaders/fullscreen.vert.glsl';
@@ -238,7 +238,7 @@ export class WebGLRenderer {
     const blendModes = new Int32Array(MAX_LAYERS);
     activeLayers.forEach((layer, i) => {
       opacities[i] = layer.opacity;
-      blendModes[i] = layer.mode === BlendMode.multiply ? 1 : 0;
+      blendModes[i] = getBlendModeId(layer.mode);
     });
 
     debugLog('🎛️ Setting uniforms:', {

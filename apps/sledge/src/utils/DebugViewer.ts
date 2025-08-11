@@ -114,7 +114,7 @@ export function bufferToDataURL(buffer: Uint8ClampedArray, width: number, height
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Failed to get canvas context');
 
-  const imageData = new ImageData(buffer, width, height);
+  const imageData = new ImageData(buffer.slice(), width, height);
   ctx.putImageData(imageData, 0, 0);
 
   // OffscreenCanvasのconvertToBlobは非同期なので、同期的な方法を使用

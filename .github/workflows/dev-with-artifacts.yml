@@ -61,13 +61,6 @@ jobs:
           releaseDraft: false # Don't care because it's a dev build
           prerelease: true # プレリリースとしてマーク
           projectPath: './apps/sledge'
-          args: >-
-            ${{
-              matrix.platform == 'ubuntu-latest' && '--config ./src-tauri/tauri.linux.conf.json' ||
-              matrix.platform == 'macos-latest' && '--config ./src-tauri/tauri.macos.conf.json' ||
-              matrix.platform == 'windows-latest' && '--config ./src-tauri/tauri.windows.conf.json' ||
-              '--config ./src-tauri/tauri.conf.json'
-            }}
 
       - name: Upload dev artifacts
         uses: actions/upload-artifact@v4

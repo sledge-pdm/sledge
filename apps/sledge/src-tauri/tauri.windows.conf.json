@@ -1,6 +1,12 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "bundle": {
-    "targets": "all"
+    "targets": "all",
+
+    "windows": {
+      "wix": {
+        "version": "0.0.1.1"
+      }
+    }
   }
 }

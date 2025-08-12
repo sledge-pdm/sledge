@@ -153,7 +153,7 @@ pub async fn open_window(
     // 4. ウィンドウ生成（非表示で）
     #[allow(unused_variables)]
     let window = builder
-        .visible(false) // App.tsx側でshowするまでは非表示
+        // .visible(false) // App.tsx側でshowするまでは非表示
         .build()
         .map_err(|e| e.to_string())?;
 

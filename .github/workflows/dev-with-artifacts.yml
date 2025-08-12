@@ -28,6 +28,8 @@ jobs:
       # Node & Rust 環境セットアップ
       - uses: actions/setup-node@v4
         with: { node-version: 'latest' }
+      - uses: pnpm/action-setup@v4
+
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable

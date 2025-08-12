@@ -88,11 +88,18 @@ jobs:
 
       - name: Upload dev artifacts
         uses: actions/upload-artifact@v4
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-latest' && matrix.args == '--target aarch64-apple-darwin'
         with:
-          name: binaries-macos
+          name: binaries-macos-aarch64
           path: |
             ${{ github.workspace }}/apps/sledge/src-tauri/target/aarch64-apple-darwin/release/bundle/**/*.app
+
+      - name: Upload dev artifacts
+        uses: actions/upload-artifact@v4
+        if: matrix.platform == 'macos-latest' && matrix.args == '--target x86_64-apple-darwin'
+        with:
+          name: binaries-macos-x86_64
+          path: |
             ${{ github.workspace }}/apps/sledge/src-tauri/target/x86_64-apple-darwin/release/bundle/**/*.app
 
       - name: Upload dev artifacts

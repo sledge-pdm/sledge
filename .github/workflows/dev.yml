@@ -29,7 +29,6 @@ jobs:
         with: { node-version: 'latest' }
       - uses: pnpm/action-setup@v4
 
-
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -88,7 +87,7 @@ jobs:
         with:
           name: binaries-macos
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.dmg
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.app
           retention-days: 3
 
       - name: Upload dev artifacts

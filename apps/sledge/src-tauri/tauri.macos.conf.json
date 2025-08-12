@@ -3,6 +3,7 @@
   "bundle": {
     "targets": "all",
     "macOS": {
+      "exceptionDomain": "api.github.com",
       "frameworks": [],
       "minimumSystemVersion": "10.13"
     }

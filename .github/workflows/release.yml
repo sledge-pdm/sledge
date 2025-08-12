@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*.*.*'
       - 'v*.*.*-prealpha'
+      - '!v*.*.*-dev.*'
 
 jobs:
   build:

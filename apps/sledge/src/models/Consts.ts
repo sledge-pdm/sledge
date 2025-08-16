@@ -5,9 +5,9 @@ export const Consts = {
 
   maxPenSize: 20,
   minCanvasWidth: 1,
-  maxCanvasWidth: 3000,
+  maxCanvasWidth: 10000,
   minCanvasHeight: 1,
-  maxCanvasHeight: 3000,
+  maxCanvasHeight: 10000,
 
   maxLayerSize: 64,
 

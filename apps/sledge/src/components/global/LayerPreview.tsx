@@ -1,4 +1,5 @@
-import { Component, onCleanup, onMount } from 'solid-js';
+import createRAF, { targetFPS } from '@solid-primitives/raf';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
@@ -20,24 +21,53 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
   const thumbnailGen = new ThumbnailGenerator();
 
-  const handleUpdateReqEvent = (e: Events['preview:requestUpdate']) => {
-    if (e.layerId === props.layer.id) {
-      updatePreview();
+  // RAF and update state management
+  const [needsUpdate, setNeedsUpdate] = createSignal<boolean>(false);
+  const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
+    targetFPS((timeStamp) => {
+      if (needsUpdate()) {
+        performUpdate();
+        setNeedsUpdate(false);
+      }
+    }, 1)
+  );
+
+  // Cache last computed dimensions to avoid unnecessary canvas resizing
+  let lastPreviewWidth = 0;
+  let lastPreviewHeight = 0;
+
+  const requestUpdate = () => {
+    setNeedsUpdate(true);
+    if (!isRunning()) {
+      startRenderLoop();
     }
   };
 
+  const handleUpdateReqEvent = (e: Events['preview:requestUpdate']) => {
+    if (e.layerId === props.layer.id) {
+      requestUpdate();
+    }
+  };
+
+  const handleCanvasSizeChanged = () => {
+    requestUpdate();
+  };
+
   onMount(() => {
-    updatePreview();
+    requestUpdate();
     eventBus.on('preview:requestUpdate', handleUpdateReqEvent);
-    eventBus.on('canvas:sizeChanged', updatePreview);
+    eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
   });
 
   onCleanup(() => {
+    stopRenderLoop();
     eventBus.off('preview:requestUpdate', handleUpdateReqEvent);
-    eventBus.off('canvas:sizeChanged', updatePreview);
+    eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
   });
 
-  const updatePreview = () => {
+  const performUpdate = async () => {
+    if (!wrapperRef || !canvasRef || !ctx) return;
+
     const targetHeight = wrapperRef.clientHeight;
     const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
@@ -50,15 +80,20 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const previewWidth = targetWidth * zoom;
     const previewHeight = targetHeight * zoom;
 
-    canvasRef.width = previewWidth;
-    canvasRef.height = previewHeight;
-    canvasRef.style.width = `${targetWidth}px`;
-    canvasRef.style.height = `${targetHeight}px`;
+    // Only resize canvas if dimensions actually changed
+    if (canvasRef.width !== previewWidth || canvasRef.height !== previewHeight) {
+      canvasRef.width = previewWidth;
+      canvasRef.height = previewHeight;
+      canvasRef.style.width = `${targetWidth}px`;
+      canvasRef.style.height = `${targetHeight}px`;
+      lastPreviewWidth = previewWidth;
+      lastPreviewHeight = previewHeight;
+    }
 
     const agent = getAgentOf(props.layer.id);
     if (agent) {
       const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
-      if (preview && ctx) {
+      if (preview) {
         ctx.imageSmoothingEnabled = true;
         ctx.putImageData(preview, 0, 0);
       }

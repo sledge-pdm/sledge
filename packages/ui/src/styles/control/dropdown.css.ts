@@ -59,6 +59,13 @@ export const menuStyle = style([
     minWidth: '100px',
     overflowY: 'auto',
     width: 'fit-content',
+
+    '::-webkit-scrollbar': {
+      width: '1px',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: '#ddd',
+    },
   },
 ]);
 

@@ -16,28 +16,52 @@ function calcFitSize(origW: number, origH: number, maxW: number, maxH: number): 
 export class ThumbnailGenerator {
   private off: OffscreenCanvas;
   private tmp: OffscreenCanvas;
+  private offCtx: OffscreenCanvasRenderingContext2D;
+  private tmpCtx: OffscreenCanvasRenderingContext2D;
+  
+  // Cache for avoiding unnecessary resizing
+  private lastOffWidth = 0;
+  private lastOffHeight = 0;
+  private lastTmpWidth = 0;
+  private lastTmpHeight = 0;
 
   constructor() {
     this.off = new OffscreenCanvas(1, 1);
     this.tmp = new OffscreenCanvas(1, 1);
+    this.offCtx = this.off.getContext('2d', { willReadFrequently: true })!;
+    this.tmpCtx = this.tmp.getContext('2d', { willReadFrequently: true })!;
   }
 
   generateLayerThumbnail(agent: LayerImageAgent, width: number, height: number): ImageData {
     const w = agent.getWidth();
     const h = agent.getHeight();
-    this.off.width = width;
-    this.off.height = height;
-    this.tmp.width = w;
-    this.tmp.height = h;
+    
+    // Only resize canvases if dimensions actually changed
+    if (this.lastOffWidth !== width || this.lastOffHeight !== height) {
+      this.off.width = width;
+      this.off.height = height;
+      this.lastOffWidth = width;
+      this.lastOffHeight = height;
+    }
+    
+    if (this.lastTmpWidth !== w || this.lastTmpHeight !== h) {
+      this.tmp.width = w;
+      this.tmp.height = h;
+      this.lastTmpWidth = w;
+      this.lastTmpHeight = h;
+    }
 
-    const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
-    const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
-
+    // Clear contexts efficiently (resizing already clears, so only clear if no resize)
+    if (this.lastOffWidth === width && this.lastOffHeight === height) {
+      this.offCtx.clearRect(0, 0, width, height);
+    }
+    
+    // Keep slice() for now to avoid type issues, but optimize canvas resizing
     const imgData = new ImageData(agent.getBuffer().slice(), w, h);
-    tctx.putImageData(imgData, 0, 0);
-    ctx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
+    this.tmpCtx.putImageData(imgData, 0, 0);
+    this.offCtx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
 
-    return ctx.getImageData(0, 0, width, height);
+    return this.offCtx.getImageData(0, 0, width, height);
   }
 
   generateCanvasThumbnail(width: number, height: number): ImageData {

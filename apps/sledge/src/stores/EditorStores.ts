@@ -88,8 +88,10 @@ const defaultInteractStore: InteractStore = {
   isPenOut: false,
   isInStroke: false,
   zoom: 1,
-  zoomMin: 0.5,
-  zoomMax: 8,
+  // zoomMin: 0.5,
+  zoomMin: 0.01,
+  // zoomMax: 8,
+  zoomMax: 100,
   touchZoomSensitivity: 0.5,
   wheelZoomStep: 0.05,
   // オフセットの初期値

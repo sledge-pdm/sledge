@@ -85,10 +85,13 @@ export const centeringCanvas = () => {
   eventBus.emit('canvas:onAdjusted', {});
 };
 
-export const setZoom = (zoom: number) => {
-  zoom = Math.round(zoom * 100) / 100;
-  if (zoom <= 0) return;
-  if (zoom !== interactStore.zoom) setInteractStore('zoom', zoom);
+export const setZoom = (zoom: number): boolean => {
+  zoom = Math.round(zoom * 1000) / 1000;
+  if (zoom > 0 && zoom !== interactStore.zoom) {
+    setInteractStore('zoom', zoom);
+    return true;
+  }
+  return false;
 };
 
 export const setOffset = (offset: { x: number; y: number }) => {

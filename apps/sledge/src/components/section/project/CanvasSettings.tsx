@@ -26,9 +26,14 @@ const CanvasSettings: Component = () => {
     }
   };
 
-  const [sizePreset, setSizePreset] = createSignal<string>();
+  const [sizePreset, setSizePreset] = createSignal<string>('undefined');
 
   createEffect(() => {
+    canvasStore.canvas;
+    updateCurrentPreset();
+  });
+
+  const updateCurrentPreset = () => {
     const cw = widthInputRef ? Number(widthInputRef.value) : canvasStore.canvas.width;
     const ch = heightInputRef ? Number(heightInputRef.value) : canvasStore.canvas.height;
     const matchedPreset = Object.entries(canvasSizePresets).find(([key, c]) => c?.width === cw && c?.height === ch);
@@ -36,9 +41,10 @@ const CanvasSettings: Component = () => {
     if (matchedPreset) {
       const [key, canvas] = matchedPreset;
       setSizePreset(JSON.stringify(canvas));
+    } else {
+      setSizePreset('undefined'); // custom
     }
-    setSizePreset('undefined'); // custom
-  });
+  };
 
   const handlePresetChange = (value: string) => {
     if (value === 'undefined') {
@@ -63,7 +69,7 @@ const CanvasSettings: Component = () => {
       <div class={sectionContent} style={{ 'padding-left': '8px', gap: '12px', 'margin-top': '8px', 'margin-bottom': '24px' }}>
         <div class={flexRow} style={{ 'align-items': 'center', gap: '12px', 'margin-bottom': '2px' }}>
           <p style={{ color: vars.color.muted }}>presets</p>
-          <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset() ?? 'undefined'} onChange={handlePresetChange} wheelSpin={false} />
+          <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
         </div>
         <div class={canvasSizeForm} style={{ 'margin-bottom': '2px' }}>
           <div>
@@ -76,10 +82,7 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
-              onInput={() => {
-                // 入力値が変更されたら手動でsizePresetを再計算させる
-                // これにより、プリセットとの一致状態が適切に更新される
-              }}
+              onInput={() => updateCurrentPreset()}
               required
             />
           </div>
@@ -96,10 +99,7 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
-              onInput={() => {
-                // 入力値が変更されたら手動でsizePresetを再計算させる
-                // これにより、プリセットとの一致状態が適切に更新される
-              }}
+              onInput={() => updateCurrentPreset()}
               required
             />
           </div>

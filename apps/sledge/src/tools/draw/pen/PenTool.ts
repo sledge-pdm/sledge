@@ -68,7 +68,10 @@ export class PenTool implements ToolBehavior {
     // 描画完了時にバッチを強制処理
     agent.getDiffManager().flush();
     const totalPx = agent.getDiffManager().getCurrent().diffs.size;
-    const resultText = `${this.categoryId} stroke done. (${this.startTime ? `${Date.now() - this.startTime}ms /` : ''} ${totalPx}px updated)`;
+    const resultText =
+      totalPx > 0
+        ? `${this.categoryId} stroke done. (${this.startTime ? `${Date.now() - this.startTime}ms /` : ''} ${totalPx}px updated)`
+        : undefined;
     return {
       result: resultText,
       shouldUpdate: true,

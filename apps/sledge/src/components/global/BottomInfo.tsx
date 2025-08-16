@@ -1,14 +1,20 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
-import { Component } from 'solid-js';
+import { Component, createEffect } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { setRotation } from '~/controllers/canvas/CanvasController';
-import { interactStore, logStore } from '~/stores/EditorStores';
+import { getNormalBottomBarText, setBottomBarText } from '~/controllers/log/LogController';
+import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
 import { bottomInfoContainer, bottomInfoContainerRight, bottomInfoRoot, bottomInfoText } from '~/styles/globals/bottom_info.css';
 
 const BottomInfo: Component = () => {
+  createEffect(() => {
+    toolStore.activeToolCategory;
+    setBottomBarText(getNormalBottomBarText());
+  });
+
   return (
     <div class={bottomInfoRoot}>
       <div class={bottomInfoContainer}>

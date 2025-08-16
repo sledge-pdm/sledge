@@ -9,6 +9,8 @@ export const Consts = {
   minCanvasHeight: 1,
   maxCanvasHeight: 10000,
 
+  zoomPrecisionSignificantDigits: 5,
+
   maxLayerSize: 64,
 
   projectThumbnailSize: 500,

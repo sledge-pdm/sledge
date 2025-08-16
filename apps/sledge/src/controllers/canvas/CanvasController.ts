@@ -86,7 +86,7 @@ export const centeringCanvas = () => {
 };
 
 export const setZoom = (zoom: number): boolean => {
-  zoom = Math.round(zoom * 1000) / 1000;
+  zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
   if (zoom > 0 && zoom !== interactStore.zoom) {
     setInteractStore('zoom', zoom);
     return true;

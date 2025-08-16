@@ -21,7 +21,7 @@ export class FillTool implements ToolBehavior {
 
   onStart(agent: LayerImageAgent, { position, color }: ToolArgs) {
     // 描画制限チェック
-    if (!selectionManager.isDrawingAllowed(position)) {
+    if (!selectionManager.isDrawingAllowed(position, true)) {
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,

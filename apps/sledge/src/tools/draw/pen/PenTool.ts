@@ -41,9 +41,10 @@ export class PenTool implements ToolBehavior {
     });
 
     if (lastPosition !== undefined) {
+      const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          if (!selectionManager.isDrawingAllowed({ x: px, y: py })) {
+          if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
             return; // 描画制限により描画しない
           }
           if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
@@ -62,6 +63,8 @@ export class PenTool implements ToolBehavior {
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    // 描画完了時にバッチを強制処理
+    agent.getDiffManager().flush();
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: true,

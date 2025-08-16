@@ -20,13 +20,15 @@ function debugLog(...log: any) {
   }
 }
 
-function checkGLError(gl: WebGL2RenderingContext, operation: string) {
-  if (DEBUG) {
+function checkGLError(gl: WebGL2RenderingContext, operation: string): boolean {
+  if (DEBUG && ENABLE_LOG) {
     const error = gl.getError();
     if (error !== gl.NO_ERROR) {
       console.error(`❌ WebGL Error: ${operation} - ${error}`);
       return false;
     }
+    return true;
+  } else {
     return true;
   }
 }
@@ -489,6 +491,13 @@ export class WebGLRenderer {
 
     if (maxTextureLayers < MAX_LAYERS) {
       console.warn(`⚠️ System supports only ${maxTextureLayers} texture layers, but we need ${MAX_LAYERS}`);
+    }
+
+    // 大きなキャンバスサイズの警告
+    if (this.width > maxTextureSize || this.height > maxTextureSize) {
+      console.error(`❌ Canvas size (${this.width}x${this.height}) exceeds WebGL MAX_TEXTURE_SIZE (${maxTextureSize})`);
+    } else if (this.width > maxTextureSize * 0.8 || this.height > maxTextureSize * 0.8) {
+      console.warn(`⚠️ Canvas size (${this.width}x${this.height}) is approaching WebGL MAX_TEXTURE_SIZE (${maxTextureSize})`);
     }
   }
 }

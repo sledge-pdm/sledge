@@ -12,6 +12,10 @@ uniform int            u_layerCount;
 uniform float          u_opacities[16];
 uniform int            u_blendModes[16];
 
+// ベースレイヤーの色情報
+uniform bool           u_hasBaseLayer;
+uniform vec4           u_baseLayerColor;
+
 
 float blendAlpha(float s, float d) {
   return s + d * (1.0 - s);
@@ -104,10 +108,19 @@ vec4 blendVividLight(vec4 src, vec4 dst) {
 }
 
 void main() {
-  // base
-  vec4 dst = texture(u_texArray, vec3(v_uv, 0.0)) * u_opacities[0];
+  // ベースレイヤーがある場合はその色を、ない場合は最初のレイヤーから開始
+  vec4 dst;
+  int startLayer;
+  
+  if (u_hasBaseLayer) {
+    dst = u_baseLayerColor;
+    startLayer = 0;
+  } else {
+    dst = texture(u_texArray, vec3(v_uv, 0.0)) * u_opacities[0];
+    startLayer = 1;
+  }
 
-  for (int i = 1; i < u_layerCount; ++i) {
+  for (int i = startLayer; i < u_layerCount; ++i) {
     vec4 src = texture(u_texArray, vec3(v_uv, float(i))) * u_opacities[i];
     int mode = u_blendModes[i];
     if (mode == 1) {

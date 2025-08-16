@@ -9,6 +9,7 @@ import { layerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/editor/layer.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 import { listenEvent } from '~/utils/TauriUtils';
+import BaseLayerItem from './item/BaseLayerItem';
 import ImagePoolItem from './item/ImagePoolItem';
 import LayerItem from './item/LayerItem';
 
@@ -133,6 +134,7 @@ const LayerList: Component<{}> = () => {
               return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
             }}
           </For>
+          <BaseLayerItem />
         </div>
       </div>
     </div>

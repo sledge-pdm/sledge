@@ -1,6 +1,8 @@
 // src/renderer/WebGLRenderer.ts
 import { allLayers } from '~/controllers/layer/LayerListController';
+import { getBaseLayerColor } from '~/models/layer/BaseLayer';
 import { getBlendModeId, Layer } from '~/models/layer/Layer';
+import { layerListStore } from '~/stores/ProjectStores';
 import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 import fragmentSrc from './shaders/blend.frag.glsl';
 import vertexSrc from './shaders/fullscreen.vert.glsl';
@@ -39,6 +41,8 @@ export class WebGLRenderer {
   private uLayerCountLoc!: WebGLUniformLocation;
   private uOpacitiesLoc!: WebGLUniformLocation;
   private uBlendModesLoc!: WebGLUniformLocation;
+  private uHasBaseLayerLoc!: WebGLUniformLocation;
+  private uBaseLayerColorLoc!: WebGLUniformLocation;
   private disposed: boolean = false;
 
   private isChromium: boolean = false;
@@ -109,6 +113,8 @@ export class WebGLRenderer {
     this.uLayerCountLoc = this.gl.getUniformLocation(this.program, 'u_layerCount')!;
     this.uOpacitiesLoc = this.gl.getUniformLocation(this.program, 'u_opacities')!;
     this.uBlendModesLoc = this.gl.getUniformLocation(this.program, 'u_blendModes')!;
+    this.uHasBaseLayerLoc = this.gl.getUniformLocation(this.program, 'u_hasBaseLayer')!;
+    this.uBaseLayerColorLoc = this.gl.getUniformLocation(this.program, 'u_baseLayerColor')!;
   }
 
   public resize(width: number, height: number) {
@@ -257,6 +263,18 @@ export class WebGLRenderer {
 
     gl.uniform1iv(this.uBlendModesLoc, blendModes);
     checkGLError(gl, 'after setting blend modes uniform');
+
+    // ベースレイヤーの設定
+    const baseLayer = layerListStore.baseLayer;
+    gl.uniform1i(this.uHasBaseLayerLoc, 1);
+
+    const baseColor = getBaseLayerColor(baseLayer);
+    // ベースレイヤーの不透明度も考慮
+    const finalColor = [baseColor[0], baseColor[1], baseColor[2], baseColor[3]];
+    gl.uniform4f(this.uBaseLayerColorLoc, finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
+    debugLog('🎨 Base layer color:', finalColor, 'mode:', baseLayer.colorMode);
+
+    checkGLError(gl, 'after setting base layer uniforms');
 
     // フルスクリーンクワッドを描画
     debugLog('🖌️ Drawing fullscreen quad...');

@@ -64,7 +64,7 @@ export const menuStyle = style([
       width: '1px',
     },
     '::-webkit-scrollbar-thumb': {
-      backgroundColor: '#ddd',
+      backgroundColor: vars.color.onBackground,
     },
   },
 ]);

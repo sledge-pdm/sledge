@@ -20,7 +20,7 @@ export const canvasSizePresets: Record<string, Canvas | undefined> = {
 
   FHD: { width: 1920, height: 1080 },
   'FHD+': { width: 2560, height: 1440 },
-  K4: { width: 3840, height: 2160 },
+  '4K': { width: 3840, height: 2160 },
 };
 
 export const canvasSizePresetsDropdownOptions: DropdownOption<string>[] = Object.entries(canvasSizePresets).map(([key, value]) => {

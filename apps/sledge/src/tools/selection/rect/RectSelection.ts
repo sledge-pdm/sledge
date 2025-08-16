@@ -18,6 +18,7 @@ export class RectSelection implements ToolBehavior {
     if (isShiftPressed) mode = 'add';
     if (isAltPressed) mode = 'subtract';
     if (isCtrlPressed) mode = 'move';
+
     return mode;
   }
 

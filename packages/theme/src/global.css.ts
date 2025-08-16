@@ -120,7 +120,7 @@ export const lightTheme = createTheme(vars, {
     accent: '#0000ff',
     active: '#ff0000',
     enabled: '#00ff00',
-    muted: 'rgba(0,0,0,0.25)',
+    muted: 'rgba(0,0,0,0.35)',
     error: '#ff0000',
     warn: '#ffcc00',
     overlay: 'rgba(0, 0, 0, 0.5)',

@@ -101,7 +101,7 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
       setFileStore('location', 'name', settings.fileName);
     }
     setLastSettingsStore('exportSettings', settings);
-    await saveGlobalSettings();
+    await saveGlobalSettings(true);
     props.onClose();
   };
 

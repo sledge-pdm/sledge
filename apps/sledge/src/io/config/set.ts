@@ -12,14 +12,39 @@ function deepObjectAssign(target: any, ...sources: any[]) {
   return target;
 }
 
-export async function getDefaultSettings() {
-  const globalConfigStore = deepObjectAssign({}, defaultConfig);
-  const keyConfigStore = deepObjectAssign({}, makeDefaultKeyConfigStore());
-  const lastSettingsStore = deepObjectAssign({}, defaultLastSettingsStore);
+export function getDefaultSettings() {
+  const globalConfigStore = JSON.parse(JSON.stringify(defaultConfig));
+  const keyConfigStore = JSON.parse(JSON.stringify(makeDefaultKeyConfigStore()));
+  const lastSettingsStore = JSON.parse(JSON.stringify(defaultLastSettingsStore));
+
+  console.log('defaultSettings: ', {
+    globalConfigStore,
+    keyConfigStore,
+    lastSettingsStore,
+  });
 
   return {
     globalConfigStore,
     keyConfigStore,
     lastSettingsStore,
+  };
+}
+
+export function getFallbackedSettings(source: { globalConfigStore?: any; keyConfigStore?: any; lastSettingsStore?: any }) {
+  const defaultSettings = getDefaultSettings();
+  const fbGlobalConfigStore = deepObjectAssign(defaultSettings.globalConfigStore, source.globalConfigStore);
+  const fbKeyConfigStore = deepObjectAssign(defaultSettings.keyConfigStore, source.keyConfigStore);
+  const fbLastSettingsStore = deepObjectAssign(defaultSettings.lastSettingsStore, source.lastSettingsStore);
+
+  console.log('fallbackedSettings: ', {
+    fbGlobalConfigStore,
+    fbKeyConfigStore,
+    fbLastSettingsStore,
+  });
+
+  return {
+    globalConfigStore: fbGlobalConfigStore,
+    keyConfigStore: fbKeyConfigStore,
+    lastSettingsStore: fbLastSettingsStore,
   };
 }

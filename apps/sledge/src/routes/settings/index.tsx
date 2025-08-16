@@ -1,3 +1,4 @@
+import { pageRoot } from '@sledge/theme';
 import { onMount } from 'solid-js';
 import ConfigForm from '~/components/config/ConfigForm';
 import { loadGlobalSettings } from '~/io/config/load';
@@ -9,5 +10,9 @@ export default function Settings() {
     await showMainWindow();
   });
 
-  return <ConfigForm />;
+  return (
+    <div class={pageRoot}>
+      <ConfigForm />
+    </div>
+  );
 }

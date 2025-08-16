@@ -14,7 +14,7 @@ interface ColorBoxProps {
 const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
   const size = () => props.sizePx || 10;
 
-  const isSelected = () => props.enableUsingSelection && props.currentColor() === props.color;
+  const isSelected = () => props.enableUsingSelection && props.currentColor?.() === props.color;
   const isWhiteOrNone = () => props.color === 'none' || props.color.toLowerCase() === '#ffffff';
 
   const preferedBorder = () => (isWhiteOrNone() || isSelected() ? `0.05rem solid ${vars.color.onBackground}` : '0.05rem solid transparent');

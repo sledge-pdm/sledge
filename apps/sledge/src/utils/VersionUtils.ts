@@ -82,13 +82,13 @@ export const isNewVersionAvailable = async (considerSkip: boolean): Promise<bool
 };
 
 export const addSkippedVersion = (version: string): void => {
-  setGlobalConfig('misc', 'skippedVersions', (prev) => {
+  setGlobalConfig('misc', 'skippedVersions', (prev: string[]) => {
     if (!prev.includes(version)) {
       return [...prev, version];
     }
     return prev;
   });
-  saveGlobalSettings();
+  saveGlobalSettings(true);
 };
 
 //   const test1 = compareSemanticVersions('0.1.0', '1.1.1-prealpha');

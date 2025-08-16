@@ -1,19 +1,22 @@
-import { flexRow } from '@sledge/core';
-import { ZFB03B, ZFB08 } from '@sledge/theme';
+import { flexRow, w100 } from '@sledge/core';
+import { vars, ZFB08, ZFB09 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const keyConfigRow = style([
   flexRow,
+  w100,
   {
+    boxSizing: 'border-box',
+    backgroundColor: vars.color.surface,
     alignItems: 'center',
-    minHeight: '24px',
+    padding: '8px 8px',
   },
 ]);
 
 export const keyConfigName = style({
-  fontFamily: ZFB03B,
+  fontFamily: ZFB09,
   fontSize: '8px',
-  minWidth: '80px',
+  width: '50%',
 });
 
 export const keyConfigValue = style({

@@ -11,24 +11,31 @@ export async function loadGlobalSettings() {
     console.warn('No global settings found, create one with default values.');
     const defaultSettings = await getDefaultSettings();
     await loadConfigToGlobalStore(defaultSettings);
-
-    await saveGlobalSettings();
-
+    await saveGlobalSettings(false);
     return defaultSettings;
   } else {
     const configData = await readTextFile(Consts.globalConfigFileName, {
       baseDir: BaseDirectory.AppConfig,
     });
 
-    let configJson = JSON.parse(configData);
-    console.log('json data loaded from file:', configJson);
+    let configJson;
 
-    if (!configJson || Object.keys(configJson).length === 0) {
-      console.warn('No global settings found, using default values.');
+    try {
+      configJson = JSON.parse(configData);
+      console.log('json data loaded from file:', configJson);
+    } catch (e) {
+      console.error('Failed to parse config JSON:', e);
     }
 
-    await loadConfigToGlobalStore(configJson);
-
-    return configJson;
+    if (!configJson) {
+      console.warn('create config with default values.');
+      const defaultSettings = await getDefaultSettings();
+      await loadConfigToGlobalStore(defaultSettings);
+      await saveGlobalSettings(false);
+      return defaultSettings;
+    } else {
+      await loadConfigToGlobalStore(configJson);
+      return configJson;
+    }
   }
 }

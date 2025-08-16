@@ -30,7 +30,7 @@ export const generalMetas: FieldMeta[] = [
       content: 'reset skipped versions',
       onClick: async () => {
         setGlobalConfig('misc', 'skippedVersions', []);
-        await saveGlobalSettings();
+        await saveGlobalSettings(true);
         alert('Reset all skipped versions.');
       },
     },

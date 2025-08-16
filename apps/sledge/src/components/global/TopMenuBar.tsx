@@ -1,4 +1,4 @@
-import { getLatestVersion } from '@sledge/core';
+import { FileLocation, getLatestVersion } from '@sledge/core';
 import { getTheme, vars, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -91,7 +91,7 @@ const TopMenuBar: Component = () => {
 
   const recentFiles = globalConfig.misc.recentFiles.slice(0, 5);
 
-  const recentFilesMenuOptions = recentFiles.map((file) => ({
+  const recentFilesMenuOptions = recentFiles.map((file: FileLocation) => ({
     label: file.name || '[error]',
     onSelect: () => {
       openExistingProject(file);

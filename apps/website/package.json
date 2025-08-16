@@ -12,16 +12,16 @@
   "license": "MIT",
   "dependencies": {
     "@solidjs/meta": "^0.29.4",
-    "@solidjs/router": "^0.15.0",
-    "@types/node": "^24.1.0",
-    "solid-js": "^1.9.5",
+    "@solidjs/router": "^0.15.3",
+    "@types/node": "^24.3.0",
+    "solid-js": "^1.9.9",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {
-    "@vanilla-extract/vite-plugin": "^5.0.1",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.0",
+    "@vanilla-extract/vite-plugin": "^5.1.1",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.5",
     "vite-plugin-node-polyfills": "^0.24.0",
-    "vite-plugin-solid": "^2.11.6"
+    "vite-plugin-solid": "^2.11.8"
   }
 }

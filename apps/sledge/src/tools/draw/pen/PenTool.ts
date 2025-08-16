@@ -9,8 +9,10 @@ import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
+  startTime: number | undefined = undefined;
+
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    // return false;
+    this.startTime = Date.now();
     return this.draw(agent, args, args.color);
   }
 
@@ -41,9 +43,10 @@ export class PenTool implements ToolBehavior {
     });
 
     if (lastPosition !== undefined) {
+      const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
-          if (!selectionManager.isDrawingAllowed({ x: px, y: py })) {
+          if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
             return; // 描画制限により描画しない
           }
           if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
@@ -56,14 +59,22 @@ export class PenTool implements ToolBehavior {
       });
     }
     return {
-      shouldUpdate: dm.getCurrent().diffs.size > 0 ? true : false,
+      shouldUpdate: true,
       shouldRegisterToHistory: false,
     };
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    // 描画完了時にバッチを強制処理
+    agent.getDiffManager().flush();
+    const totalPx = agent.getDiffManager().getCurrent().diffs.size;
+    const resultText =
+      totalPx > 0
+        ? `${this.categoryId} stroke done. (${this.startTime ? `${Date.now() - this.startTime}ms /` : ''} ${totalPx}px updated)`
+        : undefined;
     return {
-      shouldUpdate: false,
+      result: resultText,
+      shouldUpdate: true,
       shouldRegisterToHistory: true,
     };
   }

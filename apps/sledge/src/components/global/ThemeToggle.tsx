@@ -13,7 +13,7 @@ const ThemeToggle: Component<{ noBackground?: boolean }> = (props) => {
       noBackground={props.noBackground}
       onChange={(v) => {
         setGlobalConfig('appearance', 'theme', v as Theme);
-        saveGlobalSettings();
+        saveGlobalSettings(true);
       }}
     />
   );

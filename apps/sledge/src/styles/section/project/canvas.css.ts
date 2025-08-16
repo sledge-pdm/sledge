@@ -18,6 +18,7 @@ export const canvasSizeTimes = style({
 
 export const canvasSizeLabel = style({
   fontSize: vars.text.sm,
+  color: vars.color.muted,
 });
 
 export const canvasSizeInput = style({

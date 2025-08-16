@@ -44,10 +44,8 @@ const defaultProjectStore: ProjectStore = {
   autoSaveInterval: 30,
 };
 const defaultLayerListStore: LayerListStore = {
-  layers: new Array<Layer>(
-  ),
-  baseLayer: 
-    createBaseLayer('transparent'),
+  layers: new Array<Layer>(),
+  baseLayer: createBaseLayer('transparent'),
   activeLayerId: '',
   isImagePoolActive: true,
 };

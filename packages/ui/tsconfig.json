@@ -15,9 +15,9 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@sledge/core": ["../core/src"],
+      "@sledge/core": ["../core"],
       "@sledge/core/*": ["../core/src/*"],
-      "@sledge/theme": ["../theme/src"],
+      "@sledge/theme": ["../theme"],
       "@sledge/theme/*": ["../theme/src/*"]
     }
   }

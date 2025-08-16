@@ -1,9 +1,8 @@
 import { flexCol } from '@sledge/core';
-import { pageRoot, vars } from '@sledge/theme';
+import { pageRoot } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
-import { appDataDir } from '@tauri-apps/api/path';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -27,7 +26,7 @@ import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectSt
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/PathUtils';
 import { emitEvent } from '~/utils/TauriUtils';
-import { getOpenLocation, showMainWindow } from '~/utils/WindowUtils';
+import { getOpenLocation, reportCriticalError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Editor() {
   const location = useLocation();
@@ -66,55 +65,57 @@ export default function Editor() {
     adjustZoomToFit();
 
     await showMainWindow();
-    console.log(await appDataDir());
   };
 
-  // const preloadedProject = readProjectDataFromWindow();
-  const fileLocation = getOpenLocation();
-  if (fileLocation && fileLocation.path && fileLocation.name) {
-    const fullPath = join(fileLocation.path, fileLocation.name);
-    if (fileLocation.name?.endsWith('.sledge')) {
-      setFileStore('location', fileLocation);
-      readProjectFromPath(fullPath)
-        .then((projectFile) => {
+  const tryLoadProject = async (): Promise<boolean> => {
+    const fileLocation = getOpenLocation();
+    if (fileLocation && fileLocation.path && fileLocation.name) {
+      const fullPath = join(fileLocation.path, fileLocation.name);
+      if (fileLocation.name?.endsWith('.sledge')) {
+        try {
+          setFileStore('location', fileLocation);
+          const projectFile = await readProjectFromPath(fullPath);
           if (!projectFile) {
             console.error('Failed to read project from path:', fullPath);
-            return;
+            throw new Error('reading ' + fullPath);
           }
           loadProjectJson(projectFile);
-          onProjectLoad(false);
-        })
-        .catch((error) => {
+          return false;
+        } catch (error) {
           console.error('Failed to read project:', error);
-        });
-    } else {
-      // image file
-      importImageFromPath(fileLocation).then((success) => {
-        if (success) {
-          onProjectLoad(false);
+          throw new Error('Failed to read project.\n' + error);
+        }
+      } else {
+        // image file
+        const isImportSuccessful = await importImageFromPath(fileLocation);
+        if (isImportSuccessful) {
+          return false;
         } else {
           console.error('Failed to import image from path:', fileLocation);
+          throw new Error('Failed to import image from path:' + join(fileLocation.path ?? '<unknown path>', fileLocation.name ?? '<unknown file>'));
         }
+      }
+    } else {
+      const sp = new URLSearchParams(location.search);
+      // create new
+      setFileStore('location', {
+        name: undefined,
+        path: undefined,
       });
-    }
-  } else {
-    const sp = new URLSearchParams(location.search);
-    // create new
-    setFileStore('location', {
-      name: undefined,
-      path: undefined,
-    });
 
-    if (sp.has('width') && sp.has('height')) {
-      const width = Number(sp.get('width'));
-      const height = Number(sp.get('height'));
-      setCanvasStore('canvas', 'width', width);
-      setCanvasStore('canvas', 'height', height);
-      eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
+      if (sp.has('width') && sp.has('height')) {
+        const width = Number(sp.get('width'));
+        const height = Number(sp.get('height'));
+        setCanvasStore('canvas', 'width', width);
+        setCanvasStore('canvas', 'height', height);
+        eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
+      }
+      addLayer({ name: 'layer1', type: LayerType.Dot, enabled: true, dotMagnification: 1 });
+      return true;
     }
-    addLayer({ name: 'layer1', type: LayerType.Dot, enabled: true, dotMagnification: 1 });
-    onProjectLoad(true);
-  }
+
+    throw new Error('unknown error');
+  };
 
   let unlisten: UnlistenFn;
 
@@ -131,6 +132,14 @@ export default function Editor() {
         }
       }
     });
+
+    try {
+      const isNewProject = await tryLoadProject();
+      await onProjectLoad(isNewProject);
+    } catch (e) {
+      unlisten();
+      await reportCriticalError(e);
+    }
   });
 
   createEffect(() => {
@@ -149,16 +158,6 @@ export default function Editor() {
       window.location.reload();
     }
   });
-
-  const divider = () => (
-    <div
-      style={{
-        width: '1px',
-        height: '100%',
-        'background-color': vars.color.border,
-      }}
-    />
-  );
 
   return (
     <Show when={!isLoading()} fallback={<Loading />}>

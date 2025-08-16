@@ -1,23 +1,27 @@
 import { flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
-import { Component } from 'solid-js';
+import { Component, createEffect } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { setRotation } from '~/controllers/canvas/CanvasController';
-import { interactStore, logStore } from '~/stores/EditorStores';
+import { getNormalBottomBarText, setBottomBarText } from '~/controllers/log/LogController';
+import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
-import {
-  bottomInfoContainer,
-  bottomInfoContainerRight,
-  bottomInfoRoot,
-  bottomInfoText as bottomInfoTextStyle,
-} from '~/styles/globals/bottom_info.css';
+import { bottomInfoContainer, bottomInfoContainerRight, bottomInfoRoot, bottomInfoText } from '~/styles/globals/bottom_info.css';
 
 const BottomInfo: Component = () => {
+  createEffect(() => {
+    toolStore.activeToolCategory;
+    setBottomBarText(getNormalBottomBarText());
+  });
+
   return (
     <div class={bottomInfoRoot}>
       <div class={bottomInfoContainer}>
-        <p class={bottomInfoTextStyle}>x{interactStore.zoom}</p>
-        <p class={bottomInfoTextStyle} style={{ overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>
+        <p class={bottomInfoText} style={{ width: '56px' }}>
+          x{interactStore.zoom}
+        </p>
+        <p class={bottomInfoText} style={{ color: vars.color.muted, overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>
           {logStore.bottomBarText}
         </p>
         <div class={bottomInfoContainerRight}>
@@ -43,7 +47,7 @@ const BottomInfo: Component = () => {
               }}
             />
           </div>
-          {/* <p class={bottomInfoTextStyle}>theme</p> */}
+          {/* <p class={bottomInfoText}>theme</p> */}
           <ThemeToggle noBackground={true} />
         </div>
       </div>

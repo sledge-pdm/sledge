@@ -48,7 +48,11 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }, Number(globalConfig.performance.targetFPS))
   );
 
-  const handleAreaChanged = (e: Events['selection:areaChanged']) => setUpdatePosition(true);
+  const handleAreaChanged = (e: Events['selection:areaChanged']) => {
+    if (e.commit) {
+      updateMenuPos();
+    }
+  };
   const handleMoved = (e: Events['selection:moved']) => setUpdatePosition(true);
   const handleStateChanged = (e: Events['selection:stateChanged']) => {
     setSelectionState(e.newState);
@@ -60,6 +64,20 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     eventBus.on('selection:areaChanged', handleAreaChanged);
     eventBus.on('selection:moved', handleMoved);
     eventBus.on('selection:stateChanged', handleStateChanged);
+
+    const observer = new ResizeObserver((entries) => {
+      entries.forEach((el) => {
+        setUpdatePosition(true);
+      });
+    });
+    const sectionsBetweenArea = document.getElementById('sections-between-area') as HTMLElement;
+    if (sectionsBetweenArea) {
+      observer.observe(sectionsBetweenArea);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
   });
   onCleanup(() => {
     stopRenderLoop();
@@ -92,30 +110,30 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
 
     setSelectionMenuPos(basePos);
 
-    const canvasArea = document.getElementById('zoompan-wrapper') as HTMLElement;
-    if (canvasArea) {
-      const canvasRect = canvasArea.getBoundingClientRect();
+    const sectionsBetweenArea = document.getElementById('sections-between-area') as HTMLElement;
+    if (sectionsBetweenArea) {
+      const areaRect = sectionsBetweenArea.getBoundingClientRect();
 
       const originalContainerPos: Vec2 = { x: containerRect.x, y: containerRect.y };
       const newContainerPos: Vec2 = { x: containerRect.x, y: containerRect.y };
       const outerMargin = 8;
       // check if the menu is out of the canvas area
-      if (originalContainerPos.x < canvasRect.x + outerMargin) {
-        newContainerPos.x = canvasRect.x + outerMargin;
+      if (originalContainerPos.x < areaRect.x + outerMargin) {
+        newContainerPos.x = areaRect.x + outerMargin;
       }
-      if (originalContainerPos.y < canvasRect.y + outerMargin) {
-        newContainerPos.y = canvasRect.y + outerMargin;
+      if (originalContainerPos.y < areaRect.y + outerMargin) {
+        newContainerPos.y = areaRect.y + outerMargin;
       }
-      if (canvasRect.right - outerMargin < containerRect.right) {
-        newContainerPos.x = canvasRect.right - containerRect.width - outerMargin;
+      if (areaRect.right - outerMargin < containerRect.right) {
+        newContainerPos.x = areaRect.right - containerRef.offsetWidth - outerMargin;
       }
-      if (canvasRect.bottom - outerMargin < containerRect.bottom) {
-        newContainerPos.y = canvasRect.bottom - containerRect.height - outerMargin;
+      if (areaRect.bottom - outerMargin < containerRect.bottom) {
+        newContainerPos.y = areaRect.bottom - containerRef.offsetHeight - outerMargin;
       }
 
       // 画面外に出た場合
       if (newContainerPos.x !== originalContainerPos.x || newContainerPos.y !== originalContainerPos.y) {
-        setOuterPosition({ x: newContainerPos.x - canvasRect.x, y: newContainerPos.y - canvasRect.y });
+        setOuterPosition({ x: newContainerPos.x - areaRect.x, y: newContainerPos.y - areaRect.y });
       } else {
         containerRef.style.margin = `8px 0 0 0`;
         setOuterPosition(undefined);

@@ -4,6 +4,7 @@ import Tile, { TileIndex } from './Tile';
 
 export default class TileManager {
   readonly TILE_SIZE = 32;
+
   public tiles: Tile[][] = [];
 
   constructor(

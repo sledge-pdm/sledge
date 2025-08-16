@@ -27,7 +27,7 @@ export default class LayerCanvasOperator {
     const layer = findLayerById(this.getLayerIdToDraw());
     if (!layer) return;
 
-    position = this.getMagnificatedPosition(position, layer.dotMagnification);
+    if (position) position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
     if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
@@ -50,7 +50,14 @@ export default class LayerCanvasOperator {
     }
   }
 
-  private useTool(agent: LayerImageAgent, state: DrawState, originalEvent: PointerEvent, tool: ToolCategory, position: Vec2, last?: Vec2) {
+  private useTool(
+    agent: LayerImageAgent,
+    state: DrawState,
+    originalEvent: PointerEvent | undefined,
+    tool: ToolCategory,
+    position: Vec2,
+    last?: Vec2
+  ) {
     const toolArgs: ToolArgs = {
       position,
       lastPosition: last,
@@ -58,24 +65,25 @@ export default class LayerCanvasOperator {
       color: hexToRGBA(currentColor()),
       event: originalEvent,
     };
-    const startTime = Date.now();
-    let result: ToolResult | undefined = undefined;
+    let toolResult: ToolResult | undefined = undefined;
     switch (state) {
       case DrawState.start:
-        result = tool.behavior.onStart(agent, toolArgs);
+        toolResult = tool.behavior.onStart(agent, toolArgs);
         break;
       case DrawState.move:
-        result = tool.behavior.onMove(agent, toolArgs);
+        toolResult = tool.behavior.onMove(agent, toolArgs);
         break;
       case DrawState.end:
-        result = tool.behavior.onEnd(agent, toolArgs);
+        toolResult = tool.behavior.onEnd(agent, toolArgs);
+        break;
+      case DrawState.cancel:
+        toolResult = tool.behavior.onCancel?.(agent, toolArgs);
         break;
     }
-    const endTime = Date.now();
-    if (result) {
-      setBottomBarText(`${tool.name} finished. ${endTime - startTime} ms. (updated ${agent?.getTileManager().getDirtyTiles().length} dirty tiles)`);
+    if (toolResult?.result) {
+      setBottomBarText(toolResult.result);
     }
-    return result;
+    return toolResult;
   }
 
   private getMagnificatedPosition(position: Vec2, dotMagnification: number) {

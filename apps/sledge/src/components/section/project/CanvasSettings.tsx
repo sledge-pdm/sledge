@@ -1,11 +1,12 @@
-import { Component } from 'solid-js';
+import { Component, createEffect, createSignal } from 'solid-js';
 import { adjustZoomToFit, centeringCanvas, changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { flexCol, flexRow } from '@sledge/core';
-import { ZFB03 } from '@sledge/theme';
-import { Button } from '@sledge/ui';
+import { vars, ZFB03 } from '@sledge/theme';
+import { Button, Dropdown } from '@sledge/ui';
 import { activeLayer, allLayers } from '~/controllers/layer/LayerListController';
+import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/models/canvas/Canvas';
 import { Consts } from '~/models/Consts';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
 import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
@@ -25,12 +26,52 @@ const CanvasSettings: Component = () => {
     }
   };
 
+  const [sizePreset, setSizePreset] = createSignal<string>('undefined');
+
+  createEffect(() => {
+    canvasStore.canvas;
+    updateCurrentPreset();
+  });
+
+  const updateCurrentPreset = () => {
+    const cw = widthInputRef ? Number(widthInputRef.value) : canvasStore.canvas.width;
+    const ch = heightInputRef ? Number(heightInputRef.value) : canvasStore.canvas.height;
+    const matchedPreset = Object.entries(canvasSizePresets).find(([key, c]) => c?.width === cw && c?.height === ch);
+
+    if (matchedPreset) {
+      const [key, canvas] = matchedPreset;
+      setSizePreset(JSON.stringify(canvas));
+    } else {
+      setSizePreset('undefined'); // custom
+    }
+  };
+
+  const handlePresetChange = (value: string) => {
+    if (value === 'undefined') {
+      const canvas = canvasStore.canvas;
+      widthInputRef.value = canvas.width.toString();
+      heightInputRef.value = canvas.height.toString();
+      setSizePreset('undefined');
+    } else {
+      const canvas = JSON.parse(value);
+      if (canvas) {
+        widthInputRef.value = canvas.width.toString();
+        heightInputRef.value = canvas.height.toString();
+        setSizePreset(JSON.stringify(canvas));
+      }
+    }
+  };
+
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>canvas.</p>
 
-      <div class={sectionContent} style={{ 'padding-left': '8px', gap: '6px', 'margin-bottom': '8px' }}>
-        <div class={canvasSizeForm}>
+      <div class={sectionContent} style={{ 'padding-left': '8px', gap: '12px', 'margin-top': '8px', 'margin-bottom': '24px' }}>
+        <div class={flexRow} style={{ 'align-items': 'center', gap: '12px', 'margin-bottom': '2px' }}>
+          <p style={{ color: vars.color.muted }}>presets</p>
+          <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
+        </div>
+        <div class={canvasSizeForm} style={{ 'margin-bottom': '2px' }}>
           <div>
             <p class={canvasSizeLabel}>width</p>
             <input
@@ -41,6 +82,7 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
+              onInput={() => updateCurrentPreset()}
               required
             />
           </div>
@@ -57,6 +99,7 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
+              onInput={() => updateCurrentPreset()}
               required
             />
           </div>
@@ -72,7 +115,7 @@ const CanvasSettings: Component = () => {
         </div>
       </div>
 
-      <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
+      <div class={flexCol} style={{ 'padding-left': '8px', gap: '4px', overflow: 'hidden' }}>
         <div class={flexRow}>
           <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px' }}>size</p>
           <p style={{ 'white-space': 'wrap' }}>{`${canvasStore.canvas.width} x ${canvasStore.canvas.height}`}</p>
@@ -86,12 +129,12 @@ const CanvasSettings: Component = () => {
           <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
         </div>
 
-        <Button onClick={() => centeringCanvas()} style={{ 'margin-top': '8px' }}>
+        <Button onClick={() => centeringCanvas()} style={{ 'margin-top': '12px' }}>
           Center Canvas.
         </Button>
 
         <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>
-          Adjust zoom to Fit.
+          Adjust zoom.
         </Button>
       </div>
     </div>

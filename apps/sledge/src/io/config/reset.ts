@@ -1,13 +1,12 @@
-import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
+import { saveGlobalSettings } from '~/io/config/save';
 import { getDefaultSettings } from '~/io/config/set';
-import { Consts } from '~/models/Consts';
+import { loadConfigToGlobalStore } from '~/stores/GlobalStores';
 
 export async function resetToDefaultConfig() {
   try {
     const defaultConfig = getDefaultSettings();
-    await writeTextFile(Consts.globalConfigFileName, JSON.stringify(defaultConfig), {
-      baseDir: BaseDirectory.AppConfig,
-    });
+    loadConfigToGlobalStore(defaultConfig);
+    await saveGlobalSettings(true);
 
     console.log('global settings reset done.');
   } catch (e) {

@@ -3,6 +3,7 @@ import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RGBAColor } from '~/utils/ColorUtils';
 
 export interface ToolResult {
+  result?: string;
   shouldUpdate: boolean;
   shouldRegisterToHistory: boolean;
   shouldReturnToPrevTool?: boolean;
@@ -17,6 +18,8 @@ export interface ToolBehavior {
   onMove: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 
   onEnd: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
+
+  onCancel?: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 }
 
 export interface ToolArgs {

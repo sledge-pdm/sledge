@@ -106,7 +106,7 @@ const Selection: Component = () => {
               />
             </div>
 
-            <Show when={mode() !== 'none'}>
+            <Show when={mode() !== 'none' && toolStore.activeToolCategory === 'fill'}>
               <div class={flexCol}>
                 <p style={{ 'margin-bottom': '6px' }}>Fill Mode</p>
                 <Dropdown

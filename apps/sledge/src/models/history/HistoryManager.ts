@@ -28,7 +28,8 @@ export type Diff = PixelDiff | TileDiff | WholeDiff;
 export const getDiffHash = (diff: Diff) => {
   switch (diff.kind) {
     case 'pixel':
-      return `px:${diff.position.x},${diff.position.y}`;
+      // 数値ベースのハッシュに変更（文字列生成を避ける）
+      return diff.position.x * 100000 + diff.position.y; // 5桁まで対応
     case 'tile':
       return `tile:${diff.index.row},${diff.index.column}`;
     case 'whole':
@@ -37,7 +38,7 @@ export const getDiffHash = (diff: Diff) => {
 };
 
 export type DiffAction = {
-  diffs: Map<string, Diff>;
+  diffs: Map<string | number, Diff>;
 };
 
 export class HistoryManager {

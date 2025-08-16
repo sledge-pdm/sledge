@@ -1,22 +1,23 @@
-import { flexCol, flexRow, h100, wh100 } from '@sledge/core';
+import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars, ZFB08, ZFB09, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const configFormRoot = style([
   flexRow,
-  wh100,
+  w100,
   {
     position: 'relative',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   },
 ]);
 
 export const configFormSections = style([
   flexCol,
-  h100,
   {
     borderRight: `1px solid ${vars.color.border}`,
-    minWidth: '150px',
-    paddingTop: vars.spacing.md,
+    width: '150px',
+    paddingTop: '20px',
   },
 ]);
 
@@ -46,12 +47,37 @@ export const configFormSectionLabel = style({
 
 export const configFormFields = style([
   flexCol,
-  wh100,
   {
-    marginRight: vars.spacing.lg,
-    marginLeft: vars.spacing.xl,
-    marginTop: vars.spacing.xs,
+    position: 'absolute',
+    left: '150px',
+    right: '0',
+    top: '0',
+    bottom: '0',
+    overflowY: 'scroll',
+    boxSizing: 'border-box',
     gap: vars.spacing.xl,
+
+    '::-webkit-scrollbar': {
+      width: '2px',
+      backgroundColor: 'transparent',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: 'transparent',
+    },
+    selectors: {
+      '&:hover::-webkit-scrollbar-thumb': {
+        backgroundColor: '#888',
+      },
+    },
+  },
+]);
+
+export const configFormScrollContent = style([
+  flexCol,
+  {
+    overflowY: 'visible',
+    gap: vars.spacing.xl,
+    margin: `32px 28px`,
   },
 ]);
 
@@ -65,9 +91,8 @@ export const configFormNoPreset = style([
 
 export const configFormFieldHeader = style([
   {
-    marginTop: vars.spacing.xl,
-    marginBottom: vars.spacing.sm,
-    fontSize: '19px',
+    marginBottom: vars.spacing.xs,
+    fontSize: '18px',
     fontFamily: ZFB31,
     color: vars.color.accent,
   },

@@ -16,6 +16,8 @@ import { redoLayer, undoLayer } from '../../controllers/history/HistoryControlle
 
 const KeyListener: Component = () => {
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (toolStore.activeToolCategory === 'rectSelection' && e.altKey) return;
+
     if (isKeyMatchesToEntry(e, keyConfigStore['save']) && !e.repeat) {
       e.preventDefault(); // Prevent default save action
       saveProject(fileStore.location.name, fileStore.location.path);

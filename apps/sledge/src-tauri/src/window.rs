@@ -15,9 +15,9 @@ pub enum SledgeWindowKind {
     Settings,
 }
 
-// const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-extensions --disable-plugins --disable-dev-shm-usage";
+const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-extensions --disable-plugins --disable-dev-shm-usage";
 
-const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection";
+// const COMMON_BROWSER_ARGS: &str = "--enable-features=msWebView2EnableDraggableRegions --disable-features=ElasticOverscroll,msWebOOUI,msPdfOOUI,msSmartScreenProtection";
 
 fn next_editor_label(app: &AppHandle) -> String {
     loop {
@@ -153,7 +153,7 @@ pub async fn open_window(
     // 4. ウィンドウ生成（非表示で）
     #[allow(unused_variables)]
     let window = builder
-        // .visible(false) // App.tsx側でshowするまでは非表示
+        .visible(false) // App.tsx側でshowするまでは非表示
         .build()
         .map_err(|e| e.to_string())?;
 

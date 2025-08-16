@@ -8,7 +8,7 @@ import { createNew, openExistingProject, openProject } from '~/controllers/proje
 import { loadGlobalSettings } from '~/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
-import { openWindow, showMainWindow } from '~/utils/WindowUtils';
+import { openWindow, reportCriticalError, showMainWindow } from '~/utils/WindowUtils';
 import {
   header as menuContainer,
   headerItem as menuItem,
@@ -36,8 +36,12 @@ export default function Home() {
   });
 
   onMount(async () => {
-    await loadGlobalSettings();
-    await showMainWindow();
+    try {
+      await loadGlobalSettings();
+      await showMainWindow();
+    } catch (e) {
+      await reportCriticalError(e);
+    }
   });
 
   return (

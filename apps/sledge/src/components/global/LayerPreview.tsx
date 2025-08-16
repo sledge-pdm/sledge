@@ -1,4 +1,6 @@
-import { Component, onCleanup, onMount } from 'solid-js';
+import { vars } from '@sledge/theme';
+import createRAF, { targetFPS } from '@solid-primitives/raf';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { Layer } from '~/models/layer/Layer';
@@ -20,24 +22,53 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
   const thumbnailGen = new ThumbnailGenerator();
 
+  // RAF and update state management
+  const [needsUpdate, setNeedsUpdate] = createSignal<boolean>(false);
+  const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
+    targetFPS((timeStamp) => {
+      if (needsUpdate()) {
+        performUpdate();
+        setNeedsUpdate(false);
+      }
+    }, 2)
+  );
+
+  // Cache last computed dimensions to avoid unnecessary canvas resizing
+  let lastPreviewWidth = 0;
+  let lastPreviewHeight = 0;
+
+  const requestUpdate = () => {
+    if (!isRunning()) {
+      startRenderLoop();
+    }
+    setNeedsUpdate(true);
+  };
+
   const handleUpdateReqEvent = (e: Events['preview:requestUpdate']) => {
     if (e.layerId === props.layer.id) {
-      updatePreview();
+      requestUpdate();
     }
   };
 
+  const handleCanvasSizeChanged = () => {
+    requestUpdate();
+  };
+
   onMount(() => {
-    updatePreview();
+    performUpdate();
     eventBus.on('preview:requestUpdate', handleUpdateReqEvent);
-    eventBus.on('canvas:sizeChanged', updatePreview);
+    eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
   });
 
   onCleanup(() => {
+    stopRenderLoop();
     eventBus.off('preview:requestUpdate', handleUpdateReqEvent);
-    eventBus.off('canvas:sizeChanged', updatePreview);
+    eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
   });
 
-  const updatePreview = () => {
+  const performUpdate = async () => {
+    if (!wrapperRef || !canvasRef || !ctx) return;
+
     const targetHeight = wrapperRef.clientHeight;
     const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
@@ -50,23 +81,37 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const previewWidth = targetWidth * zoom;
     const previewHeight = targetHeight * zoom;
 
-    canvasRef.width = previewWidth;
-    canvasRef.height = previewHeight;
-    canvasRef.style.width = `${targetWidth}px`;
-    canvasRef.style.height = `${targetHeight}px`;
+    // Only resize canvas if dimensions actually changed
+    if (canvasRef.width !== previewWidth || canvasRef.height !== previewHeight) {
+      canvasRef.width = previewWidth;
+      canvasRef.height = previewHeight;
+      canvasRef.style.width = `${targetWidth}px`;
+      canvasRef.style.height = `${targetHeight}px`;
+      lastPreviewWidth = previewWidth;
+      lastPreviewHeight = previewHeight;
+    }
 
     const agent = getAgentOf(props.layer.id);
     if (agent) {
       const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
-      if (preview && ctx) {
+      if (preview) {
         ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.putImageData(preview, 0, 0);
       }
     }
   };
 
+  const transparent_bg_color = '#00000020';
+  const gridSize = () => 8;
+
   return (
-    <div ref={(el) => (wrapperRef = el)}>
+    <div
+      ref={(el) => (wrapperRef = el)}
+      style={{
+        'background-color': vars.color.canvas,
+      }}
+    >
       <canvas
         class='layer-preview-canvas'
         ref={(el) => {
@@ -75,6 +120,11 @@ const LayerPreview: Component<Props> = (props: Props) => {
         }}
         style={{
           'image-rendering': 'auto',
+          'background-image':
+            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
+            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%)`,
+          'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
+          'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
         onClick={(e) => {
           if (props.onClick) props.onClick(e);

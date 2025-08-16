@@ -2,7 +2,7 @@
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { getBaseLayerColor } from '~/models/layer/BaseLayer';
 import { getBlendModeId, Layer } from '~/models/layer/Layer';
-import { layerListStore } from '~/stores/ProjectStores';
+import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 import fragmentSrc from './shaders/blend.frag.glsl';
 import vertexSrc from './shaders/fullscreen.vert.glsl';
@@ -20,13 +20,15 @@ function debugLog(...log: any) {
   }
 }
 
-function checkGLError(gl: WebGL2RenderingContext, operation: string) {
-  if (DEBUG) {
+function checkGLError(gl: WebGL2RenderingContext, operation: string): boolean {
+  if (DEBUG && ENABLE_LOG) {
     const error = gl.getError();
     if (error !== gl.NO_ERROR) {
       console.error(`❌ WebGL Error: ${operation} - ${error}`);
       return false;
     }
+    return true;
+  } else {
     return true;
   }
 }
@@ -123,6 +125,8 @@ export class WebGLRenderer {
     if (width <= 0 || height <= 0) return;
     if (width === this.width && height === this.height) return;
 
+    console.log(`🔄 Resizing canvas from ${this.width}x${this.height} to ${width}x${height}`);
+
     // 前回のメモリ使用量をログ出力
     if (this.currentTextureDepth > 0) {
       const oldMemory = calculate_texture_memory_usage(this.width, this.height, this.currentTextureDepth);
@@ -131,9 +135,70 @@ export class WebGLRenderer {
 
     this.width = width;
     this.height = height;
+
+    // キャンバスのサイズを設定
     this.canvas.width = width;
     this.canvas.height = height;
+
+    // CSSスタイルも明示的に設定（必要に応じて）
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
+
+    // ビューポートを設定
     this.gl.viewport(0, 0, width, height);
+
+    // WebGLの描画バッファサイズを確認
+    const actualWidth = this.gl.drawingBufferWidth;
+    const actualHeight = this.gl.drawingBufferHeight;
+    console.log(`📏 Canvas size set to: ${width}x${height}`);
+    console.log(`📏 WebGL drawing buffer: ${actualWidth}x${actualHeight}`);
+
+    if (actualWidth !== width || actualHeight !== height) {
+      console.warn(`⚠️ WebGL drawing buffer size differs from requested size!`);
+      console.warn(`   Requested: ${width}x${height}`);
+      console.warn(`   Actual: ${actualWidth}x${actualHeight}`);
+
+      // この場合、実際の描画バッファサイズを使用する
+      if (actualWidth > 0 && actualHeight > 0) {
+        console.log(`🔧 Using actual drawing buffer size: ${actualWidth}x${actualHeight}`);
+        this.width = actualWidth;
+        this.height = actualHeight;
+
+        // 重要：すべてのレイヤーバッファもWebGLのサイズに合わせて調整
+        const newSize = { width: actualWidth, height: actualHeight };
+        console.log(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
+
+        allLayers().forEach((layer) => {
+          const agent = getAgentOf(layer.id);
+          if (agent) {
+            try {
+              agent.changeBufferSize(newSize, false); // emitEvent = falseで他のイベントを抑制
+              console.log(`✅ Resized layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
+            } catch (error) {
+              console.error(`❌ Failed to resize layer buffer ${layer.id}:`, error);
+            }
+          }
+        });
+
+        // キャンバスストアも更新（他のコンポーネントとの整合性を保つため）
+        setCanvasStore('canvas', newSize);
+        console.log(`📝 Updated canvas store to: ${actualWidth}x${actualHeight}`);
+
+        // ユーザーに分かりやすい警告メッセージを表示
+        const maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
+        console.warn(`⚠️ ========================= IMPORTANT WARNING =========================`);
+        console.warn(`⚠️ Canvas size has been automatically reduced due to WebGL limitations:`);
+        console.warn(`⚠️   Requested: ${width}x${height}`);
+        console.warn(`⚠️   Actual: ${actualWidth}x${actualHeight}`);
+        console.warn(`⚠️ This limitation is caused by WebGL memory constraint:`);
+        console.warn(`⚠️   • Drawing buffer limited to 1/8 of MAX_TEXTURE_SIZE² (${maxTextureSize}²)`);
+        console.warn(`⚠️   • Theoretical limit: ~5792 pixels per side`);
+        console.warn(`⚠️   • Actual limit: ${actualWidth} pixels (with safety margin)`);
+        console.warn(`⚠️   • Memory usage: ${((actualWidth * actualHeight * 4) / 1024 / 1024).toFixed(2)} MB`);
+        console.warn(`⚠️ All layer buffers have been resized to match WebGL constraints.`);
+        console.warn(`⚠️ ====================================================================`);
+      }
+    }
 
     // // 実際に使用するレイヤー数のみ確保（最小1レイヤー）
     const activeLayers = allLayers().filter((l) => l.enabled);
@@ -180,7 +245,26 @@ export class WebGLRenderer {
       const agent = getAgentOf(layer.id)!;
       const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
 
-      debugLog(`📊 Buffer info: length=${buf.length}, expected=${this.width * this.height * 4}`);
+      // バッファサイズの整合性をチェック
+      const expectedSize = this.width * this.height * 4;
+      const actualSize = buf.length;
+
+      debugLog(`📊 Buffer info: length=${buf.length}, expected=${expectedSize}`);
+
+      if (actualSize !== expectedSize) {
+        console.warn(`⚠️ Buffer size mismatch! Layer ${layer.id}:`);
+        console.warn(`   Expected: ${expectedSize} bytes (${this.width}x${this.height}x4)`);
+        console.warn(`   Actual: ${actualSize} bytes`);
+
+        // バッファサイズから元のサイズを推定
+        const bufferPixels = actualSize / 4;
+        const bufferSide = Math.sqrt(bufferPixels);
+        console.warn(`   Buffer appears to be: ${bufferSide}x${bufferSide}`);
+
+        // バッファサイズが期待値と異なる場合、安全のためフルアップデートをスキップ
+        console.error(`❌ Skipping layer ${i} due to buffer size mismatch`);
+        return;
+      }
 
       const dirtyTiles = agent.getTileManager().getDirtyTiles();
       if (onlyDirty && dirtyTiles.length !== 0) {
@@ -355,21 +439,48 @@ export class WebGLRenderer {
   readPixelsAsBuffer(): Uint8ClampedArray {
     const gl = this.gl;
 
+    console.log(`📖 Reading pixels as buffer: ${this.width}x${this.height}`);
+
     this.render(allLayers(), false); // フルアップデート
+
+    // ビューポートサイズを確認
+    const viewport = gl.getParameter(gl.VIEWPORT);
+    console.log(`📏 Current viewport: [${viewport[0]}, ${viewport[1]}, ${viewport[2]}, ${viewport[3]}]`);
+
+    // フレームバッファのサイズを確認
+    const drawingBufferWidth = gl.drawingBufferWidth;
+    const drawingBufferHeight = gl.drawingBufferHeight;
+    console.log(`🖼️ Drawing buffer size: ${drawingBufferWidth}x${drawingBufferHeight}`);
+
+    if (drawingBufferWidth !== this.width || drawingBufferHeight !== this.height) {
+      console.warn(`⚠️ Drawing buffer size mismatch! Expected: ${this.width}x${this.height}, Actual: ${drawingBufferWidth}x${drawingBufferHeight}`);
+    }
 
     // ① WebGL の描画バッファが現在の描画結果を保持している前提で、
     //    gl.readPixels() ですぐにピクセルデータを取得する。
     //    （※たとえば export ボタンを押した直後に呼べば、次のクリア前の状態を取れる）
     const pixels = new Uint8Array(this.width * this.height * 4);
-    gl.readPixels(
-      0, // x
-      0, // y
-      this.width,
-      this.height,
-      gl.RGBA, // フォーマット
-      gl.UNSIGNED_BYTE,
-      pixels // 読み取り先バッファ
-    );
+
+    try {
+      gl.readPixels(
+        0, // x
+        0, // y
+        this.width,
+        this.height,
+        gl.RGBA, // フォーマット
+        gl.UNSIGNED_BYTE,
+        pixels // 読み取り先バッファ
+      );
+
+      const error = gl.getError();
+      if (error !== gl.NO_ERROR) {
+        console.error(`❌ readPixels failed with error: ${error} (0x${error.toString(16)})`);
+      } else {
+        console.log(`✅ readPixels successful: ${pixels.length} bytes read`);
+      }
+    } catch (e) {
+      console.error('❌ Exception during readPixels:', e);
+    }
 
     return new Uint8ClampedArray(pixels.buffer);
   }
@@ -447,20 +558,61 @@ export class WebGLRenderer {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
 
+    console.log(`🔄 Updating texture array: ${this.width}x${this.height}x${requiredDepth} (was ${oldDepth})`);
+
     checkGLError(gl, `before texImage3D resize to depth ${requiredDepth}`);
 
-    gl.texImage3D(
-      gl.TEXTURE_2D_ARRAY,
-      0, // level
-      gl.RGBA8, // 内部フォーマット（WebGL2）
-      this.width,
-      this.height,
-      this.currentTextureDepth, // 新しいレイヤー数
-      0, // border (must be 0)
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null
-    );
+    // より詳細なエラーチェックを追加
+    const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const maxTextureLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
+
+    if (this.width > maxTextureSize || this.height > maxTextureSize) {
+      console.error(`❌ Texture size (${this.width}x${this.height}) exceeds MAX_TEXTURE_SIZE (${maxTextureSize})`);
+    }
+
+    if (requiredDepth > maxTextureLayers) {
+      console.error(`❌ Required depth (${requiredDepth}) exceeds MAX_ARRAY_TEXTURE_LAYERS (${maxTextureLayers})`);
+    }
+
+    try {
+      gl.texImage3D(
+        gl.TEXTURE_2D_ARRAY,
+        0, // level
+        gl.RGBA8, // 内部フォーマット（WebGL2）
+        this.width,
+        this.height,
+        this.currentTextureDepth, // 新しいレイヤー数
+        0, // border (must be 0)
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null
+      );
+
+      const error = gl.getError();
+      if (error === gl.NO_ERROR) {
+        console.log(`✅ Texture array resize successful: ${this.width}x${this.height}x${requiredDepth}`);
+      } else {
+        console.error(`❌ Texture array resize failed with WebGL error: ${error} (0x${error.toString(16)})`);
+
+        // エラーの詳細分析
+        switch (error) {
+          case gl.INVALID_VALUE:
+            console.error('  → INVALID_VALUE: One or more parameters are invalid');
+            console.error(`    Width: ${this.width}, Height: ${this.height}, Depth: ${this.currentTextureDepth}`);
+            break;
+          case gl.INVALID_OPERATION:
+            console.error('  → INVALID_OPERATION: Operation not allowed in current state');
+            break;
+          case gl.OUT_OF_MEMORY:
+            console.error('  → OUT_OF_MEMORY: Insufficient memory for texture');
+            const estimatedMemory = (this.width * this.height * 4 * this.currentTextureDepth) / 1024 / 1024;
+            console.error(`    Estimated memory needed: ${estimatedMemory.toFixed(2)} MB`);
+            break;
+        }
+      }
+    } catch (e) {
+      console.error('❌ Exception during texture array resize:', e);
+    }
 
     if (!checkGLError(gl, `texImage3D resize to depth ${requiredDepth}, size(${this.width},${this.height})`)) {
       console.error(`Texture array resize failed: depth=${requiredDepth}, size=(${this.width},${this.height})`);
@@ -484,11 +636,139 @@ export class WebGLRenderer {
     // テクスチャ配列の制限をチェック
     const maxTextureLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
     const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const max3DTextureSize = gl.getParameter(gl.MAX_3D_TEXTURE_SIZE);
+    const maxRenderbufferSize = gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);
+    const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
+
     console.log('Max Array Texture Layers:', maxTextureLayers);
     console.log('Max Texture Size:', maxTextureSize);
+    console.log('Max 3D Texture Size:', max3DTextureSize);
+    console.log('Max Renderbuffer Size:', maxRenderbufferSize);
+    console.log('Max Viewport Dimensions:', maxViewportDims);
+
+    // テクスチャメモリの推定チェック
+    const memoryEstimate = (this.width * this.height * 4 * MAX_LAYERS) / 1024 / 1024;
+    console.log(`Estimated texture memory usage: ${memoryEstimate.toFixed(2)} MB`);
 
     if (maxTextureLayers < MAX_LAYERS) {
       console.warn(`⚠️ System supports only ${maxTextureLayers} texture layers, but we need ${MAX_LAYERS}`);
+    }
+
+    // 大きなキャンバスサイズの警告
+    if (this.width > maxTextureSize || this.height > maxTextureSize) {
+      console.error(`❌ Canvas size (${this.width}x${this.height}) exceeds WebGL MAX_TEXTURE_SIZE (${maxTextureSize})`);
+    } else if (this.width > maxTextureSize * 0.8 || this.height > maxTextureSize * 0.8) {
+      console.warn(`⚠️ Canvas size (${this.width}x${this.height}) is approaching WebGL MAX_TEXTURE_SIZE (${maxTextureSize})`);
+    }
+
+    // 現在のキャンバスサイズでのテクスチャ作成テストを実行
+    this.testTextureCreation(gl, this.width, this.height);
+  }
+
+  public getMaxTextureSize(): number {
+    return this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
+  }
+
+  /**
+   * 指定されたサイズでテクスチャの作成が可能かテストする
+   */
+  private testTextureCreation(gl: WebGL2RenderingContext, width: number, height: number): void {
+    if (width === 0 || height === 0) return;
+
+    console.log(`🧪 Testing texture creation for size: ${width}x${height}`);
+
+    // WebGLの制限値を詳細に調査
+    const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const maxRenderbufferSize = gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);
+    const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
+    const maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+    const maxFragmentUniformVectors = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
+    const maxVertexUniformVectors = gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS);
+
+    console.log(`🔍 Detailed WebGL limits analysis:`);
+    console.log(`   MAX_TEXTURE_SIZE: ${maxTextureSize}`);
+    console.log(`   MAX_RENDERBUFFER_SIZE: ${maxRenderbufferSize}`);
+    console.log(`   MAX_VIEWPORT_DIMS: [${maxViewportDims[0]}, ${maxViewportDims[1]}]`);
+    console.log(`   MAX_TEXTURE_IMAGE_UNITS: ${maxTextureImageUnits}`);
+    console.log(`   MAX_FRAGMENT_UNIFORM_VECTORS: ${maxFragmentUniformVectors}`);
+    console.log(`   MAX_VERTEX_UNIFORM_VECTORS: ${maxVertexUniformVectors}`);
+
+    // メモリ関連の推定
+    const estimatedMemory = (width * height * 4) / 1024 / 1024;
+    console.log(`💾 Estimated memory for ${width}x${height} RGBA texture: ${estimatedMemory.toFixed(2)} MB`);
+
+    // 5759という数値の謎を解明するための計算
+    // 発見: 5759 ≈ sqrt(MAX_TEXTURE_SIZE² / 8) - 安全マージン
+    // MAX_TEXTURE_SIZE² / 8 = 16384² / 8 = 33,554,432 pixels
+    // sqrt(33,554,432) ≈ 5792.62 pixels per side
+    // 実際の制限 5759 = 理論値 5792 - 安全マージン 33 pixels
+    // これはWebGLが最大テクスチャメモリの1/8を描画バッファに割り当てているため
+    const ratio5759 = 5759 / maxTextureSize;
+    const sqrt5759 = Math.sqrt(5759);
+    const pow2Near5759 = Math.pow(2, Math.floor(Math.log2(5759)));
+    const theoreticalLimit = Math.sqrt((maxTextureSize * maxTextureSize) / 8);
+    const safetyMargin = theoreticalLimit - 5759;
+
+    console.log(`🔍 Analysis of 5759 limit (MEMORY CONSTRAINT DISCOVERED):`);
+    console.log(`   5759 / MAX_TEXTURE_SIZE(${maxTextureSize}) = ${ratio5759.toFixed(4)}`);
+    console.log(`   sqrt(5759) = ${sqrt5759.toFixed(2)}`);
+    console.log(`   nearest power of 2 = ${pow2Near5759}`);
+    console.log(`   5759^2 = ${(5759 * 5759).toLocaleString()} pixels`);
+    console.log(`   5759^2 * 4 bytes = ${((5759 * 5759 * 4) / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`   🔍 THEORY: sqrt(MAX_TEXTURE_SIZE² / 8) = ${theoreticalLimit.toFixed(2)}`);
+    console.log(`   🔍 SAFETY MARGIN: ${theoreticalLimit.toFixed(2)} - 5759 = ${safetyMargin.toFixed(2)} pixels`);
+    console.log(`   🔍 CONCLUSION: WebGL limits drawing buffer to 1/8 of max texture memory + safety margin`);
+
+    // テスト用の一時的なテクスチャを作成
+    const testTexture = gl.createTexture();
+    if (!testTexture) {
+      console.error('❌ Failed to create test texture');
+      return;
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, testTexture);
+
+    // 最初にsmallなサイズで試してみる
+    try {
+      gl.texImage3D(
+        gl.TEXTURE_2D_ARRAY,
+        0, // level
+        gl.RGBA8,
+        width,
+        height,
+        1, // 1レイヤーで試す
+        0, // border
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null
+      );
+
+      const error = gl.getError();
+      if (error === gl.NO_ERROR) {
+        console.log(`✅ Test texture creation successful for ${width}x${height}`);
+      } else {
+        console.error(`❌ Test texture creation failed with error: ${error} (0x${error.toString(16)})`);
+
+        // エラーコードの詳細説明
+        switch (error) {
+          case gl.INVALID_VALUE:
+            console.error('  → INVALID_VALUE: Width, height, or depth parameters are invalid');
+            break;
+          case gl.INVALID_OPERATION:
+            console.error('  → INVALID_OPERATION: Operation is not allowed in current state');
+            break;
+          case gl.OUT_OF_MEMORY:
+            console.error('  → OUT_OF_MEMORY: Not enough memory available');
+            break;
+          default:
+            console.error(`  → Unknown error code: ${error}`);
+        }
+      }
+    } catch (e) {
+      console.error('❌ Exception during test texture creation:', e);
+    } finally {
+      // テスト用テクスチャを削除
+      gl.deleteTexture(testTexture);
     }
   }
 }

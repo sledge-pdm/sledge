@@ -3,6 +3,7 @@ import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { RGBAColor } from '~/utils/ColorUtils';
 
 export interface ToolResult {
+  result?: string;
   shouldUpdate: boolean;
   shouldRegisterToHistory: boolean;
   shouldReturnToPrevTool?: boolean;

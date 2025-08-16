@@ -2,6 +2,7 @@
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
+import { getNormalBottomBarText } from '~/controllers/log/LogController';
 import { PaletteType } from '~/models/color/PaletteType';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
@@ -88,8 +89,10 @@ const defaultInteractStore: InteractStore = {
   isPenOut: false,
   isInStroke: false,
   zoom: 1,
-  zoomMin: 0.5,
-  zoomMax: 8,
+  // zoomMin: 0.5,
+  zoomMin: 0.01,
+  // zoomMax: 8,
+  zoomMax: 100,
   touchZoomSensitivity: 0.5,
   wheelZoomStep: 0.05,
   // オフセットの初期値
@@ -101,7 +104,7 @@ const defaultInteractStore: InteractStore = {
   isDragging: false,
 };
 const defaultLogStore: LogStore = {
-  bottomBarText: '',
+  bottomBarText: getNormalBottomBarText(true),
 };
 const defaultToolStore: ToolStore = {
   tools: toolCategories,

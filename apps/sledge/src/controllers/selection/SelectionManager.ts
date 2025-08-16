@@ -119,17 +119,17 @@ class SelectionManager {
    * @param pos チェックする位置
    * @returns 描画可能な場合true、制限により描画不可の場合false
    */
-  isDrawingAllowed(pos: Vec2): boolean {
+  isDrawingAllowed(pos: Vec2, checkState?: boolean): boolean {
     const limitMode = toolStore.selectionLimitMode;
-
-    if (limitMode === 'none') {
-      // 制限なし：常に描画可能
-      return true;
-    }
-
-    if (!this.isSelected()) {
-      // 選択範囲がない場合：制限なしとして扱う
-      return true;
+    if (checkState) {
+      if (limitMode === 'none') {
+        // 制限なし：常に描画可能
+        return true;
+      }
+      if (!this.isSelected()) {
+        // 選択範囲がない場合：制限なしとして扱う
+        return true;
+      }
     }
 
     const isInSelection = this.isMaskOverlap(pos, true);

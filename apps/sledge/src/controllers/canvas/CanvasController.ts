@@ -1,6 +1,9 @@
 import { Size2D } from '@sledge/core';
+import { message } from '@tauri-apps/plugin-dialog';
+import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { Consts } from '~/models/Consts';
+import { Layer } from '~/models/layer/Layer';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -9,13 +12,53 @@ import { getAgentOf } from '../layer/LayerAgentManager';
 export function isValidCanvasSize(size: Size2D): boolean {
   if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;
   if (size.height < Consts.minCanvasHeight || Consts.maxCanvasHeight < size.height) return false;
+
+  const maxTextureSize = webGLRenderer?.getMaxTextureSize();
+  if (maxTextureSize) {
+    // WebGL制限の計算: 描画バッファは最大テクスチャサイズの1/8に制限される
+    // 理論上限: sqrt(maxTextureSize² / 8) ≈ 5792 pixels per side (for 16384 max texture size)
+    // 実際の制限: 理論上限 - 安全マージン ≈ 5759 pixels per side
+    const theoreticalMaxSideLength = Math.sqrt((maxTextureSize * maxTextureSize) / 8);
+    const safeSideLength = theoreticalMaxSideLength - Consts.webGLTextureSizeLimitMargin;
+    const bufferSizeLimit = safeSideLength * safeSideLength * 4; // width * height * 4 bytes (RGBA)
+
+    console.log(`WebGL limit analysis:`);
+    console.log(`  MAX_TEXTURE_SIZE: ${maxTextureSize}`);
+    console.log(`  Theoretical max side: ${theoreticalMaxSideLength.toFixed(2)} pixels`);
+    console.log(`  Safe side length: ${safeSideLength.toFixed(2)} pixels`);
+    console.log(`  Buffer size limit: ${(bufferSizeLimit / 1024 / 1024).toFixed(2)} MB`);
+
+    const requestedBufferSize = size.width * size.height * 4; // RGBA bytes
+
+    if (requestedBufferSize > bufferSizeLimit) {
+      const maxSidePixels = Math.floor(safeSideLength);
+      message(
+        `Canvas size exceeds WebGL limitations.
+
+Requested: ${size.width}×${size.height} (${(requestedBufferSize / 1024 / 1024).toFixed(2)} MB)
+Maximum: ${maxSidePixels}×${maxSidePixels} (${(bufferSizeLimit / 1024 / 1024).toFixed(2)} MB)
+
+This limitation is caused by WebGL drawing buffer memory constraints:
+• Drawing buffer limited to 1/8 of MAX_TEXTURE_SIZE²
+• Your GPU's MAX_TEXTURE_SIZE: ${maxTextureSize}
+
+For larger canvases, consider using multiple smaller images or wait for tiled rendering support.`,
+        {
+          kind: 'warning',
+          title: 'Canvas Size Limitation',
+        }
+      );
+      return false;
+    }
+  }
+
   return true;
 }
 
 export function changeCanvasSize(newSize: Size2D): boolean {
   if (!isValidCanvasSize(newSize)) return false;
 
-  allLayers().forEach((layer) => {
+  allLayers().forEach((layer: Layer) => {
     const agent = getAgentOf(layer.id);
     agent?.changeBufferSize(newSize, false);
   });
@@ -85,10 +128,13 @@ export const centeringCanvas = () => {
   eventBus.emit('canvas:onAdjusted', {});
 };
 
-export const setZoom = (zoom: number) => {
-  zoom = Math.round(zoom * 100) / 100;
-  if (zoom <= 0) return;
-  if (zoom !== interactStore.zoom) setInteractStore('zoom', zoom);
+export const setZoom = (zoom: number): boolean => {
+  zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
+  if (zoom > 0 && zoom !== interactStore.zoom) {
+    setInteractStore('zoom', zoom);
+    return true;
+  }
+  return false;
 };
 
 export const setOffset = (offset: { x: number; y: number }) => {

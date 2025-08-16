@@ -5,7 +5,7 @@ import { Consts } from '~/models/Consts';
 export async function resetToDefaultConfig() {
   try {
     const defaultConfig = getDefaultSettings();
-    await writeTextFile(Consts.globalConfigFileName, JSON.stringify(defaultConfig), {
+    await writeTextFile(Consts.globalConfigFileName, JSON.stringify(defaultConfig, null, 2), {
       baseDir: BaseDirectory.AppConfig,
     });
 

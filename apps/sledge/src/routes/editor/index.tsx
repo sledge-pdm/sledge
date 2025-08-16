@@ -66,7 +66,6 @@ export default function Editor() {
     adjustZoomToFit();
 
     await showMainWindow();
-    console.log(await appDataDir());
   };
 
   // const preloadedProject = readProjectDataFromWindow();

@@ -1,7 +1,7 @@
 import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { accentedButton, vars } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
-import { confirm } from '@tauri-apps/plugin-dialog';
+import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { resetToDefaultConfig } from '~/io/config/reset';
 import { saveGlobalSettings } from '~/io/config/save';
@@ -20,6 +20,7 @@ import {
   configFormInfoAreaTop,
   configFormLoadDefaults,
   configFormRoot,
+  configFormScrollContent,
   configFormSectionItem,
   configFormSectionLabel,
   configFormSections,
@@ -103,7 +104,7 @@ const ConfigForm: Component<Props> = (props) => {
   let originalConfig: GlobalConfig | undefined;
 
   const manualSave = async () => {
-    await saveGlobalSettings();
+    await saveGlobalSettings(true);
     setIsSaved(true);
     setIsDirty(false);
   };
@@ -118,7 +119,8 @@ const ConfigForm: Component<Props> = (props) => {
 
     if (confirmed) {
       resetToDefaultConfig();
-      location.reload();
+      // location.reload();
+      message('reset succeeded.');
     }
   };
 
@@ -159,46 +161,48 @@ const ConfigForm: Component<Props> = (props) => {
         </For>
       </div>
       <div class={configFormFields}>
-        <Show when={currentSection() !== undefined}>
-          <p class={configFormFieldHeader}>{currentSection().toUpperCase()}.</p>
-          <Show when={currentSection() === Sections.KeyConfig}>
-            <KeyConfigSettings />
-          </Show>
-          <Show when={currentSection() !== Sections.KeyConfig}>
-            <For each={grouped().get(currentSection())}>
-              {(meta) => {
-                const componentProp = componentProps.get(meta.component);
-                const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
-                const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'right';
-                return (
-                  <div class={configFormFieldItem}>
-                    <div class={flexRow}>
-                      <p class={configFormFieldLabel}>{meta.label}</p>
-                      <Show when={meta.tips !== undefined}>
-                        <p class={configFormFieldLabelTooltip} title={meta.tips ?? undefined}>
-                          ?
-                        </p>
-                      </Show>
+        <div class={configFormScrollContent}>
+          <Show when={currentSection() !== undefined}>
+            <p class={configFormFieldHeader}>{currentSection().toUpperCase()}.</p>
+            <Show when={currentSection() === Sections.KeyConfig}>
+              <KeyConfigSettings />
+            </Show>
+            <Show when={currentSection() !== Sections.KeyConfig}>
+              <For each={grouped().get(currentSection())}>
+                {(meta) => {
+                  const componentProp = componentProps.get(meta.component);
+                  const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
+                  const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'right';
+                  return (
+                    <div class={configFormFieldItem}>
+                      <div class={flexRow}>
+                        <p class={configFormFieldLabel}>{meta.label}</p>
+                        <Show when={meta.tips !== undefined}>
+                          <p class={configFormFieldLabelTooltip} title={meta.tips ?? undefined}>
+                            ?
+                          </p>
+                        </Show>
+                      </div>
+                      <div class={configFormFieldControlWrapper}>
+                        <Show when={shouldShowLeftLabel}>
+                          <label for={meta.path.toString()} class={configFormFieldControlLabel}>
+                            {getParsedValueFromMetaPath(meta)}.
+                          </label>
+                        </Show>
+                        <FieldRenderer meta={meta} onChange={(v) => onFieldChange(meta, v)}></FieldRenderer>
+                        <Show when={shouldShowRightLabel}>
+                          <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': vars.spacing.sm }}>
+                            {getParsedValueFromMetaPath(meta)}.
+                          </label>
+                        </Show>
+                      </div>
                     </div>
-                    <div class={configFormFieldControlWrapper}>
-                      <Show when={shouldShowLeftLabel}>
-                        <label for={meta.path.toString()} class={configFormFieldControlLabel}>
-                          {getParsedValueFromMetaPath(meta)}.
-                        </label>
-                      </Show>
-                      <FieldRenderer meta={meta} onChange={(v) => onFieldChange(meta, v)}></FieldRenderer>
-                      <Show when={shouldShowRightLabel}>
-                        <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': vars.spacing.sm }}>
-                          {getParsedValueFromMetaPath(meta)}.
-                        </label>
-                      </Show>
-                    </div>
-                  </div>
-                );
-              }}
-            </For>
+                  );
+                }}
+              </For>
+            </Show>
           </Show>
-        </Show>
+        </div>
       </div>
 
       <div class={configFormInfoAreaTop}>

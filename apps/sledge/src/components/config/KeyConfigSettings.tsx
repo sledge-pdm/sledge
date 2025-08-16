@@ -1,5 +1,6 @@
 import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
+import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import {
   isRecordEndWithoutSave as isRecordAbortKey,
@@ -63,11 +64,11 @@ const KeyConfigSettings: Component = () => {
           <span style={{ color: vars.color.accent }}>enter</span> to confirm.&nbsp;
           <span style={{ color: vars.color.accent }}>esc</span> to abort.
         </p>
-        <For each={Object.entries(keyConfigStore)}>
-          {([name, entry]) => {
-            const isRecording = () => name === recordingName();
-            return (
-              <div class={flexCol}>
+        <div class={flexCol} style={{ gap: '4px', width: '100%' }}>
+          <For each={Object.entries(keyConfigStore)}>
+            {([name, entry]) => {
+              const isRecording = () => name === recordingName();
+              return (
                 <div class={keyConfigRow}>
                   <p class={keyConfigName}>{name}</p>
                   <a
@@ -80,26 +81,31 @@ const KeyConfigSettings: Component = () => {
                       'pointer-events': isRecording() ? 'none' : 'all',
                     }}
                   >
-                    {name === recordingName() ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'press any keys'}]` : parseKeyConfigEntry(entry[0])}
+                    {name === recordingName()
+                      ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'press any keys'}]`
+                      : parseKeyConfigEntry((entry as KeyConfigEntry[])[0])}
                   </a>
                 </div>
-                <div
-                  style={{
-                    height: '1px',
-                    'background-color': vars.color.border,
-                    'margin-right': vars.spacing.xl,
-                  }}
-                />
-              </div>
-            );
-          }}
-        </For>
+              );
+            }}
+          </For>
+        </div>
 
         <button
           style={{ 'margin-top': '24px' }}
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
-            restoreDefaultKeyConfig();
+            const confirmed = await confirm('sure to restore default key config?', {
+              kind: 'warning',
+              okLabel: 'restore defaults.',
+              cancelLabel: 'cancel.',
+              title: 'confirmation',
+            });
+
+            if (confirmed) {
+              restoreDefaultKeyConfig();
+              message('restore succeeded.');
+            }
           }}
         >
           restore default.

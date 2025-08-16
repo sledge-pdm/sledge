@@ -1,6 +1,7 @@
 import { createStore } from 'solid-js/store';
 import { ExportSettings } from '~/components/dialogs/ExportDialog';
-import { defaultConfig, GlobalConfig } from '~/models/config/GlobalConfig';
+import { getDefaultSettings } from '~/io/config/set';
+import { GlobalConfig } from '~/models/config/GlobalConfig';
 import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { KeyConfigCommands } from '~/models/Consts';
 
@@ -38,9 +39,10 @@ export const defaultLastSettingsStore: LastSettingsStore = {
   },
 };
 export const initGlobalStore = () => {
-  const [globalConfigStore, setGlobalConfigStore] = createStore(defaultConfig);
-  const [keyConfigStore, setKeyConfigStore] = createStore(makeDefaultKeyConfigStore());
-  const [lastSettingsStore, setLastSettingsStore] = createStore(defaultLastSettingsStore);
+  const defaultSettings = getDefaultSettings();
+  const [globalConfigStore, setGlobalConfigStore] = createStore(defaultSettings.globalConfigStore);
+  const [keyConfigStore, setKeyConfigStore] = createStore(defaultSettings.keyConfigStore);
+  const [lastSettingsStore, setLastSettingsStore] = createStore(defaultSettings.lastSettingsStore);
 
   return { globalConfigStore, setGlobalConfigStore, keyConfigStore, setKeyConfigStore, lastSettingsStore, setLastSettingsStore };
 };

@@ -1,5 +1,6 @@
 import { FileLocation } from '@sledge/core';
 import { saveGlobalSettings } from '~/io/config/save';
+import { GlobalConfig } from '~/models/config/GlobalConfig';
 import { setGlobalConfig } from '~/stores/GlobalStores';
 
 export const setRecentFile = (fileLocations: FileLocation[]) => {
@@ -12,7 +13,7 @@ export const addRecentFile = (fileLocation?: FileLocation) => {
   const name = fileLocation.name;
 
   // add to recent
-  setGlobalConfig((store) => {
+  setGlobalConfig((store: GlobalConfig) => {
     if (name && path && store.misc.recentFiles) {
       const oldRecentFiles = store.misc.recentFiles.filter((f) => {
         return f.name !== name || f.path !== path?.toString();
@@ -26,7 +27,7 @@ export const addRecentFile = (fileLocation?: FileLocation) => {
         ...oldRecentFiles,
       ];
       setGlobalConfig('misc', 'recentFiles', newRecentFiles);
-      saveGlobalSettings();
+      saveGlobalSettings(true);
     }
     return store;
   });

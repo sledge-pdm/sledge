@@ -4,19 +4,19 @@ import { Consts } from '~/models/Consts';
 import { getGlobalRootStore } from '~/stores/GlobalStores';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
 
-export async function saveGlobalSettings() {
+export async function saveGlobalSettings(triggerGlobalEvent: boolean) {
   try {
     const config = getGlobalRootStore();
     const fbConfig = getFallbackedSettings(config);
     if (!exists('', { baseDir: BaseDirectory.AppConfig })) {
       await mkdir('', { baseDir: BaseDirectory.AppConfig });
     }
-    const configData = await writeTextFile(Consts.globalConfigFileName, JSON.stringify(fbConfig, null, 2), {
+    await writeTextFile(Consts.globalConfigFileName, JSON.stringify(fbConfig, null, 2), {
       baseDir: BaseDirectory.AppConfig,
       create: true,
     });
-    await emitGlobalEvent('onSettingsSaved', { config: configData });
-    console.log('global settings saved:', configData);
+    if (triggerGlobalEvent) await emitGlobalEvent('onSettingsSaved', { config: fbConfig });
+    console.log('global settings saved:', fbConfig);
   } catch (e) {
     console.error('global settings save failed.', e);
     throw e;

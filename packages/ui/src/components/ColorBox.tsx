@@ -8,7 +8,7 @@ interface ColorBoxProps {
   color: string;
   forceBorderColor?: string;
   onClick?: (color: string) => void;
-  currentColor: Accessor<string>;
+  currentColor?: Accessor<string>;
 }
 
 const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {

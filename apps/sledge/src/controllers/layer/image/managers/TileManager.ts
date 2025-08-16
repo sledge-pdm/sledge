@@ -3,9 +3,7 @@ import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import Tile, { TileIndex } from './Tile';
 
 export default class TileManager {
-  readonly TILE_SIZE_SMALL = 16;
-  readonly TILE_SIZE_LARGE = 16;
-  TILE_SIZE = this.TILE_SIZE_SMALL;
+  readonly TILE_SIZE = 32;
 
   public tiles: Tile[][] = [];
 
@@ -30,8 +28,6 @@ export default class TileManager {
   }
 
   initTile() {
-    this.TILE_SIZE = this.width * this.height < 1024 * 1024 ? this.TILE_SIZE_SMALL : this.TILE_SIZE_LARGE;
-
     this.tiles = [];
     const tileRowCount = Math.ceil(this.height / this.TILE_SIZE);
     const tileColumnCount = Math.ceil(this.width / this.TILE_SIZE);

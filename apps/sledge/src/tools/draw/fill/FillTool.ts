@@ -20,6 +20,8 @@ export class FillTool implements ToolBehavior {
   onlyOnCanvas = true;
 
   onStart(agent: LayerImageAgent, { position, color }: ToolArgs) {
+    const startTime = Date.now();
+
     // 描画制限チェック
     if (!selectionManager.isDrawingAllowed(position, true)) {
       return {
@@ -34,12 +36,16 @@ export class FillTool implements ToolBehavior {
       // 制限なしの場合はWASM FloodFill
       const fill = new WasmFloodFill();
       fill.fill({ agent, color, position });
+      agent.getTileManager().setAllDirty();
     } else {
       // 選択範囲制限がある場合
       this.fillWithSelectionConstraint(agent, color, position);
     }
 
+    const endTime = Date.now();
+
     return {
+      result: `Flood Fill done. (in ${endTime - startTime} ms)`,
       shouldUpdate: true,
       shouldRegisterToHistory: true,
     };

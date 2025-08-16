@@ -39,20 +39,30 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
     <div
       class={flexRow}
       style={{
-        padding: vars.spacing.sm,
+        padding: `${vars.spacing.sm} ${vars.spacing.md}`,
         'background-color': vars.color.surface,
         'align-items': 'center',
-        gap: vars.spacing.sm,
       }}
     >
-      <p style={{ 'font-size': vars.text.sm, color: vars.color.onBackground, height: 'fit-content' }}>Base Layer</p>
+      <p
+        style={{
+          'flex-grow': 1,
+          width: '100%',
+          'font-size': vars.text.sm,
+          color: vars.color.onBackground,
+          height: 'fit-content',
+          'white-space': 'nowrap',
+        }}
+      >
+        Base Layer
+      </p>
 
-      <div class={flexRow} style={{ width: '100px', 'align-items': 'center' }}>
-        <Dropdown value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} />
+      <div class={flexRow}>
+        <Dropdown value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} wheelSpin={false} />
       </div>
 
       {baseLayer().colorMode === 'custom' && (
-        <>
+        <div class={flexRow} style={{ 'margin-left': '8px' }}>
           <ColorBox color={customColor()} currentColor={undefined} onClick={() => colorInput?.click()} sizePx={14} />
           <input
             ref={(ref) => (colorInput = ref)}
@@ -65,10 +75,9 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
               height: '0px',
               border: 'none',
               cursor: 'pointer',
-              'margin-left': '16px',
             }}
           />
-        </>
+        </div>
       )}
     </div>
   );

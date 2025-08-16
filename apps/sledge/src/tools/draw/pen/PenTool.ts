@@ -9,8 +9,10 @@ import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
+  startTime: number | undefined = undefined;
+
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    // return false;
+    this.startTime = Date.now();
     return this.draw(agent, args, args.color);
   }
 
@@ -57,7 +59,7 @@ export class PenTool implements ToolBehavior {
       });
     }
     return {
-      shouldUpdate: dm.getCurrent().diffs.size > 0 ? true : false,
+      shouldUpdate: true,
       shouldRegisterToHistory: false,
     };
   }
@@ -65,8 +67,11 @@ export class PenTool implements ToolBehavior {
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
     // 描画完了時にバッチを強制処理
     agent.getDiffManager().flush();
+    const totalPx = agent.getDiffManager().getCurrent().diffs.size;
+    const resultText = `${this.categoryId} stroke done. (${this.startTime ? `${Date.now() - this.startTime}ms /` : ''} ${totalPx}px updated)`;
     return {
-      shouldUpdate: false,
+      result: resultText,
+      shouldUpdate: true,
       shouldRegisterToHistory: true,
     };
   }

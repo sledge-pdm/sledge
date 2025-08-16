@@ -1,3 +1,4 @@
+import { vars } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
@@ -29,7 +30,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
         performUpdate();
         setNeedsUpdate(false);
       }
-    }, 1)
+    }, 2)
   );
 
   // Cache last computed dimensions to avoid unnecessary canvas resizing
@@ -37,10 +38,10 @@ const LayerPreview: Component<Props> = (props: Props) => {
   let lastPreviewHeight = 0;
 
   const requestUpdate = () => {
-    setNeedsUpdate(true);
     if (!isRunning()) {
       startRenderLoop();
     }
+    setNeedsUpdate(true);
   };
 
   const handleUpdateReqEvent = (e: Events['preview:requestUpdate']) => {
@@ -54,7 +55,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
   };
 
   onMount(() => {
-    requestUpdate();
+    performUpdate();
     eventBus.on('preview:requestUpdate', handleUpdateReqEvent);
     eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
   });
@@ -95,13 +96,22 @@ const LayerPreview: Component<Props> = (props: Props) => {
       const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
       if (preview) {
         ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.putImageData(preview, 0, 0);
       }
     }
   };
 
+  const transparent_bg_color = '#00000020';
+  const gridSize = () => 8;
+
   return (
-    <div ref={(el) => (wrapperRef = el)}>
+    <div
+      ref={(el) => (wrapperRef = el)}
+      style={{
+        'background-color': vars.color.canvas,
+      }}
+    >
       <canvas
         class='layer-preview-canvas'
         ref={(el) => {
@@ -110,6 +120,11 @@ const LayerPreview: Component<Props> = (props: Props) => {
         }}
         style={{
           'image-rendering': 'auto',
+          'background-image':
+            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
+            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%)`,
+          'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
+          'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
         onClick={(e) => {
           if (props.onClick) props.onClick(e);

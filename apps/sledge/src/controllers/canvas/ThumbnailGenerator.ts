@@ -18,7 +18,7 @@ export class ThumbnailGenerator {
   private tmp: OffscreenCanvas;
   private offCtx: OffscreenCanvasRenderingContext2D;
   private tmpCtx: OffscreenCanvasRenderingContext2D;
-  
+
   // Cache for avoiding unnecessary resizing
   private lastOffWidth = 0;
   private lastOffHeight = 0;
@@ -35,7 +35,7 @@ export class ThumbnailGenerator {
   generateLayerThumbnail(agent: LayerImageAgent, width: number, height: number): ImageData {
     const w = agent.getWidth();
     const h = agent.getHeight();
-    
+
     // Only resize canvases if dimensions actually changed
     if (this.lastOffWidth !== width || this.lastOffHeight !== height) {
       this.off.width = width;
@@ -43,7 +43,7 @@ export class ThumbnailGenerator {
       this.lastOffWidth = width;
       this.lastOffHeight = height;
     }
-    
+
     if (this.lastTmpWidth !== w || this.lastTmpHeight !== h) {
       this.tmp.width = w;
       this.tmp.height = h;
@@ -55,7 +55,7 @@ export class ThumbnailGenerator {
     if (this.lastOffWidth === width && this.lastOffHeight === height) {
       this.offCtx.clearRect(0, 0, width, height);
     }
-    
+
     // Keep slice() for now to avoid type issues, but optimize canvas resizing
     const imgData = new ImageData(agent.getBuffer().slice(), w, h);
     this.tmpCtx.putImageData(imgData, 0, 0);

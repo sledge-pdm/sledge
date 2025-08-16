@@ -27,7 +27,7 @@ export default class LayerCanvasOperator {
     const layer = findLayerById(this.getLayerIdToDraw());
     if (!layer) return;
 
-    position = this.getMagnificatedPosition(position, layer.dotMagnification);
+    if (position) position = this.getMagnificatedPosition(position, layer.dotMagnification);
     if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
 
     if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
@@ -50,7 +50,14 @@ export default class LayerCanvasOperator {
     }
   }
 
-  private useTool(agent: LayerImageAgent, state: DrawState, originalEvent: PointerEvent, tool: ToolCategory, position: Vec2, last?: Vec2) {
+  private useTool(
+    agent: LayerImageAgent,
+    state: DrawState,
+    originalEvent: PointerEvent | undefined,
+    tool: ToolCategory,
+    position: Vec2,
+    last?: Vec2
+  ) {
     const toolArgs: ToolArgs = {
       position,
       lastPosition: last,
@@ -69,6 +76,9 @@ export default class LayerCanvasOperator {
         break;
       case DrawState.end:
         result = tool.behavior.onEnd(agent, toolArgs);
+        break;
+      case DrawState.cancel:
+        result = tool.behavior.onCancel?.(agent, toolArgs);
         break;
     }
     const endTime = Date.now();

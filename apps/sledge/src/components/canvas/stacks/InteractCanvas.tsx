@@ -1,4 +1,5 @@
 import { Vec2 } from '@sledge/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
@@ -142,13 +143,23 @@ export const InteractCanvas: Component<Props> = (props) => {
     setTemporaryOut(false);
   }
 
-  onMount(() => {
+  onMount(async () => {
     canvasRef!.addEventListener('pointerdown', handlePointerDown);
     canvasRef!.addEventListener('pointerout', handlePointerOut);
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointercancel', handlePointerCancel);
     window.addEventListener('wheel', handleWheel);
+
+    const unlistenFocusChanged = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+      if (!focused) {
+        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointerup'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
+      }
+    });
+
+    return () => {
+      unlistenFocusChanged();
+    };
   });
 
   onCleanup(() => {

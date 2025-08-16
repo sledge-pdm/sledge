@@ -12,9 +12,10 @@ import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/
 const MAX_LAYERS = 16;
 
 const DEBUG = import.meta.env.DEV;
+const ENABLE_LOG = false;
 
 function debugLog(...log: any) {
-  if (DEBUG) {
+  if (DEBUG && ENABLE_LOG) {
     console.log(...log);
   }
 }

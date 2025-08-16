@@ -42,4 +42,12 @@ export class PipetteTool implements ToolBehavior {
       shouldReturnToPrevTool: false,
     };
   }
+
+  onCancel(agent: LayerImageAgent, args: ToolArgs) {
+    return {
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
+      shouldReturnToPrevTool: true,
+    };
+  }
 }

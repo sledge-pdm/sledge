@@ -34,7 +34,7 @@ export function isRecordPossible(e: KeyboardEvent): boolean {
 
 export const parseKeyConfigEntry = (entry?: KeyConfigEntry) => {
   if (!entry) return undefined;
-  return [entry.ctrl ? 'ctrl' : '', entry.shift ? 'shift' : '', entry.alt ? 'alt' : '', entry.meta ? 'meta' : '', entry.key]
+  return [entry.ctrl ? 'ctrl' : '', entry.shift ? 'shift' : '', entry.alt ? 'alt' : '', entry.meta ? 'meta' : '', entry.key ?? '']
     .filter((t) => t !== '')
     .join('+');
 };

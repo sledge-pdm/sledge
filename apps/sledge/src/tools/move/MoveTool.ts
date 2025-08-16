@@ -15,6 +15,13 @@ export class MoveTool implements ToolBehavior {
   private startOffset: Vec2 = { x: 0, y: 0 };
   private startPosition: Vec2 = { x: 0, y: 0 };
 
+  // パフォーマンス最適化のためのプロパティ
+  private previewAnimationId: number | null = null;
+  private lastPreviewOffset: Vec2 = { x: 0, y: 0 };
+  private pendingOffset: Vec2 | null = null;
+  private lastPreviewTime: number = 0;
+  private readonly PREVIEW_THROTTLE_MS = 16; // 約60FPS
+
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     const isLayerMove = selectionManager.getState() === 'move_layer' || !selectionManager.isSelected();
     if (isLayerMove) {
@@ -33,6 +40,15 @@ export class MoveTool implements ToolBehavior {
       // sequential move
     }
 
+    // プレビュー状態をリセット
+    this.lastPreviewOffset = { x: 0, y: 0 };
+    this.pendingOffset = null;
+    this.lastPreviewTime = 0;
+    if (this.previewAnimationId) {
+      cancelAnimationFrame(this.previewAnimationId);
+      this.previewAnimationId = null;
+    }
+
     selectionManager.setState(isLayerMove ? 'move_layer' : 'move_selection');
 
     return {
@@ -47,6 +63,7 @@ export class MoveTool implements ToolBehavior {
         shouldUpdate: false,
         shouldRegisterToHistory: false,
       };
+
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
     const offset = selectionManager.getMoveOffset();
@@ -56,8 +73,54 @@ export class MoveTool implements ToolBehavior {
         shouldUpdate: false,
         shouldRegisterToHistory: false,
       };
+
+    // オフセットの更新とイベント発火は即座に行う（UIの反応性を保つ）
     selectionManager.setMoveOffset({ x: dx, y: dy });
     eventBus.emit('selection:moved', { newOffset: selectionManager.getMoveOffset() });
+
+    // プレビューの更新はスロットリングして行う
+    this.schedulePreviewUpdate(agent, dx, dy);
+
+    return {
+      shouldUpdate: false, // プレビュー更新は非同期で行うため、ここではfalse
+      shouldRegisterToHistory: false,
+    };
+  }
+
+  private schedulePreviewUpdate(agent: LayerImageAgent, dx: number, dy: number) {
+    this.pendingOffset = { x: dx, y: dy };
+
+    // 既にアニメーションフレームがスケジュールされている場合はスキップ
+    if (this.previewAnimationId) {
+      return;
+    }
+
+    this.previewAnimationId = requestAnimationFrame(() => {
+      this.executePreviewUpdate(agent);
+      this.previewAnimationId = null;
+    });
+  }
+
+  private executePreviewUpdate(agent: LayerImageAgent) {
+    if (!this.pendingOffset) return;
+
+    const { x: dx, y: dy } = this.pendingOffset;
+
+    // 同じオフセットでの重複計算を避ける
+    if (dx === this.lastPreviewOffset.x && dy === this.lastPreviewOffset.y) {
+      this.pendingOffset = null;
+      return;
+    }
+
+    // スロットリング: 最後のプレビューから最小時間が経過していない場合は再スケジュール
+    const now = performance.now();
+    if (now - this.lastPreviewTime < this.PREVIEW_THROTTLE_MS) {
+      this.previewAnimationId = requestAnimationFrame(() => {
+        this.executePreviewUpdate(agent);
+        this.previewAnimationId = null;
+      });
+      return;
+    }
 
     try {
       const previewBuffer = preview_move(
@@ -68,22 +131,30 @@ export class MoveTool implements ToolBehavior {
         agent.getWidth(),
         agent.getHeight()
       );
-      agent.setBuffer(new Uint8ClampedArray(previewBuffer), true, true);
+      agent.setBuffer(new Uint8ClampedArray(previewBuffer.buffer), true, false);
+      agent.forceUpdate();
+
+      this.lastPreviewOffset = { x: dx, y: dy };
+      this.lastPreviewTime = now;
     } catch (error) {
       console.error('Move preview failed:', error);
-      return {
-        shouldUpdate: false,
-        shouldRegisterToHistory: false,
-      };
     }
 
-    return {
-      shouldUpdate: true,
-      shouldRegisterToHistory: false,
-    };
+    this.pendingOffset = null;
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    // 最後のプレビュー更新を確実に実行
+    if (this.previewAnimationId) {
+      cancelAnimationFrame(this.previewAnimationId);
+      this.previewAnimationId = null;
+    }
+
+    // 未処理のオフセットがある場合は最終更新を実行
+    if (this.pendingOffset) {
+      this.executePreviewUpdate(agent);
+    }
+
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
@@ -92,12 +163,19 @@ export class MoveTool implements ToolBehavior {
 
   commit() {
     if (!this.layerId || !this.originalBuffer) return;
+
+    // プレビュー更新をクリーンアップ
+    if (this.previewAnimationId) {
+      cancelAnimationFrame(this.previewAnimationId);
+      this.previewAnimationId = null;
+    }
+
     const agent = getAgentOf(this.layerId);
     if (!agent) return;
 
     agent.getDiffManager().add({
       kind: 'whole',
-      before: new Uint8ClampedArray(this.originalBuffer),
+      before: new Uint8ClampedArray(this.originalBuffer.buffer),
       after: new Uint8ClampedArray(agent.getBuffer()),
     });
     this.originalBuffer = undefined;
@@ -108,10 +186,21 @@ export class MoveTool implements ToolBehavior {
     selectionManager.commit();
     selectionManager.commitOffset();
     selectionManager.clear();
+
+    // 状態をリセット
+    this.pendingOffset = null;
+    this.lastPreviewOffset = { x: 0, y: 0 };
   }
 
   cancel() {
     if (!this.layerId || !this.originalBuffer) return;
+
+    // プレビュー更新をクリーンアップ
+    if (this.previewAnimationId) {
+      cancelAnimationFrame(this.previewAnimationId);
+      this.previewAnimationId = null;
+    }
+
     const agent = getAgentOf(this.layerId);
     if (!agent) return;
 
@@ -126,5 +215,9 @@ export class MoveTool implements ToolBehavior {
     selectionManager.setMoveOffset(this.startOffset);
     eventBus.emit('selection:moved', { newOffset: this.startOffset });
     selectionManager.setState('selected');
+
+    // 状態をリセット
+    this.pendingOffset = null;
+    this.lastPreviewOffset = { x: 0, y: 0 };
   }
 }

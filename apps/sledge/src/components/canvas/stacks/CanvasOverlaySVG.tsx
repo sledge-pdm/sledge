@@ -20,8 +20,6 @@ interface Area {
 }
 
 const CanvasOverlaySVG: Component = (props) => {
-  let outlineRef: SVGPathElement | undefined;
-
   const borderWidth = () => canvasStore.canvas.width * interactStore.zoom;
   const borderHeight = () => canvasStore.canvas.height * interactStore.zoom;
 
@@ -123,22 +121,26 @@ const CanvasOverlaySVG: Component = (props) => {
 
   createEffect(() => {
     const preset = getCurrentToolPreset();
-    const toolSize = (preset as any).size ?? 0;
-    const half = Math.floor(toolSize / 2);
-    let x = Math.floor(interactStore.lastMouseOnCanvas.x) - half;
-    let y = Math.floor(interactStore.lastMouseOnCanvas.y) - half;
-    let size = 1 + half * 2; // -half ~ half
+    if (preset !== undefined && preset.size !== undefined) {
+      const toolSize = preset?.size ?? 1;
+      const half = Math.floor(toolSize / 2);
+      let x = Math.floor(interactStore.lastMouseOnCanvas.x) - half;
+      let y = Math.floor(interactStore.lastMouseOnCanvas.y) - half;
+      let size = 1 + half * 2; // -half ~ half
 
-    x *= interactStore.zoom;
-    y *= interactStore.zoom;
-    size *= interactStore.zoom;
+      x *= interactStore.zoom;
+      y *= interactStore.zoom;
+      size *= interactStore.zoom;
 
-    setAreaPenWrite({
-      x,
-      y,
-      width: size,
-      height: size,
-    });
+      setAreaPenWrite({
+        x,
+        y,
+        width: size,
+        height: size,
+      });
+    } else {
+      setAreaPenWrite(undefined);
+    }
   });
 
   return (
@@ -160,7 +162,7 @@ const CanvasOverlaySVG: Component = (props) => {
         <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={0.2} pointer-events='none' />
 
         {/* pen hover preview */}
-        <Show when={globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
+        <Show when={areaPenWrite() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
           <rect
             width={areaPenWrite()?.width}
             height={areaPenWrite()?.height}
@@ -175,7 +177,6 @@ const CanvasOverlaySVG: Component = (props) => {
 
         <path
           id='selection-outline'
-          ref={(el) => (outlineRef = el)}
           d={pathCmdList().toString(interactStore.zoom)}
           fill='none'
           stroke={selectionState() === 'move_layer' ? '#FF0000' : vars.color.border}

@@ -10,7 +10,7 @@ export async function loadGlobalSettings() {
   if (!isConfigExists) {
     console.warn('No global settings found, create one with default values.');
     const defaultSettings = await getDefaultSettings();
-    await loadConfigToGlobalStore(defaultSettings);
+    loadConfigToGlobalStore(defaultSettings);
     await saveGlobalSettings(false);
     return defaultSettings;
   } else {
@@ -30,11 +30,11 @@ export async function loadGlobalSettings() {
     if (!configJson) {
       console.warn('create config with default values.');
       const defaultSettings = await getDefaultSettings();
-      await loadConfigToGlobalStore(defaultSettings);
+      loadConfigToGlobalStore(defaultSettings);
       await saveGlobalSettings(false);
       return defaultSettings;
     } else {
-      await loadConfigToGlobalStore(configJson);
+      loadConfigToGlobalStore(configJson);
       return configJson;
     }
   }

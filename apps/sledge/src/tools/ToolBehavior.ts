@@ -17,6 +17,8 @@ export interface ToolBehavior {
   onMove: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 
   onEnd: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
+
+  onCancel?: (agent: LayerImageAgent, args: ToolArgs) => ToolResult;
 }
 
 export interface ToolArgs {

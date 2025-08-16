@@ -74,7 +74,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
           ctx = canvasRef.getContext('2d')!;
         }}
         style={{
-          'image-rendering': 'crisp-edges',
+          'image-rendering': 'auto',
         }}
         onClick={(e) => {
           if (props.onClick) props.onClick(e);

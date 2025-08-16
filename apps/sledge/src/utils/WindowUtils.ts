@@ -2,6 +2,7 @@ import { FileLocation } from '@sledge/core';
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
+import { message } from '@tauri-apps/plugin-dialog';
 import { globalConfig } from '~/stores/GlobalStores';
 import { PathToFileLocation } from '~/utils/PathUtils';
 import { safeInvoke } from './TauriUtils';
@@ -42,6 +43,26 @@ export function getOpenLocation(): FileLocation | undefined {
   // @ts-ignore
   const openPath = window.__PATH__;
   return PathToFileLocation(openPath);
+}
+
+export async function reportCriticalError(e: any) {
+  const errorMessage = e instanceof Error ? e.message : String(e);
+  const errorStack = e instanceof Error ? e.stack : undefined;
+
+  console.error('Reporting critical error:', {
+    message: errorMessage,
+    stack: errorStack,
+  });
+
+  await message(`Something went wrong.\n\n${errorStack || '<No stack trace available>'}`, {
+    kind: 'error',
+    title: 'Error',
+    okLabel: 'Close',
+  });
+
+  // force close window
+  await getCurrentWindow().close();
+  await getCurrentWindow().destroy();
 }
 
 export async function showMainWindow() {

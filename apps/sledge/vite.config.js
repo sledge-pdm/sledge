@@ -2,7 +2,6 @@ import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
-import Inspect from 'vite-plugin-inspect';
 import solidPlugin from 'vite-plugin-solid';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
@@ -18,7 +17,6 @@ export default defineConfig({
     solidPlugin(),
     glsl(),
     topLevelAwait(),
-    Inspect(),
   ],
   build: {
     outDir: 'dist',

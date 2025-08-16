@@ -68,7 +68,7 @@ export class MoveTool implements ToolBehavior {
         agent.getWidth(),
         agent.getHeight()
       );
-      agent.setBuffer(new Uint8ClampedArray(previewBuffer), true, true);
+      agent.setBuffer(new Uint8ClampedArray(previewBuffer.buffer), true, false);
     } catch (error) {
       console.error('Move preview failed:', error);
       return {
@@ -97,7 +97,7 @@ export class MoveTool implements ToolBehavior {
 
     agent.getDiffManager().add({
       kind: 'whole',
-      before: new Uint8ClampedArray(this.originalBuffer),
+      before: new Uint8ClampedArray(this.originalBuffer.buffer),
       after: new Uint8ClampedArray(agent.getBuffer()),
     });
     this.originalBuffer = undefined;

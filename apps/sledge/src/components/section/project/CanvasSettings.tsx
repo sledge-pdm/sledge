@@ -26,12 +26,23 @@ const CanvasSettings: Component = () => {
     }
   };
 
+  const [isChangable, setIsChangable] = createSignal(false);
   const [sizePreset, setSizePreset] = createSignal<string>('undefined');
 
   createEffect(() => {
     canvasStore.canvas;
+    updateButtonState();
     updateCurrentPreset();
   });
+
+  const updateButtonState = () => {
+    if (!widthInputRef || !heightInputRef) {
+      setIsChangable(false);
+      return;
+    }
+    const changable = Number(widthInputRef.value) !== canvasStore.canvas.width || Number(heightInputRef.value) !== canvasStore.canvas.height;
+    setIsChangable(changable);
+  };
 
   const updateCurrentPreset = () => {
     const cw = widthInputRef ? Number(widthInputRef.value) : canvasStore.canvas.width;
@@ -60,15 +71,16 @@ const CanvasSettings: Component = () => {
         setSizePreset(JSON.stringify(canvas));
       }
     }
+    updateButtonState();
   };
 
   return (
     <div class={sectionRoot}>
       <p class={sectionCaption}>canvas.</p>
 
-      <div class={sectionContent} style={{ 'padding-left': '8px', gap: '12px', 'margin-top': '8px', 'margin-bottom': '24px' }}>
-        <div class={flexRow} style={{ 'align-items': 'center', gap: '12px', 'margin-bottom': '2px' }}>
-          <p style={{ color: vars.color.muted }}>presets</p>
+      <div class={sectionContent} style={{ 'padding-left': '8px', gap: '10px', 'margin-top': '2px', 'margin-bottom': '24px' }}>
+        <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': '2px' }}>
+          <p style={{ color: vars.color.onBackground, width: '72px' }}>presets.</p>
           <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
         </div>
         <div class={canvasSizeForm} style={{ 'margin-bottom': '2px' }}>
@@ -82,7 +94,10 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
-              onInput={() => updateCurrentPreset()}
+              onInput={() => {
+                updateButtonState();
+                updateCurrentPreset();
+              }}
               required
             />
           </div>
@@ -99,7 +114,10 @@ const CanvasSettings: Component = () => {
               value={canvasStore.canvas.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
-              onInput={() => updateCurrentPreset()}
+              onInput={() => {
+                updateButtonState();
+                updateCurrentPreset();
+              }}
               required
             />
           </div>
@@ -109,23 +127,32 @@ const CanvasSettings: Component = () => {
               e.preventDefault();
               submitSizeChange();
             }}
+            disabled={!isChangable()}
+            style={{
+              'margin-left': 'auto',
+              opacity: isChangable() ? 1 : 0.2,
+              'pointer-events': isChangable() ? 'auto' : 'none',
+              color: isChangable() ? vars.color.active : undefined,
+              'border-color': isChangable() ? vars.color.active : undefined,
+            }}
           >
-            change
+            apply
           </button>
         </div>
       </div>
 
       <div class={flexCol} style={{ 'padding-left': '8px', gap: '4px', overflow: 'hidden' }}>
+        <p style={{ 'font-family': ZFB03, width: '100%', 'font-size': '8px', 'margin-bottom': '6px' }}>{'canvas info'}</p>
         <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px' }}>size</p>
+          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>size</p>
           <p style={{ 'white-space': 'wrap' }}>{`${canvasStore.canvas.width} x ${canvasStore.canvas.height}`}</p>
         </div>
         <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px' }}>layers</p>
+          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>layers</p>
           <p style={{ 'white-space': 'wrap' }}>{`${allLayers().length}`}</p>
         </div>
         <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px' }}>active</p>
+          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>active</p>
           <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
         </div>
 

@@ -53,6 +53,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_os::init())
         .invoke_handler(tauri::generate_handler![
             analysis::get_process_memory,

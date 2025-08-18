@@ -15,6 +15,7 @@ interface Props<T extends string | number = string> {
   props?: JSX.HTMLAttributes<HTMLDivElement>;
   noBackground?: boolean;
   wheelSpin?: boolean;
+  disabled?: boolean;
 }
 
 const Dropdown = <T extends string | number>(p: Props<T>) => {
@@ -87,6 +88,11 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
       <button
         type='button'
         class={p.noBackground ? triggerButtonNoBG : triggerButton}
+        style={{
+          opacity: p.disabled ? 0.5 : 1,
+          cursor: p.disabled ? 'not-allowed' : 'pointer',
+          'pointer-events': p.disabled ? 'none' : 'all',
+        }}
         onClick={toggle}
         aria-haspopup='listbox'
         aria-expanded={open()}

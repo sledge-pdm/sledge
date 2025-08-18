@@ -6,7 +6,7 @@ import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvas
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
 interface Props {
@@ -153,7 +153,11 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     const unlistenFocusChanged = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
       if (!focused) {
-        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointerup'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
+        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
+      } else {
+        // pipetteのみ復帰時も戻す
+        if (toolStore.activeToolCategory === 'pipette')
+          props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
       }
     });
 

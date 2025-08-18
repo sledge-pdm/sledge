@@ -30,20 +30,18 @@ export class PenTool implements ToolBehavior {
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
 
+    const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
     drawSquarePixel(position, size, (px, py) => {
-      if (!selectionManager.isDrawingAllowed({ x: px, y: py })) {
+      if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
         return; // 描画制限により描画しない
       }
-      if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
-        const diff = agent.setPixel({ x: px, y: py }, color, true);
-        if (diff !== undefined) {
-          dm.add(diff);
-        }
+      const diff = agent.setPixel({ x: px, y: py }, color, true);
+      if (diff !== undefined) {
+        dm.add(diff);
       }
     });
 
     if (lastPosition !== undefined) {
-      const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
       drawCompletionLine(position, lastPosition, (x, y) => {
         drawSquarePixel({ x, y }, size, (px, py) => {
           if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
@@ -58,6 +56,7 @@ export class PenTool implements ToolBehavior {
         });
       });
     }
+
     return {
       shouldUpdate: true,
       shouldRegisterToHistory: false,

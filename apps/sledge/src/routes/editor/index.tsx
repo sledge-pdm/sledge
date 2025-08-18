@@ -1,7 +1,7 @@
 import { flexCol } from '@sledge/core';
 import { pageRoot } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
-import { useLocation } from '@solidjs/router';
+import { useLocation, useSearchParams } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
@@ -26,10 +26,12 @@ import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectSt
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/PathUtils';
 import { emitEvent } from '~/utils/TauriUtils';
-import { getOpenLocation, reportCriticalError, showMainWindow } from '~/utils/WindowUtils';
+import { getOpenLocation, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Editor() {
   const location = useLocation();
+  const [sp, setSp] = useSearchParams();
+  const isFirstStartup = sp.startup === 'true';
 
   createEffect(() => {
     trackStore(canvasStore.canvas);
@@ -69,6 +71,7 @@ export default function Editor() {
 
   const tryLoadProject = async (): Promise<boolean> => {
     const fileLocation = getOpenLocation();
+
     if (fileLocation && fileLocation.path && fileLocation.name) {
       const fullPath = join(fileLocation.path, fileLocation.name);
       if (fileLocation.name?.endsWith('.sledge')) {
@@ -138,7 +141,10 @@ export default function Editor() {
       await onProjectLoad(isNewProject);
     } catch (e) {
       unlisten();
-      await reportCriticalError(e);
+
+      // 初回起動時のみ特別(ウィンドウだけ消すとプロセスだけが残ってしまうので、プロセスをキルするreportを行う)
+      if (isFirstStartup) await reportAppStartupError(e);
+      else await reportWindowStartError(e);
     }
   });
 

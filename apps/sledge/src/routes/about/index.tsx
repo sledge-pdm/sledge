@@ -5,7 +5,7 @@ import { open } from '@tauri-apps/plugin-shell';
 import { createSignal, onMount } from 'solid-js';
 import { loadGlobalSettings } from '~/io/config/load';
 import { getCurrentVersion, getReleaseApiUrl, isNewVersionAvailable } from '~/utils/VersionUtils';
-import { reportCriticalError, showMainWindow } from '~/utils/WindowUtils';
+import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 import {
   aaContainer,
   aaText,
@@ -38,7 +38,7 @@ const About = () => {
 
       await showMainWindow();
     } catch (e) {
-      await reportCriticalError(e);
+      await reportWindowStartError(e);
     }
   });
 
@@ -109,7 +109,7 @@ const About = () => {
               <br />
               全ての意見が貴重です。
             </p>
-            <Button class={accentedButton} onClick={(e) => openLink('https://tally.so/r/w7jZNL')}>
+            <Button class={accentedButton} onClick={(e: MouseEvent) => openLink('https://tally.so/r/w7jZNL')}>
               &gt;&gt; send feedback
             </Button>
           </div>

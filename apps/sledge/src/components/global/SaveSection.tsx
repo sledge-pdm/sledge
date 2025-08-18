@@ -191,6 +191,7 @@ const SaveSection: Component = () => {
             height: '100%',
             'background-color': vars.color.accent,
             opacity: 0.1,
+            'pointer-events': 'none',
           }}
         />
       </div>

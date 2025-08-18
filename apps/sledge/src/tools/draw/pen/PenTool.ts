@@ -35,9 +35,11 @@ export class PenTool implements ToolBehavior {
       if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
         return; // 描画制限により描画しない
       }
-      const diff = agent.setPixel({ x: px, y: py }, color, true);
-      if (diff !== undefined) {
-        dm.add(diff);
+      if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
+        const diff = agent.setPixel({ x: px, y: py }, color, true);
+        if (diff !== undefined) {
+          dm.add(diff);
+        }
       }
     });
 

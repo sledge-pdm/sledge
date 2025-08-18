@@ -23,7 +23,7 @@ export const canvasSizeLabel = style({
 
 export const canvasSizeInput = style({
   fontSize: vars.text.xl,
-  width: '50px',
+  width: '64px',
 });
 export const canvasSizeButton = style({
   margin: `${vars.spacing.xs} 0`,

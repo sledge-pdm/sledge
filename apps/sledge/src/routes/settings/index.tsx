@@ -8,7 +8,6 @@ export default function Settings() {
   onMount(async () => {
     try {
       await loadGlobalSettings();
-      throw new Error('This is a test error to check global error handling.', { cause: 'TestError' });
       await showMainWindow();
     } catch (e) {
       await reportWindowStartError(e);

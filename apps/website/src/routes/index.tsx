@@ -1,5 +1,5 @@
-import { Asset, getReleaseData, os, osExtensions, ReleaseData } from '@sledge/core';
-import { vars, ZFB03B } from '@sledge/theme';
+import { Asset, flexCol, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
+import { k12x8, vars, ZFB03B, ZFB08 } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { createSignal, onMount, Show } from 'solid-js';
 import FadingImage from '~/components/FadingImage';
@@ -10,6 +10,7 @@ import {
   description,
   greetText,
   header,
+  informationText,
   mainButton,
   mainButtonContainer,
   rightBottomArea,
@@ -50,7 +51,7 @@ export default function Home() {
   }[] => {
     if (userOS() === 'none' || !releaseData()) return [];
 
-    const availableExtensions = osExtensions[userOS()].extensions;
+    const availableExtensions = osBuildInfos[userOS()].extensions;
 
     return releaseData()!
       .assets.map((asset) => {
@@ -63,6 +64,11 @@ export default function Home() {
         }
       })
       .filter((item): item is { asset: Asset; extension: string } => item !== undefined);
+  };
+  const information = (): string | undefined => {
+    if (userOS() === 'none' || !releaseData()) return undefined;
+    const information = osBuildInfos[userOS()].information;
+    return information;
   };
 
   onMount(async () => {
@@ -132,6 +138,7 @@ export default function Home() {
             <p class={versionInfoText}>
               Latest Build: <span style={{ color: vars.color.accent }}>{releaseData()?.name}</span>
             </p>
+
             <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
               <div class={mainButtonContainer}>{DownloadButtons()}</div>
               <a
@@ -156,6 +163,43 @@ export default function Home() {
               </Button>
             </Show>
           </div>
+          <Show when={information()}>
+            <div
+              class={flexCol}
+              style={{
+                'background-color': vars.color.surface,
+                padding: vars.spacing.lg,
+                color: vars.color.onBackground,
+                width: 'fit-content',
+                'max-width': '100%',
+              }}
+            >
+              <p
+                class={informationText}
+                style={{
+                  'font-family': ZFB08,
+                  'white-space': 'pre',
+                  'font-size': '8px',
+                  'margin-bottom': '12px',
+                  color: vars.color.accent,
+                }}
+              >
+                for {userOS()} users
+              </p>
+              <p
+                class={informationText}
+                style={{
+                  'font-family': k12x8,
+                  'line-height': '1.5',
+                  'white-space': 'pre',
+                  'letter-spacing': '1px',
+                  'font-size': '8px',
+                }}
+              >
+                {information()}
+              </p>
+            </div>
+          </Show>
         </div>
         <div
           class={startImageContainer}

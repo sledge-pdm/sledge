@@ -155,6 +155,15 @@ export const versionInfoText = style({
     },
   },
 });
+export const informationText = style({
+  fontSize: '8px',
+  userSelect: 'text',
+  '@media': {
+    '(max-width: 768px)': {
+      fontSize: '8px',
+    },
+  },
+});
 
 export const mainButtonContainer = style([
   flexRow,

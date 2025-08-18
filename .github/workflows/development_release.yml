@@ -1,4 +1,4 @@
-name: dev-with-artifacts
+name: development_release
 
 on:
   push:

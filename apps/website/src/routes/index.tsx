@@ -43,6 +43,8 @@ export default function Home() {
     setDownloadFlavor(downloadFlavorTexts[Math.floor(Math.random() * downloadFlavorTexts.length)]);
   };
 
+  const [isLoading, setIsLoading] = createSignal(false);
+
   const [userOS, setUserOS] = createSignal<os>('none');
   const [releaseData, setReleaseData] = createSignal<ReleaseData | null>(null);
 
@@ -73,6 +75,7 @@ export default function Home() {
   };
 
   onMount(async () => {
+    setIsLoading(false);
     const userAgent = navigator.userAgent;
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       setUserOS('sp');
@@ -98,6 +101,7 @@ export default function Home() {
     } catch (e) {
       console.error('Failed to fetch release data');
     }
+    setIsLoading(true);
   });
 
   const DownloadButtons = () => {
@@ -137,78 +141,83 @@ export default function Home() {
               <br />
               simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
             </p>
-            <Show when={information()}>
-              <div
-                class={flexCol}
-                style={{
-                  'background-color': vars.color.surface,
-                  padding: vars.spacing.lg,
-                  color: vars.color.onBackground,
-                  width: 'fit-content',
-                  'max-width': '100%',
-                }}
-              >
-                <p
-                  class={informationText}
+
+            <Show when={isLoading()} fallback={<p class={startText}>Loading...</p>}>
+              <Show when={information()}>
+                <div
+                  class={flexCol}
                   style={{
-                    'font-family': ZFB08,
-                    'white-space': 'pre',
-                    'font-size': '8px',
-                    'margin-bottom': '12px',
-                    color: vars.color.accent,
+                    'background-color': vars.color.surface,
+                    padding: vars.spacing.lg,
+                    color: vars.color.onBackground,
+                    width: 'fit-content',
+                    'max-width': '100%',
                   }}
                 >
-                  for {userOS()} users
+                  <p
+                    class={informationText}
+                    style={{
+                      'font-family': ZFB08,
+                      'white-space': 'pre',
+                      'font-size': '8px',
+                      'margin-bottom': '12px',
+                      color: vars.color.accent,
+                    }}
+                  >
+                    for {userOS()} users
+                  </p>
+                  <p
+                    class={informationText}
+                    style={{
+                      'font-family': k12x8,
+                      'line-height': '1.5',
+                      'white-space': 'pre',
+                      'letter-spacing': '1px',
+                      'font-size': '8px',
+                    }}
+                  >
+                    {information()}
+                  </p>
+                </div>
+              </Show>
+              <div class={ButtonAreaContainer}>
+                <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+                  <p class={versionInfoText}>
+                    Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
+                  </p>
+                </Show>
+                <p class={versionInfoText}>
+                  Latest Build:{' '}
+                  <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>
+                    {releaseData()?.name ?? '[ fetch failed ]'}
+                  </span>
                 </p>
-                <p
-                  class={informationText}
-                  style={{
-                    'font-family': k12x8,
-                    'line-height': '1.5',
-                    'white-space': 'pre',
-                    'letter-spacing': '1px',
-                    'font-size': '8px',
-                  }}
-                >
-                  {information()}
-                </p>
+
+                <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+                  <div class={mainButtonContainer}>{DownloadButtons()}</div>
+                  <a
+                    onClick={() => {
+                      window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+                    }}
+                    style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
+                  >
+                    OTHER DOWNLOADS.
+                  </a>
+                </Show>
+
+                <Show when={userOS() === 'sp'}>
+                  <Button
+                    onClick={() => {
+                      window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
+                    }}
+                    hoverColor='white'
+                    class={mainButton}
+                  >
+                    VIEW CODE.
+                  </Button>
+                </Show>
               </div>
             </Show>
-            <div class={ButtonAreaContainer}>
-              <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-                <p class={versionInfoText}>
-                  Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
-                </p>
-              </Show>
-              <p class={versionInfoText}>
-                Latest Build:{' '}
-                <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>{releaseData()?.name ?? '[ fetch failed ]'}</span>
-              </p>
-
-              <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-                <div class={mainButtonContainer}>{DownloadButtons()}</div>
-                <a
-                  onClick={() => {
-                    window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-                  }}
-                  style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
-                >
-                  OTHER DOWNLOADS.
-                </a>
-              </Show>
-
-              <Show when={userOS() === 'sp'}>
-                <Button
-                  onClick={() => {
-                    window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
-                  }}
-                  hoverColor='white'
-                  class={mainButton}
-                >
-                  VIEW CODE.
-                </Button>
-              </Show>
-            </div>
           </div>
           <div
             class={startImageContainer}

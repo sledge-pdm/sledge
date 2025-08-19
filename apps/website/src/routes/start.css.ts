@@ -19,6 +19,7 @@ export const scrollContent = style([
   w100,
   {
     overflowY: 'visible',
+    overflowX: 'hidden',
     padding: '42px 42px',
     boxSizing: 'border-box',
     '@media': {
@@ -46,8 +47,8 @@ export const header = style([
 ]);
 
 export const startIcon = style({
-  width: '56px',
-  height: '56px',
+  width: '48px',
+  height: '48px',
   imageRendering: 'pixelated',
   '@media': {
     '(max-width: 768px)': {
@@ -73,7 +74,7 @@ export const content = style([
   {
     flexWrap: 'nowrap',
     width: '100%',
-    padding: '5rem 3rem',
+    padding: '3rem 3rem',
     boxSizing: 'border-box',
     '@media': {
       '(max-width: 1600px)': {

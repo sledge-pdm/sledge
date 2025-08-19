@@ -34,9 +34,11 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
   },
 };
 
+// client side
 export const getReleaseData = async (apiUrl: string, pat?: string): Promise<ReleaseData | undefined> => {
   const response = await fetch(apiUrl, {
     cache: 'no-store',
+    headers: pat ? { Authorization: `Bearer ${pat}` } : {},
   });
   const data = await response.json();
 

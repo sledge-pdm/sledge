@@ -73,13 +73,6 @@ export default function Home() {
   };
 
   onMount(async () => {
-    const data = await getReleaseData(releaseApiUrl, import.meta.env.VITE_GITHUB_PAT);
-    if (!data) {
-      console.error('Failed to fetch release data');
-      return;
-    }
-    setReleaseData(data);
-
     const userAgent = navigator.userAgent;
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       setUserOS('sp');
@@ -91,6 +84,18 @@ export default function Home() {
       setUserOS('linux');
     } else {
       setUserOS('none');
+    }
+
+    try {
+      // github api refuses localhost by CORS.
+      const data = await getReleaseData(releaseApiUrl, location.origin.includes('localhost') ? undefined : import.meta.env.VITE_GITHUB_PAT);
+      if (!data) {
+        console.error('Failed to fetch release data');
+        return;
+      }
+      setReleaseData(data);
+    } catch (e) {
+      console.error('Failed to fetch release data');
     }
   });
 
@@ -175,7 +180,8 @@ export default function Home() {
                 </p>
               </Show>
               <p class={versionInfoText}>
-                Latest Build: <span style={{ color: vars.color.accent }}>{releaseData()?.name}</span>
+                Latest Build:{' '}
+                <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>{releaseData()?.name ?? '[ fetch failed ]'}</span>
               </p>
 
               <Show when={userOS() !== 'none' && userOS() !== 'sp'}>

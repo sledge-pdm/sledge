@@ -87,8 +87,11 @@ export default function Home() {
     }
 
     try {
+      const githubPat = import.meta.env.VITE_GITHUB_PAT;
+      console.log('GitHub PAT available:', !!githubPat);
+      console.log('Is localhost:', location.origin.includes('localhost'));
       // github api refuses localhost by CORS.
-      const data = await getReleaseData(releaseApiUrl, location.origin.includes('localhost') ? undefined : import.meta.env.VITE_GITHUB_PAT);
+      const data = await getReleaseData(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat);
       if (!data) {
         console.error('Failed to fetch release data');
         return;

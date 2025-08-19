@@ -23,7 +23,7 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
   windows: {
     name: 'Windows',
     extensions: ['msi', 'exe'],
-    information: ``,
+    information: `.msi(wix) and .exe(nsis) are supposed to works identically.`,
   },
   linux: {
     name: 'Linux',
@@ -34,14 +34,16 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
   },
 };
 
-export const getReleaseData = async (apiUrl: string): Promise<ReleaseData | undefined> => {
-  const response = await fetch(apiUrl);
+export const getReleaseData = async (apiUrl: string, pat?: string): Promise<ReleaseData | undefined> => {
+  const response = await fetch(apiUrl, {
+    cache: 'no-store',
+  });
   const data = await response.json();
 
   return data;
 };
 
-export const getLatestVersion = async (apiUrl: string): Promise<string | undefined> => {
-  const data = await getReleaseData(apiUrl);
+export const getLatestVersion = async (apiUrl: string, pat?: string): Promise<string | undefined> => {
+  const data = await getReleaseData(apiUrl, pat);
   return data?.name;
 };

@@ -23,7 +23,7 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
   windows: {
     name: 'Windows',
     extensions: ['msi', 'exe'],
-    information: `.msi(wix) and .exe(nsis) are supposed to works identically.`,
+    information: `Both installers (exe/msi) are supposed to work identically.`,
   },
   linux: {
     name: 'Linux',
@@ -36,13 +36,20 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
 
 // client side
 export const getReleaseData = async (apiUrl: string, pat?: string): Promise<ReleaseData | undefined> => {
-  const response = await fetch(apiUrl, {
-    cache: 'no-store',
-    headers: pat ? { Authorization: `Bearer ${pat}` } : {},
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch(apiUrl, {
+      cache: 'no-store',
+      headers: pat ? { Authorization: `Bearer ${pat}` } : {},
+    });
+    if (!response.ok) return undefined;
 
-  return data;
+    const data = await response.json();
+
+    return data;
+  } catch (e) {
+    console.error(e);
+    return undefined;
+  }
 };
 
 export const getLatestVersion = async (apiUrl: string, pat?: string): Promise<string | undefined> => {

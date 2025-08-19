@@ -43,7 +43,7 @@ export default function Home() {
     setDownloadFlavor(downloadFlavorTexts[Math.floor(Math.random() * downloadFlavorTexts.length)]);
   };
 
-  const [isLoading, setIsLoading] = createSignal(false);
+  const [isLoading, setIsLoading] = createSignal(true);
 
   const [userOS, setUserOS] = createSignal<os>('none');
   const [releaseData, setReleaseData] = createSignal<ReleaseData | null>(null);
@@ -75,7 +75,7 @@ export default function Home() {
   };
 
   onMount(async () => {
-    setIsLoading(false);
+    setIsLoading(true);
     const userAgent = navigator.userAgent;
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       setUserOS('sp');
@@ -95,13 +95,13 @@ export default function Home() {
       const data = await getReleaseData(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat);
       if (!data) {
         console.error('Failed to fetch release data');
-        return;
+      } else {
+        setReleaseData(data);
       }
-      setReleaseData(data);
     } catch (e) {
       console.error('Failed to fetch release data');
     }
-    setIsLoading(true);
+    setIsLoading(false);
   });
 
   const DownloadButtons = () => {
@@ -142,7 +142,7 @@ export default function Home() {
               simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
             </p>
 
-            <Show when={isLoading()} fallback={<p class={startText}>Loading...</p>}>
+            <Show when={!isLoading()} fallback={<p class={startText}>Loading...</p>}>
               <Show when={information()}>
                 <div
                   class={flexCol}

@@ -2,6 +2,7 @@ import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getPresetOf } from '~/controllers/tool/ToolController';
+import { PixelDiff } from '~/models/history/HistoryManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
@@ -12,18 +13,30 @@ export class PenTool implements ToolBehavior {
 
   startTime: number | undefined = undefined;
   isShift: boolean = false;
-  private originalBuffer: Uint8ClampedArray | undefined = undefined;
-  private previewBuffer: Uint8ClampedArray | undefined = undefined;
+  isCtrl: boolean = false;
+  private lastPreviewDiff: PixelDiff[] = [];
 
   startPosition: Vec2 | undefined = undefined;
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
+    // 前回の状態が残っている場合はクリーンアップ
+    if (this.lastPreviewDiff.length > 0) {
+      console.warn('PenTool: Cleaning up previous preview state');
+      this.undoLastLineDiff(agent);
+    }
+
     this.startTime = Date.now();
     this.isShift = args.event?.shiftKey ?? false;
+    this.isCtrl = args.event?.ctrlKey ?? false;
     this.startPosition = args.position;
-    this.originalBuffer = new Uint8ClampedArray(agent.getBuffer());
 
-    return this.draw(agent, args, args.color);
+    this.lastPreviewDiff = [];
+
+    if (!this.isShift) {
+      return this.draw(agent, args, args.color);
+    } else {
+      return this.drawLine(false, agent, args, args.color);
+    }
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
@@ -36,7 +49,7 @@ export class PenTool implements ToolBehavior {
 
   protected categoryId: ToolCategoryId = 'pen';
 
-  draw(agent: LayerImageAgent, { position, lastPosition, presetName }: ToolArgs, color: RGBAColor): ToolResult {
+  draw(agent: LayerImageAgent, { position, lastPosition, presetName, event }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     const size = (getPresetOf(this.categoryId, presetName) as any)?.size ?? 1;
@@ -79,16 +92,32 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  // 始点からの直線を描画
-  drawLine(saveDiff: boolean, agent: LayerImageAgent, { position, presetName }: ToolArgs, color: RGBAColor): ToolResult {
-    if (!presetName || !this.startPosition || !this.originalBuffer) return { shouldUpdate: false, shouldRegisterToHistory: false };
-
-    if (!this.previewBuffer || this.previewBuffer.length !== this.originalBuffer.length) {
-      this.previewBuffer = new Uint8ClampedArray(this.originalBuffer.length);
+  private undoLastLineDiff(agent: LayerImageAgent) {
+    const dm = agent.getDiffManager();
+    // 前回のプレビューが残っていた場合はundo
+    if (this.lastPreviewDiff.length > 0) {
+      try {
+        dm.add(this.lastPreviewDiff);
+        dm.flush();
+        agent.registerToHistory();
+        agent.undo();
+      } catch (error) {
+        console.error('Failed to undo line preview:', error);
+        // フォールバック: 手動でピクセルを復元
+        this.lastPreviewDiff.forEach((diff) => {
+          agent.setPixel(diff.position, diff.before, false);
+        });
+      } finally {
+        this.lastPreviewDiff = [];
+      }
     }
-    this.previewBuffer.set(this.originalBuffer);
+  }
 
-    const previewBuffer = new Uint8ClampedArray(this.originalBuffer);
+  // 始点からの直線を描画
+  drawLine(commit: boolean, agent: LayerImageAgent, { position, presetName, event }: ToolArgs, color: RGBAColor): ToolResult {
+    if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
+
+    this.undoLastLineDiff(agent);
 
     const size = (getPresetOf(this.categoryId, presetName) as any)?.size ?? 1;
 
@@ -102,26 +131,18 @@ export class PenTool implements ToolBehavior {
         if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
           return; // 描画制限により描画しない
         }
-        const idx = (py * agent.getWidth() + px) * 4;
-        const beforeColor: RGBAColor = [previewBuffer[idx], previewBuffer[idx + 1], previewBuffer[idx + 2], previewBuffer[idx + 3]];
-        if (!colorMatch(beforeColor, color) && pbm.isInBounds({ x: px, y: py })) {
-          previewBuffer[idx] = color[0];
-          previewBuffer[idx + 1] = color[1];
-          previewBuffer[idx + 2] = color[2];
-          previewBuffer[idx + 3] = color[3];
-          if (saveDiff) {
-            dm.add({
-              kind: 'pixel',
-              position: { x: px, y: py },
-              before: beforeColor,
-              after: color,
-            });
+        if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
+          const diff = agent.setPixel({ x: px, y: py }, color, true);
+          if (diff !== undefined) {
+            if (commit) {
+              dm.add(diff);
+            } else {
+              this.lastPreviewDiff?.push(diff);
+            }
           }
         }
       });
     });
-
-    agent.setBuffer(previewBuffer, true, false);
 
     return {
       shouldUpdate: true,
@@ -133,7 +154,6 @@ export class PenTool implements ToolBehavior {
     if (this.isShift) {
       // 直線を確定
       this.drawLine(true, agent, args, args.color);
-      this.originalBuffer = undefined;
     }
 
     // 描画完了時にバッチを強制処理
@@ -145,7 +165,9 @@ export class PenTool implements ToolBehavior {
         : undefined;
 
     this.isShift = false;
+    this.isCtrl = false;
     this.startPosition = undefined;
+    this.lastPreviewDiff = [];
 
     return {
       result: resultText,
@@ -155,10 +177,17 @@ export class PenTool implements ToolBehavior {
   }
 
   onCancel(agent: LayerImageAgent, args: ToolArgs) {
+    if (this.isShift) {
+      this.undoLastLineDiff(agent);
+    }
+
     this.isShift = false;
+    this.isCtrl = false;
     this.startPosition = undefined;
-    this.originalBuffer = undefined;
+    // this.originalBuffer = undefined;
     this.startTime = undefined;
+
+    this.lastPreviewDiff = [];
 
     return {
       shouldUpdate: false,

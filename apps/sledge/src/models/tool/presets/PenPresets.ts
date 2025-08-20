@@ -1,3 +1,4 @@
+import { Consts } from '~/models/Consts';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
@@ -8,7 +9,7 @@ export const penPresetFields: PresetFieldMeta[] = [
     component: 'Slider',
     props: {
       min: 1,
-      max: 20,
+      max: Consts.maxPenSize,
       step: 1,
       allowFloat: false,
     },

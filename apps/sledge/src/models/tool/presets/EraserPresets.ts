@@ -15,18 +15,18 @@ export const eraserPresetFields: PresetFieldMeta[] = [
     tips: 'Eraser brush size',
     customFormat: '[value]px',
   },
-  // {
-  //   key: 'shape',
-  //   label: 'Shape',
-  //   component: 'Dropdown',
-  //   props: {
-  //     options: [
-  //       { value: 'circle', label: 'Circle' },
-  //       { value: 'square', label: 'Square' },
-  //     ],
-  //   },
-  //   tips: 'Eraser brush shape',
-  // },
+  {
+    key: 'shape',
+    label: 'Shape',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { value: 'square', label: 'Square' },
+        { value: 'circle', label: 'Circle' },
+      ],
+    },
+    tips: 'Eraser brush shape',
+  },
   // {
   //   key: 'hardness',
   //   label: 'Hardness',

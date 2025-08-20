@@ -90,9 +90,9 @@ export class PenTool implements ToolBehavior {
     const dm = agent.getDiffManager();
 
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
-    
+
     const drawPixel = shape === 'circle' ? drawCirclePixel : drawSquarePixel;
-    
+
     drawPixel(position, rawPosition, size, dotMagnification, (px: number, py: number) => {
       if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
         return; // 描画制限により描画しない
@@ -107,7 +107,10 @@ export class PenTool implements ToolBehavior {
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x: number, y: number) => {
-        drawPixel({ x, y }, rawPosition, size, dotMagnification, (px: number, py: number) => {
+        // 偶数サイズのブラシでは rawPosition から中心を決めるため、
+        // 各補完点に対応する rawPosition を合成して渡す
+        const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification };
+        drawPixel({ x, y }, syntheticRaw, size, dotMagnification, (px: number, py: number) => {
           if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
             return; // 描画制限により描画しない
           }
@@ -172,7 +175,9 @@ export class PenTool implements ToolBehavior {
     const drawPixel = shape === 'circle' ? drawCirclePixel : drawSquarePixel;
 
     drawCompletionLine(targetPosition, this.startPosition, (x: number, y: number) => {
-      drawPixel({ x, y }, rawPosition, size, dotMagnification, (px: number, py: number) => {
+      // 直線補完の各点に対応する rawPosition を合成
+      const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification };
+      drawPixel({ x, y }, syntheticRaw, size, dotMagnification, (px: number, py: number) => {
         if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
           return; // 描画制限により描画しない
         }

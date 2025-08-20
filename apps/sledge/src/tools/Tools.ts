@@ -46,7 +46,7 @@ export type PenPresetConfig = PresetConfig & {
 };
 
 export type EraserPresetConfig = PresetConfig & {
-  // shape?: 'circle' | 'square';
+  shape?: 'circle' | 'square';
   // hardness?: number;
 };
 
@@ -80,7 +80,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1 } as EraserPresetConfig,
+  [DEFAULT_PRESET]: { size: 1, shape: 'square' } as EraserPresetConfig,
       },
     },
   } as ToolCategory<EraserPresetConfig>,

@@ -109,11 +109,11 @@ export default class LayerImageAgent {
   public canUndo = () => this.hm.canUndo();
   public canRedo = () => this.hm.canRedo();
 
-  public undo() {
+  public undo(silent?: boolean) {
     const undoStart = Date.now();
     const undoedAction = this.hm.undo();
     if (undoedAction === undefined) return;
-    setBottomBarText(`undo.`);
+    if (!silent) setBottomBarText(`undo.`);
     undoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
         case 'pixel':
@@ -128,18 +128,18 @@ export default class LayerImageAgent {
       }
     });
     const undoEnd = Date.now();
-    setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
+    if (!silent) setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) undo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     // this.callOnImageChangeListeners({ updatePreview: true });
   }
 
-  public redo() {
+  public redo(silent?: boolean) {
     const redoStart = Date.now();
     const redoedAction = this.hm.redo();
     if (redoedAction === undefined) return;
-    setBottomBarText(`redo.`);
+    if (!silent) setBottomBarText(`redo.`);
     redoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
         case 'pixel':
@@ -154,7 +154,7 @@ export default class LayerImageAgent {
       }
     });
     const redoEnd = Date.now();
-    setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
+    if (!silent) setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) redo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });

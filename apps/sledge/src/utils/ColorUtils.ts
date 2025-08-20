@@ -49,3 +49,13 @@ export function colorMatch(a: RGBAColor, b: RGBAColor): boolean {
 export function isTransparent(a: RGBAColor): boolean {
   return a[3] === 0 || a[3] === undefined;
 }
+
+export const getRandomColorValue = () => Math.floor(Math.random() * 256);
+
+export function getRandomColorRGBA(): RGBAColor {
+  const r = getRandomColorValue();
+  const g = getRandomColorValue();
+  const b = getRandomColorValue();
+  const a = 255;
+  return [r, g, b, a];
+}

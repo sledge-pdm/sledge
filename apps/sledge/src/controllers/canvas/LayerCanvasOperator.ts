@@ -21,18 +21,37 @@ export enum DrawState {
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
 
-  public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2, last?: Vec2) {
+  private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
+    return {
+      x: Math.floor(position.x / dotMagnification),
+      y: Math.floor(position.y / dotMagnification),
+    };
+  }
+
+  public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2, lastPosition?: Vec2) {
     const agent = getAgentOf(this.getLayerIdToDraw());
     if (!agent) return;
     const layer = findLayerById(this.getLayerIdToDraw());
     if (!layer) return;
 
-    if (position) position = this.getMagnificatedPosition(position, layer.dotMagnification);
-    if (last) last = this.getMagnificatedPosition(last, layer.dotMagnification);
+    const rawPosition = position;
+    const rawLastPosition = lastPosition;
+
+    position = this.getMagnificatedPosition(position, layer.dotMagnification);
+    if (lastPosition) lastPosition = this.getMagnificatedPosition(lastPosition, layer.dotMagnification);
 
     if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
 
-    const result = this.useTool(agent, state, originalEvent, toolCategory, position, last);
+    const toolArgs: ToolArgs = {
+      rawPosition,
+      rawLastPosition,
+      position,
+      lastPosition,
+      presetName: toolCategory.presets?.selected,
+      color: hexToRGBA(currentColor()),
+      event: originalEvent,
+    };
+    const result = this.useTool(agent, state, toolCategory, toolArgs);
 
     if (result) {
       if (result.shouldUpdate) {
@@ -50,21 +69,7 @@ export default class LayerCanvasOperator {
     }
   }
 
-  private useTool(
-    agent: LayerImageAgent,
-    state: DrawState,
-    originalEvent: PointerEvent | undefined,
-    tool: ToolCategory,
-    position: Vec2,
-    last?: Vec2
-  ) {
-    const toolArgs: ToolArgs = {
-      position,
-      lastPosition: last,
-      presetName: tool.presets?.selected,
-      color: hexToRGBA(currentColor()),
-      event: originalEvent,
-    };
+  private useTool(agent: LayerImageAgent, state: DrawState, tool: ToolCategory, toolArgs: ToolArgs) {
     let toolResult: ToolResult | undefined = undefined;
     switch (state) {
       case DrawState.start:
@@ -84,12 +89,5 @@ export default class LayerCanvasOperator {
       setBottomBarText(toolResult.result);
     }
     return toolResult;
-  }
-
-  private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
-    return {
-      x: Math.floor(position.x / dotMagnification),
-      y: Math.floor(position.y / dotMagnification),
-    };
   }
 }

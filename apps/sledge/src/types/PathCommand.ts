@@ -13,6 +13,50 @@ export class PathCmdList {
     return this.list.map((cmd) => cmd.toString(mult)).join(' ');
   }
 
+  /**
+   * 文字列の SVG パス (M/L/Z のみ) から PathCmdList を生成
+   */
+  public static parse(pathString: string): PathCmdList {
+    const pathCmds = new PathCmdList();
+    const trimmedAll = pathString.trim();
+    if (!trimmedAll) return pathCmds;
+
+    const commands = trimmedAll.split(/(?=[MLZ])/);
+    commands.forEach((cmd) => {
+      const trimmed = cmd.trim();
+      if (!trimmed) return;
+
+      const parts = trimmed.split(/\s+/);
+      const command = parts[0];
+
+      if (command === 'M' || command === 'L') {
+        const x = parseFloat(parts[1]);
+        const y = parseFloat(parts[2]);
+        pathCmds.add(new PathCmd(command, x, y));
+      } else if (command === 'Z') {
+        pathCmds.add(new PathCmd(command));
+      }
+    });
+
+    return pathCmds;
+  }
+
+  /**
+   * 平行移動 (dx, dy) を加え、さらに倍率 mult を乗じたパス文字列を返す
+   */
+  public toStringTranslated(mult: number = 1, dx: number = 0, dy: number = 0) {
+    return this.list
+      .map((cmd) => {
+        if (cmd.p1 !== undefined && cmd.p2 !== undefined) {
+          const x = (cmd.p1 + dx) * (mult ?? 1);
+          const y = (cmd.p2 + dy) * (mult ?? 1);
+          return `${cmd.cmd} ${x} ${y}`;
+        }
+        return cmd.cmd;
+      })
+      .join(' ');
+  }
+
   public getCmdsPerZ(mult?: number): string[] {
     let result: string[] = [];
     let current = new PathCmdList([]);

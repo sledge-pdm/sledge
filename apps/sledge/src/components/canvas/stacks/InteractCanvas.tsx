@@ -1,9 +1,9 @@
 import { Vec2 } from '@sledge/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import CanvasAreaInteract from '~/controllers/canvas/CanvasAreaInteract';
 import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
@@ -56,19 +56,17 @@ export const InteractCanvas: Component<Props> = (props) => {
   function isDrawableClick(e: PointerEvent): boolean {
     if (e.pointerType === 'touch') return false;
 
-    if (e.ctrlKey) {
-      if (selectionManager.isSelected()) return true;
-      // ペンツールでのctrl+shift（角度固定）を許可
-      if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
-        if (e.shiftKey) return true; // 角度固定のためのshift+ctrlは許可
-      }
-
-      return false; // それ以外はこれまで同様ゆるさない
+    // 基本的にはCanvasAreaInteractのisDraggableと逆の関係
+    if (CanvasAreaInteract.isDraggable(e)) {
+      // キャンバスドラッグが有効な場合は描画不可
+      return false;
     }
 
-    // right=1, left=2, middle=4
-    // console.log(e.buttons)
-    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) return false;
+    // マウスおよびペンにおいては左クリック相当のクリックだけを描画可能なクリックとする
+    // （右クリック、中クリックなどは弾く）
+    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) {
+      return false;
+    }
 
     return true;
   }

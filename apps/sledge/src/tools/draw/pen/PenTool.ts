@@ -17,6 +17,7 @@ export class PenTool implements ToolBehavior {
   private lastPreviewDiff: PixelDiff[] = [];
 
   startPosition: Vec2 | undefined = undefined;
+  startPointerPosition: Vec2 | undefined = undefined;
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     // 前回の状態が残っている場合はクリーンアップ
@@ -29,6 +30,11 @@ export class PenTool implements ToolBehavior {
     this.isShift = args.event?.shiftKey ?? false;
     this.isCtrl = args.event?.ctrlKey ?? false;
     this.startPosition = args.position;
+    if (args.event)
+      this.startPointerPosition = {
+        x: args.event.clientX,
+        y: args.event.clientY,
+      };
 
     this.lastPreviewDiff = [];
 
@@ -48,6 +54,26 @@ export class PenTool implements ToolBehavior {
   }
 
   protected categoryId: ToolCategoryId = 'pen';
+
+  private SNAP_ANGLE = Math.PI / 12;
+
+  private snapToAngle(current: Vec2, start: Vec2): Vec2 {
+    const dx = current.x - start.x;
+    const dy = current.y - start.y;
+    const angle = Math.atan2(dy, dx);
+
+    // 45度単位でスナップ
+    const snapAngle = Math.round(angle / this.SNAP_ANGLE) * this.SNAP_ANGLE;
+    const distance = Math.hypot(dx, dy);
+
+    // console.log(`current=(${current.x}, ${current.y}), start=(${start.x}, ${start.y})`);
+    // console.log(`position snapped to (${start.x + Math.cos(snapAngle) * distance}, ${start.y + Math.sin(snapAngle) * distance})`);
+
+    return {
+      x: Math.round(start.x + Math.cos(snapAngle) * distance),
+      y: Math.round(start.y + Math.sin(snapAngle) * distance),
+    };
+  }
 
   draw(agent: LayerImageAgent, { position, lastPosition, presetName, event }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
@@ -100,7 +126,7 @@ export class PenTool implements ToolBehavior {
         dm.add(this.lastPreviewDiff);
         dm.flush();
         agent.registerToHistory();
-        agent.undo();
+        agent.undo(true);
       } catch (error) {
         console.error('Failed to undo line preview:', error);
         // フォールバック: 手動でピクセルを復元
@@ -119,6 +145,9 @@ export class PenTool implements ToolBehavior {
 
     this.undoLastLineDiff(agent);
 
+    // ctrl+shiftの場合は角度固定
+    const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
+
     const size = (getPresetOf(this.categoryId, presetName) as any)?.size ?? 1;
 
     const pbm = agent.getPixelBufferManager();
@@ -126,7 +155,7 @@ export class PenTool implements ToolBehavior {
 
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
 
-    drawCompletionLine(position, this.startPosition, (x, y) => {
+    drawCompletionLine(targetPosition, this.startPosition, (x, y) => {
       drawSquarePixel({ x, y }, size, (px, py) => {
         if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
           return; // 描画制限により描画しない

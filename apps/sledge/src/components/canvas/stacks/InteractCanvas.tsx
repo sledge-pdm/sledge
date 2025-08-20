@@ -58,7 +58,10 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     if (e.ctrlKey) {
       if (selectionManager.isSelected())
-        return true; // [1] 選択移動の操作だけ特例
+        return true;
+      // ペンツールでのctrl+shift（角度固定）を許可
+      if (toolStore.activeToolCategory === 'pen' && e.shiftKey)
+        return true;
       else return false; // それ以外はこれまで同様ゆるさない
     }
 

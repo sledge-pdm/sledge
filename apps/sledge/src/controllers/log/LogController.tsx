@@ -5,6 +5,10 @@ let currentTimerId: ReturnType<typeof setTimeout> | null = null;
 export function getNormalBottomBarText(init?: boolean) {
   if (init) return 'rotate: shift+wheel / drag: ctrl+drag';
 
+  if (toolStore?.activeToolCategory === 'pen') {
+    return 'line: shift+drag (ctrl to snap) / rotate: shift+wheel';
+  }
+
   if (toolStore?.activeToolCategory === 'rectSelection') {
     return 'add: shift+drag / substract: alt+drag / move: ctrl+drag';
   }
@@ -16,7 +20,7 @@ export function getNormalBottomBarText(init?: boolean) {
   return 'rotate: shift+wheel / drag: ctrl+drag';
 }
 
-export function setBottomBarText(text: string, duration: number = 5000) {
+export function setBottomBarText(text: string, duration: number = 3000) {
   // 既存のタイマーがあればクリア
   if (currentTimerId !== null) {
     clearTimeout(currentTimerId);

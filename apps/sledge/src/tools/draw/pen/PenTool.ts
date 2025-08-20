@@ -6,7 +6,7 @@ import { PixelDiff } from '~/models/history/HistoryManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { drawCompletionLine, drawSquarePixel } from '../../../utils/DrawUtils';
+import { drawCompletionLine, drawSquarePixel } from './PenDraw';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可

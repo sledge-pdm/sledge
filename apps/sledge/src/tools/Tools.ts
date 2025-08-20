@@ -41,7 +41,7 @@ export type PresetConfig = {
 
 // ツール別のプリセット設定型
 export type PenPresetConfig = PresetConfig & {
-  // shape?: 'circle' | 'square';
+  shape?: 'circle' | 'square';
   // opacity?: number;
 };
 
@@ -65,10 +65,10 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1 } as PenPresetConfig,
-        fine: { size: 1 } as PenPresetConfig,
-        thick: { size: 5 } as PenPresetConfig,
-        square: { size: 3 } as PenPresetConfig,
+        [DEFAULT_PRESET]: { size: 1, shape: 'square' } as PenPresetConfig,
+        fine: { size: 1, shape: 'square' } as PenPresetConfig,
+        thick: { size: 5, shape: 'square' } as PenPresetConfig,
+        square: { size: 3, shape: 'square' } as PenPresetConfig,
       },
     },
   } as ToolCategory<PenPresetConfig>,

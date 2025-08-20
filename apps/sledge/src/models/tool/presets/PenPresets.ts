@@ -15,18 +15,18 @@ export const penPresetFields: PresetFieldMeta[] = [
     tips: 'Pen brush size',
     customFormat: '[value]px',
   },
-  // {
-  //   key: 'shape',
-  //   label: 'Shape',
-  //   component: 'Dropdown',
-  //   props: {
-  //     options: [
-  //       { value: 'circle', label: 'Circle' },
-  //       { value: 'square', label: 'Square' },
-  //     ],
-  //   },
-  //   tips: 'Pen brush shape',
-  // },
+  {
+    key: 'shape',
+    label: 'Shape',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { value: 'square', label: 'Square' },
+        { value: 'circle', label: 'Circle' },
+      ],
+    },
+    tips: 'Pen brush shape',
+  },
   // {
   //   key: 'opacity',
   //   label: 'Opacity',

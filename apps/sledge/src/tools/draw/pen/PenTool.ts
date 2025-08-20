@@ -1,12 +1,13 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { PixelDiff } from '~/models/history/HistoryManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { drawCompletionLine, drawSquarePixel } from './PenDraw';
+import { drawCirclePixel, drawCompletionLine, drawSquarePixel } from './PenDraw';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
@@ -75,16 +76,24 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  draw(agent: LayerImageAgent, { position, lastPosition, presetName, event }: ToolArgs, color: RGBAColor): ToolResult {
+  draw(agent: LayerImageAgent, { position, lastPosition, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
-    const size = (getPresetOf(this.categoryId, presetName) as any)?.size ?? 1;
+    const preset = getPresetOf(this.categoryId, presetName) as any;
+    const size = preset?.size ?? 1;
+    const shape = preset?.shape ?? 'square'; // デフォルトは正方形
+
+    const layer = activeLayer();
+    const dotMagnification = layer?.dotMagnification ?? 1;
 
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
 
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
-    drawSquarePixel(position, size, (px, py) => {
+    
+    const drawPixel = shape === 'circle' ? drawCirclePixel : drawSquarePixel;
+    
+    drawPixel(position, rawPosition, size, dotMagnification, (px: number, py: number) => {
       if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
         return; // 描画制限により描画しない
       }
@@ -97,8 +106,8 @@ export class PenTool implements ToolBehavior {
     });
 
     if (lastPosition !== undefined) {
-      drawCompletionLine(position, lastPosition, (x, y) => {
-        drawSquarePixel({ x, y }, size, (px, py) => {
+      drawCompletionLine(position, lastPosition, (x: number, y: number) => {
+        drawPixel({ x, y }, rawPosition, size, dotMagnification, (px: number, py: number) => {
           if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
             return; // 描画制限により描画しない
           }
@@ -140,7 +149,7 @@ export class PenTool implements ToolBehavior {
   }
 
   // 始点からの直線を描画
-  drawLine(commit: boolean, agent: LayerImageAgent, { position, presetName, event }: ToolArgs, color: RGBAColor): ToolResult {
+  drawLine(commit: boolean, agent: LayerImageAgent, { position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     this.undoLastLineDiff(agent);
@@ -148,15 +157,22 @@ export class PenTool implements ToolBehavior {
     // ctrl+shiftの場合は角度固定
     const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
 
-    const size = (getPresetOf(this.categoryId, presetName) as any)?.size ?? 1;
+    const preset = getPresetOf(this.categoryId, presetName) as any;
+    const size = preset?.size ?? 1;
+    const shape = preset?.shape ?? 'square'; // デフォルトは正方形
+
+    const layer = activeLayer();
+    const dotMagnification = layer?.dotMagnification ?? 1;
 
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
 
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
 
-    drawCompletionLine(targetPosition, this.startPosition, (x, y) => {
-      drawSquarePixel({ x, y }, size, (px, py) => {
+    const drawPixel = shape === 'circle' ? drawCirclePixel : drawSquarePixel;
+
+    drawCompletionLine(targetPosition, this.startPosition, (x: number, y: number) => {
+      drawPixel({ x, y }, rawPosition, size, dotMagnification, (px: number, py: number) => {
         if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
           return; // 描画制限により描画しない
         }

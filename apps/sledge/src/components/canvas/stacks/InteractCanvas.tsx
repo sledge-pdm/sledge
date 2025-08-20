@@ -57,12 +57,13 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (e.pointerType === 'touch') return false;
 
     if (e.ctrlKey) {
-      if (selectionManager.isSelected())
-        return true;
+      if (selectionManager.isSelected()) return true;
       // ペンツールでのctrl+shift（角度固定）を許可
-      if (toolStore.activeToolCategory === 'pen' && e.shiftKey)
-        return true;
-      else return false; // それ以外はこれまで同様ゆるさない
+      if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
+        if (e.shiftKey) return true; // 角度固定のためのshift+ctrlは許可
+      }
+
+      return false; // それ以外はこれまで同様ゆるさない
     }
 
     // right=1, left=2, middle=4

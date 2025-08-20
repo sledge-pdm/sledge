@@ -42,7 +42,10 @@ class CanvasAreaInteract {
     if (e.buttons === 1 && e.ctrlKey) {
       if (selectionManager.isSelected()) return false;
       // angle-snapped line
-      if (toolStore.activeToolCategory === 'pen' && e.shiftKey) return false;
+      if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
+        if (e.shiftKey) return false;
+      }
+
       return true;
     }
     return false;

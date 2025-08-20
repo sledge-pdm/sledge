@@ -1,15 +1,16 @@
 import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolPreset } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
-import { interactStore } from '~/stores/EditorStores';
+import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/misc/marching_ants.css';
 import { PathCmd, PathCmdList } from '~/types/PathCommand';
+import { RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {
@@ -174,6 +175,21 @@ const CanvasOverlaySVG: Component = (props) => {
             pointer-events='none'
           />
         </Show>
+
+        <For each={logStore.canvasDebugPoints}>
+          {(point) => {
+            return (
+              <circle
+                r={4}
+                cx={point.x * interactStore.zoom}
+                cy={point.y * interactStore.zoom}
+                fill={`#${RGBAToHex(point.color)}`}
+                stroke='none'
+                pointer-events='none'
+              />
+            );
+          }}
+        </For>
 
         <path
           id='selection-outline'

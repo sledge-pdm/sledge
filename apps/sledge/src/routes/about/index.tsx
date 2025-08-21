@@ -8,6 +8,8 @@ import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 import { aaContainer, aaText, aboutLink, aboutSubTitle, aboutTitle, contentContainer, newVersionText } from './about.css';
 
 const About = () => {
+  const githubPat = import.meta.env.VITE_GITHUB_PAT;
+
   const openLink = (url: string) => {
     open(url);
   };
@@ -20,9 +22,9 @@ const About = () => {
     try {
       await loadGlobalSettings();
       setVersion(await getCurrentVersion());
-      setLatestVersion((await getLatestVersion(getReleaseApiUrl())) ?? '');
+      setLatestVersion((await getLatestVersion(getReleaseApiUrl(), location.origin.includes('localhost') ? undefined : githubPat)) ?? '');
 
-      const isAvailable = await isNewVersionAvailable(false);
+      const isAvailable = await isNewVersionAvailable(false, location.origin.includes('localhost') ? undefined : githubPat);
       setNewVersionAvailable(isAvailable ?? false);
 
       await showMainWindow();

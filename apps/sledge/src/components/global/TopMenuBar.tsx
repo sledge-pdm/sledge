@@ -19,6 +19,7 @@ interface Item {
 }
 
 const TopMenuBar: Component = () => {
+  const githubPat = import.meta.env.VITE_GITHUB_PAT;
   const releaseApiUrl =
     import.meta.env.VITE_GITHUB_REST_API_URL +
     '/repos/' +
@@ -40,9 +41,13 @@ const TopMenuBar: Component = () => {
   const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
   onMount(async () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
-    setLatestVersion((await getLatestVersion(releaseApiUrl)) ?? undefined);
-    const isAvailable = await isNewVersionAvailable(true);
-    setNewVersionAvailable(isAvailable ?? false);
+    try {
+      setLatestVersion((await getLatestVersion(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat)) ?? undefined);
+      const isAvailable = await isNewVersionAvailable(true, location.origin.includes('localhost') ? undefined : githubPat);
+      setNewVersionAvailable(isAvailable ?? false);
+    } catch (e) {
+      console.warn('failed to fetch version data.');
+    }
   });
 
   createEffect(() => {

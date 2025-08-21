@@ -1,4 +1,5 @@
 import { flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
 import { Component, createSignal, onMount } from 'solid-js';
@@ -220,13 +221,14 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         class={flexRow}
         style={{
           position: 'absolute',
-          top: '4px',
-          right: '4px',
+          top: '6px',
+          right: '6px',
           gap: '8px',
           padding: '2px',
           'margin-bottom': '12px',
           'pointer-events': 'none',
           'image-rendering': 'auto',
+          'background-color': vars.color.onBackground,
           border: '1px solid black',
           visibility: stateStore.selected ? 'visible' : 'collapse',
           'transform-origin': '100% 0',

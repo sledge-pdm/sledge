@@ -78,7 +78,7 @@ const About = () => {
           </div>
 
           <div class={flexCol} style={{ 'margin-top': 'auto' }}>
-            <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>fontfaces</p>
+            <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>fontface</p>
             <p style={{ 'margin-bottom': '8px' }}>
               <a class={aboutLink} style={{ 'font-family': ZFB09 }} onClick={(e) => openLink('http://www.04.jp.org')}>
                 04b_XX
@@ -95,8 +95,8 @@ const About = () => {
           </div>
 
           <div class={flexCol} style={{ 'margin-top': '24px' }}>
-            <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>links</p>
-            <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'end', 'margin-bottom': '40px' }}>
+            <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>link</p>
+            <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'end', 'margin-bottom': '36px' }}>
               <a class={aboutLink} onClick={(e) => openLink('https://github.com/Innsbluck-rh/sledge')}>
                 Source (Github)
               </a>

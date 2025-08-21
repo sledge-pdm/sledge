@@ -69,7 +69,7 @@ const CanvasOverlaySVG: Component = (props) => {
   const [selectionState, setSelectionState] = createSignal(selectionManager.getState());
   const onSelectionStateChangedHandler = (e: Events['selection:stateChanged']) => {
     setSelectionChanged(true);
-    console.log('Selection state changed:', e.newState);
+    if (import.meta.env.DEV) console.log('Selection state changed:', e.newState);
     setSelectionState(e.newState);
   };
 

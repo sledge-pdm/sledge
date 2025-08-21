@@ -65,7 +65,8 @@ export class HistoryManager {
   }
 
   public addAction(action: DiffAction) {
-    console.log(`add action to history for layer ${this.layerId}.`, action);
+    if (import.meta.env.DEV) console.log(`add ${action?.diffs.size} actions to history for layer ${this.layerId}.`);
+    // if (import.meta.env.DEV) console.log(`add action to history for layer ${this.layerId}.`, action);
     // push new action and cap undo history
     this.undoActionsStack.push(action);
     if (this.undoActionsStack.length > this.maxStackSize) {
@@ -79,7 +80,8 @@ export class HistoryManager {
 
   public undo(): DiffAction | undefined {
     const undoedAction = this.undoActionsStack.pop();
-    console.log(`undo action to history for layer ${this.layerId}.`, undoedAction);
+    if (import.meta.env.DEV) console.log(`undo ${undoedAction?.diffs.size} actions to history for layer ${this.layerId}.`);
+    // if (import.meta.env.DEV) console.log(`undo action to history for layer ${this.layerId}.`, undoedAction);
     if (!undoedAction) return undefined;
 
     // push to redo and cap redo history
@@ -95,7 +97,8 @@ export class HistoryManager {
 
   public redo(): DiffAction | undefined {
     const redoedAction = this.redoActionsStack.shift();
-    console.log(`redo action to history for layer ${this.layerId}.`, redoedAction);
+    if (import.meta.env.DEV) console.log(`redo ${redoedAction?.diffs.size} actions to history for layer ${this.layerId}.`);
+    // if (import.meta.env.DEV) console.log(`redo action to history for layer ${this.layerId}.`, redoedAction);
     if (!redoedAction) return undefined;
 
     // push back to undo and cap undo history

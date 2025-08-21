@@ -126,13 +126,13 @@ const TopMenuBar: Component = () => {
         openProject();
       },
     },
-    {
-      label: '> from clipboard.',
-      onSelect: () => {
-        setIsOpenMenuShown(false);
-        openProject();
-      },
-    },
+    // {
+    //   label: '> from clipboard.',
+    //   onSelect: () => {
+    //     setIsOpenMenuShown(false);
+    //     openProject();
+    //   },
+    // },
   ];
 
   return (

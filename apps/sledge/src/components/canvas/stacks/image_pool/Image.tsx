@@ -1,5 +1,4 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
 import { Component, createSignal, onMount } from 'solid-js';
@@ -9,7 +8,6 @@ import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePool
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
-import { ImagePoolEntryMenu } from '~/models/menu/ImagePoolEntryMenu';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
 
@@ -156,9 +154,27 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       onFocus={(e) => {
         setStateStore('selected', true);
       }}
-      onContextMenu={async (e) => {
+      // onContextMenu={async (e) => {
+      //   e.preventDefault();
+      //   (await ImagePoolEntryMenu.create(props.entry.id)).show();
+      // }}
+      onContextMenu={(e) => {
         e.preventDefault();
-        (await ImagePoolEntryMenu.create(props.entry.id)).show();
+        showContextMenu(
+          [
+            {
+              label: 'delete',
+              icon: '/icons/image_pool/delete.png',
+              onSelect: () => removeEntry(props.entry.id),
+            },
+            {
+              label: 'burndown',
+              icon: '/icons/image_pool/burndown.png',
+              onSelect: handleBurndown,
+            },
+          ],
+          e
+        );
       }}
     >
       <img
@@ -173,7 +189,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           height: `${props.entry.height}px`,
           opacity: localEntry().visible ? 1 : 0.6,
           'z-index': Consts.zIndex.imagePool,
-          'pointer-events': 'none',
         }}
       />
 
@@ -217,7 +232,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         <Handle x={'0'} y={'50%'} data-pos='w' />
       </svg>
 
-      <div
+      {/* <div
         class={flexRow}
         style={{
           position: 'absolute',
@@ -283,7 +298,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
             cursor: 'pointer',
           }}
         />
-      </div>
+      </div> */}
     </div>
   );
 };

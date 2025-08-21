@@ -80,7 +80,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-  [DEFAULT_PRESET]: { size: 1, shape: 'square' } as EraserPresetConfig,
+        [DEFAULT_PRESET]: { size: 1, shape: 'square' } as EraserPresetConfig,
       },
     },
   } as ToolCategory<EraserPresetConfig>,

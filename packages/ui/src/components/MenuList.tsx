@@ -1,12 +1,13 @@
 import { vars } from '@sledge/theme';
-import { type Component, For, type JSX, onCleanup, onMount } from 'solid-js';
+import { type Component, For, type JSX, onCleanup, onMount, Show } from 'solid-js';
 import { itemText, menuDirection, menuItem, menuStyle } from '../styles/menu_list.css';
 
 export interface MenuListOption {
+  icon?: string; // 8x8
   label: string;
   disabled?: boolean;
   color?: string;
-  onSelect: () => void;
+  onSelect?: () => void;
 }
 
 interface Props extends Omit<JSX.HTMLAttributes<HTMLUListElement>, 'onClick'> {
@@ -60,6 +61,9 @@ export const MenuList: Component<Props> = (props) => {
               props.onClose?.();
             }}
           >
+            <Show when={option.icon}>
+              <img src={option.icon} alt={option.label} width='8' height='8' />
+            </Show>
             <p class={itemText} style={{ color: option.color ?? vars.color.onBackground }}>
               {option.label}
             </p>

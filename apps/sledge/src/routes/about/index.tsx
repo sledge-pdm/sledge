@@ -1,22 +1,11 @@
 import { flexCol, flexRow, getLatestVersion, w100, wh100 } from '@sledge/core';
-import { accentedButton, pageRoot } from '@sledge/theme';
-import { Button } from '@sledge/ui';
+import { k12x8, pageRoot, vars, ZFB08, ZFB09 } from '@sledge/theme';
 import { open } from '@tauri-apps/plugin-shell';
 import { createSignal, onMount } from 'solid-js';
 import { loadGlobalSettings } from '~/io/config/load';
 import { getCurrentVersion, getReleaseApiUrl, isNewVersionAvailable } from '~/utils/VersionUtils';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
-import {
-  aaContainer,
-  aaText,
-  aboutContent,
-  aboutFeedback,
-  aboutLink,
-  aboutSubTitle,
-  aboutTitle,
-  contentContainer,
-  newVersionText,
-} from './about.css';
+import { aaContainer, aaText, aboutLink, aboutSubTitle, aboutTitle, contentContainer, newVersionText } from './about.css';
 
 const About = () => {
   const openLink = (url: string) => {
@@ -85,34 +74,61 @@ const About = () => {
               {newVersionAvailable() ? `> ${latestVersion()} available.` : ''}
             </a>
           </div>
-          <div style={{ 'margin-left': '16px' }}>
-            <p class={aboutContent} style={{ 'margin-bottom': '36px' }}>
-              made with much <span style={{ color: 'magenta' }}>love</span> for:
-              <br />-{' '}
+
+          <div class={flexCol} style={{ 'margin-top': 'auto' }}>
+            <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>fontfaces</p>
+            <p style={{ 'margin-bottom': '8px' }}>
+              <a class={aboutLink} style={{ 'font-family': ZFB09 }} onClick={(e) => openLink('http://www.04.jp.org')}>
+                04b_XX
+              </a>
+              <span style={{ 'font-family': ZFB08, color: '#777', 'margin-left': '8px' }}>by yuji oshimoto</span>
+            </p>
+
+            <p>
+              <a class={aboutLink} style={{ 'font-family': k12x8 }} onClick={(e) => openLink('https://littlelimit.net/k12x8.htm')}>
+                {'k12x8'}
+              </a>
+              <span style={{ 'font-family': ZFB08, color: '#777', 'margin-left': '8px' }}>by num_kadoma (littlelimit.net)</span>
+            </p>
+          </div>
+
+          <div class={flexCol} style={{ 'margin-top': '24px' }}>
+            <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>links</p>
+            <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'end', 'margin-bottom': '40px' }}>
+              <a class={aboutLink} onClick={(e) => openLink('https://github.com/Innsbluck-rh/sledge')}>
+                Source (Github)
+              </a>
+              <p style={{ margin: '0 4px' }}>|</p>
+              <a class={aboutLink} onClick={(e) => openLink('https://www.sledge-rules.app/')}>
+                website
+              </a>
+              <p style={{ margin: '0 4px' }}>|</p>
+              <a class={aboutLink} onClick={(e) => openLink('https://www.x.com/sledge_app')}>
+                twitter
+              </a>
+              <p style={{ margin: '0 4px' }}>|</p>
+              <a class={aboutLink} onClick={(e) => openLink('https://github.com/Innsbluck-rh/sledge/blob/main/LICENSE')}>
+                License (MIT)
+              </a>
+            </div>
+          </div>
+          {/* <div class={flexCol} style={{ 'margin-bottom': '36px' }}>
+            <p class={aboutInspiredText}>
+              inspired by:
+            </p>
+            <div class={flexCol} style={{ 'margin-left': '8px' }}>
               <a class={aboutLink} onClick={(e) => openLink('https://www.sojamo.de/libraries/controlP5/')}>
                 ControlP5
               </a>
-              <br />-{' '}
               <a class={aboutLink} onClick={(e) => openLink('https://archlinux.org/')}>
                 ArchLinux
               </a>
-              <br />-{' '}
               <a class={aboutLink} onClick={(e) => openLink('https://apps.apple.com/jp/app/caustic/id775735447/')}>
                 Caustic3
               </a>
               <br />
-            </p>
-          </div>
-          <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'end' }}>
-            <p class={aboutFeedback}>
-              Feed us with your feedback.
-              <br />
-              全ての意見が貴重です。
-            </p>
-            <Button class={accentedButton} onClick={(e: MouseEvent) => openLink('https://tally.so/r/w7jZNL')}>
-              &gt;&gt; send feedback
-            </Button>
-          </div>
+            </div>
+          </div> */}
         </div>
       </div>
     </div>

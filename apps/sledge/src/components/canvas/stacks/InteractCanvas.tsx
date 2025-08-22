@@ -1,4 +1,5 @@
 import { Vec2 } from '@sledge/core';
+import { showContextMenu } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/controllers/canvas/CanvasAreaInteract';
@@ -6,6 +7,7 @@ import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPosit
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
+import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -192,6 +194,15 @@ export const InteractCanvas: Component<Props> = (props) => {
         'pointer-events': 'all',
         cursor: 'none',
         'z-index': Consts.zIndex.interactCanvas,
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log('Context menu opened');
+        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e, {
+          closeByOutsideClick: true,
+          onClose: () => console.log('Context menu closed'),
+        });
       }}
     />
   );

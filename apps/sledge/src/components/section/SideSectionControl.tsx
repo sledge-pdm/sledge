@@ -70,6 +70,10 @@ const SideSectionControl: Component<Props> = (props) => {
 
         'z-index': Consts.zIndex.sideSection,
       }}
+      // onContextMenu={(e) => {
+      //   e.preventDefault();
+      //   e.stopImmediatePropagation();
+      // }}
     >
       <p
         class={sideSectionControlToggle}

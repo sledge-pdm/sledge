@@ -2,16 +2,14 @@ import { flexCol } from '@sledge/core';
 import { Slider, ToggleSwitch } from '@sledge/ui';
 import { AlphaBlurMode, gaussian_blur, GaussianBlurOption, grayscale } from '@sledge/wasm';
 import { Component, createSignal } from 'solid-js';
+import SectionItem from '~/components/section/SectionItem';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
-import { sectionCaption, sectionRoot } from '~/styles/section/section_item.css';
 
 const Effects: Component = () => {
   const [blurOptions, setBlurOptions] = createSignal<GaussianBlurOption>(new GaussianBlurOption(1000, AlphaBlurMode.Blur));
   return (
-    <div class={sectionRoot}>
-      <p class={sectionCaption}>effects.</p>
-
+    <SectionItem title='effects.'>
       <div class={flexCol} style={{ 'margin-top': '16px', gap: '16px' }}>
         <button
           onClick={() => {
@@ -83,7 +81,7 @@ const Effects: Component = () => {
           </div>
         </div>
       </div>
-    </div>
+    </SectionItem>
   );
 };
 

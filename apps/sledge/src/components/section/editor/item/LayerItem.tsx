@@ -1,13 +1,12 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
-import { Icon, Light } from '@sledge/ui';
-import { LogicalPosition } from '@tauri-apps/api/dpi';
+import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { setLayerName } from '~/controllers/layer/LayerController';
+import { clearLayer, duplicateLayer, setLayerName } from '~/controllers/layer/LayerController';
 import { allLayers, moveLayer } from '~/controllers/layer/LayerListController';
 import { Layer } from '~/models/layer/Layer';
-import { LayerMenu } from '~/models/menu/LayerMenu';
+import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import {
   activeLight,
@@ -101,8 +100,21 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           onClick={onDetClicked}
           onContextMenu={async (e) => {
             e.preventDefault();
-            const menu = await LayerMenu.create(props.layer.id);
-            menu.show(new LogicalPosition(e.clientX, e.clientY));
+            e.stopImmediatePropagation();
+
+            // const menu = await LayerMenu.create(props.layer.id);
+            // menu.show(new LogicalPosition(e.clientX, e.clientY));
+
+            const layerId = props.layer.id;
+            showContextMenu(
+              props.layer.name,
+              [
+                { ...ContextMenuItems.BaseRemove, onSelect: () => clearLayer(layerId) },
+                { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
+                { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },
+              ],
+              e
+            );
           }}
           style={{
             animation: isHighlighted() ? 'blink 0.2s ease-in-out 0s 2' : 'none',

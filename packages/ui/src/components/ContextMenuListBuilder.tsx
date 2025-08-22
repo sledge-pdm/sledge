@@ -1,4 +1,3 @@
-/** @jsxImportSource solid-js */
 import { render } from 'solid-js/web';
 import ContextMenuList from './ContextMenuList';
 import type { MenuListOption } from './MenuList';
@@ -24,7 +23,12 @@ export interface ContextMenuController {
   close: () => void;
 }
 
-export function showContextMenu(options: MenuListOption[], position: PositionLike, opts?: ShowMenuOptions): ContextMenuController {
+export function showContextMenu(
+  title: string | undefined,
+  options: MenuListOption[],
+  position: PositionLike,
+  opts?: ShowMenuOptions
+): ContextMenuController {
   const host = document.createElement('div');
   host.style.position = 'fixed';
   host.style.inset = '0 0 0 0';
@@ -38,6 +42,7 @@ export function showContextMenu(options: MenuListOption[], position: PositionLik
   const dispose = render(
     () => (
       <ContextMenuList
+        title={title}
         options={options}
         open={true}
         position={pos}

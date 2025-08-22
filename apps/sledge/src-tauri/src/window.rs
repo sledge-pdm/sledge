@@ -163,7 +163,18 @@ pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<()
     // メインウィンドウを表示
     if let Some(window) = app.get_webview_window(&window_label) {
         window.show().map_err(|e| e.to_string())?;
-        // window.set_focus().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+
+#[tauri::command]
+pub async fn open_devtools_window(app: AppHandle, window_label: String) -> Result<(), String> {
+    // devToolsを表示
+    if let Some(window) = app.get_webview_window(&window_label) {
+        window.open_devtools();
     }
 
     Ok(())

@@ -5,11 +5,12 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB03 } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
+import SectionItem from '~/components/section/SectionItem';
 import { activeLayer, allLayers } from '~/controllers/layer/LayerListController';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/models/canvas/Canvas';
 import { Consts } from '~/models/Consts';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
@@ -75,9 +76,7 @@ const CanvasSettings: Component = () => {
   };
 
   return (
-    <div class={sectionRoot}>
-      <p class={sectionCaption}>canvas.</p>
-
+    <SectionItem title='canvas.'>
       <div class={sectionContent} style={{ 'padding-left': '8px', gap: '10px', 'margin-top': '2px', 'margin-bottom': '24px' }}>
         <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': '2px' }}>
           <p style={{ color: vars.color.onBackground, width: '72px' }}>presets.</p>
@@ -164,7 +163,7 @@ const CanvasSettings: Component = () => {
           Adjust zoom.
         </Button>
       </div>
-    </div>
+    </SectionItem>
   );
 };
 

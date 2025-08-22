@@ -8,9 +8,11 @@ import Home from './routes/start/index';
 
 import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
+import { showContextMenu } from '@sledge/ui';
 import { createEffect, onCleanup, onMount } from 'solid-js';
 import DebugViewer from '~/components/debug/DebugViewer';
 import { loadGlobalSettings } from '~/io/config/load';
+import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { globalConfig } from '~/stores/GlobalStores';
 import { reportCriticalError } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
@@ -61,7 +63,24 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <div class={[flexCol, h100].join(' ')}>
+          <div
+            class={[flexCol, h100].join(' ')}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              console.log('Context menu opened');
+              showContextMenu(
+                undefined,
+                import.meta.env.DEV
+                  ? [ContextMenuItems.Save, ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools]
+                  : [ContextMenuItems.Save],
+                e,
+                {
+                  closeByOutsideClick: true,
+                  onClose: () => console.log('Context menu closed'),
+                }
+              );
+            }}
+          >
             <TitleBar />
             <main>{props.children}</main>
             <DebugViewer />

@@ -1,4 +1,4 @@
-import { vars } from '@sledge/theme';
+import { k12x8, vars } from '@sledge/theme';
 import { createEffect, createSignal, For, onCleanup, onMount, Show, type Component } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { itemText, menuItem, menuStyle } from '../styles/menu_list.css';
@@ -8,6 +8,7 @@ import type { MenuListOption } from './MenuList';
 type Coords = { x: number; y: number };
 
 interface Props {
+  title?: string;
   options: MenuListOption[];
   open: boolean;
   position: Coords; // 表示位置（スクリーン座標, px）
@@ -87,25 +88,40 @@ export const ContextMenuList: Component<Props> = (props) => {
             // menuStyle 側の top/bottom を無効化
             bottom: 'auto',
             right: 'auto',
+            'min-width': '120px',
+            'margin-top': '4px',
+            'border-color': vars.color.onBackground,
+            'border-radius': '4px',
+
+            filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2))',
           }}
           onTransitionEnd={adjustPosition}
         >
+          <Show when={props.title}>
+            <p style={{ margin: '6px 8px', color: vars.color.muted }}>{props.title}</p>
+          </Show>
           <For each={props.options} fallback={<li>選択肢がありません</li>}>
-            {(option) => (
+            {(option, index) => (
               <li
                 class={menuItem}
                 role='option'
-                style={{ 'pointer-events': option.disabled ? 'none' : 'all', opacity: option.disabled ? 0.5 : 1 }}
+                style={{
+                  'pointer-events': option.disabled ? 'none' : 'all',
+                  opacity: option.disabled ? 0.5 : 1,
+                  'border-bottom': index() !== props.options.length - 1 ? `1px solid ${vars.color.borderSecondary}` : 'none',
+                }}
                 onClick={() => {
                   option.onSelect?.();
                   props.onClose?.();
                 }}
               >
                 {/* icon は 8x8 前提 */}
-                <Show when={option.icon}>
+                <Show when={option.icon} fallback={<div style={{ width: '8px', height: '8px' }} />}>
                   <Icon src={option.icon!} base={8} color={vars.color.onBackground} />
                 </Show>
-                <p class={itemText}>{option.label}</p>
+                <p class={itemText} style={{ 'font-family': k12x8, 'font-size': '8px', 'padding-top': '1px', 'margin-bottom': '-1px' }}>
+                  {option.label}
+                </p>
               </li>
             )}
           </For>

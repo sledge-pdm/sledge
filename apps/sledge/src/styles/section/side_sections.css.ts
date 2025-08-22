@@ -20,8 +20,8 @@ export const sideAreaContentWrapper = style([
     right: 0,
     paddingTop: '32px',
     paddingBottom: '48px',
-    paddingLeft: '28px',
-    paddingRight: '28px',
+    paddingLeft: '20px',
+    paddingRight: '20px',
 
     overflowX: 'hidden',
     overflowY: 'scroll',

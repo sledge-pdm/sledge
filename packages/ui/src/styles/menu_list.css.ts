@@ -35,8 +35,10 @@ export const menuDirection = styleVariants({
 export const menuItem = style([
   flexRow,
   {
-    padding: '7px 10px 7px 10px',
-    gap: '14px',
+    boxSizing: 'border-box',
+    padding: '8px 10px 8px 10px',
+    overflow: 'hidden',
+    gap: '12px',
     cursor: 'pointer',
     selectors: {
       '&:hover': { backgroundColor: vars.color.surface },
@@ -46,4 +48,6 @@ export const menuItem = style([
 
 export const itemText = style({
   whiteSpace: 'nowrap',
+  padding: 0,
+  inset: 0,
 });

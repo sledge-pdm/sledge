@@ -8,6 +8,7 @@ import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePool
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
+import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
 
@@ -160,16 +161,16 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       // }}
       onContextMenu={(e) => {
         e.preventDefault();
+        e.stopImmediatePropagation();
         showContextMenu(
+          props.entry.originalPath,
           [
             {
-              label: 'delete',
-              icon: '/icons/image_pool/delete.png',
+              ...ContextMenuItems.BaseRemove,
               onSelect: () => removeEntry(props.entry.id),
             },
             {
-              label: 'burndown',
-              icon: '/icons/image_pool/burndown.png',
+              ...ContextMenuItems.BaseBurndown,
               onSelect: handleBurndown,
             },
           ],

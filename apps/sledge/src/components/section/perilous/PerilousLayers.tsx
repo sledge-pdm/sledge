@@ -3,8 +3,9 @@ import { vars } from '@sledge/theme';
 import { Button, Icon } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
+import SectionItem from '~/components/section/SectionItem';
 import { resetAllLayers } from '~/controllers/layer/LayerListController';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const RESET_ALL_MSG = 'Sure to RESET ALL LAYERS?';
 const PerilousLayers: Component = () => {
@@ -15,25 +16,25 @@ const PerilousLayers: Component = () => {
         <p style={{ color: vars.color.error, 'font-size': '24px' }}>DANGER!!</p>
       </div>
       <p style={{ color: vars.color.error, 'font-size': '8px', 'margin-bottom': '28px' }}>these operations may destroy your layer/project.</p>
-      <p class={sectionCaption} style={{ color: vars.color.error }}>
-        Layers.
-      </p>
-      <div class={sectionContent} style={{ 'padding-left': '8px', gap: '6px' }}>
-        <Button
-          style={{
-            'border-color': vars.color.error,
-            padding: '4px 8px',
-            color: vars.color.error,
-            'font-size': '16px',
-          }}
-          hoverContent='!!!!!!!!!!!!!'
-          onClick={() => {
-            confirmOperation(RESET_ALL_MSG, resetAllLayers);
-          }}
-        >
-          RESET ALL LAYERS
-        </Button>
-      </div>
+
+      <SectionItem title='layer operations.'>
+        <div class={sectionContent} style={{ 'margin-top': '8px', 'padding-left': '8px', gap: '6px' }}>
+          <Button
+            style={{
+              'border-color': vars.color.error,
+              padding: '4px 8px',
+              color: vars.color.error,
+              'font-size': '16px',
+            }}
+            hoverContent='!!!!!!!!!!!!!'
+            onClick={() => {
+              confirmOperation(RESET_ALL_MSG, resetAllLayers);
+            }}
+          >
+            RESET ALL LAYERS
+          </Button>
+        </div>
+      </SectionItem>
     </div>
   );
 };

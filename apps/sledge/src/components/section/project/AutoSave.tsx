@@ -2,8 +2,9 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
+import SectionItem from '~/components/section/SectionItem';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent } from '~/styles/section/section_item.css';
 
 const autoSaveIntervalOptions: DropdownOption<number>[] = [
   { label: '15 sec', value: 15 },
@@ -15,8 +16,7 @@ const autoSaveIntervalOptions: DropdownOption<number>[] = [
 
 const AutoSave: Component = () => {
   return (
-    <div class={sectionRoot}>
-      <p class={sectionCaption}>Auto Save.</p>
+    <SectionItem title='autosave.'>
       <div class={sectionContent} style={{ 'padding-left': '8px', gap: '12px', 'margin-top': '8px', 'margin-bottom': '8px' }}>
         {/* <p>configure periodic save.</p> */}
         <ToggleSwitch
@@ -56,7 +56,7 @@ const AutoSave: Component = () => {
           </div>
         </div>
       </div>
-    </div>
+    </SectionItem>
   );
 };
 

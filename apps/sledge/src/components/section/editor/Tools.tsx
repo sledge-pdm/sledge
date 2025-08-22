@@ -3,16 +3,16 @@ import { vars } from '@sledge/theme';
 import { Component, For, Show } from 'solid-js';
 import ToolPresetManager from '~/components/tool/ToolPresetManager';
 import { toolStore } from '~/stores/EditorStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent } from '~/styles/section/section_item.css';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolItem from './item/ToolItem';
+import SectionItem from '~/components/section/SectionItem';
 
 const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'move'];
 
-const Draw: Component = () => {
+const Tools: Component = () => {
   return (
-    <div class={sectionRoot}>
-      <p class={sectionCaption}>draw.</p>
+    <SectionItem title='tool.'>
       <div class={sectionContent}>
         <div class={flexRow} style={{ 'margin-bottom': vars.spacing.xs, gap: vars.spacing.lg }}>
           <For each={mainTools}>
@@ -33,8 +33,8 @@ const Draw: Component = () => {
           </div>
         </Show>
       </div>
-    </div>
+    </SectionItem>
   );
 };
 
-export default Draw;
+export default Tools;

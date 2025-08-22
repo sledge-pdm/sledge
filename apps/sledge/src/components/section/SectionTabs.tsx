@@ -1,8 +1,9 @@
 import { Component } from 'solid-js';
 import Color from '~/components/section/editor/Color';
-import Draw from '~/components/section/editor/Draw';
+import Images from '~/components/section/editor/Images';
 import LayerList from '~/components/section/editor/LayerList';
 import Selection from '~/components/section/editor/Selection';
+import Tools from '~/components/section/editor/Tools';
 import Effects from '~/components/section/effects/Effects';
 import PerilousLayers from '~/components/section/perilous/PerilousLayers';
 import AutoSave from '~/components/section/project/AutoSave';
@@ -15,8 +16,9 @@ export const EditorTab: Component = () => {
   return (
     <>
       <Color />
-      <Draw />
+      <Tools />
       <Selection />
+      <Images />
       <LayerList />
     </>
   );

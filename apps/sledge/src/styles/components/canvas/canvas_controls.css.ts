@@ -26,14 +26,13 @@ export const undoRedoContainer = style([
 export const undoIcon = style([
   flexCol,
   {
-    width: '12px',
-    height: '12px',
+    width: '8px',
+    height: '8px',
     imageRendering: 'pixelated',
     shapeRendering: 'geometricPrecision',
     alignContent: 'center',
     alignItems: 'center',
     backdropFilter: 'invert()',
-    clipPath: 'url(/icons/misc/undo_12.svg#clipPath)',
     scale: 2,
   },
 ]);
@@ -41,14 +40,13 @@ export const undoIcon = style([
 export const redoIcon = style([
   flexCol,
   {
-    width: '12px',
-    height: '12px',
+    width: '8px',
+    height: '8px',
     imageRendering: 'pixelated',
     shapeRendering: 'geometricPrecision',
     alignContent: 'center',
     alignItems: 'center',
     backdropFilter: 'invert()',
-    clipPath: 'url(/icons/misc/redo_12.svg#clipPath)',
     scale: 2,
   },
 ]);

@@ -87,6 +87,10 @@ const SideSectionsOverlay: Component<Props> = (props) => {
 
         'pointer-events': 'all',
       }}
+      // onContextMenu={(e) => {
+      //   e.preventDefault();
+      //   e.stopImmediatePropagation();
+      // }}
     >
       <Show when={appearanceStore[props.side].shown}>
         <div id='side_sections' class={sideAreaRoot} style={{ width: '300px' }}>

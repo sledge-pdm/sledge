@@ -1,4 +1,4 @@
-import { Consts, flexCol } from '@sledge/core';
+import { Consts, flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style, styleVariants } from '@vanilla-extract/css';
 
@@ -32,14 +32,22 @@ export const menuDirection = styleVariants({
 });
 
 // メニューアイテム
-export const menuItem = style({
-  cursor: 'pointer',
-  selectors: {
-    '&:hover': { backgroundColor: vars.color.surface },
+export const menuItem = style([
+  flexRow,
+  {
+    boxSizing: 'border-box',
+    padding: '8px 10px 8px 10px',
+    overflow: 'hidden',
+    gap: '12px',
+    cursor: 'pointer',
+    selectors: {
+      '&:hover': { backgroundColor: vars.color.surface },
+    },
   },
-});
+]);
 
 export const itemText = style({
-  margin: '6px 10px 6px 10px',
   whiteSpace: 'nowrap',
+  padding: 0,
+  inset: 0,
 });

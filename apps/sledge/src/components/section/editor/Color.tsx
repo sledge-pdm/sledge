@@ -5,11 +5,12 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
 import { ColorBox, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
+import SectionItem from '~/components/section/SectionItem';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
 import { getActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
 import { colorElemDescription, swatchContainer } from '~/styles/section/editor/color.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent } from '~/styles/section/section_item.css';
 
 const Color: Component = () => {
   let hexInputRef: HTMLInputElement;
@@ -19,9 +20,15 @@ const Color: Component = () => {
   };
 
   return (
-    <div class={sectionRoot}>
-      <p class={sectionCaption}>color.</p>
-      <div class={sectionContent} style={{ 'flex-direction': 'row', 'margin-top': '6px', 'margin-bottom': '4px' }}>
+    <SectionItem title='color.'>
+      <div
+        class={sectionContent}
+        style={{
+          'flex-direction': 'row',
+          'margin-top': '6px',
+          'margin-bottom': '4px',
+        }}
+      >
         <div class={swatchContainer}>
           <For each={colorStore.swatches}>
             {(item, index) => (
@@ -87,7 +94,7 @@ const Color: Component = () => {
           />
         </div>
       </div>
-    </div>
+    </SectionItem>
   );
 };
 

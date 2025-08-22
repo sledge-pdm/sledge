@@ -121,10 +121,9 @@ pub async fn open_window(
         SledgeWindowKind::About => {
             builder = builder
                 .title("about.")
-                .inner_size(400.0, 280.0)
+                .inner_size(380.0, 260.0)
                 .resizable(false)
                 .closable(true)
-                .skip_taskbar(true)
                 .minimizable(false)
                 .maximizable(false);
         }
@@ -134,7 +133,6 @@ pub async fn open_window(
                 .inner_size(600.0, 400.0)
                 .resizable(false)
                 .closable(true)
-                .skip_taskbar(true)
                 .minimizable(false)
                 .maximizable(false);
         }
@@ -165,7 +163,19 @@ pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<()
     // メインウィンドウを表示
     if let Some(window) = app.get_webview_window(&window_label) {
         window.show().map_err(|e| e.to_string())?;
-        // window.set_focus().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+
+#[tauri::command]
+pub async fn open_devtools_window(app: AppHandle, window_label: String) -> Result<(), String> {
+    // devToolsを表示
+    if let Some(window) = app.get_webview_window(&window_label) {
+         #[cfg(debug_assertions)]
+        window.open_devtools();
     }
 
     Ok(())

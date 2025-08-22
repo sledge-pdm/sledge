@@ -68,9 +68,9 @@ export const getCurrentVersion = async (): Promise<string> => {
   return await getVersion();
 };
 
-export const isNewVersionAvailable = async (considerSkip: boolean): Promise<boolean | undefined> => {
+export const isNewVersionAvailable = async (considerSkip: boolean, pat?: string): Promise<boolean | undefined> => {
   const current = await getCurrentVersion();
-  const latestVersion = await getLatestVersion(getReleaseApiUrl());
+  const latestVersion = await getLatestVersion(getReleaseApiUrl(), pat);
 
   if (!latestVersion) return undefined;
 

@@ -3,7 +3,7 @@ import { vars } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
@@ -93,7 +93,7 @@ const SaveSection: Component = () => {
     setSaveTimeText(getSaveTimeText());
   });
 
-  const saveMenu: MenuListOption[] = [
+  const saveMenu = createMemo<MenuListOption[]>(() => [
     { label: 'Save As...', onSelect: () => save(true), color: vars.color.onBackground },
     {
       label: 'Open Saved Folder',
@@ -104,10 +104,9 @@ const SaveSection: Component = () => {
       disabled: !fileStore.location.path || !fileStore.location.name,
       color: vars.color.onBackground,
     },
-    // { label: 'Save As Layers', onSelect: () => save(true), color: vars.color.onBackground },
-  ];
+  ]);
 
-  const [iconSrc, setIconSrc] = createSignal<string | undefined>(undefined);
+  // const [iconSrc, setIconSrc] = createSignal<string | undefined>(undefined);
 
   const [autoSaveIntervalRatio, setAutoSaveIntervalRatio] = createSignal<number>(0);
 
@@ -198,7 +197,7 @@ const SaveSection: Component = () => {
 
       <Show when={isSaveMenuShown()}>
         <MenuList
-          options={saveMenu}
+          options={saveMenu()}
           onClose={() => setIsSaveMenuShown(false)}
           align={'right'}
           style={{

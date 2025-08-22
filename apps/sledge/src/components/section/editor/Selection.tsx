@@ -3,9 +3,10 @@ import { vars } from '@sledge/theme';
 import { Dropdown } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
+import SectionItem from '~/components/section/SectionItem';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent } from '~/styles/section/section_item.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
 const Selection: Component = () => {
@@ -56,9 +57,8 @@ const Selection: Component = () => {
   });
 
   return (
-    <div class={sectionRoot}>
-      <Show when={isSelected()}>
-        <p class={sectionCaption}>selection.</p>
+    <Show when={isSelected()}>
+      <SectionItem title='selection.'>
         <div class={sectionContent}>
           <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '12px', 'margin-bottom': vars.spacing.md, 'margin-top': vars.spacing.sm }}>
             <div
@@ -144,8 +144,8 @@ const Selection: Component = () => {
             </p>
           </div> */}
         </div>
-      </Show>
-    </div>
+      </SectionItem>
+    </Show>
   );
 };
 

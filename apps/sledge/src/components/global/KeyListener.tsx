@@ -19,10 +19,10 @@ const KeyListener: Component = () => {
   const isInputFocused = () => {
     const activeElement = document.activeElement;
     if (!activeElement) return false;
-    
+
     const tagName = activeElement.tagName.toLowerCase();
     const isContentEditable = activeElement.getAttribute('contenteditable') === 'true';
-    
+
     return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isContentEditable;
   };
 

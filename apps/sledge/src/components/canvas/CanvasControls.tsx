@@ -30,14 +30,14 @@ const CanvasControls: Component = () => {
         <defs>
           <clipPath id='clipPath-undo'>
             <path
-              d='M 2 4 L 3 4 L 3 3 L 5 3 L 5 2 L 4 2 L 4 4 L 9 4 L 9 10 L 3 10 L 3 9 L 10 9 L 10 5 L 4 5 L 4 7 L 5 7 L 5 6 L 3 6 L 3 5 L 2 5 L 2 4 Z'
+              d='M 2 5 L 3 5 L 3 4 L 1 4 L 1 3 L 0 3 L 0 2 L 1 2 L 1 1 L 3 1 L 3 0 L 2 0 L 2 2 L 7 2 L 7 8 L 1 8 L 1 7 L 8 7 L 8 3 L 2 3 L 2 5 Z'
               fill='black'
             />
           </clipPath>
 
           <clipPath id='clipPath-redo'>
             <path
-              d='M 7 7 L 8 7 L 8 5 L 2 5 L 2 9 L 9 9 L 9 10 L 3 10 L 3 4 L 8 4 L 8 2 L 7 2 L 7 3 L 9 3 L 9 4 L 10 4 L 10 5 L 9 5 L 9 6 L 7 6 L 7 7 Z'
+              d='M 5 1 L 7 1 L 7 2 L 8 2 L 8 3 L 7 3 L 7 4 L 5 4 L 5 5 L 6 5 L 6 3 L 0 3 L 0 7 L 7 7 L 7 8 L 1 8 L 1 2 L 6 2 L 6 0 L 5 0 L 5 1 Z'
               fill='black'
             />
           </clipPath>

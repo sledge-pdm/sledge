@@ -23,6 +23,10 @@ export function openWindow(kind: WindowKind, options?: { query?: string; openPat
   });
 }
 
+export function openDevTools(windowLabel: string): Promise<void> {
+  return safeInvoke('open_devtools_window', { windowLabel });
+}
+
 export async function closeWindowsByLabel(label: string) {
   (await getAllWebviewWindows())
     .filter((w) => w.label === label)

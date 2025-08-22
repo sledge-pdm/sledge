@@ -11,7 +11,7 @@ import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/misc/marching_ants.css';
 import { getDrawnPixelMask } from '~/tools/draw/pen/PenDraw';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
-import { PathCmd, PathCmdList } from '~/types/PathCommand';
+import { PathCmdList } from '~/types/PathCommand';
 import { RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -55,8 +55,8 @@ const CanvasOverlaySVG: Component = (props) => {
     const pathString = mask_to_path(combinedMask, width, height, offset.x, offset.y);
 
     // パス文字列をPathCmdListに変換
-  const pathCmds = PathCmdList.parse(pathString);
-  setPathCmdList(pathCmds);
+    const pathCmds = PathCmdList.parse(pathString);
+    setPathCmdList(pathCmds);
   };
 
   const onSelectionChangedHandler = (e: Events['selection:areaChanged']) => {
@@ -69,7 +69,7 @@ const CanvasOverlaySVG: Component = (props) => {
   const [selectionState, setSelectionState] = createSignal(selectionManager.getState());
   const onSelectionStateChangedHandler = (e: Events['selection:stateChanged']) => {
     setSelectionChanged(true);
-    console.log('Selection state changed:', e.newState);
+    if (import.meta.env.DEV) console.log('Selection state changed:', e.newState);
     setSelectionState(e.newState);
   };
 

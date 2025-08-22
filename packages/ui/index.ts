@@ -1,5 +1,7 @@
 export { default as Button } from './src/components/Button';
 export { default as ColorBox } from './src/components/ColorBox';
+export { default as ContextMenuList } from './src/components/ContextMenuList';
+export { showContextMenu } from './src/components/ContextMenuListBuilder';
 export { default as Checkbox } from './src/components/control/Checkbox';
 export { default as Dropdown, type DropdownOption } from './src/components/control/Dropdown';
 export { default as RadioButton } from './src/components/control/RadioButton';

@@ -92,7 +92,7 @@ export const configFormNoPreset = style([
 export const configFormFieldHeader = style([
   {
     marginBottom: vars.spacing.xs,
-    fontSize: '18px',
+    fontSize: '12px',
     fontFamily: ZFB31,
     color: vars.color.accent,
   },

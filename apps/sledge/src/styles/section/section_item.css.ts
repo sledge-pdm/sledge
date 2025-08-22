@@ -1,5 +1,5 @@
 import { flexCol, w100 } from '@sledge/core';
-import { vars, ZFB08, ZFB11 } from '@sledge/theme';
+import { vars, ZFB11 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const sectionRoot = style([
@@ -11,13 +11,13 @@ export const sectionRoot = style([
 
 export const sectionCaption = style({
   fontFamily: ZFB11,
-  fontSize: vars.text.sm,
-  marginBottom: vars.spacing.sm,
-  opacity: 0.8,
+  letterSpacing: '2px',
+  fontSize: '8px',
+  opacity: 0.6,
 });
 
 export const sectionSubCaption = style({
-  fontFamily: ZFB08,
+  fontFamily: ZFB11,
   fontSize: vars.text.sm,
   marginTop: vars.spacing.sm,
   marginBottom: vars.spacing.xs,

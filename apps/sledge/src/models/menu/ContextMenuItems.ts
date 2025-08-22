@@ -1,4 +1,3 @@
-import { MenuListOption } from '@sledge/ui';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { saveProject } from '~/io/project/out/save';

@@ -174,6 +174,7 @@ pub async fn show_main_window(app: AppHandle, window_label: String) -> Result<()
 pub async fn open_devtools_window(app: AppHandle, window_label: String) -> Result<(), String> {
     // devToolsを表示
     if let Some(window) = app.get_webview_window(&window_label) {
+         #[cfg(debug_assertions)]
         window.open_devtools();
     }
 

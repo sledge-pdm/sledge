@@ -45,7 +45,8 @@ export async function addToImagePool(imagePaths: string | string[]) {
 }
 
 export async function relinkEntry(id: string, newPath: string) {
-  updateEntryPartial(id, { originalPath: newPath, resourcePath: newPath });
+  const filename = newPath.split(/[\\/]/).pop() ?? newPath;
+  updateEntryPartial(id, { originalPath: newPath, resourcePath: newPath, fileName: filename });
 }
 
 async function createEntry(originalPath: string) {
@@ -61,6 +62,7 @@ async function createEntry(originalPath: string) {
     originalPath,
     // 段階的移行のため resourcePath は originalPath をミラー
     resourcePath: originalPath,
+    fileName: originalPath.split(/[\\/]/).pop() ?? originalPath,
     x: 0,
     y: 0,
     scale: Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height),

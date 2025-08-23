@@ -155,7 +155,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         style={{
           transform: `translate(-${size() / 2}px, -${size() / 2}px)`,
           position: 'absolute',
-          'z-index': Consts.zIndex.imagePoolHandle,
         }}
       />
     );
@@ -193,7 +192,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         e.preventDefault();
         e.stopImmediatePropagation();
         showContextMenu(
-          props.entry.originalPath,
+          props.entry.fileName,
           [
             {
               ...ContextMenuItems.BaseRemove,
@@ -219,7 +218,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           width: `${props.entry.width}px`,
           height: `${props.entry.height}px`,
           opacity: stateStore.visible ? 1 : 0.6,
-          'z-index': Consts.zIndex.imagePool,
+          'z-index': Consts.zIndex.imagePoolImage,
         }}
       />
 
@@ -237,20 +236,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           'shape-rendering': 'geometricPrecision',
           overflow: 'visible',
           visibility: stateStore.selected ? 'visible' : 'collapse',
+          'z-index': Consts.zIndex.imagePoolControl,
         }}
       >
         {/* border rect */}
-        <rect
-          class={'border-rect'}
-          width={'100%'}
-          height={'100%'}
-          fill='none'
-          stroke='black'
-          stroke-width={1 / interactStore.zoom}
-          style={{
-            'z-index': Consts.zIndex.imagePoolBorder,
-          }}
-        />
+        <rect class={'border-rect'} width={'100%'} height={'100%'} fill='none' stroke='black' stroke-width={1 / interactStore.zoom} />
         {/* 四隅 */}
         <Handle x={'0'} y={'0'} data-pos='nw' />
         <Handle x={'100%'} y={'0'} data-pos='ne' />

@@ -72,13 +72,11 @@ const referenceLengthRatio = 0.75;
 const referenceLength = () => {
   const sectionBetweenArea = document.getElementById('sections-between-area')!;
   const areaBound = sectionBetweenArea.getBoundingClientRect();
-  const width = areaBound.width;
-  const height = areaBound.height;
 
-  if (width < height) {
-    return width * referenceLengthRatio;
+  if (areaBound.width < areaBound.height) {
+    return areaBound.width * referenceLengthRatio;
   } else {
-    return height * referenceLengthRatio;
+    return areaBound.height * referenceLengthRatio;
   }
 };
 
@@ -102,8 +100,8 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
-  setZoom(referencedZoom);
 
+  setZoom(referencedZoom);
   centeringCanvas();
 };
 
@@ -115,13 +113,13 @@ export const centeringCanvas = () => {
   const areaBound = sectionBetweenArea.getBoundingClientRect();
   const zoom = interactStore.zoom;
 
-  setInteractStore('offsetOrigin', {
-    x: areaBound.x + areaBound.width / 2 - (canvasSize.width * zoom) / 2,
-    y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
-  });
   setOffset({
     x: 0,
     y: 0,
+  });
+  setInteractStore('offsetOrigin', {
+    x: areaBound.x + areaBound.width / 2 - (canvasSize.width * zoom) / 2,
+    y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
   });
   setRotation(0);
 

@@ -154,12 +154,11 @@ export const configFormInfoAreaTop = style([
 ]);
 
 export const configFormInfoAreaBottom = style([
-  flexRow,
+  flexCol,
   {
     position: 'absolute',
     bottom: vars.spacing.xl,
     left: vars.spacing.xl,
-    alignItems: 'center',
     gap: vars.spacing.md,
   },
 ]);

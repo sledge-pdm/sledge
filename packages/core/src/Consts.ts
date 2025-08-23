@@ -10,6 +10,7 @@ export const Consts = {
     canvasErrorOverlay: 999,
     titleBar: 1000,
     sideSection: 1000,
+    sideSectionFade: 1050,
     bottomInfo: 1100,
     dialog: 2000,
     dropdownMenu: 2500,

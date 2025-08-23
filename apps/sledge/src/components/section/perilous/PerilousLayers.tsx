@@ -17,7 +17,7 @@ const PerilousLayers: Component = () => {
       </div>
       <p style={{ color: vars.color.error, 'font-size': '8px', 'margin-bottom': '28px' }}>these operations may destroy your layer/project.</p>
 
-      <SectionItem title='layer operations.'>
+      <SectionItem title='layer.'>
         <div class={sectionContent} style={{ 'margin-top': '8px', 'padding-left': '8px', gap: '6px' }}>
           <Button
             style={{

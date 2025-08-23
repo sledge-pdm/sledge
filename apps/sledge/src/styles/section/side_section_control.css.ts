@@ -1,17 +1,24 @@
 import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB11 } from '@sledge/theme';
+import { vars, ZFB09, ZFB11 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const sideSectionControlRoot = style([
   flexCol,
   {
     boxSizing: 'content-box',
-    gap: '20px',
-    paddingTop: '20px',
+    paddingTop: '24px',
     paddingBottom: '16px',
-    width: '19px',
+    width: '23px',
     justifyContent: 'start',
     alignItems: 'center',
+  },
+]);
+export const sideSectionControlList = style([
+  flexCol,
+  {
+    height: '100%',
+    alignItems: 'center',
+    gap: '24px',
   },
 ]);
 export const sideSectionControlItem = style([
@@ -30,17 +37,19 @@ export const sideSectionControlToggle = style({
 });
 
 export const sideSectionControlText = style({
-  fontFamily: ZFB11,
+  fontFamily: ZFB09,
   fontSize: '8px',
-  letterSpacing: '1px',
   whiteSpace: 'nowrap',
   writingMode: 'vertical-lr',
-  color: vars.color.muted,
+  verticalAlign: 'middle',
+  color: vars.color.onBackground,
+  opacity: 0.65,
 });
 
 export const sideSectionControlTextActive = style([
   sideSectionControlText,
   {
     color: vars.color.onBackground,
+    opacity: 1,
   },
 ]);

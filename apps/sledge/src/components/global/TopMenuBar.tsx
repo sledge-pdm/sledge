@@ -79,16 +79,23 @@ const TopMenuBar: Component = () => {
     },
   ];
   const rightItems: Item[] = [
-    {
-      text: 'EXPORT.',
-      action: () => {
-        setIsExportShown(true);
-      },
-    },
+    // {
+    //   text: 'EXPORT.',
+    //   action: () => {
+    //     setIsExportShown(true);
+    //   },
+    // },
     {
       text: 'SETTINGS.',
       action: () => {
         openWindow('settings');
+        // setIsSettingShown(true);
+      },
+    },
+    {
+      text: 'ABOUT.',
+      action: () => {
+        openWindow('about');
         // setIsSettingShown(true);
       },
     },
@@ -222,18 +229,7 @@ const TopMenuBar: Component = () => {
           <div class={menuItemBackground} />
         </div>
       </Show>
-      <div class={menuItem} style={{ 'margin-right': '6px' }}>
-        <a
-          class={menuItemText}
-          style={{ 'font-family': ZFB09, 'font-size': '8px', opacity: 0.5, width: 'fit-content' }}
-          onClick={(e) => {
-            openWindow('about');
-          }}
-        >
-          ?
-        </a>
-        <div class={menuItemBackground} />
-      </div>
+      <div class={menuItem} style={{ 'margin-right': '8px' }}></div>
       {exportDialog}
     </div>
   );

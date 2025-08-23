@@ -1,12 +1,15 @@
 import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { accentedButton, vars } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
+import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
+import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { resetToDefaultConfig } from '~/io/config/reset';
 import { saveGlobalSettings } from '~/io/config/save';
 import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
 import { Sections } from '~/models/config/Sections';
+import { Consts } from '~/models/Consts';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import {
   configFormFieldControlLabel,
@@ -25,6 +28,7 @@ import {
   configFormSectionLabel,
   configFormSections,
 } from '~/styles/components/config/config_form.css';
+import { join } from '~/utils/PathUtils';
 import KeyConfigSettings from './KeyConfigSettings';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
@@ -216,6 +220,14 @@ const ConfigForm: Component<Props> = (props) => {
       </div>
 
       <div class={configFormInfoAreaBottom}>
+        <a
+          class={configFormLoadDefaults}
+          onClick={async () => {
+            revealItemInDir(join(await appConfigDir(), Consts.globalConfigFileName));
+          }}
+        >
+          Open Config File
+        </a>
         <a class={configFormLoadDefaults} onClick={loadDefaults}>
           load defaults
         </a>

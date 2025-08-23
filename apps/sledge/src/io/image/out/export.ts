@@ -3,6 +3,7 @@ import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { join } from '~/utils/PathUtils';
 
@@ -111,6 +112,15 @@ export async function getSVGBlob(options: CanvasExportOptions): Promise<Blob | u
 export async function saveBlobViaTauri(blob: Blob, dirPath: string, fileName = 'export.png'): Promise<FileLocation> {
   const buf = new Uint8Array(await blob.arrayBuffer());
   await writeFile(join(dirPath, fileName), buf, {});
+  setLastSettingsStore('exportedDirPaths', (prev) => {
+    if (prev.includes(dirPath)) {
+      prev = [...prev.filter((p) => p !== dirPath), dirPath];
+      return prev;
+    }
+    if (prev.length >= 10) prev.shift();
+    return [...prev, dirPath];
+  });
+
   return {
     path: dirPath,
     name: fileName,

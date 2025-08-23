@@ -11,6 +11,7 @@ type KeyConfigStore = {
 };
 type LastSettingsStore = {
   exportSettings: ExportSettings;
+  exportedDirPaths: string[];
 };
 
 const KEY_CONFIG_TEMPLATE: Readonly<KeyConfigStore> = {
@@ -37,12 +38,13 @@ export const defaultLastSettingsStore: LastSettingsStore = {
     },
     showDirAfterSave: false,
   },
+  exportedDirPaths: [],
 };
 export const initGlobalStore = () => {
   const defaultSettings = getDefaultSettings();
-  const [globalConfigStore, setGlobalConfigStore] = createStore(defaultSettings.globalConfigStore);
-  const [keyConfigStore, setKeyConfigStore] = createStore(defaultSettings.keyConfigStore);
-  const [lastSettingsStore, setLastSettingsStore] = createStore(defaultSettings.lastSettingsStore);
+  const [globalConfigStore, setGlobalConfigStore] = createStore<GlobalConfig>(defaultSettings.globalConfigStore);
+  const [keyConfigStore, setKeyConfigStore] = createStore<KeyConfigStore>(defaultSettings.keyConfigStore);
+  const [lastSettingsStore, setLastSettingsStore] = createStore<LastSettingsStore>(defaultSettings.lastSettingsStore);
 
   return { globalConfigStore, setGlobalConfigStore, keyConfigStore, setKeyConfigStore, lastSettingsStore, setLastSettingsStore };
 };

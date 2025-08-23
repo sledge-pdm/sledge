@@ -72,6 +72,9 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const targetHeight = wrapperRef.clientHeight;
     const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
+
+    if (targetWidth === 0 || targetHeight === 0) return;
+
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
     let zoom = 1;

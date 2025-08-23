@@ -64,7 +64,7 @@ export class ThumbnailGenerator {
     return this.offCtx.getImageData(0, 0, width, height);
   }
 
-  generateCanvasThumbnail(width: number, height: number): ImageData {
+  generateCanvasThumbnail(width: number, height: number): ImageData | undefined {
     const srcW = canvasStore.canvas.width;
     const srcH = canvasStore.canvas.height;
     this.off.width = width;

@@ -1,5 +1,5 @@
 import { flexCol } from '@sledge/core';
-import { pageRoot } from '@sledge/theme';
+import { pageRoot, vars } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation, useSearchParams } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
@@ -172,7 +172,8 @@ export default function Editor() {
         <SideSectionControl side='leftSide' />
 
         <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
-          <div style={{ 'flex-grow': 1 }}>
+          <div style={{ 'flex-grow': 1, 
+              'background-color': vars.color.canvasArea, }}>
             <CanvasArea />
           </div>
         </div>

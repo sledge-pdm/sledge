@@ -4,13 +4,13 @@ import interact from 'interactjs';
 import { Component, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
-import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { getEntry, removeEntry, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore } from '~/stores/EditorStores';
-import { imagePoolStore } from '~/stores/ProjectStores';
+import { eventBus } from '~/utils/EventBus';
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({
@@ -22,9 +22,22 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   let imageRef: HTMLImageElement;
   let svgRef: SVGSVGElement;
 
-  let [localEntry, setLocalEntry] = createSignal<ImagePoolEntry>(props.entry);
+  let [localEntry, setLocalEntry] = createSignal<ImagePoolEntry>({ ...props.entry });
 
   onMount(() => {
+    const onEntryChanged = (e: { id: string }) => {
+      if (e.id !== props.entry.id) return;
+      const latest = getEntry(props.entry.id);
+      if (!latest) return;
+      setLocalEntry({ ...latest });
+      imageRef.style.width = latest.width * latest.scale + 'px';
+      imageRef.style.height = latest.height * latest.scale + 'px';
+      svgRef.style.width = latest.width * latest.scale + 'px';
+      svgRef.style.height = latest.height * latest.scale + 'px';
+      containerRef.style.transform = `translate(${latest.x}px, ${latest.y}px)`;
+    };
+    eventBus.on('imagePool:entryPropChanged', onEntryChanged);
+
     imageRef.onload = () => {
       interact(containerRef)
         .resizable({
@@ -33,54 +46,48 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           listeners: {
             move(event) {
               if (!stateStore.selected) return;
-
-              const entry = imagePoolStore.entries.get(props.entry.id)!;
               const zoom = interactStore.zoom;
+              const base = localEntry();
               const newWidth = event.rect.width / zoom;
               const newHeight = event.rect.height / zoom;
-              const newScale = event.rect.width / entry.width;
+              const newScale = newWidth / base.width;
 
               imageRef.style.width = newWidth + 'px';
               imageRef.style.height = newHeight + 'px';
               svgRef.style.width = newWidth + 'px';
               svgRef.style.height = newHeight + 'px';
 
-              setLocalEntry((le) => {
-                le.x += event.deltaRect.left / zoom;
-                le.y += event.deltaRect.top / zoom;
-                le.scale = newScale / zoom;
-                return le;
-              });
-              setEntry(props.entry.id, localEntry());
-              containerRef.style.transform = `translate(${localEntry().x}px, ${localEntry().y}px)`;
+              const nx = base.x + event.deltaRect.left / zoom;
+              const ny = base.y + event.deltaRect.top / zoom;
+              setLocalEntry({ ...base, x: nx, y: ny, scale: newScale });
+              containerRef.style.transform = `translate(${nx}px, ${ny}px)`;
             },
             end(event) {
               if (!stateStore.selected) return;
-              setEntry(props.entry.id, localEntry());
+              const le = localEntry();
+              updateEntryPartial(props.entry.id, { x: le.x, y: le.y, scale: le.scale });
             },
           },
           preserveAspectRatio: true,
           modifiers: [
             // aspect ratio
-            interact.modifiers.aspectRatio({ ratio: imageRef.clientWidth / imageRef.clientHeight }),
+            interact.modifiers.aspectRatio({ ratio: imageRef.naturalWidth / imageRef.naturalHeight || imageRef.clientWidth / imageRef.clientHeight }),
           ],
         })
         .draggable({
           listeners: {
             move(event) {
               if (!stateStore.selected) return;
-              setLocalEntry((le) => {
-                le.x += event.dx / interactStore.zoom;
-                le.y += event.dy / interactStore.zoom;
-                return le;
-              });
-              setEntry(props.entry.id, localEntry());
-
-              containerRef.style.transform = `translate(${localEntry().x}px, ${localEntry().y}px)`;
+              const base = localEntry();
+              const nx = base.x + event.dx / interactStore.zoom;
+              const ny = base.y + event.dy / interactStore.zoom;
+              setLocalEntry({ ...base, x: nx, y: ny });
+              containerRef.style.transform = `translate(${nx}px, ${ny}px)`;
             },
             end(event) {
               if (!stateStore.selected) return;
-              setEntry(props.entry.id, localEntry());
+              const le = localEntry();
+              updateEntryPartial(props.entry.id, { x: le.x, y: le.y });
             },
           },
         });
@@ -180,7 +187,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     >
       <img
         ref={(el) => (imageRef = el)}
-        src={convertFileSrc(props.entry.resourcePath)}
+        src={convertFileSrc(localEntry().originalPath)}
         width={props.entry.width}
         height={props.entry.height}
         style={{

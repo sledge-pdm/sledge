@@ -28,15 +28,15 @@ const SaveSection: Component = () => {
 
       var interval = seconds / 31536000;
       if (interval > 1) {
-        return Math.floor(interval) + 'yr ago';
+        return Math.floor(interval) + ' years ago';
       }
       interval = seconds / 2592000;
       if (interval > 1) {
-        return Math.floor(interval) + 'mo ago';
+        return Math.floor(interval) + ' months ago';
       }
       interval = seconds / 86400;
       if (interval > 1) {
-        return Math.floor(interval) + 'd ago';
+        return Math.floor(interval) + ' days ago';
       }
       interval = seconds / 3600;
       if (interval > 1) {
@@ -51,6 +51,7 @@ const SaveSection: Component = () => {
       }
       return Math.floor(Math.floor(seconds) / 10) * 10 + ' sec ago';
     }
+
     return 'not saved yet.';
   };
 

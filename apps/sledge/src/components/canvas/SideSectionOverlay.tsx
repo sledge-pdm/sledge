@@ -92,23 +92,25 @@ const SideSectionsOverlay: Component<Props> = (props) => {
       //   e.stopImmediatePropagation();
       // }}
     >
-      <Show when={appearanceStore[props.side].shown}>
-        <div id='side_sections' class={sideAreaRoot} style={{ width: '300px' }}>
-          <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
-            <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
-              <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
-            </div>
-
-            <Show when={canScrollTop()}>
-              <div class={fadeTop} />
-            </Show>
-
-            <Show when={canScrollBottom()}>
-              <div class={fadeBottom} />
-            </Show>
+      <div
+        id='side_sections'
+        class={sideAreaRoot}
+        style={{ display: appearanceStore[props.side].shown ? 'flex' : 'none', width: appearanceStore[props.side].shown ? '300px' : '0px' }}
+      >
+        <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
+          <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
+            <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
           </div>
+
+          <Show when={canScrollTop()}>
+            <div class={fadeTop} />
+          </Show>
+
+          <Show when={canScrollBottom()}>
+            <div class={fadeBottom} />
+          </Show>
         </div>
-      </Show>
+      </div>
     </div>
   );
 };

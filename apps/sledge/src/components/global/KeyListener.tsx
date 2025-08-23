@@ -27,6 +27,10 @@ const KeyListener: Component = () => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+      e.preventDefault();
+    }
+
     if (toolStore.activeToolCategory === 'rectSelection' && e.altKey) return;
 
     // Check if input is focused early to avoid unnecessary processing

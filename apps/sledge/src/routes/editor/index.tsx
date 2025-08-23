@@ -61,6 +61,7 @@ export default function Editor() {
     }
     setProjectStore('isProjectChangedAfterSave', false);
 
+
     setIsLoading(false);
 
     await emitEvent('onSetup');

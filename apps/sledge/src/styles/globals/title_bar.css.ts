@@ -29,6 +29,15 @@ export const titleBarTitle = style([
     whiteSpace: 'pre',
   },
 ]);
+export const titleBarTitleSub = style([
+  {
+    width: 'fit-content',
+    fontFamily: ZFB08,
+    fontSize: vars.text.sm,
+    whiteSpace: 'pre',
+    opacity: 0.5,
+  },
+]);
 
 export const titleBarSaveSection = style([
   flexRow,

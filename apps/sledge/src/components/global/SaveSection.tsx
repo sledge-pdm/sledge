@@ -52,7 +52,8 @@ const SaveSection: Component = () => {
       return Math.floor(Math.floor(seconds) / 10) * 10 + ' sec ago';
     }
 
-    return 'not saved yet.';
+    // return 'not saved yet.';
+    return '';
   };
 
   const [saveTimeText, setSaveTimeText] = createSignal(getSaveTimeText());
@@ -168,9 +169,10 @@ const SaveSection: Component = () => {
           <p
             style={{
               color: vars.color.accent,
+              'white-space': 'nowrap',
             }}
           >
-            save
+            {fileStore.location.name && fileStore.location.name ? 'save' : 'save (new)'}
           </p>
         </div>
         <div class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>

@@ -2,6 +2,7 @@ import { Size2D, Vec2 } from '@sledge/core';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
+import { setProjectStore } from '~/stores/ProjectStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import DiffManager from './managers/DiffManager';
@@ -64,6 +65,7 @@ export default class LayerImageAgent {
   }
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {
+    setProjectStore('isProjectChangedAfterSave', true);
     this.pbm.buffer = rawBuffer;
     this.tm.setAllDirty();
     if (!silentlySet) {
@@ -78,6 +80,7 @@ export default class LayerImageAgent {
   }
 
   changeBufferSize(newSize: Size2D, emitEvent?: boolean) {
+    setProjectStore('isProjectChangedAfterSave', true);
     this.pbm.changeSize(newSize);
     this.tm.setSize(newSize);
     if (emitEvent) {
@@ -162,6 +165,7 @@ export default class LayerImageAgent {
   }
 
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {
+    setProjectStore('isProjectChangedAfterSave', true);
     if (!this.pbm.isInBounds(position)) return undefined;
     if (!skipExistingDiffCheck && this.dm.isDiffExists(position)) return undefined;
     const result = this.pbm.setRawPixel(position, color);

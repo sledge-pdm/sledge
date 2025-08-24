@@ -12,7 +12,7 @@ import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/models/ca
 import { Consts } from '~/models/Consts';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionCaption, sectionContent } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
@@ -79,7 +79,8 @@ const CanvasSettings: Component = () => {
 
   return (
     <SectionItem title='canvas.'>
-      <div class={sectionContent} style={{ gap: '10px', 'margin-top': '2px', 'margin-bottom': '24px' }}>
+      <div class={sectionContent} style={{ gap: '10px', 'margin-top': '8px', 'padding-bottom': '24px' }}>
+        <p class={sectionCaption}>size.</p>
         <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': '2px' }}>
           <p style={{ color: vars.color.onBackground, width: '72px' }}>presets.</p>
           <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
@@ -140,8 +141,10 @@ const CanvasSettings: Component = () => {
             apply
           </button>
         </div>
-        <div class={flexCol} style={{ 'margin-top': '8px', gap: '4px', overflow: 'hidden' }}>
-          <p style={{ 'font-family': ZFB03, width: '100%', 'font-size': '8px', 'margin-bottom': '6px' }}>{'canvas info'}</p>
+        <p class={sectionCaption} style={{ 'margin-top': '8px' }}>
+          info.
+        </p>
+        <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
           <div class={flexRow}>
             <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>size</p>
             <p style={{ 'white-space': 'wrap' }}>{`${canvasStore.canvas.width} x ${canvasStore.canvas.height}`}</p>
@@ -154,10 +157,12 @@ const CanvasSettings: Component = () => {
             <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>active</p>
             <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
           </div>
-
-          <Button onClick={() => centeringCanvas()} style={{ 'margin-top': '12px' }}>
-            Center Canvas.
-          </Button>
+        </div>
+        <p class={sectionCaption} style={{ 'margin-top': '8px' }}>
+          actions.
+        </p>
+        <div class={flexCol} style={{ 'margin-top': '4px', gap: '4px', overflow: 'hidden' }}>
+          <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 
           <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>
             Adjust zoom.
@@ -172,7 +177,7 @@ const CanvasSettings: Component = () => {
             >
               Set current size as Default.
             </Button>
-            <p style={{ 'font-family': ZFB03B, 'font-size': 'px', opacity: 0.5 }}>
+            <p style={{ 'font-family': ZFB03B, 'font-size': '8px', 'margin-left': '4px', opacity: 0.5 }}>
               [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
             </p>
           </div>

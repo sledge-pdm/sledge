@@ -80,7 +80,7 @@ const Color: Component = () => {
 
           <div
             class={flexCol}
-            style={{ 'margin-left': '24px', 'align-items': 'center', 'justify-content': 'center', cursor: 'pointer', 'pointer-events': 'all' }}
+            style={{ 'margin-left': '18px', 'align-items': 'center', 'justify-content': 'center', cursor: 'pointer', 'pointer-events': 'all' }}
             onClick={() => setActiveToolCategory('pipette')}
           >
             <Icon

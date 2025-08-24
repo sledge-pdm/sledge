@@ -115,7 +115,10 @@ const SaveSection: Component = () => {
   onMount(() => {
     makeTimer(
       () => {
-        if (!projectStore.autoSaveInterval || !projectStore.lastSavedAt) return;
+        if (!projectStore.autoSaveEnabled || !projectStore.autoSaveInterval || !projectStore.lastSavedAt) {
+          setAutoSaveIntervalRatio(0);
+          return;
+        }
         const diffSec = (new Date().getTime() - projectStore.lastSavedAt.getTime()) / 1000;
 
         const intervalRatio = diffSec / projectStore.autoSaveInterval;
@@ -192,7 +195,7 @@ const SaveSection: Component = () => {
             width: `${autoSaveIntervalRatio() * 100}%`,
             height: '100%',
             'background-color': vars.color.accent,
-            opacity: 0.1,
+            opacity: 0.25,
             'pointer-events': 'none',
           }}
         />

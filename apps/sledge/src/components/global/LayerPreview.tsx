@@ -98,8 +98,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
     if (agent) {
       const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
       if (preview) {
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        // ctx.imageSmoothingEnabled = true;
+        // ctx.imageSmoothingQuality = 'high';
         ctx.putImageData(preview, 0, 0);
       }
     }

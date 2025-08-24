@@ -26,7 +26,7 @@ const Color: Component = () => {
           class={flexRow}
           style={{
             'margin-top': '8px',
-            'margin-bottom': '12px',
+            'margin-bottom': '10px',
           }}
         >
           <div>

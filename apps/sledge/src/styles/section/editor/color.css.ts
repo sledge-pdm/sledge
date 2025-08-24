@@ -7,7 +7,7 @@ export const swatchContainer = style([
   {
     position: 'relative',
     gap: vars.spacing.xs,
-    marginRight: vars.spacing.md,
+    marginRight: vars.spacing.sm,
   },
 ]);
 

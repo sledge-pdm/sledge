@@ -4,7 +4,7 @@ import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
 import { clearLayer, duplicateLayer, setLayerName } from '~/controllers/layer/LayerController';
-import { allLayers, moveLayer } from '~/controllers/layer/LayerListController';
+import { allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { Layer } from '~/models/layer/Layer';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -109,7 +109,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             showContextMenu(
               props.layer.name,
               [
-                { ...ContextMenuItems.BaseRemove, onSelect: () => clearLayer(layerId) },
+                { ...ContextMenuItems.BaseRemove, onSelect: () => removeLayer(layerId) },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },
               ],

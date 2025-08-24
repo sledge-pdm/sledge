@@ -26,7 +26,7 @@ const AutoSave: Component = () => {
           name='auto-save-enabled'
           labelMode='right'
         >
-          {projectStore.autoSaveEnabled ? (projectStore.lastSavedAt ? 'enabled (unsaved yet)' : 'enabled') : 'disabled'}
+          {projectStore.autoSaveEnabled ? (projectStore.lastSavedAt ? 'enabled' : 'enabled (unsaved yet)') : 'disabled'}
         </ToggleSwitch>
 
         <div

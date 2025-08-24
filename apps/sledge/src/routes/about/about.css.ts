@@ -6,8 +6,8 @@ export const aaContainer = style([
   flexCol,
   {
     position: 'absolute',
-    top: '24px',
-    right: '72px',
+    top: '16px',
+    right: '84px',
     width: '200px',
     height: '100%',
     pointerEvents: 'none',
@@ -19,7 +19,8 @@ export const aaText = style({
   textRendering: 'geometricPrecision',
   fontSize: '32px',
   lineHeight: 1.0,
-  letterSpacing: 0,
+  letterSpacing: -0.75,
+  wordSpacing: 0,
   opacity: 0.15,
 });
 
@@ -28,7 +29,7 @@ export const contentContainer = style([
   {
     width: '100%',
     margin: '0 28px',
-    marginTop: '16px',
+    marginTop: '20px',
     pointerEvents: 'none',
   },
 ]);
@@ -48,9 +49,9 @@ export const aboutTitle = style({
 });
 
 export const aboutSubTitle = style({
-  fontFamily: ZFB03,
+  fontFamily: k12x8,
   fontSize: '8px',
-  color: vars.color.muted,
+  opacity: 0.6,
 });
 
 export const newVersionText = style({

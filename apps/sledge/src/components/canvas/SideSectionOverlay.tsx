@@ -3,10 +3,12 @@ import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { createScrollPosition } from '@solid-primitives/scroll';
-import { EditorTab, EffectsTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
+import interact from 'interactjs';
+import { EditorTab, EffectsTab, ExportTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
+import { eventBus } from '~/utils/EventBus';
 
 interface Props {
   side: 'leftSide' | 'rightSide';
@@ -28,32 +30,30 @@ const SideSectionsOverlay: Component<Props> = (props) => {
   });
 
   onMount(() => {
-    // interact('#side_sections').resizable({
-    //   edges: { right: true, left: true },
-    //   modifiers: [
-    //     interact.modifiers.restrictSize({
-    //       min: { width: 280, height: -1 },
-    //       max: { width: 600, height: -1 },
-    //     }),
-    //   ],
-    //   listeners: {
-    //     start: function (event) {
-    //       event.stopPropagation();
-    //       Object.assign(event.target.style, {
-    //         width: `${event.rect.width}px`,
-    //       });
-    //     },
-    //     move: function (event) {
-    //       event.stopPropagation();
-    //       let { x, y } = event.target.dataset;
-    //       x = (parseFloat(x) || 0) + event.deltaRect.left;
-    //       Object.assign(event.target.style, {
-    //         width: `${event.rect.width}px`,
-    //       });
-    //       eventBus.emit('window:sideSectionSideChanged', {});
-    //     },
-    //   },
-    // });
+    interact('#side_sections').resizable({
+      edges: { right: true, left: true },
+      modifiers: [
+        interact.modifiers.restrictSize({
+          min: { width: 280, height: -1 },
+          max: { width: 600, height: -1 },
+        }),
+      ],
+      listeners: {
+        start: function (event) {
+          Object.assign(event.target.style, {
+            width: `${event.rect.width}px`,
+          });
+        },
+        move: function (event) {
+          let { x, y } = event.target.dataset;
+          x = (parseFloat(x) || 0) + event.deltaRect.left;
+          Object.assign(event.target.style, {
+            width: `${event.rect.width}px`,
+          });
+          eventBus.emit('window:sideSectionSideChanged', {});
+        },
+      },
+    });
   });
 
   const tabContent = (tab: SectionTab) => {
@@ -64,6 +64,8 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         return <EffectsTab />;
       case 'project':
         return <ProjectTab />;
+      case 'export':
+        return <ExportTab />;
       case 'perilous':
         return <PerilousTab />;
       default:
@@ -86,29 +88,31 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         'border-left': props.side === 'rightSide' && appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
 
         'pointer-events': 'all',
+        overflow: 'visible',
       }}
-      // onContextMenu={(e) => {
-      //   e.preventDefault();
-      //   e.stopImmediatePropagation();
-      // }}
     >
-      <Show when={appearanceStore[props.side].shown}>
-        <div id='side_sections' class={sideAreaRoot} style={{ width: '300px' }}>
-          <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
-            <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
-              <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
-            </div>
-
-            <Show when={canScrollTop()}>
-              <div class={fadeTop} />
-            </Show>
-
-            <Show when={canScrollBottom()}>
-              <div class={fadeBottom} />
-            </Show>
+      <div
+        id='side_sections'
+        class={sideAreaRoot}
+        style={{
+          display: appearanceStore[props.side].shown ? 'flex' : 'none',
+          width: appearanceStore[props.side].shown ? '320px' : '0px',
+        }}
+      >
+        <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
+          <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
+            <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
           </div>
+
+          <Show when={canScrollTop()}>
+            <div class={fadeTop} />
+          </Show>
+
+          <Show when={canScrollBottom()}>
+            <div class={fadeBottom} />
+          </Show>
         </div>
-      </Show>
+      </div>
     </div>
   );
 };

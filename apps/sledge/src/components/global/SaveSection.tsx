@@ -28,15 +28,15 @@ const SaveSection: Component = () => {
 
       var interval = seconds / 31536000;
       if (interval > 1) {
-        return Math.floor(interval) + 'yr ago';
+        return Math.floor(interval) + ' years ago';
       }
       interval = seconds / 2592000;
       if (interval > 1) {
-        return Math.floor(interval) + 'mo ago';
+        return Math.floor(interval) + ' months ago';
       }
       interval = seconds / 86400;
       if (interval > 1) {
-        return Math.floor(interval) + 'd ago';
+        return Math.floor(interval) + ' days ago';
       }
       interval = seconds / 3600;
       if (interval > 1) {
@@ -51,7 +51,9 @@ const SaveSection: Component = () => {
       }
       return Math.floor(Math.floor(seconds) / 10) * 10 + ' sec ago';
     }
-    return 'not saved yet.';
+
+    // return 'not saved yet.';
+    return '';
   };
 
   const [saveTimeText, setSaveTimeText] = createSignal(getSaveTimeText());
@@ -113,7 +115,10 @@ const SaveSection: Component = () => {
   onMount(() => {
     makeTimer(
       () => {
-        if (!projectStore.autoSaveInterval || !projectStore.lastSavedAt) return;
+        if (!projectStore.autoSaveEnabled || !projectStore.autoSaveInterval || !projectStore.lastSavedAt) {
+          setAutoSaveIntervalRatio(0);
+          return;
+        }
         const diffSec = (new Date().getTime() - projectStore.lastSavedAt.getTime()) / 1000;
 
         const intervalRatio = diffSec / projectStore.autoSaveInterval;
@@ -167,9 +172,10 @@ const SaveSection: Component = () => {
           <p
             style={{
               color: vars.color.accent,
+              'white-space': 'nowrap',
             }}
           >
-            save
+            {fileStore.location.name && fileStore.location.name ? 'save' : 'save (new)'}
           </p>
         </div>
         <div class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>
@@ -189,7 +195,7 @@ const SaveSection: Component = () => {
             width: `${autoSaveIntervalRatio() * 100}%`,
             height: '100%',
             'background-color': vars.color.accent,
-            opacity: 0.1,
+            opacity: 0.25,
             'pointer-events': 'none',
           }}
         />

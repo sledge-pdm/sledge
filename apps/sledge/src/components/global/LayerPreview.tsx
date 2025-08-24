@@ -72,6 +72,9 @@ const LayerPreview: Component<Props> = (props: Props) => {
     const targetHeight = wrapperRef.clientHeight;
     const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
     const targetWidth = Math.round(targetHeight * aspectRatio);
+
+    if (targetWidth === 0 || targetHeight === 0) return;
+
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
     let zoom = 1;
@@ -95,8 +98,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
     if (agent) {
       const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
       if (preview) {
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        // ctx.imageSmoothingEnabled = true;
+        // ctx.imageSmoothingQuality = 'high';
         ctx.putImageData(preview, 0, 0);
       }
     }

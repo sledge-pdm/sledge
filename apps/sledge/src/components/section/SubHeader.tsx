@@ -48,7 +48,7 @@ export const SectionSubHeader: Component<Props> = (props) => {
             overflow: 'visible',
             'box-sizing': 'border-box',
             'background-color': vars.color.onBackground,
-            opacity: 0.6,
+            opacity: 0.7,
             'clip-path': expanded() ? 'url(#clipPath-triangle7)' : 'url(#clipPath-triangle7-flip)',
           }}
         />
@@ -61,7 +61,7 @@ export const SectionSubHeader: Component<Props> = (props) => {
           height: '1px',
           'flex-grow': 1,
           width: '100%',
-          margin: '0 8px',
+          'margin-left': '8px',
           'background-color': vars.color.borderSecondary,
         }}
       />

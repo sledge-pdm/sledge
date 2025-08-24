@@ -57,4 +57,8 @@ export const ContextMenuItems = {
     label: 'Burndown',
     icon: '/icons/misc/burndown.png',
   },
+  BaseBurndownRemove: {
+    label: 'Burndown (remove)',
+    icon: '/icons/misc/burndown_remove.png',
+  },
 };

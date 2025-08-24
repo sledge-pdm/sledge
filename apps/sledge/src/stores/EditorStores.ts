@@ -70,7 +70,7 @@ const defaultAppearanceStore: AppearanceStore = {
   },
   rightSide: {
     shown: false,
-    tabs: ['project', 'perilous'],
+    tabs: ['project', 'export', 'perilous'],
     selectedIndex: 0,
   },
 };

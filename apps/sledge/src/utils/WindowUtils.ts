@@ -139,7 +139,7 @@ export async function reportCriticalError(e: any) {
     `Something went wrong.\n${errorMessage || '<No message available>'}
     \n${errorStack || '<No stack trace available>'}`,
     {
-      kind: 'error',
+      kind: 'warning',
       title: 'Error',
       okLabel: 'Continue process',
     }

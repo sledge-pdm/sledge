@@ -1,5 +1,6 @@
-import { vars } from '@sledge/theme';
-import { For, type JSX, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
+import { vars, ZFB08 } from '@sledge/theme';
+import { createEffect, createMemo, createSignal, For, type JSX, onCleanup, onMount, Show } from 'solid-js';
+import { Portal } from 'solid-js/web';
 import { dropdownContainer, itemText, menuDirection, menuItem, menuStyle, triggerButton, triggerButtonNoBG } from '../../styles/control/dropdown.css';
 import Icon from '../Icon';
 
@@ -12,18 +13,25 @@ interface Props<T extends string | number = string> {
   value: T | (() => T);
   onChange?: (value: T) => void;
   options: DropdownOption<T>[];
+  fullWidth?: boolean;
+  align?: 'left' | 'right';
   props?: JSX.HTMLAttributes<HTMLDivElement>;
   noBackground?: boolean;
   wheelSpin?: boolean;
   disabled?: boolean;
+  fontFamily?: string;
 }
 
 const Dropdown = <T extends string | number>(p: Props<T>) => {
+  p.align = p.align ?? 'left';
+
   let containerRef: HTMLDivElement | undefined;
   let menuRef: HTMLUListElement | undefined;
 
   const [open, setOpen] = createSignal(false);
   const [dir, setDir] = createSignal<'down' | 'up'>('down');
+  type Coords = { x: number; y: number };
+  const [coords, setCoords] = createSignal<Coords>({ x: 0, y: 0 });
 
   const getValue = () => (typeof p.value === 'function' ? (p.value as () => T)() : p.value);
   const selectedLabel = createMemo(() => {
@@ -68,6 +76,57 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
     setDir(spaceBelow < menuH && spaceAbove > spaceBelow ? 'up' : 'down');
   };
 
+  // 画面外にはみ出さないように位置を調整
+  const clampToViewport = (x: number, y: number, w: number, h: number, margin = 4) => {
+    const vw = document.documentElement.clientWidth;
+    const vh = document.documentElement.clientHeight;
+    let nx = x;
+    let ny = y;
+    if (nx + w > vw - margin) nx = Math.max(margin, vw - w - margin);
+    if (ny + h > vh - margin) ny = Math.max(margin, vh - h - margin);
+    if (nx < margin) nx = margin;
+    if (ny < margin) ny = margin;
+    return { x: nx, y: ny };
+  };
+
+  // Portal 先で表示するため、viewport 基準の固定座標を算出
+  const adjustPosition = () => {
+    if (!containerRef || !menuRef) return;
+    const trigger = containerRef.getBoundingClientRect();
+    const menuRect = menuRef.getBoundingClientRect();
+    const w = menuRect.width || 160; // fallback
+    const h = Math.min(menuRef.scrollHeight, 200) || 160;
+
+    // 横位置
+    let x = p.align === 'left' ? trigger.left : trigger.right - w;
+    // 縦位置（dir に応じる）
+    let y = dir() === 'down' ? trigger.bottom : trigger.top - h;
+
+    const clamped = clampToViewport(x, y, w, h);
+    setCoords(clamped);
+  };
+
+  onMount(() => {
+    const onResize = () => open() && adjustPosition();
+    const onScroll = () => open() && adjustPosition();
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onCleanup(() => {
+      window.removeEventListener('resize', onResize as any);
+      window.removeEventListener('scroll', onScroll as any);
+    });
+  });
+
+  // open 変更時や dir 判定後に位置を更新
+  createEffect(() => {
+    if (open()) {
+      queueMicrotask(() => {
+        decideDirection();
+        adjustPosition();
+      });
+    }
+  });
+
   const spin = (isUp: boolean) => {
     const currentIndex = p.options.findIndex((option) => option.value === getValue());
     const nextIndex = isUp ? (currentIndex + 1) % p.options.length : (currentIndex - 1 + p.options.length) % p.options.length;
@@ -89,27 +148,48 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
         type='button'
         class={p.noBackground ? triggerButtonNoBG : triggerButton}
         style={{
+          'box-sizing': 'border-box',
+          overflow: 'hidden',
           opacity: p.disabled ? 0.5 : 1,
           cursor: p.disabled ? 'not-allowed' : 'pointer',
           'pointer-events': p.disabled ? 'none' : 'all',
+          width: p.fullWidth ? '100%' : undefined,
         }}
         onClick={toggle}
         aria-haspopup='listbox'
         aria-expanded={open()}
       >
-        <p class={itemText}>{getAdjustedLabel(selectedLabel())}</p>
+        <p class={itemText} style={{ 'font-family': p.fontFamily ?? ZFB08, width: p.fullWidth ? '100%' : undefined }}>
+          {getAdjustedLabel(selectedLabel())}
+        </p>
         <Icon src={'/icons/misc/dropdown_caret.png'} base={9} color={vars.color.onBackground} />
       </button>
       <Show when={open()}>
-        <ul ref={menuRef} class={`${menuStyle} ${menuDirection[dir()]}`} role='listbox'>
-          <For each={p.options} fallback={<li>選択肢がありません</li>}>
-            {(option) => (
-              <li class={menuItem} role='option' aria-selected={option.value === getValue()} onClick={() => select(option)}>
-                <p class={itemText}>{getAdjustedLabel(option.label)}</p>
-              </li>
-            )}
-          </For>
-        </ul>
+        <Portal>
+          <ul
+            ref={menuRef}
+            class={`${menuStyle} ${menuDirection[dir()]}`}
+            role='listbox'
+            style={{
+              position: 'fixed',
+              top: `${coords().y}px`,
+              left: `${coords().x}px`,
+              bottom: 'auto',
+              right: 'auto',
+            }}
+            onTransitionEnd={adjustPosition}
+          >
+            <For each={p.options} fallback={<li>no items.</li>}>
+              {(option) => (
+                <li class={menuItem} role='option' aria-selected={option.value === getValue()} onClick={() => select(option)}>
+                  <p class={itemText} style={{ 'font-family': p.fontFamily ?? ZFB08 }}>
+                    {getAdjustedLabel(option.label)}
+                  </p>
+                </li>
+              )}
+            </For>
+          </ul>
+        </Portal>
       </Show>
     </div>
   );

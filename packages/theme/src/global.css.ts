@@ -121,7 +121,7 @@ export const lightTheme = createTheme(vars, {
     borderSecondary: '#dddddd',
     accent: '#0000ff',
     active: '#ff0000',
-    enabled: '#00ff00',
+    enabled: '#00dd00',
     muted: 'rgba(0,0,0,0.35)',
     error: '#ff0000',
     warn: '#ffcc00',
@@ -140,10 +140,10 @@ export const lightTheme = createTheme(vars, {
 const darkThemeColorBase = {
   background: '#252525',
   surface: '#353535',
-  canvasArea: '#1B1B1B',
+  canvasArea: '#1A1A1A',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',
-  border: '#666666',
+  border: '#565656',
   borderSecondary: '#444444',
   accent: '#ffff00',
   active: '#00ff00',
@@ -178,13 +178,13 @@ export const darkThemeGYFlip = createTheme(vars, {
 });
 
 const blackThemeColorBase = {
-  background: '#000000',
+  background: '#101010',
   surface: '#202020',
   canvasArea: '#000000',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',
-  border: '#3A3A3A',
-  borderSecondary: '#242424',
+  border: '#505050',
+  borderSecondary: '#404040',
   accent: '#ff00ff',
   active: '#ff00ff',
   enabled: '#00ff00',
@@ -242,7 +242,14 @@ globalStyle('button', {
   height: 'fit-content',
   padding: '2px 6px',
   pointerEvents: 'all',
+  overflow: 'visible',
   width: 'fit-content',
+});
+
+globalStyle('button:disabled', {
+  color: vars.color.muted,
+  borderColor: vars.color.muted,
+  pointerEvents: 'none',
 });
 
 globalStyle('button:hover', {

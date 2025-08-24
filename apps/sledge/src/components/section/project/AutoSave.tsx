@@ -17,7 +17,7 @@ const autoSaveIntervalOptions: DropdownOption<number>[] = [
 const AutoSave: Component = () => {
   return (
     <SectionItem title='autosave.'>
-      <div class={sectionContent} style={{ 'padding-left': '8px', gap: '12px', 'margin-top': '8px', 'margin-bottom': '8px' }}>
+      <div class={sectionContent} style={{ gap: '12px', 'margin-top': '8px', 'margin-bottom': '8px' }}>
         {/* <p>configure periodic save.</p> */}
         <ToggleSwitch
           checked={projectStore.autoSaveEnabled || false}
@@ -26,7 +26,7 @@ const AutoSave: Component = () => {
           name='auto-save-enabled'
           labelMode='right'
         >
-          {projectStore.autoSaveEnabled ? (projectStore.lastSavedAt ? 'enabled (unsaved yet)' : 'enabled') : 'disabled'}
+          {projectStore.autoSaveEnabled ? (projectStore.lastSavedAt ? 'enabled' : 'suspended (save to start)') : 'disabled'}
         </ToggleSwitch>
 
         <div

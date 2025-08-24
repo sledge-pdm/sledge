@@ -32,6 +32,7 @@ export async function burndownToLayer({ entry, targetLayerId }: ImageBurndownPar
   const layer = findLayerById(targetLayerId);
   const agent = getAgentOf(targetLayerId) as LayerImageAgent;
   if (!agent) throw new Error('Layer not found');
+  const originalBuffer = new Uint8ClampedArray(agent.getBuffer()); // Uint8ClampedArray
   const dstBuf = agent.getBuffer(); // Uint8ClampedArray
 
   const layerW = agent.getWidth();
@@ -95,5 +96,13 @@ export async function burndownToLayer({ entry, targetLayerId }: ImageBurndownPar
   }
 
   agent.setBuffer(dstBuf, false, true);
-  agent.getTileManager().setAllDirty();
+
+  const dm = agent.getDiffManager();
+  dm.add({
+    kind: 'whole',
+    before: originalBuffer,
+    after: dstBuf,
+  });
+  dm.flush();
+  agent.registerToHistory();
 }

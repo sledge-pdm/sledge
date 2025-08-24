@@ -1,6 +1,7 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import mitt from 'mitt';
 import { SelectionState } from '~/controllers/selection/SelectionManager';
+import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 
 export type Events = {
   'project:saved': { path: string };
@@ -15,6 +16,9 @@ export type Events = {
   'selection:areaChanged': { commit: boolean };
   'selection:moved': { newOffset: Vec2 };
   'selection:stateChanged': { newState: SelectionState };
+
+  'imagePool:entriesChanged': { newEntries: ImagePoolEntry[] };
+  'imagePool:entryPropChanged': { id: string };
 
   'webgl:requestUpdate': { onlyDirty: boolean; context: string };
 

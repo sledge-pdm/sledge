@@ -1,16 +1,14 @@
 import { showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
-import { Component, createSignal, onMount } from 'solid-js';
+import { Component, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
-import { removeEntry, setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { burndownToCurrentLayer, getEntry, removeEntry, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore } from '~/stores/EditorStores';
-import { imagePoolStore } from '~/stores/ProjectStores';
+import { eventBus } from '~/utils/EventBus';
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({
@@ -21,10 +19,24 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   let containerRef: HTMLDivElement;
   let imageRef: HTMLImageElement;
   let svgRef: SVGSVGElement;
-
-  let [localEntry, setLocalEntry] = createSignal<ImagePoolEntry>(props.entry);
+  let onEntryChangedHandler: ((e: { id: string }) => void) | undefined;
 
   onMount(() => {
+    const onEntryChanged = (e: { id: string }) => {
+      if (e.id !== props.entry.id) return;
+      const latest = getEntry(props.entry.id);
+      if (!latest) return;
+      // reflect current store state to DOM
+      imageRef.style.width = latest.width * latest.scale + 'px';
+      imageRef.style.height = latest.height * latest.scale + 'px';
+      svgRef.style.width = latest.width * latest.scale + 'px';
+      svgRef.style.height = latest.height * latest.scale + 'px';
+      containerRef.style.transform = `translate(${latest.x}px, ${latest.y}px)`;
+      setStateStore('visible', latest.visible);
+    };
+    onEntryChangedHandler = onEntryChanged;
+    eventBus.on('imagePool:entryPropChanged', onEntryChanged);
+
     imageRef.onload = () => {
       interact(containerRef)
         .resizable({
@@ -33,54 +45,63 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           listeners: {
             move(event) {
               if (!stateStore.selected) return;
-
-              const entry = imagePoolStore.entries.get(props.entry.id)!;
               const zoom = interactStore.zoom;
-              const newWidth = event.rect.width / zoom;
-              const newHeight = event.rect.height / zoom;
-              const newScale = event.rect.width / entry.width;
+              const base = getEntry(props.entry.id) ?? props.entry;
+              // use event.scale if provided by interactjs; fallback to ratio of current/previous width
+              const currW = event.rect.width / zoom;
+              const prevW = (event.rect.width - event.deltaRect.width) / zoom;
+              const frameScale = typeof (event as any).scale === 'number' ? (event as any).scale : prevW > 0 ? currW / prevW : 1;
+              const newScale = base.scale * frameScale;
+              const newWidth = base.width * newScale;
+              const newHeight = base.height * newScale;
 
               imageRef.style.width = newWidth + 'px';
               imageRef.style.height = newHeight + 'px';
+
+              console.log(newWidth, newHeight);
               svgRef.style.width = newWidth + 'px';
               svgRef.style.height = newHeight + 'px';
 
-              setLocalEntry((le) => {
-                le.x += event.deltaRect.left / zoom;
-                le.y += event.deltaRect.top / zoom;
-                le.scale = newScale / zoom;
-                return le;
-              });
-              setEntry(props.entry.id, localEntry());
-              containerRef.style.transform = `translate(${localEntry().x}px, ${localEntry().y}px)`;
+              const nx = base.x + event.deltaRect.left / zoom;
+              const ny = base.y + event.deltaRect.top / zoom;
+              containerRef.style.transform = `translate(${nx}px, ${ny}px)`;
+              // write-through to store so consumers (e.g., burndown) always see latest
+              updateEntryPartial(props.entry.id, { x: nx, y: ny, scale: newScale });
             },
             end(event) {
               if (!stateStore.selected) return;
-              setEntry(props.entry.id, localEntry());
+              // idempotent final commit
+              const zoom = interactStore.zoom;
+              const base = getEntry(props.entry.id) ?? props.entry;
+              const currW = event.rect.width / zoom;
+              const prevW = (event.rect.width - event.deltaRect.width) / zoom;
+              const frameScale = typeof (event as any).scale === 'number' ? (event as any).scale : prevW > 0 ? currW / prevW : 1;
+              const newScale = base.scale * frameScale;
+              const nx = base.x + event.deltaRect.left / zoom;
+              const ny = base.y + event.deltaRect.top / zoom;
+              updateEntryPartial(props.entry.id, { x: nx, y: ny, scale: newScale });
             },
           },
           preserveAspectRatio: true,
           modifiers: [
             // aspect ratio
-            interact.modifiers.aspectRatio({ ratio: imageRef.clientWidth / imageRef.clientHeight }),
+            interact.modifiers.aspectRatio({ ratio: imageRef.naturalWidth / imageRef.naturalHeight || imageRef.clientWidth / imageRef.clientHeight }),
           ],
         })
         .draggable({
           listeners: {
             move(event) {
               if (!stateStore.selected) return;
-              setLocalEntry((le) => {
-                le.x += event.dx / interactStore.zoom;
-                le.y += event.dy / interactStore.zoom;
-                return le;
-              });
-              setEntry(props.entry.id, localEntry());
-
-              containerRef.style.transform = `translate(${localEntry().x}px, ${localEntry().y}px)`;
+              const base = getEntry(props.entry.id) ?? props.entry;
+              const nx = base.x + event.dx / interactStore.zoom;
+              const ny = base.y + event.dy / interactStore.zoom;
+              containerRef.style.transform = `translate(${nx}px, ${ny}px)`;
+              updateEntryPartial(props.entry.id, { x: nx, y: ny });
             },
             end(event) {
               if (!stateStore.selected) return;
-              setEntry(props.entry.id, localEntry());
+              const base = getEntry(props.entry.id) ?? props.entry;
+              updateEntryPartial(props.entry.id, { x: base.x, y: base.y });
             },
           },
         });
@@ -93,21 +114,9 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     };
   });
 
-  const handleBurndown = async () => {
-    const active = activeLayer(); // いま選択中のレイヤー
-    if (!active) return;
-
-    try {
-      await burndownToLayer({
-        entry: props.entry,
-        targetLayerId: active.id,
-      });
-      removeEntry(props.entry.id); // ImagePool から削除
-    } catch (e) {
-      console.error(e);
-      // TODO: ユーザ通知
-    }
-  };
+  onCleanup(() => {
+    if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
+  });
 
   const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
     const size = () => (props.size ?? 8) / interactStore.zoom;
@@ -127,7 +136,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         style={{
           transform: `translate(-${size() / 2}px, -${size() / 2}px)`,
           position: 'absolute',
-          'z-index': Consts.zIndex.imagePoolHandle,
         }}
       />
     );
@@ -138,12 +146,14 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       id={props.entry.id}
       ref={(el) => (containerRef = el)}
       style={{
+        display: 'flex',
         position: 'absolute',
         'pointer-events': 'all',
         'box-sizing': 'border-box',
         'touch-action': 'none',
         'transform-origin': '0 0',
-        overflow: 'visible',
+        margin: 0,
+        padding: 0,
       }}
       tabindex={props.index}
       onClick={(e) => {
@@ -163,7 +173,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         e.preventDefault();
         e.stopImmediatePropagation();
         showContextMenu(
-          props.entry.originalPath,
+          props.entry.fileName,
           [
             {
               ...ContextMenuItems.BaseRemove,
@@ -171,7 +181,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
             },
             {
               ...ContextMenuItems.BaseBurndown,
-              onSelect: handleBurndown,
+              onSelect: () => burndownToCurrentLayer(props.entry.id, false),
+            },
+            {
+              ...ContextMenuItems.BaseBurndownRemove,
+              onSelect: () => burndownToCurrentLayer(props.entry.id, true),
             },
           ],
           e
@@ -180,7 +194,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     >
       <img
         ref={(el) => (imageRef = el)}
-        src={convertFileSrc(props.entry.resourcePath)}
+        src={convertFileSrc(props.entry.originalPath)}
         width={props.entry.width}
         height={props.entry.height}
         style={{
@@ -188,8 +202,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           padding: 0,
           width: `${props.entry.width}px`,
           height: `${props.entry.height}px`,
-          opacity: localEntry().visible ? 1 : 0.6,
-          'z-index': Consts.zIndex.imagePool,
+          opacity: stateStore.visible ? 1 : 0.6,
+          'z-index': Consts.zIndex.imagePoolImage,
         }}
       />
 
@@ -207,20 +221,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           'shape-rendering': 'geometricPrecision',
           overflow: 'visible',
           visibility: stateStore.selected ? 'visible' : 'collapse',
+          'z-index': Consts.zIndex.imagePoolControl,
         }}
       >
         {/* border rect */}
-        <rect
-          class={'border-rect'}
-          width={'100%'}
-          height={'100%'}
-          fill='none'
-          stroke='black'
-          stroke-width={1 / interactStore.zoom}
-          style={{
-            'z-index': Consts.zIndex.imagePoolBorder,
-          }}
-        />
+        <rect class={'border-rect'} width={'100%'} height={'100%'} fill='none' stroke='black' stroke-width={1 / interactStore.zoom} />
         {/* 四隅 */}
         <Handle x={'0'} y={'0'} data-pos='nw' />
         <Handle x={'100%'} y={'0'} data-pos='ne' />
@@ -232,74 +237,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         <Handle x={'50%'} y={'100%'} data-pos='s' />
         <Handle x={'0'} y={'50%'} data-pos='w' />
       </svg>
-
-      {/* <div
-        class={flexRow}
-        style={{
-          position: 'absolute',
-          top: '6px',
-          right: '6px',
-          gap: '8px',
-          padding: '2px',
-          'margin-bottom': '12px',
-          'pointer-events': 'none',
-          'image-rendering': 'auto',
-          'background-color': vars.color.onBackground,
-          border: '1px solid black',
-          visibility: stateStore.selected ? 'visible' : 'collapse',
-          'transform-origin': '100% 0',
-          transform: `scale(${1 / interactStore.zoom})`,
-          'z-index': Consts.zIndex.imagePoolMenu,
-        }}
-      >
-        <img
-          src={stateStore.visible ? '/icons/image_pool/hide.png' : '/icons/image_pool/show.png'}
-          onClick={(e) => {
-            let le = localEntry();
-            le.visible = le.visible ? false : true;
-            setLocalEntry(le);
-            setStateStore('visible', le.visible);
-            setEntry(props.entry.id, le);
-          }}
-          width={12}
-          height={12}
-          style={{
-            width: '12px',
-            height: '12px',
-            margin: '2px',
-            'pointer-events': 'all',
-            cursor: 'pointer',
-          }}
-        />
-        <img
-          src='/icons/image_pool/burndown.png'
-          onClick={handleBurndown}
-          width={12}
-          height={12}
-          style={{
-            width: '12px',
-            height: '12px',
-            margin: '2px',
-            'pointer-events': 'all',
-            cursor: 'pointer',
-          }}
-        />
-        <img
-          src='/icons/image_pool/remove.png'
-          onClick={() => {
-            removeEntry(props.entry.id);
-          }}
-          width={12}
-          height={12}
-          style={{
-            width: '12px',
-            height: '12px',
-            margin: '2px',
-            'pointer-events': 'all',
-            cursor: 'pointer',
-          }}
-        />
-      </div> */}
     </div>
   );
 };

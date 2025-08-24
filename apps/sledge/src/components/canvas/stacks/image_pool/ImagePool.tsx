@@ -1,10 +1,25 @@
-import { Component, For } from 'solid-js';
+import { Component, For, createSignal, onCleanup, onMount } from 'solid-js';
+import { getEntries } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { isImagePoolActive } from '~/controllers/layer/LayerListController';
 import { Consts } from '~/models/Consts';
-import { canvasStore, imagePoolStore } from '~/stores/ProjectStores';
+import { canvasStore } from '~/stores/ProjectStores';
+import { eventBus } from '~/utils/EventBus';
 import Image from './Image';
 
 export const ImagePool: Component = () => {
+  const [entries, setEntries] = createSignal(getEntries());
+
+  const handleEntriesChanged = (e: { newEntries: ReturnType<typeof getEntries> }) => {
+    setEntries(e.newEntries);
+  };
+
+  onMount(() => {
+    eventBus.on('imagePool:entriesChanged', handleEntriesChanged);
+  });
+  onCleanup(() => {
+    eventBus.off('imagePool:entriesChanged', handleEntriesChanged);
+  });
+
   return (
     <div
       style={{
@@ -19,14 +34,7 @@ export const ImagePool: Component = () => {
         'touch-action': 'none',
       }}
     >
-      <For each={imagePoolStore.entries.values().toArray()}>
-        {(entry, i) => {
-          console.log(entry);
-          if (entry === undefined) return;
-
-          return <Image entry={entry} index={i()} />;
-        }}
-      </For>
+      <For each={entries()}>{(entry, i) => entry && <Image entry={entry} index={i()} />}</For>
     </div>
   );
 };

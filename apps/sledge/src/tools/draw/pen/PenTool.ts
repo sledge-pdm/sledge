@@ -7,7 +7,7 @@ import { PixelDiff } from '~/models/history/HistoryManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { drawCirclePixel, drawCompletionLine, drawSquarePixel } from './PenDraw';
+import { getDrawnPixelMask, drawCompletionLine } from './PenDraw';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
@@ -19,6 +19,73 @@ export class PenTool implements ToolBehavior {
 
   startPosition: Vec2 | undefined = undefined;
   startPointerPosition: Vec2 | undefined = undefined;
+
+  // 形状マスクのキャッシュ（shape+size 単位）
+  private static penMaskCache: Map<string, { mask: Uint8Array; width: number; height: number; offsetX: number; offsetY: number }> = new Map();
+
+  private cacheKey(size: number, shape: 'square' | 'circle') {
+    return `${shape}:${size}`;
+  }
+
+  private ensureMask(size: number, shape: 'square' | 'circle') {
+    const key = this.cacheKey(size, shape);
+    let entry = PenTool.penMaskCache.get(key);
+    if (!entry) {
+      entry = getDrawnPixelMask(size, shape);
+      PenTool.penMaskCache.set(key, entry);
+    }
+    return entry;
+  }
+
+  private getCenter(position: Vec2, rawPosition: Vec2 | undefined, size: number, dotMagnification: number): { cx: number; cy: number } {
+    if (size % 2 === 0 && rawPosition) {
+      // 偶数サイズ: rawPosition を基準に最近傍のグリッドへ
+      return {
+        cx: Math.round(rawPosition.x / dotMagnification),
+        cy: Math.round(rawPosition.y / dotMagnification),
+      };
+    }
+    // 奇数サイズ: ピクセル中心（整数座標）
+    return { cx: position.x, cy: position.y };
+  }
+
+  private stamp(
+    agent: LayerImageAgent,
+    centerX: number,
+    centerY: number,
+    mask: { mask: Uint8Array; width: number; height: number; offsetX: number; offsetY: number },
+    color: RGBAColor,
+    shouldCheckSelectionLimit: boolean,
+    commit: boolean,
+    previewCollector?: PixelDiff[]
+  ) {
+    const pbm = agent.getPixelBufferManager();
+    const dm = agent.getDiffManager();
+
+    const { mask: bits, width, height, offsetX, offsetY } = mask;
+    for (let iy = 0; iy < height; iy++) {
+      for (let ix = 0; ix < width; ix++) {
+        if (bits[iy * width + ix] !== 1) continue;
+        const px = centerX + offsetX + ix;
+        const py = centerY + offsetY + iy;
+        if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
+          continue;
+        }
+        if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
+          const diff = agent.setPixel({ x: px, y: py }, color, true);
+          if (diff !== undefined) {
+            if (commit) {
+              dm.add(diff);
+            } else if (previewCollector) {
+              previewCollector.push(diff);
+            } else {
+              dm.add(diff);
+            }
+          }
+        }
+      }
+    }
+  }
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     // 前回の状態が残っている場合はクリーンアップ
@@ -38,6 +105,12 @@ export class PenTool implements ToolBehavior {
       };
 
     this.lastPreviewDiff = [];
+
+    // 必要なら形状マスクを準備
+    const preset = args.presetName ? (getPresetOf(this.categoryId, args.presetName) as any) : undefined;
+    const size = preset?.size ?? 1;
+    const shape = (preset?.shape ?? 'square') as 'square' | 'circle';
+    this.ensureMask(size, shape);
 
     if (!this.isShift) {
       return this.draw(agent, args, args.color);
@@ -81,46 +154,24 @@ export class PenTool implements ToolBehavior {
 
     const preset = getPresetOf(this.categoryId, presetName) as any;
     const size = preset?.size ?? 1;
-    const shape = preset?.shape ?? 'square'; // デフォルトは正方形
+    const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
 
     const layer = activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;
 
-    const pbm = agent.getPixelBufferManager();
-    const dm = agent.getDiffManager();
-
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
+    const mask = this.ensureMask(size, shape);
 
-    const drawPixel = shape === 'circle' ? drawCirclePixel : drawSquarePixel;
-
-    drawPixel(position, rawPosition, size, dotMagnification, (px: number, py: number) => {
-      if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
-        return; // 描画制限により描画しない
-      }
-      if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
-        const diff = agent.setPixel({ x: px, y: py }, color, true);
-        if (diff !== undefined) {
-          dm.add(diff);
-        }
-      }
-    });
+    // 現在位置にスタンプ
+    const { cx, cy } = this.getCenter(position, rawPosition, size, dotMagnification);
+    this.stamp(agent, cx, cy, mask, color, shouldCheckSelectionLimit, true);
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x: number, y: number) => {
-        // 偶数サイズのブラシでは rawPosition から中心を決めるため、
-        // 各補完点に対応する rawPosition を合成して渡す
-        const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification };
-        drawPixel({ x, y }, syntheticRaw, size, dotMagnification, (px: number, py: number) => {
-          if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
-            return; // 描画制限により描画しない
-          }
-          if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
-            const diff = agent.setPixel({ x: px, y: py }, color, true);
-            if (diff !== undefined) {
-              dm.add(diff);
-            }
-          }
-        });
+        // 偶数サイズは syntheticRaw を用いて中心を決定
+        const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
+        const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
+        this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, true);
       });
     }
 
@@ -161,37 +212,20 @@ export class PenTool implements ToolBehavior {
     const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
 
     const preset = getPresetOf(this.categoryId, presetName) as any;
-    const size = preset?.size ?? 1;
-    const shape = preset?.shape ?? 'square'; // デフォルトは正方形
+  const size = preset?.size ?? 1;
+  const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
 
     const layer = activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;
 
-    const pbm = agent.getPixelBufferManager();
-    const dm = agent.getDiffManager();
-
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
-
-    const drawPixel = shape === 'circle' ? drawCirclePixel : drawSquarePixel;
+    const mask = this.ensureMask(size, shape);
 
     drawCompletionLine(targetPosition, this.startPosition, (x: number, y: number) => {
-      // 直線補完の各点に対応する rawPosition を合成
-      const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification };
-      drawPixel({ x, y }, syntheticRaw, size, dotMagnification, (px: number, py: number) => {
-        if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
-          return; // 描画制限により描画しない
-        }
-        if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
-          const diff = agent.setPixel({ x: px, y: py }, color, true);
-          if (diff !== undefined) {
-            if (commit) {
-              dm.add(diff);
-            } else {
-              this.lastPreviewDiff?.push(diff);
-            }
-          }
-        }
-      });
+      // 直線補完の各点に対応する rawPosition を合成し中心決定
+      const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
+      const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
+      this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, commit, commit ? undefined : this.lastPreviewDiff);
     });
 
     return {

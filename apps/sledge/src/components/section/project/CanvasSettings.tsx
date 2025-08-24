@@ -3,14 +3,16 @@ import { adjustZoomToFit, centeringCanvas, changeCanvasSize, isValidCanvasSize }
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB03 } from '@sledge/theme';
+import { vars, ZFB03, ZFB03B } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { activeLayer, allLayers } from '~/controllers/layer/LayerListController';
+import { saveGlobalSettings } from '~/io/config/save';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/models/canvas/Canvas';
 import { Consts } from '~/models/Consts';
+import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionCaption, sectionContent } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
@@ -77,7 +79,8 @@ const CanvasSettings: Component = () => {
 
   return (
     <SectionItem title='canvas.'>
-      <div class={sectionContent} style={{ 'padding-left': '8px', gap: '10px', 'margin-top': '2px', 'margin-bottom': '24px' }}>
+      <div class={sectionContent} style={{ gap: '10px', 'margin-top': '8px', 'padding-bottom': '24px' }}>
+        <p class={sectionCaption}>size.</p>
         <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': '2px' }}>
           <p style={{ color: vars.color.onBackground, width: '72px' }}>presets.</p>
           <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
@@ -129,8 +132,6 @@ const CanvasSettings: Component = () => {
             disabled={!isChangable()}
             style={{
               'margin-left': 'auto',
-              opacity: isChangable() ? 1 : 0.2,
-              'pointer-events': isChangable() ? 'auto' : 'none',
               color: isChangable() ? vars.color.active : undefined,
               'border-color': isChangable() ? vars.color.active : undefined,
             }}
@@ -138,30 +139,47 @@ const CanvasSettings: Component = () => {
             apply
           </button>
         </div>
-      </div>
-
-      <div class={flexCol} style={{ 'padding-left': '8px', gap: '4px', overflow: 'hidden' }}>
-        <p style={{ 'font-family': ZFB03, width: '100%', 'font-size': '8px', 'margin-bottom': '6px' }}>{'canvas info'}</p>
-        <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>size</p>
-          <p style={{ 'white-space': 'wrap' }}>{`${canvasStore.canvas.width} x ${canvasStore.canvas.height}`}</p>
+        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
+          info.
+        </p>
+        <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
+          <div class={flexRow}>
+            <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>size</p>
+            <p style={{ 'white-space': 'wrap' }}>{`${canvasStore.canvas.width} x ${canvasStore.canvas.height}`}</p>
+          </div>
+          <div class={flexRow}>
+            <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>layers</p>
+            <p style={{ 'white-space': 'wrap' }}>{`${allLayers().length}`}</p>
+          </div>
+          <div class={flexRow}>
+            <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>active</p>
+            <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
+          </div>
         </div>
-        <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>layers</p>
-          <p style={{ 'white-space': 'wrap' }}>{`${allLayers().length}`}</p>
-        </div>
-        <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>active</p>
-          <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
-        </div>
+        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
+          actions.
+        </p>
+        <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
+          <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 
-        <Button onClick={() => centeringCanvas()} style={{ 'margin-top': '12px' }}>
-          Center Canvas.
-        </Button>
-
-        <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>
-          Adjust zoom.
-        </Button>
+          <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>
+            Adjust zoom.
+          </Button>
+          <div class={flexCol} style={{ gap: '6px' }}>
+            <Button
+              onClick={async () => {
+                setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
+                await saveGlobalSettings(false);
+              }}
+              style={{ 'margin-top': '8px' }}
+            >
+              Set current size as Default.
+            </Button>
+            <p style={{ 'font-family': ZFB03B, 'font-size': '8px', 'margin-left': '4px', opacity: 0.5 }}>
+              [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
+            </p>
+          </div>
+        </div>
       </div>
     </SectionItem>
   );

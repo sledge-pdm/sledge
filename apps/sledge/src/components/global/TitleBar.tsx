@@ -16,6 +16,7 @@ import {
   titleBarSaveSection,
   titleBarTitle,
   titleBarTitleContainer,
+  titleBarTitleSub,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
 import { join } from '~/utils/PathUtils';
@@ -95,6 +96,7 @@ export default function TitleBar() {
                     {fileStore.location.path ?? ''}
                   </p>
                   <p class={titleBarTitle}>{fileStore.location.name ? join('', fileStore.location.name) : '< new project >'}</p>
+                  <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   <div
                     style={{ height: '10px', width: '1px', 'background-color': vars.color.border, 'margin-left': '8px', 'margin-right': '12px' }}
                   />

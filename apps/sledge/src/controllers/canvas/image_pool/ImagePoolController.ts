@@ -1,43 +1,88 @@
-import { appCacheDir, basename } from '@tauri-apps/api/path';
-import { copyFile, exists, mkdir } from '@tauri-apps/plugin-fs';
+import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';
+import { eventBus } from '~/utils/EventBus';
 import getFileId from '~/utils/getFileId';
-import { join } from '~/utils/PathUtils';
+
+// Plain Map でエントリーを管理
+const pool = new Map<string, ImagePoolEntry>();
+
+export const getEntries = (): ImagePoolEntry[] => Array.from(pool.values());
+export const getEntry = (id: string): ImagePoolEntry | undefined => pool.get(id);
 
 export function setEntry(id: string, entry: ImagePoolEntry) {
-  setImagePoolStore((store) => {
-    store.entries.set(id, entry);
-    return store;
-  });
+  pool.set(id, entry);
+  eventBus.emit('imagePool:entryPropChanged', { id });
+}
+
+export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
+  const old = pool.get(id);
+  if (!old) return;
+  const updated = { ...old, ...patch } as ImagePoolEntry;
+  pool.set(id, updated);
+  eventBus.emit('imagePool:entryPropChanged', { id });
 }
 
 export function removeEntry(id: string) {
-  setImagePoolStore((store) => {
-    store.entries.delete(id);
-    return store;
-  });
+  if (pool.delete(id)) {
+    eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
+  }
 }
 
-async function createResource(originalPath: string) {
+export function replaceAll(entries: ImagePoolEntry[]) {
+  pool.clear();
+  for (const e of entries) pool.set(e.id, e);
+  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
+}
+
+export async function addToImagePool(imagePaths: string | string[]) {
+  if (Array.isArray(imagePaths)) {
+    await Promise.all(imagePaths.map((p) => createEntry(p)));
+  } else {
+    await createEntry(imagePaths);
+  }
+  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
+}
+
+export async function relinkEntry(id: string, newPath: string) {
+  const filename = newPath.split(/[\\/]/).pop() ?? newPath;
+  updateEntryPartial(id, { originalPath: newPath, resourcePath: newPath, fileName: filename });
+}
+
+export async function burndownToCurrentLayer(id: string, removeAfter: boolean) {
+  const active = activeLayer(); // いま選択中のレイヤー
+  if (!active) return;
+
+  try {
+    const current = getEntry(id);
+    if (!current) return;
+    await burndownToLayer({
+      entry: current,
+      targetLayerId: active.id,
+    });
+    if (removeAfter) removeEntry(current.id); // ImagePool から削除
+  } catch (e) {
+    console.error(e);
+    // TODO: ユーザ通知
+  }
+}
+
+async function createEntry(originalPath: string) {
   const id = await getFileId(originalPath);
 
-  const imagesDir = await appCacheDir(); // e.g. src-tauri/…/app
-  const destName = `${id}-${await basename(originalPath)}`;
-  const destFolder = join(imagesDir, 'pool-images');
-  if (!(await exists(destFolder))) {
-    await mkdir(destFolder);
-  }
-  const destPath = join(imagesDir, 'pool-images', destName);
-  await copyFile(originalPath, destPath);
-
-  const { width, height } = await loadLocalImage(destPath);
+  // 画像サイズの取得（コピーせず読み込み）
+  const bitmap = await loadLocalImage(originalPath);
+  const width = bitmap.width;
+  const height = bitmap.height;
 
   const entry: ImagePoolEntry = {
     id,
     originalPath,
-    resourcePath: destPath,
+    // 段階的移行のため resourcePath は originalPath をミラー
+    resourcePath: originalPath,
+    fileName: originalPath.split(/[\\/]/).pop() ?? originalPath,
     x: 0,
     y: 0,
     scale: Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height),
@@ -46,15 +91,6 @@ async function createResource(originalPath: string) {
     opacity: 1,
     visible: true,
   };
-  setEntry(id, entry);
-
+  pool.set(id, entry);
   return id;
-}
-
-export function addToImagePool(imagePaths: string | string[]) {
-  if (Array.isArray(imagePaths)) {
-    imagePaths.forEach((path) => createResource(path));
-  } else {
-    createResource(imagePaths);
-  }
 }

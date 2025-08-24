@@ -8,9 +8,7 @@ export const paletteRoot = style([
   },
 ]);
 
-export const paletteColorBoxContainer = style({
-  position: 'relative',
-});
+export const paletteColorBoxContainer = style({});
 
 export const paletteColorBoxPrimary = style({
   position: 'absolute',

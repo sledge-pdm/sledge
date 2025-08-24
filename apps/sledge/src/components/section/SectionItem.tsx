@@ -1,5 +1,5 @@
 import { flexCol } from '@sledge/core';
-import { Component, createSignal, JSX } from 'solid-js';
+import { Component, createSignal, JSX, Show } from 'solid-js';
 import { SectionSubHeader } from '~/components/section/SubHeader';
 import { sectionRoot } from '~/styles/section/section_item.css';
 
@@ -16,17 +16,16 @@ const SectionItem: Component<Props> = (props) => {
       <SectionSubHeader defaultExpanded={expanded()} onExpandChanged={setExpanded}>
         {props.title}
       </SectionSubHeader>
-      <div
-        class={flexCol}
-        style={{
-          visibility: expanded() ? 'visible' : 'collapse',
-          height: expanded() ? 'auto' : '0',
-          overflow: 'visible',
-          'padding-right': '16px',
-        }}
-      >
-        {props.children}
-      </div>
+      <Show when={expanded()}>
+        <div
+          class={flexCol}
+          style={{
+            overflow: 'visible',
+          }}
+        >
+          {props.children}
+        </div>
+      </Show>
     </div>
   );
 };

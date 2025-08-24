@@ -1,5 +1,6 @@
 import { flexRow } from '@sledge/core';
 import { Component } from 'solid-js';
+import ImagePoolGrid from '~/components/section/editor/item/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
 import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
 import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
@@ -25,7 +26,10 @@ const Images: Component<{}> = () => {
           + add image.
         </button>
       </div>
-      {/* <ImagePoolItem /> */}
+      <div style={{ margin: '8px 0' }}>
+        {/* <ImagePoolList /> */}
+        <ImagePoolGrid />
+      </div>
     </SectionItem>
   );
 };

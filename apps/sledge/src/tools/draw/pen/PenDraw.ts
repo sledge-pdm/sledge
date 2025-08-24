@@ -74,19 +74,6 @@ export function drawSquarePixel(p: Vec2, rawP: Vec2 | undefined, size: number, d
   const start = -half;
   const end = size - half - 1;
 
-  // const centerColor = getRandomColorRGBA();
-  // const boundColor = getRandomColorRGBA();
-  // setLogStore('canvasDebugPoints', (prev) => {
-  //   return [
-  //     ...prev,
-  //     { x: centerX, y: centerY, color: centerColor },
-  //     { x: centerX + start, y: centerY, color: boundColor },
-  //     { x: centerX, y: centerY + start, color: boundColor },
-  //     { x: centerX + end, y: centerY, color: boundColor },
-  //     { x: centerX, y: centerY + end, color: boundColor },
-  //   ];
-  // });
-
   for (let dy = start; dy <= end; dy++) {
     for (let dx = start; dx <= end; dx++) {
       drawFn(centerX + dx, centerY + dy);
@@ -111,19 +98,6 @@ export function drawCirclePixel(p: Vec2, rawP: Vec2 | undefined, size: number, d
   const radiusSquared = radius * radius;
 
   const bound = Math.ceil((size - 1) / 2);
-
-  // const centerColor = getRandomColorRGBA();
-  // const boundColor = getRandomColorRGBA();
-  // setLogStore('canvasDebugPoints', (prev) => {
-  //   return [
-  //     ...prev,
-  //     { x: centerX, y: centerY, color: centerColor },
-  //     { x: centerX - bound, y: centerY, color: boundColor },
-  //     { x: centerX, y: centerY - bound, color: boundColor },
-  //     { x: centerX + bound, y: centerY, color: boundColor },
-  //     { x: centerX, y: centerY + bound, color: boundColor },
-  //   ];
-  // });
 
   for (let dy = -bound; dy <= bound; dy++) {
     for (let dx = -bound; dx <= bound; dx++) {

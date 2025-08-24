@@ -3,12 +3,14 @@ import { adjustZoomToFit, centeringCanvas, changeCanvasSize, isValidCanvasSize }
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB03 } from '@sledge/theme';
+import { vars, ZFB03, ZFB08 } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { activeLayer, allLayers } from '~/controllers/layer/LayerListController';
+import { saveGlobalSettings } from '~/io/config/save';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/models/canvas/Canvas';
 import { Consts } from '~/models/Consts';
+import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
 import { sectionContent } from '~/styles/section/section_item.css';
 
@@ -138,6 +140,9 @@ const CanvasSettings: Component = () => {
             apply
           </button>
         </div>
+        <a style={{ color: vars.color.muted }} onClick={() => {}}>
+          set to default size
+        </a>
         <div class={flexCol} style={{ 'margin-top': '8px', gap: '4px', overflow: 'hidden' }}>
           <p style={{ 'font-family': ZFB03, width: '100%', 'font-size': '8px', 'margin-bottom': '6px' }}>{'canvas info'}</p>
           <div class={flexRow}>
@@ -160,6 +165,20 @@ const CanvasSettings: Component = () => {
           <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>
             Adjust zoom.
           </Button>
+          <div class={flexCol} style={{ gap: '4px' }}>
+            <Button
+              onClick={async () => {
+                setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
+                await saveGlobalSettings(false);
+              }}
+              style={{ 'margin-top': '8px' }}
+            >
+              Set current size as Default.
+            </Button>
+            <p style={{ 'font-family': ZFB08, 'font-size': '8px', opacity: 0.75, 'margin-left': '4px' }}>
+              current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`}
+            </p>
+          </div>
         </div>
       </div>
     </SectionItem>

@@ -96,7 +96,7 @@ const About = () => {
 
           <div class={flexCol} style={{ 'margin-top': '24px' }}>
             <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>link</p>
-            <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'end', 'margin-bottom': '36px' }}>
+            <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'end', 'margin-bottom': '32px' }}>
               <a class={aboutLink} onClick={(e) => openLink('https://github.com/Innsbluck-rh/sledge')}>
                 Source (Github)
               </a>

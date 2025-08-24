@@ -84,6 +84,7 @@ class CanvasAreaInteract {
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
 
+    this.updateCursor('auto');
     if (!this.pointers.has(e.pointerId)) return;
     const prev = this.pointers.get(e.pointerId)!;
     const now = { x: e.clientX, y: e.clientY };

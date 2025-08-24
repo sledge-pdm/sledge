@@ -8,9 +8,11 @@ import Home from './routes/start/index';
 
 import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
-import { onCleanup, onMount } from 'solid-js';
+import { showContextMenu } from '@sledge/ui';
+import { createEffect, onCleanup, onMount } from 'solid-js';
 import DebugViewer from '~/components/debug/DebugViewer';
 import { loadGlobalSettings } from '~/io/config/load';
+import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { globalConfig } from '~/stores/GlobalStores';
 import { reportCriticalError } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
@@ -42,12 +44,43 @@ export default function App() {
     loadGlobalSettings();
   });
 
+  // テーマクラスを html 要素に付与して、Portal や body 直下にもトークンが届くようにする
+  let prevThemeClass: string | undefined;
+  const applyThemeToHtml = () => {
+    const cls = getTheme(globalConfig.appearance.theme);
+    const html = document.documentElement;
+    if (prevThemeClass && html.classList.contains(prevThemeClass)) {
+      html.classList.remove(prevThemeClass);
+    }
+    html.classList.add(cls);
+    prevThemeClass = cls;
+  };
+  onMount(applyThemeToHtml);
+  createEffect(applyThemeToHtml);
+
   return (
     <Router
       root={(props) => (
         <MetaProvider>
           <title>Sledge</title>
-          <div class={[flexCol, h100, getTheme(globalConfig.appearance.theme)].join(' ')}>
+          <div
+            class={[flexCol, h100].join(' ')}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              console.log('Context menu opened');
+              showContextMenu(
+                undefined,
+                import.meta.env.DEV
+                  ? [ContextMenuItems.Save, ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools]
+                  : [ContextMenuItems.Save],
+                e,
+                {
+                  closeByOutsideClick: true,
+                  onClose: () => console.log('Context menu closed'),
+                }
+              );
+            }}
+          >
             <TitleBar />
             <main>{props.children}</main>
             <DebugViewer />

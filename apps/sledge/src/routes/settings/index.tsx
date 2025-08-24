@@ -2,7 +2,7 @@ import { pageRoot } from '@sledge/theme';
 import { onMount } from 'solid-js';
 import ConfigForm from '~/components/config/ConfigForm';
 import { loadGlobalSettings } from '~/io/config/load';
-import { reportCriticalError, showMainWindow } from '~/utils/WindowUtils';
+import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Settings() {
   onMount(async () => {
@@ -10,7 +10,7 @@ export default function Settings() {
       await loadGlobalSettings();
       await showMainWindow();
     } catch (e) {
-      await reportCriticalError(e);
+      await reportWindowStartError(e);
     }
   });
 

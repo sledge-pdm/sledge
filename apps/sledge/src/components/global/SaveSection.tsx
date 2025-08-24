@@ -3,7 +3,7 @@ import { vars } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
@@ -28,15 +28,15 @@ const SaveSection: Component = () => {
 
       var interval = seconds / 31536000;
       if (interval > 1) {
-        return Math.floor(interval) + 'yr ago';
+        return Math.floor(interval) + ' years ago';
       }
       interval = seconds / 2592000;
       if (interval > 1) {
-        return Math.floor(interval) + 'mo ago';
+        return Math.floor(interval) + ' months ago';
       }
       interval = seconds / 86400;
       if (interval > 1) {
-        return Math.floor(interval) + 'd ago';
+        return Math.floor(interval) + ' days ago';
       }
       interval = seconds / 3600;
       if (interval > 1) {
@@ -51,7 +51,9 @@ const SaveSection: Component = () => {
       }
       return Math.floor(Math.floor(seconds) / 10) * 10 + ' sec ago';
     }
-    return 'not saved yet.';
+
+    // return 'not saved yet.';
+    return '';
   };
 
   const [saveTimeText, setSaveTimeText] = createSignal(getSaveTimeText());
@@ -93,7 +95,7 @@ const SaveSection: Component = () => {
     setSaveTimeText(getSaveTimeText());
   });
 
-  const saveMenu: MenuListOption[] = [
+  const saveMenu = createMemo<MenuListOption[]>(() => [
     { label: 'Save As...', onSelect: () => save(true), color: vars.color.onBackground },
     {
       label: 'Open Saved Folder',
@@ -104,17 +106,19 @@ const SaveSection: Component = () => {
       disabled: !fileStore.location.path || !fileStore.location.name,
       color: vars.color.onBackground,
     },
-    // { label: 'Save As Layers', onSelect: () => save(true), color: vars.color.onBackground },
-  ];
+  ]);
 
-  const [iconSrc, setIconSrc] = createSignal<string | undefined>(undefined);
+  // const [iconSrc, setIconSrc] = createSignal<string | undefined>(undefined);
 
   const [autoSaveIntervalRatio, setAutoSaveIntervalRatio] = createSignal<number>(0);
 
   onMount(() => {
     makeTimer(
       () => {
-        if (!projectStore.autoSaveInterval || !projectStore.lastSavedAt) return;
+        if (!projectStore.autoSaveEnabled || !projectStore.autoSaveInterval || !projectStore.lastSavedAt) {
+          setAutoSaveIntervalRatio(0);
+          return;
+        }
         const diffSec = (new Date().getTime() - projectStore.lastSavedAt.getTime()) / 1000;
 
         const intervalRatio = diffSec / projectStore.autoSaveInterval;
@@ -168,9 +172,10 @@ const SaveSection: Component = () => {
           <p
             style={{
               color: vars.color.accent,
+              'white-space': 'nowrap',
             }}
           >
-            save
+            {fileStore.location.name && fileStore.location.name ? 'save' : 'save (new)'}
           </p>
         </div>
         <div class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>
@@ -190,14 +195,15 @@ const SaveSection: Component = () => {
             width: `${autoSaveIntervalRatio() * 100}%`,
             height: '100%',
             'background-color': vars.color.accent,
-            opacity: 0.1,
+            opacity: 0.25,
+            'pointer-events': 'none',
           }}
         />
       </div>
 
       <Show when={isSaveMenuShown()}>
         <MenuList
-          options={saveMenu}
+          options={saveMenu()}
           onClose={() => setIsSaveMenuShown(false)}
           align={'right'}
           style={{

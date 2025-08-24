@@ -1,5 +1,5 @@
-import { Asset, getReleaseData, os, osExtensions, ReleaseData } from '@sledge/core';
-import { vars, ZFB03B } from '@sledge/theme';
+import { Asset, flexCol, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
+import { k12x8, vars, ZFB03B, ZFB08 } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { createSignal, onMount, Show } from 'solid-js';
 import FadingImage from '~/components/FadingImage';
@@ -10,9 +10,11 @@ import {
   description,
   greetText,
   header,
+  informationText,
   mainButton,
   mainButtonContainer,
   rightBottomArea,
+  scrollContent,
   startIcon,
   startImage,
   startImageContainer,
@@ -41,6 +43,8 @@ export default function Home() {
     setDownloadFlavor(downloadFlavorTexts[Math.floor(Math.random() * downloadFlavorTexts.length)]);
   };
 
+  const [isLoading, setIsLoading] = createSignal(true);
+
   const [userOS, setUserOS] = createSignal<os>('none');
   const [releaseData, setReleaseData] = createSignal<ReleaseData | null>(null);
 
@@ -50,7 +54,7 @@ export default function Home() {
   }[] => {
     if (userOS() === 'none' || !releaseData()) return [];
 
-    const availableExtensions = osExtensions[userOS()].extensions;
+    const availableExtensions = osBuildInfos[userOS()].extensions;
 
     return releaseData()!
       .assets.map((asset) => {
@@ -64,15 +68,14 @@ export default function Home() {
       })
       .filter((item): item is { asset: Asset; extension: string } => item !== undefined);
   };
+  const information = (): string | undefined => {
+    if (userOS() === 'none' || !releaseData()) return undefined;
+    const information = osBuildInfos[userOS()].information;
+    return information;
+  };
 
   onMount(async () => {
-    const data = await getReleaseData(releaseApiUrl);
-    if (!data) {
-      console.error('Failed to fetch release data');
-      return;
-    }
-    setReleaseData(data);
-
+    setIsLoading(true);
     const userAgent = navigator.userAgent;
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       setUserOS('sp');
@@ -85,6 +88,20 @@ export default function Home() {
     } else {
       setUserOS('none');
     }
+
+    try {
+      const githubPat = import.meta.env.VITE_GITHUB_PAT;
+      // github api refuses localhost by CORS.
+      const data = await getReleaseData(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat);
+      if (!data) {
+        console.error('Failed to fetch release data');
+      } else {
+        setReleaseData(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch release data');
+    }
+    setIsLoading(false);
   });
 
   const DownloadButtons = () => {
@@ -110,79 +127,125 @@ export default function Home() {
 
   return (
     <div class={startRoot}>
-      <a href={'https://github.com/Innsbluck-rh/sledge'} target='_blank' class={header} style={{ width: 'fit-content' }}>
-        <img class={startIcon} src={isLight() ? '/companion.png' : '/companion_light.png'} width={56} height={56} />
-        {/* <p class={startHeader}>SLEDGE.</p> */}
-      </a>
+      <div class={scrollContent}>
+        <a href={'https://github.com/Innsbluck-rh/sledge'} target='_blank' class={header} style={{ width: 'fit-content' }}>
+          <img class={startIcon} src={isLight() ? '/companion.png' : '/companion_light.png'} width={56} height={56} />
+          {/* <p class={startHeader}>SLEDGE.</p> */}
+        </a>
 
-      <div class={content}>
-        <div class={description}>
-          <p class={greetText}>HELLO.</p>
-          <p class={startText}>
-            i'm sledge.
-            <br />
-            simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
-          </p>
-          <div class={ButtonAreaContainer}>
-            <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-              <p class={versionInfoText}>
-                Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
-              </p>
-            </Show>
-            <p class={versionInfoText}>
-              Latest Build: <span style={{ color: vars.color.accent }}>{releaseData()?.name}</span>
+        <div class={content}>
+          <div class={description}>
+            <p class={greetText}>HELLO.</p>
+            <p class={startText}>
+              i'm sledge.
+              <br />
+              simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
             </p>
-            <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-              <div class={mainButtonContainer}>{DownloadButtons()}</div>
-              <a
-                onClick={() => {
-                  window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-                }}
-                style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
-              >
-                OTHER DOWNLOADS.
-              </a>
-            </Show>
 
-            <Show when={userOS() === 'sp'}>
-              <Button
-                onClick={() => {
-                  window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
-                }}
-                hoverColor='white'
-                class={mainButton}
-              >
-                VIEW CODE.
-              </Button>
+            <Show when={!isLoading()} fallback={<p class={startText}>Loading...</p>}>
+              <Show when={information()}>
+                <div
+                  class={flexCol}
+                  style={{
+                    'background-color': vars.color.surface,
+                    padding: vars.spacing.lg,
+                    color: vars.color.onBackground,
+                    width: 'fit-content',
+                    'max-width': '100%',
+                  }}
+                >
+                  <p
+                    class={informationText}
+                    style={{
+                      'font-family': ZFB08,
+                      'white-space': 'pre',
+                      'font-size': '8px',
+                      'margin-bottom': '12px',
+                      color: vars.color.accent,
+                    }}
+                  >
+                    for {userOS()} users
+                  </p>
+                  <p
+                    class={informationText}
+                    style={{
+                      'font-family': k12x8,
+                      'line-height': '1.5',
+                      'white-space': 'pre',
+                      'letter-spacing': '1px',
+                      'font-size': '8px',
+                    }}
+                  >
+                    {information()}
+                  </p>
+                </div>
+              </Show>
+              <div class={ButtonAreaContainer}>
+                <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+                  <p class={versionInfoText}>
+                    Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
+                  </p>
+                </Show>
+                <p class={versionInfoText}>
+                  Latest Build:{' '}
+                  <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>
+                    {releaseData()?.name ?? '[ fetch failed ]'}
+                  </span>
+                </p>
+
+                <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+                  <div class={mainButtonContainer}>{DownloadButtons()}</div>
+                  <a
+                    onClick={() => {
+                      window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+                    }}
+                    style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
+                  >
+                    OTHER DOWNLOADS.
+                  </a>
+                </Show>
+
+                <Show when={userOS() === 'sp'}>
+                  <Button
+                    onClick={() => {
+                      window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
+                    }}
+                    hoverColor='white'
+                    class={mainButton}
+                  >
+                    VIEW CODE.
+                  </Button>
+                </Show>
+              </div>
             </Show>
           </div>
+          <div
+            class={startImageContainer}
+            style={{
+              filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'})`,
+            }}
+          >
+            <FadingImage class={startImage} src={isLight() ? '/window_dark.png' : '/window_light.png'} />
+          </div>
         </div>
-        <div
-          class={startImageContainer}
-          style={{
-            filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'})`,
-          }}
-        >
-          <FadingImage class={startImage} src={isLight() ? '/window_dark.png' : '/window_light.png'} />
+
+        <div class={themeArea}>
+          <p style={{ 'font-size': '16px', 'font-family': ZFB03B }}>
+            try <span style={{ color: vars.color.accent }}>theme</span> here!
+          </p>
+          <ThemeToggle noBackground={false} />
         </div>
-      </div>
 
-      <div class={themeArea}>
-        <p style={{ 'font-size': '16px', 'font-family': ZFB03B }}>
-          try <span style={{ color: vars.color.accent }}>theme</span> here!
-        </p>
-        <ThemeToggle noBackground={false} />
-      </div>
-
-      <div class={rightBottomArea}>
-        <p
-          style={{
-            'font-family': ZFB03B,
-            opacity: 0.6,
-          }}
-        >
-          [C] 2025 sledge all rights reserved.
-        </p>
+        <div class={rightBottomArea}>
+          <p
+            style={{
+              'font-family': ZFB03B,
+              opacity: 0.6,
+            }}
+          >
+            [C] 2025 sledge all rights reserved.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { Size2D, Vec2 } from '@sledge/core';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
+import { setProjectStore } from '~/stores/ProjectStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import DiffManager from './managers/DiffManager';
@@ -64,6 +65,7 @@ export default class LayerImageAgent {
   }
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {
+    setProjectStore('isProjectChangedAfterSave', true);
     this.pbm.buffer = rawBuffer;
     this.tm.setAllDirty();
     if (!silentlySet) {
@@ -78,6 +80,7 @@ export default class LayerImageAgent {
   }
 
   changeBufferSize(newSize: Size2D, emitEvent?: boolean) {
+    setProjectStore('isProjectChangedAfterSave', true);
     this.pbm.changeSize(newSize);
     this.tm.setSize(newSize);
     if (emitEvent) {
@@ -109,11 +112,11 @@ export default class LayerImageAgent {
   public canUndo = () => this.hm.canUndo();
   public canRedo = () => this.hm.canRedo();
 
-  public undo() {
+  public undo(silent?: boolean) {
     const undoStart = Date.now();
     const undoedAction = this.hm.undo();
     if (undoedAction === undefined) return;
-    setBottomBarText(`undo.`);
+    if (!silent) setBottomBarText(`undo.`);
     undoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
         case 'pixel':
@@ -128,18 +131,18 @@ export default class LayerImageAgent {
       }
     });
     const undoEnd = Date.now();
-    setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
+    if (!silent) setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) undo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     // this.callOnImageChangeListeners({ updatePreview: true });
   }
 
-  public redo() {
+  public redo(silent?: boolean) {
     const redoStart = Date.now();
     const redoedAction = this.hm.redo();
     if (redoedAction === undefined) return;
-    setBottomBarText(`redo.`);
+    if (!silent) setBottomBarText(`redo.`);
     redoedAction.diffs.forEach((diff) => {
       switch (diff.kind) {
         case 'pixel':
@@ -154,7 +157,7 @@ export default class LayerImageAgent {
       }
     });
     const redoEnd = Date.now();
-    setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
+    if (!silent) setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) redo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
@@ -162,6 +165,7 @@ export default class LayerImageAgent {
   }
 
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {
+    setProjectStore('isProjectChangedAfterSave', true);
     if (!this.pbm.isInBounds(position)) return undefined;
     if (!skipExistingDiffCheck && this.dm.isDiffExists(position)) return undefined;
     const result = this.pbm.setRawPixel(position, color);

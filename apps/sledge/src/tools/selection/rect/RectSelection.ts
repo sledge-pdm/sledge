@@ -24,6 +24,7 @@ export class RectSelection implements ToolBehavior {
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     const mode = this.getMode(args.event);
+    // console.log('RectSelection onStart:', mode, 'SelectionMask size:', selectionManager.getSelectionMask().getWidth(), 'x', selectionManager.getSelectionMask().getHeight());
 
     if (mode === 'move') {
       // 移動モードの場合

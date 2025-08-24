@@ -1,15 +1,18 @@
 import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
-import { getCurrentToolPreset } from '~/controllers/tool/ToolController';
+import { getActiveToolCategory, getCurrentPresetConfig } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
-import { interactStore } from '~/stores/EditorStores';
+import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/misc/marching_ants.css';
-import { PathCmd, PathCmdList } from '~/types/PathCommand';
+import { getDrawnPixelMask } from '~/tools/draw/pen/PenDraw';
+import { TOOL_CATEGORIES } from '~/tools/Tools';
+import { PathCmdList } from '~/types/PathCommand';
+import { RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {
@@ -24,6 +27,10 @@ const CanvasOverlaySVG: Component = (props) => {
   const borderHeight = () => canvasStore.canvas.height * interactStore.zoom;
 
   const [areaPenWrite, setAreaPenWrite] = createSignal<Area>();
+  const [penOutlinePath, setPenOutlinePath] = createSignal<string>('');
+  // ローカル座標系 (mask 原点) の PathCmdList をキャッシュ
+  let cachedLocalPath: PathCmdList | undefined;
+  let cachedKey: string | undefined; // toolId + size + shape
   const borderDash = 6;
 
   const [selectionChanged, setSelectionChanged] = createSignal<boolean>(false);
@@ -48,27 +55,7 @@ const CanvasOverlaySVG: Component = (props) => {
     const pathString = mask_to_path(combinedMask, width, height, offset.x, offset.y);
 
     // パス文字列をPathCmdListに変換
-    const pathCmds = new PathCmdList();
-    if (pathString.trim()) {
-      // 簡易的なパース（将来的にはより堅牢にする）
-      const commands = pathString.split(/(?=[MLZ])/);
-      commands.forEach((cmd) => {
-        const trimmed = cmd.trim();
-        if (!trimmed) return;
-
-        const parts = trimmed.split(/\s+/);
-        const command = parts[0];
-
-        if (command === 'M' || command === 'L') {
-          const x = parseFloat(parts[1]);
-          const y = parseFloat(parts[2]);
-          pathCmds.add(new PathCmd(command, x, y));
-        } else if (command === 'Z') {
-          pathCmds.add(new PathCmd(command));
-        }
-      });
-    }
-
+    const pathCmds = PathCmdList.parse(pathString);
     setPathCmdList(pathCmds);
   };
 
@@ -82,7 +69,7 @@ const CanvasOverlaySVG: Component = (props) => {
   const [selectionState, setSelectionState] = createSignal(selectionManager.getState());
   const onSelectionStateChangedHandler = (e: Events['selection:stateChanged']) => {
     setSelectionChanged(true);
-    console.log('Selection state changed:', e.newState);
+    if (import.meta.env.DEV) console.log('Selection state changed:', e.newState);
     setSelectionState(e.newState);
   };
 
@@ -119,27 +106,47 @@ const CanvasOverlaySVG: Component = (props) => {
     stopRenderLoop();
   });
 
+  // 1) ローカルパス生成（size/shape 依存）
   createEffect(() => {
-    const preset = getCurrentToolPreset();
-    if (preset !== undefined && preset.size !== undefined) {
-      const toolSize = preset?.size ?? 1;
-      const half = Math.floor(toolSize / 2);
-      let x = Math.floor(interactStore.lastMouseOnCanvas.x) - half;
-      let y = Math.floor(interactStore.lastMouseOnCanvas.y) - half;
-      let size = 1 + half * 2; // -half ~ half
+    const active = getActiveToolCategory();
+    if (active !== TOOL_CATEGORIES.PEN && active !== TOOL_CATEGORIES.ERASER) {
+      cachedLocalPath = undefined;
+      cachedKey = undefined;
+      return;
+    }
+    const preset = getCurrentPresetConfig(active) as any;
+    const size: number = preset?.size ?? 1;
+    const shape: 'circle' | 'square' = preset?.shape ?? 'square';
+    const key = `${active}-${size}-${shape}`;
+    if (cachedKey === key && cachedLocalPath) return; // 変更なし
 
-      x *= interactStore.zoom;
-      y *= interactStore.zoom;
-      size *= interactStore.zoom;
+    const { mask, width, height } = getDrawnPixelMask(size, shape);
+    const pathLocal = mask_to_path(mask, width, height, 0.0, 0.0);
+    cachedLocalPath = PathCmdList.parse(pathLocal);
+    cachedKey = key;
+  });
 
-      setAreaPenWrite({
-        x,
-        y,
-        width: size,
-        height: size,
-      });
+  // 2) マウス移動に応じた平行移動だけ適用
+  createEffect(() => {
+    const active = getActiveToolCategory();
+    const mouse = interactStore.lastMouseOnCanvas;
+    if ((active === TOOL_CATEGORIES.PEN || active === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath) {
+      const preset = getCurrentPresetConfig(active) as any;
+      const size: number = preset?.size ?? 1;
+      const shape: 'circle' | 'square' = preset?.shape ?? 'square';
+
+      // マスクの原点 (左上) へ移すためのオフセットを再計算
+      const { offsetX, offsetY } = getDrawnPixelMask(size, shape);
+
+      const isEven = size % 2 === 0;
+      const centerX = isEven ? Math.round(mouse.x) : Math.floor(mouse.x);
+      const centerY = isEven ? Math.round(mouse.y) : Math.floor(mouse.y);
+      const originX = centerX + offsetX;
+      const originY = centerY + offsetY;
+
+      setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, originX, originY));
     } else {
-      setAreaPenWrite(undefined);
+      setPenOutlinePath('');
     }
   });
 
@@ -161,19 +168,25 @@ const CanvasOverlaySVG: Component = (props) => {
         {/* border rect */}
         <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={0.2} pointer-events='none' />
 
-        {/* pen hover preview */}
-        <Show when={areaPenWrite() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
-          <rect
-            width={areaPenWrite()?.width}
-            height={areaPenWrite()?.height}
-            x={areaPenWrite()?.x}
-            y={areaPenWrite()?.y}
-            fill='none'
-            stroke={vars.color.border}
-            stroke-width={1}
-            pointer-events='none'
-          />
+        {/* pen hover preview (exact outline) */}
+        <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
+          <path d={penOutlinePath()} fill='none' stroke={vars.color.border} stroke-width={1} pointer-events='none' />
         </Show>
+
+        <For each={logStore.canvasDebugPoints}>
+          {(point) => {
+            return (
+              <circle
+                r={4}
+                cx={point.x * interactStore.zoom}
+                cy={point.y * interactStore.zoom}
+                fill={`#${RGBAToHex(point.color)}`}
+                stroke='none'
+                pointer-events='none'
+              />
+            );
+          }}
+        </For>
 
         <path
           id='selection-outline'

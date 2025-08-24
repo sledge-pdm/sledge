@@ -1,3 +1,4 @@
+import { Consts } from '~/models/Consts';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
@@ -8,25 +9,25 @@ export const penPresetFields: PresetFieldMeta[] = [
     component: 'Slider',
     props: {
       min: 1,
-      max: 20,
+      max: Consts.maxPenSize,
       step: 1,
       allowFloat: false,
     },
     tips: 'Pen brush size',
     customFormat: '[value]px',
   },
-  // {
-  //   key: 'shape',
-  //   label: 'Shape',
-  //   component: 'Dropdown',
-  //   props: {
-  //     options: [
-  //       { value: 'circle', label: 'Circle' },
-  //       { value: 'square', label: 'Square' },
-  //     ],
-  //   },
-  //   tips: 'Pen brush shape',
-  // },
+  {
+    key: 'shape',
+    label: 'Shape',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { value: 'square', label: 'Square' },
+        { value: 'circle', label: 'Circle' },
+      ],
+    },
+    tips: 'Pen brush shape',
+  },
   // {
   //   key: 'opacity',
   //   label: 'Opacity',

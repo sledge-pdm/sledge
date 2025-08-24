@@ -1,5 +1,5 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
-import { vars, ZFB08, ZFB09, ZFB31 } from '@sledge/theme';
+import { vars, ZFB09, ZFB11, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const configFormRoot = style([
@@ -15,8 +15,8 @@ export const configFormRoot = style([
 export const configFormSections = style([
   flexCol,
   {
-    borderRight: `1px solid ${vars.color.border}`,
-    width: '150px',
+    borderRight: `1px solid ${vars.color.borderSecondary}`,
+    width: '170px',
     paddingTop: '20px',
   },
 ]);
@@ -25,6 +25,7 @@ export const configFormSectionItem = style([
   flexRow,
   {
     padding: vars.spacing.md,
+    paddingRight: vars.spacing.lg,
     paddingLeft: vars.spacing.lg,
     gap: vars.spacing.sm,
     alignItems: 'center',
@@ -37,7 +38,7 @@ export const configFormSectionItem = style([
 ]);
 
 export const configFormSectionLabel = style({
-  fontFamily: ZFB08,
+  fontFamily: ZFB11,
   fontSize: '8px',
   whiteSpace: 'nowrap',
   ':hover': {
@@ -49,7 +50,7 @@ export const configFormFields = style([
   flexCol,
   {
     position: 'absolute',
-    left: '150px',
+    left: '170px',
     right: '0',
     top: '0',
     bottom: '0',
@@ -92,7 +93,7 @@ export const configFormNoPreset = style([
 export const configFormFieldHeader = style([
   {
     marginBottom: vars.spacing.xs,
-    fontSize: '18px',
+    fontSize: '12px',
     fontFamily: ZFB31,
     color: vars.color.accent,
   },
@@ -154,12 +155,11 @@ export const configFormInfoAreaTop = style([
 ]);
 
 export const configFormInfoAreaBottom = style([
-  flexRow,
+  flexCol,
   {
     position: 'absolute',
     bottom: vars.spacing.xl,
     left: vars.spacing.xl,
-    alignItems: 'center',
     gap: vars.spacing.md,
   },
 ]);

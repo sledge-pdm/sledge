@@ -40,8 +40,8 @@ const defaultProjectStore: ProjectStore = {
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
   lastSavedAt: undefined as Date | undefined,
-  autoSaveEnabled: true,
-  autoSaveInterval: 30,
+  autoSaveEnabled: false,
+  autoSaveInterval: 60,
 };
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),

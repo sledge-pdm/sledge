@@ -1,16 +1,17 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
+import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
+import SectionItem from '~/components/section/SectionItem';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { BlendModeOptions } from '~/models/layer/Layer';
 import { layerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/editor/layer.css';
-import { sectionCaption, sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent } from '~/styles/section/section_item.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import BaseLayerItem from './item/BaseLayerItem';
-import ImagePoolItem from './item/ImagePoolItem';
 import LayerItem from './item/LayerItem';
 
 const LayerList: Component<{}> = () => {
@@ -62,31 +63,34 @@ const LayerList: Component<{}> = () => {
   });
 
   return (
-    <div class={sectionRoot}>
-      <div class={flexRow} style={{ 'margin-bottom': '6px' }}>
-        <p class={sectionCaption} style={{ 'flex-grow': 1 }}>
-          layers.
-        </p>
+    <SectionItem title='layers.'>
+      <div class={flexRow} style={{ 'margin-left': 'auto', gap: '4px', 'margin-bottom': '6px' }}>
+        <button
+          onClick={async () => {
+            await addLayer({ name: 'layer1' });
+            setItems(allLayers());
+          }}
+        >
+          + add.
+        </button>
 
-        <div class={flexRow} style={{ gap: '4px' }}>
-          <button
-            onClick={async () => {
-              await addLayer({ name: 'layer1' });
-              setItems(allLayers());
-            }}
-          >
-            + add.
-          </button>
-
-          <button
-            onClick={() => {
+        <button
+          onClick={async () => {
+            const ok = await confirm(`Sure to remove "${activeLayer().name}" ?\nYou can NOT restore this action.`, {
+              kind: 'warning',
+              title: 'Remove Layer',
+              cancelLabel: 'Cancel',
+              okLabel: 'Remove',
+            });
+            if (ok) {
               removeLayer(activeLayer()?.id);
               setItems(allLayers());
-            }}
-          >
-            - remove.
-          </button>
-        </div>
+            }
+          }}
+          disabled={layerListStore.layers.length <= 1}
+        >
+          - remove.
+        </button>
       </div>
       <div class={sectionContent}>
         <div
@@ -128,7 +132,7 @@ const LayerList: Component<{}> = () => {
         </div>
 
         <div class={layerList}>
-          <ImagePoolItem />
+          {/* <ImagePoolItem /> */}
           <For each={items()}>
             {(layer, index) => {
               return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
@@ -137,7 +141,7 @@ const LayerList: Component<{}> = () => {
           <BaseLayerItem />
         </div>
       </div>
-    </div>
+    </SectionItem>
   );
 };
 

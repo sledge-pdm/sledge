@@ -1,4 +1,5 @@
 import { flexCol, flexRow } from '@sledge/core';
+import { k12x8 } from '@sledge/theme';
 import { Component, createSignal } from 'solid-js';
 import ErrorText from '~/components/global/ErrorText';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
@@ -27,6 +28,9 @@ const ProjectName: Component = () => {
           class='project-name-input'
           type='text'
           name='project_name'
+          style={{
+            'font-family': k12x8,
+          }}
           onInput={(e) => {
             setInputName(e.target.value);
             commitNewName(e.target.value);
@@ -46,7 +50,7 @@ const ProjectName: Component = () => {
             commitNewName(e.target.value);
           }}
           value={fileStore.location.name?.replace(/\.sledge$/, '') || ''}
-          placeholder='project name'
+          placeholder='Project Name'
           autocomplete='off'
         />
         <p>.sledge</p>

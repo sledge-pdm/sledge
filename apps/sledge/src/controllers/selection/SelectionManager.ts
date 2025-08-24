@@ -99,10 +99,12 @@ class SelectionManager {
 
     // キャンバスサイズ変更が来たら、両方のマスクをリサイズ
     eventBus.on('canvas:sizeChanged', (e: any) => {
+      // console.log('SelectionManager: Received canvas:sizeChanged event', e.newSize);
       this.selectionMask.changeSize(e.newSize);
       if (this.previewMask) {
         this.previewMask.changeSize(e.newSize);
       }
+      // console.log('SelectionManager: Mask size updated to', e.newSize);
     });
   }
 
@@ -164,6 +166,13 @@ class SelectionManager {
     this.editMode = mode;
     this.moveOffset = { x: 0, y: 0 };
     eventBus.emit('selection:moved', { newOffset: this.moveOffset });
+
+    // マスクサイズが0x0の場合はエラーログを出力して早期リターン
+    if (this.selectionMask.getWidth() === 0 || this.selectionMask.getHeight() === 0) {
+      console.warn('SelectionManager: SelectionMask size is 0x0. Canvas size may not be initialized properly.');
+      return;
+    }
+
     if (mode === 'replace') {
       // Replace なら確定済みをクリアしてから新しい previewMask
       this.selectionMask.clear();
@@ -180,6 +189,12 @@ class SelectionManager {
    */
   setPreviewFragment(frag: SelectionFragment) {
     if (!this.previewMask) return;
+
+    // マスクサイズが0x0の場合はエラーログを出力して早期リターン
+    if (this.previewMask.getWidth() === 0 || this.previewMask.getHeight() === 0) {
+      console.warn('SelectionManager: PreviewMask size is 0x0. Canvas size may not be initialized properly.');
+      return;
+    }
 
     let changed = false;
 

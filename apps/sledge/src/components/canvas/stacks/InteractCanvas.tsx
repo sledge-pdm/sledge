@@ -1,12 +1,14 @@
 import { Vec2 } from '@sledge/core';
+import { showContextMenu } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import CanvasAreaInteract from '~/controllers/canvas/CanvasAreaInteract';
 import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
+import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
 interface Props {
@@ -56,15 +58,17 @@ export const InteractCanvas: Component<Props> = (props) => {
   function isDrawableClick(e: PointerEvent): boolean {
     if (e.pointerType === 'touch') return false;
 
-    if (e.ctrlKey) {
-      if (selectionManager.isSelected())
-        return true; // [1] 選択移動の操作だけ特例
-      else return false; // それ以外はこれまで同様ゆるさない
+    // 基本的にはCanvasAreaInteractのisDraggableと逆の関係
+    if (CanvasAreaInteract.isDraggable(e)) {
+      // キャンバスドラッグが有効な場合は描画不可
+      return false;
     }
 
-    // right=1, left=2, middle=4
-    // console.log(e.buttons)
-    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) return false;
+    // マウスおよびペンにおいては左クリック相当のクリックだけを描画可能なクリックとする
+    // （右クリック、中クリックなどは弾く）
+    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) {
+      return false;
+    }
 
     return true;
   }
@@ -153,7 +157,11 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     const unlistenFocusChanged = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
       if (!focused) {
-        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointerup'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
+        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
+      } else {
+        // pipetteのみ復帰時も戻す
+        if (toolStore.activeToolCategory === 'pipette')
+          props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
       }
     });
 
@@ -186,6 +194,15 @@ export const InteractCanvas: Component<Props> = (props) => {
         'pointer-events': 'all',
         cursor: 'none',
         'z-index': Consts.zIndex.interactCanvas,
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log('Context menu opened');
+        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e, {
+          closeByOutsideClick: true,
+          onClose: () => console.log('Context menu closed'),
+        });
       }}
     />
   );

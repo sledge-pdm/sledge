@@ -7,7 +7,6 @@ export const dropdownContainer = style({
   position: 'relative',
   display: 'inline-block',
   boxSizing: 'border-box',
-  width: 'auto',
 });
 
 // トリガーボタン
@@ -20,6 +19,7 @@ export const triggerButton = style([
     width: 'fit-content',
     textAlign: 'left',
     minWidth: '100px',
+    maxWidth: '100%',
     alignItems: 'center',
     gap: '6px',
     cursor: 'pointer',
@@ -49,7 +49,6 @@ export const menuStyle = style([
   {
     position: 'absolute',
     top: '100%',
-    left: 0,
     zIndex: Consts.zIndex.dropdownMenu,
     backgroundColor: vars.color.background,
     border: `1px solid ${vars.color.border}`,
@@ -86,6 +85,7 @@ export const menuDirection = styleVariants({
 
 // メニューアイテム
 export const menuItem = style({
+  zIndex: Consts.zIndex.dropdownMenu,
   padding: '8px 10px 8px 10px',
   cursor: 'pointer',
   selectors: {
@@ -94,8 +94,9 @@ export const menuItem = style({
 });
 
 export const itemText = style({
+  width: '100%',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
   color: vars.color.onBackground,
-  width: '100%',
 });

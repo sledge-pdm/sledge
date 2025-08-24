@@ -3,7 +3,7 @@ import { Consts as CoreConfig } from '@sledge/core';
 export const Consts = {
   ...CoreConfig,
 
-  maxPenSize: 20,
+  maxPenSize: 100,
   minCanvasWidth: 1,
   maxCanvasWidth: 10000, // may limited even smaller by webgl's max texture size
   minCanvasHeight: 1,

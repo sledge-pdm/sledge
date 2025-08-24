@@ -1,12 +1,12 @@
 import { getTheme, vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createSignal, onMount, Show } from 'solid-js';
+import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/SaveSection';
 import TopMenuBar from '~/components/global/TopMenuBar';
 import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { projectStore } from '~/stores/ProjectStores';
+import { canvasStore, projectStore } from '~/stores/ProjectStores';
 import {
   titleBarControlButtonContainer,
   titleBarControlButtonImg,
@@ -16,6 +16,7 @@ import {
   titleBarSaveSection,
   titleBarTitle,
   titleBarTitleContainer,
+  titleBarTitleSub,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
 import { join } from '~/utils/PathUtils';
@@ -42,11 +43,36 @@ export default function TitleBar() {
     setMaximized(await getCurrentWindow().isMaximized());
   });
 
-  if (location.pathname.startsWith('/editor')) {
-    getCurrentWindow().setTitle(
-      `${projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >'} ${fileStore.location.path ? `(${fileStore.location.path})` : ''}`
-    );
-  }
+  createEffect(() => {
+    const width = canvasStore.canvas.width;
+    const height = canvasStore.canvas.height;
+
+    if (location.pathname.startsWith('/editor')) {
+      let title = '';
+      const projName = projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >';
+
+      // non-custom titlebar (mac/linux)
+      if (isDecorated()) {
+        const size = `(${canvasStore.canvas.width} x ${canvasStore.canvas.height})`;
+        const projPath = fileStore.location.path;
+        if (projPath) {
+          title += `${projName} ${size} - ${projPath}`;
+        } else {
+          title += `${projName} ${size}`;
+        }
+      } else {
+        const projPath = fileStore.location.path;
+        if (projPath) {
+          title += `${projName} - ${projPath}`;
+        } else {
+          title += `${projName}`;
+        }
+      }
+
+      getCurrentWindow().setTitle(title);
+      console.log(title);
+    }
+  });
 
   const borderWindowLabels: string[] = ['settings'];
   const shouldShowBorder = () => borderWindowLabels.find((l) => l === getCurrentWindow().label);
@@ -70,6 +96,13 @@ export default function TitleBar() {
                     {fileStore.location.path ?? ''}
                   </p>
                   <p class={titleBarTitle}>{fileStore.location.name ? join('', fileStore.location.name) : '< new project >'}</p>
+                  <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
+                  <div
+                    style={{ height: '10px', width: '1px', 'background-color': vars.color.border, 'margin-left': '8px', 'margin-right': '12px' }}
+                  />
+                  <p class={titleBarTitle} style={{ opacity: 0.75 }}>
+                    {canvasStore.canvas.width} x {canvasStore.canvas.height}
+                  </p>
                 </Show>
               </Show>
             </div>

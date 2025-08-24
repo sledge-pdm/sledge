@@ -1,12 +1,15 @@
 import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const sideAreaRoot = style([
   flexCol,
   {
     boxSizing: 'border-box',
     backgroundColor: vars.color.background,
+    zIndex: Consts.zIndex.sideSection,
+    overflowX: 'visible',
   },
 ]);
 
@@ -20,10 +23,9 @@ export const sideAreaContentWrapper = style([
     right: 0,
     paddingTop: '32px',
     paddingBottom: '48px',
-    paddingLeft: '28px',
-    paddingRight: '28px',
-
-    overflowX: 'hidden',
+    paddingLeft: '24px',
+    paddingRight: '24px',
+    overflowX: 'visible',
     overflowY: 'scroll',
 
     '::-webkit-scrollbar': {
@@ -44,6 +46,7 @@ export const sideAreaContentWrapper = style([
 export const sideAreaContent = style([
   flexCol,
   {
+    overflowX: 'visible',
     gap: '1rem',
   },
 ]);

@@ -7,13 +7,25 @@ export const startRoot = style([
   w100,
   {
     height: '100dvh',
-    overflow: 'hidden',
-    padding: '42px 42px',
+    overflowY: 'auto',
+    overflowX: 'hidden',
     boxSizing: 'border-box',
     userSelect: 'text',
+  },
+]);
+
+export const scrollContent = style([
+  flexCol,
+  w100,
+  {
+    overflowY: 'visible',
+    overflowX: 'hidden',
+    padding: '42px 42px',
+    boxSizing: 'border-box',
     '@media': {
       '(max-width: 768px)': {
         padding: `${vars.spacing.xl} ${vars.spacing.lg}`,
+        paddingBottom: '80px',
       },
     },
   },
@@ -35,8 +47,8 @@ export const header = style([
 ]);
 
 export const startIcon = style({
-  width: '56px',
-  height: '56px',
+  width: '48px',
+  height: '48px',
   imageRendering: 'pixelated',
   '@media': {
     '(max-width: 768px)': {
@@ -62,17 +74,17 @@ export const content = style([
   {
     flexWrap: 'nowrap',
     width: '100%',
-    padding: '5rem 3rem',
+    padding: '3rem 3rem',
     boxSizing: 'border-box',
     '@media': {
       '(max-width: 1600px)': {
         gap: '3rem',
-        padding: `5rem 1rem`,
+        padding: `3rem 1rem`,
       },
       '(max-width: 768px)': {
         flexWrap: 'wrap',
         gap: '3rem',
-        padding: `4rem 1rem`,
+        padding: `3rem 1rem`,
       },
     },
   },
@@ -84,7 +96,7 @@ export const description = style([
     width: '45%',
     padding: '3rem 2rem',
     boxSizing: 'border-box',
-    gap: '3rem',
+    gap: '2rem',
     '@media': {
       '(max-width: 1600px)': {},
       '(max-width: 768px)': {
@@ -131,7 +143,6 @@ export const startText = style({
   fontSize: '24px',
   letterSpacing: '2px',
   lineHeight: '1.5',
-  marginBottom: '2rem',
   '@media': {
     '(max-width: 768px)': {
       fontSize: '16px',
@@ -149,6 +160,15 @@ export const ButtonAreaContainer = style([
 
 export const versionInfoText = style({
   fontSize: '16px',
+  '@media': {
+    '(max-width: 768px)': {
+      fontSize: '8px',
+    },
+  },
+});
+export const informationText = style({
+  fontSize: '8px',
+  userSelect: 'text',
   '@media': {
     '(max-width: 768px)': {
       fontSize: '8px',

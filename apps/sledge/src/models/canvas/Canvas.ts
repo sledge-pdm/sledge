@@ -11,6 +11,7 @@ export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crisp-edges';
 export const canvasSizePresets: Record<string, Canvas | undefined> = {
   custom: undefined,
 
+  Icon_XS: { width: 8, height: 8 },
   Icon_S: { width: 16, height: 16 },
   Icon_M: { width: 32, height: 32 },
   Icon_L: { width: 64, height: 64 },

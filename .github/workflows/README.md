@@ -2,15 +2,17 @@
 
 When: Something merged or committed in develop branch
 Build: Yes
-Build Type: Release (may need fix...)
-Create Artifacts: No
+Build Type: Release
+Create Artifacts: Yes
+Create Releases: No
 
-## dev-with-artifacts.yml
+## development_release.yml
 
 When: "vX.X.X-dev.X" tag pushed in any branches
 Build: Yes
-Build Type: Release (may need fix...)
+Build Type: Release
 Create Artifacts: Yes
+Create Release: Yes
 
 ## release.yml
 
@@ -18,3 +20,4 @@ When: "vX.X.X" / "vX.X.X-prealpha" tag pushed in any branches (not triggered whe
 Build: Yes
 Build Type: Release
 Create Artifacts: Yes
+Create Release: Yes

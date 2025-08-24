@@ -7,7 +7,7 @@ export const swatchContainer = style([
   {
     position: 'relative',
     gap: vars.spacing.xs,
-    marginRight: vars.spacing.md,
+    marginRight: vars.spacing.sm,
   },
 ]);
 
@@ -20,8 +20,8 @@ export const descriptionContainer = style([
 ]);
 
 export const colorElemDescription = style({
-  color: vars.color.muted,
   fontFamily: ZFB03,
+  opacity: 0.25,
   fontSize: vars.text.sm,
   transform: 'rotate(180deg)',
   whiteSpace: 'nowrap',

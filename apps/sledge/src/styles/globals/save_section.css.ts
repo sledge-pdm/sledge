@@ -33,7 +33,7 @@ export const saveButtonSide = style([
     alignItems: 'center',
     justifyContent: 'center',
     padding: '4px 4px',
-    borderLeft: `1px solid ${vars.color.onBackground}`,
+    borderLeft: `1px solid ${vars.color.border}`,
     ':hover': {
       backgroundColor: vars.color.button.hover,
     },

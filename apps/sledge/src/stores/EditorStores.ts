@@ -5,6 +5,7 @@ import { SectionTab } from '~/components/section/SectionTabs';
 import { getNormalBottomBarText } from '~/controllers/log/LogController';
 import { PaletteType } from '~/models/color/PaletteType';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
+import { RGBAColor } from '~/utils/ColorUtils';
 
 type AppearanceStore = {
   leftSide: {
@@ -44,8 +45,12 @@ type InteractStore = {
   isDragging: boolean;
   rotation: number;
 };
+type DebugPoint = Vec2 & {
+  color: RGBAColor;
+};
 type LogStore = {
   bottomBarText: string;
+  canvasDebugPoints: DebugPoint[]; // デバッグ用の点の配列
 };
 export type SelectionLimitMode = 'none' | 'outside' | 'inside';
 export type SelectionFillMode = 'global' | 'boundary' | 'area'; // global: 全体参照, boundary: 範囲制限, area: 選択範囲塗りつぶし
@@ -65,7 +70,7 @@ const defaultAppearanceStore: AppearanceStore = {
   },
   rightSide: {
     shown: false,
-    tabs: ['project', 'perilous'],
+    tabs: ['project', 'export', 'perilous'],
     selectedIndex: 0,
   },
 };
@@ -105,6 +110,7 @@ const defaultInteractStore: InteractStore = {
 };
 const defaultLogStore: LogStore = {
   bottomBarText: getNormalBottomBarText(true),
+  canvasDebugPoints: [],
 };
 const defaultToolStore: ToolStore = {
   tools: toolCategories,

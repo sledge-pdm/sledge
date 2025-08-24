@@ -19,11 +19,13 @@ export const canvasSizeTimes = style({
 export const canvasSizeLabel = style({
   fontSize: vars.text.sm,
   color: vars.color.muted,
+  marginBottom: '1px',
+  marginLeft: '3px',
 });
 
 export const canvasSizeInput = style({
   fontSize: vars.text.xl,
-  width: '50px',
+  width: '64px',
 });
 export const canvasSizeButton = style({
   margin: `${vars.spacing.xs} 0`,

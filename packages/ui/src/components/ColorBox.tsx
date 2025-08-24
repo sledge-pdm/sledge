@@ -17,7 +17,7 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
   const isSelected = () => props.enableUsingSelection && props.currentColor?.() === props.color;
   const isWhiteOrNone = () => props.color === 'none' || props.color.toLowerCase() === '#ffffff';
 
-  const preferedBorder = () => (isWhiteOrNone() || isSelected() ? `0.05rem solid ${vars.color.onBackground}` : '0.05rem solid transparent');
+  const preferedBorder = () => (isWhiteOrNone() || isSelected() ? `1px solid ${vars.color.onBackground}` : `1px solid ${vars.color.border}`);
 
   const onColorClicked = (color: string) => {
     if (props.onClick) props.onClick(color);
@@ -29,18 +29,28 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
         style={{
           position: 'relative',
           display: 'flex',
-          width: `${size()}px`,
-          height: `${size()}px`,
           'align-items': 'center',
           'justify-content': 'center',
-          cursor: 'pointer',
-          'background-color': props.color,
-          border: props.forceBorderColor ? `1px solid ${props.forceBorderColor}` : preferedBorder(),
-        }}
-        onClick={() => {
-          onColorClicked(props.color);
+          width: `${size()}px`,
+          height: `${size()}px`,
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            display: 'flex',
+            width: `${size()}px`,
+            height: `${size()}px`,
+            'align-items': 'center',
+            'justify-content': 'center',
+            cursor: 'pointer',
+            'background-color': props.color,
+            border: props.forceBorderColor ? `1px solid ${props.forceBorderColor}` : preferedBorder(),
+          }}
+          onClick={() => {
+            onColorClicked(props.color);
+          }}
+        />
         {props.enableUsingSelection && isSelected() && (
           <div
             style={{
@@ -48,7 +58,8 @@ const ColorBox: Component<ColorBoxProps> = (props: ColorBoxProps) => {
               height: `${Math.round(size() / 3)}px`,
               margin: 0,
               padding: 0,
-              'background-color': props.color !== '#000000' ? 'black' : 'white',
+              'backdrop-filter': 'invert()',
+              filter: 'grayscale() contrast(20) contrast(20)',
             }}
             onClick={() => {
               onColorClicked(props.color);

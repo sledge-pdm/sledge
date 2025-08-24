@@ -1,6 +1,6 @@
 [package]
 name = "sledge"
-version = "0.0.8-prealpha"
+version = "0.0.9-prealpha"
 description = "Simply destructive drawing tool."
 authors = ["innsbluck"]
 license = ""
@@ -23,7 +23,6 @@ sysinfo = "0.37.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "2.7.0", features = [
-    "macos-private-api",
     # "devtools",
     "protocol-asset",
     "image-png",
@@ -36,6 +35,7 @@ tauri-plugin-log = "2.6.0"
 tauri-plugin-os = "2.3.0 "
 uuid = { version = "1.18.0", features = ["v4"] }
 url = "2.5.4"
+tauri-plugin-process = "2"
 
 [target."cfg(target_os = \"macos\")".dependencies]
 cocoa = "0.26"

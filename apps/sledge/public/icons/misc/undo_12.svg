@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-  <clipPath id="clipPath">
-  <path d="M 2 4 L 3 4 L 3 3 L 5 3 L 5 2 L 4 2 L 4 4 L 9 4 L 9 10 L 3 10 L 3 9 L 10 9 L 10 5 L 4 5 L 4 7 L 5 7 L 5 6 L 3 6 L 3 5 L 2 5 L 2 4 Z" fill="black" />
-  </clipPath>
-  <path d="M 2 4 L 3 4 L 3 3 L 5 3 L 5 2 L 4 2 L 4 4 L 9 4 L 9 10 L 3 10 L 3 9 L 10 9 L 10 5 L 4 5 L 4 7 L 5 7 L 5 6 L 3 6 L 3 5 L 2 5 L 2 4 Z" fill="black" />
-</svg>

@@ -15,12 +15,41 @@ import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigControlle
 import { redoLayer, undoLayer } from '../../controllers/history/HistoryController';
 
 const KeyListener: Component = () => {
+  // Helper function to check if the active element is an input field
+  const isInputFocused = () => {
+    const activeElement = document.activeElement;
+    if (!activeElement) return false;
+
+    const tagName = activeElement.tagName.toLowerCase();
+    const isContentEditable = activeElement.getAttribute('contenteditable') === 'true';
+
+    return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isContentEditable;
+  };
+
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+      e.preventDefault();
+    }
+
     if (toolStore.activeToolCategory === 'rectSelection' && e.altKey) return;
+
+    // Check if input is focused early to avoid unnecessary processing
+    const inputFocused = isInputFocused();
 
     if (isKeyMatchesToEntry(e, keyConfigStore['save']) && !e.repeat) {
       e.preventDefault(); // Prevent default save action
       saveProject(fileStore.location.name, fileStore.location.path);
+    }
+
+    // デバッグビューア用ショートカット (Ctrl+Shift+D) - always allow this
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      e.preventDefault();
+      openDebugViewer();
+    }
+
+    // Skip other shortcuts if an input field is focused
+    if (inputFocused) {
+      return;
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore['undo'])) {
@@ -30,12 +59,6 @@ const KeyListener: Component = () => {
     if (isKeyMatchesToEntry(e, keyConfigStore['redo'])) {
       const active = activeLayer();
       if (active) redoLayer(active.id);
-    }
-
-    // デバッグビューア用ショートカット (Ctrl+Shift+D)
-    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-      e.preventDefault();
-      openDebugViewer();
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore['sizeIncrease'])) {
@@ -72,6 +95,11 @@ const KeyListener: Component = () => {
   };
 
   const handleKeyUp = (e: KeyboardEvent) => {
+    // Skip shortcuts if an input field is focused
+    if (isInputFocused()) {
+      return;
+    }
+
     if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategory() === 'pipette') {
       console.log('Pipette tool deactivated');
       setActiveToolCategory(getPrevActiveToolCategory() || 'pen');

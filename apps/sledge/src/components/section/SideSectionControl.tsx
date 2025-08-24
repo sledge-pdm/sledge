@@ -3,13 +3,12 @@ import { vars } from '@sledge/theme';
 import { Component, For } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
 import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
-
 import {
   sideSectionControlItem,
+  sideSectionControlList,
   sideSectionControlRoot,
   sideSectionControlText,
   sideSectionControlTextActive,
-  sideSectionControlToggle,
 } from '~/styles/section/side_section_control.css';
 
 interface ItemProps {
@@ -17,6 +16,7 @@ interface ItemProps {
   tab: SectionTab;
   index: number;
 }
+
 const ControlItem: Component<ItemProps> = (props) => {
   const selected = () => appearanceStore[props.side].selectedIndex === props.index && appearanceStore[props.side].shown;
   return (
@@ -70,17 +70,23 @@ const SideSectionControl: Component<Props> = (props) => {
 
         'z-index': Consts.zIndex.sideSection,
       }}
+      // onContextMenu={(e) => {
+      //   e.preventDefault();
+      //   e.stopImmediatePropagation();
+      // }}
     >
-      <p
+      {/* <p
         class={sideSectionControlToggle}
         onClick={() => {
           setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
         }}
       >
         {showToggle()}
-      </p>
+      </p> */}
 
-      <For each={appearanceStore[props.side].tabs}>{(tab, index) => <ControlItem side={props.side} tab={tab} index={index()} />}</For>
+      <div class={sideSectionControlList}>
+        <For each={appearanceStore[props.side].tabs}>{(tab, index) => <ControlItem side={props.side} tab={tab} index={index()} />}</For>
+      </div>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import { Vec2 } from '@sledge/core';
 import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/controllers/canvas/CanvasController';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { Consts } from '~/models/Consts';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 
 class CanvasAreaInteract {
@@ -35,13 +35,25 @@ class CanvasAreaInteract {
   ) {}
 
   static isDraggable(e: PointerEvent) {
-    return e.buttons === 4 || (e.buttons === 1 && e.ctrlKey && !selectionManager.isSelected()); // [2]
+    if (e.buttons === 4) {
+      return true;
+    }
+
+    if (e.buttons === 1 && e.ctrlKey) {
+      if (selectionManager.isSelected()) return false;
+      // angle-snapped line
+      if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
+        if (e.shiftKey) return false;
+      }
+
+      return true;
+    }
+    return false;
   }
 
   private handlePointerDown(e: PointerEvent) {
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
-    // this.wrapperRef.setPointerCapture(e.pointerId); ←前まで
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (e.pointerType === 'touch') {
@@ -72,6 +84,7 @@ class CanvasAreaInteract {
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
 
+    this.updateCursor('auto');
     if (!this.pointers.has(e.pointerId)) return;
     const prev = this.pointers.get(e.pointerId)!;
     const now = { x: e.clientX, y: e.clientY };

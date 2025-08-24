@@ -6,8 +6,8 @@ export const aaContainer = style([
   flexCol,
   {
     position: 'absolute',
-    top: '48px',
-    right: '72px',
+    top: '16px',
+    right: '84px',
     width: '200px',
     height: '100%',
     pointerEvents: 'none',
@@ -19,24 +19,24 @@ export const aaText = style({
   textRendering: 'geometricPrecision',
   fontSize: '32px',
   lineHeight: 1.0,
-  letterSpacing: 0,
-  opacity: 0.25,
+  letterSpacing: -0.75,
+  wordSpacing: 0,
+  opacity: 0.15,
 });
 
 export const contentContainer = style([
   flexCol,
   {
     width: '100%',
-    margin: '0 30px',
-    marginTop: '16px',
+    margin: '0 28px',
+    marginTop: '20px',
     pointerEvents: 'none',
   },
 ]);
 
 export const aboutLink = style({
   pointerEvents: 'all',
-  // borderBottom: '1px solid black',
-  paddingBottom: '1px',
+  width: 'fit-content',
   ':hover': {
     borderBottom: 'none',
     color: 'magenta',
@@ -49,9 +49,9 @@ export const aboutTitle = style({
 });
 
 export const aboutSubTitle = style({
-  fontFamily: ZFB03,
+  fontFamily: k12x8,
   fontSize: '8px',
-  color: '#777',
+  opacity: 0.6,
 });
 
 export const newVersionText = style({
@@ -66,11 +66,14 @@ export const aboutDev = style({
   fontFamily: ZFB03,
   fontSize: '8px',
 });
-
-export const aboutContent = style({
-  fontFamily: ZFB03,
+export const aboutDescription = style({
+  color: vars.color.muted,
   fontSize: '8px',
-  lineHeight: 2.2,
+});
+
+export const aboutInspiredText = style({
+  fontSize: '8px',
+  lineHeight: 2,
 });
 
 export const aboutFeedback = style({

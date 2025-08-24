@@ -1,22 +1,25 @@
 import { Component } from 'solid-js';
 import Color from '~/components/section/editor/Color';
-import Draw from '~/components/section/editor/Draw';
+import Images from '~/components/section/editor/Images';
 import LayerList from '~/components/section/editor/LayerList';
 import Selection from '~/components/section/editor/Selection';
+import Tools from '~/components/section/editor/Tools';
 import Effects from '~/components/section/effects/Effects';
+import Export from '~/components/section/export/Export';
 import PerilousLayers from '~/components/section/perilous/PerilousLayers';
 import AutoSave from '~/components/section/project/AutoSave';
 import CanvasSettings from '~/components/section/project/CanvasSettings';
 import Project from '~/components/section/project/Project';
 
-export type SectionTab = 'editor' | 'effects' | 'project' | 'perilous';
+export type SectionTab = 'editor' | 'effects' | 'project' | 'export' | 'perilous';
 
 export const EditorTab: Component = () => {
   return (
     <>
       <Color />
-      <Draw />
+      <Tools />
       <Selection />
+      <Images />
       <LayerList />
     </>
   );
@@ -36,6 +39,14 @@ export const ProjectTab: Component = () => {
       <Project />
       <AutoSave />
       <CanvasSettings />
+    </>
+  );
+};
+
+export const ExportTab: Component = () => {
+  return (
+    <>
+      <Export />
     </>
   );
 };

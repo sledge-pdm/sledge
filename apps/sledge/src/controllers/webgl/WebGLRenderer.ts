@@ -71,7 +71,7 @@ export class WebGLRenderer {
     if (!gl) throw new Error('WebGL2 is not supported in this browser');
     this.gl = gl;
 
-    this.checkWebGLCapabilities(gl);
+    if (import.meta.env.DEV) this.checkWebGLCapabilities(gl);
 
     this.isChromium = gl.getParameter(gl.VERSION).includes('Chromium');
 

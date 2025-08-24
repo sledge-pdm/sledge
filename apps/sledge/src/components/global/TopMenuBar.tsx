@@ -19,6 +19,7 @@ interface Item {
 }
 
 const TopMenuBar: Component = () => {
+  const githubPat = import.meta.env.VITE_GITHUB_PAT;
   const releaseApiUrl =
     import.meta.env.VITE_GITHUB_REST_API_URL +
     '/repos/' +
@@ -40,9 +41,13 @@ const TopMenuBar: Component = () => {
   const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
   onMount(async () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
-    setLatestVersion((await getLatestVersion(releaseApiUrl)) ?? undefined);
-    const isAvailable = await isNewVersionAvailable(true);
-    setNewVersionAvailable(isAvailable ?? false);
+    try {
+      setLatestVersion((await getLatestVersion(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat)) ?? undefined);
+      const isAvailable = await isNewVersionAvailable(true, location.origin.includes('localhost') ? undefined : githubPat);
+      setNewVersionAvailable(isAvailable ?? false);
+    } catch (e) {
+      console.warn('failed to fetch version data.');
+    }
   });
 
   createEffect(() => {
@@ -74,16 +79,23 @@ const TopMenuBar: Component = () => {
     },
   ];
   const rightItems: Item[] = [
-    {
-      text: 'EXPORT.',
-      action: () => {
-        setIsExportShown(true);
-      },
-    },
+    // {
+    //   text: 'EXPORT.',
+    //   action: () => {
+    //     setIsExportShown(true);
+    //   },
+    // },
     {
       text: 'SETTINGS.',
       action: () => {
         openWindow('settings');
+        // setIsSettingShown(true);
+      },
+    },
+    {
+      text: 'ABOUT.',
+      action: () => {
+        openWindow('about');
         // setIsSettingShown(true);
       },
     },
@@ -126,13 +138,13 @@ const TopMenuBar: Component = () => {
         openProject();
       },
     },
-    {
-      label: '> from clipboard.',
-      onSelect: () => {
-        setIsOpenMenuShown(false);
-        openProject();
-      },
-    },
+    // {
+    //   label: '> from clipboard.',
+    //   onSelect: () => {
+    //     setIsOpenMenuShown(false);
+    //     openProject();
+    //   },
+    // },
   ];
 
   return (
@@ -217,18 +229,7 @@ const TopMenuBar: Component = () => {
           <div class={menuItemBackground} />
         </div>
       </Show>
-      <div class={menuItem} style={{ 'margin-right': '6px' }}>
-        <a
-          class={menuItemText}
-          style={{ 'font-family': ZFB09, 'font-size': '8px', opacity: 0.5, width: 'fit-content' }}
-          onClick={(e) => {
-            openWindow('about');
-          }}
-        >
-          ?
-        </a>
-        <div class={menuItemBackground} />
-      </div>
+      <div class={menuItem} style={{ 'margin-right': '8px' }}></div>
       {exportDialog}
     </div>
   );

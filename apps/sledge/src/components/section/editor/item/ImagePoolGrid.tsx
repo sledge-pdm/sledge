@@ -1,7 +1,9 @@
 import { flexCol, flexRow } from '@sledge/core';
+import { showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
-import { getEntries } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { burndownToCurrentLayer, getEntries, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
 
 const Item: Component<{ id: string; name: string; path: string; visible: boolean }> = (props) => {
@@ -13,6 +15,28 @@ const Item: Component<{ id: string; name: string; path: string; visible: boolean
         padding: '4px 0',
         'overflow-x': 'hidden',
         width: 'fit-content',
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        showContextMenu(
+          props.name,
+          [
+            {
+              ...ContextMenuItems.BaseRemove,
+              onSelect: () => removeEntry(props.id),
+            },
+            {
+              ...ContextMenuItems.BaseBurndown,
+              onSelect: () => burndownToCurrentLayer(props.id, false),
+            },
+            {
+              ...ContextMenuItems.BaseBurndownRemove,
+              onSelect: () => burndownToCurrentLayer(props.id, true),
+            },
+          ],
+          e
+        );
       }}
     >
       <div

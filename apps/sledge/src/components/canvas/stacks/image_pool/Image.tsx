@@ -3,9 +3,7 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
 import { Component, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
-import { getEntry, removeEntry, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { burndownToCurrentLayer, getEntry, removeEntry, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
@@ -120,23 +118,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
   });
 
-  const handleBurndown = async () => {
-    const active = activeLayer(); // いま選択中のレイヤー
-    if (!active) return;
-
-    try {
-      const current = getEntry(props.entry.id) ?? props.entry;
-      await burndownToLayer({
-        entry: current,
-        targetLayerId: active.id,
-      });
-      removeEntry(props.entry.id); // ImagePool から削除
-    } catch (e) {
-      console.error(e);
-      // TODO: ユーザ通知
-    }
-  };
-
   const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
     const size = () => (props.size ?? 8) / interactStore.zoom;
     return (
@@ -200,7 +181,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
             },
             {
               ...ContextMenuItems.BaseBurndown,
-              onSelect: handleBurndown,
+              onSelect: () => burndownToCurrentLayer(props.entry.id, false),
+            },
+            {
+              ...ContextMenuItems.BaseBurndownRemove,
+              onSelect: () => burndownToCurrentLayer(props.entry.id, true),
             },
           ],
           e

@@ -1,3 +1,5 @@
+import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';
@@ -47,6 +49,24 @@ export async function addToImagePool(imagePaths: string | string[]) {
 export async function relinkEntry(id: string, newPath: string) {
   const filename = newPath.split(/[\\/]/).pop() ?? newPath;
   updateEntryPartial(id, { originalPath: newPath, resourcePath: newPath, fileName: filename });
+}
+
+export async function burndownToCurrentLayer(id: string, removeAfter: boolean) {
+  const active = activeLayer(); // いま選択中のレイヤー
+  if (!active) return;
+
+  try {
+    const current = getEntry(id);
+    if (!current) return;
+    await burndownToLayer({
+      entry: current,
+      targetLayerId: active.id,
+    });
+    if (removeAfter) removeEntry(current.id); // ImagePool から削除
+  } catch (e) {
+    console.error(e);
+    // TODO: ユーザ通知
+  }
 }
 
 async function createEntry(originalPath: string) {

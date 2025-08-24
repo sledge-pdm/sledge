@@ -61,7 +61,6 @@ export default function Editor() {
     }
     setProjectStore('isProjectChangedAfterSave', false);
 
-
     setIsLoading(false);
 
     await emitEvent('onSetup');
@@ -172,8 +171,7 @@ export default function Editor() {
         <SideSectionControl side='leftSide' />
 
         <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
-          <div style={{ 'flex-grow': 1, 
-              'background-color': vars.color.canvasArea, }}>
+          <div style={{ 'flex-grow': 1, 'background-color': vars.color.canvasArea }}>
             <CanvasArea />
           </div>
         </div>

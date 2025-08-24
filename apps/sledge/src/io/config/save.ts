@@ -8,8 +8,8 @@ export async function saveGlobalSettings(triggerGlobalEvent: boolean) {
   try {
     const config = getGlobalRootStore();
     const fbConfig = getFallbackedSettings(config);
-    if (!exists('', { baseDir: BaseDirectory.AppConfig })) {
-      await mkdir('', { baseDir: BaseDirectory.AppConfig });
+    if (!(await exists('', { baseDir: BaseDirectory.AppConfig }))) {
+      await mkdir('', { baseDir: BaseDirectory.AppConfig, recursive: true });
     }
     await writeTextFile(Consts.globalConfigFileName, JSON.stringify(fbConfig, null, 2), {
       baseDir: BaseDirectory.AppConfig,

@@ -17,7 +17,7 @@ export interface CanvasExportOptions {
 
 export const defaultExportDir = async () => {
   const dir = join(await pictureDir(), 'sledge');
-  if (!exists(dir)) {
+  if (!(await exists(dir))) {
     await mkdir(dir, { recursive: true });
   }
 

@@ -132,8 +132,6 @@ const CanvasSettings: Component = () => {
             disabled={!isChangable()}
             style={{
               'margin-left': 'auto',
-              opacity: isChangable() ? 1 : 0.2,
-              'pointer-events': isChangable() ? 'auto' : 'none',
               color: isChangable() ? vars.color.active : undefined,
               'border-color': isChangable() ? vars.color.active : undefined,
             }}
@@ -141,7 +139,7 @@ const CanvasSettings: Component = () => {
             apply
           </button>
         </div>
-        <p class={sectionCaption} style={{ 'margin-top': '8px' }}>
+        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
           info.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
@@ -158,7 +156,7 @@ const CanvasSettings: Component = () => {
             <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
           </div>
         </div>
-        <p class={sectionCaption} style={{ 'margin-top': '8px' }}>
+        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
           actions.
         </p>
         <div class={flexCol} style={{ 'margin-top': '4px', gap: '4px', overflow: 'hidden' }}>

@@ -159,7 +159,7 @@ const CanvasSettings: Component = () => {
         <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
           actions.
         </p>
-        <div class={flexCol} style={{ 'margin-top': '4px', gap: '4px', overflow: 'hidden' }}>
+        <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
           <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 
           <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>

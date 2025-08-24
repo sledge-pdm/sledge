@@ -242,7 +242,14 @@ globalStyle('button', {
   height: 'fit-content',
   padding: '2px 6px',
   pointerEvents: 'all',
+  overflow: 'visible',
   width: 'fit-content',
+});
+
+globalStyle('button:disabled', {
+  color: vars.color.muted,
+  borderColor: vars.color.muted,
+  pointerEvents: 'none',
 });
 
 globalStyle('button:hover', {

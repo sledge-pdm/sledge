@@ -1,6 +1,7 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
+import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import { setLayerProp } from '~/controllers/layer/LayerController';
@@ -74,10 +75,19 @@ const LayerList: Component<{}> = () => {
         </button>
 
         <button
-          onClick={() => {
-            removeLayer(activeLayer()?.id);
-            setItems(allLayers());
+          onClick={async () => {
+            const ok = await confirm(`Sure to remove "${activeLayer().name}" ?\nYou can NOT restore this action.`, {
+              kind: 'warning',
+              title: 'Remove Layer',
+              cancelLabel: 'Cancel',
+              okLabel: 'Remove',
+            });
+            if (ok) {
+              removeLayer(activeLayer()?.id);
+              setItems(allLayers());
+            }
           }}
+          disabled={layerListStore.layers.length <= 1}
         >
           - remove.
         </button>

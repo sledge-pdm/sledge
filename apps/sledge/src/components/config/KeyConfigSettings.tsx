@@ -15,7 +15,6 @@ import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { KeyConfigCommands } from '~/models/Consts';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components/config/key_config_settings.css';
-import { sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const KeyConfigSettings: Component = () => {
   const [recordingName, setRecordingName] = createSignal<KeyConfigCommands | undefined>(undefined);
@@ -58,59 +57,57 @@ const KeyConfigSettings: Component = () => {
   onCleanup(() => window.removeEventListener('keydown', handleOnKeyDown));
 
   return (
-    <div class={sectionRoot}>
-      <div class={sectionContent}>
-        <p style={{ 'margin-bottom': '16px' }}>
-          <span style={{ color: vars.color.accent }}>enter</span> to confirm.&nbsp;
-          <span style={{ color: vars.color.accent }}>esc</span> to abort.
-        </p>
-        <div class={flexCol} style={{ gap: '4px', width: '100%' }}>
-          <For each={Object.entries(keyConfigStore)}>
-            {([name, entry]) => {
-              const isRecording = () => name === recordingName();
-              return (
-                <div class={keyConfigRow}>
-                  <p class={keyConfigName}>{name}</p>
-                  <a
-                    class={keyConfigValue}
-                    onClick={(e) => {
-                      if (!isRecording()) startRecord(name as KeyConfigCommands);
-                    }}
-                    style={{
-                      color: isRecording() ? vars.color.active : vars.color.onBackground,
-                      'pointer-events': isRecording() ? 'none' : 'all',
-                    }}
-                  >
-                    {name === recordingName()
-                      ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'press any keys'}]`
-                      : parseKeyConfigEntry((entry as KeyConfigEntry[])[0])}
-                  </a>
-                </div>
-              );
-            }}
-          </For>
-        </div>
-
-        <button
-          style={{ 'margin-top': '24px' }}
-          onClick={async (e) => {
-            e.preventDefault();
-            const confirmed = await confirm('sure to restore default key config?', {
-              kind: 'warning',
-              okLabel: 'restore defaults.',
-              cancelLabel: 'cancel.',
-              title: 'confirmation',
-            });
-
-            if (confirmed) {
-              restoreDefaultKeyConfig();
-              message('restore succeeded.');
-            }
+    <div class={flexCol}>
+      <p style={{ 'margin-bottom': '16px' }}>
+        <span style={{ color: vars.color.accent }}>enter</span> to confirm.&nbsp;
+        <span style={{ color: vars.color.accent }}>esc</span> to abort.
+      </p>
+      <div class={flexCol} style={{ gap: '4px', width: '100%' }}>
+        <For each={Object.entries(keyConfigStore)}>
+          {([name, entry]) => {
+            const isRecording = () => name === recordingName();
+            return (
+              <div class={keyConfigRow}>
+                <p class={keyConfigName}>{name}</p>
+                <a
+                  class={keyConfigValue}
+                  onClick={(e) => {
+                    if (!isRecording()) startRecord(name as KeyConfigCommands);
+                  }}
+                  style={{
+                    color: isRecording() ? vars.color.active : vars.color.onBackground,
+                    'pointer-events': isRecording() ? 'none' : 'all',
+                  }}
+                >
+                  {name === recordingName()
+                    ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'press any keys'}]`
+                    : parseKeyConfigEntry((entry as KeyConfigEntry[])[0])}
+                </a>
+              </div>
+            );
           }}
-        >
-          restore default.
-        </button>
+        </For>
       </div>
+
+      <button
+        style={{ 'margin-top': '24px' }}
+        onClick={async (e) => {
+          e.preventDefault();
+          const confirmed = await confirm('sure to restore default key config?', {
+            kind: 'warning',
+            okLabel: 'restore defaults.',
+            cancelLabel: 'cancel.',
+            title: 'confirmation',
+          });
+
+          if (confirmed) {
+            restoreDefaultKeyConfig();
+            message('restore succeeded.');
+          }
+        }}
+      >
+        restore default.
+      </button>
     </div>
   );
 };

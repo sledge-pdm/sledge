@@ -103,9 +103,13 @@ export class RectSelection implements ToolBehavior {
     if (mode === 'move') {
       // 移動モードの場合、移動をコミット
       selectionManager.commitOffset();
-
-      console.log('committed. offset:', selectionManager.getMoveOffset());
-      selectionManager.setState('selected'); // 選択状態に戻す
+      // キャンバス外へ行くなどで選択範囲がなくなった場合は選択解除
+      if (!selectionManager.isSelected()) {
+        selectionManager.clear();
+      } else {
+        console.log('committed. offset:', selectionManager.getMoveOffset());
+        selectionManager.setState('selected'); // 選択状態に戻す
+      }
     } else {
       // 通常の選択モードの場合
       selectionManager.commit();

@@ -33,7 +33,12 @@ export class SelectionMoveTool implements ToolBehavior {
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    // キャンバス外へ行くなどで選択範囲がなくなった場合は選択解除
     selectionManager.commitOffset();
+
+    if (!selectionManager.isSelected()) {
+      selectionManager.clear();
+    }
 
     console.log('committed. offset:', selectionManager.getMoveOffset());
 

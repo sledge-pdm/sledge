@@ -5,7 +5,6 @@ import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { getPrevActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
-import { setProjectStore } from '~/stores/ProjectStores';
 import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategory } from '~/tools/Tools';
 import { hexToRGBA } from '~/utils/ColorUtils';
@@ -55,7 +54,6 @@ export default class LayerCanvasOperator {
     const result = this.useTool(agent, state, toolCategory, toolArgs);
 
     if (result) {
-      setProjectStore('isProjectChangedAfterSave', true); // optimistic about changes
       if (result.shouldUpdate) {
         eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });

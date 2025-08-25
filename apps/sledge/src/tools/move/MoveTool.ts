@@ -30,9 +30,9 @@ export class MoveTool implements ToolBehavior {
     this.layerId = agent.layerId;
 
     selectionManager.commit();
+    selectionManager.commitOffset();
 
     if (!selectionManager.isMoveState()) {
-      selectionManager.commitOffset();
       this.startOffset = selectionManager.getMoveOffset();
       this.startPosition = args.position;
       this.originalBuffer = agent.getNonClampedBuffer().slice();
@@ -58,28 +58,30 @@ export class MoveTool implements ToolBehavior {
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
-    if (!selectionManager.isSelected())
+    if (!selectionManager.isSelected()) {
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
+    }
+
+    const offsetFromStartX = args.position.x - this.startPosition.x;
+    const offsetFromStartY = args.position.y - this.startPosition.y;
+
+    if (offsetFromStartX === 0 && offsetFromStartY === 0)
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,
       };
 
-    const dx = args.position.x - this.startPosition.x;
-    const dy = args.position.y - this.startPosition.y;
-    const offset = selectionManager.getMoveOffset();
-
-    if (dx === offset.x && dy === offset.y)
-      return {
-        shouldUpdate: false,
-        shouldRegisterToHistory: false,
-      };
+    const offset = { x: this.startOffset.x + offsetFromStartX, y: this.startOffset.y + offsetFromStartY };
 
     // オフセットの更新とイベント発火は即座に行う（UIの反応性を保つ）
-    selectionManager.setMoveOffset({ x: dx, y: dy });
+    selectionManager.setMoveOffset(offset);
     eventBus.emit('selection:moved', { newOffset: selectionManager.getMoveOffset() });
 
     // プレビューの更新はスロットリングして行う
-    this.schedulePreviewUpdate(agent, dx, dy);
+    this.schedulePreviewUpdate(agent, offset.x, offset.y);
 
     return {
       shouldUpdate: false, // プレビュー更新は非同期で行うため、ここではfalse
@@ -153,6 +155,12 @@ export class MoveTool implements ToolBehavior {
     // 未処理のオフセットがある場合は最終更新を実行
     if (this.pendingOffset) {
       this.executePreviewUpdate(agent);
+    }
+
+    // キャンバス外へ行くなどで選択範囲がなくなった場合は選択解除
+    selectionManager.commitOffset();
+    if (!selectionManager.isSelected()) {
+      selectionManager.clear();
     }
 
     return {

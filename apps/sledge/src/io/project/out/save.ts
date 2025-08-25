@@ -70,7 +70,8 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       window.__PATH__ = selectedPath;
 
       setProjectStore('lastSavedAt', new Date());
-      eventBus.emit('project:saved', { path: selectedPath });
+      const loc = pathToFileLocation(selectedPath);
+      if (loc) eventBus.emit('project:saved', { location: loc });
 
       setProjectStore('isProjectChangedAfterSave', false);
 

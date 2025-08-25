@@ -1,10 +1,10 @@
-import { Size2D, Vec2 } from '@sledge/core';
+import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import mitt from 'mitt';
 import { SelectionState } from '~/controllers/selection/SelectionManager';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 
 export type Events = {
-  'project:saved': { path: string };
+  'project:saved': { location: FileLocation };
   'project:saveFailed': { error: any };
   'project:saveCancelled': {};
 

@@ -107,7 +107,7 @@ export default function TitleBar() {
                     <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
                   <div
-                    style={{ height: '12px', width: '1px', 'background-color': vars.color.border, 'margin-left': '8px', 'margin-right': '12px' }}
+                    style={{ height: '8px', width: '1px', 'background-color': vars.color.border, 'margin-left': '12px', 'margin-right': '12px' }}
                   />
                   <p class={titleBarSize} style={{ opacity: 0.9 }}>
                     {canvasStore.canvas.width} x {canvasStore.canvas.height}
@@ -121,7 +121,7 @@ export default function TitleBar() {
                 <SaveSection />
               </div>
 
-              <div style={{ height: '20px', width: '1px', 'background-color': vars.color.border, 'margin-left': '2px', 'margin-right': '12px' }} />
+              <div style={{ height: '18px', width: '1px', 'background-color': vars.color.border, 'margin-left': '2px', 'margin-right': '12px' }} />
             </Show>
             <div class={titleBarControls} data-tauri-drag-region-exclude>
               <Show when={isMinimizable()}>

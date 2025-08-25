@@ -113,7 +113,7 @@ export const lightTheme = createTheme(vars, {
   themeStyle: 'light',
   color: {
     background: '#ffffff',
-    surface: '#f2f2f2',
+    surface: '#f0f0f0',
     canvasArea: '#fafafa',
     canvas: '#ffffff',
     onBackground: '#000000D9',
@@ -179,7 +179,7 @@ export const darkThemeGYFlip = createTheme(vars, {
 
 const blackThemeColorBase = {
   background: '#101010',
-  surface: '#151515',
+  surface: '#2A2A2A',
   canvasArea: '#000000',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',

@@ -7,7 +7,7 @@ import { PixelDiff } from '~/models/history/HistoryManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { getDrawnPixelMask, drawCompletionLine } from './PenDraw';
+import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
@@ -212,8 +212,8 @@ export class PenTool implements ToolBehavior {
     const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
 
     const preset = getPresetOf(this.categoryId, presetName) as any;
-  const size = preset?.size ?? 1;
-  const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
+    const size = preset?.size ?? 1;
+    const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
 
     const layer = activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;

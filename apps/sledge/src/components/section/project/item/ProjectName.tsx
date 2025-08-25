@@ -11,7 +11,8 @@ const ProjectName: Component = () => {
 
   const commitNewName = (name: string) => {
     if (!name || name.trim() === '') {
-      setError('Project name cannot be empty.');
+      // 初期からの変更はエラーを出さない
+      if (fileStore.location.name) setError('Project name cannot be empty.');
       return;
     }
     if (!name.endsWith('.sledge')) {
@@ -50,7 +51,7 @@ const ProjectName: Component = () => {
             commitNewName(e.target.value);
           }}
           value={fileStore.location.name?.replace(/\.sledge$/, '') || ''}
-          placeholder='Project Name'
+          placeholder='project name'
           autocomplete='off'
         />
         <p>.sledge</p>

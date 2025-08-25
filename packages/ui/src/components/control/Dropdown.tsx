@@ -143,7 +143,7 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
       ref={containerRef}
       {...p.props}
       onWheel={(e) => {
-        if (!noItem() || !p.disabled) return;
+        if (noItem() || p.disabled) return;
         if (p.wheelSpin === undefined || p.wheelSpin) spin(e.deltaY > 0);
       }}
     >
@@ -153,7 +153,7 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
         style={{
           'box-sizing': 'border-box',
           overflow: 'hidden',
-          opacity: p.disabled || noItem() ? 0.75 : 1,
+          opacity: p.disabled || noItem() ? 0.5 : 1,
           cursor: p.disabled || noItem() ? 'not-allowed' : 'pointer',
           'pointer-events': p.disabled || noItem() ? 'none' : 'all',
           width: p.fullWidth ? '100%' : undefined,

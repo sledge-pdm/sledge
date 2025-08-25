@@ -179,7 +179,7 @@ export const darkThemeGYFlip = createTheme(vars, {
 
 const blackThemeColorBase = {
   background: '#101010',
-  surface: '#202020',
+  surface: '#151515',
   canvasArea: '#000000',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',
@@ -189,7 +189,7 @@ const blackThemeColorBase = {
   active: '#ff00ff',
   enabled: '#00ff00',
   muted: 'rgba(255,255,255,0.30)',
-  error: '#ff5f5f',
+  error: '#ff3030',
   warn: '#fffb00',
   overlay: 'rgba(255, 255, 255, 0.320)',
   button: {

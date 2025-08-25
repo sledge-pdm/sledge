@@ -113,8 +113,9 @@ export const centeringCanvas = () => {
   const areaBound = sectionBetweenArea.getBoundingClientRect();
   const zoom = interactStore.zoom;
 
+  const sideSectionControlLeftEl = document.getElementById('side-section-control-leftSide');
   setOffset({
-    x: 0,
+    x: sideSectionControlLeftEl ? -sideSectionControlLeftEl.scrollWidth : 0,
     y: 0,
   });
   setInteractStore('offsetOrigin', {

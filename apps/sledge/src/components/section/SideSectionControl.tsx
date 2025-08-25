@@ -22,11 +22,11 @@ const ControlItem: Component<ItemProps> = (props) => {
   return (
     <div
       class={sideSectionControlItem}
-      style={{ 'margin-top': props.tab === 'perilous' ? 'auto' : undefined, 'margin-bottom': props.tab === 'perilous' ? '16px' : undefined }}
+      style={{ 'margin-top': props.tab === 'danger' ? 'auto' : undefined, 'margin-bottom': props.tab === 'danger' ? '0px' : undefined }}
     >
       <a
         class={selected() ? sideSectionControlTextActive : sideSectionControlText}
-        style={{ color: props.tab === 'perilous' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
+        style={{ color: props.tab === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
         onClick={() => {
           if (!appearanceStore[props.side].shown) {
             setAppearanceStore(props.side, 'shown', true);
@@ -60,6 +60,7 @@ const SideSectionControl: Component<Props> = (props) => {
 
   return (
     <div
+      id={`side-section-control-${props.side}`}
       class={sideSectionControlRoot}
       style={{
         'padding-left': props.side === 'leftSide' ? '5px' : '3px',

@@ -173,6 +173,9 @@ const SaveSection: Component = () => {
             style={{
               color: vars.color.accent,
               'white-space': 'nowrap',
+              // 'text-transform': 'uppercase',
+              // 'margin-top': '1px',
+              // 'font-family': ZFB09,
             }}
           >
             {fileStore.location.name && fileStore.location.name ? 'save' : 'save (new)'}

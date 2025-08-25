@@ -37,7 +37,6 @@ export default function Editor() {
     trackStore(canvasStore.canvas);
     trackStore(layerListStore);
     setProjectStore('isProjectChangedAfterSave', true);
-        console.log('!3');
   });
 
   onCleanup(() => {

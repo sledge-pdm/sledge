@@ -1,5 +1,5 @@
 import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { vars, ZFB09 } from '@sledge/theme';
 import { Button, Icon } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
@@ -19,20 +19,27 @@ const PerilousLayers: Component = () => {
 
       <SectionItem title='layer.'>
         <div class={sectionContent} style={{ 'margin-top': '8px', 'padding-left': '8px', gap: '6px' }}>
-          <Button
+          <div
+            class={flexRow}
             style={{
-              'border-color': vars.color.error,
-              padding: '4px 8px',
-              color: vars.color.error,
-              'font-size': '16px',
-            }}
-            hoverContent='!!!!!!!!!!!!!'
-            onClick={() => {
-              confirmOperation(RESET_ALL_MSG, resetAllLayers);
+              'margin-left': '4px',
             }}
           >
-            RESET ALL LAYERS
-          </Button>
+            <Button
+              style={{
+                'border-color': vars.color.error,
+                padding: '4px 8px 3px 8px',
+                'font-family': ZFB09,
+                color: vars.color.error,
+              }}
+              hoverContent='!!!!!!!!!!!!!'
+              onClick={() => {
+                confirmOperation(RESET_ALL_MSG, resetAllLayers);
+              }}
+            >
+              RESET ALL LAYERS.
+            </Button>
+          </div>
         </div>
       </SectionItem>
     </div>

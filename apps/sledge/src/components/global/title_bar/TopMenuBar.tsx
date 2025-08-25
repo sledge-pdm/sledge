@@ -6,7 +6,7 @@ import { open } from '@tauri-apps/plugin-shell';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import ExportDialog from '~/components/dialogs/ExportDialog';
 import SettingDialog from '~/components/dialogs/SettingDialog';
-import SaveSection from '~/components/global/SaveSection';
+import SaveSection from '~/components/global/title_bar/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/controllers/project/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { menuItem, menuItemBackground, menuItemText, menuListLeft, menuListRight, root } from '~/styles/globals/top_menu_bar.css';

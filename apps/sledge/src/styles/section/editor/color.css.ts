@@ -22,7 +22,7 @@ export const descriptionContainer = style([
 export const colorElemDescription = style({
   fontFamily: ZFB03,
   opacity: 0.25,
-  fontSize: vars.text.sm,
+  fontSize: '8px',
   transform: 'rotate(180deg)',
   whiteSpace: 'nowrap',
   writingMode: 'vertical-rl',

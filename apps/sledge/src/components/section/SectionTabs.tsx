@@ -11,7 +11,7 @@ import AutoSave from '~/components/section/project/AutoSave';
 import CanvasSettings from '~/components/section/project/CanvasSettings';
 import Project from '~/components/section/project/Project';
 
-export type SectionTab = 'editor' | 'effects' | 'project' | 'export' | 'perilous';
+export type SectionTab = 'editor' | 'effects' | 'project' | 'export' | 'danger';
 
 export const EditorTab: Component = () => {
   return (

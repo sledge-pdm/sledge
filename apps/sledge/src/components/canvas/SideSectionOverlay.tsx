@@ -66,7 +66,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         return <ProjectTab />;
       case 'export':
         return <ExportTab />;
-      case 'perilous':
+      case 'danger':
         return <PerilousTab />;
       default:
         return null;

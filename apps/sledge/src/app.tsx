@@ -1,7 +1,7 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import TitleBar from './components/global/TitleBar';
+import TitleBar from './components/global/title_bar/TitleBar';
 import About from './routes/about/index';
 import Editor from './routes/editor/index';
 import Home from './routes/start/index';

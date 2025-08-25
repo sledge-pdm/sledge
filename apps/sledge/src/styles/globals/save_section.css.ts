@@ -34,6 +34,7 @@ export const saveButtonSide = style([
     justifyContent: 'center',
     padding: '4px 4px',
     borderLeft: `1px solid ${vars.color.border}`,
+    cursor: 'pointer',
     ':hover': {
       backgroundColor: vars.color.button.hover,
     },

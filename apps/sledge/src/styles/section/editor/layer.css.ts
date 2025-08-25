@@ -1,5 +1,5 @@
 import { flexCol, flexRow, h100, w100 } from '@sledge/core';
-import { k8x12, k8x12L, vars, ZFB03B } from '@sledge/theme';
+import { k8x12, vars, ZFB03B } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const layerList = style([

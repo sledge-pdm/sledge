@@ -18,9 +18,9 @@ export const ZFB25 = fontFace({ src: 'url("/fonts/04B/04B_25__.ttf")' });
 export const ZFB30 = fontFace({ src: 'url("/fonts/04B/04B_30__.ttf")' });
 export const ZFB31 = fontFace({ src: 'url("/fonts/04B/04B_31__.ttf")' });
 export const Terminus = fontFace({ src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")' });
-export const k8x12 = fontFace({ src: 'url("/fonts/k8x12/k8x12.ttf")' });
-export const k8x12L = fontFace({ src: 'url("/fonts/k8x12/k8x12L.ttf")' });
-export const k8x12S = fontFace({ src: 'url("/fonts/k8x12/k8x12S.ttf")' });
+export const k8x12 = fontFace({ src: 'url("/fonts/k8x12/k8x12.ttf")', sizeAdjust: '75%' });
+export const k8x12L = fontFace({ src: 'url("/fonts/k8x12/k8x12L.ttf")', sizeAdjust: '75%' });
+export const k8x12S = fontFace({ src: 'url("/fonts/k8x12/k8x12S.ttf")', sizeAdjust: '75%' });
 export const k12x8 = fontFace({ src: 'url("/fonts/k12x8/k12x8.ttf")' });
 
 /**
@@ -100,7 +100,7 @@ const shared = {
     xl: '16px',
   },
   font: {
-    body: `${ZFB08}, ${k8x12}`,
+    body: `${ZFB08}, ${k12x8}`,
   },
 } as const;
 

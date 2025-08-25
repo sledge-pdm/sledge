@@ -1,3 +1,4 @@
+import { flexRow } from '@sledge/core';
 import { getTheme, vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -14,6 +15,7 @@ import {
   titleBarControls,
   titleBarRoot,
   titleBarSaveSection,
+  titleBarSize,
   titleBarTitle,
   titleBarTitleContainer,
   titleBarTitleSub,
@@ -49,7 +51,7 @@ export default function TitleBar() {
 
     if (location.pathname.startsWith('/editor')) {
       let title = '';
-      const projName = projectStore.lastSavedAt ? (fileStore.location.name ?? '< unknown project >') : '< new project >';
+      const projName = projectStore.lastSavedAt ? (fileStore.location.name ?? '[unknown project]') : '[new project]';
 
       // non-custom titlebar (mac/linux)
       if (isDecorated()) {
@@ -92,15 +94,22 @@ export default function TitleBar() {
             <div class={titleBarTitleContainer}>
               <Show when={shouldShowTitle()}>
                 <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
-                  <p class={titleBarTitle} style={{ opacity: 0.5 }}>
-                    {fileStore.location.path ?? ''}
-                  </p>
-                  <p class={titleBarTitle}>{fileStore.location.name ? join('', fileStore.location.name) : '< new project >'}</p>
-                  <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   <div
-                    style={{ height: '10px', width: '1px', 'background-color': vars.color.border, 'margin-left': '8px', 'margin-right': '12px' }}
+                    class={flexRow}
+                    style={{
+                      'align-items': 'baseline',
+                    }}
+                  >
+                    <p class={titleBarTitle} style={{ opacity: 0.5 }}>
+                      {fileStore.location.path ?? ''}
+                    </p>
+                    <p class={titleBarTitle}>{fileStore.location.name ? join('', fileStore.location.name) : 'new project'}</p>
+                    <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
+                  </div>
+                  <div
+                    style={{ height: '12px', width: '1px', 'background-color': vars.color.border, 'margin-left': '8px', 'margin-right': '12px' }}
                   />
-                  <p class={titleBarTitle} style={{ opacity: 0.75 }}>
+                  <p class={titleBarSize} style={{ opacity: 0.9 }}>
                     {canvasStore.canvas.width} x {canvasStore.canvas.height}
                   </p>
                 </Show>

@@ -66,6 +66,7 @@ export default class LayerImageAgent {
 
   setBuffer(rawBuffer: Uint8ClampedArray, silentlySet: boolean = false, updatePreview: boolean = false) {
     setProjectStore('isProjectChangedAfterSave', true);
+        console.log('!2');
     this.pbm.buffer = rawBuffer;
     this.tm.setAllDirty();
     if (!silentlySet) {

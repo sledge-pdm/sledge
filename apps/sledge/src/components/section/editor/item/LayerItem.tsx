@@ -161,16 +161,19 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                 }}
                 value={props.layer.name}
                 onInput={(e) => {
-                  const result = setLayerName(props.layer.id, e.target.value);
-                  if (!result) setLayerName(props.layer.id, originalName());
+                  setLayerName(props.layer.id, e.target.value);
                 }}
                 onBlur={(e) => {
+                  const result = setLayerName(props.layer.id, e.currentTarget.value);
+                  if (!result) setLayerName(props.layer.id, originalName());
                   setNameChanging(false);
                   e.target.selectionStart = 0;
                   e.target.selectionEnd = e.target.value.length;
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
+                    const result = setLayerName(props.layer.id, e.currentTarget.value);
+                    if (!result) setLayerName(props.layer.id, originalName());
                     setNameChanging(false);
                   }
                 }}

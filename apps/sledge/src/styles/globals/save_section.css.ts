@@ -10,6 +10,7 @@ export const saveButtonRoot = style([
     border: `1px solid ${vars.color.accent}`,
     overflow: 'hidden',
     margin: 0,
+    marginLeft: "4px"
   },
 ]);
 

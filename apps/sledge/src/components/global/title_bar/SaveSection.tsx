@@ -165,7 +165,7 @@ const SaveSection: Component = () => {
       data-tauri-drag-region-exclude
     >
       <Show when={saveLog()} fallback={<p style={{ 'white-space': 'nowrap', opacity: 0.6 }}>{saveTimeText()}</p>}>
-        <p style={{ 'white-space': 'nowrap' }}>{saveLog()}</p>
+        <p style={{ 'white-space': 'nowrap', opacity: 0.8 }}>{saveLog()}</p>
       </Show>
       <div class={saveButtonRoot} data-tauri-drag-region-exclude>
         <div class={saveButtonMainButton} onClick={() => save(!isOWPossible())}>

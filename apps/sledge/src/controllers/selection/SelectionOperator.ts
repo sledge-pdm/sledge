@@ -1,10 +1,9 @@
-import { combine_masks_subtract } from '@sledge/wasm';
+import { apply_mask_offset, combine_masks_subtract, filter_by_selection_mask } from '@sledge/wasm';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { getCurrentSelection, selectionManager } from '~/controllers/selection/SelectionManager';
 import { getToolCategory } from '~/controllers/tool/ToolController';
 import { MoveTool } from '~/tools/move/MoveTool';
-import { transparent } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 
 export function commitMove() {
@@ -35,17 +34,31 @@ export function deletePixelInSelection(layerId?: string): boolean {
   const agent = getAgentOf(layerId ?? activeLayer().id);
   if (!agent) return false;
 
+  const bufferManager = agent.getPixelBufferManager();
+  const width = agent.getWidth();
+  const height = agent.getHeight();
+
+  // 元バッファを保持
+  const before = bufferManager.buffer.slice();
+
+  // moveOffset を考慮した選択マスクを用意
+  const baseMask = selection.getMask();
+  const { x: offX, y: offY } = selectionManager.getMoveOffset();
+  const mask = offX === 0 && offY === 0 ? baseMask : new Uint8Array(apply_mask_offset(baseMask, width, height, offX, offY));
+
+  // マスク内を透明化（"outside" はマスク=1の箇所を透明化する挙動）
+  const after = new Uint8ClampedArray(filter_by_selection_mask(new Uint8Array(before), mask, 'outside', width, height));
+
+  // 差分を履歴登録（whole）
   const dm = agent.getDiffManager();
-  for (let x = 0; x < selection.getWidth(); x++) {
-    for (let y = 0; y < selection.getHeight(); y++) {
-      if (selectionManager.isMaskOverlap({ x, y }, true)) {
-        const diff = agent?.setPixel({ x, y }, transparent, true);
-        if (diff !== undefined) dm.add(diff);
-      }
-    }
-  }
+  dm.add({ kind: 'whole', before, after: after.slice() });
+
+  // バッファを反映
+  bufferManager.buffer.set(after);
 
   agent.registerToHistory();
+  // タイルを更新対象に
+  agent.getTileManager().setAllDirty();
   agent.forceUpdate();
 
   return true;
@@ -66,10 +79,10 @@ export function invertSelection() {
 
   // 3) すべて 1 のマスクから現在のマスクを減算して反転を得る
   //    out = 1 & ~mask == ~mask
-  const ones = new Uint8Array(mask.length);
-  ones.fill(1);
+  let ones: Uint8Array | null = new Uint8Array(mask.length).fill(1);
   const inverted = new Uint8Array(combine_masks_subtract(ones, mask));
 
+  ones = null;
   selection.setMask(inverted);
 
   // 4) 状態更新とイベント発火

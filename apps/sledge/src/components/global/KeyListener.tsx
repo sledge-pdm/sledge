@@ -32,6 +32,7 @@ const KeyListener: Component = () => {
     }
 
     if (toolStore.activeToolCategory === 'rectSelection' && e.altKey) return;
+    if (toolStore.activeToolCategory === 'autoSelection' && e.altKey) return;
 
     // Check if input is focused early to avoid unnecessary processing
     const inputFocused = isInputFocused();

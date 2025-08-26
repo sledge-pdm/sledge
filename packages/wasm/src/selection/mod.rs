@@ -6,3 +6,5 @@ pub mod mask_ops;
 pub mod preview_move;
 // マスクフィルターのモジュールを追加
 pub mod mask_filter;
+// 自動選択（領域抽出）
+pub mod auto_select;

@@ -226,10 +226,8 @@ export const InteractCanvas: Component<Props> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        console.log('Context menu opened');
         showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e, {
           closeByOutsideClick: true,
-          onClose: () => console.log('Context menu closed'),
         });
       }}
     />

@@ -120,7 +120,7 @@ const defaultToolStore: ToolStore = {
   activeToolCategory: 'pen',
   prevActiveCategory: undefined,
   selectionLimitMode: 'inside',
-  selectionFillMode: 'global', // デフォルトは現在の動作（全体参照）
+  selectionFillMode: 'area', // デフォルトは現在の動作（全体参照）
 };
 
 export const initEditorStore = () => {

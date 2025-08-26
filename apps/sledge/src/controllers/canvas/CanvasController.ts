@@ -1,6 +1,7 @@
 import { Size2D } from '@sledge/core';
-import { message } from '@tauri-apps/plugin-dialog';
+import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { clearHistory, isHistoryAvailable } from '~/controllers/history/HistoryController';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { Consts } from '~/models/Consts';
 import { Layer } from '~/models/layer/Layer';
@@ -55,10 +56,17 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
   return true;
 }
 
-export function changeCanvasSize(newSize: Size2D): boolean {
+export async function changeCanvasSize(newSize: Size2D): Promise<boolean> {
   if (!isValidCanvasSize(newSize)) return false;
 
+  if (allLayers().some((layer) => isHistoryAvailable(layer.id))) {
+    if (!(await confirm('This will discard all history for the layers.\nDo you want to continue?'))) {
+      return false;
+    }
+  }
+
   allLayers().forEach((layer: Layer) => {
+    clearHistory(layer.id);
     const agent = getAgentOf(layer.id);
     agent?.changeBufferSize(newSize, false);
   });
@@ -114,9 +122,10 @@ export const centeringCanvas = () => {
   const zoom = interactStore.zoom;
 
   const sideSectionControlLeftEl = document.getElementById('side-section-control-leftSide');
+  const bottomBarEl = document.getElementById('bottom-bar');
   setOffset({
     x: sideSectionControlLeftEl ? -sideSectionControlLeftEl.scrollWidth : 0,
-    y: 0,
+    y: bottomBarEl ? bottomBarEl.scrollHeight : 0,
   });
   setInteractStore('offsetOrigin', {
     x: areaBound.x + areaBound.width / 2 - (canvasSize.width * zoom) / 2,

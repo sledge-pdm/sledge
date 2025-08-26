@@ -111,8 +111,8 @@ const Selection: Component = () => {
                 <p style={{ 'margin-bottom': '6px' }}>Fill Mode</p>
                 <Dropdown
                   options={[
-                    { label: 'Global (with islands)', value: 'global' },
                     { label: 'Boundary (strict)', value: 'boundary' },
+                    { label: 'Boundary (diffract)', value: 'global' },
                     { label: 'Area Fill (entire selection)', value: 'area' },
                   ]}
                   value={fillMode()}

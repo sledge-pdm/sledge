@@ -1,7 +1,7 @@
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
-export const fillPresetFields: PresetFieldMeta[] = [
+export const autoSelectionPresets: PresetFieldMeta[] = [
   {
     key: 'threshold',
     label: 'Threshold',
@@ -22,7 +22,7 @@ export const fillPresetFields: PresetFieldMeta[] = [
   // },
 ];
 
-export const fillPresetMeta: ToolPresetMeta = {
-  toolId: TOOL_CATEGORIES.FILL,
-  fields: fillPresetFields,
+export const autoSelectionPresetMeta: ToolPresetMeta = {
+  toolId: TOOL_CATEGORIES.AUTO_SELECTION,
+  fields: autoSelectionPresets,
 };

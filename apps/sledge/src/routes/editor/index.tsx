@@ -125,9 +125,11 @@ export default function Editor() {
   onMount(async () => {
     unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
       if (!isLoading() && projectStore.isProjectChangedAfterSave) {
-        const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
-          okLabel: 'quit w/o save.',
-          cancelLabel: 'cancel.',
+        const confirmed = await confirm('There are unsaved changes.\nSure to quit without save?', {
+          kind: 'warning',
+          title: 'Unsaved Changes',
+          okLabel: 'Quit without save.',
+          cancelLabel: 'Cancel.',
         });
         if (!confirmed) {
           event.preventDefault();

@@ -111,4 +111,10 @@ export class HistoryManager {
 
     return redoedAction;
   }
+
+  public clear() {
+    this.undoActionsStack = [];
+    this.redoActionsStack = [];
+    eventBus.emit('layerHistory:changed', {});
+  }
 }

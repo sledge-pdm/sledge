@@ -27,7 +27,7 @@ const BottomInfo: Component = () => {
   });
 
   return (
-    <div class={bottomInfoRoot}>
+    <div id='bottom-info' class={bottomInfoRoot}>
       <div class={bottomInfoContainer}>
         <p class={bottomInfoText} style={{ width: '56px' }}>
           x{interactStore.zoom}
@@ -46,6 +46,9 @@ const BottomInfo: Component = () => {
               allowFloat={false}
               customFormat='[value]°'
               onChange={(v) => setRotation(v)}
+              onDoubleClick={() => {
+                setRotation(0);
+              }}
               onPointerDownOnValidArea={(e) => {
                 if (e.ctrlKey) {
                   e.preventDefault();

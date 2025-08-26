@@ -67,7 +67,6 @@ export default function App() {
             class={[flexCol, h100].join(' ')}
             onContextMenu={(e) => {
               e.preventDefault();
-              console.log('Context menu opened');
               showContextMenu(
                 undefined,
                 import.meta.env.DEV
@@ -76,7 +75,6 @@ export default function App() {
                 e,
                 {
                   closeByOutsideClick: true,
-                  onClose: () => console.log('Context menu closed'),
                 }
               );
             }}

@@ -1,4 +1,4 @@
-import { FileLocation, getLatestVersion } from '@sledge/core';
+import { FileLocation, flexRow, getLatestVersion } from '@sledge/core';
 import { getTheme, vars, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -172,8 +172,10 @@ const TopMenuBar: Component = () => {
       </div>
       <div class={menuListRight}>
         <Show when={isDecorated()}>
-          <SaveSection />
-          <div style={{ width: '8px' }} />
+          <div class={flexRow} style={{ height: '100%', 'justify-content': 'center' }}>
+            <SaveSection />
+            <div style={{ width: '8px' }} />
+          </div>
         </Show>
         <For each={rightItems}>
           {(item, i) => {

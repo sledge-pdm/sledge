@@ -49,7 +49,7 @@ export const defaultConfig: GlobalConfig = {
     resetSkippedVersions: '',
   },
   default: {
-    canvasSize: { width: 1000, height: 1000 },
+    canvasSize: { width: 1024, height: 1024 },
   },
   editor: {
     cursor: 'cross',

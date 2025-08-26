@@ -121,7 +121,7 @@ export default function TitleBar() {
                 <SaveSection />
               </div>
 
-              <div style={{ height: '18px', width: '1px', 'background-color': vars.color.border, 'margin-left': '2px', 'margin-right': '12px' }} />
+              <div style={{ height: '18px', width: '1px', 'background-color': vars.color.border, 'margin-left': '0px', 'margin-right': '12px' }} />
             </Show>
             <div class={titleBarControls} data-tauri-drag-region-exclude>
               <Show when={isMinimizable()}>

@@ -18,7 +18,7 @@ pub fn scanline_flood_fill(
     fill_color_g: u8,
     fill_color_b: u8,
     fill_color_a: u8,
-    tolerance: u8,
+    threshold: u8,
 ) -> bool {
     let width = width as usize;
     let height = height as usize;
@@ -40,7 +40,7 @@ pub fn scanline_flood_fill(
     let fill_color = [fill_color_r, fill_color_g, fill_color_b, fill_color_a];
 
     // 既に同じ色の場合は何もしない
-    if colors_match(&target_color, &fill_color, tolerance) {
+    if colors_match(&target_color, &fill_color, threshold) {
         return false;
     }
 
@@ -61,7 +61,7 @@ pub fn scanline_flood_fill(
         ];
 
         // 対象色でない場合は継続
-        if !colors_match(&current_color, &target_color, tolerance) {
+        if !colors_match(&current_color, &target_color, threshold) {
             continue;
         }
 
@@ -78,7 +78,7 @@ pub fn scanline_flood_fill(
                 buffer[left_index + 2],
                 buffer[left_index + 3],
             ];
-            if colors_match(&left_color, &target_color, tolerance) {
+            if colors_match(&left_color, &target_color, threshold) {
                 left -= 1;
             } else {
                 break;
@@ -94,7 +94,7 @@ pub fn scanline_flood_fill(
                 buffer[right_index + 2],
                 buffer[right_index + 3],
             ];
-            if colors_match(&right_color, &target_color, tolerance) {
+            if colors_match(&right_color, &target_color, threshold) {
                 right += 1;
             } else {
                 break;
@@ -121,7 +121,7 @@ pub fn scanline_flood_fill(
                     buffer[up_index + 2],
                     buffer[up_index + 3],
                 ];
-                if colors_match(&up_color, &target_color, tolerance) {
+                if colors_match(&up_color, &target_color, threshold) {
                     stack.push((scan_x, y - 1));
                 }
             }
@@ -135,7 +135,7 @@ pub fn scanline_flood_fill(
                     buffer[down_index + 2],
                     buffer[down_index + 3],
                 ];
-                if colors_match(&down_color, &target_color, tolerance) {
+                if colors_match(&down_color, &target_color, threshold) {
                     stack.push((scan_x, y + 1));
                 }
             }
@@ -157,7 +157,7 @@ pub fn scanline_flood_fill_with_mask(
     fill_color_g: u8,
     fill_color_b: u8,
     fill_color_a: u8,
-    tolerance: u8,
+    threshold: u8,
     selection_mask: &[u8],
     limit_mode: &str,
 ) -> bool {
@@ -201,7 +201,7 @@ pub fn scanline_flood_fill_with_mask(
     let fill_color = [fill_color_r, fill_color_g, fill_color_b, fill_color_a];
 
     // 既に同じ色の場合は何もしない
-    if colors_match(&target_color, &fill_color, tolerance) {
+    if colors_match(&target_color, &fill_color, threshold) {
         return false;
     }
 
@@ -234,7 +234,7 @@ pub fn scanline_flood_fill_with_mask(
         ];
 
         // 対象色でない場合は継続
-        if !colors_match(&current_color, &target_color, tolerance) {
+        if !colors_match(&current_color, &target_color, threshold) {
             continue;
         }
 
@@ -251,7 +251,7 @@ pub fn scanline_flood_fill_with_mask(
                 buffer[left_index + 2],
                 buffer[left_index + 3],
             ];
-            if colors_match(&left_color, &target_color, tolerance) {
+            if colors_match(&left_color, &target_color, threshold) {
                 left -= 1;
                 visited[y * width + left] = true;
             } else {
@@ -268,7 +268,7 @@ pub fn scanline_flood_fill_with_mask(
                 buffer[right_index + 2],
                 buffer[right_index + 3],
             ];
-            if colors_match(&right_color, &target_color, tolerance) {
+            if colors_match(&right_color, &target_color, threshold) {
                 right += 1;
                 visited[y * width + right] = true;
             } else {
@@ -299,7 +299,7 @@ pub fn scanline_flood_fill_with_mask(
                         buffer[up_index + 2],
                         buffer[up_index + 3],
                     ];
-                    if colors_match(&up_color, &target_color, tolerance) {
+                    if colors_match(&up_color, &target_color, threshold) {
                         stack.push((scan_x, up_y));
                     }
                 }
@@ -317,7 +317,7 @@ pub fn scanline_flood_fill_with_mask(
                         buffer[down_index + 2],
                         buffer[down_index + 3],
                     ];
-                    if colors_match(&down_color, &target_color, tolerance) {
+                    if colors_match(&down_color, &target_color, threshold) {
                         stack.push((scan_x, down_y));
                     }
                 }
@@ -328,19 +328,19 @@ pub fn scanline_flood_fill_with_mask(
     true
 }
 
-/// 色の類似性判定（tolerance付き）
-fn colors_match(color1: &[u8; 4], color2: &[u8; 4], tolerance: u8) -> bool {
-    if tolerance == 0 {
+/// 色の類似性判定（threshold付き）
+fn colors_match(color1: &[u8; 4], color2: &[u8; 4], threshold: u8) -> bool {
+    if threshold == 0 {
         color1 == color2
     } else {
         let diff_r = (color1[0] as i16 - color2[0] as i16).abs();
         let diff_g = (color1[1] as i16 - color2[1] as i16).abs();
         let diff_b = (color1[2] as i16 - color2[2] as i16).abs();
-        let diff_a = (color1[3] as i16 - color2[3] as i16).abs();
+        // let diff_a = (color1[3] as i16 - color2[3] as i16).abs();
 
-        diff_r <= tolerance as i16
-            && diff_g <= tolerance as i16
-            && diff_b <= tolerance as i16
-            && diff_a <= tolerance as i16
+        diff_r <= threshold as i16
+            && diff_g <= threshold as i16
+            && diff_b <= threshold as i16
+            // && diff_a <= threshold as i16
     }
 }

@@ -92,9 +92,22 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       <div
         class={w100}
         style={{
-          'background-color': vars.color.surface,
+          position: 'relative',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            'background-color': isActive() ? vars.color.active : vars.color.surface,
+            opacity: isActive() ? 0.15 : 1.0,
+            'pointer-events': 'none',
+            "z-index": -1,
+          }}
+        ></div>
         <div
           class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
           onClick={onDetClicked}
@@ -144,7 +157,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
           >
             <div class={flexRow}>
-              <p class={layerItemIndex}>{allLayers().length - props.index - 1}.</p>
+              <p class={layerItemIndex}>{allLayers().length - props.index}.</p>
               <p class={layerItemType}>
                 {Math.ceil(props.layer.opacity * 100)}%, {props.layer.mode}
               </p>

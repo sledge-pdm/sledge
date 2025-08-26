@@ -19,7 +19,7 @@ export const layerItem = style([
     cursor: 'pointer',
 
     ':hover': {
-      filter: 'brightness(0.94)',
+      // filter: 'brightness(0.94)',
     },
     ':active': {
       // transform: 'translate(0, 1px)',
@@ -57,15 +57,15 @@ export const layerItemIndex = style([
   {
     whiteSpace: 'nowrap',
     fontSize: vars.text.sm,
-    opacity: 0.2,
-    width: '16px',
+    opacity: 0.3,
+    width: '14px',
   },
 ]);
 
 export const layerItemType = style({
   whiteSpace: 'nowrap',
   fontSize: vars.text.sm,
-  opacity: 0.6,
+  opacity: 0.75,
 });
 
 export const layerItemName = style([
@@ -73,7 +73,7 @@ export const layerItemName = style([
     pointerEvents: 'all',
     fontFamily: `${ZFB03B}, ${k8x12}`,
     fontSize: '16px',
-    marginLeft: '16px',
+    marginLeft: '14px',
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',
     WebkitLineClamp: 1,

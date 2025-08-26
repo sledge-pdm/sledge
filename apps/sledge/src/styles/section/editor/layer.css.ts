@@ -7,7 +7,7 @@ export const layerList = style([
   w100,
   {
     position: 'relative',
-    gap: "4px",
+    gap: '4px',
     width: '100%',
   },
 ]);
@@ -70,7 +70,6 @@ export const layerItemType = style({
 
 export const layerItemName = style([
   {
-    pointerEvents: 'all',
     fontFamily: `${ZFB03B}, ${k8x12}`,
     fontSize: '16px',
     marginLeft: '14px',

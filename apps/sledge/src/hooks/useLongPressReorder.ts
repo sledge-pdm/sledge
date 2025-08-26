@@ -19,6 +19,29 @@ interface LongPressReorderApi {
 // Utility: clamp value into [min, max]
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 
+// Copy bitmap contents from canvases in srcRoot to canvases in dstRoot without encoding.
+function copyCanvases(srcRoot: HTMLElement, dstRoot: HTMLElement) {
+  const src = Array.from(srcRoot.querySelectorAll('canvas')) as HTMLCanvasElement[];
+  const dst = Array.from(dstRoot.querySelectorAll('canvas')) as HTMLCanvasElement[];
+  const n = Math.min(src.length, dst.length);
+  for (let i = 0; i < n; i++) {
+    const s = src[i];
+    const d = dst[i];
+    const w = s.width | 0;
+    const h = s.height | 0;
+    if (!w || !h) continue;
+    try {
+      // Ensure destination bitmap matches source size, then blit.
+      if (d.width !== w) d.width = w;
+      if (d.height !== h) d.height = h;
+      const ctx = d.getContext('2d');
+      if (ctx) ctx.drawImage(s, 0, 0, w, h);
+    } catch (_e) {
+      // ignore draw failures (e.g., security restrictions)
+    }
+  }
+}
+
 // A small, dependency-free long-press reorder for vertical lists.
 export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): LongPressReorderApi {
   const LONG_PRESS_MS = options.longPressMs ?? 350;
@@ -39,6 +62,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   let ghostEl: HTMLDivElement | null = null;
   let dropLineEl: HTMLDivElement | null = null;
   let pointerInsideContainer = true;
+  let cursorStyleEl: HTMLStyleElement | null = null;
 
   const itemMap = new Map<Id, HTMLElement>();
 
@@ -62,7 +86,12 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
       sourceEl = null;
     }
     (document.body as any).style.userSelect = '';
-    (document.body as any).style.cursor = '';
+  (document.body as any).style.cursor = '';
+  // remove grabbing cursor class/style from container
+  const container = options.containerRef?.();
+  if (container) container.classList.remove('sledge-dnd-grabbing');
+  if (cursorStyleEl && cursorStyleEl.parentElement) cursorStyleEl.parentElement.removeChild(cursorStyleEl);
+  cursorStyleEl = null;
     pointerId = null;
     dragging = false;
     sourceId = null;
@@ -124,6 +153,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     ghostEl.style.boxSizing = 'border-box';
     ghostEl.style.transform = 'translateZ(0)';
     ghostEl.style.background = window.getComputedStyle(el).backgroundColor || 'transparent';
+  ghostEl.style.cursor = 'grabbing';
     // clone inner content for visuals
     const clone = el.cloneNode(true) as HTMLElement;
     clone.style.pointerEvents = 'none';
@@ -132,6 +162,9 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     clone.style.height = '100%';
     ghostEl.appendChild(clone);
     document.body.appendChild(ghostEl);
+
+    // Populate canvases in the clone from original element (fast GPU blit)
+    copyCanvases(el, clone);
 
     // create tint overlay to fully tint content
 
@@ -142,6 +175,14 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     el.style.pointerEvents = 'none';
     (document.body as any).style.userSelect = 'none';
     (document.body as any).style.cursor = 'grabbing';
+    // Force grabbing cursor within container scope
+    if (!cursorStyleEl) {
+      cursorStyleEl = document.createElement('style');
+      cursorStyleEl.id = 'sledge-dnd-cursor-style';
+      cursorStyleEl.textContent = `.sledge-dnd-grabbing, .sledge-dnd-grabbing * { cursor: grabbing !important; }`;
+      document.head.appendChild(cursorStyleEl);
+    }
+    container.classList.add('sledge-dnd-grabbing');
     dragging = true;
 
     // show initial dropline

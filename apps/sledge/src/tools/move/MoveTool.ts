@@ -30,14 +30,16 @@ export class MoveTool implements ToolBehavior {
     this.layerId = agent.layerId;
 
     selectionManager.commit();
-    selectionManager.commitOffset();
 
     if (!selectionManager.isMoveState()) {
+      selectionManager.commitOffset();
       this.startOffset = selectionManager.getMoveOffset();
       this.startPosition = args.position;
       this.originalBuffer = agent.getNonClampedBuffer().slice();
     } else {
       // sequential move
+      this.startOffset = selectionManager.getMoveOffset();
+      this.startPosition = args.position;
     }
 
     // プレビュー状態をリセット
@@ -155,12 +157,6 @@ export class MoveTool implements ToolBehavior {
     // 未処理のオフセットがある場合は最終更新を実行
     if (this.pendingOffset) {
       this.executePreviewUpdate(agent);
-    }
-
-    // キャンバス外へ行くなどで選択範囲がなくなった場合は選択解除
-    selectionManager.commitOffset();
-    if (!selectionManager.isSelected()) {
-      selectionManager.clear();
     }
 
     return {

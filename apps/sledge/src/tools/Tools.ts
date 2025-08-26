@@ -57,6 +57,11 @@ export type FillPresetConfig = PresetConfig & {
   // antialias?: boolean;
 };
 
+export type AutoSelectionPresetConfig = PresetConfig & {
+  threshold?: number;
+  // antialias?: boolean;
+};
+
 // ツールカテゴリの定義
 export const toolCategories = {
   [TOOL_CATEGORIES.PEN]: {
@@ -119,8 +124,15 @@ export const toolCategories = {
     name: 'Auto Select',
     iconSrc: '/icons/tool_bar/tool/auto_select.png',
     behavior: new AutoSelection(),
-    // プリセット不要
-  } as ToolCategory,
+    presets: {
+      selected: DEFAULT_PRESET,
+      options: {
+        [DEFAULT_PRESET]: {
+          threshold: 0,
+        } as AutoSelectionPresetConfig,
+      },
+    },
+  } as ToolCategory<AutoSelectionPresetConfig>,
   [TOOL_CATEGORIES.SELECTION_MOVE]: {
     id: TOOL_CATEGORIES.SELECTION_MOVE,
     name: 'Selection Move',

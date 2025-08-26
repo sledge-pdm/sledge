@@ -31,6 +31,7 @@ const ProjectName: Component = () => {
           name='project_name'
           style={{
             'font-family': k12x8,
+            overflow: 'visible',
           }}
           onInput={(e) => {
             setInputName(e.target.value);

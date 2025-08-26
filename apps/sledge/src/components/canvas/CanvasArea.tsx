@@ -16,6 +16,7 @@ import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 import { OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
 import BottomInfo from '~/components/global/BottomInfo';
+import { Consts } from '~/models/Consts';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CanvasArea: Component = () => {
@@ -81,8 +82,20 @@ const CanvasArea: Component = () => {
           height: '100%',
           overflow: 'hidden',
           'touch-action': 'none',
+          'z-index': Consts.zIndex.zoomPanWrapper,
         }}
       >
+        <div
+          id='out-canvas-area'
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+          }}
+        />
+
         <div
           ref={(el) => (canvasStack = el)}
           style={{

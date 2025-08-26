@@ -1,4 +1,3 @@
-
 import { vars } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
@@ -115,7 +114,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
       ref={(el) => (wrapperRef = el)}
       style={{
         'background-color': vars.color.canvas,
-        "z-index": Consts.zIndex.layerPreview
+        'z-index': Consts.zIndex.layerPreview,
       }}
     >
       <canvas

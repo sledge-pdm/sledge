@@ -5,6 +5,7 @@ import { vars } from '@sledge/theme';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import interact from 'interactjs';
 import { EditorTab, EffectsTab, ExportTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
+import { Consts } from '~/models/Consts';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
@@ -89,6 +90,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
 
         'pointer-events': 'all',
         overflow: 'visible',
+        'z-index': Consts.zIndex.sideSection,
       }}
     >
       <div

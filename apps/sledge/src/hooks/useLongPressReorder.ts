@@ -86,12 +86,12 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
       sourceEl = null;
     }
     (document.body as any).style.userSelect = '';
-  (document.body as any).style.cursor = '';
-  // remove grabbing cursor class/style from container
-  const container = options.containerRef?.();
-  if (container) container.classList.remove('sledge-dnd-grabbing');
-  if (cursorStyleEl && cursorStyleEl.parentElement) cursorStyleEl.parentElement.removeChild(cursorStyleEl);
-  cursorStyleEl = null;
+    (document.body as any).style.cursor = '';
+    // remove grabbing cursor class/style from container
+    const container = options.containerRef?.();
+    if (container) container.classList.remove('sledge-dnd-grabbing');
+    if (cursorStyleEl && cursorStyleEl.parentElement) cursorStyleEl.parentElement.removeChild(cursorStyleEl);
+    cursorStyleEl = null;
     pointerId = null;
     dragging = false;
     sourceId = null;
@@ -153,7 +153,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     ghostEl.style.boxSizing = 'border-box';
     ghostEl.style.transform = 'translateZ(0)';
     ghostEl.style.background = window.getComputedStyle(el).backgroundColor || 'transparent';
-  ghostEl.style.cursor = 'grabbing';
+    ghostEl.style.cursor = 'grabbing';
     // clone inner content for visuals
     const clone = el.cloneNode(true) as HTMLElement;
     clone.style.pointerEvents = 'none';

@@ -56,19 +56,11 @@ export class AutoSelection extends SelectionBase {
     work.set(before);
 
     // フィルカラー（元画像にあまり出ない色を選択）
-    const fillR = 255, fillG = 0, fillB = 255, fillA = 255;
-    const success = scanline_flood_fill(
-      work,
-      width,
-      height,
-      position.x,
-      position.y,
-      fillR,
-      fillG,
-      fillB,
-      fillA,
-      threshold ?? 0
-    );
+    const fillR = 255,
+      fillG = 0,
+      fillB = 255,
+      fillA = 255;
+    const success = scanline_flood_fill(work, width, height, position.x, position.y, fillR, fillG, fillB, fillA, threshold ?? 0);
 
     if (!success) return new Uint8Array((width * height) | 0); // すべて0のマスク
 

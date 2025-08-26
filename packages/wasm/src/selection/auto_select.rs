@@ -21,6 +21,10 @@ pub fn auto_select_region_mask(
     if sx >= width || sy >= height || width == 0 || height == 0 {
         return vec![0; width.saturating_mul(height)];
     }
+    
+    if threshold == 255 {
+        return vec![1; width * height];
+    }
 
     let start_index = (sy * width + sx) * 4;
     let target = [

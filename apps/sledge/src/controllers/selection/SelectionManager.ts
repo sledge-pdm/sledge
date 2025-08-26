@@ -326,7 +326,7 @@ class SelectionManager {
     this.previewMask = undefined;
     this.selectionMask.clear();
     this.setState('idle');
-    eventBus.emit('selection:areaChanged', { commit: false });
+    eventBus.emit('selection:areaChanged', { commit: true });
   }
 
   /**

@@ -153,6 +153,14 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         'transform-origin': '0 0',
         transform: `scale(${1 / interactStore.zoom})`,
       }}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }}
+      onPointerMove={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }}
     >
       <div
         ref={(ref) => (containerRef = ref)}
@@ -177,7 +185,15 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         opacity: 0.8,
         'pointer-events': 'all',
         'z-index': Consts.zIndex.canvasOverlay,
-        visibility: outerPosition() ? 'visible' : 'collapse',
+        visibility: outerPosition() !== undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
+      }}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }}
+      onPointerMove={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
       }}
     >
       <div class={container}>{MenuContent()}</div>

@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { showContextMenu } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createSignal, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/controllers/canvas/CanvasAreaInteract';
 import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
@@ -74,6 +74,25 @@ export const InteractCanvas: Component<Props> = (props) => {
     }
 
     return true;
+  }
+
+  function handleCanvasAreaPointerDown(e: PointerEvent) {
+    if (!isDrawableClick(e)) return;
+
+    const activeToolCategory = getActiveToolCategory();
+    if (!activeToolCategory.behavior.acceptStartOnOutCanvas) return;
+
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    setInteractStore('isPenOut', false);
+
+    const position = getCanvasMousePosition(e);
+    // ! note that PointerEvent is the event on CanvasArea (not on InteractCanvas)
+    //   This may cause unexpected behavior if the tool use element-specific values.
+    props.operator.handleDraw(DrawState.start, e, activeToolCategory, position, lastPos());
+    setInteractStore('isInStroke', true);
+    setLastPos(position);
   }
 
   function handlePointerDown(e: PointerEvent) {
@@ -157,6 +176,8 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   onMount(async () => {
+    const zoomPanWrapper = document.getElementById('zoompan-wrapper');
+    zoomPanWrapper!.addEventListener('pointerdown', handleCanvasAreaPointerDown);
     canvasRef!.addEventListener('pointerdown', handlePointerDown);
     canvasRef!.addEventListener('pointerout', handlePointerOut);
     window.addEventListener('pointerup', handlePointerUp);
@@ -176,16 +197,14 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     return () => {
       unlistenFocusChanged();
+      zoomPanWrapper!.removeEventListener('pointerdown', handleCanvasAreaPointerDown);
+      canvasRef!.removeEventListener('pointerdown', handlePointerDown);
+      canvasRef!.removeEventListener('pointerout', handlePointerOut);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointercancel', handlePointerCancel);
+      window.removeEventListener('wheel', handleWheel);
     };
-  });
-
-  onCleanup(() => {
-    canvasRef!.removeEventListener('pointerdown', handlePointerDown);
-    canvasRef!.removeEventListener('pointerout', handlePointerOut);
-    window.removeEventListener('pointerup', handlePointerUp);
-    window.removeEventListener('pointermove', handlePointerMove);
-    window.removeEventListener('pointercancel', handlePointerCancel);
-    window.removeEventListener('wheel', handleWheel);
   });
 
   return (

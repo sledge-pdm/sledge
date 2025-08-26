@@ -2,10 +2,11 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
+import { useLongPressReorder } from '~/hooks/useLongPressReorder';
 import { BlendModeOptions } from '~/models/layer/Layer';
 import { layerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/editor/layer.css';
@@ -16,7 +17,7 @@ import LayerItem from './item/LayerItem';
 
 const LayerList: Component<{}> = () => {
   const [items, setItems] = createSignal(allLayers());
-  const [activeItem, setActiveItem] = createSignal(null);
+  const [activeItem, setActiveItem] = createSignal<string | null>(null);
   const ids = () => items().map((l) => l.id);
 
   listenEvent('onSetup', () => {
@@ -27,8 +28,6 @@ const LayerList: Component<{}> = () => {
     setItems(allLayers());
   });
 
-  const onDragStart = ({ draggable }: { draggable: any }) => setActiveItem(draggable.id);
-
   function handleMove(draggedId: string, targetIndex: number) {
     const fromIndex = layerListStore.layers.findIndex((l) => l.id === draggedId);
     if (fromIndex === -1 || fromIndex === targetIndex) return;
@@ -37,29 +36,18 @@ const LayerList: Component<{}> = () => {
     setItems(allLayers());
   }
 
-  const onDragEnd = ({ draggable, droppable }: { draggable: any; droppable: any }) => {
-    if (draggable && droppable) {
-      const currentItems = ids();
-      const fromIndex = currentItems.indexOf(draggable.id);
-      const toIndex = currentItems.indexOf(droppable.id);
-      if (fromIndex !== toIndex) {
-        handleMove(draggable.id, toIndex);
-      }
-    }
-  };
-
-  const cancelDrag = (e: PointerEvent) => {
-    setActiveItem(null);
-  };
-
-  onMount(() => {
-    window.addEventListener('pointercancel', cancelDrag);
-    window.addEventListener('pointerup', cancelDrag);
-  });
-
-  onCleanup(() => {
-    window.removeEventListener('pointercancel', cancelDrag);
-    window.removeEventListener('pointerup', cancelDrag);
+  // DnD hook wiring
+  let listRef: HTMLDivElement | undefined;
+  const dnd = useLongPressReorder({
+    getItems: items,
+    getId: (l) => l.id,
+    containerRef: () => listRef,
+    longPressMs: 350,
+    onDrop: (from, to, id) => {
+      const adjusted = to > from ? to - 1 : to;
+      handleMove(id, adjusted);
+      setActiveItem(null);
+    },
   });
 
   return (
@@ -131,11 +119,20 @@ const LayerList: Component<{}> = () => {
           </div>
         </div>
 
-        <div class={layerList}>
+        <div class={layerList} ref={(el) => (listRef = el)}>
           {/* <ImagePoolItem /> */}
           <For each={items()}>
             {(layer, index) => {
-              return <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />;
+              return (
+                <div
+                  ref={(el) => dnd.registerItem(el, layer.id)}
+                  onPointerDown={(e) => dnd.onPointerDown(e, layer.id)}
+                  // isolate pointer to allow intentional long-press without scrolling
+                  style={{ 'touch-action': 'none' }}
+                >
+                  <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />
+                </div>
+              );
             }}
           </For>
           <BaseLayerItem />

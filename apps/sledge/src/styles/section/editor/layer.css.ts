@@ -7,7 +7,7 @@ export const layerList = style([
   w100,
   {
     position: 'relative',
-    gap: vars.spacing.xs,
+    gap: "4px",
     width: '100%',
   },
 ]);

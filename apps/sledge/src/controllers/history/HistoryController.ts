@@ -40,3 +40,23 @@ export function redoLayer(layerId: string) {
     console.log(`can't redo layer ${layerId}.`);
   }
 }
+
+export function clearHistory(layerId: string) {
+  const agent = getAgentOf(layerId);
+  if (!agent) {
+    console.log(`no agent found for  ${layerId}.`);
+    return;
+  }
+
+  agent.getHistoryManager().clear();
+}
+
+export function isHistoryAvailable(layerId: string) {
+  const agent = getAgentOf(layerId);
+  if (!agent) {
+    console.log(`no agent found for  ${layerId}.`);
+    return;
+  }
+
+  return agent.getHistoryManager().getRedoStack().length > 0 || agent.getHistoryManager().getUndoStack().length > 0;
+}

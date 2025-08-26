@@ -18,14 +18,14 @@ const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
   let heightInputRef: HTMLInputElement;
 
-  const submitSizeChange = () => {
+  const submitSizeChange = async () => {
     const width = Number(widthInputRef.value);
     const height = Number(heightInputRef.value);
     const newSize = { width, height };
 
     if (isValidCanvasSize(newSize)) {
-      changeCanvasSize(newSize);
-      adjustZoomToFit();
+      const result = await changeCanvasSize(newSize);
+      if (result) adjustZoomToFit();
     }
   };
 

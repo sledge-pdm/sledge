@@ -26,6 +26,14 @@ However, you can use the commands below in root path.
 - pnpm site:build = build sledge website(equal to "cd apps/website; pnpm build")
 - pnpm wasm:build = build wasm package(equal to "cd packages/wasm && pnpm --ignore-workspace i && wasm-pack build --target bundler". also note that sledge uses vite and "--target bundler" is a proper argument.)
 
+"pnpm wasm:build" should be called after any change in packages/wasm.
+
+Sledge app imports package(including wasm) via tsconfig and vite alias, not via workspace dependencies.
+So you don't need to rebuild or "pnpm install" after building wasm package (or after changing other packages).
+
+Note that you usually don't have to run "pnpm:build" to ensure that determine the changes are OK or not OK.
+If you need to do that, just run "pnpm:dev" and ask for user to check the actual behavior.
+
 When user creates component in \*\*/components directory, use "Component" type from SolidJS, not "React.FC".
 Like:
 

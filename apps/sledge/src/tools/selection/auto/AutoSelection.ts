@@ -1,4 +1,4 @@
-import { scanline_flood_fill } from '@sledge/wasm';
+import { auto_select_region_mask } from '@sledge/wasm';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionManager';
 import { getPresetOf } from '~/controllers/tool/ToolController';
@@ -38,42 +38,17 @@ export class AutoSelection extends SelectionBase {
     selectionManager.commit();
   }
 
-  // WASM FloodFill をコピーBufferに対して実行し、変更されたピクセルを選択マスク(0/1)として返す
+  // 自動選択用 WASM を使って、選択マスク(0/1)を返す
   private computeRegionMask(agent: LayerImageAgent, position: { x: number; y: number }, threshold: number): Uint8Array | undefined {
     const width = agent.getWidth();
     const height = agent.getHeight();
     if (width === 0 || height === 0) return undefined;
 
-    // 元バッファをコピー
+    // 元バッファ（RGBA）を直接渡して WASM 側で領域抽出
     const pbm = agent.getPixelBufferManager();
-    const srcClamped = pbm.buffer; // Uint8ClampedArray
-    const length = srcClamped.length;
-    const before = new Uint8Array(length);
-    before.set(srcClamped);
-
-    // 作業用コピーに対してフラッドフィルを実行
-    const work = new Uint8Array(length);
-    work.set(before);
-
-    // フィルカラー（元画像にあまり出ない色を選択）
-    const fillR = 255,
-      fillG = 0,
-      fillB = 255,
-      fillA = 255;
-    const success = scanline_flood_fill(work, width, height, position.x, position.y, fillR, fillG, fillB, fillA, threshold ?? 0);
-
-    if (!success) return new Uint8Array((width * height) | 0); // すべて0のマスク
-
-    // 差分からマスクを生成（1ピクセル=1ビットではなく1byte: 0/1）
-    const mask = new Uint8Array(width * height);
-    for (let i = 0, p = 0; i < length; i += 4, p++) {
-      const rChanged = work[i] !== before[i];
-      const gChanged = work[i + 1] !== before[i + 1];
-      const bChanged = work[i + 2] !== before[i + 2];
-      const aChanged = work[i + 3] !== before[i + 3];
-      mask[p] = rChanged || gChanged || bChanged || aChanged ? 1 : 0;
-    }
-
+    const src = new Uint8Array(pbm.buffer.buffer); // RGBA buffer
+    // connectivity は現状 4 固定（0を指定し内部で4接続扱い）
+    const mask = auto_select_region_mask(src, width, height, position.x, position.y, threshold ?? 0, 4);
     return mask;
   }
 }

@@ -230,6 +230,8 @@ const CanvasOverlaySVG: Component = (props) => {
           id='selection-outline'
           d={pathCmdList().toString(interactStore.zoom)}
           fill='url(#tex45borderPattern8x2-svg)'
+          fill-rule='evenodd'
+          clip-rule='evenodd'
           stroke={selectionState() === 'move_layer' ? '#FF0000' : vars.color.selectionBorder}
           stroke-width='1'
           stroke-dasharray={`${borderDash} ${borderDash}`}

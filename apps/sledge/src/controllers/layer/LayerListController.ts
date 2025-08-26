@@ -1,6 +1,8 @@
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { setBottomBarText } from '~/controllers/log/LogController';
+import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { cancelMove, cancelSelection } from '~/controllers/selection/SelectionOperator';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -48,6 +50,14 @@ export function setActiveLayerId(id: string): void {
       setBottomBarText('Cannot set inactive layer to active');
       return;
     }
+    if (layerListStore.activeLayerId === id) return;
+
+    // cancel if move is not committed
+    if (selectionManager.isMoveState()) {
+      cancelMove();
+      cancelSelection();
+    }
+
     setLayerListStore('activeLayerId', id);
   }
 }

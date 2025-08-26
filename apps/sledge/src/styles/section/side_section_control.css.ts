@@ -6,7 +6,7 @@ export const sideSectionControlRoot = style([
   flexCol,
   {
     boxSizing: 'content-box',
-    paddingTop: '24px',
+    paddingTop: '20px',
     paddingBottom: '16px',
     width: '23px',
     justifyContent: 'start',

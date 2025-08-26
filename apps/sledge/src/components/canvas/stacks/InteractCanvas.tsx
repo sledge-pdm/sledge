@@ -5,7 +5,8 @@ import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/controllers/canvas/CanvasAreaInteract';
 import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
-import { getCurrentToolCategory } from '~/controllers/tool/ToolController';
+import { activeLayer } from '~/controllers/layer/LayerListController';
+import { getActiveToolCategory } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
@@ -18,6 +19,8 @@ interface Props {
 // レイヤーごとのキャンバスの上でタッチイベントを受けるだけのキャンバス
 export const InteractCanvas: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
+
+  const [cursor, setCursor] = createSignal<string>('none');
 
   const styleWidth = () => canvasStore.canvas.width;
   const styleHeight = () => canvasStore.canvas.height;
@@ -79,7 +82,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     setInteractStore('isPenOut', false);
 
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.start, e, getCurrentToolCategory(), position, lastPos());
+    props.operator.handleDraw(DrawState.start, e, getActiveToolCategory(), position, lastPos());
     setInteractStore('isInStroke', true);
     setLastPos(position);
   }
@@ -87,13 +90,19 @@ export const InteractCanvas: Component<Props> = (props) => {
   function handlePointerCancel(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
     setInteractStore('isMouseOnCanvas', false);
-    props.operator.handleDraw(DrawState.cancel, e, getCurrentToolCategory(), position, lastPos());
+    props.operator.handleDraw(DrawState.cancel, e, getActiveToolCategory(), position, lastPos());
     endStroke(getCanvasMousePosition(e));
   }
 
   function handlePointerMove(e: PointerEvent) {
     const onCanvas = !!canvasRef?.contains(e.target as Node);
     setInteractStore('isMouseOnCanvas', onCanvas);
+
+    if (onCanvas && !activeLayer().enabled) {
+      setCursor('not-allowed');
+    } else {
+      setCursor('none');
+    }
 
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
@@ -110,13 +119,13 @@ export const InteractCanvas: Component<Props> = (props) => {
     }
     if (!interactStore.isInStroke || !lastPos()) return;
 
-    props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
+    props.operator.handleDraw(DrawState.move, e, getActiveToolCategory(), position, lastPos());
     setLastPos(position);
   }
 
   function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.end, e, getCurrentToolCategory(), position, lastPos());
+    props.operator.handleDraw(DrawState.end, e, getActiveToolCategory(), position, lastPos());
     endStroke(position);
   }
 
@@ -129,7 +138,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
     if (interactStore.isDragging && isDrawableClick(e)) {
       const position = getCanvasMousePosition(e);
-      props.operator.handleDraw(DrawState.move, e, getCurrentToolCategory(), position, lastPos());
+      props.operator.handleDraw(DrawState.move, e, getActiveToolCategory(), position, lastPos());
       setTemporaryOut(true);
     }
   }
@@ -157,11 +166,11 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     const unlistenFocusChanged = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
       if (!focused) {
-        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
+        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 }, lastPos());
       } else {
         // pipetteのみ復帰時も戻す
         if (toolStore.activeToolCategory === 'pipette')
-          props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getCurrentToolCategory(), { x: -1, y: -1 }, lastPos());
+          props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 }, lastPos());
       }
     });
 
@@ -192,7 +201,7 @@ export const InteractCanvas: Component<Props> = (props) => {
         width: `${styleWidth()}px`,
         height: `${styleHeight()}px`,
         'pointer-events': 'all',
-        cursor: 'none',
+        cursor: cursor(),
         'z-index': Consts.zIndex.interactCanvas,
       }}
       onContextMenu={(e) => {

@@ -7,7 +7,7 @@ import { ColorBox, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
 import SectionItem from '~/components/section/SectionItem';
 import { currentColor, setCurrentColor } from '~/controllers/color/ColorController';
-import { getActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
+import { getActiveToolCategoryId, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
 import { colorElemDescription, swatchContainer } from '~/styles/section/editor/color.css';
 import { sectionContent } from '~/styles/section/section_item.css';
@@ -87,7 +87,7 @@ const Color: Component = () => {
               src={'/icons/misc/pipette9.png'}
               base={8}
               scale={2}
-              color={getActiveToolCategory() === 'pipette' ? vars.color.active : vars.color.onBackground}
+              color={getActiveToolCategoryId() === 'pipette' ? vars.color.active : vars.color.onBackground}
             />
           </div>
         </div>

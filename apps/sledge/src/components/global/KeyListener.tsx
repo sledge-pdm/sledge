@@ -1,9 +1,9 @@
 import { Component, onCleanup, onMount } from 'solid-js';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import {
-  getActiveToolCategory,
+  getActiveToolCategoryId,
   getCurrentPresetConfig,
-  getPrevActiveToolCategory,
+  getPrevActiveToolCategoryId,
   setActiveToolCategory,
   updateToolPresetConfig,
 } from '~/controllers/tool/ToolController';
@@ -62,7 +62,7 @@ const KeyListener: Component = () => {
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore['sizeIncrease'])) {
-      const currentToolId = getActiveToolCategory();
+      const currentToolId = getActiveToolCategoryId();
       const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
       if (selectedPreset !== undefined) {
         const presetConfig = getCurrentPresetConfig(currentToolId);
@@ -74,7 +74,7 @@ const KeyListener: Component = () => {
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore['sizeDecrease'])) {
-      const currentToolId = getActiveToolCategory();
+      const currentToolId = getActiveToolCategoryId();
       const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
       if (selectedPreset !== undefined) {
         const presetConfig = getCurrentPresetConfig(currentToolId);
@@ -100,9 +100,9 @@ const KeyListener: Component = () => {
       return;
     }
 
-    if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategory() === 'pipette') {
+    if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategoryId() === 'pipette') {
       console.log('Pipette tool deactivated');
-      setActiveToolCategory(getPrevActiveToolCategory() || 'pen');
+      setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
     }
   };
 

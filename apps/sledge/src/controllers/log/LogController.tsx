@@ -1,4 +1,4 @@
-import { setLogStore, toolStore } from '~/stores/EditorStores';
+import { BottomBarKind, setLogStore, toolStore } from '~/stores/EditorStores';
 
 let currentTimerId: ReturnType<typeof setTimeout> | null = null;
 
@@ -20,7 +20,18 @@ export function getNormalBottomBarText(init?: boolean) {
   return 'rotate: shift+wheel / drag: ctrl+drag';
 }
 
-export function setBottomBarText(text: string, duration: number = 3000) {
+export function resetBottomBarText() {
+  setLogStore('bottomBarText', getNormalBottomBarText());
+  setLogStore('bottomBarKind', 'info');
+}
+
+interface BottomBarTextOptions {
+  duration?: number;
+  kind?: BottomBarKind;
+}
+
+export function setBottomBarText(text: string, options?: BottomBarTextOptions) {
+  const { duration = 3000, kind = 'info' } = options || {};
   // 既存のタイマーがあればクリア
   if (currentTimerId !== null) {
     clearTimeout(currentTimerId);
@@ -29,6 +40,7 @@ export function setBottomBarText(text: string, duration: number = 3000) {
 
   // 新しいテキストを設定
   setLogStore('bottomBarText', text);
+  setLogStore('bottomBarKind', kind);
 
   // 通常テキストの場合は自動復帰しない
   if (text === getNormalBottomBarText()) {
@@ -37,7 +49,7 @@ export function setBottomBarText(text: string, duration: number = 3000) {
 
   // 一時的なテキストの場合、指定時間後に通常テキストに戻す
   currentTimerId = setTimeout(() => {
-    setLogStore('bottomBarText', getNormalBottomBarText());
+    resetBottomBarText();
     currentTimerId = null;
   }, duration);
 }
@@ -49,7 +61,8 @@ export function clearBottomBarTextTimer() {
   }
 }
 
-export function setBottomBarTextPermanent(text: string) {
+export function setBottomBarTextPermanent(text: string, options?: Omit<BottomBarTextOptions, 'duration'>) {
   clearBottomBarTextTimer();
   setLogStore('bottomBarText', text);
+  setLogStore('bottomBarKind', options?.kind || 'info');
 }

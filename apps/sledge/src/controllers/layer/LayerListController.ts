@@ -1,5 +1,6 @@
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { setBottomBarText } from '~/controllers/log/LogController';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -32,12 +33,24 @@ export const addLayer = (
   layers.unshift(newLayer);
 
   setLayerListStore('layers', layers);
-  setLayerListStore('activeLayerId', newLayer.id);
+  setActiveLayerId(newLayer.id);
 
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${newLayer.id}) added` });
 
   return newLayer;
 };
+
+export function setActiveLayerId(id: string): void {
+  const layer = findLayerById(id);
+  if (layer) {
+    if (!layer.enabled) {
+      console.warn('Cannot set inactive layer to active');
+      setBottomBarText('Cannot set inactive layer to active');
+      return;
+    }
+    setLayerListStore('activeLayerId', id);
+  }
+}
 
 export function getActiveLayerIndex(): number {
   return getLayerIndex(layerListStore.activeLayerId);

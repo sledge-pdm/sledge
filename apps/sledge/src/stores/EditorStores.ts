@@ -48,8 +48,10 @@ type InteractStore = {
 type DebugPoint = Vec2 & {
   color: RGBAColor;
 };
+export type BottomBarKind = 'info' | 'warn' | 'error';
 type LogStore = {
   bottomBarText: string;
+  bottomBarKind: BottomBarKind;
   canvasDebugPoints: DebugPoint[]; // デバッグ用の点の配列
 };
 export type SelectionLimitMode = 'none' | 'outside' | 'inside';
@@ -110,6 +112,7 @@ const defaultInteractStore: InteractStore = {
 };
 const defaultLogStore: LogStore = {
   bottomBarText: getNormalBottomBarText(true),
+  bottomBarKind: 'info',
   canvasDebugPoints: [],
 };
 const defaultToolStore: ToolStore = {

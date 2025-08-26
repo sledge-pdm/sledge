@@ -1,6 +1,7 @@
 import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const canvasDebugOverlayTopLeft = style([
   flexCol,
@@ -10,6 +11,7 @@ export const canvasDebugOverlayTopLeft = style([
     left: vars.spacing.sm,
     top: vars.spacing.sm,
     pointerEvents: 'none',
+    zIndex: Consts.zIndex.canvasOverlay,
   },
 ]);
 
@@ -22,5 +24,6 @@ export const canvasDebugOverlayBottomLeft = style([
     alignItems: 'end',
     gap: vars.spacing.md,
     pointerEvents: 'none',
+    zIndex: Consts.zIndex.canvasOverlay,
   },
 ]);

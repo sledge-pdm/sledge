@@ -192,7 +192,7 @@ const CanvasOverlaySVG: Component = (props) => {
           id='selection-outline'
           d={pathCmdList().toString(interactStore.zoom)}
           fill='none'
-          stroke={selectionState() === 'move_layer' ? '#FF0000' : vars.color.border}
+          stroke={selectionState() === 'move_layer' ? '#FF0000' : vars.color.selectionBorder}
           stroke-width='1'
           stroke-dasharray={`${borderDash} ${borderDash}`}
           pointer-events='none'

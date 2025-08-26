@@ -13,6 +13,10 @@ export function getNormalBottomBarText(init?: boolean) {
     return 'add: shift+drag / substract: alt+drag / move: ctrl+drag';
   }
 
+  if (toolStore?.activeToolCategory === 'autoSelection') {
+    return 'add: shift+drag / substract: alt+drag / move: ctrl+drag';
+  }
+
   if (toolStore?.activeToolCategory === 'pipette') {
     return 'continuous pick: shift+click';
   }

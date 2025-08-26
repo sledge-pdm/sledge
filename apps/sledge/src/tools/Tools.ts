@@ -3,6 +3,7 @@ import { FillTool } from '~/tools/draw/fill/FillTool';
 import { PenTool } from '~/tools/draw/pen/PenTool';
 import { MoveTool } from '~/tools/move/MoveTool';
 import { PipetteTool } from '~/tools/pipette/PipetteTool';
+import { AutoSelection } from '~/tools/selection/auto/AutoSelection';
 import { RectSelection } from '~/tools/selection/rect/RectSelection';
 import { SelectionMoveTool } from '~/tools/selection/selection_move/SelectionMoveTool';
 import { ToolBehavior } from '~/tools/ToolBehavior';
@@ -15,6 +16,7 @@ export const TOOL_CATEGORIES = {
   FILL: 'fill',
   PIPETTE: 'pipette',
   RECT_SELECTION: 'rectSelection',
+  AUTO_SELECTION: 'autoSelection',
   SELECTION_MOVE: 'selectionMove',
   MOVE: 'move',
 } as const;
@@ -108,8 +110,15 @@ export const toolCategories = {
   [TOOL_CATEGORIES.RECT_SELECTION]: {
     id: TOOL_CATEGORIES.RECT_SELECTION,
     name: 'Rect Select',
-    iconSrc: '/icons/tool_bar/tool/rectselect.png',
+    iconSrc: '/icons/tool_bar/tool/rect_select.png',
     behavior: new RectSelection(),
+    // プリセット不要
+  } as ToolCategory,
+  [TOOL_CATEGORIES.AUTO_SELECTION]: {
+    id: TOOL_CATEGORIES.AUTO_SELECTION,
+    name: 'Auto Select',
+    iconSrc: '/icons/tool_bar/tool/auto_select.png',
+    behavior: new AutoSelection(),
     // プリセット不要
   } as ToolCategory,
   [TOOL_CATEGORIES.SELECTION_MOVE]: {

@@ -8,7 +8,7 @@ import { sectionContent } from '~/styles/section/section_item.css';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolItem from './item/ToolItem';
 
-const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'move'];
+const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'autoSelection', 'move'];
 
 const Tools: Component = () => {
   return (

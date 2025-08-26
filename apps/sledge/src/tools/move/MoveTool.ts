@@ -7,6 +7,7 @@ import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { eventBus } from '~/utils/EventBus';
 
 export class MoveTool implements ToolBehavior {
+  acceptStartOnOutCanvas = true;
   onlyOnCanvas = false;
 
   private layerId: string | undefined = undefined;

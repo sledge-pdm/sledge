@@ -4,6 +4,7 @@ import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class SelectionMoveTool implements ToolBehavior {
+  acceptStartOnOutCanvas = true;
   onlyOnCanvas = false;
   isInstantTool = true;
 

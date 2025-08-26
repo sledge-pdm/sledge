@@ -177,7 +177,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         opacity: 0.8,
         'pointer-events': 'all',
         'z-index': Consts.zIndex.canvasOverlay,
-        visibility: outerPosition() ? 'visible' : 'collapse',
+        visibility: outerPosition() !== undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
       }}
     >
       <div class={container}>{MenuContent()}</div>

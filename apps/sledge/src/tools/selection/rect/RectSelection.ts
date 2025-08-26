@@ -4,6 +4,7 @@ import { RectFragment, SelectionEditMode, selectionManager } from '~/controllers
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class RectSelection implements ToolBehavior {
+  acceptStartOnOutCanvas = true;
   onlyOnCanvas = false;
 
   private startPosition: Vec2 = { x: 0, y: 0 };

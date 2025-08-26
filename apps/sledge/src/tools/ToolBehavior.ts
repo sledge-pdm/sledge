@@ -10,6 +10,7 @@ export interface ToolResult {
 }
 
 export interface ToolBehavior {
+  acceptStartOnOutCanvas?: boolean;
   onlyOnCanvas?: boolean;
   isInstantTool?: boolean;
 

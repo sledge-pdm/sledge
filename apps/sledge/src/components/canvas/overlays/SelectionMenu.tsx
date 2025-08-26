@@ -2,7 +2,7 @@ import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/controllers/selection/SelectionManager';
-import { cancelMove, cancelSelection, commitMove, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
+import { cancelMove, cancelSelection, commitMove, deletePixelInSelection, invertSelection } from '~/controllers/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
@@ -15,13 +15,14 @@ import { container, divider, item } from '~/styles/components/canvas/overlays/se
 interface ItemProps {
   src: string;
   label?: string;
+  title?: string;
   onClick?: () => void;
 }
 
 const Item: Component<ItemProps> = (props) => {
   return (
-    <div class={item} onClick={props.onClick}>
-      <Icon src={props.src} color={vars.color.onBackground} base={10} scale={1} />
+    <div class={item} onClick={props.onClick} title={props.title}>
+      <Icon src={props.src} color={vars.color.onBackground} base={10} />
       <Show when={props.label}>
         <p>{props.label}</p>
       </Show>
@@ -211,6 +212,7 @@ const MenuContent = () => {
             commitMove();
           }}
           label='commit.'
+          title='commit.'
         />
         <Divider />
         <Item
@@ -219,6 +221,7 @@ const MenuContent = () => {
             cancelMove();
           }}
           label='cancel.'
+          title='cancel.'
         />
       </Show>
       <Show when={selectionState() === 'selected'}>
@@ -228,6 +231,15 @@ const MenuContent = () => {
             cancelSelection();
           }}
           label='cancel.'
+          title='cancel.'
+        />
+        <Divider />
+        <Item
+          src='/icons/selection/invert_10.png'
+          onClick={() => {
+            invertSelection();
+          }}
+          title='invert.'
         />
         <Divider />
         <Item
@@ -235,6 +247,7 @@ const MenuContent = () => {
           onClick={() => {
             deletePixelInSelection();
           }}
+          title='delete.'
         />
       </Show>
     </>

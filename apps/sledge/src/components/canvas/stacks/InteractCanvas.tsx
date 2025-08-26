@@ -76,7 +76,7 @@ export const InteractCanvas: Component<Props> = (props) => {
     return true;
   }
 
-  function handleCanvasAreaPointerDown(e: PointerEvent) {
+  function handleOutCanvasAreaPointerDown(e: PointerEvent) {
     if (!isDrawableClick(e)) return;
 
     const activeToolCategory = getActiveToolCategory();
@@ -176,8 +176,8 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   onMount(async () => {
-    const zoomPanWrapper = document.getElementById('zoompan-wrapper');
-    zoomPanWrapper!.addEventListener('pointerdown', handleCanvasAreaPointerDown);
+    const outCanvasArea = document.getElementById('out-canvas-area');
+    outCanvasArea!.addEventListener('pointerdown', handleOutCanvasAreaPointerDown);
     canvasRef!.addEventListener('pointerdown', handlePointerDown);
     canvasRef!.addEventListener('pointerout', handlePointerOut);
     window.addEventListener('pointerup', handlePointerUp);
@@ -197,7 +197,7 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     return () => {
       unlistenFocusChanged();
-      zoomPanWrapper!.removeEventListener('pointerdown', handleCanvasAreaPointerDown);
+      outCanvasArea!.removeEventListener('pointerdown', handleOutCanvasAreaPointerDown);
       canvasRef!.removeEventListener('pointerdown', handlePointerDown);
       canvasRef!.removeEventListener('pointerout', handlePointerOut);
       window.removeEventListener('pointerup', handlePointerUp);

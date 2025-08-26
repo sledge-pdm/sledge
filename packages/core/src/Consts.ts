@@ -1,6 +1,7 @@
 export const Consts = {
   zIndex: {
     layerPreview: 100,
+    zoomPanWrapper: 200,
     webGLcanvas: 300,
     interactCanvas: 500,
     canvasOverlay: 700,
@@ -8,6 +9,7 @@ export const Consts = {
     imagePoolImage: 830,
     imagePoolMenu: 850,
     imagePoolControl: 880,
+    selectionMenu: 900,
     canvasErrorOverlay: 999,
     titleBar: 1000,
     sideSection: 1000,

@@ -58,6 +58,7 @@ export const layerItemIndex = style([
     whiteSpace: 'nowrap',
     fontSize: vars.text.sm,
     opacity: 0.3,
+    marginLeft: '2px',
     width: '14px',
   },
 ]);
@@ -72,7 +73,7 @@ export const layerItemName = style([
   {
     fontFamily: `${ZFB03B}, ${k8x12}`,
     fontSize: '16px',
-    marginLeft: '14px',
+    marginLeft: '16px',
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',
     WebkitLineClamp: 1,

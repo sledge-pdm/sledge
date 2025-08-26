@@ -35,7 +35,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   const onDetClicked = (e: MouseEvent) => {
     e.stopPropagation();
     setActiveLayerId(props.layer.id);
-    // eventBus.emit('webgl:requestUpdate', { onlyDirty: false }); //一応
+    // not needed because setActiveLayerId calls it
+    // eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
   };
 
   const onPreviewClicked = (e: MouseEvent) => {
@@ -136,7 +137,12 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           {/* <div class={`${layerItemHandle} handle`} {...sortable.dragActivators}>
           <Icon src='/icons/misc/handle.png' base={8} color={vars.color.background} />
         </div> */}
-          <div class={layerItemHandle}>
+          <div
+            class={layerItemHandle}
+            style={{
+              'pointer-events': props.layer.enabled ? 'auto' : 'none',
+            }}
+          >
             <div class={layerItemSpinner} onClick={handleMoveUp}>
               <Icon src='/icons/misc/triangle_7.png' base={7} color={vars.color.surface} transform='rotate(180deg)' />
             </div>
@@ -154,6 +160,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               gap: '1px',
               overflow: 'hidden',
               'border-left': `1px solid ${vars.color.border}`,
+              'pointer-events': props.layer.enabled ? 'auto' : 'none',
             }}
           >
             <div class={flexRow}>

@@ -16,12 +16,14 @@ export const canvasSizePresets: Record<string, Canvas | undefined> = {
   Icon_M: { width: 32, height: 32 },
   Icon_L: { width: 64, height: 64 },
 
-  A4: { width: 2894, height: 4093 },
-  A4_LS: { width: 4093, height: 2894 },
+  Default: { width: 1024, height: 1024 },
 
   FHD: { width: 1920, height: 1080 },
   'FHD+': { width: 2560, height: 1440 },
   '4K': { width: 3840, height: 2160 },
+
+  A4: { width: 2894, height: 4093 },
+  A4_LS: { width: 4093, height: 2894 },
 };
 
 export const canvasSizePresetsDropdownOptions: DropdownOption<string>[] = Object.entries(canvasSizePresets).map(([key, value]) => {

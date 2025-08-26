@@ -6,7 +6,7 @@ import { Consts } from '~/models/Consts';
 export const bottomInfoRoot = style([
   flexRow,
   {
-    boxSizing: 'content-box',
+    boxSizing: 'border-box',
     flexWrap: 'wrap',
     backgroundColor: vars.color.background,
     borderTop: `1px solid ${vars.color.border}`,

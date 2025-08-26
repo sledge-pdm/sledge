@@ -169,7 +169,7 @@ const CanvasSettings: Component = () => {
             <Button
               onClick={async () => {
                 setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
-                await saveGlobalSettings(false);
+                await saveGlobalSettings(true);
               }}
               style={{ 'margin-top': '8px' }}
             >

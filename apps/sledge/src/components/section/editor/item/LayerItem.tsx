@@ -4,7 +4,7 @@ import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
 import { clearLayer, duplicateLayer, setLayerName } from '~/controllers/layer/LayerController';
-import { allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
+import { allLayers, moveLayer, removeLayer, setActiveLayerId } from '~/controllers/layer/LayerListController';
 import { Layer } from '~/models/layer/Layer';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -34,7 +34,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   const onDetClicked = (e: MouseEvent) => {
     e.stopPropagation();
-    setLayerListStore('activeLayerId', props.layer.id);
+    setActiveLayerId(props.layer.id);
     // eventBus.emit('webgl:requestUpdate', { onlyDirty: false }); //一応
   };
 
@@ -92,9 +92,22 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       <div
         class={w100}
         style={{
-          'background-color': vars.color.surface,
+          position: 'relative',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            'background-color': isActive() ? vars.color.active : vars.color.surface,
+            opacity: isActive() ? 0.15 : 1.0,
+            'pointer-events': 'none',
+            'z-index': -1,
+          }}
+        ></div>
         <div
           class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
           onClick={onDetClicked}
@@ -144,9 +157,10 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
           >
             <div class={flexRow}>
-              <p class={layerItemIndex}>{allLayers().length - props.index - 1}.</p>
+              <p class={layerItemIndex}>{allLayers().length - props.index}.</p>
               <p class={layerItemType}>
                 {Math.ceil(props.layer.opacity * 100)}%, {props.layer.mode}
+                {props.layer.enabled ? '' : ` (inactive)`}
               </p>
             </div>
             {isNameChanging() ? (

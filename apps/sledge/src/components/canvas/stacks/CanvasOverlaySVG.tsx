@@ -3,7 +3,7 @@ import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
-import { getActiveToolCategory, getCurrentPresetConfig } from '~/controllers/tool/ToolController';
+import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -108,7 +108,7 @@ const CanvasOverlaySVG: Component = (props) => {
 
   // 1) ローカルパス生成（size/shape 依存）
   createEffect(() => {
-    const active = getActiveToolCategory();
+    const active = getActiveToolCategoryId();
     if (active !== TOOL_CATEGORIES.PEN && active !== TOOL_CATEGORIES.ERASER) {
       cachedLocalPath = undefined;
       cachedKey = undefined;
@@ -128,9 +128,9 @@ const CanvasOverlaySVG: Component = (props) => {
 
   // 2) マウス移動に応じた平行移動だけ適用
   createEffect(() => {
-    const active = getActiveToolCategory();
+    const active = getActiveToolCategoryId();
     const mouse = interactStore.lastMouseOnCanvas;
-    if ((active === TOOL_CATEGORIES.PEN || active === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath) {
+    if ((active === TOOL_CATEGORIES.PEN || active === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
       const preset = getCurrentPresetConfig(active) as any;
       const size: number = preset?.size ?? 1;
       const shape: 'circle' | 'square' = preset?.shape ?? 'square';

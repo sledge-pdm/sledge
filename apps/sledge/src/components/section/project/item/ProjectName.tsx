@@ -51,7 +51,7 @@ const ProjectName: Component = () => {
             commitNewName(e.target.value);
           }}
           value={fileStore.location.name?.replace(/\.sledge$/, '') || ''}
-          placeholder='project name'
+          placeholder='project'
           autocomplete='off'
         />
         <p>.sledge</p>

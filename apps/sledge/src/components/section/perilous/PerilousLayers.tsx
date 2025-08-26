@@ -15,7 +15,7 @@ const PerilousLayers: Component = () => {
         <Icon src={'/icons/misc/danger_11.png'} color={vars.color.error} base={11} scale={2} />
         <p style={{ color: vars.color.error, 'font-size': '24px' }}>DANGER!!</p>
       </div>
-      <p style={{ color: vars.color.error, 'font-size': '8px', 'margin-bottom': '28px' }}>these operations may destroy your layer/project.</p>
+      <p style={{ color: vars.color.error, 'font-size': '8px', 'margin-bottom': '28px' }}>these operations may destroy your project. use them carefully!</p>
 
       <SectionItem title='layer.'>
         <div class={sectionContent} style={{ 'margin-top': '8px', 'padding-left': '8px', gap: '6px' }}>

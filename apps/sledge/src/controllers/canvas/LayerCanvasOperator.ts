@@ -3,7 +3,7 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { setBottomBarText } from '~/controllers/log/LogController';
-import { getPrevActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
+import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategory } from '~/tools/Tools';
@@ -42,6 +42,22 @@ export default class LayerCanvasOperator {
 
     if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
 
+    // This won't suppress all draw actions on inactive layers.
+    // It's due to prevent showing warn in every click out of canvas.
+    if (!isToolAllowedInCurrentLayer(toolCategory) && interactStore.isMouseOnCanvas) {
+      console.warn('Layer is inactive.');
+      setBottomBarText('Layer is inactive.', {
+        kind: 'error',
+        duration: 1000,
+      });
+      return;
+    }
+
+    // This will suppress all draw actions on inactive layers.
+    if (!isToolAllowedInCurrentLayer(toolCategory)) {
+      return;
+    }
+
     const toolArgs: ToolArgs = {
       rawPosition,
       rawLastPosition,
@@ -63,7 +79,7 @@ export default class LayerCanvasOperator {
       }
 
       if (result.shouldReturnToPrevTool) {
-        const prevTool = getPrevActiveToolCategory();
+        const prevTool = getPrevActiveToolCategoryId();
         if (prevTool) setActiveToolCategory(prevTool);
       }
     }
@@ -86,7 +102,9 @@ export default class LayerCanvasOperator {
         break;
     }
     if (toolResult?.result) {
-      setBottomBarText(toolResult.result);
+      setBottomBarText(toolResult.result, {
+        duration: 1500,
+      });
     }
     return toolResult;
   }

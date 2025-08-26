@@ -1,8 +1,10 @@
+
 import { vars } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
+import { Consts } from '~/models/Consts';
 import { Layer } from '~/models/layer/Layer';
 import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/components/layer_preview.css';
@@ -113,6 +115,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
       ref={(el) => (wrapperRef = el)}
       style={{
         'background-color': vars.color.canvas,
+        "z-index": Consts.zIndex.layerPreview
       }}
     >
       <canvas

@@ -1,5 +1,6 @@
 export const Consts = {
   zIndex: {
+    layerPreview: 100,
     webGLcanvas: 300,
     interactCanvas: 500,
     canvasOverlay: 700,

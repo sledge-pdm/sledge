@@ -14,6 +14,7 @@ interface SliderProps {
   customFormat?: string;
   allowDirectInput?: boolean;
   onChange?: (newValue: number) => void;
+  onDoubleClick?: () => void;
   onPointerDownOnValidArea?: (e: PointerEvent | MouseEvent) => boolean;
 }
 
@@ -176,7 +177,15 @@ const Slider: Component<SliderProps> = (props) => {
     <div class={sliderRoot} ref={(el) => (rootRef = el)}>
       <Show when={props.labelMode === 'left'}>{labelArea}</Show>
 
-      <div class={slider} ref={(el) => (sliderRef = el)} onPointerDown={handlePointerDown} onClick={onLineClick}>
+      <div
+        class={slider}
+        ref={(el) => (sliderRef = el)}
+        onPointerDown={handlePointerDown}
+        onDblClick={() => {
+          props.onDoubleClick?.();
+        }}
+        onClick={onLineClick}
+      >
         <div class={lineHitbox} onWheel={handleOnWheel}>
           <div class={line} />
         </div>

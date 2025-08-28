@@ -2,6 +2,7 @@ import { updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolCon
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
+import { imagePoolStore } from '~/stores/ProjectStores';
 
 type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 
@@ -119,33 +120,76 @@ class ImageEntryInteract {
       let nextScaleY = this.startScaleY;
       switch (this.resizePos) {
         case 'e':
-          nextScaleX = Math.max(0.01, (baseW * this.startScaleX + dx) / baseW);
+          nextScaleX = (baseW * this.startScaleX + dx) / baseW;
           break;
         case 'w':
-          nextScaleX = Math.max(0.01, (baseW * this.startScaleX - dx) / baseW);
+          nextScaleX = (baseW * this.startScaleX - dx) / baseW;
           break;
         case 's':
-          nextScaleY = Math.max(0.01, (baseH * this.startScaleY + dy) / baseH);
+          nextScaleY = (baseH * this.startScaleY + dy) / baseH;
           break;
         case 'n':
-          nextScaleY = Math.max(0.01, (baseH * this.startScaleY - dy) / baseH);
+          nextScaleY = (baseH * this.startScaleY - dy) / baseH;
           break;
         case 'se':
-          nextScaleX = Math.max(0.01, (baseW * this.startScaleX + dx) / baseW);
-          nextScaleY = Math.max(0.01, (baseH * this.startScaleY + dy) / baseH);
+          nextScaleX = (baseW * this.startScaleX + dx) / baseW;
+          nextScaleY = (baseH * this.startScaleY + dy) / baseH;
           break;
         case 'ne':
-          nextScaleX = Math.max(0.01, (baseW * this.startScaleX + dx) / baseW);
-          nextScaleY = Math.max(0.01, (baseH * this.startScaleY - dy) / baseH);
+          nextScaleX = (baseW * this.startScaleX + dx) / baseW;
+          nextScaleY = (baseH * this.startScaleY - dy) / baseH;
           break;
         case 'sw':
-          nextScaleX = Math.max(0.01, (baseW * this.startScaleX - dx) / baseW);
-          nextScaleY = Math.max(0.01, (baseH * this.startScaleY + dy) / baseH);
+          nextScaleX = (baseW * this.startScaleX - dx) / baseW;
+          nextScaleY = (baseH * this.startScaleY + dy) / baseH;
           break;
         case 'nw':
-          nextScaleX = Math.max(0.01, (baseW * this.startScaleX - dx) / baseW);
-          nextScaleY = Math.max(0.01, (baseH * this.startScaleY - dy) / baseH);
+          nextScaleX = (baseW * this.startScaleX - dx) / baseW;
+          nextScaleY = (baseH * this.startScaleY - dy) / baseH;
           break;
+      }
+
+      // アスペクト固定: グローバル設定を基本に、Shift キーが押されていれば必ず固定
+      const keepAspect = imagePoolStore.preserveAspectRatio || e.shiftKey;
+      if (keepAspect) {
+        switch (this.resizePos) {
+          case 'e':
+          case 'w': {
+            const s = nextScaleX;
+            nextScaleX = s;
+            nextScaleY = s;
+            break;
+          }
+          case 'n':
+          case 's': {
+            const s = nextScaleY;
+            nextScaleX = s;
+            nextScaleY = s;
+            break;
+          }
+          default: {
+            // 角ハンドル: より変化量の大きい軸に合わせる
+            const deltaW = baseW * (nextScaleX - this.startScaleX);
+            const deltaH = baseH * (nextScaleY - this.startScaleY);
+            const s = Math.abs(deltaW) >= Math.abs(deltaH) ? nextScaleX : nextScaleY;
+            nextScaleX = s;
+            nextScaleY = s;
+            break;
+          }
+        }
+      }
+
+      // 追加: 画面上の最小表示ピクセルに基づく動的クランプ
+      const minDisplayPx = Number((globalConfig as any).imagePool?.minDisplayPx ?? 8);
+      const minScaleX = Math.max(1e-4, minDisplayPx / (baseW * zoom));
+      const minScaleY = Math.max(1e-4, minDisplayPx / (baseH * zoom));
+      if (keepAspect) {
+        const s = Math.max(nextScaleX, nextScaleY, minScaleX, minScaleY);
+        nextScaleX = s;
+        nextScaleY = s;
+      } else {
+        nextScaleX = Math.max(minScaleX, nextScaleX);
+        nextScaleY = Math.max(minScaleY, nextScaleY);
       }
 
       // ピボット座標（開始時のボックスから算出）
@@ -199,6 +243,7 @@ class ImageEntryInteract {
         scaleX: nextScaleX,
         scaleY: nextScaleY,
         handle: this.resizePos,
+        keepAspect,
         pivot,
         newX,
         newY,

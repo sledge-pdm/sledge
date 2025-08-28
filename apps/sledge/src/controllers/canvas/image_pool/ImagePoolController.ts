@@ -9,6 +9,13 @@ import getFileId from '~/utils/getFileId';
 // Plain Map でエントリーを管理
 const pool = new Map<string, ImagePoolEntry>();
 
+export const setImagePool = (entries: Map<string, ImagePoolEntry>) => {
+  pool.clear();
+  entries.forEach((entry) => {
+    pool.set(entry.id, entry);
+  });
+};
+
 export const getEntries = (): ImagePoolEntry[] => Array.from(pool.values());
 export const getEntry = (id: string): ImagePoolEntry | undefined => pool.get(id);
 
@@ -31,7 +38,7 @@ export function removeEntry(id: string) {
   }
 }
 
-export function replaceAll(entries: ImagePoolEntry[]) {
+export function replaceAllEntries(entries: ImagePoolEntry[]) {
   pool.clear();
   for (const e of entries) pool.set(e.id, e);
   eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
@@ -93,4 +100,19 @@ async function createEntry(originalPath: string) {
   };
   pool.set(id, entry);
   return id;
+}
+
+export function showEntry(id: string) {
+  const entry = pool.get(id);
+  if (entry) {
+    entry.visible = true;
+    eventBus.emit('imagePool:entryPropChanged', { id });
+  }
+}
+export function hideEntry(id: string) {
+  const entry = pool.get(id);
+  if (entry) {
+    entry.visible = false;
+    eventBus.emit('imagePool:entryPropChanged', { id });
+  }
 }

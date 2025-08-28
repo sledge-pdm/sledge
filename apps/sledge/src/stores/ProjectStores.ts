@@ -1,6 +1,5 @@
 // projectStore.ts
 import { Size2D } from '@sledge/core';
-import { ReactiveMap } from '@solid-primitives/map';
 import { createStore } from 'solid-js/store';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { BaseLayer, createBaseLayer } from '~/models/layer/BaseLayer';
@@ -10,7 +9,7 @@ export type CanvasStore = {
   canvas: Size2D;
 };
 export type ImagePoolStore = {
-  entries: ReactiveMap<string, ImagePoolEntry>;
+  selectedEntryId: string | undefined;
 };
 export type ProjectStore = {
   thumbnailPath: string | undefined;
@@ -34,7 +33,7 @@ const defaultCanvasStore: CanvasStore = {
   },
 };
 const defaultImagePoolStore: ImagePoolStore = {
-  entries: new ReactiveMap(),
+  selectedEntryId: undefined, // Ensure this line is correctly formatted
 };
 const defaultProjectStore: ProjectStore = {
   thumbnailPath: undefined as string | undefined,

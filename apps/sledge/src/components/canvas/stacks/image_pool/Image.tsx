@@ -1,20 +1,29 @@
-import { showContextMenu } from '@sledge/ui';
+import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
-import { Component, onCleanup, onMount } from 'solid-js';
+import { Component, createMemo, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { getEntry, removeEntry, transferToCurrentLayer, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
+import {
+  getEntry,
+  hideEntry,
+  removeEntry,
+  showEntry,
+  transferToCurrentLayer,
+  updateEntryPartial,
+} from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore } from '~/stores/EditorStores';
+import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({
-    selected: false,
     visible: props.entry.visible,
   });
+
+  const isSelected = () => imagePoolStore.selectedEntryId === props.entry.id;
 
   let containerRef: HTMLDivElement;
   let imageRef: HTMLImageElement;
@@ -44,7 +53,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           allowFrom: '.resize-handle',
           listeners: {
             move(event) {
-              if (!stateStore.selected) return;
+              if (!isSelected()) return;
               const zoom = interactStore.zoom;
               const base = getEntry(props.entry.id) ?? props.entry;
               // use event.scale if provided by interactjs; fallback to ratio of current/previous width
@@ -69,7 +78,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
               updateEntryPartial(props.entry.id, { x: nx, y: ny, scale: newScale });
             },
             end(event) {
-              if (!stateStore.selected) return;
+              if (!isSelected()) return;
               // idempotent final commit
               const zoom = interactStore.zoom;
               const base = getEntry(props.entry.id) ?? props.entry;
@@ -91,7 +100,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         .draggable({
           listeners: {
             move(event) {
-              if (!stateStore.selected) return;
+              if (!isSelected()) return;
               const base = getEntry(props.entry.id) ?? props.entry;
               const nx = base.x + event.dx / interactStore.zoom;
               const ny = base.y + event.dy / interactStore.zoom;
@@ -99,7 +108,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
               updateEntryPartial(props.entry.id, { x: nx, y: ny });
             },
             end(event) {
-              if (!stateStore.selected) return;
+              if (!isSelected()) return;
               const base = getEntry(props.entry.id) ?? props.entry;
               updateEntryPartial(props.entry.id, { x: base.x, y: base.y });
             },
@@ -141,12 +150,14 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     );
   };
 
+  const selected = createMemo(() => imagePoolStore.selectedEntryId === props.entry.id);
+
   return (
     <div
       id={props.entry.id}
       ref={(el) => (containerRef = el)}
       style={{
-        display: 'flex',
+        display: stateStore.visible || selected() ? 'flex' : 'none',
         position: 'absolute',
         'pointer-events': 'all',
         'box-sizing': 'border-box',
@@ -160,10 +171,12 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         e.currentTarget.focus();
       }}
       onBlur={(e) => {
-        setStateStore('selected', false);
+        if (selected()) {
+          setImagePoolStore('selectedEntryId', undefined);
+        }
       }}
       onFocus={(e) => {
-        setStateStore('selected', true);
+        setImagePoolStore('selectedEntryId', props.entry.id);
       }}
       // onContextMenu={async (e) => {
       //   e.preventDefault();
@@ -172,9 +185,23 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
+        const showHideItem: MenuListOption = stateStore.visible
+          ? {
+              ...ContextMenuItems.BaseImageHide,
+              onSelect: () => {
+                hideEntry(props.entry.id);
+              },
+            }
+          : {
+              ...ContextMenuItems.BaseImageShow,
+              onSelect: () => {
+                showEntry(props.entry.id);
+              },
+            };
         showContextMenu(
-          props.entry.fileName,
+          `${props.entry.fileName}${stateStore.visible ? '' : ' (hidden)'}`,
           [
+            showHideItem,
             {
               ...ContextMenuItems.BaseTransfer,
               onSelect: () => transferToCurrentLayer(props.entry.id, false),
@@ -203,8 +230,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           padding: 0,
           width: `${props.entry.width}px`,
           height: `${props.entry.height}px`,
-          opacity: stateStore.visible ? 1 : 0.6,
           'z-index': Consts.zIndex.imagePoolImage,
+          opacity: stateStore.visible ? 1 : selected() ? 0.5 : 0,
         }}
       />
 
@@ -221,7 +248,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           'image-rendering': 'pixelated',
           'shape-rendering': 'geometricPrecision',
           overflow: 'visible',
-          visibility: stateStore.selected ? 'visible' : 'collapse',
+          visibility: isSelected() ? 'visible' : 'collapse',
           'z-index': Consts.zIndex.imagePoolControl,
         }}
       >

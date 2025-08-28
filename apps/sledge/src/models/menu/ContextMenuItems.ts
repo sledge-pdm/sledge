@@ -1,9 +1,10 @@
+import { MenuListOption } from '@sledge/ui';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { saveProject } from '~/io/project/out/save';
 import { openDevTools } from '~/utils/WindowUtils';
 
-export const ContextMenuItems = {
+export const ContextMenuItems: { [key: string]: MenuListOption } = {
   DevRefresh: {
     label: '[dev] Refresh',
     icon: '/icons/misc/refresh.png',
@@ -52,6 +53,14 @@ export const ContextMenuItems = {
   BaseClear: {
     label: 'Clear',
     icon: '/icons/misc/clear.png',
+  },
+  BaseImageShow: {
+    label: 'Show',
+    icon: '/icons/misc/show_image.png',
+  },
+  BaseImageHide: {
+    label: 'Hide',
+    icon: '/icons/misc/hide_image.png',
   },
   BaseTransfer: {
     label: 'Transfer',

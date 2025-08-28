@@ -36,6 +36,9 @@ importers:
 
   apps/sledge:
     dependencies:
+      '@interactjs/types':
+        specifier: ^1.10.27
+        version: 1.10.27
       '@jaames/iro':
         specifier: ^5.5.2
         version: 5.5.2

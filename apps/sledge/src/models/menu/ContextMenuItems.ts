@@ -1,9 +1,10 @@
+import { MenuListOption } from '@sledge/ui';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { saveProject } from '~/io/project/out/save';
 import { openDevTools } from '~/utils/WindowUtils';
 
-export const ContextMenuItems = {
+export const ContextMenuItems: { [key: string]: MenuListOption } = {
   DevRefresh: {
     label: '[dev] Refresh',
     icon: '/icons/misc/refresh.png',
@@ -33,7 +34,7 @@ export const ContextMenuItems = {
     },
   },
   Save: {
-    label: 'Save',
+    label: 'Save Project',
     icon: '/icons/misc/save.png',
     onSelect: () => {
       saveProject();
@@ -53,12 +54,20 @@ export const ContextMenuItems = {
     label: 'Clear',
     icon: '/icons/misc/clear.png',
   },
-  BaseBurndown: {
-    label: 'Burndown',
-    icon: '/icons/misc/burndown.png',
+  BaseImageShow: {
+    label: 'Show',
+    icon: '/icons/misc/show_image.png',
   },
-  BaseBurndownRemove: {
-    label: 'Burndown (remove)',
-    icon: '/icons/misc/burndown_remove.png',
+  BaseImageHide: {
+    label: 'Hide',
+    icon: '/icons/misc/hide_image.png',
+  },
+  BaseTransfer: {
+    label: 'Transfer to layer',
+    icon: '/icons/misc/transfer.png',
+  },
+  BaseTransferRemove: {
+    label: 'Transfer and Remove',
+    icon: '/icons/misc/transfer_and_remove.png',
   },
 };

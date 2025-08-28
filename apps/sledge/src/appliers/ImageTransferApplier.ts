@@ -1,10 +1,9 @@
-// src/appliers/ImageBurndownApplier.ts
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import { loadLocalImage } from '~/utils/DataUtils';
 
-export interface ImageBurndownParams {
+export interface ImageTransferParams {
   entry: {
     x: number;
     y: number;
@@ -14,7 +13,7 @@ export interface ImageBurndownParams {
   targetLayerId: string;
 }
 
-export async function burndownToLayer({ entry, targetLayerId }: ImageBurndownParams): Promise<void> {
+export async function transferToLayer({ entry, targetLayerId }: ImageTransferParams): Promise<void> {
   const bitmap = await loadLocalImage(entry.resourcePath);
   const w = Math.max(1, Math.round(bitmap.width * (entry.scale || 1)));
   const h = Math.max(1, Math.round(bitmap.height * (entry.scale || 1)));

@@ -75,10 +75,7 @@ export default function App() {
                 import.meta.env.DEV
                   ? [ContextMenuItems.Save, ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools]
                   : [ContextMenuItems.Save],
-                e,
-                {
-                  closeByOutsideClick: true,
-                }
+                e
               );
             }}
           >

@@ -141,6 +141,11 @@ export const InteractCanvas: Component<Props> = (props) => {
     const onCanvas = !!canvasRef?.contains(e.target as Node);
     setInteractStore('isMouseOnCanvas', onCanvas);
 
+    if (!isDrawableClick(e)) {
+      logger.debugWarn(`handlePointerMove cancelled because not drawable click`);
+      return;
+    }
+
     if (onCanvas && !activeLayer().enabled) {
       setCursor('not-allowed');
     } else {
@@ -151,11 +156,6 @@ export const InteractCanvas: Component<Props> = (props) => {
     const position = getCanvasMousePosition(e);
     setInteractStore('lastMouseWindow', windowPosition);
     setInteractStore('lastMouseOnCanvas', position);
-
-    if (!isDrawableClick(e)) {
-      logger.debugWarn(`handlePointerMove cancelled because not drawable click`);
-      return;
-    }
 
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
@@ -268,9 +268,7 @@ export const InteractCanvas: Component<Props> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e, {
-          closeByOutsideClick: true,
-        });
+        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e);
       }}
     />
   );

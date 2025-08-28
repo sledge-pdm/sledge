@@ -1,13 +1,20 @@
-import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
+import { transferToLayer } from '~/appliers/ImageTransferApplier';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import getFileId from '~/utils/getFileId';
 
 // Plain Map でエントリーを管理
 const pool = new Map<string, ImagePoolEntry>();
+
+export const setImagePool = (entries: Map<string, ImagePoolEntry>) => {
+  pool.clear();
+  entries.forEach((entry) => {
+    pool.set(entry.id, entry);
+  });
+};
 
 export const getEntries = (): ImagePoolEntry[] => Array.from(pool.values());
 export const getEntry = (id: string): ImagePoolEntry | undefined => pool.get(id);
@@ -27,11 +34,12 @@ export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
 
 export function removeEntry(id: string) {
   if (pool.delete(id)) {
+    selectEntry(undefined);
     eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
   }
 }
 
-export function replaceAll(entries: ImagePoolEntry[]) {
+export function replaceAllEntries(entries: ImagePoolEntry[]) {
   pool.clear();
   for (const e of entries) pool.set(e.id, e);
   eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
@@ -51,14 +59,14 @@ export async function relinkEntry(id: string, newPath: string) {
   updateEntryPartial(id, { originalPath: newPath, resourcePath: newPath, fileName: filename });
 }
 
-export async function burndownToCurrentLayer(id: string, removeAfter: boolean) {
+export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
   const active = activeLayer(); // いま選択中のレイヤー
   if (!active) return;
 
   try {
     const current = getEntry(id);
     if (!current) return;
-    await burndownToLayer({
+    await transferToLayer({
       entry: current,
       targetLayerId: active.id,
     });
@@ -93,4 +101,24 @@ async function createEntry(originalPath: string) {
   };
   pool.set(id, entry);
   return id;
+}
+
+export function selectEntry(id?: string) {
+  setImagePoolStore('selectedEntryId', id);
+}
+
+export function showEntry(id: string) {
+  const entry = pool.get(id);
+  if (entry) {
+    entry.visible = true;
+    eventBus.emit('imagePool:entryPropChanged', { id });
+  }
+}
+
+export function hideEntry(id: string) {
+  const entry = pool.get(id);
+  if (entry) {
+    entry.visible = false;
+    eventBus.emit('imagePool:entryPropChanged', { id });
+  }
 }

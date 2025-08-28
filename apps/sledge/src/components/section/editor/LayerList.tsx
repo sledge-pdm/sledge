@@ -51,19 +51,19 @@ const LayerList: Component<{}> = () => {
   });
 
   return (
-    <SectionItem title='layers.'>
-      <div class={flexRow} style={{ 'margin-left': 'auto', gap: '4px', 'margin-bottom': '6px' }}>
-        <button
-          onClick={async () => {
-            await addLayer({ name: 'layer1' });
+    <SectionItem
+      title='layers.'
+      subHeaderIcons={[
+        {
+          src: '/icons/misc/add.png',
+          onClick: () => {
+            addLayer({ name: 'layer1' });
             setItems(allLayers());
-          }}
-        >
-          + add.
-        </button>
-
-        <button
-          onClick={async () => {
+          },
+        },
+        {
+          src: '/icons/misc/remove_minus.png',
+          onClick: async () => {
             const ok = await confirm(`Sure to remove "${activeLayer().name}" ?\nYou can NOT restore this action.`, {
               kind: 'warning',
               title: 'Remove Layer',
@@ -74,12 +74,11 @@ const LayerList: Component<{}> = () => {
               removeLayer(activeLayer()?.id);
               setItems(allLayers());
             }
-          }}
-          disabled={layerListStore.layers.length <= 1}
-        >
-          - remove.
-        </button>
-      </div>
+          },
+          disabled: layerListStore.layers.length <= 1,
+        },
+      ]}
+    >
       <div class={sectionContent}>
         <div
           class={flexRow}

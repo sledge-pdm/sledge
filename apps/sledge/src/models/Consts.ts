@@ -11,7 +11,7 @@ export const Consts = {
 
   webGLTextureSizeLimitMargin: 100,
 
-  zoomPrecisionSignificantDigits: 2,
+  zoomPrecisionSignificantDigits: 4,
 
   maxLayerSize: 64,
 

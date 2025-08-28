@@ -67,7 +67,7 @@ xattr -rc /Applications/sledge.app
 | **Tools**        | Pen, Eraser           | ✅      |                                                             |
 |                  | Fill                  | ✅      |                                                             |
 |                  | Color Picker          | ✅      |                                                             |
-|                  | Image Pool            | ✅      | resize, burndown                                            |
+|                  | Image Pool            | ✅      | resize, transfer to layer                                   |
 |                  | Selection             | ✅      | rect, auto                                                  |
 |                  | Text                  | ⏳      |                                                             |
 | **Composites**   | Layer Opacity         | ✅      |                                                             |

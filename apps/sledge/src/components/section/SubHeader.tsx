@@ -82,7 +82,10 @@ export const SectionSubHeader: Component<Props> = (props) => {
             {(item) => {
               const disabled = item.disabled ?? false;
               return (
-                <div style={{ cursor: disabled ? 'none' : 'pointer', 'pointer-events': disabled ? 'none' : 'all', opacity: disabled ? 0.6 : 1 }}>
+                <div
+                  style={{ cursor: disabled ? 'none' : 'pointer', 'pointer-events': disabled ? 'none' : 'all', opacity: disabled ? 0.6 : 1 }}
+                  onMouseDown={(e) => e.preventDefault()}
+                >
                   <Icon
                     src={item.src}
                     base={8}

@@ -27,9 +27,9 @@ Sledge is a drawing tool.
 
 | Platform | Status | Detail |
 | - | - | - |
-| Windows | :white_check_mark: | *OK.* |
-| MacOS | :white_check_mark: | *almost OK. some ui/ux issues were found.* |
-| Linux | :ballot_box_with_check: | *NOTOK, but you can barely use.* |
+| Windows | :white_check_mark: | *mostly OK.* |
+| MacOS | :white_check_mark: | *almost OK. there's some ui/ux problem.* |
+| Linux | :ballot_box_with_check: | *NOTOK. barely usable.* |
 | Mobile | :zzz: | *No builds available.* |
 
 ## Install
@@ -52,41 +52,36 @@ xattr -rc /Applications/sledge.app
 
 <br>
 
+
+## Features
+
 <details>
 <summary>WIP status</summary>
 
-### Interacts
+| Category | Feature | Status | Notes |
+| - | - | - | - |
+| **Interacts** | Mouse | ✅ | |
+|  | Pen | ✅ | |
+|  | Touch | ✅ | |
+|  | Touchpads | ⏳ | |
+| **Tools** | Pen, Eraser | ✅ | |
+|  | Fill | ✅ | |
+|  | Color Picker | ✅ | |
+|  | Image Pool | ✅ | resize, burndown |
+|  | Selection | ✅ | Rect, Auto |
+|  | Selection Editing | ⏳ | copy, paste |
+|  | Text | ⏳ | editable |
+| **Composites** | Layer Opacity | ✅ | |
+|  | Layer Composite | ✅ | normal / multiply |
+| **Effects** | Effects | ⏳ | |
+|  | Animation Support | ⏳ | |
+| **I/O** | Basic I/O | ✅ | load, save, import, export |
+|  | SVG Export | ✅ | for small pixel art/icons |
+|  | Auto save | ✅ | |
+|  | Clipboard Support | ⏳ | |
+|  | Project-Level History | ⏳ | |
+| **Others** | Animation Support | ⏳ | creating frames and output to GIF, mp4 |
 
-- [x] Mouse
-- [x] Pen
-- [x] Touch
-- [ ] Touchpads
-
-### Tools
-
-- [x] Pen, Eraser
-- [x] Fill
-- [x] Color Picker
-- [x] Image Pool (resize, burndown)
-- [x] Selection (Rect, Auto)
-- [ ] Selection Editing (copy, paste)
-- [ ] Text (editable)
-
-### Composites / Effects
-
-- [x] Layer Opacity
-- [x] Layer Composite (normal / multiply)
-- [ ] Effects
-- [ ] Animation Support
-
-### I/O
-
-- [x] Basic I/O (load, save, import, export)
-- [x] SVG Export (for small pixel art/icons)
-- [x] Auto save
-- [ ] Clipboard Support
-- [ ] Project-Level History
-  
 </details>
 
 ## Fonts

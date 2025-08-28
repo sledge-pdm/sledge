@@ -41,9 +41,7 @@ export async function mergeLayer({ originLayer, targetLayer }: LayerMergeParams)
 
   // WebGL で2パス描画
   const renderer = ensureMergeRenderer(originLayer, targetLayer);
-  console.log('---start read---');
   const out = renderer.readPixelsFlipped();
-  console.log('---end read---');
 
   // diff 用コピー（before は target の現在バッファ）
   const before = new Uint8ClampedArray(targetAgent.getBuffer());

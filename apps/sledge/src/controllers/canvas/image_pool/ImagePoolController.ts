@@ -1,4 +1,4 @@
-import { burndownToLayer } from '~/appliers/ImageBurndownApplier';
+import { transferToLayer } from '~/appliers/ImageTransferApplier';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -51,14 +51,14 @@ export async function relinkEntry(id: string, newPath: string) {
   updateEntryPartial(id, { originalPath: newPath, resourcePath: newPath, fileName: filename });
 }
 
-export async function burndownToCurrentLayer(id: string, removeAfter: boolean) {
+export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
   const active = activeLayer(); // いま選択中のレイヤー
   if (!active) return;
 
   try {
     const current = getEntry(id);
     if (!current) return;
-    await burndownToLayer({
+    await transferToLayer({
       entry: current,
       targetLayerId: active.id,
     });

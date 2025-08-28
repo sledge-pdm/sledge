@@ -2,7 +2,7 @@ import { flexCol, flexRow } from '@sledge/core';
 import { showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
-import { burndownToCurrentLayer, getEntries, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { getEntries, removeEntry, transferToCurrentLayer } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
 
@@ -23,16 +23,17 @@ const Item: Component<{ id: string; name: string; path: string; visible: boolean
           props.name,
           [
             {
+              ...ContextMenuItems.BaseTransfer,
+              onSelect: () => transferToCurrentLayer(props.id, false),
+            },
+            {
+              ...ContextMenuItems.BaseTransferRemove,
+              onSelect: () => transferToCurrentLayer(props.id, true),
+            },
+            {
               ...ContextMenuItems.BaseRemove,
+              label: 'Remove from Pool',
               onSelect: () => removeEntry(props.id),
-            },
-            {
-              ...ContextMenuItems.BaseBurndown,
-              onSelect: () => burndownToCurrentLayer(props.id, false),
-            },
-            {
-              ...ContextMenuItems.BaseBurndownRemove,
-              onSelect: () => burndownToCurrentLayer(props.id, true),
             },
           ],
           e

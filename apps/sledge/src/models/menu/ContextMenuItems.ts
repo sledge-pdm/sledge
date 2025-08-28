@@ -33,7 +33,7 @@ export const ContextMenuItems = {
     },
   },
   Save: {
-    label: 'Save',
+    label: 'Save Project',
     icon: '/icons/misc/save.png',
     onSelect: () => {
       saveProject();
@@ -53,12 +53,12 @@ export const ContextMenuItems = {
     label: 'Clear',
     icon: '/icons/misc/clear.png',
   },
-  BaseBurndown: {
-    label: 'Burndown',
-    icon: '/icons/misc/burndown.png',
+  BaseTransfer: {
+    label: 'Transfer',
+    icon: '/icons/misc/transfer.png',
   },
-  BaseBurndownRemove: {
-    label: 'Burndown (remove)',
-    icon: '/icons/misc/burndown_remove.png',
+  BaseTransferRemove: {
+    label: 'Transfer and Remove',
+    icon: '/icons/misc/transfer_and_remove.png',
   },
 };

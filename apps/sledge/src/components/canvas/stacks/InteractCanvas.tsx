@@ -268,9 +268,7 @@ export const InteractCanvas: Component<Props> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e, {
-          closeByOutsideClick: true,
-        });
+        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e);
       }}
     />
   );

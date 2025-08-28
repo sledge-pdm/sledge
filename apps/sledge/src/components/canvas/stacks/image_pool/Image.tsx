@@ -3,7 +3,7 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import interact from 'interactjs';
 import { Component, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { burndownToCurrentLayer, getEntry, removeEntry, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { getEntry, removeEntry, transferToCurrentLayer, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
@@ -65,7 +65,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
               const nx = base.x + event.deltaRect.left / zoom;
               const ny = base.y + event.deltaRect.top / zoom;
               containerRef.style.transform = `translate(${nx}px, ${ny}px)`;
-              // write-through to store so consumers (e.g., burndown) always see latest
+              // write-through to store so consumers (e.g., transfer) always see latest
               updateEntryPartial(props.entry.id, { x: nx, y: ny, scale: newScale });
             },
             end(event) {
@@ -176,16 +176,17 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           props.entry.fileName,
           [
             {
+              ...ContextMenuItems.BaseTransfer,
+              onSelect: () => transferToCurrentLayer(props.entry.id, false),
+            },
+            {
+              ...ContextMenuItems.BaseTransferRemove,
+              onSelect: () => transferToCurrentLayer(props.entry.id, true),
+            },
+            {
               ...ContextMenuItems.BaseRemove,
+              label: 'Remove from Pool',
               onSelect: () => removeEntry(props.entry.id),
-            },
-            {
-              ...ContextMenuItems.BaseBurndown,
-              onSelect: () => burndownToCurrentLayer(props.entry.id, false),
-            },
-            {
-              ...ContextMenuItems.BaseBurndownRemove,
-              onSelect: () => burndownToCurrentLayer(props.entry.id, true),
             },
           ],
           e

@@ -63,7 +63,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
     icon: '/icons/misc/hide_image.png',
   },
   BaseTransfer: {
-    label: 'Transfer',
+    label: 'Transfer to layer',
     icon: '/icons/misc/transfer.png',
   },
   BaseTransferRemove: {

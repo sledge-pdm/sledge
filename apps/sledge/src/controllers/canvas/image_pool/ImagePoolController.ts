@@ -109,6 +109,7 @@ export function showEntry(id: string) {
     eventBus.emit('imagePool:entryPropChanged', { id });
   }
 }
+
 export function hideEntry(id: string) {
   const entry = pool.get(id);
   if (entry) {

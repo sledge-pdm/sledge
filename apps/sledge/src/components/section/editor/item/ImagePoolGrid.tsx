@@ -38,6 +38,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
         width: 'fit-content',
         overflow: 'visible',
         'box-sizing': 'border-box',
+        cursor: 'pointer',
         border: imagePoolStore.selectedEntryId === props.entry.id ? `1px solid ${vars.color.active}` : '1px solid transparent',
         opacity: stateStore.visible ? 1 : 0.5,
       }}
@@ -74,7 +75,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
             },
             {
               ...ContextMenuItems.BaseRemove,
-              label: 'Remove from Pool',
+              label: 'Remove from pool',
               onSelect: () => removeEntry(entry.id),
             },
           ],

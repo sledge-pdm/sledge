@@ -99,7 +99,13 @@ export class DebugLogger {
     this.label = label;
   }
 
-  public debugLog = (...msg: any) => debugLog(this.label, ...msg);
-  public debugWarn = (...msg: any) => debugWarn(this.label, ...msg);
-  public debugError = (...msg: any) => debugError(this.label, ...msg);
+  public debugLog = (...msg: any) => {
+    if (this.enabled) debugLog(this.label, ...msg);
+  };
+  public debugWarn = (...msg: any) => {
+    if (this.enabled) debugWarn(this.label, ...msg);
+  };
+  public debugError = (...msg: any) => {
+    if (this.enabled) debugError(this.label, ...msg);
+  };
 }

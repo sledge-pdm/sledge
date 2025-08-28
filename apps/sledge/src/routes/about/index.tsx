@@ -83,12 +83,12 @@ const About = () => {
               <a class={aboutLink} style={{ 'font-family': ZFB09 }} onClick={(e) => openLink('http://www.04.jp.org')}>
                 04b_XX
               </a>
-              <span style={{ 'font-family': ZFB08, color: '#777', 'margin-left': '8px' }}>by yuji oshimoto</span>
+              <span style={{ 'font-family': ZFB08, color: '#777', 'margin-left': '8px' }}>by yuji oshimoto (04.jp.org)</span>
             </p>
 
             <p>
               <a class={aboutLink} style={{ 'font-family': k12x8 }} onClick={(e) => openLink('https://littlelimit.net/k12x8.htm')}>
-                {'k12x8'}
+                {'k12x8 / k8x12'}
               </a>
               <span style={{ 'font-family': ZFB08, color: '#777', 'margin-left': '8px' }}>by num_kadoma (littlelimit.net)</span>
             </p>

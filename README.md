@@ -12,7 +12,7 @@
 
 <br>
 
-<img src="assets/0827sledge_light.png" alt="F.C.H.S." width=600 />
+<img src="assets/0827sledge_dark.png" alt="F.C.H.S." width=600 />
 
 <br>
 Sledge is a drawing tool.
@@ -25,10 +25,12 @@ Sledge is a drawing tool.
 
 ## Platform Support
 
-- **Windows** ... :white_check_mark: *OK.*
-- **MacOS** ... :white_check_mark: *almost OK. some ui/ux issues were found.*
-- **Linux** ... :ballot_box_with_check: *almost NOTOK, but you can barely use.*
-- **Mobile** ... :zzz: *No builds available.*
+| Platform | Status | Detail |
+| - | - | - |
+| Windows | :white_check_mark: | *OK.* |
+| MacOS | :white_check_mark: | *almost OK. some ui/ux issues were found.* |
+| Linux | :ballot_box_with_check: | *NOTOK, but you can barely use.* |
+| Mobile | :zzz: | *No builds available.* |
 
 ## Install
 
@@ -40,21 +42,15 @@ Sledge is a drawing tool.
 
 <summary>For Mac users</summary>
 
-MacOS mostly reports an error like: *App is Damaged*.
-To prevent it, run this command in bash before running:
+MacOS will report an "App is Damaged" error when running sledge by double click.
+Run command below to prevent:
 ```bash
 xattr -rc /Applications/sledge.app
 ```
 
 </details>
 
-## Features
-
-* 🏁 Refined Pixel-Based UI
-* :sparkles: Interface for faster & concentrated creation.
-* :art: Multiple Layer Composite w/ Blend Modes
-* :zap: Fast Image Operation via WebGL/WASM
-* :file_folder: Project File Association (.sledge)
+<br>
 
 <details>
 <summary>WIP status</summary>
@@ -93,6 +89,11 @@ xattr -rc /Applications/sledge.app
   
 </details>
 
+## Fonts
+
+* [04b_XX](http://www.04.jp.org) by yuji oshimoto (04.jp.org)
+* [k12x8](https://littlelimit.net/k12x8.htm) by num_kadoma (littlelimit.net)
+
 ## Tech
 
 ### Frontend / Website
@@ -107,9 +108,9 @@ xattr -rc /Applications/sledge.app
 ### Image Processing / Layer Composite
 
 - [WASM](https://developer.mozilla.org/ja/docs/WebAssembly) ([wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen) / [wasm-pack](https://github.com/drager/wasm-pack))
-- [WebGL](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API)
+- [WebGL2](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API)
 
-### Project File Format
+### Project Format
 
 - [msgpack](https://msgpack.org/ja.html)
 

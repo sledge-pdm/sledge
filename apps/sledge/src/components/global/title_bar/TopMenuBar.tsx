@@ -41,7 +41,7 @@ const TopMenuBar: Component = () => {
   const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
   onMount(async () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
-    
+
     try {
       getLatestVersion(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat).then((ver) => {
         setLatestVersion(ver);

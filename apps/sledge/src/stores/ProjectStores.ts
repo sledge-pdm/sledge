@@ -29,8 +29,8 @@ export type LayerListStore = {
 
 const defaultCanvasStore: CanvasStore = {
   canvas: {
-    width: 400,
-    height: 400,
+    width: 1024,
+    height: 1024,
   },
 };
 const defaultImagePoolStore: ImagePoolStore = {

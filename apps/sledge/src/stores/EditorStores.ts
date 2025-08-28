@@ -2,7 +2,6 @@
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
-import { getNormalBottomBarText } from '~/controllers/log/LogController';
 import { PaletteType } from '~/models/color/PaletteType';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 import { RGBAColor } from '~/utils/ColorUtils';
@@ -111,7 +110,7 @@ const defaultInteractStore: InteractStore = {
   isDragging: false,
 };
 const defaultLogStore: LogStore = {
-  bottomBarText: getNormalBottomBarText(true),
+  bottomBarText: 'rotate: shift+wheel / drag: ctrl+drag',
   bottomBarKind: 'info',
   canvasDebugPoints: [],
 };

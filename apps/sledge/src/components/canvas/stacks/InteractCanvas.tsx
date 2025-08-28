@@ -1,11 +1,13 @@
 import { Vec2 } from '@sledge/core';
 import { showContextMenu } from '@sledge/ui';
+import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { Component, createSignal, onMount } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/controllers/canvas/CanvasAreaInteract';
 import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { activeLayer } from '~/controllers/layer/LayerListController';
+import { DebugLogger } from '~/controllers/log/LogController';
 import { getActiveToolCategory } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
@@ -18,6 +20,9 @@ interface Props {
 
 // レイヤーごとのキャンバスの上でタッチイベントを受けるだけのキャンバス
 export const InteractCanvas: Component<Props> = (props) => {
+  const LOG_LABEL = 'InteractCanvas';
+  const logger = new DebugLogger(LOG_LABEL, false);
+
   let canvasRef: HTMLCanvasElement | undefined;
 
   const [cursor, setCursor] = createSignal<string>('none');
@@ -77,10 +82,17 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handleOutCanvasAreaPointerDown(e: PointerEvent) {
-    if (!isDrawableClick(e)) return;
-
+    const start = new Date().getTime();
+    logger.debugLog(`handleOutCanvasAreaPointerDown start`);
     const activeToolCategory = getActiveToolCategory();
-    if (!activeToolCategory.behavior.acceptStartOnOutCanvas) return;
+    if (!activeToolCategory.behavior.acceptStartOnOutCanvas) {
+      logger.debugWarn(`handleOutCanvasAreaPointerDown cancelled because tool doesn't accept it`);
+      return;
+    }
+    if (!isDrawableClick(e)) {
+      logger.debugWarn(`handleOutCanvasAreaPointerDown cancelled because not drawable click`);
+      return;
+    }
 
     e.stopPropagation();
     e.stopImmediatePropagation();
@@ -93,10 +105,17 @@ export const InteractCanvas: Component<Props> = (props) => {
     props.operator.handleDraw(DrawState.start, e, activeToolCategory, position, lastPos());
     setInteractStore('isInStroke', true);
     setLastPos(position);
+    const end = new Date().getTime();
+    logger.debugLog(`handleOutCanvasAreaPointerDown executed in ${end - start} ms`);
   }
 
   function handlePointerDown(e: PointerEvent) {
-    if (!isDrawableClick(e)) return;
+    const start = new Date().getTime();
+    logger.debugLog(`handlePointerDown start`);
+    if (!isDrawableClick(e)) {
+      logger.debugWarn(`handlePointerDown cancelled because not drawable click`);
+      return;
+    }
 
     setInteractStore('isPenOut', false);
 
@@ -104,6 +123,8 @@ export const InteractCanvas: Component<Props> = (props) => {
     props.operator.handleDraw(DrawState.start, e, getActiveToolCategory(), position, lastPos());
     setInteractStore('isInStroke', true);
     setLastPos(position);
+    const end = new Date().getTime();
+    logger.debugLog(`handlePointerDown executed in ${end - start} ms`);
   }
 
   function handlePointerCancel(e: PointerEvent) {
@@ -114,6 +135,9 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function handlePointerMove(e: PointerEvent) {
+    const start = new Date().getTime();
+    logger.debugLog(`handlePointerMove start`);
+
     const onCanvas = !!canvasRef?.contains(e.target as Node);
     setInteractStore('isMouseOnCanvas', onCanvas);
 
@@ -128,7 +152,10 @@ export const InteractCanvas: Component<Props> = (props) => {
     setInteractStore('lastMouseWindow', windowPosition);
     setInteractStore('lastMouseOnCanvas', position);
 
-    if (!isDrawableClick(e)) return;
+    if (!isDrawableClick(e)) {
+      logger.debugWarn(`handlePointerMove cancelled because not drawable click`);
+      return;
+    }
 
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {
@@ -136,10 +163,16 @@ export const InteractCanvas: Component<Props> = (props) => {
       setInteractStore('isInStroke', true);
       setLastPos(position);
     }
-    if (!interactStore.isInStroke || !lastPos()) return;
+
+    if (!interactStore.isInStroke || !lastPos()) {
+      logger.debugWarn(`handlePointerMove cancelled because not in stroke or no last position`);
+      return;
+    }
 
     props.operator.handleDraw(DrawState.move, e, getActiveToolCategory(), position, lastPos());
     setLastPos(position);
+    const end = new Date().getTime();
+    logger.debugLog(`handlePointerMove executed in ${end - start} ms`);
   }
 
   function handlePointerUp(e: PointerEvent) {
@@ -175,7 +208,9 @@ export const InteractCanvas: Component<Props> = (props) => {
     setTemporaryOut(false);
   }
 
-  onMount(async () => {
+  let unlistenFocusChanged: UnlistenFn | undefined = undefined;
+
+  onMount(() => {
     const outCanvasArea = document.getElementById('out-canvas-area');
     outCanvasArea!.addEventListener('pointerdown', handleOutCanvasAreaPointerDown);
     canvasRef!.addEventListener('pointerdown', handlePointerDown);
@@ -185,18 +220,21 @@ export const InteractCanvas: Component<Props> = (props) => {
     window.addEventListener('pointercancel', handlePointerCancel);
     window.addEventListener('wheel', handleWheel);
 
-    const unlistenFocusChanged = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
-      if (!focused) {
-        props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 }, lastPos());
-      } else {
-        // pipetteのみ復帰時も戻す
-        if (toolStore.activeToolCategory === 'pipette')
+    getCurrentWindow()
+      .onFocusChanged(({ payload: focused }) => {
+        if (!focused) {
           props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 }, lastPos());
-      }
-    });
+        } else {
+          // pipetteのみ復帰時も戻す
+          if (toolStore.activeToolCategory === 'pipette')
+            props.operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 }, lastPos());
+        }
+      })
+      .then((fn) => {
+        unlistenFocusChanged = fn;
+      });
 
     return () => {
-      unlistenFocusChanged();
       outCanvasArea!.removeEventListener('pointerdown', handleOutCanvasAreaPointerDown);
       canvasRef!.removeEventListener('pointerdown', handlePointerDown);
       canvasRef!.removeEventListener('pointerout', handlePointerOut);
@@ -205,6 +243,10 @@ export const InteractCanvas: Component<Props> = (props) => {
       window.removeEventListener('pointercancel', handlePointerCancel);
       window.removeEventListener('wheel', handleWheel);
     };
+  });
+
+  onCleanup(() => {
+    unlistenFocusChanged?.();
   });
 
   return (

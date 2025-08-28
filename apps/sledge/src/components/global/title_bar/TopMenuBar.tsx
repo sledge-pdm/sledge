@@ -41,10 +41,14 @@ const TopMenuBar: Component = () => {
   const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
   onMount(async () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
+
     try {
-      setLatestVersion((await getLatestVersion(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat)) ?? undefined);
-      const isAvailable = await isNewVersionAvailable(true, location.origin.includes('localhost') ? undefined : githubPat);
-      setNewVersionAvailable(isAvailable ?? false);
+      getLatestVersion(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat).then((ver) => {
+        setLatestVersion(ver);
+      });
+      isNewVersionAvailable(true, location.origin.includes('localhost') ? undefined : githubPat).then((isAvailable) => {
+        setNewVersionAvailable(isAvailable ?? false);
+      });
     } catch (e) {
       console.warn('failed to fetch version data.');
     }

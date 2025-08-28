@@ -2,7 +2,7 @@ import { Vec2 } from '@sledge/core';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { setBottomBarText } from '~/controllers/log/LogController';
+import { DebugLogger, setBottomBarText } from '~/controllers/log/LogController';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
@@ -17,6 +17,9 @@ export enum DrawState {
   end,
   cancel,
 }
+
+const LOG_LABEL = 'LayerCanvasOperator';
+const logger = new DebugLogger(LOG_LABEL, false);
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
@@ -87,6 +90,7 @@ export default class LayerCanvasOperator {
 
   private useTool(agent: LayerImageAgent, state: DrawState, tool: ToolCategory, toolArgs: ToolArgs) {
     let toolResult: ToolResult | undefined = undefined;
+    const start = new Date().getTime();
     switch (state) {
       case DrawState.start:
         toolResult = tool.behavior.onStart(agent, toolArgs);
@@ -101,6 +105,8 @@ export default class LayerCanvasOperator {
         toolResult = tool.behavior.onCancel?.(agent, toolArgs);
         break;
     }
+    const end = new Date().getTime();
+    logger.debugLog(`${tool.name} ${DrawState[state]} executed in ${end - start} ms: ${toolResult}`);
     if (toolResult?.result) {
       setBottomBarText(toolResult.result, {
         duration: 1500,

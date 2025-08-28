@@ -12,16 +12,12 @@
 
 <br>
 
-<img src="assets/FCHS.png" alt="F.C.H.S." width=600 />
+<img src="assets/0827sledge_dark.png" alt="F.C.H.S." width=600 />
 
 <br>
-<br>
-
 Sledge is a drawing tool.
 
 **Simple.**&nbsp;&nbsp;&nbsp;**Fast.**&nbsp;&nbsp;&nbsp;**Destructive.**
-
-www.sledge-rules.app
 
 </div>
 
@@ -29,47 +25,71 @@ www.sledge-rules.app
 
 ## Platform Support
 
-- :white_check_mark: **Windows**
-- :ballot_box_with_check: **MacOS**
-- :ballot_box_with_check: **Linux**
-- :x: **Mobile**
+| Platform | Status                  | Detail                                   |
+| -------- | ----------------------- | ---------------------------------------- |
+| Windows  | :white_check_mark:      | *mostly OK.*                             |
+| MacOS    | :white_check_mark:      | *almost OK. there's some ui/ux problem.* |
+| Linux    | :ballot_box_with_check: | *NOTOK. barely usable.*                  |
+| Mobile   | :zzz:                   | *No builds available.*                   |
 
 ## Install
 
-1. Visit [www.sledge-rules.app](https://www.sledge-rules.app/) and download installer.
+1. Visit [sledge-rules.app](https://www.sledge-rules.app/) to download installer.
 2. Run the installer and complete install.
 3. Run sledge.
 
+<details>
+
+<summary>For Mac users</summary>
+
+MacOS will report an "App is Damaged" error when running sledge by double click.
+Run command below to prevent:
+```bash
+xattr -rc /Applications/sledge.app
+```
+
+</details>
+
+<br>
+
+
 ## Features
 
-### Interacts
+<details>
+<summary>WIP status</summary>
 
-- [x] Mouse
-- [x] Pen
-- [x] Touch
-- [ ] Touchpads
+| Category         | Feature               | Status | Notes                                                       |
+| ---------------- | --------------------- | ------ | ----------------------------------------------------------- |
+| **Interactions** | Mouse                 | ✅      |                                                             |
+|                  | Pen                   | ✅      |                                                             |
+|                  | Touch                 | ✅      | can only zoom/pan because it's assumed to be used with pen. |
+|                  | Touchpads             | ⏳      |                                                             |
+| **Tools**        | Pen, Eraser           | ✅      |                                                             |
+|                  | Fill                  | ✅      |                                                             |
+|                  | Color Picker          | ✅      |                                                             |
+|                  | Image Pool            | ✅      | resize, burndown                                            |
+|                  | Selection             | ✅      | rect, auto                                                  |
+|                  | Text                  | ⏳      |                                                             |
+| **Composites**   | Layer Opacity         | ✅      |                                                             |
+|                  | Layer Blend Mode      | ✅      | normal / multiply / linear light / etc                      |
+| **Effects**      | Live Effects          | ⏳      | effects that can be chained and react to the image          |
+|                  | Invert                | ✅      | invert layer's colors                                       |
+|                  | Gaussian Blur         | ✅      | blur the layer                                              |
+|                  | Grayscale             | ✅      | convert the layer to grayscale                              |
+| **I/O**          | Basic I/O             | ✅      | load, save, import, export                                  |
+|                  | SVG Export            | ✅      | vector export for small pixel art/icons (< 128x128)         |
+|                  | Backup                | ⏳      | automatic backup for safe editing                           |
+|                  | Clipboard             | ⏳      | selection / layer                                           |
+|                  | Drag and Drop         | ⏳      | images (add to pool) / project (open)                       |
+|                  | Project-Level History | ⏳      |                                                             |
+| **Others**       | Animation             | ⏳      | creating frames and output to gif, mp4                      |
 
-### Tools
+</details>
 
-- [x] Pen, Eraser
-- [x] Fill
-- [x] Color Picker
-- [x] Selection
-- [ ] Selection Editing (copy, paste)
-- [ ] Shape drawing (line, circle, rect)
+## Fonts
 
-### Composites / Effects
-
-- [x] Layer Opacity
-- [x] Layer Composite (normal / multiply)
-- [ ] Effects
-- [ ] Animation Support
-
-### I/O
-
-- [x] Basic I/O (load, save, import, export)
-- [x] SVG Export (for small pixel art/icons)
-- [x] Auto save
+* [04b_XX](http://www.04.jp.org) by yuji oshimoto (04.jp.org)
+* [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) by num_kadoma (littlelimit.net)
 
 ## Tech
 
@@ -85,11 +105,12 @@ www.sledge-rules.app
 ### Image Processing / Layer Composite
 
 - [WASM](https://developer.mozilla.org/ja/docs/WebAssembly) ([wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen) / [wasm-pack](https://github.com/drager/wasm-pack))
-- [WebGL](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API)
+- [WebGL2](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API)
 
-### Project File Format
+### Project Format
 
 - [msgpack](https://msgpack.org/ja.html)
+
 
 
 

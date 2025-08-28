@@ -41,5 +41,3 @@ export const bottomInfoContainerRight = style([
     overflow: 'visible',
   },
 ]);
-
-export const bottomInfoText = style({});

@@ -62,7 +62,6 @@ const WebGLCanvas: Component = () => {
     try {
       webGLRenderer = new WebGLRenderer(canvasEl);
       webGLRenderer.resize(width, height);
-      console.log('[WebGLCanvas] initialize:', true);
       setUpdateRender(true); // rise flag for init render
       setOnlyDirtyUpdate(false);
     } catch (error) {
@@ -75,7 +74,6 @@ const WebGLCanvas: Component = () => {
   };
 
   listenEvent('onSetup', () => {
-    console.log('[WebGLCanvas] onSetup event received');
     init();
   });
 

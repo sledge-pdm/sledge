@@ -1,4 +1,4 @@
-import { Component, onCleanup } from 'solid-js';
+import { Component, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
@@ -8,7 +8,6 @@ import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasCon
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { eventBus } from '~/utils/EventBus';
-import { listenEvent } from '~/utils/TauriUtils';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import { flexCol, flexRow } from '@sledge/core';
@@ -25,7 +24,7 @@ const CanvasArea: Component = () => {
 
   let interact: CanvasAreaInteract | undefined = undefined;
 
-  listenEvent('onSetup', () => {
+  onMount(() => {
     getCurrentWindow().onResized(() => {
       setInteractStore('canvasAreaSize', {
         width: wrapper.clientWidth,

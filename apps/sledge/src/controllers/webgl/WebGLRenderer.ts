@@ -1,5 +1,4 @@
 // src/renderer/WebGLRenderer.ts
-import { allLayers } from '~/controllers/layer/LayerListController';
 import { getBaseLayerColor } from '~/models/layer/BaseLayer';
 import { getBlendModeId, Layer } from '~/models/layer/Layer';
 import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
@@ -12,7 +11,7 @@ import { DebugLogger } from '~/controllers/log/LogController';
 
 const MAX_LAYERS = 16;
 const LOG_LABEL = 'WebGLRenderer';
-const logger = new DebugLogger(LOG_LABEL, false);
+const logger = new DebugLogger(LOG_LABEL, true);
 
 const CHECK_ERROR = true;
 
@@ -49,7 +48,8 @@ export class WebGLRenderer {
   constructor(
     private canvas: HTMLCanvasElement,
     private width: number = 0,
-    private height: number = 0
+    private height: number = 0,
+    private layers: Layer[] = []
   ) {
     const contextOptions: WebGLContextAttributes = {
       preserveDrawingBuffer: false,
@@ -118,6 +118,10 @@ export class WebGLRenderer {
     logger.debugLog('Initialized WebGLRenderer');
   }
 
+  public setLayers(layers: Layer[]) {
+    this.layers = [...layers];
+  }
+
   public resize(width: number, height: number) {
     this.checkDisposed();
     if (width <= 0 || height <= 0) return;
@@ -166,7 +170,7 @@ export class WebGLRenderer {
         const newSize = { width: actualWidth, height: actualHeight };
         logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
 
-        allLayers().forEach((layer) => {
+        this.layers.forEach((layer) => {
           const agent = getAgentOf(layer.id);
           if (agent) {
             try {
@@ -199,16 +203,16 @@ export class WebGLRenderer {
     }
 
     // // 実際に使用するレイヤー数のみ確保（最小1レイヤー）
-    const activeLayers = allLayers().filter((l) => l.enabled);
+    const activeLayers = this.layers.filter((l) => l.enabled);
     const requiredDepth = Math.max(1, Math.min(activeLayers.length, MAX_LAYERS));
     // // テクスチャ配列のサイズを更新
     this.updateTextureArraySize(requiredDepth, true);
   }
 
-  public render(layers: Layer[] | Layer, onlyDirty?: boolean): void {
+  public render(onlyDirty?: boolean): void {
     this.checkDisposed();
     if (this.width === 0 || this.height === 0) return;
-    if (!Array.isArray(layers)) layers = [layers];
+    const layers = this.layers.toReversed().slice(0, MAX_LAYERS);
 
     logger.debugLog('🎨 WebGLRenderer.render() called:', {
       layerCount: layers.length,
@@ -216,7 +220,6 @@ export class WebGLRenderer {
       dimensions: `${this.width}x${this.height}`,
     });
 
-    layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);
 
     logger.debugLog('🔍 Active layers:', activeLayers.length);
@@ -442,7 +445,7 @@ export class WebGLRenderer {
 
     logger.debugLog(`📖 Reading pixels as buffer: ${this.width}x${this.height}`);
 
-    this.render(allLayers(), false); // フルアップデート
+    this.render(false); // フルアップデート
 
     // ビューポートサイズを確認
     const viewport = gl.getParameter(gl.VIEWPORT);
@@ -495,15 +498,31 @@ export class WebGLRenderer {
     const h = this.height;
 
     // (1) フルアップデート → ピクセル読み取り
-    this.render(allLayers(), false);
+    this.render(false);
     const raw = new Uint8Array(w * h * 4);
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
+
+    console.log(raw);
 
     // (2) WASM関数を使った高速な上下反転
     const flipped = new Uint8Array(raw);
     flip_pixels_vertically(flipped, w, h);
 
     return new Uint8ClampedArray(flipped.buffer);
+  }
+
+  /**
+   * 現在のフレームバッファをそのまま読み出す（上下反転なし、再レンダリングなし）
+   */
+  public readPixelsRaw(): Uint8ClampedArray {
+    this.checkDisposed();
+    const gl = this.gl;
+    const w = this.width;
+    const h = this.height;
+
+    const raw = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
+    return new Uint8ClampedArray(raw.buffer);
   }
 
   /**

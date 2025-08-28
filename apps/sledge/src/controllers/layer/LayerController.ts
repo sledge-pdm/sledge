@@ -1,11 +1,12 @@
+import { mergeLayer } from '~/appliers/LayerMergeApplier';
 import { Layer } from '~/models/layer/Layer';
 import { interactStore } from '~/stores/EditorStores';
-import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/LayerImageAgent';
 import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
-import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
+import { addLayer, findLayerById, getLayerIndex, removeLayer } from './LayerListController';
 
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
 
@@ -93,6 +94,24 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
     eventBus.emit('preview:requestUpdate', { layerId: layerId });
     return newAgent;
   }
+}
+
+export function mergeToBelowLayer(layerId: string) {
+  const originLayerIndex = getLayerIndex(layerId);
+  const targetLayerIndex = originLayerIndex + 1;
+  if (originLayerIndex >= layerListStore.layers.length) return;
+
+  const originLayer = layerListStore.layers[originLayerIndex];
+  const targetLayer = layerListStore.layers[targetLayerIndex];
+
+  // merge
+  mergeLayer({ originLayer, targetLayer });
+
+  removeLayer(layerId);
+
+  const agent = getAgentOf(targetLayer.id);
+
+  agent?.forceUpdate();
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {

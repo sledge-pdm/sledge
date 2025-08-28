@@ -16,10 +16,8 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
   });
 
   const onChanged = (e: Events['imagePool:entryPropChanged']) => {
-    console.log('what');
     if (e.id === props.entry.id) {
       const newEntry = getEntry(props.entry.id);
-      console.log(newEntry);
       setStateStore('visible', newEntry?.visible ?? true);
     }
   };
@@ -39,7 +37,8 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
         overflow: 'visible',
         'box-sizing': 'border-box',
         cursor: 'pointer',
-        border: imagePoolStore.selectedEntryId === props.entry.id ? `1px solid ${vars.color.active}` : '1px solid transparent',
+        margin: '-1px',
+        border: imagePoolStore.selectedEntryId === props.entry.id ? `1px solid ${vars.color.active}` : `1px solid ${vars.color.border}`,
         opacity: stateStore.visible ? 1 : 0.5,
       }}
       onContextMenu={(e) => {
@@ -96,7 +95,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
           height={40}
           alt={props.entry.fileName}
           title={props.entry.fileName}
-          style={{ 'object-fit': 'cover', 'border-radius': '2px', border: '1px solid #0003' }}
+          style={{ 'object-fit': 'cover' }}
           onError={(e) => {
             e.currentTarget.style.opacity = '0.5';
             e.currentTarget.alt = 'missing';
@@ -122,7 +121,7 @@ const ImagePoolGrid: Component = () => {
   });
 
   return (
-    <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '6px' }}>
+    <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '8px' }}>
       <For each={entries()}>{(entry) => <Item entry={entry} />}</For>
     </div>
   );

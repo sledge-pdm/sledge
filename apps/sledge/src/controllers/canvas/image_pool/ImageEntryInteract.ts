@@ -1,6 +1,7 @@
 import { updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { interactStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 
 type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 
@@ -19,6 +20,48 @@ class ImageEntryInteract {
   private startY = 0;
   private startScaleX = 1;
   private startScaleY = 1;
+  // rAF batching
+  private rafId: number | null = null;
+  private rafScheduled = false;
+  private lastTs = 0;
+  private pending: { x: number; y: number; scaleX: number; scaleY: number } | undefined;
+
+  private enqueueUpdate(next: { x: number; y: number; scaleX: number; scaleY: number }) {
+    this.pending = next; // overwrite with the latest
+    if (!this.rafScheduled) {
+      this.rafScheduled = true;
+      this.rafId = requestAnimationFrame(this.applyPending);
+    }
+  }
+
+  private applyPending = (ts: number) => {
+    const fps = Number(globalConfig.performance.targetFPS || 60);
+    const interval = 1000 / (fps > 0 ? fps : 60);
+    if (this.lastTs && ts - this.lastTs < interval) {
+      // throttle to target FPS
+      this.rafId = requestAnimationFrame(this.applyPending);
+      return;
+    }
+    this.lastTs = ts;
+    this.rafScheduled = false;
+    const payload = this.pending;
+    this.pending = undefined;
+    if (!payload) return;
+    const entry = this.getEntry();
+    if (!entry) return;
+    updateEntryPartial(entry.id, {
+      x: payload.x,
+      y: payload.y,
+      // legacy representative scale
+      scale: (payload.scaleX + payload.scaleY) / 2,
+      transform: {
+        x: payload.x,
+        y: payload.y,
+        scaleX: payload.scaleX,
+        scaleY: payload.scaleY,
+      },
+    });
+  };
   private resizePos: ResizePos | undefined;
 
   constructor(
@@ -63,16 +106,11 @@ class ImageEntryInteract {
       const nx = this.startX + dx;
       const ny = this.startY + dy;
       console.debug('[ImagePool] drag delta', { id: entry.id, dx, dy, nx, ny, zoom });
-      // 実表示反映（旧プロパティ + transform）
-      updateEntryPartial(entry.id, {
+      this.enqueueUpdate({
         x: nx,
         y: ny,
-        transform: {
-          x: nx,
-          y: ny,
-          scaleX: entry.transform?.scaleX ?? entry.scale,
-          scaleY: entry.transform?.scaleY ?? entry.scale,
-        },
+        scaleX: entry.transform?.scaleX ?? entry.scale,
+        scaleY: entry.transform?.scaleY ?? entry.scale,
       });
     } else if (this.mode === 'resize') {
       const baseW = entry.base?.width ?? entry.width;
@@ -167,17 +205,11 @@ class ImageEntryInteract {
         zoom,
       });
 
-      updateEntryPartial(entry.id, {
-        // 旧互換: scale は代表値（平均）を入れておく
-        scale: (nextScaleX + nextScaleY) / 2,
+      this.enqueueUpdate({
         x: newX,
         y: newY,
-        transform: {
-          x: newX,
-          y: newY,
-          scaleX: nextScaleX,
-          scaleY: nextScaleY,
-        },
+        scaleX: nextScaleX,
+        scaleY: nextScaleY,
       });
     }
   };
@@ -191,6 +223,15 @@ class ImageEntryInteract {
       this.svgRoot.releasePointerCapture(e.pointerId);
     } catch {}
     console.debug('[ImagePool] pointer end');
+    // flush pending at pointer end for consistency
+    if (this.pending) {
+      this.applyPending(performance.now());
+    }
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+      this.rafScheduled = false;
+    }
   };
 
   public setInteractListeners() {

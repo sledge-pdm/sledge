@@ -1,7 +1,6 @@
 // projectStore.ts
 import { Size2D } from '@sledge/core';
 import { createStore } from 'solid-js/store';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { BaseLayer, createBaseLayer } from '~/models/layer/BaseLayer';
 import { Layer } from '~/models/layer/Layer';
 
@@ -10,6 +9,7 @@ export type CanvasStore = {
 };
 export type ImagePoolStore = {
   selectedEntryId: string | undefined;
+  preserveAspectRatio: boolean;
 };
 export type ProjectStore = {
   thumbnailPath: string | undefined;
@@ -33,7 +33,8 @@ const defaultCanvasStore: CanvasStore = {
   },
 };
 const defaultImagePoolStore: ImagePoolStore = {
-  selectedEntryId: undefined, // Ensure this line is correctly formatted
+  selectedEntryId: undefined,
+  preserveAspectRatio: true,
 };
 const defaultProjectStore: ProjectStore = {
   thumbnailPath: undefined as string | undefined,

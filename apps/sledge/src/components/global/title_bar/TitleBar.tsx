@@ -72,7 +72,6 @@ export default function TitleBar() {
       }
 
       getCurrentWindow().setTitle(title);
-      console.log(title);
     }
   });
 

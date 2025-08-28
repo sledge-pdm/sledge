@@ -282,13 +282,11 @@ class CanvasAreaInteract {
 
   public setInteractListeners() {
     this.removeInteractListeners();
-    // preventDefault を使うので passive: false（既定）
     this.wrapperRef.addEventListener('pointerdown', this.onPointerDown);
     window.addEventListener('pointermove', this.onPointerMove);
     window.addEventListener('pointerup', this.onPointerUp);
     this.wrapperRef.addEventListener('pointercancel', this.onPointerCancel);
-    // wheel はスクロールしないUIなら明示的に passive: true でもOK
-    this.wrapperRef.addEventListener('wheel', this.onWheel, { passive: true });
+    this.wrapperRef.addEventListener('wheel', this.onWheel);
     // keyboard
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);

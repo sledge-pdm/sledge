@@ -25,7 +25,6 @@ const CanvasArea: Component = () => {
   let interact: CanvasAreaInteract | undefined = undefined;
 
   onMount(() => {
-    console.log('[CanvasArea] onSetup event received');
     getCurrentWindow().onResized(() => {
       setInteractStore('canvasAreaSize', {
         width: wrapper.clientWidth,
@@ -62,7 +61,6 @@ const CanvasArea: Component = () => {
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();
     interact.updateTransform();
-    console.log('[CanvasArea] onSetup event completed');
   });
 
   onCleanup(() => {

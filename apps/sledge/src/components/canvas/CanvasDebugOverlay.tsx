@@ -3,7 +3,7 @@ import { SparkLine } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { debugLog } from '~/controllers/log/LogController';
+import { DebugLogger } from '~/controllers/log/LogController';
 import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -16,9 +16,10 @@ interface TauriMemInfo {
   main_bytes: number;
   children_bytes: number;
 }
-
 const CanvasDebugOverlay: Component = (props) => {
   const LOG_LABEL = 'CanvasDebugOverlay';
+  const logger = new DebugLogger(LOG_LABEL, false);
+
   const toMiB = (bytes?: number): string => {
     if (bytes !== undefined) return (bytes / 1024 / 1024).toFixed(1) + ' MiB';
     else return '- MiB';
@@ -42,7 +43,7 @@ const CanvasDebugOverlay: Component = (props) => {
     if (!globalConfig.debug.showPerformanceMonitor || memFetchInFlight || !document.hasFocus()) return;
     memFetchInFlight = true;
     try {
-      debugLog(LOG_LABEL, `update memory info start.`);
+      logger.debugLog(`update memory info start.`);
       // JS heap は即時取得
       try {
         setJsMemInfo((performance as any).memory);
@@ -67,7 +68,7 @@ const CanvasDebugOverlay: Component = (props) => {
         };
       });
 
-      debugLog(LOG_LABEL, `update memory info done.`);
+      logger.debugLog(`update memory info done.`);
     } finally {
       memFetchInFlight = false;
     }

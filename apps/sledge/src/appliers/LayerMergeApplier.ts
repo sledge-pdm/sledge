@@ -15,12 +15,16 @@ let mergeRenderer: WebGLRenderer | null = null;
 function ensureMergeRenderer(originLayer: Layer, targetLayer: Layer): WebGLRenderer {
   const { width, height } = canvasStore.canvas;
   if (!mergeCanvas) mergeCanvas = document.createElement('canvas');
+  mergeCanvas.width = width;
+  mergeCanvas.height = height;
+  mergeCanvas.style.width = `${width}px`;
+  mergeCanvas.style.height = `${height}px`;
   if (!mergeRenderer) {
     mergeRenderer = new WebGLRenderer(mergeCanvas, width, height, [originLayer, targetLayer]);
   } else {
     mergeRenderer.setLayers([originLayer, targetLayer]);
+    mergeRenderer.resize(width, height);
   }
-  mergeRenderer.resize(width, height);
   mergeRenderer.setIncludeBaseLayer(false);
   return mergeRenderer;
 }
@@ -37,13 +41,15 @@ export async function mergeLayer({ originLayer, targetLayer }: LayerMergeParams)
 
   // WebGL で2パス描画
   const renderer = ensureMergeRenderer(originLayer, targetLayer);
+  console.log('---start read---');
   const out = renderer.readPixelsFlipped();
+  console.log('---end read---');
 
   // diff 用コピー（before は target の現在バッファ）
-  const before = new Uint8ClampedArray(targetAgent.getBuffer().buffer);
+  const before = new Uint8ClampedArray(targetAgent.getBuffer());
 
   // バッファ更新 + 履歴登録（ImageTransferApplier と同じ流儀）
-  targetAgent.setBuffer(out, false, true);
+  targetAgent.setBuffer(out, true, true);
   const dm = targetAgent.getDiffManager();
   dm.add({ kind: 'whole', before, after: out });
   dm.flush();

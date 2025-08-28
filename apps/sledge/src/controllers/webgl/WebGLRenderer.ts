@@ -11,9 +11,9 @@ import { DebugLogger } from '~/controllers/log/LogController';
 
 const MAX_LAYERS = 16;
 const LOG_LABEL = 'WebGLRenderer';
-const logger = new DebugLogger(LOG_LABEL, true);
+const logger = new DebugLogger(LOG_LABEL, false);
 
-const CHECK_ERROR = true;
+const CHECK_ERROR = false;
 
 function checkGLError(gl: WebGL2RenderingContext, operation: string): boolean {
   if (CHECK_ERROR) {
@@ -128,7 +128,7 @@ export class WebGLRenderer {
     this.includeBaseLayer = include;
   }
 
-  public resize(width: number, height: number) {
+  public resize(width: number, height: number, checkActualBuffer: boolean = true): void {
     this.checkDisposed();
     if (width <= 0 || height <= 0) return;
     if (width === this.width && height === this.height) return;
@@ -155,56 +155,58 @@ export class WebGLRenderer {
     // ビューポートを設定
     this.gl.viewport(0, 0, width, height);
 
-    // WebGLの描画バッファサイズを確認
-    const actualWidth = this.gl.drawingBufferWidth;
-    const actualHeight = this.gl.drawingBufferHeight;
-    logger.debugLog(`📏 Canvas size set to: ${width}x${height}`);
-    logger.debugLog(`📏 WebGL drawing buffer: ${actualWidth}x${actualHeight}`);
+    if (checkActualBuffer) {
+      // WebGLの描画バッファサイズを確認
+      const actualWidth = this.gl.drawingBufferWidth;
+      const actualHeight = this.gl.drawingBufferHeight;
+      logger.debugLog(`📏 Canvas size set to: ${width}x${height}`);
+      logger.debugLog(`📏 WebGL drawing buffer: ${actualWidth}x${actualHeight}`);
 
-    if (actualWidth !== width || actualHeight !== height) {
-      logger.debugWarn(`⚠️ WebGL drawing buffer size differs from requested size!`);
-      logger.debugWarn(`   Requested: ${width}x${height}`);
-      logger.debugWarn(`   Actual: ${actualWidth}x${actualHeight}`);
+      if (actualWidth !== width || actualHeight !== height) {
+        logger.debugWarn(`⚠️ WebGL drawing buffer size differs from requested size!`);
+        logger.debugWarn(`   Requested: ${width}x${height}`);
+        logger.debugWarn(`   Actual: ${actualWidth}x${actualHeight}`);
 
-      // この場合、実際の描画バッファサイズを使用する
-      if (actualWidth > 0 && actualHeight > 0) {
-        logger.debugLog(`🔧 Using actual drawing buffer size: ${actualWidth}x${actualHeight}`);
-        this.width = actualWidth;
-        this.height = actualHeight;
+        // この場合、実際の描画バッファサイズを使用する
+        if (actualWidth > 0 && actualHeight > 0) {
+          logger.debugLog(`🔧 Using actual drawing buffer size: ${actualWidth}x${actualHeight}`);
+          this.width = actualWidth;
+          this.height = actualHeight;
 
-        // 重要：すべてのレイヤーバッファもWebGLのサイズに合わせて調整
-        const newSize = { width: actualWidth, height: actualHeight };
-        logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
+          // 重要：すべてのレイヤーバッファもWebGLのサイズに合わせて調整
+          const newSize = { width: actualWidth, height: actualHeight };
+          logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
 
-        this.layers.forEach((layer) => {
-          const agent = getAgentOf(layer.id);
-          if (agent) {
-            try {
-              agent.changeBufferSize(newSize, false); // emitEvent = falseで他のイベントを抑制
-              logger.debugLog(`✅ Resized layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
-            } catch (error) {
-              logger.debugError(`❌ Failed to resize layer buffer ${layer.id}:`, error);
+          this.layers.forEach((layer) => {
+            const agent = getAgentOf(layer.id);
+            if (agent) {
+              try {
+                agent.changeBufferSize(newSize, false); // emitEvent = falseで他のイベントを抑制
+                logger.debugLog(`✅ Resized layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
+              } catch (error) {
+                logger.debugError(`❌ Failed to resize layer buffer ${layer.id}:`, error);
+              }
             }
-          }
-        });
+          });
 
-        // キャンバスストアも更新（他のコンポーネントとの整合性を保つため）
-        setCanvasStore('canvas', newSize);
-        logger.debugLog(`📝 Updated canvas store to: ${actualWidth}x${actualHeight}`);
+          // キャンバスストアも更新（他のコンポーネントとの整合性を保つため）
+          setCanvasStore('canvas', newSize);
+          logger.debugLog(`📝 Updated canvas store to: ${actualWidth}x${actualHeight}`);
 
-        // ユーザーに分かりやすい警告メッセージを表示
-        const maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
-        logger.debugWarn(`⚠️ ========================= IMPORTANT WARNING =========================`);
-        logger.debugWarn(`⚠️ Canvas size has been automatically reduced due to WebGL limitations:`);
-        logger.debugWarn(`⚠️   Requested: ${width}x${height}`);
-        logger.debugWarn(`⚠️   Actual: ${actualWidth}x${actualHeight}`);
-        logger.debugWarn(`⚠️ This limitation is caused by WebGL memory constraint:`);
-        logger.debugWarn(`⚠️   • Drawing buffer limited to 1/8 of MAX_TEXTURE_SIZE² (${maxTextureSize}²)`);
-        logger.debugWarn(`⚠️   • Theoretical limit: ~5792 pixels per side`);
-        logger.debugWarn(`⚠️   • Actual limit: ${actualWidth} pixels (with safety margin)`);
-        logger.debugWarn(`⚠️   • Memory usage: ${((actualWidth * actualHeight * 4) / 1024 / 1024).toFixed(2)} MB`);
-        logger.debugWarn(`⚠️ All layer buffers have been resized to match WebGL constraints.`);
-        logger.debugWarn(`⚠️ ====================================================================`);
+          // ユーザーに分かりやすい警告メッセージを表示
+          const maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
+          logger.debugWarn(`⚠️ ========================= IMPORTANT WARNING =========================`);
+          logger.debugWarn(`⚠️ Canvas size has been automatically reduced due to WebGL limitations:`);
+          logger.debugWarn(`⚠️   Requested: ${width}x${height}`);
+          logger.debugWarn(`⚠️   Actual: ${actualWidth}x${actualHeight}`);
+          logger.debugWarn(`⚠️ This limitation is caused by WebGL memory constraint:`);
+          logger.debugWarn(`⚠️   • Drawing buffer limited to 1/8 of MAX_TEXTURE_SIZE² (${maxTextureSize}²)`);
+          logger.debugWarn(`⚠️   • Theoretical limit: ~5792 pixels per side`);
+          logger.debugWarn(`⚠️   • Actual limit: ${actualWidth} pixels (with safety margin)`);
+          logger.debugWarn(`⚠️   • Memory usage: ${((actualWidth * actualHeight * 4) / 1024 / 1024).toFixed(2)} MB`);
+          logger.debugWarn(`⚠️ All layer buffers have been resized to match WebGL constraints.`);
+          logger.debugWarn(`⚠️ ====================================================================`);
+        }
       }
     }
 
@@ -510,14 +512,12 @@ export class WebGLRenderer {
     const gl = this.gl;
     const w = this.width;
     const h = this.height;
-    console.log(w, h);
 
     // (1) フルアップデート → ピクセル読み取り
     this.render(false);
+    this.gl.finish?.();
     const raw = new Uint8Array(w * h * 4);
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
-
-    console.log(raw);
 
     // (2) WASM関数を使った高速な上下反転
     const flipped = new Uint8Array(raw);

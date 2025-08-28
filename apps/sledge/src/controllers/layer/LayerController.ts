@@ -108,6 +108,9 @@ export async function mergeToBelowLayer(layerId: string) {
   await mergeLayer({ originLayer, targetLayer });
 
   setLayerProp(layerId, 'enabled', false);
+  if (layerListStore.activeLayerId === layerId) {
+    setLayerListStore('activeLayerId', targetLayer.id);
+  }
   // removeLayer(layerId);
 }
 

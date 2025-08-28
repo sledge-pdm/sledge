@@ -12,15 +12,16 @@ export interface LayerMergeParams {
 let mergeCanvas: HTMLCanvasElement | null = null;
 let mergeRenderer: WebGLRenderer | null = null;
 
-function ensureMergeRenderer(): WebGLRenderer {
+function ensureMergeRenderer(originLayer: Layer, targetLayer: Layer): WebGLRenderer {
   const { width, height } = canvasStore.canvas;
   if (!mergeCanvas) mergeCanvas = document.createElement('canvas');
   if (!mergeRenderer) {
-    mergeRenderer = new WebGLRenderer(mergeCanvas, width, height);
+    mergeRenderer = new WebGLRenderer(mergeCanvas, width, height, [originLayer, targetLayer]);
   } else {
-    mergeRenderer.resize(width, height);
+    mergeRenderer.setLayers([originLayer, targetLayer]);
   }
-  mergeRenderer.setLayers([]);
+  mergeRenderer.resize(width, height);
+  mergeRenderer.setIncludeBaseLayer(false);
   return mergeRenderer;
 }
 
@@ -35,8 +36,7 @@ export async function mergeLayer({ originLayer, targetLayer }: LayerMergeParams)
   if (tIdx < 0 || oIdx < 0) return;
 
   // WebGL で2パス描画
-  const renderer = ensureMergeRenderer();
-  renderer.setLayers([originLayer, targetLayer]);
+  const renderer = ensureMergeRenderer(originLayer, targetLayer);
   const out = renderer.readPixelsFlipped();
 
   // diff 用コピー（before は target の現在バッファ）

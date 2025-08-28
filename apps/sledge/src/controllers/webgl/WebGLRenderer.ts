@@ -45,6 +45,8 @@ export class WebGLRenderer {
 
   private isChromium: boolean = false;
 
+  private includeBaseLayer: boolean = true;
+
   constructor(
     private canvas: HTMLCanvasElement,
     private width: number = 0,
@@ -120,6 +122,10 @@ export class WebGLRenderer {
 
   public setLayers(layers: Layer[]) {
     this.layers = [...layers];
+  }
+
+  public setIncludeBaseLayer(include: boolean) {
+    this.includeBaseLayer = include;
   }
 
   public resize(width: number, height: number) {
@@ -353,15 +359,23 @@ export class WebGLRenderer {
     gl.uniform1iv(this.uBlendModesLoc, blendModes);
     checkGLError(gl, 'after setting blend modes uniform');
 
-    // ベースレイヤーの設定
-    const baseLayer = layerListStore.baseLayer;
-    gl.uniform1i(this.uHasBaseLayerLoc, 1);
+    if (this.includeBaseLayer) {
+      // ベースレイヤーの設定
+      const baseLayer = layerListStore.baseLayer;
+      gl.uniform1i(this.uHasBaseLayerLoc, 1);
 
-    const baseColor = getBaseLayerColor(baseLayer);
-    // ベースレイヤーの不透明度も考慮
-    const finalColor = [baseColor[0], baseColor[1], baseColor[2], baseColor[3]];
-    gl.uniform4f(this.uBaseLayerColorLoc, finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
-    logger.debugLog('🎨 Base layer color:', finalColor, 'mode:', baseLayer.colorMode);
+      const baseColor = getBaseLayerColor(baseLayer);
+      // ベースレイヤーの不透明度も考慮
+      const finalColor = [baseColor[0], baseColor[1], baseColor[2], baseColor[3]];
+      gl.uniform4f(this.uBaseLayerColorLoc, finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
+      logger.debugLog('🎨 Base layer color:', finalColor, 'mode:', baseLayer.colorMode);
+    } else {
+      // ベースを使わない
+      this.gl.uniform1i(this.uHasBaseLayerLoc, 0);
+      // u_baseLayerColor は未使用だが0を入れておく
+      this.gl.uniform4f(this.uBaseLayerColorLoc, 0, 0, 0, 0);
+      logger.debugLog('🎨 Base layer disabled for this render');
+    }
 
     checkGLError(gl, 'after setting base layer uniforms');
 
@@ -496,6 +510,7 @@ export class WebGLRenderer {
     const gl = this.gl;
     const w = this.width;
     const h = this.height;
+    console.log(w, h);
 
     // (1) フルアップデート → ピクセル読み取り
     this.render(false);

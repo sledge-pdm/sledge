@@ -6,7 +6,7 @@ import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/LayerImageAgent';
 import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';
-import { addLayer, findLayerById, getLayerIndex, removeLayer } from './LayerListController';
+import { addLayer, findLayerById, getLayerIndex } from './LayerListController';
 
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
 
@@ -96,7 +96,7 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
   }
 }
 
-export function mergeToBelowLayer(layerId: string) {
+export async function mergeToBelowLayer(layerId: string) {
   const originLayerIndex = getLayerIndex(layerId);
   const targetLayerIndex = originLayerIndex + 1;
   if (originLayerIndex >= layerListStore.layers.length) return;
@@ -105,13 +105,10 @@ export function mergeToBelowLayer(layerId: string) {
   const targetLayer = layerListStore.layers[targetLayerIndex];
 
   // merge
-  mergeLayer({ originLayer, targetLayer });
+  await mergeLayer({ originLayer, targetLayer });
 
-  removeLayer(layerId);
-
-  const agent = getAgentOf(targetLayer.id);
-
-  agent?.forceUpdate();
+  setLayerProp(layerId, 'enabled', false);
+  // removeLayer(layerId);
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {

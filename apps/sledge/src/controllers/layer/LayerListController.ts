@@ -19,6 +19,21 @@ export const addLayer = (
   },
   initImage?: Uint8ClampedArray
 ) => {
+  return addLayerTo(0, layer, initImage);
+};
+
+export const addLayerTo = (
+  index: number,
+  layer: {
+    name?: string;
+    type?: LayerType;
+    enabled?: boolean;
+    dotMagnification?: number;
+    opacity?: number;
+    mode?: BlendMode;
+  },
+  initImage?: Uint8ClampedArray
+) => {
   const { name = 'layer', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal } = layer;
 
   const newLayer = createLayer({
@@ -32,7 +47,7 @@ export const addLayer = (
   });
 
   const layers = [...allLayers()];
-  layers.unshift(newLayer);
+  layers.splice(index, 0, newLayer);
 
   setLayerListStore('layers', layers);
   setActiveLayerId(newLayer.id);

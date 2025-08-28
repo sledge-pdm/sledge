@@ -54,6 +54,10 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
     label: 'Clear',
     icon: '/icons/misc/clear.png',
   },
+  BaseMergeDown: {
+    label: 'Merge Down',
+    icon: '/icons/misc/merge_down.png',
+  },
   BaseImageShow: {
     label: 'Show',
     icon: '/icons/misc/show_image.png',

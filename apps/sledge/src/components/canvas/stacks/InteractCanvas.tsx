@@ -138,6 +138,11 @@ export const InteractCanvas: Component<Props> = (props) => {
     const start = new Date().getTime();
     logger.debugLog(`handlePointerMove start`);
 
+    const windowPosition = getWindowMousePosition(e);
+    const position = getCanvasMousePosition(e);
+    setInteractStore('lastMouseWindow', windowPosition);
+    setInteractStore('lastMouseOnCanvas', position);
+
     const onCanvas = !!canvasRef?.contains(e.target as Node);
     setInteractStore('isMouseOnCanvas', onCanvas);
 
@@ -151,11 +156,6 @@ export const InteractCanvas: Component<Props> = (props) => {
     } else {
       setCursor('none');
     }
-
-    const windowPosition = getWindowMousePosition(e);
-    const position = getCanvasMousePosition(e);
-    setInteractStore('lastMouseWindow', windowPosition);
-    setInteractStore('lastMouseOnCanvas', position);
 
     // 押したまま外に出てから戻ってきたときはそこから再開
     if (temporaryOut()) {

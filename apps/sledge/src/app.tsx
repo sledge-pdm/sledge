@@ -10,7 +10,7 @@ import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
 import { showContextMenu } from '@sledge/ui';
 import { createEffect, onCleanup, onMount } from 'solid-js';
-import DebugViewer from '~/components/debug/DebugViewer';
+import DebugViewer from '~/components/global/debug/DebugViewer';
 import { loadGlobalSettings } from '~/io/config/load';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { globalConfig } from '~/stores/GlobalStores';

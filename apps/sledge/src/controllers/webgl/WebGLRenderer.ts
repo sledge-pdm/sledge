@@ -1,5 +1,4 @@
 // src/renderer/WebGLRenderer.ts
-import { allLayers } from '~/controllers/layer/LayerListController';
 import { getBaseLayerColor } from '~/models/layer/BaseLayer';
 import { getBlendModeId, Layer } from '~/models/layer/Layer';
 import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
@@ -14,7 +13,7 @@ const MAX_LAYERS = 16;
 const LOG_LABEL = 'WebGLRenderer';
 const logger = new DebugLogger(LOG_LABEL, false);
 
-const CHECK_ERROR = true;
+const CHECK_ERROR = false;
 
 function checkGLError(gl: WebGL2RenderingContext, operation: string): boolean {
   if (CHECK_ERROR) {
@@ -46,10 +45,13 @@ export class WebGLRenderer {
 
   private isChromium: boolean = false;
 
+  private includeBaseLayer: boolean = true;
+
   constructor(
     private canvas: HTMLCanvasElement,
     private width: number = 0,
-    private height: number = 0
+    private height: number = 0,
+    private layers: Layer[] = []
   ) {
     const contextOptions: WebGLContextAttributes = {
       preserveDrawingBuffer: false,
@@ -118,7 +120,15 @@ export class WebGLRenderer {
     logger.debugLog('Initialized WebGLRenderer');
   }
 
-  public resize(width: number, height: number) {
+  public setLayers(layers: Layer[]) {
+    this.layers = [...layers];
+  }
+
+  public setIncludeBaseLayer(include: boolean) {
+    this.includeBaseLayer = include;
+  }
+
+  public resize(width: number, height: number, checkActualBuffer: boolean = true): void {
     this.checkDisposed();
     if (width <= 0 || height <= 0) return;
     if (width === this.width && height === this.height) return;
@@ -145,70 +155,72 @@ export class WebGLRenderer {
     // ビューポートを設定
     this.gl.viewport(0, 0, width, height);
 
-    // WebGLの描画バッファサイズを確認
-    const actualWidth = this.gl.drawingBufferWidth;
-    const actualHeight = this.gl.drawingBufferHeight;
-    logger.debugLog(`📏 Canvas size set to: ${width}x${height}`);
-    logger.debugLog(`📏 WebGL drawing buffer: ${actualWidth}x${actualHeight}`);
+    if (checkActualBuffer) {
+      // WebGLの描画バッファサイズを確認
+      const actualWidth = this.gl.drawingBufferWidth;
+      const actualHeight = this.gl.drawingBufferHeight;
+      logger.debugLog(`📏 Canvas size set to: ${width}x${height}`);
+      logger.debugLog(`📏 WebGL drawing buffer: ${actualWidth}x${actualHeight}`);
 
-    if (actualWidth !== width || actualHeight !== height) {
-      logger.debugWarn(`⚠️ WebGL drawing buffer size differs from requested size!`);
-      logger.debugWarn(`   Requested: ${width}x${height}`);
-      logger.debugWarn(`   Actual: ${actualWidth}x${actualHeight}`);
+      if (actualWidth !== width || actualHeight !== height) {
+        logger.debugWarn(`⚠️ WebGL drawing buffer size differs from requested size!`);
+        logger.debugWarn(`   Requested: ${width}x${height}`);
+        logger.debugWarn(`   Actual: ${actualWidth}x${actualHeight}`);
 
-      // この場合、実際の描画バッファサイズを使用する
-      if (actualWidth > 0 && actualHeight > 0) {
-        logger.debugLog(`🔧 Using actual drawing buffer size: ${actualWidth}x${actualHeight}`);
-        this.width = actualWidth;
-        this.height = actualHeight;
+        // この場合、実際の描画バッファサイズを使用する
+        if (actualWidth > 0 && actualHeight > 0) {
+          logger.debugLog(`🔧 Using actual drawing buffer size: ${actualWidth}x${actualHeight}`);
+          this.width = actualWidth;
+          this.height = actualHeight;
 
-        // 重要：すべてのレイヤーバッファもWebGLのサイズに合わせて調整
-        const newSize = { width: actualWidth, height: actualHeight };
-        logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
+          // 重要：すべてのレイヤーバッファもWebGLのサイズに合わせて調整
+          const newSize = { width: actualWidth, height: actualHeight };
+          logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
 
-        allLayers().forEach((layer) => {
-          const agent = getAgentOf(layer.id);
-          if (agent) {
-            try {
-              agent.changeBufferSize(newSize, false); // emitEvent = falseで他のイベントを抑制
-              logger.debugLog(`✅ Resized layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
-            } catch (error) {
-              logger.debugError(`❌ Failed to resize layer buffer ${layer.id}:`, error);
+          this.layers.forEach((layer) => {
+            const agent = getAgentOf(layer.id);
+            if (agent) {
+              try {
+                agent.changeBufferSize(newSize, false); // emitEvent = falseで他のイベントを抑制
+                logger.debugLog(`✅ Resized layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
+              } catch (error) {
+                logger.debugError(`❌ Failed to resize layer buffer ${layer.id}:`, error);
+              }
             }
-          }
-        });
+          });
 
-        // キャンバスストアも更新（他のコンポーネントとの整合性を保つため）
-        setCanvasStore('canvas', newSize);
-        logger.debugLog(`📝 Updated canvas store to: ${actualWidth}x${actualHeight}`);
+          // キャンバスストアも更新（他のコンポーネントとの整合性を保つため）
+          setCanvasStore('canvas', newSize);
+          logger.debugLog(`📝 Updated canvas store to: ${actualWidth}x${actualHeight}`);
 
-        // ユーザーに分かりやすい警告メッセージを表示
-        const maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
-        logger.debugWarn(`⚠️ ========================= IMPORTANT WARNING =========================`);
-        logger.debugWarn(`⚠️ Canvas size has been automatically reduced due to WebGL limitations:`);
-        logger.debugWarn(`⚠️   Requested: ${width}x${height}`);
-        logger.debugWarn(`⚠️   Actual: ${actualWidth}x${actualHeight}`);
-        logger.debugWarn(`⚠️ This limitation is caused by WebGL memory constraint:`);
-        logger.debugWarn(`⚠️   • Drawing buffer limited to 1/8 of MAX_TEXTURE_SIZE² (${maxTextureSize}²)`);
-        logger.debugWarn(`⚠️   • Theoretical limit: ~5792 pixels per side`);
-        logger.debugWarn(`⚠️   • Actual limit: ${actualWidth} pixels (with safety margin)`);
-        logger.debugWarn(`⚠️   • Memory usage: ${((actualWidth * actualHeight * 4) / 1024 / 1024).toFixed(2)} MB`);
-        logger.debugWarn(`⚠️ All layer buffers have been resized to match WebGL constraints.`);
-        logger.debugWarn(`⚠️ ====================================================================`);
+          // ユーザーに分かりやすい警告メッセージを表示
+          const maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
+          logger.debugWarn(`⚠️ ========================= IMPORTANT WARNING =========================`);
+          logger.debugWarn(`⚠️ Canvas size has been automatically reduced due to WebGL limitations:`);
+          logger.debugWarn(`⚠️   Requested: ${width}x${height}`);
+          logger.debugWarn(`⚠️   Actual: ${actualWidth}x${actualHeight}`);
+          logger.debugWarn(`⚠️ This limitation is caused by WebGL memory constraint:`);
+          logger.debugWarn(`⚠️   • Drawing buffer limited to 1/8 of MAX_TEXTURE_SIZE² (${maxTextureSize}²)`);
+          logger.debugWarn(`⚠️   • Theoretical limit: ~5792 pixels per side`);
+          logger.debugWarn(`⚠️   • Actual limit: ${actualWidth} pixels (with safety margin)`);
+          logger.debugWarn(`⚠️   • Memory usage: ${((actualWidth * actualHeight * 4) / 1024 / 1024).toFixed(2)} MB`);
+          logger.debugWarn(`⚠️ All layer buffers have been resized to match WebGL constraints.`);
+          logger.debugWarn(`⚠️ ====================================================================`);
+        }
       }
     }
 
     // // 実際に使用するレイヤー数のみ確保（最小1レイヤー）
-    const activeLayers = allLayers().filter((l) => l.enabled);
+    const activeLayers = this.layers.filter((l) => l.enabled);
     const requiredDepth = Math.max(1, Math.min(activeLayers.length, MAX_LAYERS));
     // // テクスチャ配列のサイズを更新
     this.updateTextureArraySize(requiredDepth, true);
   }
 
-  public render(layers: Layer[] | Layer, onlyDirty?: boolean): void {
+  public render(onlyDirty?: boolean): void {
     this.checkDisposed();
     if (this.width === 0 || this.height === 0) return;
-    if (!Array.isArray(layers)) layers = [layers];
+    const layers = this.layers.toReversed().slice(0, MAX_LAYERS);
 
     logger.debugLog('🎨 WebGLRenderer.render() called:', {
       layerCount: layers.length,
@@ -216,7 +228,6 @@ export class WebGLRenderer {
       dimensions: `${this.width}x${this.height}`,
     });
 
-    layers = layers.toReversed().slice(0, MAX_LAYERS);
     const activeLayers = layers.filter((l) => l.enabled);
 
     logger.debugLog('🔍 Active layers:', activeLayers.length);
@@ -350,15 +361,23 @@ export class WebGLRenderer {
     gl.uniform1iv(this.uBlendModesLoc, blendModes);
     checkGLError(gl, 'after setting blend modes uniform');
 
-    // ベースレイヤーの設定
-    const baseLayer = layerListStore.baseLayer;
-    gl.uniform1i(this.uHasBaseLayerLoc, 1);
+    if (this.includeBaseLayer) {
+      // ベースレイヤーの設定
+      const baseLayer = layerListStore.baseLayer;
+      gl.uniform1i(this.uHasBaseLayerLoc, 1);
 
-    const baseColor = getBaseLayerColor(baseLayer);
-    // ベースレイヤーの不透明度も考慮
-    const finalColor = [baseColor[0], baseColor[1], baseColor[2], baseColor[3]];
-    gl.uniform4f(this.uBaseLayerColorLoc, finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
-    logger.debugLog('🎨 Base layer color:', finalColor, 'mode:', baseLayer.colorMode);
+      const baseColor = getBaseLayerColor(baseLayer);
+      // ベースレイヤーの不透明度も考慮
+      const finalColor = [baseColor[0], baseColor[1], baseColor[2], baseColor[3]];
+      gl.uniform4f(this.uBaseLayerColorLoc, finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
+      logger.debugLog('🎨 Base layer color:', finalColor, 'mode:', baseLayer.colorMode);
+    } else {
+      // ベースを使わない
+      this.gl.uniform1i(this.uHasBaseLayerLoc, 0);
+      // u_baseLayerColor は未使用だが0を入れておく
+      this.gl.uniform4f(this.uBaseLayerColorLoc, 0, 0, 0, 0);
+      logger.debugLog('🎨 Base layer disabled for this render');
+    }
 
     checkGLError(gl, 'after setting base layer uniforms');
 
@@ -442,7 +461,7 @@ export class WebGLRenderer {
 
     logger.debugLog(`📖 Reading pixels as buffer: ${this.width}x${this.height}`);
 
-    this.render(allLayers(), false); // フルアップデート
+    this.render(false); // フルアップデート
 
     // ビューポートサイズを確認
     const viewport = gl.getParameter(gl.VIEWPORT);
@@ -495,7 +514,8 @@ export class WebGLRenderer {
     const h = this.height;
 
     // (1) フルアップデート → ピクセル読み取り
-    this.render(allLayers(), false);
+    this.render(false);
+    this.gl.finish?.();
     const raw = new Uint8Array(w * h * 4);
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
 
@@ -504,6 +524,20 @@ export class WebGLRenderer {
     flip_pixels_vertically(flipped, w, h);
 
     return new Uint8ClampedArray(flipped.buffer);
+  }
+
+  /**
+   * 現在のフレームバッファをそのまま読み出す（上下反転なし、再レンダリングなし）
+   */
+  public readPixelsRaw(): Uint8ClampedArray {
+    this.checkDisposed();
+    const gl = this.gl;
+    const w = this.width;
+    const h = this.height;
+
+    const raw = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
+    return new Uint8ClampedArray(raw.buffer);
   }
 
   /**

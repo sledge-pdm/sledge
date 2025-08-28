@@ -3,7 +3,7 @@ import { vars } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { clearLayer, duplicateLayer, setLayerName } from '~/controllers/layer/LayerController';
+import { clearLayer, duplicateLayer, mergeToBelowLayer as mergeDownLayer, setLayerName } from '~/controllers/layer/LayerController';
 import { allLayers, moveLayer, removeLayer, setActiveLayerId } from '~/controllers/layer/LayerListController';
 import { Layer } from '~/models/layer/Layer';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
@@ -123,6 +123,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             showContextMenu(
               props.layer.name,
               [
+                { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeDownLayer(layerId) },
                 { ...ContextMenuItems.BaseRemove, onSelect: () => removeLayer(layerId) },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },

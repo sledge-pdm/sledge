@@ -2,7 +2,16 @@ import { getEntries } from '~/controllers/canvas/image_pool/ImagePoolController'
 import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { CanvasStore, canvasStore, imagePoolStore, ImagePoolStore, LayerListStore, layerListStore, ProjectStore, projectStore } from '~/stores/ProjectStores';
+import {
+  CanvasStore,
+  canvasStore,
+  imagePoolStore,
+  ImagePoolStore,
+  LayerListStore,
+  layerListStore,
+  ProjectStore,
+  projectStore,
+} from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 
 export interface Project {

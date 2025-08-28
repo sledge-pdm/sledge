@@ -1,6 +1,7 @@
+import { mergeLayer } from '~/appliers/LayerMergeApplier';
 import { Layer } from '~/models/layer/Layer';
 import { interactStore } from '~/stores/EditorStores';
-import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/LayerImageAgent';
@@ -93,6 +94,24 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
     eventBus.emit('preview:requestUpdate', { layerId: layerId });
     return newAgent;
   }
+}
+
+export async function mergeToBelowLayer(layerId: string) {
+  const originLayerIndex = getLayerIndex(layerId);
+  const targetLayerIndex = originLayerIndex + 1;
+  if (originLayerIndex >= layerListStore.layers.length) return;
+
+  const originLayer = layerListStore.layers[originLayerIndex];
+  const targetLayer = layerListStore.layers[targetLayerIndex];
+
+  // merge
+  await mergeLayer({ originLayer, targetLayer });
+
+  setLayerProp(layerId, 'enabled', false);
+  if (layerListStore.activeLayerId === layerId) {
+    setLayerListStore('activeLayerId', targetLayer.id);
+  }
+  // removeLayer(layerId);
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {

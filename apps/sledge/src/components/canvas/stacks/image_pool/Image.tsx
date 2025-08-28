@@ -3,12 +3,19 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createMemo, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import ImageEntryInteract from '~/controllers/canvas/image_pool/ImageEntryInteract';
-import { getEntry, hideEntry, removeEntry, showEntry, transferToCurrentLayer } from '~/controllers/canvas/image_pool/ImagePoolController';
+import {
+  getEntry,
+  hideEntry,
+  removeEntry,
+  selectEntry,
+  showEntry,
+  transferToCurrentLayer,
+} from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore } from '~/stores/EditorStores';
-import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { imagePoolStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
@@ -113,11 +120,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       }}
       onBlur={(e) => {
         if (selected()) {
-          setImagePoolStore('selectedEntryId', undefined);
+          selectEntry(undefined);
         }
       }}
       onFocus={(e) => {
-        setImagePoolStore('selectedEntryId', props.entry.id);
+        selectEntry(props.entry.id);
       }}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -127,12 +134,14 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
               ...ContextMenuItems.BaseImageHide,
               onSelect: () => {
                 hideEntry(props.entry.id);
+                selectEntry(props.entry.id);
               },
             }
           : {
               ...ContextMenuItems.BaseImageShow,
               onSelect: () => {
                 showEntry(props.entry.id);
+                selectEntry(props.entry.id);
               },
             };
         showContextMenu(

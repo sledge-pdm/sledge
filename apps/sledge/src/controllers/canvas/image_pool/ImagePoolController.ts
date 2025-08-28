@@ -1,7 +1,7 @@
 import { transferToLayer } from '~/appliers/ImageTransferApplier';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import getFileId from '~/utils/getFileId';
@@ -34,6 +34,7 @@ export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
 
 export function removeEntry(id: string) {
   if (pool.delete(id)) {
+    selectEntry(undefined);
     eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
   }
 }
@@ -100,6 +101,10 @@ async function createEntry(originalPath: string) {
   };
   pool.set(id, entry);
   return id;
+}
+
+export function selectEntry(id?: string) {
+  setImagePoolStore('selectedEntryId', id);
 }
 
 export function showEntry(id: string) {

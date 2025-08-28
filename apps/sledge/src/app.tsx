@@ -55,7 +55,10 @@ export default function App() {
     html.classList.add(cls);
     prevThemeClass = cls;
   };
-  onMount(applyThemeToHtml);
+  onMount(async () => {
+    applyThemeToHtml();
+    // await openDevTools(getCurrentWindow().label);
+  });
   createEffect(applyThemeToHtml);
 
   return (

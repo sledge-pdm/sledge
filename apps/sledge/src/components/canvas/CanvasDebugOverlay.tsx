@@ -2,6 +2,8 @@ import { flexCol } from '@sledge/core';
 import { SparkLine } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { createStore } from 'solid-js/store';
+import { debugLog } from '~/controllers/log/LogController';
 import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -16,6 +18,7 @@ interface TauriMemInfo {
 }
 
 const CanvasDebugOverlay: Component = (props) => {
+  const LOG_LABEL = 'CanvasDebugOverlay';
   const toMiB = (bytes?: number): string => {
     if (bytes !== undefined) return (bytes / 1024 / 1024).toFixed(1) + ' MiB';
     else return '- MiB';
@@ -26,21 +29,49 @@ const CanvasDebugOverlay: Component = (props) => {
   const lastMouseOnCanvas = () => interactStore.lastMouseOnCanvas;
   const [jsMemInfo, setJsMemInfo] = createSignal<any>({});
   const [processMemInfo, setProcessMemInfo] = createSignal<TauriMemInfo>();
+
+  // for sparklines
+  const [sparkLineStore, setSparkLineStore] = createStore<{ jsHeap: number[]; process: number[] }>({
+    jsHeap: [],
+    process: [],
+  });
+
+  let memFetchInFlight = false;
   const callback = async () => {
-    setJsMemInfo((performance as any).memory);
+    // 監視がオフ・ウィンドウ非フォーカス時はスキップ
+    if (!globalConfig.debug.showPerformanceMonitor || memFetchInFlight || !document.hasFocus()) return;
+    memFetchInFlight = true;
+    try {
+      debugLog(LOG_LABEL, `update memory info start.`);
+      // JS heap は即時取得
+      try {
+        setJsMemInfo((performance as any).memory);
+      } catch {}
 
-    const processInfo = await safeInvoke<TauriMemInfo>('get_process_memory');
-    if (processInfo) {
-      setProcessMemInfo(processInfo);
-      // console.log(processInfo);
+      // ネイティブ呼び出しはタイムアウト付きで最大300msだけ待つ
+      const processInfo = await Promise.race<Promise<TauriMemInfo | undefined>>([
+        safeInvoke<TauriMemInfo>('get_process_memory'),
+        new Promise<TauriMemInfo | undefined>((resolve) => setTimeout(() => resolve(undefined), 300)),
+      ]);
+      if (processInfo) {
+        setProcessMemInfo(processInfo);
+      }
+      // 非破壊更新 + 同一tick内での再読込を避けるためlocal値を使用
+      setSparkLineStore((prev) => {
+        const jsMiB = (jsMemInfo()?.usedJSHeapSize ?? 0) / 1024 / 1024;
+        const totalBytes = processInfo?.total_bytes ?? 0;
+        const procMiB = totalBytes / 1024 / 1024;
+        return {
+          jsHeap: [...prev.jsHeap, jsMiB].slice(-60),
+          process: [...prev.process, procMiB].slice(-60),
+        };
+      });
+
+      debugLog(LOG_LABEL, `update memory info done.`);
+    } finally {
+      memFetchInFlight = false;
     }
-    // console.log(`MAIN: ${toMiB(processMemInfo()?.main_bytes)}
-    // CHILDREN: ${toMiB(processMemInfo()?.children_bytes)}
-    // TOTAL: ${toMiB(processMemInfo()?.total_bytes)}
-    // JS Heap: ${toMiB(jsMemInfo().usedJSHeapSize)} / ${toMiB(jsMemInfo().totalJSHeapSize)}`);
   };
-
-  const disposeInterval = makeTimer(callback, 5000, setInterval);
 
   const [offsetX, setOffsetX] = createSignal(0);
   const [offsetY, setOffsetY] = createSignal(0);
@@ -59,15 +90,22 @@ const CanvasDebugOverlay: Component = (props) => {
     }
   };
 
+  let disposeInterval: (() => void) | undefined;
+  let startTimerId: number | undefined;
   onMount(() => {
+    // 起動直後の描画・初期化と競合しないよう少し遅らせて開始
+    startTimerId = window.setTimeout(() => {
+      disposeInterval = makeTimer(callback, 1000, setInterval);
+    }, 1500);
     eventBus.on('selection:areaChanged', onSelectionChanged);
     eventBus.on('selection:moved', onSelectionMoved);
   });
 
   onCleanup(() => {
-    eventBus.on('selection:areaChanged', onSelectionChanged);
+    if (startTimerId) clearTimeout(startTimerId);
+    disposeInterval?.();
+    eventBus.off('selection:areaChanged', onSelectionChanged);
     eventBus.off('selection:moved', onSelectionMoved);
-    disposeInterval();
   });
 
   return (
@@ -91,31 +129,15 @@ const CanvasDebugOverlay: Component = (props) => {
             <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>
             <p>CHILDREN: {toMiB(processMemInfo()?.children_bytes)}</p>
             <p>TOTAL: {toMiB(processMemInfo()?.total_bytes)}</p>
-            <SparkLine
-              width={120}
-              height={60}
-              color='#00ca00'
-              suffix='MiB'
-              fetchSample={async () => {
-                const processInfo = await safeInvoke<TauriMemInfo>('get_process_memory');
-                return processInfo ? processInfo.total_bytes / 1024 / 1024 : undefined;
-              }}
-              interval={1000}
-            />
+
+            <SparkLine length={60} height={60} lengthMult={2} color='#00ca00' values={sparkLineStore.process} min={0} />
           </div>
           <div class={flexCol} style={{ gap: '1px' }}>
             <p>
               JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
             </p>
 
-            <SparkLine
-              width={120}
-              height={60}
-              color='#f44336'
-              suffix='MiB'
-              fetchSample={async () => (performance as any).memory.usedJSHeapSize / 1024 / 1024}
-              interval={1000}
-            />
+            <SparkLine length={60} height={60} lengthMult={2} color='#f44336' values={sparkLineStore.jsHeap} min={0} />
           </div>
         </div>
       </Show>

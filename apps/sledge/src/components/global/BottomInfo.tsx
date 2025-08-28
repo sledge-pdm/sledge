@@ -1,23 +1,28 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
-import { Component, createEffect, createMemo } from 'solid-js';
+import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { setRotation } from '~/controllers/canvas/CanvasController';
 import { resetBottomBarText } from '~/controllers/log/LogController';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
-import { bottomInfoContainer, bottomInfoContainerRight, bottomInfoRoot, bottomInfoText } from '~/styles/globals/bottom_info.css';
+import { bottomInfoContainer, bottomInfoContainerRight, bottomInfoRoot } from '~/styles/globals/bottom_info.css';
 
 const BottomInfo: Component = () => {
+  onMount(() => {
+    resetBottomBarText();
+  });
+
   createEffect(() => {
     toolStore.activeToolCategory;
     resetBottomBarText();
   });
 
   const textColor = createMemo<string>(() => {
-    switch (logStore.bottomBarKind) {
+    switch (logStore?.bottomBarKind) {
       case 'info':
+      default:
         return vars.color.muted;
       case 'warn':
         return vars.color.warn;
@@ -29,12 +34,8 @@ const BottomInfo: Component = () => {
   return (
     <div id='bottom-info' class={bottomInfoRoot}>
       <div class={bottomInfoContainer}>
-        <p class={bottomInfoText} style={{ width: '56px' }}>
-          x{interactStore.zoom}
-        </p>
-        <p class={bottomInfoText} style={{ color: textColor(), overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>
-          {logStore.bottomBarText}
-        </p>
+        <p style={{ width: '56px' }}>x{interactStore.zoom}</p>
+        <p style={{ color: textColor(), overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
           <div class={flexRow} style={{ width: '150px', overflow: 'visible' }}>
             <Slider

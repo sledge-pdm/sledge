@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
+import { DebugLogger } from '~/controllers/log/LogController';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 
@@ -41,6 +42,9 @@ export type DiffAction = {
   diffs: Map<string | number, Diff>;
 };
 
+const LOG_LABEL = 'HistoryManager';
+const logger = new DebugLogger(LOG_LABEL, false);
+
 export class HistoryManager {
   protected undoActionsStack: DiffAction[] = [];
   protected redoActionsStack: DiffAction[] = [];
@@ -65,7 +69,7 @@ export class HistoryManager {
   }
 
   public addAction(action: DiffAction) {
-    if (import.meta.env.DEV) console.log(`add ${action?.diffs.size} actions to history for layer ${this.layerId}.`);
+    logger.debugLog(`add ${action?.diffs.size} actions to history for layer ${this.layerId}.`);
     // if (import.meta.env.DEV) console.log(`add action to history for layer ${this.layerId}.`, action);
     // push new action and cap undo history
     this.undoActionsStack.push(action);
@@ -80,7 +84,7 @@ export class HistoryManager {
 
   public undo(): DiffAction | undefined {
     const undoedAction = this.undoActionsStack.pop();
-    if (import.meta.env.DEV) console.log(`undo ${undoedAction?.diffs.size} actions to history for layer ${this.layerId}.`);
+    logger.debugLog(LOG_LABEL, `undo ${undoedAction?.diffs.size} actions to history for layer ${this.layerId}.`);
     // if (import.meta.env.DEV) console.log(`undo action to history for layer ${this.layerId}.`, undoedAction);
     if (!undoedAction) return undefined;
 
@@ -97,7 +101,7 @@ export class HistoryManager {
 
   public redo(): DiffAction | undefined {
     const redoedAction = this.redoActionsStack.shift();
-    if (import.meta.env.DEV) console.log(`redo ${redoedAction?.diffs.size} actions to history for layer ${this.layerId}.`);
+    logger.debugLog(LOG_LABEL, `redo ${redoedAction?.diffs.size} actions to history for layer ${this.layerId}.`);
     // if (import.meta.env.DEV) console.log(`redo action to history for layer ${this.layerId}.`, redoedAction);
     if (!redoedAction) return undefined;
 

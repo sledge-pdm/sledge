@@ -12,16 +12,12 @@
 
 <br>
 
-<img src="assets/FCHS.png" alt="F.C.H.S." width=600 />
+<img src="assets/0827sledge_light.png" alt="F.C.H.S." width=600 />
 
 <br>
-<br>
-
 Sledge is a drawing tool.
 
 **Simple.**&nbsp;&nbsp;&nbsp;**Fast.**&nbsp;&nbsp;&nbsp;**Destructive.**
-
-www.sledge-rules.app
 
 </div>
 
@@ -29,18 +25,39 @@ www.sledge-rules.app
 
 ## Platform Support
 
-- :white_check_mark: **Windows**
-- :ballot_box_with_check: **MacOS**
-- :ballot_box_with_check: **Linux**
-- :x: **Mobile**
+- **Windows** ... :white_check_mark: *OK.*
+- **MacOS** ... :white_check_mark: *almost OK. some ui/ux issues were found.*
+- **Linux** ... :ballot_box_with_check: *almost NOTOK, but you can barely use.*
+- **Mobile** ... :zzz: *No builds available.*
 
 ## Install
 
-1. Visit [www.sledge-rules.app](https://www.sledge-rules.app/) and download installer.
+1. Visit [sledge-rules.app](https://www.sledge-rules.app/) to download installer.
 2. Run the installer and complete install.
 3. Run sledge.
 
+<details>
+
+<summary>For Mac users</summary>
+
+MacOS mostly reports an error like: *App is Damaged*.
+To prevent it, run this command in bash before running:
+```bash
+xattr -rc /Applications/sledge.app
+```
+
+</details>
+
 ## Features
+
+* 🏁 Refined Pixel-Based UI
+* :sparkles: Interface for faster & concentrated creation.
+* :art: Multiple Layer Composite w/ Blend Modes
+* :zap: Fast Image Operation via WebGL/WASM
+* :file_folder: Project File Association (.sledge)
+
+<details>
+<summary>WIP status</summary>
 
 ### Interacts
 
@@ -54,9 +71,10 @@ www.sledge-rules.app
 - [x] Pen, Eraser
 - [x] Fill
 - [x] Color Picker
-- [x] Selection
+- [x] Image Pool (resize, burndown)
+- [x] Selection (Rect, Auto)
 - [ ] Selection Editing (copy, paste)
-- [ ] Shape drawing (line, circle, rect)
+- [ ] Text (editable)
 
 ### Composites / Effects
 
@@ -70,6 +88,10 @@ www.sledge-rules.app
 - [x] Basic I/O (load, save, import, export)
 - [x] SVG Export (for small pixel art/icons)
 - [x] Auto save
+- [ ] Clipboard Support
+- [ ] Project-Level History
+  
+</details>
 
 ## Tech
 
@@ -90,6 +112,7 @@ www.sledge-rules.app
 ### Project File Format
 
 - [msgpack](https://msgpack.org/ja.html)
+
 
 
 

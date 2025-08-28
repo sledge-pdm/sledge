@@ -5,23 +5,23 @@ import { createTheme, createThemeContract, fontFace, globalStyle, style } from '
  * 1. Font faces –変更なし
  * ---------------------------------------------------------------------------
  */
-export const ZFB03 = fontFace({ src: 'url("/fonts/04B/04B_03__.ttf")' });
-export const ZFB03B = fontFace({ src: 'url("/fonts/04B/04B_03B_.ttf")' });
-export const ZFB08 = fontFace({ src: 'url("/fonts/04B/04B_08__.ttf")' });
-export const ZFB09 = fontFace({ src: 'url("/fonts/04B/04B_09__.ttf")' });
-export const ZFB11 = fontFace({ src: 'url("/fonts/04B/04B_11__.ttf")' });
-export const ZFB19 = fontFace({ src: 'url("/fonts/04B/04B_19__.ttf")' });
-export const ZFB20 = fontFace({ src: 'url("/fonts/04B/04B_20__.ttf")' });
-export const ZFB21 = fontFace({ src: 'url("/fonts/04B/04B_21__.ttf")' });
-export const ZFB24 = fontFace({ src: 'url("/fonts/04B/04B_24__.ttf")' });
-export const ZFB25 = fontFace({ src: 'url("/fonts/04B/04B_25__.ttf")' });
-export const ZFB30 = fontFace({ src: 'url("/fonts/04B/04B_30__.ttf")' });
-export const ZFB31 = fontFace({ src: 'url("/fonts/04B/04B_31__.ttf")' });
-export const Terminus = fontFace({ src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")' });
-export const k8x12 = fontFace({ src: 'url("/fonts/k8x12/k8x12.ttf")', sizeAdjust: '75%' });
-export const k8x12L = fontFace({ src: 'url("/fonts/k8x12/k8x12L.ttf")', sizeAdjust: '75%' });
-export const k8x12S = fontFace({ src: 'url("/fonts/k8x12/k8x12S.ttf")', sizeAdjust: '75%' });
-export const k12x8 = fontFace({ src: 'url("/fonts/k12x8/k12x8.ttf")' });
+export const ZFB03 = fontFace({ src: 'url("/fonts/04B/04B_03__.ttf")', fontDisplay: 'swap' });
+export const ZFB03B = fontFace({ src: 'url("/fonts/04B/04B_03B_.ttf")', fontDisplay: 'swap' });
+export const ZFB08 = fontFace({ src: 'url("/fonts/04B/04B_08__.ttf")', fontDisplay: 'swap' });
+export const ZFB09 = fontFace({ src: 'url("/fonts/04B/04B_09__.ttf")', fontDisplay: 'swap' });
+export const ZFB11 = fontFace({ src: 'url("/fonts/04B/04B_11__.ttf")', fontDisplay: 'swap' });
+export const ZFB19 = fontFace({ src: 'url("/fonts/04B/04B_19__.ttf")', fontDisplay: 'swap' });
+export const ZFB20 = fontFace({ src: 'url("/fonts/04B/04B_20__.ttf")', fontDisplay: 'swap' });
+export const ZFB21 = fontFace({ src: 'url("/fonts/04B/04B_21__.ttf")', fontDisplay: 'swap' });
+export const ZFB24 = fontFace({ src: 'url("/fonts/04B/04B_24__.ttf")', fontDisplay: 'swap' });
+export const ZFB25 = fontFace({ src: 'url("/fonts/04B/04B_25__.ttf")', fontDisplay: 'swap' });
+export const ZFB30 = fontFace({ src: 'url("/fonts/04B/04B_30__.ttf")', fontDisplay: 'swap' });
+export const ZFB31 = fontFace({ src: 'url("/fonts/04B/04B_31__.ttf")', fontDisplay: 'swap' });
+export const Terminus = fontFace({ src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")', fontDisplay: 'swap' });
+export const k8x12 = fontFace({ src: 'url("/fonts/k8x12/k8x12.ttf")', sizeAdjust: '75%', fontDisplay: 'swap' });
+export const k8x12L = fontFace({ src: 'url("/fonts/k8x12/k8x12L.ttf")', sizeAdjust: '75%', fontDisplay: 'swap' });
+export const k8x12S = fontFace({ src: 'url("/fonts/k8x12/k8x12S.ttf")', sizeAdjust: '75%', fontDisplay: 'swap' });
+export const k12x8 = fontFace({ src: 'url("/fonts/k12x8/k12x8.ttf")', fontDisplay: 'swap' });
 
 /**
  * ---------------------------------------------------------------------------

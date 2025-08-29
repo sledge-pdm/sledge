@@ -58,9 +58,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseId: ${{ github.ref_name }}
           tagName: ${{ github.ref_name }}
           releaseName: ${{ github.ref_name }}
+          assetNamePattern: 'sledge-__VERSION__-{{target}}.{{ext}}'
           projectPath: './apps/sledge'
           releaseDraft: true
           prerelease: false

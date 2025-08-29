@@ -71,8 +71,9 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'Development Build ${{ github.ref_name }}'
           releaseBody: 'This is a development build. Use at your own risk.'
+          assetNamePattern: 'sledge-__VERSION__-{{target}}.{{ext}}'
           releaseDraft: false # Don't care because it's a dev build
-          prerelease: true # プレリリースとしてマーク
+          prerelease: true
           projectPath: './apps/sledge'
           args: ${{ matrix.args }}
 

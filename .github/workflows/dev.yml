@@ -68,6 +68,7 @@ jobs:
           RUSTC_WRAPPER: 'sccache'
         with:
           projectPath: './apps/sledge'
+          assetNamePattern: 'sledge-__VERSION__-{{target}}.{{ext}}'
           args: ${{ matrix.args }}
 
       - name: Upload dev artifacts

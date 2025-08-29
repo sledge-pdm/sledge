@@ -80,8 +80,8 @@ jobs:
         with:
           name: binaries-macos
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.dmg
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.app
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
 
       - name: Upload dev artifacts
         uses: actions/upload-artifact@v4

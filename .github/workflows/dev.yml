@@ -75,8 +75,8 @@ jobs:
         with:
           name: binaries-macos
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.dmg
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.app
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
           retention-days: 3
 
       - name: Upload dev artifacts

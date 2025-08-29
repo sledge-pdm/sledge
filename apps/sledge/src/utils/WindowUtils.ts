@@ -8,6 +8,11 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { PathToFileLocation } from '~/utils/PathUtils';
 import { safeInvoke } from './TauriUtils';
 
+export function zoomForIntegerize(dpr: number) {
+  const n = Math.round(dpr - 0.01);
+  return n / dpr;
+}
+
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
 
 export type WindowKind = 'start' | 'editor' | 'settings' | 'about';

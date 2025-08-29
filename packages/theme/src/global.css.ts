@@ -235,6 +235,7 @@ globalStyle('div', {
 globalStyle('button, p, a, input, label, span', {
   fontFamily: vars.font.body,
   color: vars.color.onBackground,
+  textRendering: 'geometricPrecision',
 });
 
 globalStyle('a:hover', {

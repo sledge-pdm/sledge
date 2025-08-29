@@ -68,10 +68,10 @@ jobs:
           SCCACHE_GHA_ENABLED: 'true'
           RUSTC_WRAPPER: 'sccache'
         with:
+          releaseId: ${{ github.ref_name }}
           tagName: ${{ github.ref_name }}
           releaseName: 'Development Build ${{ github.ref_name }}'
           releaseBody: 'This is a development build. Use at your own risk.'
-          assetNamePattern: 'sledge-__VERSION__-{{target}}.{{ext}}'
           releaseDraft: false # Don't care because it's a dev build
           prerelease: true
           projectPath: './apps/sledge'

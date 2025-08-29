@@ -4,21 +4,27 @@ import { DebugLogger } from '~/controllers/log/LogController';
 import { RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 
-export type PixelDiff = {
+export type DiffKind = 'pixel' | 'tile' | 'whole';
+
+export type DiffBase = {
+  kind: DiffKind;
+};
+
+export type PixelDiff = DiffBase & {
   kind: 'pixel';
   position: Vec2;
   before: RGBAColor;
   after: RGBAColor;
 };
 
-export type TileDiff = {
+export type TileDiff = DiffBase & {
   kind: 'tile';
   index: TileIndex;
   beforeColor: RGBAColor | undefined;
   afterColor: RGBAColor;
 };
 
-export type WholeDiff = {
+export type WholeDiff = DiffBase & {
   kind: 'whole';
   before: Uint8ClampedArray;
   after: Uint8ClampedArray;

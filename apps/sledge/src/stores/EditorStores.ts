@@ -66,7 +66,7 @@ export type ToolStore = {
 const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: true,
-    tabs: ['editor', 'effects'],
+    tabs: ['editor', 'effects', 'history'],
     selectedIndex: 0,
   },
   rightSide: {

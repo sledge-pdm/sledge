@@ -3,7 +3,7 @@ name: template/feature
 about: feature template
 title: 'feat: '
 labels: feature
-assignees: ''
+assignees: Innsbluck-rh
 
 ---
 

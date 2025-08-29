@@ -4,6 +4,6 @@
     "enableGTKAppId": true
   },
   "bundle": {
-    "targets": "all"
+    "targets": ["deb", "rpm"]
   }
 }

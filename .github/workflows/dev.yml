@@ -13,7 +13,7 @@ jobs:
       matrix:
         include:
           - platform: 'macos-latest'
-            args: ''
+            args: '--target universal-apple-darwin'
           - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ''
           - platform: 'windows-latest'
@@ -30,20 +30,16 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
+      - name: install x86_64-apple-darwin binary (macOS only)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          rustup target add x86_64-apple-darwin
+
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.9
-
-      - name: Setup Rust cache environment
-        run: |
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
-          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-        shell: bash
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -59,8 +55,6 @@ jobs:
         id: tauri-build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SCCACHE_GHA_ENABLED: 'true'
-          RUSTC_WRAPPER: 'sccache'
         with:
           projectPath: './apps/sledge'
           args: ${{ matrix.args }}
@@ -73,7 +67,6 @@ jobs:
           path: |
             ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.deb
             ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.rpm
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.AppImage
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -82,7 +75,8 @@ jobs:
         with:
           name: binaries-macos
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.app
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
+            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -92,5 +86,4 @@ jobs:
           name: binaries-windows
           path: |
             ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.exe
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.msi
           retention-days: 3

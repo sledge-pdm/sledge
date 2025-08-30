@@ -88,7 +88,7 @@ export const SectionSubHeader: Component<Props> = (props) => {
                 >
                   <Icon
                     src={item.src}
-                    base={8}
+                    base={12}
                     scale={1}
                     onClick={(e) => {
                       e.preventDefault();

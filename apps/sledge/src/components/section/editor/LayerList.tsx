@@ -55,14 +55,14 @@ const LayerList: Component<{}> = () => {
       title='layers.'
       subHeaderIcons={[
         {
-          src: '/icons/misc/add.png',
+          src: '/icons/misc/plus_12.png',
           onClick: () => {
             addLayer({ name: 'layer1' });
             setItems(allLayers());
           },
         },
         {
-          src: '/icons/misc/remove_minus.png',
+          src: '/icons/misc/minus_12.png',
           onClick: async () => {
             const ok = await confirm(`Sure to remove "${activeLayer().name}" ?\nYou can NOT restore this action.`, {
               kind: 'warning',

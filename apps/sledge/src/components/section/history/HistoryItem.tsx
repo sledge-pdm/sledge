@@ -35,11 +35,17 @@ const HistoryItem: Component<Props> = ({ layer }) => {
   return (
     <SectionItem title={layer.name}>
       <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
-        <For each={historyStore.undoStack}>{(action, i) => <HistoryRow undo={true} action={action} />}</For>
+        <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
+          <For each={historyStore.undoStack}>{(action, i) => <HistoryRow undo={true} action={action} />}</For>
+        </Show>
+
         <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
           <p style={{ color: vars.color.active }}>---present---</p>
         </div>
-        <For each={historyStore.redoStack}>{(action, i) => <HistoryRow undo={false} action={action} />}</For>
+
+        <Show when={historyStore.redoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no redo stack &gt;</p>}>
+          <For each={historyStore.redoStack}>{(action, i) => <HistoryRow undo={false} action={action} />}</For>
+        </Show>
       </div>
     </SectionItem>
   );
@@ -60,7 +66,7 @@ const HistoryRow: Component<{ undo?: boolean; action: DiffAction }> = ({ undo = 
   );
   return (
     <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-      <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} base={8} />
+      <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} />
       <Show when={counts['pixel'] > 0}>
         <p style={{ width: '50px', 'text-align': 'end' }}>{counts['pixel']} px</p>
       </Show>

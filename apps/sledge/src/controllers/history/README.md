@@ -1,5 +1,3 @@
-# About
-
 ## Note
 
 NOTE that the editor still uses layer-level history in production (= HistoryController & HistoryManager).
@@ -19,7 +17,7 @@ Each action type implements undo/redo; both operations should be idempotent.
 
 ## Canvas Size
 
-Status: [Almost there](./actions/CanvasSizeHistoryAction.ts)
+Status: [OK](./actions/CanvasSizeHistoryAction.ts)
 Test: [Written](../../../test/history/HistoryActions.canvasSize.test.ts)
 
 - Currently it only changes the canvas dimensions in the store.

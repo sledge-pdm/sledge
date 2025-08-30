@@ -105,10 +105,11 @@ const LayerList: Component<{}> = () => {
               min={0}
               max={1}
               allowFloat={true}
+              floatSignificantDigits={2}
               labelMode={'none'}
-              onChange={(newValue, commit) => {
+              onChange={(newValue) => {
                 setLayerProp(activeLayer().id, 'opacity', newValue, {
-                  noDiff: !commit,
+                  noDiff: true,
                 });
               }}
             />

@@ -1,5 +1,4 @@
 import { Point, Size2D, Vec2 } from '@sledge/core';
-import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { RGBAColor } from '~/utils/ColorUtils';
 
 export default class PixelBufferManager {
@@ -14,7 +13,7 @@ export default class PixelBufferManager {
     return [this.buffer[i] ?? 0, this.buffer[i + 1] ?? 0, this.buffer[i + 2] ?? 0, this.buffer[i + 3] ?? 0];
   }
 
-  public setRawPixel(position: Vec2, color: RGBAColor): PixelDiff | undefined {
+  public setRawPixel(position: Vec2, color: RGBAColor): { before: RGBAColor; after: RGBAColor } | undefined {
     if (!this.isInBounds(position)) return undefined;
     const idx = position.y * this.width + position.x;
     const ptr = idx * 4;
@@ -25,7 +24,7 @@ export default class PixelBufferManager {
     this.buffer[ptr + 2] = color[2];
     this.buffer[ptr + 3] = color[3];
 
-    return { kind: 'pixel', position, before, after: color };
+  return { before, after: color };
   }
 
   public changeSize(

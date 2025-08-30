@@ -1,4 +1,3 @@
-import { Vec2 } from '@sledge/core';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
@@ -6,49 +5,6 @@ import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { cancelMove } from '~/controllers/selection/SelectionOperator';
 import { RGBAColor } from '~/utils/ColorUtils';
 
-export type DiffKind = 'pixel' | 'tile' | 'whole';
-
-export type DiffBase = {
-  kind: DiffKind;
-};
-
-export type PixelDiff = DiffBase & {
-  kind: 'pixel';
-  position: Vec2;
-  before: RGBAColor;
-  after: RGBAColor;
-};
-
-export type TileDiff = DiffBase & {
-  kind: 'tile';
-  index: TileIndex;
-  beforeColor: RGBAColor | undefined;
-  afterColor: RGBAColor;
-};
-
-export type WholeDiff = DiffBase & {
-  kind: 'whole';
-  before: Uint8ClampedArray;
-  after: Uint8ClampedArray;
-};
-
-export type Diff = PixelDiff | TileDiff | WholeDiff;
-
-export const getDiffHash = (diff: Diff) => {
-  switch (diff.kind) {
-    case 'pixel':
-      // 数値ベースのハッシュに変更（文字列生成を避ける）
-      return diff.position.x * 100000 + diff.position.y; // 5桁まで対応
-    case 'tile':
-      return `tile:${diff.index.row},${diff.index.column}`;
-    case 'whole':
-      return `whole`; // whole以外には存在しないはず
-  }
-};
-
-export type DiffAction = {
-  diffs: Map<string | number, Diff>;
-};
 
 // Packed color helpers (AABBGGRR or similar). We'll use little-endian RR GG BB AA for clarity in JS.
 export type PackedRGBA = number; // 0xAARRGGBB
@@ -90,18 +46,10 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
 
   constructor(
     public readonly layerId: string,
-    public readonly actionOrPatch: DiffAction | LayerBufferPatch,
+    public readonly patch: LayerBufferPatch,
     context?: any
   ) {
     super(context, `Layer ${layerId}: buffer`);
-  }
-
-  protected undoTileDiff(tileDiff: TileDiff): void {
-    if (tileDiff.beforeColor) getAgentOf(this.layerId)?.getTileManager().fillWholeTile(tileDiff.index, tileDiff.beforeColor, false);
-  }
-
-  protected redoTileDiff(tileDiff: TileDiff): void {
-    getAgentOf(this.layerId)?.getTileManager().fillWholeTile(tileDiff.index, tileDiff.afterColor, false);
   }
 
   undo(): void {
@@ -119,15 +67,7 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
     }
 
     console.log(`undo layer ${layerId}.`);
-    // Prefer patch path when available
-    const anyPayload = this.actionOrPatch as any;
-    if (anyPayload && anyPayload.layerId && (anyPayload.pixels || anyPayload.tiles || anyPayload.whole)) {
-      agent.undoPatch(anyPayload);
-    } else {
-      // fallback to legacy Map-based action
-      // undoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
-      agent.undoAction(this.actionOrPatch as DiffAction);
-    }
+    agent.undoPatch(this.patch);
   }
 
   redo(): void {
@@ -145,12 +85,6 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
     }
 
     console.log(`redo layer ${layerId}.`);
-    const anyPayload = this.actionOrPatch as any;
-    if (anyPayload && anyPayload.layerId && (anyPayload.pixels || anyPayload.tiles || anyPayload.whole)) {
-      agent.redoPatch(anyPayload);
-    } else {
-      // redoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
-      agent.redoAction(this.actionOrPatch as DiffAction);
-    }
+    agent.redoPatch(this.patch);
   }
 }

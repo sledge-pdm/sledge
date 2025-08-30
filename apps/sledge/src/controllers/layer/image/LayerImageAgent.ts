@@ -1,13 +1,6 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import {
-  DiffAction,
-  LayerBufferHistoryAction,
-  LayerBufferPatch,
-  packRGBA,
-  PixelDiff,
-  TileDiff,
-} from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { LayerBufferHistoryAction, LayerBufferPatch } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
@@ -41,21 +34,16 @@ export default class LayerImageAgent {
     width: number,
     height: number
   ) {
-    this.dm = new DiffManager();
-    this.pbm = new PixelBufferManager(buffer, width, height);
-    this.tm = new TileManager(
+  this.pbm = new PixelBufferManager(buffer, width, height);
+  this.tm = new TileManager(
       width,
       height,
       (position: Vec2) => this.pbm.getPixel(position),
       (i: number, v: number) => (this.pbm.buffer[i] = v),
       (index: TileIndex, uniformColor: RGBAColor | undefined, fillColor: RGBAColor) =>
-        this.dm.add({
-          kind: 'tile',
-          index,
-          beforeColor: uniformColor,
-          afterColor: fillColor,
-        })
+        this.dm.addTileFill(index, uniformColor, fillColor)
     );
+  this.dm = new DiffManager(this.tm);
   }
 
   getBuffer(): Uint8ClampedArray {
@@ -94,122 +82,23 @@ export default class LayerImageAgent {
   }
 
   public registerToHistory(context?: any) {
-    let shouldAddAction = true;
-    // Flush batched pixel diffs before snapshotting
+    // Patchのみで履歴登録
     this.dm.flush();
-    const current = this.dm.getCurrent();
-    if (current.diffs.size === 0) shouldAddAction = false; // meaningless action
-
-    if (shouldAddAction) {
-      // Build SoA patch from current diffs for efficient history application
-      const patch = this.buildPatchFromDiffAction(current);
+    const patch = this.dm.buildPatch(this.layerId);
+    if (patch) {
       const action = new LayerBufferHistoryAction(this.layerId, patch, { from: 'LayerImageAgent.registerToHistory', ...context });
       projectHistoryController.addAction(action);
     }
     this.dm.reset();
   }
 
-  private buildPatchFromDiffAction(current: DiffAction): LayerBufferPatch {
-    const pixelBuckets = new Map<string, { tile: { row: number; column: number }; idx: number[]; before: number[]; after: number[] }>();
-    const tiles: Array<{ type: 'tileFill'; tile: { row: number; column: number }; before?: number; after: number }> = [];
-    let whole: { type: 'whole'; before: Uint8ClampedArray; after: Uint8ClampedArray } | undefined;
 
-    const tileSize = this.tm.TILE_SIZE;
 
-    for (const diff of current.diffs.values()) {
-      if (diff.kind === 'pixel') {
-        const tIndex = this.tm.getTileIndex(diff.position);
-        const tile = this.tm.getTile(tIndex);
-        const { x: ox, y: oy } = tile.getOffset();
-        const local = diff.position.x - ox + (diff.position.y - oy) * tileSize;
-        const key = `${tIndex.row},${tIndex.column}`;
-        let bucket = pixelBuckets.get(key);
-        if (!bucket) {
-          bucket = { tile: tIndex, idx: [], before: [], after: [] };
-          pixelBuckets.set(key, bucket);
-        }
-        bucket.idx.push(local);
-        bucket.before.push(packRGBA(diff.before));
-        bucket.after.push(packRGBA(diff.after));
-      } else if (diff.kind === 'tile') {
-        tiles.push({
-          type: 'tileFill',
-          tile: diff.index,
-          before: diff.beforeColor ? packRGBA(diff.beforeColor) : undefined,
-          after: packRGBA(diff.afterColor),
-        });
-      } else if (diff.kind === 'whole') {
-        whole = { type: 'whole', before: diff.before, after: diff.after };
-      }
-    }
-
-    const pixels = Array.from(pixelBuckets.values()).map((b) => ({
-      type: 'pixels' as const,
-      tile: b.tile,
-      idx: new Uint16Array(b.idx),
-      before: new Uint32Array(b.before),
-      after: new Uint32Array(b.after),
-    }));
-
-    return {
-      layerId: this.layerId,
-      pixels: pixels.length ? pixels : undefined,
-      tiles: tiles.length ? (tiles as any) : undefined,
-      whole,
-    };
-  }
-
-  public undoAction(action: DiffAction) {
-    action.diffs.forEach((diff) => {
-      switch (diff.kind) {
-        case 'pixel':
-          this.setPixel(diff.position, diff.before, true);
-          break;
-        case 'tile':
-          this.undoTileDiff(diff);
-          break;
-        case 'whole':
-          this.setBuffer(diff.before, true, false);
-          break;
-      }
-    });
-
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) undo` });
-    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
-  }
-
-  protected undoTileDiff(tileDiff: TileDiff): void {
-    if (tileDiff.beforeColor) this.tm.fillWholeTile(tileDiff.index, tileDiff.beforeColor, false);
-  }
-
-  public redoAction(action: DiffAction) {
-    action.diffs.forEach((diff) => {
-      switch (diff.kind) {
-        case 'pixel':
-          this.setPixel(diff.position, diff.after, true);
-          break;
-        case 'tile':
-          this.redoTileDiff(diff);
-          break;
-        case 'whole':
-          this.setBuffer(diff.after, true, false);
-          break;
-      }
-    });
-
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) redo` });
-    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
-  }
-
-  protected redoTileDiff(tileDiff: TileDiff): void {
-    this.tm.fillWholeTile(tileDiff.index, tileDiff.afterColor, false);
-  }
-
-  public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {
+  public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): { before: RGBAColor; after: RGBAColor } | undefined {
     setProjectStore('isProjectChangedAfterSave', true);
     if (!this.pbm.isInBounds(position)) return undefined;
     if (!skipExistingDiffCheck && this.dm.isDiffExists(position)) return undefined;
-    const result = this.pbm.setRawPixel(position, color);
+  const result = this.pbm.setRawPixel(position, color);
     if (result !== undefined) {
       const tileIndex = this.tm.getTileIndex(position);
       this.tm.tiles[tileIndex.row][tileIndex.column].isDirty = true;
@@ -220,7 +109,7 @@ export default class LayerImageAgent {
         this.tm.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined;
       }
     }
-    return result;
+  return result;
   }
 
   // Apply new SoA patch format (undo path uses "before", redo uses "after").

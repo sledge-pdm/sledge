@@ -37,6 +37,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   }
   const layer = findLayerById(layerId);
   if (!layer) return;
+  const beforeValue = layer[propName];
   const before: Omit<Layer, 'id'> = { ...layer } as any;
   const idx = getLayerIndex(layerId);
   setLayerListStore('layers', idx, propName, newValue);
@@ -45,7 +46,9 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   delete (before as any).id;
   delete (after as any).id;
   if (!options?.noDiff) {
-    const act = new LayerPropsHistoryAction(layerId, before, after, { from: `LayerController.setLayerProp(${String(propName)})` });
+    const act = new LayerPropsHistoryAction(layerId, before, after, {
+      from: `LayerController.setLayerProp(${String(propName)}: ${String(beforeValue)} > ${String(newValue)})`,
+    });
     projectHistoryController.addAction(act);
   }
   if (propNamesToUpdate.indexOf(propName) !== -1)
@@ -76,11 +79,7 @@ export function clearLayer(layerId: string) {
 
   agent.setBuffer(newBuffer, true, true);
 
-  agent.getDiffManager().add({
-    kind: 'whole',
-    before: new Uint8ClampedArray(originalBuffer),
-    after: new Uint8ClampedArray(newBuffer.buffer),
-  });
+  agent.getDiffManager().setWhole(new Uint8ClampedArray(originalBuffer), new Uint8ClampedArray(newBuffer.buffer));
   agent.registerToHistory({ tool: 'clear' });
   agent.forceUpdate();
 }

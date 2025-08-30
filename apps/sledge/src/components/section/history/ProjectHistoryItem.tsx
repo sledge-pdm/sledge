@@ -9,7 +9,7 @@ import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSiz
 import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
 import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
-import { LayerBufferHistoryAction, LayerBufferPatch } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
@@ -140,7 +140,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
       if (context.tool === 'fx') {
         description = `${findLayerById(lbaction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
       } else {
-        const patch = lbaction.actionOrPatch as LayerBufferPatch;
+        const patch = lbaction.patch;
         const pixels = patch.pixels
           ? `${
               patch.pixels.reduce((prev, pixelList) => {

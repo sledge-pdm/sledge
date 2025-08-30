@@ -13,7 +13,7 @@ interface SliderProps {
   labelMode: LabelMode;
   customFormat?: string;
   allowDirectInput?: boolean;
-  onChange?: (newValue: number, commit: boolean) => void;
+  onChange?: (newValue: number) => void;
   onDoubleClick?: () => void;
   onPointerDownOnValidArea?: (e: PointerEvent | MouseEvent) => boolean;
 }
@@ -43,10 +43,9 @@ const Slider: Component<SliderProps> = (props) => {
   const [isDrag, setDrag] = createSignal(false);
   const percent = () => ((value() - props.min) / (props.max - props.min)) * 100;
 
-  const update = (newValue: number, commit: boolean) => {
-    console.log(commit);
+  const update = (newValue: number) => {
     setValue(newValue);
-    props.onChange?.(newValue, commit);
+    props.onChange?.(newValue);
   };
 
   const onPointerDownOnValidArea = (e: PointerEvent | MouseEvent): boolean => {
@@ -69,14 +68,10 @@ const Slider: Component<SliderProps> = (props) => {
       const { left, width } = sliderRef.getBoundingClientRect();
       let pos = Math.max(0, Math.min(e.clientX - left, width));
       const raw = props.min + (pos / width) * (props.max - props.min);
-      update(getFixedValue(raw), false);
+      update(getFixedValue(raw));
     }
   };
 
-  const cancelHandlingUp = (e: PointerEvent) => {
-    if (isDrag()) update(value(), true);
-    setDrag(false);
-  };
   const cancelHandling = () => {
     setDrag(false);
   };
@@ -87,7 +82,7 @@ const Slider: Component<SliderProps> = (props) => {
     const { left, width } = sliderRef.getBoundingClientRect();
     let pos = Math.max(0, Math.min(e.clientX - left, width));
     const raw = props.min + (pos / width) * (props.max - props.min);
-    update(getFixedValue(raw), false);
+    update(getFixedValue(raw));
   };
 
   const getFixedValue = (raw: number): number => {
@@ -109,7 +104,7 @@ const Slider: Component<SliderProps> = (props) => {
 
   const handleClickOutside = (e: MouseEvent) => {
     if (directInputMode() && labelRef && !labelRef.contains(e.target as Node)) {
-      update(Number(directInputRef.value), false);
+      update(Number(directInputRef.value));
       setDirectInputMode(false);
     }
   };
@@ -121,20 +116,20 @@ const Slider: Component<SliderProps> = (props) => {
   const handleOnWheel = (e: WheelEvent) => {
     if (props.wheelSpin) {
       const newValue = getFixedValue(value() + (e.deltaY < 0 ? 1 : -1));
-      update(getFixedValue(newValue), newValue !== value());
+      update(getFixedValue(newValue));
     }
   };
 
   onMount(() => {
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', cancelHandlingUp);
+    document.addEventListener('pointerup', cancelHandling);
     document.addEventListener('pointercancel', cancelHandling);
   });
   onCleanup(() => {
     document.removeEventListener('click', handleClickOutside);
     document.removeEventListener('pointermove', handlePointerMove);
-    document.removeEventListener('pointerup', cancelHandlingUp);
+    document.removeEventListener('pointerup', cancelHandling);
     document.removeEventListener('pointercancel', cancelHandling);
   });
 
@@ -166,7 +161,7 @@ const Slider: Component<SliderProps> = (props) => {
           onFocusOut={cancelDirectInput}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              update(Number(directInputRef.value), true);
+              update(Number(directInputRef.value));
               setDirectInputMode(false);
             }
           }}

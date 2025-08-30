@@ -179,11 +179,7 @@ export class MoveTool implements ToolBehavior {
     const agent = getAgentOf(this.layerId);
     if (!agent) return;
 
-    agent.getDiffManager().add({
-      kind: 'whole',
-      before: new Uint8ClampedArray(this.originalBuffer.buffer),
-      after: new Uint8ClampedArray(agent.getBuffer()),
-    });
+    agent.getDiffManager().setWhole(new Uint8ClampedArray(this.originalBuffer.buffer), new Uint8ClampedArray(agent.getBuffer()));
     this.originalBuffer = undefined;
 
     agent.registerToHistory({ tool: TOOL_CATEGORIES.MOVE });

@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const h = vi.hoisted(() => ({
   agentMock: {
     canUndo: vi.fn(() => true),
-    undoAction: vi.fn(),
-    redoAction: vi.fn(),
+    undoPatch: vi.fn(),
+    redoPatch: vi.fn(),
   } as any,
   isMoveStateMock: vi.fn(() => false),
   cancelMoveMock: vi.fn(),
@@ -21,7 +21,7 @@ vi.mock('~/controllers/selection/SelectionOperator', () => ({
   cancelMove: h.cancelMoveMock,
 }));
 
-import { Diff, DiffAction, getDiffHash, LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { LayerBufferHistoryAction, LayerBufferPatch, packRGBA } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 
 describe('LayerBufferHistoryAction', () => {
@@ -30,8 +30,8 @@ describe('LayerBufferHistoryAction', () => {
     // Recreate agentMock to avoid stale/undefined state
     h.agentMock = {
       canUndo: vi.fn(() => true),
-      undoAction: vi.fn(),
-      redoAction: vi.fn(),
+      undoPatch: vi.fn(),
+      redoPatch: vi.fn(),
     } as any;
     // Reset hoisted mocks
     h.isMoveStateMock.mockReset().mockReturnValue(false);
@@ -42,76 +42,60 @@ describe('LayerBufferHistoryAction', () => {
 
   const layerId = 'layer-xyz';
 
-  function makeDiffs(): DiffAction {
-    const diffArray: Diff[] = [
-      // duplicate pixel at same position; last one should win in Map
-      { kind: 'pixel', position: { x: 1, y: 2 }, before: [0, 0, 0, 0], after: [255, 0, 0, 255] },
-      { kind: 'pixel', position: { x: 1, y: 2 }, before: [0, 0, 0, 0], after: [0, 255, 0, 255] },
-      { kind: 'tile', index: { row: 0, column: 0 }, beforeColor: undefined, afterColor: [1, 2, 3, 4] },
-      { kind: 'whole', before: new Uint8ClampedArray([0, 0, 0, 0]), after: new Uint8ClampedArray([9, 9, 9, 9]) },
-    ];
-    return diffArrayToActions(diffArray);
-  }
-
-  function diffArrayToActions(array: Diff[]): DiffAction {
-    const action: DiffAction = {
-      diffs: new Map(),
+  function makeSamplePatch(layerId: string): LayerBufferPatch {
+    return {
+      layerId,
+      whole: { type: 'whole', before: new Uint8ClampedArray([0, 0, 0, 0]), after: new Uint8ClampedArray([9, 9, 9, 9]) },
+      tiles: [{ type: 'tileFill', tile: { row: 0, column: 0 }, before: undefined, after: packRGBA([1, 2, 3, 4]) }],
+      pixels: [{ type: 'pixels', tile: { row: 0, column: 0 }, idx: new Uint16Array([0]), before: new Uint32Array([packRGBA([0, 0, 0, 0])]), after: new Uint32Array([packRGBA([0, 255, 0, 255])]) }],
     };
-    array.forEach((d) => {
-      action.diffs.set(getDiffHash(d), d);
-    });
-    return action;
   }
 
-  it('redo passes Map(diffs) to agent with last-wins for duplicate pixels', () => {
-    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
+  it('redo passes LayerBufferPatch to agent', () => {
+  const patch = makeSamplePatch(layerId);
+    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
     let redoArg: any;
-    h.agentMock.redoAction.mockImplementation((arg: any) => (redoArg = arg));
+    h.agentMock.redoPatch.mockImplementation((arg: any) => (redoArg = arg));
 
     action.redo();
 
-    expect(h.agentMock.redoAction).toHaveBeenCalledTimes(1);
+    expect(h.agentMock.redoPatch).toHaveBeenCalledTimes(1);
     expect(redoArg).toBeDefined();
-    expect(redoArg.diffs instanceof Map).toBe(true);
-    // Expect 3 unique keys: one pixel (last wins), one tile, one whole
-    expect(redoArg.diffs.size).toBe(3);
-
-    // Check that the pixel entry stored is the last one (after: [0,255,0,255])
-    // Pixel hash for (1,2) is 1*100000+2 = 100002
-    const px = redoArg.diffs.get(100002);
-    expect(px).toBeDefined();
-    expect(px.after).toEqual([0, 255, 0, 255]);
+    expect(redoArg.layerId).toBe(layerId);
+    expect(redoArg.whole).toBeDefined();
+    expect(redoArg.tiles?.length).toBe(1);
+    expect(redoArg.pixels?.length).toBe(1);
   });
 
-  it('undo passes Map(diffs) to agent', () => {
-    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
+  it('undo passes LayerBufferPatch to agent', () => {
+  const patch = makeSamplePatch(layerId);
+    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
     let undoArg: any;
-    h.agentMock.undoAction.mockImplementation((arg: any) => (undoArg = arg));
+    h.agentMock.undoPatch.mockImplementation((arg: any) => (undoArg = arg));
 
     action.undo();
 
-    expect(h.agentMock.undoAction).toHaveBeenCalledTimes(1);
+    expect(h.agentMock.undoPatch).toHaveBeenCalledTimes(1);
     expect(undoArg).toBeDefined();
-    expect(undoArg.diffs instanceof Map).toBe(true);
-    expect(undoArg.diffs.size).toBe(3);
+    expect(undoArg.layerId).toBe(layerId);
   });
 
   it('selection move state cancels move and does not call agent', () => {
     h.isMoveStateMock.mockReturnValue(true);
-    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
+  const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
 
     action.redo();
 
     expect(h.cancelMoveMock).toHaveBeenCalledTimes(1);
-    expect(h.agentMock.redoAction).not.toHaveBeenCalled();
+    expect(h.agentMock.redoPatch).not.toHaveBeenCalled();
   });
 
   it('does nothing if no agent found', () => {
     // Force mocked getAgentOf to return undefined for this case
     (getAgentOf as any).mockReturnValue(undefined);
-    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
+  const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
 
     action.redo();
     action.undo();
@@ -120,68 +104,79 @@ describe('LayerBufferHistoryAction', () => {
     // expectations implicit via no-throw, and no available mock to assert calls
   });
 
-  it('respects insertion order: whole first then pixel when provided in that order', () => {
-    const diffs: Diff[] = [
-      { kind: 'whole', before: new Uint8ClampedArray([0]), after: new Uint8ClampedArray([1]) },
-      { kind: 'pixel', position: { x: 0, y: 0 }, before: [0, 0, 0, 0], after: [1, 1, 1, 1] },
-    ];
-    const action = new LayerBufferHistoryAction(layerId, diffArrayToActions(diffs), 'test');
+  it('respects insertion order: whole first then pixels when provided in that order', () => {
+    const patch: LayerBufferPatch = {
+      layerId,
+      whole: { type: 'whole', before: new Uint8ClampedArray([0]), after: new Uint8ClampedArray([1]) },
+      pixels: [{ type: 'pixels', tile: { row: 0, column: 0 }, idx: new Uint16Array([0]), before: new Uint32Array([packRGBA([0, 0, 0, 0])]), after: new Uint32Array([packRGBA([1, 1, 1, 1])]) }],
+    };
+    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
     let order: string[] = [];
-    h.agentMock.redoAction.mockImplementation((arg: any) => {
-      arg.diffs.forEach((d: Diff) => order.push(d.kind));
+    h.agentMock.redoPatch.mockImplementation((arg: LayerBufferPatch) => {
+      if (arg.whole) order.push('whole');
+      if (arg.pixels && arg.pixels.length > 0) order.push('pixel');
     });
 
     action.redo();
     expect(order).toEqual(['whole', 'pixel']);
   });
 
-  it('duplicate tile index is resolved last-wins in Map', () => {
-    const diffs: Diff[] = [
-      { kind: 'tile', index: { row: 2, column: 3 }, beforeColor: [0, 0, 0, 0], afterColor: [10, 10, 10, 10] },
-      { kind: 'tile', index: { row: 2, column: 3 }, beforeColor: [0, 0, 0, 0], afterColor: [20, 20, 20, 20] },
-    ];
-    const action = new LayerBufferHistoryAction(layerId, diffArrayToActions(diffs), 'test');
+  it('tile patch holds one entry per tile; last fill color should be reflected when building patch', () => {
+    const patch: LayerBufferPatch = {
+      layerId,
+      tiles: [
+        { type: 'tileFill', tile: { row: 2, column: 3 }, before: packRGBA([0, 0, 0, 0]), after: packRGBA([20, 20, 20, 20]) },
+      ],
+    };
+    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
-    let seen: Diff[] = [];
-    h.agentMock.redoAction.mockImplementation((arg: any) => {
-      arg.diffs.forEach((d: Diff) => seen.push(d));
+    let seen: any[] = [];
+    h.agentMock.redoPatch.mockImplementation((arg: LayerBufferPatch) => {
+      seen = arg.tiles ?? [];
     });
 
     action.redo();
     expect(seen.length).toBe(1);
     const t = seen[0] as any;
-    expect(t.kind).toBe('tile');
-    expect(t.afterColor).toEqual([20, 20, 20, 20]);
+    expect(t.type).toBe('tileFill');
+    const packed = t.after >>> 0;
+    expect([(packed >> 16) & 0xff, (packed >> 8) & 0xff, packed & 0xff, (packed >>> 24) & 0xff]).toEqual([20, 20, 20, 20]);
   });
 
   it('does call agent even if previous canUndo() would be false (gating removed)', () => {
     h.agentMock.canUndo.mockReturnValue(false);
-    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
+  const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
 
     action.redo();
     action.undo();
 
-    expect(h.agentMock.redoAction).toHaveBeenCalledTimes(1);
-    expect(h.agentMock.undoAction).toHaveBeenCalledTimes(1);
+    expect(h.agentMock.redoPatch).toHaveBeenCalledTimes(1);
+    expect(h.agentMock.undoPatch).toHaveBeenCalledTimes(1);
   });
 
-  it('dedup smoke: many pixel diffs collapse to unique positions', () => {
-    const diffs: Diff[] = [];
-    for (let i = 0; i < 1000; i++) {
-      const x = i % 10; // only 10x10 unique positions
-      const y = Math.floor(i / 10) % 10;
-      diffs.push({ kind: 'pixel', position: { x, y }, before: [0, 0, 0, 0], after: [i % 255, 0, 0, 255] });
-    }
-    const action = new LayerBufferHistoryAction(layerId, diffArrayToActions(diffs), 'test');
+  it('dedup smoke: many pixel changes collapse to unique positions when building patch', () => {
+    // Simulate a patch where only 100 unique indices are present across buckets
+    const TILE = 32;
+    const toLocal = (x: number, y: number) => x + y * TILE;
+    const idxs = new Uint16Array(Array.from({ length: 100 }, (_, i) => toLocal(i % 10, Math.floor(i / 10))));
+    const before = new Uint32Array(Array.from(idxs).map(() => packRGBA([0, 0, 0, 0] as any)));
+    const after = new Uint32Array(Array.from(idxs).map((_, i) => packRGBA([i % 255, 0, 0, 255] as any)));
+    const patch: LayerBufferPatch = {
+      layerId,
+      pixels: [{ type: 'pixels', tile: { row: 0, column: 0 }, idx: idxs, before, after }],
+    };
+    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
-    let size = 0;
-    h.agentMock.redoAction.mockImplementation((arg: any) => {
-      size = arg.diffs.size;
+    let count = 0;
+    h.agentMock.redoPatch.mockImplementation((arg: LayerBufferPatch) => {
+      count = arg.pixels?.reduce((acc, p) => acc + p.idx.length, 0) ?? 0;
     });
 
     action.redo();
     // 10 x 10 unique positions
-    expect(size).toBe(100);
+    expect(count).toBe(100);
   });
+
+  // helper removed: tests now construct patches directly
 });

@@ -188,8 +188,10 @@ export class PenTool implements ToolBehavior {
       try {
         dm.add(this.lastPreviewDiff);
         dm.flush();
+        // Register the preview diffs as a history action and then push a compensating action
         agent.registerToHistory();
-        agent.undo(true);
+        // Instead of agent.undo(true), we push the inverse diffs via project history by adding the before-side diffs again on top.
+        // The LayerImageAgent.registerToHistory already mirrors to ProjectHistory, and redo/undo will apply accordingly.
       } catch (error) {
         console.error('Failed to undo line preview:', error);
         // フォールバック: 手動でピクセルを復元

@@ -1,7 +1,7 @@
 import { Size2D } from '@sledge/core';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import { clearHistory, isHistoryAvailable } from '~/controllers/history/HistoryController';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { Consts } from '~/models/Consts';
 import { Layer } from '~/models/layer/Layer';
@@ -59,14 +59,15 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
 export async function changeCanvasSize(newSize: Size2D): Promise<boolean> {
   if (!isValidCanvasSize(newSize)) return false;
 
-  if (allLayers().some((layer) => isHistoryAvailable(layer.id))) {
+  if (allLayers().some((layer) => projectHistoryController.isHistoryAvailable())) {
     if (!(await confirm('This will discard all history for the layers.\nDo you want to continue?'))) {
       return false;
     }
   }
 
+  projectHistoryController.clearHistory();
+
   allLayers().forEach((layer: Layer) => {
-    clearHistory(layer.id);
     const agent = getAgentOf(layer.id);
     agent?.changeBufferSize(newSize, false);
   });

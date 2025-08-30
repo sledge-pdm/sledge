@@ -47,17 +47,8 @@ export const getDiffHash = (diff: Diff) => {
 };
 
 export type DiffAction = {
-  // Array for persistence/serialization friendliness
-  diffs: Diff[];
+  diffs: Map<string | number, Diff>;
 };
-
-function toMap(action: DiffAction): Map<string | number, Diff> {
-  const m = new Map<string | number, Diff>();
-  for (const d of action.diffs) {
-    m.set(getDiffHash(d), d);
-  }
-  return m;
-}
 
 // history action for layer buffer changes
 export class LayerBufferHistoryAction extends BaseHistoryAction {
@@ -68,7 +59,7 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
     public readonly action: DiffAction,
     context?: any
   ) {
-    super(context);
+    super(context, `Layer ${layerId}: buffer`);
   }
 
   protected undoTileDiff(tileDiff: TileDiff): void {
@@ -93,17 +84,9 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
       return;
     }
 
-    if (agent.canUndo()) {
-      console.log(`undo layer ${layerId}.`);
-      // no more use this. bc agent undo is based on layer-level histories...
-      // agent.undo();
-
-      // Convert array to Map for current agent API.
-      // undoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
-      agent.undoAction({ diffs: toMap(this.action) } as any);
-    } else {
-      console.log(`can't undo layer ${layerId}.`);
-    }
+    console.log(`undo layer ${layerId}.`);
+    // undoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
+    agent.undoAction(this.action);
   }
 
   redo(): void {
@@ -120,16 +103,8 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
       return;
     }
 
-    if (agent.canUndo()) {
-      console.log(`redo layer ${layerId}.`);
-      // no more use this. bc agent undo is based on layer-level histories...
-      // agent.redo();
-
-      // Convert array to Map for current agent API.
-      // redoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
-      agent.redoAction({ diffs: toMap(this.action) } as any);
-    } else {
-      console.log(`can't redo layer ${layerId}.`);
-    }
+    console.log(`redo layer ${layerId}.`);
+    // redoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
+    agent.redoAction(this.action);
   }
 }

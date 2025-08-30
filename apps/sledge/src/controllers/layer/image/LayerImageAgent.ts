@@ -1,4 +1,6 @@
 import { Size2D, Vec2 } from '@sledge/core';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { DiffAction, HistoryManager, PixelDiff, TileDiff } from '~/controllers/layer/image/managers/HistoryManager';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { setBottomBarText } from '~/controllers/log/LogController';
@@ -14,13 +16,9 @@ export default class LayerImageAgent {
   protected pbm: PixelBufferManager;
   protected tm: TileManager;
   protected dm: DiffManager;
-  protected hm: HistoryManager;
 
   getPixelBufferManager() {
     return this.pbm;
-  }
-  getHistoryManager() {
-    return this.hm;
   }
   getTileManager() {
     return this.tm;
@@ -53,7 +51,6 @@ export default class LayerImageAgent {
           afterColor: fillColor,
         })
     );
-    this.hm = new HistoryManager(layerId);
   }
 
   getBuffer(): Uint8ClampedArray {
@@ -101,39 +98,17 @@ export default class LayerImageAgent {
 
   public registerToHistory() {
     let shouldAddAction = true;
-    if (this.dm.getCurrent().diffs.size === 0) shouldAddAction = false; // meaningless action
+    const current = this.dm.getCurrent();
+    if (current.diffs.size === 0) shouldAddAction = false; // meaningless action
 
     if (shouldAddAction) {
-      this.hm.addAction(this.dm.getCurrent());
+      // 1) Keep existing layer-level history behavior
+      // this.hm.addAction(current);
+      // 2) Also push to project-level history as LayerBufferHistoryAction
+      const action = new LayerBufferHistoryAction(this.layerId, current, { from: 'LayerImageAgent.registerToHistory' });
+      projectHistoryController.addAction(action);
     }
     this.dm.reset();
-  }
-
-  public canUndo = () => this.hm.canUndo();
-  public canRedo = () => this.hm.canRedo();
-
-  public undo(silent?: boolean) {
-    const undoStart = Date.now();
-    const undoedAction = this.hm.undo();
-    if (undoedAction === undefined) return;
-    if (!silent) setBottomBarText(`undo.`);
-    this.undoAction(undoedAction);
-    const undoEnd = Date.now();
-    if (!silent) setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
-
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) undo` });
-    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
-    // this.callOnImageChangeListeners({ updatePreview: true });
-  }
-
-  public redo(silent?: boolean) {
-    const redoStart = Date.now();
-    const redoedAction = this.hm.redo();
-    if (redoedAction === undefined) return;
-    if (!silent) setBottomBarText(`redo.`);
-    this.redoAction(redoedAction);
-    const redoEnd = Date.now();
-    if (!silent) setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
   }
 
   public undoAction(action: DiffAction) {

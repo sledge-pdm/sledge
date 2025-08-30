@@ -134,5 +134,4 @@ export function getCurrentPointingColorHex(): string | undefined {
   return undefined;
 }
 
-export const canUndo = (): boolean => getActiveAgent()?.canUndo() ?? false;
-export const canRedo = (): boolean => getActiveAgent()?.canRedo() ?? false;
+// Project-level history now drives undo/redo; layer-level canUndo/canRedo are deprecated.

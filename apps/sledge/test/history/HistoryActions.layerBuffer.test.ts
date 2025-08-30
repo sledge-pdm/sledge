@@ -21,7 +21,7 @@ vi.mock('~/controllers/selection/SelectionOperator', () => ({
   cancelMove: h.cancelMoveMock,
 }));
 
-import { Diff, LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { Diff, DiffAction, getDiffHash, LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 
 describe('LayerBufferHistoryAction', () => {
@@ -42,18 +42,29 @@ describe('LayerBufferHistoryAction', () => {
 
   const layerId = 'layer-xyz';
 
-  function makeDiffs(): Diff[] {
-    return [
+  function makeDiffs(): DiffAction {
+    const diffArray: Diff[] = [
       // duplicate pixel at same position; last one should win in Map
       { kind: 'pixel', position: { x: 1, y: 2 }, before: [0, 0, 0, 0], after: [255, 0, 0, 255] },
       { kind: 'pixel', position: { x: 1, y: 2 }, before: [0, 0, 0, 0], after: [0, 255, 0, 255] },
       { kind: 'tile', index: { row: 0, column: 0 }, beforeColor: undefined, afterColor: [1, 2, 3, 4] },
       { kind: 'whole', before: new Uint8ClampedArray([0, 0, 0, 0]), after: new Uint8ClampedArray([9, 9, 9, 9]) },
     ];
+    return diffArrayToActions(diffArray);
+  }
+
+  function diffArrayToActions(array: Diff[]): DiffAction {
+    const action: DiffAction = {
+      diffs: new Map(),
+    };
+    array.forEach((d) => {
+      action.diffs.set(getDiffHash(d), d);
+    });
+    return action;
   }
 
   it('redo passes Map(diffs) to agent with last-wins for duplicate pixels', () => {
-    const action = new LayerBufferHistoryAction(layerId, { diffs: makeDiffs() }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
 
     let redoArg: any;
     h.agentMock.redoAction.mockImplementation((arg: any) => (redoArg = arg));
@@ -74,7 +85,7 @@ describe('LayerBufferHistoryAction', () => {
   });
 
   it('undo passes Map(diffs) to agent', () => {
-    const action = new LayerBufferHistoryAction(layerId, { diffs: makeDiffs() }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
 
     let undoArg: any;
     h.agentMock.undoAction.mockImplementation((arg: any) => (undoArg = arg));
@@ -89,7 +100,7 @@ describe('LayerBufferHistoryAction', () => {
 
   it('selection move state cancels move and does not call agent', () => {
     h.isMoveStateMock.mockReturnValue(true);
-    const action = new LayerBufferHistoryAction(layerId, { diffs: makeDiffs() }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
 
     action.redo();
 
@@ -100,7 +111,7 @@ describe('LayerBufferHistoryAction', () => {
   it('does nothing if no agent found', () => {
     // Force mocked getAgentOf to return undefined for this case
     (getAgentOf as any).mockReturnValue(undefined);
-    const action = new LayerBufferHistoryAction(layerId, { diffs: makeDiffs() }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
 
     action.redo();
     action.undo();
@@ -114,7 +125,7 @@ describe('LayerBufferHistoryAction', () => {
       { kind: 'whole', before: new Uint8ClampedArray([0]), after: new Uint8ClampedArray([1]) },
       { kind: 'pixel', position: { x: 0, y: 0 }, before: [0, 0, 0, 0], after: [1, 1, 1, 1] },
     ];
-    const action = new LayerBufferHistoryAction(layerId, { diffs }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, diffArrayToActions(diffs), 'test');
 
     let order: string[] = [];
     h.agentMock.redoAction.mockImplementation((arg: any) => {
@@ -130,7 +141,7 @@ describe('LayerBufferHistoryAction', () => {
       { kind: 'tile', index: { row: 2, column: 3 }, beforeColor: [0, 0, 0, 0], afterColor: [10, 10, 10, 10] },
       { kind: 'tile', index: { row: 2, column: 3 }, beforeColor: [0, 0, 0, 0], afterColor: [20, 20, 20, 20] },
     ];
-    const action = new LayerBufferHistoryAction(layerId, { diffs }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, diffArrayToActions(diffs), 'test');
 
     let seen: Diff[] = [];
     h.agentMock.redoAction.mockImplementation((arg: any) => {
@@ -144,15 +155,15 @@ describe('LayerBufferHistoryAction', () => {
     expect(t.afterColor).toEqual([20, 20, 20, 20]);
   });
 
-  it('when agent.canUndo() is false, undo/redo are no-ops for agent', () => {
+  it('does call agent even if previous canUndo() would be false (gating removed)', () => {
     h.agentMock.canUndo.mockReturnValue(false);
-    const action = new LayerBufferHistoryAction(layerId, { diffs: makeDiffs() }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeDiffs(), 'test');
 
     action.redo();
     action.undo();
 
-    expect(h.agentMock.redoAction).not.toHaveBeenCalled();
-    expect(h.agentMock.undoAction).not.toHaveBeenCalled();
+    expect(h.agentMock.redoAction).toHaveBeenCalledTimes(1);
+    expect(h.agentMock.undoAction).toHaveBeenCalledTimes(1);
   });
 
   it('dedup smoke: many pixel diffs collapse to unique positions', () => {
@@ -162,7 +173,7 @@ describe('LayerBufferHistoryAction', () => {
       const y = Math.floor(i / 10) % 10;
       diffs.push({ kind: 'pixel', position: { x, y }, before: [0, 0, 0, 0], after: [i % 255, 0, 0, 255] });
     }
-    const action = new LayerBufferHistoryAction(layerId, { diffs }, 'test');
+    const action = new LayerBufferHistoryAction(layerId, diffArrayToActions(diffs), 'test');
 
     let size = 0;
     h.agentMock.redoAction.mockImplementation((arg: any) => {

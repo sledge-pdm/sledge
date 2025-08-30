@@ -62,6 +62,15 @@ export class ProjectHistoryController {
     const snapshot = { canUndo: this.canUndo(), canRedo: this.canRedo(), lastLabel };
     this.listeners.forEach((l) => l(snapshot));
   }
+
+  public clearHistory() {
+    this.undoStack = [];
+    this.redoStack = [];
+  }
+
+  public isHistoryAvailable() {
+    return this.getUndoStack().length > 0 || this.getRedoStack().length > 0;
+  }
 }
 
 export const projectHistoryController = new ProjectHistoryController();

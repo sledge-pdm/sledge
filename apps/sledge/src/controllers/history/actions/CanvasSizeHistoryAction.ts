@@ -1,6 +1,6 @@
 import { Size2D } from '@sledge/core';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
-import { clearHistory } from '~/controllers/history/HistoryController';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { getAgentOf, getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { allLayers } from '~/controllers/layer/LayerListController';
@@ -53,7 +53,6 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
     // Clear layer histories and resize pixel buffers without prompts
     const layers = allLayers();
     layers.forEach((l) => {
-      clearHistory(l.id);
       const agent = getAgentOf(l.id);
       agent?.changeBufferSize(size, false);
     });

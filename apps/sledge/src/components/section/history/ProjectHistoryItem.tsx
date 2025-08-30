@@ -5,11 +5,16 @@ import { Component, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
+import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { findLayerById } from '~/controllers/layer/LayerListController';
 import { sectionContent } from '~/styles/section/section_item.css';
 
 const ProjectHistoryItem: Component = () => {
-  const [historyStore, setHistoryStore] = createStore({
+  const [historyStore, setHistoryStore] = createStore<{
+    undoStack: BaseHistoryAction[];
+    redoStack: BaseHistoryAction[];
+  }>({
     undoStack: projectHistoryController.getUndoStack(),
     redoStack: projectHistoryController.getRedoStack(),
   });
@@ -22,10 +27,11 @@ const ProjectHistoryItem: Component = () => {
       };
     });
     projectHistoryController.onChange((state) => {
+      console.log('changed!: ', projectHistoryController.getUndoStack(), projectHistoryController.getRedoStack());
       setHistoryStore((prev) => {
         return {
-          undoStack: projectHistoryController.getUndoStack(),
-          redoStack: projectHistoryController.getRedoStack(),
+          undoStack: [...projectHistoryController.getUndoStack()],
+          redoStack: [...projectHistoryController.getRedoStack()],
         };
       });
     });
@@ -51,10 +57,24 @@ const ProjectHistoryItem: Component = () => {
 };
 
 const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ undo = true, action }) => {
+  let description = '';
+
+  switch (action.type) {
+    case 'layer_buffer':
+      const lbaction = action as LayerBufferHistoryAction;
+      description = `${findLayerById(lbaction.layerId)?.name}/${lbaction.action.diffs.size} diffs`;
+      break;
+    default:
+      description = '<unknown>';
+  }
+
   return (
-    <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-      <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} />
-      <p style={{ width: '50px', 'text-align': 'end' }}>{action.label}</p>
+    <div class={flexRow} style={{ height: 'auto', gap: '8px', 'align-items': 'center' }}>
+      <div>
+        <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
+      </div>
+      <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p>
+      <p style={{ width: '100%' }}>{description}</p>
     </div>
   );
 };

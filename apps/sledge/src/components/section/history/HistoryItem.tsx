@@ -5,7 +5,7 @@ import { Component, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { DiffAction, DiffKind } from '~/models/history/HistoryManager';
+import { DiffAction, DiffKind } from '~/controllers/layer/image/managers/HistoryManager';
 import { Layer } from '~/models/layer/Layer';
 import { sectionContent } from '~/styles/section/section_item.css';
 import { eventBus, Events } from '~/utils/EventBus';

@@ -1,0 +1,24 @@
+export type HistoryActionTypes =
+  | 'canvas_size'
+  | 'color'
+  | 'image_pool'
+  | 'image_pool_entry_props'
+  | 'layer_buffer'
+  | 'layer_list'
+  | 'layer_props'
+  | 'OtherHistoryActionType';
+
+// not in use for now
+type UnusedHistoryActionTypes = 'project' | 'interact_move' | 'section_resize';
+
+// Base class for all history actions
+export abstract class BaseHistoryAction {
+  abstract readonly type: HistoryActionTypes;
+
+  constructor(
+    public readonly context?: any // The context for action (used for log etc)
+  ) {}
+
+  abstract undo(): void;
+  abstract redo(): void;
+}

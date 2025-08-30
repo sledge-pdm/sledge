@@ -1,7 +1,7 @@
 import { Size2D, Vec2 } from '@sledge/core';
+import { DiffAction, HistoryManager, PixelDiff, TileDiff } from '~/controllers/layer/image/managers/HistoryManager';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { setBottomBarText } from '~/controllers/log/LogController';
-import { HistoryManager, PixelDiff, TileDiff } from '~/models/history/HistoryManager';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
@@ -117,19 +117,7 @@ export default class LayerImageAgent {
     const undoedAction = this.hm.undo();
     if (undoedAction === undefined) return;
     if (!silent) setBottomBarText(`undo.`);
-    undoedAction.diffs.forEach((diff) => {
-      switch (diff.kind) {
-        case 'pixel':
-          this.setPixel(diff.position, diff.before, true);
-          break;
-        case 'tile':
-          this.undoTileDiff(diff);
-          break;
-        case 'whole':
-          this.setBuffer(diff.before, true, false);
-          break;
-      }
-    });
+    this.undoAction(undoedAction);
     const undoEnd = Date.now();
     if (!silent) setBottomBarText(`undo done. (${undoedAction.diffs.size} px updated, ${undoEnd - undoStart}ms)`);
 
@@ -143,7 +131,32 @@ export default class LayerImageAgent {
     const redoedAction = this.hm.redo();
     if (redoedAction === undefined) return;
     if (!silent) setBottomBarText(`redo.`);
-    redoedAction.diffs.forEach((diff) => {
+    this.redoAction(redoedAction);
+    const redoEnd = Date.now();
+    if (!silent) setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
+  }
+
+  public undoAction(action: DiffAction) {
+    action.diffs.forEach((diff) => {
+      switch (diff.kind) {
+        case 'pixel':
+          this.setPixel(diff.position, diff.before, true);
+          break;
+        case 'tile':
+          this.undoTileDiff(diff);
+          break;
+        case 'whole':
+          this.setBuffer(diff.before, true, false);
+          break;
+      }
+    });
+
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) undo` });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+  }
+
+  public redoAction(action: DiffAction) {
+    action.diffs.forEach((diff) => {
       switch (diff.kind) {
         case 'pixel':
           this.setPixel(diff.position, diff.after, true);
@@ -156,12 +169,9 @@ export default class LayerImageAgent {
           break;
       }
     });
-    const redoEnd = Date.now();
-    if (!silent) setBottomBarText(`redo done. (${redoedAction.diffs.size} px updated, ${redoEnd - redoStart}ms)`);
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) redo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
-    // this.callOnImageChangeListeners({ updatePreview: true });
   }
 
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {

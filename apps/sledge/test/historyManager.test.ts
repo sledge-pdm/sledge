@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { HistoryManager, type DiffAction, type Diff } from '~/models/history/HistoryManager';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { HistoryManager, type Diff, type DiffAction } from '~/controllers/layer/image/managers/HistoryManager';
 
 const makeTileDiff = (row = 0, column = 0): Diff => ({
   kind: 'tile',
@@ -23,8 +23,8 @@ describe('HistoryManager', () => {
   });
 
   it('addAction pushes to undo and clears redo', () => {
-    const a1: DiffAction = { diffs: new Map([["a", makeTileDiff(0, 0)]]) };
-    const a2: DiffAction = { diffs: new Map([["b", makeTileDiff(0, 1)]]) };
+    const a1: DiffAction = { diffs: new Map([['a', makeTileDiff(0, 0)]]) };
+    const a2: DiffAction = { diffs: new Map([['b', makeTileDiff(0, 1)]]) };
     hm.addAction(a1);
     expect(hm.canUndo()).toBe(true);
     hm.addAction(a2);
@@ -34,8 +34,8 @@ describe('HistoryManager', () => {
   });
 
   it('undo moves action from undo to redo (front) and returns it', () => {
-    const a1: DiffAction = { diffs: new Map([["a", makeTileDiff(0, 0)]]) };
-    const a2: DiffAction = { diffs: new Map([["b", makeTileDiff(0, 1)]]) };
+    const a1: DiffAction = { diffs: new Map([['a', makeTileDiff(0, 0)]]) };
+    const a2: DiffAction = { diffs: new Map([['b', makeTileDiff(0, 1)]]) };
     hm.addAction(a1);
     hm.addAction(a2);
     const undone = hm.undo();
@@ -47,7 +47,7 @@ describe('HistoryManager', () => {
   });
 
   it('redo takes from redo (front) and pushes back to undo', () => {
-    const a1: DiffAction = { diffs: new Map([["a", makeTileDiff(0, 0)]]) };
+    const a1: DiffAction = { diffs: new Map([['a', makeTileDiff(0, 0)]]) };
     hm.addAction(a1);
     const undone = hm.undo();
     expect(undone).toBeDefined();
@@ -58,8 +58,8 @@ describe('HistoryManager', () => {
   });
 
   it('adding new action after undo clears redo', () => {
-    const a1: DiffAction = { diffs: new Map([["a", makeTileDiff(0, 0)]]) };
-    const a2: DiffAction = { diffs: new Map([["b", makeTileDiff(0, 1)]]) };
+    const a1: DiffAction = { diffs: new Map([['a', makeTileDiff(0, 0)]]) };
+    const a2: DiffAction = { diffs: new Map([['b', makeTileDiff(0, 1)]]) };
     hm.addAction(a1);
     hm.undo();
     expect(hm.getRedoStack().length).toBe(1);

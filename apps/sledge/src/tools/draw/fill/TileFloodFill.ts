@@ -1,9 +1,9 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { PixelDiff } from '~/controllers/layer/image/managers/HistoryManager';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { colorMatch } from '~/utils/ColorUtils';
 import { Fill, FillProps } from './FillTool';
+import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 
 export interface MaskFillProps {
   agent: LayerImageAgent;

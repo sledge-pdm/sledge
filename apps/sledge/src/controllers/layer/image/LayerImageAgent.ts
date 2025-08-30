@@ -1,9 +1,7 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
-import { DiffAction, HistoryManager, PixelDiff, TileDiff } from '~/controllers/layer/image/managers/HistoryManager';
+import { DiffAction, LayerBufferHistoryAction, PixelDiff, TileDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
-import { setBottomBarText } from '~/controllers/log/LogController';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
@@ -88,14 +86,6 @@ export default class LayerImageAgent {
     // this.callOnImageChangeListeners({ newSize, updatePreview: true });
   }
 
-  protected undoTileDiff(tileDiff: TileDiff): void {
-    if (tileDiff.beforeColor) this.tm.fillWholeTile(tileDiff.index, tileDiff.beforeColor, false);
-  }
-
-  protected redoTileDiff(tileDiff: TileDiff): void {
-    this.tm.fillWholeTile(tileDiff.index, tileDiff.afterColor, false);
-  }
-
   public registerToHistory() {
     let shouldAddAction = true;
     const current = this.dm.getCurrent();
@@ -130,6 +120,10 @@ export default class LayerImageAgent {
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
   }
 
+  protected undoTileDiff(tileDiff: TileDiff): void {
+    if (tileDiff.beforeColor) this.tm.fillWholeTile(tileDiff.index, tileDiff.beforeColor, false);
+  }
+
   public redoAction(action: DiffAction) {
     action.diffs.forEach((diff) => {
       switch (diff.kind) {
@@ -147,6 +141,10 @@ export default class LayerImageAgent {
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) redo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+  }
+
+  protected redoTileDiff(tileDiff: TileDiff): void {
+    this.tm.fillWholeTile(tileDiff.index, tileDiff.afterColor, false);
   }
 
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): PixelDiff | undefined {

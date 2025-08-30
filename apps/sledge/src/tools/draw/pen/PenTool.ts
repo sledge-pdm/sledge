@@ -1,6 +1,5 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { PixelDiff } from '~/controllers/layer/image/managers/HistoryManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getPresetOf } from '~/controllers/tool/ToolController';
@@ -8,6 +7,7 @@ import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
+import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可

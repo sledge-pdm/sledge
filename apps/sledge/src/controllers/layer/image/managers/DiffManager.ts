@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { Diff, DiffAction, getDiffHash, PixelDiff } from '~/controllers/layer/image/managers/HistoryManager';
+import { Diff, DiffAction, getDiffHash, PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 
 export default class DiffManager {
   private currentDiffAction: DiffAction;

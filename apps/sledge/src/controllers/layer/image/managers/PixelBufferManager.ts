@@ -1,5 +1,5 @@
 import { Point, Size2D, Vec2 } from '@sledge/core';
-import { PixelDiff } from '~/controllers/layer/image/managers/HistoryManager';
+import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { RGBAColor } from '~/utils/ColorUtils';
 
 export default class PixelBufferManager {

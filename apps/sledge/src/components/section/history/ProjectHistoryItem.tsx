@@ -69,7 +69,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ 
   }
 
   return (
-    <div class={flexRow} style={{ height: 'auto', gap: '8px', 'align-items': 'center' }}>
+    <div class={flexRow} style={{ height: 'auto', gap: '8px', 'align-items': 'center' }} title={`${action.label}\n${JSON.stringify(action.context)}`}>
       <div>
         <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
       </div>

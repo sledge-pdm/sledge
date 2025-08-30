@@ -61,7 +61,7 @@ class ImageEntryInteract {
         scaleX: payload.scaleX,
         scaleY: payload.scaleY,
       },
-    });
+    }, { noDiff: true });
   };
   private resizePos: ResizePos | undefined;
 

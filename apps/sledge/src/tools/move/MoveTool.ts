@@ -4,6 +4,7 @@ import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
+import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
 export class MoveTool implements ToolBehavior {
@@ -185,7 +186,7 @@ export class MoveTool implements ToolBehavior {
     });
     this.originalBuffer = undefined;
 
-    agent.registerToHistory();
+    agent.registerToHistory({ tool: TOOL_CATEGORIES.MOVE });
     agent.forceUpdate();
 
     selectionManager.commit();

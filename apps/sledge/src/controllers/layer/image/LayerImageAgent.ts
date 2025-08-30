@@ -86,7 +86,7 @@ export default class LayerImageAgent {
     // this.callOnImageChangeListeners({ newSize, updatePreview: true });
   }
 
-  public registerToHistory() {
+  public registerToHistory(context?: any) {
     let shouldAddAction = true;
     const current = this.dm.getCurrent();
     if (current.diffs.size === 0) shouldAddAction = false; // meaningless action
@@ -95,7 +95,7 @@ export default class LayerImageAgent {
       // 1) Keep existing layer-level history behavior
       // this.hm.addAction(current);
       // 2) Also push to project-level history as LayerBufferHistoryAction
-      const action = new LayerBufferHistoryAction(this.layerId, current, { from: 'LayerImageAgent.registerToHistory' });
+      const action = new LayerBufferHistoryAction(this.layerId, current, { from: 'LayerImageAgent.registerToHistory', ...context });
       projectHistoryController.addAction(action);
     }
     this.dm.reset();

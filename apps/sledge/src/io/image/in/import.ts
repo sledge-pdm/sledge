@@ -32,6 +32,8 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
     type: LayerType.Dot,
     dotMagnification: 1,
     opacity: 1,
+  }, {
+    noDiff: true
   });
 
   const agent = getAgentOf(initLayer.id);
@@ -66,6 +68,8 @@ export function importImageFromWindow(): boolean {
     type: LayerType.Dot,
     dotMagnification: 1,
     opacity: 1,
+  }, {
+    noDiff: true
   });
 
   const agent = getAgentOf(initLayer.id);

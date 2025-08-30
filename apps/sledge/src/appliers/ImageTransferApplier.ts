@@ -103,5 +103,5 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
     after: dstBuf,
   });
   dm.flush();
-  agent.registerToHistory();
+  agent.registerToHistory({ tool: 'image' });
 }

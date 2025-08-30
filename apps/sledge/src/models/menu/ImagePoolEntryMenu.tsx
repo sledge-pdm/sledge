@@ -1,5 +1,7 @@
 import { Menu, MenuItem } from '@tauri-apps/api/menu';
-import { removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { getEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
 import RightClickMenu from './RightClickMenu';
 
 export class ImagePoolEntryMenu extends RightClickMenu {
@@ -14,7 +16,11 @@ export class ImagePoolEntryMenu extends RightClickMenu {
           id: 'remove',
           text: 'remove',
           action: () => {
-            removeEntry(id);
+            const snap = getEntry(id);
+            if (snap) {
+              projectHistoryController.addAction(new ImagePoolHistoryAction('remove', snap, { from: 'ImagePoolEntryMenu' }));
+              removeEntry(id);
+            }
           },
         }),
       ],

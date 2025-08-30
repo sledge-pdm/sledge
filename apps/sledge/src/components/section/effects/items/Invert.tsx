@@ -32,7 +32,7 @@ const Invert: Component = () => {
                   before: originalBuffer,
                   after: agent.getBuffer(),
                 });
-                agent.registerToHistory();
+                agent.registerToHistory({ tool: 'fx', fxName: 'Invert' });
               }
             }}
           >

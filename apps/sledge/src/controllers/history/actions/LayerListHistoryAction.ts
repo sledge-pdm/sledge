@@ -29,7 +29,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
         // Undo of add = remove the inserted layer by id (snapshot required)
         const id = this.layerSnapshot?.id;
         if (!id) return;
-        removeLayer(id);
+        removeLayer(id, { noDiff: true });
         break;
       }
       case 'delete': {
@@ -56,7 +56,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
       case 'delete': {
         const id = this.layerSnapshot?.id ?? layerListStore.layers[this.index]?.id;
         if (!id) return;
-        removeLayer(id);
+        removeLayer(id, { noDiff: true });
         break;
       }
       case 'reorder': {

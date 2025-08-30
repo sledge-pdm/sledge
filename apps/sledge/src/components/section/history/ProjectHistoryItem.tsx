@@ -5,10 +5,15 @@ import { Component, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
+import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
+import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
 import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import { sectionContent } from '~/styles/section/section_item.css';
+import { toolCategories } from '~/tools/Tools';
+import { RGBAToHex } from '~/utils/ColorUtils';
 
 const ProjectHistoryItem: Component = () => {
   const [historyStore, setHistoryStore] = createStore<{
@@ -26,7 +31,7 @@ const ProjectHistoryItem: Component = () => {
         redoStack: projectHistoryController.getRedoStack(),
       };
     });
-    projectHistoryController.onChange((state) => {
+    const dispose = projectHistoryController.onChange((state) => {
       console.log('changed!: ', projectHistoryController.getUndoStack(), projectHistoryController.getRedoStack());
       setHistoryStore((prev) => {
         return {
@@ -35,6 +40,8 @@ const ProjectHistoryItem: Component = () => {
         };
       });
     });
+
+    return () => dispose();
   });
 
   return (
@@ -56,13 +63,60 @@ const ProjectHistoryItem: Component = () => {
   );
 };
 
+function getIconForTool(tool?: string) {
+  if (!tool) return '';
+
+  if (tool in toolCategories) {
+    const categoryId = tool as keyof typeof toolCategories;
+    return toolCategories[categoryId].iconSrc;
+  }
+  switch (tool) {
+    case 'clear':
+      return 'icons/misc/clear.png';
+    case 'fx':
+      return 'icons/misc/fx.png';
+  }
+
+  return '';
+}
+
 const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ undo = true, action }) => {
+  const { context } = action;
+  let colorIcon:
+    | {
+        old: string;
+        new: string;
+      }
+    | undefined = undefined;
+  let icon = getIconForTool(context.tool);
   let description = '';
 
   switch (action.type) {
+    case 'image_pool':
+      const ipaction = action as ImagePoolHistoryAction;
+      description = `${ipaction.kind} -> ${ipaction.targetEntry.fileName}`;
+      break;
+    case 'color':
+      const claction = action as ColorHistoryAction;
+      const oldHex = `#${RGBAToHex(claction.oldColor)}`;
+      const newHex = `#${RGBAToHex(claction.newColor)}`;
+      description = `${oldHex} -> ${newHex}`;
+      colorIcon = {
+        old: oldHex,
+        new: newHex,
+      };
+      break;
+    case 'layer_list':
+      const llaction = action as LayerListHistoryAction;
+      description = `${llaction.kind} / ${llaction.layerSnapshot?.name}`;
+      break;
     case 'layer_buffer':
       const lbaction = action as LayerBufferHistoryAction;
-      description = `${findLayerById(lbaction.layerId)?.name}/${lbaction.action.diffs.size} diffs`;
+      if (context.tool === 'fx') {
+        description = `${findLayerById(lbaction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
+      } else {
+        description = `${findLayerById(lbaction.layerId)?.name}/${lbaction.action.diffs.size} diffs`;
+      }
       break;
     default:
       description = '<unknown>';
@@ -70,10 +124,23 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ 
 
   return (
     <div class={flexRow} style={{ height: 'auto', gap: '8px', 'align-items': 'center' }} title={`${action.label}\n${JSON.stringify(action.context)}`}>
-      <div>
+      {/* <div>
         <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
-      </div>
-      <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p>
+      </div> */}
+      <Show
+        when={colorIcon}
+        fallback={
+          <div>
+            <Icon src={icon || ''} color={vars.color.onBackground} base={8} scale={1} />
+          </div>
+        }
+      >
+        <div style={{ width: '8px', height: '8px', position: 'relative', overflow: 'hidden', 'background-color': colorIcon!.new }}>
+          {/* <div style={{ width: '6px', height: '6px', position: 'absolute', top: 0, left: 0, 'background-color': colorIcon!.old }} />
+          <div style={{ width: '6px', height: '6px', position: 'absolute', top: '2px', left: '2px', 'background-color': colorIcon!.new }} /> */}
+        </div>
+      </Show>
+      {/* <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p> */}
       <p style={{ width: '100%' }}>{description}</p>
     </div>
   );

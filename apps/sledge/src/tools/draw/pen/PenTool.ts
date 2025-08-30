@@ -1,13 +1,13 @@
 import { Vec2 } from '@sledge/core';
+import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
-import { ToolCategoryId } from '~/tools/Tools';
+import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
-import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
@@ -127,7 +127,7 @@ export class PenTool implements ToolBehavior {
     }
   }
 
-  protected categoryId: ToolCategoryId = 'pen';
+  protected categoryId: ToolCategoryId = TOOL_CATEGORIES.PEN;
 
   private SNAP_ANGLE = Math.PI / 12;
 
@@ -189,7 +189,7 @@ export class PenTool implements ToolBehavior {
         dm.add(this.lastPreviewDiff);
         dm.flush();
         // Register the preview diffs as a history action and then push a compensating action
-        agent.registerToHistory();
+        agent.registerToHistory({ tool: this.categoryId });
         // Instead of agent.undo(true), we push the inverse diffs via project history by adding the before-side diffs again on top.
         // The LayerImageAgent.registerToHistory already mirrors to ProjectHistory, and redo/undo will apply accordingly.
       } catch (error) {

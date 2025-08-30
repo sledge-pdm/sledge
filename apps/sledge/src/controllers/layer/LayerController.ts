@@ -1,4 +1,6 @@
 import { mergeLayer } from '~/appliers/LayerMergeApplier';
+import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { Layer } from '~/models/layer/Layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -31,9 +33,18 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   }
   const layer = findLayerById(layerId);
   if (!layer) return;
-
+  const before: Omit<Layer, 'id'> = { ...layer } as any;
   const idx = getLayerIndex(layerId);
   setLayerListStore('layers', idx, propName, newValue);
+  const after = { ...findLayerById(layerId)! } as Omit<Layer, 'id'>;
+  // Remove id from snapshots
+  delete (before as any).id;
+  delete (after as any).id;
+  // Push only when the value actually changed
+  if (JSON.stringify(before) !== JSON.stringify(after)) {
+    const act = new LayerPropsHistoryAction(layerId, before, after, { from: `LayerController.setLayerProp(${String(propName)})` });
+    projectHistoryController.addAction(act);
+  }
   if (propNamesToUpdate.indexOf(propName) !== -1)
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${layerId}) prop updated(${propName})` });
 }
@@ -44,7 +55,9 @@ export function duplicateLayer(layerId: string) {
     {
       ...layer,
     },
-    getBufferOf(layerId)
+    {
+      initImage: getBufferOf(layerId),
+    }
   );
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) duplicated` });
 }
@@ -65,7 +78,7 @@ export function clearLayer(layerId: string) {
     before: new Uint8ClampedArray(originalBuffer),
     after: new Uint8ClampedArray(newBuffer.buffer),
   });
-  agent.registerToHistory();
+  agent.registerToHistory({ tool: 'clear' });
   agent.forceUpdate();
 }
 

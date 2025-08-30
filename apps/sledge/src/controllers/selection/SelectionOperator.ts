@@ -56,7 +56,7 @@ export function deletePixelInSelection(layerId?: string): boolean {
   // バッファを反映
   bufferManager.buffer.set(after);
 
-  agent.registerToHistory();
+  agent.registerToHistory({ tool: 'clear' });
   // タイルを更新対象に
   agent.getTileManager().setAllDirty();
   agent.forceUpdate();

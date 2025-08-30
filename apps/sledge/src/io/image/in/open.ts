@@ -23,6 +23,8 @@ export const initProjectWithNewImage = async (filePath: string, fileName: string
     type: LayerType.Dot,
     dotMagnification: 1,
     opacity: 1,
+  }, {
+    noDiff: true
   });
 
   const agent = getAgentOf(initLayer.id);

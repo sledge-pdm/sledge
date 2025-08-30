@@ -3,7 +3,7 @@ import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryActi
 import { ProjectHistoryController } from '~/controllers/history/ProjectHistoryController';
 
 class TestAction extends BaseHistoryAction {
-  readonly type = 'OtherHistoryActionType' as const;
+  readonly type = 'unknown' as const;
   public didUndo = false;
   public didRedo = false;
   constructor(label?: string) {

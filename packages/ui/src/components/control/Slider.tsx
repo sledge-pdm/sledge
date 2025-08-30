@@ -13,7 +13,7 @@ interface SliderProps {
   labelMode: LabelMode;
   customFormat?: string;
   allowDirectInput?: boolean;
-  onChange?: (newValue: number) => void;
+  onChange?: (newValue: number, commit: boolean) => void;
   onDoubleClick?: () => void;
   onPointerDownOnValidArea?: (e: PointerEvent | MouseEvent) => boolean;
 }
@@ -21,7 +21,6 @@ interface SliderProps {
 const Slider: Component<SliderProps> = (props) => {
   let labelRef: HTMLDivElement;
   let directInputRef: HTMLInputElement;
-  let rootRef: HTMLDivElement;
   let sliderRef: HTMLDivElement;
   const [directInputMode, setDirectInputMode] = createSignal(false);
 
@@ -44,9 +43,10 @@ const Slider: Component<SliderProps> = (props) => {
   const [isDrag, setDrag] = createSignal(false);
   const percent = () => ((value() - props.min) / (props.max - props.min)) * 100;
 
-  const update = (newValue: number) => {
+  const update = (newValue: number, commit: boolean) => {
+    console.log(commit);
     setValue(newValue);
-    props.onChange?.(newValue);
+    props.onChange?.(newValue, commit);
   };
 
   const onPointerDownOnValidArea = (e: PointerEvent | MouseEvent): boolean => {
@@ -69,10 +69,14 @@ const Slider: Component<SliderProps> = (props) => {
       const { left, width } = sliderRef.getBoundingClientRect();
       let pos = Math.max(0, Math.min(e.clientX - left, width));
       const raw = props.min + (pos / width) * (props.max - props.min);
-      update(getFixedValue(raw));
+      update(getFixedValue(raw), false);
     }
   };
 
+  const cancelHandlingUp = (e: PointerEvent) => {
+    if (isDrag()) update(value(), true);
+    setDrag(false);
+  };
   const cancelHandling = () => {
     setDrag(false);
   };
@@ -83,7 +87,7 @@ const Slider: Component<SliderProps> = (props) => {
     const { left, width } = sliderRef.getBoundingClientRect();
     let pos = Math.max(0, Math.min(e.clientX - left, width));
     const raw = props.min + (pos / width) * (props.max - props.min);
-    update(getFixedValue(raw));
+    update(getFixedValue(raw), false);
   };
 
   const getFixedValue = (raw: number): number => {
@@ -105,7 +109,7 @@ const Slider: Component<SliderProps> = (props) => {
 
   const handleClickOutside = (e: MouseEvent) => {
     if (directInputMode() && labelRef && !labelRef.contains(e.target as Node)) {
-      update(Number(directInputRef.value));
+      update(Number(directInputRef.value), false);
       setDirectInputMode(false);
     }
   };
@@ -117,20 +121,20 @@ const Slider: Component<SliderProps> = (props) => {
   const handleOnWheel = (e: WheelEvent) => {
     if (props.wheelSpin) {
       const newValue = getFixedValue(value() + (e.deltaY < 0 ? 1 : -1));
-      update(getFixedValue(newValue));
+      update(getFixedValue(newValue), newValue !== value());
     }
   };
 
   onMount(() => {
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', cancelHandling);
+    document.addEventListener('pointerup', cancelHandlingUp);
     document.addEventListener('pointercancel', cancelHandling);
   });
   onCleanup(() => {
     document.removeEventListener('click', handleClickOutside);
     document.removeEventListener('pointermove', handlePointerMove);
-    document.removeEventListener('pointerup', cancelHandling);
+    document.removeEventListener('pointerup', cancelHandlingUp);
     document.removeEventListener('pointercancel', cancelHandling);
   });
 
@@ -162,7 +166,7 @@ const Slider: Component<SliderProps> = (props) => {
           onFocusOut={cancelDirectInput}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              update(Number(directInputRef.value));
+              update(Number(directInputRef.value), true);
               setDirectInputMode(false);
             }
           }}
@@ -174,7 +178,7 @@ const Slider: Component<SliderProps> = (props) => {
   );
 
   return (
-    <div class={sliderRoot} ref={(el) => (rootRef = el)}>
+    <div class={sliderRoot}>
       <Show when={props.labelMode === 'left'}>{labelArea}</Show>
 
       <div

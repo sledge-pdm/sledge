@@ -30,8 +30,8 @@ export default class PixelBufferManager {
 
   public changeSize(
     newSize: Size2D,
-    destOrigin: Point = { x: 0, y: 0 }, // 新バッファ上の貼り付け開始位置
-    srcOrigin: Point = { x: 0, y: 0 } // 元バッファ上の切り取り開始位置
+    destOrigin: Point = { x: 0, y: 0 }, // paste origin on the new buffer
+    srcOrigin: Point = { x: 0, y: 0 } // crop origin on the source buffer
   ): void {
     const { width: newW, height: newH } = newSize;
     const oldW = this.width,
@@ -39,18 +39,18 @@ export default class PixelBufferManager {
     const oldBuf = this.buffer;
     const newBuf = new Uint8ClampedArray(newW * newH * 4);
 
-    // 元バッファから実際にコピーできる幅／高さ
+    // Width/height that can actually be copied from source buffer
     const copyW = Math.min(oldW - srcOrigin.x, newW - destOrigin.x);
     const copyH = Math.min(oldH - srcOrigin.y, newH - destOrigin.y);
 
     for (let y = 0; y < copyH; y++) {
-      // 元バッファの読み出し開始オフセット
+      // Read offset on the old buffer
       const oldRow = (y + srcOrigin.y) * oldW + srcOrigin.x;
       const oldOffset = oldRow * 4;
-      // 新バッファの書き込み開始オフセット
+      // Write offset on the new buffer
       const newRow = (y + destOrigin.y) * newW + destOrigin.x;
       const newOffset = newRow * 4;
-      // 一行分コピー
+      // Copy one row
       newBuf.set(oldBuf.subarray(oldOffset, oldOffset + copyW * 4), newOffset);
     }
 

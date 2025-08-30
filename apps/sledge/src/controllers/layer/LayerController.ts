@@ -27,7 +27,11 @@ export function setLayerName(layerId: string, newName: string): boolean {
   return true;
 }
 
-export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K]) {
+interface SetLayerPropOptions {
+  noDiff?: boolean;
+}
+
+export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K], options?: SetLayerPropOptions) {
   if (propName === 'id') {
     return;
   }
@@ -40,8 +44,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   // Remove id from snapshots
   delete (before as any).id;
   delete (after as any).id;
-  // Push only when the value actually changed
-  if (JSON.stringify(before) !== JSON.stringify(after)) {
+  if (!options?.noDiff) {
     const act = new LayerPropsHistoryAction(layerId, before, after, { from: `LayerController.setLayerProp(${String(propName)})` });
     projectHistoryController.addAction(act);
   }
@@ -120,7 +123,7 @@ export async function mergeToBelowLayer(layerId: string) {
   // merge
   await mergeLayer({ originLayer, targetLayer });
 
-  setLayerProp(layerId, 'enabled', false);
+  setLayerProp(layerId, 'enabled', false, { noDiff: true });
   if (layerListStore.activeLayerId === layerId) {
     setLayerListStore('activeLayerId', targetLayer.id);
   }

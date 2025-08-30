@@ -1,6 +1,13 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { DiffAction, LayerBufferHistoryAction, PixelDiff, TileDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import {
+  DiffAction,
+  LayerBufferHistoryAction,
+  LayerBufferPatch,
+  packRGBA,
+  PixelDiff,
+  TileDiff,
+} from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
@@ -9,7 +16,7 @@ import DiffManager from './managers/DiffManager';
 import PixelBufferManager from './managers/PixelBufferManager';
 import TileManager from './managers/TileManager';
 
-// それぞれのLayerCanvasの描画、表示までの処理過程を記述するクラス
+// Agent that manages per-layer image operations: buffer, tiles, diffs, and applying history actions
 export default class LayerImageAgent {
   protected pbm: PixelBufferManager;
   protected tm: TileManager;
@@ -88,17 +95,68 @@ export default class LayerImageAgent {
 
   public registerToHistory(context?: any) {
     let shouldAddAction = true;
+    // Flush batched pixel diffs before snapshotting
+    this.dm.flush();
     const current = this.dm.getCurrent();
     if (current.diffs.size === 0) shouldAddAction = false; // meaningless action
 
     if (shouldAddAction) {
-      // 1) Keep existing layer-level history behavior
-      // this.hm.addAction(current);
-      // 2) Also push to project-level history as LayerBufferHistoryAction
-      const action = new LayerBufferHistoryAction(this.layerId, current, { from: 'LayerImageAgent.registerToHistory', ...context });
+      // Build SoA patch from current diffs for efficient history application
+      const patch = this.buildPatchFromDiffAction(current);
+      const action = new LayerBufferHistoryAction(this.layerId, patch, { from: 'LayerImageAgent.registerToHistory', ...context });
       projectHistoryController.addAction(action);
     }
     this.dm.reset();
+  }
+
+  private buildPatchFromDiffAction(current: DiffAction): LayerBufferPatch {
+    const pixelBuckets = new Map<string, { tile: { row: number; column: number }; idx: number[]; before: number[]; after: number[] }>();
+    const tiles: Array<{ type: 'tileFill'; tile: { row: number; column: number }; before?: number; after: number }> = [];
+    let whole: { type: 'whole'; before: Uint8ClampedArray; after: Uint8ClampedArray } | undefined;
+
+    const tileSize = this.tm.TILE_SIZE;
+
+    for (const diff of current.diffs.values()) {
+      if (diff.kind === 'pixel') {
+        const tIndex = this.tm.getTileIndex(diff.position);
+        const tile = this.tm.getTile(tIndex);
+        const { x: ox, y: oy } = tile.getOffset();
+        const local = diff.position.x - ox + (diff.position.y - oy) * tileSize;
+        const key = `${tIndex.row},${tIndex.column}`;
+        let bucket = pixelBuckets.get(key);
+        if (!bucket) {
+          bucket = { tile: tIndex, idx: [], before: [], after: [] };
+          pixelBuckets.set(key, bucket);
+        }
+        bucket.idx.push(local);
+        bucket.before.push(packRGBA(diff.before));
+        bucket.after.push(packRGBA(diff.after));
+      } else if (diff.kind === 'tile') {
+        tiles.push({
+          type: 'tileFill',
+          tile: diff.index,
+          before: diff.beforeColor ? packRGBA(diff.beforeColor) : undefined,
+          after: packRGBA(diff.afterColor),
+        });
+      } else if (diff.kind === 'whole') {
+        whole = { type: 'whole', before: diff.before, after: diff.after };
+      }
+    }
+
+    const pixels = Array.from(pixelBuckets.values()).map((b) => ({
+      type: 'pixels' as const,
+      tile: b.tile,
+      idx: new Uint16Array(b.idx),
+      before: new Uint32Array(b.before),
+      after: new Uint32Array(b.after),
+    }));
+
+    return {
+      layerId: this.layerId,
+      pixels: pixels.length ? pixels : undefined,
+      tiles: tiles.length ? (tiles as any) : undefined,
+      whole,
+    };
   }
 
   public undoAction(action: DiffAction) {
@@ -163,5 +221,99 @@ export default class LayerImageAgent {
       }
     }
     return result;
+  }
+
+  // Apply new SoA patch format (undo path uses "before", redo uses "after").
+  public undoPatch(patch: LayerBufferPatch) {
+    setProjectStore('isProjectChangedAfterSave', true);
+
+    // Whole buffer restore first if present
+    if (patch.whole) {
+      this.setBuffer(patch.whole.before, true, false);
+    } else {
+      // Tile fills (prefer restoring previous color if available)
+      if (patch.tiles) {
+        for (const t of patch.tiles) {
+          if (t.before !== undefined) {
+            const color: RGBAColor = [(t.before >> 16) & 0xff, (t.before >> 8) & 0xff, t.before & 0xff, (t.before >>> 24) & 0xff];
+            this.tm.fillWholeTile(t.tile, color, false);
+          } else {
+            // no-op here; pixel patches (if any) will reconstruct non-uniform content
+            const tile = this.tm.getTile(t.tile);
+            tile.isDirty = true;
+            tile.isUniform = false;
+            tile.uniformColor = undefined;
+          }
+        }
+      }
+
+      // Pixel lists (write previous values)
+      if (patch.pixels) {
+        for (const px of patch.pixels) {
+          this.applyPixelList(px, true);
+        }
+      }
+    }
+
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) undo (patch)` });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+  }
+
+  public redoPatch(patch: LayerBufferPatch) {
+    setProjectStore('isProjectChangedAfterSave', true);
+
+    if (patch.whole) {
+      this.setBuffer(patch.whole.after, true, false);
+    } else {
+      // Tile fills first (apply new uniform color)
+      if (patch.tiles) {
+        for (const t of patch.tiles) {
+          const color: RGBAColor = [(t.after >> 16) & 0xff, (t.after >> 8) & 0xff, t.after & 0xff, (t.after >>> 24) & 0xff];
+          this.tm.fillWholeTile(t.tile, color, false);
+        }
+      }
+
+      // Pixel lists (apply new pixel values)
+      if (patch.pixels) {
+        for (const px of patch.pixels) {
+          this.applyPixelList(px, false);
+        }
+      }
+    }
+
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) redo (patch)` });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+  }
+
+  private applyPixelList(pxPatch: { tile: any; idx: Uint16Array; before: Uint32Array; after: Uint32Array }, useBefore: boolean) {
+    const tile = this.tm.getTile(pxPatch.tile);
+    const { x: ox, y: oy } = tile.getOffset();
+    const tileSize = this.tm.TILE_SIZE;
+    const w = this.pbm.width;
+    const h = this.pbm.height;
+    const buf = this.pbm.buffer;
+
+    // The tile becomes non-uniform when applying arbitrary pixels
+    tile.isDirty = true;
+    tile.isUniform = false;
+    tile.uniformColor = undefined;
+
+    const values = useBefore ? pxPatch.before : pxPatch.after;
+    const N = pxPatch.idx.length;
+    for (let i = 0; i < N; i++) {
+      const local = pxPatch.idx[i];
+      const dx = local % tileSize;
+      const dy = (local / tileSize) | 0;
+      const x = ox + dx;
+      const y = oy + dy;
+      if (x >= w || y >= h) continue; // guard for boundary tiles
+      const ptr = (y * w + x) * 4;
+
+      const packed = values[i] >>> 0; // ensure unsigned
+      buf[ptr] = (packed >> 16) & 0xff; // R
+      buf[ptr + 1] = (packed >> 8) & 0xff; // G
+      buf[ptr + 2] = packed & 0xff; // B
+      buf[ptr + 3] = (packed >>> 24) & 0xff; // A
+    }
   }
 }

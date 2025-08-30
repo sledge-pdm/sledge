@@ -4,9 +4,9 @@ import { Diff, DiffAction, getDiffHash, PixelDiff } from '~/controllers/history/
 export default class DiffManager {
   private currentDiffAction: DiffAction;
 
-  // バッチ処理用のバッファ
+  // Buffer for batched pixel diffs
   private pixelBatch: Map<number, PixelDiff> = new Map();
-  private batchSize = 100; // バッチサイズ
+  private batchSize = 100; // batch size
 
   constructor() {
     this.currentDiffAction = { diffs: new Map() };
@@ -17,7 +17,7 @@ export default class DiffManager {
   }
 
   public reset() {
-    // 残っているバッチを処理してからリセット
+    // Flush remaining batch before resetting
     this.flushPixelBatch();
     this.currentDiffAction = { diffs: new Map() };
   }
@@ -32,10 +32,10 @@ export default class DiffManager {
 
   private addSingle(diff: Diff) {
     if (diff.kind === 'pixel') {
-      // ピクセルdiffはバッチ処理
+      // Pixel diffs are batched
       this.addToPixelBatch(diff);
     } else {
-      // タイルやwholeは従来通り即座に処理
+      // Tile/whole diffs are applied immediately
       this.set(diff);
     }
   }
@@ -44,7 +44,7 @@ export default class DiffManager {
     const hash = getDiffHash(diff) as number;
     this.pixelBatch.set(hash, diff);
 
-    // バッチサイズに達したら処理
+    // Flush when the batch reaches threshold
     if (this.pixelBatch.size >= this.batchSize) {
       this.flushPixelBatch();
     }
@@ -53,7 +53,7 @@ export default class DiffManager {
   private flushPixelBatch() {
     if (this.pixelBatch.size === 0) return;
 
-    // バッチを一括処理
+    // Apply the batch to the current action
     for (const [hash, diff] of this.pixelBatch) {
       this.currentDiffAction.diffs.set(hash, diff);
     }
@@ -70,7 +70,7 @@ export default class DiffManager {
     return this.currentDiffAction.diffs.has(hash) || this.pixelBatch.has(hash);
   }
 
-  // 強制的にバッチを処理（描画完了時などに呼び出し）
+  // Force flush batch (e.g., at the end of a draw)
   public flush() {
     this.flushPixelBatch();
   }

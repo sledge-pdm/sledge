@@ -9,8 +9,9 @@ import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSiz
 import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
 import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
-import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { LayerBufferHistoryAction, LayerBufferPatch } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
+import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
@@ -102,15 +103,6 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
     | undefined = undefined;
   let icon = getIconForTool(context.tool);
   let description = '';
-  // export type HistoryActionTypes =
-  //   | 'canvas_size'
-  //   | 'color'
-  //   | 'image_pool'
-  //   | 'image_pool_entry_props'
-  //   | 'layer_buffer'
-  //   | 'layer_list'
-  //   | 'layer_props'
-  //   | 'unknown';
   switch (action.type) {
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
@@ -148,8 +140,24 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
       if (context.tool === 'fx') {
         description = `${findLayerById(lbaction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
       } else {
-        description = `${findLayerById(lbaction.layerId)?.name}/${lbaction.action.diffs.size} diffs`;
+        const patch = lbaction.actionOrPatch as LayerBufferPatch;
+        const pixels = patch.pixels
+          ? `${
+              patch.pixels.reduce((prev, pixelList) => {
+                prev += pixelList.idx.length;
+                return prev;
+              }, 0) ?? 0
+            } pixels`
+          : '';
+        const tiles = patch.tiles ? `${patch.tiles.length ?? 0} tiles` : '';
+        const whole = patch.whole ? `whole` : '';
+        description = `${findLayerById(lbaction.layerId)?.name} / ${[pixels, tiles, whole].join(' ')}`;
       }
+      break;
+    case 'layer_props':
+      icon = 'icons/misc/layer.png';
+      const lpaction = action as LayerPropsHistoryAction;
+      description = `${findLayerById(lpaction.layerId)?.name} props change`;
       break;
     default:
       description = '<unknown>';

@@ -66,7 +66,7 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       if (location) {
         setFileStore('location', 'path', location.path);
         const fileNameWithoutExt = fileStore.location.name?.split('.').slice(0, -1).join('.') ?? 'new project';
-        setFileStore('location', 'name', fileNameWithoutExt );
+        setFileStore('location', 'name', fileNameWithoutExt);
         // setLastSettingsStore('exportSettings', 'dirPath', location.path);
       }
       // @ts-ignore

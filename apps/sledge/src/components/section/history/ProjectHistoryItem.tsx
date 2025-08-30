@@ -13,7 +13,7 @@ import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBuf
 import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { findLayerById } from '~/controllers/layer/LayerListController';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
 import { toolCategories } from '~/tools/Tools';
 import { RGBAToHex } from '~/utils/ColorUtils';
 
@@ -34,7 +34,6 @@ const ProjectHistoryItem: Component = () => {
       };
     });
     const dispose = projectHistoryController.onChange((state) => {
-      console.log('changed!: ', projectHistoryController.getUndoStack(), projectHistoryController.getRedoStack());
       setHistoryStore((prev) => {
         return {
           undoStack: [...projectHistoryController.getUndoStack()],
@@ -47,14 +46,14 @@ const ProjectHistoryItem: Component = () => {
   });
 
   return (
-    <>
-      <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
+    <SectionItem title={`history`}>
+      <div class={sectionContent} style={{ gap: '8px', 'margin-bottom': '8px', 'padding-top': '8px' }}>
         <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
           <p style={{ color: vars.color.active }}>top = recent / bottom = oldest</p>
         </div>
-      </div>
-      <SectionItem title={`redo stack (${historyStore.redoStack.length})`}>
-        <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
+
+        <p class={sectionSubCaption}>redo stack ({historyStore.redoStack.length})</p>
+        <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
           <Show when={historyStore.redoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no redo stack &gt;</p>}>
             <For each={historyStore.redoStack}>
               {(action, i) => {
@@ -64,20 +63,15 @@ const ProjectHistoryItem: Component = () => {
             </For>
           </Show>
         </div>
-      </SectionItem>
-      {/* <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
-        <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-          <p style={{ color: vars.color.active }}>---present---</p>
-        </div>
-      </div> */}
-      <SectionItem title={`undo stack (${historyStore.undoStack.length})`}>
-        <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
+
+        <p class={sectionSubCaption}>{`undo stack (${historyStore.undoStack.length})`}</p>
+        <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
           <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
             <For each={historyStore.undoStack}>{(action, i) => <HistoryRow undo={true} action={action} index={i()} />}</For>
           </Show>
         </div>
-      </SectionItem>
-    </>
+      </div>
+    </SectionItem>
   );
 };
 
@@ -119,8 +113,9 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
   //   | 'unknown';
   switch (action.type) {
     case 'canvas_size':
-      icon = 'icons/misc/canvas_size_change.png';
       const csaction = action as CanvasSizeHistoryAction;
+      const bigger = csaction.newSize.width * csaction.newSize.height >= csaction.oldSize.width * csaction.oldSize.height;
+      icon = bigger ? 'icons/misc/canvas_size_bigger.png' : 'icons/misc/canvas_size_smaller.png';
       description = `${csaction.oldSize.width}x${csaction.oldSize.height} -> ${csaction.newSize.width}x${csaction.newSize.height}`;
       break;
     case 'image_pool':
@@ -144,6 +139,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
       };
       break;
     case 'layer_list':
+      icon = 'icons/misc/layer.png';
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.layerSnapshot?.name}`;
       break;
@@ -163,9 +159,9 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
     <div
       class={flexRow}
       style={{ 'box-sizing': 'border-box', height: 'auto', gap: '8px', 'align-items': 'center', overflow: 'hidden' }}
-      title={`${action.label}\n${JSON.stringify(action.context)}`}
+      title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}
     >
-      <p>{typeof index === 'function' ? index() : index}</p>
+      <p style={{ width: '18px' }}>{typeof index === 'function' ? index() : index}</p>
       {/* <div>
         <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
       </div> */}
@@ -183,7 +179,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
         </div>
       </Show>
       {/* <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p> */}
-      <p style={{ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', overflow: 'visible' }}>{description}</p>
+      <p style={{ 'white-space': 'pre-line', 'text-overflow': 'ellipsis', overflow: 'visible' }}>{description}</p>
     </div>
   );
 };

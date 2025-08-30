@@ -1,7 +1,6 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
-import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
@@ -76,21 +75,13 @@ const LayerList: Component<{}> = () => {
         },
         {
           src: '/icons/misc/minus_12.png',
-          onClick: async () => {
-            const ok = await confirm(`Sure to remove "${activeLayer().name}" ?\nYou can NOT restore this action.`, {
-              kind: 'warning',
-              title: 'Remove Layer',
-              cancelLabel: 'Cancel',
-              okLabel: 'Remove',
-            });
-            if (ok) {
-              const id = activeLayer()?.id;
-              if (id) {
-                // LayerListController.removeLayer already adds history; just call it
-                removeLayer(id);
-              }
-              setItems(allLayers());
+          onClick: () => {
+            const id = activeLayer()?.id;
+            if (id) {
+              // LayerListController.removeLayer already adds history; just call it
+              removeLayer(id);
             }
+            setItems(allLayers());
           },
           disabled: layerListStore.layers.length <= 1,
         },

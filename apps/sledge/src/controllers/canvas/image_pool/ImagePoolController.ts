@@ -40,18 +40,11 @@ export function setEntry(id: string, entry: ImagePoolEntry) {
   eventBus.emit('imagePool:entryPropChanged', { id });
 }
 
-interface ImagePoolEntryPropsOption {
-  noDiff?: boolean;
-}
-
-export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>, options?: ImagePoolEntryPropsOption) {
+export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
   const old = pool.get(id);
   if (!old) return;
   const updated = { ...old, ...patch } as ImagePoolEntry;
   pool.set(id, updated);
-  if (!options?.noDiff) {
-    projectHistoryController.addAction(new ImagePoolEntryPropsHistoryAction(id, old, updated, { from: 'ImagePoolController.removeEntry' }));
-  }
   eventBus.emit('imagePool:entryPropChanged', { id });
 }
 

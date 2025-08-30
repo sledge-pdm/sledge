@@ -1,4 +1,4 @@
-import { addToImagePool, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { insertEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 
@@ -8,8 +8,8 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
 
   constructor(
     public readonly kind: 'add' | 'remove',
-    public readonly targetEntry: ImagePoolEntry,
-    context?: any // ex: "By user interact with opacity slider"
+    public readonly targetEntry: ImagePoolEntry, // snapshot including id
+    context?: any
   ) {
     super(context);
   }
@@ -23,8 +23,8 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
         removeEntry(this.targetEntry.id);
         break;
       case 'remove':
-        // Re-add the removed entry
-        addToImagePool(this.targetEntry.originalPath);
+        // Re-add the removed entry with the same id
+        insertEntry(this.targetEntry);
         break;
     }
   }
@@ -32,7 +32,8 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
   redo(): void {
     switch (this.kind) {
       case 'add':
-        addToImagePool(this.targetEntry.originalPath);
+        // Redo add should add the same snapshot
+        insertEntry(this.targetEntry);
         break;
       case 'remove':
         // Remove the added entry

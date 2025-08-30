@@ -11,7 +11,7 @@ export class ColorHistoryAction extends BaseHistoryAction {
     public readonly palette: PaletteType,
     public readonly oldColor: RGBAColor,
     public readonly newColor: RGBAColor,
-    context?: any // ex: "By user interact with opacity slider"
+    context?: any
   ) {
     super(context);
   }

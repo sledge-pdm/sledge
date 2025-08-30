@@ -19,6 +19,12 @@ export const setImagePool = (entries: Map<string, ImagePoolEntry>) => {
 export const getEntries = (): ImagePoolEntry[] => Array.from(pool.values());
 export const getEntry = (id: string): ImagePoolEntry | undefined => pool.get(id);
 
+// Insert entry with a given id (used for undo/redo to keep id stable)
+export function insertEntry(entry: ImagePoolEntry) {
+  pool.set(entry.id, entry);
+  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
+}
+
 export function setEntry(id: string, entry: ImagePoolEntry) {
   pool.set(id, entry);
   eventBus.emit('imagePool:entryPropChanged', { id });

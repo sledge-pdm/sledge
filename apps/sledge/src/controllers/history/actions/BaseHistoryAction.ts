@@ -16,7 +16,8 @@ export abstract class BaseHistoryAction {
   abstract readonly type: HistoryActionTypes;
 
   constructor(
-    public readonly context?: any // The context for action (used for log etc)
+    public readonly context?: any, // The context for action (used for log etc)
+    public readonly label?: string // A short label for UI like "Undo: Brush" etc.
   ) {}
 
   abstract undo(): void;

@@ -10,7 +10,7 @@ export class ImagePoolEntryPropsHistoryAction extends BaseHistoryAction {
     public readonly entryId: string,
     public readonly oldEntryProps: Omit<ImagePoolEntry, 'id'>,
     public readonly newEntryProps: Omit<ImagePoolEntry, 'id'>,
-    context?: any // ex: "By user interact with opacity slider"
+    context?: any
   ) {
     super(context);
   }

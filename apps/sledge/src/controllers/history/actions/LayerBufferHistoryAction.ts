@@ -47,8 +47,17 @@ export const getDiffHash = (diff: Diff) => {
 };
 
 export type DiffAction = {
-  diffs: Map<string | number, Diff>;
+  // Array for persistence/serialization friendliness
+  diffs: Diff[];
 };
+
+function toMap(action: DiffAction): Map<string | number, Diff> {
+  const m = new Map<string | number, Diff>();
+  for (const d of action.diffs) {
+    m.set(getDiffHash(d), d);
+  }
+  return m;
+}
 
 // history action for layer buffer changes
 export class LayerBufferHistoryAction extends BaseHistoryAction {
@@ -89,8 +98,9 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
       // no more use this. bc agent undo is based on layer-level histories...
       // agent.undo();
 
+      // Convert array to Map for current agent API.
       // undoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
-      agent.undoAction(this.action);
+      agent.undoAction({ diffs: toMap(this.action) } as any);
     } else {
       console.log(`can't undo layer ${layerId}.`);
     }
@@ -114,9 +124,10 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
       console.log(`redo layer ${layerId}.`);
       // no more use this. bc agent undo is based on layer-level histories...
       // agent.redo();
-      
+
+      // Convert array to Map for current agent API.
       // redoAction emits 'webgl:requestUpdate' and 'preview:requestUpdate' actions itself!
-      agent.redoAction(this.action);
+      agent.redoAction({ diffs: toMap(this.action) } as any);
     } else {
       console.log(`can't redo layer ${layerId}.`);
     }

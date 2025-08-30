@@ -9,7 +9,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
   constructor(
     public readonly oldSize: Size2D,
     public readonly newSize: Size2D,
-    context?: any // ex: "By user interact with opacity slider"
+    context?: any
   ) {
     super(context);
   }

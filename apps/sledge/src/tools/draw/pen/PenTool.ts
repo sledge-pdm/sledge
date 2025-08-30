@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
@@ -192,6 +193,7 @@ export class PenTool implements ToolBehavior {
         agent.registerToHistory({ tool: this.categoryId });
         // Instead of agent.undo(true), we push the inverse diffs via project history by adding the before-side diffs again on top.
         // The LayerImageAgent.registerToHistory already mirrors to ProjectHistory, and redo/undo will apply accordingly.
+        projectHistoryController.hardUndo();
       } catch (error) {
         console.error('Failed to undo line preview:', error);
         // フォールバック: 手動でピクセルを復元

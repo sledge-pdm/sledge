@@ -13,7 +13,7 @@ import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { exportDialogCustomScaleInput, exportDialogField, exportDialogFieldDisabled } from '~/styles/dialogs/export_dialog.css';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
 
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
   { label: 'png', value: 'png' },

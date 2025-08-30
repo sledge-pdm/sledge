@@ -9,7 +9,7 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { saveButtonMainButton, saveButtonRoot, saveButtonSide } from '~/styles/globals/save_section.css';
 import { eventBus } from '~/utils/EventBus';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
 
 const SaveSection: Component = () => {
   const [isSaveMenuShown, setIsSaveMenuShown] = createSignal(false);

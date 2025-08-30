@@ -4,7 +4,7 @@ import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import getFileId from '~/utils/getFileId';
+import { getFileUniqueId } from '~/utils/FileUtils';
 
 // Plain Map でエントリーを管理
 const pool = new Map<string, ImagePoolEntry>();
@@ -84,7 +84,7 @@ export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
 }
 
 async function createEntry(originalPath: string) {
-  const id = await getFileId(originalPath);
+  const id = await getFileUniqueId(originalPath);
 
   // 画像サイズの取得（コピーせず読み込み）
   const bitmap = await loadLocalImage(originalPath);

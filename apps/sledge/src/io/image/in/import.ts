@@ -5,7 +5,7 @@ import { addLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
 
 export async function importImageFromPath(location: FileLocation): Promise<boolean> {
   if (!location || !location.path || !location.name) {

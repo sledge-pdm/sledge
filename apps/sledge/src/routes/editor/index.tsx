@@ -14,7 +14,7 @@ import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
-import { AutoSaveManager } from '~/controllers/project/AutoSaveManager';
+import { AutoSaveManager } from '~/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/io/config/load';
 import { importImageFromPath } from '~/io/image/in/import';
 import { readProjectFromPath } from '~/io/project/in/import';
@@ -24,7 +24,7 @@ import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
 import { getOpenLocation, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 

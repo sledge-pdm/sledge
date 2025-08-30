@@ -21,7 +21,7 @@ import {
   titleBarTitleSub,
 } from '~/styles/globals/title_bar.css';
 import '~/styles/globals/title_bar_region.css';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
 
 export default function TitleBar() {
   const [isMaximizable, setIsMaximizable] = createSignal(false);

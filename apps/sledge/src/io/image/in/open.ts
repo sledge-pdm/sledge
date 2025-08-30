@@ -3,7 +3,7 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { addLayer } from '~/controllers/layer/LayerListController';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
 
 export const initProjectWithNewImage = async (filePath: string, fileName: string) => {
   const imagePath = join(filePath, fileName);

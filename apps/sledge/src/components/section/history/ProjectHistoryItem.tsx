@@ -10,21 +10,21 @@ import { sectionContent } from '~/styles/section/section_item.css';
 
 const ProjectHistoryItem: Component = () => {
   const [historyStore, setHistoryStore] = createStore({
-    history: projectHistoryController.getHistory(),
+    undoStack: projectHistoryController.getUndoStack(),
     redoStack: projectHistoryController.getRedoStack(),
   });
 
   onMount(() => {
     setHistoryStore((prev) => {
       return {
-        history: projectHistoryController.getHistory(),
+        undoStack: projectHistoryController.getUndoStack(),
         redoStack: projectHistoryController.getRedoStack(),
       };
     });
     projectHistoryController.onChange((state) => {
       setHistoryStore((prev) => {
         return {
-          history: projectHistoryController.getHistory(),
+          undoStack: projectHistoryController.getUndoStack(),
           redoStack: projectHistoryController.getRedoStack(),
         };
       });
@@ -34,8 +34,8 @@ const ProjectHistoryItem: Component = () => {
   return (
     <SectionItem title={'project'}>
       <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
-        <Show when={historyStore.history.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
-          <For each={historyStore.history}>{(action, i) => <HistoryRow undo={true} action={action} />}</For>
+        <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
+          <For each={historyStore.undoStack}>{(action, i) => <HistoryRow undo={true} action={action} />}</For>
         </Show>
 
         <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>

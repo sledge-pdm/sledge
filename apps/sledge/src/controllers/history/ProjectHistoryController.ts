@@ -2,7 +2,7 @@ import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryActi
 
 // new history controller for project-level history
 export class ProjectHistoryController {
-  private history: BaseHistoryAction[] = [];
+  private undoStack: BaseHistoryAction[] = [];
   private redoStack: BaseHistoryAction[] = [];
   private listeners: Set<(state: { canUndo: boolean; canRedo: boolean; lastLabel?: string }) => void> = new Set();
 
@@ -10,8 +10,8 @@ export class ProjectHistoryController {
     // Initialize the history controller
   }
 
-  getHistory(): BaseHistoryAction[] {
-    return this.history;
+  getUndoStack(): BaseHistoryAction[] {
+    return this.undoStack;
   }
 
   getRedoStack(): BaseHistoryAction[] {
@@ -19,13 +19,13 @@ export class ProjectHistoryController {
   }
 
   addAction(action: BaseHistoryAction): void {
-    this.history.push(action);
+    this.undoStack.push(action);
     this.redoStack = [];
     this.emitChange();
   }
 
   undo(): void {
-    const action = this.history.pop();
+    const action = this.undoStack.pop();
     if (action) {
       action.undo();
       this.redoStack.push(action);
@@ -37,13 +37,13 @@ export class ProjectHistoryController {
     const action = this.redoStack.pop();
     if (action) {
       action.redo();
-      this.history.push(action);
+      this.undoStack.push(action);
       this.emitChange();
     }
   }
 
   canUndo(): boolean {
-    return this.history.length > 0;
+    return this.undoStack.length > 0;
   }
 
   canRedo(): boolean {
@@ -53,12 +53,12 @@ export class ProjectHistoryController {
   onChange(listener: (state: { canUndo: boolean; canRedo: boolean; lastLabel?: string }) => void): () => void {
     this.listeners.add(listener);
     // emit initial
-    listener({ canUndo: this.canUndo(), canRedo: this.canRedo(), lastLabel: this.history[this.history.length - 1]?.label });
+    listener({ canUndo: this.canUndo(), canRedo: this.canRedo(), lastLabel: this.undoStack[this.undoStack.length - 1]?.label });
     return () => this.listeners.delete(listener);
   }
 
   private emitChange() {
-    const lastLabel = this.history[this.history.length - 1]?.label;
+    const lastLabel = this.undoStack[this.undoStack.length - 1]?.label;
     const snapshot = { canUndo: this.canUndo(), canRedo: this.canRedo(), lastLabel };
     this.listeners.forEach((l) => l(snapshot));
   }

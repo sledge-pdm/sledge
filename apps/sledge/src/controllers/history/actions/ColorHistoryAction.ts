@@ -17,10 +17,10 @@ export class ColorHistoryAction extends BaseHistoryAction {
   }
 
   undo(): void {
-    setColor(this.palette, RGBAToHex(this.oldColor));
+    setColor(this.palette, `#${RGBAToHex(this.oldColor, true)}`);
   }
 
   redo(): void {
-    setColor(this.palette, RGBAToHex(this.newColor));
+    setColor(this.palette, `#${RGBAToHex(this.newColor, true)}`);
   }
 }

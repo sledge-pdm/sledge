@@ -105,6 +105,7 @@ export default function Editor() {
         name: undefined,
         path: undefined,
       });
+      setFileStore('extension', 'sledge');
 
       if (sp.has('width') && sp.has('height')) {
         const width = Number(sp.get('width'));

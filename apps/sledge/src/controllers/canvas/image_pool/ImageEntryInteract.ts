@@ -309,7 +309,7 @@ class ImageEntryInteract {
         scaleY: startPayload.scaleY,
       },
     };
-    const startEntry = {...entry, ...startPartialData} as ImagePoolEntry;
+    const startEntry = { ...entry, ...startPartialData } as ImagePoolEntry;
 
     const payload = {
       x: entry.x,
@@ -330,10 +330,12 @@ class ImageEntryInteract {
         scaleY: payload.scaleY,
       },
     };
-    const endEntry = {...entry, ...partialData} as ImagePoolEntry;
+    const endEntry = { ...entry, ...partialData } as ImagePoolEntry;
 
     if (JSON.stringify(startPayload) !== JSON.stringify(payload)) {
-      projectHistoryController.addAction(new ImagePoolEntryPropsHistoryAction(entry.id, startEntry, endEntry, { from: 'ImageEntryInteract.commitDiff' }));
+      projectHistoryController.addAction(
+        new ImagePoolEntryPropsHistoryAction(entry.id, startEntry, endEntry, { from: 'ImageEntryInteract.commitDiff' })
+      );
     }
   }
 

@@ -1,6 +1,5 @@
 import { Vec2 } from '@sledge/core';
 import { PixelDiff } from '~/controllers/history/actions/LayerBufferHistoryAction';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
@@ -185,24 +184,16 @@ export class PenTool implements ToolBehavior {
   private undoLastLineDiff(agent: LayerImageAgent) {
     const dm = agent.getDiffManager();
     // 前回のプレビューが残っていた場合はundo
-    if (this.lastPreviewDiff.length > 0) {
-      try {
-        dm.add(this.lastPreviewDiff);
-        dm.flush();
-        // Register the preview diffs as a history action and then push a compensating action
-        agent.registerToHistory({ tool: this.categoryId });
-        // Instead of agent.undo(true), we push the inverse diffs via project history by adding the before-side diffs again on top.
-        // The LayerImageAgent.registerToHistory already mirrors to ProjectHistory, and redo/undo will apply accordingly.
-        projectHistoryController.hardUndo();
-      } catch (error) {
-        console.error('Failed to undo line preview:', error);
-        // フォールバック: 手動でピクセルを復元
-        this.lastPreviewDiff.forEach((diff) => {
-          agent.setPixel(diff.position, diff.before, false);
-        });
-      } finally {
-        this.lastPreviewDiff = [];
+    if (this.lastPreviewDiff.length === 0) return;
+    try {
+      for (const diff of this.lastPreviewDiff) {
+        // apply 'before' color; skipExistingDiffCheck=true to ensure applying
+        agent.setPixel(diff.position, diff.before, true);
       }
+    } catch (error) {
+      console.error('Failed to undo line preview:', error);
+    } finally {
+      this.lastPreviewDiff = [];
     }
   }
 

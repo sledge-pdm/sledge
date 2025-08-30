@@ -1,6 +1,5 @@
 import { readFile } from '@tauri-apps/plugin-fs';
 
-
 export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

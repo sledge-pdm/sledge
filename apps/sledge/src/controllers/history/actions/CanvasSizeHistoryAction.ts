@@ -1,6 +1,5 @@
 import { Size2D } from '@sledge/core';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { getAgentOf, getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { allLayers } from '~/controllers/layer/LayerListController';

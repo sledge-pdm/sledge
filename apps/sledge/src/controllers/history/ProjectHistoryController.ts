@@ -33,16 +33,6 @@ export class ProjectHistoryController {
     }
   }
 
-  // undo that doesn't push to redo stack
-  // for preview use etc
-  hardUndo(): void {
-    const action = this.undoStack.pop();
-    if (action) {
-      action.undo();
-      this.emitChange();
-    }
-  }
-
   redo(): void {
     const action = this.redoStack.pop();
     if (action) {

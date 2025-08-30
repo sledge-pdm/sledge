@@ -60,9 +60,13 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       console.log('project saved to:', selectedPath);
       addRecentFile(pathToFileLocation(selectedPath));
 
+      setFileStore('openAs', 'project');
+      setFileStore('extension', 'sledge');
       const location = pathToFileLocation(selectedPath);
       if (location) {
-        setFileStore('location', location);
+        setFileStore('location', 'path', location.path);
+        const fileNameWithoutExt = fileStore.location.name?.split('.').slice(0, -1).join('.') ?? 'new project';
+        setFileStore('location', 'name', fileNameWithoutExt );
         // setLastSettingsStore('exportSettings', 'dirPath', location.path);
       }
       // @ts-ignore

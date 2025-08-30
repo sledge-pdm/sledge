@@ -3,9 +3,6 @@ import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
-import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { BlendModeOptions } from '~/models/layer/Layer';
@@ -59,17 +56,7 @@ const LayerList: Component<{}> = () => {
         {
           src: '/icons/misc/plus_12.png',
           onClick: () => {
-            const l = addLayer(
-              { name: 'layer1' },
-              {
-                noDiff: true,
-              }
-            );
-            if (l) {
-              projectHistoryController.addAction(
-                new LayerListHistoryAction('add', 0, { ...l, buffer: getBufferOf(l.id) } as any, undefined, undefined, { from: 'LayerList.add' })
-              );
-            }
+            addLayer({ name: 'layer1' });
             setItems(allLayers());
           },
         },

@@ -25,6 +25,8 @@ type ColorStore = {
   swatches: string[];
 };
 type FileStore = {
+  openAs: 'project' | 'image';
+  extension: string;
   location: FileLocation;
 };
 type InteractStore = {
@@ -82,6 +84,8 @@ const defaultColorStore: ColorStore = {
   swatches: ['#000000', '#FFFFFF', '#ffff00', '#00ffff', '#00ff00', '#ff00ff', '#ff0000', '#0000ff', '#000080', '#400080'],
 };
 const defaultFileStore: FileStore = {
+  openAs: 'project',
+  extension: 'sledge',
   location: {
     name: undefined,
     path: undefined,

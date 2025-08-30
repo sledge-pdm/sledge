@@ -1,11 +1,13 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { Component, For, onMount, Show } from 'solid-js';
+import { Accessor, Component, createMemo, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
+import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
+import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
 import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
@@ -45,21 +47,37 @@ const ProjectHistoryItem: Component = () => {
   });
 
   return (
-    <SectionItem title={'project'}>
+    <>
       <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
-        <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
-          <For each={historyStore.undoStack}>{(action, i) => <HistoryRow undo={true} action={action} />}</For>
-        </Show>
-
+        <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
+          <p style={{ color: vars.color.active }}>top = recent / bottom = oldest</p>
+        </div>
+      </div>
+      <SectionItem title={`redo stack (${historyStore.redoStack.length})`}>
+        <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
+          <Show when={historyStore.redoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no redo stack &gt;</p>}>
+            <For each={historyStore.redoStack}>
+              {(action, i) => {
+                const index = createMemo(() => historyStore.redoStack.length - i() - 1);
+                return <HistoryRow undo={false} action={action} index={index} />;
+              }}
+            </For>
+          </Show>
+        </div>
+      </SectionItem>
+      {/* <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
         <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
           <p style={{ color: vars.color.active }}>---present---</p>
         </div>
-
-        <Show when={historyStore.redoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no redo stack &gt;</p>}>
-          <For each={historyStore.redoStack}>{(action, i) => <HistoryRow undo={false} action={action} />}</For>
-        </Show>
-      </div>
-    </SectionItem>
+      </div> */}
+      <SectionItem title={`undo stack (${historyStore.undoStack.length})`}>
+        <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px', 'flex-direction': 'column-reverse' }}>
+          <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
+            <For each={historyStore.undoStack}>{(action, i) => <HistoryRow undo={true} action={action} index={i()} />}</For>
+          </Show>
+        </div>
+      </SectionItem>
+    </>
   );
 };
 
@@ -80,7 +98,7 @@ function getIconForTool(tool?: string) {
   return '';
 }
 
-const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ undo = true, action }) => {
+const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({ undo = true, action, index }) => {
   const { context } = action;
   let colorIcon:
     | {
@@ -90,11 +108,30 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ 
     | undefined = undefined;
   let icon = getIconForTool(context.tool);
   let description = '';
-
+  // export type HistoryActionTypes =
+  //   | 'canvas_size'
+  //   | 'color'
+  //   | 'image_pool'
+  //   | 'image_pool_entry_props'
+  //   | 'layer_buffer'
+  //   | 'layer_list'
+  //   | 'layer_props'
+  //   | 'unknown';
   switch (action.type) {
+    case 'canvas_size':
+      icon = 'icons/misc/canvas_size_change.png';
+      const csaction = action as CanvasSizeHistoryAction;
+      description = `${csaction.oldSize.width}x${csaction.oldSize.height} -> ${csaction.newSize.width}x${csaction.newSize.height}`;
+      break;
     case 'image_pool':
+      icon = 'icons/misc/image.png';
       const ipaction = action as ImagePoolHistoryAction;
       description = `${ipaction.kind} -> ${ipaction.targetEntry.fileName}`;
+      break;
+    case 'image_pool_entry_props':
+      icon = 'icons/misc/image.png';
+      const ipepaction = action as ImagePoolEntryPropsHistoryAction;
+      description = `${ipepaction.newEntryProps.fileName}`;
       break;
     case 'color':
       const claction = action as ColorHistoryAction;
@@ -123,7 +160,12 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ 
   }
 
   return (
-    <div class={flexRow} style={{ height: 'auto', gap: '8px', 'align-items': 'center' }} title={`${action.label}\n${JSON.stringify(action.context)}`}>
+    <div
+      class={flexRow}
+      style={{ 'box-sizing': 'border-box', height: 'auto', gap: '8px', 'align-items': 'center', overflow: 'hidden' }}
+      title={`${action.label}\n${JSON.stringify(action.context)}`}
+    >
+      <p>{typeof index === 'function' ? index() : index}</p>
       {/* <div>
         <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
       </div> */}
@@ -141,7 +183,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction }> = ({ 
         </div>
       </Show>
       {/* <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p> */}
-      <p style={{ width: '100%' }}>{description}</p>
+      <p style={{ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', overflow: 'visible' }}>{description}</p>
     </div>
   );
 };

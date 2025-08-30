@@ -27,6 +27,8 @@ class ImageEntryInteract {
   private lastTs = 0;
   private pending: { x: number; y: number; scaleX: number; scaleY: number } | undefined;
 
+  private lastPartialData: Partial<ImagePoolEntry> | undefined = undefined;
+
   private enqueueUpdate(next: { x: number; y: number; scaleX: number; scaleY: number }) {
     this.pending = next; // overwrite with the latest
     if (!this.rafScheduled) {
@@ -50,7 +52,7 @@ class ImageEntryInteract {
     if (!payload) return;
     const entry = this.getEntry();
     if (!entry) return;
-    updateEntryPartial(entry.id, {
+    const partialData = {
       x: payload.x,
       y: payload.y,
       // legacy representative scale
@@ -61,7 +63,11 @@ class ImageEntryInteract {
         scaleX: payload.scaleX,
         scaleY: payload.scaleY,
       },
-    }, { noDiff: true });
+    };
+    if (JSON.stringify(partialData) !== JSON.stringify(this.lastPartialData)) {
+      updateEntryPartial(entry.id, partialData, { noDiff: true });
+    }
+    this.lastPartialData = partialData;
   };
   private resizePos: ResizePos | undefined;
 
@@ -279,17 +285,42 @@ class ImageEntryInteract {
     }
   };
 
+  private readonly ignoreCommitProps: (keyof ImagePoolEntry)[] = [];
+
+  private commitDiff(entry: ImagePoolEntry) {
+    if (JSON.stringify(entry) !== JSON.stringify(this.lastPartialData)) {
+      updateEntryPartial(entry.id, entry, { noDiff: false });
+    }
+    this.lastPartialData = undefined;
+  }
+
+  private onWindowPointerUp = (e: PointerEvent) => {
+    const entry = this.getEntry();
+    if (!entry) return;
+    this.commitDiff(entry);
+  };
+
+  private onWindowPointerCancel = (e: PointerEvent) => {
+    const entry = this.getEntry();
+    if (!entry) return;
+    this.commitDiff(entry);
+  };
+
   public setInteractListeners() {
     this.removeInteractListeners();
     this.svgRoot.addEventListener('pointerdown', this.handlePointerDown);
     this.svgRoot.addEventListener('pointermove', this.handlePointerMove);
     this.svgRoot.addEventListener('pointerup', this.handlePointerUp);
+    window.addEventListener('pointerup', this.onWindowPointerUp);
+    window.addEventListener('pointercancel', this.onWindowPointerCancel);
   }
 
   public removeInteractListeners() {
     this.svgRoot.removeEventListener('pointerdown', this.handlePointerDown);
     this.svgRoot.removeEventListener('pointermove', this.handlePointerMove);
     this.svgRoot.removeEventListener('pointerup', this.handlePointerUp);
+    window.removeEventListener('pointerup', this.onWindowPointerUp);
+    window.removeEventListener('pointercancel', this.onWindowPointerCancel);
   }
 }
 

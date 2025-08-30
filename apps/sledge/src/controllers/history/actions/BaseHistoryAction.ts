@@ -6,7 +6,7 @@ export type HistoryActionTypes =
   | 'layer_buffer'
   | 'layer_list'
   | 'layer_props'
-  | 'OtherHistoryActionType';
+  | 'unknown';
 
 // not in use for now
 type UnusedHistoryActionTypes = 'project' | 'interact_move' | 'section_resize';

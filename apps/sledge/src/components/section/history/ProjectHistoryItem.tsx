@@ -118,7 +118,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
     case 'image_pool_entry_props':
       icon = 'icons/misc/image.png';
       const ipepaction = action as ImagePoolEntryPropsHistoryAction;
-      description = `${ipepaction.newEntryProps.fileName}`;
+      description = `${ipepaction.newEntryProps.fileName} transform`;
       break;
     case 'color':
       const claction = action as ColorHistoryAction;
@@ -157,7 +157,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
     case 'layer_props':
       icon = 'icons/misc/layer.png';
       const lpaction = action as LayerPropsHistoryAction;
-      description = `${findLayerById(lpaction.layerId)?.name} props change`;
+      description = `${findLayerById(lpaction.layerId)?.name} ${context.propName}: ${context.before} > ${context.after}`;
       break;
     default:
       description = '<unknown>';

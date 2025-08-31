@@ -48,6 +48,9 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   if (!options?.noDiff) {
     const act = new LayerPropsHistoryAction(layerId, before, after, {
       from: `LayerController.setLayerProp(${String(propName)}: ${String(beforeValue)} > ${String(newValue)})`,
+      propName,
+      before: String(beforeValue),
+      after: String(newValue),
     });
     projectHistoryController.addAction(act);
   }

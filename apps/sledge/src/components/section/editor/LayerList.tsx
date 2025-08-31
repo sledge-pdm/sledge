@@ -136,6 +136,9 @@ const LayerList: Component<{}> = () => {
                     const { id: _id2, ...afterProps } = latest as any;
                     const act = new LayerPropsHistoryAction(opacityHistoryLayerId, opacityHistoryBefore as any, afterProps as any, {
                       from: 'LayerList.opacitySlider(debounced 500ms)',
+                      propName: 'opacity',
+                      before: String(opacityHistoryBefore.opacity),
+                      after: String(afterProps.opacity),
                     });
                     projectHistoryController.addAction(act);
                   } finally {

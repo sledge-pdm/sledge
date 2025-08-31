@@ -94,7 +94,7 @@ function getIconForTool(tool?: string) {
 }
 
 const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({ undo = true, action, index }) => {
-  const { context } = action;
+  const { context } = action ?? {};
   let colorIcon:
     | {
         old: string;

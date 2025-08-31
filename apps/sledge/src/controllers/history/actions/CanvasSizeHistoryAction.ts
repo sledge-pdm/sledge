@@ -1,4 +1,5 @@
 import { Size2D } from '@sledge/core';
+import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
 import { getAgentOf, getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
@@ -57,6 +58,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
     });
     // Update canvas store and notify listeners
     setCanvasStore('canvas', size);
+    adjustZoomToFit();
     eventBus.emit('canvas:sizeChanged', { newSize: size });
   }
 

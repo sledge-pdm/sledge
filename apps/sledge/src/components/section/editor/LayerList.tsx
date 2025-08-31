@@ -1,17 +1,18 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
-import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
+import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
-import { useLongPressReorder } from '~/hooks/useLongPressReorder';
 import { BlendModeOptions } from '~/models/layer/Layer';
 import { layerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/editor/layer.css';
 import { sectionContent } from '~/styles/section/section_item.css';
 import { listenEvent } from '~/utils/TauriUtils';
+import { useLongPressReorder } from '~/utils/useLongPressReorder';
 import BaseLayerItem from './item/BaseLayerItem';
 import LayerItem from './item/LayerItem';
 
@@ -38,6 +39,10 @@ const LayerList: Component<{}> = () => {
 
   // DnD hook wiring
   let listRef: HTMLDivElement | undefined;
+  // Debounce state for opacity change history aggregation
+  let opacityCommitTimer: number | undefined;
+  let opacityHistoryBefore: Omit<ReturnType<typeof activeLayer>, 'id'> | null = null;
+  let opacityHistoryLayerId: string | null = null;
   const dnd = useLongPressReorder({
     getItems: items,
     getId: (l) => l.id,
@@ -55,25 +60,21 @@ const LayerList: Component<{}> = () => {
       title='layers.'
       subHeaderIcons={[
         {
-          src: '/icons/misc/add.png',
+          src: '/icons/misc/plus_12.png',
           onClick: () => {
             addLayer({ name: 'layer1' });
             setItems(allLayers());
           },
         },
         {
-          src: '/icons/misc/remove_minus.png',
-          onClick: async () => {
-            const ok = await confirm(`Sure to remove "${activeLayer().name}" ?\nYou can NOT restore this action.`, {
-              kind: 'warning',
-              title: 'Remove Layer',
-              cancelLabel: 'Cancel',
-              okLabel: 'Remove',
-            });
-            if (ok) {
-              removeLayer(activeLayer()?.id);
-              setItems(allLayers());
+          src: '/icons/misc/minus_12.png',
+          onClick: () => {
+            const id = activeLayer()?.id;
+            if (id) {
+              // LayerListController.removeLayer already adds history; just call it
+              removeLayer(id);
             }
+            setItems(allLayers());
           },
           disabled: layerListStore.layers.length <= 1,
         },
@@ -110,9 +111,42 @@ const LayerList: Component<{}> = () => {
               min={0}
               max={1}
               allowFloat={true}
+              floatSignificantDigits={2}
               labelMode={'none'}
               onChange={(newValue) => {
-                setLayerProp(activeLayer().id, 'opacity', newValue);
+                // Debounced history: apply change immediately without diff, then commit once after 500ms idle
+                const layer = activeLayer();
+                // capture BEFORE snapshot only at the beginning of a burst
+                if (!opacityCommitTimer) {
+                  const { id: _id, ...beforeProps } = layer as any;
+                  opacityHistoryBefore = beforeProps;
+                  opacityHistoryLayerId = layer.id;
+                }
+
+                setLayerProp(layer.id, 'opacity', newValue, {
+                  noDiff: true, // Don't record per-change: commit a single history entry after debounce
+                });
+
+                if (opacityCommitTimer) window.clearTimeout(opacityCommitTimer);
+                opacityCommitTimer = window.setTimeout(() => {
+                  try {
+                    if (!opacityHistoryLayerId || !opacityHistoryBefore) return;
+                    const latest = layerListStore.layers.find((l) => l.id === opacityHistoryLayerId);
+                    if (!latest) return;
+                    const { id: _id2, ...afterProps } = latest as any;
+                    const act = new LayerPropsHistoryAction(opacityHistoryLayerId, opacityHistoryBefore as any, afterProps as any, {
+                      from: 'LayerList.opacitySlider(debounced 500ms)',
+                      propName: 'opacity',
+                      before: String(opacityHistoryBefore.opacity),
+                      after: String(afterProps.opacity),
+                    });
+                    projectHistoryController.addAction(act);
+                  } finally {
+                    opacityCommitTimer = undefined as any;
+                    opacityHistoryBefore = null;
+                    opacityHistoryLayerId = null;
+                  }
+                }, 200) as any;
               }}
             />
           </div>

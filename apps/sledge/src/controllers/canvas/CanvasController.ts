@@ -71,7 +71,8 @@ export async function changeCanvasSize(newSize: Size2D): Promise<boolean> {
 
 const referenceLengthRatio = 0.75;
 const referenceLength = () => {
-  const sectionBetweenArea = document.getElementById('sections-between-area')!;
+  const sectionBetweenArea = document.getElementById('sections-between-area');
+  if (sectionBetweenArea === null) return 800 * referenceLengthRatio;
   const areaBound = sectionBetweenArea.getBoundingClientRect();
 
   if (areaBound.width < areaBound.height) {

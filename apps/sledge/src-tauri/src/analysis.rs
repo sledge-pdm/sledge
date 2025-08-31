@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sysinfo::{get_current_pid, ProcessesToUpdate, System};
+use sysinfo::{ProcessesToUpdate, System, get_current_pid};
 
 #[derive(Serialize)]
 pub struct ProcessMem {
@@ -17,7 +17,13 @@ pub async fn get_process_memory() -> ProcessMem {
     match tauri::async_runtime::spawn_blocking(|| {
         let pid = match get_current_pid() {
             Ok(p) => p,
-            Err(_) => return ProcessMem { total_bytes: 0, main_bytes: 0, children_bytes: 0 },
+            Err(_) => {
+                return ProcessMem {
+                    total_bytes: 0,
+                    main_bytes: 0,
+                    children_bytes: 0,
+                };
+            }
         };
 
         let mut sys = System::new_all();
@@ -41,11 +47,19 @@ pub async fn get_process_memory() -> ProcessMem {
             }
         }
 
-        ProcessMem { total_bytes: main + children, main_bytes: main, children_bytes: children }
+        ProcessMem {
+            total_bytes: main + children,
+            main_bytes: main,
+            children_bytes: children,
+        }
     })
     .await
     {
         Ok(mem) => mem,
-        Err(_) => ProcessMem { total_bytes: 0, main_bytes: 0, children_bytes: 0 },
+        Err(_) => ProcessMem {
+            total_bytes: 0,
+            main_bytes: 0,
+            children_bytes: 0,
+        },
     }
 }

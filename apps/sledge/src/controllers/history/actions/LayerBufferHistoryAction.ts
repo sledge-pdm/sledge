@@ -5,7 +5,6 @@ import { selectionManager } from '~/controllers/selection/SelectionManager';
 import { cancelMove } from '~/controllers/selection/SelectionOperator';
 import { RGBAColor } from '~/utils/ColorUtils';
 
-
 // Packed color helpers (AABBGGRR or similar). We'll use little-endian RR GG BB AA for clarity in JS.
 export type PackedRGBA = number; // 0xAARRGGBB
 export const packRGBA = (c: RGBAColor): PackedRGBA => (c[3] << 24) | (c[0] << 16) | (c[1] << 8) | c[2];

@@ -23,13 +23,13 @@ export const getEntries = (): ImagePoolEntry[] => Array.from(pool.values());
 export const getEntry = (id: string): ImagePoolEntry | undefined => pool.get(id);
 
 // Insert entry with a given id (used for undo/redo to keep id stable)
-export function insertEntry(entry: ImagePoolEntry) {
+export function insertEntry(entry: ImagePoolEntry, noDiff?: boolean) {
   let old = undefined;
   if (pool.has(entry.id)) {
     old = pool.get(entry.id);
   }
   pool.set(entry.id, entry);
-  if (old && JSON.stringify(old) !== JSON.stringify(entry)) {
+  if (!noDiff && old && JSON.stringify(old) !== JSON.stringify(entry)) {
     projectHistoryController.addAction(new ImagePoolEntryPropsHistoryAction(entry.id, old, entry, { from: 'ImagePoolController.removeEntry' }));
   }
   eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
@@ -48,13 +48,13 @@ export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
   eventBus.emit('imagePool:entryPropChanged', { id });
 }
 
-export function removeEntry(id: string) {
+export function removeEntry(id: string, noDiff?: boolean) {
   const entry = getEntry(id);
   if (!entry) {
     console.warn(`ImagePoolController.removeEntry: Entry not found for id ${id}`);
     return;
   }
-  projectHistoryController.addAction(new ImagePoolHistoryAction('remove', entry, { from: 'ImagePoolController.removeEntry' }));
+  if (!noDiff) projectHistoryController.addAction(new ImagePoolHistoryAction('remove', entry, { from: 'ImagePoolController.removeEntry' }));
 
   if (pool.delete(id)) {
     selectEntry(undefined);

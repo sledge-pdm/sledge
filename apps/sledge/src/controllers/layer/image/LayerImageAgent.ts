@@ -34,16 +34,15 @@ export default class LayerImageAgent {
     width: number,
     height: number
   ) {
-  this.pbm = new PixelBufferManager(buffer, width, height);
-  this.tm = new TileManager(
+    this.pbm = new PixelBufferManager(buffer, width, height);
+    this.tm = new TileManager(
       width,
       height,
       (position: Vec2) => this.pbm.getPixel(position),
       (i: number, v: number) => (this.pbm.buffer[i] = v),
-      (index: TileIndex, uniformColor: RGBAColor | undefined, fillColor: RGBAColor) =>
-        this.dm.addTileFill(index, uniformColor, fillColor)
+      (index: TileIndex, uniformColor: RGBAColor | undefined, fillColor: RGBAColor) => this.dm.addTileFill(index, uniformColor, fillColor)
     );
-  this.dm = new DiffManager(this.tm);
+    this.dm = new DiffManager(this.tm);
   }
 
   getBuffer(): Uint8ClampedArray {
@@ -92,13 +91,11 @@ export default class LayerImageAgent {
     this.dm.reset();
   }
 
-
-
   public setPixel(position: Vec2, color: RGBAColor, skipExistingDiffCheck: boolean): { before: RGBAColor; after: RGBAColor } | undefined {
     setProjectStore('isProjectChangedAfterSave', true);
     if (!this.pbm.isInBounds(position)) return undefined;
     if (!skipExistingDiffCheck && this.dm.isDiffExists(position)) return undefined;
-  const result = this.pbm.setRawPixel(position, color);
+    const result = this.pbm.setRawPixel(position, color);
     if (result !== undefined) {
       const tileIndex = this.tm.getTileIndex(position);
       this.tm.tiles[tileIndex.row][tileIndex.column].isDirty = true;
@@ -109,7 +106,7 @@ export default class LayerImageAgent {
         this.tm.tiles[tileIndex.row][tileIndex.column].uniformColor = undefined;
       }
     }
-  return result;
+    return result;
   }
 
   // Apply new SoA patch format (undo path uses "before", redo uses "after").

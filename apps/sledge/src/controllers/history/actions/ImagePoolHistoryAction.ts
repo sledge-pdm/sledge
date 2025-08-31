@@ -20,11 +20,11 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
     switch (this.kind) {
       case 'add':
         // Remove the added entry
-        removeEntry(this.targetEntry.id);
+        removeEntry(this.targetEntry.id, true);
         break;
       case 'remove':
         // Re-add the removed entry with the same id
-        insertEntry(this.targetEntry);
+        insertEntry(this.targetEntry, true);
         break;
     }
   }
@@ -33,11 +33,11 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
     switch (this.kind) {
       case 'add':
         // Redo add should add the same snapshot
-        insertEntry(this.targetEntry);
+        insertEntry(this.targetEntry, true);
         break;
       case 'remove':
         // Remove the added entry
-        removeEntry(this.targetEntry.id);
+        removeEntry(this.targetEntry.id, true);
         break;
     }
   }

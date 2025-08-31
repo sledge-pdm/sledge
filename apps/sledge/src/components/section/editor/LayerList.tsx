@@ -3,6 +3,8 @@ import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
+import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { setLayerProp } from '~/controllers/layer/LayerController';
 import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
 import { BlendModeOptions } from '~/models/layer/Layer';
@@ -37,6 +39,10 @@ const LayerList: Component<{}> = () => {
 
   // DnD hook wiring
   let listRef: HTMLDivElement | undefined;
+  // Debounce state for opacity change history aggregation
+  let opacityCommitTimer: number | undefined;
+  let opacityHistoryBefore: Omit<ReturnType<typeof activeLayer>, 'id'> | null = null;
+  let opacityHistoryLayerId: string | null = null;
   const dnd = useLongPressReorder({
     getItems: items,
     getId: (l) => l.id,
@@ -108,9 +114,36 @@ const LayerList: Component<{}> = () => {
               floatSignificantDigits={2}
               labelMode={'none'}
               onChange={(newValue) => {
-                setLayerProp(activeLayer().id, 'opacity', newValue, {
-                  noDiff: true,
+                // Debounced history: apply change immediately without diff, then commit once after 500ms idle
+                const layer = activeLayer();
+                // capture BEFORE snapshot only at the beginning of a burst
+                if (!opacityCommitTimer) {
+                  const { id: _id, ...beforeProps } = layer as any;
+                  opacityHistoryBefore = beforeProps;
+                  opacityHistoryLayerId = layer.id;
+                }
+
+                setLayerProp(layer.id, 'opacity', newValue, {
+                  noDiff: true, // Don't record per-change: commit a single history entry after debounce
                 });
+
+                if (opacityCommitTimer) window.clearTimeout(opacityCommitTimer);
+                opacityCommitTimer = window.setTimeout(() => {
+                  try {
+                    if (!opacityHistoryLayerId || !opacityHistoryBefore) return;
+                    const latest = layerListStore.layers.find((l) => l.id === opacityHistoryLayerId);
+                    if (!latest) return;
+                    const { id: _id2, ...afterProps } = latest as any;
+                    const act = new LayerPropsHistoryAction(opacityHistoryLayerId, opacityHistoryBefore as any, afterProps as any, {
+                      from: 'LayerList.opacitySlider(debounced 500ms)',
+                    });
+                    projectHistoryController.addAction(act);
+                  } finally {
+                    opacityCommitTimer = undefined as any;
+                    opacityHistoryBefore = null;
+                    opacityHistoryLayerId = null;
+                  }
+                }, 200) as any;
               }}
             />
           </div>

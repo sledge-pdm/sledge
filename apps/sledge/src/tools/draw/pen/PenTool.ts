@@ -132,7 +132,7 @@ export class PenTool implements ToolBehavior {
   private snapToAngle(current: Vec2, start: Vec2): Vec2 {
     const dx = current.x - start.x;
     const dy = current.y - start.y;
-  const angle = Math.atan2(dy, dx);
+    const angle = Math.atan2(dy, dx);
 
     // 45度単位でスナップ
     const snapAngle = Math.round(angle / this.SNAP_ANGLE) * this.SNAP_ANGLE;
@@ -158,18 +158,18 @@ export class PenTool implements ToolBehavior {
     const dotMagnification = layer?.dotMagnification ?? 1;
 
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
-  const mask = this.ensureMask(size, shape);
+    const mask = this.ensureMask(size, shape);
 
     // 現在位置にスタンプ
-  const { cx, cy } = this.getCenter(position, rawPosition, size, dotMagnification);
+    const { cx, cy } = this.getCenter(position, rawPosition, size, dotMagnification);
     this.stamp(agent, cx, cy, mask, color, shouldCheckSelectionLimit, true);
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x: number, y: number) => {
         // 偶数サイズは syntheticRaw を用いて中心を決定
-  const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
-  const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
-  this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, true);
+        const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
+        const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
+        this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, true);
       });
     }
 
@@ -212,13 +212,13 @@ export class PenTool implements ToolBehavior {
     const dotMagnification = layer?.dotMagnification ?? 1;
 
     const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
-  const mask = this.ensureMask(size, shape);
+    const mask = this.ensureMask(size, shape);
 
     drawCompletionLine(targetPosition, this.startPosition, (x: number, y: number) => {
       // 直線補完の各点に対応する rawPosition を合成し中心決定
-  const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
-  const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
-  this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, commit, commit ? undefined : this.lastPreviewDiff);
+      const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
+      const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
+      this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, commit, commit ? undefined : this.lastPreviewDiff);
     });
 
     return {
@@ -234,8 +234,8 @@ export class PenTool implements ToolBehavior {
     }
 
     // 描画完了時にバッチを強制処理
-  agent.getDiffManager().flush();
-  const totalPx = agent.getDiffManager().getPendingPixelCount();
+    agent.getDiffManager().flush();
+    const totalPx = agent.getDiffManager().getPendingPixelCount();
     const resultText =
       totalPx > 0
         ? `${this.categoryId} stroke done. (${this.startTime ? `${Date.now() - this.startTime}ms /` : ''} ${totalPx}px updated)`

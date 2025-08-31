@@ -33,7 +33,7 @@ export class TileFloodFill implements Fill {
     const tilesFilled: TileIndex[] = [];
     const tileQueue: TileIndex[] = [tm.getTileIndex(position)];
 
-  const pxDiffs: Array<{ position: Vec2; before: [number, number, number, number]; after: [number, number, number, number] }> = [];
+    const pxDiffs: Array<{ position: Vec2; before: [number, number, number, number]; after: [number, number, number, number] }> = [];
     const visitedPx = new Uint8Array(agent.getWidth() * agent.getHeight());
 
     // First tile flood pass

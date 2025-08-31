@@ -4,17 +4,17 @@ import { currentColor, selectPalette, setColor } from '~/controllers/color/Color
 import { ProjectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
-import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
+import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
+import { LayerBufferHistoryAction, packRGBA } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
-import { LayerBufferHistoryAction, packRGBA } from '~/controllers/history/actions/LayerBufferHistoryAction';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { PaletteType } from '~/models/color/PaletteType';
-import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
-import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
 import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { PaletteType } from '~/models/color/PaletteType';
+import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
+import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Tiny seeded RNG (LCG) for reproducibility
 function makeRng(seed = 123456789) {
@@ -55,7 +55,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     const LOG_RND = process.env.VITEST_LOG_RND === '1';
     const hc = new ProjectHistoryController();
 
-  const initial = snapshotState();
+    const initial = snapshotState();
 
     // Predefined candidate entries for pool operations
     const entries: Record<string, ImagePoolEntry> = {
@@ -311,32 +311,32 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
       console.log(`${header}\n${body}`);
     }
 
-  const final = snapshotState();
+    const final = snapshotState();
 
     // Undo all → initial snapshot
     while (hc.canUndo()) hc.undo();
-  expect(currentColor()).toBe(initial.color);
-  expect(canvasStore.canvas.width).toBe(initial.canvas.width);
-  expect(canvasStore.canvas.height).toBe(initial.canvas.height);
-  expect(simplifyPoolState()).toEqual(initial.pool);
-  expect(simplifyLayers()).toEqual(initial.layers);
+    expect(currentColor()).toBe(initial.color);
+    expect(canvasStore.canvas.width).toBe(initial.canvas.width);
+    expect(canvasStore.canvas.height).toBe(initial.canvas.height);
+    expect(simplifyPoolState()).toEqual(initial.pool);
+    expect(simplifyLayers()).toEqual(initial.layers);
 
     // Redo all → final snapshot
     while (hc.canRedo()) hc.redo();
-  expect(currentColor()).toBe(final.color);
-  expect(canvasStore.canvas.width).toBe(final.canvas.width);
-  expect(canvasStore.canvas.height).toBe(final.canvas.height);
-  expect(simplifyPoolState()).toEqual(final.pool);
-  expect(simplifyLayers()).toEqual(final.layers);
+    expect(currentColor()).toBe(final.color);
+    expect(canvasStore.canvas.width).toBe(final.canvas.width);
+    expect(canvasStore.canvas.height).toBe(final.canvas.height);
+    expect(simplifyPoolState()).toEqual(final.pool);
+    expect(simplifyLayers()).toEqual(final.layers);
 
     // Idempotency check: repeat once more
     while (hc.canUndo()) hc.undo();
     while (hc.canRedo()) hc.redo();
-  expect(currentColor()).toBe(final.color);
-  expect(canvasStore.canvas.width).toBe(final.canvas.width);
-  expect(canvasStore.canvas.height).toBe(final.canvas.height);
-  expect(simplifyPoolState()).toEqual(final.pool);
-  expect(simplifyLayers()).toEqual(final.layers);
+    expect(currentColor()).toBe(final.color);
+    expect(canvasStore.canvas.width).toBe(final.canvas.width);
+    expect(canvasStore.canvas.height).toBe(final.canvas.height);
+    expect(simplifyPoolState()).toEqual(final.pool);
+    expect(simplifyLayers()).toEqual(final.layers);
   });
 });
 
@@ -354,14 +354,19 @@ function simplifyPoolState() {
   const ids = ['rnd-a', 'rnd-b', 'rnd-c'];
   return ids.map((id) => {
     const e = getEntry(id);
-    return e
-      ? { id, exists: true, x: e.x, y: e.y, opacity: e.opacity, visible: e.visible, scale: e.scale }
-      : { id, exists: false };
+    return e ? { id, exists: true, x: e.x, y: e.y, opacity: e.opacity, visible: e.visible, scale: e.scale } : { id, exists: false };
   });
 }
 
 function simplifyLayers() {
-  return layerListStore.layers.map((l) => ({ id: l.id, name: l.name, enabled: l.enabled, opacity: l.opacity, mode: l.mode, dotMagnification: l.dotMagnification }));
+  return layerListStore.layers.map((l) => ({
+    id: l.id,
+    name: l.name,
+    enabled: l.enabled,
+    opacity: l.opacity,
+    mode: l.mode,
+    dotMagnification: l.dotMagnification,
+  }));
 }
 
 function snapshotState() {

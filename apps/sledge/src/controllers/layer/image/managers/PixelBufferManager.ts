@@ -24,7 +24,7 @@ export default class PixelBufferManager {
     this.buffer[ptr + 2] = color[2];
     this.buffer[ptr + 3] = color[3];
 
-  return { before, after: color };
+    return { before, after: color };
   }
 
   public changeSize(

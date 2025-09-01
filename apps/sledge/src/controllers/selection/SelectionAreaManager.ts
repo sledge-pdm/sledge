@@ -1,9 +1,10 @@
 // controllers/layer/SelectionManager.ts
 
 import { Vec2 } from '@sledge/core';
-import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask } from '@sledge/wasm';
+import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask, slice_patch_rgba } from '@sledge/wasm';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
-import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
+import { getActiveAgent, getBufferOf } from '~/controllers/layer/LayerAgentManager';
+import { FloatingBuffer, floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import SelectionMask from '~/controllers/selection/SelectionMask';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -27,7 +28,7 @@ export type TileFragment = {
 
 export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
-export type SelectionState = 'idle' | 'selected' | 'move_selection' | 'move_layer';
+export type SelectionState = 'idle' | 'selected';
 
 class SelectionAreaManager {
   private editMode: SelectionEditMode = 'replace';
@@ -46,31 +47,25 @@ class SelectionAreaManager {
     eventBus.emit('selection:stateChanged', { newState: state });
   }
 
-  // ---should move to FloatingMoveManager start---
-  public isMoveState() {
-    return this.state === 'move_selection' || this.state === 'move_layer';
+  private areaOffset: Vec2 = { x: 0, y: 0 };
+  public setAreaOffset(areaOffset: Vec2) {
+    this.areaOffset = areaOffset;
   }
-
-  private moveOffset: Vec2 = { x: 0, y: 0 };
-  public setMoveOffset(moveOffset: Vec2) {
-    this.moveOffset = moveOffset;
+  public getAreaOffset() {
+    return this.areaOffset;
   }
-  public getMoveOffset() {
-    return this.moveOffset;
-  }
-  // ---should move to FloatingMoveManager end---
 
   public shiftOffset(delta: Vec2) {
-    this.moveOffset.x += delta.x;
-    this.moveOffset.y += delta.y;
-    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
-    return this.moveOffset;
+    this.areaOffset.x += delta.x;
+    this.areaOffset.y += delta.y;
+    eventBus.emit('selection:offsetChanged', { newOffset: this.areaOffset });
+    return this.areaOffset;
   }
 
   public setOffset(pos: Vec2) {
-    this.moveOffset = pos;
-    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
-    return this.moveOffset;
+    this.areaOffset = pos;
+    eventBus.emit('selection:offsetChanged', { newOffset: this.areaOffset });
+    return this.areaOffset;
   }
 
   // 「確定済み」のマスク
@@ -109,8 +104,8 @@ class SelectionAreaManager {
 
   isMaskOverlap(pos: Vec2, withMoveOffset?: boolean) {
     if (withMoveOffset) {
-      pos.x -= this.moveOffset.x;
-      pos.y -= this.moveOffset.y;
+      pos.x -= this.areaOffset.x;
+      pos.y -= this.areaOffset.y;
     }
     return this.selectionMask.get(pos) === 1;
   }
@@ -118,8 +113,8 @@ class SelectionAreaManager {
   /** 「プレビュー開始時」に呼ぶ */
   beginPreview(mode: SelectionEditMode) {
     this.editMode = mode;
-    this.moveOffset = { x: 0, y: 0 };
-    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
+    this.areaOffset = { x: 0, y: 0 };
+    eventBus.emit('selection:offsetChanged', { newOffset: this.areaOffset });
 
     // マスクサイズが0x0の場合はエラーログを出力して早期リターン
     if (this.selectionMask.getWidth() === 0 || this.selectionMask.getHeight() === 0) {
@@ -255,7 +250,7 @@ class SelectionAreaManager {
    * moveOffsetで見せかけていた選択範囲の移動を、実際のselectionMaskに反映する
    */
   commitOffset() {
-    const offset = this.getMoveOffset();
+    const offset = this.getAreaOffset();
     if (offset.x === 0 && offset.y === 0) return;
 
     const width = this.selectionMask.getWidth();
@@ -266,10 +261,10 @@ class SelectionAreaManager {
     const newMask = new Uint8Array(apply_mask_offset(oldMask, width, height, offset.x, offset.y));
 
     this.selectionMask.setMask(newMask);
-    this.setMoveOffset({ x: 0, y: 0 }); // オフセットをリセット
+    this.setAreaOffset({ x: 0, y: 0 }); // オフセットをリセット
 
     // 状態を更新: 移動完了後はselected状態に戻す
-    if (this.isMoveState()) {
+    if (this.isSelected()) {
       this.setState('selected');
     }
 
@@ -287,16 +282,50 @@ class SelectionAreaManager {
    * 現在の選択状況に基づいてstateを更新する
    */
   private updateStateBasedOnSelection() {
-    if (this.isMoveState()) {
-      // move状態の場合は変更しない（移動中）
-      return;
-    }
-
     if (this.isSelected()) {
-      this.setState('selected');
+      this.setState('selected'); // 選択状態に遷移
     } else {
       this.setState('idle');
     }
+  }
+
+  public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
+    const buffer = getBufferOf(srcLayerId);
+    if (!buffer) return;
+    const { width, height } = canvasStore.canvas;
+
+    this.commitOffset();
+    this.commit();
+
+    // slice buffer by mask
+    const patch = slice_patch_rgba(
+      // source
+      new Uint8Array(buffer.buffer),
+      width,
+      height,
+      // mask
+      new Uint8Array(this.getCombinedMask()),
+      // this.selectionMask.getWidth(), selection mask is canvas size
+      // this.selectionMask.getHeight(),
+      // this.areaOffset.x,
+      // this.areaOffset.y
+      width,
+      height,
+      0,
+      0
+    );
+
+    return {
+      buffer: new Uint8ClampedArray(patch.buffer),
+      offset: { x: 0, y: 0 },
+      width,
+      height,
+    };
+  }
+
+  // 現在の選択範囲からFloat状態を作成
+  public switchToMove() {
+    floatingMoveManager.startMove(this.getFloatingBuffer(getActiveAgent()!.layerId)!, 'selection');
   }
 }
 

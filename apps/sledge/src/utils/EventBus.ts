@@ -15,6 +15,7 @@ export type Events = {
   'selection:offsetChanged': { newOffset: Vec2 };
   'selection:stateChanged': { newState: SelectionState };
 
+  'floatingMove:stateChanged': { moving: boolean };
   'floatingMove:moved': {};
   'floatingMove:committed': {};
 

@@ -4,6 +4,7 @@ import { Vec2 } from '@sledge/core';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { DebugLogger } from '~/controllers/log/LogController';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -31,6 +32,7 @@ class FloatingMoveManager {
   private readonly LOG_LABEL = 'FloatingMoveManager';
   private logger = new DebugLogger(this.LOG_LABEL, true);
 
+  private targetBuffer: Uint8ClampedArray | undefined = undefined;
   // moveOffsetを扱う代わりに、FloatingBufferにoffsetを持たせるようにする。
   // これにより、選択範囲のoffsetをmoveに引きついで扱える。
   private floatingBuffer: FloatingBuffer | undefined = undefined;
@@ -43,6 +45,10 @@ class FloatingMoveManager {
   // のようにする方が安全と思います。
   private movePreviewBuffer: Uint8ClampedArray | undefined = undefined; // should be same size as layer/canvas.
   private state: MoveMode | undefined = undefined;
+
+  public getPreviewBuffer() {
+    return this.movePreviewBuffer;
+  }
 
   public getFloatingBuffer() {
     return this.floatingBuffer;
@@ -58,24 +64,30 @@ class FloatingMoveManager {
 
   constructor() {}
 
-  public startMove(floatingBuffer: FloatingBuffer, state: MoveMode) {
+  private getTargetBuffer() {
+    return getActiveAgent()?.getBuffer();
+  }
+
+  public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode) {
+    this.targetBuffer = this.getTargetBuffer();
+    if (!this.targetBuffer) return;
+
     this.logger.debugLog('startMove', { floatingBuffer, state });
     this.floatingBuffer = floatingBuffer;
     this.state = state;
+
+    this.movePreviewBuffer = applyFloatingBuffer({
+      width: canvasStore.canvas.width,
+      height: canvasStore.canvas.height,
+      floatingBuffer: this.floatingBuffer,
+      target: this.targetBuffer,
+    });
+
+    eventBus.emit('floatingMove:stateChanged', { moving: true });
   }
 
-  // The operation right before commiting/preview.
-  // For example, if move context was selection moving or pasting "cut" area,
-  // original area should be deleted before moving.
-  public preMove() {
-    // for example:
-    if (this.state === 'selection') {
-      // Clear the original area in the preview buffer (not original buffer!)
-    }
-  }
-
-  public async move(delta: Vec2) {
-    this.logger.debugLog('move', { delta });
+  public async moveDelta(delta: Vec2) {
+    this.logger.debugLog('moveDelta', { delta });
     if (!this.floatingBuffer || !this.movePreviewBuffer) {
       console.error('attempt to move, but nothing is moving.');
       return;
@@ -84,27 +96,67 @@ class FloatingMoveManager {
     this.floatingBuffer.offset.x += delta.x;
     this.floatingBuffer.offset.y += delta.y;
 
-    this.preMove();
+    return this.updatePreview();
+  }
+
+  public async moveTo(newOffset: Vec2) {
+    this.logger.debugLog('moveTo', { offset: newOffset });
+    if (!this.floatingBuffer || !this.movePreviewBuffer) {
+      console.error('attempt to move, but nothing is moving.');
+      return;
+    }
+
+    this.floatingBuffer.offset = newOffset;
+
+    return this.updatePreview();
+  }
+
+  public updatePreview() {
+    if (!this.floatingBuffer || !this.movePreviewBuffer || !this.targetBuffer) {
+      console.error('attempt to move, but nothing is moving.');
+      return;
+    }
+
     // update preview buffer
-    this.movePreviewBuffer = await applyFloatingBuffer({
+    this.movePreviewBuffer = applyFloatingBuffer({
       width: canvasStore.canvas.width,
       height: canvasStore.canvas.height,
       floatingBuffer: this.floatingBuffer,
-      target: this.movePreviewBuffer,
+      target: this.targetBuffer,
     });
 
     eventBus.emit('floatingMove:moved', {});
+    eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
 
     return this.floatingBuffer;
   }
 
+  // The operation right before commiting/preview.
+  // For example, if move context was selection moving or pasting "cut" area,
+  // original area should be deleted before moving.
+  public preCommit() {
+    // for example:
+    if (this.state === 'layer') {
+      this.targetBuffer?.fill(0);
+    }
+  }
+
   public commit() {
     this.logger.debugLog('commit', {});
-    if (!this.floatingBuffer || !this.movePreviewBuffer) {
+    if (!this.floatingBuffer || !this.movePreviewBuffer || !this.targetBuffer) {
       console.error('attempt to commit, but nothing is moving.');
       return;
     }
 
+    this.preCommit();
+    // update preview buffer
+    this.movePreviewBuffer = applyFloatingBuffer({
+      width: canvasStore.canvas.width,
+      height: canvasStore.canvas.height,
+      floatingBuffer: this.floatingBuffer,
+      target: this.targetBuffer,
+    });
     // apply preview to actual buffer
     getActiveAgent()?.setBuffer(this.movePreviewBuffer);
 
@@ -112,11 +164,25 @@ class FloatingMoveManager {
     eventBus.emit('floatingMove:committed', {});
 
     // Reset the state
-    this.floatingBuffer = undefined;
     this.state = undefined;
+    this.floatingBuffer = undefined;
+    this.targetBuffer = undefined;
+
+    eventBus.emit('floatingMove:stateChanged', { moving: false });
   }
 
-  public cancel() {}
+  public cancel() {
+    //cancel
+    if (this.getState() === 'layer') {
+      selectionManager.clear();
+    }
+    // Reset the state
+    this.state = undefined;
+    this.floatingBuffer = undefined;
+    this.targetBuffer = undefined;
+
+    eventBus.emit('floatingMove:stateChanged', { moving: false });
+  }
 }
 
-export const selectionManager = new FloatingMoveManager();
+export const floatingMoveManager = new FloatingMoveManager();

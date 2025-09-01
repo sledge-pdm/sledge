@@ -13,7 +13,7 @@ export class SelectionMoveTool implements ToolBehavior {
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    this.startOffset = selectionManager.getMoveOffset();
+    this.startOffset = selectionManager.getAreaOffset();
     this.startPosition = args.position;
     return {
       shouldUpdate: false,
@@ -42,7 +42,7 @@ export class SelectionMoveTool implements ToolBehavior {
       selectionManager.clear();
     }
 
-    console.log('committed. offset:', selectionManager.getMoveOffset());
+    console.log('committed. offset:', selectionManager.getAreaOffset());
 
     return {
       shouldUpdate: false,

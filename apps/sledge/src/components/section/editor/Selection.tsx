@@ -15,7 +15,7 @@ const Selection: Component = () => {
     state: selectionManager.getState(),
     status: isSelectionAvailable() ? 'Selected' : 'Not Selected',
     size: { width: selectionManager.getSelectionMask().getWidth(), height: selectionManager.getSelectionMask().getHeight() },
-    offset: { x: selectionManager.getMoveOffset().x, y: selectionManager.getMoveOffset().y },
+    offset: { x: selectionManager.getAreaOffset().x, y: selectionManager.getAreaOffset().y },
   });
 
   onMount(() => {
@@ -32,8 +32,8 @@ const Selection: Component = () => {
       setSelectionStatus('size', 'height', height);
     });
     eventBus.on('selection:offsetChanged', (e: Events['selection:offsetChanged']) => {
-      setSelectionStatus('offset', 'x', selectionManager.getMoveOffset().x);
-      setSelectionStatus('offset', 'y', selectionManager.getMoveOffset().y);
+      setSelectionStatus('offset', 'x', selectionManager.getAreaOffset().x);
+      setSelectionStatus('offset', 'y', selectionManager.getAreaOffset().y);
     });
   });
 

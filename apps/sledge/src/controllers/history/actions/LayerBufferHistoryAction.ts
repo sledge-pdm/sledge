@@ -1,7 +1,7 @@
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { cancelMove } from '~/controllers/selection/SelectionOperator';
 import { RGBAColor } from '~/utils/ColorUtils';
 
@@ -60,7 +60,7 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
     }
 
     // If the selection is in move state, cancel the move
-    if (selectionManager.isMoveState()) {
+    if (floatingMoveManager.isMoving()) {
       cancelMove();
       return;
     }
@@ -78,7 +78,7 @@ export class LayerBufferHistoryAction extends BaseHistoryAction {
     }
 
     // If the selection is in move state, cancel the move
-    if (selectionManager.isMoveState()) {
+    if (floatingMoveManager.isMoving()) {
       cancelMove();
       return;
     }

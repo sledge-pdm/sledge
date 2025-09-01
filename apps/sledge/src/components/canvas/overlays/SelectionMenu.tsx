@@ -1,8 +1,8 @@
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/controllers/selection/SelectionAreaManager';
-import { cancelMove, cancelSelection, commitMove, deletePixelInSelection, invertSelectionArea } from '~/controllers/selection/SelectionOperator';
+import { cancelMove, cancelSelection, commitMove, deletePixelInSelection, getSelectionOffset, invertSelectionArea } from '~/controllers/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
@@ -35,6 +35,7 @@ const Divider: Component = () => {
 };
 
 const [selectionState, setSelectionState] = createSignal<SelectionState>(selectionManager.getState());
+const [floatingMoveState, setFloatingMoveState] = createSignal<boolean>(false);
 
 const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefined);
 
@@ -59,12 +60,15 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     setSelectionState(e.newState);
     setUpdatePosition(true);
   };
-
+  const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
+    setFloatingMoveState(e.moving);
+  };
   onMount(() => {
     startRenderLoop();
     eventBus.on('selection:maskChanged', handleAreaChanged);
     eventBus.on('selection:offsetChanged', handleMoved);
     eventBus.on('selection:stateChanged', handleStateChanged);
+    eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
 
     const observer = new ResizeObserver((entries) => {
       entries.forEach((el) => {
@@ -77,14 +81,13 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }
 
     return () => {
+      stopRenderLoop();
+      eventBus.off('selection:maskChanged', handleAreaChanged);
+      eventBus.off('selection:offsetChanged', handleMoved);
+      eventBus.off('selection:stateChanged', handleStateChanged);
+      eventBus.off('floatingMove:stateChanged', handleMoveStateChanged);
       observer.disconnect();
     };
-  });
-  onCleanup(() => {
-    stopRenderLoop();
-    eventBus.off('selection:maskChanged', handleAreaChanged);
-    eventBus.off('selection:offsetChanged', handleMoved);
-    eventBus.off('selection:stateChanged', handleStateChanged);
   });
 
   createEffect(() => {
@@ -102,11 +105,11 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     if (!outlineBound) return;
 
     const containerRect = containerRef.getBoundingClientRect();
-
+    const selectionOffset = getSelectionOffset();
     // 基本位置：選択範囲の右下
     let basePos = {
-      x: outlineBound.right + selectionManager.getMoveOffset().x + 1,
-      y: outlineBound.bottom + selectionManager.getMoveOffset().y + 1,
+      x: outlineBound.right + selectionOffset.x + 1,
+      y: outlineBound.bottom + selectionOffset.y + 1,
     };
 
     setSelectionMenuPos(basePos);
@@ -205,7 +208,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
 const MenuContent = () => {
   return (
     <>
-      <Show when={selectionState() === 'move_layer' || selectionState() === 'move_selection'}>
+      <Show when={floatingMoveState()}>
         <Item
           src='/icons/selection/commit_10.png'
           onClick={() => {
@@ -224,7 +227,7 @@ const MenuContent = () => {
           title='cancel.'
         />
       </Show>
-      <Show when={selectionState() === 'selected'}>
+      <Show when={!floatingMoveState()}>
         <Item
           src='/icons/selection/cancel_10.png'
           onClick={() => {

@@ -32,7 +32,7 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       // 移動モード開始
       this.startPosition = args.position;
-      this.startOffset = selectionManager.getMoveOffset();
+      this.startOffset = selectionManager.getAreaOffset();
       selectionManager.setState('selected');
     } else {
       // ツール固有の選択開始処理

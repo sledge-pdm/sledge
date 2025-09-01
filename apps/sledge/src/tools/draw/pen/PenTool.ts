@@ -1,7 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { activeLayer } from '~/controllers/layer/LayerListController';
-import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';

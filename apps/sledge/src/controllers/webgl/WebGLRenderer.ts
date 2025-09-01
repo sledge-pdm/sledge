@@ -8,6 +8,7 @@ import vertexSrc from './shaders/fullscreen.vert.glsl';
 // WASM関数をインポート
 import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
 import { DebugLogger } from '~/controllers/log/LogController';
+import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 
 const MAX_LAYERS = 16;
 const LOG_LABEL = 'WebGLRenderer';
@@ -252,7 +253,10 @@ export class WebGLRenderer {
       logger.debugLog(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
 
       const agent = getAgentOf(layer.id)!;
-      const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
+      // const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
+      const buf =
+        layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving() ? floatingMoveManager.getPreviewBuffer() : getBufferOf(layer.id);
+      if (!buf) return;
 
       // バッファサイズの整合性をチェック
       const expectedSize = this.width * this.height * 4;

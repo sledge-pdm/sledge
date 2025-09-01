@@ -1,9 +1,7 @@
 use wasm_bindgen::prelude::*;
 
-
-
 #[wasm_bindgen]
-pub fn patch_buffer(
+pub fn patch_buffer_rgba(
     // target
     target: &[u8],
     target_width: u32,

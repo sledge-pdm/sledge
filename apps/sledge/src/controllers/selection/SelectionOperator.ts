@@ -1,11 +1,10 @@
 import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_subtract, filter_by_selection_mask } from '@sledge/wasm';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
+import { getActiveAgent, getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
+import { FloatingBuffer, floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { getToolCategory } from '~/controllers/tool/ToolController';
 import { SelectionFillMode, SelectionLimitMode, toolStore } from '~/stores/EditorStores';
-import { MoveTool } from '~/tools/move/MoveTool';
 import { eventBus } from '~/utils/EventBus';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
@@ -53,29 +52,45 @@ export function getSelectionFillMode(): SelectionFillMode {
   return toolStore.selectionFillMode;
 }
 
-// ---should move to FloatingMoveManager start---
+// 現在の状況からFloat状態を作成
+export function startMove() {
+  const activeAgent = getActiveAgent();
+  if (!activeAgent) {
+    console.error('No active agent found');
+    return;
+  }
+
+  if (isSelectionAvailable()) {
+    floatingMoveManager.startMove(selectionManager.getFloatingBuffer(activeAgent.layerId)!, 'selection');
+  } else {
+    selectionManager.selectAll();
+    const layerFloatingBuffer: FloatingBuffer = {
+      buffer: activeAgent.getBuffer().slice(),
+      width: activeAgent.getWidth(),
+      height: activeAgent.getHeight(),
+      offset: { x: 0, y: 0 },
+    };
+    floatingMoveManager.startMove(layerFloatingBuffer, 'layer');
+  }
+}
+
+export function getSelectionOffset() {
+  return floatingMoveManager.isMoving() ? floatingMoveManager.getFloatingBuffer()!.offset : selectionManager.getAreaOffset();
+}
+
+export function cancelSelection() {
+  if (floatingMoveManager.isMoving()) {
+    floatingMoveManager.cancel();
+  }
+  selectionManager.clear();
+}
+
 export function commitMove() {
-  const moveTool = getToolCategory('move').behavior as MoveTool;
-  moveTool.commit();
+  floatingMoveManager.commit();
 }
 
 export function cancelMove() {
-  const isLayerMove = selectionManager.getState() === 'move_layer';
-  const moveTool = getToolCategory('move').behavior as MoveTool;
-  moveTool.cancel();
-
-  // レイヤーの場合移動キャンセルで選択解除まで行う
-  if (isLayerMove) {
-    selectionManager.clear();
-  }
-}
-// ---should move to FloatingMoveManager end---
-
-export function cancelSelection() {
-  if (selectionManager.isMoveState()) {
-    cancelMove();
-  }
-  selectionManager.clear();
+  floatingMoveManager.cancel();
 }
 
 export function deletePixelInSelection(layerId?: string): boolean {
@@ -92,7 +107,7 @@ export function deletePixelInSelection(layerId?: string): boolean {
 
   // moveOffset を考慮した選択マスクを用意
   const baseMask = selection.getMask();
-  const { x: offX, y: offY } = selectionManager.getMoveOffset();
+  const { x: offX, y: offY } = selectionManager.getAreaOffset();
   const mask = offX === 0 && offY === 0 ? baseMask : new Uint8Array(apply_mask_offset(baseMask, width, height, offX, offY));
 
   // マスク内を透明化（"outside" はマスク=1の箇所を透明化する挙動）

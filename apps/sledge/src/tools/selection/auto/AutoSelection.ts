@@ -1,6 +1,6 @@
 import { auto_select_region_mask } from '@sledge/wasm';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionManager';
+import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { ToolArgs } from '~/tools/ToolBehavior';
 import { SelectionBase } from '~/tools/selection/SelectionBase';
@@ -20,7 +20,7 @@ export class AutoSelection extends SelectionBase {
     if (preview && mask) {
       preview.setMask(mask);
       // プレビュー更新イベント（UI反映用）
-      eventBus.emit('selection:areaChanged', { commit: false });
+      eventBus.emit('selection:maskChanged', { commit: false });
     }
   }
 

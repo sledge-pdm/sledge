@@ -1,6 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class SelectionMoveTool implements ToolBehavior {
@@ -37,7 +38,7 @@ export class SelectionMoveTool implements ToolBehavior {
     // キャンバス外へ行くなどで選択範囲がなくなった場合は選択解除
     selectionManager.commitOffset();
 
-    if (!selectionManager.isSelected()) {
+    if (!isSelectionAvailable()) {
       selectionManager.clear();
     }
 

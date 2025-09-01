@@ -4,7 +4,7 @@ import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { DebugLogger } from '~/controllers/log/LogController';
-import { getCurrentSelection } from '~/controllers/selection/SelectionManager';
+import { getCurrentSelection } from '~/controllers/selection/SelectionAreaManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
@@ -79,11 +79,11 @@ const CanvasDebugOverlay: Component = (props) => {
   const [selectionWidth, setSelectionWidth] = createSignal(0);
   const [selectionHeight, setSelectionHeight] = createSignal(0);
 
-  const onSelectionMoved = (e: Events['selection:moved']) => {
+  const onSelectionMoved = (e: Events['selection:offsetChanged']) => {
     setOffsetX(e.newOffset.x);
     setOffsetY(e.newOffset.y);
   };
-  const onSelectionChanged = (e: Events['selection:areaChanged']) => {
+  const onSelectionChanged = (e: Events['selection:maskChanged']) => {
     const box = getCurrentSelection().getBoundBox();
     if (box) {
       setSelectionWidth(box.right - box.left + 1);
@@ -98,15 +98,15 @@ const CanvasDebugOverlay: Component = (props) => {
     startTimerId = window.setTimeout(() => {
       disposeInterval = makeTimer(callback, 1000, setInterval);
     }, 1500);
-    eventBus.on('selection:areaChanged', onSelectionChanged);
-    eventBus.on('selection:moved', onSelectionMoved);
+    eventBus.on('selection:maskChanged', onSelectionChanged);
+    eventBus.on('selection:offsetChanged', onSelectionMoved);
   });
 
   onCleanup(() => {
     if (startTimerId) clearTimeout(startTimerId);
     disposeInterval?.();
-    eventBus.off('selection:areaChanged', onSelectionChanged);
-    eventBus.off('selection:moved', onSelectionMoved);
+    eventBus.off('selection:maskChanged', onSelectionChanged);
+    eventBus.off('selection:offsetChanged', onSelectionMoved);
   });
 
   return (

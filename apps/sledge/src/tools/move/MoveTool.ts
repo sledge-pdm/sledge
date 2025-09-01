@@ -2,7 +2,8 @@ import { Vec2 } from '@sledge/core';
 import { preview_move } from '@sledge/wasm';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
@@ -25,7 +26,7 @@ export class MoveTool implements ToolBehavior {
   private readonly PREVIEW_THROTTLE_MS = 16; // 約60FPS
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    const isLayerMove = selectionManager.getState() === 'move_layer' || !selectionManager.isSelected();
+    const isLayerMove = selectionManager.getState() === 'move_layer' || !isSelectionAvailable();
     if (isLayerMove) {
       selectionManager.selectAll();
     }
@@ -62,7 +63,7 @@ export class MoveTool implements ToolBehavior {
   }
 
   onMove(agent: LayerImageAgent, args: ToolArgs) {
-    if (!selectionManager.isSelected()) {
+    if (!isSelectionAvailable()) {
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,
@@ -82,7 +83,7 @@ export class MoveTool implements ToolBehavior {
 
     // オフセットの更新とイベント発火は即座に行う（UIの反応性を保つ）
     selectionManager.setMoveOffset(offset);
-    eventBus.emit('selection:moved', { newOffset: selectionManager.getMoveOffset() });
+    eventBus.emit('selection:offsetChanged', { newOffset: selectionManager.getMoveOffset() });
 
     // プレビューの更新はスロットリングして行う
     this.schedulePreviewUpdate(agent, offset.x, offset.y);
@@ -215,7 +216,7 @@ export class MoveTool implements ToolBehavior {
 
     // 移動オフセットをリセット
     selectionManager.setMoveOffset(this.startOffset);
-    eventBus.emit('selection:moved', { newOffset: this.startOffset });
+    eventBus.emit('selection:offsetChanged', { newOffset: this.startOffset });
     selectionManager.setState('selected');
 
     // 状態をリセット

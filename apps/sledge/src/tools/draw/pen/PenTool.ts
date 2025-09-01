@@ -1,7 +1,8 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { activeLayer } from '~/controllers/layer/LayerListController';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
@@ -67,7 +68,7 @@ export class PenTool implements ToolBehavior {
         if (bits[iy * width + ix] !== 1) continue;
         const px = centerX + offsetX + ix;
         const py = centerY + offsetY + iy;
-        if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
+        if (shouldCheckSelectionLimit && !isDrawingAllowed({ x: px, y: py }, false)) {
           continue;
         }
         if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
@@ -157,7 +158,7 @@ export class PenTool implements ToolBehavior {
     const layer = activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;
 
-    const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
+    const shouldCheckSelectionLimit = isSelectionAvailable() && getSelectionLimitMode() !== 'none';
     const mask = this.ensureMask(size, shape);
 
     // 現在位置にスタンプ
@@ -211,7 +212,7 @@ export class PenTool implements ToolBehavior {
     const layer = activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;
 
-    const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
+    const shouldCheckSelectionLimit = isSelectionAvailable() && getSelectionLimitMode() !== 'none';
     const mask = this.ensureMask(size, shape);
 
     drawCompletionLine(targetPosition, this.startPosition, (x: number, y: number) => {

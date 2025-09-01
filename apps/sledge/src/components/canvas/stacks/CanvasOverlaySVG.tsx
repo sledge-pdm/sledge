@@ -2,7 +2,7 @@ import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { interactStore, logStore } from '~/stores/EditorStores';
@@ -59,10 +59,10 @@ const CanvasOverlaySVG: Component = (props) => {
     setPathCmdList(pathCmds);
   };
 
-  const onSelectionChangedHandler = (e: Events['selection:areaChanged']) => {
+  const onSelectionChangedHandler = (e: Events['selection:maskChanged']) => {
     setSelectionChanged(true);
   };
-  const onSelectionMovedHandler = (e: Events['selection:moved']) => {
+  const onSelectionMovedHandler = (e: Events['selection:offsetChanged']) => {
     setSelectionChanged(true);
   };
 
@@ -92,15 +92,15 @@ const CanvasOverlaySVG: Component = (props) => {
 
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:areaChanged', onSelectionChangedHandler);
-    eventBus.on('selection:moved', onSelectionMovedHandler);
+    eventBus.on('selection:maskChanged', onSelectionChangedHandler);
+    eventBus.on('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.on('selection:stateChanged', onSelectionStateChangedHandler);
     window.addEventListener('keydown', tempKeyMove);
     setSelectionChanged(true);
   });
   onCleanup(() => {
-    eventBus.off('selection:areaChanged', onSelectionChangedHandler);
-    eventBus.off('selection:moved', onSelectionMovedHandler);
+    eventBus.off('selection:maskChanged', onSelectionChangedHandler);
+    eventBus.off('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.off('selection:stateChanged', onSelectionStateChangedHandler);
     window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();

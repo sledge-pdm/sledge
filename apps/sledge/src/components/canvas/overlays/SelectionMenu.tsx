@@ -1,7 +1,7 @@
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { selectionManager, SelectionState } from '~/controllers/selection/SelectionManager';
+import { selectionManager, SelectionState } from '~/controllers/selection/SelectionAreaManager';
 import { cancelMove, cancelSelection, commitMove, deletePixelInSelection, invertSelection } from '~/controllers/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -49,12 +49,12 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }, Number(globalConfig.performance.targetFPS))
   );
 
-  const handleAreaChanged = (e: Events['selection:areaChanged']) => {
+  const handleAreaChanged = (e: Events['selection:maskChanged']) => {
     if (e.commit) {
       updateMenuPos();
     }
   };
-  const handleMoved = (e: Events['selection:moved']) => setUpdatePosition(true);
+  const handleMoved = (e: Events['selection:offsetChanged']) => setUpdatePosition(true);
   const handleStateChanged = (e: Events['selection:stateChanged']) => {
     setSelectionState(e.newState);
     setUpdatePosition(true);
@@ -62,8 +62,8 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
 
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:areaChanged', handleAreaChanged);
-    eventBus.on('selection:moved', handleMoved);
+    eventBus.on('selection:maskChanged', handleAreaChanged);
+    eventBus.on('selection:offsetChanged', handleMoved);
     eventBus.on('selection:stateChanged', handleStateChanged);
 
     const observer = new ResizeObserver((entries) => {
@@ -82,8 +82,8 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   });
   onCleanup(() => {
     stopRenderLoop();
-    eventBus.off('selection:areaChanged', handleAreaChanged);
-    eventBus.off('selection:moved', handleMoved);
+    eventBus.off('selection:maskChanged', handleAreaChanged);
+    eventBus.off('selection:offsetChanged', handleMoved);
     eventBus.off('selection:stateChanged', handleStateChanged);
   });
 

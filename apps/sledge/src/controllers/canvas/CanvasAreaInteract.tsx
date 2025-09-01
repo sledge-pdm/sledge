@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/controllers/canvas/CanvasController';
 import { DebugLogger } from '~/controllers/log/LogController';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { Consts } from '~/models/Consts';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -54,7 +54,7 @@ class CanvasAreaInteract {
     }
 
     if (e.buttons === 1 && e.ctrlKey) {
-      if (selectionManager.isSelected()) return false;
+      if (isSelectionAvailable()) return false;
       // angle-snapped line
       if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
         if (e.shiftKey) return false;

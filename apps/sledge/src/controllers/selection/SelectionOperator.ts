@@ -1,10 +1,56 @@
+import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_subtract, filter_by_selection_mask } from '@sledge/wasm';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
-import { getCurrentSelection, selectionManager } from '~/controllers/selection/SelectionManager';
+import { getCurrentSelection, selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { getToolCategory } from '~/controllers/tool/ToolController';
+import { SelectionFillMode, SelectionLimitMode, toolStore } from '~/stores/EditorStores';
 import { MoveTool } from '~/tools/move/MoveTool';
 import { eventBus } from '~/utils/EventBus';
+
+// SelectionOperator is an integrated manager of selection area and floating move management.
+
+export function isSelectionAvailable(): boolean {
+  return selectionManager.isSelected();
+}
+/**
+ * 描画制限モードに基づいて描画可能な位置かチェック
+ * @param pos チェックする位置
+ * @returns 描画可能な場合true、制限により描画不可の場合false
+ */
+export function isDrawingAllowed(pos: Vec2, checkState?: boolean): boolean {
+  const limitMode = toolStore.selectionLimitMode;
+  if (checkState) {
+    if (limitMode === 'none') {
+      // 制限なし：常に描画可能
+      return true;
+    }
+    if (!isSelectionAvailable()) {
+      // 選択範囲がない場合：制限なしとして扱う
+      return true;
+    }
+  }
+
+  const isInSelection = selectionManager.isMaskOverlap(pos, true);
+
+  if (limitMode === 'inside') {
+    // 選択範囲内のみ描画可能
+    return isInSelection;
+  } else if (limitMode === 'outside') {
+    // 選択範囲外のみ描画可能
+    return !isInSelection;
+  }
+
+  return true;
+}
+
+export function getSelectionLimitMode(): SelectionLimitMode {
+  return toolStore.selectionLimitMode;
+}
+
+export function getSelectionFillMode(): SelectionFillMode {
+  return toolStore.selectionFillMode;
+}
 
 export function commitMove() {
   const moveTool = getToolCategory('move').behavior as MoveTool;
@@ -86,6 +132,6 @@ export function invertSelection() {
   selection.setMask(inverted);
 
   // 4) 状態更新とイベント発火
-  selectionManager.setState(selectionManager.isSelected() ? 'selected' : 'idle');
-  eventBus.emit('selection:areaChanged', { commit: true });
+  selectionManager.setState(isSelectionAvailable() ? 'selected' : 'idle');
+  eventBus.emit('selection:maskChanged', { commit: true });
 }

@@ -1,7 +1,7 @@
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { cancelMove } from '~/controllers/selection/SelectionOperator';
 import { RGBAColor } from '~/utils/ColorUtils';
 

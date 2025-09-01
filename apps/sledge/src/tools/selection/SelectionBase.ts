@@ -1,6 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionManager';
+import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 // 共通のモード判定と ctrl+ドラッグ移動処理をまとめたベースクラス
@@ -69,7 +70,7 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       // 移動確定
       selectionManager.commitOffset();
-      if (!selectionManager.isSelected()) {
+      if (!isSelectionAvailable()) {
         selectionManager.clear();
       } else {
         selectionManager.setState('selected');

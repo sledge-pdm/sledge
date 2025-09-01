@@ -1,5 +1,5 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { RectFragment, SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionManager';
+import { RectFragment, SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { ToolArgs } from '~/tools/ToolBehavior';
 import { SelectionBase } from '~/tools/selection/SelectionBase';
 

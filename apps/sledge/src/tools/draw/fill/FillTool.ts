@@ -1,7 +1,8 @@
 import { Vec2 } from '@sledge/core';
 import { filter_by_selection_mask } from '@sledge/wasm';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { getSelectionFillMode, getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { WasmFloodFill } from '~/tools/draw/fill/WasmFloodFill';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
@@ -25,7 +26,7 @@ export class FillTool implements ToolBehavior {
     const startTime = Date.now();
 
     // 描画制限チェック
-    if (!selectionManager.isDrawingAllowed(position, true)) {
+    if (!isDrawingAllowed(position, true)) {
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,
@@ -34,9 +35,9 @@ export class FillTool implements ToolBehavior {
     const preset = presetName ? (getPresetOf('fill', presetName) as any) : undefined;
     const threshold = preset?.threshold ?? 0;
 
-    const limitMode = selectionManager.getSelectionLimitMode();
+    const limitMode = getSelectionLimitMode();
 
-    if (limitMode === 'none' || !selectionManager.isSelected()) {
+    if (limitMode === 'none' || !isSelectionAvailable()) {
       // 制限なしの場合はWASM FloodFill
       const fill = new WasmFloodFill();
       fill.fill({ agent, color, position, threshold });
@@ -57,8 +58,8 @@ export class FillTool implements ToolBehavior {
 
   private fillWithSelectionConstraint(agent: LayerImageAgent, color: RGBAColor, position: Vec2, threshold?: number) {
     const selectionMask = selectionManager.getSelectionMask();
-    const limitMode = selectionManager.getSelectionLimitMode();
-    const fillMode = selectionManager.getSelectionFillMode();
+    const limitMode = getSelectionLimitMode();
+    const fillMode = getSelectionFillMode();
 
     // 選択範囲がない、または制限モードがnoneの場合は通常のフラッドフィル
     if (!selectionMask || limitMode === 'none') {

@@ -4,7 +4,7 @@ import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListH
 import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { setBottomBarText } from '~/controllers/log/LogController';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { cancelMove, cancelSelection } from '~/controllers/selection/SelectionOperator';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';

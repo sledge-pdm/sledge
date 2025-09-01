@@ -30,7 +30,7 @@ export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type SelectionState = 'idle' | 'selected' | 'move_selection' | 'move_layer';
 
-class SelectionManager {
+class SelectionAreaManager {
   private editMode: SelectionEditMode = 'replace';
   private state: SelectionState = 'idle';
 
@@ -41,6 +41,7 @@ class SelectionManager {
   public getState() {
     return this.state;
   }
+
   public setState(state: SelectionState) {
     this.state = state;
     eventBus.emit('selection:stateChanged', { newState: state });
@@ -61,12 +62,13 @@ class SelectionManager {
   public move(delta: Vec2) {
     this.moveOffset.x += delta.x;
     this.moveOffset.y += delta.y;
-    eventBus.emit('selection:moved', { newOffset: this.moveOffset });
+    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
     return this.moveOffset;
   }
+
   public moveTo(pos: Vec2) {
     this.moveOffset = pos;
-    eventBus.emit('selection:moved', { newOffset: this.moveOffset });
+    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
     return this.moveOffset;
   }
 
@@ -85,12 +87,6 @@ class SelectionManager {
 
   public isSelected() {
     return !this.selectionMask.isCleared();
-  }
-
-  public isPointInSelection(pos: Vec2) {
-    if (!this.isSelected()) return false;
-    // return this.selectionMask.get(pos) === 1;
-    return true;
   }
 
   constructor() {
@@ -118,56 +114,11 @@ class SelectionManager {
     return this.selectionMask.get(pos) === 1;
   }
 
-  /**
-   * 描画制限モードに基づいて描画可能な位置かチェック
-   * @param pos チェックする位置
-   * @returns 描画可能な場合true、制限により描画不可の場合false
-   */
-  isDrawingAllowed(pos: Vec2, checkState?: boolean): boolean {
-    const limitMode = toolStore.selectionLimitMode;
-    if (checkState) {
-      if (limitMode === 'none') {
-        // 制限なし：常に描画可能
-        return true;
-      }
-      if (!this.isSelected()) {
-        // 選択範囲がない場合：制限なしとして扱う
-        return true;
-      }
-    }
-
-    const isInSelection = this.isMaskOverlap(pos, true);
-
-    if (limitMode === 'inside') {
-      // 選択範囲内のみ描画可能
-      return isInSelection;
-    } else if (limitMode === 'outside') {
-      // 選択範囲外のみ描画可能
-      return !isInSelection;
-    }
-
-    return true;
-  }
-
-  /**
-   * 現在の選択範囲制限モードを取得
-   */
-  getSelectionLimitMode(): SelectionLimitMode {
-    return toolStore.selectionLimitMode;
-  }
-
-  /**
-   * 現在の選択範囲フィルモードを取得
-   */
-  getSelectionFillMode(): SelectionFillMode {
-    return toolStore.selectionFillMode;
-  }
-
   /** 「プレビュー開始時」に呼ぶ */
   beginPreview(mode: SelectionEditMode) {
     this.editMode = mode;
     this.moveOffset = { x: 0, y: 0 };
-    eventBus.emit('selection:moved', { newOffset: this.moveOffset });
+    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
 
     // マスクサイズが0x0の場合はエラーログを出力して早期リターン
     if (this.selectionMask.getWidth() === 0 || this.selectionMask.getHeight() === 0) {
@@ -231,7 +182,7 @@ class SelectionManager {
     }
 
     // 毎回プレビュー更新イベント
-    if (changed) eventBus.emit('selection:areaChanged', { commit: false });
+    if (changed) eventBus.emit('selection:maskChanged', { commit: false });
   }
 
   /** onEnd で呼ぶ */
@@ -263,7 +214,7 @@ class SelectionManager {
     // 状態を更新: 選択範囲があればselected、なければidle
     this.updateStateBasedOnSelection();
 
-    eventBus.emit('selection:areaChanged', { commit: true });
+    eventBus.emit('selection:maskChanged', { commit: true });
   }
 
   selectAll() {
@@ -271,7 +222,7 @@ class SelectionManager {
 
     this.previewMask = undefined;
     this.updateStateBasedOnSelection();
-    eventBus.emit('selection:areaChanged', { commit: true });
+    eventBus.emit('selection:maskChanged', { commit: true });
   }
 
   /** プレビューをキャンセル */
@@ -281,7 +232,7 @@ class SelectionManager {
     // 状態を更新: キャンセル後は選択状況に基づいて状態を決定
     this.updateStateBasedOnSelection();
 
-    eventBus.emit('selection:areaChanged', { commit: false });
+    eventBus.emit('selection:maskChanged', { commit: false });
   }
 
   public getCombinedMask(): Uint8Array {
@@ -321,14 +272,14 @@ class SelectionManager {
       this.setState('selected');
     }
 
-    eventBus.emit('selection:areaChanged', { commit: true });
+    eventBus.emit('selection:maskChanged', { commit: true });
   }
 
   clear() {
     this.previewMask = undefined;
     this.selectionMask.clear();
     this.setState('idle');
-    eventBus.emit('selection:areaChanged', { commit: true });
+    eventBus.emit('selection:maskChanged', { commit: true });
   }
 
   /**
@@ -346,9 +297,7 @@ class SelectionManager {
       this.setState('idle');
     }
   }
-
-  public forEachMaskPixels(fn: (position: Vec2) => void, withMoveOffset?: boolean) {}
 }
 
-export const selectionManager = new SelectionManager();
+export const selectionManager = new SelectionAreaManager();
 export const getCurrentSelection = () => selectionManager.getSelectionMask();

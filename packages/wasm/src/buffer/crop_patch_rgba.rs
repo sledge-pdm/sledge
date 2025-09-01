@@ -36,27 +36,28 @@ pub fn crop_patch_rgba(
             let mx = sx - ox;
             let my = sy - oy;
 
-            let mut selected = false;
+            // mask==1 => selected (should be transparent in crop)
+            // mask==0 => non-selected (copy source pixel)
+            let mut is_selected = false;
             if mx >= 0 && mx < mw && my >= 0 && my < mh {
                 let midx = (my * mw + mx) as usize;
                 if midx < mask.len() {
-                    selected = mask[midx] != 0;
+                    is_selected = mask[midx] != 0;
                 }
             }
 
-            if !selected {
-                // leave transparent
+            let didx = (sy * sw + sx) as usize * 4;
+            if is_selected {
+                // leave as transparent (already zeroed)
                 continue;
+            } else {
+                let sidx = didx;
+                if sidx + 3 >= source.len() { continue; }
+                result[didx] = source[sidx];
+                result[didx + 1] = source[sidx + 1];
+                result[didx + 2] = source[sidx + 2];
+                result[didx + 3] = source[sidx + 3];
             }
-
-            let sidx = (sy * sw + sx) as usize * 4;
-            if sidx + 3 >= source.len() { continue; }
-            let didx = sidx; // same position in result
-
-            result[didx] = source[sidx];
-            result[didx + 1] = source[sidx + 1];
-            result[didx + 2] = source[sidx + 2];
-            result[didx + 3] = source[sidx + 3];
         }
     }
 

@@ -1,6 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
 import { canvasStore } from '~/stores/ProjectStores';
+
+// Mock 'document' if used in CanvasSizeHistoryAction or related code
+if (typeof document === 'undefined') {
+  (globalThis as any).document = {
+    // Add minimal stubs as needed for your code
+    createElement: vi.fn(),
+    getElementById: vi.fn(),
+    // ...add more if required
+  };
+}
 
 describe('CanvasSizeHistoryAction', () => {
   it('undo/redo updates canvas size value', () => {

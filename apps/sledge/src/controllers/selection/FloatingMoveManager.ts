@@ -118,6 +118,10 @@ class FloatingMoveManager {
       target: this.targetBuffer,
     });
 
+    eventBus.emit('floatingMove:moved', {});
+    eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
+
     eventBus.emit('floatingMove:stateChanged', { moving: true });
   }
 

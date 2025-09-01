@@ -4,7 +4,8 @@ import { getActiveAgent, getAgentOf } from '~/controllers/layer/LayerAgentManage
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { FloatingBuffer, floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { SelectionFillMode, SelectionLimitMode, toolStore } from '~/stores/EditorStores';
+import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
+import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
@@ -72,6 +73,40 @@ export function startMove() {
     };
     floatingMoveManager.startMove(layerFloatingBuffer, 'layer', activeAgent.layerId);
   }
+}
+
+export function startMoveFromPasted(imageData: ImageData) {
+  const activeAgent = getActiveAgent();
+  if (!activeAgent) {
+    console.error('No active agent found');
+    return;
+  }
+
+  cancelSelection();
+
+  setToolStore('activeToolCategory', TOOL_CATEGORIES.MOVE);
+
+  const offset = { x: 0, y: 0 };
+  // create selection according to pasted image
+  selectionManager.beginPreview('replace');
+  selectionManager.setPreviewFragment({
+    kind: 'rect',
+    startPosition: offset,
+    width: imageData.width,
+    height: imageData.height,
+  });
+  selectionManager.commit();
+
+  floatingMoveManager.startMove(
+    {
+      buffer: new Uint8ClampedArray(imageData.data),
+      width: imageData.width,
+      height: imageData.height,
+      offset: { x: 0, y: 0 },
+    },
+    'pasted',
+    activeAgent.layerId
+  );
 }
 
 export function getSelectionOffset() {

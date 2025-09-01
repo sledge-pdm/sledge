@@ -3,10 +3,13 @@
 import { Vec2 } from '@sledge/core';
 import { crop_patch_rgba } from '@sledge/wasm';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
-import { getActiveAgent, getAgentOf } from '~/controllers/layer/LayerAgentManager';
+import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { getActiveAgent, getAgentOf, getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { DebugLogger } from '~/controllers/log/LogController';
 import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { canvasStore } from '~/stores/ProjectStores';
+import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
 export type MoveMode = 'selection' | 'layer' | 'pasted';
@@ -33,6 +36,7 @@ class FloatingMoveManager {
   private readonly LOG_LABEL = 'FloatingMoveManager';
   private logger = new DebugLogger(this.LOG_LABEL, true);
 
+  private targetLayerId: string | undefined = undefined;
   private targetBuffer: Uint8ClampedArray | undefined = undefined;
   // moveOffsetを扱う代わりに、FloatingBufferにoffsetを持たせるようにする。
   // これにより、選択範囲のoffsetをmoveに引きついで扱える。
@@ -101,6 +105,8 @@ class FloatingMoveManager {
     this.targetBuffer = this.getBaseBuffer(state, targetLayerId);
     if (!this.targetBuffer) return;
 
+    this.targetLayerId = targetLayerId;
+
     this.logger.debugLog('startMove', { floatingBuffer, state });
     this.floatingBuffer = floatingBuffer;
     this.state = state;
@@ -161,24 +167,17 @@ class FloatingMoveManager {
     return this.floatingBuffer;
   }
 
-  // The operation right before commiting/preview.
-  // For example, if move context was selection moving or pasting "cut" area,
-  // original area should be deleted before moving.
-  public preCommit() {
-    // for example:
-    if (this.state === 'layer') {
-      this.targetBuffer?.fill(0);
-    }
-  }
-
   public commit() {
     this.logger.debugLog('commit', {});
-    if (!this.floatingBuffer || !this.movePreviewBuffer || !this.targetBuffer) {
+    if (!this.targetLayerId || !this.targetBuffer) {
+      console.error('attempt to commit, but no target layer or buffer is set.');
+      return;
+    }
+    if (!this.floatingBuffer || !this.movePreviewBuffer) {
       console.error('attempt to commit, but nothing is moving.');
       return;
     }
 
-    this.preCommit();
     // update preview buffer
     this.movePreviewBuffer = applyFloatingBuffer({
       width: canvasStore.canvas.width,
@@ -186,8 +185,29 @@ class FloatingMoveManager {
       floatingBuffer: this.floatingBuffer,
       target: this.targetBuffer,
     });
+
+    const beforeBuffer = getBufferOf(this.targetLayerId);
+
     // apply preview to actual buffer
     getActiveAgent()?.setBuffer(this.movePreviewBuffer);
+
+    if (beforeBuffer) {
+      // just record buffer change.
+      // should be replaced by SelectionHistoryAction or something.
+      const action = new LayerBufferHistoryAction(
+        this.targetLayerId,
+        {
+          layerId: this.targetLayerId,
+          whole: {
+            type: 'whole',
+            before: beforeBuffer,
+            after: this.movePreviewBuffer.slice(),
+          },
+        },
+        { from: 'LayerImageAgent.registerToHistory', tool: TOOL_CATEGORIES.MOVE }
+      );
+      projectHistoryController.addAction(action);
+    }
 
     // Emit the commit event
     eventBus.emit('floatingMove:committed', {});
@@ -198,6 +218,7 @@ class FloatingMoveManager {
     // Reset the state
     this.state = undefined;
     this.floatingBuffer = undefined;
+    this.targetLayerId = undefined;
     this.targetBuffer = undefined;
 
     eventBus.emit('floatingMove:stateChanged', { moving: false });
@@ -211,6 +232,7 @@ class FloatingMoveManager {
     // Reset the state
     this.state = undefined;
     this.floatingBuffer = undefined;
+    this.targetLayerId = undefined;
     this.targetBuffer = undefined;
 
     eventBus.emit('floatingMove:stateChanged', { moving: false });

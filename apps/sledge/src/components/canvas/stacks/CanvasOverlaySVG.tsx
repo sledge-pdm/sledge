@@ -75,6 +75,9 @@ const CanvasOverlaySVG: Component = (props) => {
     if (import.meta.env.DEV) console.log('Selection state changed:', e.newState);
     setSelectionState(e.newState);
   };
+  const onFloatingStateChangedHandler = (e: Events['floatingMove:stateChanged']) => {
+    setMoveState(floatingMoveManager.getState());
+  };
   const onFloatingMovedHandler = (e: Events['floatingMove:moved']) => {
     setMoveState(floatingMoveManager.getState());
   };
@@ -102,6 +105,7 @@ const CanvasOverlaySVG: Component = (props) => {
     eventBus.on('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.on('selection:stateChanged', onSelectionStateChangedHandler);
     eventBus.on('floatingMove:moved', onFloatingMovedHandler);
+    eventBus.on('floatingMove:stateChanged', onFloatingStateChangedHandler);
     window.addEventListener('keydown', tempKeyMove);
     setSelectionChanged(true);
   });
@@ -110,6 +114,7 @@ const CanvasOverlaySVG: Component = (props) => {
     eventBus.off('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.off('selection:stateChanged', onSelectionStateChangedHandler);
     eventBus.off('floatingMove:moved', onFloatingMovedHandler);
+    eventBus.off('floatingMove:stateChanged', onFloatingStateChangedHandler);
     window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();
   });

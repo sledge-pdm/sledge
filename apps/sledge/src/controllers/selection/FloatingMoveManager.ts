@@ -4,6 +4,7 @@ import { Vec2 } from '@sledge/core';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { DebugLogger } from '~/controllers/log/LogController';
+import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export type MoveMode = 'selection' | 'layer' | 'pasted';
@@ -86,6 +87,8 @@ class FloatingMoveManager {
     this.preMove();
     // update preview buffer
     this.movePreviewBuffer = await applyFloatingBuffer({
+      width: canvasStore.canvas.width,
+      height: canvasStore.canvas.height,
       floatingBuffer: this.floatingBuffer,
       target: this.movePreviewBuffer,
     });

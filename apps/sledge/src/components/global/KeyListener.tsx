@@ -1,12 +1,11 @@
-import { slice_patch_rgba } from '@sledge/wasm';
+import { slice_patch_rgba, trim_mask_with_box } from '@sledge/wasm';
 import { Component, onCleanup, onMount } from 'solid-js';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { activeIndex, addLayerTo } from '~/controllers/layer/LayerListController';
 import { setBottomBarText } from '~/controllers/log/LogController';
-import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { cancelMove, cancelSelection, isSelectionAvailable, startMoveFromPasted } from '~/controllers/selection/SelectionOperator';
+import { isSelectionAvailable, startMoveFromPasted } from '~/controllers/selection/SelectionOperator';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -31,6 +30,7 @@ const KeyListener: Component = () => {
     type: 'selection' | 'layer';
     canvas?: { width: number; height: number };
     // Optional bounding box or other future fields
+    bbox?: { x: number; y: number; width: number; height: number };
   };
 
   const makeMetaBlob = (meta: ClipboardMeta) => new Blob([`${META_PREFIX}${JSON.stringify(meta)}`], { type: 'text/plain' });
@@ -49,6 +49,27 @@ const KeyListener: Component = () => {
       // ignore parse errors
     }
     return undefined;
+  };
+
+  // Compute tight bounding box of 1s in a canvas-sized selection mask
+  const computeMaskBBox = (mask: Uint8Array, width: number, height: number): { x: number; y: number; width: number; height: number } | undefined => {
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxX = -1;
+    let maxY = -1;
+    for (let y = 0; y < height; y++) {
+      const row = y * width;
+      for (let x = 0; x < width; x++) {
+        if (mask[row + x] === 1) {
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+    if (maxX < 0 || maxY < 0) return undefined;
+    return { x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
   };
   // Helper function to check if the active element is an input field
   const isInputFocused = () => {
@@ -150,6 +171,11 @@ const KeyListener: Component = () => {
       if (isSelectionAvailable()) {
         const width = activeAgent.getWidth();
         const height = activeAgent.getHeight();
+        selectionManager.commitOffset();
+        const mask = selectionManager.getCombinedMask();
+        const bbox = computeMaskBBox(mask, width, height);
+        if (!bbox) return;
+        const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
         const selectionBlob = await bufferToBlob({
           buffer: slice_patch_rgba(
             // source
@@ -157,16 +183,22 @@ const KeyListener: Component = () => {
             width,
             height,
             // mask
-            new Uint8Array(selectionManager.getCombinedMask()),
-            width,
-            height,
-            0,
-            0
+            new Uint8Array(trimmedMask),
+            bbox.width,
+            bbox.height,
+            bbox.x,
+            bbox.y
           ),
-          width,
-          height,
+          width: bbox.width,
+          height: bbox.height,
         });
-        const meta = makeMetaBlob({ app: 'sledge', v: 1, type: 'selection', canvas: { width, height } });
+        const meta = makeMetaBlob({
+          app: 'sledge',
+          v: 1,
+          type: 'selection',
+          canvas: { width, height },
+          bbox: bbox ?? undefined,
+        });
         await navigator.clipboard.write([new ClipboardItem({ 'text/plain': meta, [selectionBlob.type]: selectionBlob })]);
 
         setBottomBarText('selection copied!', {
@@ -213,8 +245,8 @@ const KeyListener: Component = () => {
         if (meta?.type === 'selection') {
           // Start floating move with pasted buffer
           const targetLayerId = layerListStore.activeLayerId;
-          if (targetLayerId) {
-            startMoveFromPasted(imageData);
+          if (targetLayerId && meta.bbox) {
+            startMoveFromPasted(imageData, meta.bbox);
           } else {
             // Fallback: add as a new layer
             addLayerTo(activeIndex(), { name: 'pasted selection' }, { initImage: new Uint8ClampedArray(imageData.data) });

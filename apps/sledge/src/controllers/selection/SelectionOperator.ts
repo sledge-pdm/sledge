@@ -75,7 +75,7 @@ export function startMove() {
   }
 }
 
-export function startMoveFromPasted(imageData: ImageData) {
+export function startMoveFromPasted(imageData: ImageData, boundBox: { x: number; y: number; width: number; height: number }) {
   const activeAgent = getActiveAgent();
   if (!activeAgent) {
     console.error('No active agent found');
@@ -86,23 +86,23 @@ export function startMoveFromPasted(imageData: ImageData) {
 
   setToolStore('activeToolCategory', TOOL_CATEGORIES.MOVE);
 
-  const offset = { x: 0, y: 0 };
+  const pastingOffset = { x: 0, y: 0 };
   // create selection according to pasted image
   selectionManager.beginPreview('replace');
   selectionManager.setPreviewFragment({
     kind: 'rect',
-    startPosition: offset,
-    width: imageData.width,
-    height: imageData.height,
+    startPosition: pastingOffset,
+    width: boundBox.width,
+    height: boundBox.height,
   });
   selectionManager.commit();
 
   floatingMoveManager.startMove(
     {
       buffer: new Uint8ClampedArray(imageData.data),
-      width: imageData.width,
-      height: imageData.height,
-      offset: { x: 0, y: 0 },
+      width: boundBox.width,
+      height: boundBox.height,
+      offset: pastingOffset,
     },
     'pasted',
     activeAgent.layerId

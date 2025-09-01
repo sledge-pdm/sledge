@@ -216,7 +216,7 @@ class FloatingMoveManager {
     // Emit the commit event
     eventBus.emit('floatingMove:committed', {});
 
-    if (this.state === 'layer') {
+    if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
     }
     // Reset the state
@@ -230,7 +230,7 @@ class FloatingMoveManager {
 
   public cancel() {
     //cancel
-    if (this.getState() === 'layer') {
+    if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
     }
     // Reset the state

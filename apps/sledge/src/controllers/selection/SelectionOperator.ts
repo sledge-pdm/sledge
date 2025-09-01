@@ -61,7 +61,7 @@ export function startMove() {
   }
 
   if (isSelectionAvailable()) {
-    floatingMoveManager.startMove(selectionManager.getFloatingBuffer(activeAgent.layerId)!, 'selection');
+    floatingMoveManager.startMove(selectionManager.getFloatingBuffer(activeAgent.layerId)!, 'selection', activeAgent.layerId);
   } else {
     selectionManager.selectAll();
     const layerFloatingBuffer: FloatingBuffer = {
@@ -70,7 +70,7 @@ export function startMove() {
       height: activeAgent.getHeight(),
       offset: { x: 0, y: 0 },
     };
-    floatingMoveManager.startMove(layerFloatingBuffer, 'layer');
+    floatingMoveManager.startMove(layerFloatingBuffer, 'layer', activeAgent.layerId);
   }
 }
 

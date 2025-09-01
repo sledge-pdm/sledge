@@ -4,7 +4,7 @@ import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask, slice_patch_rgba } from '@sledge/wasm';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getActiveAgent, getBufferOf } from '~/controllers/layer/LayerAgentManager';
-import { FloatingBuffer, floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
+import { FloatingBuffer } from '~/controllers/selection/FloatingMoveManager';
 import SelectionMask from '~/controllers/selection/SelectionMask';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -321,11 +321,6 @@ class SelectionAreaManager {
       width,
       height,
     };
-  }
-
-  // 現在の選択範囲からFloat状態を作成
-  public switchToMove() {
-    floatingMoveManager.startMove(this.getFloatingBuffer(getActiveAgent()!.layerId)!, 'selection');
   }
 }
 

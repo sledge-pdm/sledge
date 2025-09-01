@@ -15,9 +15,11 @@ export class MoveTool implements ToolBehavior {
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     selectionManager.commitOffset();
     selectionManager.commit();
-
-    // 選択状態があれば選択範囲のバッファを、なければレイヤーを移動
-    startMove();
+    if (!floatingMoveManager.isMoving()) {
+      console.log('start moving.');
+      // 選択状態があれば選択範囲のバッファを、なければレイヤーを移動
+      startMove();
+    }
 
     this.startOffset = floatingMoveManager.getFloatingBuffer()?.offset ?? { x: 0, y: 0 };
     this.startPosition = args.position;

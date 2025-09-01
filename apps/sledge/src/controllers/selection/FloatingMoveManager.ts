@@ -1,8 +1,9 @@
 // controllers/layer/SelectionManager.ts
 
 import { Vec2 } from '@sledge/core';
+import { crop_patch_rgba } from '@sledge/wasm';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
-import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
+import { getActiveAgent, getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { DebugLogger } from '~/controllers/log/LogController';
 import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -64,12 +65,40 @@ class FloatingMoveManager {
 
   constructor() {}
 
-  private getTargetBuffer() {
-    return getActiveAgent()?.getBuffer();
+  private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
+    const targetAgent = getAgentOf(targetLayerId);
+    if (!targetAgent) return;
+    if (state === 'layer') {
+      // layer: source layer = target layer
+      // move whole layer so return empty buffer
+      return new Uint8ClampedArray(targetAgent.getWidth() * targetAgent.getHeight() * 4);
+    } else if (state === 'selection') {
+      // selection: source layer = target layer
+      // move selection so return buffer cropped by selection
+
+      // slice buffer by mask
+      const width = targetAgent.getWidth();
+      const height = targetAgent.getHeight();
+      const croppedBuffer = crop_patch_rgba(
+        // source
+        new Uint8Array(targetAgent.getBuffer()),
+        width,
+        height,
+        new Uint8Array(selectionManager.getCombinedMask()),
+        width,
+        height,
+        0,
+        0
+      );
+      return new Uint8ClampedArray(croppedBuffer.buffer);
+    } else if (state === 'pasted') {
+      // pasted: source is pasted buffer so just return target buffer
+      return targetAgent.getBuffer().slice() as Uint8ClampedArray;
+    }
   }
 
-  public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode) {
-    this.targetBuffer = this.getTargetBuffer();
+  public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
+    this.targetBuffer = this.getBaseBuffer(state, targetLayerId);
     if (!this.targetBuffer) return;
 
     this.logger.debugLog('startMove', { floatingBuffer, state });
@@ -163,6 +192,9 @@ class FloatingMoveManager {
     // Emit the commit event
     eventBus.emit('floatingMove:committed', {});
 
+    if (this.state === 'layer') {
+      selectionManager.clear();
+    }
     // Reset the state
     this.state = undefined;
     this.floatingBuffer = undefined;

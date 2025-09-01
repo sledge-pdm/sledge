@@ -121,6 +121,7 @@ class FloatingMoveManager {
     eventBus.emit('floatingMove:moved', {});
     eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
+    eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
 
     eventBus.emit('floatingMove:stateChanged', { moving: true });
   }
@@ -167,6 +168,7 @@ class FloatingMoveManager {
     eventBus.emit('floatingMove:moved', {});
     eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
+    eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
 
     return this.floatingBuffer;
   }
@@ -226,6 +228,8 @@ class FloatingMoveManager {
     this.targetBuffer = undefined;
 
     eventBus.emit('floatingMove:stateChanged', { moving: false });
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
+    eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
   }
 
   public cancel() {

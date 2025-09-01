@@ -1,44 +1,31 @@
 use wasm_bindgen::prelude::*;
 
+
+
 #[wasm_bindgen]
 pub fn patch_buffer(
+    // target
     target: &[u8],
+    target_width: u32,
+    target_height: u32,
+    // patch
     patch: &[u8],
+    patch_width: u32,
+    patch_height: u32,
     offset_x: f32,
     offset_y: f32,
-    width: u32,
-    height: u32,
 ) -> Vec<u8> {
-    let w = width as i32;
-    let h = height as i32;
+    let w = target_width as i32;
+    let h = target_height as i32;
 
     // Expect RGBA buffers
     let mut result = target.to_vec();
 
-    // patch is assumed to be RGBA and its size determines src width/height implicitly
-    let patch_len = patch.len();
-    if patch_len % 4 != 0 {
-        return result;
-    }
-
-    let src_pixels = (patch_len / 4) as i32;
-    // If patch represents a full-width image it may be width*height, but we don't know src width.
-    // We'll try to infer src width as w if it divides evenly, otherwise treat src as linear strip of width w.
-    // Better approach: caller should pass properly sized patch (matching intended src width/height).
-
-    // For simplicity assume patch width == w and derive src_h accordingly when possible.
-    let mut src_w = w;
-    if src_w <= 0 { return result; }
-    let mut src_h = src_pixels / src_w;
-    if src_h * src_w != src_pixels {
-        // fallback: treat patch as same dimensions as target
-        src_w = w;
-        src_h = h;
-        if src_h * src_w != src_pixels {
-            // cannot determine shape; abort
-            return result;
-        }
-    }
+    // Validate patch buffer size matches dimensions (RGBA)
+    let src_w = patch_width as i32;
+    let src_h = patch_height as i32;
+    if src_w <= 0 || src_h <= 0 { return result; }
+    if (src_w as usize) * (src_h as usize) * 4 != patch.len() { return result; }
 
     let dx = offset_x.round() as i32;
     let dy = offset_y.round() as i32;

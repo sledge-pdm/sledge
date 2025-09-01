@@ -1,16 +1,18 @@
 // controllers/layer/SelectionManager.ts
 
 import { Vec2 } from '@sledge/core';
+import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
+import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import { DebugLogger } from '~/controllers/log/LogController';
 import { eventBus } from '~/utils/EventBus';
 
-export type MoveMode = 'selection' | 'layer';
+export type MoveMode = 'selection' | 'layer' | 'pasted';
 
 export interface FloatingBuffer {
   buffer: Uint8ClampedArray;
   width: number;
   height: number;
-  startOffset: Vec2;
+  offset: Vec2;
 }
 
 // Usage:
@@ -28,22 +30,21 @@ class FloatingMoveManager {
   private readonly LOG_LABEL = 'FloatingMoveManager';
   private logger = new DebugLogger(this.LOG_LABEL, true);
 
+  // moveOffsetを扱う代わりに、FloatingBufferにoffsetを持たせるようにする。
+  // これにより、選択範囲のoffsetをmoveに引きついで扱える。
   private floatingBuffer: FloatingBuffer | undefined = undefined;
+
+  // Don't modify original layer buffer while moving.
+  // instead, create a preview buffer and conditionally use it.
+  // 注釈: 現在はオリジナルの元バッファを保持したうえで、オリジナルのバッファを改変してしまっています。
+  // それだと保存やエクスポートの時にcommitされていない変更が載ってしまうので、プレビュー用バッファを用意したうえでwebGLに渡すときに
+  //   const buffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving() ? floatingMoveManager.movePreviewBuffer : getBufferOf(layer.id);
+  // のようにする方が安全と思います。
+  private movePreviewBuffer: Uint8ClampedArray | undefined = undefined; // should be same size as layer/canvas.
   private state: MoveMode | undefined = undefined;
 
-  // The offset from move start position.
-  // This is supposed to be (0,0) when nothing is moved.
-  // (because the final offset always calculated by [selection offset] + [move offset]).
-  // Note: If floating buffer is not starting from (0,0),
-  //       this offset should start with that offset. (e.g. most of the selection)
-  private moveOffset: Vec2 = { x: 0, y: 0 };
-
-  public setMoveOffset(moveOffset: Vec2) {
-    this.moveOffset = moveOffset;
-  }
-
-  public getMoveOffset() {
-    return this.moveOffset;
+  public getFloatingBuffer() {
+    return this.floatingBuffer;
   }
 
   public isMoving() {
@@ -60,43 +61,59 @@ class FloatingMoveManager {
     this.logger.debugLog('startMove', { floatingBuffer, state });
     this.floatingBuffer = floatingBuffer;
     this.state = state;
-    this.moveOffset = floatingBuffer.startOffset;
   }
 
-  public move(delta: Vec2) {
+  // The operation right before commiting/preview.
+  // For example, if move context was selection moving or pasting "cut" area,
+  // original area should be deleted before moving.
+  public preMove() {
+    // for example:
+    if (this.state === 'selection') {
+      // Clear the original area in the preview buffer (not original buffer!)
+    }
+  }
+
+  public async move(delta: Vec2) {
     this.logger.debugLog('move', { delta });
-    this.moveOffset.x += delta.x;
-    this.moveOffset.y += delta.y;
+    if (!this.floatingBuffer || !this.movePreviewBuffer) {
+      console.error('attempt to move, but nothing is moving.');
+      return;
+    }
 
-    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
-    return this.moveOffset;
-  }
+    this.floatingBuffer.offset.x += delta.x;
+    this.floatingBuffer.offset.y += delta.y;
 
-  public moveTo(pos: Vec2) {
-    this.logger.debugLog('moveTo', { pos });
-    this.moveOffset = pos;
+    this.preMove();
+    // update preview buffer
+    this.movePreviewBuffer = await applyFloatingBuffer({
+      floatingBuffer: this.floatingBuffer,
+      target: this.movePreviewBuffer,
+    });
 
-    eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
-    return this.moveOffset;
+    eventBus.emit('floatingMove:moved', {});
+
+    return this.floatingBuffer;
   }
 
   public commit() {
     this.logger.debugLog('commit', {});
-    if (!this.floatingBuffer) {
+    if (!this.floatingBuffer || !this.movePreviewBuffer) {
       console.error('attempt to commit, but nothing is moving.');
       return;
     }
 
-    // implement buffer commit.
+    // apply preview to actual buffer
+    getActiveAgent()?.setBuffer(this.movePreviewBuffer);
 
     // Emit the commit event
-    eventBus.emit('floatingMove:committed', { newOffset: this.moveOffset });
+    eventBus.emit('floatingMove:committed', {});
 
     // Reset the state
     this.floatingBuffer = undefined;
     this.state = undefined;
-    this.moveOffset = { x: 0, y: 0 };
   }
+
+  public cancel() {}
 }
 
 export const selectionManager = new FloatingMoveManager();

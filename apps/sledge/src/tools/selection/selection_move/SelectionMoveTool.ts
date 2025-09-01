@@ -24,7 +24,7 @@ export class SelectionMoveTool implements ToolBehavior {
   onMove(agent: LayerImageAgent, args: ToolArgs) {
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
-    selectionManager.moveTo({
+    selectionManager.setOffset({
       x: this.startOffset.x + dx,
       y: this.startOffset.y + dy,
     });

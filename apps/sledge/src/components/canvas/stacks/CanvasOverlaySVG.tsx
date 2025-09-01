@@ -76,16 +76,16 @@ const CanvasOverlaySVG: Component = (props) => {
   const tempKeyMove = (e: KeyboardEvent) => {
     switch (e.key) {
       case 'ArrowLeft':
-        selectionManager.move({ x: -1, y: 0 });
+        selectionManager.shiftOffset({ x: -1, y: 0 });
         break;
       case 'ArrowRight':
-        selectionManager.move({ x: 1, y: 0 });
+        selectionManager.shiftOffset({ x: 1, y: 0 });
         break;
       case 'ArrowUp':
-        selectionManager.move({ x: 0, y: -1 });
+        selectionManager.shiftOffset({ x: 0, y: -1 });
         break;
       case 'ArrowDown':
-        selectionManager.move({ x: 0, y: 1 });
+        selectionManager.shiftOffset({ x: 0, y: 1 });
         break;
     }
   };

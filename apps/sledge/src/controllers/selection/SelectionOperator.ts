@@ -13,6 +13,7 @@ import { eventBus } from '~/utils/EventBus';
 export function isSelectionAvailable(): boolean {
   return selectionManager.isSelected();
 }
+
 /**
  * 描画制限モードに基づいて描画可能な位置かチェック
  * @param pos チェックする位置
@@ -52,6 +53,7 @@ export function getSelectionFillMode(): SelectionFillMode {
   return toolStore.selectionFillMode;
 }
 
+// ---should move to FloatingMoveManager start---
 export function commitMove() {
   const moveTool = getToolCategory('move').behavior as MoveTool;
   moveTool.commit();
@@ -67,6 +69,7 @@ export function cancelMove() {
     selectionManager.clear();
   }
 }
+// ---should move to FloatingMoveManager end---
 
 export function cancelSelection() {
   if (selectionManager.isMoveState()) {
@@ -110,7 +113,7 @@ export function deletePixelInSelection(layerId?: string): boolean {
   return true;
 }
 
-export function invertSelection() {
+export function invertSelectionArea() {
   // 1) 移動中なら見た目どおりに反映してから反転
   selectionManager.commitOffset();
 

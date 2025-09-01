@@ -2,7 +2,7 @@ import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/controllers/selection/SelectionAreaManager';
-import { cancelMove, cancelSelection, commitMove, deletePixelInSelection, invertSelection } from '~/controllers/selection/SelectionOperator';
+import { cancelMove, cancelSelection, commitMove, deletePixelInSelection, invertSelectionArea } from '~/controllers/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
@@ -237,7 +237,7 @@ const MenuContent = () => {
         <Item
           src='/icons/selection/invert_10.png'
           onClick={() => {
-            invertSelection();
+            invertSelectionArea();
           }}
           title='invert.'
         />

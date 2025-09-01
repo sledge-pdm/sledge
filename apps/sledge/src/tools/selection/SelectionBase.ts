@@ -52,7 +52,7 @@ export abstract class SelectionBase implements ToolBehavior {
       // 移動中のオフセットを反映
       const dx = args.position.x - this.startPosition.x;
       const dy = args.position.y - this.startPosition.y;
-      selectionManager.moveTo({ x: this.startOffset.x + dx, y: this.startOffset.y + dy });
+      selectionManager.setOffset({ x: this.startOffset.x + dx, y: this.startOffset.y + dy });
     } else {
       // ツール固有の選択更新処理
       this.onMoveSelection(agent, args, mode);
@@ -91,7 +91,7 @@ export abstract class SelectionBase implements ToolBehavior {
 
     if (mode === 'move') {
       // 位置を元に戻す
-      selectionManager.moveTo(this.startOffset);
+      selectionManager.setOffset(this.startOffset);
       selectionManager.setState('selected');
     } else {
       // ツール固有のキャンセル処理

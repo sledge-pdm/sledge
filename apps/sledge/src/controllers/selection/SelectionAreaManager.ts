@@ -5,7 +5,6 @@ import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_ma
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
 import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
 import SelectionMask from '~/controllers/selection/SelectionMask';
-import { SelectionFillMode, SelectionLimitMode, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -47,6 +46,7 @@ class SelectionAreaManager {
     eventBus.emit('selection:stateChanged', { newState: state });
   }
 
+  // ---should move to FloatingMoveManager start---
   public isMoveState() {
     return this.state === 'move_selection' || this.state === 'move_layer';
   }
@@ -58,15 +58,16 @@ class SelectionAreaManager {
   public getMoveOffset() {
     return this.moveOffset;
   }
+  // ---should move to FloatingMoveManager end---
 
-  public move(delta: Vec2) {
+  public shiftOffset(delta: Vec2) {
     this.moveOffset.x += delta.x;
     this.moveOffset.y += delta.y;
     eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
     return this.moveOffset;
   }
 
-  public moveTo(pos: Vec2) {
+  public setOffset(pos: Vec2) {
     this.moveOffset = pos;
     eventBus.emit('selection:offsetChanged', { newOffset: this.moveOffset });
     return this.moveOffset;

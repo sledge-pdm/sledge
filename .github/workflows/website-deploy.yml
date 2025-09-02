@@ -1,4 +1,4 @@
-name: Website Deploy (Vercel Hook)
+name: website-production
 
 on:
   push:

@@ -1,8 +1,9 @@
-import { getTheme } from '@sledge/theme';
+import { getTheme, vars } from '@sledge/theme';
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
 import { onMount, Suspense, type Component } from 'solid-js';
 import Home from '~/routes';
+import Telling from '~/routes/telling';
 import { globalStore } from '~/store/GlobalStore';
 
 const App: Component = () => {
@@ -16,7 +17,14 @@ const App: Component = () => {
         <MetaProvider>
           <title>Sledge</title>
           <Suspense>
-            <main class={getTheme(globalStore.theme)}>{props.children}</main>
+            <main
+              class={getTheme(globalStore.theme)}
+              style={{
+                background: vars.color.surface,
+              }}
+            >
+              {props.children}
+            </main>
           </Suspense>
 
           {/* <p class={sledgeLogo}>sledge.</p> */}
@@ -24,6 +32,7 @@ const App: Component = () => {
       )}
     >
       <Route path='/' component={Home} />
+      <Route path='/telling' component={Telling} />
     </Router>
   );
 };

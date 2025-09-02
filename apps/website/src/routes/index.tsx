@@ -9,13 +9,11 @@ import {
   content,
   description,
   greetText,
-  header,
   informationText,
   mainButton,
   mainButtonContainer,
   rightBottomArea,
   scrollContent,
-  startIcon,
   startImage,
   startImageContainer,
   startRoot,
@@ -34,6 +32,19 @@ export default function Home() {
     import.meta.env.VITE_GITHUB_REPO +
     '/releases/latest';
 
+  const imageSrc = () => {
+    switch (globalStore.theme) {
+      case 'light':
+      default:
+        return './0827sledge_light.png';
+      case 'black':
+        return './0827sledge_black.png';
+      case 'dark':
+        return './0827sledge_dark.png';
+      case 'dark-gy-flip':
+        return './0827sledge_darkgyflip.png';
+    }
+  };
   const isLight = () => globalStore.theme === 'light';
 
   const downloadFlavorTexts = ['Take This!'];
@@ -128,105 +139,106 @@ export default function Home() {
   return (
     <div class={startRoot}>
       <div class={scrollContent}>
-        <a href={'https://github.com/Innsbluck-rh/sledge'} target='_blank' class={header} style={{ width: 'fit-content' }}>
-          <img class={startIcon} src={isLight() ? '/companion.png' : '/companion_light.png'} width={56} height={56} />
-          {/* <p class={startHeader}>SLEDGE.</p> */}
-        </a>
+        <div class={content}></div>
+        <div class={description}>
+          <p class={greetText}>HELLO.</p>
+          <p class={startText}>
+            i'm sledge.
+            <br />
+            simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
+          </p>
 
-        <div class={content}>
-          <div class={description}>
-            <p class={greetText}>HELLO.</p>
-            <p class={startText}>
-              i'm sledge.
-              <br />
-              simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
-            </p>
-
-            <Show when={!isLoading()} fallback={<p class={startText}>Loading...</p>}>
-              <Show when={information()}>
-                <div
-                  class={flexCol}
+          <Show when={!isLoading()} fallback={<p class={startText}>Loading...</p>}>
+            <Show when={information()}>
+              <div
+                class={flexCol}
+                style={{
+                  'background-color': vars.color.surface,
+                  padding: vars.spacing.lg,
+                  color: vars.color.onBackground,
+                  width: 'fit-content',
+                  'max-width': '100%',
+                }}
+              >
+                <p
+                  class={informationText}
                   style={{
-                    'background-color': vars.color.surface,
-                    padding: vars.spacing.lg,
-                    color: vars.color.onBackground,
-                    width: 'fit-content',
-                    'max-width': '100%',
+                    'font-family': ZFB08,
+                    'white-space': 'pre',
+                    'font-size': '8px',
+                    'margin-bottom': '12px',
+                    color: vars.color.accent,
                   }}
                 >
-                  <p
-                    class={informationText}
-                    style={{
-                      'font-family': ZFB08,
-                      'white-space': 'pre',
-                      'font-size': '8px',
-                      'margin-bottom': '12px',
-                      color: vars.color.accent,
-                    }}
-                  >
-                    for {userOS()} users
-                  </p>
-                  <p
-                    class={informationText}
-                    style={{
-                      'font-family': k12x8,
-                      'line-height': '1.5',
-                      'white-space': 'pre',
-                      'letter-spacing': '1px',
-                      'font-size': '8px',
-                    }}
-                  >
-                    {information()}
-                  </p>
-                </div>
-              </Show>
-              <div class={ButtonAreaContainer}>
-                <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-                  <p class={versionInfoText}>
-                    Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
-                  </p>
-                </Show>
-                <p class={versionInfoText}>
-                  Latest Build:{' '}
-                  <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>
-                    {releaseData()?.name ?? '[ fetch failed ]'}
-                  </span>
+                  for {userOS()} users
                 </p>
-
-                <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-                  <div class={mainButtonContainer}>{DownloadButtons()}</div>
-                  <a
-                    onClick={() => {
-                      window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-                    }}
-                    style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
-                  >
-                    OTHER DOWNLOADS.
-                  </a>
-                </Show>
-
-                <Show when={userOS() === 'sp'}>
-                  <Button
-                    onClick={() => {
-                      window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
-                    }}
-                    hoverColor='white'
-                    class={mainButton}
-                  >
-                    VIEW CODE.
-                  </Button>
-                </Show>
+                <p
+                  class={informationText}
+                  style={{
+                    'font-family': k12x8,
+                    'line-height': '1.5',
+                    'white-space': 'pre',
+                    'letter-spacing': '1px',
+                    'font-size': '8px',
+                  }}
+                >
+                  {information()}
+                </p>
               </div>
             </Show>
-          </div>
-          <div
-            class={startImageContainer}
-            style={{
-              filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'})`,
-            }}
-          >
-            <FadingImage class={startImage} src={isLight() ? '/window_dark.png' : '/window_light.png'} />
-          </div>
+            <div class={ButtonAreaContainer}>
+              <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+                <p class={versionInfoText}>
+                  Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
+                </p>
+              </Show>
+              <p class={versionInfoText}>
+                Latest Build:{' '}
+                <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>{releaseData()?.name ?? '[ fetch failed ]'}</span>
+              </p>
+
+              <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+                <div class={mainButtonContainer}>{DownloadButtons()}</div>
+                <div class={mainButtonContainer}>
+                  <Button onClick={() => {}} hoverColor='white' class={mainButton}>
+                    pseudo DL
+                  </Button>
+                </div>
+                <a
+                  onClick={() => {
+                    window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+                  }}
+                  style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
+                >
+                  OTHER DOWNLOADS.
+                </a>
+              </Show>
+
+              <Show when={userOS() === 'sp'}>
+                <Button
+                  onClick={() => {
+                    window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
+                  }}
+                  hoverColor='white'
+                  class={mainButton}
+                >
+                  VIEW CODE.
+                </Button>
+              </Show>
+            </div>
+          </Show>
+
+          <p style={{ 'font-family': ZFB03B, 'font-size': '16px' }}>learn more?</p>
+          <p>sssss</p>
+        </div>
+
+        <div
+          class={startImageContainer}
+          style={{
+            filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'})`,
+          }}
+        >
+          <FadingImage class={startImage} src={imageSrc()} />
         </div>
 
         <div class={themeArea}>

@@ -1,15 +1,21 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
-import { vars, ZFB08, ZFB31 } from '@sledge/theme';
+import { vars, ZFB08, ZFB09, ZFB11, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const startRoot = style([
   flexCol,
   w100,
   {
+    justifySelf: 'center',
+    width: '80%',
     height: '100dvh',
     overflowY: 'auto',
     overflowX: 'hidden',
     boxSizing: 'border-box',
+    scrollSnapType: 'y mandatory',
+    scrollBehavior: 'smooth',
+    overscrollBehavior: 'contain',
+    backgroundColor: vars.color.background,
   },
 ]);
 
@@ -21,6 +27,7 @@ export const scrollContent = style([
     overflowX: 'hidden',
     padding: '42px 42px',
     boxSizing: 'border-box',
+    backgroundColor: vars.color.background,
     '@media': {
       '(max-width: 768px)': {
         padding: `${vars.spacing.xl} ${vars.spacing.lg}`,
@@ -71,10 +78,10 @@ export const startHeader = style({
 export const content = style([
   flexRow,
   {
-    position: 'fixed',
+    position: 'relative',
     flexWrap: 'nowrap',
     width: '100%',
-    padding: '3rem 3rem',
+    padding: '1rem 3rem',
     boxSizing: 'border-box',
     zIndex: 1,
     pointerEvents: 'none',
@@ -96,9 +103,8 @@ export const description = style([
   flexCol,
   {
     width: '45%',
-    padding: '5rem 5rem',
+    padding: '1rem 5rem',
     boxSizing: 'border-box',
-    gap: '2rem',
     pointerEvents: 'none',
     zIndex: 2,
     '@media': {
@@ -114,11 +120,11 @@ export const description = style([
 
 export const startImageContainer = style({
   position: 'absolute',
-  top: '18%',
-  right: '10%',
+  top: '15%',
+  right: '5%',
   width: '40%',
   pointerEvents: 'none',
-  zIndex: -1,
+  zIndex: 0,
   '@media': {
     '(max-width: 1600px)': {
       padding: 0,
@@ -138,7 +144,7 @@ export const startImage = style({
 
 export const greetText = style({
   fontFamily: ZFB31,
-  fontSize: '88px',
+  fontSize: '80px',
   letterSpacing: '2px',
   '@media': {
     '(max-width: 768px)': {
@@ -148,10 +154,28 @@ export const greetText = style({
 });
 
 export const startText = style({
-  fontFamily: ZFB08,
-  fontSize: '24px',
+  fontFamily: ZFB09,
+  fontSize: '16px',
+  marginTop: '-1.5rem',
+  marginBottom: '72px',
   letterSpacing: '2px',
+  fontStyle: 'italic',
+
+  '@media': {
+    '(max-width: 768px)': {
+      fontSize: '16px',
+      marginBottom: '0.25rem',
+    },
+  },
+});
+
+export const flavorText = style({
+  fontFamily: ZFB11,
+  fontSize: '16px',
+  letterSpacing: '1px',
+  marginBottom: '4rem',
   lineHeight: '1.5',
+  opacity: 0.2,
   '@media': {
     '(max-width: 768px)': {
       fontSize: '16px',
@@ -168,7 +192,8 @@ export const ButtonAreaContainer = style([
 ]);
 
 export const versionInfoText = style({
-  fontSize: '16px',
+  fontFamily: ZFB09,
+  fontSize: '8px',
   '@media': {
     '(max-width: 768px)': {
       fontSize: '8px',
@@ -272,3 +297,100 @@ export const rightBottomArea = style([
     },
   },
 ]);
+
+// --- Scroll telling specific ---
+export const panel = style([
+  flexRow,
+  {
+    scrollSnapAlign: 'start',
+    scrollSnapStop: 'always',
+    minHeight: '100dvh',
+    position: 'relative',
+    boxSizing: 'border-box',
+    alignItems: 'stretch',
+  },
+]);
+
+export const panelInner = style([
+  flexRow,
+  {
+    width: '100%',
+    boxSizing: 'border-box',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '2rem',
+    padding: '4rem 10rem',
+    '@media': {
+      '(max-width: 768px)': {
+        flexWrap: 'wrap',
+        padding: `3rem 1rem`,
+        gap: '1.5rem',
+      },
+    },
+  },
+]);
+
+export const leftCol = style([
+  flexCol,
+  {
+    width: '55%',
+    height: '70%',
+    gap: '1.5rem',
+    '@media': {
+      '(max-width: 768px)': {
+        width: '100%',
+      },
+    },
+  },
+]);
+
+export const rightCol = style([
+  flexCol,
+  {
+    width: '45%',
+    alignItems: 'flex-end',
+    '@media': {
+      '(max-width: 768px)': {
+        width: '100%',
+        alignItems: 'stretch',
+      },
+    },
+  },
+]);
+
+export const heroHeading = style({
+  fontFamily: ZFB31,
+  fontSize: '64px',
+  textTransform: 'uppercase',
+  textRendering: 'geometricPrecision',
+  color: vars.color.onBackground,
+  '@media': {
+    '(max-width: 768px)': {
+      fontSize: '40px',
+    },
+  },
+});
+
+export const subHeading = style({
+  fontFamily: ZFB08,
+  fontSize: '16px',
+  letterSpacing: '1px',
+  lineHeight: 1.6,
+  color: vars.color.onBackground,
+  '@media': {
+    '(max-width: 768px)': {
+      fontSize: '14px',
+    },
+  },
+});
+
+export const animatedBlock = style({
+  opacity: 0,
+  transform: 'translateY(12px)',
+  transition: 'opacity 420ms ease, transform 420ms ease',
+});
+
+export const animatedActive = style({
+  opacity: 1,
+  transform: 'translateY(0)',
+});

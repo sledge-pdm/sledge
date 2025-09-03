@@ -253,7 +253,6 @@ export class WebGLRenderer {
       logger.debugLog(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
 
       const agent = getAgentOf(layer.id)!;
-      // const buf = getBufferOf(layer.id)!; // 全体の RGBA バッファ幅 = this.width * this.height * 4
       const buf =
         layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving() ? floatingMoveManager.getPreviewBuffer() : getBufferOf(layer.id);
       if (!buf) return;

@@ -1,8 +1,9 @@
 import { Size2D } from '@sledge/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { Consts } from '~/models/Consts';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 
 export function calcThumbnailSize(origW: number, origH: number): Size2D {
   return calcFitSize(origW, origH, Consts.projectThumbnailSize, Consts.projectThumbnailSize);
@@ -57,8 +58,12 @@ export class ThumbnailGenerator {
         this.offCtx.clearRect(0, 0, width, height);
       }
 
+      const buf =
+        agent.layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving()
+          ? floatingMoveManager.getPreviewBuffer()!
+          : agent.getBuffer();
       // Keep slice() for now to avoid type issues, but optimize canvas resizing
-      const imgData = new ImageData(agent.getBuffer().slice(), w, h);
+      const imgData = new ImageData(buf.slice(), w, h);
       this.tmpCtx.putImageData(imgData, 0, 0);
       this.offCtx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
 

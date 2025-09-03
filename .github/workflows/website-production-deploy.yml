@@ -2,14 +2,6 @@ name: website-production
 
 on:
   push:
-    branches:
-      - develop
-    paths:
-      - 'apps/website/**'
-      - 'packages/core/**'
-      - 'packages/theme/**'
-      - 'packages/ui/**'
-      - '.github/workflows/website-deploy.yml'
   workflow_dispatch:
 
 jobs:

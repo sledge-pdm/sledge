@@ -176,9 +176,8 @@ const TopMenuBar: Component = () => {
       </div>
       <div class={menuListRight}>
         <Show when={isDecorated()}>
-          <div class={flexRow} style={{ height: '100%', 'justify-content': 'center' }}>
+          <div class={flexRow} style={{ 'align-self': 'center' }}>
             <SaveSection />
-            <div style={{ width: '8px' }} />
           </div>
         </Show>
         <For each={rightItems}>

@@ -34,7 +34,7 @@ export interface FloatingBuffer {
 
 class FloatingMoveManager {
   private readonly LOG_LABEL = 'FloatingMoveManager';
-  private logger = new DebugLogger(this.LOG_LABEL, true);
+  private logger = new DebugLogger(this.LOG_LABEL, false);
 
   private targetLayerId: string | undefined = undefined;
   private targetBuffer: Uint8ClampedArray | undefined = undefined;

@@ -8,10 +8,13 @@ import { join } from '~/utils/FileUtils';
 export const initProjectWithNewImage = async (filePath: string, fileName: string) => {
   const imagePath = join(filePath, fileName);
   const imageBitmap = await loadLocalImage(imagePath);
-  changeCanvasSize({
-    width: imageBitmap.width,
-    height: imageBitmap.height,
-  }, true);
+  changeCanvasSize(
+    {
+      width: imageBitmap.width,
+      height: imageBitmap.height,
+    },
+    true
+  );
 
   const imageData = await loadImageData(imageBitmap); // ここで画像のバッファを読み込み
   imageBitmap.close();

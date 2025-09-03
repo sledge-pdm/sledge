@@ -1,25 +1,12 @@
 import { slice_patch_rgba, trim_mask_with_box } from '@sledge/wasm';
 import { Component, onCleanup, onMount } from 'solid-js';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeIndex, activeLayer, addLayerTo } from '~/controllers/layer/LayerListController';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMoveFromPasted } from '~/controllers/selection/SelectionOperator';
-import {
-  getActiveToolCategoryId,
-  getCurrentPresetConfig,
-  getPrevActiveToolCategoryId,
-  setActiveToolCategory,
-  updateToolPresetConfig,
-} from '~/controllers/tool/ToolController';
-import { saveProject } from '~/io/project/out/save';
-import { fileStore, toolStore } from '~/stores/EditorStores';
-import { keyConfigStore } from '~/stores/GlobalStores';
 import { layerListStore } from '~/stores/ProjectStores';
 import { bufferToBlob, loadImageData } from '~/utils/DataUtils';
-import { openDebugViewer } from '~/utils/DebugViewer';
-import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';
 
 const ClipboardListener: Component = () => {
   const META_PREFIX = 'SLEDGE:';

@@ -2,7 +2,14 @@ import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/controllers/selection/SelectionAreaManager';
-import { cancelMove, cancelSelection, commitMove, deletePixelInSelection, getSelectionOffset, invertSelectionArea } from '~/controllers/selection/SelectionOperator';
+import {
+  cancelMove,
+  cancelSelection,
+  commitMove,
+  deletePixelInSelection,
+  getSelectionOffset,
+  invertSelectionArea,
+} from '~/controllers/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';

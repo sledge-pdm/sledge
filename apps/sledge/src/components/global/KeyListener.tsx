@@ -25,7 +25,7 @@ const KeyListener: Component = () => {
     return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isContentEditable;
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
       e.preventDefault();
     }

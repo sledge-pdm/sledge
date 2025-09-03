@@ -2,7 +2,9 @@ import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { getSelectionOffset } from '~/controllers/selection/SelectionOperator';
 import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { interactStore, logStore } from '~/stores/EditorStores';
@@ -46,7 +48,7 @@ const CanvasOverlaySVG: Component = (props) => {
 
   const updateOutline = () => {
     const { width, height } = canvasStore.canvas;
-    const offset = selectionManager.getMoveOffset();
+    const offset = getSelectionOffset();
 
     // 合成されたマスクを取得
     const combinedMask = selectionManager.getCombinedMask();
@@ -59,49 +61,60 @@ const CanvasOverlaySVG: Component = (props) => {
     setPathCmdList(pathCmds);
   };
 
-  const onSelectionChangedHandler = (e: Events['selection:areaChanged']) => {
+  const onSelectionChangedHandler = (e: Events['selection:maskChanged']) => {
     setSelectionChanged(true);
   };
-  const onSelectionMovedHandler = (e: Events['selection:moved']) => {
+  const onSelectionMovedHandler = (e: Events['selection:offsetChanged']) => {
     setSelectionChanged(true);
   };
 
   const [selectionState, setSelectionState] = createSignal(selectionManager.getState());
+  const [moveState, setMoveState] = createSignal(floatingMoveManager.getState());
   const onSelectionStateChangedHandler = (e: Events['selection:stateChanged']) => {
     setSelectionChanged(true);
     if (import.meta.env.DEV) console.log('Selection state changed:', e.newState);
     setSelectionState(e.newState);
   };
+  const onFloatingStateChangedHandler = (e: Events['floatingMove:stateChanged']) => {
+    setMoveState(floatingMoveManager.getState());
+  };
+  const onFloatingMovedHandler = (e: Events['floatingMove:moved']) => {
+    setMoveState(floatingMoveManager.getState());
+  };
 
   const tempKeyMove = (e: KeyboardEvent) => {
     switch (e.key) {
       case 'ArrowLeft':
-        selectionManager.move({ x: -1, y: 0 });
+        selectionManager.shiftOffset({ x: -1, y: 0 });
         break;
       case 'ArrowRight':
-        selectionManager.move({ x: 1, y: 0 });
+        selectionManager.shiftOffset({ x: 1, y: 0 });
         break;
       case 'ArrowUp':
-        selectionManager.move({ x: 0, y: -1 });
+        selectionManager.shiftOffset({ x: 0, y: -1 });
         break;
       case 'ArrowDown':
-        selectionManager.move({ x: 0, y: 1 });
+        selectionManager.shiftOffset({ x: 0, y: 1 });
         break;
     }
   };
 
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:areaChanged', onSelectionChangedHandler);
-    eventBus.on('selection:moved', onSelectionMovedHandler);
+    eventBus.on('selection:maskChanged', onSelectionChangedHandler);
+    eventBus.on('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.on('selection:stateChanged', onSelectionStateChangedHandler);
+    eventBus.on('floatingMove:moved', onFloatingMovedHandler);
+    eventBus.on('floatingMove:stateChanged', onFloatingStateChangedHandler);
     window.addEventListener('keydown', tempKeyMove);
     setSelectionChanged(true);
   });
   onCleanup(() => {
-    eventBus.off('selection:areaChanged', onSelectionChangedHandler);
-    eventBus.off('selection:moved', onSelectionMovedHandler);
+    eventBus.off('selection:maskChanged', onSelectionChangedHandler);
+    eventBus.off('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.off('selection:stateChanged', onSelectionStateChangedHandler);
+    eventBus.off('floatingMove:moved', onFloatingMovedHandler);
+    eventBus.off('floatingMove:stateChanged', onFloatingStateChangedHandler);
     window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();
   });
@@ -232,7 +245,7 @@ const CanvasOverlaySVG: Component = (props) => {
           fill='url(#tex45borderPattern8x2-svg)'
           fill-rule='evenodd'
           clip-rule='evenodd'
-          stroke={selectionState() === 'move_layer' ? '#FF0000' : vars.color.selectionBorder}
+          stroke={moveState() === 'layer' ? '#FF0000' : vars.color.selectionBorder}
           stroke-width='1'
           stroke-dasharray={`${borderDash} ${borderDash}`}
           pointer-events='none'

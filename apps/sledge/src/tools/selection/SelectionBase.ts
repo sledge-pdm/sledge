@@ -1,6 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionManager';
+import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 // 共通のモード判定と ctrl+ドラッグ移動処理をまとめたベースクラス
@@ -31,7 +32,7 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       // 移動モード開始
       this.startPosition = args.position;
-      this.startOffset = selectionManager.getMoveOffset();
+      this.startOffset = selectionManager.getAreaOffset();
       selectionManager.setState('selected');
     } else {
       // ツール固有の選択開始処理
@@ -51,7 +52,7 @@ export abstract class SelectionBase implements ToolBehavior {
       // 移動中のオフセットを反映
       const dx = args.position.x - this.startPosition.x;
       const dy = args.position.y - this.startPosition.y;
-      selectionManager.moveTo({ x: this.startOffset.x + dx, y: this.startOffset.y + dy });
+      selectionManager.setOffset({ x: this.startOffset.x + dx, y: this.startOffset.y + dy });
     } else {
       // ツール固有の選択更新処理
       this.onMoveSelection(agent, args, mode);
@@ -69,7 +70,7 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       // 移動確定
       selectionManager.commitOffset();
-      if (!selectionManager.isSelected()) {
+      if (!isSelectionAvailable()) {
         selectionManager.clear();
       } else {
         selectionManager.setState('selected');
@@ -90,7 +91,7 @@ export abstract class SelectionBase implements ToolBehavior {
 
     if (mode === 'move') {
       // 位置を元に戻す
-      selectionManager.moveTo(this.startOffset);
+      selectionManager.setOffset(this.startOffset);
       selectionManager.setState('selected');
     } else {
       // ツール固有のキャンセル処理

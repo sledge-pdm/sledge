@@ -6,6 +6,8 @@ pub mod effects;
 pub mod webgl;
 // 選択範囲関連
 pub mod selection;
+// バッファ操作
+pub mod buffer;
 // ユーティリティ
 pub mod utils;
 // FloodFill関連

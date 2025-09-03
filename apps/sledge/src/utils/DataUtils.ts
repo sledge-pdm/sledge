@@ -36,12 +36,15 @@ export async function loadImageData(bitmap: ImageBitmap): Promise<ImageData> {
   return imageData;
 }
 
-export async function downloadBufferAsPNG(
-  buffer: Uint8Array | Uint8ClampedArray,
-  width: number,
-  height: number,
-  filename: string = 'debug-buffer.png'
-): Promise<string> {
+export async function bufferToBlob({
+  buffer,
+  width,
+  height,
+}: {
+  buffer: Uint8Array | Uint8ClampedArray;
+  width: number;
+  height: number;
+}): Promise<Blob> {
   // OffscreenCanvasを使ってバッファから画像を作成
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d');
@@ -53,6 +56,16 @@ export async function downloadBufferAsPNG(
 
   // Blobに変換
   const blob = await canvas.convertToBlob({ type: 'image/png' });
+  return blob;
+}
+
+export async function downloadBufferAsPNG(
+  buffer: Uint8Array | Uint8ClampedArray,
+  width: number,
+  height: number,
+  filename: string = 'debug-buffer.png'
+): Promise<string> {
+  const blob = await bufferToBlob({ buffer, width, height });
 
   // ダウンロード用のリンクを作成
   const url = URL.createObjectURL(blob);

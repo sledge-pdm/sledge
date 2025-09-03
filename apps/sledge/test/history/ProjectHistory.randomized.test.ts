@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { currentColor, selectPalette, setColor } from '~/controllers/color/ColorController';
 import { ProjectHistoryController } from '~/controllers/history/ProjectHistoryController';
@@ -15,6 +15,16 @@ import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { PaletteType } from '~/models/color/PaletteType';
 import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
 import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
+
+// Mock 'document' if used in CanvasSizeHistoryAction or related code
+if (typeof document === 'undefined') {
+  (globalThis as any).document = {
+    // Add minimal stubs as needed for your code
+    createElement: vi.fn(),
+    getElementById: vi.fn(),
+    // ...add more if required
+  };
+}
 
 // Tiny seeded RNG (LCG) for reproducibility
 function makeRng(seed = 123456789) {

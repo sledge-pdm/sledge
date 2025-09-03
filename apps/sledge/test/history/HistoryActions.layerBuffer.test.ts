@@ -47,12 +47,20 @@ describe('LayerBufferHistoryAction', () => {
       layerId,
       whole: { type: 'whole', before: new Uint8ClampedArray([0, 0, 0, 0]), after: new Uint8ClampedArray([9, 9, 9, 9]) },
       tiles: [{ type: 'tileFill', tile: { row: 0, column: 0 }, before: undefined, after: packRGBA([1, 2, 3, 4]) }],
-      pixels: [{ type: 'pixels', tile: { row: 0, column: 0 }, idx: new Uint16Array([0]), before: new Uint32Array([packRGBA([0, 0, 0, 0])]), after: new Uint32Array([packRGBA([0, 255, 0, 255])]) }],
+      pixels: [
+        {
+          type: 'pixels',
+          tile: { row: 0, column: 0 },
+          idx: new Uint16Array([0]),
+          before: new Uint32Array([packRGBA([0, 0, 0, 0])]),
+          after: new Uint32Array([packRGBA([0, 255, 0, 255])]),
+        },
+      ],
     };
   }
 
   it('redo passes LayerBufferPatch to agent', () => {
-  const patch = makeSamplePatch(layerId);
+    const patch = makeSamplePatch(layerId);
     const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
     let redoArg: any;
@@ -69,7 +77,7 @@ describe('LayerBufferHistoryAction', () => {
   });
 
   it('undo passes LayerBufferPatch to agent', () => {
-  const patch = makeSamplePatch(layerId);
+    const patch = makeSamplePatch(layerId);
     const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
     let undoArg: any;
@@ -84,7 +92,7 @@ describe('LayerBufferHistoryAction', () => {
 
   it('selection move state cancels move and does not call agent', () => {
     h.isMoveStateMock.mockReturnValue(true);
-  const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
 
     action.redo();
 
@@ -95,7 +103,7 @@ describe('LayerBufferHistoryAction', () => {
   it('does nothing if no agent found', () => {
     // Force mocked getAgentOf to return undefined for this case
     (getAgentOf as any).mockReturnValue(undefined);
-  const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
 
     action.redo();
     action.undo();
@@ -108,7 +116,15 @@ describe('LayerBufferHistoryAction', () => {
     const patch: LayerBufferPatch = {
       layerId,
       whole: { type: 'whole', before: new Uint8ClampedArray([0]), after: new Uint8ClampedArray([1]) },
-      pixels: [{ type: 'pixels', tile: { row: 0, column: 0 }, idx: new Uint16Array([0]), before: new Uint32Array([packRGBA([0, 0, 0, 0])]), after: new Uint32Array([packRGBA([1, 1, 1, 1])]) }],
+      pixels: [
+        {
+          type: 'pixels',
+          tile: { row: 0, column: 0 },
+          idx: new Uint16Array([0]),
+          before: new Uint32Array([packRGBA([0, 0, 0, 0])]),
+          after: new Uint32Array([packRGBA([1, 1, 1, 1])]),
+        },
+      ],
     };
     const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
@@ -125,9 +141,7 @@ describe('LayerBufferHistoryAction', () => {
   it('tile patch holds one entry per tile; last fill color should be reflected when building patch', () => {
     const patch: LayerBufferPatch = {
       layerId,
-      tiles: [
-        { type: 'tileFill', tile: { row: 2, column: 3 }, before: packRGBA([0, 0, 0, 0]), after: packRGBA([20, 20, 20, 20]) },
-      ],
+      tiles: [{ type: 'tileFill', tile: { row: 2, column: 3 }, before: packRGBA([0, 0, 0, 0]), after: packRGBA([20, 20, 20, 20]) }],
     };
     const action = new LayerBufferHistoryAction(layerId, patch, 'test');
 
@@ -146,7 +160,7 @@ describe('LayerBufferHistoryAction', () => {
 
   it('does call agent even if previous canUndo() would be false (gating removed)', () => {
     h.agentMock.canUndo.mockReturnValue(false);
-  const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
+    const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
 
     action.redo();
     action.undo();

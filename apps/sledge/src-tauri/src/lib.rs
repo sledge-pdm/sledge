@@ -7,7 +7,6 @@ use tauri::{AppHandle, Manager, async_runtime::block_on};
 use tauri_plugin_fs::FsExt;
 use window::{SledgeWindowKind, WindowOpenOptions};
 
-
 fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
     println!("handle_file_associations called with {} files", files.len());
     // This requires the `fs` tauri plugin and is required to make the plugin's frontend work:

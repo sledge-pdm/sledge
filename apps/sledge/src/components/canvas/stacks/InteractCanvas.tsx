@@ -33,11 +33,6 @@ export const InteractCanvas: Component<Props> = (props) => {
   const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
   const [temporaryOut, setTemporaryOut] = createSignal(false);
 
-  function getOffset() {
-    const rect = canvasRef!.getBoundingClientRect();
-    return { x: rect.left, y: rect.top };
-  }
-
   function getWindowMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
     let x = 0;
     let y = 0;

@@ -23,10 +23,13 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
   const fileExtension = location.name.split('.').slice(-1).join('.');
   setFileStore('extension', fileExtension);
 
-  changeCanvasSize({
-    width: imageData.width,
-    height: imageData.height,
-  });
+  changeCanvasSize(
+    {
+      width: imageData.width,
+      height: imageData.height,
+    },
+    true
+  );
 
   const initLayer = addLayer(
     {
@@ -63,10 +66,13 @@ export function importImageFromWindow(): boolean {
   const fileExtension = fileName.split('.').slice(-1).join('.');
   setFileStore('extension', fileExtension);
 
-  changeCanvasSize({
-    width: imageData.width,
-    height: imageData.height,
-  });
+  changeCanvasSize(
+    {
+      width: imageData.width,
+      height: imageData.height,
+    },
+    true
+  );
 
   const initLayer = addLayer(
     {

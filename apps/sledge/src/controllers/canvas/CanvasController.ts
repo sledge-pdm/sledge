@@ -54,7 +54,7 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
   return true;
 }
 
-export async function changeCanvasSize(newSize: Size2D): Promise<boolean> {
+export async function changeCanvasSize(newSize: Size2D, noDiff?: boolean): Promise<boolean> {
   if (!isValidCanvasSize(newSize)) return false;
 
   const current = canvasStore.canvas;
@@ -64,8 +64,10 @@ export async function changeCanvasSize(newSize: Size2D): Promise<boolean> {
   const act = new CanvasSizeHistoryAction({ ...current }, { ...newSize }, { from: 'CanvasController.changeCanvasSize' });
   // Apply immediately (user intent)
   act.redo();
-  // Then push onto history stack
-  projectHistoryController.addAction(act);
+  if (!noDiff) {
+    // Then push onto history stack
+    projectHistoryController.addAction(act);
+  }
   return true;
 }
 

@@ -15,12 +15,12 @@ const routes: Route[] = [
     label: 'About.',
   },
   {
-    path: '/download',
-    label: 'Download.',
-  },
-  {
     path: '/features',
     label: 'features.',
+  },
+  {
+    path: '/download',
+    label: 'Download.',
   },
   // {
   //   path: '/play',

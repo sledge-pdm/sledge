@@ -2,7 +2,7 @@ import { Asset, flexCol, getDebugReleaseData, getReleaseData, os, osBuildInfos, 
 import { k12x8, vars, ZFB08 } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { mainButton } from '~/styles/buttons.css';
+import { mainButton, mainLink } from '~/styles/buttons.css';
 import { informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
 
 const DownloadSection: Component<{}> = () => {
@@ -116,7 +116,7 @@ const DownloadSection: Component<{}> = () => {
   return (
     <div class={flexCol} style={{ width: '100%', gap: '2rem' }}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
-        <div class={flexCol} style={{ gap: '0.5rem', width: '100%', 'margin-top': '12px' }}>
+        <div class={flexCol} style={{ gap: '0.5rem', width: '100%', 'margin-top': '12px', 'margin-left': '12px' }}>
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <p class={versionInfoText}>
               Platform:{' '}
@@ -131,18 +131,21 @@ const DownloadSection: Component<{}> = () => {
               {releaseData()?.name ?? '[ fetch failed ]'}
             </span>
           </p>
+          <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+            <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '-2px' }}>
+              {DownloadButtons()}
+            </div>
+          </Show>
         </div>
-        <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-          <div class={flexCol}>{DownloadButtons()}</div>
-          <a
-            onClick={() => {
-              window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-            }}
-            style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
-          >
-            OTHER DOWNLOADS.
-          </a>
-        </Show>
+        <a
+          onClick={() => {
+            window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+          }}
+          class={mainLink}
+          style={{ 'margin-left': '4px', 'margin-top': '24px', color: vars.color.muted }}
+        >
+          OTHER DOWNLOADS.
+        </a>
       </Show>
       <Show when={information()}>
         <div

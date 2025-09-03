@@ -1,6 +1,6 @@
 import { flexCol, flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
+import { pageImage } from '~/styles/page.css';
 
 export const panel = style([
   flexRow,
@@ -78,14 +78,12 @@ export const headingContainer = style([
   },
 ]);
 
-export const sectionImage = style({
-  width: '100%',
-  height: 'auto',
-  border: `1px solid ${vars.color.muted}`,
-  borderRadius: '8px',
-  placeItems: 'center',
-  imageRendering: 'auto',
-});
+export const sectionImage = style([
+  pageImage,
+  {
+    maxHeight: '200px',
+  },
+]);
 
 export const animatedBlock = style({
   opacity: 0,

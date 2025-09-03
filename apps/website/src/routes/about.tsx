@@ -3,8 +3,7 @@ import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, JSX } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
-import { heroHeading, pageRoot, subHeading } from '~/styles/page.css';
-import { sectionImage } from '~/styles/telling_section.css';
+import { heroHeading, pageImage, pageRoot, subHeading } from '~/styles/page.css';
 
 export function About() {
   const imageSrc = () => {
@@ -24,11 +23,11 @@ export function About() {
 
   return (
     <main class={pageRoot}>
-      <p class={heroHeading}>WHaT'S SLEDGE?</p>
+      <p class={heroHeading}>WHAT?</p>
       <p class={subHeading}>Sledge is a pixel-based drawing tool.</p>
 
-      <p class={heroHeading} style={{ 'margin-top': '2rem' }}>
-        WHY SLEDGE?
+      <p class={heroHeading} style={{ 'margin-top': '1rem' }}>
+        WHY?
       </p>
       <SubHeadingWithDot>Because it's cool.</SubHeadingWithDot>
       <SubHeadingWithDot>Because it's useful.</SubHeadingWithDot>
@@ -40,7 +39,7 @@ export function About() {
           filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.2)'})`,
         }}
       >
-        <img class={sectionImage} src={imageSrc()} />
+        <img class={pageImage} src={imageSrc()} />
       </div>
     </main>
   );

@@ -19,13 +19,13 @@ const routes: Route[] = [
     label: 'Download.',
   },
   {
-    path: '/learn',
-    label: 'Learn.',
+    path: '/features',
+    label: 'features.',
   },
-  {
-    path: '/play',
-    label: 'Play.',
-  },
+  // {
+  //   path: '/play',
+  //   label: 'Play.',
+  // },
 ];
 
 const SideBarMenu: Component = () => {
@@ -35,6 +35,8 @@ const SideBarMenu: Component = () => {
       <ul class={menuTextContainer}>
         <For each={routes}>
           {(route, i) => {
+            const isInPath = () => location.pathname === route.path;
+            const isPlay = () => route.path === '/play';
             return (
               <>
                 <div class={menuItem}>
@@ -43,10 +45,10 @@ const SideBarMenu: Component = () => {
                     class={menuText}
                     href={route.path}
                     style={{
-                      color: location.pathname === route.path ? vars.color.active : vars.color.onBackground,
-                      opacity: location.pathname === route.path ? 1 : 0.8,
-                      'text-decoration': route.path === '/play' ? 'line-through' : undefined,
-                      'pointer-events': route.path === '/play' ? 'none' : undefined,
+                      color: isInPath() ? vars.color.active : vars.color.onBackground,
+                      opacity: isInPath() ? 1 : 0.8,
+                      'text-decoration': isPlay() ? 'line-through' : undefined,
+                      'pointer-events': isPlay() || isInPath() ? 'none' : undefined,
                     }}
                   >
                     {route.label}

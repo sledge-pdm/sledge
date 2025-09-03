@@ -2,7 +2,7 @@ import { Asset, flexCol, getDebugReleaseData, getReleaseData, os, osBuildInfos, 
 import { k12x8, vars, ZFB08 } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
-import { mainButton, mainButtonContainer } from '~/styles/buttons.css';
+import { mainButton } from '~/styles/buttons.css';
 import { informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
 
 const DownloadSection: Component<{}> = () => {
@@ -85,27 +85,30 @@ const DownloadSection: Component<{}> = () => {
 
     return assets.map((item) => {
       const { asset, extension } = item;
-      const text = `DOWNLOAD`;
+      const text = `for ${userOS()}`;
       return (
-        <Button
-          key={asset.id}
-          onClick={() => {
-            window.open(asset.browser_download_url, '_blank')?.focus();
-          }}
-          hoverColor='white'
-          class={mainButton}
-          style={{
-            'text-align': 'start',
-            display: 'flex',
-            'flex-direction': 'column',
-            gap: '4px',
-          }}
-        >
-          <span style={{}}>{text}</span>
-          <span style={{ 'font-family': k12x8, 'font-size': '8px', opacity: 0.6 }}>
-            {asset.size ? `${Math.round((asset.size / 1024 / 1024) * 100) / 100}MB` : ''} / .{extension}
-          </span>
-        </Button>
+        <>
+          <Button
+            key={asset.id}
+            onClick={() => {
+              window.open(asset.browser_download_url, '_blank')?.focus();
+            }}
+            hoverColor='white'
+            class={mainButton}
+            style={{
+              padding: '4px 12px',
+              display: 'flex',
+              'flex-direction': 'column',
+              'text-align': 'start',
+              gap: '4px',
+            }}
+          >
+            <span style={{}}>{releaseData()?.tag_name}</span>
+            <span style={{ 'font-family': k12x8, 'font-size': '8px', opacity: 0.6 }}>
+              for {userOS()} {asset.size ? `${Math.round((asset.size / 1024 / 1024) * 100) / 100}MB` : ''} / .{extension}
+            </span>
+          </Button>
+        </>
       );
     });
   };
@@ -113,7 +116,7 @@ const DownloadSection: Component<{}> = () => {
   return (
     <div class={flexCol} style={{ width: '100%', gap: '2rem' }}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
-        <div class={flexCol} style={{ gap: '0.5rem', width: '100%' }}>
+        <div class={flexCol} style={{ gap: '0.5rem', width: '100%', 'margin-top': '12px' }}>
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <p class={versionInfoText}>
               Platform:{' '}
@@ -130,7 +133,7 @@ const DownloadSection: Component<{}> = () => {
           </p>
         </div>
         <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-          <div class={mainButtonContainer}>{DownloadButtons()}</div>
+          <div class={flexCol}>{DownloadButtons()}</div>
           <a
             onClick={() => {
               window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();

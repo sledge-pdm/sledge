@@ -22,9 +22,13 @@ export const mainLink = style({
   letterSpacing: '0px',
   color: vars.color.accent,
   textDecoration: 'underline',
-  ':hover': {
-    color: vars.color.active,
-    textDecoration: 'none',
+  '@media': {
+    '(any-hover: hover)': {
+      ':hover': {
+        color: vars.color.active,
+        textDecoration: 'none',
+      },
+    },
   },
 });
 
@@ -34,10 +38,14 @@ export const mainButton = style({
   padding: '8px 20px',
   borderWidth: '2px',
   borderRadius: '4px',
-  ':hover': {
-    backgroundColor: vars.color.accent,
-    borderColor: vars.color.accent,
-    color: vars.color.background,
+  '@media': {
+    '(any-hover: hover)': {
+      ':hover': {
+        backgroundColor: vars.color.accent,
+        borderColor: vars.color.accent,
+        color: vars.color.background,
+      },
+    },
   },
 });
 
@@ -46,12 +54,14 @@ export const subButton = style({
   padding: '8px 14px',
   borderWidth: '2px',
   borderRadius: '4px',
-  ':hover': {
-    backgroundColor: vars.color.accent,
-    borderColor: vars.color.accent,
-    color: vars.color.background,
-  },
   '@media': {
+    '(any-hover: hover)': {
+      ':hover': {
+        backgroundColor: vars.color.accent,
+        borderColor: vars.color.accent,
+        color: vars.color.background,
+      },
+    },
     '(max-width: 599px)': {
       borderWidth: '2px',
       padding: '12px 24px',

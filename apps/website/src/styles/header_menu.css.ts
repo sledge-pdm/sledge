@@ -1,5 +1,5 @@
 import { flexRow } from '@sledge/core';
-import { k12x8 } from '@sledge/theme';
+import { ZFB09 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const menuTextContainer = style([
@@ -7,7 +7,7 @@ export const menuTextContainer = style([
   {
     boxSizing: 'border-box',
     width: 'auto',
-    gap: '12px',
+    gap: '16px',
   },
 ]);
 
@@ -19,18 +19,17 @@ export const menuItem = style([
 ]);
 
 export const menuText = style({
-  fontFamily: `${k12x8}`,
+  fontFamily: `${ZFB09}`,
   fontSize: '8px',
-  width: 'fit-content',
-  textTransform: 'lowercase',
-  padding: '2px',
+  letterSpacing: '2px',
   textDecoration: 'none',
 
-  ':hover': {
-    textDecoration: 'underline',
-  },
-
   '@media': {
+    '(any-hover: hover)': {
+      ':hover': {
+        textDecoration: 'underline',
+      },
+    },
     '(max-width: 599px)': {
       fontSize: '8px',
     },

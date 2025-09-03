@@ -9,9 +9,10 @@ export const headerRoot = style([
     top: 0,
     left: 0,
     right: 0,
+    maxWidth: '500px',
     boxSizing: 'content-box',
     height: 'auto',
-    padding: '3rem 0 0rem 0',
+    padding: '3rem 0 0.25rem 0',
     marginBottom: '3rem',
     backgroundColor: vars.color.background,
     borderBottom: `1px solid ${vars.color.borderSecondary}`,
@@ -19,7 +20,7 @@ export const headerRoot = style([
     '@media': {
       '(max-width: 599px)': {
         justifyContent: 'auto',
-        padding: '2.5rem 0 0rem 0',
+        padding: '2.5rem 0 0.25rem 0',
       },
     },
   },
@@ -78,15 +79,24 @@ export const flavorText = style({
 export const menuContainer = style([
   flexCol,
   {
+    width: '100$',
     boxSizing: 'border-box',
-    maxWidth: '500px',
     overflowX: 'auto',
-    padding: '0 4rem 0 3rem',
+    margin: '0 4rem 0 3rem',
+    touchAction: 'auto',
+
+    '::-webkit-scrollbar': {
+      height: '2px',
+    },
+    '::-webkit-scrollbar-thumb': {
+      backgroundColor: '#dddddd75',
+    },
+
     '@media': {
       '(max-width: 599px)': {
         boxSizing: 'border-box',
         width: '100%',
-        padding: '0 2rem 0 2rem',
+        margin: '0 2rem 0 2rem',
       },
     },
   },

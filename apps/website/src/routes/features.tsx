@@ -7,7 +7,7 @@ import { globalStore } from '~/store/GlobalStore';
 import { pageRoot, scrollContent } from '~/styles/page.css';
 import { animatedActive } from '~/styles/telling_section.css';
 
-export function Learn() {
+export function Features() {
   const imageSrc = () => {
     switch (globalStore.theme) {
       case 'light':

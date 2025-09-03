@@ -14,7 +14,7 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
   },
   macOS: {
     name: 'macOS',
-    extensions: ['dmg', 'tar.gz'],
+    extensions: ['dmg'],
     information: `After installation, enter the command below in bash.
 (Note: you should enter this every time you update sledge.)
 
@@ -22,8 +22,8 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
   },
   windows: {
     name: 'Windows',
-    extensions: ['msi', 'exe'],
-    information: `Both installers (exe/msi) are supposed to work identically.`,
+    extensions: ['exe'],
+    // information: `Both installers (exe/msi) are supposed to work identically.`,
   },
   linux: {
     name: 'Linux',

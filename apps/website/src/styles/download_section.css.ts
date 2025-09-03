@@ -1,14 +1,5 @@
-import { flexCol } from '@sledge/core';
 import { k12x8, vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-
-export const ButtonAreaContainer = style([
-  flexCol,
-  {
-    gap: '1rem',
-    marginBottom: '16px',
-  },
-]);
 
 export const versionInfoText = style({
   fontFamily: k12x8,

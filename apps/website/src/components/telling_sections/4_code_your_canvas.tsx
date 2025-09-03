@@ -1,6 +1,5 @@
 import { Component } from 'solid-js';
 import { TellingSection } from '~/components/TellingSection';
-import { mainLink } from '~/styles/buttons.css';
 import { heroHeading, subHeading } from '~/styles/page.css';
 import { sectionContainer, sectionImage } from '~/styles/telling_section.css';
 
@@ -14,7 +13,7 @@ const CodeYourCanvasSection: Component<Props> = (props) => {
       <div class={sectionContainer}>
         <p class={heroHeading}>CODE YOUR CANVAS.</p>
         <p class={subHeading}>Extend Sledge with WASM-powered tools and scripts. Your canvas, your rules.</p>
-        <a
+        {/* <a
           onClick={() => {
             window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
           }}
@@ -22,7 +21,7 @@ const CodeYourCanvasSection: Component<Props> = (props) => {
           style={{ 'text-align': 'end', 'margin-bottom': '1rem' }}
         >
           &gt; VIEW CODE.
-        </a>
+        </a> */}
 
         <img class={sectionImage} src='/images/history_tab_0903.png'>
           open-core docs & api preview

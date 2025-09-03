@@ -16,8 +16,7 @@ export const rootContainer = style([
       width: '2px',
     },
     '::-webkit-scrollbar-thumb': {
-      backgroundColor: vars.color.onBackground,
-      opacity: 0.3,
+      backgroundColor: '#dddddd75',
     },
 
     '@media': {
@@ -33,6 +32,7 @@ export const pageContainer = style([
   flexCol,
   {
     height: 'auto',
+    maxHeight: '500px',
     boxSizing: 'content-box',
     '@media': {
       '(max-width: 599px)': {

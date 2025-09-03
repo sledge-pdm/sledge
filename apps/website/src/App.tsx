@@ -7,7 +7,7 @@ import Header from '~/components/Header';
 import ThemeToggle from '~/components/ThemeToggle';
 import { About } from '~/routes/about';
 import { Download } from '~/routes/downloads';
-import { Learn } from '~/routes/learn';
+import { Features } from '~/routes/features';
 import { Playground } from '~/routes/play';
 import { globalStore } from '~/store/GlobalStore';
 import { pageContainer, restContainer, rootContainer } from '~/styles/app.css';
@@ -120,7 +120,7 @@ const App: Component = () => {
               </div>
 
               <div class={restContainer}>
-                <p>Playground or Descripting matters goes here.</p>
+                {/* <p>Playground or Descripting matters goes here.</p> */}
 
                 <div
                   style={{
@@ -150,18 +150,16 @@ const App: Component = () => {
                     opacity: 0.6,
                   }}
                 >
-                  [C] 2025 sledge all rights reserved.
+                  2025 sledge all rights reserved.
                 </p>
               </div>
             </div>
           </Suspense>
-
-          {/* <p class={sledgeLogo}>sledge.</p> */}
         </MetaProvider>
       )}
     >
       <Route path='/' component={About} />
-      <Route path='/learn' component={Learn} />
+      <Route path='/features' component={Features} />
       <Route path='/play' component={Playground} />
       <Route path='/download' component={Download} />
     </Router>

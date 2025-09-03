@@ -1,10 +1,8 @@
-import { vars } from '@sledge/theme';
-import { Button } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { TellingSection } from '~/components/TellingSection';
-import { globalStore } from '~/store/GlobalStore';
-import { mainButton, mainButtonContainer } from '~/styles/buttons.css';
-import { heroHeading, leftCol, rightCol, subHeading } from '~/styles/telling_section.css';
+import { mainLink } from '~/styles/buttons.css';
+import { heroHeading, subHeading } from '~/styles/page.css';
+import { sectionContainer, sectionImage } from '~/styles/telling_section.css';
 
 interface Props {
   attachPanelRef: (el: HTMLElement) => void;
@@ -13,42 +11,22 @@ interface Props {
 const CodeYourCanvasSection: Component<Props> = (props) => {
   return (
     <TellingSection pageNumber={4}>
-      <div
-        class={leftCol}
-        style={{
-          padding: '7rem 5rem',
-          gap: '4rem',
-        }}
-      >
+      <div class={sectionContainer}>
         <p class={heroHeading}>CODE YOUR CANVAS.</p>
         <p class={subHeading}>Extend Sledge with WASM-powered tools and scripts. Your canvas, your rules.</p>
-        <div class={mainButtonContainer}>
-          <Button
-            onClick={() => {
-              window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
-            }}
-            hoverColor='white'
-            class={mainButton}
-          >
-            VIEW CODE.
-          </Button>
-        </div>
-      </div>
-      <div
-        class={rightCol}
-        style={{
-          visibility: globalStore.currentTellingPage === 4 ? 'visible' : 'collapse',
-        }}
-      >
-        <div
-          style={{
-            width: '80%',
-            height: '50vh',
-            background: `linear-gradient(90deg, ${vars.color.accent}11 0%, ${vars.color.accent}44 50%, ${vars.color.accent}11 100%)`,
-            border: `1px solid ${vars.color.accent}`,
-            'border-radius': '8px',
+        <a
+          onClick={() => {
+            window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
           }}
-        />
+          class={mainLink}
+          style={{ 'text-align': 'end', 'margin-bottom': '1rem' }}
+        >
+          &gt; VIEW CODE.
+        </a>
+
+        <img class={sectionImage} src='/images/history_tab_0903.png'>
+          open-core docs & api preview
+        </img>
       </div>
     </TellingSection>
   );

@@ -1,6 +1,6 @@
-import { children, Component, createEffect, JSX, onCleanup } from 'solid-js';
-import SectionTag from '~/components/telling_sections/SectionTag';
-import { globalStore, setGlobalStore } from '~/store/GlobalStore';
+import { Component, JSX, onCleanup } from 'solid-js';
+import SectionTag from '~/components/SectionTag';
+import { setGlobalStore } from '~/store/GlobalStore';
 import { panel, panelInner } from '~/styles/telling_section.css';
 
 interface Props {
@@ -9,7 +9,6 @@ interface Props {
 }
 
 export const TellingSection: Component<Props> = (props) => {
-
   const sectionTagObserver = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {

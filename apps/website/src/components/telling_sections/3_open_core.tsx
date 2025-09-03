@@ -1,10 +1,8 @@
-import { vars } from '@sledge/theme';
-import { Button } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { TellingSection } from '~/components/TellingSection';
-import { globalStore } from '~/store/GlobalStore';
-import { mainButton } from '~/styles/buttons.css';
-import { heroHeading, leftCol, rightCol, subHeading } from '~/styles/telling_section.css';
+import { mainLink } from '~/styles/buttons.css';
+import { heroHeading, subHeading } from '~/styles/page.css';
+import { sectionContainer, sectionImage } from '~/styles/telling_section.css';
 
 interface Props {
   attachPanelRef: (el: HTMLElement) => void;
@@ -13,34 +11,20 @@ interface Props {
 const OpenCoreSection: Component<Props> = (props) => {
   return (
     <TellingSection pageNumber={3}>
-      <div
-        class={leftCol}
-        style={{
-          padding: '7rem 5rem',
-          gap: '4rem',
-        }}
-      >
+      <div class={sectionContainer}>
         <p class={heroHeading}>OPEN CORE.</p>
         <p class={subHeading}>MIT-licensed core with a transparent roadmap, tests, and a welcoming PR flow.</p>
 
-        <Button class={mainButton}>Visit GITHUB</Button>
-      </div>
-      <div
-        class={rightCol}
-        style={{
-          visibility: globalStore.currentTellingPage === 3 ? 'visible' : 'collapse',
-        }}
-      >
-        <img
-          src='/images/github_0903.png'
-          style={{
-            width: '100%',
-            height: 'auto',
-            border: `1px solid ${vars.color.muted}`,
-            'border-radius': '8px',
-            'place-items': 'center',
+        <a
+          onClick={() => {
+            window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
           }}
+          class={mainLink}
+          style={{ 'text-align': 'end', 'margin-bottom': '1rem' }}
         >
+          &gt; Visit GITHUB.
+        </a>
+        <img class={sectionImage} src='/images/github_0903.png'>
           open-core docs & api preview
         </img>
       </div>

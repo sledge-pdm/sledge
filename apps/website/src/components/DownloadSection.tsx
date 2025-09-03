@@ -1,9 +1,9 @@
-import { Asset, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
+import { Asset, flexCol, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
 import { k12x8, vars, ZFB08 } from '@sledge/theme';
 import { Button } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { mainButton, mainButtonContainer } from '~/styles/buttons.css';
-import { ButtonAreaContainer, informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
+import { informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
 
 const DownloadSection: Component<{}> = () => {
   const releaseApiUrl =
@@ -96,7 +96,6 @@ const DownloadSection: Component<{}> = () => {
           class={mainButton}
           style={{
             'text-align': 'start',
-            padding: '5px 8px',
             display: 'flex',
             'flex-direction': 'column',
             gap: '4px',
@@ -112,69 +111,71 @@ const DownloadSection: Component<{}> = () => {
   };
 
   return (
-    <>
+    <div class={flexCol} style={{ width: '100%', gap: '2rem' }}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
-        <Show when={information()}>
-          <div
-            style={{
-              'background-color': vars.color.surface,
-              padding: vars.spacing.lg,
-              color: vars.color.onBackground,
-              width: 'fit-content',
-              'max-width': '100%',
-            }}
-          >
-            <p
-              class={informationText}
-              style={{
-                'font-family': ZFB08,
-                'white-space': 'pre',
-                'font-size': '8px',
-                'margin-bottom': '12px',
-                color: vars.color.accent,
-              }}
-            >
-              for {userOS()} users
-            </p>
-            <p
-              class={informationText}
-              style={{
-                'font-family': k12x8,
-                'line-height': '1.5',
-                'white-space': 'pre',
-                'letter-spacing': '1px',
-                'font-size': '8px',
-              }}
-            >
-              {information()}
-            </p>
-          </div>
-        </Show>
-        <div class={`${ButtonAreaContainer}`}>
+        <div class={flexCol} style={{ gap: '0.5rem', width: '100%' }}>
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <p class={versionInfoText}>
-              Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
+              Platform:{' '}
+              <span class={versionInfoText} style={{ color: vars.color.accent }}>
+                {userOS()}
+              </span>
             </p>
           </Show>
           <p class={versionInfoText}>
             Latest Build:{' '}
-            <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>{releaseData()?.name ?? '[ fetch failed ]'}</span>
+            <span class={versionInfoText} style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>
+              {releaseData()?.name ?? '[ fetch failed ]'}
+            </span>
           </p>
-
-          <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-            <div class={mainButtonContainer}>{DownloadButtons()}</div>
-            <a
-              onClick={() => {
-                window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-              }}
-              style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
-            >
-              OTHER DOWNLOADS.
-            </a>
-          </Show>
+        </div>
+        <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+          <div class={mainButtonContainer}>{DownloadButtons()}</div>
+          <a
+            onClick={() => {
+              window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+            }}
+            style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
+          >
+            OTHER DOWNLOADS.
+          </a>
+        </Show>
+      </Show>
+      <Show when={information()}>
+        <div
+          style={{
+            width: '100%',
+            'background-color': vars.color.surface,
+            padding: vars.spacing.lg,
+            color: vars.color.onBackground,
+          }}
+        >
+          <p
+            class={informationText}
+            style={{
+              'font-family': ZFB08,
+              'white-space': 'pre',
+              'font-size': '8px',
+              'margin-bottom': '8px',
+              color: vars.color.accent,
+            }}
+          >
+            for {userOS()} users
+          </p>
+          <p
+            class={informationText}
+            style={{
+              'font-family': k12x8,
+              'line-height': '1.5',
+              'letter-spacing': '1px',
+              'font-size': '8px',
+            }}
+          >
+            {information()}
+          </p>
         </div>
       </Show>
-    </>
+    </div>
   );
 };
 

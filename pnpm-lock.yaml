@@ -148,6 +148,9 @@ importers:
 
   apps/website:
     dependencies:
+      '@solid-primitives/timer':
+        specifier: ^1.4.2
+        version: 1.4.2(solid-js@1.9.9)
       '@solidjs/meta':
         specifier: ^0.29.4
         version: 0.29.4(solid-js@1.9.9)

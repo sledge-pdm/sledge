@@ -1,17 +1,16 @@
 import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB08, ZFB20 } from '@sledge/theme';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const panel = style([
   flexRow,
   {
+    width: '100%',
     scrollSnapAlign: 'start',
     scrollSnapStop: 'always',
-    minHeight: '100dvh',
-    height: '100%',
-    position: 'relative',
     boxSizing: 'border-box',
     alignItems: 'stretch',
+    gap: '12px',
   },
 ]);
 
@@ -19,31 +18,16 @@ export const panelInner = style([
   flexRow,
   {
     width: '100%',
-    height: '100%',
-    boxSizing: 'border-box',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    '@media': {
-      '(max-width: 768px)': {
-        flexWrap: 'wrap',
-        padding: `3rem 1rem`,
-        gap: '1.5rem',
-      },
-    },
+    height: 'auto',
   },
 ]);
 
-export const leftCol = style([
+export const sectionContainer = style([
   flexCol,
   {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    width: '40%',
-    height: '100dvh',
-    backgroundColor: vars.color.background,
+    width: '100%',
     '@media': {
-      '(max-width: 768px)': {
+      '(max-width: 599px)': {
         width: '100%',
       },
     },
@@ -72,7 +56,7 @@ export const rightCol = style([
     justifyContent: 'center',
     alignItems: 'center',
     '@media': {
-      '(max-width: 768px)': {
+      '(max-width: 599px)': {
         width: '100%',
         alignItems: 'stretch',
       },
@@ -90,37 +74,17 @@ export const headingContainer = style([
     boxSizing: 'border-box',
     transform: 'rotate(90deg) translateY(-100%)',
     textOrientation: 'sideways',
-    whiteSpace: 'nowrap',
     marginLeft: '-3px',
   },
 ]);
 
-export const heroHeading = style({
-  fontFamily: ZFB20,
-  fontSize: '46px',
-  letterSpacing: '2px',
-  verticalAlign: 'baseline',
-  inset: 0,
-  color: vars.color.onBackground,
-  '@media': {
-    '(max-width: 768px)': {
-      fontSize: '40px',
-    },
-  },
-});
-
-export const subHeading = style({
-  fontFamily: ZFB08,
-  fontSize: '16px',
-  letterSpacing: '1px',
+export const sectionImage = style({
   width: '100%',
-  lineHeight: 1.6,
-  color: vars.color.onBackground,
-  '@media': {
-    '(max-width: 768px)': {
-      fontSize: '14px',
-    },
-  },
+  height: 'auto',
+  border: `1px solid ${vars.color.muted}`,
+  borderRadius: '8px',
+  placeItems: 'center',
+  imageRendering: 'auto',
 });
 
 export const animatedBlock = style({

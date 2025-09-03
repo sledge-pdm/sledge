@@ -1,6 +1,6 @@
 import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { Component, createMemo, onCleanup, onMount } from 'solid-js';
+import { Component, createMemo, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import ImageEntryInteract from '~/controllers/canvas/image_pool/ImageEntryInteract';
 import {
@@ -62,11 +62,26 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     // attach entry-level pointer interactions (logging only for now)
     entryInteract = new ImageEntryInteract(svgRef, () => getEntry(props.entry.id) ?? props.entry);
     entryInteract.setInteractListeners();
-  });
 
-  onCleanup(() => {
-    if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
-    entryInteract?.removeInteractListeners();
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef && !containerRef.contains(e.target as Node)) {
+        if (selected()) {
+          selectEntry(undefined);
+        }
+      } else {
+        selectEntry(props.entry.id);
+      }
+    };
+
+    const canvasArea = document.getElementById('canvas-area');
+    if (canvasArea) canvasArea.addEventListener('click', handleClickOutside);
+
+    () => {
+      const canvasArea = document.getElementById('canvas-area');
+      if (canvasArea) canvasArea.removeEventListener('click', handleClickOutside);
+      if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
+      entryInteract?.removeInteractListeners();
+    };
   });
 
   const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
@@ -95,7 +110,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     );
   };
 
-  const selected = createMemo(() => imagePoolStore.selectedEntryId === props.entry.id);
+  const selected = createMemo<boolean>(() => imagePoolStore.selectedEntryId === props.entry.id);
 
   return (
     <div
@@ -119,14 +134,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       onClick={(e) => {
         e.currentTarget.focus();
       }}
-      onBlur={(e) => {
-        if (selected()) {
-          selectEntry(undefined);
-        }
-      }}
-      onFocus={(e) => {
-        selectEntry(props.entry.id);
-      }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -135,7 +142,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
               ...ContextMenuItems.BaseImageHide,
               onSelect: () => {
                 hideEntry(props.entry.id);
-                selectEntry(props.entry.id);
+                selectEntry(undefined);
               },
             }
           : {

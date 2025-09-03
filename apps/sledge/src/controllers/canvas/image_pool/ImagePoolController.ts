@@ -139,6 +139,7 @@ async function createEntry(originalPath: string) {
 
 export function selectEntry(id?: string) {
   setImagePoolStore('selectedEntryId', id);
+  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
 }
 
 export function showEntry(id: string) {

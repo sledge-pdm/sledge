@@ -27,7 +27,7 @@ const Header: Component = () => {
       () => {
         setFlavor(descriptionFlavors[Math.floor(Math.random() * descriptionFlavors.length)]);
       },
-      10000,
+      8000,
       setInterval
     );
   });
@@ -37,9 +37,10 @@ const Header: Component = () => {
       <div class={headerContentContainer}>
         <p class={sledgeText}>SLEDGE.</p>
         <div class={flavorTextContainer}>
-          <TypewriterText class={flavorText} text={flavor()} durationPerCharacter={40} />
+          <TypewriterText class={flavorText} text={flavor()} durationPerCharacter={60} />
         </div>
       </div>
+
       <div class={menuContainer}>
         <SideBarMenu />
       </div>

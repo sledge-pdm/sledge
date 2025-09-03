@@ -6,7 +6,7 @@ import { createEffect, onMount, Suspense, type Component } from 'solid-js';
 import Header from '~/components/Header';
 import ThemeToggle from '~/components/ThemeToggle';
 import { About } from '~/routes/about';
-import { Downloads } from '~/routes/downloads';
+import { Download } from '~/routes/downloads';
 import { Learn } from '~/routes/learn';
 import { Playground } from '~/routes/play';
 import { globalStore } from '~/store/GlobalStore';
@@ -163,7 +163,7 @@ const App: Component = () => {
       <Route path='/' component={About} />
       <Route path='/learn' component={Learn} />
       <Route path='/play' component={Playground} />
-      <Route path='/downloads' component={Downloads} />
+      <Route path='/download' component={Download} />
     </Router>
   );
 };

@@ -10,7 +10,7 @@ export const rootContainer = style([
     overflowX: 'hidden',
     overflowY: 'visible',
     zIndex: 2,
-    borderRight: `1px solid ${vars.color.border}`,
+    borderRight: `1px solid ${vars.color.borderSecondary}`,
 
     '::-webkit-scrollbar': {
       width: '2px',

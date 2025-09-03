@@ -15,16 +15,16 @@ const routes: Route[] = [
     label: 'About.',
   },
   {
+    path: '/download',
+    label: 'Download.',
+  },
+  {
     path: '/learn',
     label: 'Learn.',
   },
   {
-    path: '/downloads',
-    label: 'Downloads.',
-  },
-  {
     path: '/play',
-    label: 'Playground.',
+    label: 'Play.',
   },
 ];
 
@@ -36,23 +36,27 @@ const SideBarMenu: Component = () => {
         <For each={routes}>
           {(route, i) => {
             return (
-              <div class={menuItem}>
-                {/* <Icon src='icons/misc/dot.png' base={8} color={vars.color.muted} /> */}
-                <a
-                  class={menuText}
-                  href={route.path}
-                  style={{
-                    color: location.pathname === route.path ? vars.color.enabled : vars.color.onBackground,
-                    'text-decoration': route.path === '/play' ? 'line-through' : undefined,
-                    'pointer-events': route.path === '/play' ? 'none' : undefined,
-                  }}
-                >
-                  {route.label}
-                </a>
-                <Show when={route.path === '/play'}>
-                  <Icon src='icons/misc/open_external.png' base={8} color={vars.color.muted} />
-                </Show>
-              </div>
+              <>
+                <div class={menuItem}>
+                  {/* <Icon src='icons/misc/dot.png' base={8} color={vars.color.muted} /> */}
+                  <a
+                    class={menuText}
+                    href={route.path}
+                    style={{
+                      color: location.pathname === route.path ? vars.color.active : vars.color.onBackground,
+                      opacity: location.pathname === route.path ? 1 : 0.8,
+                      'text-decoration': route.path === '/play' ? 'line-through' : undefined,
+                      'pointer-events': route.path === '/play' ? 'none' : undefined,
+                    }}
+                  >
+                    {route.label}
+                  </a>
+                  <Show when={route.path === '/play'}>
+                    <Icon src='icons/misc/open_external.png' base={8} color={vars.color.muted} />
+                  </Show>
+                  {/* <p>/</p> */}
+                </div>
+              </>
             );
           }}
         </For>

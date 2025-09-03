@@ -20,13 +20,14 @@ export const pageRoot = style([
 ]);
 
 export const heroHeading = style({
-  fontFamily: ZFB20,
+  fontFamily: `${ZFB20}, ${k12x8}`,
   fontSize: '16px',
   letterSpacing: '1px',
   marginBottom: '16px',
   verticalAlign: 'baseline',
   inset: 0,
   color: vars.color.onBackground,
+  opacity: 0.95, // slightly weaken
   '@media': {
     '(max-width: 599px)': {
       fontSize: '16px',
@@ -42,6 +43,7 @@ export const subHeading = style({
   lineHeight: 1.6,
   marginBottom: '12px',
   color: vars.color.onBackground,
+  opacity: 0.95, // slightly weaken
   '@media': {
     '(max-width: 599px)': {
       fontSize: '8px',

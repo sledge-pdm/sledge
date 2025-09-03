@@ -36,7 +36,7 @@ const TypewriterText: Component<Props> = (props) => {
       () => {
         setCursorTicker((t) => !t);
       },
-      500,
+      800,
       setInterval
     );
   });

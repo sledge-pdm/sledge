@@ -1,3 +1,7 @@
+import { flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
+import { Component, JSX } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
 import { heroHeading, pageRoot, subHeading } from '~/styles/page.css';
 import { sectionImage } from '~/styles/telling_section.css';
@@ -20,16 +24,16 @@ export function About() {
 
   return (
     <main class={pageRoot}>
-      <p class={heroHeading}>ABOUT.</p>
-      <p class={subHeading}>Sledge is a drawing tool.</p>
+      <p class={heroHeading}>WHaT'S SLEDGE?</p>
+      <p class={subHeading}>Sledge is a pixel-based drawing tool.</p>
 
-      <p class={subHeading}>
-        Sledge is a drawing tool.
-        <br />
-        Sledge is a drawing tool.
-        <br />
-        Sledge is a drawing tool.
+      <p class={heroHeading} style={{ 'margin-top': '2rem' }}>
+        WHY SLEDGE?
       </p>
+      <SubHeadingWithDot>Because it's cool.</SubHeadingWithDot>
+      <SubHeadingWithDot>Because it's useful.</SubHeadingWithDot>
+      <SubHeadingWithDot>Because it's fast (maybe faster than you think).</SubHeadingWithDot>
+
       <div
         style={{
           'margin-top': '2rem',
@@ -41,3 +45,14 @@ export function About() {
     </main>
   );
 }
+
+const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
+  return (
+    <div class={flexRow} style={{ 'align-items': 'center', gap: '6px', 'margin-bottom': '8px' }}>
+      <Icon src='icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+      <p class={subHeading} {...props} style={{ 'margin-bottom': 0, 'vertical-align': 'middle' }}>
+        {props.children}
+      </p>
+    </div>
+  );
+};

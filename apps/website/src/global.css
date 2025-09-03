@@ -5,6 +5,9 @@ main {
   padding: 0;
   width: 100vw;
   height: 100dvh;
+  image-rendering: pixelated;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
 }
 
 /* * {

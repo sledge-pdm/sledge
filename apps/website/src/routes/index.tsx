@@ -1,37 +1,27 @@
-import { Asset, flexCol, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
-import { k12x8, vars, ZFB03B, ZFB08 } from '@sledge/theme';
-import { Button } from '@sledge/ui';
-import { createSignal, onMount, Show } from 'solid-js';
-import FadingImage from '~/components/FadingImage';
+import { vars, ZFB03B } from '@sledge/theme';
+import { createSignal, onMount } from 'solid-js';
+import DownloadSection from '~/components/DownloadSection';
+import HardEdgedSection from '~/components/telling_sections/1_hard_edged';
+import ChaosEngineSection from '~/components/telling_sections/2_chaos_engine';
+import OpenCoreSection from '~/components/telling_sections/3_open_core';
+import CodeYourCanvasSection from '~/components/telling_sections/4_code_your_canvas';
+import { TellingSection } from '~/components/TellingSection';
 import ThemeToggle from '~/components/ThemeToggle';
+import { globalStore, setGlobalStore } from '~/store/GlobalStore';
+import { animatedActive } from '~/styles/telling_section.css';
 import {
-  ButtonAreaContainer,
-  content,
-  description,
-  greetText,
-  informationText,
-  mainButton,
-  mainButtonContainer,
+  leftContent,
   rightBottomArea,
   scrollContent,
+  sledgeText,
   startImage,
-  startImageContainer,
   startRoot,
   startText,
+  startTextContainer,
   themeArea,
-  versionInfoText,
-} from '~/routes/start.css';
-import { globalStore } from '~/store/GlobalStore';
+} from './start.css';
 
-export default function Home() {
-  const releaseApiUrl =
-    import.meta.env.VITE_GITHUB_REST_API_URL +
-    '/repos/' +
-    import.meta.env.VITE_GITHUB_OWNER +
-    '/' +
-    import.meta.env.VITE_GITHUB_REPO +
-    '/releases/latest';
-
+export function Start() {
   const imageSrc = () => {
     switch (globalStore.theme) {
       case 'light':
@@ -46,218 +36,135 @@ export default function Home() {
     }
   };
   const isLight = () => globalStore.theme === 'light';
+  const descriptionFlavors: string[] = [
+    'Paint, rearmed.',
+    `A tiny hooligan in your pocket.`,
+    `Keep it in your pocket. Break when needed.`,
+    `Always at hand. Always unruly.`,
+    `A hammer with a master.`,
+    `Not a studio. A hammer.`,
+    `Strike pixels, not canvas.`,
+    `8MB. Free. Always ready.`,
+    `The pocket-sized sidearm for your pixels.`,
+    `Small enough to carry. Sharp enough to cut.`,
+    `Notepad for images.`,
+    `A glitchpad for your desktop.`,
+  ];
 
-  const downloadFlavorTexts = ['Take This!'];
-
-  const [downloadFlavor, setDownloadFlavor] = createSignal(downloadFlavorTexts[Math.floor(Math.random() * downloadFlavorTexts.length)]);
-  const changeDownloadFlavor = () => {
-    setDownloadFlavor(downloadFlavorTexts[Math.floor(Math.random() * downloadFlavorTexts.length)]);
+  const [flavor, setFlavor] = createSignal(descriptionFlavors[0]);
+  // intersection observer for simple in-view animations
+  let panelEls: HTMLElement[] = [];
+  const attachPanelRef = (el: HTMLElement) => {
+    panelEls.push(el);
   };
 
-  const [isLoading, setIsLoading] = createSignal(true);
+  let tagEls: HTMLElement[] = [];
+  const attachTagRef = (el: HTMLElement) => {
+    tagEls.push(el);
+  };
 
-  const [userOS, setUserOS] = createSignal<os>('none');
-  const [releaseData, setReleaseData] = createSignal<ReleaseData | null>(null);
-
-  const availableAssets = (): {
-    asset: Asset;
-    extension: string;
-  }[] => {
-    if (userOS() === 'none' || !releaseData()) return [];
-
-    const availableExtensions = osBuildInfos[userOS()].extensions;
-
-    return releaseData()!
-      .assets.map((asset) => {
-        const ext = availableExtensions.find((ext) => asset.name.endsWith(`.${ext}`));
-        if (ext) {
-          return {
-            asset,
-            extension: ext,
-          };
+  onMount(() => {
+    const sectionTagObserver = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            console.log(e.target.textContent);
+            setGlobalStore('currentTellingPage', Number(e.target.textContent));
+          }
         }
-      })
-      .filter((item): item is { asset: Asset; extension: string } => item !== undefined);
-  };
-  const information = (): string | undefined => {
-    if (userOS() === 'none' || !releaseData()) return undefined;
-    const information = osBuildInfos[userOS()].information;
-    return information;
-  };
+      },
+      { root: null, threshold: 0.55 }
+    );
 
-  onMount(async () => {
-    setIsLoading(true);
-    const userAgent = navigator.userAgent;
-    if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
-      setUserOS('sp');
-    } else if (userAgent.includes('Mac OS X')) {
-      setUserOS('macOS');
-    } else if (userAgent.includes('Windows')) {
-      setUserOS('windows');
-    } else if (userAgent.includes('Linux')) {
-      setUserOS('linux');
-    } else {
-      setUserOS('none');
-    }
+    const animationObserver = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add(animatedActive);
+          } else {
+            e.target.classList.remove(animatedActive);
+          }
+        }
+      },
+      { root: null, threshold: 0.55 }
+    );
 
-    try {
-      const githubPat = import.meta.env.VITE_GITHUB_PAT;
-      // github api refuses localhost by CORS.
-      const data = await getReleaseData(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat);
-      if (!data) {
-        console.error('Failed to fetch release data');
-      } else {
-        setReleaseData(data);
-      }
-    } catch (e) {
-      console.error('Failed to fetch release data');
-    }
-    setIsLoading(false);
+    panelEls.forEach((el) => animationObserver.observe(el));
+    tagEls.forEach((el) => sectionTagObserver.observe(el));
+
+    return () => {
+      animationObserver.disconnect();
+      sectionTagObserver.disconnect();
+    };
   });
-
-  const DownloadButtons = () => {
-    const assets = availableAssets();
-
-    return assets.map((item) => {
-      const { asset, extension } = item;
-      const text = `DOWNLOAD (.${extension})`;
-      return (
-        <Button
-          key={asset.id}
-          onClick={() => {
-            window.open(asset.browser_download_url, '_blank')?.focus();
-          }}
-          hoverColor='white'
-          class={mainButton}
-        >
-          {text}
-        </Button>
-      );
-    });
-  };
 
   return (
     <div class={startRoot}>
-      <div class={scrollContent}>
-        <div class={content}></div>
-        <div class={description}>
-          <p class={greetText}>HELLO.</p>
-          <p class={startText}>
-            i'm sledge.
-            <br />
-            simply <span style={{ color: vars.color.active }}>destructive</span> draw tool.
-          </p>
-
-          <Show when={!isLoading()} fallback={<p class={startText}>Loading...</p>}>
-            <Show when={information()}>
-              <div
-                class={flexCol}
-                style={{
-                  'background-color': vars.color.surface,
-                  padding: vars.spacing.lg,
-                  color: vars.color.onBackground,
-                  width: 'fit-content',
-                  'max-width': '100%',
-                }}
-              >
-                <p
-                  class={informationText}
-                  style={{
-                    'font-family': ZFB08,
-                    'white-space': 'pre',
-                    'font-size': '8px',
-                    'margin-bottom': '12px',
-                    color: vars.color.accent,
-                  }}
-                >
-                  for {userOS()} users
-                </p>
-                <p
-                  class={informationText}
-                  style={{
-                    'font-family': k12x8,
-                    'line-height': '1.5',
-                    'white-space': 'pre',
-                    'letter-spacing': '1px',
-                    'font-size': '8px',
-                  }}
-                >
-                  {information()}
-                </p>
-              </div>
-            </Show>
-            <div class={ButtonAreaContainer}>
-              <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-                <p class={versionInfoText}>
-                  Platform: <span style={{ color: vars.color.accent }}>{userOS()}</span>
-                </p>
-              </Show>
-              <p class={versionInfoText}>
-                Latest Build:{' '}
-                <span style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>{releaseData()?.name ?? '[ fetch failed ]'}</span>
-              </p>
-
-              <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-                <div class={mainButtonContainer}>{DownloadButtons()}</div>
-                <div class={mainButtonContainer}>
-                  <Button onClick={() => {}} hoverColor='white' class={mainButton}>
-                    pseudo DL
-                  </Button>
-                </div>
-                <a
-                  onClick={() => {
-                    window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-                  }}
-                  style={{ 'text-decoration': 'underline', 'margin-left': '4px', 'margin-top': '8px', color: vars.color.muted }}
-                >
-                  OTHER DOWNLOADS.
-                </a>
-              </Show>
-
-              <Show when={userOS() === 'sp'}>
-                <Button
-                  onClick={() => {
-                    window.open('https://github.com/Innsbluck-rh/sledge', '_blank')?.focus();
-                  }}
-                  hoverColor='white'
-                  class={mainButton}
-                >
-                  VIEW CODE.
-                </Button>
-              </Show>
-            </div>
-          </Show>
-
-          <p style={{ 'font-family': ZFB03B, 'font-size': '16px' }}>learn more?</p>
-          <p>sssss</p>
-        </div>
-
-        <div
-          class={startImageContainer}
-          style={{
-            filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'})`,
-          }}
-        >
-          <FadingImage class={startImage} src={imageSrc()} />
-        </div>
-
-        <div class={themeArea}>
-          <p style={{ 'font-size': '16px', 'font-family': ZFB03B }}>
-            try <span style={{ color: vars.color.accent }}>theme</span> here!
-          </p>
-          <ThemeToggle noBackground={false} />
-        </div>
-
-        <div class={rightBottomArea}>
+      <div class={leftContent}>
+        <p class={sledgeText}>SLEDGE.</p>
+        <div class={startTextContainer}>
           <p
-            style={{
-              'font-family': ZFB03B,
-              opacity: 0.6,
+            class={startText}
+            onPointerEnter={() => {
+              setFlavor(descriptionFlavors[Math.floor(Math.random() * descriptionFlavors.length)]);
             }}
           >
-            [C] 2025 sledge all rights reserved.
+            {flavor()}
           </p>
         </div>
+
+        <DownloadSection />
+      </div>
+
+      <div class={scrollContent}>
+        {/* Panel 0: TOP */}
+        <TellingSection pageNumber={0}>
+          <div>
+            <div
+              ref={attachPanelRef}
+              style={{
+                visibility: globalStore.currentTellingPage === 0 ? 'visible' : 'collapse',
+                filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'})`,
+                width: '60%',
+                margin: 'auto',
+                'padding-bottom': '4rem',
+              }}
+            >
+              <img class={startImage} src={imageSrc()} />
+            </div>
+
+            <div style={{ display: 'flex', position: 'absolute', bottom: '4rem', left: '3rem' }}>
+              <p style={{ 'font-size': '16px' }}>↓ LEARN MORE... ↓</p>
+            </div>
+          </div>
+        </TellingSection>
+        {/* Panel 1: HARD EDGED. */}
+        <HardEdgedSection attachPanelRef={attachPanelRef} />
+        {/* Panel 2: CHAOS ENGINE. */}
+        <ChaosEngineSection attachPanelRef={attachPanelRef} />
+        {/* Panel 3: OPEN CORE. */}
+        <OpenCoreSection attachPanelRef={attachPanelRef} />
+        {/* Panel 4: CODE YOUR CANVAS. */}
+        <CodeYourCanvasSection attachPanelRef={attachPanelRef} />
+      </div>
+
+      {/* floating UI elements */}
+      <div class={themeArea}>
+        <p style={{ 'font-size': '16px', 'font-family': ZFB03B }}>
+          try <span style={{ color: vars.color.accent }}>theme</span> here!
+        </p>
+        <ThemeToggle noBackground={false} />
+      </div>
+
+      <div class={rightBottomArea}>
+        <p
+          style={{
+            'font-family': ZFB03B,
+            opacity: 0.6,
+          }}
+        >
+          [C] 2025 sledge all rights reserved.
+        </p>
       </div>
     </div>
   );

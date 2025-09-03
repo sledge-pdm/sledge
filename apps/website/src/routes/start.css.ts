@@ -1,15 +1,25 @@
 import { flexCol, flexRow, w100 } from '@sledge/core';
-import { vars, ZFB08, ZFB31 } from '@sledge/theme';
+import { vars, ZFB09, ZFB11, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const startRoot = style([
-  flexCol,
+  flexRow,
   w100,
   {
+    justifySelf: 'center',
+    width: '100vw',
     height: '100dvh',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    boxSizing: 'border-box',
+  },
+]);
+
+export const leftContent = style([
+  flexCol,
+  {
+    width: '30%',
+    height: '100dvh',
+    padding: '7rem 4rem',
+    gap: '2rem',
+    borderRight: `1px solid ${vars.color.border}`,
   },
 ]);
 
@@ -17,16 +27,14 @@ export const scrollContent = style([
   flexCol,
   w100,
   {
-    overflowY: 'visible',
+    width: '100%',
+    height: '100dvh',
+    overflowY: 'auto',
     overflowX: 'hidden',
-    padding: '42px 42px',
     boxSizing: 'border-box',
-    '@media': {
-      '(max-width: 768px)': {
-        padding: `${vars.spacing.xl} ${vars.spacing.lg}`,
-        paddingBottom: '80px',
-      },
-    },
+    scrollSnapType: 'y mandatory',
+    scrollBehavior: 'smooth',
+    overscrollBehavior: 'contain',
   },
 ]);
 
@@ -37,6 +45,7 @@ export const header = style([
     gap: '2rem',
     alignItems: 'center',
     textDecoration: 'none',
+    backgroundColor: 'limegreen',
     '@media': {
       '(max-width: 768px)': {
         height: '36px',
@@ -44,18 +53,6 @@ export const header = style([
     },
   },
 ]);
-
-export const startIcon = style({
-  width: '48px',
-  height: '48px',
-  imageRendering: 'pixelated',
-  '@media': {
-    '(max-width: 768px)': {
-      width: '36px',
-      height: '36px',
-    },
-  },
-});
 
 export const startHeader = style({
   fontFamily: ZFB31,
@@ -68,77 +65,49 @@ export const startHeader = style({
   },
 });
 
-export const content = style([
-  flexRow,
-  {
-    position: 'fixed',
-    flexWrap: 'nowrap',
-    width: '100%',
-    padding: '3rem 3rem',
-    boxSizing: 'border-box',
-    zIndex: 1,
-    pointerEvents: 'none',
-    '@media': {
-      '(max-width: 1600px)': {
-        gap: '3rem',
-        padding: `3rem 1rem`,
-      },
-      '(max-width: 768px)': {
-        flexWrap: 'wrap',
-        gap: '3rem',
-        padding: `3rem 1rem`,
-      },
-    },
-  },
-]);
-
-export const description = style([
-  flexCol,
-  {
-    width: '45%',
-    padding: '5rem 5rem',
-    boxSizing: 'border-box',
-    gap: '2rem',
-    pointerEvents: 'none',
-    zIndex: 2,
-    '@media': {
-      '(max-width: 1600px)': {},
-      '(max-width: 768px)': {
-        width: '100%',
-        padding: 0,
-        gap: '1rem',
-      },
-    },
-  },
-]);
-
-export const startImageContainer = style({
-  position: 'absolute',
-  top: '18%',
-  right: '10%',
-  width: '40%',
-  pointerEvents: 'none',
-  zIndex: -1,
-  '@media': {
-    '(max-width: 1600px)': {
-      padding: 0,
-      width: '55%',
-    },
-    '(max-width: 768px)': {
-      width: '100%',
-      gap: '1rem',
-    },
-  },
-});
-
 export const startImage = style({
   objectFit: 'contain',
   width: '100%',
+  height: 'auto',
+  borderRadius: '6px',
+  overflow: 'hidden',
 });
 
-export const greetText = style({
+export const startPanel = style([
+  flexRow,
+  {
+    scrollSnapAlign: 'start',
+    scrollSnapStop: 'always',
+    minHeight: '100dvh',
+    height: '100%',
+    position: 'relative',
+    boxSizing: 'border-box',
+    alignItems: 'stretch',
+    backgroundColor: vars.color.background,
+  },
+]);
+
+export const startPanelInner = style([
+  flexCol,
+  {
+    width: '100%',
+    height: '100dvh',
+    boxSizing: 'border-box',
+    justifyContent: 'center',
+    gap: '2rem',
+    '@media': {
+      '(max-width: 768px)': {
+        flexWrap: 'wrap',
+        padding: `3rem 1rem`,
+        gap: '1.5rem',
+      },
+    },
+  },
+]);
+
+export const sledgeText = style({
   fontFamily: ZFB31,
-  fontSize: '88px',
+  fontSize: '52px',
   letterSpacing: '2px',
   '@media': {
     '(max-width: 768px)': {
@@ -147,11 +116,21 @@ export const greetText = style({
   },
 });
 
+// 行数可変なので固定+マージン取り
+export const startTextContainer = style([
+  flexCol,
+  {
+    marginTop: '-1.2rem',
+    flexGrow: 1,
+  },
+]);
 export const startText = style({
-  fontFamily: ZFB08,
-  fontSize: '24px',
+  fontFamily: ZFB09,
+  fontSize: '16px',
   letterSpacing: '2px',
-  lineHeight: '1.5',
+  fontStyle: 'italic',
+  opacity: 0.6,
+
   '@media': {
     '(max-width: 768px)': {
       fontSize: '16px',
@@ -160,77 +139,17 @@ export const startText = style({
   },
 });
 
-export const ButtonAreaContainer = style([
-  flexCol,
-  {
-    gap: '1rem',
-  },
-]);
-
-export const versionInfoText = style({
+export const flavorText = style({
+  fontFamily: ZFB11,
   fontSize: '16px',
+  letterSpacing: '1px',
+  marginBottom: '4rem',
+  lineHeight: '1.5',
+  opacity: 0.2,
   '@media': {
     '(max-width: 768px)': {
-      fontSize: '8px',
-    },
-  },
-});
-export const informationText = style({
-  fontSize: '8px',
-  userSelect: 'text',
-  '@media': {
-    '(max-width: 768px)': {
-      fontSize: '8px',
-    },
-  },
-});
-
-export const mainButtonContainer = style([
-  flexRow,
-  {
-    marginTop: '0.5rem',
-    gap: '2rem',
-    flexWrap: 'wrap',
-    '@media': {
-      '(max-width: 768px)': {
-        gap: '1rem',
-      },
-    },
-  },
-]);
-
-export const mainButton = style({
-  minWidth: '180px',
-  fontSize: '16px',
-  padding: '16px 28px',
-  borderWidth: '2px',
-  borderRadius: '4px',
-  ':hover': {
-    backgroundColor: vars.color.accent,
-    borderColor: vars.color.accent,
-    color: vars.color.background,
-  },
-  '@media': {
-    '(max-width: 768px)': {
-      borderWidth: '2px',
-      padding: '12px 24px',
-    },
-  },
-});
-export const subButton = style({
-  fontSize: '8px',
-  padding: '8px 14px',
-  borderWidth: '2px',
-  borderRadius: '4px',
-  ':hover': {
-    backgroundColor: vars.color.accent,
-    borderColor: vars.color.accent,
-    color: vars.color.background,
-  },
-  '@media': {
-    '(max-width: 768px)': {
-      borderWidth: '2px',
-      padding: '12px 24px',
+      fontSize: '16px',
+      marginBottom: '0.25rem',
     },
   },
 });

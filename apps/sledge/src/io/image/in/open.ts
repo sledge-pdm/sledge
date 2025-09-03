@@ -11,7 +11,7 @@ export const initProjectWithNewImage = async (filePath: string, fileName: string
   changeCanvasSize({
     width: imageBitmap.width,
     height: imageBitmap.height,
-  });
+  }, true);
 
   const imageData = await loadImageData(imageBitmap); // ここで画像のバッファを読み込み
   imageBitmap.close();

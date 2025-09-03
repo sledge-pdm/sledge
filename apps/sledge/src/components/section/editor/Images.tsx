@@ -50,8 +50,6 @@ const Images: Component<{}> = () => {
               gap: '4px',
             }}
           >
-            {/* <p>{imagePoolStore.selectedEntryId}</p>
-            <p>{selectedEntry()?.fileName}</p> */}
             <Checkbox
               checked={imagePoolStore.preserveAspectRatio}
               label='preserve ratio.'

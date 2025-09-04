@@ -12,7 +12,7 @@ interface Route {
 const routes: Route[] = [
   {
     path: '/about',
-    label: 'About.',
+    label: 'about.',
   },
   {
     path: '/features',
@@ -20,7 +20,7 @@ const routes: Route[] = [
   },
   {
     path: '/download',
-    label: 'Download.',
+    label: 'download.',
   },
   // {
   //   path: '/play',
@@ -36,6 +36,7 @@ const SideBarMenu: Component = () => {
         <For each={routes}>
           {(route, i) => {
             const isInPath = () => location.pathname === route.path;
+            const isDownload = () => route.path === '/download';
             const isPlay = () => route.path === '/play';
             return (
               <>

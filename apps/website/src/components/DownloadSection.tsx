@@ -1,9 +1,9 @@
-import { Asset, flexCol, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
+import { Asset, flexCol, flexRow, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
 import { k12x8, vars, ZFB08 } from '@sledge/theme';
 import { Button, Icon } from '@sledge/ui';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { downloadButton, mainLink } from '~/styles/buttons.css';
-import { assetText, informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
+import { assetText, informationText, loadingText, osInfoText, versionInfoText } from '~/styles/download_section.css';
 
 const DownloadSection: Component<{}> = () => {
   const releaseApiUrl =
@@ -83,36 +83,75 @@ const DownloadSection: Component<{}> = () => {
   return (
     <div class={flexCol} style={{ width: '100%', gap: '2rem' }}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
-        <div class={flexCol} style={{ gap: '0.5rem', width: '100%', 'margin-top': '12px' }}>
-          <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-            <p class={versionInfoText}>
-              Platform:{' '}
-              <span class={versionInfoText} style={{ color: vars.color.accent }}>
-                {userOS()}
-              </span>
-            </p>
-          </Show>
-          <p class={versionInfoText}>
+        <div class={flexCol} style={{ width: '100%', 'margin-top': '12px' }}>
+          <p class={versionInfoText} style={{ 'margin-bottom': '36px' }}>
             Latest Build:{' '}
             <span class={versionInfoText} style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>
               {releaseData()?.name ?? '[ fetch failed ]'}
             </span>
           </p>
+
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-            <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '-2px' }}>
+            <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
+              <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+              <p class={osInfoText}>
+                {' '}
+                for{' '}
+                <span class={osInfoText} style={{ color: vars.color.accent }}>
+                  {userOS()}
+                </span>
+              </p>
+            </div>
+          </Show>
+          <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+            <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '16px' }}>
               <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
             </div>
           </Show>
+
+          <a
+            onClick={() => {
+              window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+            }}
+            class={mainLink}
+            style={{ 'margin-top': '48px', color: vars.color.muted }}
+          >
+            &gt; OTHER DOWNLOADS.
+          </a>
+
+          {/* <div class={flexCol} style={{ width: '100%', gap: '16px' }}>
+            <For each={Object.entries(osBuildInfos)}>
+              {([key, info]) => {
+                const name = key;
+                const exts = info.extensions;
+                const assets = releaseData()!
+                  .assets.filter((asset) => exts.some((ext) => asset.name.endsWith(`.${ext}`)))
+                  .map((asset) => {
+                    const extension = exts.find((ext) => asset.name.endsWith(`.${ext}`))!;
+                    return { asset, extension };
+                  });
+                if (assets.length === 0) return null;
+                return (
+                  <div class={flexCol} style={{ width: '100%', gap: '8px' }}>
+                    <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
+                      <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+                      <p class={osInfoText}>
+                        {' '}
+                        for{' '}
+                        <span class={osInfoText} style={{ color: vars.color.accent }}>
+                          {name}
+                        </span>
+                      </p>
+                    </div>
+                    <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '16px' }}>
+                      <For each={assets}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
+                    </div>
+                  </div>
+                );
+              }}
+            </For>
+          </div> */}
         </div>
-        <a
-          onClick={() => {
-            window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-          }}
-          class={mainLink}
-          style={{ 'margin-top': '24px', color: vars.color.muted }}
-        >
-          &gt; OTHER DOWNLOADS.
-        </a>
       </Show>
       <Show when={information()}>
         <div

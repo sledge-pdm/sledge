@@ -2,15 +2,10 @@ import type { ReleaseData } from './Release';
 
 export type os = 'sp' | 'macOS' | 'windows' | 'linux' | 'none';
 export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; information?: string } } = {
-  sp: {
-    name: 'sp',
-    extensions: [],
-    information: 'Mobile builds are not available yet.',
-  },
-  none: {
-    name: 'None',
-    extensions: [],
-    information: "Device not supported. (It seems you're using an uncommon device.)",
+  windows: {
+    name: 'Windows',
+    extensions: ['exe'],
+    // information: `Both installers (exe/msi) are supposed to work identically.`,
   },
   macOS: {
     name: 'macOS',
@@ -20,17 +15,22 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
 
 > xattr -rc /Applications/sledge.app`,
   },
-  windows: {
-    name: 'Windows',
-    extensions: ['exe'],
-    // information: `Both installers (exe/msi) are supposed to work identically.`,
-  },
   linux: {
     name: 'Linux',
     extensions: ['rpm', 'AppImage', 'deb'],
     information: `.deb       for Debian-based distros (e.g., Ubuntu)
 .rpm       for Red Hat-based distros (e.g., Fedora, CentOS)
 .AppImage  for portable applications`,
+  },
+  sp: {
+    name: 'sp',
+    extensions: [],
+    information: 'Mobile builds are not available yet.',
+  },
+  none: {
+    name: 'None',
+    extensions: [],
+    information: "Device not supported. (It seems you're using an uncommon device.)",
   },
 };
 

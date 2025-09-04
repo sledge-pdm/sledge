@@ -48,7 +48,7 @@ export function About() {
 const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
     <div class={flexRow} style={{ 'align-items': 'center', gap: '6px', 'margin-bottom': '8px' }}>
-      <Icon src='icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+      <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
       <p class={subHeading} {...props} style={{ 'margin-bottom': 0, 'vertical-align': 'middle' }}>
         {props.children}
       </p>

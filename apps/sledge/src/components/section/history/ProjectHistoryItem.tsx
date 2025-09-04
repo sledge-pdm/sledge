@@ -85,9 +85,9 @@ function getIconForTool(tool?: string) {
   }
   switch (tool) {
     case 'clear':
-      return 'icons/misc/clear.png';
+      return '/icons/misc/clear.png';
     case 'fx':
-      return 'icons/misc/fx.png';
+      return '/icons/misc/fx.png';
   }
 
   return '';
@@ -101,22 +101,22 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
         new: string;
       }
     | undefined = undefined;
-  let icon = getIconForTool(context.tool);
+  let icon = getIconForTool(context?.tool);
   let description = '';
   switch (action.type) {
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
       const bigger = csaction.newSize.width * csaction.newSize.height >= csaction.oldSize.width * csaction.oldSize.height;
-      icon = bigger ? 'icons/misc/canvas_size_bigger.png' : 'icons/misc/canvas_size_smaller.png';
+      icon = bigger ? '/icons/misc/canvas_size_bigger.png' : '/icons/misc/canvas_size_smaller.png';
       description = `${csaction.oldSize.width}x${csaction.oldSize.height} -> ${csaction.newSize.width}x${csaction.newSize.height}`;
       break;
     case 'image_pool':
-      icon = 'icons/misc/image.png';
+      icon = '/icons/misc/image.png';
       const ipaction = action as ImagePoolHistoryAction;
       description = `${ipaction.kind} -> ${ipaction.targetEntry.fileName}`;
       break;
     case 'image_pool_entry_props':
-      icon = 'icons/misc/image.png';
+      icon = '/icons/misc/image.png';
       const ipepaction = action as ImagePoolEntryPropsHistoryAction;
       description = `${ipepaction.newEntryProps.fileName} transform`;
       break;
@@ -131,13 +131,13 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
       };
       break;
     case 'layer_list':
-      icon = 'icons/misc/layer.png';
+      icon = '/icons/misc/layer.png';
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.layerSnapshot?.name}`;
       break;
     case 'layer_buffer':
       const lbaction = action as LayerBufferHistoryAction;
-      if (context.tool === 'fx') {
+      if (context?.tool === 'fx') {
         description = `${findLayerById(lbaction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
       } else {
         const patch = lbaction.patch;
@@ -155,7 +155,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
       }
       break;
     case 'layer_props':
-      icon = 'icons/misc/layer.png';
+      icon = '/icons/misc/layer.png';
       const lpaction = action as LayerPropsHistoryAction;
       description = `${findLayerById(lpaction.layerId)?.name} ${context.propName}: ${context.before} > ${context.after}`;
       break;
@@ -171,7 +171,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
     >
       <p style={{ width: '18px' }}>{typeof index === 'function' ? index() : index}</p>
       {/* <div>
-        <Icon src={undo ? 'icons/misc/undo.png' : 'icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
+        <Icon src={undo ? '/icons/misc/undo.png' : '/icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
       </div> */}
       <Show
         when={colorIcon}

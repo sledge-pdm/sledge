@@ -41,7 +41,7 @@ const SideBarMenu: Component = () => {
             return (
               <>
                 <div class={menuItem}>
-                  {/* <Icon src='icons/misc/dot.png' base={8} color={vars.color.muted} /> */}
+                  {/* <Icon src='/icons/misc/dot.png' base={8} color={vars.color.muted} /> */}
                   <A
                     class={menuText}
                     href={route.path}
@@ -55,7 +55,7 @@ const SideBarMenu: Component = () => {
                     {route.label}
                   </A>
                   <Show when={route.path === '/play'}>
-                    <Icon src='icons/misc/open_external.png' base={8} color={vars.color.muted} />
+                    <Icon src='/icons/misc/open_external.png' base={8} color={vars.color.muted} />
                   </Show>
                   {/* <p>/</p> */}
                 </div>

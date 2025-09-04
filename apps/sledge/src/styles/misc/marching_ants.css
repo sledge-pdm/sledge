@@ -2,6 +2,7 @@
   from {
     stroke-dashoffset: 0;
   }
+
   to {
     stroke-dashoffset: 12; /* borderDash * 2 = 6 * 2 = 12 */
   }

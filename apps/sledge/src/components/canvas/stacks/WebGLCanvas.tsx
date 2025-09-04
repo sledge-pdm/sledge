@@ -1,12 +1,12 @@
 import { flexCol } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createSignal, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, Show } from 'solid-js';
 import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
 import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 
@@ -23,7 +23,7 @@ const WebGLCanvas: Component = () => {
       if (updateRender()) {
         setUpdateRender(false);
         try {
-          webGLRenderer?.render(allLayers(), onlyDirtyUpdate());
+          webGLRenderer?.render(onlyDirtyUpdate());
         } catch (error) {
           console.error('WebGLCanvas: Failed to resize WebGLRenderer', error);
         }
@@ -61,8 +61,8 @@ const WebGLCanvas: Component = () => {
     console.log('WebGLCanvas: Starting render loop');
     try {
       webGLRenderer = new WebGLRenderer(canvasEl);
+      webGLRenderer?.setLayers(allLayers());
       webGLRenderer.resize(width, height);
-      console.log('[WebGLCanvas] initialize:', true);
       setUpdateRender(true); // rise flag for init render
       setOnlyDirtyUpdate(false);
     } catch (error) {
@@ -75,8 +75,12 @@ const WebGLCanvas: Component = () => {
   };
 
   listenEvent('onSetup', () => {
-    console.log('[WebGLCanvas] onSetup event received');
     init();
+  });
+
+  createEffect(() => {
+    const layers = layerListStore.layers;
+    webGLRenderer?.setLayers(layers);
   });
 
   onCleanup(() => {

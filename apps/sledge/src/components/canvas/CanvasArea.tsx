@@ -1,4 +1,4 @@
-import { Component, onCleanup } from 'solid-js';
+import { Component, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
@@ -8,7 +8,6 @@ import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasCon
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { eventBus } from '~/utils/EventBus';
-import { listenEvent } from '~/utils/TauriUtils';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import { flexCol, flexRow } from '@sledge/core';
@@ -16,6 +15,7 @@ import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 import { OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
 import BottomInfo from '~/components/global/BottomInfo';
+import { Consts } from '~/models/Consts';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CanvasArea: Component = () => {
@@ -24,7 +24,7 @@ const CanvasArea: Component = () => {
 
   let interact: CanvasAreaInteract | undefined = undefined;
 
-  listenEvent('onSetup', () => {
+  onMount(() => {
     getCurrentWindow().onResized(() => {
       setInteractStore('canvasAreaSize', {
         width: wrapper.clientWidth,
@@ -70,7 +70,7 @@ const CanvasArea: Component = () => {
   return (
     <div class={canvasArea}>
       <div
-        id='zoompan-wrapper'
+        id='canvas-area'
         ref={(el) => {
           wrapper = el;
         }}
@@ -81,8 +81,20 @@ const CanvasArea: Component = () => {
           height: '100%',
           overflow: 'hidden',
           'touch-action': 'none',
+          'z-index': Consts.zIndex.zoomPanWrapper,
         }}
       >
+        <div
+          id='out-canvas-area'
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+          }}
+        />
+
         <div
           ref={(el) => (canvasStack = el)}
           style={{

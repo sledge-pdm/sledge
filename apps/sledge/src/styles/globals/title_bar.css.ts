@@ -1,5 +1,5 @@
 import { flexCol, flexRow, h100, w100 } from '@sledge/core';
-import { vars, ZFB08 } from '@sledge/theme';
+import { k12x8, vars, ZFB03, ZFB08 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const titleBarRoot = style([
@@ -19,23 +19,32 @@ export const titleBarTitleContainer = style([
   {
     marginRight: 'auto',
     paddingLeft: '24px',
+    alignItems: 'center',
   },
 ]);
 export const titleBarTitle = style([
   {
     width: 'fit-content',
-    fontFamily: ZFB08,
-    fontSize: vars.text.sm,
+    fontFamily: k12x8,
+    fontSize: '8px',
     whiteSpace: 'pre',
   },
 ]);
 export const titleBarTitleSub = style([
   {
     width: 'fit-content',
-    fontFamily: ZFB08,
+    fontFamily: ZFB03,
     fontSize: vars.text.sm,
     whiteSpace: 'pre',
     opacity: 0.5,
+  },
+]);
+export const titleBarSize = style([
+  {
+    width: 'fit-content',
+    fontFamily: ZFB08,
+    fontSize: '8px',
+    whiteSpace: 'pre',
   },
 ]);
 

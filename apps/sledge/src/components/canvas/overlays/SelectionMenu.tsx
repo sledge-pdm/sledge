@@ -1,8 +1,15 @@
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { selectionManager, SelectionState } from '~/controllers/selection/SelectionManager';
-import { cancelMove, cancelSelection, commitMove, deletePixelInSelection } from '~/controllers/selection/SelectionOperator';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { selectionManager, SelectionState } from '~/controllers/selection/SelectionAreaManager';
+import {
+  cancelMove,
+  cancelSelection,
+  commitMove,
+  deletePixelInSelection,
+  getSelectionOffset,
+  invertSelectionArea,
+} from '~/controllers/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
@@ -15,13 +22,14 @@ import { container, divider, item } from '~/styles/components/canvas/overlays/se
 interface ItemProps {
   src: string;
   label?: string;
+  title?: string;
   onClick?: () => void;
 }
 
 const Item: Component<ItemProps> = (props) => {
   return (
-    <div class={item} onClick={props.onClick}>
-      <Icon src={props.src} color={vars.color.onBackground} base={10} scale={1} />
+    <div class={item} onClick={props.onClick} title={props.title}>
+      <Icon src={props.src} color={vars.color.onBackground} base={10} />
       <Show when={props.label}>
         <p>{props.label}</p>
       </Show>
@@ -34,6 +42,7 @@ const Divider: Component = () => {
 };
 
 const [selectionState, setSelectionState] = createSignal<SelectionState>(selectionManager.getState());
+const [floatingMoveState, setFloatingMoveState] = createSignal<boolean>(false);
 
 const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefined);
 
@@ -48,22 +57,25 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }, Number(globalConfig.performance.targetFPS))
   );
 
-  const handleAreaChanged = (e: Events['selection:areaChanged']) => {
+  const handleAreaChanged = (e: Events['selection:maskChanged']) => {
     if (e.commit) {
       updateMenuPos();
     }
   };
-  const handleMoved = (e: Events['selection:moved']) => setUpdatePosition(true);
+  const handleMoved = (e: Events['selection:offsetChanged']) => setUpdatePosition(true);
   const handleStateChanged = (e: Events['selection:stateChanged']) => {
     setSelectionState(e.newState);
     setUpdatePosition(true);
   };
-
+  const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
+    setFloatingMoveState(e.moving);
+  };
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:areaChanged', handleAreaChanged);
-    eventBus.on('selection:moved', handleMoved);
+    eventBus.on('selection:maskChanged', handleAreaChanged);
+    eventBus.on('selection:offsetChanged', handleMoved);
     eventBus.on('selection:stateChanged', handleStateChanged);
+    eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
 
     const observer = new ResizeObserver((entries) => {
       entries.forEach((el) => {
@@ -76,14 +88,13 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }
 
     return () => {
+      stopRenderLoop();
+      eventBus.off('selection:maskChanged', handleAreaChanged);
+      eventBus.off('selection:offsetChanged', handleMoved);
+      eventBus.off('selection:stateChanged', handleStateChanged);
+      eventBus.off('floatingMove:stateChanged', handleMoveStateChanged);
       observer.disconnect();
     };
-  });
-  onCleanup(() => {
-    stopRenderLoop();
-    eventBus.off('selection:areaChanged', handleAreaChanged);
-    eventBus.off('selection:moved', handleMoved);
-    eventBus.off('selection:stateChanged', handleStateChanged);
   });
 
   createEffect(() => {
@@ -101,11 +112,11 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     if (!outlineBound) return;
 
     const containerRect = containerRef.getBoundingClientRect();
-
+    const selectionOffset = getSelectionOffset();
     // 基本位置：選択範囲の右下
     let basePos = {
-      x: outlineBound.right + selectionManager.getMoveOffset().x + 1,
-      y: outlineBound.bottom + selectionManager.getMoveOffset().y + 1,
+      x: outlineBound.right + selectionOffset.x + 1,
+      y: outlineBound.bottom + selectionOffset.y + 1,
     };
 
     setSelectionMenuPos(basePos);
@@ -153,6 +164,14 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         'transform-origin': '0 0',
         transform: `scale(${1 / interactStore.zoom})`,
       }}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }}
+      onPointerMove={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }}
     >
       <div
         ref={(ref) => (containerRef = ref)}
@@ -177,7 +196,15 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         opacity: 0.8,
         'pointer-events': 'all',
         'z-index': Consts.zIndex.canvasOverlay,
-        visibility: outerPosition() ? 'visible' : 'collapse',
+        visibility: outerPosition() !== undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
+      }}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }}
+      onPointerMove={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
       }}
     >
       <div class={container}>{MenuContent()}</div>
@@ -188,13 +215,14 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
 const MenuContent = () => {
   return (
     <>
-      <Show when={selectionState() === 'move_layer' || selectionState() === 'move_selection'}>
+      <Show when={floatingMoveState()}>
         <Item
           src='/icons/selection/commit_10.png'
           onClick={() => {
             commitMove();
           }}
           label='commit.'
+          title='commit.'
         />
         <Divider />
         <Item
@@ -203,15 +231,25 @@ const MenuContent = () => {
             cancelMove();
           }}
           label='cancel.'
+          title='cancel.'
         />
       </Show>
-      <Show when={selectionState() === 'selected'}>
+      <Show when={!floatingMoveState()}>
         <Item
           src='/icons/selection/cancel_10.png'
           onClick={() => {
             cancelSelection();
           }}
           label='cancel.'
+          title='cancel.'
+        />
+        <Divider />
+        <Item
+          src='/icons/selection/invert_10.png'
+          onClick={() => {
+            invertSelectionArea();
+          }}
+          title='invert.'
         />
         <Divider />
         <Item
@@ -219,6 +257,7 @@ const MenuContent = () => {
           onClick={() => {
             deletePixelInSelection();
           }}
+          title='delete.'
         />
       </Show>
     </>

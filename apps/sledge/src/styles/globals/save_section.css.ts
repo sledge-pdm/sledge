@@ -10,6 +10,7 @@ export const saveButtonRoot = style([
     border: `1px solid ${vars.color.accent}`,
     overflow: 'hidden',
     margin: 0,
+    marginLeft: '4px',
   },
 ]);
 
@@ -34,6 +35,7 @@ export const saveButtonSide = style([
     justifyContent: 'center',
     padding: '4px 4px',
     borderLeft: `1px solid ${vars.color.border}`,
+    cursor: 'pointer',
     ':hover': {
       backgroundColor: vars.color.button.hover,
     },

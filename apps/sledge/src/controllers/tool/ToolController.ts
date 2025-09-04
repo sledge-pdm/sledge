@@ -1,9 +1,10 @@
+import { activeLayer } from '~/controllers/layer/LayerListController';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { PresetConfig, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
 export const getToolCategory = (id: ToolCategoryId): ToolCategory => toolStore.tools[id];
 
-export const getCurrentToolCategory = (): ToolCategory => getToolCategory(toolStore.activeToolCategory);
+export const getActiveToolCategory = (): ToolCategory => getToolCategory(toolStore.activeToolCategory);
 
 export function getPresetOf(id: ToolCategoryId, presetName: string): PresetConfig | undefined;
 export function getPresetOf(category: ToolCategory, presetName: string): PresetConfig | undefined;
@@ -24,13 +25,13 @@ export function getSelectedPreset(category: ToolCategory): PresetConfig | undefi
 }
 
 export function getCurrentToolPreset(): PresetConfig | undefined {
-  return getSelectedPreset(getCurrentToolCategory());
+  return getSelectedPreset(getActiveToolCategory());
 }
 
-export function getActiveToolCategory(): ToolCategoryId {
+export function getActiveToolCategoryId(): ToolCategoryId {
   return toolStore.activeToolCategory;
 }
-export function getPrevActiveToolCategory(): ToolCategoryId | undefined {
+export function getPrevActiveToolCategoryId(): ToolCategoryId | undefined {
   return toolStore.prevActiveCategory;
 }
 
@@ -56,3 +57,11 @@ export const getCurrentPresetConfig = (toolId: ToolCategoryId): Record<string, a
   const selectedPreset = tool.presets.selected;
   return tool.presets.options[selectedPreset];
 };
+
+export function isToolAllowedInCurrentLayer(category?: ToolCategory): boolean {
+  // return true when it's accepted in tool behavior
+  // if (category.behavior.acceptInactiveLayer) return true;
+
+  // otherwise it's up to whether the layer is enabled
+  return activeLayer().enabled;
+}

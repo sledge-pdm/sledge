@@ -1,11 +1,10 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createSignal, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
 import { vars } from '@sledge/theme';
 import { OnCanvasSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -41,14 +40,6 @@ const CanvasStack: Component = () => {
       const { width, height } = newSize;
       updateGridSize(width, height);
     });
-  });
-
-  createEffect(() => {
-    const active = activeLayer();
-    if (active) {
-      const agent = getAgentOf(active.id);
-      if (!agent) return;
-    }
   });
 
   return (

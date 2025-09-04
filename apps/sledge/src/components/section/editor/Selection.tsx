@@ -4,7 +4,8 @@ import { Dropdown } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
 import { sectionContent } from '~/styles/section/section_item.css';
 import { eventBus, Events } from '~/utils/EventBus';
@@ -12,16 +13,16 @@ import { eventBus, Events } from '~/utils/EventBus';
 const Selection: Component = () => {
   const [selectionStatus, setSelectionStatus] = createStore({
     state: selectionManager.getState(),
-    status: selectionManager.isSelected() ? 'Selected' : 'Not Selected',
+    status: isSelectionAvailable() ? 'Selected' : 'Not Selected',
     size: { width: selectionManager.getSelectionMask().getWidth(), height: selectionManager.getSelectionMask().getHeight() },
-    offset: { x: selectionManager.getMoveOffset().x, y: selectionManager.getMoveOffset().y },
+    offset: { x: selectionManager.getAreaOffset().x, y: selectionManager.getAreaOffset().y },
   });
 
   onMount(() => {
     eventBus.on('selection:stateChanged', (e: Events['selection:stateChanged']) => {
       setSelectionStatus('state', e.newState);
     });
-    eventBus.on('selection:areaChanged', (e: Events['selection:areaChanged']) => {
+    eventBus.on('selection:maskChanged', (e: Events['selection:maskChanged']) => {
       const bbox = selectionManager.getSelectionMask().getBoundBox();
       if (!bbox) return;
       const { top, left, bottom, right } = bbox;
@@ -30,9 +31,9 @@ const Selection: Component = () => {
       setSelectionStatus('size', 'width', width);
       setSelectionStatus('size', 'height', height);
     });
-    eventBus.on('selection:moved', (e: Events['selection:moved']) => {
-      setSelectionStatus('offset', 'x', selectionManager.getMoveOffset().x);
-      setSelectionStatus('offset', 'y', selectionManager.getMoveOffset().y);
+    eventBus.on('selection:offsetChanged', (e: Events['selection:offsetChanged']) => {
+      setSelectionStatus('offset', 'x', selectionManager.getAreaOffset().x);
+      setSelectionStatus('offset', 'y', selectionManager.getAreaOffset().y);
     });
   });
 
@@ -47,12 +48,12 @@ const Selection: Component = () => {
     setToolStore('selectionFillMode', newMode);
   };
 
-  const [isSelected, setIsSelected] = createSignal(selectionManager.isSelected());
+  const [isSelected, setIsSelected] = createSignal(isSelectionAvailable());
 
   onMount(() => {
-    setIsSelected(selectionManager.isSelected());
+    setIsSelected(isSelected());
     eventBus.on('selection:stateChanged', () => {
-      setIsSelected(selectionManager.isSelected());
+      setIsSelected(isSelected());
     });
   });
 
@@ -111,8 +112,8 @@ const Selection: Component = () => {
                 <p style={{ 'margin-bottom': '6px' }}>Fill Mode</p>
                 <Dropdown
                   options={[
-                    { label: 'Global (with islands)', value: 'global' },
                     { label: 'Boundary (strict)', value: 'boundary' },
+                    { label: 'Boundary (diffract)', value: 'global' },
                     { label: 'Area Fill (entire selection)', value: 'area' },
                   ]}
                   value={fillMode()}

@@ -2,13 +2,13 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, For, Show } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
-import ToolPresetManager from '~/components/tool/ToolPresetManager';
+import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManager';
 import { toolStore } from '~/stores/EditorStores';
 import { sectionContent } from '~/styles/section/section_item.css';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolItem from './item/ToolItem';
 
-const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'move'];
+const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'autoSelection', 'move'];
 
 const Tools: Component = () => {
   return (

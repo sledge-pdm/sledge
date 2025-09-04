@@ -1,124 +1,91 @@
-import { showContextMenu } from '@sledge/ui';
+import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import interact from 'interactjs';
-import { Component, onCleanup, onMount } from 'solid-js';
+import { Component, createMemo, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { burndownToCurrentLayer, getEntry, removeEntry, updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
+import ImageEntryInteract from '~/controllers/canvas/image_pool/ImageEntryInteract';
+import {
+  getEntry,
+  hideEntry,
+  removeEntry,
+  selectEntry,
+  showEntry,
+  transferToCurrentLayer,
+} from '~/controllers/canvas/image_pool/ImagePoolController';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { Consts } from '~/models/Consts';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { interactStore } from '~/stores/EditorStores';
+import { imagePoolStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({
-    selected: false,
     visible: props.entry.visible,
+    // transform-based drawing state
+    tx: props.entry.transform.x,
+    ty: props.entry.transform.y,
+    sx: props.entry.transform.scaleX,
+    sy: props.entry.transform.scaleY,
+    baseW: props.entry.base.width,
+    baseH: props.entry.base.height,
   });
 
   let containerRef: HTMLDivElement;
   let imageRef: HTMLImageElement;
   let svgRef: SVGSVGElement;
   let onEntryChangedHandler: ((e: { id: string }) => void) | undefined;
+  let entryInteract: ImageEntryInteract | undefined;
 
   onMount(() => {
     const onEntryChanged = (e: { id: string }) => {
       if (e.id !== props.entry.id) return;
       const latest = getEntry(props.entry.id);
       if (!latest) return;
-      // reflect current store state to DOM
-      imageRef.style.width = latest.width * latest.scale + 'px';
-      imageRef.style.height = latest.height * latest.scale + 'px';
-      svgRef.style.width = latest.width * latest.scale + 'px';
-      svgRef.style.height = latest.height * latest.scale + 'px';
-      containerRef.style.transform = `translate(${latest.x}px, ${latest.y}px)`;
-      setStateStore('visible', latest.visible);
+      // update reactive state only; styles bind to these
+      setStateStore({
+        visible: latest.visible,
+        tx: latest.transform.x,
+        ty: latest.transform.y,
+        sx: latest.transform.scaleX,
+        sy: latest.transform.scaleY,
+        baseW: latest.base.width,
+        baseH: latest.base.height,
+      });
     };
     onEntryChangedHandler = onEntryChanged;
     eventBus.on('imagePool:entryPropChanged', onEntryChanged);
 
-    imageRef.onload = () => {
-      interact(containerRef)
-        .resizable({
-          edges: { top: true, left: true, bottom: true, right: true },
-          allowFrom: '.resize-handle',
-          listeners: {
-            move(event) {
-              if (!stateStore.selected) return;
-              const zoom = interactStore.zoom;
-              const base = getEntry(props.entry.id) ?? props.entry;
-              // use event.scale if provided by interactjs; fallback to ratio of current/previous width
-              const currW = event.rect.width / zoom;
-              const prevW = (event.rect.width - event.deltaRect.width) / zoom;
-              const frameScale = typeof (event as any).scale === 'number' ? (event as any).scale : prevW > 0 ? currW / prevW : 1;
-              const newScale = base.scale * frameScale;
-              const newWidth = base.width * newScale;
-              const newHeight = base.height * newScale;
+    // initial transform-related styling hints
+    containerRef.style.willChange = 'transform';
+    containerRef.style.backfaceVisibility = 'hidden';
 
-              imageRef.style.width = newWidth + 'px';
-              imageRef.style.height = newHeight + 'px';
+    // attach entry-level pointer interactions (logging only for now)
+    entryInteract = new ImageEntryInteract(svgRef, () => getEntry(props.entry.id) ?? props.entry);
+    entryInteract.setInteractListeners();
 
-              console.log(newWidth, newHeight);
-              svgRef.style.width = newWidth + 'px';
-              svgRef.style.height = newHeight + 'px';
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef && !containerRef.contains(e.target as Node)) {
+        if (selected()) {
+          selectEntry(undefined);
+        }
+      } else {
+        selectEntry(props.entry.id);
+      }
+    };
 
-              const nx = base.x + event.deltaRect.left / zoom;
-              const ny = base.y + event.deltaRect.top / zoom;
-              containerRef.style.transform = `translate(${nx}px, ${ny}px)`;
-              // write-through to store so consumers (e.g., burndown) always see latest
-              updateEntryPartial(props.entry.id, { x: nx, y: ny, scale: newScale });
-            },
-            end(event) {
-              if (!stateStore.selected) return;
-              // idempotent final commit
-              const zoom = interactStore.zoom;
-              const base = getEntry(props.entry.id) ?? props.entry;
-              const currW = event.rect.width / zoom;
-              const prevW = (event.rect.width - event.deltaRect.width) / zoom;
-              const frameScale = typeof (event as any).scale === 'number' ? (event as any).scale : prevW > 0 ? currW / prevW : 1;
-              const newScale = base.scale * frameScale;
-              const nx = base.x + event.deltaRect.left / zoom;
-              const ny = base.y + event.deltaRect.top / zoom;
-              updateEntryPartial(props.entry.id, { x: nx, y: ny, scale: newScale });
-            },
-          },
-          preserveAspectRatio: true,
-          modifiers: [
-            // aspect ratio
-            interact.modifiers.aspectRatio({ ratio: imageRef.naturalWidth / imageRef.naturalHeight || imageRef.clientWidth / imageRef.clientHeight }),
-          ],
-        })
-        .draggable({
-          listeners: {
-            move(event) {
-              if (!stateStore.selected) return;
-              const base = getEntry(props.entry.id) ?? props.entry;
-              const nx = base.x + event.dx / interactStore.zoom;
-              const ny = base.y + event.dy / interactStore.zoom;
-              containerRef.style.transform = `translate(${nx}px, ${ny}px)`;
-              updateEntryPartial(props.entry.id, { x: nx, y: ny });
-            },
-            end(event) {
-              if (!stateStore.selected) return;
-              const base = getEntry(props.entry.id) ?? props.entry;
-              updateEntryPartial(props.entry.id, { x: base.x, y: base.y });
-            },
-          },
-        });
+    const canvasArea = document.getElementById('canvas-area');
+    if (canvasArea) canvasArea.addEventListener('click', handleClickOutside);
 
-      imageRef.style.width = props.entry.width * props.entry.scale + 'px';
-      imageRef.style.height = props.entry.height * props.entry.scale + 'px';
-      svgRef.style.width = props.entry.width * props.entry.scale + 'px';
-      svgRef.style.height = props.entry.height * props.entry.scale + 'px';
-      containerRef.style.transform = `translate(${props.entry.x}px, ${props.entry.y}px)`;
+    () => {
+      const canvasArea = document.getElementById('canvas-area');
+      if (canvasArea) canvasArea.removeEventListener('click', handleClickOutside);
+      if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
+      entryInteract?.removeInteractListeners();
     };
   });
 
-  onCleanup(() => {
-    if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
-  });
-
   const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
+    // オーバーレイはスケールしないので、ズームのみ相殺
     const size = () => (props.size ?? 8) / interactStore.zoom;
     return (
       <rect
@@ -131,81 +98,111 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         stroke='black'
         fill='white'
         stroke-width={1 / interactStore.zoom}
+        vector-effect={'non-scaling-stroke'}
         pointer-events='all'
-        shape-rendering='geometricPrecision'
         style={{
+          cursor: `${props['data-pos']}-resize`,
           transform: `translate(-${size() / 2}px, -${size() / 2}px)`,
           position: 'absolute',
+          visibility: selected() ? 'visible' : 'collapse',
         }}
       />
     );
   };
 
+  const selected = createMemo<boolean>(() => imagePoolStore.selectedEntryId === props.entry.id);
+
   return (
     <div
+      class={'image_root'}
       id={props.entry.id}
       ref={(el) => (containerRef = el)}
       style={{
-        display: 'flex',
+        display: stateStore.visible || selected() ? 'flex' : 'none',
         position: 'absolute',
         'pointer-events': 'all',
         'box-sizing': 'border-box',
-        'touch-action': 'none',
         'transform-origin': '0 0',
+        // ルートは移動のみ（スケールは内側に適用）
+        transform: `translate3d(${stateStore.tx}px, ${stateStore.ty}px, 0)`,
         margin: 0,
         padding: 0,
+        cursor: selected() ? 'all-scroll' : undefined,
+        'z-index': Consts.zIndex.imagePoolImage,
       }}
-      tabindex={props.index}
+      tabIndex={props.index}
       onClick={(e) => {
         e.currentTarget.focus();
       }}
-      onBlur={(e) => {
-        setStateStore('selected', false);
-      }}
-      onFocus={(e) => {
-        setStateStore('selected', true);
-      }}
-      // onContextMenu={async (e) => {
-      //   e.preventDefault();
-      //   (await ImagePoolEntryMenu.create(props.entry.id)).show();
-      // }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
+        const showHideItem: MenuListOption = stateStore.visible
+          ? {
+              ...ContextMenuItems.BaseImageHide,
+              onSelect: () => {
+                hideEntry(props.entry.id);
+                selectEntry(undefined);
+              },
+            }
+          : {
+              ...ContextMenuItems.BaseImageShow,
+              onSelect: () => {
+                showEntry(props.entry.id);
+                selectEntry(props.entry.id);
+              },
+            };
         showContextMenu(
-          props.entry.fileName,
+          `${props.entry.fileName}${stateStore.visible ? '' : ' (hidden)'}`,
           [
+            showHideItem,
+            {
+              ...ContextMenuItems.BaseTransfer,
+              onSelect: () => transferToCurrentLayer(props.entry.id, false),
+            },
+            {
+              ...ContextMenuItems.BaseTransferRemove,
+              onSelect: () => transferToCurrentLayer(props.entry.id, true),
+            },
             {
               ...ContextMenuItems.BaseRemove,
+              label: 'Remove from pool',
               onSelect: () => removeEntry(props.entry.id),
-            },
-            {
-              ...ContextMenuItems.BaseBurndown,
-              onSelect: () => burndownToCurrentLayer(props.entry.id, false),
-            },
-            {
-              ...ContextMenuItems.BaseBurndownRemove,
-              onSelect: () => burndownToCurrentLayer(props.entry.id, true),
             },
           ],
           e
         );
       }}
     >
-      <img
-        ref={(el) => (imageRef = el)}
-        src={convertFileSrc(props.entry.originalPath)}
-        width={props.entry.width}
-        height={props.entry.height}
+      {/* スケールは画像側のラッパーに適用 */}
+      <div
         style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
           margin: 0,
           padding: 0,
-          width: `${props.entry.width}px`,
-          height: `${props.entry.height}px`,
-          opacity: stateStore.visible ? 1 : 0.6,
-          'z-index': Consts.zIndex.imagePoolImage,
+          'transform-origin': '0 0',
+          transform: `scale(${stateStore.sx}, ${stateStore.sy})`,
         }}
-      />
+      >
+        <img
+          ref={(el) => (imageRef = el)}
+          src={convertFileSrc(props.entry.originalPath)}
+          width={stateStore.baseW}
+          height={stateStore.baseH}
+          style={{
+            margin: 0,
+            padding: 0,
+            width: `${stateStore.baseW}px`,
+            height: `${stateStore.baseH}px`,
+            'z-index': Consts.zIndex.imagePoolImage,
+            opacity: stateStore.visible ? 1 : selected() ? 0.5 : 0,
+            'pointer-events': 'none',
+            'touch-action': 'none',
+          }}
+        />
+      </div>
 
       <svg
         xmlns='http://www.w3.org/2000/svg'
@@ -216,16 +213,39 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           left: 0,
           margin: 0,
           padding: 0,
-          'pointer-events': 'none',
           'image-rendering': 'pixelated',
           'shape-rendering': 'geometricPrecision',
           overflow: 'visible',
-          visibility: stateStore.selected ? 'visible' : 'collapse',
           'z-index': Consts.zIndex.imagePoolControl,
+          width: `${stateStore.baseW * stateStore.sx}px`,
+          height: `${stateStore.baseH * stateStore.sy}px`,
         }}
       >
+        {/* 内部ドラッグ用の透明サーフェス */}
+        <rect
+          class={'drag-surface'}
+          x={'0'}
+          y={'0'}
+          width={'100%'}
+          height={'100%'}
+          fill={'transparent'}
+          pointer-events={'all'}
+          style={{ cursor: 'move' }}
+        />
         {/* border rect */}
-        <rect class={'border-rect'} width={'100%'} height={'100%'} fill='none' stroke='black' stroke-width={1 / interactStore.zoom} />
+        <rect
+          class={'border-rect'}
+          width={'100%'}
+          height={'100%'}
+          fill='none'
+          stroke='black'
+          stroke-width={1 / interactStore.zoom}
+          vector-effect={'non-scaling-stroke'}
+          style={{
+            visibility: selected() ? 'visible' : 'collapse',
+            'pointer-events': 'none',
+          }}
+        />
         {/* 四隅 */}
         <Handle x={'0'} y={'0'} data-pos='nw' />
         <Handle x={'100%'} y={'0'} data-pos='ne' />

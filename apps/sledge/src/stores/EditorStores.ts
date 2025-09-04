@@ -2,7 +2,6 @@
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
-import { getNormalBottomBarText } from '~/controllers/log/LogController';
 import { PaletteType } from '~/models/color/PaletteType';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 import { RGBAColor } from '~/utils/ColorUtils';
@@ -26,6 +25,8 @@ type ColorStore = {
   swatches: string[];
 };
 type FileStore = {
+  openAs: 'project' | 'image';
+  extension: string;
   location: FileLocation;
 };
 type InteractStore = {
@@ -48,8 +49,10 @@ type InteractStore = {
 type DebugPoint = Vec2 & {
   color: RGBAColor;
 };
+export type BottomBarKind = 'info' | 'warn' | 'error';
 type LogStore = {
   bottomBarText: string;
+  bottomBarKind: BottomBarKind;
   canvasDebugPoints: DebugPoint[]; // デバッグ用の点の配列
 };
 export type SelectionLimitMode = 'none' | 'outside' | 'inside';
@@ -70,7 +73,7 @@ const defaultAppearanceStore: AppearanceStore = {
   },
   rightSide: {
     shown: false,
-    tabs: ['project', 'export', 'perilous'],
+    tabs: ['project', 'export', 'history', 'danger'],
     selectedIndex: 0,
   },
 };
@@ -81,6 +84,8 @@ const defaultColorStore: ColorStore = {
   swatches: ['#000000', '#FFFFFF', '#ffff00', '#00ffff', '#00ff00', '#ff00ff', '#ff0000', '#0000ff', '#000080', '#400080'],
 };
 const defaultFileStore: FileStore = {
+  openAs: 'project',
+  extension: 'sledge',
   location: {
     name: undefined,
     path: undefined,
@@ -109,7 +114,8 @@ const defaultInteractStore: InteractStore = {
   isDragging: false,
 };
 const defaultLogStore: LogStore = {
-  bottomBarText: getNormalBottomBarText(true),
+  bottomBarText: 'rotate: shift+wheel / drag: ctrl+drag',
+  bottomBarKind: 'info',
   canvasDebugPoints: [],
 };
 const defaultToolStore: ToolStore = {
@@ -117,7 +123,7 @@ const defaultToolStore: ToolStore = {
   activeToolCategory: 'pen',
   prevActiveCategory: undefined,
   selectionLimitMode: 'inside',
-  selectionFillMode: 'global', // デフォルトは現在の動作（全体参照）
+  selectionFillMode: 'area', // デフォルトは現在の動作（全体参照）
 };
 
 export const initEditorStore = () => {

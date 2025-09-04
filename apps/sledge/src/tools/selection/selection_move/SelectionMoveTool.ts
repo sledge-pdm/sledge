@@ -1,9 +1,11 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class SelectionMoveTool implements ToolBehavior {
+  acceptStartOnOutCanvas = true;
   onlyOnCanvas = false;
   isInstantTool = true;
 
@@ -11,7 +13,7 @@ export class SelectionMoveTool implements ToolBehavior {
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   onStart(agent: LayerImageAgent, args: ToolArgs) {
-    this.startOffset = selectionManager.getMoveOffset();
+    this.startOffset = selectionManager.getAreaOffset();
     this.startPosition = args.position;
     return {
       shouldUpdate: false,
@@ -22,7 +24,7 @@ export class SelectionMoveTool implements ToolBehavior {
   onMove(agent: LayerImageAgent, args: ToolArgs) {
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
-    selectionManager.moveTo({
+    selectionManager.setOffset({
       x: this.startOffset.x + dx,
       y: this.startOffset.y + dy,
     });
@@ -33,9 +35,14 @@ export class SelectionMoveTool implements ToolBehavior {
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    // キャンバス外へ行くなどで選択範囲がなくなった場合は選択解除
     selectionManager.commitOffset();
 
-    console.log('committed. offset:', selectionManager.getMoveOffset());
+    if (!isSelectionAvailable()) {
+      selectionManager.clear();
+    }
+
+    console.log('committed. offset:', selectionManager.getAreaOffset());
 
     return {
       shouldUpdate: false,

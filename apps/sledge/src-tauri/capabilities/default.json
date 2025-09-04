@@ -49,7 +49,9 @@
     "core:window:allow-toggle-maximize",
     "core:window:allow-start-dragging",
     "core:window:allow-set-title",
+    "core:webview:allow-set-webview-zoom",
     "os:default",
-    "process:default"
+    "process:default",
+    "updater:default"
   ]
 }

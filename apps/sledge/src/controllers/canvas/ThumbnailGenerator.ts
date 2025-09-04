@@ -1,8 +1,9 @@
 import { Size2D } from '@sledge/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { Consts } from '~/models/Consts';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 
 export function calcThumbnailSize(origW: number, origH: number): Size2D {
   return calcFitSize(origW, origH, Consts.projectThumbnailSize, Consts.projectThumbnailSize);
@@ -33,76 +34,107 @@ export class ThumbnailGenerator {
   }
 
   generateLayerThumbnail(agent: LayerImageAgent, width: number, height: number): ImageData {
-    const w = agent.getWidth();
-    const h = agent.getHeight();
+    try {
+      const w = agent.getWidth();
+      const h = agent.getHeight();
 
-    // Only resize canvases if dimensions actually changed
-    if (this.lastOffWidth !== width || this.lastOffHeight !== height) {
-      this.off.width = width;
-      this.off.height = height;
-      this.lastOffWidth = width;
-      this.lastOffHeight = height;
+      // Only resize canvases if dimensions actually changed
+      if (this.lastOffWidth !== width || this.lastOffHeight !== height) {
+        this.off.width = width;
+        this.off.height = height;
+        this.lastOffWidth = width;
+        this.lastOffHeight = height;
+      }
+
+      if (this.lastTmpWidth !== w || this.lastTmpHeight !== h) {
+        this.tmp.width = w;
+        this.tmp.height = h;
+        this.lastTmpWidth = w;
+        this.lastTmpHeight = h;
+      }
+
+      // Clear contexts efficiently (resizing already clears, so only clear if no resize)
+      if (this.lastOffWidth === width && this.lastOffHeight === height) {
+        this.offCtx.clearRect(0, 0, width, height);
+      }
+
+      const buf =
+        agent.layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving()
+          ? floatingMoveManager.getPreviewBuffer()!
+          : agent.getBuffer();
+      // Keep slice() for now to avoid type issues, but optimize canvas resizing
+      const imgData = new ImageData(buf.slice(), w, h);
+      this.tmpCtx.putImageData(imgData, 0, 0);
+      this.offCtx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
+
+      return this.offCtx.getImageData(0, 0, width, height);
+    } catch (err) {
+      // Suppress thumbnail generation errors; return a transparent fallback ImageData
+      // (avoid escalating as a critical error for thumbnail generation)
+      // eslint-disable-next-line no-console
+      console.warn('ThumbnailGenerator.generateLayerThumbnail suppressed error:', err);
+      try {
+        return new ImageData(width || 1, height || 1);
+      } catch {
+        // In very constrained environments ImageData constructor may fail; create minimal 1x1
+        return new ImageData(1, 1);
+      }
     }
-
-    if (this.lastTmpWidth !== w || this.lastTmpHeight !== h) {
-      this.tmp.width = w;
-      this.tmp.height = h;
-      this.lastTmpWidth = w;
-      this.lastTmpHeight = h;
-    }
-
-    // Clear contexts efficiently (resizing already clears, so only clear if no resize)
-    if (this.lastOffWidth === width && this.lastOffHeight === height) {
-      this.offCtx.clearRect(0, 0, width, height);
-    }
-
-    // Keep slice() for now to avoid type issues, but optimize canvas resizing
-    const imgData = new ImageData(agent.getBuffer().slice(), w, h);
-    this.tmpCtx.putImageData(imgData, 0, 0);
-    this.offCtx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
-
-    return this.offCtx.getImageData(0, 0, width, height);
   }
 
   generateCanvasThumbnail(width: number, height: number): ImageData | undefined {
-    const srcW = canvasStore.canvas.width;
-    const srcH = canvasStore.canvas.height;
-    this.off.width = width;
-    this.off.height = height;
-    this.tmp.width = srcW;
-    this.tmp.height = srcH;
+    try {
+      const srcW = canvasStore.canvas.width;
+      const srcH = canvasStore.canvas.height;
+      this.off.width = width;
+      this.off.height = height;
+      this.tmp.width = srcW;
+      this.tmp.height = srcH;
 
-    const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
-    const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
+      const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
+      const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
 
-    const buffer = webGLRenderer!.readPixelsFlipped();
-    const imgData = new ImageData(buffer.slice(), srcW, srcH);
-    tctx.putImageData(imgData, 0, 0);
+      const buffer = webGLRenderer!.readPixelsFlipped();
+      const imgData = new ImageData(buffer.slice(), srcW, srcH);
+      tctx.putImageData(imgData, 0, 0);
 
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
 
-    return ctx.getImageData(0, 0, width, height);
+      return ctx.getImageData(0, 0, width, height);
+    } catch (err) {
+      // Suppress errors during canvas thumbnail generation and return undefined
+      // eslint-disable-next-line no-console
+      console.warn('ThumbnailGenerator.generateCanvasThumbnail suppressed error:', err);
+      return undefined;
+    }
   }
 
   generateCanvasThumbnailBlob(width: number, height: number): Promise<Blob> {
-    const srcW = canvasStore.canvas.width;
-    const srcH = canvasStore.canvas.height;
-    this.off.width = width;
-    this.off.height = height;
-    this.tmp.width = srcW;
-    this.tmp.height = srcH;
+    try {
+      const srcW = canvasStore.canvas.width;
+      const srcH = canvasStore.canvas.height;
+      this.off.width = width;
+      this.off.height = height;
+      this.tmp.width = srcW;
+      this.tmp.height = srcH;
 
-    const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
-    const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
+      const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
+      const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
 
-    const buffer = webGLRenderer!.readPixelsFlipped();
-    const imgData = new ImageData(buffer.slice(), srcW, srcH);
-    tctx.putImageData(imgData, 0, 0);
+      const buffer = webGLRenderer!.readPixelsFlipped();
+      const imgData = new ImageData(buffer.slice(), srcW, srcH);
+      tctx.putImageData(imgData, 0, 0);
 
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
 
-    return this.off.convertToBlob();
+      return this.off.convertToBlob();
+    } catch (err) {
+      // Suppress blob generation errors and return an empty blob as fallback
+      // eslint-disable-next-line no-console
+      console.warn('ThumbnailGenerator.generateCanvasThumbnailBlob suppressed error:', err);
+      return Promise.resolve(new Blob());
+    }
   }
 }

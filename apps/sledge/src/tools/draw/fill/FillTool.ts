@@ -1,7 +1,9 @@
 import { Vec2 } from '@sledge/core';
 import { filter_by_selection_mask } from '@sledge/wasm';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { getSelectionFillMode, getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
+import { getPresetOf } from '~/controllers/tool/ToolController';
 import { WasmFloodFill } from '~/tools/draw/fill/WasmFloodFill';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { RGBAColor } from '~/utils/ColorUtils';
@@ -11,6 +13,7 @@ export interface FillProps {
   agent: LayerImageAgent;
   color: RGBAColor;
   position: Vec2;
+  threshold?: number;
 }
 export interface Fill {
   fill: (props: FillProps) => void;
@@ -19,27 +22,29 @@ export interface Fill {
 export class FillTool implements ToolBehavior {
   onlyOnCanvas = true;
 
-  onStart(agent: LayerImageAgent, { position, color }: ToolArgs) {
+  onStart(agent: LayerImageAgent, { position, color, presetName }: ToolArgs) {
     const startTime = Date.now();
 
     // 描画制限チェック
-    if (!selectionManager.isDrawingAllowed(position, true)) {
+    if (!isDrawingAllowed(position, true)) {
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,
       };
     }
+    const preset = presetName ? (getPresetOf('fill', presetName) as any) : undefined;
+    const threshold = preset?.threshold ?? 0;
 
-    const limitMode = selectionManager.getSelectionLimitMode();
+    const limitMode = getSelectionLimitMode();
 
-    if (limitMode === 'none' || !selectionManager.isSelected()) {
+    if (limitMode === 'none' || !isSelectionAvailable()) {
       // 制限なしの場合はWASM FloodFill
       const fill = new WasmFloodFill();
-      fill.fill({ agent, color, position });
+      fill.fill({ agent, color, position, threshold });
       agent.getTileManager().setAllDirty();
     } else {
       // 選択範囲制限がある場合
-      this.fillWithSelectionConstraint(agent, color, position);
+      this.fillWithSelectionConstraint(agent, color, position, threshold);
     }
 
     const endTime = Date.now();
@@ -51,22 +56,22 @@ export class FillTool implements ToolBehavior {
     };
   }
 
-  private fillWithSelectionConstraint(agent: LayerImageAgent, color: RGBAColor, position: Vec2) {
+  private fillWithSelectionConstraint(agent: LayerImageAgent, color: RGBAColor, position: Vec2, threshold?: number) {
     const selectionMask = selectionManager.getSelectionMask();
-    const limitMode = selectionManager.getSelectionLimitMode();
-    const fillMode = selectionManager.getSelectionFillMode();
+    const limitMode = getSelectionLimitMode();
+    const fillMode = getSelectionFillMode();
 
     // 選択範囲がない、または制限モードがnoneの場合は通常のフラッドフィル
     if (!selectionMask || limitMode === 'none') {
       const fill = new WasmFloodFill();
-      fill.fill({ agent, color, position });
+      fill.fill({ agent, color, position, threshold });
       return;
     }
 
     if (fillMode === 'global') {
-      this.fillWithGlobalReference(agent, color, position, selectionMask.getMask(), limitMode);
+      this.fillWithGlobalReference(agent, color, position, selectionMask.getMask(), limitMode, threshold);
     } else if (fillMode === 'boundary') {
-      this.fillWithBoundaryConstraint(agent, color, position, selectionMask.getMask(), limitMode);
+      this.fillWithBoundaryConstraint(agent, color, position, selectionMask.getMask(), limitMode, threshold);
     } else if (fillMode === 'area') {
       this.fillWithAreaMode(agent, color, position, selectionMask.getMask(), limitMode);
     }
@@ -77,7 +82,8 @@ export class FillTool implements ToolBehavior {
     color: RGBAColor,
     position: Vec2,
     selectionMask: Uint8Array,
-    limitMode: 'inside' | 'outside'
+    limitMode: 'inside' | 'outside',
+    threshold?: number
   ): void {
     const bufferManager = agent.getPixelBufferManager();
     const sourceBuffer = bufferManager.buffer.slice();
@@ -97,7 +103,7 @@ export class FillTool implements ToolBehavior {
     }
 
     const fill = new WasmFloodFill();
-    fill.fill({ agent, color, position });
+    fill.fill({ agent, color, position, threshold });
 
     const currentBuffer = bufferManager.buffer;
 
@@ -139,11 +145,7 @@ export class FillTool implements ToolBehavior {
 
     // バッファ全体の差分を履歴に記録
     const dm = agent.getDiffManager();
-    dm.add({
-      kind: 'whole',
-      before: sourceBuffer,
-      after: finalBuffer.slice(),
-    });
+    dm.setWhole(sourceBuffer, finalBuffer.slice());
 
     // 最終結果を設定
     // new Uint8Array(currentBuffer).set(finalBuffer); 前の
@@ -159,7 +161,8 @@ export class FillTool implements ToolBehavior {
     color: RGBAColor,
     position: Vec2,
     selectionMask: Uint8Array,
-    limitMode: 'inside' | 'outside'
+    limitMode: 'inside' | 'outside',
+    threshold?: number
   ): void {
     const bufferManager = agent.getPixelBufferManager();
     const width = agent.getWidth();
@@ -184,6 +187,7 @@ export class FillTool implements ToolBehavior {
       position,
       selectionMask,
       limitMode,
+      threshold,
     });
 
     // 境界制限フラッドフィル結果を記録
@@ -233,11 +237,7 @@ export class FillTool implements ToolBehavior {
 
     // バッファ全体の差分を履歴に記録
     const dm = agent.getDiffManager();
-    dm.add({
-      kind: 'whole',
-      before: sourceBuffer,
-      after: currentBuffer.slice(),
-    });
+    dm.setWhole(sourceBuffer, currentBuffer.slice());
 
     // 結果を記録
     addDebugImage(currentBuffer.slice(), width, height, '3. Area Fill Result', sessionId);

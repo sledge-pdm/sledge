@@ -5,23 +5,23 @@ import { createTheme, createThemeContract, fontFace, globalStyle, style } from '
  * 1. Font faces –変更なし
  * ---------------------------------------------------------------------------
  */
-export const ZFB03 = fontFace({ src: 'url("/fonts/04B/04B_03__.ttf")' });
-export const ZFB03B = fontFace({ src: 'url("/fonts/04B/04B_03B_.ttf")' });
-export const ZFB08 = fontFace({ src: 'url("/fonts/04B/04B_08__.ttf")' });
-export const ZFB09 = fontFace({ src: 'url("/fonts/04B/04B_09__.ttf")' });
-export const ZFB11 = fontFace({ src: 'url("/fonts/04B/04B_11__.ttf")' });
-export const ZFB19 = fontFace({ src: 'url("/fonts/04B/04B_19__.ttf")' });
-export const ZFB20 = fontFace({ src: 'url("/fonts/04B/04B_20__.ttf")' });
-export const ZFB21 = fontFace({ src: 'url("/fonts/04B/04B_21__.ttf")' });
-export const ZFB24 = fontFace({ src: 'url("/fonts/04B/04B_24__.ttf")' });
-export const ZFB25 = fontFace({ src: 'url("/fonts/04B/04B_25__.ttf")' });
-export const ZFB30 = fontFace({ src: 'url("/fonts/04B/04B_30__.ttf")' });
-export const ZFB31 = fontFace({ src: 'url("/fonts/04B/04B_31__.ttf")' });
-export const Terminus = fontFace({ src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")' });
-export const k8x12 = fontFace({ src: 'url("/fonts/k8x12/k8x12.ttf")' });
-export const k8x12L = fontFace({ src: 'url("/fonts/k8x12/k8x12L.ttf")' });
-export const k8x12S = fontFace({ src: 'url("/fonts/k8x12/k8x12S.ttf")' });
-export const k12x8 = fontFace({ src: 'url("/fonts/k12x8/k12x8.ttf")' });
+export const ZFB03 = fontFace({ src: 'url("/fonts/04B/04B_03__.ttf")', fontDisplay: 'swap' });
+export const ZFB03B = fontFace({ src: 'url("/fonts/04B/04B_03B_.ttf")', fontDisplay: 'swap' });
+export const ZFB08 = fontFace({ src: 'url("/fonts/04B/04B_08__.ttf")', fontDisplay: 'swap' });
+export const ZFB09 = fontFace({ src: 'url("/fonts/04B/04B_09__.ttf")', fontDisplay: 'swap' });
+export const ZFB11 = fontFace({ src: 'url("/fonts/04B/04B_11__.ttf")', fontDisplay: 'swap' });
+export const ZFB19 = fontFace({ src: 'url("/fonts/04B/04B_19__.ttf")', fontDisplay: 'swap' });
+export const ZFB20 = fontFace({ src: 'url("/fonts/04B/04B_20__.ttf")', fontDisplay: 'swap' });
+export const ZFB21 = fontFace({ src: 'url("/fonts/04B/04B_21__.ttf")', fontDisplay: 'swap' });
+export const ZFB24 = fontFace({ src: 'url("/fonts/04B/04B_24__.ttf")', fontDisplay: 'swap' });
+export const ZFB25 = fontFace({ src: 'url("/fonts/04B/04B_25__.ttf")', fontDisplay: 'swap' });
+export const ZFB30 = fontFace({ src: 'url("/fonts/04B/04B_30__.ttf")', fontDisplay: 'swap' });
+export const ZFB31 = fontFace({ src: 'url("/fonts/04B/04B_31__.ttf")', fontDisplay: 'swap' });
+export const Terminus = fontFace({ src: 'url("/fonts/terminus/TerminusTTF-4.49.3.ttf")', fontDisplay: 'swap' });
+export const k8x12 = fontFace({ src: 'url("/fonts/k8x12/k8x12.ttf")', sizeAdjust: '75%', fontDisplay: 'swap' });
+export const k8x12L = fontFace({ src: 'url("/fonts/k8x12/k8x12L.ttf")', sizeAdjust: '75%', fontDisplay: 'swap' });
+export const k8x12S = fontFace({ src: 'url("/fonts/k8x12/k8x12S.ttf")', sizeAdjust: '75%', fontDisplay: 'swap' });
+export const k12x8 = fontFace({ src: 'url("/fonts/k12x8/k12x8.ttf")', fontDisplay: 'swap' });
 
 /**
  * ---------------------------------------------------------------------------
@@ -37,6 +37,8 @@ export const vars = createThemeContract({
     canvasArea: null,
     canvas: null,
     onBackground: null,
+    selectionBorder: null,
+    selectionBorderFill: null,
     border: null,
     borderSecondary: null,
     accent: null,
@@ -51,6 +53,7 @@ export const vars = createThemeContract({
       hover: null,
       active: null,
       text: null,
+      textOnAccent: null,
       border: null,
     },
   },
@@ -100,7 +103,7 @@ const shared = {
     xl: '16px',
   },
   font: {
-    body: `${ZFB08}, ${k8x12}`,
+    body: `${ZFB08}, ${k12x8}`,
   },
 } as const;
 
@@ -113,14 +116,16 @@ export const lightTheme = createTheme(vars, {
   themeStyle: 'light',
   color: {
     background: '#ffffff',
-    surface: '#f2f2f2',
+    surface: '#f0f0f0',
     canvasArea: '#fafafa',
     canvas: '#ffffff',
-    onBackground: '#000000D9',
+    onBackground: '#202020',
+    selectionBorder: '#808080',
+    selectionBorderFill: '#80808040',
     border: '#aaaaaa',
     borderSecondary: '#dddddd',
-    accent: '#0000ff',
-    active: '#ff0000',
+    accent: '#0080ff',
+    active: '#ff00ff',
     enabled: '#00dd00',
     muted: 'rgba(0,0,0,0.35)',
     error: '#ff0000',
@@ -130,8 +135,9 @@ export const lightTheme = createTheme(vars, {
       bg: '#ffffff',
       hover: '#e5e5e5',
       active: '#e0e0e0',
-      text: '#000000DE',
-      border: '#000000DE',
+      text: '#202020DE',
+      textOnAccent: '#ffffff',
+      border: '#202020DE',
     },
   },
   ...shared,
@@ -143,6 +149,8 @@ const darkThemeColorBase = {
   canvasArea: '#1A1A1A',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',
+  selectionBorder: '#808080',
+  selectionBorderFill: '#80808040',
   border: '#565656',
   borderSecondary: '#444444',
   accent: '#ffff00',
@@ -157,6 +165,7 @@ const darkThemeColorBase = {
     hover: '#444444',
     active: '#555555',
     text: '#eeeeee',
+    textOnAccent: '#222222',
     border: '#bbbbbb',
   },
 };
@@ -173,23 +182,29 @@ export const darkThemeGYFlip = createTheme(vars, {
     ...darkThemeColorBase,
     accent: darkThemeColorBase.active,
     active: darkThemeColorBase.accent,
+    button: {
+      ...darkThemeColorBase.button,
+      textOnAccent: '#222222',
+    },
   },
   ...shared,
 });
 
 const blackThemeColorBase = {
   background: '#101010',
-  surface: '#202020',
+  surface: '#2A2A2A',
   canvasArea: '#000000',
   canvas: '#eeeeee',
   onBackground: '#eeeeee',
+  selectionBorder: '#808080',
+  selectionBorderFill: '#80808040',
   border: '#505050',
   borderSecondary: '#404040',
   accent: '#ff00ff',
   active: '#ff00ff',
   enabled: '#00ff00',
   muted: 'rgba(255,255,255,0.30)',
-  error: '#ff5f5f',
+  error: '#ff3030',
   warn: '#fffb00',
   overlay: 'rgba(255, 255, 255, 0.320)',
   button: {
@@ -197,6 +212,7 @@ const blackThemeColorBase = {
     hover: '#444444',
     active: '#555555',
     text: '#eeeeee',
+    textOnAccent: '#101010',
     border: '#aaaaaa',
   },
 };
@@ -227,6 +243,7 @@ globalStyle('div', {
 globalStyle('button, p, a, input, label, span', {
   fontFamily: vars.font.body,
   color: vars.color.onBackground,
+  textRendering: 'geometricPrecision',
 });
 
 globalStyle('a:hover', {

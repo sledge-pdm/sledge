@@ -1,0 +1,19 @@
+html {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  image-rendering: pixelated;
+}
+
+body,
+#root {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100dvh;
+}
+
+div {
+  box-sizing: border-box;
+}

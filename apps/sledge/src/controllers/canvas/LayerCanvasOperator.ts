@@ -2,10 +2,9 @@ import { Vec2 } from '@sledge/core';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { setBottomBarText } from '~/controllers/log/LogController';
-import { getPrevActiveToolCategory, setActiveToolCategory } from '~/controllers/tool/ToolController';
+import { DebugLogger, setBottomBarText } from '~/controllers/log/LogController';
+import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/controllers/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
-import { setProjectStore } from '~/stores/ProjectStores';
 import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategory } from '~/tools/Tools';
 import { hexToRGBA } from '~/utils/ColorUtils';
@@ -18,6 +17,9 @@ export enum DrawState {
   end,
   cancel,
 }
+
+const LOG_LABEL = 'LayerCanvasOperator';
+const logger = new DebugLogger(LOG_LABEL, false);
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
@@ -43,6 +45,22 @@ export default class LayerCanvasOperator {
 
     if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
 
+    // This won't suppress all draw actions on inactive layers.
+    // It's due to prevent showing warn in every click out of canvas.
+    if (!isToolAllowedInCurrentLayer(toolCategory) && interactStore.isMouseOnCanvas) {
+      console.warn('Layer is inactive.');
+      setBottomBarText('Layer is inactive.', {
+        kind: 'error',
+        duration: 1000,
+      });
+      return;
+    }
+
+    // This will suppress all draw actions on inactive layers.
+    if (!isToolAllowedInCurrentLayer(toolCategory)) {
+      return;
+    }
+
     const toolArgs: ToolArgs = {
       rawPosition,
       rawLastPosition,
@@ -55,17 +73,16 @@ export default class LayerCanvasOperator {
     const result = this.useTool(agent, state, toolCategory, toolArgs);
 
     if (result) {
-      setProjectStore('isProjectChangedAfterSave', true); // optimistic about changes
       if (result.shouldUpdate) {
         eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });
       }
       if (result.shouldRegisterToHistory) {
-        agent.registerToHistory();
+        agent.registerToHistory({ tool: toolCategory.id });
       }
 
       if (result.shouldReturnToPrevTool) {
-        const prevTool = getPrevActiveToolCategory();
+        const prevTool = getPrevActiveToolCategoryId();
         if (prevTool) setActiveToolCategory(prevTool);
       }
     }
@@ -73,6 +90,7 @@ export default class LayerCanvasOperator {
 
   private useTool(agent: LayerImageAgent, state: DrawState, tool: ToolCategory, toolArgs: ToolArgs) {
     let toolResult: ToolResult | undefined = undefined;
+    const start = new Date().getTime();
     switch (state) {
       case DrawState.start:
         toolResult = tool.behavior.onStart(agent, toolArgs);
@@ -87,8 +105,12 @@ export default class LayerCanvasOperator {
         toolResult = tool.behavior.onCancel?.(agent, toolArgs);
         break;
     }
+    const end = new Date().getTime();
+    logger.debugLog(`${tool.name} ${DrawState[state]} executed in ${end - start} ms: ${toolResult}`);
     if (toolResult?.result) {
-      setBottomBarText(toolResult.result);
+      setBottomBarText(toolResult.result, {
+        duration: 1500,
+      });
     }
     return toolResult;
   }

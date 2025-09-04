@@ -2,8 +2,10 @@ import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
-import { getActiveToolCategory, getCurrentPresetConfig } from '~/controllers/tool/ToolController';
+import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
+import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { getSelectionOffset } from '~/controllers/selection/SelectionOperator';
+import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/controllers/tool/ToolController';
 import { Consts } from '~/models/Consts';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -46,7 +48,7 @@ const CanvasOverlaySVG: Component = (props) => {
 
   const updateOutline = () => {
     const { width, height } = canvasStore.canvas;
-    const offset = selectionManager.getMoveOffset();
+    const offset = getSelectionOffset();
 
     // 合成されたマスクを取得
     const combinedMask = selectionManager.getCombinedMask();
@@ -59,56 +61,67 @@ const CanvasOverlaySVG: Component = (props) => {
     setPathCmdList(pathCmds);
   };
 
-  const onSelectionChangedHandler = (e: Events['selection:areaChanged']) => {
+  const onSelectionChangedHandler = (e: Events['selection:maskChanged']) => {
     setSelectionChanged(true);
   };
-  const onSelectionMovedHandler = (e: Events['selection:moved']) => {
+  const onSelectionMovedHandler = (e: Events['selection:offsetChanged']) => {
     setSelectionChanged(true);
   };
 
   const [selectionState, setSelectionState] = createSignal(selectionManager.getState());
+  const [moveState, setMoveState] = createSignal(floatingMoveManager.getState());
   const onSelectionStateChangedHandler = (e: Events['selection:stateChanged']) => {
     setSelectionChanged(true);
     if (import.meta.env.DEV) console.log('Selection state changed:', e.newState);
     setSelectionState(e.newState);
   };
+  const onFloatingStateChangedHandler = (e: Events['floatingMove:stateChanged']) => {
+    setMoveState(floatingMoveManager.getState());
+  };
+  const onFloatingMovedHandler = (e: Events['floatingMove:moved']) => {
+    setMoveState(floatingMoveManager.getState());
+  };
 
   const tempKeyMove = (e: KeyboardEvent) => {
     switch (e.key) {
       case 'ArrowLeft':
-        selectionManager.move({ x: -1, y: 0 });
+        selectionManager.shiftOffset({ x: -1, y: 0 });
         break;
       case 'ArrowRight':
-        selectionManager.move({ x: 1, y: 0 });
+        selectionManager.shiftOffset({ x: 1, y: 0 });
         break;
       case 'ArrowUp':
-        selectionManager.move({ x: 0, y: -1 });
+        selectionManager.shiftOffset({ x: 0, y: -1 });
         break;
       case 'ArrowDown':
-        selectionManager.move({ x: 0, y: 1 });
+        selectionManager.shiftOffset({ x: 0, y: 1 });
         break;
     }
   };
 
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:areaChanged', onSelectionChangedHandler);
-    eventBus.on('selection:moved', onSelectionMovedHandler);
+    eventBus.on('selection:maskChanged', onSelectionChangedHandler);
+    eventBus.on('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.on('selection:stateChanged', onSelectionStateChangedHandler);
+    eventBus.on('floatingMove:moved', onFloatingMovedHandler);
+    eventBus.on('floatingMove:stateChanged', onFloatingStateChangedHandler);
     window.addEventListener('keydown', tempKeyMove);
     setSelectionChanged(true);
   });
   onCleanup(() => {
-    eventBus.off('selection:areaChanged', onSelectionChangedHandler);
-    eventBus.off('selection:moved', onSelectionMovedHandler);
+    eventBus.off('selection:maskChanged', onSelectionChangedHandler);
+    eventBus.off('selection:offsetChanged', onSelectionMovedHandler);
     eventBus.off('selection:stateChanged', onSelectionStateChangedHandler);
+    eventBus.off('floatingMove:moved', onFloatingMovedHandler);
+    eventBus.off('floatingMove:stateChanged', onFloatingStateChangedHandler);
     window.removeEventListener('keydown', tempKeyMove);
     stopRenderLoop();
   });
 
   // 1) ローカルパス生成（size/shape 依存）
   createEffect(() => {
-    const active = getActiveToolCategory();
+    const active = getActiveToolCategoryId();
     if (active !== TOOL_CATEGORIES.PEN && active !== TOOL_CATEGORIES.ERASER) {
       cachedLocalPath = undefined;
       cachedKey = undefined;
@@ -128,9 +141,9 @@ const CanvasOverlaySVG: Component = (props) => {
 
   // 2) マウス移動に応じた平行移動だけ適用
   createEffect(() => {
-    const active = getActiveToolCategory();
+    const active = getActiveToolCategoryId();
     const mouse = interactStore.lastMouseOnCanvas;
-    if ((active === TOOL_CATEGORIES.PEN || active === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath) {
+    if ((active === TOOL_CATEGORIES.PEN || active === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
       const preset = getCurrentPresetConfig(active) as any;
       const size: number = preset?.size ?? 1;
       const shape: 'circle' | 'square' = preset?.shape ?? 'square';
@@ -165,6 +178,44 @@ const CanvasOverlaySVG: Component = (props) => {
           'z-index': Consts.zIndex.canvasOverlay,
         }}
       >
+        <defs>
+          <pattern id='tex45borderPattern' x='0' y='0' width='8' height='8' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+            <image href='/icons/misc/tex_45border.png' x='0' y='0' width='8' height='8' style={{ 'image-rendering': 'pixelated' }} />
+          </pattern>
+          <pattern id='tex45borderPattern-svg' width='8' height='8' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+            <svg width='8' height='8' viewBox='0 0 8 8'>
+              <path
+                d='M 0 8 L 1 8 L 1 6 L 3 6 L 3 4 L 5 4 L 5 2 L 7 2 L 7 0 L 8 0 L 8 1 L 6 1 L 6 3 L 4 3 L 4 5 L 2 5 L 2 7 L 0 7 L 0 8 Z M 4 8 L 5 8 L 5 6 L 7 6 L 7 4 L 8 4 L 8 5 L 6 5 L 6 7 L 4 7 L 4 8 Z M 1 2 L 3 2 L 3 0 L 4 0 L 4 1 L 2 1 L 2 3 L 0 3 L 0 4 L 1 4 L 1 2 Z'
+                fill={vars.color.selectionBorderFill}
+              />
+            </svg>
+          </pattern>
+
+          <pattern id='tex45borderPattern8x2' x='0' y='0' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+            <image href='/icons/misc/tex_45border.png' x='0' y='0' width='16' height='16' style={{ 'image-rendering': 'pixelated' }} />
+          </pattern>
+          <pattern id='tex45borderPattern8x2-svg' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+            <svg width='16' height='16' viewBox='0 0 8 8'>
+              <path
+                d='M 0 8 L 1 8 L 1 6 L 3 6 L 3 4 L 5 4 L 5 2 L 7 2 L 7 0 L 8 0 L 8 1 L 6 1 L 6 3 L 4 3 L 4 5 L 2 5 L 2 7 L 0 7 L 0 8 Z M 4 8 L 5 8 L 5 6 L 7 6 L 7 4 L 8 4 L 8 5 L 6 5 L 6 7 L 4 7 L 4 8 Z M 1 2 L 3 2 L 3 0 L 4 0 L 4 1 L 2 1 L 2 3 L 0 3 L 0 4 L 1 4 L 1 2 Z'
+                fill={vars.color.selectionBorderFill}
+              />
+            </svg>
+          </pattern>
+
+          <pattern id='tex45borderPattern16' x='0' y='0' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+            <image href='/icons/misc/tex_45border_16.png' x='0' y='0' width='16' height='16' style={{ 'image-rendering': 'pixelated' }} />
+          </pattern>
+          <pattern id='tex45borderPattern16-svg' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+            <svg width='16' height='16' viewBox='0 0 16 16'>
+              <path
+                d='M 5 10 L 7 10 L 7 8 L 9 8 L 9 6 L 11 6 L 11 4 L 13 4 L 13 2 L 15 2 L 15 0 L 16 0 L 16 1 L 14 1 L 14 3 L 12 3 L 12 5 L 10 5 L 10 7 L 8 7 L 8 9 L 6 9 L 6 11 L 4 11 L 4 13 L 2 13 L 2 15 L 0 15 L 0 16 L 1 16 L 1 14 L 3 14 L 3 12 L 5 12 L 5 10 Z M 13 10 L 15 10 L 15 8 L 16 8 L 16 9 L 14 9 L 14 11 L 12 11 L 12 13 L 10 13 L 10 15 L 8 15 L 8 16 L 9 16 L 9 14 L 11 14 L 11 12 L 13 12 L 13 10 Z M 0 7 L 2 7 L 2 5 L 4 5 L 4 3 L 6 3 L 6 1 L 8 1 L 8 0 L 7 0 L 7 2 L 5 2 L 5 4 L 3 4 L 3 6 L 1 6 L 1 8 L 0 8 L 0 7 Z'
+                fill={vars.color.selectionBorderFill}
+              />
+            </svg>
+          </pattern>
+        </defs>
+
         {/* border rect */}
         <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={0.2} pointer-events='none' />
 
@@ -191,8 +242,10 @@ const CanvasOverlaySVG: Component = (props) => {
         <path
           id='selection-outline'
           d={pathCmdList().toString(interactStore.zoom)}
-          fill='none'
-          stroke={selectionState() === 'move_layer' ? '#FF0000' : vars.color.border}
+          fill='url(#tex45borderPattern8x2-svg)'
+          fill-rule='evenodd'
+          clip-rule='evenodd'
+          stroke={moveState() === 'layer' ? '#FF0000' : vars.color.selectionBorder}
           stroke-width='1'
           stroke-dasharray={`${borderDash} ${borderDash}`}
           pointer-events='none'

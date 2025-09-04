@@ -6,6 +6,8 @@ pub mod effects;
 pub mod webgl;
 // 選択範囲関連
 pub mod selection;
+// バッファ操作
+pub mod buffer;
 // ユーティリティ
 pub mod utils;
 // FloodFill関連
@@ -21,9 +23,4 @@ extern "C" {
 #[macro_export]
 macro_rules! console_log {
     ($($t:tt)*) => (crate::log(&format_args!($($t)*).to_string()))
-}
-
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(&format!("Hello, {}!", name));
 }

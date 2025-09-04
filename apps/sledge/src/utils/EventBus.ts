@@ -1,21 +1,23 @@
-import { Size2D, Vec2 } from '@sledge/core';
+import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import mitt from 'mitt';
-import { SelectionState } from '~/controllers/selection/SelectionManager';
+import { SelectionState } from '~/controllers/selection/SelectionAreaManager';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 
 export type Events = {
-  'project:saved': { path: string };
+  'project:saved': { location: FileLocation };
   'project:saveFailed': { error: any };
   'project:saveCancelled': {};
 
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
 
-  'layerHistory:changed': {};
-
-  'selection:areaChanged': { commit: boolean };
-  'selection:moved': { newOffset: Vec2 };
+  'selection:maskChanged': { commit: boolean };
+  'selection:offsetChanged': { newOffset: Vec2 };
   'selection:stateChanged': { newState: SelectionState };
+
+  'floatingMove:stateChanged': { moving: boolean };
+  'floatingMove:moved': {};
+  'floatingMove:committed': {};
 
   'imagePool:entriesChanged': { newEntries: ImagePoolEntry[] };
   'imagePool:entryPropChanged': { id: string };

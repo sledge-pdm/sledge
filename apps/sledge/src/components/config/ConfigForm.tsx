@@ -5,12 +5,13 @@ import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { loadGlobalSettings } from '~/io/config/load';
 import { resetToDefaultConfig } from '~/io/config/reset';
 import { saveGlobalSettings } from '~/io/config/save';
 import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
 import { Sections } from '~/models/config/Sections';
 import { Consts } from '~/models/Consts';
-import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
+import { globalConfig, KeyConfigStore, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
 import {
   configFormFieldControlLabel,
   configFormFieldControlWrapper,
@@ -28,7 +29,8 @@ import {
   configFormSectionLabel,
   configFormSections,
 } from '~/styles/components/config/config_form.css';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
+import { listenEvent } from '~/utils/TauriUtils';
 import KeyConfigSettings from './KeyConfigSettings';
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
@@ -105,8 +107,6 @@ const ConfigForm: Component<Props> = (props) => {
   const [isSaved, setIsSaved] = createSignal(false);
   const [isDirty, setIsDirty] = createSignal(false);
 
-  let originalConfig: GlobalConfig | undefined;
-
   const manualSave = async () => {
     await saveGlobalSettings(true);
     setIsSaved(true);
@@ -128,19 +128,64 @@ const ConfigForm: Component<Props> = (props) => {
     }
   };
 
-  const onFieldChange = (meta: FieldMeta, v: any) => {
-    if (JSON.stringify(originalConfig) !== JSON.stringify(globalConfig)) {
+  const onFieldChange = (meta: FieldMeta, v: any) => checkDirty();
+  const onKeyConfigChange = () => checkDirty();
+
+  const checkDirty = () => {
+    console.log(
+      'original globalConfig:',
+      JSON.stringify({
+        ...originalConfig,
+        misc: undefined,
+      })
+    );
+    console.log(
+      'globalConfig:',
+      JSON.stringify({
+        ...globalConfig,
+        misc: undefined,
+      })
+    );
+    console.log(
+      JSON.stringify({
+        ...originalConfig,
+        misc: undefined,
+      }) !==
+        JSON.stringify({
+          ...globalConfig,
+          misc: undefined,
+        })
+    );
+    console.log('original keyConfigStore:', originalKeyConfig);
+    console.log('keyConfigStore:', keyConfigStore);
+    console.log(JSON.stringify(originalKeyConfig) !== JSON.stringify(keyConfigStore));
+    if (
+      JSON.stringify({
+        ...originalConfig,
+        misc: undefined,
+      }) !==
+        JSON.stringify({
+          ...globalConfig,
+          misc: undefined,
+        }) ||
+      JSON.stringify(originalKeyConfig) !== JSON.stringify(keyConfigStore)
+    ) {
       setIsDirty(true);
+      console.log('dirty');
     } else {
       setIsDirty(false);
+      console.log('clean');
     }
   };
 
   const [grouped, setGrouped] = createSignal<Map<Sections, FieldMeta[]>>(new Map());
 
+  let originalConfig: GlobalConfig | undefined;
+  let originalKeyConfig: KeyConfigStore | undefined;
   onMount(async () => {
+    await loadGlobalSettings();
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
-
+    originalKeyConfig = JSON.parse(JSON.stringify(keyConfigStore));
     const grouped = settingsMeta.reduce((map, field) => {
       const arr = map.get(field.section) ?? [];
       arr.push(field);
@@ -148,6 +193,13 @@ const ConfigForm: Component<Props> = (props) => {
       return map;
     }, new Map<Sections, FieldMeta[]>());
     setGrouped(grouped);
+  });
+
+  listenEvent('onSettingsSaved', async () => {
+    await loadGlobalSettings();
+    originalConfig = JSON.parse(JSON.stringify(globalConfig));
+    originalKeyConfig = JSON.parse(JSON.stringify(keyConfigStore));
+    checkDirty();
   });
 
   return (
@@ -169,7 +221,7 @@ const ConfigForm: Component<Props> = (props) => {
           <Show when={currentSection() !== undefined}>
             <p class={configFormFieldHeader}>{currentSection().toUpperCase()}.</p>
             <Show when={currentSection() === Sections.KeyConfig}>
-              <KeyConfigSettings />
+              <KeyConfigSettings onKeyConfigChange={onKeyConfigChange} />
             </Show>
             <Show when={currentSection() !== Sections.KeyConfig}>
               <For each={grouped().get(currentSection())}>

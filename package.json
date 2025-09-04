@@ -6,7 +6,9 @@
     "build": "pnpm -F sledge build",
     "site:dev": "pnpm -F sledge-website dev",
     "site:build": "pnpm -F sledge-website build",
-    "wasm:build": "cd packages/wasm && pnpm --ignore-workspace i && wasm-pack build --target bundler"
+    "wasm:build": "cd packages/wasm && pnpm --ignore-workspace i && wasm-pack build --target bundler",
+    "test": "vitest run",
+    "test:ui": "vitest"
   },
   "dependencies": {
     "@vanilla-extract/css": "^1.17.4",
@@ -14,10 +16,14 @@
     "@vanilla-extract/recipes": "^0.5.7"
   },
   "devDependencies": {
+    "dotenv": "^17.2.1",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
     "stylelint": "^16.23.1",
     "stylelint-config-standard": "^39.0.0",
-    "stylelint-order": "^7.0.0"
+    "stylelint-order": "^7.0.0",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^3.2.4"
   }
 }

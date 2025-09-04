@@ -1,20 +1,24 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
+import { Consts } from '~/models/Consts';
 
 export const container = style([
   flexRow,
   {
+    boxSizing: 'content-box',
     position: 'fixed',
     border: `1px solid ${vars.color.onBackground}`,
     backgroundColor: vars.color.surface,
     pointerEvents: 'all',
+    zIndex: Consts.zIndex.canvasOverlay,
   },
 ]);
 
 export const item = style([
   flexRow,
   {
+    boxSizing: 'content-box',
     alignItems: 'center',
     pointerEvents: 'all',
     cursor: 'pointer',

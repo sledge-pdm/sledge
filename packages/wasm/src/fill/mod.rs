@@ -18,7 +18,7 @@ pub fn scanline_flood_fill(
     fill_color_g: u8,
     fill_color_b: u8,
     fill_color_a: u8,
-    tolerance: u8,
+    threshold: u8,
 ) -> bool {
     let width = width as usize;
     let height = height as usize;
@@ -40,11 +40,26 @@ pub fn scanline_flood_fill(
     let fill_color = [fill_color_r, fill_color_g, fill_color_b, fill_color_a];
 
     // 既に同じ色の場合は何もしない
-    if colors_match(&target_color, &fill_color, tolerance) {
-        return false;
+    // if colors_match(&target_color, &fill_color, 0) {
+    //     return false;
+    // }
+
+    // しきい値が最大の場合、マスク条件に合致する全画素を高速に塗りつぶす
+    if threshold == 255 {
+        for y in 0..height {
+            for x in 0..width {
+                let idx = (y * width + x) * 4;
+                buffer[idx] = fill_color[0];
+                buffer[idx + 1] = fill_color[1];
+                buffer[idx + 2] = fill_color[2];
+                buffer[idx + 3] = fill_color[3];
+            }
+        }
+        return true;
     }
 
     let mut stack = Vec::new();
+    let mut visited = vec![false; width * height];
     stack.push((start_x, start_y));
 
     while let Some((x, y)) = stack.pop() {
@@ -52,7 +67,12 @@ pub fn scanline_flood_fill(
             continue;
         }
 
-        let pixel_index = (y * width + x) * 4;
+        let flat_index = y * width + x;
+        if visited[flat_index] {
+            continue;
+        }
+
+        let pixel_index = flat_index * 4;
         let current_color = [
             buffer[pixel_index],
             buffer[pixel_index + 1],
@@ -61,25 +81,28 @@ pub fn scanline_flood_fill(
         ];
 
         // 対象色でない場合は継続
-        if !colors_match(&current_color, &target_color, tolerance) {
+        if !colors_match(&current_color, &target_color, threshold) {
             continue;
         }
 
         // スキャンライン方式：左右に拡張
-        let mut left = x;
-        let mut right = x;
+    let mut left = x;
+    let mut right = x;
 
         // 左方向に拡張
         while left > 0 {
-            let left_index = (y * width + (left - 1)) * 4;
+            let lf = y * width + (left - 1);
+            if visited[lf] { break; }
+            let left_index = lf * 4;
             let left_color = [
                 buffer[left_index],
                 buffer[left_index + 1],
                 buffer[left_index + 2],
                 buffer[left_index + 3],
             ];
-            if colors_match(&left_color, &target_color, tolerance) {
+            if colors_match(&left_color, &target_color, threshold) {
                 left -= 1;
+                visited[lf] = true;
             } else {
                 break;
             }
@@ -87,15 +110,18 @@ pub fn scanline_flood_fill(
 
         // 右方向に拡張
         while right < width - 1 {
-            let right_index = (y * width + (right + 1)) * 4;
+            let rf = y * width + (right + 1);
+            if visited[rf] { break; }
+            let right_index = rf * 4;
             let right_color = [
                 buffer[right_index],
                 buffer[right_index + 1],
                 buffer[right_index + 2],
                 buffer[right_index + 3],
             ];
-            if colors_match(&right_color, &target_color, tolerance) {
+            if colors_match(&right_color, &target_color, threshold) {
                 right += 1;
+                visited[rf] = true;
             } else {
                 break;
             }
@@ -103,7 +129,9 @@ pub fn scanline_flood_fill(
 
         // 水平ラインを塗りつぶし
         for scan_x in left..=right {
-            let scan_index = (y * width + scan_x) * 4;
+            let flat = y * width + scan_x;
+            visited[flat] = true;
+            let scan_index = flat * 4;
             buffer[scan_index] = fill_color[0];
             buffer[scan_index + 1] = fill_color[1];
             buffer[scan_index + 2] = fill_color[2];
@@ -114,29 +142,37 @@ pub fn scanline_flood_fill(
         for scan_x in left..=right {
             // 上の行
             if y > 0 {
-                let up_index = ((y - 1) * width + scan_x) * 4;
-                let up_color = [
-                    buffer[up_index],
-                    buffer[up_index + 1],
-                    buffer[up_index + 2],
-                    buffer[up_index + 3],
-                ];
-                if colors_match(&up_color, &target_color, tolerance) {
-                    stack.push((scan_x, y - 1));
+                let up_y = y - 1;
+                let up_flat = up_y * width + scan_x;
+                if !visited[up_flat] {
+                    let up_index = up_flat * 4;
+                    let up_color = [
+                        buffer[up_index],
+                        buffer[up_index + 1],
+                        buffer[up_index + 2],
+                        buffer[up_index + 3],
+                    ];
+                    if colors_match(&up_color, &target_color, threshold) {
+                        stack.push((scan_x, up_y));
+                    }
                 }
             }
 
             // 下の行
             if y < height - 1 {
-                let down_index = ((y + 1) * width + scan_x) * 4;
-                let down_color = [
-                    buffer[down_index],
-                    buffer[down_index + 1],
-                    buffer[down_index + 2],
-                    buffer[down_index + 3],
-                ];
-                if colors_match(&down_color, &target_color, tolerance) {
-                    stack.push((scan_x, y + 1));
+                let down_y = y + 1;
+                let down_flat = down_y * width + scan_x;
+                if !visited[down_flat] {
+                    let down_index = down_flat * 4;
+                    let down_color = [
+                        buffer[down_index],
+                        buffer[down_index + 1],
+                        buffer[down_index + 2],
+                        buffer[down_index + 3],
+                    ];
+                    if colors_match(&down_color, &target_color, threshold) {
+                        stack.push((scan_x, down_y));
+                    }
                 }
             }
         }
@@ -157,7 +193,7 @@ pub fn scanline_flood_fill_with_mask(
     fill_color_g: u8,
     fill_color_b: u8,
     fill_color_a: u8,
-    tolerance: u8,
+    threshold: u8,
     selection_mask: &[u8],
     limit_mode: &str,
 ) -> bool {
@@ -201,8 +237,24 @@ pub fn scanline_flood_fill_with_mask(
     let fill_color = [fill_color_r, fill_color_g, fill_color_b, fill_color_a];
 
     // 既に同じ色の場合は何もしない
-    if colors_match(&target_color, &fill_color, tolerance) {
-        return false;
+    // if colors_match(&target_color, &fill_color, 0) {
+    //     return false;
+    // }
+
+    // しきい値が最大の場合、マスク条件に合致する全画素を高速に塗りつぶす
+    if threshold == 255 {
+        for y in 0..height {
+            for x in 0..width {
+                if is_allowed(x, y) {
+                    let idx = (y * width + x) * 4;
+                    buffer[idx] = fill_color[0];
+                    buffer[idx + 1] = fill_color[1];
+                    buffer[idx + 2] = fill_color[2];
+                    buffer[idx + 3] = fill_color[3];
+                }
+            }
+        }
+        return true;
     }
 
     let mut stack = Vec::new();
@@ -234,7 +286,7 @@ pub fn scanline_flood_fill_with_mask(
         ];
 
         // 対象色でない場合は継続
-        if !colors_match(&current_color, &target_color, tolerance) {
+        if !colors_match(&current_color, &target_color, threshold) {
             continue;
         }
 
@@ -251,7 +303,7 @@ pub fn scanline_flood_fill_with_mask(
                 buffer[left_index + 2],
                 buffer[left_index + 3],
             ];
-            if colors_match(&left_color, &target_color, tolerance) {
+            if colors_match(&left_color, &target_color, threshold) {
                 left -= 1;
                 visited[y * width + left] = true;
             } else {
@@ -268,7 +320,7 @@ pub fn scanline_flood_fill_with_mask(
                 buffer[right_index + 2],
                 buffer[right_index + 3],
             ];
-            if colors_match(&right_color, &target_color, tolerance) {
+            if colors_match(&right_color, &target_color, threshold) {
                 right += 1;
                 visited[y * width + right] = true;
             } else {
@@ -299,7 +351,7 @@ pub fn scanline_flood_fill_with_mask(
                         buffer[up_index + 2],
                         buffer[up_index + 3],
                     ];
-                    if colors_match(&up_color, &target_color, tolerance) {
+                    if colors_match(&up_color, &target_color, threshold) {
                         stack.push((scan_x, up_y));
                     }
                 }
@@ -317,7 +369,7 @@ pub fn scanline_flood_fill_with_mask(
                         buffer[down_index + 2],
                         buffer[down_index + 3],
                     ];
-                    if colors_match(&down_color, &target_color, tolerance) {
+                    if colors_match(&down_color, &target_color, threshold) {
                         stack.push((scan_x, down_y));
                     }
                 }
@@ -328,19 +380,19 @@ pub fn scanline_flood_fill_with_mask(
     true
 }
 
-/// 色の類似性判定（tolerance付き）
-fn colors_match(color1: &[u8; 4], color2: &[u8; 4], tolerance: u8) -> bool {
-    if tolerance == 0 {
+/// 色の類似性判定（threshold付き）
+fn colors_match(color1: &[u8; 4], color2: &[u8; 4], threshold: u8) -> bool {
+    if threshold == 0 {
         color1 == color2
     } else {
         let diff_r = (color1[0] as i16 - color2[0] as i16).abs();
         let diff_g = (color1[1] as i16 - color2[1] as i16).abs();
         let diff_b = (color1[2] as i16 - color2[2] as i16).abs();
-        let diff_a = (color1[3] as i16 - color2[3] as i16).abs();
+        // let diff_a = (color1[3] as i16 - color2[3] as i16).abs();
 
-        diff_r <= tolerance as i16
-            && diff_g <= tolerance as i16
-            && diff_b <= tolerance as i16
-            && diff_a <= tolerance as i16
+        diff_r <= threshold as i16
+            && diff_g <= threshold as i16
+            && diff_b <= threshold as i16
+            // && diff_a <= threshold as i16
     }
 }

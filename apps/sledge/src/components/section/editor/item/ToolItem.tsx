@@ -21,7 +21,9 @@ const ToolItem: Component<Props> = (props: Props) => {
     <div class={toolConfigRow} style={{}}>
       {/* <Light on={props.isInUse} /> */}
       <div class={toolConfigRowClickable} onClick={() => setActiveToolCategory(category.id)}>
-        <Icon src={category.iconSrc ?? ''} base={10} scale={2} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
+        <div style={{ padding: '1px' }}>
+          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
+        </div>
         <Show when={shouldShowLabel()}>
           <p
             class={toolConfigRowName}

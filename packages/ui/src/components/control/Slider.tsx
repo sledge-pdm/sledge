@@ -14,13 +14,13 @@ interface SliderProps {
   customFormat?: string;
   allowDirectInput?: boolean;
   onChange?: (newValue: number) => void;
+  onDoubleClick?: () => void;
   onPointerDownOnValidArea?: (e: PointerEvent | MouseEvent) => boolean;
 }
 
 const Slider: Component<SliderProps> = (props) => {
   let labelRef: HTMLDivElement;
   let directInputRef: HTMLInputElement;
-  let rootRef: HTMLDivElement;
   let sliderRef: HTMLDivElement;
   const [directInputMode, setDirectInputMode] = createSignal(false);
 
@@ -173,10 +173,18 @@ const Slider: Component<SliderProps> = (props) => {
   );
 
   return (
-    <div class={sliderRoot} ref={(el) => (rootRef = el)}>
+    <div class={sliderRoot}>
       <Show when={props.labelMode === 'left'}>{labelArea}</Show>
 
-      <div class={slider} ref={(el) => (sliderRef = el)} onPointerDown={handlePointerDown} onClick={onLineClick}>
+      <div
+        class={slider}
+        ref={(el) => (sliderRef = el)}
+        onPointerDown={handlePointerDown}
+        onDblClick={() => {
+          props.onDoubleClick?.();
+        }}
+        onClick={onLineClick}
+      >
         <div class={lineHitbox} onWheel={handleOnWheel}>
           <div class={line} />
         </div>

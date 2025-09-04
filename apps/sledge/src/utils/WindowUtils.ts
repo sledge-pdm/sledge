@@ -5,8 +5,13 @@ import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
 import { message } from '@tauri-apps/plugin-dialog';
 import { exit } from '@tauri-apps/plugin-process';
 import { globalConfig } from '~/stores/GlobalStores';
-import { PathToFileLocation } from '~/utils/PathUtils';
+import { PathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
+
+export function zoomForIntegerize(dpr: number) {
+  const n = Math.round(dpr - 0.01);
+  return n / dpr;
+}
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
 

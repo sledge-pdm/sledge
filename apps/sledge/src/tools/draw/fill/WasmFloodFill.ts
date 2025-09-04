@@ -10,6 +10,7 @@ export interface WasmMaskFillProps {
   position: Vec2;
   selectionMask: Uint8Array;
   limitMode: 'inside' | 'outside';
+  threshold?: number;
 }
 
 /**
@@ -22,9 +23,7 @@ export interface WasmMaskFillProps {
  * - 選択範囲制限サポート
  */
 export class WasmFloodFill implements Fill {
-  private readonly tolerance: number = 0; // 将来的にはツール設定から取得
-
-  fill({ agent, color, position }: FillProps) {
+  fill({ agent, color, position, threshold }: FillProps) {
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
 
@@ -48,14 +47,10 @@ export class WasmFloodFill implements Fill {
       color[1],
       color[2],
       color[3],
-      this.tolerance
+      threshold ?? 0
     );
 
-    dm.add({
-      kind: 'whole',
-      before: originalBuffer,
-      after: agent.getBuffer(),
-    });
+    dm.setWhole(originalBuffer, agent.getBuffer());
     const endTime = performance.now();
     console.log(`WASM FloodFill completed in ${(endTime - startTime).toFixed(2)}ms`);
 
@@ -70,7 +65,7 @@ export class WasmFloodFill implements Fill {
     return true;
   }
 
-  fillWithMask({ agent, color, position, selectionMask, limitMode }: WasmMaskFillProps) {
+  fillWithMask({ agent, color, position, selectionMask, limitMode, threshold }: WasmMaskFillProps) {
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
 
@@ -94,16 +89,12 @@ export class WasmFloodFill implements Fill {
       color[1],
       color[2],
       color[3],
-      this.tolerance,
+      threshold ?? 0,
       selectionMask,
       limitMode
     );
 
-    dm.add({
-      kind: 'whole',
-      before: originalBuffer,
-      after: agent.getBuffer(),
-    });
+    dm.setWhole(originalBuffer, agent.getBuffer());
     const endTime = performance.now();
     console.log(`WASM FloodFill with mask (${limitMode}) completed in ${(endTime - startTime).toFixed(2)}ms`);
 

@@ -7,7 +7,6 @@ use tauri::{AppHandle, Manager, async_runtime::block_on};
 use tauri_plugin_fs::FsExt;
 use window::{SledgeWindowKind, WindowOpenOptions};
 
-
 fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
     println!("handle_file_associations called with {} files", files.len());
     // This requires the `fs` tauri plugin and is required to make the plugin's frontend work:
@@ -54,6 +53,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_os::init())
         .invoke_handler(tauri::generate_handler![
@@ -78,6 +78,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init());
 
     builder
+        .enable_macos_default_menu(false)
         .setup(
             #[allow(unused_variables)]
             |app| {
@@ -131,7 +132,6 @@ pub fn run() {
                         .into_iter()
                         .filter_map(|url| url.to_file_path().ok())
                         .collect::<Vec<_>>();
-
                     handle_file_associations(app.clone(), files);
                 }
             },

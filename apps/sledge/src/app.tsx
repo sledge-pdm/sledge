@@ -1,7 +1,7 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
-import TitleBar from './components/global/TitleBar';
+import TitleBar from './components/global/title_bar/TitleBar';
 import About from './routes/about/index';
 import Editor from './routes/editor/index';
 import Home from './routes/start/index';
@@ -9,12 +9,14 @@ import Home from './routes/start/index';
 import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
 import { showContextMenu } from '@sledge/ui';
+import { getCurrentWebview } from '@tauri-apps/api/webview';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, onCleanup, onMount } from 'solid-js';
-import DebugViewer from '~/components/debug/DebugViewer';
+import DebugViewer from '~/components/global/debug/DebugViewer';
 import { loadGlobalSettings } from '~/io/config/load';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { globalConfig } from '~/stores/GlobalStores';
-import { reportCriticalError } from '~/utils/WindowUtils';
+import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
@@ -55,7 +57,22 @@ export default function App() {
     html.classList.add(cls);
     prevThemeClass = cls;
   };
-  onMount(applyThemeToHtml);
+
+  onMount(async () => {
+    applyThemeToHtml();
+    const webview = getCurrentWebview();
+    const window = getCurrentWindow();
+    await webview.setZoom(zoomForIntegerize(await window.scaleFactor()));
+
+    window.onScaleChanged(async ({ payload }) => {
+      const { scaleFactor, size } = payload;
+      console.log('scale changed to:', scaleFactor, 'dprzoom: ', zoomForIntegerize(scaleFactor));
+      await webview.setZoom(zoomForIntegerize(scaleFactor));
+    });
+
+    // await checkForUpdates();
+  });
+
   createEffect(applyThemeToHtml);
 
   return (
@@ -67,17 +84,12 @@ export default function App() {
             class={[flexCol, h100].join(' ')}
             onContextMenu={(e) => {
               e.preventDefault();
-              console.log('Context menu opened');
               showContextMenu(
                 undefined,
                 import.meta.env.DEV
                   ? [ContextMenuItems.Save, ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools]
                   : [ContextMenuItems.Save],
-                e,
-                {
-                  closeByOutsideClick: true,
-                  onClose: () => console.log('Context menu closed'),
-                }
+                e
               );
             }}
           >

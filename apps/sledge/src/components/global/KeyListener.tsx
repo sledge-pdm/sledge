@@ -1,9 +1,9 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import {
-  getActiveToolCategory,
+  getActiveToolCategoryId,
   getCurrentPresetConfig,
-  getPrevActiveToolCategory,
+  getPrevActiveToolCategoryId,
   setActiveToolCategory,
   updateToolPresetConfig,
 } from '~/controllers/tool/ToolController';
@@ -12,7 +12,6 @@ import { fileStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { openDebugViewer } from '~/utils/DebugViewer';
 import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';
-import { redoLayer, undoLayer } from '../../controllers/history/HistoryController';
 
 const KeyListener: Component = () => {
   // Helper function to check if the active element is an input field
@@ -26,12 +25,13 @@ const KeyListener: Component = () => {
     return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isContentEditable;
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
       e.preventDefault();
     }
 
     if (toolStore.activeToolCategory === 'rectSelection' && e.altKey) return;
+    if (toolStore.activeToolCategory === 'autoSelection' && e.altKey) return;
 
     // Check if input is focused early to avoid unnecessary processing
     const inputFocused = isInputFocused();
@@ -53,16 +53,14 @@ const KeyListener: Component = () => {
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore['undo'])) {
-      const active = activeLayer();
-      if (active) undoLayer(active.id);
+      projectHistoryController.undo();
     }
     if (isKeyMatchesToEntry(e, keyConfigStore['redo'])) {
-      const active = activeLayer();
-      if (active) redoLayer(active.id);
+      projectHistoryController.redo();
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore['sizeIncrease'])) {
-      const currentToolId = getActiveToolCategory();
+      const currentToolId = getActiveToolCategoryId();
       const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
       if (selectedPreset !== undefined) {
         const presetConfig = getCurrentPresetConfig(currentToolId);
@@ -74,7 +72,7 @@ const KeyListener: Component = () => {
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore['sizeDecrease'])) {
-      const currentToolId = getActiveToolCategory();
+      const currentToolId = getActiveToolCategoryId();
       const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
       if (selectedPreset !== undefined) {
         const presetConfig = getCurrentPresetConfig(currentToolId);
@@ -91,6 +89,9 @@ const KeyListener: Component = () => {
       if (isKeyMatchesToEntry(e, keyConfigStore['pen'])) setActiveToolCategory('pen');
       if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) setActiveToolCategory('eraser');
       if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) setActiveToolCategory('fill');
+      if (isKeyMatchesToEntry(e, keyConfigStore['rect_select'])) setActiveToolCategory('rectSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore['auto_select'])) setActiveToolCategory('autoSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore['move'])) setActiveToolCategory('move');
     }
   };
 
@@ -100,9 +101,9 @@ const KeyListener: Component = () => {
       return;
     }
 
-    if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategory() === 'pipette') {
+    if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategoryId() === 'pipette') {
       console.log('Pipette tool deactivated');
-      setActiveToolCategory(getPrevActiveToolCategory() || 'pen');
+      setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
     }
   };
 

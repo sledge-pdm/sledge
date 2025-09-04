@@ -8,13 +8,14 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import ClipboardListener from '~/components/global/ClipboardListener';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { addLayer } from '~/controllers/layer/LayerListController';
-import { AutoSaveManager } from '~/controllers/project/AutoSaveManager';
+import { AutoSaveManager } from '~/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/io/config/load';
 import { importImageFromPath } from '~/io/image/in/import';
 import { readProjectFromPath } from '~/io/project/in/import';
@@ -24,7 +25,7 @@ import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { join } from '~/utils/PathUtils';
+import { join } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
 import { getOpenLocation, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
@@ -53,7 +54,7 @@ export default function Editor() {
     await loadGlobalSettings();
 
     if (isNewProject) {
-      changeCanvasSize(globalConfig.default.canvasSize);
+      changeCanvasSize(globalConfig.default.canvasSize, true);
       setCanvasStore('canvas', globalConfig.default.canvasSize);
       layerListStore.layers.forEach((layer) => {
         resetLayerImage(layer.id, 1);
@@ -105,6 +106,7 @@ export default function Editor() {
         name: undefined,
         path: undefined,
       });
+      setFileStore('extension', 'sledge');
 
       if (sp.has('width') && sp.has('height')) {
         const width = Number(sp.get('width'));
@@ -113,7 +115,12 @@ export default function Editor() {
         setCanvasStore('canvas', 'height', height);
         eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
       }
-      addLayer({ name: 'layer1', type: LayerType.Dot, enabled: true, dotMagnification: 1 });
+      addLayer(
+        { name: 'layer1', type: LayerType.Dot, enabled: true, dotMagnification: 1 },
+        {
+          noDiff: true,
+        }
+      );
       return true;
     }
 
@@ -125,9 +132,11 @@ export default function Editor() {
   onMount(async () => {
     unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
       if (!isLoading() && projectStore.isProjectChangedAfterSave) {
-        const confirmed = await confirm('the project is not saved.\nsure to quit without save?', {
-          okLabel: 'quit w/o save.',
-          cancelLabel: 'cancel.',
+        const confirmed = await confirm('There are unsaved changes.\nSure to quit without save?', {
+          kind: 'warning',
+          title: 'Unsaved Changes',
+          okLabel: 'Quit without save.',
+          cancelLabel: 'Cancel.',
         });
         if (!confirmed) {
           event.preventDefault();
@@ -179,6 +188,7 @@ export default function Editor() {
         <SideSectionControl side='rightSide' />
 
         <KeyListener />
+        <ClipboardListener />
         {/* <Companion /> */}
       </div>
     </Show>

@@ -127,6 +127,8 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
     }
   });
 
+  const noItem = createMemo<boolean>(() => p.options.length === 0);
+
   const spin = (isUp: boolean) => {
     const currentIndex = p.options.findIndex((option) => option.value === getValue());
     const nextIndex = isUp ? (currentIndex + 1) % p.options.length : (currentIndex - 1 + p.options.length) % p.options.length;
@@ -141,6 +143,7 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
       ref={containerRef}
       {...p.props}
       onWheel={(e) => {
+        if (noItem() || p.disabled) return;
         if (p.wheelSpin === undefined || p.wheelSpin) spin(e.deltaY > 0);
       }}
     >
@@ -150,9 +153,9 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
         style={{
           'box-sizing': 'border-box',
           overflow: 'hidden',
-          opacity: p.disabled ? 0.5 : 1,
-          cursor: p.disabled ? 'not-allowed' : 'pointer',
-          'pointer-events': p.disabled ? 'none' : 'all',
+          opacity: p.disabled || noItem() ? 0.5 : 1,
+          cursor: p.disabled || noItem() ? 'not-allowed' : 'pointer',
+          'pointer-events': p.disabled || noItem() ? 'none' : 'all',
           width: p.fullWidth ? '100%' : undefined,
         }}
         onClick={toggle}
@@ -160,9 +163,11 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
         aria-expanded={open()}
       >
         <p class={itemText} style={{ 'font-family': p.fontFamily ?? ZFB08, width: p.fullWidth ? '100%' : undefined }}>
-          {getAdjustedLabel(selectedLabel())}
+          {noItem() ? '- no item -' : getAdjustedLabel(selectedLabel())}
         </p>
-        <Icon src={'/icons/misc/dropdown_caret.png'} base={9} color={vars.color.onBackground} />
+        <div>
+          <Icon src={'/icons/misc/dropdown_caret.png'} base={9} color={vars.color.onBackground} style={{ opacity: 0.75 }} />
+        </div>
       </button>
       <Show when={open()}>
         <Portal>
@@ -179,7 +184,7 @@ const Dropdown = <T extends string | number>(p: Props<T>) => {
             }}
             onTransitionEnd={adjustPosition}
           >
-            <For each={p.options} fallback={<li>no items.</li>}>
+            <For each={p.options}>
               {(option) => (
                 <li class={menuItem} role='option' aria-selected={option.value === getValue()} onClick={() => select(option)}>
                   <p class={itemText} style={{ 'font-family': p.fontFamily ?? ZFB08 }}>

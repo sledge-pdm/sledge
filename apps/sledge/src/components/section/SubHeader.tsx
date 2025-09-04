@@ -1,10 +1,18 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
-import { Component, createSignal, JSX } from 'solid-js';
+import { Icon } from '@sledge/ui';
+import { Component, createSignal, For, JSX, Show } from 'solid-js';
 import { sectionCaption } from '~/styles/section/section_item.css';
+
+export interface SubHeaderIcon {
+  src: string;
+  onClick: (e: MouseEvent) => void;
+  disabled?: boolean;
+}
 
 interface Props {
   // title?: string;
+  icons?: SubHeaderIcon[];
   defaultExpanded?: boolean;
   onExpandChanged?: (expanded: boolean) => void;
   children: JSX.Element;
@@ -13,15 +21,7 @@ export const SectionSubHeader: Component<Props> = (props) => {
   const [expanded, setExpanded] = createSignal(props.defaultExpanded ?? true);
 
   return (
-    <div
-      class={flexRow}
-      style={{ 'align-items': 'center', 'margin-bottom': expanded() ? '8px' : '0px' }}
-      onClick={() => {
-        setExpanded(!expanded());
-
-        props.onExpandChanged?.(expanded());
-      }}
-    >
+    <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': expanded() ? '8px' : '0px' }}>
       <svg width='0' height='0'>
         <defs>
           <clipPath id='clipPath-triangle7'>
@@ -39,6 +39,11 @@ export const SectionSubHeader: Component<Props> = (props) => {
           'align-items': 'center',
           cursor: 'pointer',
           'pointer-events': 'all',
+        }}
+        onClick={() => {
+          setExpanded(!expanded());
+
+          props.onExpandChanged?.(expanded());
         }}
       >
         <div
@@ -65,6 +70,40 @@ export const SectionSubHeader: Component<Props> = (props) => {
           'background-color': vars.color.borderSecondary,
         }}
       />
+      <Show when={expanded()}>
+        <div
+          class={flexRow}
+          style={{
+            'margin-left': '12px',
+            gap: '12px',
+          }}
+        >
+          <For each={props.icons}>
+            {(item) => {
+              const disabled = item.disabled ?? false;
+              return (
+                <div
+                  style={{ cursor: disabled ? 'none' : 'pointer', 'pointer-events': disabled ? 'none' : 'all' }}
+                  onMouseDown={(e) => e.preventDefault()}
+                >
+                  <Icon
+                    src={item.src}
+                    base={12}
+                    scale={1}
+                    color={disabled ? vars.color.muted : vars.color.onBackground}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      e.stopImmediatePropagation();
+                      item.onClick(e);
+                    }}
+                  />
+                </div>
+              );
+            }}
+          </For>
+        </div>
+      </Show>
     </div>
   );
 };

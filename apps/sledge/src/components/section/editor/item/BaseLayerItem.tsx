@@ -58,7 +58,7 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
       </p>
 
       <div class={flexRow}>
-        <Dropdown value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} wheelSpin={false} />
+        <Dropdown value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} wheelSpin={true} />
       </div>
 
       {baseLayer().colorMode === 'custom' && (

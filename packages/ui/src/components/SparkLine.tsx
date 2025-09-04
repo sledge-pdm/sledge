@@ -1,82 +1,83 @@
 import { vars } from '@sledge/theme';
-import { type Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { type Component, createEffect, createSignal, onMount } from 'solid-js';
 
 interface SparkLineProps {
-  /** 横ピクセル数＝バッファ長 */
-  width: number;
-  /** 縦ピクセル数 */
   height: number;
-  /** 新しいサンプルを返す非同期関数 */
-  fetchSample: () => Promise<number | undefined>;
-  /** ミリ秒 */
-  interval?: number;
-  /** 線の色 */
+  length: number;
+  lengthMult?: number;
+  min?: number;
+  values: (number | undefined)[]; // old->new (should be pad started to length)
   color?: string;
-  suffix?: string;
-  initialMaxValue?: number;
 }
 
 export const SparkLine: Component<SparkLineProps> = (props) => {
   let canvas: HTMLCanvasElement;
+  let container: HTMLDivElement;
   let ctx: CanvasRenderingContext2D;
-  // width ピクセル分のバッファをゼロ埋め
-  const buffer: number[] = Array(props.width).fill(0);
-  const [lastBuffer, setLastBuffer] = createSignal<number | undefined>(-1);
-  const [maxValue, setMaxValue] = createSignal(1);
+  const [values, setValues] = createSignal<(number | undefined)[]>(Array(props.length).fill(undefined));
+  const lengthMult = () => props.lengthMult ?? 1;
 
-  let iv: number;
+  createEffect(() => {
+    const newValues = props.values;
+    const paddedValues = Array(props.length - newValues.length)
+      .fill(undefined)
+      .concat(newValues);
+    setValues(paddedValues);
+    updateLine();
+  });
 
   onMount(() => {
     ctx = canvas.getContext('2d')!;
-    // ピクセルパーフェクトを狙うなら、実際の canvas.width/height と CSSサイズを同じに
-    canvas.width = props.width;
+    container.style.width = `${props.length * lengthMult()}px`;
+    container.style.height = `${props.height}px`;
+    canvas.style.width = `${props.length * lengthMult()}px`;
+    canvas.style.height = `${props.height}px`;
+    canvas.width = props.length * lengthMult();
     canvas.height = props.height;
 
-    // 描画関数：バッファ全部を１ドットずつ打っていく
-    const draw = () => {
-      // クリア
-      ctx.clearRect(0, 0, props.width, props.height);
-      ctx.fillStyle = props.color || 'lime';
-
-      for (let x = 0; x < buffer.length; x++) {
-        // 0〜maxValue を 0〜(height-1) に丸め込む
-        const q = Math.round((buffer[x] / maxValue()) * (props.height - 1));
-        // 底辺を y=height-1 として上向きに描画
-        const y = props.height - 1 - q;
-        ctx.fillRect(x, y, 1, 1);
-      }
-    };
-
-    // 定期取得＋描画ループ
-    iv = setInterval(async () => {
-      try {
-        const v = await props.fetchSample();
-        buffer.shift();
-        buffer.push(v ?? 0);
-        setLastBuffer(v ? Math.round(v * 10) / 10 : undefined);
-        // バッファ全体の現在最大値を取得し、1.5倍してスケール更新
-        const bufMax = Math.max(...buffer);
-        // 0除算防止 & 少なくとも initialMaxValue 以上にはする
-        const newMax = Math.max(bufMax * 1.5, props.initialMaxValue ?? 0);
-        setMaxValue(Math.round(newMax * 10) / 10);
-        draw();
-      } catch {
-        // 無視
-      }
-    }, props.interval ?? 1000);
+    const newValues = props.values;
+    const paddedValues = Array(props.length - newValues.length)
+      .fill(undefined)
+      .concat(newValues);
+    setValues(paddedValues);
+    updateLine();
   });
 
-  // マウント解除時に止める
-  onCleanup(() => clearInterval(iv));
+  // 現在のvaluesで描画を更新
+  const updateLine = async () => {
+    ctx = canvas.getContext('2d')!;
+
+    const maxValue = values().reduce((a, b) => ((a ?? 0) > (b ?? 0) ? a : b), props.min ?? 0);
+
+    // クリア
+    ctx.clearRect(0, 0, props.length * lengthMult(), props.height);
+    ctx.fillStyle = props.color || 'lime';
+
+    // 20%
+    const paddingTop = Math.round(props.height * 0.2);
+
+    for (let x = 0; x < values().length; x++) {
+      const v = values()[x];
+      if (v === undefined) continue;
+      if (!maxValue) continue;
+      // 0〜maxValue を 0〜(height-1) に丸め込む
+      const q = Math.round((v / maxValue) * (props.height - 1 - paddingTop));
+      // 底辺を y=height-1 として上向きに描画
+      const y = props.height - 1 - q;
+      ctx.fillRect(x * lengthMult(), y, lengthMult(), 1);
+    }
+  };
 
   return (
     <div
+      ref={(el) => (container = el)}
       style={{
         position: 'relative',
-        width: `${props.width}px`,
-        height: `${props.height}px`,
         background: '#00000017',
         border: `1px solid ${vars.color.border}`,
+        width: `${props.length * lengthMult()}px`,
+        height: `${props.height}px`,
+        'box-sizing': 'content-box',
       }}
     >
       <canvas
@@ -85,18 +86,12 @@ export const SparkLine: Component<SparkLineProps> = (props) => {
           position: 'absolute',
           top: 0,
           left: 0,
-          // 拡大時にもドットがにじまないように
           'image-rendering': 'pixelated',
-          // 必要なら表示を大きくする
-          width: `${props.width}px`,
+          width: `${props.length * lengthMult()}px`,
           height: `${props.height}px`,
+          'box-sizing': 'content-box',
         }}
       />
-      {/* <p style={{ position: 'absolute', top: '0px', left: '4px' }}>{maxValue()}</p> */}
-      <p style={{ position: 'absolute', bottom: '0px', left: '4px' }}>{0}</p>
-      <p style={{ position: 'absolute', top: '0px', right: '4px' }}>
-        {lastBuffer()} {props.suffix}
-      </p>
     </div>
   );
 };

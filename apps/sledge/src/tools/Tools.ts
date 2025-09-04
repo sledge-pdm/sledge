@@ -3,8 +3,8 @@ import { FillTool } from '~/tools/draw/fill/FillTool';
 import { PenTool } from '~/tools/draw/pen/PenTool';
 import { MoveTool } from '~/tools/move/MoveTool';
 import { PipetteTool } from '~/tools/pipette/PipetteTool';
+import { AutoSelection } from '~/tools/selection/auto/AutoSelection';
 import { RectSelection } from '~/tools/selection/rect/RectSelection';
-import { SelectionMoveTool } from '~/tools/selection/selection_move/SelectionMoveTool';
 import { ToolBehavior } from '~/tools/ToolBehavior';
 
 export const DEFAULT_PRESET = 'default';
@@ -15,6 +15,7 @@ export const TOOL_CATEGORIES = {
   FILL: 'fill',
   PIPETTE: 'pipette',
   RECT_SELECTION: 'rectSelection',
+  AUTO_SELECTION: 'autoSelection',
   SELECTION_MOVE: 'selectionMove',
   MOVE: 'move',
 } as const;
@@ -51,7 +52,12 @@ export type EraserPresetConfig = PresetConfig & {
 };
 
 export type FillPresetConfig = PresetConfig & {
-  // threshold?: number;
+  threshold?: number;
+  // antialias?: boolean;
+};
+
+export type AutoSelectionPresetConfig = PresetConfig & {
+  threshold?: number;
   // antialias?: boolean;
 };
 
@@ -92,7 +98,9 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: {} as FillPresetConfig,
+        [DEFAULT_PRESET]: {
+          threshold: 0,
+        } as FillPresetConfig,
       },
     },
   } as ToolCategory<FillPresetConfig>,
@@ -106,17 +114,24 @@ export const toolCategories = {
   [TOOL_CATEGORIES.RECT_SELECTION]: {
     id: TOOL_CATEGORIES.RECT_SELECTION,
     name: 'Rect Select',
-    iconSrc: '/icons/tool_bar/tool/rectselect.png',
+    iconSrc: '/icons/tool_bar/tool/rect_select.png',
     behavior: new RectSelection(),
     // プリセット不要
   } as ToolCategory,
-  [TOOL_CATEGORIES.SELECTION_MOVE]: {
-    id: TOOL_CATEGORIES.SELECTION_MOVE,
-    name: 'Selection Move',
-    iconSrc: '/icons/tool_bar/tool/move_area.png',
-    behavior: new SelectionMoveTool(),
-    // プリセット不要
-  } as ToolCategory,
+  [TOOL_CATEGORIES.AUTO_SELECTION]: {
+    id: TOOL_CATEGORIES.AUTO_SELECTION,
+    name: 'Auto Select',
+    iconSrc: '/icons/tool_bar/tool/auto_select.png',
+    behavior: new AutoSelection(),
+    presets: {
+      selected: DEFAULT_PRESET,
+      options: {
+        [DEFAULT_PRESET]: {
+          threshold: 0,
+        } as AutoSelectionPresetConfig,
+      },
+    },
+  } as ToolCategory<AutoSelectionPresetConfig>,
   [TOOL_CATEGORIES.MOVE]: {
     id: TOOL_CATEGORIES.MOVE,
     name: 'Move',

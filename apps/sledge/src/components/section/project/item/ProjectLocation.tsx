@@ -2,33 +2,32 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB09 } from '@sledge/theme';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
-import { join } from '~/utils/PathUtils';
-import { getOpenLocation } from '~/utils/WindowUtils';
+import { fileStore } from '~/stores/EditorStores';
+import { join } from '~/utils/FileUtils';
 
 const ProjectLocation: Component = () => {
-  const location = getOpenLocation();
+  const isNewProject = () => !fileStore.location.name || !fileStore.location.path;
 
-  const isNewProject = () => !location || !location.name || !location.path;
-
-  console.log('ProjectLocation', location);
+  console.log('ProjectLocation', fileStore.location);
 
   return (
     <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
       <Show when={!isNewProject()} fallback={<p style={{ 'font-family': ZFB09, margin: '4px 0', opacity: 0.3 }}>[ unsaved project ]</p>}>
         <div class={flexRow}>
           <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>path</p>
-          <p style={{ 'white-space': 'wrap' }}>{location?.path || '<unknown>'}</p>
+          <p style={{ 'white-space': 'wrap' }}>{fileStore.location.path || '<unknown>'}</p>
         </div>
         <div class={flexRow}>
           <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>file</p>
-          <p>{location?.name || '<unknown>'}</p>
+          <p>{fileStore.location.name || '<unknown>'}</p>
         </div>
         <div class={flexRow} style={{ 'margin-top': '6px', 'justify-content': 'start' }}>
           <a
             href='#'
             onClick={(e) => {
-              if (!location || !location.path || !location.name) return;
-              revealItemInDir(join(location.path, location.name));
+              const loc = fileStore.location;
+              if (!loc || !loc.path || !loc.name) return;
+              revealItemInDir(join(loc.path, loc.name));
             }}
             style={{ color: vars.color.muted, 'padding-bottom': '2px' }}
           >

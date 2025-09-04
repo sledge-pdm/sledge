@@ -1,9 +1,14 @@
 import { Vec2 } from '@sledge/core';
 import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/controllers/canvas/CanvasController';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { DebugLogger } from '~/controllers/log/LogController';
+import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { Consts } from '~/models/Consts';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
+import { isMacOS } from '~/utils/OSUtils';
+
+const LOG_LABEL = 'CanvasAreaInteract';
+const logger = new DebugLogger(LOG_LABEL, false);
 
 class CanvasAreaInteract {
   private pointers = new Map<number, Vec2>();
@@ -32,15 +37,29 @@ class CanvasAreaInteract {
   constructor(
     private canvasStack: HTMLDivElement,
     private wrapperRef: HTMLDivElement
-  ) {}
+  ) {
+    // UAジェスチャ（パン/ズーム/長押し右クリック等）を無効化
+    this.wrapperRef.style.touchAction = 'none';
+    (this.wrapperRef.style as any).msTouchAction = 'none';
+    this.canvasStack.style.touchAction = 'none';
+    (this.canvasStack.style as any).msTouchAction = 'none';
+
+    // コンポジタ昇格して transform の適用を安定化
+    this.canvasStack.style.willChange = 'transform';
+    this.canvasStack.style.backfaceVisibility = 'hidden';
+  }
+
+  static isDragKey(e: PointerEvent): boolean {
+    return isMacOS() ? e.metaKey : e.ctrlKey;
+  }
 
   static isDraggable(e: PointerEvent) {
     if (e.buttons === 4) {
       return true;
     }
 
-    if (e.buttons === 1 && e.ctrlKey) {
-      if (selectionManager.isSelected()) return false;
+    if (e.buttons === 1 && CanvasAreaInteract.isDragKey(e)) {
+      if (isSelectionAvailable()) return false;
       // angle-snapped line
       if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
         if (e.shiftKey) return false;
@@ -52,6 +71,8 @@ class CanvasAreaInteract {
   }
 
   private handlePointerDown(e: PointerEvent) {
+    const start = new Date().getTime();
+    logger.debugLog(`handlePointerDown start`);
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -78,14 +99,21 @@ class CanvasAreaInteract {
         setInteractStore('isDragging', true);
       }
     }
+    const end = new Date().getTime();
+    logger.debugLog(`handlePointerDown executed in ${end - start} ms`);
   }
 
   private handlePointerMove(e: PointerEvent) {
+    const start = new Date().getTime();
+    logger.debugLog(`handlePointerMove start`);
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
 
     this.updateCursor('auto');
-    if (!this.pointers.has(e.pointerId)) return;
+    if (!this.pointers.has(e.pointerId)) {
+      logger.debugWarn(`handlePointerMove cancelled because don't have current pointer`);
+      return;
+    }
     const prev = this.pointers.get(e.pointerId)!;
     const now = { x: e.clientX, y: e.clientY };
 
@@ -165,6 +193,8 @@ class CanvasAreaInteract {
         this.updateCursor('auto');
       }
     }
+    const end = new Date().getTime();
+    logger.debugLog(`handlePointerMove executed in ${end - start} ms`);
   }
 
   private handlePointerUp(e: PointerEvent) {
@@ -256,15 +286,16 @@ class CanvasAreaInteract {
   private onKeyUp = this.handleKeyUp.bind(this);
 
   public setInteractListeners() {
+    this.removeInteractListeners();
     this.wrapperRef.addEventListener('pointerdown', this.onPointerDown);
     window.addEventListener('pointermove', this.onPointerMove);
     window.addEventListener('pointerup', this.onPointerUp);
     this.wrapperRef.addEventListener('pointercancel', this.onPointerCancel);
-    // wheel
     this.wrapperRef.addEventListener('wheel', this.onWheel);
     // keyboard
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
+    logger.debugLog('setInteractListeners done');
   }
 
   public removeInteractListeners() {

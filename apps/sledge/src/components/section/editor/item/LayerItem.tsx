@@ -3,8 +3,8 @@ import { vars } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { clearLayer, duplicateLayer, setLayerName } from '~/controllers/layer/LayerController';
-import { allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
+import { clearLayer, duplicateLayer, mergeToBelowLayer as mergeDownLayer, setLayerName } from '~/controllers/layer/LayerController';
+import { allLayers, moveLayer, removeLayer, setActiveLayerId } from '~/controllers/layer/LayerListController';
 import { Layer } from '~/models/layer/Layer';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -34,8 +34,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   const onDetClicked = (e: MouseEvent) => {
     e.stopPropagation();
-    setLayerListStore('activeLayerId', props.layer.id);
-    // eventBus.emit('webgl:requestUpdate', { onlyDirty: false }); //一応
+    setActiveLayerId(props.layer.id);
+    // not needed because setActiveLayerId calls it
+    // eventBus.emit('webgl:requestUpdate', { onlyDirty: false });
   };
 
   const onPreviewClicked = (e: MouseEvent) => {
@@ -92,9 +93,22 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       <div
         class={w100}
         style={{
-          'background-color': vars.color.surface,
+          position: 'relative',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            'background-color': isActive() ? vars.color.active : vars.color.surface,
+            opacity: isActive() ? 0.15 : 1.0,
+            'pointer-events': 'none',
+            'z-index': -1,
+          }}
+        ></div>
         <div
           class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
           onClick={onDetClicked}
@@ -109,6 +123,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             showContextMenu(
               props.layer.name,
               [
+                { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeDownLayer(layerId) },
                 { ...ContextMenuItems.BaseRemove, onSelect: () => removeLayer(layerId) },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },
@@ -123,7 +138,12 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           {/* <div class={`${layerItemHandle} handle`} {...sortable.dragActivators}>
           <Icon src='/icons/misc/handle.png' base={8} color={vars.color.background} />
         </div> */}
-          <div class={layerItemHandle}>
+          <div
+            class={layerItemHandle}
+            style={{
+              'pointer-events': props.layer.enabled ? 'auto' : 'none',
+            }}
+          >
             <div class={layerItemSpinner} onClick={handleMoveUp}>
               <Icon src='/icons/misc/triangle_7.png' base={7} color={vars.color.surface} transform='rotate(180deg)' />
             </div>
@@ -141,12 +161,14 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               gap: '1px',
               overflow: 'hidden',
               'border-left': `1px solid ${vars.color.border}`,
+              'pointer-events': props.layer.enabled ? 'auto' : 'none',
             }}
           >
             <div class={flexRow}>
-              <p class={layerItemIndex}>{allLayers().length - props.index - 1}.</p>
+              <p class={layerItemIndex}>{allLayers().length - props.index}.</p>
               <p class={layerItemType}>
                 {Math.ceil(props.layer.opacity * 100)}%, {props.layer.mode}
+                {props.layer.enabled ? '' : ` (inactive)`}
               </p>
             </div>
             {isNameChanging() ? (
@@ -161,16 +183,19 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                 }}
                 value={props.layer.name}
                 onInput={(e) => {
-                  const result = setLayerName(props.layer.id, e.target.value);
-                  if (!result) setLayerName(props.layer.id, originalName());
+                  setLayerName(props.layer.id, e.target.value);
                 }}
                 onBlur={(e) => {
+                  const result = setLayerName(props.layer.id, e.currentTarget.value);
+                  if (!result) setLayerName(props.layer.id, originalName());
                   setNameChanging(false);
                   e.target.selectionStart = 0;
                   e.target.selectionEnd = e.target.value.length;
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
+                    const result = setLayerName(props.layer.id, e.currentTarget.value);
+                    if (!result) setLayerName(props.layer.id, originalName());
                     setNameChanging(false);
                   }
                 }}

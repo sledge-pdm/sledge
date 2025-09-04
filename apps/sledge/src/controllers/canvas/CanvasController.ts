@@ -1,13 +1,12 @@
 import { Size2D } from '@sledge/core';
 import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import { allLayers } from '~/controllers/layer/LayerListController';
+import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
 import { Consts } from '~/models/Consts';
-import { Layer } from '~/models/layer/Layer';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { getAgentOf } from '../layer/LayerAgentManager';
 
 export function isValidCanvasSize(size: Size2D): boolean {
   if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;
@@ -55,22 +54,27 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
   return true;
 }
 
-export function changeCanvasSize(newSize: Size2D): boolean {
+export async function changeCanvasSize(newSize: Size2D, noDiff?: boolean): Promise<boolean> {
   if (!isValidCanvasSize(newSize)) return false;
 
-  allLayers().forEach((layer: Layer) => {
-    const agent = getAgentOf(layer.id);
-    agent?.changeBufferSize(newSize, false);
-  });
+  const current = canvasStore.canvas;
+  if (current.width === newSize.width && current.height === newSize.height) return false;
 
-  setCanvasStore('canvas', newSize);
-  eventBus.emit('canvas:sizeChanged', { newSize });
+  // Use history action so that undo/redo works and buffers are snapshotted/restored
+  const act = new CanvasSizeHistoryAction({ ...current }, { ...newSize }, { from: 'CanvasController.changeCanvasSize' });
+  // Apply immediately (user intent)
+  act.redo();
+  if (!noDiff) {
+    // Then push onto history stack
+    projectHistoryController.addAction(act);
+  }
   return true;
 }
 
 const referenceLengthRatio = 0.75;
 const referenceLength = () => {
-  const sectionBetweenArea = document.getElementById('sections-between-area')!;
+  const sectionBetweenArea = document.getElementById('sections-between-area');
+  if (!sectionBetweenArea) return 800 * referenceLengthRatio;
   const areaBound = sectionBetweenArea.getBoundingClientRect();
 
   if (areaBound.width < areaBound.height) {
@@ -113,9 +117,11 @@ export const centeringCanvas = () => {
   const areaBound = sectionBetweenArea.getBoundingClientRect();
   const zoom = interactStore.zoom;
 
+  const sideSectionControlLeftEl = document.getElementById('side-section-control-leftSide');
+  const bottomBarEl = document.getElementById('bottom-bar');
   setOffset({
-    x: 0,
-    y: 0,
+    x: sideSectionControlLeftEl ? -sideSectionControlLeftEl.scrollWidth : 0,
+    y: bottomBarEl ? bottomBarEl.scrollHeight : 0,
   });
   setInteractStore('offsetOrigin', {
     x: areaBound.x + areaBound.width / 2 - (canvasSize.width * zoom) / 2,

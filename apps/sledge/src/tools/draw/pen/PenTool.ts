@@ -1,13 +1,12 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { activeLayer } from '~/controllers/layer/LayerListController';
-import { selectionManager } from '~/controllers/selection/SelectionManager';
+import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { getPresetOf } from '~/controllers/tool/ToolController';
-import { PixelDiff } from '~/models/history/HistoryManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
-import { ToolCategoryId } from '~/tools/Tools';
+import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
-import { getDrawnPixelMask, drawCompletionLine } from './PenDraw';
+import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
 
 export class PenTool implements ToolBehavior {
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
@@ -15,7 +14,7 @@ export class PenTool implements ToolBehavior {
   startTime: number | undefined = undefined;
   isShift: boolean = false;
   isCtrl: boolean = false;
-  private lastPreviewDiff: PixelDiff[] = [];
+  private lastPreviewDiff: Array<{ position: Vec2; before: RGBAColor; after: RGBAColor }> = [];
 
   startPosition: Vec2 | undefined = undefined;
   startPointerPosition: Vec2 | undefined = undefined;
@@ -37,16 +36,16 @@ export class PenTool implements ToolBehavior {
     return entry;
   }
 
-  private getCenter(position: Vec2, rawPosition: Vec2 | undefined, size: number, dotMagnification: number): { cx: number; cy: number } {
-    if (size % 2 === 0 && rawPosition) {
-      // 偶数サイズ: rawPosition を基準に最近傍のグリッドへ
-      return {
-        cx: Math.round(rawPosition.x / dotMagnification),
-        cy: Math.round(rawPosition.y / dotMagnification),
-      };
+  private getCenter(p: Vec2, rawP: Vec2 | undefined, size: number, dotMagnification: number) {
+    let cx: number, cy: number;
+    if (size % 2 === 0 && rawP) {
+      cx = Math.round(rawP.x / dotMagnification);
+      cy = Math.round(rawP.y / dotMagnification);
+    } else {
+      cx = p.x;
+      cy = p.y;
     }
-    // 奇数サイズ: ピクセル中心（整数座標）
-    return { cx: position.x, cy: position.y };
+    return { cx, cy };
   }
 
   private stamp(
@@ -57,7 +56,7 @@ export class PenTool implements ToolBehavior {
     color: RGBAColor,
     shouldCheckSelectionLimit: boolean,
     commit: boolean,
-    previewCollector?: PixelDiff[]
+    previewCollector?: Array<{ position: Vec2; before: RGBAColor; after: RGBAColor }>
   ) {
     const pbm = agent.getPixelBufferManager();
     const dm = agent.getDiffManager();
@@ -68,25 +67,24 @@ export class PenTool implements ToolBehavior {
         if (bits[iy * width + ix] !== 1) continue;
         const px = centerX + offsetX + ix;
         const py = centerY + offsetY + iy;
-        if (shouldCheckSelectionLimit && !selectionManager.isDrawingAllowed({ x: px, y: py }, false)) {
+        if (shouldCheckSelectionLimit && !isDrawingAllowed({ x: px, y: py }, false)) {
           continue;
         }
         if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
-          const diff = agent.setPixel({ x: px, y: py }, color, true);
-          if (diff !== undefined) {
+          const changed = agent.setPixel({ x: px, y: py }, color, true);
+          if (changed) {
             if (commit) {
-              dm.add(diff);
+              dm.addPixel({ x: px, y: py }, changed.before, changed.after);
             } else if (previewCollector) {
-              previewCollector.push(diff);
+              previewCollector.push({ position: { x: px, y: py }, before: changed.before, after: changed.after });
             } else {
-              dm.add(diff);
+              dm.addPixel({ x: px, y: py }, changed.before, changed.after);
             }
           }
         }
       }
     }
   }
-
   onStart(agent: LayerImageAgent, args: ToolArgs) {
     // 前回の状態が残っている場合はクリーンアップ
     if (this.lastPreviewDiff.length > 0) {
@@ -127,7 +125,7 @@ export class PenTool implements ToolBehavior {
     }
   }
 
-  protected categoryId: ToolCategoryId = 'pen';
+  protected categoryId: ToolCategoryId = TOOL_CATEGORIES.PEN;
 
   private SNAP_ANGLE = Math.PI / 12;
 
@@ -159,7 +157,7 @@ export class PenTool implements ToolBehavior {
     const layer = activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;
 
-    const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
+    const shouldCheckSelectionLimit = isSelectionAvailable() && getSelectionLimitMode() !== 'none';
     const mask = this.ensureMask(size, shape);
 
     // 現在位置にスタンプ
@@ -184,21 +182,16 @@ export class PenTool implements ToolBehavior {
   private undoLastLineDiff(agent: LayerImageAgent) {
     const dm = agent.getDiffManager();
     // 前回のプレビューが残っていた場合はundo
-    if (this.lastPreviewDiff.length > 0) {
-      try {
-        dm.add(this.lastPreviewDiff);
-        dm.flush();
-        agent.registerToHistory();
-        agent.undo(true);
-      } catch (error) {
-        console.error('Failed to undo line preview:', error);
-        // フォールバック: 手動でピクセルを復元
-        this.lastPreviewDiff.forEach((diff) => {
-          agent.setPixel(diff.position, diff.before, false);
-        });
-      } finally {
-        this.lastPreviewDiff = [];
+    if (this.lastPreviewDiff.length === 0) return;
+    try {
+      for (const diff of this.lastPreviewDiff) {
+        // apply 'before' color; skipExistingDiffCheck=true to ensure applying
+        agent.setPixel(diff.position, diff.before, true);
       }
+    } catch (error) {
+      console.error('Failed to undo line preview:', error);
+    } finally {
+      this.lastPreviewDiff = [];
     }
   }
 
@@ -212,13 +205,13 @@ export class PenTool implements ToolBehavior {
     const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
 
     const preset = getPresetOf(this.categoryId, presetName) as any;
-  const size = preset?.size ?? 1;
-  const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
+    const size = preset?.size ?? 1;
+    const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
 
     const layer = activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;
 
-    const shouldCheckSelectionLimit = selectionManager.isSelected() && selectionManager.getSelectionLimitMode() !== 'none';
+    const shouldCheckSelectionLimit = isSelectionAvailable() && getSelectionLimitMode() !== 'none';
     const mask = this.ensureMask(size, shape);
 
     drawCompletionLine(targetPosition, this.startPosition, (x: number, y: number) => {
@@ -242,7 +235,7 @@ export class PenTool implements ToolBehavior {
 
     // 描画完了時にバッチを強制処理
     agent.getDiffManager().flush();
-    const totalPx = agent.getDiffManager().getCurrent().diffs.size;
+    const totalPx = agent.getDiffManager().getPendingPixelCount();
     const resultText =
       totalPx > 0
         ? `${this.categoryId} stroke done. (${this.startTime ? `${Date.now() - this.startTime}ms /` : ''} ${totalPx}px updated)`

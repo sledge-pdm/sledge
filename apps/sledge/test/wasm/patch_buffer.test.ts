@@ -25,7 +25,7 @@ function getPx(buf: Uint8Array, width: number, x: number, y: number): [number, n
   return [buf[idx], buf[idx + 1], buf[idx + 2], buf[idx + 3]];
 }
 
-describe('wasm.patch_buffer', () => {
+describe('wasm.patch_buffer_rgba', () => {
   it('overwrites opaque patch pixels onto transparent target', () => {
     const tw = 8,
       th = 8;
@@ -35,7 +35,7 @@ describe('wasm.patch_buffer', () => {
       ph = 2;
     const patch = makeRGBA(pw, ph, 255, 0, 0, 255);
 
-    const res = (wasm as any).patch_buffer(target, tw, th, patch, pw, ph, 3, 4) as Uint8Array;
+    const res = (wasm as any).patch_buffer_rgba(target, tw, th, patch, pw, ph, 3, 4) as Uint8Array;
 
     expect(getPx(res, tw, 3, 4)).toEqual([255, 0, 0, 255]);
     expect(getPx(res, tw, 4, 4)).toEqual([255, 0, 0, 255]);
@@ -54,7 +54,7 @@ describe('wasm.patch_buffer', () => {
       ph = 1;
     const patch = makeRGBA(pw, ph, 255, 0, 0, 128); // half-transparent red
 
-    const res = (wasm as any).patch_buffer(target, tw, th, patch, pw, ph, 1, 1) as Uint8Array;
+    const res = (wasm as any).patch_buffer_rgba(target, tw, th, patch, pw, ph, 1, 1) as Uint8Array;
 
     const [r, g, b, a] = getPx(res, tw, 1, 1);
     // Expected: src over dst => r≈127,g≈0,b≈127, a≈255
@@ -72,7 +72,7 @@ describe('wasm.patch_buffer', () => {
       ph = 3;
     const patch = makeRGBA(pw, ph, 0, 255, 0, 255);
 
-    const res = (wasm as any).patch_buffer(target, tw, th, patch, pw, ph, 2, 2) as Uint8Array;
+    const res = (wasm as any).patch_buffer_rgba(target, tw, th, patch, pw, ph, 2, 2) as Uint8Array;
 
     // Only bottom-right pixel should be affected
     expect(getPx(res, tw, 2, 2)).toEqual([0, 255, 0, 255]);

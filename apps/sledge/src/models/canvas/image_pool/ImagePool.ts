@@ -15,25 +15,18 @@ export type ImagePoolEntry = {
   fileName: string; // 表示用のファイル名（ベース名）
 
   /**
-   * 新: 元画像の自然サイズ（px）
+   * 元画像の自然サイズ（px）
    */
-  base?: { width: number; height: number };
+  base: { width: number; height: number };
 
   /**
-   * 新: 表示上の位置とスケール。transform-origin は (0,0) 前提。
+   * 表示上の位置とスケール。transform-origin は (0,0) 前提。
    */
-  transform?: { x: number; y: number; scaleX: number; scaleY: number };
+  transform: { x: number; y: number; scaleX: number; scaleY: number };
 
   /**
-   * 旧: 表示用の位置とスケール、サイズ（px）。段階的撤去予定。
-   * width/height は base の値に相当し、scale は等倍拡縮を想定。
+   * 透過度 / 表示
    */
-  x: number;
-  y: number;
-  scale: number;
-  width: number;
-  height: number;
-
   opacity: number;
   visible: boolean;
 };

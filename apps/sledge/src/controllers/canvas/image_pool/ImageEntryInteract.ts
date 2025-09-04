@@ -53,19 +53,14 @@ class ImageEntryInteract {
     if (!payload) return;
     const entry = this.getEntry();
     if (!entry) return;
-    const partialData = {
-      x: payload.x,
-      y: payload.y,
-      // legacy representative scale
-      scale: (payload.scaleX + payload.scaleY) / 2,
+    updateEntryPartial(entry.id, {
       transform: {
         x: payload.x,
         y: payload.y,
         scaleX: payload.scaleX,
         scaleY: payload.scaleY,
       },
-    };
-    updateEntryPartial(entry.id, partialData);
+    });
   };
   private resizePos: ResizePos | undefined;
 
@@ -83,10 +78,10 @@ class ImageEntryInteract {
     this.pointerActive = true;
     this.startClientX = e.clientX;
     this.startClientY = e.clientY;
-    this.startX = entry.transform?.x ?? entry.x;
-    this.startY = entry.transform?.y ?? entry.y;
-    this.startScaleX = entry.transform?.scaleX ?? entry.scale;
-    this.startScaleY = entry.transform?.scaleY ?? entry.scale;
+    this.startX = entry.transform.x;
+    this.startY = entry.transform.y;
+    this.startScaleX = entry.transform.scaleX;
+    this.startScaleY = entry.transform.scaleY;
 
     if (handle) {
       this.mode = 'resize';
@@ -115,12 +110,12 @@ class ImageEntryInteract {
       this.enqueueUpdate({
         x: nx,
         y: ny,
-        scaleX: entry.transform?.scaleX ?? entry.scale,
-        scaleY: entry.transform?.scaleY ?? entry.scale,
+        scaleX: entry.transform.scaleX,
+        scaleY: entry.transform.scaleY,
       });
     } else if (this.mode === 'resize') {
-      const baseW = entry.base?.width ?? entry.width;
-      const baseH = entry.base?.height ?? entry.height;
+      const baseW = entry.base.width;
+      const baseH = entry.base.height;
       let nextScaleX = this.startScaleX;
       let nextScaleY = this.startScaleY;
       switch (this.resizePos) {
@@ -297,40 +292,19 @@ class ImageEntryInteract {
       scaleY: this.startScaleY,
       rotation: this.startRotation,
     };
-    const startPartialData = {
-      x: startPayload.x,
-      y: startPayload.y,
-      // legacy representative scale
-      scale: (startPayload.scaleX + startPayload.scaleY) / 2,
-      transform: {
-        x: startPayload.x,
-        y: startPayload.y,
-        scaleX: startPayload.scaleX,
-        scaleY: startPayload.scaleY,
-      },
-    };
-    const startEntry = { ...entry, ...startPartialData } as ImagePoolEntry;
+    const startEntry = {
+      ...entry,
+      transform: { x: startPayload.x, y: startPayload.y, scaleX: startPayload.scaleX, scaleY: startPayload.scaleY },
+    } as ImagePoolEntry;
 
     const payload = {
-      x: entry.x,
-      y: entry.y,
-      scaleX: entry.transform?.scaleX ?? 1,
-      scaleY: entry.transform?.scaleY ?? 1,
+      x: entry.transform.x,
+      y: entry.transform.y,
+      scaleX: entry.transform.scaleX,
+      scaleY: entry.transform.scaleY,
       rotation: this.startRotation,
     };
-    const partialData = {
-      x: payload.x,
-      y: payload.y,
-      // legacy representative scale
-      scale: (payload.scaleX + payload.scaleY) / 2,
-      transform: {
-        x: payload.x,
-        y: payload.y,
-        scaleX: payload.scaleX,
-        scaleY: payload.scaleY,
-      },
-    };
-    const endEntry = { ...entry, ...partialData } as ImagePoolEntry;
+    const endEntry = { ...entry } as ImagePoolEntry;
 
     if (JSON.stringify(startPayload) !== JSON.stringify(payload)) {
       projectHistoryController.addAction(

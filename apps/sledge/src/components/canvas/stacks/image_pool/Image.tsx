@@ -22,12 +22,12 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({
     visible: props.entry.visible,
     // transform-based drawing state
-    tx: props.entry.transform?.x ?? props.entry.x,
-    ty: props.entry.transform?.y ?? props.entry.y,
-    sx: props.entry.transform?.scaleX ?? props.entry.scale,
-    sy: props.entry.transform?.scaleY ?? props.entry.scale,
-    baseW: props.entry.base?.width ?? props.entry.width,
-    baseH: props.entry.base?.height ?? props.entry.height,
+    tx: props.entry.transform.x,
+    ty: props.entry.transform.y,
+    sx: props.entry.transform.scaleX,
+    sy: props.entry.transform.scaleY,
+    baseW: props.entry.base.width,
+    baseH: props.entry.base.height,
   });
 
   let containerRef: HTMLDivElement;
@@ -44,12 +44,12 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       // update reactive state only; styles bind to these
       setStateStore({
         visible: latest.visible,
-        tx: latest.transform?.x ?? latest.x,
-        ty: latest.transform?.y ?? latest.y,
-        sx: latest.transform?.scaleX ?? latest.scale,
-        sy: latest.transform?.scaleY ?? latest.scale,
-        baseW: latest.base?.width ?? latest.width,
-        baseH: latest.base?.height ?? latest.height,
+        tx: latest.transform.x,
+        ty: latest.transform.y,
+        sx: latest.transform.scaleX,
+        sy: latest.transform.scaleY,
+        baseW: latest.base.width,
+        baseH: latest.base.height,
       });
     };
     onEntryChangedHandler = onEntryChanged;

@@ -74,11 +74,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         originalPath: 'C:/dummyA.png',
         resourcePath: 'C:/dummyA.png',
         fileName: 'dummyA.png',
-        x: 0,
-        y: 0,
-        scale: 1,
-        width: 8,
-        height: 8,
+        base: { width: 8, height: 8 },
+        transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
         opacity: 1,
         visible: true,
       },
@@ -87,11 +84,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         originalPath: 'C:/dummyB.png',
         resourcePath: 'C:/dummyB.png',
         fileName: 'dummyB.png',
-        x: 1,
-        y: 1,
-        scale: 1,
-        width: 12,
-        height: 12,
+        base: { width: 12, height: 12 },
+        transform: { x: 1, y: 1, scaleX: 1, scaleY: 1 },
         opacity: 1,
         visible: true,
       },
@@ -100,11 +94,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         originalPath: 'C:/dummyC.png',
         resourcePath: 'C:/dummyC.png',
         fileName: 'dummyC.png',
-        x: 2,
-        y: 2,
-        scale: 1,
-        width: 16,
-        height: 16,
+        base: { width: 16, height: 16 },
+        transform: { x: 2, y: 2, scaleX: 1, scaleY: 1 },
         opacity: 1,
         visible: true,
       },
@@ -181,8 +172,11 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
           const { id: _omit2, ...baseNoId } = cur as any;
           const newProps: Omit<ImagePoolEntry, 'id'> = {
             ...baseNoId,
-            x: cur.x + dx,
-            y: cur.y + dy,
+            transform: {
+              ...cur.transform,
+              x: cur.transform.x + dx,
+              y: cur.transform.y + dy,
+            },
             opacity: Math.max(0, Math.min(1, cur.opacity + dop)),
             visible: rng() < 0.3 ? !cur.visible : cur.visible,
           };
@@ -364,7 +358,18 @@ function simplifyPoolState() {
   const ids = ['rnd-a', 'rnd-b', 'rnd-c'];
   return ids.map((id) => {
     const e = getEntry(id);
-    return e ? { id, exists: true, x: e.x, y: e.y, opacity: e.opacity, visible: e.visible, scale: e.scale } : { id, exists: false };
+    return e
+      ? {
+          id,
+          exists: true,
+          x: e.transform.x,
+          y: e.transform.y,
+          opacity: e.opacity,
+          visible: e.visible,
+          scaleX: e.transform.scaleX,
+          scaleY: e.transform.scaleY,
+        }
+      : { id, exists: false };
   });
 }
 

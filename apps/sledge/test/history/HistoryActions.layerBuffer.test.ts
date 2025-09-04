@@ -20,6 +20,9 @@ vi.mock('~/controllers/selection/SelectionManager', () => ({
 vi.mock('~/controllers/selection/SelectionOperator', () => ({
   cancelMove: h.cancelMoveMock,
 }));
+vi.mock('~/controllers/selection/FloatingMoveManager', () => ({
+  floatingMoveManager: { isMoving: h.isMoveStateMock },
+}));
 
 import { LayerBufferHistoryAction, LayerBufferPatch, packRGBA } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { getAgentOf } from '~/controllers/layer/LayerAgentManager';

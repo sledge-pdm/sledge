@@ -12,7 +12,7 @@ export async function checkForUpdates() {
 
       const confirmed = await confirm(
         `New version available.
-${update.currentVersion} -> ${update.version}`,
+(${update.currentVersion} -> ${update.version})`,
         {
           kind: 'info',
           title: 'Update Available',

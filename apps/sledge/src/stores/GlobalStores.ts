@@ -7,10 +7,10 @@ import { KeyConfigCommands } from '~/models/Consts';
 import { isMacOS } from '~/utils/OSUtils';
 
 // global
-type KeyConfigStore = {
+export type KeyConfigStore = {
   [command in KeyConfigCommands]: KeyConfigEntry[];
 };
-type LastSettingsStore = {
+export type LastSettingsStore = {
   exportSettings: ExportSettings;
   exportedDirPaths: string[];
 };

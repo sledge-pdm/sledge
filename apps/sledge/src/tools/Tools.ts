@@ -5,7 +5,6 @@ import { MoveTool } from '~/tools/move/MoveTool';
 import { PipetteTool } from '~/tools/pipette/PipetteTool';
 import { AutoSelection } from '~/tools/selection/auto/AutoSelection';
 import { RectSelection } from '~/tools/selection/rect/RectSelection';
-import { SelectionMoveTool } from '~/tools/selection/selection_move/SelectionMoveTool';
 import { ToolBehavior } from '~/tools/ToolBehavior';
 
 export const DEFAULT_PRESET = 'default';
@@ -133,13 +132,6 @@ export const toolCategories = {
       },
     },
   } as ToolCategory<AutoSelectionPresetConfig>,
-  [TOOL_CATEGORIES.SELECTION_MOVE]: {
-    id: TOOL_CATEGORIES.SELECTION_MOVE,
-    name: 'Selection Move',
-    iconSrc: '/icons/tool_bar/tool/move_area.png',
-    behavior: new SelectionMoveTool(),
-    // プリセット不要
-  } as ToolCategory,
   [TOOL_CATEGORIES.MOVE]: {
     id: TOOL_CATEGORIES.MOVE,
     name: 'Move',

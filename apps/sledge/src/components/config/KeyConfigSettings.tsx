@@ -16,7 +16,11 @@ import { KeyConfigCommands } from '~/models/Consts';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components/config/key_config_settings.css';
 
-const KeyConfigSettings: Component = () => {
+interface Props {
+  onKeyConfigChange?: () => void;
+}
+
+const KeyConfigSettings: Component<Props> = (props) => {
   const [recordingName, setRecordingName] = createSignal<KeyConfigCommands | undefined>(undefined);
   const [recordedEntry, setRecordedEntry] = createSignal<KeyConfigEntry | undefined>(undefined);
 
@@ -48,6 +52,7 @@ const KeyConfigSettings: Component = () => {
     if (!name) return;
     if (save) {
       saveKeyConfigEntry(name, recordedEntry());
+      props.onKeyConfigChange?.();
     }
     setRecordedEntry(undefined);
     setRecordingName(undefined);
@@ -102,6 +107,7 @@ const KeyConfigSettings: Component = () => {
 
           if (confirmed) {
             restoreDefaultKeyConfig();
+            props.onKeyConfigChange?.();
             message('restore succeeded.');
           }
         }}

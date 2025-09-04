@@ -1,8 +1,8 @@
-import { FileLocation, flexRow, getLatestVersion } from '@sledge/core';
+import { FileLocation, flexRow } from '@sledge/core';
 import { getTheme, vars, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { open } from '@tauri-apps/plugin-shell';
+import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import ExportDialog from '~/components/global/dialogs/ExportDialog';
 import SettingDialog from '~/components/global/dialogs/SettingDialog';
@@ -10,7 +10,8 @@ import SaveSection from '~/components/global/title_bar/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { menuItem, menuItemBackground, menuItemText, menuListLeft, menuListRight, root } from '~/styles/globals/top_menu_bar.css';
-import { addSkippedVersion, isNewVersionAvailable } from '~/utils/VersionUtils';
+import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
+import { addSkippedVersion } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
 
 interface Item {
@@ -19,15 +20,6 @@ interface Item {
 }
 
 const TopMenuBar: Component = () => {
-  const githubPat = import.meta.env.VITE_GITHUB_PAT;
-  const releaseApiUrl =
-    import.meta.env.VITE_GITHUB_REST_API_URL +
-    '/repos/' +
-    import.meta.env.VITE_GITHUB_OWNER +
-    '/' +
-    import.meta.env.VITE_GITHUB_REPO +
-    '/releases/latest';
-
   const [isRecentMenuShown, setIsRecentMenuShown] = createSignal(false);
   const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
 
@@ -37,21 +29,11 @@ const TopMenuBar: Component = () => {
   let settingDialog = null;
 
   const [isDecorated, setIsDecorated] = createSignal(true);
-  const [latestVersion, setLatestVersion] = createSignal<string | undefined>();
-  const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
+  const [availableUpdate, setAvailableUpdate] = createSignal<Update | undefined>();
   onMount(async () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
-
-    try {
-      getLatestVersion(releaseApiUrl, location.origin.includes('localhost') ? undefined : githubPat).then((ver) => {
-        setLatestVersion(ver);
-      });
-      isNewVersionAvailable(true, location.origin.includes('localhost') ? undefined : githubPat).then((isAvailable) => {
-        setNewVersionAvailable(isAvailable ?? false);
-      });
-    } catch (e) {
-      console.warn('failed to fetch version data.');
-    }
+    const update = await getUpdate();
+    setAvailableUpdate(update);
   });
 
   createEffect(() => {
@@ -193,7 +175,7 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
-      <Show when={newVersionAvailable()}>
+      <Show when={availableUpdate() && !globalConfig.misc.skippedVersions.includes(availableUpdate()?.version || '')}>
         <div class={menuItem}>
           <a
             class={menuItemText}
@@ -204,16 +186,15 @@ const TopMenuBar: Component = () => {
               'white-space': 'nowrap',
               color: vars.color.active,
             }}
-            onClick={(e) => {
-              // open(`https://github.com/Innsbluck-rh/sledge/releases/tag/${latestVersion()}`);
-              open('https://www.sledge-rules.app');
+            onClick={async (e) => {
+              await askAndInstallUpdate();
             }}
           >
-            ! update available
+            ! update
           </a>
           <div class={menuItemBackground} />
         </div>
-        <div class={menuItem} style={{ 'margin-right': '6px' }}>
+        <div class={menuItem} style={{ 'margin-left': '-4px', 'margin-right': '0px' }}>
           <a
             class={menuItemText}
             style={{
@@ -223,10 +204,12 @@ const TopMenuBar: Component = () => {
               'white-space': 'nowrap',
               color: vars.color.muted,
             }}
+            title={'You can restore skipped updates from settings.'}
             onClick={(e) => {
-              addSkippedVersion(latestVersion()!);
-              setNewVersionAvailable(false);
-              setLatestVersion(undefined);
+              const skippingVersion = availableUpdate()?.version;
+              if (skippingVersion) {
+                addSkippedVersion(skippingVersion);
+              }
             }}
           >
             [skip]

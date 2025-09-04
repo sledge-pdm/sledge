@@ -16,6 +16,10 @@ import { rightBottomArea, themeArea } from '~/styles/page.css';
 
 const App: Component = () => {
   onMount(() => {
+    applyThemeToHtml();
+  });
+
+  createEffect(() => {
     localStorage.setItem('theme', globalStore.theme);
   });
 
@@ -30,10 +34,6 @@ const App: Component = () => {
     html.classList.add(cls);
     prevThemeClass = cls;
   };
-
-  onMount(async () => {
-    applyThemeToHtml();
-  });
 
   createEffect(applyThemeToHtml);
 

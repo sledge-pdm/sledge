@@ -1,32 +1,23 @@
-import { flexCol, flexRow, getLatestVersion, w100, wh100 } from '@sledge/core';
+import { flexCol, flexRow, w100, wh100 } from '@sledge/core';
 import { k12x8, pageRoot, vars, ZFB08, ZFB09 } from '@sledge/theme';
 import { open } from '@tauri-apps/plugin-shell';
 import { createSignal, onMount } from 'solid-js';
 import { loadGlobalSettings } from '~/io/config/load';
-import { getCurrentVersion, getReleaseApiUrl, isNewVersionAvailable } from '~/utils/VersionUtils';
+import { getCurrentVersion } from '~/utils/VersionUtils';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
-import { aaContainer, aaText, aboutLink, aboutSubTitle, aboutTitle, contentContainer, newVersionText } from './about.css';
+import { aaContainer, aaText, aboutLink, aboutSubTitle, aboutTitle, contentContainer } from './about.css';
 
 const About = () => {
-  const githubPat = import.meta.env.VITE_GITHUB_PAT;
-
   const openLink = (url: string) => {
     open(url);
   };
 
   const [version, setVersion] = createSignal('');
-  const [latestVersion, setLatestVersion] = createSignal('');
-  const [newVersionAvailable, setNewVersionAvailable] = createSignal(false);
 
   onMount(async () => {
     try {
       await loadGlobalSettings();
       setVersion(await getCurrentVersion());
-      setLatestVersion((await getLatestVersion(getReleaseApiUrl(), location.origin.includes('localhost') ? undefined : githubPat)) ?? '');
-
-      const isAvailable = await isNewVersionAvailable(false, location.origin.includes('localhost') ? undefined : githubPat);
-      setNewVersionAvailable(isAvailable ?? false);
-
       await showMainWindow();
     } catch (e) {
       await reportWindowStartError(e);
@@ -67,15 +58,9 @@ const About = () => {
               by alphendp
             </p> */}
           </div>
-          <div class={flexCol} style={{ 'margin-bottom': '16px', gap: '4px' }}>
-            <p class={aboutSubTitle} style={{ 'margin-right': '12px' }}>
-              v{version()}
-            </p>
-            {/* 'https://github.com/Innsbluck-rh/sledge/releases/' */}
-            <a class={newVersionText} onClick={(e) => openLink(`https://github.com/Innsbluck-rh/sledge/releases/tag/${latestVersion()}`)} href='#'>
-              {newVersionAvailable() ? `> ${latestVersion()} available.` : ''}
-            </a>
-          </div>
+          <p class={aboutSubTitle} style={{ 'margin-right': '12px', 'margin-top': '2px', 'margin-bottom': '16px' }}>
+            v{version()}
+          </p>
 
           <div class={flexCol} style={{ 'margin-top': 'auto' }}>
             <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>fontface</p>

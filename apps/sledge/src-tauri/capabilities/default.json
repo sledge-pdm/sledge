@@ -51,6 +51,7 @@
     "core:window:allow-set-title",
     "core:webview:allow-set-webview-zoom",
     "os:default",
-    "process:default"
+    "process:default",
+    "updater:default"
   ]
 }

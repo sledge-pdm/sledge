@@ -69,6 +69,8 @@ export default function App() {
       console.log('scale changed to:', scaleFactor, 'dprzoom: ', zoomForIntegerize(scaleFactor));
       await webview.setZoom(zoomForIntegerize(scaleFactor));
     });
+
+    // await checkForUpdates();
   });
 
   createEffect(applyThemeToHtml);

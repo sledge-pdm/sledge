@@ -29,7 +29,7 @@ export const contentContainer = style([
   {
     width: '100%',
     margin: '0 28px',
-    marginTop: '20px',
+    marginTop: '16px',
     pointerEvents: 'none',
   },
 ]);
@@ -45,13 +45,13 @@ export const aboutLink = style({
 
 export const aboutTitle = style({
   fontFamily: ZFB31,
-  fontSize: '31px',
+  fontSize: '36px',
 });
 
 export const aboutSubTitle = style({
   fontFamily: k12x8,
   fontSize: '8px',
-  opacity: 0.6,
+  fontStyle: 'italic',
 });
 
 export const newVersionText = style({

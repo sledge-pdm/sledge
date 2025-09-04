@@ -1,22 +1,51 @@
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
+import { check, Update } from '@tauri-apps/plugin-updater';
 
-export async function checkForUpdates() {
+function isValidUpdate(update: Update): boolean {
+  if (update.version.includes('dev') || update.version.includes('test')) {
+    if (import.meta.env.DEV) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export async function getUpdate(): Promise<Update | undefined> {
   console.log('checking for updates...');
   try {
     const update = await check({
-      timeout: 10000,
+      timeout: 5000,
     });
-    if (update) {
+    if (update && isValidUpdate(update)) {
+      return update;
+    }
+  } catch (e) {
+    console.error('failed to update:', e);
+  }
+
+  return undefined;
+}
+
+export async function askAndInstallUpdate() {
+  console.log('checking for updates...');
+  try {
+    const update = await check({
+      timeout: 5000,
+    });
+    if (update && isValidUpdate(update)) {
       console.log(`found update ${update.version} from ${update.date} with notes ${update.body}`);
 
       const confirmed = await confirm(
         `New version available.
-(${update.currentVersion} -> ${update.version})`,
+${update.currentVersion} -> ${update.version}`,
         {
           kind: 'info',
           title: 'Update Available',
-          okLabel: 'Download and Install',
+          okLabel: 'Update',
           cancelLabel: 'Not Now',
         }
       );
@@ -25,7 +54,7 @@ export async function checkForUpdates() {
         let downloaded = 0;
         let contentLength = 0;
         // alternatively we could also call update.download() and update.install() separately
-        await update.download((event) => {
+        await update.downloadAndInstall((event) => {
           switch (event.event) {
             case 'Started':
               contentLength = event.data.contentLength || 0;
@@ -42,7 +71,7 @@ export async function checkForUpdates() {
         });
 
         console.log('update installed');
-        //   await relaunch();
+        await relaunch();
       }
     }
   } catch (e) {

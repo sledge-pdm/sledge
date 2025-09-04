@@ -4,6 +4,7 @@ mod window;
 
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, async_runtime::block_on};
+use tauri::menu::MenuBuilder;
 use tauri_plugin_fs::FsExt;
 use window::{SledgeWindowKind, WindowOpenOptions};
 

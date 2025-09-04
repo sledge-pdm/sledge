@@ -1,13 +1,14 @@
 import { flexRow } from '@sledge/core';
 import { getTheme, vars, ZFB03B } from '@sledge/theme';
 import { MetaProvider } from '@solidjs/meta';
-import { Route, Router } from '@solidjs/router';
+import { Navigate, Route, Router } from '@solidjs/router';
 import { createEffect, onMount, Suspense, type Component } from 'solid-js';
 import Header from '~/components/Header';
 import ThemeToggle from '~/components/ThemeToggle';
 import { About } from '~/routes/about';
 import { Download } from '~/routes/downloads';
 import { Features } from '~/routes/features';
+import NotFound from '~/routes/not-found';
 import { Playground } from '~/routes/play';
 import { globalStore } from '~/store/GlobalStore';
 import { pageContainer, restContainer, rootContainer } from '~/styles/app.css';
@@ -18,7 +19,7 @@ const App: Component = () => {
     localStorage.setItem('theme', globalStore.theme);
   });
 
-  // テーマクラスを html 要素に付与して、Portal や body 直下にもトークンが届くようにする
+  // Apply theme class to the html element so tokens are available to Portal and any body-level elements
   let prevThemeClass: string | undefined;
   const applyThemeToHtml = () => {
     const cls = getTheme(globalStore.theme);
@@ -158,10 +159,12 @@ const App: Component = () => {
         </MetaProvider>
       )}
     >
-      <Route path='/' component={About} />
+      <Route path='/' component={() => <Navigate href={'/about'} />} />
+      <Route path='/about' component={About} />
       <Route path='/features' component={Features} />
       <Route path='/play' component={Playground} />
       <Route path='/download' component={Download} />
+      <Route path='*' component={NotFound} />
     </Router>
   );
 };

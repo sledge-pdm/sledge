@@ -32,6 +32,26 @@ export const mainLink = style({
   },
 });
 
+export const downloadButton = style({
+  minWidth: '120px',
+  fontSize: '16px',
+  padding: '8px 20px',
+  borderWidth: '2px',
+  borderRadius: '4px',
+  backgroundColor: vars.color.accent,
+  borderColor: vars.color.accent,
+  color: vars.color.button.textOnAccent,
+  '@media': {
+    '(any-hover: hover)': {
+      ':hover': {
+        backgroundColor: vars.color.button.bg,
+        borderColor: vars.color.accent,
+        color: vars.color.button.text,
+      },
+    },
+  },
+});
+
 export const mainButton = style({
   minWidth: '120px',
   fontSize: '16px',

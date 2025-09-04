@@ -1,9 +1,9 @@
-import { Asset, flexCol, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
+import { Asset, flexCol, flexRow, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
 import { k12x8, vars, ZFB08 } from '@sledge/theme';
-import { Button } from '@sledge/ui';
-import { Component, createSignal, onMount, Show } from 'solid-js';
-import { mainButton, mainLink } from '~/styles/buttons.css';
-import { informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
+import { Button, Icon } from '@sledge/ui';
+import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { downloadButton, mainLink } from '~/styles/buttons.css';
+import { assetText, informationText, loadingText, osInfoText, versionInfoText } from '~/styles/download_section.css';
 
 const DownloadSection: Component<{}> = () => {
   const releaseApiUrl =
@@ -80,72 +80,78 @@ const DownloadSection: Component<{}> = () => {
     setIsLoading(false);
   });
 
-  const DownloadButtons = () => {
-    const assets = availableAssets();
-
-    return assets.map((item) => {
-      const { asset, extension } = item;
-      const text = `for ${userOS()}`;
-      return (
-        <>
-          <Button
-            key={asset.id}
-            onClick={() => {
-              window.open(asset.browser_download_url, '_blank')?.focus();
-            }}
-            hoverColor='white'
-            class={mainButton}
-            style={{
-              padding: '4px 12px',
-              display: 'flex',
-              'flex-direction': 'column',
-              'text-align': 'start',
-              gap: '4px',
-            }}
-          >
-            <span style={{}}>{releaseData()?.tag_name}</span>
-            <span style={{ 'font-family': k12x8, 'font-size': '8px', opacity: 0.6 }}>
-              for {userOS()} {asset.size ? `${Math.round((asset.size / 1024 / 1024) * 100) / 100}MB` : ''} / .{extension}
-            </span>
-          </Button>
-        </>
-      );
-    });
-  };
-
   return (
     <div class={flexCol} style={{ width: '100%', gap: '2rem' }}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
-        <div class={flexCol} style={{ gap: '0.5rem', width: '100%', 'margin-top': '12px', 'margin-left': '12px' }}>
-          <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-            <p class={versionInfoText}>
-              Platform:{' '}
-              <span class={versionInfoText} style={{ color: vars.color.accent }}>
-                {userOS()}
-              </span>
-            </p>
-          </Show>
-          <p class={versionInfoText}>
+        <div class={flexCol} style={{ width: '100%', 'margin-top': '12px' }}>
+          <p class={versionInfoText} style={{ 'margin-bottom': '36px' }}>
             Latest Build:{' '}
             <span class={versionInfoText} style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>
               {releaseData()?.name ?? '[ fetch failed ]'}
             </span>
           </p>
+
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-            <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '-2px' }}>
-              {DownloadButtons()}
+            <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
+              <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+              <p class={osInfoText}>
+                {' '}
+                for{' '}
+                <span class={osInfoText} style={{ color: vars.color.accent }}>
+                  {userOS()}
+                </span>
+              </p>
             </div>
           </Show>
+          <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+            <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '16px' }}>
+              <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
+            </div>
+          </Show>
+
+          <a
+            onClick={() => {
+              window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+            }}
+            class={mainLink}
+            style={{ 'margin-top': '48px', color: vars.color.muted }}
+          >
+            &gt; OTHER DOWNLOADS.
+          </a>
+
+          {/* <div class={flexCol} style={{ width: '100%', gap: '16px' }}>
+            <For each={Object.entries(osBuildInfos)}>
+              {([key, info]) => {
+                const name = key;
+                const exts = info.extensions;
+                const assets = releaseData()!
+                  .assets.filter((asset) => exts.some((ext) => asset.name.endsWith(`.${ext}`)))
+                  .map((asset) => {
+                    const extension = exts.find((ext) => asset.name.endsWith(`.${ext}`))!;
+                    return { asset, extension };
+                  });
+                if (assets.length === 0) return null;
+                return (
+                  <div class={flexCol} style={{ width: '100%', gap: '8px' }}>
+                    <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
+                      <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+                      <p class={osInfoText}>
+                        {' '}
+                        for{' '}
+                        <span class={osInfoText} style={{ color: vars.color.accent }}>
+                          {name}
+                        </span>
+                      </p>
+                    </div>
+                    <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '16px' }}>
+                      <For each={assets}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
+                    </div>
+                  </div>
+                );
+              }}
+            </For>
+          </div> */}
         </div>
-        <a
-          onClick={() => {
-            window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
-          }}
-          class={mainLink}
-          style={{ 'margin-left': '4px', 'margin-top': '24px', color: vars.color.muted }}
-        >
-          OTHER DOWNLOADS.
-        </a>
       </Show>
       <Show when={information()}>
         <div
@@ -182,6 +188,68 @@ const DownloadSection: Component<{}> = () => {
         </div>
       </Show>
     </div>
+  );
+};
+const DownloadButton: Component<{
+  os: os;
+  assetItem: {
+    asset: Asset;
+    extension: string;
+  };
+}> = ({ os, assetItem }) => {
+  const { asset, extension } = assetItem;
+  const [showDigest, setShowDigest] = createSignal(false);
+
+  return (
+    <>
+      <Button
+        key={asset.id}
+        onClick={() => {
+          window.open(asset.browser_download_url, '_blank')?.focus();
+        }}
+        class={downloadButton}
+        style={{
+          display: 'flex',
+          'flex-direction': 'row',
+          'text-align': 'start',
+          gap: '4px',
+        }}
+      >
+        <Icon src='/icons/misc/save.png' style={{ width: '16px', height: '16px', 'margin-bottom': '-4px' }} />
+        DOWNLOAD
+      </Button>
+      <p class={assetText} style={{ 'margin-top': '8px' }}>
+        file: {asset.name}
+      </p>
+      <p class={assetText} style={{ 'margin-bottom': '4px' }}>
+        size: {asset.size ? `${Math.round((asset.size / 1024 / 1024) * 100) / 100}MB` : ''}
+      </p>
+
+      <Show
+        when={showDigest()}
+        fallback={
+          <a class={`${mainLink} ${assetText}`} onClick={() => setShowDigest(true)}>
+            show digest
+          </a>
+        }
+      >
+        <a class={`${mainLink} ${assetText}`} onClick={() => setShowDigest(false)}>
+          hide digest
+        </a>
+        <p class={assetText} style={{ opacity: 0.7 }}>
+          {asset.digest}&nbsp;
+          <a
+            class={`${mainLink} ${assetText}`}
+            onClick={() => {
+              navigator.clipboard.writeText(asset.digest);
+              alert('copied to clipboard.');
+            }}
+          >
+            copy
+          </a>
+        </p>
+      </Show>
+    </>
   );
 };
 

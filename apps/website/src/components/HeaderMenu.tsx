@@ -1,6 +1,6 @@
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { useLocation } from '@solidjs/router';
+import { A, useLocation } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
 import { menuItem, menuText, menuTextContainer } from '~/styles/header_menu.css';
 
@@ -11,8 +11,8 @@ interface Route {
 
 const routes: Route[] = [
   {
-    path: '/',
-    label: 'About.',
+    path: '/about',
+    label: 'about.',
   },
   {
     path: '/features',
@@ -20,7 +20,7 @@ const routes: Route[] = [
   },
   {
     path: '/download',
-    label: 'Download.',
+    label: 'download.',
   },
   // {
   //   path: '/play',
@@ -36,12 +36,13 @@ const SideBarMenu: Component = () => {
         <For each={routes}>
           {(route, i) => {
             const isInPath = () => location.pathname === route.path;
+            const isDownload = () => route.path === '/download';
             const isPlay = () => route.path === '/play';
             return (
               <>
                 <div class={menuItem}>
-                  {/* <Icon src='icons/misc/dot.png' base={8} color={vars.color.muted} /> */}
-                  <a
+                  {/* <Icon src='/icons/misc/dot.png' base={8} color={vars.color.muted} /> */}
+                  <A
                     class={menuText}
                     href={route.path}
                     style={{
@@ -52,9 +53,9 @@ const SideBarMenu: Component = () => {
                     }}
                   >
                     {route.label}
-                  </a>
+                  </A>
                   <Show when={route.path === '/play'}>
-                    <Icon src='icons/misc/open_external.png' base={8} color={vars.color.muted} />
+                    <Icon src='/icons/misc/open_external.png' base={8} color={vars.color.muted} />
                   </Show>
                   {/* <p>/</p> */}
                 </div>

@@ -1,5 +1,4 @@
 import { Consts as CoreConfig } from '@sledge/core';
-import { ToolCategory, ToolPresets } from '~/tools/Tools';
 
 export const Consts = {
   ...CoreConfig,

@@ -159,7 +159,7 @@ const App: Component = () => {
         </MetaProvider>
       )}
     >
-      <Route path='/' component={() => <Navigate href={'/about'} />} />;
+      <Route path='/' component={() => <Navigate href={'/about'} />} />
       <Route path='/about' component={About} />
       <Route path='/features' component={Features} />
       <Route path='/play' component={Playground} />

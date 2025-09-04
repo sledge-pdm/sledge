@@ -51,7 +51,7 @@ const BottomInfo: Component = () => {
                 setRotation(0);
               }}
               onPointerDownOnValidArea={(e) => {
-                if (e.ctrlKey) {
+                if (e.ctrlKey || e.metaKey) {
                   e.preventDefault();
                   e.stopPropagation();
                   e.stopImmediatePropagation();

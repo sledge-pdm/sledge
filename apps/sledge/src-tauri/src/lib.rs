@@ -126,13 +126,19 @@ pub fn run() {
             #[allow(unused_variables)]
             |app, event| {
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
-                if let tauri::RunEvent::Opened { urls } = event {
-                    let files = urls
-                        .into_iter()
-                        .filter_map(|url| url.to_file_path().ok())
-                        .collect::<Vec<_>>();
+                {
+                    let menu = MenuBuilder::new(app)
+                        .build()?;
+                    app.set_menu(menu.clone())?;
+                    
+                    if let tauri::RunEvent::Opened { urls } = event {
+                        let files = urls
+                            .into_iter()
+                            .filter_map(|url| url.to_file_path().ok())
+                            .collect::<Vec<_>>();
 
-                    handle_file_associations(app.clone(), files);
+                        handle_file_associations(app.clone(), files);
+                    }
                 }
             },
         );

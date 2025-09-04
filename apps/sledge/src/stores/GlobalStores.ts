@@ -4,6 +4,7 @@ import { getDefaultSettings } from '~/io/config/set';
 import { GlobalConfig } from '~/models/config/GlobalConfig';
 import { KeyConfigEntry } from '~/models/config/KeyConfig';
 import { KeyConfigCommands } from '~/models/Consts';
+import { isMacOS } from '~/utils/OSUtils';
 
 // global
 type KeyConfigStore = {
@@ -44,12 +45,7 @@ const KEY_CONFIG_TEMPLATE_MAC: Readonly<KeyConfigStore> = {
 } as const;
 
 export const makeDefaultKeyConfigStore = (): KeyConfigStore => {
-  let isMac = false;
-  const userAgent = navigator.userAgent;
-  if (userAgent.includes('Mac OS X')) {
-    isMac = true;
-  }
-  return structuredClone(isMac ? KEY_CONFIG_TEMPLATE_MAC : KEY_CONFIG_TEMPLATE_DEFAULT);
+  return structuredClone(isMacOS() ? KEY_CONFIG_TEMPLATE_MAC : KEY_CONFIG_TEMPLATE_DEFAULT);
 };
 
 export const defaultLastSettingsStore: LastSettingsStore = {

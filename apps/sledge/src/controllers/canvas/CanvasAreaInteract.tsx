@@ -5,6 +5,7 @@ import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator'
 import { Consts } from '~/models/Consts';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
+import { isMacOS } from '~/utils/OSUtils';
 
 const LOG_LABEL = 'CanvasAreaInteract';
 const logger = new DebugLogger(LOG_LABEL, false);
@@ -48,12 +49,16 @@ class CanvasAreaInteract {
     this.canvasStack.style.backfaceVisibility = 'hidden';
   }
 
+  static isDragKey(e: PointerEvent): boolean {
+    return isMacOS() ? e.metaKey : e.ctrlKey;
+  }
+
   static isDraggable(e: PointerEvent) {
     if (e.buttons === 4) {
       return true;
     }
 
-    if (e.buttons === 1 && e.ctrlKey) {
+    if (e.buttons === 1 && CanvasAreaInteract.isDragKey(e)) {
       if (isSelectionAvailable()) return false;
       // angle-snapped line
       if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {

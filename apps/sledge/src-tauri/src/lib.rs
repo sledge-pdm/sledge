@@ -78,6 +78,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init());
 
     builder
+        .enable_macos_default_menu(false)
         .setup(
             #[allow(unused_variables)]
             |app| {
@@ -131,7 +132,6 @@ pub fn run() {
                         .into_iter()
                         .filter_map(|url| url.to_file_path().ok())
                         .collect::<Vec<_>>();
-
                     handle_file_associations(app.clone(), files);
                 }
             },

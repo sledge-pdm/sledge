@@ -89,6 +89,9 @@ const KeyListener: Component = () => {
       if (isKeyMatchesToEntry(e, keyConfigStore['pen'])) setActiveToolCategory('pen');
       if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) setActiveToolCategory('eraser');
       if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) setActiveToolCategory('fill');
+      if (isKeyMatchesToEntry(e, keyConfigStore['rect_select'])) setActiveToolCategory('rectSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore['auto_select'])) setActiveToolCategory('autoSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore['move'])) setActiveToolCategory('move');
     }
   };
 

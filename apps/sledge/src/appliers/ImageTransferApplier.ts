@@ -5,9 +5,8 @@ import { loadLocalImage } from '~/utils/DataUtils';
 
 export interface ImageTransferParams {
   entry: {
-    x: number;
-    y: number;
-    scale: number;
+    transform: { x: number; y: number; scaleX: number; scaleY: number };
+    base: { width: number; height: number };
     resourcePath: string; // file path (already used by ImagePool)
   };
   targetLayerId: string;
@@ -15,8 +14,11 @@ export interface ImageTransferParams {
 
 export async function transferToLayer({ entry, targetLayerId }: ImageTransferParams): Promise<void> {
   const bitmap = await loadLocalImage(entry.resourcePath);
-  const w = Math.max(1, Math.round(bitmap.width * (entry.scale || 1)));
-  const h = Math.max(1, Math.round(bitmap.height * (entry.scale || 1)));
+  // 自由比スケール: base 情報は呼び出し側 entry.base と bitmap 自然サイズが一致する前提
+  const scaleX = entry.transform.scaleX ?? 1;
+  const scaleY = entry.transform.scaleY ?? 1;
+  const w = Math.max(1, Math.round(bitmap.width * scaleX));
+  const h = Math.max(1, Math.round(bitmap.height * scaleY));
 
   const off = new OffscreenCanvas(w, h);
   const ctx = off.getContext('2d')!;
@@ -38,8 +40,8 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
   const layerH = agent.getHeight();
   const dot = layer?.dotMagnification || 1;
 
-  let dstX = Math.floor(entry.x / dot);
-  let dstY = Math.floor(entry.y / dot);
+  let dstX = Math.floor(entry.transform.x / dot);
+  let dstY = Math.floor(entry.transform.y / dot);
 
   let srcX = 0;
   let srcY = 0;

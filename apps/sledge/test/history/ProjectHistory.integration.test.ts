@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi  } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { currentColor, selectPalette, setColor } from '~/controllers/color/ColorController';
 import { ProjectHistoryController } from '~/controllers/history/ProjectHistoryController';
@@ -40,11 +40,8 @@ describe('Project-level history integration', () => {
       originalPath: 'C:/dummy.png',
       resourcePath: 'C:/dummy.png',
       fileName: 'dummy.png',
-      x: 0,
-      y: 0,
-      scale: 1,
-      width: 10,
-      height: 10,
+      base: { width: 10, height: 10 },
+      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
       opacity: 1,
       visible: true,
     };

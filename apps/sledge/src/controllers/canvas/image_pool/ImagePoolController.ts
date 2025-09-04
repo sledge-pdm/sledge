@@ -101,7 +101,11 @@ export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
     const current = getEntry(id);
     if (!current) return;
     await transferToLayer({
-      entry: current,
+      entry: {
+        transform: current.transform,
+        base: current.base,
+        resourcePath: current.resourcePath,
+      },
       targetLayerId: active.id,
     });
     if (removeAfter) removeEntry(current.id); // ImagePool から削除
@@ -119,17 +123,14 @@ async function createEntry(originalPath: string) {
   const width = bitmap.width;
   const height = bitmap.height;
 
+  const initialScale = Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height);
   const entry: ImagePoolEntry = {
     id,
     originalPath,
-    // 段階的移行のため resourcePath は originalPath をミラー
-    resourcePath: originalPath,
+    resourcePath: originalPath, // resourcePath は現状 originalPath をミラー
     fileName: originalPath.split(/[\\/]/).pop() ?? originalPath,
-    x: 0,
-    y: 0,
-    scale: Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height),
-    width,
-    height,
+    base: { width, height },
+    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale },
     opacity: 1,
     visible: true,
   };

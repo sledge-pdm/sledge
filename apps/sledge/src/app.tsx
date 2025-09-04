@@ -19,6 +19,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
+import { checkForUpdates } from '~/utils/UpdateUtils';
 
 export default function App() {
   // グローバルエラーハンドラーを設定
@@ -69,6 +70,8 @@ export default function App() {
       console.log('scale changed to:', scaleFactor, 'dprzoom: ', zoomForIntegerize(scaleFactor));
       await webview.setZoom(zoomForIntegerize(scaleFactor));
     });
+
+    await checkForUpdates();
   });
 
   createEffect(applyThemeToHtml);

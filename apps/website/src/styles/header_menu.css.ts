@@ -1,5 +1,5 @@
 import { flexRow } from '@sledge/core';
-import { ZFB09 } from '@sledge/theme';
+import { k12x8, ZFB08 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const menuTextContainer = style([
@@ -19,7 +19,7 @@ export const menuItem = style([
 ]);
 
 export const menuText = style({
-  fontFamily: `${ZFB09}`,
+  fontFamily: `${ZFB08} ${k12x8}`,
   fontSize: '8px',
   letterSpacing: '2px',
   textDecoration: 'none',

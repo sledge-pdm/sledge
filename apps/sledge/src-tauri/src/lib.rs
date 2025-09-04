@@ -4,7 +4,6 @@ mod window;
 
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, async_runtime::block_on};
-use tauri::menu::MenuBuilder;
 use tauri_plugin_fs::FsExt;
 use window::{SledgeWindowKind, WindowOpenOptions};
 
@@ -79,6 +78,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init());
 
     builder
+        .enable_macos_default_menu(false)
         .setup(
             #[allow(unused_variables)]
             |app| {
@@ -127,19 +127,12 @@ pub fn run() {
             #[allow(unused_variables)]
             |app, event| {
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
-                {
-                    let menu = MenuBuilder::new(app)
-                        .build()?;
-                    app.set_menu(menu.clone())?;
-                    
-                    if let tauri::RunEvent::Opened { urls } = event {
-                        let files = urls
-                            .into_iter()
-                            .filter_map(|url| url.to_file_path().ok())
-                            .collect::<Vec<_>>();
-
-                        handle_file_associations(app.clone(), files);
-                    }
+                if let tauri::RunEvent::Opened { urls } = event {
+                    let files = urls
+                        .into_iter()
+                        .filter_map(|url| url.to_file_path().ok())
+                        .collect::<Vec<_>>();
+                    handle_file_associations(app.clone(), files);
                 }
             },
         );

@@ -1,9 +1,9 @@
 import { Asset, flexCol, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
 import { k12x8, vars, ZFB08 } from '@sledge/theme';
-import { Button } from '@sledge/ui';
-import { Component, createSignal, onMount, Show } from 'solid-js';
-import { mainButton, mainLink } from '~/styles/buttons.css';
-import { informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
+import { Button, Icon } from '@sledge/ui';
+import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { downloadButton, mainLink } from '~/styles/buttons.css';
+import { assetText, informationText, loadingText, versionInfoText } from '~/styles/download_section.css';
 
 const DownloadSection: Component<{}> = () => {
   const releaseApiUrl =
@@ -80,43 +80,10 @@ const DownloadSection: Component<{}> = () => {
     setIsLoading(false);
   });
 
-  const DownloadButtons = () => {
-    const assets = availableAssets();
-
-    return assets.map((item) => {
-      const { asset, extension } = item;
-      const text = `for ${userOS()}`;
-      return (
-        <>
-          <Button
-            key={asset.id}
-            onClick={() => {
-              window.open(asset.browser_download_url, '_blank')?.focus();
-            }}
-            hoverColor='white'
-            class={mainButton}
-            style={{
-              padding: '4px 12px',
-              display: 'flex',
-              'flex-direction': 'column',
-              'text-align': 'start',
-              gap: '4px',
-            }}
-          >
-            <span style={{}}>{releaseData()?.tag_name}</span>
-            <span style={{ 'font-family': k12x8, 'font-size': '8px', opacity: 0.6 }}>
-              for {userOS()} {asset.size ? `${Math.round((asset.size / 1024 / 1024) * 100) / 100}MB` : ''} / .{extension}
-            </span>
-          </Button>
-        </>
-      );
-    });
-  };
-
   return (
     <div class={flexCol} style={{ width: '100%', gap: '2rem' }}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
-        <div class={flexCol} style={{ gap: '0.5rem', width: '100%', 'margin-top': '12px', 'margin-left': '12px' }}>
+        <div class={flexCol} style={{ gap: '0.5rem', width: '100%', 'margin-top': '12px' }}>
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <p class={versionInfoText}>
               Platform:{' '}
@@ -133,7 +100,7 @@ const DownloadSection: Component<{}> = () => {
           </p>
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '-2px' }}>
-              {DownloadButtons()}
+              <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
             </div>
           </Show>
         </div>
@@ -142,9 +109,9 @@ const DownloadSection: Component<{}> = () => {
             window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
           }}
           class={mainLink}
-          style={{ 'margin-left': '4px', 'margin-top': '24px', color: vars.color.muted }}
+          style={{ 'margin-top': '24px', color: vars.color.muted }}
         >
-          OTHER DOWNLOADS.
+          &gt; OTHER DOWNLOADS.
         </a>
       </Show>
       <Show when={information()}>
@@ -182,6 +149,68 @@ const DownloadSection: Component<{}> = () => {
         </div>
       </Show>
     </div>
+  );
+};
+const DownloadButton: Component<{
+  os: os;
+  assetItem: {
+    asset: Asset;
+    extension: string;
+  };
+}> = ({ os, assetItem }) => {
+  const { asset, extension } = assetItem;
+  const [showDigest, setShowDigest] = createSignal(false);
+
+  return (
+    <>
+      <Button
+        key={asset.id}
+        onClick={() => {
+          window.open(asset.browser_download_url, '_blank')?.focus();
+        }}
+        class={downloadButton}
+        style={{
+          display: 'flex',
+          'flex-direction': 'row',
+          'text-align': 'start',
+          gap: '4px',
+        }}
+      >
+        <Icon src='/icons/misc/save.png' style={{ width: '16px', height: '16px', 'margin-bottom': '-4px' }} />
+        DOWNLOAD
+      </Button>
+      <p class={assetText} style={{ 'margin-top': '8px' }}>
+        file: {asset.name}
+      </p>
+      <p class={assetText} style={{ 'margin-bottom': '4px' }}>
+        size: {asset.size ? `${Math.round((asset.size / 1024 / 1024) * 100) / 100}MB` : ''}
+      </p>
+
+      <Show
+        when={showDigest()}
+        fallback={
+          <a class={`${mainLink} ${assetText}`} onClick={() => setShowDigest(true)}>
+            show digest
+          </a>
+        }
+      >
+        <a class={`${mainLink} ${assetText}`} onClick={() => setShowDigest(false)}>
+          hide digest
+        </a>
+        <p class={assetText} style={{ opacity: 0.7 }}>
+          {asset.digest}&nbsp;
+          <a
+            class={`${mainLink} ${assetText}`}
+            onClick={() => {
+              navigator.clipboard.writeText(asset.digest);
+              alert('copied to clipboard.');
+            }}
+          >
+            copy
+          </a>
+        </p>
+      </Show>
+    </>
   );
 };
 

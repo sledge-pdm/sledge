@@ -53,6 +53,7 @@ export const vars = createThemeContract({
       hover: null,
       active: null,
       text: null,
+      textOnAccent: null,
       border: null,
     },
   },
@@ -134,8 +135,9 @@ export const lightTheme = createTheme(vars, {
       bg: '#ffffff',
       hover: '#e5e5e5',
       active: '#e0e0e0',
-      text: '#000000DE',
-      border: '#000000DE',
+      text: '#202020DE',
+      textOnAccent: '#ffffff',
+      border: '#202020DE',
     },
   },
   ...shared,
@@ -163,6 +165,7 @@ const darkThemeColorBase = {
     hover: '#444444',
     active: '#555555',
     text: '#eeeeee',
+    textOnAccent: '#222222',
     border: '#bbbbbb',
   },
 };
@@ -179,6 +182,10 @@ export const darkThemeGYFlip = createTheme(vars, {
     ...darkThemeColorBase,
     accent: darkThemeColorBase.active,
     active: darkThemeColorBase.accent,
+    button: {
+      ...darkThemeColorBase.button,
+      textOnAccent: '#222222',
+    },
   },
   ...shared,
 });
@@ -205,6 +212,7 @@ const blackThemeColorBase = {
     hover: '#444444',
     active: '#555555',
     text: '#eeeeee',
+    textOnAccent: '#101010',
     border: '#aaaaaa',
   },
 };

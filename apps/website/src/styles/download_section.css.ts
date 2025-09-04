@@ -29,3 +29,16 @@ export const loadingText = style({
     },
   },
 });
+
+export const assetText = style({
+  width: 'fit-content',
+  fontFamily: k12x8,
+  fontSize: '8px',
+  opacity: 0.5,
+  lineHeight: 1.5,
+  overflow: 'hidden',
+  whiteSpace: 'normal',
+  textWrap: 'pretty',
+  wordBreak: 'break-all',
+  userSelect: 'text',
+});

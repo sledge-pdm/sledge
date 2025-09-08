@@ -1,10 +1,10 @@
 import { mergeLayer } from '~/appliers/LayerMergeApplier';
-import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { RGBAColor, RGBAToHex } from '~/features/color';
+import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { Layer } from '~/models/layer/Layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import LayerImageAgent from './image/LayerImageAgent';
 import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from './LayerAgentManager';

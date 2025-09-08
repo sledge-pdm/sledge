@@ -1,6 +1,6 @@
 import { Vec2 } from '@sledge/core';
-import { LayerBufferPatch, packRGBA } from '~/controllers/history/actions/LayerBufferHistoryAction';
-import { RGBAColor } from '~/utils/ColorUtils';
+import { RGBAColor } from '~/features/color';
+import { LayerBufferPatch, packRGBA } from '~/features/history/actions/LayerBufferHistoryAction';
 import { TileIndex } from './Tile';
 import TileManager from './TileManager';
 

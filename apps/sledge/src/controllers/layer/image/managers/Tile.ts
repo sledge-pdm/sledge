@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { RGBAColor } from '~/utils/ColorUtils';
+import { RGBAColor } from '~/features/color';
 
 export interface TileIndex {
   row: number;

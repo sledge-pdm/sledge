@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { currentColor, selectPalette, setColor } from '~/controllers/color/ColorController';
 import { ProjectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
 import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
+import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { PaletteType } from '~/models/color/PaletteType';
 import { canvasStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code

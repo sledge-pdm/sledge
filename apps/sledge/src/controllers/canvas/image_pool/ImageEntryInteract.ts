@@ -1,6 +1,6 @@
 import { updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';

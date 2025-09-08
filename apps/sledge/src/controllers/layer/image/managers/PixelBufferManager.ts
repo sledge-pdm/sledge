@@ -1,5 +1,5 @@
 import { Point, Size2D, Vec2 } from '@sledge/core';
-import { RGBAColor } from '~/utils/ColorUtils';
+import { RGBAColor } from '~/features/color';
 
 export default class PixelBufferManager {
   constructor(

@@ -1,8 +1,8 @@
 import { transferToLayer } from '~/appliers/ImageTransferApplier';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
-import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
 import { activeLayer } from '~/controllers/layer/LayerListController';
+import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
+import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';

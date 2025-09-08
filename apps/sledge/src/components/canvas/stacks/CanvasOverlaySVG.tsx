@@ -6,6 +6,7 @@ import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager
 import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
 import { getSelectionOffset } from '~/controllers/selection/SelectionOperator';
 import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/controllers/tool/ToolController';
+import { RGBAToHex } from '~/features/color';
 import { Consts } from '~/models/Consts';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -14,7 +15,6 @@ import '~/styles/misc/marching_ants.css';
 import { getDrawnPixelMask } from '~/tools/draw/pen/PenDraw';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PathCmdList } from '~/types/PathCommand';
-import { RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {

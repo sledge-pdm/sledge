@@ -1,5 +1,5 @@
 import { Size2D, Vec2 } from '@sledge/core';
-import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
+import { colorMatch, RGBAColor } from '~/features/color';
 import Tile, { TileIndex } from './Tile';
 
 export default class TileManager {

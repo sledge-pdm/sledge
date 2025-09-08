@@ -1,11 +1,10 @@
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
-import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { currentColor, setCurrentColor } from '~/features/color';
+import { currentColor, hexToRGBA, RGBAColor, setCurrentColor } from '~/features/color';
+import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { colorStore } from '~/stores/EditorStores';
-import { hexToRGBA, RGBAColor } from '~/utils/ColorUtils';
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;

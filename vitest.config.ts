@@ -11,7 +11,16 @@ export default defineConfig({
     globals: true,
     env: dotenv.config({ path: '.env.vitest' }).parsed,
     setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
-    include: ['apps/sledge/test/**/*.test.ts', 'apps/sledge/test/**/*.test.tsx'],
+    // app-level integration tests + feature-local unit tests
+    include: [
+      'apps/sledge/test/**/*.test.ts',
+      'apps/sledge/test/**/*.test.tsx',
+      'apps/sledge/src/features/**/__tests__/**/*.test.ts',
+      'apps/sledge/src/features/**/__tests__/**/*.test.tsx',
+      // unit test variant naming
+      'apps/sledge/src/features/**/__tests__/**/*.unit.test.ts',
+      'apps/sledge/src/features/**/__tests__/**/*.unit.test.tsx',
+    ],
     exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
     coverage: {
       reporter: ['text', 'html'],

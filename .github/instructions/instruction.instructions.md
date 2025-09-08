@@ -30,3 +30,15 @@ However, you can use the commands below in root path.
 
 Sledge app imports package(including wasm) via tsconfig and vite alias, not via workspace dependencies.
 So you don't need to rebuild or "pnpm install" after building wasm package (or after changing other packages).
+
+Please avoid using "snapshot" for everything that bundles something.
+In the concept, the word "snapshot" should means "the state of current editor including canvas image data."
+Unless it is unavoidable, stop naming functions, values, and concepts using the word "snapshot" in other meaning.
+
+Don't write the words like "early return" in the comments because it's very subjective word.
+Instead, use more direct expressions like "return undefined when values are not ready".
+
+naming "safeXXX" for functions or values. It's also subjective and just increases the number of values to handle.
+Instead, consider assignning fallback-ed value for original value(e.g. "XXX").
+
+In case of testing, ALWAYS USE `pnpm test` in project root. that's it. PLEASE don't mess up with commands.

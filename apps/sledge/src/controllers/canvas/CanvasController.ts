@@ -2,7 +2,7 @@ import { Size2D } from '@sledge/core';
 import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
+import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { Consts } from '~/models/Consts';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';

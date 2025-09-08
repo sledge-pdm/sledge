@@ -1,7 +1,6 @@
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { setCurrentColor } from '~/features/color';
+import { isTransparent, RGBAColor, RGBToHex, setCurrentColor, transparent } from '~/features/color';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
-import { isTransparent, RGBAColor, RGBToHex, transparent } from '~/utils/ColorUtils';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;

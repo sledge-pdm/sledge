@@ -3,9 +3,9 @@ import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { activeLayer } from '~/controllers/layer/LayerListController';
 import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { getPresetOf } from '~/controllers/tool/ToolController';
+import { colorMatch, RGBAColor } from '~/features/color';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
-import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
 
 export class PenTool implements ToolBehavior {

@@ -1,9 +1,9 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { LayerBufferHistoryAction, LayerBufferPatch } from '~/controllers/history/actions/LayerBufferHistoryAction';
 import { TileIndex } from '~/controllers/layer/image/managers/Tile';
+import { colorMatch, RGBAColor } from '~/features/color';
+import { LayerBufferHistoryAction, LayerBufferPatch } from '~/features/history/actions/LayerBufferHistoryAction';
 import { setProjectStore } from '~/stores/ProjectStores';
-import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { eventBus } from '~/utils/EventBus';
 import DiffManager from './managers/DiffManager';
 import PixelBufferManager from './managers/PixelBufferManager';

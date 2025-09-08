@@ -86,9 +86,9 @@ class SelectionAreaManager {
   }
 
   constructor() {
-    // キャンバスサイズが不明な段階では (0,0) で初期化
-    // this.selectionMask = new SelectionMask(0, 0);
-    this.selectionMask = new SelectionMask(canvasStore.canvas.width, canvasStore.canvas.height);
+    const width = canvasStore?.canvas?.width ?? 0;
+    const height = canvasStore?.canvas?.height ?? 0;
+    this.selectionMask = new SelectionMask(width, height);
     this.previewMask = undefined;
 
     // キャンバスサイズ変更が来たら、両方のマスクをリサイズ
@@ -116,7 +116,6 @@ class SelectionAreaManager {
     this.areaOffset = { x: 0, y: 0 };
     eventBus.emit('selection:offsetChanged', { newOffset: this.areaOffset });
 
-    // マスクサイズが0x0の場合はエラーログを出力して早期リターン
     if (this.selectionMask.getWidth() === 0 || this.selectionMask.getHeight() === 0) {
       console.warn('SelectionManager: SelectionMask size is 0x0. Canvas size may not be initialized properly.');
       return;
@@ -292,7 +291,9 @@ class SelectionAreaManager {
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
     const buffer = getBufferOf(srcLayerId);
     if (!buffer) return;
-    const { width, height } = canvasStore.canvas;
+  // canvasStore が未初期化なケース (極早期テスト) では何も返さない
+  if (!canvasStore?.canvas) return;
+  const { width, height } = canvasStore.canvas;
 
     this.commitOffset();
     this.commit();

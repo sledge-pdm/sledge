@@ -4,8 +4,7 @@ import { ColorBox } from '@sledge/ui';
 import { useMousePosition } from '@solid-primitives/mouse';
 import { Component, Show } from 'solid-js';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/controllers/layer/LayerController';
-import { currentColor } from '~/features/color';
-import { isTransparent, transparent } from '~/utils/ColorUtils';
+import { currentColor, isTransparent, transparent } from '~/features/color';
 
 const PipetteDetail: Component = (props: {}) => {
   const pos = useMousePosition();

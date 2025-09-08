@@ -2,9 +2,8 @@
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
-import { PaletteType } from '~/features/color';
+import { PaletteType, RGBAColor } from '~/features/color';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
-import { RGBAColor } from '~/utils/ColorUtils';
 
 type AppearanceStore = {
   leftSide: {

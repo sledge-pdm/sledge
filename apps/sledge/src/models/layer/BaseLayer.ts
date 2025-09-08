@@ -1,6 +1,6 @@
 // BaseLayer is bottom layer, that only can change color/transparency like canvas fabric.
 
-import { hexToRGBA } from '~/utils/ColorUtils';
+import { hexToRGBA } from '~/features/color';
 
 export type BaseLayerColorMode = 'transparent' | 'white' | 'black' | 'custom';
 

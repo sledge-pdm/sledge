@@ -1,7 +1,7 @@
 // Side-effectful operations / state interactions for color feature
 import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
 import { hexToRGBA } from '~/features/color';
+import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 import { PaletteType } from './palette';
 

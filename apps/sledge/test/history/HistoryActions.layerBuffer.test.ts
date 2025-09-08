@@ -13,16 +13,16 @@ const h = vi.hoisted(() => ({
   cancelMoveMock: vi.fn(),
 }));
 
-vi.mock('~/controllers/layer/LayerAgentManager', () => ({
+vi.mock('~/features/layer/LayerAgentManager', () => ({
   getAgentOf: vi.fn(() => h.agentMock),
 }));
-vi.mock('~/controllers/selection/SelectionManager', () => ({
+vi.mock('~/features/selection/SelectionManager', () => ({
   selectionManager: { isMoveState: h.isMoveStateMock },
 }));
-vi.mock('~/controllers/selection/SelectionOperator', () => ({
+vi.mock('~/features/selection/SelectionOperator', () => ({
   cancelMove: h.cancelMoveMock,
 }));
-vi.mock('~/controllers/selection/FloatingMoveManager', () => ({
+vi.mock('~/features/selection/FloatingMoveManager', () => ({
   floatingMoveManager: { isMoving: h.isMoveStateMock },
 }));
 

@@ -69,7 +69,7 @@ vi.mock('@sledge/theme', () => ({
 }));
 
 // Mock WebGLRenderer consumer modules that import GLSL to avoid Vite parsing GLSL files in node tests
-vi.mock('~/controllers/webgl/WebGLRenderer', () => ({
+vi.mock('~/webgl/WebGLRenderer', () => ({
   WebGLRenderer: class {
     constructor() {}
   },

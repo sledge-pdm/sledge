@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ImagePoolEntryPropsHistoryAction } from '~/features/history';
-import { getEntry, insertEntry, removeEntry } from '~/features/image_pool';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { getEntry, ImagePoolEntry, insertEntry, removeEntry } from '~/features/image_pool';
 
 describe('ImagePoolEntryPropsHistoryAction', () => {
   const id = 'ip-1';

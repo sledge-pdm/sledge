@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ImagePoolHistoryAction } from '~/features/history';
-import { getEntry, insertEntry, removeEntry } from '~/features/image_pool';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { getEntry, ImagePoolEntry, insertEntry, removeEntry } from '~/features/image_pool';
 
 describe('ImagePoolHistoryAction', () => {
   it('undo/redo add/remove keeps id with insertEntry()', async () => {

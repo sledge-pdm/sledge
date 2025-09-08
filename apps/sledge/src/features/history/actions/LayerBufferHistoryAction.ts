@@ -1,5 +1,5 @@
 import { RGBAColor } from '~/features/color';
-import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { TileIndex } from '~/features/layer/managers/Tile';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';

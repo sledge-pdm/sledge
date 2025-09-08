@@ -13,7 +13,7 @@ import {
 } from '~/features/history';
 import { getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { BlendMode, Layer, LayerType, resetLayerImage } from '~/features/layer';
-import { getBufferOf } from '~/features/layer/LayerAgentManager';
+import { getBufferOf } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code

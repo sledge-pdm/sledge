@@ -1,6 +1,6 @@
 import { changeCanvasSize } from '~/features/canvas';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { join } from '~/utils/FileUtils';
 

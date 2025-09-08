@@ -1,7 +1,7 @@
 import { Size2D } from '@sledge/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 

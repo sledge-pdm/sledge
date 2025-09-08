@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';

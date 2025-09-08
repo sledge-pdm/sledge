@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { activeLayer } from '~/features/layer';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { getPresetOf } from '~/features/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';

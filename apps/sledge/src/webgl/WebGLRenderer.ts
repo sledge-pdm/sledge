@@ -5,7 +5,7 @@ import fragmentSrc from './shaders/blend.frag.glsl';
 import vertexSrc from './shaders/fullscreen.vert.glsl';
 // WASM関数をインポート
 import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
-import { getAgentOf, getBufferOf } from '~/features/layer/LayerAgentManager';
+import { getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
 import { DebugLogger } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 

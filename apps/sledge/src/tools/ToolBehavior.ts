@@ -1,6 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { RGBAColor } from '~/features/color';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 
 export interface ToolResult {
   result?: string;

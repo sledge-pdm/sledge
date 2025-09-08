@@ -5,7 +5,7 @@ import { crop_patch_rgba } from '@sledge/wasm';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
 import { projectHistoryController } from '~/features/history';
 import { LayerBufferHistoryAction } from '~/features/history/actions/LayerBufferHistoryAction';
-import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/LayerAgentManager';
+import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
 import { DebugLogger } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { canvasStore } from '~/stores/ProjectStores';

@@ -1,8 +1,8 @@
 import { Vec2 } from '@sledge/core';
 import { currentColor, hexToRGBA } from '~/features/color';
 import { findLayerById } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/LayerAgentManager';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';

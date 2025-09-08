@@ -1,7 +1,7 @@
 import { Size2D } from '@sledge/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers, resetLayerImage } from '~/features/layer';
-import { getAgentOf, getBufferOf } from '~/features/layer/LayerAgentManager';
+import { getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';

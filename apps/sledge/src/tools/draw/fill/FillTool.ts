@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { filter_by_selection_mask } from '@sledge/wasm';
 import { RGBAColor } from '~/features/color';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionFillMode, getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { getPresetOf } from '~/features/tool/ToolController';

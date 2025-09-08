@@ -1,4 +1,4 @@
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { RectFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { ToolArgs } from '~/tools/ToolBehavior';
 import { SelectionBase } from '~/tools/selection/SelectionBase';

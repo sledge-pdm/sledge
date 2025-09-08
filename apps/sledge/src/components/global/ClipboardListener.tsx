@@ -1,7 +1,7 @@
 import { slice_patch_rgba, trim_mask_with_box } from '@sledge/wasm';
 import { Component, onCleanup, onMount } from 'solid-js';
 import { activeIndex, activeLayer, addLayerTo } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { setBottomBarText } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMoveFromPasted } from '~/features/selection/SelectionOperator';

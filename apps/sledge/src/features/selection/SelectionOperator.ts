@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_subtract, filter_by_selection_mask } from '@sledge/wasm';
 import { activeLayer } from '~/features/layer';
-import { getActiveAgent, getAgentOf } from '~/features/layer/LayerAgentManager';
+import { getActiveAgent, getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';

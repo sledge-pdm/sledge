@@ -1,5 +1,5 @@
 import { BlendMode, getLayerIndex, Layer } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 

@@ -1,5 +1,5 @@
 import { auto_select_region_mask } from '@sledge/wasm';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getPresetOf } from '~/features/tool/ToolController';
 import { SelectionBase } from '~/tools/selection/SelectionBase';

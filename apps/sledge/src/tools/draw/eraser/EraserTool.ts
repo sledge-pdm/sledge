@@ -1,5 +1,5 @@
 import { transparent } from '~/features/color';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { ToolArgs } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 import { PenTool } from '../pen/PenTool';

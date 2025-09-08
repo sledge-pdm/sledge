@@ -1,6 +1,6 @@
 import { findLayerById } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/LayerAgentManager';
-import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { loadLocalImage } from '~/utils/DataUtils';
 
 export interface ImageTransferParams {

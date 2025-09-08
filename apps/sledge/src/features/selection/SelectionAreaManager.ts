@@ -2,8 +2,8 @@
 
 import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask, slice_patch_rgba } from '@sledge/wasm';
-import { getActiveAgent, getBufferOf } from '~/features/layer/LayerAgentManager';
-import { TileIndex } from '~/features/layer/managers/Tile';
+import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
+import { TileIndex } from '~/features/layer/agent/managers/Tile';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { canvasStore } from '~/stores/ProjectStores';

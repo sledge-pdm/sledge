@@ -3,7 +3,7 @@ import { accentedButton } from '@sledge/theme';
 import { grayscale } from '@sledge/wasm';
 import { Component } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
-import { getActiveAgent } from '~/features/layer/LayerAgentManager';
+import { getActiveAgent } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
 import { sectionContent } from '~/styles/section/section_item.css';
 

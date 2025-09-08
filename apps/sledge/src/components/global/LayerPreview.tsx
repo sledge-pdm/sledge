@@ -4,7 +4,7 @@ import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { Consts } from '~/Consts';
 import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { Layer } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/components/layer_preview.css';
 import { eventBus, Events } from '~/utils/EventBus';

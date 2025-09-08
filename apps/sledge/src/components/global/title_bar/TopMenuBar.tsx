@@ -134,7 +134,7 @@ const TopMenuBar: Component = () => {
   ];
 
   return (
-    <div class={[getTheme(globalConfig.appearance.theme), root].join(' ')}>
+    <div class={root}>
       <div class={menuListLeft}>
         <For each={leftItems}>
           {(item, i) => {

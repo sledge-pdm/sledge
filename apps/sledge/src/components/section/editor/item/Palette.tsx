@@ -1,7 +1,6 @@
 import { ColorBox } from '@sledge/ui';
 import { Component } from 'solid-js';
-import { currentColor, selectPalette } from '~/controllers/color/ColorController';
-import { PaletteType } from '~/models/color/PaletteType';
+import { currentColor, PaletteType, selectPalette } from '~/features/color';
 import { colorStore } from '~/stores/EditorStores';
 import { paletteRoot } from '~/styles/components/palette.css';
 

@@ -16,7 +16,6 @@ export const TOOL_CATEGORIES = {
   PIPETTE: 'pipette',
   RECT_SELECTION: 'rectSelection',
   AUTO_SELECTION: 'autoSelection',
-  SELECTION_MOVE: 'selectionMove',
   MOVE: 'move',
 } as const;
 

@@ -1,5 +1,5 @@
-import { setCurrentColor } from '~/controllers/color/ColorController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { setCurrentColor } from '~/features/color';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { isTransparent, RGBAColor, RGBToHex, transparent } from '~/utils/ColorUtils';
 

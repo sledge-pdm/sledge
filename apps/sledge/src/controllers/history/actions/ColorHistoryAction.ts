@@ -1,6 +1,5 @@
-import { setColor } from '~/controllers/color/ColorController';
 import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
-import { PaletteType } from '~/models/color/PaletteType';
+import { PaletteType, setColor } from '~/features/color';
 import { RGBAColor, RGBAToHex } from '~/utils/ColorUtils';
 
 // history action for color change in palette

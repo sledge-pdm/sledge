@@ -3,8 +3,8 @@ import { vars, ZFB08, ZFB09 } from '@sledge/theme';
 import { ColorBox } from '@sledge/ui';
 import { useMousePosition } from '@solid-primitives/mouse';
 import { Component, Show } from 'solid-js';
-import { currentColor } from '~/controllers/color/ColorController';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/controllers/layer/LayerController';
+import { currentColor } from '~/features/color';
 import { isTransparent, transparent } from '~/utils/ColorUtils';
 
 const PipetteDetail: Component = (props: {}) => {

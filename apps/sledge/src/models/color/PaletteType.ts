@@ -1,4 +1,4 @@
-export enum PaletteType {
-  primary = 'primary',
-  secondary = 'secondary',
-}
+/**
+ * @deprecated Moved to features/color. Import from '~/features/color'.
+ */
+export { PaletteType } from '~/features/color';

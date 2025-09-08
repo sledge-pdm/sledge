@@ -3,18 +3,18 @@
 export type { ImagePoolEntry } from './model';
 
 export {
-  setImagePool,
+  addToImagePool,
   getEntries,
   getEntry,
+  hideEntry,
   insertEntry,
-  setEntry,
-  updateEntryPartial,
+  relinkEntry,
   removeEntry,
   replaceAllEntries,
-  addToImagePool,
-  relinkEntry,
-  transferToCurrentLayer,
   selectEntry,
+  setEntry,
+  setImagePool,
   showEntry,
-  hideEntry,
+  transferToCurrentLayer,
+  updateEntryPartial,
 } from './service';

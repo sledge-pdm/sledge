@@ -12,7 +12,7 @@ import { showContextMenu } from '@sledge/ui';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createEffect, onCleanup, onMount } from 'solid-js';
+import { createEffect, onMount } from 'solid-js';
 import DebugViewer from '~/components/global/debug/DebugViewer';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { loadGlobalSettings } from '~/io/config/load';
@@ -36,11 +36,11 @@ export default function App() {
   onMount(() => {
     window.addEventListener('error', handleGlobalError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
-  });
 
-  onCleanup(() => {
-    window.removeEventListener('error', handleGlobalError);
-    window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   });
 
   listenEvent('onSettingsSaved', () => {

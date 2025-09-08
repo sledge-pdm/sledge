@@ -1,9 +1,9 @@
 import { RGBAColor } from '~/features/color';
 import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
-import { TileIndex } from '~/features/layer/managers/Tile';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
 import { BaseHistoryAction } from '../base';
+import { TileIndex } from '~/features/layer/agent/managers/Tile';
 
 export type PackedRGBA = number;
 export const packRGBA = (c: RGBAColor): PackedRGBA => (c[3] << 24) | (c[0] << 16) | (c[1] << 8) | c[2];

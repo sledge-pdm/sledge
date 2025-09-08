@@ -2,12 +2,12 @@ import { Size2D, Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { LayerBufferHistoryAction, LayerBufferPatch } from '~/features/history/actions/LayerBufferHistoryAction';
-import { TileIndex } from '~/features/layer/managers/Tile';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import DiffManager from './managers/DiffManager';
 import PixelBufferManager from './managers/PixelBufferManager';
 import TileManager from './managers/TileManager';
+import { TileIndex } from '~/features/layer/agent/managers/Tile';
 
 // Agent that manages per-layer image operations: buffer, tiles, diffs, and applying history actions
 export default class LayerImageAgent {

@@ -1,7 +1,7 @@
 import { findLayerById } from '~/features/layer';
+import { SledgeNode } from './nodes/DSLNodes';
 import { LayerIn } from './nodes/pass/LayerIn';
 import { LayerOut } from './nodes/pass/LayerOut';
-import { SledgeNode } from '~/dsl/nodes/DSLNodes';
 
 export class DSL {
   layerIn: LayerIn;

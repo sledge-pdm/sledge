@@ -1,6 +1,6 @@
 import { Component, For, createSignal, onCleanup, onMount } from 'solid-js';
-import { getEntries } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { isImagePoolActive } from '~/controllers/layer/LayerListController';
+import { getEntries } from '~/features/image_pool';
+import { isImagePoolActive } from '~/features/layer';
 import { Consts } from '~/models/Consts';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';

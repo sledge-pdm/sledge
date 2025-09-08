@@ -1,6 +1,5 @@
-import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { removeLayer } from '~/controllers/layer/LayerListController';
-import type { Layer } from '~/models/layer/Layer';
+import type { Layer } from '~/features/layer';
+import { removeLayer, resetLayerImage } from '~/features/layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';

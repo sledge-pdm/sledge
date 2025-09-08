@@ -4,15 +4,7 @@ import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createSignal, For, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import {
-  getEntries,
-  getEntry,
-  hideEntry,
-  removeEntry,
-  selectEntry,
-  showEntry,
-  transferToCurrentLayer,
-} from '~/controllers/canvas/image_pool/ImagePoolController';
+import { getEntries, getEntry, hideEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { imagePoolStore } from '~/stores/ProjectStores';

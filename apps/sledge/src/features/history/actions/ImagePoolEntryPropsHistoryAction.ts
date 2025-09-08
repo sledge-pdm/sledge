@@ -1,4 +1,4 @@
-import { setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { setEntry } from '~/features/image_pool';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { BaseHistoryAction } from '../base';
 

@@ -1,5 +1,5 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
+import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
 

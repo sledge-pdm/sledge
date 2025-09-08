@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
+import { BlendMode, LayerType } from '~/features/layer';
 import { loadProjectJson } from '~/io/project/in/load';
 import { dumpProject, type Project } from '~/io/project/out/dump';
-import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 
 describe('Project dump/load roundtrip', () => {

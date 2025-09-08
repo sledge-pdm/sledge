@@ -6,7 +6,7 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB03B } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
-import { activeLayer, allLayers } from '~/controllers/layer/LayerListController';
+import { activeLayer, allLayers } from '~/features/layer';
 import { saveGlobalSettings } from '~/io/config/save';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/models/canvas/Canvas';
 import { Consts } from '~/models/Consts';

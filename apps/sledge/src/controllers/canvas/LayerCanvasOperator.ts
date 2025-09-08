@@ -1,15 +1,14 @@
 import { Vec2 } from '@sledge/core';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { findLayerById } from '~/controllers/layer/LayerListController';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { DebugLogger, setBottomBarText } from '~/controllers/log/LogController';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/controllers/tool/ToolController';
-import { hexToRGBA } from '~/features/color';
+import { currentColor, hexToRGBA } from '~/features/color';
+import { findLayerById } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { ToolArgs, ToolResult } from '~/tools/ToolBehavior';
 import { ToolCategory } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
-import { currentColor } from '../color/ColorController';
 
 export enum DrawState {
   start,

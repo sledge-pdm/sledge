@@ -1,4 +1,4 @@
-import { autoSelectionPresetMeta } from '~/models/tool/presets/AutoSelectionPresets';
+import { autoSelectionPresetMeta } from '~/tools/presets/AutoSelectionPresets';
 import { eraserPresetMeta } from './EraserPresets';
 import { fillPresetMeta } from './FillPresets';
 import { penPresetMeta } from './PenPresets';

@@ -1,9 +1,9 @@
 import { Vec2 } from '@sledge/core';
 import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { activeLayer } from '~/controllers/layer/LayerListController';
 import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
 import { getPresetOf } from '~/controllers/tool/ToolController';
 import { colorMatch, RGBAColor } from '~/features/color';
+import { activeLayer } from '~/features/layer';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';

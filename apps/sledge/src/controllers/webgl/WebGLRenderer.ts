@@ -1,6 +1,5 @@
 // src/renderer/WebGLRenderer.ts
-import { getBaseLayerColor } from '~/models/layer/BaseLayer';
-import { getBlendModeId, Layer } from '~/models/layer/Layer';
+import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
 import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 import { getAgentOf, getBufferOf } from '../layer/LayerAgentManager';
 import fragmentSrc from './shaders/blend.frag.glsl';

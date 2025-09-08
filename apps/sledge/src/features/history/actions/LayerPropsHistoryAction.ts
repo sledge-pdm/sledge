@@ -1,5 +1,4 @@
-import { getLayerIndex } from '~/controllers/layer/LayerListController';
-import { Layer } from '~/models/layer/Layer';
+import { getLayerIndex, Layer } from '~/features/layer';
 import { setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';

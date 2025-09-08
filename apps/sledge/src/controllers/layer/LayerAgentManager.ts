@@ -1,4 +1,4 @@
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { activeLayer } from '~/features/layer';
 import LayerImageAgent from './image/LayerImageAgent';
 
 export class LayerAgentManager {

@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
+import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { LayerListHistoryAction } from '~/features/history';
-import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
+import type { Layer } from '~/features/layer';
+import * as layerModule from '~/features/layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 
-vi.mock('~/controllers/layer/LayerController', () => ({
-  resetLayerImage: vi.fn(),
-}));
+const { BlendMode, LayerType } = layerModule;
 
 describe('LayerListHistoryAction', () => {
   const l = (id: string, name = id): Layer => ({
@@ -22,6 +21,11 @@ describe('LayerListHistoryAction', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    if (!vi.isMockFunction(layerModule.resetLayerImage)) {
+      vi.spyOn(layerModule, 'resetLayerImage').mockImplementation(
+        (_id: string, _mag: number, _buffer?: Uint8ClampedArray) => new LayerImageAgent(_id, _buffer ?? new Uint8ClampedArray(), 0, 0)
+      );
+    }
     setLayerListStore('layers', [l('A'), l('B'), l('C')]);
     setLayerListStore('activeLayerId', 'A');
   });
@@ -31,7 +35,7 @@ describe('LayerListHistoryAction', () => {
     const a = new LayerListHistoryAction('add', 1, snapshot, undefined, undefined, 'test');
     a.redo();
     expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'X', 'B', 'C']);
-    expect(resetLayerImage).toHaveBeenCalledWith('X', 1, snapshot.buffer);
+    expect(layerModule.resetLayerImage).toHaveBeenCalledWith('X', 1, snapshot.buffer);
 
     a.undo();
     expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'C']);

@@ -1,7 +1,7 @@
 import { IconMenuItem, Menu } from '@tauri-apps/api/menu';
 import { resolveResource } from '@tauri-apps/api/path';
 import { clearLayer, duplicateLayer } from '~/controllers/layer/LayerController';
-import { removeLayer } from '~/controllers/layer/LayerListController';
+import { removeLayer } from '~/features/layer';
 import RightClickMenu from './RightClickMenu';
 
 export class LayerMenu extends RightClickMenu {

@@ -1,4 +1,4 @@
-import { findLayerById } from '~/controllers/layer/LayerListController';
+import { findLayerById } from '~/features/layer';
 import { SledgeNode } from '~/models/dsl/nodes/DSLNodes';
 import { LayerIn } from './nodes/pass/LayerIn';
 import { LayerOut } from './nodes/pass/LayerOut';

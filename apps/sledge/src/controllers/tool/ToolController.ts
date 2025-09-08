@@ -1,4 +1,4 @@
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { activeLayer } from '~/features/layer';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { PresetConfig, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 

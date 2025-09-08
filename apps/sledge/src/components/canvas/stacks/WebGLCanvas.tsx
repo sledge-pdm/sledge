@@ -1,8 +1,8 @@
 import { flexCol } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, Show } from 'solid-js';
-import { allLayers } from '~/controllers/layer/LayerListController';
 import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
+import { allLayers } from '~/features/layer';
 import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';

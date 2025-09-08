@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
 import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
 import {
   CanvasSizeHistoryAction,
@@ -14,8 +12,9 @@ import {
   packRGBA,
   ProjectHistoryController,
 } from '~/features/history';
+import { getEntry, removeEntry } from '~/features/image_pool';
+import { BlendMode, Layer, LayerType, resetLayerImage } from '~/features/layer';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
-import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
 import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code

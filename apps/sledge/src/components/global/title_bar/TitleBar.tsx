@@ -1,12 +1,11 @@
 import { flexRow } from '@sledge/core';
-import { getTheme, vars } from '@sledge/theme';
+import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
 import { fileStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
 import {
   titleBarControlButtonContainer,
@@ -77,7 +76,7 @@ export default function TitleBar() {
   const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === getCurrentWindow().label);
 
   return (
-    <header class={getTheme(globalConfig.appearance.theme)}>
+    <header>
       <div
         style={{
           'border-bottom': shouldShowBorder() ? `1px solid ${vars.color.border}` : 'none',

@@ -1,6 +1,6 @@
 import { transferToLayer } from '~/appliers/ImageTransferApplier';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { activeLayer } from '~/controllers/layer/LayerListController';
+import { projectHistoryController } from '~/features/history';
 import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';

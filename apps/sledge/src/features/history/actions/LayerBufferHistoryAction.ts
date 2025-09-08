@@ -3,7 +3,7 @@ import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { cancelMove } from '~/controllers/selection/SelectionOperator';
 import { RGBAColor } from '~/features/color';
-import { BaseHistoryAction } from '~/features/history';
+import { BaseHistoryAction } from '../base';
 
 export type PackedRGBA = number;
 export const packRGBA = (c: RGBAColor): PackedRGBA => (c[3] << 24) | (c[0] << 16) | (c[1] << 8) | c[2];

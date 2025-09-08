@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { projectHistoryController } from '~/features/history';
 import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
 import { layerListStore } from '~/stores/ProjectStores';

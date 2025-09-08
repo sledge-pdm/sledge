@@ -3,10 +3,10 @@
 import { Vec2 } from '@sledge/core';
 import { crop_patch_rgba } from '@sledge/wasm';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { getActiveAgent, getAgentOf, getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { DebugLogger } from '~/controllers/log/LogController';
 import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
+import { projectHistoryController } from '~/features/history';
 import { LayerBufferHistoryAction } from '~/features/history/actions/LayerBufferHistoryAction';
 import { canvasStore } from '~/stores/ProjectStores';
 import { TOOL_CATEGORIES } from '~/tools/Tools';

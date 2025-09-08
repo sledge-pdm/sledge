@@ -1,9 +1,9 @@
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { removeLayer } from '~/controllers/layer/LayerListController';
-import { BaseHistoryAction } from '~/features/history';
 import type { Layer } from '~/models/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { BaseHistoryAction } from '../base';
 
 export class LayerListHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_list' as const;

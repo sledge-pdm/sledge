@@ -291,9 +291,9 @@ class SelectionAreaManager {
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
     const buffer = getBufferOf(srcLayerId);
     if (!buffer) return;
-  // canvasStore が未初期化なケース (極早期テスト) では何も返さない
-  if (!canvasStore?.canvas) return;
-  const { width, height } = canvasStore.canvas;
+    // canvasStore が未初期化なケース (極早期テスト) では何も返さない
+    if (!canvasStore?.canvas) return;
+    const { width, height } = canvasStore.canvas;
 
     this.commitOffset();
     this.commit();

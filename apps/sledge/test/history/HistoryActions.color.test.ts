@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
 import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
+import { ColorHistoryAction } from '~/features/history';
 
 describe('ColorHistoryAction', () => {
   beforeEach(() => {

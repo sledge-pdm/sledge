@@ -1,6 +1,6 @@
 import { mergeLayer } from '~/appliers/LayerMergeApplier';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { RGBAColor, RGBAToHex } from '~/features/color';
+import { projectHistoryController } from '~/features/history';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { Layer } from '~/models/layer/Layer';
 import { interactStore } from '~/stores/EditorStores';

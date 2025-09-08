@@ -1,8 +1,8 @@
 import { getLayerIndex } from '~/controllers/layer/LayerListController';
-import { BaseHistoryAction } from '~/features/history';
 import { Layer } from '~/models/layer/Layer';
 import { setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { BaseHistoryAction } from '../base';
 
 export class LayerPropsHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_props' as const;

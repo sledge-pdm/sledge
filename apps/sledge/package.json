@@ -9,6 +9,7 @@
     "build": "tauri build",
     "debug": "nest start --debug --watch",
     "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config ../../.prettierrc",
+    "prettier:test": "prettier --write test/**/*.test.ts --config ../../.prettierrc",
     "stylelint": "stylelint -c ../../.stylelintrc.json \"src/**/*.css\" --fix"
   },
   "dependencies": {

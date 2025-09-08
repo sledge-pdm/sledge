@@ -1,6 +1,6 @@
 import { setEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { BaseHistoryAction } from '~/features/history';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { BaseHistoryAction } from '../base';
 
 // history action for changes in image pool entry property
 export class ImagePoolEntryPropsHistoryAction extends BaseHistoryAction {

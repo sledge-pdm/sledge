@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
+import { LayerListHistoryAction } from '~/features/history';
 import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 

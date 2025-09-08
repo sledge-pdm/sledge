@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getEntry, insertEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
+import { ImagePoolHistoryAction } from '~/features/history';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 
 describe('ImagePoolHistoryAction', () => {

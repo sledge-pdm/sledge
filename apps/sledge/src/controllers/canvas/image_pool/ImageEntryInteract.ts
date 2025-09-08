@@ -1,5 +1,5 @@
 import { updateEntryPartial } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { projectHistoryController } from '~/features/history';
 import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { interactStore } from '~/stores/EditorStores';

@@ -1,10 +1,10 @@
 import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { setBottomBarText } from '~/controllers/log/LogController';
 import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/controllers/selection/SelectionOperator';
+import { projectHistoryController } from '~/features/history';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { BlendMode, LayerType } from '~/models/layer/Layer';
 import { createLayer } from '~/models/layer/LayerFactory';

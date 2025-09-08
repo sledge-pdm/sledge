@@ -3,9 +3,9 @@ import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
 import { getAgentOf, getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { allLayers } from '~/controllers/layer/LayerListController';
-import { BaseHistoryAction } from '~/features/history';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { BaseHistoryAction } from '../base';
 
 type LayerBufferSnapshot = { layerId: string; dotMag: number; buffer: Uint8ClampedArray };
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
+import { LayerPropsHistoryAction } from '~/features/history';
 import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
 import { setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';

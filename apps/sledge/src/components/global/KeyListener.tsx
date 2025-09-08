@@ -1,5 +1,4 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -7,6 +6,7 @@ import {
   setActiveToolCategory,
   updateToolPresetConfig,
 } from '~/controllers/tool/ToolController';
+import { projectHistoryController } from '~/features/history';
 import { saveProject } from '~/io/project/out/save';
 import { fileStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';

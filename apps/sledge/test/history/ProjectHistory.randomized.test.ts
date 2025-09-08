@@ -1,16 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { ProjectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
-import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
-import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
-import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
-import { LayerBufferHistoryAction, packRGBA } from '~/controllers/history/actions/LayerBufferHistoryAction';
-import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
-import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
 import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { resetLayerImage } from '~/controllers/layer/LayerController';
 import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
+import {
+  CanvasSizeHistoryAction,
+  ColorHistoryAction,
+  ImagePoolEntryPropsHistoryAction,
+  ImagePoolHistoryAction,
+  LayerBufferHistoryAction,
+  LayerListHistoryAction,
+  LayerPropsHistoryAction,
+  packRGBA,
+  ProjectHistoryController,
+} from '~/features/history';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { BlendMode, Layer, LayerType } from '~/models/layer/Layer';
 import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';

@@ -1,5 +1,5 @@
 import { PaletteType, RGBAColor, RGBAToHex, setColor } from '~/features/color';
-import { BaseHistoryAction } from '~/features/history';
+import { BaseHistoryAction } from '../base';
 
 // history action for color change in palette
 export class ColorHistoryAction extends BaseHistoryAction {

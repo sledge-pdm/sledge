@@ -1,10 +1,10 @@
 import { slice_patch_rgba, trim_mask_with_box } from '@sledge/wasm';
 import { Component, onCleanup, onMount } from 'solid-js';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { setBottomBarText } from '~/controllers/log/LogController';
-import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { isSelectionAvailable, startMoveFromPasted } from '~/controllers/selection/SelectionOperator';
 import { activeIndex, activeLayer, addLayerTo } from '~/features/layer';
+import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import { setBottomBarText } from '~/features/log/service';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { isSelectionAvailable, startMoveFromPasted } from '~/features/selection/SelectionOperator';
 import { layerListStore } from '~/stores/ProjectStores';
 import { bufferToBlob, loadImageData } from '~/utils/DataUtils';
 

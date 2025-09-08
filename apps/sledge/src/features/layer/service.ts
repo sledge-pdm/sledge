@@ -1,16 +1,16 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
 import { mergeLayer } from '~/appliers/LayerMergeApplier';
-import { adjustZoomToFit } from '~/controllers/canvas/CanvasController';
-import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from '~/controllers/layer/LayerAgentManager';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { setBottomBarText } from '~/controllers/log/LogController';
-import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
-import { cancelMove, cancelSelection } from '~/controllers/selection/SelectionOperator';
+import { adjustZoomToFit } from '~/features/canvas';
 import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
+import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from '~/features/layer/LayerAgentManager';
+import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import { setBottomBarText } from '~/features/log/service';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';

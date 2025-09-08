@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { LayerListHistoryAction } from '~/features/history';
 import type { Layer } from '~/features/layer';
 import * as layerModule from '~/features/layer';
+import LayerImageAgent from '~/features/layer/LayerImageAgent';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 
 const { BlendMode, LayerType } = layerModule;

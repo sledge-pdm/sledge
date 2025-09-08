@@ -1,8 +1,8 @@
-import { TileIndex } from '~/controllers/layer/image/managers/Tile';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
-import { cancelMove } from '~/controllers/selection/SelectionOperator';
 import { RGBAColor } from '~/features/color';
+import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import { TileIndex } from '~/features/layer/managers/Tile';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { cancelMove } from '~/features/selection/SelectionOperator';
 import { BaseHistoryAction } from '../base';
 
 export type PackedRGBA = number;

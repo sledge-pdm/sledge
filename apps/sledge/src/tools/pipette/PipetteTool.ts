@@ -1,5 +1,5 @@
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
 import { isTransparent, RGBAColor, RGBToHex, setCurrentColor, transparent } from '~/features/color';
+import LayerImageAgent from '~/features/layer/LayerImageAgent';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class PipetteTool implements ToolBehavior {

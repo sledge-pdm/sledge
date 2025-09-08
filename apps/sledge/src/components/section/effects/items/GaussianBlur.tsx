@@ -4,7 +4,7 @@ import { Slider, ToggleSwitch } from '@sledge/ui';
 import { AlphaBlurMode, gaussian_blur, GaussianBlurOption } from '@sledge/wasm';
 import { Component, createSignal } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
-import { getActiveAgent } from '~/controllers/layer/LayerAgentManager';
+import { getActiveAgent } from '~/features/layer/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
 

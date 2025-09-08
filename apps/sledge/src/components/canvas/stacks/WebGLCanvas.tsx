@@ -1,14 +1,14 @@
 import { flexCol } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, Show } from 'solid-js';
-import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
+import { Consts } from '~/Consts';
 import { allLayers } from '~/features/layer';
-import { Consts } from '~/models/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
+import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 
 export let webGLRenderer: WebGLRenderer | undefined;
 

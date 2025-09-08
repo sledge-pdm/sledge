@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import type { RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
+import { layerAgentManager } from '~/features/layer/LayerAgentManager';
 
 function makeBuffer(w: number, h: number, color: RGBAColor = [0, 0, 0, 0]) {
   const buf = new Uint8ClampedArray(w * h * 4);

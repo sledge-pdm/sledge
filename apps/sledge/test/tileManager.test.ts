@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import TileManager from '~/controllers/layer/image/managers/TileManager';
 import type { RGBAColor } from '~/features/color';
+import TileManager from '~/features/layer/managers/TileManager';
 
 function makeBuffer(w: number, h: number, color: RGBAColor = [0, 0, 0, 0]) {
   const buf = new Uint8ClampedArray(w * h * 4);

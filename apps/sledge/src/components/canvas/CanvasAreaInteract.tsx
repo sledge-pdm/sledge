@@ -1,8 +1,8 @@
 import { Vec2 } from '@sledge/core';
-import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/controllers/canvas/CanvasController';
-import { DebugLogger } from '~/controllers/log/LogController';
-import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
+import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/features/canvas';
+import { DebugLogger } from '~/features/log/service';
+import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { isMacOS } from '~/utils/OSUtils';

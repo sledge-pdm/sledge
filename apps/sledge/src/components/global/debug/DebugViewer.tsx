@@ -1,5 +1,5 @@
 import { Component, For, Show, createSignal } from 'solid-js';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 import {
   bufferToDataURL,
   clearDebugData,

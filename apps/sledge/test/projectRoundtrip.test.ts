@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { layerAgentManager } from '~/controllers/layer/LayerAgentManager';
 import { BlendMode, LayerType } from '~/features/layer';
+import { layerAgentManager } from '~/features/layer/LayerAgentManager';
 import { loadProjectJson } from '~/io/project/in/load';
 import { dumpProject, type Project } from '~/io/project/out/dump';
 import { layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';

@@ -1,4 +1,4 @@
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 

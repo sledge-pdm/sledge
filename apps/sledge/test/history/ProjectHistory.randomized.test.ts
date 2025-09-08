@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getBufferOf } from '~/controllers/layer/LayerAgentManager';
 import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
 import {
   CanvasSizeHistoryAction,
@@ -14,6 +13,7 @@ import {
 } from '~/features/history';
 import { getEntry, removeEntry } from '~/features/image_pool';
 import { BlendMode, Layer, LayerType, resetLayerImage } from '~/features/layer';
+import { getBufferOf } from '~/features/layer/LayerAgentManager';
 import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
 

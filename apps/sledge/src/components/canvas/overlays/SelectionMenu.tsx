@@ -1,7 +1,7 @@
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
-import { selectionManager, SelectionState } from '~/controllers/selection/SelectionAreaManager';
+import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
 import {
   cancelMove,
   cancelSelection,
@@ -9,12 +9,12 @@ import {
   deletePixelInSelection,
   getSelectionOffset,
   invertSelectionArea,
-} from '~/controllers/selection/SelectionOperator';
+} from '~/features/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { container, divider, item } from '~/styles/components/canvas/overlays/selection_menu.css';

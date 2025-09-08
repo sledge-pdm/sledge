@@ -3,6 +3,7 @@ import { vars } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
+import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import {
   allLayers,
   clearLayer,
@@ -14,7 +15,6 @@ import {
   setActiveLayerId,
   setLayerName,
 } from '~/features/layer';
-import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import {
   activeLight,

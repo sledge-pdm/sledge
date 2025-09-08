@@ -1,6 +1,6 @@
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 import { findLayerById } from '~/features/layer';
+import { getAgentOf } from '~/features/layer/LayerAgentManager';
+import LayerImageAgent from '~/features/layer/LayerImageAgent';
 import { loadLocalImage } from '~/utils/DataUtils';
 
 export interface ImageTransferParams {

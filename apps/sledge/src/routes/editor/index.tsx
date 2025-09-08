@@ -12,7 +12,7 @@ import ClipboardListener from '~/components/global/ClipboardListener';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
-import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, changeCanvasSize } from '~/features/canvas';
 import { addLayer, LayerType, resetLayerImage } from '~/features/layer';
 import { AutoSaveManager } from '~/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/io/config/load';

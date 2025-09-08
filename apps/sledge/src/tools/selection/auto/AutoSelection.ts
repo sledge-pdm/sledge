@@ -1,9 +1,9 @@
 import { auto_select_region_mask } from '@sledge/wasm';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { getPresetOf } from '~/controllers/tool/ToolController';
-import { ToolArgs } from '~/tools/ToolBehavior';
+import LayerImageAgent from '~/features/layer/LayerImageAgent';
+import { SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { getPresetOf } from '~/features/tool/ToolController';
 import { SelectionBase } from '~/tools/selection/SelectionBase';
+import { ToolArgs } from '~/tools/ToolBehavior';
 import { eventBus } from '~/utils/EventBus';
 
 export class AutoSelection extends SelectionBase {

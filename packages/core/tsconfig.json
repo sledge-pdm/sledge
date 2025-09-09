@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
     "module": "esnext",
-    "moduleResolution": "bundler",        // ← ここがポイント
+    "moduleResolution": "bundler",
 
-    "allowImportingTsExtensions": true,   // .css.ts など拡張子付き import を許可
     "noEmit": true,
-    "verbatimModuleSyntax": true,         // 任意：import/export をそのまま残す
+    "verbatimModuleSyntax": true, // 任意：import/export をそのまま残す
     "jsx": "preserve",
     "target": "esnext",
     "isolatedModules": true,

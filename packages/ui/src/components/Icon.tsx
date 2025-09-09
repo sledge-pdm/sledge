@@ -24,7 +24,7 @@ const Icon: Component<IconProps> = (props) => {
   return (
     <div
       {...rest}
-      class="icon"
+      class='icon'
       style={{
         '--icon-size': `${px}px`,
         '--icon-fill': local.color ?? 'currentColor',

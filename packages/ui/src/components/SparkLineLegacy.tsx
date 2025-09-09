@@ -41,8 +41,8 @@ export const SparkLineLegacy: Component<SparkLineProps> = (props) => {
     canvas.width = props.width;
     canvas.height = props.height;
 
-  // 描画関数：バッファ全部を１ドットずつ打っていく（rAFでスケジュール）
-  const draw = () => {
+    // 描画関数：バッファ全部を１ドットずつ打っていく（rAFでスケジュール）
+    const draw = () => {
       // クリア
       ctx.clearRect(0, 0, props.width, props.height);
       ctx.fillStyle = props.color || 'lime';

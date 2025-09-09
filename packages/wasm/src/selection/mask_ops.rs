@@ -39,7 +39,7 @@ pub fn fill_rect_mask(
 ) {
     let w = width as usize;
     let _h = height as usize;
-    
+
     for y in start_y..(start_y + rect_height).min(height) {
         for x in start_x..(start_x + rect_width).min(width) {
             let idx = (y as usize) * w + (x as usize);
@@ -62,14 +62,14 @@ pub fn apply_mask_offset(
     let w = width as i32;
     let h = height as i32;
     let mut result = vec![0u8; (width * height) as usize];
-    
+
     for y in 0..h {
         for x in 0..w {
             let old_idx = (y * w + x) as usize;
             if old_idx < mask.len() && mask[old_idx] == 1 {
                 let new_x = x + offset_x;
                 let new_y = y + offset_y;
-                
+
                 if new_x >= 0 && new_x < w && new_y >= 0 && new_y < h {
                     let new_idx = (new_y * w + new_x) as usize;
                     if new_idx < result.len() {
@@ -79,6 +79,6 @@ pub fn apply_mask_offset(
             }
         }
     }
-    
+
     result
 }

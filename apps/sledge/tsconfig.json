@@ -18,6 +18,7 @@
       "@sledge/core": ["../../packages/core"],
       "@sledge/wasm": ["../../packages/wasm/pkg/sledge_wasm.js"]
     },
+    "types": ["vite/client"],
     "rootDirs": ["src"]
   }
 }

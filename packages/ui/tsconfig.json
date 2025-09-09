@@ -2,9 +2,8 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler", // ← ここがポイント
+    "moduleResolution": "bundler",
 
-    "allowImportingTsExtensions": true, // .css.ts など拡張子付き import を許可
     "noEmit": true,
     "verbatimModuleSyntax": true, // 任意：import/export をそのまま残す
     "esModuleInterop": true,

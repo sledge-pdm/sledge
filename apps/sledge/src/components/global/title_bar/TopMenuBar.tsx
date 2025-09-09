@@ -1,5 +1,5 @@
 import { FileLocation, flexRow } from '@sledge/core';
-import { getTheme, vars, ZFB09 } from '@sledge/theme';
+import { vars, ZFB09 } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Update } from '@tauri-apps/plugin-updater';

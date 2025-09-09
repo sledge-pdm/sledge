@@ -4,15 +4,7 @@
   "bundle": {
     "targets": ["app", "dmg"],
     "resources": ["resources/**/*", "icons/**/*"],
-    "icon": [
-      "icons/icon.icns",
-      "icons/icon.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/256x256.png",
-      "icons/512x512.png",
-      "icons/512x512@2x.png"
-    ],
+    "icon": ["icons/icon.icns", "icons/icon.png", "icons/128x128.png", "icons/128x128@2x.png"],
     "macOS": {
       "exceptionDomain": "api.github.com",
       "frameworks": [],

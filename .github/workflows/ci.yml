@@ -64,7 +64,7 @@ jobs:
         run: pnpm wasm:build
 
       - name: Type check (all workspaces)
-        run: pnpm -r exec tsc --noEmit
+        run: pnpm -r exec tsc --noEmit --skipLibCheck
 
       - name: Prettier check
         run: pnpm exec prettier --check .

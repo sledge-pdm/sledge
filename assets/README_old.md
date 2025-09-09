@@ -31,7 +31,6 @@ npm tauri dev # launch
 ### \>\_ &nbsp;useful (or _unstable_) effects
 
 - built-in stuff:
-
   - **standard effects** — `brightness`, `contrast`, `invert`
 
   - **filter and split functions** — `splitV`, `colorRange`, `rect`

@@ -1,6 +1,6 @@
 import type { LabelMode } from '@sledge/core';
-import { toggleInput, toggleThumb, toggleTrack, toggleWrapper } from '../../styles/control/toggle_switch.css';
 import { Show, type Component } from 'solid-js';
+import { toggleInput, toggleThumb, toggleTrack, toggleWrapper } from '../../styles/control/toggle_switch.css';
 
 interface Props {
   id?: string;

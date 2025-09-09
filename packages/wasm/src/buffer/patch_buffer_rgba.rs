@@ -22,8 +22,12 @@ pub fn patch_buffer_rgba(
     // Validate patch buffer size matches dimensions (RGBA)
     let src_w = patch_width as i32;
     let src_h = patch_height as i32;
-    if src_w <= 0 || src_h <= 0 { return result; }
-    if (src_w as usize) * (src_h as usize) * 4 != patch.len() { return result; }
+    if src_w <= 0 || src_h <= 0 {
+        return result;
+    }
+    if (src_w as usize) * (src_h as usize) * 4 != patch.len() {
+        return result;
+    }
 
     let dx = offset_x.round() as i32;
     let dy = offset_y.round() as i32;
@@ -67,10 +71,18 @@ pub fn patch_buffer_rgba(
             let dst_a_f = dst_a / 255.0;
 
             // premultiplied-like alpha blend (source over)
-            let out_r = (px_r as f32 * src_a_f + dst_r * (1.0 - src_a_f)).round().clamp(0.0, 255.0) as u8;
-            let out_g = (px_g as f32 * src_a_f + dst_g * (1.0 - src_a_f)).round().clamp(0.0, 255.0) as u8;
-            let out_b = (px_b as f32 * src_a_f + dst_b * (1.0 - src_a_f)).round().clamp(0.0, 255.0) as u8;
-            let out_a = ((src_a_f + dst_a_f * (1.0 - src_a_f)) * 255.0).round().clamp(0.0, 255.0) as u8;
+            let out_r = (px_r as f32 * src_a_f + dst_r * (1.0 - src_a_f))
+                .round()
+                .clamp(0.0, 255.0) as u8;
+            let out_g = (px_g as f32 * src_a_f + dst_g * (1.0 - src_a_f))
+                .round()
+                .clamp(0.0, 255.0) as u8;
+            let out_b = (px_b as f32 * src_a_f + dst_b * (1.0 - src_a_f))
+                .round()
+                .clamp(0.0, 255.0) as u8;
+            let out_a = ((src_a_f + dst_a_f * (1.0 - src_a_f)) * 255.0)
+                .round()
+                .clamp(0.0, 255.0) as u8;
 
             result[tgt_start] = out_r;
             result[tgt_start + 1] = out_g;

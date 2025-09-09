@@ -21,7 +21,7 @@ pub fn auto_select_region_mask(
     if sx >= width || sy >= height || width == 0 || height == 0 {
         return vec![0; width.saturating_mul(height)];
     }
-    
+
     if threshold == 255 {
         return vec![1; width * height];
     }
@@ -42,10 +42,14 @@ pub fn auto_select_region_mask(
     stack.push((sx, sy));
 
     while let Some((x, y)) = stack.pop() {
-        if x >= width || y >= height { continue; }
+        if x >= width || y >= height {
+            continue;
+        }
 
         let flat = y * width + x;
-        if visited[flat] { continue; }
+        if visited[flat] {
+            continue;
+        }
 
         // 現在ピクセルが対象色か判定
         let idx = flat * 4;
@@ -55,7 +59,9 @@ pub fn auto_select_region_mask(
             buffer[idx + 2],
             buffer[idx + 3],
         ];
-        if !colors_match(&current, &target, threshold) { continue; }
+        if !colors_match(&current, &target, threshold) {
+            continue;
+        }
 
         // スキャンラインで左右に拡張
         let mut left = x;
@@ -64,7 +70,9 @@ pub fn auto_select_region_mask(
         // 左へ
         while left > 0 {
             let lf = y * width + (left - 1);
-            if visited[lf] { break; }
+            if visited[lf] {
+                break;
+            }
             let li = lf * 4;
             let lc = [buffer[li], buffer[li + 1], buffer[li + 2], buffer[li + 3]];
             if colors_match(&lc, &target, threshold) {
@@ -77,7 +85,9 @@ pub fn auto_select_region_mask(
         // 右へ
         while right + 1 < width {
             let rf = y * width + (right + 1);
-            if visited[rf] { break; }
+            if visited[rf] {
+                break;
+            }
             let ri = rf * 4;
             let rc = [buffer[ri], buffer[ri + 1], buffer[ri + 2], buffer[ri + 3]];
             if colors_match(&rc, &target, threshold) {
@@ -100,10 +110,14 @@ pub fn auto_select_region_mask(
             let up_y = y - 1;
             for scan_x in left..=right {
                 let f = up_y * width + scan_x;
-                if visited[f] { continue; }
+                if visited[f] {
+                    continue;
+                }
                 let i = f * 4;
                 let c = [buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3]];
-                if colors_match(&c, &target, threshold) { stack.push((scan_x, up_y)); }
+                if colors_match(&c, &target, threshold) {
+                    stack.push((scan_x, up_y));
+                }
             }
         }
         // 下
@@ -111,10 +125,14 @@ pub fn auto_select_region_mask(
             let down_y = y + 1;
             for scan_x in left..=right {
                 let f = down_y * width + scan_x;
-                if visited[f] { continue; }
+                if visited[f] {
+                    continue;
+                }
                 let i = f * 4;
                 let c = [buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3]];
-                if colors_match(&c, &target, threshold) { stack.push((scan_x, down_y)); }
+                if colors_match(&c, &target, threshold) {
+                    stack.push((scan_x, down_y));
+                }
             }
         }
     }
@@ -124,7 +142,9 @@ pub fn auto_select_region_mask(
 
 #[inline]
 fn colors_match(color1: &[u8; 4], color2: &[u8; 4], threshold: u8) -> bool {
-    if threshold == 0 { color1 == color2 } else {
+    if threshold == 0 {
+        color1 == color2
+    } else {
         let dr = (color1[0] as i16 - color2[0] as i16).abs();
         let dg = (color1[1] as i16 - color2[1] as i16).abs();
         let db = (color1[2] as i16 - color2[2] as i16).abs();

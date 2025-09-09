@@ -100,7 +100,7 @@ pub fn run() {
                             continue;
                         }
 
-                        let raw_maybe_file = format!(r"{}", maybe_file);
+                        let raw_maybe_file = maybe_file.to_string();
                         // handle `file://` path urls and skip other urls
                         if let Ok(url) = url::Url::parse(&raw_maybe_file) {
                             if let Ok(path) = url.to_file_path() {

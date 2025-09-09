@@ -1,3 +1,3 @@
-export * from './src/global.css.ts';
-export * from './src/reset.css.ts';
-export * from './src/Theme.ts';
+export * from './src/global.css';
+export * from './src/reset.css';
+export * from './src/Theme';

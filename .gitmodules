@@ -1,0 +1,3 @@
+[submodule "packages/theme"]
+	path = packages/theme
+	url = git@github.com:sledge-pdm/sledge-theme.git

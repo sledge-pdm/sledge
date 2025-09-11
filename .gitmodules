@@ -1,3 +1,6 @@
 [submodule "packages/theme"]
 	path = packages/theme
 	url = git@github.com:sledge-pdm/sledge-theme.git
+[submodule "packages/ui"]
+	path = packages/ui
+	url = git@github.com:sledge-pdm/sledge-ui.git

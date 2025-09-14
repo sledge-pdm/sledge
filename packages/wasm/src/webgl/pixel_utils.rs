@@ -108,9 +108,7 @@ pub fn blend_layers(
             ),
             _ => (
                 // Normal (alpha blending)
-                overlay_r,
-                overlay_g,
-                overlay_b,
+                overlay_r, overlay_g, overlay_b,
             ),
         };
 
@@ -162,13 +160,12 @@ pub fn copy_buffer_region(
     for y in 0..copy_height {
         let source_row_start = ((source_y + y) * source_width + source_x) * bytes_per_pixel;
         let dest_row_start = ((dest_y + y) * dest_width + dest_x) * bytes_per_pixel;
-        
+
         let source_end = source_row_start + copy_width * bytes_per_pixel;
         let dest_end = dest_row_start + copy_width * bytes_per_pixel;
 
         if source_end <= source.len() && dest_end <= dest.len() {
-            dest[dest_row_start..dest_end]
-                .copy_from_slice(&source[source_row_start..source_end]);
+            dest[dest_row_start..dest_end].copy_from_slice(&source[source_row_start..source_end]);
         }
     }
 }

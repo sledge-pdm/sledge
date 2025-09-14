@@ -1,9 +1,8 @@
-name: development-release
+name: development-build
 
 on:
   push:
-    branches: [develop]
-    tags: ['v*.*.*-dev.*']
+    branches: ['develop']
   workflow_dispatch: {}
 
 jobs:
@@ -71,7 +70,7 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
-      # Tauri Build + Release Upload
+      # Tauri Build Only
       - uses: tauri-apps/tauri-action@v0
         id: tauri-build
         env:
@@ -79,15 +78,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Development Build ${{ github.ref_name }}'
-          releaseBody: 'This is a development build. Use at your own risk.'
-          releaseDraft: false # Don't care because it's a dev build
-          prerelease: true
           projectPath: './apps/sledge'
-          includeUpdaterJson: true
-          updaterJsonPreferNsis: true
-          updaterJsonKeepUniversal: true
           args: ${{ matrix.args }}
 
       - name: Upload dev artifacts
@@ -98,6 +89,7 @@ jobs:
           path: |
             ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.deb
             ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.rpm
+          retention-days: 3
 
       - name: Upload dev artifacts
         uses: actions/upload-artifact@v4
@@ -107,6 +99,7 @@ jobs:
           path: |
             ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
             ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
+          retention-days: 3
 
       - name: Upload dev artifacts
         uses: actions/upload-artifact@v4
@@ -115,3 +108,4 @@ jobs:
           name: binaries-windows
           path: |
             ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.exe
+          retention-days: 3

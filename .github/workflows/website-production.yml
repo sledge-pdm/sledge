@@ -1,7 +1,6 @@
 name: website-production
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:

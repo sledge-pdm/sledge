@@ -86,13 +86,15 @@ pub fn scanline_flood_fill(
         }
 
         // スキャンライン方式：左右に拡張
-    let mut left = x;
-    let mut right = x;
+        let mut left = x;
+        let mut right = x;
 
         // 左方向に拡張
         while left > 0 {
             let lf = y * width + (left - 1);
-            if visited[lf] { break; }
+            if visited[lf] {
+                break;
+            }
             let left_index = lf * 4;
             let left_color = [
                 buffer[left_index],
@@ -111,7 +113,9 @@ pub fn scanline_flood_fill(
         // 右方向に拡張
         while right < width - 1 {
             let rf = y * width + (right + 1);
-            if visited[rf] { break; }
+            if visited[rf] {
+                break;
+            }
             let right_index = rf * 4;
             let right_color = [
                 buffer[right_index],
@@ -390,9 +394,7 @@ fn colors_match(color1: &[u8; 4], color2: &[u8; 4], threshold: u8) -> bool {
         let diff_b = (color1[2] as i16 - color2[2] as i16).abs();
         // let diff_a = (color1[3] as i16 - color2[3] as i16).abs();
 
-        diff_r <= threshold as i16
-            && diff_g <= threshold as i16
-            && diff_b <= threshold as i16
-            // && diff_a <= threshold as i16
+        diff_r <= threshold as i16 && diff_g <= threshold as i16 && diff_b <= threshold as i16
+        // && diff_a <= threshold as i16
     }
 }

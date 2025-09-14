@@ -52,7 +52,9 @@ pub fn crop_patch_rgba(
                 continue;
             } else {
                 let sidx = didx;
-                if sidx + 3 >= source.len() { continue; }
+                if sidx + 3 >= source.len() {
+                    continue;
+                }
                 result[didx] = source[sidx];
                 result[didx + 1] = source[sidx + 1];
                 result[didx + 2] = source[sidx + 2];

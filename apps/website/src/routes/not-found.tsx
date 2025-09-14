@@ -1,4 +1,3 @@
-import { A } from '@solidjs/router';
 import { type Component } from 'solid-js';
 import { heroHeading, pageRoot, scrollContent, subHeading } from '~/styles/page.css';
 

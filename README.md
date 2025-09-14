@@ -27,10 +27,10 @@ Sledge is a drawing tool.
 
 | Platform | Status                  | Detail                                   |
 | -------- | ----------------------- | ---------------------------------------- |
-| Windows  | :white_check_mark:      | *mostly OK.*                             |
-| MacOS    | :white_check_mark:      | *almost OK. there's some ui/ux problem.* |
-| Linux    | :ballot_box_with_check: | *NOTOK. barely usable.*                  |
-| Mobile   | :zzz:                   | *No builds available.*                   |
+| Windows  | :white_check_mark:      | _mostly OK._                             |
+| MacOS    | :white_check_mark:      | _almost OK. there's some ui/ux problem._ |
+| Linux    | :ballot_box_with_check: | _NOTOK. barely usable._                  |
+| Mobile   | :zzz:                   | _No builds available._                   |
 
 ## Install
 
@@ -44,6 +44,7 @@ Sledge is a drawing tool.
 
 MacOS will report an "App is Damaged" error when running sledge by double click.
 Run command below to prevent:
+
 ```bash
 xattr -rc /Applications/sledge.app
 ```
@@ -52,7 +53,6 @@ xattr -rc /Applications/sledge.app
 
 <br>
 
-
 ## Features
 
 <details>
@@ -60,36 +60,36 @@ xattr -rc /Applications/sledge.app
 
 | Category         | Feature               | Status | Notes                                                       |
 | ---------------- | --------------------- | ------ | ----------------------------------------------------------- |
-| **Interactions** | Mouse                 | ✅      |                                                             |
-|                  | Pen                   | ✅      |                                                             |
-|                  | Touch                 | ✅      | can only zoom/pan because it's assumed to be used with pen. |
-|                  | Touchpads             | ⏳      |                                                             |
-| **Tools**        | Pen, Eraser           | ✅      |                                                             |
-|                  | Fill                  | ✅      |                                                             |
-|                  | Color Picker          | ✅      |                                                             |
-|                  | Image Pool            | ✅      | resize, transfer to layer                                   |
-|                  | Selection             | ✅      | rect, auto                                                  |
-|                  | Text                  | ⏳      |                                                             |
-| **Composites**   | Layer Opacity         | ✅      |                                                             |
-|                  | Layer Blend Mode      | ✅      | normal / multiply / linear light / etc                      |
-| **Effects**      | Live Effects          | ⏳      | effects that can be chained and react to the image          |
-|                  | Invert                | ✅      | invert layer's colors                                       |
-|                  | Gaussian Blur         | ✅      | blur the layer                                              |
-|                  | Grayscale             | ✅      | convert the layer to grayscale                              |
-| **I/O**          | Basic I/O             | ✅      | load, save, import, export                                  |
-|                  | SVG Export            | ✅      | vector export for small pixel art/icons (< 128x128)         |
-|                  | Backup                | ⏳      | automatic backup for safe editing                           |
-|                  | Clipboard             | ⏳      | selection / layer                                           |
-|                  | Drag and Drop         | ⏳      | images (add to pool) / project (open)                       |
-|                  | Project-Level History | ⏳      |                                                             |
-| **Others**       | Animation             | ⏳      | creating frames and output to gif, mp4                      |
+| **Interactions** | Mouse                 | ✅     |                                                             |
+|                  | Pen                   | ✅     |                                                             |
+|                  | Touch                 | ✅     | can only zoom/pan because it's assumed to be used with pen. |
+|                  | Touchpads             | ⏳     |                                                             |
+| **Tools**        | Pen, Eraser           | ✅     |                                                             |
+|                  | Fill                  | ✅     |                                                             |
+|                  | Color Picker          | ✅     |                                                             |
+|                  | Image Pool            | ✅     | resize, transfer to layer                                   |
+|                  | Selection             | ✅     | rect, auto                                                  |
+|                  | Text                  | ⏳     |                                                             |
+| **Composites**   | Layer Opacity         | ✅     |                                                             |
+|                  | Layer Blend Mode      | ✅     | normal / multiply / linear light / etc                      |
+| **Effects**      | Live Effects          | ⏳     | effects that can be chained and react to the image          |
+|                  | Invert                | ✅     | invert layer's colors                                       |
+|                  | Gaussian Blur         | ✅     | blur the layer                                              |
+|                  | Grayscale             | ✅     | convert the layer to grayscale                              |
+| **I/O**          | Basic I/O             | ✅     | load, save, import, export                                  |
+|                  | SVG Export            | ✅     | vector export for small pixel art/icons (< 128x128)         |
+|                  | Backup                | ⏳     | automatic backup for safe editing                           |
+|                  | Clipboard             | ⏳     | selection / layer                                           |
+|                  | Drag and Drop         | ⏳     | images (add to pool) / project (open)                       |
+|                  | Project-Level History | ⏳     |                                                             |
+| **Others**       | Animation             | ⏳     | creating frames and output to gif, mp4                      |
 
 </details>
 
 ## Fonts
 
-* [04b_XX](http://www.04.jp.org) by yuji oshimoto (04.jp.org)
-* [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) by num_kadoma (littlelimit.net)
+- [04b_XX](http://www.04.jp.org) by yuji oshimoto (04.jp.org)
+- [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) by num_kadoma (littlelimit.net)
 
 ## Tech
 
@@ -110,8 +110,3 @@ xattr -rc /Applications/sledge.app
 ### Project Format
 
 - [msgpack](https://msgpack.org/ja.html)
-
-
-
-
-

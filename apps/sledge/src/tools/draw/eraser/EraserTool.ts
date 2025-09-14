@@ -1,7 +1,7 @@
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
+import { transparent } from '~/features/color';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { ToolArgs } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
-import { transparent } from '~/utils/ColorUtils';
 import { PenTool } from '../pen/PenTool';
 
 export class EraserTool extends PenTool {

@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { SelectionEditMode, selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 // 共通のモード判定と ctrl+ドラッグ移動処理をまとめたベースクラス

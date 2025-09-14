@@ -1,16 +1,16 @@
 import { Component, createSignal, onMount } from 'solid-js';
-import LayerCanvasOperator from '~/controllers/canvas/LayerCanvasOperator';
+import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
 import { vars } from '@sledge/theme';
 import { OnCanvasSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
-import { activeLayer } from '~/controllers/layer/LayerListController';
+import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
+import { activeLayer } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import { eventBus } from '~/utils/EventBus';
-import { ImagePool } from './image_pool/ImagePool';
 import WebGLCanvas from './WebGLCanvas';
 
 export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);

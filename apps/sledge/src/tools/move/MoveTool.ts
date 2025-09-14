@@ -1,8 +1,8 @@
 import { Vec2 } from '@sledge/core';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
-import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { isSelectionAvailable, startMove } from '~/controllers/selection/SelectionOperator';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { isSelectionAvailable, startMove } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class MoveTool implements ToolBehavior {

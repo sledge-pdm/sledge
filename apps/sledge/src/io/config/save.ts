@@ -1,6 +1,6 @@
 import { BaseDirectory, exists, mkdir, writeTextFile } from '@tauri-apps/plugin-fs';
+import { Consts } from '~/Consts';
 import { getFallbackedSettings } from '~/io/config/set';
-import { Consts } from '~/models/Consts';
 import { getGlobalRootStore } from '~/stores/GlobalStores';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
 

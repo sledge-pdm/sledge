@@ -2,7 +2,7 @@ import { flexCol, flexRow } from '@sledge/core';
 import { ZFB09 } from '@sledge/theme';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
-import { getEntries, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
+import { getEntries, removeEntry } from '~/features/image_pool';
 import { eventBus } from '~/utils/EventBus';
 
 const Item: Component<{ id: string; name: string; path: string; visible: boolean }> = (props) => {

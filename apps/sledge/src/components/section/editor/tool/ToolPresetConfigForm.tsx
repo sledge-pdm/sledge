@@ -2,8 +2,8 @@ import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, For } from 'solid-js';
-import { getPresetMetaByToolId, PresetFieldMeta } from '~/models/tool/presets';
 import { configFormFieldLabel } from '~/styles/components/config/config_form.css';
+import { getPresetMetaByToolId, PresetFieldMeta } from '~/tools/presets';
 import { ToolCategoryId } from '~/tools/Tools';
 
 interface Props {

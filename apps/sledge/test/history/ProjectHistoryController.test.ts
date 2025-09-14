@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
-import { ProjectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { BaseHistoryAction, ProjectHistoryController } from '~/features/history';
 
 class TestAction extends BaseHistoryAction {
   readonly type = 'unknown' as const;

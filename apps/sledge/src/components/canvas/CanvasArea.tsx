@@ -1,10 +1,10 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import CanvasAreaInteract from '../../controllers/canvas/CanvasAreaInteract';
+import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import WebGLCanvas from './stacks/CanvasStack';
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { adjustZoomToFit, centeringCanvas } from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { eventBus } from '~/utils/EventBus';
@@ -15,7 +15,7 @@ import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 import { OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
 import BottomInfo from '~/components/global/BottomInfo';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CanvasArea: Component = () => {

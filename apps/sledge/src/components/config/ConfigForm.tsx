@@ -5,12 +5,12 @@ import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Consts } from '~/Consts';
+import { FieldMeta, GlobalConfig, settingsMeta } from '~/features/config/models/GlobalConfig';
+import { Sections } from '~/features/config/models/Sections';
 import { loadGlobalSettings } from '~/io/config/load';
 import { resetToDefaultConfig } from '~/io/config/reset';
 import { saveGlobalSettings } from '~/io/config/save';
-import { FieldMeta, GlobalConfig, settingsMeta } from '~/models/config/GlobalConfig';
-import { Sections } from '~/models/config/Sections';
-import { Consts } from '~/models/Consts';
 import { globalConfig, KeyConfigStore, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
 import {
   configFormFieldControlLabel,

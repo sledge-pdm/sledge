@@ -4,19 +4,18 @@ import { Icon } from '@sledge/ui';
 import { Accessor, Component, createMemo, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
-import { BaseHistoryAction } from '~/controllers/history/actions/BaseHistoryAction';
-import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
-import { ColorHistoryAction } from '~/controllers/history/actions/ColorHistoryAction';
-import { ImagePoolEntryPropsHistoryAction } from '~/controllers/history/actions/ImagePoolEntryPropsHistoryAction';
-import { ImagePoolHistoryAction } from '~/controllers/history/actions/ImagePoolHistoryAction';
-import { LayerBufferHistoryAction } from '~/controllers/history/actions/LayerBufferHistoryAction';
-import { LayerListHistoryAction } from '~/controllers/history/actions/LayerListHistoryAction';
-import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { findLayerById } from '~/controllers/layer/LayerListController';
+import { RGBAToHex } from '~/features/color';
+import { BaseHistoryAction, projectHistoryController } from '~/features/history';
+import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
+import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
+import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
+import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
+import { LayerBufferHistoryAction } from '~/features/history/actions/LayerBufferHistoryAction';
+import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
+import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
+import { findLayerById } from '~/features/layer';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
 import { toolCategories } from '~/tools/Tools';
-import { RGBAToHex } from '~/utils/ColorUtils';
 
 const ProjectHistoryItem: Component = () => {
   const [historyStore, setHistoryStore] = createStore<{
@@ -28,19 +27,8 @@ const ProjectHistoryItem: Component = () => {
   });
 
   onMount(() => {
-    setHistoryStore((prev) => {
-      return {
-        undoStack: projectHistoryController.getUndoStack(),
-        redoStack: projectHistoryController.getRedoStack(),
-      };
-    });
-    const dispose = projectHistoryController.onChange((state) => {
-      setHistoryStore((prev) => {
-        return {
-          undoStack: [...projectHistoryController.getUndoStack()],
-          redoStack: [...projectHistoryController.getRedoStack()],
-        };
-      });
+    const dispose = projectHistoryController.onChange(() => {
+      setHistoryStore({ undoStack: [...projectHistoryController.getUndoStack()], redoStack: [...projectHistoryController.getRedoStack()] });
     });
 
     return () => dispose();
@@ -49,9 +37,9 @@ const ProjectHistoryItem: Component = () => {
   return (
     <SectionItem title={`history`}>
       <div class={sectionContent} style={{ gap: '8px', 'margin-bottom': '8px', 'padding-top': '8px' }}>
-        <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
+        {/* <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
           <p style={{ color: vars.color.active }}>top = recent / bottom = oldest</p>
-        </div>
+        </div> */}
 
         <p class={sectionSubCaption}>redo stack ({historyStore.redoStack.length})</p>
         <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
@@ -94,6 +82,7 @@ function getIconForTool(tool?: string) {
 }
 
 const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({ undo = true, action, index }) => {
+  action = action ?? {};
   const { context } = action ?? {};
   let colorIcon:
     | {
@@ -103,7 +92,7 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
     | undefined = undefined;
   let icon = getIconForTool(context?.tool);
   let description = '';
-  switch (action.type) {
+  switch (action?.type) {
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
       const bigger = csaction.newSize.width * csaction.newSize.height >= csaction.oldSize.width * csaction.oldSize.height;

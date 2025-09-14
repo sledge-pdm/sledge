@@ -1,7 +1,7 @@
 import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 
 export const sideAreaRoot = style([
   flexCol,

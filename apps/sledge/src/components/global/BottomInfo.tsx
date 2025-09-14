@@ -3,8 +3,8 @@ import { vars } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
-import { setRotation } from '~/controllers/canvas/CanvasController';
-import { resetBottomBarText } from '~/controllers/log/LogController';
+import { setRotation } from '~/features/canvas';
+import { resetBottomBarText } from '~/features/log/service';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
 import { bottomInfoContainer, bottomInfoContainerRight, bottomInfoRoot } from '~/styles/globals/bottom_info.css';

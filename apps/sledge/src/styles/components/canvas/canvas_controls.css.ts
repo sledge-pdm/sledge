@@ -1,6 +1,6 @@
 import { flexCol } from '@sledge/core';
 import { style } from '@vanilla-extract/css';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 
 export const topRightNav = style({
   display: 'flex',

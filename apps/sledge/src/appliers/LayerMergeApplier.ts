@@ -1,8 +1,7 @@
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { getLayerIndex } from '~/controllers/layer/LayerListController';
-import { WebGLRenderer } from '~/controllers/webgl/WebGLRenderer';
-import { BlendMode, Layer } from '~/models/layer/Layer';
+import { BlendMode, getLayerIndex, Layer } from '~/features/layer';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
+import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 
 export interface LayerMergeParams {
   originLayer: Layer;

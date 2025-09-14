@@ -1,7 +1,7 @@
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import mitt from 'mitt';
-import { SelectionState } from '~/controllers/selection/SelectionAreaManager';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { ImagePoolEntry } from '~/features/image_pool';
+import { SelectionState } from '~/features/selection/SelectionAreaManager';
 
 export type Events = {
   'project:saved': { location: FileLocation };

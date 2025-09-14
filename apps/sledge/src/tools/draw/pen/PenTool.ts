@@ -1,11 +1,11 @@
 import { Vec2 } from '@sledge/core';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { activeLayer } from '~/controllers/layer/LayerListController';
-import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
-import { getPresetOf } from '~/controllers/tool/ToolController';
+import { colorMatch, RGBAColor } from '~/features/color';
+import { activeLayer } from '~/features/layer';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { getPresetOf } from '~/features/tool/ToolController';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
-import { colorMatch, RGBAColor } from '~/utils/ColorUtils';
 import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
 
 export class PenTool implements ToolBehavior {

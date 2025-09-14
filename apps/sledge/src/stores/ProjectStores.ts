@@ -1,8 +1,7 @@
 // projectStore.ts
 import { Size2D } from '@sledge/core';
 import { createStore } from 'solid-js/store';
-import { BaseLayer, createBaseLayer } from '~/models/layer/BaseLayer';
-import { Layer } from '~/models/layer/Layer';
+import { BaseLayer, Layer } from '~/features/layer';
 
 export type CanvasStore = {
   canvas: Size2D;
@@ -45,7 +44,9 @@ const defaultProjectStore: ProjectStore = {
 };
 const defaultLayerListStore: LayerListStore = {
   layers: new Array<Layer>(),
-  baseLayer: createBaseLayer('transparent'),
+  baseLayer: {
+    colorMode: 'transparent',
+  },
   activeLayerId: '',
   isImagePoolActive: true,
 };

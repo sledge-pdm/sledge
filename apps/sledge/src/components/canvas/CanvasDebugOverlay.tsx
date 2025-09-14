@@ -1,10 +1,9 @@
 import { flexCol } from '@sledge/core';
 import { SparkLine } from '@sledge/ui';
-import { makeTimer } from '@solid-primitives/timer';
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { DebugLogger } from '~/controllers/log/LogController';
-import { getCurrentSelection } from '~/controllers/selection/SelectionAreaManager';
+import { DebugLogger } from '~/features/log/service';
+import { getCurrentSelection } from '~/features/selection/SelectionAreaManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
@@ -91,22 +90,21 @@ const CanvasDebugOverlay: Component = (props) => {
     }
   };
 
-  let disposeInterval: (() => void) | undefined;
-  let startTimerId: number | undefined;
   onMount(() => {
+    let intervalId: NodeJS.Timeout | undefined;
     // 起動直後の描画・初期化と競合しないよう少し遅らせて開始
-    startTimerId = window.setTimeout(() => {
-      disposeInterval = makeTimer(callback, 1000, setInterval);
+    const startTimerId = window.setTimeout(() => {
+      intervalId = setInterval(callback, 1000);
     }, 1500);
     eventBus.on('selection:maskChanged', onSelectionChanged);
     eventBus.on('selection:offsetChanged', onSelectionMoved);
-  });
 
-  onCleanup(() => {
-    if (startTimerId) clearTimeout(startTimerId);
-    disposeInterval?.();
-    eventBus.off('selection:maskChanged', onSelectionChanged);
-    eventBus.off('selection:offsetChanged', onSelectionMoved);
+    return () => {
+      if (startTimerId) clearTimeout(startTimerId);
+      if (intervalId) clearInterval(intervalId);
+      eventBus.off('selection:maskChanged', onSelectionChanged);
+      eventBus.off('selection:offsetChanged', onSelectionMoved);
+    };
   });
 
   return (

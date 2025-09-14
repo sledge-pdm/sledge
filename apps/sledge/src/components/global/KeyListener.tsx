@@ -1,17 +1,17 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { projectHistoryController } from '~/features/history';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
   getPrevActiveToolCategoryId,
   setActiveToolCategory,
   updateToolPresetConfig,
-} from '~/controllers/tool/ToolController';
+} from '~/features/tool/ToolController';
 import { saveProject } from '~/io/project/out/save';
 import { fileStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { openDebugViewer } from '~/utils/DebugViewer';
-import { isKeyMatchesToEntry } from '../../controllers/config/KeyConfigController';
+import { isKeyMatchesToEntry } from '../../features/config/KeyConfigController';
 
 const KeyListener: Component = () => {
   // Helper function to check if the active element is an input field

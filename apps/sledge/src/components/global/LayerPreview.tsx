@@ -1,10 +1,10 @@
 import { vars } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
-import { ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { Consts } from '~/models/Consts';
-import { Layer } from '~/models/layer/Layer';
+import { Consts } from '~/Consts';
+import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
+import { Layer } from '~/features/layer';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/components/layer_preview.css';
 import { eventBus, Events } from '~/utils/EventBus';

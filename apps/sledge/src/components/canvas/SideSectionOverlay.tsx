@@ -5,7 +5,7 @@ import { vars } from '@sledge/theme';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import interact from 'interactjs';
 import { EditorTab, EffectsTab, ExportTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';

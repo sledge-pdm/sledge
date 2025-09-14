@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { TileIndex } from '~/controllers/layer/image/managers/Tile';
-import { colorMatch } from '~/utils/ColorUtils';
+import { colorMatch } from '~/features/color';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { TileIndex } from '~/features/layer/agent/managers/Tile';
 import { Fill, FillProps } from './FillTool';
 
 export interface MaskFillProps {

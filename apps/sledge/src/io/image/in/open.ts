@@ -1,7 +1,6 @@
-import { changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
-import { addLayer } from '~/controllers/layer/LayerListController';
-import { BlendMode, LayerType } from '~/models/layer/Layer';
+import { changeCanvasSize } from '~/features/canvas';
+import { addLayer, BlendMode, LayerType } from '~/features/layer';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { join } from '~/utils/FileUtils';
 

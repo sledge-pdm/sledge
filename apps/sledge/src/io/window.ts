@@ -1,5 +1,5 @@
 import { FileLocation } from '@sledge/core';
-import { addRecentFile } from '~/controllers/config/RecentFileController';
+import { addRecentFile } from '~/features/config/RecentFileController';
 import { openNewFile } from '~/io/open/open';
 import { join, PathToFileLocation } from '~/utils/FileUtils';
 import { getNewProjectSearchParams, openWindow } from '~/utils/WindowUtils';

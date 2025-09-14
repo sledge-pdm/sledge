@@ -2,6 +2,7 @@ import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
+import { KeyConfigCommands } from '~/Consts';
 import {
   isRecordEndWithoutSave as isRecordAbortKey,
   isRecordEndSave as isRecordEndKey,
@@ -10,9 +11,8 @@ import {
   recordKey,
   restoreDefaultKeyConfig,
   saveKeyConfigEntry,
-} from '~/controllers/config/KeyConfigController';
-import { KeyConfigEntry } from '~/models/config/KeyConfig';
-import { KeyConfigCommands } from '~/models/Consts';
+} from '~/features/config/KeyConfigController';
+import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components/config/key_config_settings.css';
 

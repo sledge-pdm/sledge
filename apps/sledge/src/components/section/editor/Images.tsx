@@ -3,9 +3,8 @@ import { Checkbox } from '@sledge/ui';
 import { Component, createMemo, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/item/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
-import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
-import { addToImagePool, getEntry, removeEntry } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { addToImagePool, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
+import { openImageImportDialog } from '~/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { sectionContent } from '~/styles/section/section_item.css';
 

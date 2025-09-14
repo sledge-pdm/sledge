@@ -1,12 +1,12 @@
 import { Vec2 } from '@sledge/core';
 import { filter_by_selection_mask } from '@sledge/wasm';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { getSelectionFillMode, getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/controllers/selection/SelectionOperator';
-import { getPresetOf } from '~/controllers/tool/ToolController';
+import { RGBAColor } from '~/features/color';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { getSelectionFillMode, getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { getPresetOf } from '~/features/tool/ToolController';
 import { WasmFloodFill } from '~/tools/draw/fill/WasmFloodFill';
 import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
-import { RGBAColor } from '~/utils/ColorUtils';
 import { addDebugImage, endDebugSession, startDebugSession, visualizeSelectionMask } from '~/utils/DebugViewer';
 
 export interface FillProps {

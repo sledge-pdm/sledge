@@ -1,5 +1,4 @@
 import { flexCol } from '@sledge/core';
-import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 import { Consts } from '~/Consts';
 
@@ -29,7 +28,7 @@ export const canvasTempControlContainer = style([
     padding: '8px',
     zIndex: Consts.zIndex.canvasOverlay,
     pointerEvents: 'auto',
-    filter: `drop-shadow(0 0 2px ${vars.color.background})`,
+    // filter: `drop-shadow(0 0 2px ${vars.color.background})`,
   },
 ]);
 

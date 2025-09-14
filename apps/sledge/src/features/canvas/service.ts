@@ -148,5 +148,25 @@ export const setOffset = (offset: { x: number; y: number }) => {
 };
 
 export const setRotation = (rotation: number) => {
-  if (rotation !== interactStore.rotation) setInteractStore('rotation', Math.round(rotation % 360));
+  // 内部表現を (-180, 180] の範囲に正規化して管理する
+  // 例: 270 -> -90, -181 -> 179
+  let r = rotation % 360; // JS の % は符号を保持する
+  if (r > 180) r -= 360; // 181..359 -> -179..-1
+  if (r <= -180) r += 360; // ... -360..-180 -> 0..180 ( -180 は 180 に統一 )
+  r = Math.round(r);
+  if (r !== interactStore.rotation) setInteractStore('rotation', r);
+};
+
+export const toggleVerticalFlip = () => {
+  setInteractStore('verticalFlipped', (v) => !v);
+};
+export const setVerticalFlip = (flipped: boolean) => {
+  setInteractStore('verticalFlipped', flipped);
+};
+
+export const toggleHorizontalFlip = () => {
+  setInteractStore('horizontalFlipped', (v) => !v);
+};
+export const setHorizontalFlip = (flipped: boolean) => {
+  setInteractStore('horizontalFlipped', flipped);
 };

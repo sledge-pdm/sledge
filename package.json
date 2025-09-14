@@ -1,6 +1,6 @@
 {
   "private": true,
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@10.16.1",
   "scripts": {
     "dev": "pnpm -F sledge dev",
     "build": "pnpm -F sledge build",

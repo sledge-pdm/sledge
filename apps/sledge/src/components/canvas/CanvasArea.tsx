@@ -1,7 +1,7 @@
 import { Component, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
-import WebGLCanvas from './stacks/CanvasStack';
+import CanvasStack from './stacks/CanvasStack';
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
@@ -105,7 +105,7 @@ const CanvasArea: Component = () => {
             'transform-origin': '0 0',
           }}
         >
-          <WebGLCanvas />
+          <CanvasStack />
         </div>
 
         <CanvasAreaOverlay />

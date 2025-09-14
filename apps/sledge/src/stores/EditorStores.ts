@@ -44,6 +44,8 @@ type InteractStore = {
   offset: Vec2;
   isDragging: boolean;
   rotation: number;
+  verticalFlipped: boolean;
+  horizontalFlipped: boolean;
 };
 type DebugPoint = Vec2 & {
   color: RGBAColor;
@@ -109,6 +111,9 @@ const defaultInteractStore: InteractStore = {
   offset: { x: 0, y: 0 },
 
   rotation: 0,
+
+  verticalFlipped: false,
+  horizontalFlipped: false,
 
   isDragging: false,
 };

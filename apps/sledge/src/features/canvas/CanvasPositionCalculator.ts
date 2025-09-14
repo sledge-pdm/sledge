@@ -32,10 +32,19 @@ export function clientPositionToCanvasPosition(clientPos: Vec2): Vec2 {
   const rx = dx * Math.cos(t) - dy * Math.sin(t);
   const ry = dx * Math.sin(t) + dy * Math.cos(t);
 
+  let canvasPos = { x: rx + canvasStore.canvas.width / 2, y: ry + canvasStore.canvas.height / 2 };
+
+  if (interactStore.horizontalFlipped) {
+    canvasPos.x = canvasStore.canvas.width - canvasPos.x;
+  }
+  if (interactStore.verticalFlipped) {
+    canvasPos.y = canvasStore.canvas.height - canvasPos.y;
+  }
+
   // 4. キャンバス座標
   return {
-    x: rx + canvasStore.canvas.width / 2,
-    y: ry + canvasStore.canvas.height / 2,
+    x: canvasPos.x,
+    y: canvasPos.y,
   };
 }
 

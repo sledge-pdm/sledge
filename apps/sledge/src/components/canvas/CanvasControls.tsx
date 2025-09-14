@@ -116,7 +116,7 @@ const CanvasControls: Component = () => {
           }}
         >
           <Icon
-            src={isTempControlMenuOpen() ? '/icons/misc/menu_out.png' : 'icons/misc/menu_in.png'}
+            src={isTempControlMenuOpen() ? '/icons/misc/menu_out.png' : '/icons/misc/menu_in.png'}
             base={7}
             scale={2}
             color={vars.color.onBackground}

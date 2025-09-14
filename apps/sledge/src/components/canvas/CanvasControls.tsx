@@ -11,7 +11,7 @@ import {
 
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { setRotation, toggleHorizontalFlip, toggleVerticalFlip } from '~/features/canvas';
+import { resetOrientation, setRotation, toggleHorizontalFlip, toggleVerticalFlip } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';
 import { layerListStore } from '~/stores/ProjectStores';
 // no longer relying on layerHistory:changed; use projectHistoryController.onChange
@@ -102,9 +102,10 @@ const CanvasControls: Component = () => {
       <div class={topLeftNav}>
         <div
           class={canvasTempControlContainer}
+          title='temporary canvas controls.'
           style={{
             cursor: 'pointer',
-            'margin-right': '4px',
+            opacity: isTempControlMenuOpen() ? 0.5 : 1.0,
           }}
           onClick={(e) => {
             e.preventDefault();
@@ -118,14 +119,16 @@ const CanvasControls: Component = () => {
             src={isTempControlMenuOpen() ? '/icons/misc/menu_out.png' : 'icons/misc/menu_in.png'}
             base={7}
             scale={2}
-            color={vars.color.muted}
+            color={vars.color.onBackground}
             hoverColor={vars.color.active}
           />
         </div>
 
         <Show when={isTempControlMenuOpen()}>
+          <div />
           <div
             class={canvasTempControlContainer}
+            title='reset orientation.'
             style={{
               cursor: 'pointer',
             }}
@@ -134,19 +137,14 @@ const CanvasControls: Component = () => {
               e.stopPropagation();
               e.stopImmediatePropagation();
 
-              toggleHorizontalFlip();
+              resetOrientation();
             }}
           >
-            <Icon
-              src='/icons/misc/flip_horizontal.png'
-              base={7}
-              scale={2}
-              color={interactStore.horizontalFlipped ? vars.color.enabled : vars.color.muted}
-              // hoverColor={vars.color.active}
-            />
+            <Icon src='/icons/misc/reset_orientation.png' base={7} scale={2} color={vars.color.onBackground} hoverColor={vars.color.active} />
           </div>
           <div
             class={canvasTempControlContainer}
+            title='vertical flip.'
             style={{
               cursor: 'pointer',
             }}
@@ -162,12 +160,35 @@ const CanvasControls: Component = () => {
               src='/icons/misc/flip_vertical.png'
               base={7}
               scale={2}
-              color={interactStore.verticalFlipped ? vars.color.enabled : vars.color.muted}
+              color={interactStore.verticalFlipped ? vars.color.enabled : vars.color.onBackground}
               // hoverColor={vars.color.active}
             />
           </div>
           <div
             class={canvasTempControlContainer}
+            title='horizontal flip.'
+            style={{
+              cursor: 'pointer',
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+
+              toggleHorizontalFlip();
+            }}
+          >
+            <Icon
+              src='/icons/misc/flip_horizontal.png'
+              base={7}
+              scale={2}
+              color={interactStore.horizontalFlipped ? vars.color.enabled : vars.color.onBackground}
+              // hoverColor={vars.color.active}
+            />
+          </div>
+          <div
+            class={canvasTempControlContainer}
+            title='rotate clockwise.'
             style={{
               cursor: 'pointer',
             }}
@@ -180,10 +201,11 @@ const CanvasControls: Component = () => {
               setRotation((currentNearestRightAngle + 1) * 90);
             }}
           >
-            <Icon src='/icons/misc/rotate_clockwise.png' base={7} scale={2} color={vars.color.muted} hoverColor={vars.color.active} />
+            <Icon src='/icons/misc/rotate_clockwise.png' base={7} scale={2} color={vars.color.onBackground} hoverColor={vars.color.active} />
           </div>
           <div
             class={canvasTempControlContainer}
+            title='rotate counter-clockwise.'
             style={{
               cursor: 'pointer',
             }}
@@ -196,7 +218,7 @@ const CanvasControls: Component = () => {
               setRotation((currentNearestRightAngle - 1) * 90);
             }}
           >
-            <Icon src='/icons/misc/rotate_counterclockwise.png' base={7} scale={2} color={vars.color.muted} hoverColor={vars.color.active} />
+            <Icon src='/icons/misc/rotate_counterclockwise.png' base={7} scale={2} color={vars.color.onBackground} hoverColor={vars.color.active} />
           </div>
         </Show>
       </div>

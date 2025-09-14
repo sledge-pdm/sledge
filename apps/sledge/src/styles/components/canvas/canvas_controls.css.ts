@@ -1,16 +1,24 @@
 import { flexCol } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 import { Consts } from '~/Consts';
 
 export const topLeftNav = style({
   display: 'flex',
   flexDirection: 'row',
-  alignItems: 'center',
-  gap: '12px',
-  padding: '16px',
-  position: 'absolute',
   left: '0px',
   top: '0px',
+  // flexDirection: 'row-reverse',
+  // right: '0px',
+  // bottom: '0px',
+  alignItems: 'center',
+  padding: '4px',
+  gap: '4px',
+  margin: '8px',
+  position: 'absolute',
+  // backgroundColor: '#00000030',
+  zIndex: Consts.zIndex.canvasOverlay,
+  borderRadius: '4px',
 });
 
 export const canvasTempControlContainer = style([
@@ -18,9 +26,24 @@ export const canvasTempControlContainer = style([
   {
     alignContent: 'center',
     alignItems: 'center',
-    padding: '4px',
+    padding: '8px',
     zIndex: Consts.zIndex.canvasOverlay,
     pointerEvents: 'auto',
+    filter: `drop-shadow(0 0 2px ${vars.color.background})`,
+  },
+]);
+
+export const canvasTempControlIcon = style([
+  flexCol,
+  {
+    width: '14px',
+    height: '14px',
+    imageRendering: 'pixelated',
+    shapeRendering: 'geometricPrecision',
+    alignContent: 'center',
+    alignItems: 'center',
+    backdropFilter: 'invert()',
+    scale: 2,
   },
 ]);
 

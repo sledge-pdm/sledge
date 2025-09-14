@@ -14,6 +14,7 @@ export type Events = {
   'selection:maskChanged': { commit: boolean };
   'selection:offsetChanged': { newOffset: Vec2 };
   'selection:stateChanged': { newState: SelectionState };
+  'selection:requestMenuUpdate': {};
 
   'floatingMove:stateChanged': { moving: boolean };
   'floatingMove:moved': {};

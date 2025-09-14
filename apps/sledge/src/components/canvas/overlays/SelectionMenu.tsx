@@ -60,6 +60,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   const handleAreaChanged = (e: Events['selection:maskChanged']) => {
     if (e.commit) {
       updateMenuPos();
+      setUpdatePosition(true);
     }
   };
   const handleMoved = (e: Events['selection:offsetChanged']) => setUpdatePosition(true);
@@ -70,11 +71,15 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
     setFloatingMoveState(e.moving);
   };
+  const handleRequestMenuUpdate = (e: Events['selection:requestMenuUpdate']) => {
+    setUpdatePosition(true);
+  };
   onMount(() => {
     startRenderLoop();
     eventBus.on('selection:maskChanged', handleAreaChanged);
     eventBus.on('selection:offsetChanged', handleMoved);
     eventBus.on('selection:stateChanged', handleStateChanged);
+    eventBus.on('selection:requestMenuUpdate', handleRequestMenuUpdate);
     eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
 
     const observer = new ResizeObserver((entries) => {
@@ -92,6 +97,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
       eventBus.off('selection:maskChanged', handleAreaChanged);
       eventBus.off('selection:offsetChanged', handleMoved);
       eventBus.off('selection:stateChanged', handleStateChanged);
+      eventBus.off('selection:requestMenuUpdate', handleRequestMenuUpdate);
       eventBus.off('floatingMove:stateChanged', handleMoveStateChanged);
       observer.disconnect();
     };
@@ -113,10 +119,13 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
 
     const containerRect = containerRef.getBoundingClientRect();
     const selectionOffset = getSelectionOffset();
-    // 基本位置：選択範囲の右下
-    let basePos = {
-      x: outlineBound.right + selectionOffset.x + 1,
-      y: outlineBound.bottom + selectionOffset.y + 1,
+
+    const boundBaseX = interactStore.horizontalFlipped ? outlineBound.left : outlineBound.right + 1;
+    const boundBaseY = interactStore.verticalFlipped ? outlineBound.top : outlineBound.bottom + 1;
+
+    const basePos: Vec2 = {
+      x: boundBaseX + selectionOffset.x,
+      y: boundBaseY + selectionOffset.y,
     };
 
     setSelectionMenuPos(basePos);
@@ -162,7 +171,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         'pointer-events': 'all',
         'z-index': Consts.zIndex.canvasOverlay,
         'transform-origin': '0 0',
-        transform: `scale(${1 / interactStore.zoom})`,
+        transform: `scale(${interactStore.horizontalFlipped ? '-' : ''}${1 / interactStore.zoom},${interactStore.verticalFlipped ? '-' : ''}${1 / interactStore.zoom}) `,
       }}
       onPointerDown={(e) => {
         e.stopPropagation();

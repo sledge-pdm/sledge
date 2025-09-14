@@ -1,5 +1,4 @@
-import { insertEntry, removeEntry } from '~/features/image_pool';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { ImagePoolEntry, insertEntry, removeEntry } from '~/features/image_pool';
 import { BaseHistoryAction } from '../base';
 
 // history action for changes in image pool

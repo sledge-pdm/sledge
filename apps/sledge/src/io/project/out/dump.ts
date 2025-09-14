@@ -1,7 +1,6 @@
-import { getEntries } from '~/features/image_pool';
+import { getEntries, ImagePoolEntry } from '~/features/image_pool';
 import { allLayers } from '~/features/layer';
 import { getBufferOf } from '~/features/layer/agent/LayerAgentManager';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
 import {
   CanvasStore,
   canvasStore,

@@ -132,10 +132,34 @@ export const centeringCanvas = () => {
   eventBus.emit('canvas:onAdjusted', {});
 };
 
-export const setZoom = (zoom: number): boolean => {
+export const setZoomByReference = (zoomByReference: number): boolean => {
+  const referencedZoom = getReferencedZoom() ?? 1;
+  let zoom = zoomByReference * referencedZoom;
   zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
   if (zoom > 0 && zoom !== interactStore.zoom) {
     setInteractStore('zoom', zoom);
+    zoomByReference =
+      Math.round(zoomByReference * Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits)) /
+      Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits);
+    setInteractStore('zoomByReference', zoomByReference);
+    return true;
+  }
+  return false;
+};
+
+export const setZoom = (zoom: number): boolean => {
+  const rawZoom = zoom;
+  zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
+  if (zoom > 0 && zoom !== interactStore.zoom) {
+    setInteractStore('zoom', zoom);
+
+    const referencedZoom = getReferencedZoom() ?? 1;
+    let zoomByReference = rawZoom / referencedZoom;
+
+    zoomByReference =
+      Math.round(zoomByReference * Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits)) /
+      Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits);
+    setInteractStore('zoomByReference', zoomByReference);
     return true;
   }
   return false;

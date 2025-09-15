@@ -1,18 +1,7 @@
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
-import {
-  canvasTempControlContainer,
-  redoIcon,
-  topLeftNav,
-  topRightNav,
-  undoIcon,
-  undoRedoContainer,
-} from '~/styles/components/canvas/canvas_controls.css';
+import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
-import { vars } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
-import { resetOrientation, setRotation, toggleHorizontalFlip, toggleVerticalFlip } from '~/features/canvas';
-import { interactStore } from '~/stores/EditorStores';
 import { layerListStore } from '~/stores/ProjectStores';
 // no longer relying on layerHistory:changed; use projectHistoryController.onChange
 
@@ -25,7 +14,7 @@ const CanvasControls: Component = () => {
       setActiveCanUndo(state.canUndo);
       setActiveCanRedo(state.canRedo);
     });
-    onCleanup(() => dispose());
+    return () => dispose();
   });
 
   createEffect(() => {
@@ -99,7 +88,7 @@ const CanvasControls: Component = () => {
         </div>
       </div>
 
-      <div class={topLeftNav}>
+      {/* <div class={topLeftNav}>
         <div
           class={canvasTempControlContainer}
           title='temporary canvas controls.'
@@ -221,7 +210,7 @@ const CanvasControls: Component = () => {
             <Icon src='/icons/misc/rotate_counterclockwise.png' base={7} scale={2} color={vars.color.onBackground} hoverColor={vars.color.active} />
           </div>
         </Show>
-      </div>
+      </div> */}
     </>
   );
 };

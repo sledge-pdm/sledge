@@ -85,6 +85,7 @@ const CanvasStack: Component = () => {
         }}
       >
         <div
+          id='canvas-stack'
           class={canvasStack}
           style={{
             width: `${canvasStore.canvas.width}px`,

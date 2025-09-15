@@ -6,10 +6,19 @@ import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import ExportDialog from '~/components/global/dialogs/ExportDialog';
 import SettingDialog from '~/components/global/dialogs/SettingDialog';
+import CanvasTempControls from '~/components/global/title_bar/CanvasTempControls';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
-import { menuItem, menuItemBackground, menuItemText, menuListLeft, menuListRight, root } from '~/styles/globals/top_menu_bar.css';
+import {
+  menuItem,
+  menuItemBackground,
+  menuItemText,
+  menuListCanvasControls,
+  menuListLeft,
+  menuListRight,
+  root,
+} from '~/styles/globals/top_menu_bar.css';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
@@ -20,6 +29,8 @@ interface Item {
 }
 
 const TopMenuBar: Component = () => {
+  let canvasControlsRef: HTMLDivElement | undefined;
+
   const [isRecentMenuShown, setIsRecentMenuShown] = createSignal(false);
   const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
 
@@ -30,6 +41,7 @@ const TopMenuBar: Component = () => {
 
   const [isDecorated, setIsDecorated] = createSignal(true);
   const [availableUpdate, setAvailableUpdate] = createSignal<Update | undefined>();
+
   onMount(async () => {
     setIsDecorated(await getCurrentWindow().isDecorated());
     const update = await getUpdate();
@@ -156,6 +168,11 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
+
+      <div class={menuListCanvasControls} ref={canvasControlsRef}>
+        <CanvasTempControls />
+      </div>
+
       <div class={menuListRight}>
         <Show when={isDecorated()}>
           <div class={flexRow} style={{ 'align-self': 'center' }}>
@@ -175,6 +192,7 @@ const TopMenuBar: Component = () => {
           }}
         </For>
       </div>
+
       <Show when={availableUpdate() && !globalConfig.misc.skippedVersions.includes(availableUpdate()?.version || '')}>
         <div class={menuItem}>
           <a

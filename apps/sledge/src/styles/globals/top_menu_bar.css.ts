@@ -32,6 +32,13 @@ export const menuListLeft = style([
   },
 ]);
 
+export const menuListCanvasControls = style([
+  flexRow,
+  {
+    alignItems: 'center',
+  },
+]);
+
 export const menuListRight = style([
   flexRow,
   {

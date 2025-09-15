@@ -31,11 +31,35 @@ const SideSectionsOverlay: Component<Props> = (props) => {
   });
 
   onMount(() => {
-    interact('#side_sections').resizable({
-      edges: { right: true, left: true },
+    interact('#side-sections-leftSide').resizable({
+      edges: { right: true, left: false },
       modifiers: [
         interact.modifiers.restrictSize({
-          min: { width: 280, height: -1 },
+          min: { width: 300, height: -1 },
+          max: { width: 600, height: -1 },
+        }),
+      ],
+      listeners: {
+        start: function (event) {
+          Object.assign(event.target.style, {
+            width: `${event.rect.width}px`,
+          });
+        },
+        move: function (event) {
+          let { x, y } = event.target.dataset;
+          x = (parseFloat(x) || 0) + event.deltaRect.left;
+          Object.assign(event.target.style, {
+            width: `${event.rect.width}px`,
+          });
+          eventBus.emit('window:sideSectionSideChanged', {});
+        },
+      },
+    });
+    interact('#side-sections-rightSide').resizable({
+      edges: { right: false, left: true },
+      modifiers: [
+        interact.modifiers.restrictSize({
+          min: { width: 300, height: -1 },
           max: { width: 600, height: -1 },
         }),
       ],
@@ -96,7 +120,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
       }}
     >
       <div
-        id='side_sections'
+        id={`side-sections-${props.side}`}
         class={sideAreaRoot}
         style={{
           display: appearanceStore[props.side].shown ? 'flex' : 'none',
@@ -104,7 +128,14 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         }}
       >
         <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
-          <div class={sideAreaContentWrapper} ref={(el) => (scrollRef = el)}>
+          <div
+            class={sideAreaContentWrapper}
+            ref={(el) => (scrollRef = el)}
+            style={{
+              'padding-left': props.side === 'leftSide' ? '16px' : '24px',
+              'padding-right': props.side === 'rightSide' ? '16px' : '24px',
+            }}
+          >
             <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
           </div>
 

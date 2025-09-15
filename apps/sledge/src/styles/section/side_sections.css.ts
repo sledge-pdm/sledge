@@ -21,7 +21,7 @@ export const sideAreaContentWrapper = style([
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: '32px',
+    paddingTop: '28px',
     paddingBottom: '48px',
     paddingLeft: '24px',
     paddingRight: '24px',

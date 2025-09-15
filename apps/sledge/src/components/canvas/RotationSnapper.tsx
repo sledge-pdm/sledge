@@ -15,45 +15,41 @@ function normalizeDeg(a: number): number {
 }
 
 export class RotationSnapper {
-  private active = false;
-  private baselineRotation = 0; // Normalized rotation at gesture start
-  private rotationInGesture = 0;
-  private committed = false; // Whether rotation updates are allowed in this gesture
+  private rotationOnStart = 0;
+  private rotationAllowed = false;
 
   /** Called when the two-finger gesture starts */
   public onGestureStart(initialRotationDeg: number) {
-    this.active = true;
-    this.baselineRotation = normalizeDeg(initialRotationDeg);
-    // If starting away from zero, allow immediately
-    this.committed = Math.abs(this.baselineRotation) > NEAR_ZERO_EPS;
+    this.rotationOnStart = normalizeDeg(initialRotationDeg);
+    this.rotationAllowed = Math.abs(this.rotationOnStart) > NEAR_ZERO_EPS;
   }
   /** Called when gesture ends (fingers < 2) */
   public onGestureEnd() {
-    this.active = false;
-    this.committed = false;
+    // this.rotationAllowed = true;
   }
 
-  /**
-   * Returns the rotation to apply this frame.
-   * If not yet committed and still below threshold, returns baseline (likely 0°).
-   */
   public process(candidateDeg: number): number {
-    if (!this.active) return candidateDeg;
+    const normalizedDeg = normalizeDeg(candidateDeg);
 
-    const norm = normalizeDeg(candidateDeg);
+    console.log('candidate(normalized): ', normalizedDeg);
 
-    if (!this.committed) {
-      const deviation = Math.abs(normalizeDeg(norm - this.baselineRotation));
-      this.rotationInGesture += deviation;
+    console.log('rotation is ', this.rotationAllowed ? 'allowed' : 'not allowed');
+    if (this.rotationAllowed) {
+      console.log('returning', normalizedDeg);
+      return normalizedDeg;
+    } else {
+      const deltaFromStart = normalizeDeg(normalizedDeg - this.rotationOnStart);
+      console.log('considering', deltaFromStart, 'by', `${normalizedDeg} - ${this.rotationOnStart}`);
 
-      if (this.rotationInGesture >= THRESHOLD_DEG) {
-        this.committed = true;
-        return deviation; // first allowed rotation
+      if (Math.abs(deltaFromStart) >= THRESHOLD_DEG) {
+        console.log('delta over threshold. allow. returns ', normalizedDeg);
+        this.rotationAllowed = true;
+        return normalizedDeg;
+      } else {
+        console.log('delta is not over threshold. deny. returns ', this.rotationOnStart);
+        return this.rotationOnStart;
       }
-      return this.baselineRotation; // keep baseline (suppress tiny accidental rotation)
     }
-
-    return norm;
   }
 }
 

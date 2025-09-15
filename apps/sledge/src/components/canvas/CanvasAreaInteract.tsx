@@ -341,6 +341,7 @@ class CanvasAreaInteract {
     const deltaRad = angleNew - this.lastAppliedAngle;
     const rotOldDeg = interactStore.rotation;
     const rotCandidate = Math.round(rotOldDeg + (deltaRad * 180) / Math.PI) % 360;
+
     const rotProcessed = this.rotationSnapper.process(rotCandidate);
 
     // 適用前にズーム (clamp は setZoom 内部で処理)

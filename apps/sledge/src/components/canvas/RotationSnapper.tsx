@@ -16,37 +16,35 @@ function normalizeDeg(a: number): number {
 
 export class RotationSnapper {
   private rotationOnStart = 0;
+  private rotationFromStart = 0;
   private rotationAllowed = false;
 
   /** Called when the two-finger gesture starts */
   public onGestureStart(initialRotationDeg: number) {
     this.rotationOnStart = normalizeDeg(initialRotationDeg);
+    this.rotationFromStart = this.rotationOnStart;
     this.rotationAllowed = Math.abs(this.rotationOnStart) > NEAR_ZERO_EPS;
   }
   /** Called when gesture ends (fingers < 2) */
   public onGestureEnd() {
     // this.rotationAllowed = true;
+    this.rotationOnStart = 0;
+    this.rotationFromStart = 0;
   }
 
   public process(candidateDeg: number): number {
     const normalizedDeg = normalizeDeg(candidateDeg);
 
-    console.log('candidate(normalized): ', normalizedDeg);
-
-    console.log('rotation is ', this.rotationAllowed ? 'allowed' : 'not allowed');
     if (this.rotationAllowed) {
-      console.log('returning', normalizedDeg);
       return normalizedDeg;
     } else {
       const deltaFromStart = normalizeDeg(normalizedDeg - this.rotationOnStart);
-      console.log('considering', deltaFromStart, 'by', `${normalizedDeg} - ${this.rotationOnStart}`);
+      this.rotationFromStart += deltaFromStart;
 
-      if (Math.abs(deltaFromStart) >= THRESHOLD_DEG) {
-        console.log('delta over threshold. allow. returns ', normalizedDeg);
+      if (Math.abs(this.rotationFromStart) >= THRESHOLD_DEG) {
         this.rotationAllowed = true;
-        return normalizedDeg;
+        return this.rotationFromStart;
       } else {
-        console.log('delta is not over threshold. deny. returns ', this.rotationOnStart);
         return this.rotationOnStart;
       }
     }

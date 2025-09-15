@@ -2,7 +2,9 @@
 
 [![release](https://github.com/Innsbluck-rh/sledge/actions/workflows/release.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/release.yml)
 &nbsp;
-[![dev](https://github.com/Innsbluck-rh/sledge/actions/workflows/dev.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/dev.yml)
+[![development_release](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_release.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_release.yml)
+&nbsp;
+[![development_build](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_build.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_build.yml)
 &nbsp;
 ![Vercel Deploy](https://deploy-badge.vercel.app/vercel/sledge-gold)
 &nbsp;

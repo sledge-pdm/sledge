@@ -35,7 +35,9 @@ export const menuListLeft = style([
 export const menuListCanvasControls = style([
   flexRow,
   {
+    height: '100%',
     alignItems: 'center',
+    marginRight: '6px',
   },
 ]);
 

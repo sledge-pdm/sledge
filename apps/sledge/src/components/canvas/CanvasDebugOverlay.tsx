@@ -8,13 +8,12 @@ import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { eventBus, Events } from '~/utils/EventBus';
-import { safeInvoke } from '~/utils/TauriUtils';
 
-interface TauriMemInfo {
-  total_bytes: number;
-  main_bytes: number;
-  children_bytes: number;
-}
+// interface TauriMemInfo {
+//   total_bytes: number;
+//   main_bytes: number;
+//   children_bytes: number;
+// }
 const CanvasDebugOverlay: Component = (props) => {
   const LOG_LABEL = 'CanvasDebugOverlay';
   const logger = new DebugLogger(LOG_LABEL, false);
@@ -28,7 +27,7 @@ const CanvasDebugOverlay: Component = (props) => {
   const lastMouseWindow = () => interactStore.lastMouseWindow;
   const lastMouseOnCanvas = () => interactStore.lastMouseOnCanvas;
   const [jsMemInfo, setJsMemInfo] = createSignal<any>({});
-  const [processMemInfo, setProcessMemInfo] = createSignal<TauriMemInfo>();
+  // const [processMemInfo, setProcessMemInfo] = createSignal<TauriMemInfo>();
 
   // for sparklines
   const [sparkLineStore, setSparkLineStore] = createStore<{ jsHeap: number[]; process: number[] }>({
@@ -49,21 +48,21 @@ const CanvasDebugOverlay: Component = (props) => {
       } catch {}
 
       // ネイティブ呼び出しはタイムアウト付きで最大300msだけ待つ
-      const processInfo = await Promise.race<Promise<TauriMemInfo | undefined>>([
-        safeInvoke<TauriMemInfo>('get_process_memory'),
-        new Promise<TauriMemInfo | undefined>((resolve) => setTimeout(() => resolve(undefined), 300)),
-      ]);
-      if (processInfo) {
-        setProcessMemInfo(processInfo);
-      }
+      // const processInfo = await Promise.race<Promise<TauriMemInfo | undefined>>([
+      //   safeInvoke<TauriMemInfo>('get_process_memory'),
+      //   new Promise<TauriMemInfo | undefined>((resolve) => setTimeout(() => resolve(undefined), 300)),
+      // ]);
+      // if (processInfo) {
+      //   setProcessMemInfo(processInfo);
+      // }
       // 非破壊更新 + 同一tick内での再読込を避けるためlocal値を使用
       setSparkLineStore((prev) => {
         const jsMiB = (jsMemInfo()?.usedJSHeapSize ?? 0) / 1024 / 1024;
-        const totalBytes = processInfo?.total_bytes ?? 0;
-        const procMiB = totalBytes / 1024 / 1024;
+        // const totalBytes = processInfo?.total_bytes ?? 0;
+        // const procMiB = totalBytes / 1024 / 1024;
         return {
           jsHeap: [...prev.jsHeap, jsMiB].slice(-60),
-          process: [...prev.process, procMiB].slice(-60),
+          // process: [...prev.process, procMiB].slice(-60),
         };
       });
 
@@ -124,13 +123,13 @@ const CanvasDebugOverlay: Component = (props) => {
 
       <Show when={globalConfig.debug.showPerformanceMonitor}>
         <div class={canvasDebugOverlayBottomLeft}>
-          <div class={flexCol} style={{ gap: '1px' }}>
+          {/* <div class={flexCol} style={{ gap: '1px' }}>
             <p>MAIN: {toMiB(processMemInfo()?.main_bytes)}</p>
             <p>CHILDREN: {toMiB(processMemInfo()?.children_bytes)}</p>
             <p>TOTAL: {toMiB(processMemInfo()?.total_bytes)}</p>
 
             <SparkLine length={60} height={60} lengthMult={2} color='#00ca00' values={sparkLineStore.process} min={0} />
-          </div>
+          </div> */}
           <div class={flexCol} style={{ gap: '1px' }}>
             <p>
               JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}

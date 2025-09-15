@@ -36,6 +36,7 @@ type InteractStore = {
   isInStroke: boolean;
   isPenOut: boolean;
   zoom: number;
+  zoomByReference: number;
   zoomMin: number;
   zoomMax: number;
   touchZoomSensitivity: number;
@@ -69,12 +70,12 @@ export type ToolStore = {
 const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: true,
-    tabs: ['editor', 'effects'],
+    tabs: ['editor', 'effects', 'danger'],
     selectedIndex: 0,
   },
   rightSide: {
     shown: false,
-    tabs: ['project', 'export', 'history', 'danger'],
+    tabs: ['project', 'export', 'history'],
     selectedIndex: 0,
   },
 };
@@ -100,6 +101,7 @@ const defaultInteractStore: InteractStore = {
   isPenOut: false,
   isInStroke: false,
   zoom: 1,
+  zoomByReference: 1,
   // zoomMin: 0.5,
   zoomMin: 0.01,
   // zoomMax: 8,

@@ -34,10 +34,10 @@ const BottomInfo: Component = () => {
   return (
     <div id='bottom-info' class={bottomInfoRoot}>
       <div class={bottomInfoContainer}>
-        <p style={{ width: '56px' }}>x{interactStore.zoom}</p>
+        <p style={{ width: '56px' }}>x{interactStore.zoomByReference}</p>
         <p style={{ color: textColor(), overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
-          <div class={flexRow} style={{ width: '150px', overflow: 'visible' }}>
+          <div class={flexRow} style={{ width: '140px', overflow: 'visible' }}>
             <Slider
               labelMode='left'
               value={interactStore.rotation}

@@ -1,18 +1,7 @@
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
-import {
-  canvasTempControlContainer,
-  redoIcon,
-  topLeftNav,
-  topRightNav,
-  undoIcon,
-  undoRedoContainer,
-} from '~/styles/components/canvas/canvas_controls.css';
+import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
-import { vars } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
-import { resetOrientation, setRotation, toggleHorizontalFlip, toggleVerticalFlip } from '~/features/canvas';
-import { interactStore } from '~/stores/EditorStores';
 import { layerListStore } from '~/stores/ProjectStores';
 // no longer relying on layerHistory:changed; use projectHistoryController.onChange
 
@@ -25,7 +14,7 @@ const CanvasControls: Component = () => {
       setActiveCanUndo(state.canUndo);
       setActiveCanRedo(state.canRedo);
     });
-    onCleanup(() => dispose());
+    return () => dispose();
   });
 
   createEffect(() => {
@@ -97,130 +86,6 @@ const CanvasControls: Component = () => {
             }}
           />
         </div>
-      </div>
-
-      <div class={topLeftNav}>
-        <div
-          class={canvasTempControlContainer}
-          title='temporary canvas controls.'
-          style={{
-            cursor: 'pointer',
-            opacity: isTempControlMenuOpen() ? 0.5 : 1.0,
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-
-            setIsTempControlMenuOpen(!isTempControlMenuOpen());
-          }}
-        >
-          <Icon
-            src={isTempControlMenuOpen() ? '/icons/misc/menu_out.png' : '/icons/misc/menu_in.png'}
-            base={7}
-            scale={2}
-            color={vars.color.onBackground}
-            hoverColor={vars.color.active}
-          />
-        </div>
-
-        <Show when={isTempControlMenuOpen()}>
-          <div />
-          <div
-            class={canvasTempControlContainer}
-            title='reset orientation.'
-            style={{
-              cursor: 'pointer',
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-
-              resetOrientation();
-            }}
-          >
-            <Icon src='/icons/misc/reset_orientation.png' base={7} scale={2} color={vars.color.onBackground} hoverColor={vars.color.active} />
-          </div>
-          <div
-            class={canvasTempControlContainer}
-            title='vertical flip.'
-            style={{
-              cursor: 'pointer',
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-
-              toggleVerticalFlip();
-            }}
-          >
-            <Icon
-              src='/icons/misc/flip_vertical.png'
-              base={7}
-              scale={2}
-              color={interactStore.verticalFlipped ? vars.color.enabled : vars.color.onBackground}
-              // hoverColor={vars.color.active}
-            />
-          </div>
-          <div
-            class={canvasTempControlContainer}
-            title='horizontal flip.'
-            style={{
-              cursor: 'pointer',
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-
-              toggleHorizontalFlip();
-            }}
-          >
-            <Icon
-              src='/icons/misc/flip_horizontal.png'
-              base={7}
-              scale={2}
-              color={interactStore.horizontalFlipped ? vars.color.enabled : vars.color.onBackground}
-              // hoverColor={vars.color.active}
-            />
-          </div>
-          <div
-            class={canvasTempControlContainer}
-            title='rotate clockwise.'
-            style={{
-              cursor: 'pointer',
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-
-              const currentNearestRightAngle = Math.round(interactStore.rotation / 90);
-              setRotation((currentNearestRightAngle + 1) * 90);
-            }}
-          >
-            <Icon src='/icons/misc/rotate_clockwise.png' base={7} scale={2} color={vars.color.onBackground} hoverColor={vars.color.active} />
-          </div>
-          <div
-            class={canvasTempControlContainer}
-            title='rotate counter-clockwise.'
-            style={{
-              cursor: 'pointer',
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-
-              const currentNearestRightAngle = Math.round(interactStore.rotation / 90);
-              setRotation((currentNearestRightAngle - 1) * 90);
-            }}
-          >
-            <Icon src='/icons/misc/rotate_counterclockwise.png' base={7} scale={2} color={vars.color.onBackground} hoverColor={vars.color.active} />
-          </div>
-        </Show>
       </div>
     </>
   );

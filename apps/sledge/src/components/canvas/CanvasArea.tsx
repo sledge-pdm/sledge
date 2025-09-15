@@ -57,6 +57,9 @@ const CanvasArea: Component = () => {
     eventBus.on('canvas:onAdjusted', (e) => {
       interact?.updateTransform();
     });
+    eventBus.on('canvas:onZoomChanged', (e) => {
+      interact?.updateTransform();
+    });
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();

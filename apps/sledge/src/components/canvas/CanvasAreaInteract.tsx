@@ -6,6 +6,7 @@ import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { isMacOS } from '~/utils/OSUtils';
+import RotationSnapper from './RotationSnapper';
 
 const LOG_LABEL = 'CanvasAreaInteract';
 const logger = new DebugLogger(LOG_LABEL, false);
@@ -18,6 +19,9 @@ class CanvasAreaInteract {
 
   private lastDist: number = 0;
   private lastAngle: number = 0;
+
+  // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
+  private rotationSnapper = new RotationSnapper();
 
   private offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
   private offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
@@ -91,6 +95,8 @@ class CanvasAreaInteract {
         const [p0, p1] = Array.from(this.pointers.values());
         this.lastDist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
         this.lastAngle = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+        // 回転スナップ状態初期化
+        this.rotationSnapper.onGestureStart(interactStore.rotation);
       }
     } else {
       // タッチ以外
@@ -161,7 +167,9 @@ class CanvasAreaInteract {
         const deltaRad = angleNew - this.lastAngle;
         this.lastAngle = angleNew;
         const rotOldDeg = interactStore.rotation;
-        const rotNewDeg = Math.round(rotOldDeg + (deltaRad * 180) / Math.PI) % 360;
+        const rotCandidate = Math.round(rotOldDeg + (deltaRad * 180) / Math.PI) % 360;
+        // ソフトスナップ処理（タッチ回転のみ）
+        const rotProcessed = this.rotationSnapper.process(rotCandidate);
 
         // (6) 適用
         setZoom(newZoom);
@@ -169,7 +177,7 @@ class CanvasAreaInteract {
           x: interactStore.offset.x + canvasMidX * (zoomOld - newZoom) + dxCanvas,
           y: interactStore.offset.y + canvasMidY * (zoomOld - newZoom) + dyCanvas,
         });
-        setRotation(rotNewDeg);
+        setRotation(rotProcessed);
 
         this.updateTransform();
       }
@@ -203,6 +211,10 @@ class CanvasAreaInteract {
 
     this.pointers.delete(e.pointerId);
     this.wrapperRef.releasePointerCapture(e.pointerId);
+    if (this.pointers.size < 2) {
+      // 2本指ピンチ終了時にスナップ状態リセット
+      this.rotationSnapper.onGestureEnd();
+    }
     if (this.pointers.size === 0) {
       setInteractStore('isDragging', false);
       this.lastDist = 0;

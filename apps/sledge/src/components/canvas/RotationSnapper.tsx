@@ -17,6 +17,7 @@ function normalizeDeg(a: number): number {
 export class RotationSnapper {
   private active = false;
   private baselineRotation = 0; // Normalized rotation at gesture start
+  private rotationInGesture = 0;
   private committed = false; // Whether rotation updates are allowed in this gesture
 
   /** Called when the two-finger gesture starts */
@@ -43,9 +44,11 @@ export class RotationSnapper {
 
     if (!this.committed) {
       const deviation = Math.abs(normalizeDeg(norm - this.baselineRotation));
-      if (deviation >= THRESHOLD_DEG) {
+      this.rotationInGesture += deviation;
+
+      if (this.rotationInGesture >= THRESHOLD_DEG) {
         this.committed = true;
-        return norm; // first allowed rotation
+        return deviation; // first allowed rotation
       }
       return this.baselineRotation; // keep baseline (suppress tiny accidental rotation)
     }

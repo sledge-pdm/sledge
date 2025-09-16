@@ -25,8 +25,8 @@ export class AutoSaveManager {
     }
     this.currentInterval = interval;
     this.intervalId = setInterval(async () => {
-      if (fileStore.location.name && fileStore.location.path) {
-        await saveProject(fileStore.location.name, fileStore.location.path);
+      if (fileStore.savedLocation.name && fileStore.savedLocation.path) {
+        await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
       } else {
         console.log('Auto-save skipped: No valid file location.');
       }

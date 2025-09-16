@@ -2,16 +2,15 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, createSignal, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
-import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { fileStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
 const ProjectSave: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
-  const isOWPossible = () => fileStore.location.name !== undefined && fileStore.location.path !== undefined;
+  const isOWPossible = () => fileStore.savedLocation.name !== undefined && fileStore.savedLocation.path !== undefined;
 
-  const save = (forceNew?: boolean) => {
-    setFileStore('location', 'name', fileStore.location.name);
-    saveProject(fileStore.location.name, forceNew ? undefined : fileStore.location.path).then((result) => {
+  const save = () => {
+    saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path).then((result) => {
       if (result) {
         setSaveLog('saved!');
         setProjectStore('isProjectChangedAfterSave', false);
@@ -41,11 +40,11 @@ const ProjectSave: Component = () => {
         >
           save.
         </button>
-        <button onClick={() => save(true)}>save (new).</button>
+        <button onClick={() => save()}>save (new).</button>
       </Show>
       <Show when={!isOWPossible()}>
         <button
-          onClick={() => save(true)}
+          onClick={() => save()}
           style={{
             color: vars.color.accent,
             'border-color': vars.color.accent,

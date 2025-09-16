@@ -14,10 +14,11 @@ import { join } from '~/utils/FileUtils';
 const SaveSection: Component = () => {
   const [isSaveMenuShown, setIsSaveMenuShown] = createSignal(false);
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
-  const isOWPossible = () => fileStore.location.name !== undefined && fileStore.location.path !== undefined && fileStore.openAs === 'project';
+  const isOWPossible = () =>
+    fileStore.savedLocation.name !== undefined && fileStore.savedLocation.path !== undefined && fileStore.openAs === 'project';
 
-  const save = (forceNew?: boolean) => {
-    saveProject(fileStore.location.name, forceNew ? undefined : fileStore.location.path);
+  const save = () => {
+    saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
   };
 
   const getSaveTimeText = () => {
@@ -95,14 +96,14 @@ const SaveSection: Component = () => {
   });
 
   const saveMenu = createMemo<MenuListOption[]>(() => [
-    { label: 'Save As...', onSelect: () => save(true), color: vars.color.onBackground },
+    { label: 'Save As...', onSelect: () => save(), color: vars.color.onBackground },
     {
       label: 'Open Saved Folder',
       onSelect: () => {
-        if (!fileStore.location.path || !fileStore.location.name) return;
-        revealItemInDir(join(fileStore.location.path, fileStore.location.name));
+        if (!fileStore.savedLocation.path || !fileStore.savedLocation.name) return;
+        revealItemInDir(join(fileStore.savedLocation.path, fileStore.savedLocation.name));
       },
-      disabled: !fileStore.location.path || !fileStore.location.name,
+      disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
       color: vars.color.onBackground,
     },
   ]);
@@ -167,7 +168,7 @@ const SaveSection: Component = () => {
         <p style={{ 'white-space': 'nowrap', opacity: 0.8 }}>{saveLog()}</p>
       </Show>
       <div class={saveButtonRoot} data-tauri-drag-region-exclude>
-        <div class={saveButtonMainButton} onClick={() => save(!isOWPossible())}>
+        <div class={saveButtonMainButton} onClick={() => save()}>
           <p
             style={{
               color: vars.color.accent,
@@ -216,7 +217,7 @@ const SaveSection: Component = () => {
         />
       </Show>
 
-      {/* <Show when={projectStore.autoSaveEnabled && fileStore.location.name && fileStore.location.path && projectStore.lastSavedAt}>
+      {/* <Show when={projectStore.autoSaveEnabled && fileStore.savedLocation.name && fileStore.savedLocation.path && projectStore.lastSavedAt}>
         <div style={{ opacity: 0.3 }}>
           <Icon src={iconSrc() ?? ''} color={vars.color.onBackground} base={12} scale={1} />
         </div>

@@ -38,7 +38,7 @@ const KeyListener: Component = () => {
 
     if (isKeyMatchesToEntry(e, keyConfigStore['save']) && !e.repeat) {
       e.preventDefault(); // Prevent default save action
-      saveProject(fileStore.location.name, fileStore.location.path);
+      saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
     }
 
     // デバッグビューア用ショートカット (Ctrl+Shift+D) - always allow this

@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
+    "dev": "git submodule update --recursive --init && vite",
+    "build": "git submodule update --recursive --init && vite build",
+    "serve": "git submodule update --recursive --init && vite preview",
     "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config ../../.prettierrc"
   },
   "license": "MIT",

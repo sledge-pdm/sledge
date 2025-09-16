@@ -1,14 +1,15 @@
 import { componentProps, flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
-import { Component, For } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { toolStore } from '~/stores/EditorStores';
 import { configFormFieldLabel } from '~/styles/components/config/config_form.css';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/tools/presets';
 import { ToolCategoryId } from '~/tools/Tools';
+import { eventBus } from '~/utils/EventBus';
 
 interface Props {
   toolId: ToolCategoryId;
-  presetConfig: any;
   onConfigChange: (key: string, value: any) => void;
 }
 
@@ -35,7 +36,7 @@ function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v:
 
   switch (meta.component) {
     case 'Dropdown':
-      return <Dropdown value={value} options={meta.props?.options} onChange={onChange} />;
+      return <Dropdown value={value()} options={meta.props?.options} onChange={onChange} />;
     case 'Slider':
       return (
         <Slider
@@ -72,35 +73,54 @@ function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v:
 }
 
 const ToolPresetConfigForm: Component<Props> = (props) => {
-  const presetMeta = () => getPresetMetaByToolId(props.toolId);
+  const presets = createMemo(() => toolStore.tools[props.toolId].presets);
+  const [options, setOptions] = createSignal(presets()?.selected ? presets()!.options[presets()!.selected] : undefined);
+  const [presetMeta, setPresetMeta] = createSignal(getPresetMetaByToolId(props.toolId));
 
-  if (!presetMeta()) {
+  if (!presetMeta() || !presets()) {
     return <div>No preset configuration available for this tool.</div>;
   }
 
+  onMount(() => {
+    eventBus.on('tools:presetLoaded', (e) => {
+      if (props.toolId === e.toolId) {
+        console.log('loaded preset for tool:', props.toolId);
+        setPresetMeta(getPresetMetaByToolId(props.toolId));
+        setOptions(presets()?.selected ? presets()!.options[presets()!.selected] : undefined);
+      }
+    });
+  });
+
+  createEffect(() => {
+    setPresetMeta(getPresetMetaByToolId(props.toolId));
+    setOptions(presets()?.selected ? presets()!.options[presets()!.selected] : undefined);
+  });
+
   return (
     <div class={flexCol} style={{ gap: vars.spacing.sm }}>
-      <For each={presetMeta()!.fields}>
-        {(fieldMeta) => {
-          const value = () => props.presetConfig[fieldMeta.key] ?? '';
-          const onChange = (newValue: any) => {
-            props.onConfigChange(fieldMeta.key, newValue);
-          };
+      <Show when={presetMeta()?.fields}>
+        <For each={presetMeta()!.fields}>
+          {(fieldMeta) => {
+            const value = () => options()[fieldMeta.key] ?? '';
+            const onChange = (newValue: any) => {
+              props.onConfigChange(fieldMeta.key, newValue);
+            };
 
-          return (
-            <div class={flexRow} style={{ width: '100%', 'min-height': '20px', 'align-items': 'center' }}>
-              <div class={flexRow} style={{ width: '80px' }}>
-                <label class={configFormFieldLabel} for={fieldMeta.key}>
-                  {fieldMeta.label}
-                </label>
+            return (
+              <div class={flexRow} style={{ width: '100%', 'min-height': '20px', 'align-items': 'center' }}>
+                <div class={flexRow} style={{ width: '80px' }}>
+                  <label class={configFormFieldLabel} for={fieldMeta.key}>
+                    {fieldMeta.label}
+                  </label>
+                </div>
+                <div class={flexRow} style={{ 'flex-grow': 1, 'justify-content': 'end' }}>
+                  <FieldRenderer meta={fieldMeta} value={value} onChange={onChange} />
+                </div>
               </div>
-              <div class={flexRow} style={{ 'flex-grow': 1, 'justify-content': 'end' }}>
-                <FieldRenderer meta={fieldMeta} value={value} onChange={onChange} />
-              </div>
-            </div>
-          );
-        }}
-      </For>
+            );
+          }}
+        </For>
+      </Show>
     </div>
   );
 };

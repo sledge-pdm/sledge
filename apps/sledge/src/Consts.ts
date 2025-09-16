@@ -19,6 +19,7 @@ export const Consts = {
   projectThumbnailSize: 500,
 
   globalConfigFileName: 'global.sledgeconfig',
+  toolPresetsConfigFileName: 'tools.sledgeconfig',
 };
 
 export type KeyConfigCommands =

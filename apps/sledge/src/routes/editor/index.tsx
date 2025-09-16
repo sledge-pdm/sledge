@@ -13,7 +13,7 @@ import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit, changeCanvasSize } from '~/features/canvas';
-import { setLocation } from '~/features/config';
+import { loadToolPresets, setLocation } from '~/features/config';
 import { addLayer, LayerType, resetLayerImage } from '~/features/layer';
 import { AutoSaveManager } from '~/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/io/config/load';
@@ -51,6 +51,7 @@ export default function Editor() {
     await emitEvent('onProjectLoad');
 
     await loadGlobalSettings();
+    await loadToolPresets();
 
     if (isNewProject) {
       changeCanvasSize(globalConfig.default.canvasSize, true);

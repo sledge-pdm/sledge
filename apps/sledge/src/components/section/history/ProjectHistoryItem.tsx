@@ -1,7 +1,7 @@
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { Accessor, Component, createMemo, For, onMount, Show } from 'solid-js';
+import { Accessor, Component, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { RGBAToHex } from '~/features/color';
@@ -46,7 +46,7 @@ const ProjectHistoryItem: Component = () => {
           <Show when={historyStore.redoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no redo stack &gt;</p>}>
             <For each={historyStore.redoStack}>
               {(action, i) => {
-                const index = createMemo(() => historyStore.redoStack.length - i() - 1);
+                const index = () => historyStore.redoStack.length - i();
                 return <HistoryRow undo={false} action={action} index={index} />;
               }}
             </For>
@@ -56,7 +56,12 @@ const ProjectHistoryItem: Component = () => {
         <p class={sectionSubCaption}>{`undo stack (${historyStore.undoStack.length})`}</p>
         <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
           <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
-            <For each={historyStore.undoStack}>{(action, i) => <HistoryRow undo={true} action={action} index={i()} />}</For>
+            <For each={historyStore.undoStack}>
+              {(action, i) => {
+                const index = () => i() + 1;
+                return <HistoryRow undo={true} action={action} index={index} />;
+              }}
+            </For>
           </Show>
         </div>
       </div>

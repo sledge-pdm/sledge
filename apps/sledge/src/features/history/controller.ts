@@ -1,3 +1,4 @@
+import { globalConfig } from '~/stores/GlobalStores';
 import { BaseHistoryAction } from './base';
 
 export class ProjectHistoryController {
@@ -14,6 +15,10 @@ export class ProjectHistoryController {
   }
 
   addAction(action: BaseHistoryAction): void {
+    if (this.undoStack.length >= globalConfig.editor.maxHistoryItemsCount) {
+      // just shift() to maintain the size after max count changed
+      this.undoStack.shift();
+    }
     this.undoStack.push(action);
     this.redoStack = [];
     this.emitChange();

@@ -30,8 +30,11 @@ const CanvasArea: Component = () => {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
-      if (globalConfig.editor.centerCanvasWhenWindowResized) {
+      if (globalConfig.editor.centerCanvasOnResize === 'offset') {
         centeringCanvas();
+      }
+      if (globalConfig.editor.centerCanvasOnResize === 'offset_zoom') {
+        adjustZoomToFit();
       }
     });
     eventBus.on('window:sideSectionSideChanged', (e) => {
@@ -39,8 +42,11 @@ const CanvasArea: Component = () => {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
-      if (globalConfig.editor.centerCanvasWhenWindowResized) {
+      if (globalConfig.editor.centerCanvasOnResize === 'offset') {
         centeringCanvas();
+      }
+      if (globalConfig.editor.centerCanvasOnResize === 'offset_zoom') {
+        adjustZoomToFit();
       }
     });
 

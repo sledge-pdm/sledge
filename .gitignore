@@ -34,7 +34,6 @@ repomix-output.xml
 
 *.heapprofile
 
-*.sledge
 node_modules
 
 *.lnk
@@ -48,3 +47,5 @@ post_build.bat
 
 .cargo
 .tauri
+
+coverage

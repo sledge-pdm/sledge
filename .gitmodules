@@ -1,12 +1,9 @@
 [submodule "packages/theme"]
 	path = packages/theme
-	url = git@github.com:sledge-pdm/sledge-theme.git
+	url = https://github.com/sledge-pdm/sledge-theme.git
 [submodule "packages/ui"]
 	path = packages/ui
-	url = git@github.com:sledge-pdm/sledge-ui.git
-[submodule "apps/sledge/public"]
-	path = apps/sledge/public
-	url = git@github.com:sledge-pdm/sledge-assets.git
+	url = https://github.com/sledge-pdm/sledge-ui.git
 [submodule "assets"]
 	path = assets
-	url = git@github.com:sledge-pdm/sledge-assets.git
+	url = https://github.com/sledge-pdm/sledge-assets.git

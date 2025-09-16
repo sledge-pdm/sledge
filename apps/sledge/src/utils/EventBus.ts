@@ -17,6 +17,8 @@ export type Events = {
   'selection:stateChanged': { newState: SelectionState };
   'selection:requestMenuUpdate': {};
 
+  'tools:presetLoaded': { toolId?: string };
+
   'floatingMove:stateChanged': { moving: boolean };
   'floatingMove:moved': {};
   'floatingMove:committed': {};

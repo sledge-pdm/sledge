@@ -18,6 +18,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
   },
+  publicDir: '../../assets',
   resolve: {
     alias: {
       '@sledge/core': path.join(__dirname, '../../packages/core'),

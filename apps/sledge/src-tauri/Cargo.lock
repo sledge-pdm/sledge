@@ -2241,9 +2241,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.27"
+version = "0.4.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13dc2df351e3202783a1fe0d44375f7295ffb4049267b0f3018346dc122a1d94"
+checksum = "34080505efa8e45a4b816c349525ebe327ceaa8559756f0356cba97ef3bf7432"
 dependencies = [
  "value-bag",
 ]
@@ -3813,10 +3813,11 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.219"
+version = "1.0.225"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6"
+checksum = "fd6c24dee235d0da097043389623fb913daddf92c76e9f5a1db88607a0bcbd1d"
 dependencies = [
+ "serde_core",
  "serde_derive",
 ]
 
@@ -3832,10 +3833,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_derive"
-version = "1.0.219"
+name = "serde_core"
+version = "1.0.225"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00"
+checksum = "659356f9a0cb1e529b24c01e43ad2bdf520ec4ceaf83047b83ddcc2251f96383"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.225"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ea936adf78b1f766949a4977b91d2f5595825bd6ec079aa9543ad2685fc4516"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3855,14 +3865,15 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.143"
+version = "1.0.145"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d401abef1d108fbd9cbaebc3e46611f4b1021f714a0597a71f41ee463f5f4a5a"
+checksum = "402a6f66d8c709116cf22f558eab210f5a50187f702eb4d7e5ef38d9a7f1c79c"
 dependencies = [
  "itoa",
  "memchr",
  "ryu",
  "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -4060,7 +4071,7 @@ checksum = "7a2ae44ef20feb57a68b23d846850f861394c2e02dc425a50098ae8c90267589"
 
 [[package]]
 name = "sledge"
-version = "0.0.10-prealpha"
+version = "0.0.11-prealpha"
 dependencies = [
  "cocoa",
  "log",
@@ -4359,9 +4370,9 @@ checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
 
 [[package]]
 name = "tauri"
-version = "2.8.4"
+version = "2.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d545ccf7b60dcd44e07c6fb5aeb09140966f0aabd5d2aa14a6821df7bc99348"
+checksum = "d4d1d3b3dc4c101ac989fd7db77e045cc6d91a25349cd410455cb5c57d510c1c"
 dependencies = [
  "anyhow",
  "bytes",
@@ -4413,9 +4424,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-build"
-version = "2.4.0"
+version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67945dbaf8920dbe3a1e56721a419a0c3d085254ab24cff5b9ad55e2b0016e0b"
+checksum = "9c432ccc9ff661803dab74c6cd78de11026a578a9307610bbc39d3c55be7943f"
 dependencies = [
  "anyhow",
  "cargo_toml",
@@ -4493,9 +4504,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-dialog"
-version = "2.3.3"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ee5a3c416dc59d7d9aa0de5490a82d6e201c67ffe97388979d77b69b08cda40"
+checksum = "0beee42a4002bc695550599b011728d9dfabf82f767f134754ed6655e434824e"
 dependencies = [
  "log",
  "raw-window-handle",
@@ -4533,9 +4544,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-log"
-version = "2.6.0"
+version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a59139183e0907cec1499dddee4e085f5a801dc659efa0848ee224f461371426"
+checksum = "61c1438bc7662acd16d508c919b3c087efd63669a4c75625dff829b1c75975ec"
 dependencies = [
  "android_logger",
  "byte-unit",
@@ -5245,9 +5256,9 @@ checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
 name = "uuid"
-version = "1.18.0"
+version = "1.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f33196643e165781c20a5ead5582283a7dacbb87855d867fbc2df3f81eddc1be"
+checksum = "2f87b8aa10b915a06587d0dec516c282ff295b475d94abf425d62b57710070a2"
 dependencies = [
  "getrandom 0.3.3",
  "js-sys",

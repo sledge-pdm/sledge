@@ -26,7 +26,8 @@ export type GlobalConfig = {
     cursor: Cursor;
     rotateDegreePerWheelScroll: number;
     showPointedPixel: boolean;
-    centerCanvasWhenWindowResized: boolean;
+    centerCanvasOnResize: boolean;
+    maxHistoryItemsCount: number;
   };
   performance: {
     canvasRenderingMode: CanvasRenderingMode;
@@ -54,8 +55,9 @@ export const defaultConfig: GlobalConfig = {
   editor: {
     cursor: 'cross',
     rotateDegreePerWheelScroll: 1,
-    centerCanvasWhenWindowResized: true,
+    centerCanvasOnResize: true,
     showPointedPixel: true,
+    maxHistoryItemsCount: 50,
   },
   performance: {
     canvasRenderingMode: 'adaptive',

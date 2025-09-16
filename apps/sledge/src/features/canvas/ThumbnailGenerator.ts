@@ -65,6 +65,8 @@ export class ThumbnailGenerator {
       // Keep slice() for now to avoid type issues, but optimize canvas resizing
       const imgData = new ImageData(buf.slice(), w, h);
       this.tmpCtx.putImageData(imgData, 0, 0);
+
+      this.offCtx.imageSmoothingEnabled = false;
       this.offCtx.drawImage(this.tmp, 0, 0, w, h, 0, 0, width, height);
 
       return this.offCtx.getImageData(0, 0, width, height);

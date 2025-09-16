@@ -11,6 +11,8 @@ import { eventBus, Events } from '~/utils/EventBus';
 
 interface Props {
   layer: Layer;
+  width?: number;
+  height?: number;
   maxWidth?: number;
   maxHeight?: number;
   onClick?: (e: MouseEvent) => void;
@@ -113,6 +115,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
     <div
       ref={(el) => (wrapperRef = el)}
       style={{
+        width: props.width ? `${props.width}px` : undefined,
+        height: props.height ? `${props.height}px` : undefined,
         'background-color': vars.color.canvas,
         'z-index': Consts.zIndex.layerPreview,
       }}
@@ -124,7 +128,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
           ctx = canvasRef.getContext('2d')!;
         }}
         style={{
-          'image-rendering': 'auto',
+          'image-rendering': 'pixelated',
           'background-image':
             `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
             `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%)`,

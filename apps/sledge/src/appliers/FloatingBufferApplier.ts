@@ -1,5 +1,5 @@
 import { patch_buffer_rgba } from '@sledge/wasm';
-import { FloatingBuffer } from '~/controllers/selection/FloatingMoveManager';
+import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 
 export interface FloatingBufferApplyParams {
   width: number;

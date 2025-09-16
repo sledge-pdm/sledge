@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { scanline_flood_fill, scanline_flood_fill_with_mask } from '@sledge/wasm';
-import LayerImageAgent from '~/controllers/layer/image/LayerImageAgent';
-import { colorMatch } from '~/utils/ColorUtils';
+import { colorMatch } from '~/features/color';
+import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { Fill, FillProps } from './FillTool';
 
 export interface WasmMaskFillProps {

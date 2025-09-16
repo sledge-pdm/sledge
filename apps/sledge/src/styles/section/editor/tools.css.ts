@@ -24,7 +24,7 @@ export const toolConfigRowClickable = style([
 
 export const toolConfigRowName = style({
   cursor: 'pointer',
-  width: '50px',
+  width: '40px',
   fontSize: vars.text.sm,
   padding: `${vars.spacing.md} 0`,
 });

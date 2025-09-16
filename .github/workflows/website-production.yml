@@ -1,0 +1,23 @@
+name: website-production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger-vercel:
+    name: Trigger Vercel Deploy Hook
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Call Vercel Deploy Hook
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
+            echo "Missing secret: VERCEL_DEPLOY_HOOK_URL" >&2
+            exit 1
+          fi
+          echo "Triggering Vercel Deploy Hook..."
+          curl -fsSL -X POST "$VERCEL_DEPLOY_HOOK_URL"
+          echo "Done."

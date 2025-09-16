@@ -2,11 +2,12 @@ import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { floatingMoveManager } from '~/controllers/selection/FloatingMoveManager';
-import { selectionManager } from '~/controllers/selection/SelectionAreaManager';
-import { getSelectionOffset } from '~/controllers/selection/SelectionOperator';
-import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/controllers/tool/ToolController';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
+import { RGBAToHex } from '~/features/color';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { getSelectionOffset } from '~/features/selection/SelectionOperator';
+import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/features/tool/ToolController';
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -14,7 +15,6 @@ import '~/styles/misc/marching_ants.css';
 import { getDrawnPixelMask } from '~/tools/draw/pen/PenDraw';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PathCmdList } from '~/types/PathCommand';
-import { RGBAToHex } from '~/utils/ColorUtils';
 import { eventBus, Events } from '~/utils/EventBus';
 
 interface Area {

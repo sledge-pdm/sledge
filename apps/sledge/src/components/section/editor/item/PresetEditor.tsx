@@ -1,7 +1,7 @@
 import { flexCol, flexRow } from '@sledge/core';
 import { Slider } from '@sledge/ui';
 import { Component } from 'solid-js';
-import { updateToolPresetConfig } from '~/controllers/tool/ToolController';
+import { updateToolPresetConfig } from '~/features/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
 import { DEFAULT_PRESET, ToolCategoryId } from '~/tools/Tools';
 

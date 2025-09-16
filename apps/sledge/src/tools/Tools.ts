@@ -16,7 +16,6 @@ export const TOOL_CATEGORIES = {
   PIPETTE: 'pipette',
   RECT_SELECTION: 'rectSelection',
   AUTO_SELECTION: 'autoSelection',
-  SELECTION_MOVE: 'selectionMove',
   MOVE: 'move',
 } as const;
 
@@ -71,10 +70,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1, shape: 'square' } as PenPresetConfig,
-        fine: { size: 1, shape: 'square' } as PenPresetConfig,
-        thick: { size: 5, shape: 'square' } as PenPresetConfig,
-        square: { size: 3, shape: 'square' } as PenPresetConfig,
+        [DEFAULT_PRESET]: { size: 1, shape: 'circle' } as PenPresetConfig,
       },
     },
   } as ToolCategory<PenPresetConfig>,
@@ -86,7 +82,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1, shape: 'square' } as EraserPresetConfig,
+        [DEFAULT_PRESET]: { size: 1, shape: 'circle' } as EraserPresetConfig,
       },
     },
   } as ToolCategory<EraserPresetConfig>,

@@ -12,15 +12,14 @@ import ClipboardListener from '~/components/global/ClipboardListener';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
-import { adjustZoomToFit, changeCanvasSize } from '~/controllers/canvas/CanvasController';
-import { resetLayerImage } from '~/controllers/layer/LayerController';
-import { addLayer } from '~/controllers/layer/LayerListController';
+import { adjustZoomToFit, changeCanvasSize } from '~/features/canvas';
+import { loadToolPresets, setLocation } from '~/features/config';
+import { addLayer, LayerType, resetLayerImage } from '~/features/layer';
 import { AutoSaveManager } from '~/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/io/config/load';
 import { importImageFromPath } from '~/io/image/in/import';
 import { readProjectFromPath } from '~/io/project/in/import';
 import { loadProjectJson } from '~/io/project/in/load';
-import { LayerType } from '~/models/layer/Layer';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
@@ -52,6 +51,7 @@ export default function Editor() {
     await emitEvent('onProjectLoad');
 
     await loadGlobalSettings();
+    await loadToolPresets();
 
     if (isNewProject) {
       changeCanvasSize(globalConfig.default.canvasSize, true);
@@ -77,12 +77,12 @@ export default function Editor() {
       const fullPath = join(fileLocation.path, fileLocation.name);
       if (fileLocation.name?.endsWith('.sledge')) {
         try {
-          setFileStore('location', fileLocation);
           const projectFile = await readProjectFromPath(fullPath);
           if (!projectFile) {
             console.error('Failed to read project from path:', fullPath);
             throw new Error('reading ' + fullPath);
           }
+          setLocation(fullPath);
           loadProjectJson(projectFile);
           return false;
         } catch (error) {
@@ -102,11 +102,10 @@ export default function Editor() {
     } else {
       const sp = new URLSearchParams(location.search);
       // create new
-      setFileStore('location', {
+      setFileStore('savedLocation', {
         name: undefined,
         path: undefined,
       });
-      setFileStore('extension', 'sledge');
 
       if (sp.has('width') && sp.has('height')) {
         const width = Number(sp.get('width'));

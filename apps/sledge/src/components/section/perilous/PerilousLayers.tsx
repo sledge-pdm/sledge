@@ -4,7 +4,7 @@ import { Button, Icon } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
 import SectionItem from '~/components/section/SectionItem';
-import { resetAllLayers } from '~/controllers/layer/LayerListController';
+import { resetAllLayers } from '~/features/layer';
 import { sectionContent, sectionRoot } from '~/styles/section/section_item.css';
 
 const RESET_ALL_MSG = 'Sure to RESET ALL LAYERS?';

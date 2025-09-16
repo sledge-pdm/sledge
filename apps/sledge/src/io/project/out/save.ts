@@ -1,17 +1,19 @@
+import { FileLocation } from '@sledge/core';
 import { path } from '@tauri-apps/api';
 import { appDataDir } from '@tauri-apps/api/path';
 import { save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
-import { calcThumbnailSize, ThumbnailGenerator } from '~/controllers/canvas/ThumbnailGenerator';
-import { addRecentFile } from '~/controllers/config/RecentFileController';
+import { calcThumbnailSize, ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
+import { setLocation as setSavedLocation } from '~/features/config';
+import { addRecentFile } from '~/features/config/RecentFileController';
 import { dumpProject } from '~/io/project/out/dump';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { getFileUniqueId, join, PathToFileLocation as pathToFileLocation } from '~/utils/FileUtils';
+import { getFileNameWithoutExtension, getFileUniqueId, join, pathToFileLocation } from '~/utils/FileUtils';
 
-async function folderSelection(name?: string) {
+async function folderSelection(location?: FileLocation) {
   try {
     await mkdir('sledge', {
       baseDir: BaseDirectory.Home,
@@ -20,14 +22,25 @@ async function folderSelection(name?: string) {
   } catch (e) {
     console.warn('failed or skipped making new directory:', e);
   }
-
   const home = await path.homeDir();
 
-  const nameWithoutExtension = fileStore.location.name?.replace(/\.sledge$/, '') ?? 'new project';
+  const nameWOExtension = location?.name ? getFileNameWithoutExtension(location?.name) : 'new project';
+  let defaultPath = '';
+  console.log('path', location?.path);
+  if (location?.path) {
+    // if path is provided, open the path as default
+    defaultPath = join(location?.path, `${nameWOExtension}`);
+  } else {
+    // if path is not defined
+    defaultPath = join(home, `sledge/${nameWOExtension}`);
+  }
+
+  console.log('default save path:', defaultPath);
 
   return await save({
     title: 'save sledge project',
-    defaultPath: await path.join(home, `sledge/${nameWithoutExtension}.sledge`),
+    defaultPath,
+    canCreateDirectories: true,
     filters: [{ name: 'sledge project', extensions: ['sledge'] }],
   });
 }
@@ -44,16 +57,25 @@ async function saveThumbnailData(selectedPath: string) {
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
   let selectedPath: string | null;
 
-  if (existingPath && name) {
+  let fileNameWOExtension = name ? getFileNameWithoutExtension(name) : 'new project';
+
+  console.log(fileNameWOExtension);
+  console.log(fileStore);
+
+  if (fileStore.openAs === 'project' && existingPath && name) {
+    // overwrite existing project
     selectedPath = join(existingPath, name);
+  } else if (fileStore.openAs === 'image' && name) {
+    // write as new project from image path and name
+    selectedPath = await folderSelection({ path: existingPath, name: `${fileNameWOExtension}.sledge` });
   } else {
-    selectedPath = await folderSelection(name);
+    // write as new project ($HOME&/sledge/new project.sledge)
+    selectedPath = await folderSelection();
   }
 
   if (typeof selectedPath === 'string') {
     try {
       const thumbpath = await saveThumbnailData(selectedPath);
-      console.log(thumbpath);
 
       const data = await dumpProject();
       await writeFile(selectedPath, data);
@@ -61,14 +83,7 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       addRecentFile(pathToFileLocation(selectedPath));
 
       setFileStore('openAs', 'project');
-      setFileStore('extension', 'sledge');
-      const location = pathToFileLocation(selectedPath);
-      if (location) {
-        setFileStore('location', 'path', location.path);
-        const fileNameWithoutExt = fileStore.location.name?.split('.').slice(0, -1).join('.') ?? 'new project';
-        setFileStore('location', 'name', fileNameWithoutExt);
-        // setLastSettingsStore('exportSettings', 'dirPath', location.path);
-      }
+      setSavedLocation(selectedPath);
       // @ts-ignore
       window.__PATH__ = selectedPath;
 

@@ -1,2 +1,11 @@
 node_modules
 public
+pkg
+dist
+build
+target
+
+*.txt
+*.md
+
+pnpm-lock.yaml

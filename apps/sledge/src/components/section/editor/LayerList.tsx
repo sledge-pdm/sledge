@@ -3,11 +3,9 @@ import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
-import { LayerPropsHistoryAction } from '~/controllers/history/actions/LayerPropsHistoryAction';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
-import { setLayerProp } from '~/controllers/layer/LayerController';
-import { activeLayer, addLayer, allLayers, moveLayer, removeLayer } from '~/controllers/layer/LayerListController';
-import { BlendModeOptions } from '~/models/layer/Layer';
+import { projectHistoryController } from '~/features/history';
+import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
+import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/editor/layer.css';
 import { sectionContent } from '~/styles/section/section_item.css';
@@ -98,7 +96,7 @@ const LayerList: Component<{}> = () => {
           >
             <Dropdown
               value={activeLayer().mode}
-              options={BlendModeOptions}
+              options={blendModeOptions}
               onChange={(e) => {
                 setLayerProp(activeLayer().id, 'mode', e);
               }}

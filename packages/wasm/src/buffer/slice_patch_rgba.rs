@@ -33,15 +33,23 @@ pub fn slice_patch_rgba(
     for y in 0..mh {
         for x in 0..mw {
             let mi = (y * mw + x) as usize; // mask index (1 byte/pixel)
-            if mi >= mask.len() { continue; }
-            if mask[mi] == 0 { continue; } // not selected
+            if mi >= mask.len() {
+                continue;
+            }
+            if mask[mi] == 0 {
+                continue;
+            } // not selected
 
             let sx = x + ox;
             let sy = y + oy;
-            if sx < 0 || sy < 0 || sx >= sw || sy >= sh { continue; }
+            if sx < 0 || sy < 0 || sx >= sw || sy >= sh {
+                continue;
+            }
 
             let src_start = ((sy * sw + sx) as usize) * 4;
-            if src_start + 3 >= source.len() { continue; }
+            if src_start + 3 >= source.len() {
+                continue;
+            }
 
             let dst_start = (mi as usize) * 4; // same layout as mask (RGBA)
             result[dst_start] = source[src_start];

@@ -9,12 +9,13 @@ import Home from './routes/start/index';
 import { flexCol, h100 } from '@sledge/core';
 import { getTheme } from '@sledge/theme';
 import { showContextMenu } from '@sledge/ui';
+import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createEffect, onCleanup, onMount } from 'solid-js';
+import { createEffect, onMount } from 'solid-js';
 import DebugViewer from '~/components/global/debug/DebugViewer';
+import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { loadGlobalSettings } from '~/io/config/load';
-import { ContextMenuItems } from '~/models/menu/ContextMenuItems';
 import { globalConfig } from '~/stores/GlobalStores';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
@@ -35,11 +36,11 @@ export default function App() {
   onMount(() => {
     window.addEventListener('error', handleGlobalError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
-  });
 
-  onCleanup(() => {
-    window.removeEventListener('error', handleGlobalError);
-    window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   });
 
   listenEvent('onSettingsSaved', () => {
@@ -48,8 +49,14 @@ export default function App() {
 
   // テーマクラスを html 要素に付与して、Portal や body 直下にもトークンが届くようにする
   let prevThemeClass: string | undefined;
-  const applyThemeToHtml = () => {
-    const cls = getTheme(globalConfig.appearance.theme);
+
+  const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {
+    let cls;
+    if (osTheme && globalConfig.appearance.theme === 'os') {
+      cls = getTheme(osTheme);
+    } else {
+      cls = getTheme(globalConfig.appearance.theme);
+    }
     const html = document.documentElement;
     if (prevThemeClass && html.classList.contains(prevThemeClass)) {
       html.classList.remove(prevThemeClass);
@@ -58,10 +65,16 @@ export default function App() {
     prevThemeClass = cls;
   };
 
+  listen('tauri://theme-changed', (e) => {
+    applyThemeToHtml(e.payload === 'dark' ? 'dark' : 'light');
+  });
+
   onMount(async () => {
     applyThemeToHtml();
+
     const webview = getCurrentWebview();
     const window = getCurrentWindow();
+
     await webview.setZoom(zoomForIntegerize(await window.scaleFactor()));
 
     window.onScaleChanged(async ({ payload }) => {
@@ -73,7 +86,7 @@ export default function App() {
     // await checkForUpdates();
   });
 
-  createEffect(applyThemeToHtml);
+  createEffect(() => applyThemeToHtml());
 
   return (
     <Router

@@ -4,7 +4,7 @@ import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
 import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
 import PixelCursor from '~/components/canvas/overlays/cursors/PixelCursor';
 import PipetteDetail from '~/components/canvas/overlays/PipetteDetail';
-import { getActiveToolCategory, getActiveToolCategoryId, isToolAllowedInCurrentLayer } from '~/controllers/tool/ToolController';
+import { getActiveToolCategory, getActiveToolCategoryId, isToolAllowedInCurrentLayer } from '~/features/tool/ToolController';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 

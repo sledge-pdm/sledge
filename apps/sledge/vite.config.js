@@ -83,6 +83,7 @@ export default defineConfig({
       '@vanilla-extract/dynamic',
     ],
   },
+  publicDir: '../../assets',
   resolve: {
     alias: {
       '~': path.join(__dirname, 'src'),

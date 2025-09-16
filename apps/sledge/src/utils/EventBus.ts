@@ -1,7 +1,7 @@
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import mitt from 'mitt';
-import { SelectionState } from '~/controllers/selection/SelectionAreaManager';
-import { ImagePoolEntry } from '~/models/canvas/image_pool/ImagePool';
+import { ImagePoolEntry } from '~/features/image_pool';
+import { SelectionState } from '~/features/selection/SelectionAreaManager';
 
 export type Events = {
   'project:saved': { location: FileLocation };
@@ -10,10 +10,14 @@ export type Events = {
 
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
+  'canvas:onZoomChanged': {};
 
   'selection:maskChanged': { commit: boolean };
   'selection:offsetChanged': { newOffset: Vec2 };
   'selection:stateChanged': { newState: SelectionState };
+  'selection:requestMenuUpdate': {};
+
+  'tools:presetLoaded': { toolId?: string };
 
   'floatingMove:stateChanged': { moving: boolean };
   'floatingMove:moved': {};

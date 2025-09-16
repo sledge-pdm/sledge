@@ -2,9 +2,8 @@
 import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
-import { PaletteType } from '~/models/color/PaletteType';
+import { PaletteType, RGBAColor } from '~/features/color';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
-import { RGBAColor } from '~/utils/ColorUtils';
 
 type AppearanceStore = {
   leftSide: {
@@ -26,8 +25,7 @@ type ColorStore = {
 };
 type FileStore = {
   openAs: 'project' | 'image';
-  extension: string;
-  location: FileLocation;
+  savedLocation: FileLocation;
 };
 type InteractStore = {
   canvasAreaSize: Size2D;
@@ -37,6 +35,7 @@ type InteractStore = {
   isInStroke: boolean;
   isPenOut: boolean;
   zoom: number;
+  zoomByReference: number;
   zoomMin: number;
   zoomMax: number;
   touchZoomSensitivity: number;
@@ -45,6 +44,8 @@ type InteractStore = {
   offset: Vec2;
   isDragging: boolean;
   rotation: number;
+  verticalFlipped: boolean;
+  horizontalFlipped: boolean;
 };
 type DebugPoint = Vec2 & {
   color: RGBAColor;
@@ -68,12 +69,12 @@ export type ToolStore = {
 const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: true,
-    tabs: ['editor', 'effects'],
+    tabs: ['editor', 'effects', 'danger'],
     selectedIndex: 0,
   },
   rightSide: {
     shown: false,
-    tabs: ['project', 'export', 'history', 'danger'],
+    tabs: ['project', 'export', 'history'],
     selectedIndex: 0,
   },
 };
@@ -85,8 +86,7 @@ const defaultColorStore: ColorStore = {
 };
 const defaultFileStore: FileStore = {
   openAs: 'project',
-  extension: 'sledge',
-  location: {
+  savedLocation: {
     name: undefined,
     path: undefined,
   },
@@ -99,6 +99,7 @@ const defaultInteractStore: InteractStore = {
   isPenOut: false,
   isInStroke: false,
   zoom: 1,
+  zoomByReference: 1,
   // zoomMin: 0.5,
   zoomMin: 0.01,
   // zoomMax: 8,
@@ -110,6 +111,9 @@ const defaultInteractStore: InteractStore = {
   offset: { x: 0, y: 0 },
 
   rotation: 0,
+
+  verticalFlipped: false,
+  horizontalFlipped: false,
 
   isDragging: false,
 };

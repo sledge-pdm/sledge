@@ -1,5 +1,5 @@
-import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { projectHistoryController } from '~/controllers/history/ProjectHistoryController';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { projectHistoryController } from '~/features/history';
 import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
 import { layerListStore } from '~/stores/ProjectStores';
@@ -14,7 +14,7 @@ const CanvasControls: Component = () => {
       setActiveCanUndo(state.canUndo);
       setActiveCanRedo(state.canRedo);
     });
-    onCleanup(() => dispose());
+    return () => dispose();
   });
 
   createEffect(() => {
@@ -25,66 +25,69 @@ const CanvasControls: Component = () => {
     setActiveCanRedo(projectHistoryController.canRedo());
   });
 
+  const [isTempControlMenuOpen, setIsTempControlMenuOpen] = createSignal<boolean>(false);
   return (
-    <div class={topRightNav}>
-      <svg width='0' height='0'>
-        <defs>
-          <clipPath id='clipPath-undo'>
-            <path
-              d='M 2 5 L 3 5 L 3 4 L 1 4 L 1 3 L 0 3 L 0 2 L 1 2 L 1 1 L 3 1 L 3 0 L 2 0 L 2 2 L 7 2 L 7 8 L 1 8 L 1 7 L 8 7 L 8 3 L 2 3 L 2 5 Z'
-              fill='black'
-            />
-          </clipPath>
+    <>
+      <div class={topRightNav}>
+        <svg width='0' height='0'>
+          <defs>
+            <clipPath id='clipPath-undo'>
+              <path
+                d='M 2 5 L 3 5 L 3 4 L 1 4 L 1 3 L 0 3 L 0 2 L 1 2 L 1 1 L 3 1 L 3 0 L 2 0 L 2 2 L 7 2 L 7 8 L 1 8 L 1 7 L 8 7 L 8 3 L 2 3 L 2 5 Z'
+                fill='black'
+              />
+            </clipPath>
 
-          <clipPath id='clipPath-redo'>
-            <path
-              d='M 5 1 L 7 1 L 7 2 L 8 2 L 8 3 L 7 3 L 7 4 L 5 4 L 5 5 L 6 5 L 6 3 L 0 3 L 0 7 L 7 7 L 7 8 L 1 8 L 1 2 L 6 2 L 6 0 L 5 0 L 5 1 Z'
-              fill='black'
-            />
-          </clipPath>
-        </defs>
-      </svg>
-      <div
-        class={undoRedoContainer}
-        style={{
-          cursor: activeCanUndo() ? 'pointer' : 'unset',
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          projectHistoryController.undo();
-        }}
-      >
+            <clipPath id='clipPath-redo'>
+              <path
+                d='M 5 1 L 7 1 L 7 2 L 8 2 L 8 3 L 7 3 L 7 4 L 5 4 L 5 5 L 6 5 L 6 3 L 0 3 L 0 7 L 7 7 L 7 8 L 1 8 L 1 2 L 6 2 L 6 0 L 5 0 L 5 1 Z'
+                fill='black'
+              />
+            </clipPath>
+          </defs>
+        </svg>
         <div
-          class={undoIcon}
+          class={undoRedoContainer}
           style={{
-            'clip-path': 'url(#clipPath-undo)',
-            opacity: activeCanUndo() ? '1.0' : '0.3',
+            cursor: activeCanUndo() ? 'pointer' : 'unset',
           }}
-        />
-      </div>
-      <div
-        class={undoRedoContainer}
-        style={{
-          cursor: activeCanRedo() ? 'pointer' : 'unset',
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          projectHistoryController.redo();
-        }}
-      >
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            projectHistoryController.undo();
+          }}
+        >
+          <div
+            class={undoIcon}
+            style={{
+              'clip-path': 'url(#clipPath-undo)',
+              opacity: activeCanUndo() ? '1.0' : '0.3',
+            }}
+          />
+        </div>
         <div
-          class={redoIcon}
+          class={undoRedoContainer}
           style={{
-            'clip-path': 'url(#clipPath-redo)',
-            opacity: activeCanRedo() ? '1.0' : '0.3',
+            cursor: activeCanRedo() ? 'pointer' : 'unset',
           }}
-        />
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            projectHistoryController.redo();
+          }}
+        >
+          <div
+            class={redoIcon}
+            style={{
+              'clip-path': 'url(#clipPath-redo)',
+              opacity: activeCanRedo() ? '1.0' : '0.3',
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

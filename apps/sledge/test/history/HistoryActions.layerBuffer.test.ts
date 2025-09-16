@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { LayerBufferHistoryAction, LayerBufferPatch, packRGBA } from '~/features/history';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 
 // Use hoisted container so vi.mock factories can reference them safely
 const h = vi.hoisted(() => ({
@@ -11,21 +13,18 @@ const h = vi.hoisted(() => ({
   cancelMoveMock: vi.fn(),
 }));
 
-vi.mock('~/controllers/layer/LayerAgentManager', () => ({
+vi.mock('~/features/layer/agent/LayerAgentManager', () => ({
   getAgentOf: vi.fn(() => h.agentMock),
 }));
-vi.mock('~/controllers/selection/SelectionManager', () => ({
+vi.mock('~/features/selection/SelectionManager', () => ({
   selectionManager: { isMoveState: h.isMoveStateMock },
 }));
-vi.mock('~/controllers/selection/SelectionOperator', () => ({
+vi.mock('~/features/selection/SelectionOperator', () => ({
   cancelMove: h.cancelMoveMock,
 }));
-vi.mock('~/controllers/selection/FloatingMoveManager', () => ({
+vi.mock('~/features/selection/FloatingMoveManager', () => ({
   floatingMoveManager: { isMoving: h.isMoveStateMock },
 }));
-
-import { LayerBufferHistoryAction, LayerBufferPatch, packRGBA } from '~/controllers/history/actions/LayerBufferHistoryAction';
-import { getAgentOf } from '~/controllers/layer/LayerAgentManager';
 
 describe('LayerBufferHistoryAction', () => {
   beforeEach(() => {

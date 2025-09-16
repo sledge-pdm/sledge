@@ -79,6 +79,7 @@ export const configFormScrollContent = style([
     overflowY: 'visible',
     gap: vars.spacing.xl,
     margin: `32px 28px`,
+    paddingBottom: vars.spacing.md,
   },
 ]);
 
@@ -111,7 +112,7 @@ export const configFormFieldLabelTooltip = style({
   width: 'fit-content',
   fontFamily: ZFB09,
   color: vars.color.muted,
-  cursor: 'help',
+  // cursor: 'help',
   ':hover': {
     color: vars.color.active,
   },
@@ -124,7 +125,7 @@ export const configFormFieldLabel = style({
   verticalAlign: 'middle',
   marginBottom: '-1px',
   textAlign: 'left',
-  marginRight: '16px',
+  marginRight: '8px',
 });
 
 export const configFormFieldControlWrapper = style([

@@ -1,15 +1,15 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSize, isValidCanvasSize } from '~/controllers/canvas/CanvasController';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSize, isValidCanvasSize } from '~/features/canvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB03, ZFB03B } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
-import { activeLayer, allLayers } from '~/controllers/layer/LayerListController';
+import { Consts } from '~/Consts';
+import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
+import { activeLayer, allLayers } from '~/features/layer';
 import { saveGlobalSettings } from '~/io/config/save';
-import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/models/canvas/Canvas';
-import { Consts } from '~/models/Consts';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
 import { sectionCaption, sectionContent } from '~/styles/section/section_item.css';

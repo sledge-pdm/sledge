@@ -2,7 +2,7 @@
 import { flexRow, w100 } from '@sledge/core';
 import { vars, ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 
 export const overlay = style({
   position: 'fixed',

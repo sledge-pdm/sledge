@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CanvasSizeHistoryAction } from '~/controllers/history/actions/CanvasSizeHistoryAction';
+import { CanvasSizeHistoryAction } from '~/features/history';
 import { canvasStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code

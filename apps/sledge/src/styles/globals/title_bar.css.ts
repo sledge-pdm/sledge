@@ -27,6 +27,8 @@ export const titleBarTitle = style([
     width: 'fit-content',
     fontFamily: k12x8,
     fontSize: '8px',
+    height: '8px',
+    verticalAlign: 'bottom',
     whiteSpace: 'pre',
   },
 ]);
@@ -36,6 +38,8 @@ export const titleBarTitleSub = style([
     fontFamily: ZFB03,
     fontSize: vars.text.sm,
     whiteSpace: 'pre',
+    height: '8px',
+    verticalAlign: 'bottom',
     opacity: 0.5,
   },
 ]);

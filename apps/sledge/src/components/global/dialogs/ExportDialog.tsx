@@ -8,7 +8,7 @@ import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
-import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import {
@@ -48,7 +48,7 @@ export interface ExportImageProps extends DialogExternalProps {
 }
 
 const ExportDialog: Component<ExportImageProps> = (props) => {
-  const nameWithoutExtension = () => fileStore.location.name?.replace(/\.sledge$/, '');
+  const nameWithoutExtension = () => fileStore.savedLocation.name?.replace(/\.sledge$/, '');
 
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
@@ -97,9 +97,6 @@ const ExportDialog: Component<ExportImageProps> = (props) => {
       }
     }
 
-    if (fileStore.location.name === 'new project' && settings.fileName !== fileStore.location.name && settings.fileName) {
-      setFileStore('location', 'name', settings.fileName);
-    }
     setLastSettingsStore('exportSettings', settings);
     await saveGlobalSettings(true);
     props.onClose();

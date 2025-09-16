@@ -1,7 +1,7 @@
 import { flexCol, w100 } from '@sledge/core';
 import { vars, ZFB03B, ZFB09 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 
 export const rfsCaption = style({
   fontFamily: ZFB03B,

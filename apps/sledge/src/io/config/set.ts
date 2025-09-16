@@ -1,4 +1,4 @@
-import { defaultConfig } from '~/models/config/GlobalConfig';
+import { defaultConfig } from '~/features/config/models/GlobalConfig';
 import { defaultLastSettingsStore, makeDefaultKeyConfigStore } from '~/stores/GlobalStores';
 
 function deepObjectAssign(target: any, ...sources: any[]) {

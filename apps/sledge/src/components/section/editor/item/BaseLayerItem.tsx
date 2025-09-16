@@ -2,8 +2,7 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { ColorBox, Dropdown } from '@sledge/ui';
 import { Component, createSignal } from 'solid-js';
-import { setBaseLayerColorMode, setBaseLayerCustomColor } from '~/controllers/layer/BaseLayerController';
-import { BaseLayerColorMode } from '~/models/layer/BaseLayer';
+import { BaseLayerColorMode, setBaseLayerColorMode, setBaseLayerCustomColor } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
 
 interface BaseLayerItemProps {}

@@ -1,6 +1,6 @@
 import { flexRow } from '@sledge/core';
 import { Component, Show } from 'solid-js';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 import { rfsItem, rfsName, rfsPath, rfsThumb } from '~/styles/components/file_item/standard.css';
 import { FileItemProps } from './FileItemBase';
 

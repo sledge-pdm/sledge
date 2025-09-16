@@ -1,8 +1,8 @@
 import { flexCol } from '@sledge/core';
 import { Component, Show } from 'solid-js';
-import { getCurrentPresetConfig, setActiveToolPreset, updateToolPresetConfig } from '~/controllers/tool/ToolController';
+import ToolPresetDropDown from '~/components/section/editor/tool/ToolPresetDropDown';
+import { updateToolPresetConfig } from '~/features/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
-import { configFormNoPreset } from '~/styles/components/config/config_form.css';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolPresetConfigForm from './ToolPresetConfigForm';
 
@@ -14,21 +14,6 @@ const ToolPresetManager: Component<Props> = (props) => {
   const currentTool = () => toolStore.tools[props.toolId];
   const presets = () => currentTool()?.presets;
   const selectedPreset = () => presets()?.selected;
-  const currentPresetConfig = (): Record<string, any> | undefined => getCurrentPresetConfig(props.toolId);
-
-  // プリセット選択肢を作成
-  const presetOptions = () => {
-    if (!presets()) return [];
-
-    return Object.keys(presets()!.options).map((key) => ({
-      value: key,
-      label: key === 'default' ? 'Default' : key.charAt(0).toUpperCase() + key.slice(1),
-    }));
-  };
-
-  const handlePresetChange = (presetName: string) => {
-    setActiveToolPreset(props.toolId, presetName);
-  };
 
   const handleConfigChange = (key: string, value: any) => {
     if (!selectedPreset()) return;
@@ -37,12 +22,13 @@ const ToolPresetManager: Component<Props> = (props) => {
 
   return (
     <div class={flexCol}>
-      {/* プリセット設定フォーム */}
-      <Show when={currentPresetConfig() && Object.keys(currentPresetConfig()!).length > 0} fallback={<p class={configFormNoPreset}>no preset.</p>}>
-        <div class={flexCol} style={{ gap: '8px', 'margin-top': '8px' }}>
-          <ToolPresetConfigForm toolId={props.toolId} presetConfig={currentPresetConfig()!} onConfigChange={handleConfigChange} />
-        </div>
-      </Show>
+      <div class={flexCol} style={{ gap: '8px', 'margin-top': '8px' }}>
+        <Show when={presets() && Object.keys(presets()!.options).length > 1}>
+          <ToolPresetDropDown toolId={props.toolId} />
+        </Show>
+
+        <ToolPresetConfigForm toolId={props.toolId} onConfigChange={handleConfigChange} />
+      </div>
     </div>
   );
 };

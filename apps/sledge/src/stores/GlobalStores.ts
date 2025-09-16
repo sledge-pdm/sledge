@@ -1,9 +1,9 @@
 import { createStore } from 'solid-js/store';
 import { ExportSettings } from '~/components/global/dialogs/ExportDialog';
+import { KeyConfigCommands } from '~/Consts';
+import { GlobalConfig } from '~/features/config/models/GlobalConfig';
+import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
 import { getDefaultSettings } from '~/io/config/set';
-import { GlobalConfig } from '~/models/config/GlobalConfig';
-import { KeyConfigEntry } from '~/models/config/KeyConfig';
-import { KeyConfigCommands } from '~/models/Consts';
 import { isMacOS } from '~/utils/OSUtils';
 
 // global

@@ -1,7 +1,7 @@
 import { flexRow, w100, wh100 } from '@sledge/core';
 import { vars, ZFB11 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
-import { Consts } from '~/models/Consts';
+import { Consts } from '~/Consts';
 
 export const root = style([
   flexRow,
@@ -29,6 +29,15 @@ export const menuListLeft = style([
     flexGrow: 1,
     paddingLeft: '16px',
     gap: vars.spacing.xs,
+  },
+]);
+
+export const menuListCanvasControls = style([
+  flexRow,
+  {
+    height: '100%',
+    alignItems: 'center',
+    marginRight: '6px',
   },
 ]);
 

@@ -1,7 +1,8 @@
-name: development_release
+name: development-release
 
 on:
   push:
+    branches: [develop]
     tags: ['v*.*.*-dev.*']
   workflow_dispatch: {}
 
@@ -22,10 +23,22 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup pnpm (install first for node cache detection)
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
 
       # Node & Rust 環境セットアップ
       - uses: actions/setup-node@v4
-        with: { node-version: 'latest' }
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - uses: pnpm/action-setup@v4
 
       - name: install Rust stable
@@ -35,6 +48,13 @@ jobs:
         if: matrix.platform == 'macos-latest'
         run: |
           rustup target add x86_64-apple-darwin
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            apps/sledge/src-tauri
+            packages/wasm
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.

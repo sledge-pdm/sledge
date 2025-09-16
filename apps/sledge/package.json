@@ -9,10 +9,10 @@
     "build": "tauri build",
     "debug": "nest start --debug --watch",
     "prettier": "prettier --write 'src/**/*.{ts,tsx,css,module.css}' --config ../../.prettierrc",
+    "prettier:test": "prettier --write test/**/*.test.ts --config ../../.prettierrc",
     "stylelint": "stylelint -c ../../.stylelintrc.json \"src/**/*.css\" --fix"
   },
   "dependencies": {
-    "@interactjs/types": "^1.10.27",
     "@jaames/iro": "^5.5.2",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
@@ -43,6 +43,7 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.8.3",
     "@vanilla-extract/vite-plugin": "^5.1.1",
+    "@interactjs/types": "^1.10.27",
     "vite": "^7.1.3",
     "vite-plugin-glsl": "^1.5.1",
     "vite-plugin-inspect": "^11.3.3",

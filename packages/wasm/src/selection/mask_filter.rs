@@ -128,7 +128,7 @@ pub fn trim_mask_with_box(
     box_height: u32,
 ) -> Vec<u8> {
     let mw = mask_width as i32;
-    let mh = mask_height as i32;
+    let _mh = mask_height as i32;
     let bw = box_width as i32;
     let bh = box_height as i32;
 

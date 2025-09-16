@@ -12,13 +12,13 @@ const ProjectName: Component = () => {
   const commitNewName = (name: string) => {
     if (!name || name.trim() === '') {
       // 初期からの変更はエラーを出さない
-      if (fileStore.location.name) setError('Project name cannot be empty.');
+      if (fileStore.savedLocation.name) setError('Project name cannot be empty.');
       return;
     }
     if (!name.endsWith('.sledge')) {
       name += '.sledge';
     }
-    setFileStore('location', 'name', name);
+    setFileStore('savedLocation', 'name', name);
     setError(undefined);
   };
 
@@ -42,16 +42,16 @@ const ProjectName: Component = () => {
             commitNewName(e.target.value);
           }}
           onFocus={(e) => {
-            e.target.value = fileStore.location.name?.replace(/\.sledge$/, '') || '';
+            e.target.value = fileStore.savedLocation.name?.replace(/\.sledge$/, '') || '';
             setInputName(e.target.value);
             commitNewName(e.target.value);
           }}
           onBlur={(e) => {
-            e.target.value = fileStore.location.name?.replace(/\.sledge$/, '') || '';
+            e.target.value = fileStore.savedLocation.name?.replace(/\.sledge$/, '') || '';
             setInputName(e.target.value);
             commitNewName(e.target.value);
           }}
-          value={fileStore.location.name?.replace(/\.sledge$/, '') || ''}
+          value={fileStore.savedLocation.name?.replace(/\.sledge$/, '') || ''}
           placeholder='project'
           autocomplete='off'
         />

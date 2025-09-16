@@ -2,9 +2,9 @@ import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
-import { openImageImportDialog } from '~/controllers/canvas/image_pool/ImageImport';
-import { addToImagePool } from '~/controllers/canvas/image_pool/ImagePoolController';
-import { isImagePoolActive, setImagePoolActive } from '~/controllers/layer/LayerListController';
+import { addToImagePool } from '~/features/image_pool';
+import { isImagePoolActive, setImagePoolActive } from '~/features/layer';
+import { openImageImportDialog } from '~/io/image_pool/import';
 
 const ImagePoolItem: Component = () => {
   return (

@@ -1,6 +1,6 @@
 import { vars } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { Consts } from '~/Consts';
 import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { Layer } from '~/features/layer';
@@ -67,6 +67,11 @@ const LayerPreview: Component<Props> = (props: Props) => {
     stopRenderLoop();
     eventBus.off('preview:requestUpdate', handleUpdateReqEvent);
     eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
+  });
+
+  createEffect(() => {
+    props.layer;
+    performUpdate();
   });
 
   const performUpdate = async () => {

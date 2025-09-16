@@ -7,6 +7,7 @@ export type Canvas = {
 
 export type ImageRenderingAttribute = 'auto' | 'pixelated' | 'crisp-edges';
 export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crisp-edges';
+export type CanvasCenteringMode = 'disabled' | 'offset' | 'offset_zoom';
 
 export const canvasSizePresets: Record<string, Canvas | undefined> = {
   custom: undefined,

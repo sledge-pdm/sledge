@@ -40,7 +40,14 @@ export const editorMetas: FieldMeta[] = [
     section: Sections.Editor,
     path: ['editor', 'centerCanvasOnResize'],
     label: 'center canvas on resize',
-    component: 'ToggleSwitch',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: 'disabled', value: 'disabled' },
+        { label: 'offset only', value: 'offset' },
+        { label: 'offset+zoom', value: 'offset_zoom' },
+      ],
+    },
     tips: `centering canvas when area resized.`,
   },
   {

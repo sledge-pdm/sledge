@@ -1,6 +1,7 @@
 import { ConfigComponentName, FileLocation } from '@sledge/core';
 import { Theme } from '@sledge/theme';
 import { CanvasRenderingMode } from '~/features/canvas';
+import { CanvasCenteringMode } from '~/features/canvas/model';
 import { debugMetas } from '~/features/config/models/meta/Debug';
 import { editorMetas } from '~/features/config/models/meta/Editor';
 import { generalMetas } from '~/features/config/models/meta/General';
@@ -26,7 +27,7 @@ export type GlobalConfig = {
     cursor: Cursor;
     rotateDegreePerWheelScroll: number;
     showPointedPixel: boolean;
-    centerCanvasOnResize: boolean;
+    centerCanvasOnResize: CanvasCenteringMode;
     maxHistoryItemsCount: number;
   };
   performance: {
@@ -55,7 +56,7 @@ export const defaultConfig: GlobalConfig = {
   editor: {
     cursor: 'cross',
     rotateDegreePerWheelScroll: 1,
-    centerCanvasOnResize: true,
+    centerCanvasOnResize: 'offset',
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
   },

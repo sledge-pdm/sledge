@@ -4,7 +4,7 @@ import { addLayer, BlendMode, LayerType } from '~/features/layer';
 import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
-import { join } from '~/utils/FileUtils';
+import { join, pathToFileLocation } from '~/utils/FileUtils';
 
 export async function importImageFromPath(location: FileLocation): Promise<boolean> {
   if (!location || !location.path || !location.name) {
@@ -16,11 +16,20 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
   const imageData = await loadImageData(bitmap);
 
   setFileStore('openAs', 'image');
-  const fileNameWithoutExt = location.name.split('.').slice(0, -1).join('.');
-  setFileStore('location', 'path', location.path);
-  setFileStore('location', 'name', fileNameWithoutExt);
-  const fileExtension = location.name.split('.').slice(-1).join('.');
-  setFileStore('extension', fileExtension);
+  // it's not meant to overwrite image on save.
+  // this should be treated well in save function using openAs state.
+  setFileStore(
+    'savedLocation',
+    pathToFileLocation(path) ?? {
+      name: undefined,
+      path: undefined,
+    }
+  );
+
+  console.log('path', {
+    name: location.name,
+    path: location.path,
+  });
 
   changeCanvasSize(
     {
@@ -46,49 +55,6 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
 
   const agent = getAgentOf(initLayer.id);
   agent?.setBuffer(Uint8ClampedArray.from(imageData.data), false, true);
-
-  return true;
-}
-
-export function importImageFromWindow(): boolean {
-  // @ts-ignore
-  const imageData = window.__IMAGE__;
-
-  if (!imageData || !imageData.buffer || !imageData.width || !imageData.height || !imageData.fileName) {
-    console.log('No image data found');
-    return false;
-  }
-
-  const fileName = imageData.fileName;
-  const fileNameWithoutExt = fileName.split('.').slice(0, -1).join('.');
-  setFileStore('location', 'name', fileNameWithoutExt);
-  const fileExtension = fileName.split('.').slice(-1).join('.');
-  setFileStore('extension', fileExtension);
-
-  changeCanvasSize(
-    {
-      width: imageData.width,
-      height: imageData.height,
-    },
-    true
-  );
-
-  const initLayer = addLayer(
-    {
-      enabled: true,
-      name: fileName,
-      mode: BlendMode.normal,
-      type: LayerType.Dot,
-      dotMagnification: 1,
-      opacity: 1,
-    },
-    {
-      noDiff: true,
-    }
-  );
-
-  const agent = getAgentOf(initLayer.id);
-  agent?.setBuffer(new Uint8ClampedArray(imageData.buffer), false, true);
 
   return true;
 }

@@ -5,7 +5,7 @@ import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
 import { message } from '@tauri-apps/plugin-dialog';
 import { exit } from '@tauri-apps/plugin-process';
 import { globalConfig } from '~/stores/GlobalStores';
-import { PathToFileLocation } from '~/utils/FileUtils';
+import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
 
 export function zoomForIntegerize(dpr: number) {
@@ -52,7 +52,7 @@ export const getNewProjectSearchParams = (): string => {
 export function getOpenLocation(): FileLocation | undefined {
   // @ts-ignore
   const openPath = window.__PATH__;
-  return PathToFileLocation(openPath);
+  return pathToFileLocation(openPath);
 }
 
 const alreadyShownErrors: Set<string> = new Set();

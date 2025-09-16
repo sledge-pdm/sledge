@@ -25,8 +25,7 @@ type ColorStore = {
 };
 type FileStore = {
   openAs: 'project' | 'image';
-  extension: string;
-  location: FileLocation;
+  savedLocation: FileLocation;
 };
 type InteractStore = {
   canvasAreaSize: Size2D;
@@ -87,8 +86,7 @@ const defaultColorStore: ColorStore = {
 };
 const defaultFileStore: FileStore = {
   openAs: 'project',
-  extension: 'sledge',
-  location: {
+  savedLocation: {
     name: undefined,
     path: undefined,
   },

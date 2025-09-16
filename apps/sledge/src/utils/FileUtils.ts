@@ -10,7 +10,7 @@ export async function getFileUniqueId(path: string): Promise<string> {
   return hex.slice(0, 16);
 }
 
-export const PathToFileLocation = (fullPath: string): FileLocation | undefined => {
+export const pathToFileLocation = (fullPath: string): FileLocation | undefined => {
   fullPath = fullPath.replace(/\//g, '\\'); // Normalize path format for Windows
   const filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'));
   const fileName = fullPath.split('\\').pop()?.split('\\').pop();
@@ -24,6 +24,11 @@ export const PathToFileLocation = (fullPath: string): FileLocation | undefined =
       name: fileName,
     };
   }
+};
+
+export const getFileNameWithoutExtension = (fileName?: string): string => {
+  if (!fileName) return '';
+  return fileName.replace(/\.[^/.]+$/, '');
 };
 
 export const join = (...paths: string[]): string => {

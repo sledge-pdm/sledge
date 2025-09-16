@@ -1,6 +1,8 @@
-import { vars } from '@sledge/theme';
+import { ZFB31 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const loadingText = style({
-  fontSize: vars.text.md,
+  fontFamily: ZFB31,
+  textTransform: 'uppercase',
+  fontSize: '12px',
 });

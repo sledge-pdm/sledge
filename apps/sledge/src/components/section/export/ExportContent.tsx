@@ -8,12 +8,12 @@ import { Component, createEffect, createMemo, createSignal, onMount, Show } from
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
-import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { exportDialogCustomScaleInput, exportDialogField, exportDialogFieldDisabled } from '~/styles/dialogs/export_dialog.css';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
-import { join } from '~/utils/FileUtils';
+import { getFileNameWithoutExtension, join } from '~/utils/FileUtils';
 
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
   { label: 'png', value: 'png' },
@@ -36,7 +36,7 @@ export interface ExportSettings {
 }
 
 const ExportContent: Component = () => {
-  const nameWithoutExtension = () => fileStore.location.name?.replace(/\.sledge$/, '');
+  const nameWithoutExtension = () => getFileNameWithoutExtension(fileStore.savedLocation.name);
 
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
@@ -47,7 +47,11 @@ const ExportContent: Component = () => {
   const finalScale = () => (settings.exportOptions.scale !== 0 ? settings.exportOptions.scale : customScale()) ?? 1;
 
   onMount(async () => {
-    if (settings.dirPath === '' || !settings.dirPath) setSettings('dirPath', await defaultExportDir());
+    if (fileStore.savedLocation.path) {
+      setSettings('dirPath', fileStore.savedLocation.path);
+    } else {
+      setSettings('dirPath', await defaultExportDir());
+    }
   });
 
   createEffect(async () => {
@@ -97,10 +101,6 @@ const ExportContent: Component = () => {
       }
     }
 
-    if (fileStore.location.name === 'new project' && settings.fileName !== fileStore.location.name && settings.fileName) {
-      const fileNameWithoutExt = settings.fileName.split('.').slice(0, -1).join('.');
-      setFileStore('location', 'name', fileNameWithoutExt);
-    }
     setLastSettingsStore('exportSettings', settings);
     await saveGlobalSettings(true);
   };

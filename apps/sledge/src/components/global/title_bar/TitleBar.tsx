@@ -46,23 +46,22 @@ export default function TitleBar() {
   createEffect(() => {
     if (location.pathname.startsWith('/editor')) {
       let title = '';
-      let projName = fileStore.location.name ?? 'new project';
-      const extension = fileStore.extension !== 'sledge' ? fileStore.extension : '';
+      let fileName = fileStore.savedLocation.name ?? '[new project]';
       // non-custom titlebar (mac/linux)
       if (isDecorated()) {
         const size = `(${canvasStore.canvas.width} x ${canvasStore.canvas.height})`;
-        const projPath = fileStore.location.path;
+        const projPath = fileStore.savedLocation.path;
         if (projPath) {
-          title += `${projName}.${extension} ${size} - ${projPath}`;
+          title += `${fileName} ${size} - ${projPath}`;
         } else {
-          title += `${projName}.${extension} ${size}`;
+          title += `${fileName} ${size}`;
         }
       } else {
-        const projPath = fileStore.location.path;
+        const projPath = fileStore.savedLocation.path;
         if (projPath) {
-          title += `${projName}.${extension} - ${projPath}`;
+          title += `${fileName} - ${projPath}`;
         } else {
-          title += `${projName}.${extension}`;
+          title += `${fileName}`;
         }
       }
 
@@ -91,16 +90,20 @@ export default function TitleBar() {
                   <div
                     class={flexRow}
                     style={{
-                      'align-items': 'baseline',
+                      height: '8px',
                     }}
                   >
-                    <p class={titleBarTitle} style={{ opacity: 0.5 }}>
-                      {fileStore.location.path ?? ''}\
-                    </p>
                     <p class={titleBarTitle}>
-                      {fileStore.location.name ?? 'new project'}
-                      {fileStore.extension !== 'sledge' ? `.${fileStore.extension}` : ''}
+                      <span class={titleBarTitle} style={{ opacity: 0.5 }}>
+                        {fileStore.savedLocation.path ? `${fileStore.savedLocation.path}\\` : ''}
+                      </span>
+                      {fileStore.savedLocation.name ?? '[new project]'}
                     </p>
+                    <Show when={fileStore.openAs === 'image'}>
+                      <div style={{ 'margin-left': '8px' }}>
+                        <Icon src='icons/misc/image.png' base={8} />
+                      </div>
+                    </Show>
                     <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
                   <div

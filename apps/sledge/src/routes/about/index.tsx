@@ -82,7 +82,7 @@ const About = () => {
           <div class={flexCol} style={{ 'margin-top': '24px' }}>
             <p style={{ color: vars.color.active, 'margin-bottom': '8px' }}>link</p>
             <div class={[flexRow, w100].join(' ')} style={{ 'align-items': 'end', 'margin-bottom': '32px' }}>
-              <a class={aboutLink} onClick={(e) => openLink('https://github.com/Innsbluck-rh/sledge')}>
+              <a class={aboutLink} onClick={(e) => openLink('https://github.com/sledge-pdm/sledge')}>
                 Source (Github)
               </a>
               <p style={{ margin: '0 4px' }}>|</p>
@@ -94,7 +94,7 @@ const About = () => {
                 twitter
               </a>
               <p style={{ margin: '0 4px' }}>|</p>
-              <a class={aboutLink} onClick={(e) => openLink('https://github.com/Innsbluck-rh/sledge/blob/main/LICENSE')}>
+              <a class={aboutLink} onClick={(e) => openLink('https://github.com/sledge-pdm/sledge/blob/main/LICENSE')}>
                 License (MIT)
               </a>
             </div>

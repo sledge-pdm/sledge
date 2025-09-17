@@ -91,6 +91,7 @@ export default defineConfig({
       '@sledge/theme': path.join(__dirname, '../../packages/theme'),
       '@sledge/ui': path.join(__dirname, '../../packages/ui'),
       '@sledge/wasm': path.join(__dirname, '../../packages/wasm/pkg/sledge_wasm.js'),
+      '@assets': path.join(__dirname, '../../assets'),
     },
   },
 });

@@ -4,7 +4,7 @@ version = "0.0.11-prealpha"
 description = "Simply destructive drawing tool."
 authors = ["innsbluck"]
 license = ""
-repository = "https://github.com/Innsbluck-rh/sledge"
+repository = "https://github.com/sledge-pdm/sledge"
 edition = "2024"
 rust-version = "1.89.0"
 

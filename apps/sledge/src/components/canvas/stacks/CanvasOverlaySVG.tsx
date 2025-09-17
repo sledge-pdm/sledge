@@ -1,7 +1,7 @@
 import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSX, onCleanup, onMount, Show } from 'solid-js';
 import { Consts } from '~/Consts';
 import { RGBAToHex } from '~/features/color';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -15,243 +15,225 @@ import '~/styles/misc/marching_ants.css';
 import { getDrawnPixelMask } from '~/tools/draw/pen/PenDraw';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PathCmdList } from '~/types/PathCommand';
-import { eventBus, Events } from '~/utils/EventBus';
+import { eventBus } from '~/utils/EventBus';
 
-interface Area {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import rawPattern45border16 from '@assets/patterns/45border16.svg?raw';
+import rawPattern45border8 from '@assets/patterns/45border8.svg?raw';
 
-const CanvasOverlaySVG: Component = (props) => {
-  const borderWidth = () => canvasStore.canvas.width * interactStore.zoom;
-  const borderHeight = () => canvasStore.canvas.height * interactStore.zoom;
+// raw SVG 文字列から最初の <path .../> だけを抽出（self-closing想定）。失敗時は全体を返す。
+const extractFirstPath = (svg: string) => {
+  const m = svg.match(/<path[\s\S]*?>/i); // self-closing or standard 最短
+  return m ? m[0] : svg;
+};
+const pattern45border16Path = extractFirstPath(rawPattern45border16);
+const pattern45border8Path = extractFirstPath(rawPattern45border8);
 
-  const [areaPenWrite, setAreaPenWrite] = createSignal<Area>();
-  const [penOutlinePath, setPenOutlinePath] = createSignal<string>('');
-  // ローカル座標系 (mask 原点) の PathCmdList をキャッシュ
+const CanvasOverlaySVG: Component = () => {
+  // 論理キャンバスサイズ (ズーム非適用)
+  const logicalWidth = () => canvasStore.canvas.width;
+  const logicalHeight = () => canvasStore.canvas.height;
+
+  const [penOutlinePath, setPenOutlinePath] = createSignal('');
   let cachedLocalPath: PathCmdList | undefined;
-  let cachedKey: string | undefined; // toolId + size + shape
+  let cachedKey: string | undefined;
   const borderDash = 6;
-
-  const [selectionChanged, setSelectionChanged] = createSignal<boolean>(false);
+  const [selectionChanged, setSelectionChanged] = createSignal(false);
   const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
-  const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
-    targetFPS((timeStamp) => {
+  const [moveState, setMoveState] = createSignal(floatingMoveManager.getState());
+
+  const [_, startRenderLoop, stopRenderLoop] = createRAF(
+    targetFPS(() => {
       if (selectionChanged()) {
-        updateOutline();
+        updateSelectionOutline();
         setSelectionChanged(false);
       }
     }, Number(globalConfig.performance.targetFPS))
   );
 
-  const updateOutline = () => {
+  const updateSelectionOutline = () => {
     const { width, height } = canvasStore.canvas;
     const offset = getSelectionOffset();
-
-    // 合成されたマスクを取得
-    const combinedMask = selectionManager.getCombinedMask();
-
-    // wasmでSVGパス文字列を生成
-    const pathString = mask_to_path(combinedMask, width, height, offset.x, offset.y);
-
-    // パス文字列をPathCmdListに変換
-    const pathCmds = PathCmdList.parse(pathString);
-    setPathCmdList(pathCmds);
+    const mask = selectionManager.getCombinedMask();
+    const pathString = mask_to_path(mask, width, height, offset.x, offset.y);
+    setPathCmdList(PathCmdList.parse(pathString));
   };
 
-  const onSelectionChangedHandler = (e: Events['selection:maskChanged']) => {
-    setSelectionChanged(true);
-  };
-  const onSelectionMovedHandler = (e: Events['selection:offsetChanged']) => {
-    setSelectionChanged(true);
-  };
-
-  const [selectionState, setSelectionState] = createSignal(selectionManager.getState());
-  const [moveState, setMoveState] = createSignal(floatingMoveManager.getState());
-  const onSelectionStateChangedHandler = (e: Events['selection:stateChanged']) => {
-    setSelectionChanged(true);
-    if (import.meta.env.DEV) console.log('Selection state changed:', e.newState);
-    setSelectionState(e.newState);
-  };
-  const onFloatingStateChangedHandler = (e: Events['floatingMove:stateChanged']) => {
-    setMoveState(floatingMoveManager.getState());
-  };
-  const onFloatingMovedHandler = (e: Events['floatingMove:moved']) => {
-    setMoveState(floatingMoveManager.getState());
-  };
-
-  const tempKeyMove = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowLeft':
-        selectionManager.shiftOffset({ x: -1, y: 0 });
-        break;
-      case 'ArrowRight':
-        selectionManager.shiftOffset({ x: 1, y: 0 });
-        break;
-      case 'ArrowUp':
-        selectionManager.shiftOffset({ x: 0, y: -1 });
-        break;
-      case 'ArrowDown':
-        selectionManager.shiftOffset({ x: 0, y: 1 });
-        break;
-    }
-  };
-
+  // Events
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:maskChanged', onSelectionChangedHandler);
-    eventBus.on('selection:offsetChanged', onSelectionMovedHandler);
-    eventBus.on('selection:stateChanged', onSelectionStateChangedHandler);
-    eventBus.on('floatingMove:moved', onFloatingMovedHandler);
-    eventBus.on('floatingMove:stateChanged', onFloatingStateChangedHandler);
-    window.addEventListener('keydown', tempKeyMove);
+    eventBus.on('selection:maskChanged', () => setSelectionChanged(true));
+    eventBus.on('selection:offsetChanged', () => setSelectionChanged(true));
+    eventBus.on('selection:stateChanged', () => setSelectionChanged(true));
+    eventBus.on('floatingMove:moved', () => setMoveState(floatingMoveManager.getState()));
+    eventBus.on('floatingMove:stateChanged', () => setMoveState(floatingMoveManager.getState()));
     setSelectionChanged(true);
   });
   onCleanup(() => {
-    eventBus.off('selection:maskChanged', onSelectionChangedHandler);
-    eventBus.off('selection:offsetChanged', onSelectionMovedHandler);
-    eventBus.off('selection:stateChanged', onSelectionStateChangedHandler);
-    eventBus.off('floatingMove:moved', onFloatingMovedHandler);
-    eventBus.off('floatingMove:stateChanged', onFloatingStateChangedHandler);
-    window.removeEventListener('keydown', tempKeyMove);
+    eventBus.off('selection:maskChanged');
+    eventBus.off('selection:offsetChanged');
+    eventBus.off('selection:stateChanged');
+    eventBus.off('floatingMove:moved');
+    eventBus.off('floatingMove:stateChanged');
     stopRenderLoop();
   });
 
-  // 1) ローカルパス生成（size/shape 依存）
+  // Cache local pen shape path
   createEffect(() => {
-    const active = getActiveToolCategoryId();
-    if (active !== TOOL_CATEGORIES.PEN && active !== TOOL_CATEGORIES.ERASER) {
+    const tool = getActiveToolCategoryId();
+    if (tool !== TOOL_CATEGORIES.PEN && tool !== TOOL_CATEGORIES.ERASER) {
       cachedLocalPath = undefined;
       cachedKey = undefined;
       return;
     }
-    const preset = getCurrentPresetConfig(active) as any;
+    const preset = getCurrentPresetConfig(tool) as any;
     const size: number = preset?.size ?? 1;
     const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-    const key = `${active}-${size}-${shape}`;
-    if (cachedKey === key && cachedLocalPath) return; // 変更なし
-
+    const key = `${tool}-${size}-${shape}`;
+    if (key === cachedKey && cachedLocalPath) return;
     const { mask, width, height } = getDrawnPixelMask(size, shape);
-    const pathLocal = mask_to_path(mask, width, height, 0.0, 0.0);
-    cachedLocalPath = PathCmdList.parse(pathLocal);
+    const localPath = mask_to_path(mask, width, height, 0, 0);
+    cachedLocalPath = PathCmdList.parse(localPath);
     cachedKey = key;
   });
 
-  // 2) マウス移動に応じた平行移動だけ適用
+  // Pen outline (logical coordinates)
   createEffect(() => {
-    const active = getActiveToolCategoryId();
+    const tool = getActiveToolCategoryId();
     const mouse = interactStore.lastMouseOnCanvas;
-    if ((active === TOOL_CATEGORIES.PEN || active === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
-      const preset = getCurrentPresetConfig(active) as any;
+    if ((tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
+      const preset = getCurrentPresetConfig(tool) as any;
       const size: number = preset?.size ?? 1;
       const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-
-      // マスクの原点 (左上) へ移すためのオフセットを再計算
       const { offsetX, offsetY } = getDrawnPixelMask(size, shape);
-
-      const isEven = size % 2 === 0;
-      const centerX = isEven ? Math.round(mouse.x) : Math.floor(mouse.x);
-      const centerY = isEven ? Math.round(mouse.y) : Math.floor(mouse.y);
-      const originX = centerX + offsetX;
-      const originY = centerY + offsetY;
-
-      setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, originX, originY));
+      const even = size % 2 === 0;
+      const cx = even ? Math.round(mouse.x) : Math.floor(mouse.x);
+      const cy = even ? Math.round(mouse.y) : Math.floor(mouse.y);
+      const ox = cx + offsetX;
+      const oy = cy + offsetY;
+      setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, ox, oy));
     } else {
       setPenOutlinePath('');
     }
   });
 
+  // Wrapper: pan だけ (zoom は座標へ直接反映し stroke を不変に保つ)
+  const panWrapperStyle = (): JSX.CSSProperties => ({
+    position: 'absolute',
+    top: '0px',
+    left: '0px',
+    transform: `translate(${interactStore.offsetOrigin.x + interactStore.offset.x}px, ${interactStore.offsetOrigin.y + interactStore.offset.y}px)`,
+    'transform-origin': '0 0',
+    'pointer-events': 'none',
+    'z-index': Consts.zIndex.canvasOverlay,
+  });
+
+  // rotate + flip (中心基準)  ※ zoom は含まない
+  const rotateFlipStyle = (): JSX.CSSProperties => {
+    const w = logicalWidth() * interactStore.zoom; // サイズはズーム反映
+    const h = logicalHeight() * interactStore.zoom;
+    const cx = w / 2;
+    const cy = h / 2;
+    const sx = interactStore.horizontalFlipped ? -1 : 1;
+    const sy = interactStore.verticalFlipped ? -1 : 1;
+    const rot = interactStore.rotation;
+    return {
+      position: 'absolute',
+      top: '0px',
+      left: '0px',
+      width: `${w}px`,
+      height: `${h}px`,
+      transform: `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`,
+      'transform-origin': '0 0',
+      'pointer-events': 'none',
+    };
+  };
+
   return (
     <>
-      <svg
-        viewBox={`0 0 ${borderWidth()} ${borderHeight()}`}
-        xmlns='http://www.w3.org/2000/svg'
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          'pointer-events': 'none',
-          'shape-rendering': 'auto',
-          overflow: 'visible',
-          'z-index': Consts.zIndex.canvasOverlay,
-        }}
-      >
-        <defs>
-          <pattern id='tex45borderPattern' x='0' y='0' width='8' height='8' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-            <image href='/icons/misc/tex_45border.png' x='0' y='0' width='8' height='8' style={{ 'image-rendering': 'pixelated' }} />
-          </pattern>
-          <pattern id='tex45borderPattern-svg' width='8' height='8' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-            <svg width='8' height='8' viewBox='0 0 8 8'>
+      <svg viewBox={`0 0 0 0`} xmlns='http://www.w3.org/2000/svg'></svg>
+
+      <div style={panWrapperStyle()}>
+        <div style={rotateFlipStyle()}>
+          <svg
+            // viewBox は論理座標系、width/height はズーム反映済レイアウト (座標は内部で拡大済)
+            viewBox={`0 0 ${logicalWidth() * interactStore.zoom} ${logicalHeight() * interactStore.zoom}`}
+            xmlns='http://www.w3.org/2000/svg'
+            style={
+              {
+                position: 'absolute',
+                top: '0px',
+                left: '0px',
+                width: `${logicalWidth() * interactStore.zoom}px`,
+                height: `${logicalHeight() * interactStore.zoom}px`,
+                overflow: 'visible',
+                pointerEvents: 'none',
+                'shape-rendering': 'auto',
+              } as JSX.CSSProperties
+            }
+          >
+            <defs>
+              <pattern id='45border8-svg' width='8' height='8' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+                <g innerHTML={pattern45border8Path} />
+              </pattern>
+              <pattern id='45border16-svg' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+                <g innerHTML={pattern45border16Path} />
+              </pattern>
+            </defs>
+            {/* Canvas border (debug) */}
+            <rect
+              width={logicalWidth() * interactStore.zoom}
+              height={logicalHeight() * interactStore.zoom}
+              fill='none'
+              stroke={vars.color.canvasBorder}
+              stroke-width={1}
+              vector-effect='non-scaling-stroke'
+              pointer-events='none'
+            />
+
+            {/* Pen hover preview */}
+            <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
               <path
-                d='M 0 8 L 1 8 L 1 6 L 3 6 L 3 4 L 5 4 L 5 2 L 7 2 L 7 0 L 8 0 L 8 1 L 6 1 L 6 3 L 4 3 L 4 5 L 2 5 L 2 7 L 0 7 L 0 8 Z M 4 8 L 5 8 L 5 6 L 7 6 L 7 4 L 8 4 L 8 5 L 6 5 L 6 7 L 4 7 L 4 8 Z M 1 2 L 3 2 L 3 0 L 4 0 L 4 1 L 2 1 L 2 3 L 0 3 L 0 4 L 1 4 L 1 2 Z'
-                fill={vars.color.selectionBorderFill}
-              />
-            </svg>
-          </pattern>
-
-          <pattern id='tex45borderPattern8x2' x='0' y='0' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-            <image href='/icons/misc/tex_45border.png' x='0' y='0' width='16' height='16' style={{ 'image-rendering': 'pixelated' }} />
-          </pattern>
-          <pattern id='tex45borderPattern8x2-svg' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-            <svg width='16' height='16' viewBox='0 0 8 8'>
-              <path
-                d='M 0 8 L 1 8 L 1 6 L 3 6 L 3 4 L 5 4 L 5 2 L 7 2 L 7 0 L 8 0 L 8 1 L 6 1 L 6 3 L 4 3 L 4 5 L 2 5 L 2 7 L 0 7 L 0 8 Z M 4 8 L 5 8 L 5 6 L 7 6 L 7 4 L 8 4 L 8 5 L 6 5 L 6 7 L 4 7 L 4 8 Z M 1 2 L 3 2 L 3 0 L 4 0 L 4 1 L 2 1 L 2 3 L 0 3 L 0 4 L 1 4 L 1 2 Z'
-                fill={vars.color.selectionBorderFill}
-              />
-            </svg>
-          </pattern>
-
-          <pattern id='tex45borderPattern16' x='0' y='0' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-            <image href='/icons/misc/tex_45border_16.png' x='0' y='0' width='16' height='16' style={{ 'image-rendering': 'pixelated' }} />
-          </pattern>
-          <pattern id='tex45borderPattern16-svg' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-            <svg width='16' height='16' viewBox='0 0 16 16'>
-              <path
-                d='M 5 10 L 7 10 L 7 8 L 9 8 L 9 6 L 11 6 L 11 4 L 13 4 L 13 2 L 15 2 L 15 0 L 16 0 L 16 1 L 14 1 L 14 3 L 12 3 L 12 5 L 10 5 L 10 7 L 8 7 L 8 9 L 6 9 L 6 11 L 4 11 L 4 13 L 2 13 L 2 15 L 0 15 L 0 16 L 1 16 L 1 14 L 3 14 L 3 12 L 5 12 L 5 10 Z M 13 10 L 15 10 L 15 8 L 16 8 L 16 9 L 14 9 L 14 11 L 12 11 L 12 13 L 10 13 L 10 15 L 8 15 L 8 16 L 9 16 L 9 14 L 11 14 L 11 12 L 13 12 L 13 10 Z M 0 7 L 2 7 L 2 5 L 4 5 L 4 3 L 6 3 L 6 1 L 8 1 L 8 0 L 7 0 L 7 2 L 5 2 L 5 4 L 3 4 L 3 6 L 1 6 L 1 8 L 0 8 L 0 7 Z'
-                fill={vars.color.selectionBorderFill}
-              />
-            </svg>
-          </pattern>
-        </defs>
-
-        {/* border rect */}
-        <rect width={borderWidth()} height={borderHeight()} fill='none' stroke='black' stroke-width={0.2} pointer-events='none' />
-
-        {/* pen hover preview (exact outline) */}
-        <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
-          <path d={penOutlinePath()} fill='none' stroke={vars.color.border} stroke-width={1} pointer-events='none' />
-        </Show>
-
-        <For each={logStore.canvasDebugPoints}>
-          {(point) => {
-            return (
-              <circle
-                r={4}
-                cx={point.x * interactStore.zoom}
-                cy={point.y * interactStore.zoom}
-                fill={`#${RGBAToHex(point.color)}`}
-                stroke='none'
+                d={penOutlinePath()}
+                fill='none'
+                stroke={vars.color.border}
+                stroke-width={1}
+                vector-effect='non-scaling-stroke'
                 pointer-events='none'
               />
-            );
-          }}
-        </For>
+            </Show>
 
-        <path
-          id='selection-outline'
-          d={pathCmdList().toString(interactStore.zoom)}
-          fill='url(#tex45borderPattern8x2-svg)'
-          fill-rule='evenodd'
-          clip-rule='evenodd'
-          stroke={moveState() === 'layer' ? '#FF0000' : vars.color.selectionBorder}
-          stroke-width='1'
-          stroke-dasharray={`${borderDash} ${borderDash}`}
-          pointer-events='none'
-          class='marching-ants-animation'
-        />
-      </svg>
+            {/* Debug points */}
+            <For each={logStore.canvasDebugPoints}>
+              {(p) => (
+                <circle
+                  r={3}
+                  cx={p.x * interactStore.zoom}
+                  cy={p.y * interactStore.zoom}
+                  fill={`#${RGBAToHex(p.color)}`}
+                  stroke='none'
+                  vector-effect='non-scaling-stroke'
+                  pointer-events='none'
+                />
+              )}
+            </For>
+
+            {/* Selection outline */}
+            <path
+              id='selection-outline'
+              d={pathCmdList().toString(interactStore.zoom)}
+              fill='url(#45border16-svg)'
+              fill-rule='evenodd'
+              clip-rule='evenodd'
+              stroke={moveState() === 'layer' ? '#FF0000' : vars.color.selectionBorder}
+              stroke-width='1'
+              vector-effect='non-scaling-stroke'
+              stroke-dasharray={`${borderDash} ${borderDash}`}
+              pointer-events='none'
+              class='marching-ants-animation'
+            />
+          </svg>
+        </div>
+      </div>
     </>
   );
 };

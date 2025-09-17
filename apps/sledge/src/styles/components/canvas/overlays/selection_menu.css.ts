@@ -6,8 +6,6 @@ import { Consts } from '~/Consts';
 export const container = style([
   flexRow,
   {
-    boxSizing: 'content-box',
-    position: 'fixed',
     border: `1px solid ${vars.color.onBackground}`,
     backgroundColor: vars.color.surface,
     pointerEvents: 'all',

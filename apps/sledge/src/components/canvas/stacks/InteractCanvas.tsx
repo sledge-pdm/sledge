@@ -1,10 +1,8 @@
 import { Vec2 } from '@sledge/core';
-import { showContextMenu } from '@sledge/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
-import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { Consts } from '~/Consts';
 import { clientPositionToCanvasPosition } from '~/features/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
@@ -263,7 +261,6 @@ export const InteractCanvas: Component<Props> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e);
       }}
     />
   );

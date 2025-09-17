@@ -57,6 +57,10 @@ const CanvasControls: Component = () => {
             e.stopImmediatePropagation();
             projectHistoryController.undo();
           }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }}
         >
           <div
             class={undoIcon}
@@ -76,6 +80,10 @@ const CanvasControls: Component = () => {
             e.stopPropagation();
             e.stopImmediatePropagation();
             projectHistoryController.redo();
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
           }}
         >
           <div

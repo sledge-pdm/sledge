@@ -46,3 +46,11 @@ export const join = (...paths: string[]): string => {
     return paths.join('/');
   }
 };
+
+export const normalizePath = (path: string): string => {
+  return path.replace(/\\/g, '/').replace(/\/+/g, '/');
+};
+
+export const normalizeJoin = (...paths: string[]): string => {
+  return normalizePath(join(...paths));
+};

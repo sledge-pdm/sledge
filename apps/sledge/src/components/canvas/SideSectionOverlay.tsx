@@ -4,7 +4,7 @@ import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { createScrollPosition } from '@solid-primitives/scroll';
 import interact from 'interactjs';
-import { EditorTab, EffectsTab, ExportTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
+import { EditorTab, EffectsTab, ExportTab, FilesTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { appearanceStore } from '~/stores/EditorStores';
 import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
@@ -87,6 +87,8 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         return <EditorTab />;
       case 'effects':
         return <EffectsTab />;
+      case 'files':
+        return <FilesTab />;
       case 'history':
         return <HistoryTab />;
       case 'project':

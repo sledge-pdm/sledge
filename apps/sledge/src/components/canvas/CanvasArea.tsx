@@ -12,8 +12,9 @@ import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import { flexCol, flexRow } from '@sledge/core';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
-import { OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
+import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
+import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
 import BottomInfo from '~/components/global/BottomInfo';
 import { Consts } from '~/Consts';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -117,6 +118,22 @@ const CanvasArea: Component = () => {
           <CanvasStack />
         </div>
 
+        {/* オーバーレイ (ズーム外) のための固定ルート */}
+        <div
+          id='canvas-overlay-root'
+          style={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'visible',
+            'pointer-events': 'none',
+            'z-index': Consts.zIndex.canvasOverlay,
+          }}
+        >
+          {/* SelectionMenu / SVG Overlay をズーム外で描画 */}
+          <CanvasOverlaySVG />
+          <OnCanvasSelectionMenu />
+          {/* <CornerDebugMarkers /> */}
+        </div>
         <CanvasAreaOverlay />
       </div>
       <div

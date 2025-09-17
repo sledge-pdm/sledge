@@ -15,6 +15,7 @@ import { eventBus, Events } from '~/utils/EventBus';
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/Consts';
+import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { container, divider, item } from '~/styles/components/canvas/overlays/selection_menu.css';
@@ -60,8 +61,8 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   const handleAreaChanged = (e: Events['selection:maskChanged']) => {
     if (e.commit) {
       updateMenuPos();
-      setUpdatePosition(true);
     }
+    setUpdatePosition(true);
   };
   const handleMoved = (e: Events['selection:offsetChanged']) => setUpdatePosition(true);
   const handleStateChanged = (e: Events['selection:stateChanged']) => {
@@ -70,6 +71,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   };
   const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
     setFloatingMoveState(e.moving);
+    setUpdatePosition(true);
   };
   const handleRequestMenuUpdate = (e: Events['selection:requestMenuUpdate']) => {
     setUpdatePosition(true);
@@ -104,10 +106,13 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   });
 
   createEffect(() => {
-    interactStore.zoom;
+    // 位置に影響し得る要素を購読
+    interactStore.zoom; // zoom が変われば位置再計算 (ズームで位置は動くがメニュー自体はスケールしない)
     interactStore.rotation;
     interactStore.offset.x;
     interactStore.offset.y;
+    interactStore.horizontalFlipped;
+    interactStore.verticalFlipped;
     setUpdatePosition(true);
   });
 
@@ -116,46 +121,44 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   const updateMenuPos = () => {
     const outlineBound = selectionManager.getSelectionMask().getBoundBox();
     if (!outlineBound) return;
-
-    const containerRect = containerRef.getBoundingClientRect();
     const selectionOffset = getSelectionOffset();
 
-    const boundBaseX = interactStore.horizontalFlipped ? outlineBound.left : outlineBound.right + 1;
-    const boundBaseY = interactStore.verticalFlipped ? outlineBound.top : outlineBound.bottom + 1;
+    // 選択領域の4隅 (右+1, 下+1 を含めてピクセル境界の外側を含む) を列挙し、回転/flip/zoom 後の見かけ上の AABB を screen 上で取得
+    const cornersCanvas: Vec2[] = [
+      { x: outlineBound.left, y: outlineBound.top },
+      { x: outlineBound.right + 1, y: outlineBound.top },
+      { x: outlineBound.right + 1, y: outlineBound.bottom + 1 },
+      { x: outlineBound.left, y: outlineBound.bottom + 1 },
+    ].map((c) => ({ x: c.x + selectionOffset.x, y: c.y + selectionOffset.y }));
 
-    const basePos: Vec2 = {
-      x: boundBaseX + selectionOffset.x,
-      y: boundBaseY + selectionOffset.y,
-    };
+    const cornersScreen = cornersCanvas.map((c) => canvasToScreenNoZoom(c));
+    const minX = Math.min(...cornersScreen.map((c) => c.x));
+    const minY = Math.min(...cornersScreen.map((c) => c.y));
+    const maxX = Math.max(...cornersScreen.map((c) => c.x));
+    const maxY = Math.max(...cornersScreen.map((c) => c.y));
 
-    setSelectionMenuPos(basePos);
+    const containerWidth = containerRef?.offsetWidth ?? 0;
 
+    const margin = 8;
+    const anchor = { x: maxX - containerWidth, y: maxY + margin };
+    setSelectionMenuPos(anchor);
+
+    // Outer 領域 (sections-between-area) へのクランプ
     const sectionsBetweenArea = document.getElementById('sections-between-area') as HTMLElement;
-    if (sectionsBetweenArea) {
+    if (sectionsBetweenArea && containerRef) {
       const areaRect = sectionsBetweenArea.getBoundingClientRect();
-
-      const originalContainerPos: Vec2 = { x: containerRect.x, y: containerRect.y };
-      const newContainerPos: Vec2 = { x: containerRect.x, y: containerRect.y };
+      const menuW = containerRef.offsetWidth;
+      const menuH = containerRef.offsetHeight;
       const outerMargin = 8;
-      // check if the menu is out of the canvas area
-      if (originalContainerPos.x < areaRect.x + outerMargin) {
-        newContainerPos.x = areaRect.x + outerMargin;
-      }
-      if (originalContainerPos.y < areaRect.y + outerMargin) {
-        newContainerPos.y = areaRect.y + outerMargin;
-      }
-      if (areaRect.right - outerMargin < containerRect.right) {
-        newContainerPos.x = areaRect.right - containerRef.offsetWidth - outerMargin;
-      }
-      if (areaRect.bottom - outerMargin < containerRect.bottom) {
-        newContainerPos.y = areaRect.bottom - containerRef.offsetHeight - outerMargin;
-      }
-
-      // 画面外に出た場合
-      if (newContainerPos.x !== originalContainerPos.x || newContainerPos.y !== originalContainerPos.y) {
-        setOuterPosition({ x: newContainerPos.x - areaRect.x, y: newContainerPos.y - areaRect.y });
+      let clampedX = anchor.x;
+      let clampedY = anchor.y;
+      if (clampedX > areaRect.right - outerMargin - menuW) clampedX = areaRect.right - outerMargin - menuW;
+      if (clampedY > areaRect.bottom - outerMargin - menuH) clampedY = areaRect.bottom - outerMargin - menuH;
+      if (clampedX < areaRect.left + outerMargin) clampedX = areaRect.left + outerMargin;
+      if (clampedY < areaRect.top + outerMargin) clampedY = areaRect.top + outerMargin;
+      if (clampedX !== anchor.x || clampedY !== anchor.y) {
+        setOuterPosition({ x: clampedX - areaRect.left, y: clampedY - areaRect.top });
       } else {
-        containerRef.style.margin = `8px 0 0 0`;
         setOuterPosition(undefined);
       }
     }
@@ -164,14 +167,13 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   return (
     <div
       style={{
-        position: 'fixed',
+        position: 'absolute',
         left: `${selectionMenuPos().x}px`,
         top: `${selectionMenuPos().y}px`,
         visibility: outerPosition() === undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
         'pointer-events': 'all',
-        'z-index': Consts.zIndex.canvasOverlay,
         'transform-origin': '0 0',
-        transform: `scale(${interactStore.horizontalFlipped ? '-' : ''}${1 / interactStore.zoom},${interactStore.verticalFlipped ? '-' : ''}${1 / interactStore.zoom}) `,
+        'z-index': Consts.zIndex.canvasOverlay,
       }}
       onPointerDown={(e) => {
         e.stopPropagation();
@@ -182,13 +184,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         e.stopImmediatePropagation();
       }}
     >
-      <div
-        ref={(ref) => (containerRef = ref)}
-        class={container}
-        style={{
-          translate: '-100% 0',
-        }}
-      >
+      <div ref={(ref) => (containerRef = ref)} class={container}>
         {MenuContent()}
       </div>
     </div>

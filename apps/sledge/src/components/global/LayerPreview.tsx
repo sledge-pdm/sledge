@@ -134,9 +134,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
         }}
         style={{
           'image-rendering': 'pixelated',
-          'background-image':
-            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
-            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%)`,
+          'background-image': `url(/patterns/CheckerboardPattern.svg)`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}

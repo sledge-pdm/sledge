@@ -69,6 +69,8 @@ class ImageEntryInteract {
   ) {}
 
   private handlePointerDown = (e: PointerEvent) => {
+    // 左クリックのみ許容
+    if (e.button !== 0) return;
     const target = e.target as HTMLElement;
     const handle = target.closest?.('.resize-handle') as HTMLElement | null;
     const entry = this.getEntry();

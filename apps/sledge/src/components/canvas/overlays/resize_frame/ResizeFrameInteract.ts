@@ -63,6 +63,8 @@ export class ResizeFrameInteract {
   };
 
   private handlePointerDown = (e: PointerEvent) => {
+    // 左クリック(通常: button===0) 以外は無視
+    if (e.button !== 0) return;
     const target = e.target as HTMLElement;
     const handle = target.closest?.('.resize-handle') as HTMLElement | null;
     const dragSurface = target.closest?.('.drag-surface');

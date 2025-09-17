@@ -2,7 +2,6 @@
 import { flexRow } from '@sledge/core';
 import { style } from '@vanilla-extract/css';
 
-
 export const canvasStack = style([
   flexRow,
   {

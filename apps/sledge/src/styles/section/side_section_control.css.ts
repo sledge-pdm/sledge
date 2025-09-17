@@ -41,15 +41,14 @@ export const sideSectionControlText = style({
   fontSize: '8px',
   whiteSpace: 'nowrap',
   writingMode: 'vertical-lr',
-  verticalAlign: 'middle',
   color: vars.color.onBackground,
-  opacity: 0.65,
+  opacity: 0.5,
 });
 
 export const sideSectionControlTextActive = style([
   sideSectionControlText,
   {
-    color: vars.color.onBackground,
+    color: vars.color.accent,
     opacity: 1,
   },
 ]);

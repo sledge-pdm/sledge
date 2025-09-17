@@ -78,7 +78,7 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
   const [presetMeta, setPresetMeta] = createSignal(getPresetMetaByToolId(props.toolId));
 
   if (!presetMeta() || !presets()) {
-    return <div>No preset configuration available for this tool.</div>;
+    return null;
   }
 
   onMount(() => {

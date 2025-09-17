@@ -20,6 +20,8 @@ export const Consts = {
 
   globalConfigFileName: 'global.sledgeconfig',
   toolPresetsConfigFileName: 'tools.sledgeconfig',
+
+  fileItemIndent: 8,
 };
 
 export type KeyConfigCommands =

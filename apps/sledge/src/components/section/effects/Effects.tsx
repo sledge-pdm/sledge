@@ -42,7 +42,7 @@ const Effects: Component = () => {
             'align-self': 'center',
             width: 'fit-content',
             height: 'auto',
-            border: `1px solid ${vars.color.active}`,
+            border: `1px solid ${vars.color.border}`,
             'margin-bottom': '12px',
           }}
         >

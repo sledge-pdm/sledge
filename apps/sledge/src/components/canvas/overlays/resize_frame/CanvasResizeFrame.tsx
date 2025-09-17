@@ -2,7 +2,7 @@ import { Size2D, Vec2 } from '@sledge/core';
 import { ZFB08 } from '@sledge/theme';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { canvasToScreen } from '~/features/canvas/CanvasPositionCalculator';
-import { interactStore } from '~/stores/EditorStores';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import ResizeFrameInteract, { ResizeFrameRect } from './ResizeFrameInteract';
 
@@ -35,8 +35,8 @@ export const CanvasResizeFrame: Component = () => {
         setRect(r);
         recomputeScreenBox();
       },
-      (startRect, endRect) => {
-        // TODO: commit (history + canvas サイズ反映など) 実装予定
+      () => {
+        /* commit は CanvasControls 側 */
       }
     );
     interact.setInteractListeners();
@@ -73,10 +73,11 @@ export const CanvasResizeFrame: Component = () => {
     if (!rect() && w > 0 && h > 0) {
       setRect({ x: 0, y: 0, width: w, height: h });
       recomputeScreenBox();
-      // rect が初期化されたのでインタラクト初期化を再試行
       setupInteract();
     }
   });
+  // saveRectToStore 削除: logicalFrame から同期する
+
   const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
     // オーバーレイはスケールしないので、ズームのみ相殺
     const size = () => props.size ?? 8;
@@ -102,23 +103,34 @@ export const CanvasResizeFrame: Component = () => {
     );
   };
 
-  // 確定時に使用する整数キャンバスサイズとオフセットを計算
+  // 確定時に使用する整数キャンバスサイズとフレーム左上座標(startX,startY)を計算
   // - startX = floor(rect.x) / startY = floor(rect.y)
   // - endX = ceil(rect.x + rect.width) / endY = ceil(rect.y + rect.height)
   // => 新しいキャンバス幅/高さ = end - start (必ず整数, 選択領域を完全包含)
-  // - 旧キャンバス内容を新キャンバスへ貼る際の配置オフセット = (-startX, -startY)
+  // store にはフレーム左上の旧キャンバス座標 (startX,startY) をそのまま + 正符号で保持する。
+  // commit 時に srcOrigin = (startX,startY), destOrigin = (0,0) でコピーし、(startX,startY) が新キャンバスの (0,0) に再基準化される。
   const logicalFrame = createMemo(() => {
     const r = rect();
     if (!r) return undefined;
+    // フレーム矩形を整数化 (ドラッグ中も整数運用だが安全のため再適用)
     const startX = Math.floor(r.x);
     const startY = Math.floor(r.y);
     const endX = Math.ceil(r.x + r.width);
     const endY = Math.ceil(r.y + r.height);
     const canvasWidth = endX - startX;
     const canvasHeight = endY - startY;
-    const offsetX = -startX; // 旧キャンバス原点を新キャンバス内でどこに置くか
-    const offsetY = -startY;
+    // offset はフレーム左上の旧キャンバス座標を正符号で持つ
+    const offsetX = startX;
+    const offsetY = startY;
     return { canvasWidth, canvasHeight, offsetX, offsetY };
+  });
+
+  // logicalFrame を store に同期 (commit UI 用)
+  createEffect(() => {
+    const lf = logicalFrame();
+    if (!lf) return;
+    setInteractStore('canvasSizeFrameOffset', { x: lf.offsetX, y: lf.offsetY }); // (startX,startY)
+    setInteractStore('canvasSizeFrameSize', { width: lf.canvasWidth, height: lf.canvasHeight });
   });
 
   return (

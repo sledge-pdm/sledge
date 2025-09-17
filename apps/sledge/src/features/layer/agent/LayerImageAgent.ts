@@ -1,4 +1,4 @@
-import { Size2D, Vec2 } from '@sledge/core';
+import { Point, Size2D, Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { LayerBufferHistoryAction, LayerBufferPatch } from '~/features/history/actions/LayerBufferHistoryAction';
@@ -68,16 +68,15 @@ export default class LayerImageAgent {
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
   }
 
-  changeBufferSize(newSize: Size2D, emitEvent?: boolean) {
+  changeBufferSize(newSize: Size2D, emitEvent?: boolean, destOrigin?: Point, srcOrigin?: Point) {
     setProjectStore('isProjectChangedAfterSave', true);
-    this.pbm.changeSize(newSize);
+    this.pbm.changeSize(newSize, destOrigin ?? { x: 0, y: 0 }, srcOrigin ?? { x: 0, y: 0 });
     this.tm.setSize(newSize);
     if (emitEvent) {
       this.tm.setAllDirty();
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) buffer size changed` });
       eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
-    // this.callOnImageChangeListeners({ newSize, updatePreview: true });
   }
 
   public registerToHistory(context?: any) {

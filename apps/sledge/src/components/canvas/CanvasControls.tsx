@@ -1,8 +1,16 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
-import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
+import { bottomRightNav, redoIcon, topLeftNav, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
-import { layerListStore } from '~/stores/ProjectStores';
+import { flexCol, flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
+import { Consts } from '~/Consts';
+import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
+import { allLayers } from '~/features/layer';
+import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 // no longer relying on layerHistory:changed; use projectHistoryController.onChange
 
 const CanvasControls: Component = () => {
@@ -95,7 +103,137 @@ const CanvasControls: Component = () => {
           />
         </div>
       </div>
+      <Show when={interactStore.isCanvasSizeFrameMode}>
+        <div class={topLeftNav} style={{}}>
+          <div class={flexCol}>
+            <p style={{ color: vars.color.accent, 'font-size': '16px' }}>FRAME MODE.</p>
+          </div>
+        </div>
+
+        <div class={bottomRightNav} style={{ 'z-index': Consts.zIndex.canvasOverlay }}>
+          <div class={flexCol}>
+            <div class={flexCol} style={{ padding: '12px' }}>
+              <p style={{ 'font-size': '8px', color: 'white' }}>new canvas size.</p>
+              <p style={{ 'font-size': '16px', color: 'white' }}>
+                {interactStore.canvasSizeFrameSize.width} x {interactStore.canvasSizeFrameSize.height}
+              </p>
+            </div>
+            <div class={flexRow}>
+              <Item
+                src='/icons/selection/commit_10.png'
+                onClick={() => {
+                  // commit size change with current frame
+                  const targetW = interactStore.canvasSizeFrameSize.width;
+                  const targetH = interactStore.canvasSizeFrameSize.height;
+                  if (!targetW || !targetH) return;
+                  const offset = interactStore.canvasSizeFrameOffset; // (startX, startY) フレーム左上（旧キャンバス座標）
+                  const oldSize = { ...canvasStore.canvas };
+                  const newSize = { width: targetW, height: targetH };
+                  if (oldSize.width === newSize.width && oldSize.height === newSize.height && offset.x === 0 && offset.y === 0) {
+                    setInteractStore('isCanvasSizeFrameMode', false);
+                    return; // no-op
+                  }
+
+                  // frame: startX = offset.x, startY = offset.y
+                  const startX = offset.x;
+                  const startY = offset.y;
+                  // 1. 履歴アクション作成: old/new サイズ。内部でレイヤは size 変更されるが、ここでオフセットコピーを行う必要がある。
+                  const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'CanvasControls.frameCommit' });
+
+                  // 2. まずレイヤを newSize にリサイズしつつバッファにコピー (オフセット適用)
+                  //    CanvasSizeHistoryAction の redo() はサイズ変更→snapshot 保存→snapshot restore するので、
+                  //    ここでは redo() ではなく内部処理を模倣しつつオフセットコピーを適用し、その後 newSnapshots を収集させるために act.redo() を呼ぶ。
+                  //    → シンプルに: 先に act.redo() でサイズ変更 → その後 offset を考慮した再配置を上書きし newSnapshots を更新する。
+                  //    ただし act.redo() 内で newSnapshots が確定してしまうため、オフセット版を履歴で再生できるようにするには
+                  //    redo 前にレイヤを手動で resize + copy し、その状態を newSnapshots として記録させる必要がある。
+
+                  // a) サイズ変更 + オフセット再配置 (PixelBufferManager に任せる)
+                  // 新キャンバスの (0,0) に旧(startX,startY) が来るように: srcOrigin = (startX,startY), destOrigin = (0,0)
+                  const destOrigin = { x: 0, y: 0 };
+                  for (const l of allLayers()) {
+                    const agent = getAgentOf(l.id)!;
+                    agent.changeBufferSize(newSize, false, destOrigin, { x: startX, y: startY });
+                    agent.forceUpdate();
+                  }
+
+                  // c) Canvas サイズ更新
+                  setCanvasStore('canvas', newSize);
+
+                  // d) act を履歴へ (newSnapshots を現状態として確定させるために act.redo() 呼んでから addAction)
+                  // act.redo() は再度 resize + snapshot 復元するが既に newSize のため second-path (applyState) を使用したい →
+                  // ここでは act.redo() を最初に一回呼んで newSnapshots をセットし、その後 addAction。
+                  act.redo();
+                  projectHistoryController.addAction(act);
+
+                  // 3. モード終了
+                  setInteractStore('isCanvasSizeFrameMode', false);
+                  // 4. フレーム用ストア初期化
+                  setInteractStore('canvasSizeFrameOffset', { x: 0, y: 0 });
+                  setInteractStore('canvasSizeFrameSize', { width: 0, height: 0 });
+                }}
+                label='commit.'
+                title='commit.'
+              />
+              <Divider />
+              <Item
+                src='/icons/selection/cancel_10.png'
+                onClick={() => {
+                  setInteractStore('isCanvasSizeFrameMode', false);
+                }}
+                label='cancel.'
+                title='cancel.'
+              />
+            </div>
+          </div>
+        </div>
+      </Show>
     </>
+  );
+};
+
+interface ItemProps {
+  src: string;
+  label?: string;
+  title?: string;
+  onClick?: () => void;
+}
+
+const Item: Component<ItemProps> = (props) => {
+  const [hover, setHover] = createSignal(false);
+  return (
+    <div
+      class={flexRow}
+      style={{
+        padding: '8px',
+        gap: '8px',
+        'align-items': 'center',
+        cursor: 'pointer',
+        'pointer-events': 'all',
+        'z-index': Consts.zIndex.canvasOverlay,
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={props.onClick}
+      title={props.title}
+    >
+      <Icon src={props.src} color={hover() ? vars.color.enabled : 'white'} base={10} />
+      <Show when={props.label}>
+        <p style={{ color: hover() ? vars.color.enabled : 'white' }}>{props.label}</p>
+      </Show>
+    </div>
+  );
+};
+const Divider: Component = () => {
+  return (
+    <div
+      style={{
+        width: '1px',
+        'margin-top': '4px',
+        'margin-bottom': '4px',
+        'box-sizing': 'content-box',
+        'background-color': '#ffffff80',
+      }}
+    />
   );
 };
 

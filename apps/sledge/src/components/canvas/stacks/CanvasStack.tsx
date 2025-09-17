@@ -3,7 +3,7 @@ import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import { InteractCanvas } from './InteractCanvas';
 
 import { vars } from '@sledge/theme';
-import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
+import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';

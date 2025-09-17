@@ -81,9 +81,9 @@ xattr -rc /Applications/sledge.app
 | **I/O**          | Basic I/O             | ✅      | load, save, import, export                                  |
 |                  | SVG Export            | ✅      | vector export for small pixel art/icons (< 128x128)         |
 |                  | Backup                | ⏳      | automatic backup for safe editing                           |
-|                  | Clipboard             | ⏳      | selection / layer                                           |
+|                  | Clipboard             | ✅      | selection / layer                                           |
 |                  | Drag and Drop         | ⏳      | images (add to pool) / project (open)                       |
-|                  | Project-Level History | ⏳      |                                                             |
+|                  | Project-Level History | ✅      | you can see how it works on "history" tab!                  |
 | **Others**       | Animation             | ⏳      | creating frames and output to gif, mp4                      |
 
 </details>

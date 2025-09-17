@@ -48,7 +48,7 @@ export const join = (...paths: string[]): string => {
 };
 
 export const normalizePath = (path: string): string => {
-  return path.replace(/\\/g, '/').replace(/\/+/g, '/');
+  return path.trim().replace(/\\/g, '/').replace(/\/+/g, '/');
 };
 
 export const normalizeJoin = (...paths: string[]): string => {

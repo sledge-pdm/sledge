@@ -1,0 +1,290 @@
+import { FileLocation, flexCol, flexRow } from '@sledge/core';
+import { PM10, vars } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
+import { pictureDir } from '@tauri-apps/api/path';
+import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
+import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { createStore } from 'solid-js/store';
+import FileItem, { FilesConfig } from '~/components/section/files/item/FileItem';
+import { openExistingProject } from '~/io/window';
+import { fileStore } from '~/stores/EditorStores';
+import { join, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+
+interface Props {
+  defaultPath?: string;
+}
+
+const Explorer: Component<Props> = (props) => {
+  let inputRef: HTMLInputElement | undefined = undefined;
+  const [configStore, setConfigStore] = createStore<FilesConfig>({
+    twoColumns: false,
+    pathEditMode: false,
+  });
+  const [currentPath, setCurrentPath] = createSignal<string>(props.defaultPath ?? '');
+  const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
+
+  onMount(async () => {
+    const openPath = fileStore.savedLocation.path ? join(fileStore.savedLocation.path) : undefined;
+    const defaultPath = props.defaultPath ?? openPath ?? (await pictureDir());
+    if (defaultPath) {
+      setPath(defaultPath);
+    }
+  });
+
+  const setPath = (path: string) => {
+    if (!path.includes('/')) path += '/';
+    setCurrentPath(normalizePath(path));
+  };
+
+  createEffect(async () => {
+    const path = currentPath();
+    if (path) {
+      try {
+        const entries = await readDir(path);
+
+        // sort dir => file
+        entries.sort((a, b) => {
+          if (a.isDirectory && !b.isDirectory) return -1;
+          if (!a.isDirectory && b.isDirectory) return 1;
+          return a.name.localeCompare(b.name);
+        });
+
+        setEntries(entries);
+      } catch (e) {
+        setEntries(undefined);
+      }
+    }
+  });
+
+  const Breadcrumbs: Component<{ path: string }> = (props) => {
+    const parts = createMemo<string[]>(() => {
+      return props.path
+        .replaceAll('\\', '/')
+        .split('/')
+        .filter((p) => p);
+    });
+    return (
+      <div class={flexRow} style={{ gap: '4px', 'flex-wrap': 'wrap' }}>
+        <For each={parts()}>
+          {(part, index) => {
+            return (
+              <div class={flexRow} style={{ gap: '4px', 'align-items': 'center' }}>
+                {index() > 0 && <p>&gt;</p>}
+                <a
+                  onClick={() => {
+                    const newPath = parts()
+                      .slice(0, index() + 1)
+                      .join('/');
+                    setPath(newPath);
+                  }}
+                  style={{
+                    'font-family': `${PM10}`,
+                    'font-size': '10px',
+                    'pointer-events': index() === parts().length - 1 ? 'none' : 'auto',
+                  }}
+                >
+                  {part}
+                  {parts().length === 1 && '/'}
+                </a>
+              </div>
+            );
+          }}
+        </For>
+      </div>
+    );
+  };
+
+  return (
+    <div class={flexCol} style={{ width: '100%', height: 'auto', gap: '8px' }}>
+      {/* <p class={sectionCaption} style={{ margin: 0 }}>
+        explorer.
+      </p> */}
+      <div class={flexCol} style={{ gap: '8px', 'margin-bottom': '16px' }}>
+        <div class={flexCol} style={{ padding: '8px', gap: '8px', background: vars.color.surface }}>
+          <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
+            <Show
+              when={configStore.pathEditMode}
+              fallback={
+                <>
+                  <div style={{ 'flex-grow': 1 }}>
+                    <Breadcrumbs path={currentPath()} />
+                  </div>
+
+                  <div
+                    style={{ padding: '2px', cursor: 'pointer' }}
+                    onClick={() => {
+                      setConfigStore('pathEditMode', true);
+                      inputRef?.focus();
+                      // inputRef?.select();
+                    }}
+                  >
+                    <Icon src={'/icons/misc/edit.png'} base={8} hoverColor={vars.color.accent} />
+                  </div>
+                </>
+              }
+            >
+              <input
+                ref={(ref) => (inputRef = ref)}
+                value={currentPath()}
+                onInput={(e) => {
+                  setPath(e.currentTarget.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === 'Escape') {
+                    setConfigStore('pathEditMode', false);
+                    inputRef?.blur();
+                  }
+                }}
+                onBlur={() => setConfigStore('pathEditMode', false)}
+                style={{
+                  'font-family': `${PM10}`,
+                  'font-size': '10px',
+                  'letter-spacing': '1px',
+                  'flex-grow': 1,
+                  opacity: configStore.pathEditMode ? 1 : 0.4,
+                }}
+              />
+            </Show>
+          </div>
+
+          <div class={flexRow} style={{ width: '100%', gap: '6px', overflow: 'hidden', 'align-items': 'center', 'justify-content': 'right' }}>
+            <div
+              style={{ padding: '2px', cursor: 'pointer' }}
+              onClick={() => {
+                const path = currentPath();
+                const parts = normalizePath(path).split('/');
+                if (parts.length <= 1) return;
+                let parent = parts.slice(0, -1).join('/');
+                if (parts.length === 2) parent += '/';
+                if (parent) {
+                  setPath(parent);
+                }
+              }}
+            >
+              <Icon src={'/icons/misc/folder_up.png'} base={8} hoverColor={vars.color.accent} />
+            </div>
+            <div
+              style={{ padding: '2px', cursor: 'pointer' }}
+              onClick={() => {
+                setConfigStore('twoColumns', (v) => !v);
+              }}
+            >
+              <Icon
+                src={configStore.twoColumns ? '/icons/misc/two_column.png' : '/icons/misc/one_column.png'}
+                base={8}
+                hoverColor={vars.color.accent}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={
+            {
+              // 'min-height': '500px',
+            }
+          }
+        >
+          <div
+            class={flexRow}
+            style={{
+              width: '100%',
+              height: 'auto',
+              gap: '4px 0',
+              'margin-left': '4px',
+              overflow: 'hidden',
+              'flex-wrap': 'wrap',
+            }}
+          >
+            <Switch
+              fallback={
+                <For each={entries()}>
+                  {(entry) => {
+                    const path = normalizeJoin(currentPath(), entry.name);
+                    const location: FileLocation = {
+                      name: entry.name,
+                      path: currentPath(),
+                    };
+
+                    const openPath =
+                      fileStore.savedLocation.path && fileStore.savedLocation.name
+                        ? normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name)
+                        : undefined;
+                    const isMe = openPath && openPath === path;
+                    const isPartOfMe = openPath && openPath.startsWith(path);
+
+                    return (
+                      <FileItem
+                        config={configStore}
+                        entry={entry}
+                        isMe={!!isMe}
+                        isPartOfMe={!!isPartOfMe}
+                        onClick={(e) => {
+                          if (entry.isDirectory) {
+                            setPath(path);
+                          } else if (entry.isFile) {
+                            const ext = ['sledge', 'png', 'jpg', 'jpeg'];
+                            if (ext.some((e) => entry.name.endsWith(`.${e}`))) {
+                              openExistingProject(location);
+                            }
+                          }
+                        }}
+                      />
+                    );
+                  }}
+                </For>
+              }
+            >
+              <Match when={entries() === undefined}>
+                <p>failed to open directory.</p>
+              </Match>
+              <Match when={entries() !== undefined && entries()!.length === 0}>
+                <p>this directory is empty.</p>
+              </Match>
+            </Switch>
+          </div>
+        </div>
+      </div>
+
+      {/* <SectionItem title='drives.' defaultExpanded={false}>
+        <div
+          class={flexCol}
+          style={{
+            width: '100%',
+            height: 'auto',
+            gap: '4px',
+            'margin-left': '12px',
+            overflow: 'hidden',
+          }}
+        >
+          <Item
+            entry={{
+              isDirectory: false,
+              isFile: false,
+              isDrive: true,
+              name: 'C:/',
+              isSymlink: false,
+            }}
+            config={configStore}
+            isMe={false}
+            isPartOfMe={false}
+          />
+          <Item
+            entry={{
+              isDirectory: false,
+              isFile: false,
+              isDrive: true,
+              name: 'D:/',
+              isSymlink: false,
+            }}
+            config={configStore}
+            isMe={false}
+            isPartOfMe={false}
+          />
+        </div>
+      </SectionItem> */}
+    </div>
+  );
+};
+
+export default Explorer;

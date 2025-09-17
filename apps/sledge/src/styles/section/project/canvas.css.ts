@@ -6,7 +6,6 @@ export const canvasSizeForm = style([
   flexRow,
   {
     alignItems: 'flex-end',
-    marginBottom: '6px',
     gap: vars.spacing.sm,
   },
 ]);

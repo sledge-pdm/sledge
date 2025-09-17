@@ -101,7 +101,7 @@ const CanvasSettings: Component = () => {
           <p style={{ color: vars.color.onBackground, width: '72px' }}>presets.</p>
           <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
         </div>
-        <div class={canvasSizeForm} style={{ 'margin-bottom': '2px' }}>
+        <div class={canvasSizeForm}>
           <div>
             <p class={canvasSizeLabel}>width</p>
             <input
@@ -155,21 +155,20 @@ const CanvasSettings: Component = () => {
             apply
           </button>
         </div>
-        <div class={flexCol} style={{ gap: '6px' }}>
+        <div class={flexCol} style={{ width: '100%', 'margin-top': '8px', 'align-items': 'end', gap: '6px' }}>
           <Button
             onClick={async () => {
               setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
               await saveGlobalSettings(true);
             }}
-            style={{ 'margin-top': '8px' }}
           >
-            Set current size as Default.
+            Set as Default.
           </Button>
           <p style={{ 'font-family': ZFB03B, 'font-size': '8px', 'margin-left': '4px', opacity: 0.5 }}>
             [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
           </p>
         </div>
-        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
+        <p class={sectionCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
           info.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>

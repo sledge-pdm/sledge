@@ -1,2 +1,74 @@
-pnpm install
-pnpm format
+#!/usr/bin/env sh
+# Format & lint only staged files, then re-stage them so the commit includes the changes.
+# 目的:
+# 1. 全ファイルではなく変更ファイルだけをフォーマットして高速化
+# 2. フォーマット差分を自動で再ステージしてコミット後に余計な変更が残らないようにする
+
+. "$(dirname "$0")/_/husky.sh"
+
+set -e
+
+echo "[pre-commit] collect staged files"
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
+
+if [ -z "$STAGED_FILES" ]; then
+	echo "[pre-commit] no staged files"
+	exit 0
+fi
+
+TS_LIKE_EXT='(ts|tsx|js|jsx|mjs|cjs|json|md|css|scss)'
+
+# ---- Prettier対象 ----
+PRETTIER_TARGETS=$(echo "$STAGED_FILES" | grep -E "\.${TS_LIKE_EXT}$" || true)
+if [ -n "$PRETTIER_TARGETS" ]; then
+	echo "[pre-commit] prettier formatting..."
+	# 1ファイルずつ処理 (xargs の BSD/GNU 差異対策)
+	echo "$PRETTIER_TARGETS" | while IFS= read -r f; do
+		[ -f "$f" ] || continue
+		npx --yes prettier --write --config configs/format/prettier.config.json "$f" >/dev/null 2>&1 || {
+			echo "[pre-commit] prettier failed on $f" >&2
+			exit 1
+		}
+		git add "$f"
+	done
+fi
+
+# ---- Stylelint (CSS/SCSS) ----
+STYLELINT_TARGETS=$(echo "$STAGED_FILES" | grep -E '\.(css|scss)$' || true)
+if [ -n "$STYLELINT_TARGETS" ]; then
+	echo "[pre-commit] stylelint --fix ..."
+	echo "$STYLELINT_TARGETS" | while IFS= read -r f; do
+		[ -f "$f" ] || continue
+		npx --yes stylelint --fix --config configs/lint/stylelint.config.json "$f" || {
+			echo "[pre-commit] stylelint failed on $f" >&2
+			exit 1
+		}
+		git add "$f"
+	done
+fi
+
+# ---- Rust (only if .rs staged) ----
+RS_CHANGED=$(echo "$STAGED_FILES" | grep -E '\.rs$' || true)
+if [ -n "$RS_CHANGED" ]; then
+	echo "[pre-commit] rustfmt (cargo fmt) ..."
+	# wasm crate
+	if echo "$RS_CHANGED" | grep -q '^packages/wasm/'; then
+		(cd packages/wasm && cargo fmt) || { echo "[pre-commit] cargo fmt failed in packages/wasm" >&2; exit 1; }
+	fi
+	# tauri crate
+	if echo "$RS_CHANGED" | grep -q '^apps/sledge/src-tauri/'; then
+		(cd apps/sledge/src-tauri && cargo fmt) || { echo "[pre-commit] cargo fmt failed in apps/sledge/src-tauri" >&2; exit 1; }
+	fi
+	# 変更された rust ファイルを再ステージ (fmt は crate 全体を触る可能性があるので find して add)
+	echo "$RS_CHANGED" | while IFS= read -r f; do
+		[ -f "$f" ] && git add "$f"
+	done
+fi
+
+# もしフォーマットで追加修正が入ったかを判断したい場合は以下のコメントアウトを利用:
+# if ! git diff --cached --quiet; then
+#   echo "[pre-commit] formatting applied & staged. (必要ならこの時点で exit 1 にしてユーザに再実行させる)"
+# fi
+
+echo "[pre-commit] done"
+exit 0

@@ -2,7 +2,7 @@ import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createMemo, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import ImageEntryInteract from '~/components/canvas/stacks/image_pool/ImageEntryInteract';
+import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { Consts } from '~/Consts';
 import { getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';

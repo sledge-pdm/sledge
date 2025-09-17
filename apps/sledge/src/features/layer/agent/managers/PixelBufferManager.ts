@@ -38,9 +38,26 @@ export default class PixelBufferManager {
     const oldBuf = this.buffer;
     const newBuf = new Uint8ClampedArray(newW * newH * 4);
 
-    // Width/height that can actually be copied from source buffer
-    const copyW = Math.min(oldW - srcOrigin.x, newW - destOrigin.x);
-    const copyH = Math.min(oldH - srcOrigin.y, newH - destOrigin.y);
+    // 正常化: 負の destOrigin / srcOrigin はコピーを発生させないようにクランプ
+    if (destOrigin.x < 0 || destOrigin.y < 0) {
+      // 範囲外開始: 有効領域へずらす（対応する srcOrigin もシフト）
+      const shiftX = destOrigin.x < 0 ? -destOrigin.x : 0;
+      const shiftY = destOrigin.y < 0 ? -destOrigin.y : 0;
+      destOrigin = { x: destOrigin.x + shiftX, y: destOrigin.y + shiftY };
+      srcOrigin = { x: srcOrigin.x + shiftX, y: srcOrigin.y + shiftY };
+    }
+    if (srcOrigin.x < 0 || srcOrigin.y < 0) {
+      const shiftX = srcOrigin.x < 0 ? -srcOrigin.x : 0;
+      const shiftY = srcOrigin.y < 0 ? -srcOrigin.y : 0;
+      srcOrigin = { x: srcOrigin.x + shiftX, y: srcOrigin.y + shiftY };
+      destOrigin = { x: destOrigin.x + shiftX, y: destOrigin.y + shiftY };
+    }
+
+    // Width/height that can actually be copied from source buffer (>=0)
+    let copyW = Math.min(oldW - srcOrigin.x, newW - destOrigin.x);
+    let copyH = Math.min(oldH - srcOrigin.y, newH - destOrigin.y);
+    if (copyW < 0) copyW = 0;
+    if (copyH < 0) copyH = 0;
 
     for (let y = 0; y < copyH; y++) {
       // Read offset on the old buffer

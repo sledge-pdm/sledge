@@ -1,4 +1,5 @@
 import { flexCol } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 import { Consts } from '~/Consts';
 
@@ -50,3 +51,23 @@ export const redoIcon = style([
     scale: 2,
   },
 ]);
+
+export const topLeftNav = style({
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '36px',
+  padding: '16px',
+  position: 'absolute',
+  left: '8px',
+  top: '8px',
+});
+
+export const bottomRightNav = style({
+  display: 'flex',
+  flexDirection: 'row',
+  position: 'absolute',
+  backgroundColor: '#000000A0',
+  border: `1px solid ${vars.color.border}`,
+  right: '8px',
+  bottom: '8px',
+});

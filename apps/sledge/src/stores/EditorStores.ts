@@ -46,6 +46,10 @@ type InteractStore = {
   rotation: number;
   verticalFlipped: boolean;
   horizontalFlipped: boolean;
+
+  isCanvasSizeFrameMode: boolean;
+  canvasSizeFrameOffset: Vec2;
+  canvasSizeFrameSize: Size2D;
 };
 type DebugPoint = Vec2 & {
   color: RGBAColor;
@@ -116,6 +120,10 @@ const defaultInteractStore: InteractStore = {
   horizontalFlipped: false,
 
   isDragging: false,
+
+  isCanvasSizeFrameMode: false,
+  canvasSizeFrameOffset: { x: 0, y: 0 },
+  canvasSizeFrameSize: { width: 0, height: 0 },
 };
 const defaultLogStore: LogStore = {
   bottomBarText: 'rotate: shift+wheel / drag: ctrl+drag',

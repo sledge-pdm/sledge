@@ -10,6 +10,7 @@ export const Consts = {
     imagePoolMenu: 850,
     imagePoolControl: 880,
     selectionMenu: 900,
+    canvasResizeFrame: 950,
     canvasErrorOverlay: 999,
     titleBar: 1000,
     sideSection: 1000,

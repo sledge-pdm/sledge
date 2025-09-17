@@ -33,17 +33,17 @@ const CornerDebugMarkers: Component = () => {
     eventBus.on('canvas:sizeChanged', update);
     eventBus.on('canvas:onZoomChanged', update);
     eventBus.on('canvas:onAdjusted', update);
-    // rotation / flip / offset は interactStore の signal 変化を watch
-    createEffect(() => {
-      // 参照して依存関係を張るだけ
-      interactStore.offset.x;
-      interactStore.offset.y;
-      interactStore.rotation;
-      interactStore.horizontalFlipped;
-      interactStore.verticalFlipped;
-      interactStore.zoom;
-      recompute();
-    });
+  });
+  // rotation / flip / offset は interactStore の signal 変化を watch
+  createEffect(() => {
+    // 参照して依存関係を張るだけ
+    interactStore.offset.x;
+    interactStore.offset.y;
+    interactStore.rotation;
+    interactStore.horizontalFlipped;
+    interactStore.verticalFlipped;
+    interactStore.zoom;
+    recompute();
   });
 
   onCleanup(() => {

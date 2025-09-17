@@ -10,6 +10,7 @@ import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
 import { activeLayer, allLayers } from '~/features/layer';
 import { saveGlobalSettings } from '~/io/config/save';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
 import { sectionCaption, sectionContent } from '~/styles/section/section_item.css';
@@ -80,12 +81,27 @@ const CanvasSettings: Component = () => {
   return (
     <SectionItem title='canvas.'>
       <div class={sectionContent} style={{ gap: '10px', 'margin-top': '8px', 'padding-bottom': '24px' }}>
-        <p class={sectionCaption}>size.</p>
+        <div class={flexRow}>
+          <p class={sectionCaption}>size.</p>
+          <div class={flexCol} style={{ 'margin-left': 'auto', gap: '6px' }}>
+            <Button
+              onClick={async () => {
+                setInteractStore('isCanvasSizeFrameMode', (v) => !v);
+              }}
+              style={{
+                color: interactStore.isCanvasSizeFrameMode ? vars.color.error : vars.color.accent,
+                'border-color': interactStore.isCanvasSizeFrameMode ? vars.color.error : vars.color.accent,
+              }}
+            >
+              {interactStore.isCanvasSizeFrameMode ? 'QUIT FRAME MODE.' : 'RESIZE WITH FRAME.'}
+            </Button>
+          </div>
+        </div>
         <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': '2px' }}>
           <p style={{ color: vars.color.onBackground, width: '72px' }}>presets.</p>
           <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
         </div>
-        <div class={canvasSizeForm} style={{ 'margin-bottom': '2px' }}>
+        <div class={canvasSizeForm}>
           <div>
             <p class={canvasSizeLabel}>width</p>
             <input
@@ -139,7 +155,20 @@ const CanvasSettings: Component = () => {
             apply
           </button>
         </div>
-        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
+        <div class={flexCol} style={{ width: '100%', 'margin-top': '8px', 'align-items': 'end', gap: '6px' }}>
+          <Button
+            onClick={async () => {
+              setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
+              await saveGlobalSettings(true);
+            }}
+          >
+            Set as Default.
+          </Button>
+          <p style={{ 'font-family': ZFB03B, 'font-size': '8px', 'margin-left': '4px', opacity: 0.5 }}>
+            [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
+          </p>
+        </div>
+        <p class={sectionCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
           info.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
@@ -165,20 +194,6 @@ const CanvasSettings: Component = () => {
           <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>
             Adjust zoom.
           </Button>
-          <div class={flexCol} style={{ gap: '6px' }}>
-            <Button
-              onClick={async () => {
-                setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
-                await saveGlobalSettings(true);
-              }}
-              style={{ 'margin-top': '8px' }}
-            >
-              Set current size as Default.
-            </Button>
-            <p style={{ 'font-family': ZFB03B, 'font-size': '8px', 'margin-left': '4px', opacity: 0.5 }}>
-              [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
-            </p>
-          </div>
         </div>
       </div>
     </SectionItem>

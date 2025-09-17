@@ -1,17 +1,18 @@
-import { Component, onCleanup, onMount } from 'solid-js';
+import { Component, onCleanup, onMount, Show } from 'solid-js';
 import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
-import { setInteractStore } from '~/stores/EditorStores';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import { flexCol, flexRow } from '@sledge/core';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
+import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
 import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
@@ -133,6 +134,9 @@ const CanvasArea: Component = () => {
             'z-index': Consts.zIndex.canvasOverlay,
           }}
         >
+          <Show when={interactStore.isCanvasSizeFrameMode}>
+            <CanvasResizeFrame />
+          </Show>
           {/* SelectionMenu / SVG Overlay をズーム外で描画 */}
           <CanvasOverlaySVG />
           <OnCanvasSelectionMenu />

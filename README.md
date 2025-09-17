@@ -14,7 +14,7 @@
 
 <br>
 
-<img src="assets/0827sledge_dark.png" alt="the visual of sledge." width=600 />
+<img src="https://github.com/sledge-pdm/sledge-assets/blob/0a516e7a70669d60c370e400b2b2e83e74eb6c07/0827sledge_dark.png?raw=true" alt="the visual of sledge." width=600 />
 
 <br>
 Sledge is a drawing tool.
@@ -112,3 +112,4 @@ xattr -rc /Applications/sledge.app
 ### Project Format
 
 - [msgpack](https://msgpack.org/ja.html)
+

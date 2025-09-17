@@ -111,7 +111,7 @@ const DownloadSection: Component<{}> = () => {
 
           <a
             onClick={() => {
-              window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+              window.open('https://github.com/sledge-pdm/sledge/releases', '_blank')?.focus();
             }}
             class={mainLink}
             style={{ 'margin-top': '48px', color: vars.color.muted }}

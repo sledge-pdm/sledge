@@ -1,14 +1,14 @@
 # Sledge
 
-[![release](https://github.com/Innsbluck-rh/sledge/actions/workflows/release.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/release.yml)
+[![release](https://github.com/sledge-pdm/sledge/actions/workflows/release.yml/badge.svg)](https://github.com/sledge-pdm/sledge/actions/workflows/release.yml)
 &nbsp;
-[![development_release](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_release.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_release.yml)
+[![development_release](https://github.com/sledge-pdm/sledge/actions/workflows/development_release.yml/badge.svg)](https://github.com/sledge-pdm/sledge/actions/workflows/development_release.yml)
 &nbsp;
-[![development_build](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_build.yml/badge.svg)](https://github.com/Innsbluck-rh/sledge/actions/workflows/development_build.yml)
+[![development_build](https://github.com/sledge-pdm/sledge/actions/workflows/development_build.yml/badge.svg)](https://github.com/sledge-pdm/sledge/actions/workflows/development_build.yml)
 &nbsp;
 ![Vercel Deploy](https://deploy-badge.vercel.app/vercel/sledge-gold)
 &nbsp;
-![GitHub Release](https://img.shields.io/github/v/release/Innsbluck-rh/sledge)
+![GitHub Release](https://img.shields.io/github/v/release/sledge-pdm/sledge)
 
 <div align="center">
 
@@ -62,29 +62,29 @@ xattr -rc /Applications/sledge.app
 
 | Category         | Feature               | Status | Notes                                                       |
 | ---------------- | --------------------- | ------ | ----------------------------------------------------------- |
-| **Interactions** | Mouse                 | ✅     |                                                             |
-|                  | Pen                   | ✅     |                                                             |
-|                  | Touch                 | ✅     | can only zoom/pan because it's assumed to be used with pen. |
-|                  | Touchpads             | ⏳     |                                                             |
-| **Tools**        | Pen, Eraser           | ✅     |                                                             |
-|                  | Fill                  | ✅     |                                                             |
-|                  | Color Picker          | ✅     |                                                             |
-|                  | Image Pool            | ✅     | resize, transfer to layer                                   |
-|                  | Selection             | ✅     | rect, auto                                                  |
-|                  | Text                  | ⏳     |                                                             |
-| **Composites**   | Layer Opacity         | ✅     |                                                             |
-|                  | Layer Blend Mode      | ✅     | normal / multiply / linear light / etc                      |
-| **Effects**      | Live Effects          | ⏳     | effects that can be chained and react to the image          |
-|                  | Invert                | ✅     | invert layer's colors                                       |
-|                  | Gaussian Blur         | ✅     | blur the layer                                              |
-|                  | Grayscale             | ✅     | convert the layer to grayscale                              |
-| **I/O**          | Basic I/O             | ✅     | load, save, import, export                                  |
-|                  | SVG Export            | ✅     | vector export for small pixel art/icons (< 128x128)         |
-|                  | Backup                | ⏳     | automatic backup for safe editing                           |
-|                  | Clipboard             | ⏳     | selection / layer                                           |
-|                  | Drag and Drop         | ⏳     | images (add to pool) / project (open)                       |
-|                  | Project-Level History | ⏳     |                                                             |
-| **Others**       | Animation             | ⏳     | creating frames and output to gif, mp4                      |
+| **Interactions** | Mouse                 | ✅      |                                                             |
+|                  | Pen                   | ✅      |                                                             |
+|                  | Touch                 | ✅      | can only zoom/pan because it's assumed to be used with pen. |
+|                  | Touchpads             | ⏳      |                                                             |
+| **Tools**        | Pen, Eraser           | ✅      |                                                             |
+|                  | Fill                  | ✅      |                                                             |
+|                  | Color Picker          | ✅      |                                                             |
+|                  | Image Pool            | ✅      | resize, transfer to layer                                   |
+|                  | Selection             | ✅      | rect, auto                                                  |
+|                  | Text                  | ⏳      |                                                             |
+| **Composites**   | Layer Opacity         | ✅      |                                                             |
+|                  | Layer Blend Mode      | ✅      | normal / multiply / linear light / etc                      |
+| **Effects**      | Live Effects          | ⏳      | effects that can be chained and react to the image          |
+|                  | Invert                | ✅      | invert layer's colors                                       |
+|                  | Gaussian Blur         | ✅      | blur the layer                                              |
+|                  | Grayscale             | ✅      | convert the layer to grayscale                              |
+| **I/O**          | Basic I/O             | ✅      | load, save, import, export                                  |
+|                  | SVG Export            | ✅      | vector export for small pixel art/icons (< 128x128)         |
+|                  | Backup                | ⏳      | automatic backup for safe editing                           |
+|                  | Clipboard             | ⏳      | selection / layer                                           |
+|                  | Drag and Drop         | ⏳      | images (add to pool) / project (open)                       |
+|                  | Project-Level History | ⏳      |                                                             |
+| **Others**       | Animation             | ⏳      | creating frames and output to gif, mp4                      |
 
 </details>
 

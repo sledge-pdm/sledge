@@ -65,9 +65,9 @@ export const InteractCanvas: Component<Props> = (props) => {
       return false;
     }
 
-    // マウスおよびペンにおいては左クリック相当のクリックだけを描画可能なクリックとする
-    // （右クリック、中クリックなどは弾く）
-    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) {
+    // マウスおよびペンにおいては右、左クリック相当のクリックだけを描画可能なクリックとする（中クリックは弾く）
+    // 右クリックはツールのallowRightClickによってほぼ弾かれる
+    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1 && e.buttons !== 2) {
       return false;
     }
 

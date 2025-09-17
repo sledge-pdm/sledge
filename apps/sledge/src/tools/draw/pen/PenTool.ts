@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { colorMatch, RGBAColor } from '~/features/color';
+import { colorMatch, RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
 import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -9,6 +9,7 @@ import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
 
 export class PenTool implements ToolBehavior {
+  allowRightClick = true;
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
   startTime: number | undefined = undefined;
@@ -150,6 +151,10 @@ export class PenTool implements ToolBehavior {
   draw(agent: LayerImageAgent, { position, lastPosition, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
+    if (event?.buttons === 2) {
+      color = transparent;
+    }
+
     const preset = getPresetOf(this.categoryId, presetName) as any;
     const size = preset?.size ?? 1;
     const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
@@ -199,6 +204,10 @@ export class PenTool implements ToolBehavior {
   drawLine(commit: boolean, agent: LayerImageAgent, { position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
+    if (event?.buttons === 2) {
+      color = transparent;
+    }
+
     this.undoLastLineDiff(agent);
 
     // ctrl+shiftの場合は角度固定
@@ -228,9 +237,13 @@ export class PenTool implements ToolBehavior {
   }
 
   onEnd(agent: LayerImageAgent, args: ToolArgs) {
+    let { event, color } = args;
+    if (event?.buttons === 2) {
+      color = transparent;
+    }
     if (this.isShift) {
       // 直線を確定
-      this.drawLine(true, agent, args, args.color);
+      this.drawLine(true, agent, args, color);
     }
 
     // 描画完了時にバッチを強制処理

@@ -43,6 +43,7 @@ export default class LayerCanvasOperator {
     if (lastPosition) lastPosition = this.getMagnificatedPosition(lastPosition, layer.dotMagnification);
 
     if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
+    if (!toolCategory.behavior.allowRightClick && originalEvent.buttons === 2) return;
 
     // This won't suppress all draw actions on inactive layers.
     // It's due to prevent showing warn in every click out of canvas.

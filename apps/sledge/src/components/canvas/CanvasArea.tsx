@@ -93,6 +93,10 @@ const CanvasArea: Component = () => {
           'touch-action': 'none',
           'z-index': Consts.zIndex.zoomPanWrapper,
         }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }}
       >
         <div
           id='out-canvas-area'

@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
-import { bottomRightNav, redoIcon, topLeftNav, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
+import { bottomRightNav, redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
 import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
@@ -104,11 +104,11 @@ const CanvasControls: Component = () => {
         </div>
       </div>
       <Show when={interactStore.isCanvasSizeFrameMode}>
-        <div class={topLeftNav} style={{}}>
+        {/* <div class={topLeftNav}>
           <div class={flexCol}>
             <p style={{ color: vars.color.accent, 'font-size': '16px' }}>FRAME MODE.</p>
           </div>
-        </div>
+        </div> */}
 
         <div class={bottomRightNav} style={{ 'z-index': Consts.zIndex.canvasOverlay }}>
           <div class={flexCol}>
@@ -122,7 +122,6 @@ const CanvasControls: Component = () => {
               <Item
                 src='/icons/selection/commit_10.png'
                 onClick={() => {
-                  // commit size change with current frame
                   const targetW = interactStore.canvasSizeFrameSize.width;
                   const targetH = interactStore.canvasSizeFrameSize.height;
                   if (!targetW || !targetH) return;
@@ -134,40 +133,22 @@ const CanvasControls: Component = () => {
                     return; // no-op
                   }
 
-                  // frame: startX = offset.x, startY = offset.y
                   const startX = offset.x;
                   const startY = offset.y;
-                  // 1. 履歴アクション作成: old/new サイズ。内部でレイヤは size 変更されるが、ここでオフセットコピーを行う必要がある。
                   const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'CanvasControls.frameCommit' });
 
-                  // 2. まずレイヤを newSize にリサイズしつつバッファにコピー (オフセット適用)
-                  //    CanvasSizeHistoryAction の redo() はサイズ変更→snapshot 保存→snapshot restore するので、
-                  //    ここでは redo() ではなく内部処理を模倣しつつオフセットコピーを適用し、その後 newSnapshots を収集させるために act.redo() を呼ぶ。
-                  //    → シンプルに: 先に act.redo() でサイズ変更 → その後 offset を考慮した再配置を上書きし newSnapshots を更新する。
-                  //    ただし act.redo() 内で newSnapshots が確定してしまうため、オフセット版を履歴で再生できるようにするには
-                  //    redo 前にレイヤを手動で resize + copy し、その状態を newSnapshots として記録させる必要がある。
-
-                  // a) サイズ変更 + オフセット再配置 (PixelBufferManager に任せる)
-                  // 新キャンバスの (0,0) に旧(startX,startY) が来るように: srcOrigin = (startX,startY), destOrigin = (0,0)
                   const destOrigin = { x: 0, y: 0 };
                   for (const l of allLayers()) {
                     const agent = getAgentOf(l.id)!;
                     agent.changeBufferSize(newSize, false, destOrigin, { x: startX, y: startY });
                     agent.forceUpdate();
                   }
-
-                  // c) Canvas サイズ更新
                   setCanvasStore('canvas', newSize);
 
-                  // d) act を履歴へ (newSnapshots を現状態として確定させるために act.redo() 呼んでから addAction)
-                  // act.redo() は再度 resize + snapshot 復元するが既に newSize のため second-path (applyState) を使用したい →
-                  // ここでは act.redo() を最初に一回呼んで newSnapshots をセットし、その後 addAction。
                   act.redo();
                   projectHistoryController.addAction(act);
 
-                  // 3. モード終了
                   setInteractStore('isCanvasSizeFrameMode', false);
-                  // 4. フレーム用ストア初期化
                   setInteractStore('canvasSizeFrameOffset', { x: 0, y: 0 });
                   setInteractStore('canvasSizeFrameSize', { width: 0, height: 0 });
                 }}

@@ -187,12 +187,12 @@ export const CanvasResizeFrame: Component = () => {
               screen: {Math.round(size()!.width)} x {Math.round(size()!.height)}
             </text> */}
             <Show when={logicalFrame()}>
-              <text x={10} y={20}>
+              <text x={8} y={20}>
                 ({logicalFrame()!.offsetX}, {logicalFrame()!.offsetY})
               </text>
-              <text x={size()!.width - 10} y={20} text-anchor='end'>
+              {/* <text x={size()!.width - 10} y={20} text-anchor='end'>
                 {logicalFrame()!.canvasWidth} x {logicalFrame()!.canvasHeight}
-              </text>
+              </text> */}
             </Show>
           </g>
           {/* 四隅 */}

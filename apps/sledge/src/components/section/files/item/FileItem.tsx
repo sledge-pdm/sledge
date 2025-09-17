@@ -1,8 +1,8 @@
-import { flexCol, flexRow } from "@sledge/core";
-import { PM10, vars, ZFB03 } from "@sledge/theme";
-import { Icon } from "@sledge/ui";
-import { DirEntry } from "@tauri-apps/plugin-fs";
-import { Component, Show } from "solid-js";
+import { flexCol, flexRow } from '@sledge/core';
+import { PM10, vars, ZFB03 } from '@sledge/theme';
+import { Icon } from '@sledge/ui';
+import { DirEntry } from '@tauri-apps/plugin-fs';
+import { Component, Show } from 'solid-js';
 
 export interface FilesConfig {
   twoColumns: boolean;
@@ -51,6 +51,7 @@ const FileItem: Component<{
           'white-space': 'nowrap',
           'text-overflow': 'ellipsis',
           overflow: 'hidden',
+          //   'font-weight': entry.name.endsWith('.sledge') ? 'bold' : 'normal',
           'text-decoration': entry.isDirectory ? 'underline' : 'none',
           color: isMe ? vars.color.active : undefined,
           'pointer-events': isMe ? 'none' : 'auto',

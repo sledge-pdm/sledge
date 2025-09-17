@@ -12,7 +12,7 @@ const Files: Component = () => {
 
   return (
     <>
-      <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
+      <div class={flexRow} style={{ gap: '8px', 'align-items': 'center', 'margin-bottom': '-4px' }}>
         <a
           class={sectionCaption}
           style={{ padding: '4px', color: tab() === 'recent' ? vars.color.active : vars.color.muted }}

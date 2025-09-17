@@ -71,9 +71,17 @@ const TopMenuBar: Component = () => {
         openWindow('start');
       },
     },
+    // {
+    //   text: '+ NEW',
+    //   action: () => {
+    //     createNew();
+    //   },
+    // },
     {
-      text: '> OPEN.',
-      action: () => setIsOpenMenuShown(true),
+      text: '+ OPEN.',
+      action: () => {
+        setIsOpenMenuShown(true);
+      },
     },
   ];
   const rightItems: Item[] = [
@@ -91,7 +99,7 @@ const TopMenuBar: Component = () => {
       },
     },
     {
-      text: 'ABOUT.',
+      text: '?',
       action: () => {
         openWindow('about');
         // setIsSettingShown(true);
@@ -123,14 +131,14 @@ const TopMenuBar: Component = () => {
 
   const openMenu: MenuListOption[] = [
     {
-      label: '> create...',
+      label: '+ new project.',
       onSelect: () => {
         setIsOpenMenuShown(false);
         createNew();
       },
     },
     {
-      label: '> existing project.',
+      label: '> open project.',
       onSelect: () => {
         setIsOpenMenuShown(false);
         openProject();
@@ -160,7 +168,7 @@ const TopMenuBar: Component = () => {
                 <Show when={item.text === 'RECENT.' && isRecentMenuShown()}>
                   <MenuList options={startMenu} onClose={() => setIsRecentMenuShown(false)} />
                 </Show>
-                <Show when={item.text === '> OPEN.' && isOpenMenuShown()}>
+                <Show when={item.text === '+ OPEN.' && isOpenMenuShown()}>
                   <MenuList options={openMenu} onClose={() => setIsOpenMenuShown(false)} />
                 </Show>
               </div>

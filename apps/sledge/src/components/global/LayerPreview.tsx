@@ -15,6 +15,8 @@ interface Props {
   height?: number;
   maxWidth?: number;
   maxHeight?: number;
+  updateInterval?: number; // ms, default: on demand
+
   onClick?: (e: MouseEvent) => void;
 }
 
@@ -33,7 +35,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
         performUpdate();
         setNeedsUpdate(false);
       }
-    }, 2)
+    }, props.updateInterval ?? 2)
   );
 
   // Cache last computed dimensions to avoid unnecessary canvas resizing
@@ -122,6 +124,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
       style={{
         width: props.width ? `${props.width}px` : undefined,
         height: props.height ? `${props.height}px` : undefined,
+        'max-width': props.maxWidth ? `${props.maxWidth}px` : undefined,
+        'max-height': props.maxHeight ? `${props.maxHeight}px` : undefined,
         'background-color': vars.color.canvas,
         'z-index': Consts.zIndex.layerPreview,
       }}
@@ -133,6 +137,8 @@ const LayerPreview: Component<Props> = (props: Props) => {
           ctx = canvasRef.getContext('2d')!;
         }}
         style={{
+          'max-width': props.maxWidth ? `${props.maxWidth}px` : undefined,
+          'max-height': props.maxHeight ? `${props.maxHeight}px` : undefined,
           'image-rendering': 'pixelated',
           'background-image': `url(/patterns/CheckerboardPattern.svg)`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,

@@ -159,7 +159,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               <Icon src='/icons/misc/triangle_7.png' base={7} color={vars.color.surface} />
             </div>
           </div>
-          <LayerPreview layer={props.layer} onClick={onPreviewClicked} maxHeight={36} maxWidth={36} />
+          <LayerPreview layer={props.layer} onClick={onPreviewClicked} height={40} maxWidth={80} />
           <div
             class={`${flexCol} ${w100}`}
             style={{

@@ -12,6 +12,7 @@ import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import { flexCol, flexRow } from '@sledge/core';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
+import CanvasResizeFrame from '~/components/canvas/overlays/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/canvas/SideSectionOverlay';
 import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
@@ -133,6 +134,7 @@ const CanvasArea: Component = () => {
             'z-index': Consts.zIndex.canvasOverlay,
           }}
         >
+          <CanvasResizeFrame />
           {/* SelectionMenu / SVG Overlay をズーム外で描画 */}
           <CanvasOverlaySVG />
           <OnCanvasSelectionMenu />

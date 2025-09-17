@@ -46,7 +46,7 @@ const Effects: Component = () => {
             'margin-bottom': '12px',
           }}
         >
-          <LayerPreview layer={selectedLayer()} onClick={() => {}} width={170} height={170} />
+          <LayerPreview layer={selectedLayer()} onClick={() => {}} height={170} maxWidth={300} updateInterval={8} />
         </div>
         <div class={flexRow} style={{ 'align-items': 'center', gap: '12px' }}>
           <p>apply to</p>

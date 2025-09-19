@@ -1,4 +1,3 @@
-import { Anvil } from '@sledge/anvil';
 import { Point, Size2D, Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
@@ -15,7 +14,6 @@ export default class LayerImageAgent {
   protected pbm: PixelBufferManager;
   protected tm: TileManager;
   protected dm: DiffManager;
-  protected anvil: Anvil;
 
   getPixelBufferManager() {
     return this.pbm;
@@ -25,9 +23,6 @@ export default class LayerImageAgent {
   }
   getDiffManager() {
     return this.dm;
-  }
-  getAnvil() {
-    return this.anvil;
   }
 
   getWidth = (): number => this.pbm.width;
@@ -48,13 +43,7 @@ export default class LayerImageAgent {
       (index: TileIndex, uniformColor: RGBAColor | undefined, fillColor: RGBAColor) => this.dm.addTileFill(index, uniformColor, fillColor)
     );
     this.dm = new DiffManager(this.tm);
-
-    // Initialize anvil instance for this layer with same dimensions
-    this.anvil = new Anvil(width, height);
-    // Load existing buffer data into anvil
-    this.anvil.loadImageData(buffer);
   }
-
   getBuffer(): Uint8ClampedArray {
     return this.pbm.buffer;
   }
@@ -68,15 +57,11 @@ export default class LayerImageAgent {
     this.pbm.buffer = rawBuffer;
     this.tm.setAllDirty();
 
-    // Sync anvil with new buffer data
-    this.anvil.loadImageData(rawBuffer);
-
     if (!silentlySet) {
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) buffer set` });
       if (updatePreview) eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
   }
-
   forceUpdate() {
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${this.layerId}) force update` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
@@ -87,18 +72,12 @@ export default class LayerImageAgent {
     this.pbm.changeSize(newSize, destOrigin ?? { x: 0, y: 0 }, srcOrigin ?? { x: 0, y: 0 });
     this.tm.setSize(newSize);
 
-    // Sync anvil with new size and buffer content
-    const destOffset = destOrigin ?? { x: 0, y: 0 };
-    this.anvil.resizeWithOffset(newSize.width, newSize.height, destOffset.x, destOffset.y);
-    this.anvil.loadImageData(this.pbm.buffer);
-
     if (emitEvent) {
       this.tm.setAllDirty();
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) buffer size changed` });
       eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
   }
-
   public registerToHistory(context?: any) {
     // Patchのみで履歴登録
     this.dm.flush();

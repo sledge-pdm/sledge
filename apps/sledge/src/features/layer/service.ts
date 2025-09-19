@@ -6,8 +6,8 @@ import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { getActiveAgent, getAgentOf, getBufferOf, layerAgentManager } from '~/features/layer/agent/LayerAgentManager';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
+import { anvilManager, getAnvilBufferOf } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
@@ -87,7 +87,7 @@ export function duplicateLayer(layerId: string) {
 }
 
 export function clearLayer(layerId: string) {
-  const agent = getAgentOf(layerId);
+  let agent = getAgentOf(layerId);
   if (!agent) return;
   const originalBuffer = agent.getBuffer().buffer;
   // clear current buffer
@@ -102,7 +102,8 @@ export function clearLayer(layerId: string) {
   agent.forceUpdate();
 }
 
-export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): LayerImageAgent {
+// 移行段階: ここからは Anvil のみ初期化 (LayerImageAgent は後方互換で残すが生成しない)
+export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): void {
   let width = Math.round(canvasStore.canvas.width / dotMagnification);
   let height = Math.round(canvasStore.canvas.height / dotMagnification);
   let buffer: Uint8ClampedArray;
@@ -113,20 +114,16 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
     buffer = new Uint8ClampedArray(width * height * 4);
   }
 
-  const agent = getAgentOf(layerId);
-  if (agent !== undefined) {
-    agent.getTileManager().setAllDirty();
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) image reset` });
-    eventBus.emit('preview:requestUpdate', { layerId: layerId });
-    agent.setBuffer(buffer, false, true);
-    return agent;
-  } else {
-    const newAgent = layerAgentManager.registerAgent(layerId, buffer, width, height);
-    newAgent.getTileManager().setAllDirty();
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) image reset` });
-    eventBus.emit('preview:requestUpdate', { layerId: layerId });
-    return newAgent;
+  // 旧 Agent パス: 現在は新規生成を停止し、既存があれば最低限 dirty マークのみ行う
+  const legacyAgent = getAgentOf(layerId);
+  if (legacyAgent) {
+    legacyAgent.getTileManager().setAllDirty();
+    legacyAgent.setBuffer(buffer, false, true); // 将来的に削除予定
   }
+
+  anvilManager.registerAnvil(layerId, buffer, width, height);
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) image reset (anvil)` });
+  eventBus.emit('preview:requestUpdate', { layerId: layerId });
 }
 
 export async function mergeToBelowLayer(layerId: string) {
@@ -243,7 +240,9 @@ export const addLayerTo = (
 
   if (!options?.noDiff) {
     // push history (add) with snapshot including optional buffer
-    const snapshot = { ...newLayer, buffer: getBufferOf(newLayer.id) } as any;
+    // Anvil 移行中: まずは Anvil バッファが存在すればそれを優先
+    const snapshotBuffer = getAnvilBufferOf(newLayer.id) ?? getBufferOf(newLayer.id);
+    const snapshot = { ...newLayer, buffer: snapshotBuffer } as any;
     const act = new LayerListHistoryAction('add', index, snapshot, undefined, undefined, { from: 'LayerService.addLayerTo' });
     projectHistoryController.addAction(act);
   }
@@ -327,7 +326,9 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   // snapshot before removal
   const toRemove = layers[index];
-  const snapshot = { ...toRemove, buffer: getBufferOf(toRemove.id) } as any;
+  // Anvil 移行中: 削除時スナップショットも Anvil 優先
+  const removeSnapshotBuffer = getAnvilBufferOf(toRemove.id) ?? getBufferOf(toRemove.id);
+  const snapshot = { ...toRemove, buffer: removeSnapshotBuffer } as any;
 
   layers.splice(index, 1);
 
@@ -339,6 +340,9 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
     const act = new LayerListHistoryAction('delete', index, snapshot, undefined, undefined, { from: 'LayerService.removeLayer' });
     projectHistoryController.addAction(act);
   }
+
+  // Anvil インスタンスも破棄
+  anvilManager.removeAnvil(layerId);
 };
 
 export const allLayers = () => layerListStore.layers;

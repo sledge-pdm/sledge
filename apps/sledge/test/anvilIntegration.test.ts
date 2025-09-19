@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { RGBAColor } from '~/features/color';
-import { getAnvilOf, layerAgentManager } from '~/features/layer/agent/LayerAgentManager';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 
 function makeBuffer(w: number, h: number, color: RGBAColor = [0, 0, 0, 0]) {
   const buf = new Uint8ClampedArray(w * h * 4);
@@ -18,16 +18,15 @@ describe('Anvil integration with LayerImageAgent', () => {
     H = 64;
 
   beforeEach(() => {
-    // Clean up agents before each test
-    (layerAgentManager as any).agents.clear();
+    // Clean up anvils before each test
+    (anvilManager as any).anvils.clear();
   });
 
   it('should create anvil instance alongside LayerImageAgent', () => {
     const initial: RGBAColor = [100, 150, 200, 255];
     const buf = makeBuffer(W, H, initial);
 
-    const agent = layerAgentManager.registerAgent('L1', buf, W, H);
-    const anvil = getAnvilOf('L1');
+    const anvil = anvilManager.registerAnvil('L1', buf, W, H);
 
     expect(anvil).toBeDefined();
     expect(anvil?.getWidth()).toBe(W);
@@ -38,8 +37,7 @@ describe('Anvil integration with LayerImageAgent', () => {
     const initial: RGBAColor = [100, 150, 200, 255];
     const buf = makeBuffer(W, H, initial);
 
-    const agent = layerAgentManager.registerAgent('L1', buf, W, H);
-    const anvil = getAnvilOf('L1')!;
+    const anvil = anvilManager.registerAnvil('L1', buf, W, H);
 
     // Check that anvil has the same pixel data
     const anvilPixel = anvil.getPixel(10, 10);
@@ -52,14 +50,12 @@ describe('Anvil integration with LayerImageAgent', () => {
     const initialBuf = makeBuffer(W, H, initial);
     const newBuf = makeBuffer(W, H, newColor);
 
-    const agent = layerAgentManager.registerAgent('L1', initialBuf, W, H);
-    const anvil = getAnvilOf('L1')!;
+    const anvil = anvilManager.registerAnvil('L1', initialBuf, W, H);
 
     // Verify initial state
     expect(anvil.getPixel(10, 10)).toEqual(initial);
 
-    // Update buffer via agent
-    agent.setBuffer(newBuf, true);
+    anvil.loadImageData(newBuf);
 
     // Verify anvil was synced
     expect(anvil.getPixel(10, 10)).toEqual(newColor);
@@ -69,13 +65,13 @@ describe('Anvil integration with LayerImageAgent', () => {
     const initial: RGBAColor = [100, 150, 200, 255];
     const buf = makeBuffer(W, H, initial);
 
-    const agent = layerAgentManager.registerAgent('L1', buf, W, H);
-    const anvil = getAnvilOf('L1')!;
+    const anvil = anvilManager.registerAnvil('L1', buf, W, H);
 
     // Resize to larger dimensions
     const newW = W * 2;
     const newH = H * 2;
-    agent.changeBufferSize({ width: newW, height: newH }, false);
+
+    anvil.resize(newW, newH);
 
     // Verify anvil was resized
     expect(anvil.getWidth()).toBe(newW);
@@ -88,11 +84,8 @@ describe('Anvil integration with LayerImageAgent', () => {
     const buf1 = makeBuffer(W, H, color1);
     const buf2 = makeBuffer(W, H, color2);
 
-    const agent1 = layerAgentManager.registerAgent('L1', buf1, W, H);
-    const agent2 = layerAgentManager.registerAgent('L2', buf2, W, H);
-
-    const anvil1 = getAnvilOf('L1')!;
-    const anvil2 = getAnvilOf('L2')!;
+    const anvil1 = anvilManager.registerAnvil('L1', buf1, W, H);
+    const anvil2 = anvilManager.registerAnvil('L2', buf2, W, H);
 
     expect(anvil1).not.toBe(anvil2);
     expect(anvil1.getPixel(10, 10)).toEqual(color1);
@@ -104,8 +97,7 @@ describe('Anvil integration with LayerImageAgent', () => {
     const testColor: RGBAColor = [255, 128, 64, 255];
     const buf = makeBuffer(W, H, initial);
 
-    const agent = layerAgentManager.registerAgent('L1', buf, W, H);
-    const anvil = getAnvilOf('L1')!;
+    const anvil = anvilManager.registerAnvil('L1', buf, W, H);
 
     // Test setting a pixel through anvil
     anvil.setPixel(20, 20, testColor);

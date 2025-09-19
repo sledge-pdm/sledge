@@ -134,6 +134,12 @@ export function getDirtyTiles(layerId: string) {
   return anvil.getDirtyTileIndices();
 }
 
+export function clearDirtyTiles(layerId: string) {
+  const anvil = getAnvilOf(layerId);
+  if (!anvil) return;
+  anvil.clearDirtyTiles();
+}
+
 export function getTileUniformColor(layerId: string, tile: { row: number; col: number }) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;

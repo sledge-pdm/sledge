@@ -1,7 +1,9 @@
+import type { Patch as AnvilPatch } from '@sledge/anvil';
 import { Point, Size2D, Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
-import { LayerBufferHistoryAction, LayerBufferPatch } from '~/features/history/actions/LayerBufferHistoryAction';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
+import { LayerBufferPatch } from '~/features/history/actions/LayerBufferHistoryAction';
 import { TileIndex } from '~/features/layer/agent/managers/Tile';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -79,12 +81,15 @@ export default class LayerImageAgent {
     }
   }
   public registerToHistory(context?: any) {
-    // Patchのみで履歴登録
+    // 旧 DiffManager 由来パッチを AnvilLayerHistoryAction 互換の Patch 形式へ変換しつつ登録
     this.dm.flush();
-    const patch = this.dm.buildPatch(this.layerId);
-    if (patch) {
-      const action = new LayerBufferHistoryAction(this.layerId, patch, { from: 'LayerImageAgent.registerToHistory', ...context });
-      projectHistoryController.addAction(action);
+    const legacyPatch = this.dm.buildPatch(this.layerId);
+    if (legacyPatch) {
+      const converted = convertLegacyLayerBufferPatchToAnvilPatch(legacyPatch);
+      if (converted) {
+        const action = new AnvilLayerHistoryAction(this.layerId, converted, { from: 'LayerImageAgent.registerToHistory', ...context });
+        projectHistoryController.addAction(action);
+      }
     }
     this.dm.reset();
   }
@@ -200,4 +205,34 @@ export default class LayerImageAgent {
       buf[ptr + 3] = (packed >>> 24) & 0xff; // A
     }
   }
+}
+
+// ---- Conversion helpers (legacy LayerBufferPatch -> Anvil Patch) ----
+function convertLegacyLayerBufferPatchToAnvilPatch(p: LayerBufferPatch): AnvilPatch | null {
+  const out: AnvilPatch = {};
+  if (p.whole) {
+    out.whole = { before: p.whole.before, after: p.whole.after } as any;
+  }
+  if (p.tiles && p.tiles.length) {
+    out.tiles = p.tiles.map((t) => {
+      const before = t.before !== undefined ? unpackPackedRGBA(t.before) : undefined;
+      const after = unpackPackedRGBA(t.after);
+      return { tile: t.tile as any, before, after } as any;
+    });
+  }
+  if (p.pixels && p.pixels.length) {
+    out.pixels = p.pixels.map((pl) => {
+      return {
+        tile: pl.tile as any,
+        idx: pl.idx,
+        before: pl.before,
+        after: pl.after,
+      } as any;
+    });
+  }
+  return out;
+}
+
+function unpackPackedRGBA(packed: number): [number, number, number, number] {
+  return [(packed >> 16) & 0xff, (packed >> 8) & 0xff, packed & 0xff, (packed >>> 24) & 0xff];
 }

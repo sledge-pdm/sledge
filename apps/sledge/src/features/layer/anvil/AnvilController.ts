@@ -4,7 +4,7 @@ import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
 // NOTE: 移行期間の簡易アダプタ。旧 LayerImageAgent 利用箇所を段階的に除去するためのユーティリティ。
 
-export function getBuffer(layerId: string): Uint8ClampedArray | undefined {
+export function getBufferCopy(layerId: string): Uint8ClampedArray | undefined {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;
   return anvil.getImageData();

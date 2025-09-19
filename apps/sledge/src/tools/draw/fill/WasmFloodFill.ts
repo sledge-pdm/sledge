@@ -3,7 +3,7 @@ import { scanline_flood_fill, scanline_flood_fill_with_mask } from '@sledge/wasm
 import { colorMatch } from '~/features/color';
 // LayerImageAgent 依存除去: AnvilController 経由で操作
 import {
-  getBuffer,
+  getBufferCopy,
   getBufferPointer,
   getHeight as getLayerHeight,
   getWidth as getLayerWidth,
@@ -74,7 +74,7 @@ export class WasmFloodFill implements Fill {
   }
 
   fillWithMask({ layerId, color, position, selectionMask, limitMode, threshold }: WasmMaskFillProps) {
-    const buffer = getBuffer(layerId);
+    const buffer = getBufferCopy(layerId);
     if (!buffer) return false;
     const width = getLayerWidth(layerId)!;
     const height = getLayerHeight(layerId)!;

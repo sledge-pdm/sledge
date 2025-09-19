@@ -4,10 +4,10 @@ import { mergeLayer } from '~/appliers/LayerMergeApplier';
 import { adjustZoomToFit } from '~/features/canvas';
 import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
-import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
+import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -70,7 +70,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
 export function duplicateLayer(layerId: string) {
   const layer = findLayerById(layerId);
   if (!layer) return;
-
+  const buffer = getBufferCopy(layerId);
   addLayer(
     {
       name: layer.name,
@@ -80,30 +80,26 @@ export function duplicateLayer(layerId: string) {
       opacity: layer.opacity,
       mode: layer.mode,
     },
-    {
-      initImage: getBufferOf(layerId),
-    }
+    { initImage: buffer }
   );
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) duplicated` });
 }
 
 export function clearLayer(layerId: string) {
-  let agent = getAgentOf(layerId);
-  if (!agent) return;
-  const originalBuffer = agent.getBuffer().buffer;
-  // clear current buffer
-  let width = canvasStore.canvas.width;
-  let height = canvasStore.canvas.height;
-  const newBuffer = new Uint8ClampedArray(width * height * 4);
-
-  agent.setBuffer(newBuffer, true, true);
-
-  agent.getDiffManager().setWhole(new Uint8ClampedArray(originalBuffer), new Uint8ClampedArray(newBuffer.buffer));
-  agent.registerToHistory({ tool: 'clear' });
-  agent.forceUpdate();
+  const before = getBufferCopy(layerId);
+  const w = getWidth(layerId);
+  const h = getHeight(layerId);
+  if (!before || w == null || h == null) return;
+  const after = new Uint8ClampedArray(w * h * 4);
+  registerWholeChange(layerId, before, after);
+  setBuffer(layerId, after);
+  const patch = flushPatch(layerId);
+  if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch, { tool: 'clear' }));
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) cleared` });
+  eventBus.emit('preview:requestUpdate', { layerId });
 }
 
-// 移行段階: ここからは Anvil のみ初期化 (LayerImageAgent は後方互換で残すが生成しない)
+// Anvil 初期化
 export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): void {
   let width = Math.round(canvasStore.canvas.width / dotMagnification);
   let height = Math.round(canvasStore.canvas.height / dotMagnification);
@@ -116,11 +112,7 @@ export function resetLayerImage(layerId: string, dotMagnification: number, initI
   }
 
   // 旧 Agent パス: 現在は新規生成を停止し、既存があれば最低限 dirty マークのみ行う
-  const legacyAgent = getAgentOf(layerId);
-  if (legacyAgent) {
-    legacyAgent.getTileManager().setAllDirty();
-    legacyAgent.setBuffer(buffer, false, true); // 将来的に削除予定
-  }
+  // legacy agent path removed
 
   anvilManager.registerAnvil(layerId, buffer, width, height);
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) image reset (anvil)` });
@@ -146,23 +138,16 @@ export async function mergeToBelowLayer(layerId: string) {
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {
-  const agent = getActiveAgent();
-  return agent?.getPixelBufferManager().getPixel({
-    x: Math.floor(interactStore.lastMouseOnCanvas.x),
-    y: Math.floor(interactStore.lastMouseOnCanvas.y),
-  });
+  if (!interactStore.lastMouseOnCanvas) return undefined;
+  const x = Math.floor(interactStore.lastMouseOnCanvas.x);
+  const y = Math.floor(interactStore.lastMouseOnCanvas.y);
+  const color = getPixel(layerListStore.activeLayerId, x, y);
+  return color as RGBAColor | undefined;
 }
 
 export function getCurrentPointingColorHex(): string | undefined {
-  if (!interactStore.lastMouseOnCanvas) return undefined;
-  const agent = getActiveAgent();
-  const color = agent?.getPixelBufferManager().getPixel({
-    x: Math.floor(interactStore.lastMouseOnCanvas.x),
-    y: Math.floor(interactStore.lastMouseOnCanvas.y),
-  });
-  if (color !== undefined) return `#${RGBAToHex(color, false)}`;
-
-  return undefined;
+  const c = getCurrentPointingColor();
+  return c ? `#${RGBAToHex(c, false)}` : undefined;
 }
 
 // Layer list management
@@ -242,7 +227,7 @@ export const addLayerTo = (
   if (!options?.noDiff) {
     // push history (add) with snapshot including optional buffer
     // Anvil 移行中: まずは Anvil バッファが存在すればそれを優先
-    const snapshotBuffer = getBufferCopy(newLayer.id) ?? getBufferOf(newLayer.id);
+    const snapshotBuffer = getBufferCopy(newLayer.id);
     const snapshot = { ...newLayer, buffer: snapshotBuffer } as any;
     const act = new LayerListHistoryAction('add', index, snapshot, undefined, undefined, { from: 'LayerService.addLayerTo' });
     projectHistoryController.addAction(act);
@@ -328,7 +313,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   // snapshot before removal
   const toRemove = layers[index];
   // Anvil 移行中: 削除時スナップショットも Anvil 優先
-  const removeSnapshotBuffer = getBufferCopy(toRemove.id) ?? getBufferOf(toRemove.id);
+  const removeSnapshotBuffer = getBufferCopy(toRemove.id);
   const snapshot = { ...toRemove, buffer: removeSnapshotBuffer } as any;
 
   layers.splice(index, 1);

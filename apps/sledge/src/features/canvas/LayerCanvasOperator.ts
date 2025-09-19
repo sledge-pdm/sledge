@@ -3,8 +3,7 @@ import { currentColor, hexToRGBA } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager'; // TODO: 移行中 (history fallback 用)。全ツール移行後に削除。
-// import LayerImageAgent from '~/features/layer/agent/LayerImageAgent'; // ツール経路から排除済
+// Legacy LayerImageAgent 依存は除去済み
 import { flushPatch } from '~/features/layer/anvil/AnvilController';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tool/ToolController';
@@ -34,14 +33,8 @@ export default class LayerCanvasOperator {
   }
 
   public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2, lastPosition?: Vec2) {
-    // 旧 LayerImageAgent は履歴 fallback 用にのみ取得 (段階的撤去)。
-    const agent = getAgentOf(this.getLayerIdToDraw());
     const layer = findLayerById(this.getLayerIdToDraw());
     if (!layer) return;
-    if (!agent) {
-      // layer はあるが legacy agent 無し = 完全移行後の状態を想定。history fallback を諦めて続行。
-      // （patch flush があるのでアクション自体は成立する）
-    }
 
     const rawPosition = position;
     const rawLastPosition = lastPosition;
@@ -88,14 +81,8 @@ export default class LayerCanvasOperator {
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });
       }
       if (result.shouldRegisterToHistory) {
-        // 旧 Agent diff フローを残しつつ Anvil patch を優先 (存在すれば)
         const patch = flushPatch(layer.id);
-        if (patch) {
-          projectHistoryController.addAction(new AnvilLayerHistoryAction(layer.id, patch, { tool: toolCategory.id }));
-        } else {
-          // fallback to legacy agent until fully removed
-          agent?.registerToHistory({ tool: toolCategory.id });
-        }
+        if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(layer.id, patch, { tool: toolCategory.id }));
       }
 
       if (result.shouldReturnToPrevTool) {

@@ -1,8 +1,7 @@
 import { Vec2 } from '@sledge/core';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class SelectionMoveTool implements ToolBehavior {
   acceptStartOnOutCanvas = true;
@@ -12,7 +11,7 @@ export class SelectionMoveTool implements ToolBehavior {
   private startOffset: Vec2 = { x: 0, y: 0 };
   private startPosition: Vec2 = { x: 0, y: 0 };
 
-  onStart(agent: LayerImageAgent, args: ToolArgs) {
+  onStart(_ctx: AnvilToolContext, args: ToolArgs) {
     this.startOffset = selectionManager.getAreaOffset();
     this.startPosition = args.position;
     return {
@@ -21,7 +20,7 @@ export class SelectionMoveTool implements ToolBehavior {
     };
   }
 
-  onMove(agent: LayerImageAgent, args: ToolArgs) {
+  onMove(_ctx: AnvilToolContext, args: ToolArgs) {
     const dx = args.position.x - this.startPosition.x;
     const dy = args.position.y - this.startPosition.y;
     selectionManager.setOffset({
@@ -34,7 +33,7 @@ export class SelectionMoveTool implements ToolBehavior {
     };
   }
 
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+  onEnd(_ctx: AnvilToolContext, args: ToolArgs) {
     // キャンバス外へ行くなどで選択範囲がなくなった場合は選択解除
     selectionManager.commitOffset();
 

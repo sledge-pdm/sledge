@@ -20,15 +20,6 @@ const GrayScale: Component<EffectSectionProps> = (props) => {
           <button
             class={accentedButton}
             onClick={() => {
-              // const agent = getAgentOf(props.selectedLayerId());
-              // if (agent) {
-              //   const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
-              //   grayscale(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height);
-              //   agent.forceUpdate();
-
-              //   agent.getDiffManager().setWhole(originalBuffer, agent.getBuffer());
-              //   agent.registerToHistory({ tool: 'fx', fxName: 'GrayScale' });
-
               applyEffect(props.selectedLayerId(), 'grayscale');
             }}
           >

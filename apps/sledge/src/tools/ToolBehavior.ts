@@ -1,6 +1,5 @@
 import { Vec2 } from '@sledge/core';
 import { RGBAColor } from '~/features/color';
-// NOTE: 移行中: 旧 LayerImageAgent を直接受け取っていたインターフェースを AnvilAdapter API に抽象化
 import { fillRect, getPixel, setPixel } from '~/features/layer/anvil/AnvilController';
 
 export interface AnvilToolContext {

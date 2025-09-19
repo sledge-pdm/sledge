@@ -47,15 +47,6 @@ const GaussianBlur: Component<EffectSectionProps> = (props) => {
           <button
             class={accentedButton}
             onClick={() => {
-              // const agent = getAgentOf(props.selectedLayerId());
-              // if (agent) {
-              //   const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
-              //   gaussian_blur(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height, blurOptions());
-              //   agent.forceUpdate();
-
-              //   agent.getDiffManager().setWhole(originalBuffer, agent.getBuffer());
-              //   agent.registerToHistory({ tool: 'fx', fxName: 'GaussianBlur' });
-
               applyEffect(props.selectedLayerId(), 'gaussian_blur', blurOptions());
             }}
           >

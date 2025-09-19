@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { colorMatch } from '~/features/color';
+// TODO: Migrate off LayerImageAgent to AnvilController abstractions
 import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { TileIndex } from '~/features/layer/agent/managers/Tile';
 import { Fill, FillProps } from './FillTool';

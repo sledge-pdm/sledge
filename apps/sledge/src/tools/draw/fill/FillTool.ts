@@ -3,7 +3,13 @@ import { filter_by_selection_mask } from '@sledge/wasm';
 import { RGBAColor } from '~/features/color';
 // LayerImageAgent 依存を除去し AnvilToolContext を利用
 //import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
-import { getBufferCopy, getHeight as getLayerHeight, getWidth as getLayerWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
+import {
+  getBufferCopy,
+  getBufferPointer,
+  getHeight as getLayerHeight,
+  getWidth as getLayerWidth,
+  registerWholeChange,
+} from '~/features/layer/anvil/AnvilController';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionFillMode, getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { getPresetOf } from '~/features/tool/ToolController';
@@ -200,7 +206,7 @@ export class FillTool implements ToolBehavior {
     const layerId = ctx.layerId;
     const width = getLayerWidth(layerId)!;
     const height = getLayerHeight(layerId)!;
-    const currentBuffer = getBufferCopy(layerId)!;
+    const currentBuffer = getBufferPointer(layerId)!;
 
     // デバッグセッション開始
     const sessionId = startDebugSession(`FloodFill ${limitMode} mode (Area Fill)`);

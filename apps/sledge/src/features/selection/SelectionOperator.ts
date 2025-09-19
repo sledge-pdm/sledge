@@ -1,8 +1,13 @@
 import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_subtract, filter_by_selection_mask } from '@sledge/wasm';
 import { activeLayer } from '~/features/layer';
-import { getActiveAgent } from '~/features/layer/agent/LayerAgentManager'; // TODO: 移行後削除 (startMove がまだ agent を利用)
-import { registerWholeChange } from '~/features/layer/anvil/AnvilController';
+// import { getActiveAgent } from '~/features/layer/agent/LayerAgentManager'; // legacy (will be removed)
+import {
+  getBufferPointer,
+  getHeight as getLayerHeight,
+  getWidth as getLayerWidth,
+  registerWholeChange,
+} from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -57,57 +62,39 @@ export function getSelectionFillMode(): SelectionFillMode {
 
 // 現在の状況からFloat状態を作成
 export function startMove() {
-  const activeAgent = getActiveAgent();
-  if (!activeAgent) {
-    console.error('No active agent found');
-    return;
-  }
+  const layer = activeLayer();
+  const layerId = layer.id;
+  const width = getLayerWidth(layerId);
+  const height = getLayerHeight(layerId);
+  if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
-    floatingMoveManager.startMove(selectionManager.getFloatingBuffer(activeAgent.layerId)!, 'selection', activeAgent.layerId);
+    floatingMoveManager.startMove(selectionManager.getFloatingBuffer(layerId)!, 'selection', layerId);
   } else {
     selectionManager.selectAll();
+    const buf = getBufferPointer(layerId);
     const layerFloatingBuffer: FloatingBuffer = {
-      buffer: activeAgent.getBuffer().slice(),
-      width: activeAgent.getWidth(),
-      height: activeAgent.getHeight(),
+      buffer: buf ? buf.slice() : new Uint8ClampedArray(width * height * 4),
+      width,
+      height,
       offset: { x: 0, y: 0 },
     };
-    floatingMoveManager.startMove(layerFloatingBuffer, 'layer', activeAgent.layerId);
+    floatingMoveManager.startMove(layerFloatingBuffer, 'layer', layerId);
   }
 }
 
 export function startMoveFromPasted(imageData: ImageData, boundBox: { x: number; y: number; width: number; height: number }) {
-  const activeAgent = getActiveAgent();
-  if (!activeAgent) {
-    console.error('No active agent found');
-    return;
-  }
-
+  const layerId = activeLayer().id;
   cancelSelection();
-
   setToolStore('activeToolCategory', TOOL_CATEGORIES.MOVE);
-
   const pastingOffset = { x: 0, y: 0 };
-  // create selection according to pasted image
   selectionManager.beginPreview('replace');
-  selectionManager.setPreviewFragment({
-    kind: 'rect',
-    startPosition: pastingOffset,
-    width: boundBox.width,
-    height: boundBox.height,
-  });
+  selectionManager.setPreviewFragment({ kind: 'rect', startPosition: pastingOffset, width: boundBox.width, height: boundBox.height });
   selectionManager.commit();
-
   floatingMoveManager.startMove(
-    {
-      buffer: new Uint8ClampedArray(imageData.data),
-      width: boundBox.width,
-      height: boundBox.height,
-      offset: pastingOffset,
-    },
+    { buffer: new Uint8ClampedArray(imageData.data), width: boundBox.width, height: boundBox.height, offset: pastingOffset },
     'pasted',
-    activeAgent.layerId
+    layerId
   );
 }
 

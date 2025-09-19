@@ -1,11 +1,18 @@
 import { Vec2 } from '@sledge/core';
 import { scanline_flood_fill, scanline_flood_fill_with_mask } from '@sledge/wasm';
 import { colorMatch } from '~/features/color';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+// LayerImageAgent 依存除去: AnvilController 経由で操作
+import {
+  getBuffer,
+  getBufferPointer,
+  getHeight as getLayerHeight,
+  getWidth as getLayerWidth,
+  registerWholeChange,
+} from '~/features/layer/anvil/AnvilController';
 import { Fill, FillProps } from './FillTool';
 
 export interface WasmMaskFillProps {
-  agent: LayerImageAgent;
+  layerId: string;
   color: [number, number, number, number];
   position: Vec2;
   selectionMask: Uint8Array;
@@ -23,22 +30,23 @@ export interface WasmMaskFillProps {
  * - 選択範囲制限サポート
  */
 export class WasmFloodFill implements Fill {
-  fill({ agent, color, position, threshold }: FillProps) {
-    const pbm = agent.getPixelBufferManager();
-    const dm = agent.getDiffManager();
+  fill({ layerId, color, position, threshold }: FillProps) {
+    const buffer = getBufferPointer(layerId);
+    if (!buffer) return false;
+    const width = getLayerWidth(layerId)!;
+    const height = getLayerHeight(layerId)!;
 
-    const targetColor = pbm.getPixel(position);
+    const idx = (position.y * width + position.x) * 4;
+    if (idx < 0 || idx + 3 >= buffer.length) return false;
+    const targetColor: [number, number, number, number] = [buffer[idx], buffer[idx + 1], buffer[idx + 2], buffer[idx + 3]];
     if (colorMatch(targetColor, color)) return false;
 
-    const width = agent.getWidth();
-    const height = agent.getHeight();
-
-    const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
+    const originalBuffer = buffer.slice();
     const startTime = performance.now();
 
     // WASM FloodFill実行
     const success = scanline_flood_fill(
-      new Uint8Array(pbm.buffer.buffer),
+      new Uint8Array(buffer.buffer),
       width,
       height,
       position.x,
@@ -50,7 +58,7 @@ export class WasmFloodFill implements Fill {
       threshold ?? 0
     );
 
-    dm.setWhole(originalBuffer, agent.getBuffer());
+    registerWholeChange(layerId, originalBuffer, buffer.slice());
     const endTime = performance.now();
     console.log(`WASM FloodFill completed in ${(endTime - startTime).toFixed(2)}ms`);
 
@@ -65,22 +73,23 @@ export class WasmFloodFill implements Fill {
     return true;
   }
 
-  fillWithMask({ agent, color, position, selectionMask, limitMode, threshold }: WasmMaskFillProps) {
-    const pbm = agent.getPixelBufferManager();
-    const dm = agent.getDiffManager();
+  fillWithMask({ layerId, color, position, selectionMask, limitMode, threshold }: WasmMaskFillProps) {
+    const buffer = getBuffer(layerId);
+    if (!buffer) return false;
+    const width = getLayerWidth(layerId)!;
+    const height = getLayerHeight(layerId)!;
 
-    const targetColor = pbm.getPixel(position);
+    const idx = (position.y * width + position.x) * 4;
+    if (idx < 0 || idx + 3 >= buffer.length) return false;
+    const targetColor: [number, number, number, number] = [buffer[idx], buffer[idx + 1], buffer[idx + 2], buffer[idx + 3]];
     if (colorMatch(targetColor, color)) return false;
 
-    const width = agent.getWidth();
-    const height = agent.getHeight();
-
-    const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
+    const originalBuffer = buffer.slice();
     const startTime = performance.now();
 
     // WASM 選択範囲制限付きFloodFill実行
     const success = scanline_flood_fill_with_mask(
-      new Uint8Array(pbm.buffer.buffer),
+      new Uint8Array(buffer.buffer),
       width,
       height,
       position.x,
@@ -94,7 +103,7 @@ export class WasmFloodFill implements Fill {
       limitMode
     );
 
-    dm.setWhole(originalBuffer, agent.getBuffer());
+    registerWholeChange(layerId, originalBuffer, buffer.slice());
     const endTime = performance.now();
     console.log(`WASM FloodFill with mask (${limitMode}) completed in ${(endTime - startTime).toFixed(2)}ms`);
 

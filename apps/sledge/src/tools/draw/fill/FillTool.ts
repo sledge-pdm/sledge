@@ -1,16 +1,18 @@
 import { Vec2 } from '@sledge/core';
 import { filter_by_selection_mask } from '@sledge/wasm';
 import { RGBAColor } from '~/features/color';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+// LayerImageAgent 依存を除去し AnvilToolContext を利用
+//import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { getBuffer, getHeight as getLayerHeight, getWidth as getLayerWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionFillMode, getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { getPresetOf } from '~/features/tool/ToolController';
 import { WasmFloodFill } from '~/tools/draw/fill/WasmFloodFill';
-import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 import { addDebugImage, endDebugSession, startDebugSession, visualizeSelectionMask } from '~/utils/DebugViewer';
 
 export interface FillProps {
-  agent: LayerImageAgent;
+  layerId: string;
   color: RGBAColor;
   position: Vec2;
   threshold?: number;
@@ -22,7 +24,7 @@ export interface Fill {
 export class FillTool implements ToolBehavior {
   onlyOnCanvas = true;
 
-  onStart(agent: LayerImageAgent, { position, color, presetName }: ToolArgs) {
+  onStart(ctx: AnvilToolContext, { position, color, presetName, layerId }: ToolArgs) {
     const startTime = Date.now();
 
     // 描画制限チェック
@@ -38,13 +40,10 @@ export class FillTool implements ToolBehavior {
     const limitMode = getSelectionLimitMode();
 
     if (limitMode === 'none' || !isSelectionAvailable()) {
-      // 制限なしの場合はWASM FloodFill
       const fill = new WasmFloodFill();
-      fill.fill({ agent, color, position, threshold });
-      agent.getTileManager().setAllDirty();
+      fill.fill({ layerId: layerId ?? ctx.layerId, color, position, threshold });
     } else {
-      // 選択範囲制限がある場合
-      this.fillWithSelectionConstraint(agent, color, position, threshold);
+      this.fillWithSelectionConstraint(ctx, color, position, threshold);
     }
 
     const endTime = Date.now();
@@ -56,7 +55,7 @@ export class FillTool implements ToolBehavior {
     };
   }
 
-  private fillWithSelectionConstraint(agent: LayerImageAgent, color: RGBAColor, position: Vec2, threshold?: number) {
+  private fillWithSelectionConstraint(ctx: AnvilToolContext, color: RGBAColor, position: Vec2, threshold?: number) {
     const selectionMask = selectionManager.getSelectionMask();
     const limitMode = getSelectionLimitMode();
     const fillMode = getSelectionFillMode();
@@ -64,31 +63,33 @@ export class FillTool implements ToolBehavior {
     // 選択範囲がない、または制限モードがnoneの場合は通常のフラッドフィル
     if (!selectionMask || limitMode === 'none') {
       const fill = new WasmFloodFill();
-      fill.fill({ agent, color, position, threshold });
+      fill.fill({ layerId: ctx.layerId, color, position, threshold });
       return;
     }
 
     if (fillMode === 'global') {
-      this.fillWithGlobalReference(agent, color, position, selectionMask.getMask(), limitMode, threshold);
+      this.fillWithGlobalReference(ctx, color, position, selectionMask.getMask(), limitMode, threshold);
     } else if (fillMode === 'boundary') {
-      this.fillWithBoundaryConstraint(agent, color, position, selectionMask.getMask(), limitMode, threshold);
+      this.fillWithBoundaryConstraint(ctx, color, position, selectionMask.getMask(), limitMode, threshold);
     } else if (fillMode === 'area') {
-      this.fillWithAreaMode(agent, color, position, selectionMask.getMask(), limitMode);
+      this.fillWithAreaMode(ctx, color, position, selectionMask.getMask(), limitMode);
     }
   }
 
   private fillWithGlobalReference(
-    agent: LayerImageAgent,
+    ctx: AnvilToolContext,
     color: RGBAColor,
     position: Vec2,
     selectionMask: Uint8Array,
     limitMode: 'inside' | 'outside',
     threshold?: number
   ): void {
-    const bufferManager = agent.getPixelBufferManager();
-    const sourceBuffer = bufferManager.buffer.slice();
-    const width = agent.getWidth();
-    const height = agent.getHeight();
+    const layerId = ctx.layerId;
+    const original = getBuffer(layerId);
+    if (!original) return;
+    const sourceBuffer = original.slice();
+    const width = getLayerWidth(layerId)!;
+    const height = getLayerHeight(layerId)!;
 
     // デバッグセッション開始
     const sessionId = startDebugSession(`FloodFill ${limitMode} mode (Global)`);
@@ -103,9 +104,9 @@ export class FillTool implements ToolBehavior {
     }
 
     const fill = new WasmFloodFill();
-    fill.fill({ agent, color, position, threshold });
+    fill.fill({ layerId, color, position, threshold });
 
-    const currentBuffer = bufferManager.buffer;
+    const currentBuffer = getBuffer(layerId)!;
 
     // フラッドフィル結果を記録
     addDebugImage(currentBuffer.slice(), width, height, '3. Flood Fill Result', sessionId);
@@ -144,11 +145,7 @@ export class FillTool implements ToolBehavior {
     addDebugImage(finalBuffer, width, height, '6. Final Result', sessionId);
 
     // バッファ全体の差分を履歴に記録
-    const dm = agent.getDiffManager();
-    dm.setWhole(sourceBuffer, finalBuffer.slice());
-
-    // 最終結果を設定
-    // new Uint8Array(currentBuffer).set(finalBuffer); 前の
+    registerWholeChange(layerId, sourceBuffer, finalBuffer.slice());
     currentBuffer.set(finalBuffer);
 
     // デバッグセッション終了とビューア表示
@@ -157,22 +154,23 @@ export class FillTool implements ToolBehavior {
   }
 
   private fillWithBoundaryConstraint(
-    agent: LayerImageAgent,
+    ctx: AnvilToolContext,
     color: RGBAColor,
     position: Vec2,
     selectionMask: Uint8Array,
     limitMode: 'inside' | 'outside',
     threshold?: number
   ): void {
-    const bufferManager = agent.getPixelBufferManager();
-    const width = agent.getWidth();
-    const height = agent.getHeight();
+    const layerId = ctx.layerId;
+    const width = getLayerWidth(layerId)!;
+    const height = getLayerHeight(layerId)!;
+    const before = getBuffer(layerId)!.slice();
 
     // デバッグセッション開始
     const sessionId = startDebugSession(`FloodFill ${limitMode} mode (Boundary)`);
 
     // 元画像を記録
-    addDebugImage(bufferManager.buffer.slice(), width, height, '1. Original Image', sessionId);
+    addDebugImage(before.slice(), width, height, '1. Original Image', sessionId);
 
     // 選択マスクを可視化して記録
     if (selectionMask) {
@@ -181,17 +179,11 @@ export class FillTool implements ToolBehavior {
     }
 
     const fill = new WasmFloodFill();
-    fill.fillWithMask({
-      agent,
-      color,
-      position,
-      selectionMask,
-      limitMode,
-      threshold,
-    });
+    fill.fillWithMask({ layerId, color, position, selectionMask, limitMode, threshold });
 
-    // 境界制限フラッドフィル結果を記録
-    addDebugImage(bufferManager.buffer.slice(), width, height, '3. Boundary-Constrained Result', sessionId);
+    addDebugImage(getBuffer(layerId)!.slice(), width, height, '3. Boundary-Constrained Result', sessionId);
+
+    registerWholeChange(layerId, before, getBuffer(layerId)!.slice());
 
     // デバッグセッション終了とビューア表示
     endDebugSession();
@@ -199,21 +191,22 @@ export class FillTool implements ToolBehavior {
   }
 
   private fillWithAreaMode(
-    agent: LayerImageAgent,
+    ctx: AnvilToolContext,
     color: RGBAColor,
     position: Vec2,
     selectionMask: Uint8Array,
     limitMode: 'inside' | 'outside'
   ): void {
-    const bufferManager = agent.getPixelBufferManager();
-    const width = agent.getWidth();
-    const height = agent.getHeight();
+    const layerId = ctx.layerId;
+    const width = getLayerWidth(layerId)!;
+    const height = getLayerHeight(layerId)!;
+    const currentBuffer = getBuffer(layerId)!;
 
     // デバッグセッション開始
     const sessionId = startDebugSession(`FloodFill ${limitMode} mode (Area Fill)`);
 
     // 元画像を記録
-    const sourceBuffer = bufferManager.buffer.slice();
+    const sourceBuffer = currentBuffer.slice();
     addDebugImage(sourceBuffer, width, height, '1. Original Image', sessionId);
 
     // 選択マスクを可視化して記録
@@ -221,7 +214,7 @@ export class FillTool implements ToolBehavior {
     addDebugImage(maskVisualization, width, height, '2. Selection Mask', sessionId);
 
     // 選択範囲全体を指定色で塗りつぶし
-    const currentBuffer = bufferManager.buffer;
+    // currentBuffer を直接塗る
     for (let i = 0; i < selectionMask.length; i++) {
       const isInSelection = selectionMask[i] === 1;
       const shouldFill = (limitMode === 'inside' && isInSelection) || (limitMode === 'outside' && !isInSelection);
@@ -236,8 +229,7 @@ export class FillTool implements ToolBehavior {
     }
 
     // バッファ全体の差分を履歴に記録
-    const dm = agent.getDiffManager();
-    dm.setWhole(sourceBuffer, currentBuffer.slice());
+    registerWholeChange(layerId, sourceBuffer, currentBuffer.slice());
 
     // 結果を記録
     addDebugImage(currentBuffer.slice(), width, height, '3. Area Fill Result', sessionId);
@@ -247,14 +239,14 @@ export class FillTool implements ToolBehavior {
     // openDebugViewer();
   }
 
-  onMove(agent: LayerImageAgent, args: ToolArgs) {
+  onMove(ctx: AnvilToolContext, args: ToolArgs) {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
     };
   }
 
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+  onEnd(ctx: AnvilToolContext, args: ToolArgs) {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,

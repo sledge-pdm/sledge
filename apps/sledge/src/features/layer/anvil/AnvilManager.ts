@@ -21,5 +21,3 @@ export class AnvilManager {
 
 export const anvilManager = new AnvilManager();
 export const getAnvilOf = (layerId: string) => anvilManager.getAnvil(layerId);
-// 現状 LayerImageAgent からの脱却中: 履歴や複製で利用するバッファアクセス用ヘルパ
-export const getAnvilBufferOf = (layerId: string): Uint8ClampedArray | undefined => anvilManager.getAnvil(layerId)?.getImageData();

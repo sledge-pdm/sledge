@@ -1,7 +1,7 @@
 import { Size2D } from '@sledge/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 
@@ -33,10 +33,13 @@ export class ThumbnailGenerator {
     this.tmpCtx = this.tmp.getContext('2d', { willReadFrequently: true })!;
   }
 
-  generateLayerThumbnail(agent: LayerImageAgent, width: number, height: number): ImageData {
+  generateLayerThumbnail(layerId: string, width: number, height: number): ImageData {
     try {
-      const w = agent.getWidth();
-      const h = agent.getHeight();
+      const anvil = getAnvilOf(layerId);
+      if (!anvil) throw new Error('No Anvil for layer ' + layerId);
+
+      const w = anvil.getWidth();
+      const h = anvil.getHeight();
 
       // Only resize canvases if dimensions actually changed
       if (this.lastOffWidth !== width || this.lastOffHeight !== height) {
@@ -59,9 +62,7 @@ export class ThumbnailGenerator {
       }
 
       const buf =
-        agent.layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving()
-          ? floatingMoveManager.getPreviewBuffer()!
-          : agent.getBuffer();
+        layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving() ? floatingMoveManager.getPreviewBuffer()! : anvil.getImageData();
       // Keep slice() for now to avoid type issues, but optimize canvas resizing
       const imgData = new ImageData(buf.slice(), w, h);
       this.tmpCtx.putImageData(imgData, 0, 0);

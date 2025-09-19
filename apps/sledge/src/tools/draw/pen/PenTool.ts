@@ -1,10 +1,9 @@
 import { Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { getPresetOf } from '~/features/tool/ToolController';
-import { ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 import { drawCompletionLine, getDrawnPixelMask } from './PenDraw';
 
@@ -50,7 +49,7 @@ export class PenTool implements ToolBehavior {
   }
 
   private stamp(
-    agent: LayerImageAgent,
+    ctx: AnvilToolContext,
     centerX: number,
     centerY: number,
     mask: { mask: Uint8Array; width: number; height: number; offsetX: number; offsetY: number },
@@ -59,8 +58,7 @@ export class PenTool implements ToolBehavior {
     commit: boolean,
     previewCollector?: Array<{ position: Vec2; before: RGBAColor; after: RGBAColor }>
   ) {
-    const pbm = agent.getPixelBufferManager();
-    const dm = agent.getDiffManager();
+    // Anvil: diff flush は外部。ここでは即時 setPixel。
 
     const { mask: bits, width, height, offsetX, offsetY } = mask;
     for (let iy = 0; iy < height; iy++) {
@@ -71,26 +69,22 @@ export class PenTool implements ToolBehavior {
         if (shouldCheckSelectionLimit && !isDrawingAllowed({ x: px, y: py }, false)) {
           continue;
         }
-        if (!colorMatch(pbm.getPixel({ x: px, y: py }), color)) {
-          const changed = agent.setPixel({ x: px, y: py }, color, true);
-          if (changed) {
-            if (commit) {
-              dm.addPixel({ x: px, y: py }, changed.before, changed.after);
-            } else if (previewCollector) {
-              previewCollector.push({ position: { x: px, y: py }, before: changed.before, after: changed.after });
-            } else {
-              dm.addPixel({ x: px, y: py }, changed.before, changed.after);
-            }
+        const current = ctx.getPixel(px, py) as RGBAColor | undefined;
+        if (!current || !colorMatch(current, color)) {
+          const before = current ?? transparent;
+          ctx.setPixel(px, py, color);
+          if (!commit && previewCollector) {
+            previewCollector.push({ position: { x: px, y: py }, before, after: color });
           }
         }
       }
     }
   }
-  onStart(agent: LayerImageAgent, args: ToolArgs) {
+  onStart(ctx: AnvilToolContext, args: ToolArgs) {
     // 前回の状態が残っている場合はクリーンアップ
     if (this.lastPreviewDiff.length > 0) {
       console.warn('PenTool: Cleaning up previous preview state');
-      this.undoLastLineDiff(agent);
+      this.undoLastLineDiff(ctx);
     }
 
     this.startTime = Date.now();
@@ -112,17 +106,17 @@ export class PenTool implements ToolBehavior {
     this.ensureMask(size, shape);
 
     if (!this.isShift) {
-      return this.draw(agent, args, args.color);
+      return this.draw(ctx, args, args.color);
     } else {
-      return this.drawLine(false, agent, args, args.color);
+      return this.drawLine(false, ctx, args, args.color);
     }
   }
 
-  onMove(agent: LayerImageAgent, args: ToolArgs) {
+  onMove(ctx: AnvilToolContext, args: ToolArgs) {
     if (!this.isShift) {
-      return this.draw(agent, args, args.color);
+      return this.draw(ctx, args, args.color);
     } else {
-      return this.drawLine(false, agent, args, args.color);
+      return this.drawLine(false, ctx, args, args.color);
     }
   }
 
@@ -148,7 +142,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  draw(agent: LayerImageAgent, { position, lastPosition, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  draw(ctx: AnvilToolContext, { position, lastPosition, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
@@ -167,14 +161,14 @@ export class PenTool implements ToolBehavior {
 
     // 現在位置にスタンプ
     const { cx, cy } = this.getCenter(position, rawPosition, size, dotMagnification);
-    this.stamp(agent, cx, cy, mask, color, shouldCheckSelectionLimit, true);
+    this.stamp(ctx, cx, cy, mask, color, shouldCheckSelectionLimit, true);
 
     if (lastPosition !== undefined) {
       drawCompletionLine(position, lastPosition, (x: number, y: number) => {
         // 偶数サイズは syntheticRaw を用いて中心を決定
         const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
         const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
-        this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, true);
+        this.stamp(ctx, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, true);
       });
     }
 
@@ -184,14 +178,13 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  private undoLastLineDiff(agent: LayerImageAgent) {
-    const dm = agent.getDiffManager();
+  private undoLastLineDiff(ctx: AnvilToolContext) {
     // 前回のプレビューが残っていた場合はundo
     if (this.lastPreviewDiff.length === 0) return;
     try {
       for (const diff of this.lastPreviewDiff) {
         // apply 'before' color; skipExistingDiffCheck=true to ensure applying
-        agent.setPixel(diff.position, diff.before, true);
+        ctx.setPixel(diff.position.x, diff.position.y, diff.before as any);
       }
     } catch (error) {
       console.error('Failed to undo line preview:', error);
@@ -201,14 +194,14 @@ export class PenTool implements ToolBehavior {
   }
 
   // 始点からの直線を描画
-  drawLine(commit: boolean, agent: LayerImageAgent, { position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  drawLine(commit: boolean, ctx: AnvilToolContext, { position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
       color = transparent;
     }
 
-    this.undoLastLineDiff(agent);
+    this.undoLastLineDiff(ctx);
 
     // ctrl+shiftの場合は角度固定
     const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
@@ -227,7 +220,7 @@ export class PenTool implements ToolBehavior {
       // 直線補完の各点に対応する rawPosition を合成し中心決定
       const syntheticRaw = { x: x * dotMagnification, y: y * dotMagnification } as Vec2;
       const c = this.getCenter({ x, y }, syntheticRaw, size, dotMagnification);
-      this.stamp(agent, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, commit, commit ? undefined : this.lastPreviewDiff);
+      this.stamp(ctx, c.cx, c.cy, mask, color, shouldCheckSelectionLimit, commit, commit ? undefined : this.lastPreviewDiff);
     });
 
     return {
@@ -236,23 +229,16 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+  onEnd(ctx: AnvilToolContext, args: ToolArgs) {
     let { event, color } = args;
     if (event?.buttons === 2) {
       color = transparent;
     }
     if (this.isShift) {
       // 直線を確定
-      this.drawLine(true, agent, args, color);
+      this.drawLine(true, ctx, args, color);
     }
-
-    // 描画完了時にバッチを強制処理
-    agent.getDiffManager().flush();
-    const totalPx = agent.getDiffManager().getPendingPixelCount();
-    const resultText =
-      totalPx > 0
-        ? `${this.categoryId} stroke done. (${this.startTime ? `${Date.now() - this.startTime}ms /` : ''} ${totalPx}px updated)`
-        : undefined;
+    const resultText = `${this.categoryId} stroke done.`;
 
     this.isShift = false;
     this.isCtrl = false;
@@ -266,9 +252,9 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onCancel(agent: LayerImageAgent, args: ToolArgs) {
+  onCancel(ctx: AnvilToolContext, args: ToolArgs) {
     if (this.isShift) {
-      this.undoLastLineDiff(agent);
+      this.undoLastLineDiff(ctx);
     }
 
     this.isShift = false;

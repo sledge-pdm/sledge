@@ -7,7 +7,8 @@ import { projectHistoryController } from '~/features/history';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
-import { anvilManager, getAnvilBufferOf } from '~/features/layer/anvil/AnvilManager';
+import { getBuffer } from '~/features/layer/anvil/AnvilController';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
@@ -241,7 +242,7 @@ export const addLayerTo = (
   if (!options?.noDiff) {
     // push history (add) with snapshot including optional buffer
     // Anvil 移行中: まずは Anvil バッファが存在すればそれを優先
-    const snapshotBuffer = getAnvilBufferOf(newLayer.id) ?? getBufferOf(newLayer.id);
+    const snapshotBuffer = getBuffer(newLayer.id) ?? getBufferOf(newLayer.id);
     const snapshot = { ...newLayer, buffer: snapshotBuffer } as any;
     const act = new LayerListHistoryAction('add', index, snapshot, undefined, undefined, { from: 'LayerService.addLayerTo' });
     projectHistoryController.addAction(act);
@@ -327,7 +328,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   // snapshot before removal
   const toRemove = layers[index];
   // Anvil 移行中: 削除時スナップショットも Anvil 優先
-  const removeSnapshotBuffer = getAnvilBufferOf(toRemove.id) ?? getBufferOf(toRemove.id);
+  const removeSnapshotBuffer = getBuffer(toRemove.id) ?? getBufferOf(toRemove.id);
   const snapshot = { ...toRemove, buffer: removeSnapshotBuffer } as any;
 
   layers.splice(index, 1);

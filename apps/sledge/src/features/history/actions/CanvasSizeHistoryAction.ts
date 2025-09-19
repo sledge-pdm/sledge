@@ -2,7 +2,8 @@ import { Size2D } from '@sledge/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers, resetLayerImage } from '~/features/layer';
 // Anvil 移行: 旧 Agent API 依存を排除し Anvil バッファを直接扱う
-import { anvilManager, getAnvilBufferOf, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getBuffer } from '~/features/layer/anvil/AnvilController';
+import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';
@@ -22,7 +23,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
     // Snapshot all layers' buffers for the old size immediately
     this.oldSnapshots = allLayers().map((l) => {
       // 既存 Anvil からバッファ取得; 無ければ現在キャンバスサイズ基準で空バッファ
-      const buf = getAnvilBufferOf(l.id);
+      const buf = getBuffer(l.id);
       const w = Math.round(canvasStore.canvas.width / l.dotMagnification);
       const h = Math.round(canvasStore.canvas.height / l.dotMagnification);
       return {
@@ -47,7 +48,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       this.applyCanvasSize(this.newSize);
       this.resizeAllLayers(this.newSize);
       this.newSnapshots = allLayers().map((l) => {
-        const buf = getAnvilBufferOf(l.id);
+        const buf = getBuffer(l.id);
         const w = Math.round(this.newSize.width / l.dotMagnification);
         const h = Math.round(this.newSize.height / l.dotMagnification);
         return {

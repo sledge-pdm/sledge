@@ -9,6 +9,7 @@
       "@sledge/ui": ["../../packages/ui"],
       "@sledge/theme": ["../../packages/theme"],
       "@sledge/core": ["../../packages/core"],
+      "@sledge/anvil": ["../../packages/anvil"],
       "@sledge/wasm": ["../../packages/wasm/pkg/sledge_wasm.js"]
     },
     "types": ["vite/client"],

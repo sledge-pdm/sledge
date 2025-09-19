@@ -20,3 +20,4 @@ export const layerAgentManager = new LayerAgentManager();
 export const getActiveAgent = () => layerAgentManager.getAgent(activeLayer().id);
 export const getAgentOf = (layerId: string) => layerAgentManager.getAgent(layerId);
 export const getBufferOf = (layerId: string) => layerAgentManager.getAgent(layerId)?.getBuffer();
+export const getAnvilOf = (layerId: string) => layerAgentManager.getAgent(layerId)?.getAnvil();

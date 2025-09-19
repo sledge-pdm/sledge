@@ -4,6 +4,5 @@ export * from './CanvasSizeHistoryAction';
 export * from './ColorHistoryAction';
 export * from './ImagePoolEntryPropsHistoryAction';
 export * from './ImagePoolHistoryAction';
-export * from './LayerBufferHistoryAction';
 export * from './LayerListHistoryAction';
 export * from './LayerPropsHistoryAction';

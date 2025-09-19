@@ -21,3 +21,8 @@ export class AnvilManager {
 
 export const anvilManager = new AnvilManager();
 export const getAnvilOf = (layerId: string) => anvilManager.getAnvil(layerId);
+// Test/utility: direct register existing Anvil instance
+export const registerLayerAnvil = (layerId: string, anvil: Anvil) => {
+  (anvilManager as any).anvils.set(layerId, anvil);
+  return anvil;
+};

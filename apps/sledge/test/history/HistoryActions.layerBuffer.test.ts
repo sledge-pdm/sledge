@@ -1,198 +1,99 @@
+import { Anvil } from '@sledge/anvil';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { LayerBufferHistoryAction, LayerBufferPatch, packRGBA } from '~/features/history';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import { projectHistoryController } from '~/features/history';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
+import { applyPatch, fillRect, flushPatch, registerWholeChange, setPixel } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf, registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
 
-// Use hoisted container so vi.mock factories can reference them safely
-const h = vi.hoisted(() => ({
-  agentMock: {
-    canUndo: vi.fn(() => true),
-    undoPatch: vi.fn(),
-    redoPatch: vi.fn(),
-  } as any,
-  isMoveStateMock: vi.fn(() => false),
-  cancelMoveMock: vi.fn(),
-}));
-
-vi.mock('~/features/layer/agent/LayerAgentManager', () => ({
-  getAgentOf: vi.fn(() => h.agentMock),
-}));
-vi.mock('~/features/selection/SelectionManager', () => ({
-  selectionManager: { isMoveState: h.isMoveStateMock },
+vi.mock('~/features/selection/FloatingMoveManager', () => ({
+  floatingMoveManager: { isMoving: () => false },
 }));
 vi.mock('~/features/selection/SelectionOperator', () => ({
-  cancelMove: h.cancelMoveMock,
-}));
-vi.mock('~/features/selection/FloatingMoveManager', () => ({
-  floatingMoveManager: { isMoving: h.isMoveStateMock },
+  cancelMove: vi.fn(),
 }));
 
-describe('LayerBufferHistoryAction', () => {
+describe('AnvilLayerHistoryAction', () => {
+  const layerId = 'layer-history-test';
+
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Recreate agentMock to avoid stale/undefined state
-    h.agentMock = {
-      canUndo: vi.fn(() => true),
-      undoPatch: vi.fn(),
-      redoPatch: vi.fn(),
-    } as any;
-    // Reset hoisted mocks
-    h.isMoveStateMock.mockReset().mockReturnValue(false);
-    h.cancelMoveMock.mockReset();
-    (getAgentOf as any).mockReset?.();
-    (getAgentOf as any).mockReturnValue(h.agentMock);
+    projectHistoryController.clearHistory();
+    // 手動で Anvil インスタンス作成しマネージャへ登録 (ESM import 利用)
+    registerLayerAnvil(layerId, new Anvil(32, 32, 32));
   });
 
-  const layerId = 'layer-xyz';
+  it('undo/redo whole buffer change restores data', () => {
+    const anvil = getAnvilOf(layerId)!;
+    const before = anvil.getImageData();
+    // simulate effect applying: fill all with color
+    const originalCopy = before.slice();
+    const after = before.slice();
+    after.fill(128);
+    registerWholeChange(layerId, originalCopy, after);
+    const patch = flushPatch(layerId)!;
+    const action = new AnvilLayerHistoryAction(layerId, patch);
 
-  function makeSamplePatch(layerId: string): LayerBufferPatch {
-    return {
-      layerId,
-      whole: { type: 'whole', before: new Uint8ClampedArray([0, 0, 0, 0]), after: new Uint8ClampedArray([9, 9, 9, 9]) },
-      tiles: [{ type: 'tileFill', tile: { row: 0, column: 0 }, before: undefined, after: packRGBA([1, 2, 3, 4]) }],
-      pixels: [
-        {
-          type: 'pixels',
-          tile: { row: 0, column: 0 },
-          idx: new Uint16Array([0]),
-          before: new Uint32Array([packRGBA([0, 0, 0, 0])]),
-          after: new Uint32Array([packRGBA([0, 255, 0, 255])]),
-        },
-      ],
-    };
-  }
-
-  it('redo passes LayerBufferPatch to agent', () => {
-    const patch = makeSamplePatch(layerId);
-    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
-
-    let redoArg: any;
-    h.agentMock.redoPatch.mockImplementation((arg: any) => (redoArg = arg));
-
-    action.redo();
-
-    expect(h.agentMock.redoPatch).toHaveBeenCalledTimes(1);
-    expect(redoArg).toBeDefined();
-    expect(redoArg.layerId).toBe(layerId);
-    expect(redoArg.whole).toBeDefined();
-    expect(redoArg.tiles?.length).toBe(1);
-    expect(redoArg.pixels?.length).toBe(1);
-  });
-
-  it('undo passes LayerBufferPatch to agent', () => {
-    const patch = makeSamplePatch(layerId);
-    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
-
-    let undoArg: any;
-    h.agentMock.undoPatch.mockImplementation((arg: any) => (undoArg = arg));
-
+    // apply redo (already applied logically, but test revert path)
     action.undo();
-
-    expect(h.agentMock.undoPatch).toHaveBeenCalledTimes(1);
-    expect(undoArg).toBeDefined();
-    expect(undoArg.layerId).toBe(layerId);
-  });
-
-  it('selection move state cancels move and does not call agent', () => {
-    h.isMoveStateMock.mockReturnValue(true);
-    const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
+    const reverted = anvil.getImageData();
+    expect(reverted[0]).toBe(originalCopy[0]);
 
     action.redo();
-
-    expect(h.cancelMoveMock).toHaveBeenCalledTimes(1);
-    expect(h.agentMock.redoPatch).not.toHaveBeenCalled();
+    const reApplied = anvil.getImageData();
+    expect(reApplied[0]).toBe(128);
   });
 
-  it('does nothing if no agent found', () => {
-    // Force mocked getAgentOf to return undefined for this case
-    (getAgentOf as any).mockReturnValue(undefined);
-    const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
-
-    action.redo();
+  it('pixel patch writes individual pixels and can be undone', () => {
+    const anvil = getAnvilOf(layerId)!;
+    const before = anvil.getImageData();
+    const beforeCopy = before.slice();
+    setPixel(layerId, 1, 1, [255, 0, 0, 255]);
+    setPixel(layerId, 2, 1, [0, 255, 0, 255]);
+    const patch = flushPatch(layerId)!;
+    const action = new AnvilLayerHistoryAction(layerId, patch);
+    expect(getAnvilOf(layerId)!.getPixel(1, 1)[0]).toBe(255);
     action.undo();
-
-    // nothing thrown; nothing called
-    // expectations implicit via no-throw, and no available mock to assert calls
+    expect(getAnvilOf(layerId)!.getPixel(1, 1)[0]).toBe(beforeCopy[(1 + 1 * 32) * 4]);
+    action.redo();
+    expect(getAnvilOf(layerId)!.getPixel(2, 1)[1]).toBe(255);
   });
 
-  it('respects insertion order: whole first then pixels when provided in that order', () => {
-    const patch: LayerBufferPatch = {
-      layerId,
-      whole: { type: 'whole', before: new Uint8ClampedArray([0]), after: new Uint8ClampedArray([1]) },
-      pixels: [
-        {
-          type: 'pixels',
-          tile: { row: 0, column: 0 },
-          idx: new Uint16Array([0]),
-          before: new Uint32Array([packRGBA([0, 0, 0, 0])]),
-          after: new Uint32Array([packRGBA([1, 1, 1, 1])]),
-        },
-      ],
-    };
-    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
-
-    let order: string[] = [];
-    h.agentMock.redoPatch.mockImplementation((arg: LayerBufferPatch) => {
-      if (arg.whole) order.push('whole');
-      if (arg.pixels && arg.pixels.length > 0) order.push('pixel');
-    });
-
-    action.redo();
-    expect(order).toEqual(['whole', 'pixel']);
-  });
-
-  it('tile patch holds one entry per tile; last fill color should be reflected when building patch', () => {
-    const patch: LayerBufferPatch = {
-      layerId,
-      tiles: [{ type: 'tileFill', tile: { row: 2, column: 3 }, before: packRGBA([0, 0, 0, 0]), after: packRGBA([20, 20, 20, 20]) }],
-    };
-    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
-
-    let seen: any[] = [];
-    h.agentMock.redoPatch.mockImplementation((arg: LayerBufferPatch) => {
-      seen = arg.tiles ?? [];
-    });
-
-    action.redo();
-    expect(seen.length).toBe(1);
-    const t = seen[0] as any;
-    expect(t.type).toBe('tileFill');
-    const packed = t.after >>> 0;
-    expect([(packed >> 16) & 0xff, (packed >> 8) & 0xff, packed & 0xff, (packed >>> 24) & 0xff]).toEqual([20, 20, 20, 20]);
-  });
-
-  it('does call agent even if previous canUndo() would be false (gating removed)', () => {
-    h.agentMock.canUndo.mockReturnValue(false);
-    const action = new LayerBufferHistoryAction(layerId, makeSamplePatch(layerId), 'test');
-
-    action.redo();
+  it('tile fill optimization produces tile patch (treated like multiple pixels)', () => {
+    const anvil = getAnvilOf(layerId)!;
+    fillRect(layerId, 0, 0, 32, 32, [10, 20, 30, 255]);
+    const patch = flushPatch(layerId)!;
+    const hasTile = !!patch.tiles && patch.tiles.length >= 1;
+    expect(hasTile).toBe(true);
+    const action = new AnvilLayerHistoryAction(layerId, patch);
     action.undo();
-
-    expect(h.agentMock.redoPatch).toHaveBeenCalledTimes(1);
-    expect(h.agentMock.undoPatch).toHaveBeenCalledTimes(1);
+    // after undo the tile should revert to transparent (initial state)
+    const px = anvil.getPixel(0, 0);
+    expect(px[3]).toBe(0);
   });
 
-  it('dedup smoke: many pixel changes collapse to unique positions when building patch', () => {
-    // Simulate a patch where only 100 unique indices are present across buckets
-    const TILE = 32;
-    const toLocal = (x: number, y: number) => x + y * TILE;
-    const idxs = new Uint16Array(Array.from({ length: 100 }, (_, i) => toLocal(i % 10, Math.floor(i / 10))));
-    const before = new Uint32Array(Array.from(idxs).map(() => packRGBA([0, 0, 0, 0] as any)));
-    const after = new Uint32Array(Array.from(idxs).map((_, i) => packRGBA([i % 255, 0, 0, 255] as any)));
-    const patch: LayerBufferPatch = {
-      layerId,
-      pixels: [{ type: 'pixels', tile: { row: 0, column: 0 }, idx: idxs, before, after }],
-    };
-    const action = new LayerBufferHistoryAction(layerId, patch, 'test');
-
-    let count = 0;
-    h.agentMock.redoPatch.mockImplementation((arg: LayerBufferPatch) => {
-      count = arg.pixels?.reduce((acc, p) => acc + p.idx.length, 0) ?? 0;
-    });
-
-    action.redo();
-    // 10 x 10 unique positions
-    expect(count).toBe(100);
+  it('history controller pushes and undoes Anvil patches', () => {
+    setPixel(layerId, 0, 0, [9, 9, 9, 255]);
+    const patch = flushPatch(layerId)!;
+    projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch));
+    expect(projectHistoryController.canUndo()).toBe(true);
+    projectHistoryController.undo();
+    const anvil = getAnvilOf(layerId)!;
+    expect(anvil.getPixel(0, 0)[3]).toBe(0); // alpha back to 0 after undo
+    projectHistoryController.redo();
+    expect(anvil.getPixel(0, 0)[0]).toBe(9);
   });
 
-  // helper removed: tests now construct patches directly
+  it('applyPatch helper symmetry (manual call)', () => {
+    // set some pixels -> patch captures before(0) and after(1 / 5)
+    setPixel(layerId, 5, 5, [1, 2, 3, 4]);
+    setPixel(layerId, 6, 5, [5, 6, 7, 8]);
+    const patch = flushPatch(layerId)!;
+    // Modify pixels again so applying redo will restore patch effect
+    setPixel(layerId, 5, 5, [9, 9, 9, 9]);
+    setPixel(layerId, 6, 5, [9, 9, 9, 9]);
+    flushPatch(layerId); // discard second patch
+    applyPatch(layerId, patch, 'redo'); // apply effect (after values)
+    expect(getAnvilOf(layerId)!.getPixel(5, 5)[0]).toBe(1);
+    applyPatch(layerId, patch, 'undo'); // revert to before (0)
+    expect(getAnvilOf(layerId)!.getPixel(6, 5)[0]).toBe(0);
+  });
 });

@@ -3,10 +3,10 @@ import { Point, Size2D, Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { LayerBufferPatch } from '~/features/history/actions/LayerBufferHistoryAction';
 import { TileIndex } from '~/features/layer/agent/managers/Tile';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { LayerBufferPatch } from './legacyPatchTypes';
 import DiffManager from './managers/DiffManager';
 import PixelBufferManager from './managers/PixelBufferManager';
 import TileManager from './managers/TileManager';
@@ -209,30 +209,26 @@ export default class LayerImageAgent {
 
 // ---- Conversion helpers (legacy LayerBufferPatch -> Anvil Patch) ----
 function convertLegacyLayerBufferPatchToAnvilPatch(p: LayerBufferPatch): AnvilPatch | null {
+  // Anvil 側 applyPatch 実装は tile.before/after を "packed RGBA (u32)" として扱う。
+  // 旧 LayerBufferPatch も tile.before/after は既に packed 数値なのでそのまま流用する。
   const out: AnvilPatch = {};
   if (p.whole) {
     out.whole = { before: p.whole.before, after: p.whole.after } as any;
   }
   if (p.tiles && p.tiles.length) {
-    out.tiles = p.tiles.map((t) => {
-      const before = t.before !== undefined ? unpackPackedRGBA(t.before) : undefined;
-      const after = unpackPackedRGBA(t.after);
-      return { tile: t.tile as any, before, after } as any;
-    });
+    out.tiles = p.tiles.map((t) => ({
+      tile: t.tile as any,
+      before: t.before, // packed number or undefined
+      after: t.after, // packed number
+    }));
   }
   if (p.pixels && p.pixels.length) {
-    out.pixels = p.pixels.map((pl) => {
-      return {
-        tile: pl.tile as any,
-        idx: pl.idx,
-        before: pl.before,
-        after: pl.after,
-      } as any;
-    });
+    out.pixels = p.pixels.map((pl) => ({
+      tile: pl.tile as any,
+      idx: pl.idx,
+      before: pl.before,
+      after: pl.after,
+    }));
   }
   return out;
-}
-
-function unpackPackedRGBA(packed: number): [number, number, number, number] {
-  return [(packed >> 16) & 0xff, (packed >> 8) & 0xff, packed & 0xff, (packed >>> 24) & 0xff];
 }

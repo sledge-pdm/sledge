@@ -83,8 +83,13 @@ export function applyPatch(layerId: string, patch: Patch, mode: 'undo' | 'redo')
 
   // Tile fills
   patch.tiles?.forEach((t) => {
-    const packed = mode === 'undo' ? t.before : t.after;
-    if (packed === undefined) return; // 元が非一様: pixel パッチが再構築
+    let packed = mode === 'undo' ? t.before : t.after;
+    // undo 時 before が undefined の場合: 元タイルは非一様 (pixels で再構築) もしくは取得不能。
+    // その場合は一旦透明で初期化し pixel patch が上書きする (透明 => 任意ピクセル) ことで再現性維持。
+    if (mode === 'undo' && packed === undefined) {
+      packed = 0; // transparent RGBA(0,0,0,0)
+    }
+    if (packed === undefined) return; // redo 方向で after が無いケースは無視
     const r = (packed >> 16) & 0xff;
     const g = (packed >> 8) & 0xff;
     const b = packed & 0xff;

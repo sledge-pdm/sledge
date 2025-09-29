@@ -21,7 +21,8 @@ Sledge is pixel-based drawing tool made with Tauri v2, SolidJS and Vite.
 - /packages/core ... core package (some basic types and consts)
 - /packages/theme ... theme package (reset/global styles, fonts, and color theme)
 - /packages/ui ... ui package (common things such as Dropdown)
-- /packages/wasm ... Some functions written in WASM (mostly low-level and heavy actions, such as flood fill)
+- /packages/wasm ... Some functions written in WASM (mostly low-level and heavy actions, such as flood fill). currently some buffer-related functions are copied to Anvil (for the loose coupling).
+- /packages/anvil ... Anvil is buffer operation package. It's basically for sledge, but I'm aiming to make it separated with any specific code in sledge. Currently moving buffer-related things from sledge to Anvil (like fill, layer/image transfer, pen, eraser).
 
 ## Commands
 

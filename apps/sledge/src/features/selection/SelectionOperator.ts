@@ -11,7 +11,7 @@ import {
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
-import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
+import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
@@ -54,10 +54,6 @@ export function isDrawingAllowed(pos: Vec2, checkState?: boolean): boolean {
 
 export function getSelectionLimitMode(): SelectionLimitMode {
   return toolStore.selectionLimitMode;
-}
-
-export function getSelectionFillMode(): SelectionFillMode {
-  return toolStore.selectionFillMode;
 }
 
 // 現在の状況からFloat状態を作成

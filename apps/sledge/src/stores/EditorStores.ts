@@ -61,13 +61,11 @@ type LogStore = {
   canvasDebugPoints: DebugPoint[]; // デバッグ用の点の配列
 };
 export type SelectionLimitMode = 'none' | 'outside' | 'inside';
-export type SelectionFillMode = 'global' | 'boundary' | 'area'; // global: 全体参照, boundary: 範囲制限, area: 選択範囲塗りつぶし
 export type ToolStore = {
   tools: Record<ToolCategoryId, ToolCategory>;
   activeToolCategory: ToolCategoryId;
   prevActiveCategory: ToolCategoryId | undefined;
   selectionLimitMode: SelectionLimitMode;
-  selectionFillMode: SelectionFillMode;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
@@ -135,7 +133,6 @@ const defaultToolStore: ToolStore = {
   activeToolCategory: 'pen',
   prevActiveCategory: undefined,
   selectionLimitMode: 'inside',
-  selectionFillMode: 'area', // デフォルトは現在の動作（全体参照）
 };
 
 export const initEditorStore = () => {

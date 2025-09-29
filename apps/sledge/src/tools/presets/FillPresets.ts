@@ -14,6 +14,19 @@ export const fillPresetFields: PresetFieldMeta[] = [
     },
     tips: 'Color tolerance for fill operation',
   },
+  {
+    key: 'fillMode',
+    label: 'Fill Mode',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { value: '', label: 'area' },
+        { value: 'area', label: 'area' },
+        { value: 'inside', label: 'inside' },
+      ],
+    },
+    tips: 'Pen brush shape',
+  },
   // {
   //   key: 'antialias',
   //   label: 'Antialias',

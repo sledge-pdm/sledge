@@ -11,7 +11,7 @@ import {
   registerWholeChange,
 } from '~/features/layer/anvil/AnvilController';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
-import { getSelectionLimitMode, isDrawingAllowed, isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { getSelectionLimitMode, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { getPresetOf } from '~/features/tool/ToolController';
 import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
@@ -31,15 +31,16 @@ export class FillTool implements ToolBehavior {
   onStart(ctx: AnvilToolContext, { position, color, presetName, layerId }: ToolArgs) {
     const startTime = Date.now();
 
-    console.log('start');
-    // 描画制限チェック
-    if (!isDrawingAllowed(position, true)) {
-      console.log('aa');
-      return {
-        shouldUpdate: false,
-        shouldRegisterToHistory: false,
-      };
-    }
+    // Restrict by selection (a little bit harsh, so currently commented out)
+    //
+    // if (!isDrawingAllowed(position, true)) {
+    //   setBottomBarText('Click inside selection.', { kind: 'warn' });
+
+    //   return {
+    //     shouldUpdate: false,
+    //     shouldRegisterToHistory: false,
+    //   };
+    // }
 
     const preset = presetName ? (getPresetOf('fill', presetName) as any) : undefined;
     const threshold = preset?.threshold ?? 0;
@@ -49,7 +50,6 @@ export class FillTool implements ToolBehavior {
 
     // 選択範囲がない、または制限モードがnoneの場合は通常のフラッドフィル
     if (!isSelectionAvailable()) {
-      console.log('hm');
       floodFill({
         target: getBufferPointer(ctx.layerId)!,
         targetWidth: getLayerWidth(ctx.layerId)!,
@@ -61,7 +61,6 @@ export class FillTool implements ToolBehavior {
       });
     } else {
       const selectionMask = selectionManager.getSelectionMask();
-      console.log('woah');
       const fillMode = preset.fillMode ?? 'area';
       if (fillMode === 'inside') {
         floodFill({
@@ -76,7 +75,18 @@ export class FillTool implements ToolBehavior {
           maskMode: limitMode,
         });
       } else {
-        this.fillWithAreaMode(ctx, color, selectionMask.getMask());
+        const maskBuffer = selectionMask.getMask();
+        const target = getBufferPointer(ctx.layerId)!;
+        for (let i = 0; i < maskBuffer.length; i++) {
+          const isInSelection = maskBuffer[i] === 1;
+          if (isInSelection) {
+            const bufferIndex = i * 4;
+            target[bufferIndex] = color[0]; // R
+            target[bufferIndex + 1] = color[1]; // G
+            target[bufferIndex + 2] = color[2]; // B
+            target[bufferIndex + 3] = color[3]; // A
+          }
+        }
       }
     }
 
@@ -90,32 +100,6 @@ export class FillTool implements ToolBehavior {
       shouldUpdate: true,
       shouldRegisterToHistory: true,
     };
-  }
-
-  private fillWithAreaMode(ctx: AnvilToolContext, color: RGBAColor, selectionMask: Uint8Array): void {
-    const layerId = ctx.layerId;
-    const width = getLayerWidth(layerId)!;
-    const height = getLayerHeight(layerId)!;
-    const currentBuffer = getBufferPointer(layerId)!;
-
-    // 元画像を記録
-    const sourceBuffer = currentBuffer.slice();
-
-    // 選択範囲全体を指定色で塗りつぶし
-    // currentBuffer を直接塗る
-    for (let i = 0; i < selectionMask.length; i++) {
-      const isInSelection = selectionMask[i] === 1;
-      if (isInSelection) {
-        const bufferIndex = i * 4;
-        currentBuffer[bufferIndex] = color[0]; // R
-        currentBuffer[bufferIndex + 1] = color[1]; // G
-        currentBuffer[bufferIndex + 2] = color[2]; // B
-        currentBuffer[bufferIndex + 3] = color[3]; // A
-      }
-    }
-
-    // バッファ全体の差分を履歴に記録
-    registerWholeChange(layerId, sourceBuffer, currentBuffer.slice());
   }
 
   onMove(ctx: AnvilToolContext, args: ToolArgs) {

@@ -20,7 +20,6 @@ export const fillPresetFields: PresetFieldMeta[] = [
     component: 'Dropdown',
     props: {
       options: [
-        { value: '', label: 'area' },
         { value: 'area', label: 'area' },
         { value: 'inside', label: 'inside' },
       ],

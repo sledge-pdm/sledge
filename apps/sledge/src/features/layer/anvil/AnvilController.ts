@@ -25,7 +25,7 @@ export function setBuffer(layerId: string, buffer: Uint8ClampedArray) {
 export function registerWholeChange(layerId: string, before: Uint8ClampedArray, after: Uint8ClampedArray) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return;
-  anvil.addWholeBufferChange(before, after);
+  anvil.addWholeDiff(before, after);
 }
 
 export function setPixel(layerId: string, x: number, y: number, rgba: [number, number, number, number]) {

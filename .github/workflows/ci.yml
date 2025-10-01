@@ -68,6 +68,9 @@ jobs:
       - name: Install JS dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: build anvil wasm
+        run: pnpm anvil:wasm-build
+
       - name: Build wasm
         run: pnpm wasm:build
 

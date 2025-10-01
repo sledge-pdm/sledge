@@ -118,6 +118,8 @@ export function applyPatch(layerId: string, patch: Patch, mode: 'undo' | 'redo')
     }
   });
 
+  anvil.flush();
+
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${layerId}) ${mode}` });
   eventBus.emit('preview:requestUpdate', { layerId });
 }

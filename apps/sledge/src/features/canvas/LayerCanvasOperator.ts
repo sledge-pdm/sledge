@@ -82,6 +82,7 @@ export default class LayerCanvasOperator {
       }
       if (result.shouldRegisterToHistory) {
         const patch = flushPatch(layer.id);
+        console.log(patch);
         if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(layer.id, patch, { tool: toolCategory.id }));
       }
 

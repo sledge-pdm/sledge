@@ -2,6 +2,7 @@ import { putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
+import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { getPresetOf } from '~/features/tool/ToolController';
 import { ShapeStore } from '~/tools/draw/pen/ShapeStore';
@@ -15,12 +16,26 @@ export class PenTool implements ToolBehavior {
   startTime: number | undefined = undefined;
   isShift: boolean = false;
   isCtrl: boolean = false;
-  private lastPreviewDiff: Array<{ position: Vec2; before: RGBAColor; after: RGBAColor }> = [];
+  private lastPreviewDiff: Array<{ x: number; y: number; before: RGBAColor; after: RGBAColor }> = [];
 
   startPosition: Vec2 | undefined = undefined;
   startPointerPosition: Vec2 | undefined = undefined;
 
   shapeStore = new ShapeStore();
+
+  // key=x,y
+  diffsWhileStroke: Map<string, { x: number; y: number; before: RGBAColor; after: RGBAColor }> = new Map();
+
+  addStrokeDiffs(diffs: { x: number; y: number; before: RGBAColor; after: RGBAColor }[]) {
+    diffs?.forEach((d) => {
+      const k = `${d.x},${d.y}`;
+      // すでにある場合はそのbeforeを持ってくる
+      const pastDiff = this.diffsWhileStroke.get(k);
+      if (pastDiff) d.before = pastDiff.before;
+
+      this.diffsWhileStroke.set(k, d);
+    });
+  }
 
   centerPosition(rawPos: Vec2, size: number): Vec2 {
     const even = size % 2 === 0;
@@ -33,7 +48,7 @@ export class PenTool implements ToolBehavior {
     // 前回の状態が残っている場合はクリーンアップ
     if (this.lastPreviewDiff.length > 0) {
       console.warn('PenTool: Cleaning up previous preview state');
-      this.undoLastLineDiff(ctx);
+      this.undoLastLineDiff(args.layerId);
     }
 
     this.startTime = Date.now();
@@ -47,6 +62,7 @@ export class PenTool implements ToolBehavior {
       };
 
     this.lastPreviewDiff = [];
+    this.diffsWhileStroke = new Map();
 
     if (!this.isShift) {
       return this.draw(ctx, args, args.color);
@@ -54,6 +70,11 @@ export class PenTool implements ToolBehavior {
       return this.drawLine(false, ctx, args, args.color);
     }
   }
+
+  // onRawUpdate(ctx: AnvilToolContext, args: ToolArgs) {
+  //   console.log(args);
+  //   return this.draw(ctx, args, args.color);
+  // }
 
   onMove(ctx: AnvilToolContext, args: ToolArgs) {
     if (!this.isShift) {
@@ -100,8 +121,9 @@ export class PenTool implements ToolBehavior {
     const anvil = layer ? getAnvilOf(layer.id) : undefined;
     if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
     const cp = this.centerPosition(rawPosition, size);
-    const diffs = putShape({ anvil, posX: cp.x, posY: cp.y, shape: this.shapeStore.get(shape, size)!, color });
-    diffs?.forEach((d) => anvil.addPixelDiff(d.x, d.y, d.before, d.after));
+
+    const diffs = putShape({ anvil, posX: cp.x, posY: cp.y, shape: this.shapeStore.get(shape, size)!, color, manualDiff: true });
+    if (diffs) this.addStrokeDiffs(diffs);
 
     if (rawLastPosition !== undefined) {
       const fromCp = this.centerPosition(rawLastPosition, size);
@@ -113,8 +135,9 @@ export class PenTool implements ToolBehavior {
         fromPosY: fromCp.y,
         shape: this.shapeStore.get(shape, size)!,
         color,
+        manualDiff: true,
       });
-      diffs?.forEach((d) => anvil.addPixelDiff(d.x, d.y, d.before, d.after));
+      if (diffs) this.addStrokeDiffs(diffs);
     }
 
     return {
@@ -123,13 +146,22 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  private undoLastLineDiff(ctx: AnvilToolContext) {
+  private undoLastLineDiff(layerId: string) {
     // 前回のプレビューが残っていた場合はundo
     if (this.lastPreviewDiff.length === 0) return;
     try {
+      const target = getBufferPointer(layerId);
+      const tw = getWidth(layerId);
+      if (!target || !tw) return;
+
       for (const diff of this.lastPreviewDiff) {
         // apply 'before' color; skipExistingDiffCheck=true to ensure applying
-        ctx.setPixel(diff.position.x, diff.position.y, diff.before as any);
+        // ctx.setPixel(diff.x, diff.y, diff.before);
+        const idx = (diff.x + diff.y * tw) * 4;
+        target[idx] = diff.before[0];
+        target[idx + 1] = diff.before[1];
+        target[idx + 2] = diff.before[2];
+        target[idx + 3] = diff.before[3];
       }
     } catch (error) {
       console.error('Failed to undo line preview:', error);
@@ -139,14 +171,14 @@ export class PenTool implements ToolBehavior {
   }
 
   // 始点からの直線を描画
-  drawLine(commit: boolean, ctx: AnvilToolContext, { position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  drawLine(commit: boolean, ctx: AnvilToolContext, { layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
       color = transparent;
     }
 
-    this.undoLastLineDiff(ctx);
+    this.undoLastLineDiff(layerId);
 
     // ctrl+shiftの場合は角度固定
     const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
@@ -169,8 +201,15 @@ export class PenTool implements ToolBehavior {
       fromPosY: fromCp.y,
       shape: this.shapeStore.get(shape, size)!,
       color,
+      manualDiff: true,
     });
-    diffs?.forEach((d) => anvil.addPixelDiff(d.x, d.y, d.before, d.after));
+    if (diffs) {
+      if (commit) {
+        this.addStrokeDiffs(diffs);
+      } else {
+        this.lastPreviewDiff = diffs;
+      }
+    }
 
     return {
       shouldUpdate: true,
@@ -179,7 +218,7 @@ export class PenTool implements ToolBehavior {
   }
 
   onEnd(ctx: AnvilToolContext, args: ToolArgs) {
-    let { event, color } = args;
+    let { event, color, layerId } = args;
     if (event?.buttons === 2) {
       color = transparent;
     }
@@ -194,6 +233,11 @@ export class PenTool implements ToolBehavior {
     this.startPosition = undefined;
     this.lastPreviewDiff = [];
 
+    // flush diffs
+    const anvil = getAnvilOf(layerId);
+    this.diffsWhileStroke.values().forEach((d) => anvil?.addPixelDiff(d.x, d.y, d.before, d.after));
+    this.diffsWhileStroke = new Map();
+
     return {
       result: resultText,
       shouldUpdate: true,
@@ -203,7 +247,7 @@ export class PenTool implements ToolBehavior {
 
   onCancel(ctx: AnvilToolContext, args: ToolArgs) {
     if (this.isShift) {
-      this.undoLastLineDiff(ctx);
+      this.undoLastLineDiff(args.layerId);
     }
 
     this.isShift = false;
@@ -213,6 +257,9 @@ export class PenTool implements ToolBehavior {
     this.startTime = undefined;
 
     this.lastPreviewDiff = [];
+
+    // flush diffs
+    this.diffsWhileStroke = new Map();
 
     return {
       shouldUpdate: false,

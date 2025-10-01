@@ -145,7 +145,8 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
           : '';
         const tiles = patch.tiles ? `${patch.tiles.length ?? 0} tiles` : '';
         const whole = patch.whole ? `whole` : '';
-        description = `${findLayerById(anvilAction.layerId)?.name} / ${[pixels, tiles, whole].join(' ')}`;
+        const partial = patch.partial ? `partial(${patch.partial.boundBox.width}x${patch.partial.boundBox.height})` : '';
+        description = `${findLayerById(anvilAction.layerId)?.name} / ${[pixels, tiles, whole, partial].filter(Boolean).join(' ')}`;
       }
       break;
     }

@@ -80,6 +80,14 @@ export function applyPatch(layerId: string, patch: Patch, mode: 'undo' | 'redo')
     anvil.loadImageData(target);
   }
 
+  // Partial rectangle (applies after whole, before tiles/pixels)
+  if (patch.partial) {
+    const { boundBox, before, after } = patch.partial;
+    const target = mode === 'undo' ? before : after;
+    anvil.setPartialBuffer(boundBox, target);
+    anvil.flush();
+  }
+
   // Tile fills
   patch.tiles?.forEach((t) => {
     let packed = mode === 'undo' ? t.before : t.after;
@@ -161,6 +169,9 @@ function packRGBA(r: number, g: number, b: number, a: number) {
 function convertLayerPatch(raw: any): Patch {
   const out: Patch = {};
   if (raw.whole) out.whole = raw.whole; // before/after は Uint8ClampedArray で同型
+  if (raw.partial) {
+    out.partial = raw.partial; // { boundBox, before, after }
+  }
   if (raw.tiles) {
     out.tiles = raw.tiles.map((t: any) => ({
       tile: t.tile,

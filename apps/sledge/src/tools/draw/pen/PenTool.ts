@@ -26,6 +26,9 @@ export class PenTool implements ToolBehavior {
   // key=x,y
   diffsWhileStroke: Map<string, { x: number; y: number; before: RGBAColor; after: RGBAColor }> = new Map();
 
+  strokeBoundBox: { minX: number; minY: number; maxX: number; maxY: number } | undefined = undefined;
+  diffMode: 'pixels' | 'partial' = 'pixels';
+
   addStrokeDiffs(diffs: { x: number; y: number; before: RGBAColor; after: RGBAColor }[]) {
     diffs?.forEach((d) => {
       const k = `${d.x},${d.y}`;
@@ -34,7 +37,25 @@ export class PenTool implements ToolBehavior {
       if (pastDiff) d.before = pastDiff.before;
 
       this.diffsWhileStroke.set(k, d);
+
+      // bounding box 更新
+      if (!this.strokeBoundBox) {
+        this.strokeBoundBox = { minX: d.x, minY: d.y, maxX: d.x, maxY: d.y };
+      } else {
+        if (d.x < this.strokeBoundBox.minX) this.strokeBoundBox.minX = d.x;
+        if (d.y < this.strokeBoundBox.minY) this.strokeBoundBox.minY = d.y;
+        if (d.x > this.strokeBoundBox.maxX) this.strokeBoundBox.maxX = d.x;
+        if (d.y > this.strokeBoundBox.maxY) this.strokeBoundBox.maxY = d.y;
+      }
     });
+
+    // diffMode 切替判定（閾値 10000 ピクセル）: 既に partial の場合は何もしない
+    if (this.diffMode === 'pixels') {
+      const count = this.diffsWhileStroke.size;
+      if (count >= 10000) {
+        this.diffMode = 'partial';
+      }
+    }
   }
 
   centerPosition(rawPos: Vec2, size: number): Vec2 {
@@ -63,6 +84,13 @@ export class PenTool implements ToolBehavior {
 
     this.lastPreviewDiff = [];
     this.diffsWhileStroke = new Map();
+    this.strokeBoundBox = undefined;
+    this.diffMode = 'pixels';
+
+    // バッチモード開始 (stroke 全体をまとめる). レイヤが変わる可能性はほぼ無い前提で開始。
+    const layer = activeLayer();
+    const anvil = layer ? getAnvilOf(layer.id) : undefined;
+    anvil?.beginBatch();
 
     if (!this.isShift) {
       return this.draw(ctx, args, args.color);
@@ -233,9 +261,58 @@ export class PenTool implements ToolBehavior {
     this.startPosition = undefined;
     this.lastPreviewDiff = [];
 
-    // flush diffs
+    // diff をまとめて登録
     const anvil = getAnvilOf(layerId);
-    this.diffsWhileStroke.values().forEach((d) => anvil?.addPixelDiff(d.x, d.y, d.before, d.after));
+    if (anvil) {
+      if (this.diffMode === 'pixels') {
+        // small change = pixels diff
+        anvil.addPixelDiffs(Array.from(this.diffsWhileStroke.values()));
+        anvil.endBatch();
+      } else {
+        // big change = partial buffer diff
+        if (this.strokeBoundBox) {
+          const bbox = this.strokeBoundBox;
+          const w = bbox.maxX - bbox.minX + 1;
+          const h = bbox.maxY - bbox.minY + 1;
+          const before = new Uint8ClampedArray(w * h * 4);
+          const after = new Uint8ClampedArray(w * h * 4);
+          // Layer全体バッファ取得
+          const layerBuffer = getBufferPointer(layerId);
+          const layerWidth = getWidth(layerId);
+          if (layerBuffer && layerWidth) {
+            // まず after を現バッファから丸ごとコピー
+            for (let yy = 0; yy < h; yy++) {
+              const srcRowStart = (bbox.minX + (bbox.minY + yy) * layerWidth) * 4;
+              const dstRowStart = yy * w * 4;
+              after.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
+            }
+            // 未変更領域は after と同一なので最初にコピーしてから変更ピクセルの before を上書き
+            before.set(after);
+            for (const diff of this.diffsWhileStroke.values()) {
+              const lx = diff.x - bbox.minX;
+              const ly = diff.y - bbox.minY;
+              const di = (lx + ly * w) * 4;
+              before[di] = diff.before[0];
+              before[di + 1] = diff.before[1];
+              before[di + 2] = diff.before[2];
+              before[di + 3] = diff.before[3];
+            }
+            anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, before, after);
+            anvil.endBatch();
+          } else {
+            // フォールバック: pixel diff に戻す
+            anvil.addPixelDiffs(Array.from(this.diffsWhileStroke.values()));
+            anvil.endBatch();
+          }
+        } else {
+          // bbox が無い場合フォールバック
+          anvil.addPixelDiffs(Array.from(this.diffsWhileStroke.values()));
+          anvil.endBatch();
+        }
+      }
+    }
+    this.strokeBoundBox = undefined;
+    this.diffMode = 'pixels';
     this.diffsWhileStroke = new Map();
 
     return {
@@ -258,7 +335,11 @@ export class PenTool implements ToolBehavior {
 
     this.lastPreviewDiff = [];
 
-    // flush diffs
+    // diff 破棄 & バッチ終了(変更はプレビューのみなので endBatch 前に discard されているような構造)
+    const anvil = getAnvilOf(args.layerId);
+    anvil?.endBatch();
+    this.strokeBoundBox = undefined;
+    this.diffMode = 'pixels';
     this.diffsWhileStroke = new Map();
 
     return {

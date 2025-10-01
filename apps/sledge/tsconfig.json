@@ -14,5 +14,10 @@
     },
     "types": ["vite/client"],
     "rootDirs": ["src"]
-  }
+  },
+  "exclude": [
+    // Tauri が生成するバイナリ的 JS 資産群（型チェック不要 / 文字化けし ts エラーになる）
+    "src-tauri/target",
+    "**/out/tauri-codegen-assets/**"
+  ]
 }

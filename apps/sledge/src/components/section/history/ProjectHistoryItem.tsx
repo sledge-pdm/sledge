@@ -6,11 +6,11 @@ import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { RGBAToHex } from '~/features/color';
 import { BaseHistoryAction, projectHistoryController } from '~/features/history';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
-import { LayerBufferHistoryAction } from '~/features/history/actions/LayerBufferHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
@@ -129,15 +129,15 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.layerSnapshot?.name}`;
       break;
-    case 'layer_buffer':
-      const lbaction = action as LayerBufferHistoryAction;
+    case 'layer_buffer': {
+      const anvilAction = action as AnvilLayerHistoryAction;
       if (context?.tool === 'fx') {
-        description = `${findLayerById(lbaction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
+        description = `${findLayerById(anvilAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
       } else {
-        const patch = lbaction.patch;
+        const patch: any = anvilAction.patch;
         const pixels = patch.pixels
           ? `${
-              patch.pixels.reduce((prev, pixelList) => {
+              patch.pixels.reduce((prev: number, pixelList: any) => {
                 prev += pixelList.idx.length;
                 return prev;
               }, 0) ?? 0
@@ -145,9 +145,11 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
           : '';
         const tiles = patch.tiles ? `${patch.tiles.length ?? 0} tiles` : '';
         const whole = patch.whole ? `whole` : '';
-        description = `${findLayerById(lbaction.layerId)?.name} / ${[pixels, tiles, whole].join(' ')}`;
+        const partial = patch.partial ? `partial(${patch.partial.boundBox.width}x${patch.partial.boundBox.height})` : '';
+        description = `${findLayerById(anvilAction.layerId)?.name} / ${[pixels, tiles, whole, partial].filter(Boolean).join(' ')}`;
       }
       break;
+    }
     case 'layer_props':
       icon = '/icons/misc/layer.png';
       const lpaction = action as LayerPropsHistoryAction;

@@ -5,7 +5,9 @@ import fragmentSrc from './shaders/blend.frag.glsl';
 import vertexSrc from './shaders/fullscreen.vert.glsl';
 // WASM関数をインポート
 import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
-import { getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
+// import { getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
+import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 
@@ -178,13 +180,13 @@ export class WebGLRenderer {
           logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
 
           this.layers.forEach((layer) => {
-            const agent = getAgentOf(layer.id);
-            if (agent) {
+            const anvil = getAnvilOf(layer.id);
+            if (anvil) {
               try {
-                agent.changeBufferSize(newSize, false); // emitEvent = falseで他のイベントを抑制
-                logger.debugLog(`✅ Resized layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
+                anvil.resize(actualWidth, actualHeight); // offset なし resize
+                logger.debugLog(`✅ Resized anvil layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
               } catch (error) {
-                logger.debugError(`❌ Failed to resize layer buffer ${layer.id}:`, error);
+                logger.debugError(`❌ Failed to resize anvil layer buffer ${layer.id}:`, error);
               }
             }
           });
@@ -251,9 +253,11 @@ export class WebGLRenderer {
     activeLayers.forEach((layer, i) => {
       logger.debugLog(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
 
-      const agent = getAgentOf(layer.id)!;
+      const anvil = getAnvilOf(layer.id);
       const buf =
-        layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving() ? floatingMoveManager.getPreviewBuffer() : getBufferOf(layer.id);
+        layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving()
+          ? floatingMoveManager.getPreviewBuffer()
+          : getBufferPointer(layer.id);
       if (!buf) return;
 
       // バッファサイズの整合性をチェック
@@ -277,15 +281,19 @@ export class WebGLRenderer {
         return;
       }
 
-      const dirtyTiles = agent.getTileManager().getDirtyTiles();
+      const dirtyTiles = getDirtyTiles(layer.id);
       if (onlyDirty && dirtyTiles.length !== 0) {
         logger.debugLog(`🔧 Processing ${dirtyTiles.length} dirty tiles for layer ${i}`);
         // dirtyなタイルがなければフォールバック
         dirtyTiles.forEach((tile) => {
           // 差分アップデート - WASM関数を使って高速化
-          const { x: ox, y: oy } = tile.getOffset();
-          const w = Math.min(this.width - ox, tile.size);
-          const h = Math.min(this.height - oy, tile.size);
+          const tileSize = anvil?.getTileSize() ?? 0;
+          const col = (tile as any).col;
+          const row = (tile as any).row;
+          const ox = col * tileSize;
+          const oy = row * tileSize;
+          const w = Math.min(this.width - ox, tileSize);
+          const h = Math.min(this.height - oy, tileSize);
 
           // フォールバック: 元のJavaScript実装
           const tileByteLength = w * h * 4;
@@ -307,8 +315,6 @@ export class WebGLRenderer {
               `Tile upload failed: layer=${i}, offset=(${ox},${oy}), size=(${w},${h}), buffer.length=${tileBuffer.length}`
             );
           }
-
-          tile.isDirty = false;
         });
       } else {
         logger.debugLog(`📤 Full upload for layer ${i}`);
@@ -335,7 +341,8 @@ export class WebGLRenderer {
           logger.debugError(`Full upload failed: layer=${i}, size=(${this.width},${this.height}), buffer.length=${buf.length}`);
         }
 
-        agent.getTileManager().resetDirtyStates();
+        // フルアップロード後は dirty フラグをクリア (patch 経由でない更新ケース)
+        clearDirtyTiles(layer.id);
       }
     });
 

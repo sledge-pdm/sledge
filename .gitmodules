@@ -7,3 +7,6 @@
 [submodule "assets"]
 	path = assets
 	url = https://github.com/sledge-pdm/sledge-assets.git
+[submodule "packages/anvil"]
+	path = packages/anvil
+	url = https://github.com/sledge-pdm/anvil.git

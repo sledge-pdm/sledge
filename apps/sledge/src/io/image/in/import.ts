@@ -1,9 +1,10 @@
 import { FileLocation } from '@sledge/core';
 import { changeCanvasSize } from '~/features/canvas';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import { setBuffer } from '~/features/layer/anvil/AnvilController';
 import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
+import { eventBus } from '~/utils/EventBus';
 import { join, pathToFileLocation } from '~/utils/FileUtils';
 
 export async function importImageFromPath(location: FileLocation): Promise<boolean> {
@@ -53,8 +54,9 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
     }
   );
 
-  const agent = getAgentOf(initLayer.id);
-  agent?.setBuffer(Uint8ClampedArray.from(imageData.data), false, true);
+  setBuffer(initLayer.id, Uint8ClampedArray.from(imageData.data));
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Import ${location.name}` });
+  eventBus.emit('preview:requestUpdate', { layerId: initLayer.id });
 
   return true;
 }

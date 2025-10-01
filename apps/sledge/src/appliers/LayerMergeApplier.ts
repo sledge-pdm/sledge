@@ -1,5 +1,7 @@
+import { projectHistoryController } from '~/features/history';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { BlendMode, getLayerIndex, Layer } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import { flushPatch, getBufferCopy, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
 import { canvasStore, setLayerListStore } from '~/stores/ProjectStores';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 
@@ -29,9 +31,9 @@ function ensureMergeRenderer(originLayer: Layer, targetLayer: Layer): WebGLRende
 }
 
 export async function mergeLayer({ originLayer, targetLayer }: LayerMergeParams): Promise<void> {
-  // ターゲットのエージェント（描画先）
-  const targetAgent = getAgentOf(targetLayer.id);
-  if (!targetAgent) return;
+  // Anvil 層が存在する前提 (存在しない場合は何もしない)
+  const before = getBufferCopy(targetLayer.id);
+  if (!before) return;
 
   // インデックスの確認
   const tIdx = getLayerIndex(targetLayer.id);
@@ -42,16 +44,11 @@ export async function mergeLayer({ originLayer, targetLayer }: LayerMergeParams)
   const renderer = ensureMergeRenderer(originLayer, targetLayer);
   const out = renderer.readPixelsFlipped();
 
-  // diff 用コピー（before は target の現在バッファ）
-  const before = new Uint8ClampedArray(targetAgent.getBuffer());
-
-  // バッファ更新 + 履歴登録（ImageTransferApplier と同じ流儀）
-  targetAgent.setBuffer(out, true, true);
-  const dm = targetAgent.getDiffManager();
-  dm.setWhole(before, out);
-  dm.flush();
-  targetAgent.registerToHistory();
-  targetAgent.forceUpdate();
+  // whole diff 登録 & 履歴
+  registerWholeChange(targetLayer.id, before, out);
+  setBuffer(targetLayer.id, out);
+  const patch = flushPatch(targetLayer.id);
+  if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(targetLayer.id, patch, { tool: 'merge' }));
 
   // target を normal / 100% に正規化
   if (tIdx >= 0) {

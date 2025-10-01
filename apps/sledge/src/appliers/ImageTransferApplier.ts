@@ -1,6 +1,7 @@
+import { projectHistoryController } from '~/features/history';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { flushPatch, getBufferCopy, getHeight, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
 import { loadLocalImage } from '~/utils/DataUtils';
 
 export interface ImageTransferParams {
@@ -31,13 +32,12 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
 
   /* 2) レイヤーピクセルバッファへ行コピー */
   const layer = findLayerById(targetLayerId);
-  const agent = getAgentOf(targetLayerId) as LayerImageAgent;
-  if (!agent) throw new Error('Layer not found');
-  const originalBuffer = new Uint8ClampedArray(agent.getBuffer()); // Uint8ClampedArray
-  const dstBuf = agent.getBuffer(); // Uint8ClampedArray
-
-  const layerW = agent.getWidth();
-  const layerH = agent.getHeight();
+  if (!layer) throw new Error('Layer not found');
+  const layerW = getWidth(targetLayerId)!;
+  const layerH = getHeight(targetLayerId)!;
+  // 現在バッファコピー (before)
+  const originalBuffer = getBufferCopy(targetLayerId)!;
+  const dstBuf = originalBuffer.slice(); // 作業用コピー (後で after として書き戻し)
   const dot = layer?.dotMagnification || 1;
 
   let dstX = Math.floor(entry.transform.x / dot);
@@ -96,10 +96,11 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
     }
   }
 
-  agent.setBuffer(dstBuf, false, true);
-
-  const dm = agent.getDiffManager();
-  dm.setWhole(originalBuffer, dstBuf);
-  dm.flush();
-  agent.registerToHistory({ tool: 'image' });
+  // After 全体更新 & 履歴登録 (Anvil whole diff)
+  registerWholeChange(targetLayerId, originalBuffer, dstBuf);
+  setBuffer(targetLayerId, dstBuf);
+  const patch = flushPatch(targetLayerId);
+  if (patch) {
+    projectHistoryController.addAction(new AnvilLayerHistoryAction(targetLayerId, patch, { tool: 'image' }));
+  }
 }

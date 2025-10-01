@@ -6,7 +6,7 @@ import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
+import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
 import { sectionContent } from '~/styles/section/section_item.css';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -43,10 +43,10 @@ const Selection: Component = () => {
     setToolStore('selectionLimitMode', newMode);
   };
 
-  const fillMode = () => toolStore.selectionFillMode;
-  const setFillMode = (newMode: SelectionFillMode) => {
-    setToolStore('selectionFillMode', newMode);
-  };
+  // const fillMode = () => toolStore.selectionFillMode;
+  // const setFillMode = (newMode: SelectionFillMode) => {
+  //   setToolStore('selectionFillMode', newMode);
+  // };
 
   const [isSelected, setIsSelected] = createSignal(isSelectionAvailable());
 
@@ -107,7 +107,7 @@ const Selection: Component = () => {
               />
             </div>
 
-            <Show when={mode() !== 'none' && toolStore.activeToolCategory === 'fill'}>
+            {/* <Show when={mode() !== 'none' && toolStore.activeToolCategory === 'fill'}>
               <div class={flexCol}>
                 <p style={{ 'margin-bottom': '6px' }}>Fill Mode</p>
                 <Dropdown
@@ -120,7 +120,7 @@ const Selection: Component = () => {
                   onChange={(e) => setFillMode(e as SelectionFillMode)}
                 />
               </div>
-            </Show>
+            </Show> */}
           </div>
 
           {/* <div class={flexRow} style={{ 'flex-wrap': 'wrap', 'row-gap': '2px' }}>

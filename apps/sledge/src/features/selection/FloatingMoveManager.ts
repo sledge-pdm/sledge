@@ -4,8 +4,17 @@ import { Vec2 } from '@sledge/core';
 import { crop_patch_rgba } from '@sledge/wasm';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
 import { projectHistoryController } from '~/features/history';
-import { LayerBufferHistoryAction } from '~/features/history/actions/LayerBufferHistoryAction';
-import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
+// import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
+import {
+  flushPatch,
+  getBufferCopy,
+  getBufferPointer,
+  getHeight,
+  getWidth,
+  registerWholeChange,
+  setBuffer,
+} from '~/features/layer/anvil/AnvilController';
 import { DebugLogger } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -70,34 +79,20 @@ class FloatingMoveManager {
   constructor() {}
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
-    const targetAgent = getAgentOf(targetLayerId);
-    if (!targetAgent) return;
+    const width = getWidth(targetLayerId);
+    const height = getHeight(targetLayerId);
+    if (width == null || height == null) return undefined;
     if (state === 'layer') {
-      // layer: source layer = target layer
-      // move whole layer so return empty buffer
-      return new Uint8ClampedArray(targetAgent.getWidth() * targetAgent.getHeight() * 4);
+      return new Uint8ClampedArray(width * height * 4);
     } else if (state === 'selection') {
-      // selection: source layer = target layer
-      // move selection so return buffer cropped by selection
-
-      // slice buffer by mask
-      const width = targetAgent.getWidth();
-      const height = targetAgent.getHeight();
-      const croppedBuffer = crop_patch_rgba(
-        // source
-        new Uint8Array(targetAgent.getBuffer()),
-        width,
-        height,
-        new Uint8Array(selectionManager.getCombinedMask()),
-        width,
-        height,
-        0,
-        0
-      );
+      const base = getBufferPointer(targetLayerId);
+      if (!base) return undefined;
+      const mask = selectionManager.getCombinedMask();
+      const croppedBuffer = crop_patch_rgba(new Uint8Array(base.buffer), width, height, new Uint8Array(mask), width, height, 0, 0);
       return new Uint8ClampedArray(croppedBuffer.buffer);
     } else if (state === 'pasted') {
-      // pasted: source is pasted buffer so just return target buffer
-      return targetAgent.getBuffer().slice() as Uint8ClampedArray;
+      const base = getBufferCopy(targetLayerId);
+      return base ? base.slice() : undefined;
     }
   }
 
@@ -192,27 +187,15 @@ class FloatingMoveManager {
       target: this.targetBuffer,
     });
 
-    const beforeBuffer = getBufferOf(this.targetLayerId);
-
-    // apply preview to actual buffer
-    getActiveAgent()?.setBuffer(this.movePreviewBuffer);
-
+    const beforeBuffer = getBufferCopy(this.targetLayerId);
     if (beforeBuffer) {
-      // just record buffer change.
-      // should be replaced by SelectionHistoryAction or something.
-      const action = new LayerBufferHistoryAction(
-        this.targetLayerId,
-        {
-          layerId: this.targetLayerId,
-          whole: {
-            type: 'whole',
-            before: beforeBuffer,
-            after: this.movePreviewBuffer.slice(),
-          },
-        },
-        { from: 'LayerImageAgent.registerToHistory', tool: TOOL_CATEGORIES.MOVE }
-      );
-      projectHistoryController.addAction(action);
+      registerWholeChange(this.targetLayerId, beforeBuffer, this.movePreviewBuffer.slice());
+      // load into anvil
+      setBuffer(this.targetLayerId, this.movePreviewBuffer);
+      const patch = flushPatch(this.targetLayerId);
+      if (patch) {
+        projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
+      }
     }
 
     // Emit the commit event

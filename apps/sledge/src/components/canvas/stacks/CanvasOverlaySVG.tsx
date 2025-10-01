@@ -12,13 +12,15 @@ import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/misc/marching_ants.css';
-import { getDrawnPixelMask } from '~/tools/draw/pen/PenDraw';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus } from '~/utils/EventBus';
 
 import rawPattern45border16 from '@assets/patterns/45border16.svg?raw';
 import rawPattern45border8 from '@assets/patterns/45border8.svg?raw';
+import { ShapeMask } from '@sledge/anvil';
+import { Circle } from '~/tools/draw/pen/shape/Circle';
+import { Square } from '~/tools/draw/pen/shape/Square';
 
 // raw SVG 文字列から最初の <path .../> だけを抽出（self-closing想定）。失敗時は全体を返す。
 const extractFirstPath = (svg: string) => {
@@ -27,6 +29,15 @@ const extractFirstPath = (svg: string) => {
 };
 const pattern45border16Path = extractFirstPath(rawPattern45border16);
 const pattern45border8Path = extractFirstPath(rawPattern45border8);
+
+function getDrawnPixelMask(size: number, shape: 'circle' | 'square'): ShapeMask {
+  switch (shape) {
+    case 'circle':
+      return new Circle(size).createMask();
+    case 'square':
+      return new Square(size).createMask();
+  }
+}
 
 const CanvasOverlaySVG: Component = () => {
   // 論理キャンバスサイズ (ズーム非適用)

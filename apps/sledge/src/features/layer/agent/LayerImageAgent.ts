@@ -1,10 +1,12 @@
+import type { Patch as AnvilPatch } from '@sledge/anvil';
 import { Point, Size2D, Vec2 } from '@sledge/core';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
-import { LayerBufferHistoryAction, LayerBufferPatch } from '~/features/history/actions/LayerBufferHistoryAction';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { TileIndex } from '~/features/layer/agent/managers/Tile';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { LayerBufferPatch } from './legacyPatchTypes';
 import DiffManager from './managers/DiffManager';
 import PixelBufferManager from './managers/PixelBufferManager';
 import TileManager from './managers/TileManager';
@@ -44,7 +46,6 @@ export default class LayerImageAgent {
     );
     this.dm = new DiffManager(this.tm);
   }
-
   getBuffer(): Uint8ClampedArray {
     return this.pbm.buffer;
   }
@@ -57,12 +58,12 @@ export default class LayerImageAgent {
     setProjectStore('isProjectChangedAfterSave', true);
     this.pbm.buffer = rawBuffer;
     this.tm.setAllDirty();
+
     if (!silentlySet) {
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) buffer set` });
       if (updatePreview) eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
   }
-
   forceUpdate() {
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${this.layerId}) force update` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
@@ -72,20 +73,23 @@ export default class LayerImageAgent {
     setProjectStore('isProjectChangedAfterSave', true);
     this.pbm.changeSize(newSize, destOrigin ?? { x: 0, y: 0 }, srcOrigin ?? { x: 0, y: 0 });
     this.tm.setSize(newSize);
+
     if (emitEvent) {
       this.tm.setAllDirty();
       eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${this.layerId}) buffer size changed` });
       eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
     }
   }
-
   public registerToHistory(context?: any) {
-    // Patchのみで履歴登録
+    // 旧 DiffManager 由来パッチを AnvilLayerHistoryAction 互換の Patch 形式へ変換しつつ登録
     this.dm.flush();
-    const patch = this.dm.buildPatch(this.layerId);
-    if (patch) {
-      const action = new LayerBufferHistoryAction(this.layerId, patch, { from: 'LayerImageAgent.registerToHistory', ...context });
-      projectHistoryController.addAction(action);
+    const legacyPatch = this.dm.buildPatch(this.layerId);
+    if (legacyPatch) {
+      const converted = convertLegacyLayerBufferPatchToAnvilPatch(legacyPatch);
+      if (converted) {
+        const action = new AnvilLayerHistoryAction(this.layerId, converted, { from: 'LayerImageAgent.registerToHistory', ...context });
+        projectHistoryController.addAction(action);
+      }
     }
     this.dm.reset();
   }
@@ -201,4 +205,30 @@ export default class LayerImageAgent {
       buf[ptr + 3] = (packed >>> 24) & 0xff; // A
     }
   }
+}
+
+// ---- Conversion helpers (legacy LayerBufferPatch -> Anvil Patch) ----
+function convertLegacyLayerBufferPatchToAnvilPatch(p: LayerBufferPatch): AnvilPatch | null {
+  // Anvil 側 applyPatch 実装は tile.before/after を "packed RGBA (u32)" として扱う。
+  // 旧 LayerBufferPatch も tile.before/after は既に packed 数値なのでそのまま流用する。
+  const out: AnvilPatch = {};
+  if (p.whole) {
+    out.whole = { before: p.whole.before, after: p.whole.after } as any;
+  }
+  if (p.tiles && p.tiles.length) {
+    out.tiles = p.tiles.map((t) => ({
+      tile: t.tile as any,
+      before: t.before, // packed number or undefined
+      after: t.after, // packed number
+    }));
+  }
+  if (p.pixels && p.pixels.length) {
+    out.pixels = p.pixels.map((pl) => ({
+      tile: pl.tile as any,
+      idx: pl.idx,
+      before: pl.before,
+      after: pl.after,
+    }));
+  }
+  return out;
 }

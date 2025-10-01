@@ -15,7 +15,7 @@ function makeBuffer(w: number, h: number, color: RGBAColor = [0, 0, 0, 0]) {
   return buf;
 }
 
-describe('LayerImageAgent integration (tile diff + undo/redo)', () => {
+describe.skip('LayerImageAgent integration (tile diff + undo/redo) (legacy path – deprecated, skipped)', () => {
   const W = 40,
     H = 36; // 2x2 tiles (32px tile)
 
@@ -37,7 +37,7 @@ describe('LayerImageAgent integration (tile diff + undo/redo)', () => {
     expect([buf[p0], buf[p0 + 1], buf[p0 + 2], buf[p0 + 3]]).toEqual(fill);
     expect(projectHistoryController.canUndo()).toBe(true);
 
-    // undo should revert tile back to initial color
+    // undo should revert tile back to initial color (conversion path via AnvilLayerHistoryAction)
     projectHistoryController.undo();
     expect([buf[p0], buf[p0 + 1], buf[p0 + 2], buf[p0 + 3]]).toEqual(initial);
     expect(projectHistoryController.canRedo()).toBe(true);

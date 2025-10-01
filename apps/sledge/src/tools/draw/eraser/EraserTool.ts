@@ -1,6 +1,5 @@
 import { transparent } from '~/features/color';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
-import { ToolArgs } from '~/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 import { PenTool } from '../pen/PenTool';
 
@@ -9,15 +8,15 @@ export class EraserTool extends PenTool {
 
   protected categoryId: ToolCategoryId = TOOL_CATEGORIES.ERASER;
 
-  onStart(agent: LayerImageAgent, args: ToolArgs) {
-    return super.draw(agent, args, transparent);
+  onStart(ctx: AnvilToolContext, args: ToolArgs) {
+    return super.draw(ctx as any, args, transparent);
   }
 
-  onMove(agent: LayerImageAgent, args: ToolArgs) {
-    return super.draw(agent, args, transparent);
+  onMove(ctx: AnvilToolContext, args: ToolArgs) {
+    return super.draw(ctx as any, args, transparent);
   }
 
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
-    return super.onEnd(agent, args);
+  onEnd(ctx: AnvilToolContext, args: ToolArgs) {
+    return super.onEnd(ctx as any, args);
   }
 }

@@ -2,8 +2,11 @@
 
 import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask, slice_patch_rgba } from '@sledge/wasm';
-import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
-import { TileIndex } from '~/features/layer/agent/managers/Tile';
+// import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
+import { activeLayer } from '~/features/layer';
+import type { TileIndex } from '~/features/layer/agent/managers/Tile'; // 型は暫定流用 (後でAnvilタイル型へ移行)
+import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -146,7 +149,7 @@ class SelectionAreaManager {
 
     let changed = false;
 
-    const tm = getActiveAgent()?.getTileManager()!;
+    const anvil = getAnvilOf(activeLayer().id);
     switch (frag.kind) {
       case 'pixel': {
         this.previewMask.setFlag(frag.position, 1);
@@ -154,10 +157,15 @@ class SelectionAreaManager {
         break;
       }
       case 'tile': {
-        const tile = tm.getTile(frag.index);
-        const offset = tile.getOffset();
-        for (let x = offset.x; x < offset.x + tile.size; x++) {
-          for (let y = offset.y; y < offset.y + tile.size; y++) {
+        if (!anvil) break;
+        const tileSize = anvil.getTileSize();
+        // TileIndex (legacy) から行列を推測 (row/col か x/y を許容)
+        const col: number = (frag.index as any).col ?? (frag.index as any).x;
+        const row: number = (frag.index as any).row ?? (frag.index as any).y;
+        const ox = col * tileSize;
+        const oy = row * tileSize;
+        for (let x = ox; x < ox + tileSize; x++) {
+          for (let y = oy; y < oy + tileSize; y++) {
             this.previewMask.setFlag({ x, y }, 1);
             changed = true;
           }
@@ -289,7 +297,7 @@ class SelectionAreaManager {
   }
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
-    const buffer = getBufferOf(srcLayerId);
+    const buffer = getBufferPointer(srcLayerId);
     if (!buffer) return;
     // canvasStore が未初期化なケース (極早期テスト) では何も返さない
     if (!canvasStore?.canvas) return;

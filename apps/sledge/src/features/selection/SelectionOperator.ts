@@ -1,10 +1,17 @@
 import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_subtract, filter_by_selection_mask } from '@sledge/wasm';
 import { activeLayer } from '~/features/layer';
-import { getActiveAgent, getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+// import { getActiveAgent } from '~/features/layer/agent/LayerAgentManager'; // legacy (will be removed)
+import {
+  getBufferPointer,
+  getHeight as getLayerHeight,
+  getWidth as getLayerWidth,
+  registerWholeChange,
+} from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
-import { SelectionFillMode, SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
+import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
@@ -49,63 +56,41 @@ export function getSelectionLimitMode(): SelectionLimitMode {
   return toolStore.selectionLimitMode;
 }
 
-export function getSelectionFillMode(): SelectionFillMode {
-  return toolStore.selectionFillMode;
-}
-
 // 現在の状況からFloat状態を作成
 export function startMove() {
-  const activeAgent = getActiveAgent();
-  if (!activeAgent) {
-    console.error('No active agent found');
-    return;
-  }
+  const layer = activeLayer();
+  const layerId = layer.id;
+  const width = getLayerWidth(layerId);
+  const height = getLayerHeight(layerId);
+  if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
-    floatingMoveManager.startMove(selectionManager.getFloatingBuffer(activeAgent.layerId)!, 'selection', activeAgent.layerId);
+    floatingMoveManager.startMove(selectionManager.getFloatingBuffer(layerId)!, 'selection', layerId);
   } else {
     selectionManager.selectAll();
+    const buf = getBufferPointer(layerId);
     const layerFloatingBuffer: FloatingBuffer = {
-      buffer: activeAgent.getBuffer().slice(),
-      width: activeAgent.getWidth(),
-      height: activeAgent.getHeight(),
+      buffer: buf ? buf.slice() : new Uint8ClampedArray(width * height * 4),
+      width,
+      height,
       offset: { x: 0, y: 0 },
     };
-    floatingMoveManager.startMove(layerFloatingBuffer, 'layer', activeAgent.layerId);
+    floatingMoveManager.startMove(layerFloatingBuffer, 'layer', layerId);
   }
 }
 
 export function startMoveFromPasted(imageData: ImageData, boundBox: { x: number; y: number; width: number; height: number }) {
-  const activeAgent = getActiveAgent();
-  if (!activeAgent) {
-    console.error('No active agent found');
-    return;
-  }
-
+  const layerId = activeLayer().id;
   cancelSelection();
-
   setToolStore('activeToolCategory', TOOL_CATEGORIES.MOVE);
-
   const pastingOffset = { x: 0, y: 0 };
-  // create selection according to pasted image
   selectionManager.beginPreview('replace');
-  selectionManager.setPreviewFragment({
-    kind: 'rect',
-    startPosition: pastingOffset,
-    width: boundBox.width,
-    height: boundBox.height,
-  });
+  selectionManager.setPreviewFragment({ kind: 'rect', startPosition: pastingOffset, width: boundBox.width, height: boundBox.height });
   selectionManager.commit();
-
   floatingMoveManager.startMove(
-    {
-      buffer: new Uint8ClampedArray(imageData.data),
-      width: boundBox.width,
-      height: boundBox.height,
-      offset: pastingOffset,
-    },
+    { buffer: new Uint8ClampedArray(imageData.data), width: boundBox.width, height: boundBox.height, offset: pastingOffset },
     'pasted',
-    activeAgent.layerId
+    layerId
   );
 }
 
@@ -130,35 +115,27 @@ export function cancelMove() {
 
 export function deletePixelInSelection(layerId?: string): boolean {
   const selection = getCurrentSelection();
-  const agent = getAgentOf(layerId ?? activeLayer().id);
-  if (!agent) return false;
+  const lid = layerId ?? activeLayer().id;
+  const anvil = getAnvilOf(lid);
+  if (!anvil) return false;
 
-  const bufferManager = agent.getPixelBufferManager();
-  const width = agent.getWidth();
-  const height = agent.getHeight();
+  const buf = anvil.getBufferData();
+  const width = anvil.getWidth();
+  const height = anvil.getHeight();
+  if (!buf || width == null || height == null) return false;
 
-  // 元バッファを保持
-  const before = bufferManager.buffer.slice();
-
-  // moveOffset を考慮した選択マスクを用意
+  const before = buf.slice();
   const baseMask = selection.getMask();
   const { x: offX, y: offY } = selectionManager.getAreaOffset();
   const mask = offX === 0 && offY === 0 ? baseMask : new Uint8Array(apply_mask_offset(baseMask, width, height, offX, offY));
 
-  // マスク内を透明化（"outside" はマスク=1の箇所を透明化する挙動）
   const after = new Uint8ClampedArray(filter_by_selection_mask(new Uint8Array(before), mask, 'outside', width, height));
 
-  // 差分を履歴登録（whole）
-  const dm = agent.getDiffManager();
-  dm.setWhole(before, after.slice());
+  registerWholeChange(lid, before, after.slice()); // also set all tiles dirty
+  buf.set(after);
 
-  // バッファを反映
-  bufferManager.buffer.set(after);
-
-  agent.registerToHistory({ tool: 'clear' });
-  // タイルを更新対象に
-  agent.getTileManager().setAllDirty();
-  agent.forceUpdate();
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'delete in selection' });
+  eventBus.emit('preview:requestUpdate', { layerId: lid });
 
   return true;
 }

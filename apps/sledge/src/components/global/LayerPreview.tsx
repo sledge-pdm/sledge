@@ -4,7 +4,6 @@ import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid
 import { Consts } from '~/Consts';
 import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { Layer } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
 import '~/styles/components/layer_preview.css';
 import { eventBus, Events } from '~/utils/EventBus';
@@ -104,14 +103,11 @@ const LayerPreview: Component<Props> = (props: Props) => {
       lastPreviewHeight = previewHeight;
     }
 
-    const agent = getAgentOf(props.layer.id);
-    if (agent) {
-      const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
-      if (preview) {
-        // ctx.imageSmoothingEnabled = true;
-        // ctx.imageSmoothingQuality = 'high';
-        ctx.putImageData(preview, 0, 0);
-      }
+    const preview = thumbnailGen.generateLayerThumbnail(props.layer.id, previewWidth, previewHeight);
+    if (preview) {
+      // ctx.imageSmoothingEnabled = true;
+      // ctx.imageSmoothingQuality = 'high';
+      ctx.putImageData(preview, 0, 0);
     }
   };
 

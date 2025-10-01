@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "pnpm -F sledge dev",
     "build": "pnpm -F sledge build",
+    "anvil:wasm-build": "cd packages/anvil && pnpm wasm:build",
     "site:dev": "pnpm -F sledge-website dev",
     "site:build": "pnpm -F sledge-website build",
     "wasm:build": "cd packages/wasm && pnpm --ignore-workspace i && wasm-pack build --target bundler",

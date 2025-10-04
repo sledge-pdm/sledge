@@ -103,7 +103,7 @@ const defaultInteractStore: InteractStore = {
   zoom: 1,
   zoomByReference: 1,
   // zoomMin: 0.5,
-  zoomMin: 0.01,
+  zoomMin: 1,
   // zoomMax: 8,
   zoomMax: 100,
   touchZoomSensitivity: 0.5,

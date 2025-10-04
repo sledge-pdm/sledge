@@ -108,8 +108,8 @@ const SideSectionControl: Component<Props> = (props) => {
                 orientation='vertical'
                 labelMode='none'
                 value={interactStore.zoomByReference}
-                min={0.1}
-                max={10}
+                min={interactStore.zoomMin}
+                max={interactStore.zoomMax}
                 wheelSpin={true}
                 wheelStep={0.1}
                 allowFloat={true}

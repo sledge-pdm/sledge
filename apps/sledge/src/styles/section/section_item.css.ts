@@ -30,6 +30,6 @@ export const sectionSubCaption = style({
   opacity: 0.7,
 });
 
-export const sectionContent = style([flexCol, w100, { paddingLeft: '4px', boxSizing: 'border-box', overflow: 'visible' }]);
+export const sectionContent = style([flexCol, w100, { paddingLeft: '8px', boxSizing: 'border-box', overflow: 'visible' }]);
 
 export const sectionSubContent = style([flexCol, w100, { gap: '8px', paddingLeft: '8px', boxSizing: 'border-box', overflow: 'visible' }]);

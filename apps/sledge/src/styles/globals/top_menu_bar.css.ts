@@ -8,7 +8,7 @@ export const root = style([
   w100,
   {
     borderBottom: `1px solid ${vars.color.border}`,
-    backgroundColor: vars.color.background,
+    backgroundColor: vars.color.controls,
     height: '28px',
     alignItems: 'end',
     zIndex: Consts.zIndex.titleBar,

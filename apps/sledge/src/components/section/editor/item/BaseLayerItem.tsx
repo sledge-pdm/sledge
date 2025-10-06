@@ -38,8 +38,9 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
     <div
       class={flexRow}
       style={{
-        padding: `${vars.spacing.sm} ${vars.spacing.md}`,
+        padding: `${vars.spacing.xs} ${vars.spacing.sm} ${vars.spacing.xs}  ${vars.spacing.md}`,
         'background-color': vars.color.surface,
+        border: `1px solid ${vars.color.borderSecondary}`,
         'align-items': 'center',
       }}
     >
@@ -57,7 +58,7 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
       </p>
 
       <div class={flexRow}>
-        <Dropdown value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} wheelSpin={true} />
+        <Dropdown noBackground value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} wheelSpin={true} />
       </div>
 
       {baseLayer().colorMode === 'custom' && (

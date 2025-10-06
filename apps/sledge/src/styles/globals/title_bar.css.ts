@@ -8,7 +8,7 @@ export const titleBarRoot = style([
   {
     position: 'relative',
     pointerEvents: 'all',
-    backgroundColor: vars.color.background,
+    backgroundColor: vars.color.controls,
     alignItems: 'center',
   },
 ]);

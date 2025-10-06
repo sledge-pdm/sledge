@@ -60,7 +60,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
       modifiers: [
         interact.modifiers.restrictSize({
           min: { width: 300, height: -1 },
-          max: { width: 600, height: -1 },
+          max: { width: 500, height: -1 },
         }),
       ],
       listeners: {
@@ -126,7 +126,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         class={sideAreaRoot}
         style={{
           display: appearanceStore[props.side].shown ? 'flex' : 'none',
-          width: appearanceStore[props.side].shown ? '320px' : '0px',
+          width: appearanceStore[props.side].shown ? '300px' : '0px',
         }}
       >
         <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
@@ -134,8 +134,8 @@ const SideSectionsOverlay: Component<Props> = (props) => {
             class={sideAreaContentWrapper}
             ref={(el) => (scrollRef = el)}
             style={{
-              'padding-left': props.side === 'leftSide' ? '16px' : '20px',
-              'padding-right': props.side === 'rightSide' ? '16px' : '20px',
+              'padding-left': props.side === 'leftSide' ? '8px' : '24px',
+              'padding-right': props.side === 'rightSide' ? '8px' : '24px',
             }}
           >
             <div class={sideAreaContent}>{tabContent(selectedTab())}</div>

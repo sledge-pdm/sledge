@@ -48,10 +48,16 @@ const ColorPicker: Component<{ width: number }> = (props) => {
               component: iro.ui.Box,
               options: {},
             },
+            // {
+            //   component: iro.ui.Slider,
+            //   options: {
+            //     // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
+            //     sliderType: 'value',
+            //   },
+            // },
             {
               component: iro.ui.Slider,
               options: {
-                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
                 sliderType: 'hue',
               },
             },

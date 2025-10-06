@@ -45,6 +45,6 @@ export const sideAreaContent = style([
   flexCol,
   {
     overflowX: 'visible',
-    gap: '1rem',
+    gap: '8px',
   },
 ]);

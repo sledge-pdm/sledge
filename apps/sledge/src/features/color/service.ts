@@ -32,3 +32,7 @@ export const setColor = (palette: PaletteType, colorHexString: string) => {
 export const selectPalette = (palette: PaletteType) => {
   return setColorStore('currentPalette', palette);
 };
+
+export const setCurrentSwatch = (swatchName: string) => {
+  return setColorStore('currentSwatchName', swatchName);
+};

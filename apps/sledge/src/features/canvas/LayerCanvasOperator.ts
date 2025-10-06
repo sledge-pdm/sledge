@@ -3,7 +3,6 @@ import { currentColor, hexToRGBA } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
-// Legacy LayerImageAgent 依存は除去済み
 import { flushPatch } from '~/features/layer/anvil/AnvilController';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tool/ToolController';

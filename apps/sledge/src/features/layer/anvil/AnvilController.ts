@@ -1,5 +1,4 @@
-import type { Patch } from '@sledge/anvil';
-import { Size2D, Vec2 } from '@sledge/core';
+import type { LayerPatch } from '@sledge/anvil';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
 
@@ -18,7 +17,7 @@ export function getBufferPointer(layerId: string): Uint8ClampedArray<ArrayBuffer
 export function setBuffer(layerId: string, buffer: Uint8ClampedArray) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;
-  anvil.loadImageData(buffer);
+  anvil.replaceBuffer(buffer);
 }
 
 // Whole buffer diff 登録 (clear, FX など)
@@ -50,7 +49,7 @@ export function fillRect(layerId: string, x: number, y: number, w: number, h: nu
   anvil.fillRect(x, y, w, h, rgba);
 }
 
-export function flushPatch(layerId: string): Patch | null {
+export function flushPatch(layerId: string): LayerPatch | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;
   const raw = anvil.flush();
@@ -62,84 +61,11 @@ export function flushPatch(layerId: string): Patch | null {
   return patch ?? null;
 }
 
-export function previewPatch(layerId: string): Patch | null {
+export function previewPatch(layerId: string): LayerPatch | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;
   const raw = anvil.previewPatch();
   return raw ? convertLayerPatch(raw) : null;
-}
-
-// Patch 適用 (undo / redo)。Anvil 本体未実装の差分適用をここで行う。
-export function applyPatch(layerId: string, patch: Patch, mode: 'undo' | 'redo') {
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return;
-
-  // Whole buffer
-  if (patch.whole) {
-    const target = mode === 'undo' ? patch.whole.before : patch.whole.after;
-    anvil.loadImageData(target);
-  }
-
-  // Partial rectangle (applies after whole, before tiles/pixels)
-  if (patch.partial) {
-    const { boundBox, before, after } = patch.partial;
-    const target = mode === 'undo' ? before : after;
-    anvil.setPartialBuffer(boundBox, target);
-    anvil.flush();
-  }
-
-  // Tile fills
-  patch.tiles?.forEach((t) => {
-    let packed = mode === 'undo' ? t.before : t.after;
-    // undo 時 before が undefined の場合: 元タイルは非一様 (pixels で再構築) もしくは取得不能。
-    // その場合は一旦透明で初期化し pixel patch が上書きする (透明 => 任意ピクセル) ことで再現性維持。
-    if (mode === 'undo' && packed === undefined) {
-      packed = 0; // transparent RGBA(0,0,0,0)
-    }
-    if (packed === undefined) return; // redo 方向で after が無いケースは無視
-    const r = (packed >> 16) & 0xff;
-    const g = (packed >> 8) & 0xff;
-    const b = packed & 0xff;
-    const a = (packed >>> 24) & 0xff;
-    const tileSize = anvil.getTileSize();
-    const ox = t.tile.col * tileSize;
-    const oy = t.tile.row * tileSize;
-    anvil.fillRect(ox, oy, tileSize, tileSize, [r, g, b, a]);
-  });
-
-  // Pixels
-  patch.pixels?.forEach((p) => {
-    const values = mode === 'undo' ? p.before : p.after;
-    const tileSize = anvil.getTileSize();
-    const ox = p.tile.col * tileSize;
-    const oy = p.tile.row * tileSize;
-    for (let i = 0; i < p.idx.length; i++) {
-      const local = p.idx[i];
-      const dx = local % tileSize;
-      const dy = (local / tileSize) | 0;
-      const packed = values[i] >>> 0;
-      const r = (packed >> 16) & 0xff;
-      const g = (packed >> 8) & 0xff;
-      const b = packed & 0xff;
-      const a = (packed >>> 24) & 0xff;
-      anvil.setPixel(ox + dx, oy + dy, [r, g, b, a]);
-    }
-  });
-
-  anvil.flush();
-
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${layerId}) ${mode}` });
-  eventBus.emit('preview:requestUpdate', { layerId });
-}
-
-export function resize(layerId: string, newWidth: number, newHeight: number, origin?: Vec2) {
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return;
-  if (origin) {
-    anvil.resizeWithOffset(newWidth, newHeight, origin.x, origin.y);
-  } else {
-    anvil.resize(newWidth, newHeight);
-  }
 }
 
 export function getDirtyTiles(layerId: string) {
@@ -166,8 +92,8 @@ function packRGBA(r: number, g: number, b: number, a: number) {
 }
 
 // Anvil の LayerPatch (RGBA配列ベース) を public Patch (packed u32) へ変換
-function convertLayerPatch(raw: any): Patch {
-  const out: Patch = {};
+function convertLayerPatch(raw: any): LayerPatch {
+  const out: LayerPatch = {};
   if (raw.whole) out.whole = raw.whole; // before/after は Uint8ClampedArray で同型
   if (raw.partial) {
     out.partial = raw.partial; // { boundBox, before, after }
@@ -200,13 +126,4 @@ export function getHeight(layerId: string) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;
   return anvil.getHeight();
-}
-
-export function getSize(layerId: string): Size2D | undefined {
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return undefined;
-  return {
-    width: anvil.getWidth(),
-    height: anvil.getHeight(),
-  };
 }

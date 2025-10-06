@@ -3,6 +3,7 @@ import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
 import { PaletteType, RGBAColor } from '~/features/color';
+import { DEFAULT, SMPTE, Swatch } from '~/features/color/swatch/swatches';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
 type AppearanceStore = {
@@ -21,7 +22,8 @@ type ColorStore = {
   currentPalette: PaletteType;
   primary: string;
   secondary: string;
-  swatches: string[];
+  swatches: Swatch[];
+  currentSwatchName: string;
 };
 type FileStore = {
   openAs: 'project' | 'image';
@@ -84,7 +86,8 @@ const defaultColorStore: ColorStore = {
   currentPalette: 'primary' as PaletteType,
   primary: '#000000', // 通常の描画色
   secondary: '#ffffff', // 背景・消しゴムなど
-  swatches: ['#000000', '#FFFFFF', '#ffff00', '#00ffff', '#00ff00', '#ff00ff', '#ff0000', '#0000ff', '#000080', '#400080'],
+  swatches: [DEFAULT, SMPTE],
+  currentSwatchName: DEFAULT.name,
 };
 const defaultFileStore: FileStore = {
   openAs: 'project',

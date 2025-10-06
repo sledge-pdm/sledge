@@ -11,6 +11,8 @@ export const sideSectionControlRoot = style([
     width: '23px',
     justifyContent: 'start',
     alignItems: 'center',
+
+    backgroundColor: vars.color.background,
   },
 ]);
 export const sideSectionControlList = style([

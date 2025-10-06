@@ -1,7 +1,7 @@
 import { slice_patch_rgba, trim_mask_with_box } from '@sledge/wasm';
 import { Component, onCleanup, onMount } from 'solid-js';
 import { activeIndex, activeLayer, addLayerTo } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMoveFromPasted } from '~/features/selection/SelectionOperator';
@@ -77,11 +77,11 @@ const ClipboardListener: Component = () => {
     e.preventDefault();
 
     const layer = activeLayer();
-    const activeAgent = getAgentOf(layer.id);
-    if (activeAgent) {
+    const activeAnvil = getAnvilOf(layer.id);
+    if (activeAnvil) {
       if (isSelectionAvailable()) {
-        const width = activeAgent.getWidth();
-        const height = activeAgent.getHeight();
+        const width = activeAnvil.getWidth();
+        const height = activeAnvil.getHeight();
         selectionManager.commitOffset();
         const mask = selectionManager.getCombinedMask();
         const bbox = computeMaskBBox(mask, width, height);
@@ -90,7 +90,7 @@ const ClipboardListener: Component = () => {
         const selectionBlob = await bufferToBlob({
           buffer: slice_patch_rgba(
             // source
-            new Uint8Array(activeAgent.getBuffer().buffer),
+            new Uint8Array(activeAnvil.getImageData().buffer),
             width,
             height,
             // mask
@@ -118,16 +118,16 @@ const ClipboardListener: Component = () => {
         });
       } else {
         const layerBlob = await bufferToBlob({
-          buffer: new Uint8Array(activeAgent.getBuffer()),
-          width: activeAgent.getWidth(),
-          height: activeAgent.getHeight(),
+          buffer: new Uint8Array(activeAnvil.getBufferData()),
+          width: activeAnvil.getWidth(),
+          height: activeAnvil.getHeight(),
         });
         const meta = makeMetaBlob({
           app: 'sledge',
           v: 1,
           type: 'layer',
           sourceName: layer.name,
-          canvas: { width: activeAgent.getWidth(), height: activeAgent.getHeight() },
+          canvas: { width: activeAnvil.getWidth(), height: activeAnvil.getHeight() },
         });
         await navigator.clipboard.write([new ClipboardItem({ 'text/plain': meta, [layerBlob.type]: layerBlob })]);
 

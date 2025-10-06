@@ -39,7 +39,6 @@ export {
   moveLayer,
   removeLayer,
   resetAllLayers,
-  resetLayerImage,
   setActiveLayerId,
   // BaseLayer operations
   setBaseLayerColorMode,

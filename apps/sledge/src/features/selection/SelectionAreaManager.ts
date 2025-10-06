@@ -1,10 +1,10 @@
 // controllers/layer/SelectionManager.ts
 
+import { TileIndex } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask, slice_patch_rgba } from '@sledge/wasm';
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { activeLayer } from '~/features/layer';
-import type { TileIndex } from '~/features/layer/agent/managers/Tile'; // 型は暫定流用 (後でAnvilタイル型へ移行)
 import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
@@ -307,22 +307,7 @@ class SelectionAreaManager {
     this.commit();
 
     // slice buffer by mask
-    const patch = slice_patch_rgba(
-      // source
-      new Uint8Array(buffer.buffer),
-      width,
-      height,
-      // mask
-      new Uint8Array(this.getCombinedMask()),
-      // this.selectionMask.getWidth(), selection mask is canvas size
-      // this.selectionMask.getHeight(),
-      // this.areaOffset.x,
-      // this.areaOffset.y
-      width,
-      height,
-      0,
-      0
-    );
+    const patch = slice_patch_rgba(new Uint8Array(buffer.buffer), width, height, new Uint8Array(this.getCombinedMask()), width, height, 0, 0);
 
     return {
       buffer: new Uint8ClampedArray(patch.buffer),

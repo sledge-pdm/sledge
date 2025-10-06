@@ -226,6 +226,8 @@ const Explorer: Component<Props> = (props) => {
                             const ext = ['sledge', 'png', 'jpg', 'jpeg'];
                             if (ext.some((e) => entry.name.endsWith(`.${e}`))) {
                               openExistingProject(location);
+                            } else {
+                              // TODO: show error toast
                             }
                           }
                         }}

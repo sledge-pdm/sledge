@@ -8,7 +8,7 @@ import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHi
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
-import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
@@ -99,26 +99,6 @@ export function clearLayer(layerId: string) {
   eventBus.emit('preview:requestUpdate', { layerId });
 }
 
-// Anvil 初期化
-export function resetLayerImage(layerId: string, dotMagnification: number, initImage?: Uint8ClampedArray): void {
-  let width = Math.round(canvasStore.canvas.width / dotMagnification);
-  let height = Math.round(canvasStore.canvas.height / dotMagnification);
-  let buffer: Uint8ClampedArray;
-  if (initImage) {
-    buffer = new Uint8ClampedArray(initImage);
-  } else {
-    // 透明（RGBA＝0,0,0,0）で初期化された Uint8ClampedArray を生成
-    buffer = new Uint8ClampedArray(width * height * 4);
-  }
-
-  // 旧 Agent パス: 現在は新規生成を停止し、既存があれば最低限 dirty マークのみ行う
-  // legacy agent path removed
-
-  anvilManager.registerAnvil(layerId, buffer, width, height);
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) image reset (anvil)` });
-  eventBus.emit('preview:requestUpdate', { layerId: layerId });
-}
-
 export async function mergeToBelowLayer(layerId: string) {
   const originLayerIndex = getLayerIndex(layerId);
   const targetLayerIndex = originLayerIndex + 1;
@@ -127,14 +107,14 @@ export async function mergeToBelowLayer(layerId: string) {
   const originLayer = layerListStore.layers[originLayerIndex];
   const targetLayer = layerListStore.layers[targetLayerIndex];
 
-  // merge
   await mergeLayer({ originLayer, targetLayer });
 
   setLayerProp(layerId, 'enabled', false, { noDiff: true });
   if (layerListStore.activeLayerId === layerId) {
     setLayerListStore('activeLayerId', targetLayer.id);
   }
-  // removeLayer(layerId);
+
+  // TODO: add Merge history action which provides undo/redo for both layers
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {
@@ -213,8 +193,10 @@ export const addLayerTo = (
     getNumberUniqueLayerName
   );
 
-  // Initialize layer image with agent
-  resetLayerImage(newLayer.id, dotMagnification, options?.initImage);
+  // Initialize anvil
+  const width = canvasStore.canvas.width;
+  const height = canvasStore.canvas.height;
+  anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
 
   const layers = [...allLayers()];
   layers.splice(index, 0, newLayer as any);
@@ -274,7 +256,7 @@ export function isImagePoolActive() {
 
 export const resetAllLayers = () => {
   layerListStore.layers.forEach((l) => {
-    resetLayerImage(l.id, l.dotMagnification);
+    getAnvilOf(l.id)?.resetBuffer();
   });
   adjustZoomToFit();
 };

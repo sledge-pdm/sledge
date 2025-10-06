@@ -1,14 +1,21 @@
-import { flexRow } from '@sledge/core';
+import { flexCol, flexRow } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
 export const paletteRoot = style([
-  flexRow,
+  flexCol,
   {
-    gap: '6px',
+    gap: '12px',
+    marginLeft: '12px',
   },
 ]);
 
-export const paletteColorBoxContainer = style({});
+export const paletteColorBoxContainer = style([flexRow, {}]);
+
+export const paletteColorBoxCaption = style({
+  width: '12px',
+  color: vars.color.muted,
+});
 
 export const paletteColorBoxPrimary = style({
   position: 'absolute',

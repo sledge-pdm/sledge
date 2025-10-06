@@ -1,6 +1,7 @@
 import { flexCol } from '@sledge/core';
 import { Component, For } from 'solid-js';
 import FileItem from '~/components/section/files/item/FileItem';
+import { openExistingProject } from '~/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 
@@ -10,7 +11,7 @@ const RecentFiles: Component = () => {
       class={flexCol}
       style={{
         width: '100%',
-        gap: '4px',
+        gap: '8px',
         'margin-left': '4px',
         'margin-bottom': '8px',
       }}
@@ -31,7 +32,16 @@ const RecentFiles: Component = () => {
               }}
               isMe={false}
               isPartOfMe={false}
-              onClick={() => {}}
+              onClick={() => {
+                if (!location.path || !location.name) return;
+
+                const ext = ['sledge', 'png', 'jpg', 'jpeg'];
+                if (ext.some((e) => location.name?.endsWith(`.${e}`))) {
+                  openExistingProject(location);
+                } else {
+                  // TODO: show error toast
+                }
+              }}
             />
           );
         }}

@@ -1,19 +1,18 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSize, isValidCanvasSize } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, isValidCanvasSize } from '~/features/canvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB03, ZFB03B } from '@sledge/theme';
+import { vars, ZFB03B } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
-import { activeLayer, allLayers } from '~/features/layer';
 import { saveGlobalSettings } from '~/io/config/save';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
-import { sectionCaption, sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent, sectionSubCaption } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
@@ -25,7 +24,7 @@ const CanvasSettings: Component = () => {
     const newSize = { width, height };
 
     if (isValidCanvasSize(newSize)) {
-      const result = await changeCanvasSize(newSize);
+      const result = await changeCanvasSizeWithNoOffset(newSize);
       if (result) adjustZoomToFit();
     }
   };
@@ -82,7 +81,7 @@ const CanvasSettings: Component = () => {
     <SectionItem title='canvas.'>
       <div class={sectionContent} style={{ gap: '10px', 'margin-top': '8px', 'padding-bottom': '24px' }}>
         <div class={flexRow}>
-          <p class={sectionCaption}>size.</p>
+          <p class={sectionSubCaption}>size.</p>
           <div class={flexCol} style={{ 'margin-left': 'auto', gap: '6px' }}>
             <Button
               onClick={async () => {
@@ -168,7 +167,7 @@ const CanvasSettings: Component = () => {
             [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
           </p>
         </div>
-        <p class={sectionCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
+        {/* <p class={sectionSubCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
           info.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
@@ -184,8 +183,8 @@ const CanvasSettings: Component = () => {
             <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>active</p>
             <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
           </div>
-        </div>
-        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
+        </div> */}
+        <p class={sectionSubCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
           actions.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>

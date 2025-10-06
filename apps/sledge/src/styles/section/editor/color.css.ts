@@ -1,13 +1,24 @@
-import { flexCol } from '@sledge/core';
+import { flexCol, flexRow } from '@sledge/core';
 import { vars, ZFB03 } from '@sledge/theme';
 import { style } from '@vanilla-extract/css';
 
+export const swatchHeader = style([
+  flexRow,
+  {
+    alignItems: 'center',
+    marginBottom: '8px',
+  },
+]);
+
+export const swatchDropdownContainer = style([flexRow, {}]);
+
 export const swatchContainer = style([
-  flexCol,
+  flexRow,
   {
     position: 'relative',
     gap: vars.spacing.xs,
-    marginRight: vars.spacing.sm,
+    marginLeft: '8px',
+    marginBottom: vars.spacing.lg,
   },
 ]);
 

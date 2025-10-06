@@ -1,5 +1,6 @@
 import type { Layer } from '~/features/layer';
-import { removeLayer, resetLayerImage } from '~/features/layer';
+import { removeLayer } from '~/features/layer';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';
@@ -66,7 +67,7 @@ function insertAt(index: number, layer: Layer & { buffer?: Uint8ClampedArray }) 
   const arr = [...layerListStore.layers];
   arr.splice(index, 0, layerProps as Layer);
   setLayerListStore('layers', arr);
-  if (buffer) resetLayerImage(layer.id, layer.dotMagnification, buffer);
+  if (buffer) getAnvilOf(layer.id)?.replaceBuffer(buffer);
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${layer.id}) inserted` });
 }
 

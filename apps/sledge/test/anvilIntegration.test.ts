@@ -55,7 +55,7 @@ describe('Anvil integration with LayerImageAgent', () => {
     // Verify initial state
     expect(anvil.getPixel(10, 10)).toEqual(initial);
 
-    anvil.loadImageData(newBuf);
+    anvil.replaceBuffer(newBuf);
 
     // Verify anvil was synced
     expect(anvil.getPixel(10, 10)).toEqual(newColor);

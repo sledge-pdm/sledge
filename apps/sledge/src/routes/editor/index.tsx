@@ -12,9 +12,10 @@ import ClipboardListener from '~/components/global/ClipboardListener';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
-import { adjustZoomToFit, changeCanvasSize } from '~/features/canvas';
+import { adjustZoomToFit, changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { loadToolPresets, setLocation } from '~/features/config';
-import { addLayer, LayerType, resetLayerImage } from '~/features/layer';
+import { addLayer, LayerType } from '~/features/layer';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { AutoSaveManager } from '~/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/io/config/load';
 import { importImageFromPath } from '~/io/image/in/import';
@@ -54,10 +55,12 @@ export default function Editor() {
     await loadToolPresets();
 
     if (isNewProject) {
-      changeCanvasSize(globalConfig.default.canvasSize, true);
+      changeCanvasSizeWithNoOffset(globalConfig.default.canvasSize, true);
       setCanvasStore('canvas', globalConfig.default.canvasSize);
+      const canvasSize = globalConfig.default.canvasSize;
       layerListStore.layers.forEach((layer) => {
-        resetLayerImage(layer.id, 1);
+        const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
+        anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
       });
     }
     setProjectStore('isProjectChangedAfterSave', false);

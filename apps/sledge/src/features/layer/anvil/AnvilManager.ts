@@ -9,7 +9,7 @@ export class AnvilManager {
 
   public registerAnvil(layerId: string, buffer: Uint8ClampedArray, width: number, height: number): Anvil {
     const anvil = new Anvil(width, height);
-    anvil.loadImageData(buffer);
+    anvil.replaceBuffer(buffer);
     this.anvils.set(layerId, anvil);
     return anvil;
   }

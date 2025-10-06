@@ -100,9 +100,9 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
   switch (action?.type) {
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
-      const bigger = csaction.newSize.width * csaction.newSize.height >= csaction.oldSize.width * csaction.oldSize.height;
+      const bigger = csaction.afterSize.width * csaction.afterSize.height >= csaction.beforeSize.width * csaction.beforeSize.height;
       icon = bigger ? '/icons/misc/canvas_size_bigger.png' : '/icons/misc/canvas_size_smaller.png';
-      description = `${csaction.oldSize.width}x${csaction.oldSize.height} -> ${csaction.newSize.width}x${csaction.newSize.height}`;
+      description = `${csaction.beforeSize.width}x${csaction.beforeSize.height} -> ${csaction.afterSize.width}x${csaction.afterSize.height}`;
       break;
     case 'image_pool':
       icon = '/icons/misc/image.png';

@@ -1,6 +1,6 @@
 import { getEntries, ImagePoolEntry } from '~/features/image_pool';
 import { allLayers } from '~/features/layer';
-import { getBufferOf } from '~/features/layer/agent/LayerAgentManager';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import {
   CanvasStore,
   canvasStore,
@@ -25,7 +25,7 @@ export interface Project {
 export function getLayerBuffers(): Map<string, Uint8ClampedArray> {
   const map = new Map<string, Uint8ClampedArray>();
   allLayers().forEach((layer) => {
-    map.set(layer.id, getBufferOf(layer.id)!);
+    map.set(layer.id, getAnvilOf(layer.id)!.getImageData());
   });
   return map;
 }

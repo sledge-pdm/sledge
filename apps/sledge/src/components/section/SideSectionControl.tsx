@@ -67,8 +67,19 @@ const SideSectionControl: Component<Props> = (props) => {
       id={`side-section-control-${props.side}`}
       class={sideSectionControlRoot}
       style={{
-        'padding-left': props.side === 'leftSide' ? '5px' : '3px',
-        'padding-right': props.side === 'leftSide' ? '3px' : '5px',
+        // 'padding-left': props.side === 'leftSide' ? '5px' : '3px',
+        // 'padding-right': props.side === 'leftSide' ? '3px' : '5px',
+        'padding-left': '4px',
+        'padding-right': '4px',
+
+        // 'border-right':
+        //   props.side === 'leftSide' && !appearanceStore[props.side].shown
+        //     ? `1px solid ${vars.color.border}`
+        //     : `1px solid ${vars.color.borderSecondary}`,
+        // 'border-left':
+        //   props.side === 'rightSide' && !appearanceStore[props.side].shown
+        //     ? `1px solid ${vars.color.border}`
+        //     : `1px solid ${vars.color.borderSecondary}`,
 
         'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
         'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',

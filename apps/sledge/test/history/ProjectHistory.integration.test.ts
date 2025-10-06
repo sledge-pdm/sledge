@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
 import { CanvasSizeHistoryAction, ColorHistoryAction, ImagePoolHistoryAction, ProjectHistoryController } from '~/features/history';
 import { getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
-import { canvasStore } from '~/stores/ProjectStores';
+import { allLayers } from '~/features/layer';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
 if (typeof document === 'undefined') {
@@ -48,7 +50,16 @@ describe('Project-level history integration', () => {
     hc.addAction(a1);
 
     const a2 = new CanvasSizeHistoryAction(initialCanvas, targetCanvas, { from: 'int' });
-    a2.redo();
+    // redoing CanvasSizeHistoryActions no longer means apply resizing.
+    // a2.redo();
+
+    a2.registerBefore();
+
+    setCanvasStore('canvas', targetCanvas);
+    allLayers().forEach((l) => getAnvilOf(l.id)?.resize(targetCanvas.width, targetCanvas.height));
+
+    a2.registerAfter();
+
     if (LOG_SEQ) logs.push(`Canvas ${initialCanvas.width}x${initialCanvas.height} -> ${targetCanvas.width}x${targetCanvas.height}`);
     hc.addAction(a2);
 

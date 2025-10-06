@@ -23,7 +23,7 @@ const BottomInfo: Component = () => {
     switch (logStore?.bottomBarKind) {
       case 'info':
       default:
-        return vars.color.muted;
+        return vars.color.onBackground;
       case 'warn':
         return vars.color.warn;
       case 'error':
@@ -34,7 +34,7 @@ const BottomInfo: Component = () => {
   return (
     <div id='bottom-info' class={bottomInfoRoot}>
       <div class={bottomInfoContainer}>
-        <p style={{ width: '56px' }}>x{interactStore.zoomByReference}</p>
+        {/** <p style={{ width: '56px' }}>x{interactStore.zoomByReference}</p> */}
         <p style={{ color: textColor(), overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
           <div class={flexRow} style={{ width: '140px', overflow: 'visible' }}>

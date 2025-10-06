@@ -53,10 +53,6 @@ class FloatingMoveManager {
 
   // Don't modify original layer buffer while moving.
   // instead, create a preview buffer and conditionally use it.
-  // 注釈: 現在はオリジナルの元バッファを保持したうえで、オリジナルのバッファを改変してしまっています。
-  // それだと保存やエクスポートの時にcommitされていない変更が載ってしまうので、プレビュー用バッファを用意したうえでwebGLに渡すときに
-  //   const buffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving() ? floatingMoveManager.movePreviewBuffer : getBufferOf(layer.id);
-  // のようにする方が安全と思います。
   private movePreviewBuffer: Uint8ClampedArray | undefined = undefined; // should be same size as layer/canvas.
   private state: MoveMode | undefined = undefined;
 
@@ -189,9 +185,8 @@ class FloatingMoveManager {
 
     const beforeBuffer = getBufferCopy(this.targetLayerId);
     if (beforeBuffer) {
-      registerWholeChange(this.targetLayerId, beforeBuffer, this.movePreviewBuffer.slice());
-      // load into anvil
       setBuffer(this.targetLayerId, this.movePreviewBuffer);
+      registerWholeChange(this.targetLayerId, beforeBuffer, this.movePreviewBuffer.slice());
       const patch = flushPatch(this.targetLayerId);
       if (patch) {
         projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
@@ -203,13 +198,20 @@ class FloatingMoveManager {
 
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
+    } else {
+      const newOffset = this.floatingBuffer.offset;
+      selectionManager.shiftOffset(newOffset);
+      selectionManager.commitOffset();
+
+      eventBus.emit('selection:offsetChanged', { newOffset });
+      eventBus.emit('selection:maskChanged', { commit: true });
     }
+
     // Reset the state
     this.state = undefined;
     this.floatingBuffer = undefined;
     this.targetLayerId = undefined;
     this.targetBuffer = undefined;
-
     eventBus.emit('floatingMove:stateChanged', { moving: false });
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });

@@ -13,7 +13,7 @@ import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { interactStore } from '~/stores/EditorStores';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { changeBaseLayerColor, createLayer } from './model';
 import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
@@ -107,14 +107,14 @@ export async function mergeToBelowLayer(layerId: string) {
   const originLayer = layerListStore.layers[originLayerIndex];
   const targetLayer = layerListStore.layers[targetLayerIndex];
 
-  // merge
   await mergeLayer({ originLayer, targetLayer });
 
   setLayerProp(layerId, 'enabled', false, { noDiff: true });
   if (layerListStore.activeLayerId === layerId) {
     setLayerListStore('activeLayerId', targetLayer.id);
   }
-  // removeLayer(layerId);
+
+  // TODO: add Merge history action which provides undo/redo for both layers
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {
@@ -193,8 +193,10 @@ export const addLayerTo = (
     getNumberUniqueLayerName
   );
 
-  // Initialize layer image with agent
-  getAnvilOf(newLayer.id)?.resetBuffer(options?.initImage);
+  // Initialize anvil
+  const width = canvasStore.canvas.width;
+  const height = canvasStore.canvas.height;
+  anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
 
   const layers = [...allLayers()];
   layers.splice(index, 0, newLayer as any);

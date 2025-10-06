@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { CanvasSizeHistoryAction } from '~/features/history';
-import { canvasStore } from '~/stores/ProjectStores';
+import { allLayers } from '~/features/layer';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
 if (typeof document === 'undefined') {
@@ -17,7 +19,16 @@ describe('CanvasSizeHistoryAction', () => {
     const oldSize = { width: 100, height: 80 } as const;
     const newSize = { width: 120, height: 90 } as const;
     const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'test' });
-    act.redo();
+    // redoing CanvasSizeHistoryActions no longer means apply resizing.
+    // act.redo();
+
+    act.registerBefore();
+
+    setCanvasStore('canvas', newSize);
+    allLayers().forEach((l) => getAnvilOf(l.id)?.resize(newSize.width, newSize.height));
+
+    act.registerAfter();
+
     expect(canvasStore.canvas.width).toBe(newSize.width);
     expect(canvasStore.canvas.height).toBe(newSize.height);
     act.undo();

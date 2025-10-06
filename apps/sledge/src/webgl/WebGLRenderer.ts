@@ -1,15 +1,13 @@
 // src/renderer/WebGLRenderer.ts
-import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
-import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
-import fragmentSrc from './shaders/blend.frag.glsl';
-import vertexSrc from './shaders/fullscreen.vert.glsl';
-// WASM関数をインポート
 import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
-// import { getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
+import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
 import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
+import fragmentSrc from './shaders/blend.frag.glsl';
+import vertexSrc from './shaders/fullscreen.vert.glsl';
 
 const MAX_LAYERS = 16;
 const LOG_LABEL = 'WebGLRenderer';

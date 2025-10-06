@@ -4,8 +4,10 @@ import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { projectHistoryController } from '~/features/history';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
+import { allLayers } from '~/features/layer';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export function isValidCanvasSize(size: Size2D): boolean {
@@ -54,18 +56,27 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
   return true;
 }
 
-export async function changeCanvasSize(newSize: Size2D, noDiff?: boolean): Promise<boolean> {
+export async function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?: boolean): Promise<boolean> {
   if (!isValidCanvasSize(newSize)) return false;
 
   const current = canvasStore.canvas;
   if (current.width === newSize.width && current.height === newSize.height) return false;
 
   // Use history action so that undo/redo works and buffers are snapshotted/restored
-  const act = new CanvasSizeHistoryAction({ ...current }, { ...newSize }, { from: 'CanvasController.changeCanvasSize' });
+  const act = new CanvasSizeHistoryAction(current, newSize, { from: 'CanvasController.changeCanvasSize' });
+  if (!skipHistory) act.registerBefore();
+
   // Apply immediately (user intent)
-  act.redo();
-  if (!noDiff) {
-    // Then push onto history stack
+  setCanvasStore('canvas', newSize);
+  adjustZoomToFit();
+  eventBus.emit('canvas:sizeChanged', { newSize: newSize });
+
+  allLayers().forEach((l) => {
+    const anvil = getAnvilOf(l.id);
+    anvil?.resize(newSize.width, newSize.height);
+  });
+  if (!skipHistory) {
+    act.registerAfter();
     projectHistoryController.addAction(act);
   }
   return true;

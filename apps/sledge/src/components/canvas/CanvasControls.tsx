@@ -8,9 +8,10 @@ import { Icon } from '@sledge/ui';
 import { Consts } from '~/Consts';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { allLayers } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
+import { eventBus } from '~/utils/EventBus';
 // no longer relying on layerHistory:changed; use projectHistoryController.onChange
 
 const CanvasControls: Component = () => {
@@ -133,21 +134,28 @@ const CanvasControls: Component = () => {
                     return; // no-op
                   }
 
+                  // CanvasSizeHistoryAction uses the "current" canvas size and buffer as an old state, so must be called before resizing buffers.
+                  const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'CanvasControls.frameCommit' });
+                  act.registerBefore();
+
+                  setCanvasStore('canvas', newSize);
+                  eventBus.emit('canvas:sizeChanged', { newSize });
+
                   const startX = offset.x;
                   const startY = offset.y;
-                  const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'CanvasControls.frameCommit' });
-
-                  const destOrigin = { x: 0, y: 0 };
                   for (const l of allLayers()) {
-                    const agent = getAgentOf(l.id)!;
-                    agent.changeBufferSize(newSize, false, destOrigin, { x: startX, y: startY });
-                    agent.forceUpdate();
+                    const anvil = getAnvilOf(l.id)!;
+                    anvil.resizeWithOffset(newSize, {
+                      srcOrigin: { x: startX, y: startY },
+                      destOrigin: { x: 0, y: 0 },
+                    });
+                    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'CanvasControls.frameCommit' });
+                    eventBus.emit('preview:requestUpdate', { layerId: l.id });
                   }
-                  setCanvasStore('canvas', newSize);
 
-                  act.redo();
+                  act.registerAfter();
+
                   projectHistoryController.addAction(act);
-
                   setInteractStore('isCanvasSizeFrameMode', false);
                   setInteractStore('canvasSizeFrameOffset', { x: 0, y: 0 });
                   setInteractStore('canvasSizeFrameSize', { width: 0, height: 0 });

@@ -1,12 +1,12 @@
 import type { Patch } from '@sledge/anvil';
-import { applyPatch } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
+import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';
 
 /**
  * History action for Anvil-based layer buffer changes.
- * Patch は packed RGBA32 を使用。undo/redo 双方向適用は AnvilController.applyPatch 経由。
  */
 export class AnvilLayerHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_buffer'; // 既存と同一 type を維持し履歴表示互換
@@ -24,7 +24,10 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
       cancelMove();
       return;
     }
-    applyPatch(this.layerId, this.patch, 'undo');
+    getAnvilOf(this.layerId)?.applyPatch(this.patch, 'undo');
+
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${this.layerId}) undo` });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
   }
 
   redo(): void {
@@ -32,6 +35,9 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
       cancelMove();
       return;
     }
-    applyPatch(this.layerId, this.patch, 'redo');
+    getAnvilOf(this.layerId)?.applyPatch(this.patch, 'redo');
+
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${this.layerId}) redo` });
+    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
   }
 }

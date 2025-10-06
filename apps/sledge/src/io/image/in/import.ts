@@ -1,7 +1,7 @@
 import { FileLocation } from '@sledge/core';
-import { changeCanvasSize } from '~/features/canvas';
+import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
-import { setBuffer } from '~/features/layer/anvil/AnvilController';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
@@ -27,12 +27,7 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
     }
   );
 
-  console.log('path', {
-    name: location.name,
-    path: location.path,
-  });
-
-  changeCanvasSize(
+  changeCanvasSizeWithNoOffset(
     {
       width: imageData.width,
       height: imageData.height,
@@ -54,7 +49,8 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
     }
   );
 
-  setBuffer(initLayer.id, Uint8ClampedArray.from(imageData.data));
+  anvilManager.registerAnvil(initLayer.id, new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
+
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Import ${location.name}` });
   eventBus.emit('preview:requestUpdate', { layerId: initLayer.id });
 

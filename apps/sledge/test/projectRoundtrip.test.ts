@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BlendMode, LayerType } from '~/features/layer';
-import { layerAgentManager } from '~/features/layer/agent/LayerAgentManager';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { loadProjectJson } from '~/io/project/in/load';
 import { dumpProject, type Project } from '~/io/project/out/dump';
 import { layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
@@ -30,7 +30,7 @@ describe('Project dump/load roundtrip', () => {
     buf[1] = 0;
     buf[2] = 0;
     buf[3] = 255; // one red pixel for sanity
-    layerAgentManager.registerAgent(layer.id, buf, 4, 4);
+    anvilManager.registerAnvil(layer.id, buf, 4, 4);
 
     // Dump
     const packed = await dumpProject();

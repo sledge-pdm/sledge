@@ -2,7 +2,7 @@ import { Anvil } from '@sledge/anvil';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { applyPatch, fillRect, flushPatch, registerWholeChange, setPixel } from '~/features/layer/anvil/AnvilController';
+import { fillRect, flushPatch, registerWholeChange, setPixel } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf, registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
 
 vi.mock('~/features/selection/FloatingMoveManager', () => ({
@@ -83,6 +83,7 @@ describe('AnvilLayerHistoryAction', () => {
   });
 
   it('applyPatch helper symmetry (manual call)', () => {
+    const anvil = getAnvilOf(layerId)!;
     // set some pixels -> patch captures before(0) and after(1 / 5)
     setPixel(layerId, 5, 5, [1, 2, 3, 4]);
     setPixel(layerId, 6, 5, [5, 6, 7, 8]);
@@ -91,9 +92,9 @@ describe('AnvilLayerHistoryAction', () => {
     setPixel(layerId, 5, 5, [9, 9, 9, 9]);
     setPixel(layerId, 6, 5, [9, 9, 9, 9]);
     flushPatch(layerId); // discard second patch
-    applyPatch(layerId, patch, 'redo'); // apply effect (after values)
+    anvil.applyPatch(patch, 'redo'); // apply effect (after values)
     expect(getAnvilOf(layerId)!.getPixel(5, 5)[0]).toBe(1);
-    applyPatch(layerId, patch, 'undo'); // revert to before (0)
+    anvil.applyPatch(patch, 'undo'); // apply effect (after values)
     expect(getAnvilOf(layerId)!.getPixel(6, 5)[0]).toBe(0);
   });
 });

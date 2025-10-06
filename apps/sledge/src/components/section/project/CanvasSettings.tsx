@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSize, isValidCanvasSize } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, isValidCanvasSize } from '~/features/canvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { flexCol, flexRow } from '@sledge/core';
@@ -25,7 +25,7 @@ const CanvasSettings: Component = () => {
     const newSize = { width, height };
 
     if (isValidCanvasSize(newSize)) {
-      const result = await changeCanvasSize(newSize);
+      const result = await changeCanvasSizeWithNoOffset(newSize);
       if (result) adjustZoomToFit();
     }
   };

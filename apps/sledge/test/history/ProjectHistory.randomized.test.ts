@@ -11,9 +11,9 @@ import {
 } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
-import { BlendMode, Layer, LayerType, resetLayerImage } from '~/features/layer';
+import { BlendMode, Layer, LayerType } from '~/features/layer';
 import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
@@ -37,8 +37,12 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     // Normalize color and image pool before each test
     selectPalette(PaletteType.primary);
     setColor(PaletteType.primary, '#000000');
+
+    const WIDTH = 16;
+    const HEIGHT = 16;
+
     // Keep canvas small to make layer buffers tiny
-    setCanvasStore('canvas', { width: 16, height: 16 });
+    setCanvasStore('canvas', { width: WIDTH, height: HEIGHT });
     // Seed 3 layers with agents (small buffers)
     const l = (id: string, name = id): Layer => ({
       id,
@@ -52,8 +56,10 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     });
     setLayerListStore('layers', [l('L1'), l('L2'), l('L3')]);
     setLayerListStore('activeLayerId', 'L1');
-    // Ensure agents exist for each layer id
-    layerListStore.layers.forEach((layer) => resetLayerImage(layer.id, layer.dotMagnification));
+    // Ensure anvils exist for each layer id
+    layerListStore.layers.forEach((layer) => {
+      anvilManager.registerAnvil(layer.id, new Uint8ClampedArray(WIDTH * HEIGHT * 4), WIDTH, HEIGHT);
+    });
     // Drop a few known test IDs if present
     ['rnd-a', 'rnd-b', 'rnd-c'].forEach((id) => {
       if (getEntry(id)) removeEntry(id);

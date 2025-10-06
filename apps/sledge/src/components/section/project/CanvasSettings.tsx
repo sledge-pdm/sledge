@@ -3,12 +3,11 @@ import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, isValid
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB03, ZFB03B } from '@sledge/theme';
+import { vars, ZFB03B } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
-import { activeLayer, allLayers } from '~/features/layer';
 import { saveGlobalSettings } from '~/io/config/save';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
@@ -168,7 +167,7 @@ const CanvasSettings: Component = () => {
             [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
           </p>
         </div>
-        <p class={sectionSubCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
+        {/* <p class={sectionSubCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
           info.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
@@ -184,7 +183,7 @@ const CanvasSettings: Component = () => {
             <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>active</p>
             <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
           </div>
-        </div>
+        </div> */}
         <p class={sectionSubCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
           actions.
         </p>

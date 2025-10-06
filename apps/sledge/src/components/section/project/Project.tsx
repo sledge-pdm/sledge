@@ -1,7 +1,7 @@
 import { Component } from 'solid-js';
 import ProjectLocation from '~/components/section/project/item/ProjectLocation';
 import SectionItem from '~/components/section/SectionItem';
-import { sectionContent, sectionSubCaption } from '~/styles/section/section_item.css';
+import { sectionContent } from '~/styles/section/section_item.css';
 
 const Project: Component = () => {
   return (
@@ -11,10 +11,7 @@ const Project: Component = () => {
         <div style={{ 'padding-left': '4px' }}>
           <ProjectName />
         </div> */}
-        <p class={sectionSubCaption}>Location.</p>
-        <div style={{ 'padding-left': '4px' }}>
-          <ProjectLocation />
-        </div>
+        <ProjectLocation />
         {/* <p class={sectionSubCaption}>File Control.</p>
         <div style={{ 'padding-left': '8px' }}>
           <ProjectSave />

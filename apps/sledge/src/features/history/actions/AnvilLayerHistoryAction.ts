@@ -1,4 +1,4 @@
-import type { Patch } from '@sledge/anvil';
+import type { LayerPatch } from '@sledge/anvil';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
@@ -13,7 +13,7 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
 
   constructor(
     public readonly layerId: string,
-    public readonly patch: Patch,
+    public readonly patch: LayerPatch,
     context?: any
   ) {
     super(context, `Layer ${layerId}: buffer`);

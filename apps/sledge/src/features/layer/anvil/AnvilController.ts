@@ -1,4 +1,4 @@
-import type { Patch } from '@sledge/anvil';
+import type { LayerPatch } from '@sledge/anvil';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
 
@@ -49,7 +49,7 @@ export function fillRect(layerId: string, x: number, y: number, w: number, h: nu
   anvil.fillRect(x, y, w, h, rgba);
 }
 
-export function flushPatch(layerId: string): Patch | null {
+export function flushPatch(layerId: string): LayerPatch | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;
   const raw = anvil.flush();
@@ -61,7 +61,7 @@ export function flushPatch(layerId: string): Patch | null {
   return patch ?? null;
 }
 
-export function previewPatch(layerId: string): Patch | null {
+export function previewPatch(layerId: string): LayerPatch | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;
   const raw = anvil.previewPatch();
@@ -92,8 +92,8 @@ function packRGBA(r: number, g: number, b: number, a: number) {
 }
 
 // Anvil の LayerPatch (RGBA配列ベース) を public Patch (packed u32) へ変換
-function convertLayerPatch(raw: any): Patch {
-  const out: Patch = {};
+function convertLayerPatch(raw: any): LayerPatch {
+  const out: LayerPatch = {};
   if (raw.whole) out.whole = raw.whole; // before/after は Uint8ClampedArray で同型
   if (raw.partial) {
     out.partial = raw.partial; // { boundBox, before, after }

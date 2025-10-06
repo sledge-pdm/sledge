@@ -13,7 +13,7 @@ import { saveGlobalSettings } from '~/io/config/save';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
-import { sectionCaption, sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent, sectionSubCaption } from '~/styles/section/section_item.css';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
@@ -82,7 +82,7 @@ const CanvasSettings: Component = () => {
     <SectionItem title='canvas.'>
       <div class={sectionContent} style={{ gap: '10px', 'margin-top': '8px', 'padding-bottom': '24px' }}>
         <div class={flexRow}>
-          <p class={sectionCaption}>size.</p>
+          <p class={sectionSubCaption}>size.</p>
           <div class={flexCol} style={{ 'margin-left': 'auto', gap: '6px' }}>
             <Button
               onClick={async () => {
@@ -168,7 +168,7 @@ const CanvasSettings: Component = () => {
             [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
           </p>
         </div>
-        <p class={sectionCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
+        <p class={sectionSubCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
           info.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
@@ -185,7 +185,7 @@ const CanvasSettings: Component = () => {
             <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
           </div>
         </div>
-        <p class={sectionCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
+        <p class={sectionSubCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
           actions.
         </p>
         <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>

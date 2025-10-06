@@ -6,21 +6,21 @@ import { fileStore } from '~/stores/EditorStores';
 import { join } from '~/utils/FileUtils';
 
 const ProjectLocation: Component = () => {
-  const isNewProject = () => !fileStore.savedLocation.name || !fileStore.savedLocation.path;
-
-  console.log('ProjectLocation', fileStore.savedLocation);
-
   return (
     <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
-      <Show when={!isNewProject()} fallback={<p style={{ 'font-family': ZFB09, margin: '4px 0', opacity: 0.3 }}>[ unsaved project ]</p>}>
-        <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>path</p>
+      <div class={flexRow}>
+        <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>path</p>
+        <Show when={fileStore.savedLocation.path} fallback={<p style={{ 'font-family': ZFB09, opacity: 0.3 }}></p>}>
           <p style={{ 'white-space': 'wrap' }}>{fileStore.savedLocation.path || '<unknown>'}</p>
-        </div>
-        <div class={flexRow}>
-          <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>file</p>
-          <p>{fileStore.savedLocation.name || '<unknown>'}</p>
-        </div>
+        </Show>
+      </div>
+      <div class={flexRow}>
+        <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>file</p>
+        <Show when={fileStore.savedLocation.name} fallback={<p style={{ 'font-family': ZFB09, opacity: 0.3 }}>[ unsaved project ]</p>}>
+          <p style={{ 'white-space': 'wrap' }}>{fileStore.savedLocation.name || '<unknown>'}</p>
+        </Show>
+      </div>
+      <Show when={fileStore.savedLocation.name && fileStore.savedLocation.path}>
         <div class={flexRow} style={{ 'margin-top': '6px', 'justify-content': 'start' }}>
           <a
             href='#'

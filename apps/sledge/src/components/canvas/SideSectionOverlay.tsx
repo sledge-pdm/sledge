@@ -134,8 +134,8 @@ const SideSectionsOverlay: Component<Props> = (props) => {
             class={sideAreaContentWrapper}
             ref={(el) => (scrollRef = el)}
             style={{
-              'padding-left': props.side === 'leftSide' ? '16px' : '24px',
-              'padding-right': props.side === 'rightSide' ? '16px' : '24px',
+              'padding-left': props.side === 'leftSide' ? '16px' : '20px',
+              'padding-right': props.side === 'rightSide' ? '16px' : '20px',
             }}
           >
             <div class={sideAreaContent}>{tabContent(selectedTab())}</div>

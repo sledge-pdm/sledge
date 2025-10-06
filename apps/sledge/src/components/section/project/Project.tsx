@@ -6,7 +6,7 @@ import { sectionContent, sectionSubCaption } from '~/styles/section/section_item
 const Project: Component = () => {
   return (
     <SectionItem title='project.'>
-      <div class={sectionContent} style={{ gap: '6px', 'margin-bottom': '8px' }}>
+      <div class={sectionContent} style={{ gap: '6px' }}>
         {/* <p class={sectionSubCaption}>Name.</p>
         <div style={{ 'padding-left': '4px' }}>
           <ProjectName />

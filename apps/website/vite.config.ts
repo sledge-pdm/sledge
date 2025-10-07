@@ -1,3 +1,4 @@
+import { ecsstatic } from '@acab/ecsstatic/vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import path from 'path';
 import { defineConfig } from 'vite';
@@ -7,6 +8,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [
+    ecsstatic(),
     vanillaExtractPlugin(),
     solidPlugin(),
     tsconfigPaths(),

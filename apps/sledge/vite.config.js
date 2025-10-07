@@ -1,3 +1,4 @@
+import { ecsstatic } from '@acab/ecsstatic/vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import path from 'path';
 import { defineConfig } from 'vite';
@@ -11,6 +12,7 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
   plugins: [
     wasmPlugin(),
+    ecsstatic(),
     vanillaExtractPlugin({
       devStyleRuntime: 'vanilla-extract',
     }),

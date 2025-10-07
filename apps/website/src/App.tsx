@@ -14,6 +14,8 @@ import { globalStore } from '~/store/GlobalStore';
 import { pageContainer, restContainer, rootContainer } from '~/styles/app.css';
 import { rightBottomArea, themeArea } from '~/styles/page.css';
 
+import '@sledge/theme/src/global.css';
+
 const App: Component = () => {
   onMount(() => {
     applyThemeToHtml();

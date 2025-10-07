@@ -7,7 +7,7 @@ import Editor from './routes/editor/index';
 import Home from './routes/start/index';
 
 import { flexCol, h100 } from '@sledge/core';
-import { getTheme } from '@sledge/theme';
+import { applyTheme, getTheme } from '@sledge/theme';
 import { showContextMenu } from '@sledge/ui';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
@@ -20,6 +20,8 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
+
+import '@sledge/theme/src/global.css';
 
 export default function App() {
   // グローバルエラーハンドラーを設定
@@ -54,8 +56,10 @@ export default function App() {
     let cls;
     if (osTheme && globalConfig.appearance.theme === 'os') {
       cls = getTheme(osTheme);
+      applyTheme(osTheme);
     } else {
       cls = getTheme(globalConfig.appearance.theme);
+      applyTheme(globalConfig.appearance.theme);
     }
     const html = document.documentElement;
     if (prevThemeClass && html.classList.contains(prevThemeClass)) {
@@ -86,7 +90,10 @@ export default function App() {
     // await checkForUpdates();
   });
 
-  createEffect(() => applyThemeToHtml());
+  createEffect(() => {
+    const theme = globalConfig.appearance.theme;
+    applyThemeToHtml();
+  });
 
   return (
     <Router

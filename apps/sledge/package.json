@@ -43,9 +43,10 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.8.3",
+    "@acab/ecsstatic": "^0.9.0",
     "@vanilla-extract/vite-plugin": "^5.1.1",
     "@interactjs/types": "^1.10.27",
-    "vite": "^7.1.3",
+    "vite": "^7.1.9",
     "vite-plugin-glsl": "^1.5.1",
     "vite-plugin-inspect": "^11.3.3",
     "vite-plugin-solid": "^2.11.8",

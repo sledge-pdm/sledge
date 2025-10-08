@@ -1,6 +1,8 @@
 ---
-applyTo: '**/*'
+applyTo: 'nothing!'
 ---
+
+> This migration is already done! Just make sure you have to follow this instructions when defining new style.
 
 # ecsstatic Migration Instructions
 
@@ -86,7 +88,7 @@ const dynamicStyle = css`
 - vanilla-extract(css.ts)からの移行と同時に、不要なjsx内でのstyle props(style={{...}})の定義がある場合、適切な名前を付けてecsstaticのcssに抽出してください。
 
 ## 移行状況
-- [x] packages/ui - 完了（試験移行）
-- [ ] apps/sledge - 進行中
+- [x] packages/ui - 完了
+- [x] apps/sledge - 完了
 
 この移行により、スタイル定義の一本化とパフォーマンス向上を実現し、開発体験の改善を図ります。

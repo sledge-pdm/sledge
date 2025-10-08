@@ -3,9 +3,9 @@ import { flexCol } from '@sledge/core';
 import { accentedButton, k12x8 } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Slider } from '@sledge/ui';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
-import { exists, mkdir } from '@tauri-apps/plugin-fs';
+import { exists } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/io/config/save';
 import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
@@ -130,13 +130,6 @@ const ExportContent: Component = () => {
       setSettings('dirPath', fileStore.savedLocation.path);
     } else {
       setSettings('dirPath', await defaultExportDir());
-    }
-  });
-
-  createEffect(async () => {
-    const dir = settings.dirPath;
-    if (dir && !(await exists(dir))) {
-      await mkdir(dir, { recursive: true });
     }
   });
 

@@ -31,6 +31,8 @@ Thumbs.db
 # repomix
 repomix-output.txt
 repomix-output.xml
+*-repomix.txt
+*-repomix.xml
 
 *.heapprofile
 

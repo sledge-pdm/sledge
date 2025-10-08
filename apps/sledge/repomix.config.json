@@ -1,7 +1,7 @@
 {
   "output": {
-    "filePath": "repomix-output.txt",
-    "style": "plain",
+    "filePath": "sledge-repomix.xml",
+    "style": "xml",
     "parsableStyle": false,
     "compress": false,
     "headerText": "REPOMIX output file",

@@ -1,5 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Asset, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
+import { color } from '@sledge/theme';
 import { Button, Icon } from '@sledge/ui';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 
@@ -53,6 +54,14 @@ const assetText = css`
   user-select: text;
 `;
 
+const downloadsContainer = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+  margin-left: 16px;
+  gap: 12px;
+`;
+
 const downloadButton = css`
   min-width: 120px;
   font-size: 16px;
@@ -85,6 +94,17 @@ const mainLink = css`
   }
 `;
 
+const otherDownloadsContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+  margin-left: 2px;
+  margin-top: 8px;
+  padding: 24px 16px;
+  border-left: 1px solid var(--color-border-secondary);
+`;
+
 const DownloadSection: Component<{}> = () => {
   const releaseApiUrl =
     import.meta.env.VITE_GITHUB_REST_API_URL +
@@ -98,6 +118,8 @@ const DownloadSection: Component<{}> = () => {
 
   const [userOS, setUserOS] = createSignal<os>('none');
   const [releaseData, setReleaseData] = createSignal<ReleaseData | null>(null);
+
+  const [otherDownlaodsOpen, setOtherDownloadsOpen] = createSignal(false);
 
   const availableAssets = (): {
     asset: Asset;
@@ -170,7 +192,6 @@ const DownloadSection: Component<{}> = () => {
               {releaseData()?.name ?? '[ fetch failed ]'}
             </span>
           </p>
-
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
               <Icon src='/icons/misc/dot.png' base={8} color={'var(--color-on-background)'} />
@@ -184,25 +205,31 @@ const DownloadSection: Component<{}> = () => {
             </div>
           </Show>
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-            <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '16px' }}>
+            <div class={downloadsContainer}>
               <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
             </div>
           </Show>
-
           <a
             onClick={() => {
-              window.open('https://github.com/sledge-pdm/sledge/releases', '_blank')?.focus();
+              /* window.open('https://github.com/sledge-pdm/sledge/releases', '_blank')?.focus(); */
+              setOtherDownloadsOpen(!otherDownlaodsOpen());
             }}
             class={mainLink}
-            style={{ 'margin-top': '48px', color: 'var(--color-muted)' }}
+            style={{ width: 'fit-content', 'margin-top': '48px', color: 'var(--color-muted)' }}
           >
             &gt; OTHER DOWNLOADS.
           </a>
 
-          {/* <div class={flexCol} style={{ width: '100%', gap: '16px' }}>
+          <div
+            class={otherDownloadsContainer}
+            style={{
+              display: otherDownlaodsOpen() ? 'flex' : 'none',
+            }}
+          >
             <For each={Object.entries(osBuildInfos)}>
               {([key, info]) => {
                 const name = key;
+                if (name === userOS()) return null;
                 const exts = info.extensions;
                 const assets = releaseData()!
                   .assets.filter((asset) => exts.some((ext) => asset.name.endsWith(`.${ext}`)))
@@ -212,25 +239,25 @@ const DownloadSection: Component<{}> = () => {
                   });
                 if (assets.length === 0) return null;
                 return (
-                  <div class={flexCol} style={{ width: '100%', gap: '8px' }}>
+                  <div class={flexCol} style={{ width: '100%' }}>
                     <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-                      <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+                      <Icon src='/icons/misc/dot.png' base={8} color={color.onBackground} />
                       <p class={osInfoText}>
                         {' '}
                         for{' '}
-                        <span class={osInfoText} style={{ color: vars.color.accent }}>
+                        <span class={osInfoText} style={{ color: color.accent }}>
                           {name}
                         </span>
                       </p>
                     </div>
-                    <div class={flexCol} style={{ 'margin-top': '12px', 'margin-left': '16px' }}>
+                    <div class={downloadsContainer}>
                       <For each={assets}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
                     </div>
                   </div>
                 );
               }}
             </For>
-          </div> */}
+          </div>
         </div>
       </Show>
       <Show when={information()}>
@@ -281,7 +308,7 @@ const DownloadButton: Component<{
   const [showDigest, setShowDigest] = createSignal(false);
 
   return (
-    <>
+    <div class={flexCol}>
       <Button
         key={asset.id}
         onClick={() => {
@@ -308,7 +335,7 @@ const DownloadButton: Component<{
       <Show
         when={showDigest()}
         fallback={
-          <a class={`${mainLink} ${assetText}`} onClick={() => setShowDigest(true)}>
+          <a class={`${mainLink} ${assetText}`} style={{ opacity: 0.2 }} onClick={() => setShowDigest(true)}>
             show digest
           </a>
         }
@@ -329,7 +356,7 @@ const DownloadButton: Component<{
           </a>
         </p>
       </Show>
-    </>
+    </div>
   );
 };
 

@@ -1,10 +1,40 @@
+import { css } from '@acab/ecsstatic';
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, Show } from 'solid-js';
 import { setActiveToolCategory } from '~/features/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
-import { toolConfigRow, toolConfigRowClickable, toolConfigRowName } from '~/styles/section/editor/tools.css';
 import { ToolCategoryId } from '~/tools/Tools';
+
+const toolConfigRow = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 32px;
+  width: auto;
+  gap: var(--spacing-md);
+  align-items: center;
+`;
+
+const toolConfigRowClickable = css`
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md);
+  align-items: center;
+  pointer-events: all;
+  cursor: pointer;
+`;
+
+const toolConfigRowName = css`
+  cursor: pointer;
+  width: 40px;
+  font-size: var(--text-sm);
+  padding: var(--spacing-md) 0;
+`;
+
+const iconWrapper = css`
+  padding: 1px;
+`;
 
 interface Props {
   categoryId: ToolCategoryId;
@@ -18,10 +48,10 @@ const ToolItem: Component<Props> = (props: Props) => {
   const shouldShowLabel = () => props.withLabel === 'always' || (props.withLabel === 'inUse' && props.isInUse);
 
   return (
-    <div class={toolConfigRow} style={{}}>
+    <div class={toolConfigRow}>
       {/* <Light on={props.isInUse} /> */}
       <div class={toolConfigRowClickable} onClick={() => setActiveToolCategory(category.id)}>
-        <div style={{ padding: '1px' }}>
+        <div class={iconWrapper}>
           <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
         </div>
         <Show when={shouldShowLabel()}>

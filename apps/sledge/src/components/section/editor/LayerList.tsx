@@ -1,3 +1,4 @@
+import { css } from '@acab/ecsstatic';
 import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
@@ -7,12 +8,20 @@ import { projectHistoryController } from '~/features/history';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { layerList } from '~/styles/section/editor/layer.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
 import { sectionContent } from '../SectionStyles';
 import BaseLayerItem from './item/BaseLayerItem';
 import LayerItem from './item/LayerItem';
+
+const layerList = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  gap: 4px;
+  width: 100%;
+`;
 
 const LayerList: Component<{}> = () => {
   const [items, setItems] = createSignal(allLayers());

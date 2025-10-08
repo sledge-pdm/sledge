@@ -1,3 +1,4 @@
+import { css } from '@acab/ecsstatic';
 import { flexCol, flexRow, w100 } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
@@ -16,17 +17,70 @@ import {
   setLayerName,
 } from '~/features/layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import {
-  activeLight,
-  layerItem,
-  layerItemDisabled,
-  layerItemHandle,
-  layerItemIndex,
-  layerItemName,
-  layerItemSpinner,
-  layerItemType,
-} from '~/styles/section/editor/layer.css';
 import { eventBus } from '~/utils/EventBus';
+
+const layerItem = css`
+  display: flex;
+  flex-direction: row;
+  height: 40px;
+  cursor: pointer;
+`;
+
+const layerItemHandle = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 12px;
+  background-color: var(--color-border);
+`;
+
+const layerItemSpinner = css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: #666;
+  }
+`;
+
+const layerItemDisabled = css`
+  opacity: 0.3;
+`;
+
+const layerItemIndex = css`
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  opacity: 0.3;
+  margin-left: 2px;
+  width: 14px;
+`;
+
+const layerItemType = css`
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  opacity: 0.75;
+`;
+
+const layerItemName = css`
+  font-family: ZFB03B, k8x12;
+  font-size: 16px;
+  margin-left: 16px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const activeLight = css`
+  align-self: center;
+  margin: var(--spacing-sm) 0;
+  margin-left: var(--spacing-sm);
+  margin-right: var(--spacing-md);
+`;
 
 interface LayerItemProps {
   index: number;

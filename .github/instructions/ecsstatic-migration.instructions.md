@@ -2,7 +2,7 @@
 applyTo: '**/*'
 ---
 
-# ECSStatic Migration Instructions
+# ecsstatic Migration Instructions
 
 ## 背景と目的
 
@@ -79,7 +79,7 @@ const dynamicStyle = css`
   - vars.color.camelCase = var(--color-snake-case) ※color以外でも同様
   - Consts.zIndex.camelCase = var(--zindex-snake-case)
 
-- font-familyについては、vanilla-extractと同名での定義をcssで行っています(ZFB09 = ZFB09, PM12 = PM12)。font名についてはvar()ではなく、そのまま
+- font-familyについては、vanilla-extractと同名での定義をcssで行っています(ZFB09 = ZFB09, PM12 = PM12)。font名についてはvar()ではなく、そのままフォント変数名をcss内に記述できます。
 
 ## 移行状況
 - [x] packages/ui - 完了（試験移行）

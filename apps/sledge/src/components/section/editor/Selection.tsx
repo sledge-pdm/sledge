@@ -1,5 +1,5 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { flexCol } from '@sledge/core';
 import { Dropdown } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -9,6 +9,31 @@ import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { sectionContent } from '../SectionStyles';
+
+const selectionControlContainer = css`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+`;
+
+const iconContainer = css`
+  display: flex;
+  flex-direction: row;
+  width: fit-content;
+`;
+
+const modeText = css`
+  margin-bottom: 6px;
+`;
+
+const pixelatedIcon = css`
+  image-rendering: pixelated;
+  width: 32px;
+  height: 32px;
+`;
 
 const Selection: Component = () => {
   const [selectionStatus, setSelectionStatus] = createStore({
@@ -61,41 +86,21 @@ const Selection: Component = () => {
     <Show when={isSelected()}>
       <SectionItem title='selection.'>
         <div class={sectionContent}>
-          <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '12px', 'margin-bottom': vars.spacing.md, 'margin-top': vars.spacing.sm }}>
-            <div
-              class={flexRow}
-              style={{
-                width: 'fit-content',
-              }}
-            >
+          <div class={selectionControlContainer}>
+            <div class={iconContainer}>
               <Show when={mode() === 'outside'}>
-                <img
-                  src='/icons/tool_bar/config/outside2.png'
-                  style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px' }}
-                  width={16}
-                  height={16}
-                />
+                <img src='/icons/tool_bar/config/outside2.png' class={pixelatedIcon} width={16} height={16} />
               </Show>
               <Show when={mode() === 'inside'}>
-                <img
-                  src='/icons/tool_bar/config/inside2.png'
-                  style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px' }}
-                  width={16}
-                  height={16}
-                />
+                <img src='/icons/tool_bar/config/inside2.png' class={pixelatedIcon} width={16} height={16} />
               </Show>
               <Show when={mode() === 'none'}>
-                <img
-                  src='/icons/tool_bar/config/none.png'
-                  style={{ 'image-rendering': 'pixelated', width: '32px', height: '32px ' }}
-                  width={16}
-                  height={16}
-                />
+                <img src='/icons/tool_bar/config/none.png' class={pixelatedIcon} width={16} height={16} />
               </Show>
             </div>
 
             <div class={flexCol}>
-              <p style={{ 'margin-bottom': '6px' }}>Selection Limiting</p>
+              <p class={modeText}>Selection Limiting</p>
               <Dropdown
                 options={[
                   { label: 'Inside', value: 'inside' },

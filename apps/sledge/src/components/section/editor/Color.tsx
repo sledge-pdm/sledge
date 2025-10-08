@@ -1,7 +1,8 @@
+import { css } from '@acab/ecsstatic';
 import { Component, createMemo, For } from 'solid-js';
 import ColorPicker from '~/components/section/editor/item/ColorPicker';
 
-import { flexCol, flexRow } from '@sledge/core';
+import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { ColorBox, DropdownOption, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
@@ -9,8 +10,57 @@ import SectionItem from '~/components/section/SectionItem';
 import { currentColor, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
-import { colorElemDescription, swatchContainer, swatchHeader } from '~/styles/section/editor/color.css';
 import { sectionContent } from '../SectionStyles';
+
+const swatchHeader = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 8px;
+`;
+
+const swatchContainer = css`
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  gap: var(--spacing-xs);
+  margin-left: 8px;
+  margin-bottom: var(--spacing-lg);
+`;
+
+const colorElemDescription = css`
+  font-family: ZFB03;
+  opacity: 0.25;
+  font-size: 8px;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+`;
+
+const colorContent = css`
+  display: flex;
+  flex-direction: column;
+  margin-left: 4px;
+`;
+
+const pickerToolContainer = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  margin-bottom: 8px;
+  margin-left: 24px;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+`;
+
+const pipetteContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  pointer-events: all;
+`;
 
 const Color: Component = () => {
   let hexInputRef: HTMLInputElement;
@@ -72,29 +122,11 @@ const Color: Component = () => {
 
           <ColorPicker width={140} />
 
-          <div class={flexCol} style={{ 'margin-left': '4px' }}>
+          <div class={colorContent}>
             <Palette />
 
-            <div
-              class={flexCol}
-              style={{
-                'margin-top': 'auto',
-                'margin-bottom': '8px',
-                'margin-left': '24px',
-                'align-items': 'center',
-                'justify-content': 'center',
-                gap: '16px',
-              }}
-            >
-              <div
-                class={flexCol}
-                style={{
-                  gap: '8px',
-                  cursor: 'pointer',
-                  'pointer-events': 'all',
-                }}
-                onClick={() => setActiveToolCategory('pipette')}
-              >
+            <div class={pickerToolContainer}>
+              <div class={pipetteContainer} onClick={() => setActiveToolCategory('pipette')}>
                 <Icon
                   src={'/icons/misc/pipette.png'}
                   base={8}

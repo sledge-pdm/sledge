@@ -1,39 +1,62 @@
-import { flexRow } from '@sledge/core';
-import { vars, ZFB09 } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Button, Icon } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
 import SectionItem from '~/components/section/SectionItem';
 import { resetAllLayers } from '~/features/layer';
-import { sectionContent, sectionRoot } from '~/styles/section/section_item.css';
+import { sectionContent, sectionRoot } from '../SectionStyles';
+
+const dangerHeaderStyle = css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+`;
+
+const dangerTitleStyle = css`
+  color: var(--color-error);
+  font-size: 24px;
+`;
+
+const dangerDescriptionStyle = css`
+  color: var(--color-error);
+  font-size: 8px;
+  margin-bottom: 28px;
+`;
+
+const layerContentStyle = css`
+  margin-top: 8px;
+  padding-left: 8px;
+  gap: 6px;
+`;
+
+const resetButtonContainerStyle = css`
+  display: flex;
+  margin-left: 4px;
+`;
+
+const resetButtonStyle = css`
+  border-color: var(--color-error);
+  padding: 4px 8px 3px 8px;
+  font-family: ZFB09;
+  color: var(--color-error);
+`;
 
 const RESET_ALL_MSG = 'Sure to RESET ALL LAYERS?';
 const PerilousLayers: Component = () => {
   return (
     <div class={sectionRoot}>
-      <div class={flexRow} style={{ 'align-items': 'center', gap: '8px', 'margin-bottom': '6px' }}>
-        <Icon src={'/icons/misc/danger_11.png'} color={vars.color.error} base={11} scale={2} />
-        <p style={{ color: vars.color.error, 'font-size': '24px' }}>DANGER!!</p>
+      <div class={dangerHeaderStyle}>
+        <Icon src={'/icons/misc/danger_11.png'} color={'var(--color-error)'} base={11} scale={2} />
+        <p class={dangerTitleStyle}>DANGER!!</p>
       </div>
-      <p style={{ color: vars.color.error, 'font-size': '8px', 'margin-bottom': '28px' }}>
-        these operations may destroy your project. use them carefully!
-      </p>
+      <p class={dangerDescriptionStyle}>these operations may destroy your project. use them carefully!</p>
 
       <SectionItem title='layer.'>
-        <div class={sectionContent} style={{ 'margin-top': '8px', 'padding-left': '8px', gap: '6px' }}>
-          <div
-            class={flexRow}
-            style={{
-              'margin-left': '4px',
-            }}
-          >
+        <div class={`${sectionContent} ${layerContentStyle}`}>
+          <div class={resetButtonContainerStyle}>
             <Button
-              style={{
-                'border-color': vars.color.error,
-                padding: '4px 8px 3px 8px',
-                'font-family': ZFB09,
-                color: vars.color.error,
-              }}
+              class={resetButtonStyle}
               hoverContent='!!!!!!!!!!!!!'
               onClick={() => {
                 confirmOperation(RESET_ALL_MSG, resetAllLayers);

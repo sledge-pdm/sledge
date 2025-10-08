@@ -1,4 +1,4 @@
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
+import { ecsstatic } from '@acab/ecsstatic/vite';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
@@ -6,12 +6,7 @@ import solidPlugin from 'vite-plugin-solid';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [
-    vanillaExtractPlugin(),
-    solidPlugin(),
-    tsconfigPaths(),
-    nodePolyfills({ include: ['process'], globals: { global: true, process: true } }),
-  ],
+  plugins: [ecsstatic(), solidPlugin(), tsconfigPaths(), nodePolyfills({ include: ['process'], globals: { global: true, process: true } })],
   server: {
     port: 3000,
   },

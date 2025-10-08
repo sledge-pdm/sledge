@@ -1,9 +1,19 @@
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createMemo } from 'solid-js';
 import { resetOrientation, setRotation, toggleHorizontalFlip, toggleVerticalFlip } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';
-import { iconContainer } from '~/styles/globals/orientation_controls.css';
+
+const iconContainer = css`
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  padding: 6px;
+  z-index: var(--zindex-canvas-overlay);
+  pointer-events: auto;
+`;
 
 const CanvasTempControls: Component = () => {
   const resetAvailable = createMemo(() => interactStore.verticalFlipped || interactStore.horizontalFlipped || interactStore.rotation !== 0);
@@ -29,8 +39,8 @@ const CanvasTempControls: Component = () => {
           src='/icons/misc/flip_vertical_9.png'
           base={9}
           scale={1}
-          color={interactStore.verticalFlipped ? vars.color.enabled : vars.color.onBackground}
-          // hoverColor={vars.color.active}
+          color={interactStore.verticalFlipped ? color.enabled : color.onBackground}
+          // hoverColor={color.active}
         />
       </div>
       <div
@@ -52,8 +62,8 @@ const CanvasTempControls: Component = () => {
           src='/icons/misc/flip_horizontal_9.png'
           base={9}
           scale={1}
-          color={interactStore.horizontalFlipped ? vars.color.enabled : vars.color.onBackground}
-          // hoverColor={vars.color.active}
+          color={interactStore.horizontalFlipped ? color.enabled : color.onBackground}
+          // hoverColor={color.active}
         />
       </div>
       <div
@@ -71,7 +81,7 @@ const CanvasTempControls: Component = () => {
           setRotation((currentNearestRightAngle + 1) * 90);
         }}
       >
-        <Icon src='/icons/misc/rotate_clockwise_9.png' base={9} scale={1} color={vars.color.onBackground} hoverColor={vars.color.active} />
+        <Icon src='/icons/misc/rotate_clockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
       <div
         class={iconContainer}
@@ -88,7 +98,7 @@ const CanvasTempControls: Component = () => {
           setRotation((currentNearestRightAngle - 1) * 90);
         }}
       >
-        <Icon src='/icons/misc/rotate_counterclockwise_9.png' base={9} scale={1} color={vars.color.onBackground} hoverColor={vars.color.active} />
+        <Icon src='/icons/misc/rotate_counterclockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
       <div
         class={iconContainer}
@@ -106,7 +116,7 @@ const CanvasTempControls: Component = () => {
           resetOrientation();
         }}
       >
-        <Icon src='/icons/misc/reset_orientation_9.png' base={9} scale={1} color={vars.color.onBackground} hoverColor={vars.color.active} />
+        <Icon src='/icons/misc/reset_orientation_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
     </>
   );

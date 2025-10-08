@@ -1,5 +1,5 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
@@ -7,7 +7,46 @@ import { setRotation } from '~/features/canvas';
 import { resetBottomBarText } from '~/features/log/service';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
-import { bottomInfoContainer, bottomInfoContainerRight, bottomInfoRoot } from '~/styles/globals/bottom_info.css';
+const bottomInfoRoot = css`
+  display: flex;
+  flex-direction: row;
+  box-sizing: content-box;
+  flex-wrap: wrap;
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  height: 20px;
+  z-index: var(--zindex-bottom-info);
+  pointer-events: all;
+  overflow-y: visible;
+`;
+
+const bottomInfoContainer = css`
+  display: flex;
+  flex-direction: row;
+  height: 20px;
+  width: 100%;
+  align-items: center;
+  padding-left: var(--spacing-md);
+  gap: var(--spacing-md);
+`;
+
+const bottomInfoContainerRight = css`
+  display: flex;
+  flex-direction: row;
+  height: 20px;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: end;
+  gap: var(--spacing-md);
+  overflow: visible;
+`;
+
+const sliderContainer = css`
+  display: flex;
+  flex-direction: row;
+  width: 140px;
+  overflow: visible;
+`;
 
 const BottomInfo: Component = () => {
   onMount(() => {
@@ -23,11 +62,11 @@ const BottomInfo: Component = () => {
     switch (logStore?.bottomBarKind) {
       case 'info':
       default:
-        return vars.color.onBackground;
+        return color.onBackground;
       case 'warn':
-        return vars.color.warn;
+        return color.warn;
       case 'error':
-        return vars.color.error;
+        return color.error;
     }
   });
 
@@ -37,7 +76,7 @@ const BottomInfo: Component = () => {
         {/** <p style={{ width: '56px' }}>x{interactStore.zoomByReference}</p> */}
         <p style={{ color: textColor(), overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
-          <div class={flexRow} style={{ width: '140px', overflow: 'visible' }}>
+          <div class={sliderContainer}>
             <Slider
               labelMode='left'
               value={interactStore.rotation}

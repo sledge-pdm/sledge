@@ -1,6 +1,12 @@
-import { pageRoot } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Component } from 'solid-js';
-import { loadingText } from '~/styles/globals/loading.css';
+import { pageRoot } from '~/styles/StyleSnippets';
+
+const loadingText = css`
+  font-family: ZFB31;
+  text-transform: uppercase;
+  font-size: 12px;
+`;
 
 const Loading: Component = (props) => {
   return (

@@ -1,8 +1,24 @@
+import { css } from '@acab/ecsstatic';
 import { ColorBox } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { currentColor, PaletteType, selectPalette } from '~/features/color';
 import { colorStore } from '~/stores/EditorStores';
-import { paletteColorBoxCaption, paletteColorBoxContainer, paletteRoot } from '~/styles/components/palette.css';
+
+export const paletteRoot = css`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-left: 12px;
+`;
+export const paletteColorBoxContainer = css`
+  display: flex;
+  flex-direction: row;
+`;
+
+export const paletteColorBoxCaption = css`
+  width: 12px;
+  color: var(--color-muted);
+`;
 
 const Palette: Component = () => {
   return (

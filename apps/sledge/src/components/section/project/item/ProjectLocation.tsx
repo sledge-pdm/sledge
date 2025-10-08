@@ -1,15 +1,57 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB03, ZFB09 } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
 import { fileStore } from '~/stores/EditorStores';
-import { sectionSubCaption } from '~/styles/section/section_item.css';
 import { join } from '~/utils/FileUtils';
+import { sectionSubCaption } from '../../SectionStyles';
+
+const locationHeaderStyle = css`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const explorerLinkStyle = css`
+  color: var(--color-muted);
+  text-decoration: none;
+  font-family: ZFB03;
+`;
+
+const locationContentStyle = css`
+  padding-left: 4px;
+`;
+
+const locationInfoStyle = css`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+`;
+
+const locationRowStyle = css`
+  display: flex;
+`;
+
+const locationLabelStyle = css`
+  font-family: ZFB03;
+  width: 40px;
+  font-size: 8px;
+`;
+
+const locationValueStyle = css`
+  white-space: wrap;
+`;
+
+const placeholderStyle = css`
+  font-family: ZFB09;
+  opacity: 0.3;
+`;
 
 const ProjectLocation: Component = () => {
   return (
     <>
-      <div class={flexRow} style={{ gap: '4px', 'align-items': 'center', 'justify-content': 'space-between' }}>
+      <div class={locationHeaderStyle}>
         <p class={sectionSubCaption}>Location.</p>
 
         <Show when={fileStore.savedLocation.name && fileStore.savedLocation.path}>
@@ -20,24 +62,24 @@ const ProjectLocation: Component = () => {
               if (!loc || !loc.path || !loc.name) return;
               revealItemInDir(join(loc.path, loc.name));
             }}
-            style={{ color: vars.color.muted, 'text-decoration': 'none', 'font-family': ZFB03 }}
+            class={explorerLinkStyle}
           >
             Open in Explorer
           </a>
         </Show>
       </div>
-      <div style={{ 'padding-left': '4px' }}>
-        <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
-          <div class={flexRow}>
-            <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>path</p>
-            <Show when={fileStore.savedLocation.path} fallback={<p style={{ 'font-family': ZFB09, opacity: 0.3 }}></p>}>
-              <p style={{ 'white-space': 'wrap' }}>{fileStore.savedLocation.path || '<unknown>'}</p>
+      <div class={locationContentStyle}>
+        <div class={locationInfoStyle}>
+          <div class={locationRowStyle}>
+            <p class={locationLabelStyle}>path</p>
+            <Show when={fileStore.savedLocation.path} fallback={<p class={placeholderStyle}></p>}>
+              <p class={locationValueStyle}>{fileStore.savedLocation.path || '<unknown>'}</p>
             </Show>
           </div>
-          <div class={flexRow}>
-            <p style={{ 'font-family': ZFB03, width: '40px', 'font-size': '8px' }}>file</p>
-            <Show when={fileStore.savedLocation.name} fallback={<p style={{ 'font-family': ZFB09, opacity: 0.3 }}>[ unsaved project ]</p>}>
-              <p style={{ 'white-space': 'wrap' }}>{fileStore.savedLocation.name || '<unknown>'}</p>
+          <div class={locationRowStyle}>
+            <p class={locationLabelStyle}>file</p>
+            <Show when={fileStore.savedLocation.name} fallback={<p class={placeholderStyle}>[ unsaved project ]</p>}>
+              <p class={locationValueStyle}>{fileStore.savedLocation.name || '<unknown>'}</p>
             </Show>
           </div>
         </div>

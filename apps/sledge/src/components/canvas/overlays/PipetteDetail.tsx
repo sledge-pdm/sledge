@@ -1,28 +1,44 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB08, ZFB09 } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color, fonts, spacing, text } from '@sledge/theme';
 import { ColorBox } from '@sledge/ui';
 import { useMousePosition } from '@solid-primitives/mouse';
 import { Component, Show } from 'solid-js';
 import { currentColor, isTransparent, transparent } from '~/features/color';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';
 
+const pipetteDetailContainer = css`
+  display: flex;
+  flex-direction: row;
+  position: fixed;
+  pointer-events: none;
+  align-items: center;
+`;
+
+const pipetteInfo = css`
+  display: flex;
+  flex-direction: column;
+`;
+
+const pipetteHeader = css`
+  display: flex;
+  flex-direction: row;
+  opacity: 0.8;
+`;
+
 const PipetteDetail: Component = (props: {}) => {
   const pos = useMousePosition();
   return (
     <div
-      class={flexRow}
+      class={pipetteDetailContainer}
       style={{
-        position: 'fixed',
         top: `${pos.y}px`,
         left: `${pos.x}px`,
-        'margin-top': vars.spacing.md,
-        'margin-left': vars.spacing.md,
-        padding: vars.spacing.xs,
-        gap: vars.spacing.md,
-        border: `1px solid ${vars.color.border}`,
-        'background-color': vars.color.background,
-        'pointer-events': 'none',
-        'align-items': 'center',
+        'margin-top': spacing.md,
+        'margin-left': spacing.md,
+        padding: spacing.xs,
+        gap: spacing.md,
+        border: `1px solid ${color.border}`,
+        'background-color': color.background,
       }}
     >
       <Show
@@ -30,9 +46,9 @@ const PipetteDetail: Component = (props: {}) => {
         fallback={
           <p
             style={{
-              'font-family': ZFB08,
-              'font-size': vars.text.sm,
-              color: vars.color.onBackground,
+              'font-family': fonts.ZFB08,
+              'font-size': text.sm,
+              color: color.onBackground,
               opacity: 0.7,
             }}
           >
@@ -40,20 +56,19 @@ const PipetteDetail: Component = (props: {}) => {
           </p>
         }
       >
-        <ColorBox currentColor={currentColor} color={getCurrentPointingColorHex()!} sizePx={24} forceBorderColor={vars.color.onBackground} />
-        <div class={flexCol} style={{ gap: vars.spacing.xs }}>
+        <ColorBox currentColor={currentColor} color={getCurrentPointingColorHex()!} sizePx={24} forceBorderColor={color.onBackground} />
+        <div class={pipetteInfo} style={{ gap: spacing.xs }}>
           <div
-            class={flexRow}
+            class={pipetteHeader}
             style={{
-              opacity: 0.8,
-              gap: vars.spacing.sm,
+              gap: spacing.sm,
             }}
           >
-            {/* <Icon src='/icons/tool_bar/tool/pipette.png' base={10} scale={1} color={vars.color.onBackground} /> */}
+            {/* <Icon src='/icons/tool_bar/tool/pipette.png' base={10} scale={1} color={color.onBackground} /> */}
             <p
               style={{
-                'font-family': ZFB08,
-                color: vars.color.onBackground,
+                'font-family': fonts.ZFB08,
+                color: color.onBackground,
               }}
             >
               pipette.
@@ -61,9 +76,9 @@ const PipetteDetail: Component = (props: {}) => {
           </div>
           <p
             style={{
-              'font-family': ZFB09,
-              'font-size': vars.text.md,
-              color: vars.color.onBackground,
+              'font-family': fonts.ZFB09,
+              'font-size': text.md,
+              color: color.onBackground,
             }}
           >
             {getCurrentPointingColorHex()!.toUpperCase()}

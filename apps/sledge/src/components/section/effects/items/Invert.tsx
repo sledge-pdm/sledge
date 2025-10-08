@@ -1,22 +1,23 @@
-import { flexCol } from '@sledge/core';
-import { accentedButton } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Component } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import SectionItem from '~/components/section/SectionItem';
 import { applyEffect } from '~/features/effect/Effects';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { accentedButton } from '~/styles/StyleSnippets';
+import { sectionContent } from '../../SectionStyles';
+
+const applyButtonContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: end;
+`;
 
 const Invert: Component<EffectSectionProps> = (props) => {
   return (
     <SectionItem title='invert.'>
       <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px' }}>
-        <div
-          class={flexCol}
-          style={{
-            width: '100%',
-            'align-items': 'end',
-          }}
-        >
+        <div class={applyButtonContainer}>
           <button
             class={accentedButton}
             onClick={() => {

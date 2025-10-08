@@ -1,4 +1,3 @@
-import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
@@ -12,13 +11,47 @@ import {
 } from '~/features/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
+import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
+import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Consts } from '~/Consts';
 import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { container, divider, item } from '~/styles/components/canvas/overlays/selection_menu.css';
+
+const container = css`
+  display: flex;
+  flex-direction: row;
+  border: 1px solid var(--color-on-background);
+  background-color: var(--color-surface);
+  pointer-events: all;
+  z-index: var(--zindex-canvas-overlay);
+`;
+
+const item = css`
+  display: flex;
+  flex-direction: row;
+  box-sizing: content-box;
+  align-items: center;
+  pointer-events: all;
+  cursor: pointer;
+  padding: 6px;
+  gap: 6px;
+  background-color: var(--color-surface);
+  &:hover {
+    filter: brightness(0.85);
+  }
+`;
+
+const divider = css`
+  display: flex;
+  flex-direction: row;
+  width: 1px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  box-sizing: content-box;
+  background-color: var(--color-muted);
+`;
 
 interface ItemProps {
   src: string;
@@ -30,7 +63,7 @@ interface ItemProps {
 const Item: Component<ItemProps> = (props) => {
   return (
     <div class={item} onClick={props.onClick} title={props.title}>
-      <Icon src={props.src} color={vars.color.onBackground} base={10} />
+      <Icon src={props.src} color={color.onBackground} base={10} />
       <Show when={props.label}>
         <p>{props.label}</p>
       </Show>
@@ -173,7 +206,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         visibility: outerPosition() === undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
         'pointer-events': 'all',
         'transform-origin': '0 0',
-        'z-index': Consts.zIndex.canvasOverlay,
+        'z-index': 'var(--zindex-canvas-overlay)',
       }}
       onPointerDown={(e) => {
         e.stopPropagation();
@@ -200,7 +233,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         top: `${outerPosition()?.y ?? 0}px`,
         opacity: 0.8,
         'pointer-events': 'all',
-        'z-index': Consts.zIndex.canvasOverlay,
+        'z-index': 'var(--zindex-canvas-overlay)',
         visibility: outerPosition() !== undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
       }}
       onPointerDown={(e) => {

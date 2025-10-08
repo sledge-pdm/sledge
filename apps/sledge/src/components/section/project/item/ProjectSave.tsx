@@ -1,9 +1,21 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Component, createSignal, Show } from 'solid-js';
 import { saveProject } from '~/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
+
+const saveContainerStyle = css`
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  margin-bottom: 12px;
+  gap: var(--spacing-sm);
+`;
+
+const primarySaveButtonStyle = css`
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+`;
 
 const ProjectSave: Component = () => {
   const [saveLog, setSaveLog] = createSignal<string | undefined>(undefined);
@@ -21,35 +33,15 @@ const ProjectSave: Component = () => {
   };
 
   return (
-    <div
-      class={flexRow}
-      style={{
-        'align-items': 'center',
-        'margin-top': '4px',
-        'margin-bottom': '12px',
-        gap: vars.spacing.sm,
-      }}
-    >
+    <div class={saveContainerStyle}>
       <Show when={isOWPossible()}>
-        <button
-          onClick={() => save()}
-          style={{
-            color: vars.color.accent,
-            'border-color': vars.color.accent,
-          }}
-        >
+        <button onClick={() => save()} class={primarySaveButtonStyle}>
           save.
         </button>
         <button onClick={() => save()}>save (new).</button>
       </Show>
       <Show when={!isOWPossible()}>
-        <button
-          onClick={() => save()}
-          style={{
-            color: vars.color.accent,
-            'border-color': vars.color.accent,
-          }}
-        >
+        <button onClick={() => save()} class={primarySaveButtonStyle}>
           save (new).
         </button>
       </Show>

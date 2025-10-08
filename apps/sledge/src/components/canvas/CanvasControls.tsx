@@ -1,11 +1,9 @@
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
-import { bottomRightNav, redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
-import { flexCol, flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { Consts } from '~/Consts';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { allLayers } from '~/features/layer';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -13,6 +11,97 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 // no longer relying on layerHistory:changed; use projectHistoryController.onChange
+
+const topRightNav = css`
+  display: flex;
+  flex-direction: row;
+  gap: 36px;
+  padding: 36px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+`;
+
+const undoRedoContainer = css`
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  padding: 12px;
+  z-index: var(--zindex-canvas-overlay);
+  pointer-events: auto;
+`;
+
+const undoIcon = css`
+  display: flex;
+  flex-direction: column;
+  width: 8px;
+  height: 8px;
+  image-rendering: pixelated;
+  shape-rendering: geometricPrecision;
+  align-content: center;
+  align-items: center;
+  backdrop-filter: invert();
+  scale: 2;
+`;
+
+const redoIcon = css`
+  display: flex;
+  flex-direction: column;
+  width: 8px;
+  height: 8px;
+  image-rendering: pixelated;
+  shape-rendering: geometricPrecision;
+  align-content: center;
+  align-items: center;
+  backdrop-filter: invert();
+  scale: 2;
+`;
+
+const bottomRightNav = css`
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  background-color: #000000a0;
+  border: 1px solid var(--color-border);
+  right: 8px;
+  bottom: 8px;
+`;
+
+const frameContainer = css`
+  display: flex;
+  flex-direction: column;
+`;
+
+const frameSizeInfo = css`
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+`;
+
+const frameActions = css`
+  display: flex;
+  flex-direction: row;
+`;
+
+const itemContainer = css`
+  display: flex;
+  flex-direction: row;
+  padding: 8px;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  pointer-events: all;
+  z-index: var(--zindex-canvas-overlay);
+`;
+
+const dividerStyle = css`
+  width: 1px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  box-sizing: content-box;
+  background-color: #ffffff80;
+`;
 
 const CanvasControls: Component = () => {
   const [activeCanUndo, setActiveCanUndo] = createSignal(projectHistoryController.canUndo());
@@ -107,19 +196,19 @@ const CanvasControls: Component = () => {
       <Show when={interactStore.isCanvasSizeFrameMode}>
         {/* <div class={topLeftNav}>
           <div class={flexCol}>
-            <p style={{ color: vars.color.accent, 'font-size': '16px' }}>FRAME MODE.</p>
+            <p style={{ color: color.accent, 'font-size': '16px' }}>FRAME MODE.</p>
           </div>
         </div> */}
 
-        <div class={bottomRightNav} style={{ 'z-index': Consts.zIndex.canvasOverlay }}>
-          <div class={flexCol}>
-            <div class={flexCol} style={{ padding: '12px' }}>
+        <div class={bottomRightNav} style={{ 'z-index': 'var(--zindex-canvas-overlay)' }}>
+          <div class={frameContainer}>
+            <div class={frameSizeInfo}>
               <p style={{ 'font-size': '8px', color: 'white' }}>new canvas size.</p>
               <p style={{ 'font-size': '16px', color: 'white' }}>
                 {interactStore.canvasSizeFrameSize.width} x {interactStore.canvasSizeFrameSize.height}
               </p>
             </div>
-            <div class={flexRow}>
+            <div class={frameActions}>
               <Item
                 src='/icons/selection/commit_10.png'
                 onClick={() => {
@@ -190,40 +279,16 @@ interface ItemProps {
 const Item: Component<ItemProps> = (props) => {
   const [hover, setHover] = createSignal(false);
   return (
-    <div
-      class={flexRow}
-      style={{
-        padding: '8px',
-        gap: '8px',
-        'align-items': 'center',
-        cursor: 'pointer',
-        'pointer-events': 'all',
-        'z-index': Consts.zIndex.canvasOverlay,
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={props.onClick}
-      title={props.title}
-    >
-      <Icon src={props.src} color={hover() ? vars.color.enabled : 'white'} base={10} />
+    <div class={itemContainer} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={props.onClick} title={props.title}>
+      <Icon src={props.src} color={hover() ? color.enabled : 'white'} base={10} />
       <Show when={props.label}>
-        <p style={{ color: hover() ? vars.color.enabled : 'white' }}>{props.label}</p>
+        <p style={{ color: hover() ? color.enabled : 'white' }}>{props.label}</p>
       </Show>
     </div>
   );
 };
 const Divider: Component = () => {
-  return (
-    <div
-      style={{
-        width: '1px',
-        'margin-top': '4px',
-        'margin-bottom': '4px',
-        'box-sizing': 'content-box',
-        'background-color': '#ffffff80',
-      }}
-    />
-  );
+  return <div class={dividerStyle} />;
 };
 
 export default CanvasControls;

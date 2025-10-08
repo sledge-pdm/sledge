@@ -1,12 +1,17 @@
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { Consts } from '~/Consts';
 import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { Layer } from '~/features/layer';
 import { canvasStore } from '~/stores/ProjectStores';
-import '~/styles/components/layer_preview.css';
 import { eventBus, Events } from '~/utils/EventBus';
+
+const canvas = css`
+  width: 100%;
+  height: 100%;
+  image-rendering: crisp-edges;
+`;
 
 interface Props {
   layer: Layer;
@@ -122,12 +127,12 @@ const LayerPreview: Component<Props> = (props: Props) => {
         height: props.height ? `${props.height}px` : undefined,
         'max-width': props.maxWidth ? `${props.maxWidth}px` : undefined,
         'max-height': props.maxHeight ? `${props.maxHeight}px` : undefined,
-        'background-color': vars.color.canvas,
-        'z-index': Consts.zIndex.layerPreview,
+        'background-color': color.canvas,
+        'z-index': 'var(--zindex-layer-preview)',
       }}
     >
       <canvas
-        class='layer-preview-canvas'
+        class={canvas}
         ref={(el) => {
           canvasRef = el;
           ctx = canvasRef.getContext('2d')!;

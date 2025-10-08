@@ -1,5 +1,4 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
 import { Accessor, Component, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -14,8 +13,48 @@ import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHist
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
 import { toolCategories } from '~/tools/Tools';
+import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
+
+const historyContentStyle = css`
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-top: 8px;
+`;
+
+const redoUndoContentStyle = css`
+  flex-direction: column-reverse;
+`;
+
+const mutedTextStyle = css`
+  color: var(--color-muted);
+`;
+
+const historyRowStyle = css`
+  display: flex;
+  box-sizing: border-box;
+  height: auto;
+  gap: 8px;
+  align-items: center;
+  overflow: hidden;
+`;
+
+const colorIconStyle = css`
+  width: 8px;
+  height: 8px;
+  position: relative;
+  overflow: hidden;
+`;
+
+const indexStyle = css`
+  width: 18px;
+`;
+
+const descriptionStyle = css`
+  white-space: pre-line;
+  text-overflow: ellipsis;
+  overflow: visible;
+`;
 
 const ProjectHistoryItem: Component = () => {
   const [historyStore, setHistoryStore] = createStore<{
@@ -36,14 +75,14 @@ const ProjectHistoryItem: Component = () => {
 
   return (
     <SectionItem title={`history`}>
-      <div class={sectionContent} style={{ gap: '8px', 'margin-bottom': '8px', 'padding-top': '8px' }}>
+      <div class={`${sectionContent} ${historyContentStyle}`}>
         {/* <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-          <p style={{ color: vars.color.active }}>top = recent / bottom = oldest</p>
+          <p style={{ color: var(--color-active) }}>top = recent / bottom = oldest</p>
         </div> */}
 
         <p class={sectionSubCaption}>redo stack ({historyStore.redoStack.length})</p>
-        <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
-          <Show when={historyStore.redoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no redo stack &gt;</p>}>
+        <div class={`${sectionSubContent} ${redoUndoContentStyle}`}>
+          <Show when={historyStore.redoStack.length > 0} fallback={<p class={mutedTextStyle}>&lt; no redo stack &gt;</p>}>
             <For each={historyStore.redoStack}>
               {(action, i) => {
                 const index = () => historyStore.redoStack.length - i();
@@ -54,8 +93,8 @@ const ProjectHistoryItem: Component = () => {
         </div>
 
         <p class={sectionSubCaption}>{`undo stack (${historyStore.undoStack.length})`}</p>
-        <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
-          <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
+        <div class={`${sectionSubContent} ${redoUndoContentStyle}`}>
+          <Show when={historyStore.undoStack.length > 0} fallback={<p class={mutedTextStyle}>&lt; no undo stack &gt;</p>}>
             <For each={historyStore.undoStack}>
               {(action, i) => {
                 const index = () => i() + 1;
@@ -160,30 +199,26 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
   }
 
   return (
-    <div
-      class={flexRow}
-      style={{ 'box-sizing': 'border-box', height: 'auto', gap: '8px', 'align-items': 'center', overflow: 'hidden' }}
-      title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}
-    >
-      <p style={{ width: '18px' }}>{typeof index === 'function' ? index() : index}</p>
+    <div class={historyRowStyle} title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}>
+      <p class={indexStyle}>{typeof index === 'function' ? index() : index}</p>
       {/* <div>
-        <Icon src={undo ? '/icons/misc/undo.png' : '/icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
+        <Icon src={undo ? '/icons/misc/undo.png' : '/icons/misc/redo.png'} color={var(--color-on-background)} base={8} scale={1} />
       </div> */}
       <Show
         when={colorIcon}
         fallback={
           <div>
-            <Icon src={icon || ''} color={vars.color.onBackground} base={8} scale={1} />
+            <Icon src={icon || ''} color={'var(--color-on-background)'} base={8} scale={1} />
           </div>
         }
       >
-        <div style={{ width: '8px', height: '8px', position: 'relative', overflow: 'hidden', 'background-color': colorIcon!.new }}>
+        <div class={colorIconStyle} style={{ 'background-color': colorIcon!.new }}>
           {/* <div style={{ width: '6px', height: '6px', position: 'absolute', top: 0, left: 0, 'background-color': colorIcon!.old }} />
           <div style={{ width: '6px', height: '6px', position: 'absolute', top: '2px', left: '2px', 'background-color': colorIcon!.new }} /> */}
         </div>
       </Show>
       {/* <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p> */}
-      <p style={{ 'white-space': 'pre-line', 'text-overflow': 'ellipsis', overflow: 'visible' }}>{description}</p>
+      <p class={descriptionStyle}>{description}</p>
     </div>
   );
 };

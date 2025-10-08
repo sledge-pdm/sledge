@@ -1,5 +1,4 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createSignal, For, onMount } from 'solid-js';
@@ -7,6 +6,7 @@ import { createStore } from 'solid-js/store';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { getEntries, getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { imagePoolStore } from '~/stores/ProjectStores';
+import { flexCol, flexRow } from '~/styles/StyleSnippets';
 import { eventBus, Events } from '~/utils/EventBus';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
@@ -37,7 +37,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
         'box-sizing': 'border-box',
         cursor: 'pointer',
         margin: '-1px',
-        border: imagePoolStore.selectedEntryId === props.entry.id ? `1px solid ${vars.color.active}` : `1px solid ${vars.color.border}`,
+        border: imagePoolStore.selectedEntryId === props.entry.id ? `1px solid ${color.active}` : `1px solid ${color.border}`,
         opacity: stateStore.visible ? 1 : 0.5,
       }}
       onContextMenu={(e) => {

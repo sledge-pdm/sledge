@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal } from 'solid-js';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, isValidCanvasSize } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, isValidCanvasSize, setRotation } from '~/features/canvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { Button, Dropdown } from '@sledge/ui';
@@ -162,6 +162,13 @@ const CanvasSettings: Component = () => {
     }
     updateButtonState();
   };
+
+  createEffect(() => {
+    const rotation = interactStore.rotation;
+    if (interactStore.isCanvasSizeFrameMode && rotation !== 0) {
+      setRotation(0);
+    }
+  });
 
   return (
     <SectionItem title='canvas.'>

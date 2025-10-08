@@ -159,5 +159,4 @@ const CanvasControls: Component = () => {
   );
 };
 
-
 export default CanvasControls;

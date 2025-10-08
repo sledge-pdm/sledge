@@ -2,13 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
-  "windows": [
-    "start",
-    "editor-*",
-    "about",
-    "settings",
-    "error"
-  ],
+  "windows": ["start", "editor-*", "about", "settings", "error"],
   "permissions": [
     "core:default",
     "dialog:default",

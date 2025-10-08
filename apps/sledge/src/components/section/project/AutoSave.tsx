@@ -1,10 +1,29 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { sectionContent } from '../SectionStyles';
+
+const autoSaveContentStyle = css`
+  gap: 12px;
+  margin-top: 8px;
+`;
+
+const intervalContainerStyle = css`
+  display: flex;
+`;
+
+const intervalControlsStyle = css`
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+`;
+
+const intervalLabelStyle = css`
+  color: var(--color-on-background);
+  width: 72px;
+`;
 
 const autoSaveIntervalOptions: DropdownOption<number>[] = [
   { label: '15 sec', value: 15 },
@@ -17,7 +36,7 @@ const autoSaveIntervalOptions: DropdownOption<number>[] = [
 const AutoSave: Component = () => {
   return (
     <SectionItem title='autosave.'>
-      <div class={sectionContent} style={{ gap: '12px', 'margin-top': '8px' }}>
+      <div class={`${sectionContent} ${autoSaveContentStyle}`}>
         {/* <p>configure periodic save.</p> */}
         <ToggleSwitch
           checked={projectStore.autoSaveEnabled || false}
@@ -30,20 +49,18 @@ const AutoSave: Component = () => {
         </ToggleSwitch>
 
         <div
-          class={flexRow}
+          class={intervalContainerStyle}
           style={{
             opacity: projectStore.autoSaveEnabled ? 1 : 0.5,
           }}
         >
           <div
-            class={flexRow}
+            class={intervalControlsStyle}
             style={{
-              'align-items': 'center',
-              'box-sizing': 'border-box',
               'pointer-events': projectStore.autoSaveEnabled ? 'auto' : 'none',
             }}
           >
-            <p style={{ color: vars.color.onBackground, width: '72px' }}>interval.</p>
+            <p class={intervalLabelStyle}>interval.</p>
             <Dropdown
               options={autoSaveIntervalOptions}
               value={projectStore.autoSaveInterval ?? 15}

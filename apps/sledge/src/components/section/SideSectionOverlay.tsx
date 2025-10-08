@@ -1,14 +1,20 @@
 import { Component, onMount } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
-import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import interact from 'interactjs';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import { EditorTab, EffectsTab, ExportTab, FilesTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
-import { Consts } from '~/Consts';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
+
+const container = css`
+  display: flex;
+  height: 100%;
+  pointer-events: all;
+  overflow: visible;
+  z-index: var(--zindex-side-section);
+`;
 
 const sideAreaRoot = css`
   display: flex;
@@ -134,19 +140,15 @@ const SideSectionsOverlay: Component<Props> = (props) => {
 
   return (
     <div
+      class={container}
       style={{
-        display: 'flex',
         'flex-direction': props.side === 'leftSide' ? 'row' : 'row-reverse',
-        height: '100%',
+
         left: props.side === 'leftSide' ? '0' : 'unset',
         right: props.side === 'rightSide' ? '0' : 'unset',
 
         'border-right': props.side === 'leftSide' && appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
         'border-left': props.side === 'rightSide' && appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
-
-        'pointer-events': 'all',
-        overflow: 'visible',
-        'z-index': Consts.zIndex.sideSection,
       }}
     >
       <div
@@ -157,19 +159,17 @@ const SideSectionsOverlay: Component<Props> = (props) => {
           width: appearanceStore[props.side].shown ? '300px' : '0px',
         }}
       >
-        <div class={flexCol} style={{ height: '100%' }}>
-          <ScrollFadeContainer class={sideAreaContentWrapper}>
-            <div
-              class={sideAreaContent}
-              style={{
-                'padding-left': props.side === 'leftSide' ? '8px' : '16px',
-                'padding-right': props.side === 'rightSide' ? '8px' : '16px',
-              }}
-            >
-              {tabContent(selectedTab())}
-            </div>
-          </ScrollFadeContainer>
-        </div>
+        <ScrollFadeContainer class={sideAreaContentWrapper}>
+          <div
+            class={sideAreaContent}
+            style={{
+              'padding-left': props.side === 'leftSide' ? '8px' : '16px',
+              'padding-right': props.side === 'rightSide' ? '8px' : '16px',
+            }}
+          >
+            {tabContent(selectedTab())}
+          </div>
+        </ScrollFadeContainer>
       </div>
     </div>
   );

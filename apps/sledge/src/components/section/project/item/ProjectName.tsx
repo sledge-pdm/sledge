@@ -1,9 +1,39 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { k12x8 } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Component, createSignal } from 'solid-js';
 import ErrorText from '~/components/global/ErrorText';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
-import '~/styles/section/project/project.css';
+
+const projectNameContainerStyle = css`
+  display: flex;
+  flex-direction: column;
+`;
+
+const nameInputRowStyle = css`
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+`;
+
+const projectNameInputStyle = css`
+  width: 0;
+  flex-grow: 1;
+  border: none;
+  font-size: var(--text-xl);
+  margin-left: -2px;
+  outline: none;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 2px;
+  font-family: k12x8;
+  overflow: visible;
+
+  &::placeholder {
+    opacity: 0.5;
+  }
+`;
+
+const errorTextStyle = css`
+  margin-top: 8px;
+`;
 
 const ProjectName: Component = () => {
   const [inputName, setInputName] = createSignal<string | undefined>(undefined);
@@ -23,16 +53,12 @@ const ProjectName: Component = () => {
   };
 
   return (
-    <div class={flexCol}>
-      <div class={flexRow} style={{ 'align-items': 'baseline', gap: '4px' }}>
+    <div class={projectNameContainerStyle}>
+      <div class={nameInputRowStyle}>
         <input
-          class='project-name-input'
+          class={projectNameInputStyle}
           type='text'
           name='project_name'
-          style={{
-            'font-family': k12x8,
-            overflow: 'visible',
-          }}
           onInput={(e) => {
             setInputName(e.target.value);
             commitNewName(e.target.value);
@@ -58,7 +84,7 @@ const ProjectName: Component = () => {
         <p>.sledge</p>
       </div>
 
-      <ErrorText style={{ 'margin-top': '8px' }}>{error()}</ErrorText>
+      <ErrorText class={errorTextStyle}>{error()}</ErrorText>
     </div>
   );
 };

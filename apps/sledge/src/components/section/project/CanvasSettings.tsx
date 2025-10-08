@@ -1,9 +1,8 @@
+import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal } from 'solid-js';
 import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, isValidCanvasSize } from '~/features/canvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
-import { flexCol, flexRow } from '@sledge/core';
-import { vars, ZFB03B } from '@sledge/theme';
 import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
@@ -11,8 +10,95 @@ import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/
 import { saveGlobalSettings } from '~/io/config/save';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
-import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
 import { sectionContent, sectionSubCaption } from '../SectionStyles';
+
+const canvasContentStyle = css`
+  gap: 10px;
+  margin-top: 8px;
+  padding-bottom: 24px;
+`;
+
+const sizeRowStyle = css`
+  display: flex;
+`;
+
+const frameModeButtonContainerStyle = css`
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  gap: 6px;
+`;
+
+const presetRowStyle = css`
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+`;
+
+const presetLabelStyle = css`
+  color: var(--color-on-background);
+  width: 72px;
+`;
+
+const canvasSizeFormStyle = css`
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
+`;
+
+const canvasSizeTimesStyle = css`
+  font-size: var(--text-xl);
+  margin-bottom: var(--spacing-xs);
+`;
+
+const canvasSizeLabelStyle = css`
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-bottom: 1px;
+  margin-left: 3px;
+`;
+
+const canvasSizeInputStyle = css`
+  font-size: var(--text-xl);
+  width: 64px;
+`;
+
+const canvasSizeButtonStyle = css`
+  margin: var(--spacing-xs) 0;
+  margin-left: auto;
+`;
+
+const defaultButtonContainerStyle = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 8px;
+  align-items: end;
+  gap: 6px;
+`;
+
+const defaultInfoStyle = css`
+  font-family: ZFB03B;
+  font-size: 8px;
+  margin-left: 4px;
+  opacity: 0.5;
+`;
+
+const actionsSectionStyle = css`
+  margin-top: 12px;
+  margin-bottom: 4px;
+`;
+
+const actionsContainerStyle = css`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+`;
+
+const adjustZoomButtonStyle = css`
+  margin-top: 8px;
+`;
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
@@ -79,33 +165,33 @@ const CanvasSettings: Component = () => {
 
   return (
     <SectionItem title='canvas.'>
-      <div class={sectionContent} style={{ gap: '10px', 'margin-top': '8px', 'padding-bottom': '24px' }}>
-        <div class={flexRow}>
+      <div class={`${sectionContent} ${canvasContentStyle}`}>
+        <div class={sizeRowStyle}>
           <p class={sectionSubCaption}>size.</p>
-          <div class={flexCol} style={{ 'margin-left': 'auto', gap: '6px' }}>
+          <div class={frameModeButtonContainerStyle}>
             <Button
               onClick={async () => {
                 setInteractStore('isCanvasSizeFrameMode', (v) => !v);
               }}
               style={{
-                color: interactStore.isCanvasSizeFrameMode ? vars.color.error : vars.color.accent,
-                'border-color': interactStore.isCanvasSizeFrameMode ? vars.color.error : vars.color.accent,
+                color: interactStore.isCanvasSizeFrameMode ? 'var(--color-error)' : 'var(--color-accent)',
+                'border-color': interactStore.isCanvasSizeFrameMode ? 'var(--color-error)' : 'var(--color-accent)',
               }}
             >
               {interactStore.isCanvasSizeFrameMode ? 'QUIT FRAME MODE.' : 'RESIZE WITH FRAME.'}
             </Button>
           </div>
         </div>
-        <div class={flexRow} style={{ 'align-items': 'center', 'margin-bottom': '2px' }}>
-          <p style={{ color: vars.color.onBackground, width: '72px' }}>presets.</p>
+        <div class={presetRowStyle}>
+          <p class={presetLabelStyle}>presets.</p>
           <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
         </div>
-        <div class={canvasSizeForm}>
+        <div class={canvasSizeFormStyle}>
           <div>
-            <p class={canvasSizeLabel}>width</p>
+            <p class={canvasSizeLabelStyle}>width</p>
             <input
               ref={(el) => (widthInputRef = el)}
-              class={canvasSizeInput}
+              class={canvasSizeInputStyle}
               type='number'
               name='width'
               value={canvasStore.canvas.width}
@@ -119,13 +205,13 @@ const CanvasSettings: Component = () => {
             />
           </div>
 
-          <p class={canvasSizeTimes}>x</p>
+          <p class={canvasSizeTimesStyle}>x</p>
 
           <div>
-            <p class={canvasSizeLabel}>height</p>
+            <p class={canvasSizeLabelStyle}>height</p>
             <input
               ref={(el) => (heightInputRef = el)}
-              class={canvasSizeInput}
+              class={canvasSizeInputStyle}
               type='number'
               name='height'
               value={canvasStore.canvas.height}
@@ -139,22 +225,21 @@ const CanvasSettings: Component = () => {
             />
           </div>
           <button
-            class={canvasSizeButton}
+            class={canvasSizeButtonStyle}
             onClick={(e) => {
               e.preventDefault();
               submitSizeChange();
             }}
             disabled={!isChangable()}
             style={{
-              'margin-left': 'auto',
-              color: isChangable() ? vars.color.active : undefined,
-              'border-color': isChangable() ? vars.color.active : undefined,
+              color: isChangable() ? 'var(--color-active)' : undefined,
+              'border-color': isChangable() ? 'var(--color-active)' : undefined,
             }}
           >
             apply
           </button>
         </div>
-        <div class={flexCol} style={{ width: '100%', 'margin-top': '8px', 'align-items': 'end', gap: '6px' }}>
+        <div class={defaultButtonContainerStyle}>
           <Button
             onClick={async () => {
               setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
@@ -163,9 +248,7 @@ const CanvasSettings: Component = () => {
           >
             Set as Default.
           </Button>
-          <p style={{ 'font-family': ZFB03B, 'font-size': '8px', 'margin-left': '4px', opacity: 0.5 }}>
-            [ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]
-          </p>
+          <p class={defaultInfoStyle}>[ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]</p>
         </div>
         {/* <p class={sectionSubCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
           info.
@@ -184,13 +267,11 @@ const CanvasSettings: Component = () => {
             <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
           </div>
         </div> */}
-        <p class={sectionSubCaption} style={{ 'margin-top': '12px', 'margin-bottom': '4px' }}>
-          actions.
-        </p>
-        <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
+        <p class={`${sectionSubCaption} ${actionsSectionStyle}`}>actions.</p>
+        <div class={actionsContainerStyle}>
           <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 
-          <Button onClick={() => adjustZoomToFit()} style={{ 'margin-top': '8px' }}>
+          <Button onClick={() => adjustZoomToFit()} class={adjustZoomButtonStyle}>
             Adjust zoom.
           </Button>
         </div>

@@ -80,6 +80,7 @@ const dynamicStyle = css`
   - Consts.zIndex.camelCase = var(--zindex-snake-case)
 
 - font-familyについては、vanilla-extractと同名での定義をcssで行っています(ZFB09 = ZFB09, PM12 = PM12)。font名についてはvar()ではなく、そのままフォント変数名をcss内に記述できます。
+- 同名同様のスタイルが複数のコンポーネントにまたがっている場合は、XXStyles.tsのようなファイルを作成し、共通スタイルをexport const someStyle = css`...`のような形でexportすることも検討してください。ただし、部分的に共通している部分がある場合は共通化せず、全く同一のスタイルである場合のみこれを行ってください。
 
 ## 移行状況
 - [x] packages/ui - 完了（試験移行）

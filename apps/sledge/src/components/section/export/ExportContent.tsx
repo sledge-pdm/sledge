@@ -1,5 +1,6 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { accentedButton, k12x8, vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { flexCol } from '@sledge/core';
+import { accentedButton, k12x8 } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Slider } from '@sledge/ui';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir } from '@tauri-apps/plugin-fs';
@@ -11,9 +12,87 @@ import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { exportDialogCustomScaleInput, exportDialogField, exportDialogFieldDisabled } from '~/styles/dialogs/export_dialog.css';
 import { getFileNameWithoutExtension, join } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
+
+const exportDialogField = css`
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+`;
+
+const exportDialogFieldDisabled = css`
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  pointer-events: none;
+  cursor: auto;
+  opacity: 0.4;
+`;
+
+const exportDialogCustomScaleInput = css`
+  font-family: ZFB09;
+  font-size: var(--text-md);
+  width: 24px;
+`;
+
+const directoryPath = css`
+  font-family: k12x8;
+  font-size: 8px;
+  line-height: 1.2;
+  word-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
+  padding: 4px;
+`;
+
+const browseButton = css`
+  white-space: nowrap;
+  align-self: end;
+`;
+
+const fileNameInput = css`
+  width: auto;
+  font-size: 16px;
+  font-family: k12x8;
+  border-bottom-color: var(--color-border);
+`;
+
+const scaleContainer = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+`;
+
+const customScaleContainer = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const exportSection = css`
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  justify-content: right;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const exportControls = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
+
+const estimatedSize = css`
+  width: fit-content;
+`;
 
 const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
   { label: 'png', value: 'png' },
@@ -139,20 +218,8 @@ const ExportContent: Component = () => {
           Output Directory.
         </p>
         <div class={sectionSubContent}>
-          <p
-            style={{
-              'font-family': k12x8,
-              'font-size': '8px',
-              'line-height': 1.2,
-              'word-wrap': 'break-word',
-              'text-wrap': 'balance',
-              width: '100%',
-              padding: '4px',
-            }}
-          >
-            {settings.dirPath}\
-          </p>
-          <button style={{ 'white-space': 'nowrap', 'align-self': 'end' }} onClick={openDirSelectionDialog}>
+          <p class={directoryPath}>{settings.dirPath}\</p>
+          <button class={browseButton} onClick={openDirSelectionDialog}>
             browse...
           </button>
         </div>
@@ -164,7 +231,7 @@ const ExportContent: Component = () => {
         </p>
         <div class={sectionSubContent}>
           <input
-            style={{ width: 'auto', 'font-size': '16px', 'font-family': k12x8, 'border-bottom-color': vars.color.border }}
+            class={fileNameInput}
             placeholder='file name'
             value={settings.fileName}
             autocomplete='off'
@@ -204,14 +271,14 @@ const ExportContent: Component = () => {
           Scale.
         </p>
         <div class={sectionSubContent}>
-          <div class={flexRow} style={{ 'align-items': 'center', gap: '12px' }}>
+          <div class={scaleContainer}>
             <Dropdown
               options={scaleOptions}
               value={settings.exportOptions.scale ?? 1}
               onChange={(e) => setSettings('exportOptions', 'scale', Number(e))}
             />
             <Show when={settings.exportOptions.scale === 0}>
-              <div style={{ 'align-items': 'center' }} class={flexRow}>
+              <div class={customScaleContainer}>
                 <p>x</p>
                 <input
                   class={exportDialogCustomScaleInput}
@@ -227,11 +294,11 @@ const ExportContent: Component = () => {
         </div>
       </div>
 
-      <div class={flexCol} style={{ 'align-items': 'end', 'justify-content': 'right', gap: '8px', 'margin-top': '8px' }}>
-        <p style={{ width: 'fit-content' }}>
+      <div class={exportSection}>
+        <p class={estimatedSize}>
           estimated size: {canvasStore.canvas.width * finalScale()} x {canvasStore.canvas.height * finalScale()}
         </p>
-        <div class={flexRow} style={{ width: '100%', 'justify-content': 'end', 'align-items': 'center', gap: '8px', 'margin-bottom': '8px' }}>
+        <div class={exportControls}>
           <Checkbox
             checked={settings.showDirAfterSave}
             onChange={(checked) => setSettings('showDirAfterSave', checked)}

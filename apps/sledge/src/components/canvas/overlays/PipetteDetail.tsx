@@ -6,23 +6,31 @@ import { Component, Show } from 'solid-js';
 import { currentColor, isTransparent, transparent } from '~/features/color';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';
 
-const flexRow = css`
+const pipetteDetailContainer = css`
   display: flex;
   flex-direction: row;
+  position: fixed;
+  pointer-events: none;
+  align-items: center;
 `;
 
-const flexCol = css`
+const pipetteInfo = css`
   display: flex;
   flex-direction: column;
+`;
+
+const pipetteHeader = css`
+  display: flex;
+  flex-direction: row;
+  opacity: 0.8;
 `;
 
 const PipetteDetail: Component = (props: {}) => {
   const pos = useMousePosition();
   return (
     <div
-      class={flexRow}
+      class={pipetteDetailContainer}
       style={{
-        position: 'fixed',
         top: `${pos.y}px`,
         left: `${pos.x}px`,
         'margin-top': vars.spacing.md,
@@ -31,8 +39,6 @@ const PipetteDetail: Component = (props: {}) => {
         gap: vars.spacing.md,
         border: `1px solid ${vars.color.border}`,
         'background-color': vars.color.background,
-        'pointer-events': 'none',
-        'align-items': 'center',
       }}
     >
       <Show
@@ -51,11 +57,10 @@ const PipetteDetail: Component = (props: {}) => {
         }
       >
         <ColorBox currentColor={currentColor} color={getCurrentPointingColorHex()!} sizePx={24} forceBorderColor={vars.color.onBackground} />
-        <div class={flexCol} style={{ gap: vars.spacing.xs }}>
+        <div class={pipetteInfo} style={{ gap: vars.spacing.xs }}>
           <div
-            class={flexRow}
+            class={pipetteHeader}
             style={{
-              opacity: 0.8,
               gap: vars.spacing.sm,
             }}
           >

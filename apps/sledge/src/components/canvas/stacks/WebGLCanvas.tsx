@@ -10,9 +10,12 @@ import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 
-const flexCol = css`
+const errorOverlayContent = css`
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
 `;
 
 export let webGLRenderer: WebGLRenderer | undefined;
@@ -126,13 +129,10 @@ const WebGLCanvas: Component = () => {
           }}
         >
           <div
-            class={flexCol}
+            class={errorOverlayContent}
             style={{
               width: `${canvasStore.canvas.width}px`,
               height: `${canvasStore.canvas.height}px`,
-              gap: '8px',
-              'align-items': 'center',
-              'justify-content': 'center',
               // 'transform-origin': '0 0',
               transform: `scale(${2 / interactStore.zoom})`,
             }}

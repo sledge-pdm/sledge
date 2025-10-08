@@ -83,7 +83,8 @@ const dynamicStyle = css`
 - font-familyについては、vanilla-extractと同名での定義をcssで行っています(ZFB09 = ZFB09, PM12 = PM12)。font名についてはvar()ではなく、そのままフォント変数名をcss内に記述できます。この際、font-family: ${font}ではなくfont-family: fontのように記述してください。
 - 同名同様のスタイルが複数のコンポーネントにまたがっている場合は、XXStyles.tsのようなファイルを作成し、共通スタイルをexport const someStyle = css`...`のような形でexportすることも検討してください。ただし、部分的に共通している部分がある場合は共通化せず、全く同一のスタイルである場合のみこれを行ってください。
 
-- flexRow, flexCol, w100, h100, wh100といったスニペットクラスはvanilla-extract定義のクラスなので、基本的にこれらは撤廃してcss内部にdisplay:flex等の内容をそのまま記述してください。
+- flexRow, flexCol, w100, h100, wh100といったスニペットクラスはvanilla-extract定義のクラスなので、基本的にこれらは撤廃し、個別に定義したcss内部にdisplay:flex等の内容をそのまま記述してください。flexRowやflexColという名前のcss変数を作成することは避けてください。
+- vanilla-extract(css.ts)からの移行と同時に、不要なjsx内でのstyle props(style={{...}})の定義がある場合、適切な名前を付けてecsstaticのcssに抽出してください。
 
 ## 移行状況
 - [x] packages/ui - 完了（試験移行）

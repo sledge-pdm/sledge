@@ -30,9 +30,10 @@ const canvasDebugOverlayBottomLeft = css`
   z-index: var(--zindex-canvas-overlay);
 `;
 
-const flexCol = css`
+const jsHeapContainer = css`
   display: flex;
   flex-direction: column;
+  gap: 1px;
 `;
 
 // interface TauriMemInfo {
@@ -156,7 +157,7 @@ const CanvasDebugOverlay: Component = (props) => {
 
             <SparkLine length={60} height={60} lengthMult={2} color='#00ca00' values={sparkLineStore.process} min={0} />
           </div> */}
-          <div class={flexCol} style={{ gap: '1px' }}>
+          <div class={jsHeapContainer}>
             <p>
               JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
             </p>

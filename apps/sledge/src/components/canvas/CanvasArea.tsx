@@ -16,7 +16,6 @@ import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/o
 import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
 import BottomInfo from '~/components/global/BottomInfo';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
-import { Consts } from '~/Consts';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const canvasArea = css`
@@ -26,14 +25,66 @@ const canvasArea = css`
   padding: 0;
 `;
 
-const flexCol = css`
+const sectionsContainer = css`
   display: flex;
-  flex-direction: column;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 `;
 
-const flexRow = css`
+const sectionsBetweenAreaContainer = css`
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex-grow: 1;
+  width: 0;
+  pointer-events: none;
+`;
+
+const sectionsBetweenArea = css`
   display: flex;
   flex-direction: row;
+  inset: 0;
+  box-sizing: content-box;
+  flex-grow: 1;
+  position: relative;
+  pointer-events: none;
+`;
+
+const canvasAreaWrapper = css`
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  z-index: var(--zindex-zoom-pan-wrapper);
+`;
+
+const outCanvasArea = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+`;
+
+const canvasStackWrapper = css`
+  width: fit-content;
+  height: fit-content;
+  padding: 0;
+  margin: 0;
+  transform-origin: 0 0;
+`;
+
+const canvasOverlayRoot = css`
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: var(--zindex-canvas-overlay);
 `;
 
 const CanvasArea: Component = () => {
@@ -101,89 +152,34 @@ const CanvasArea: Component = () => {
         ref={(el) => {
           wrapper = el;
         }}
-        style={{
-          display: 'flex',
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          overflow: 'hidden',
-          'touch-action': 'none',
-          'z-index': Consts.zIndex.zoomPanWrapper,
-        }}
+        class={canvasAreaWrapper}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopImmediatePropagation();
         }}
       >
-        <div
-          id='out-canvas-area'
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
-          }}
-        />
+        <div id='out-canvas-area' class={outCanvasArea} />
 
-        <div
-          ref={(el) => (canvasStack = el)}
-          style={{
-            width: 'fit-content',
-            height: 'fit-content',
-            padding: 0,
-            margin: 0,
-            'transform-origin': '0 0',
-          }}
-        >
+        <div ref={(el) => (canvasStack = el)} class={canvasStackWrapper}>
           <CanvasStack />
         </div>
 
         {/* オーバーレイ (ズーム外) のための固定ルート */}
-        <div
-          id='canvas-overlay-root'
-          style={{
-            position: 'absolute',
-            inset: 0,
-            overflow: 'visible',
-            'pointer-events': 'none',
-            'z-index': Consts.zIndex.canvasOverlay,
-          }}
-        >
+        <div id='canvas-overlay-root' class={canvasOverlayRoot}>
           <Show when={interactStore.isCanvasSizeFrameMode}>
             <CanvasResizeFrame />
           </Show>
           {/* SelectionMenu / SVG Overlay をズーム外で描画 */}
           <CanvasOverlaySVG />
           <OnCanvasSelectionMenu />
-          {/* <CornerDebugMarkers /> */}
         </div>
         <CanvasAreaOverlay />
       </div>
-      <div
-        style={{
-          display: 'flex',
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          overflow: 'visible',
-          'pointer-events': 'none',
-        }}
-      >
+      <div class={sectionsContainer}>
         <SideSectionsOverlay side='leftSide' />
         {/* content between side sections */}
-        <div class={flexCol} style={{ position: 'relative', 'flex-grow': 1, width: 0, 'pointer-events': 'none' }}>
-          <div
-            id='sections-between-area'
-            class={flexRow}
-            style={{
-              inset: 0,
-              'box-sizing': 'content-box',
-              'flex-grow': 1,
-              position: 'relative',
-              'pointer-events': 'none',
-            }}
-          >
+        <div class={sectionsBetweenAreaContainer}>
+          <div id='sections-between-area' class={sectionsBetweenArea}>
             <CanvasControls />
             <OuterSelectionMenu />
             <CanvasDebugOverlay />

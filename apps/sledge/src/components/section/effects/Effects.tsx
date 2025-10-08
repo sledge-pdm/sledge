@@ -30,6 +30,7 @@ const layerSelectContainer = css`
   flex-direction: row;
   align-items: center;
   gap: 12px;
+  margin-left: 16px;
 `;
 
 export interface EffectSectionProps {

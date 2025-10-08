@@ -8,6 +8,8 @@ const container = css`
   display: flex;
   flex-direction: row;
   align-items: center;
+  background-color: var(--color-surface);
+  padding: 2px 4px;
 `;
 const captionContainer = css`
   display: flex;

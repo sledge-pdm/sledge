@@ -69,14 +69,39 @@ const bottomRightNav = css`
   bottom: 8px;
 `;
 
-const flexCol = css`
+const frameContainer = css`
   display: flex;
   flex-direction: column;
 `;
 
-const flexRow = css`
+const frameSizeInfo = css`
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+`;
+
+const frameActions = css`
   display: flex;
   flex-direction: row;
+`;
+
+const itemContainer = css`
+  display: flex;
+  flex-direction: row;
+  padding: 8px;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  pointer-events: all;
+  z-index: var(--zindex-canvas-overlay);
+`;
+
+const dividerStyle = css`
+  width: 1px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  box-sizing: content-box;
+  background-color: #ffffff80;
 `;
 
 const CanvasControls: Component = () => {
@@ -177,14 +202,14 @@ const CanvasControls: Component = () => {
         </div> */}
 
         <div class={bottomRightNav} style={{ 'z-index': Consts.zIndex.canvasOverlay }}>
-          <div class={flexCol}>
-            <div class={flexCol} style={{ padding: '12px' }}>
+          <div class={frameContainer}>
+            <div class={frameSizeInfo}>
               <p style={{ 'font-size': '8px', color: 'white' }}>new canvas size.</p>
               <p style={{ 'font-size': '16px', color: 'white' }}>
                 {interactStore.canvasSizeFrameSize.width} x {interactStore.canvasSizeFrameSize.height}
               </p>
             </div>
-            <div class={flexRow}>
+            <div class={frameActions}>
               <Item
                 src='/icons/selection/commit_10.png'
                 onClick={() => {
@@ -255,21 +280,7 @@ interface ItemProps {
 const Item: Component<ItemProps> = (props) => {
   const [hover, setHover] = createSignal(false);
   return (
-    <div
-      class={flexRow}
-      style={{
-        padding: '8px',
-        gap: '8px',
-        'align-items': 'center',
-        cursor: 'pointer',
-        'pointer-events': 'all',
-        'z-index': Consts.zIndex.canvasOverlay,
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={props.onClick}
-      title={props.title}
-    >
+    <div class={itemContainer} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={props.onClick} title={props.title}>
       <Icon src={props.src} color={hover() ? vars.color.enabled : 'white'} base={10} />
       <Show when={props.label}>
         <p style={{ color: hover() ? vars.color.enabled : 'white' }}>{props.label}</p>
@@ -278,17 +289,7 @@ const Item: Component<ItemProps> = (props) => {
   );
 };
 const Divider: Component = () => {
-  return (
-    <div
-      style={{
-        width: '1px',
-        'margin-top': '4px',
-        'margin-bottom': '4px',
-        'box-sizing': 'content-box',
-        'background-color': '#ffffff80',
-      }}
-    />
-  );
+  return <div class={dividerStyle} />;
 };
 
 export default CanvasControls;

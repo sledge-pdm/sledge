@@ -19,6 +19,7 @@ const filesContainer = css`
   padding: 4px;
   gap: 8px;
   margin-top: 4px;
+  margin-left: 8px;
 `;
 
 const tabsContainer = css`

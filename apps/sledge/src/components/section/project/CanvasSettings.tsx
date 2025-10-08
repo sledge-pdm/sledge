@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal } from 'solid-js';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, isValidCanvasSize, setRotation } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, setRotation } from '~/features/canvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { Button, Dropdown } from '@sledge/ui';
@@ -109,10 +109,8 @@ const CanvasSettings: Component = () => {
     const height = Number(heightInputRef.value);
     const newSize = { width, height };
 
-    if (isValidCanvasSize(newSize)) {
-      const result = await changeCanvasSizeWithNoOffset(newSize);
-      if (result) adjustZoomToFit();
-    }
+    const result = await changeCanvasSizeWithNoOffset(newSize, false);
+    if (result) adjustZoomToFit();
   };
 
   const [isChangable, setIsChangable] = createSignal(false);
@@ -120,6 +118,8 @@ const CanvasSettings: Component = () => {
 
   createEffect(() => {
     canvasStore.canvas;
+
+    console.log('CanvasSettings: canvas changed', canvasStore.canvas);
     updateButtonState();
     updateCurrentPreset();
   });

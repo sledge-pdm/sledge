@@ -1,5 +1,5 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { spacing } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
@@ -7,12 +7,21 @@ import { projectHistoryController } from '~/features/history';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { layerList } from '~/styles/section/editor/layer.css';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { flexRow } from '~/styles/StyleSnippets';
 import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
+import { sectionContent } from '../SectionStyles';
 import BaseLayerItem from './item/BaseLayerItem';
 import LayerItem from './item/LayerItem';
+
+const layerList = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  gap: 4px;
+  width: 100%;
+`;
 
 const LayerList: Component<{}> = () => {
   const [items, setItems] = createSignal(allLayers());
@@ -58,14 +67,14 @@ const LayerList: Component<{}> = () => {
       title='layers.'
       subHeaderIcons={[
         {
-          src: '/icons/misc/plus_12.png',
+          src: '/icons/misc/add.png',
           onClick: () => {
             addLayer({ name: 'layer1' });
             setItems(allLayers());
           },
         },
         {
-          src: '/icons/misc/minus_12.png',
+          src: '/icons/misc/remove_minus.png',
           onClick: () => {
             const id = activeLayer()?.id;
             if (id) {
@@ -83,8 +92,8 @@ const LayerList: Component<{}> = () => {
           class={flexRow}
           style={{
             'align-items': 'center',
-            gap: vars.spacing.sm,
-            'margin-bottom': vars.spacing.sm,
+            gap: spacing.sm,
+            'margin-bottom': spacing.sm,
           }}
         >
           <div

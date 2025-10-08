@@ -35,10 +35,10 @@ export const osBuildInfos: { [key in os]: { name: string; extensions: string[]; 
 };
 
 const debugResponce = `{
-  "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/242093818",
-  "assets_url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/242093818/assets",
-  "upload_url": "https://uploads.github.com/repos/Innsbluck-rh/sledge/releases/242093818/assets{?name,label}",
-  "html_url": "https://github.com/Innsbluck-rh/sledge/releases/tag/v0.0.9-prealpha",
+  "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/242093818",
+  "assets_url": "https://api.github.com/repos/sledge-pdm/sledge/releases/242093818/assets",
+  "upload_url": "https://uploads.github.com/repos/sledge-pdm/sledge/releases/242093818/assets{?name,label}",
+  "html_url": "https://github.com/sledge-pdm/sledge/releases/tag/v0.0.9-prealpha",
   "id": 242093818,
   "author": {
     "login": "github-actions[bot]",
@@ -73,7 +73,7 @@ const debugResponce = `{
   "published_at": "2025-08-24T10:34:15Z",
   "assets": [
     {
-      "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/assets/285695090",
+      "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/assets/285695090",
       "id": 285695090,
       "node_id": "RA_kwDOPXDgN84RB1xy",
       "name": "sledge-0.0.9-prealpha-1.x86_64.rpm",
@@ -106,10 +106,10 @@ const debugResponce = `{
       "download_count": 2,
       "created_at": "2025-08-24T10:33:03Z",
       "updated_at": "2025-08-24T10:33:04Z",
-      "browser_download_url": "https://github.com/Innsbluck-rh/sledge/releases/download/v0.0.9-prealpha/sledge-0.0.9-prealpha-1.x86_64.rpm"
+      "browser_download_url": "https://github.com/sledge-pdm/sledge/releases/download/v0.0.9-prealpha/sledge-0.0.9-prealpha-1.x86_64.rpm"
     },
     {
-      "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/assets/285694930",
+      "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/assets/285694930",
       "id": 285694930,
       "node_id": "RA_kwDOPXDgN84RB1vS",
       "name": "sledge_0.0.9-prealpha_aarch64.dmg",
@@ -142,10 +142,10 @@ const debugResponce = `{
       "download_count": 3,
       "created_at": "2025-08-24T10:30:40Z",
       "updated_at": "2025-08-24T10:30:40Z",
-      "browser_download_url": "https://github.com/Innsbluck-rh/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_aarch64.dmg"
+      "browser_download_url": "https://github.com/sledge-pdm/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_aarch64.dmg"
     },
     {
-      "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/assets/285695091",
+      "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/assets/285695091",
       "id": 285695091,
       "node_id": "RA_kwDOPXDgN84RB1xz",
       "name": "sledge_0.0.9-prealpha_amd64.AppImage",
@@ -178,10 +178,10 @@ const debugResponce = `{
       "download_count": 2,
       "created_at": "2025-08-24T10:33:04Z",
       "updated_at": "2025-08-24T10:33:08Z",
-      "browser_download_url": "https://github.com/Innsbluck-rh/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_amd64.AppImage"
+      "browser_download_url": "https://github.com/sledge-pdm/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_amd64.AppImage"
     },
     {
-      "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/assets/285695088",
+      "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/assets/285695088",
       "id": 285695088,
       "node_id": "RA_kwDOPXDgN84RB1xw",
       "name": "sledge_0.0.9-prealpha_amd64.deb",
@@ -214,10 +214,10 @@ const debugResponce = `{
       "download_count": 2,
       "created_at": "2025-08-24T10:33:02Z",
       "updated_at": "2025-08-24T10:33:03Z",
-      "browser_download_url": "https://github.com/Innsbluck-rh/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_amd64.deb"
+      "browser_download_url": "https://github.com/sledge-pdm/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_amd64.deb"
     },
     {
-      "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/assets/285695149",
+      "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/assets/285695149",
       "id": 285695149,
       "node_id": "RA_kwDOPXDgN84RB1yt",
       "name": "sledge_0.0.9-prealpha_x64-setup.exe",
@@ -250,10 +250,10 @@ const debugResponce = `{
       "download_count": 1,
       "created_at": "2025-08-24T10:33:50Z",
       "updated_at": "2025-08-24T10:33:50Z",
-      "browser_download_url": "https://github.com/Innsbluck-rh/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_x64-setup.exe"
+      "browser_download_url": "https://github.com/sledge-pdm/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_x64-setup.exe"
     },
     {
-      "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/assets/285695148",
+      "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/assets/285695148",
       "id": 285695148,
       "node_id": "RA_kwDOPXDgN84RB1ys",
       "name": "sledge_0.0.9-prealpha_x64_en-US.msi",
@@ -286,10 +286,10 @@ const debugResponce = `{
       "download_count": 4,
       "created_at": "2025-08-24T10:33:50Z",
       "updated_at": "2025-08-24T10:33:50Z",
-      "browser_download_url": "https://github.com/Innsbluck-rh/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_x64_en-US.msi"
+      "browser_download_url": "https://github.com/sledge-pdm/sledge/releases/download/v0.0.9-prealpha/sledge_0.0.9-prealpha_x64_en-US.msi"
     },
     {
-      "url": "https://api.github.com/repos/Innsbluck-rh/sledge/releases/assets/285694931",
+      "url": "https://api.github.com/repos/sledge-pdm/sledge/releases/assets/285694931",
       "id": 285694931,
       "node_id": "RA_kwDOPXDgN84RB1vT",
       "name": "sledge_aarch64.app.tar.gz",
@@ -322,11 +322,11 @@ const debugResponce = `{
       "download_count": 1,
       "created_at": "2025-08-24T10:30:41Z",
       "updated_at": "2025-08-24T10:30:42Z",
-      "browser_download_url": "https://github.com/Innsbluck-rh/sledge/releases/download/v0.0.9-prealpha/sledge_aarch64.app.tar.gz"
+      "browser_download_url": "https://github.com/sledge-pdm/sledge/releases/download/v0.0.9-prealpha/sledge_aarch64.app.tar.gz"
     }
   ],
-  "tarball_url": "https://api.github.com/repos/Innsbluck-rh/sledge/tarball/v0.0.9-prealpha",
-  "zipball_url": "https://api.github.com/repos/Innsbluck-rh/sledge/zipball/v0.0.9-prealpha",
+  "tarball_url": "https://api.github.com/repos/sledge-pdm/sledge/tarball/v0.0.9-prealpha",
+  "zipball_url": "https://api.github.com/repos/sledge-pdm/sledge/zipball/v0.0.9-prealpha",
   "body": "",
   "mentions_count": 1
 }`;

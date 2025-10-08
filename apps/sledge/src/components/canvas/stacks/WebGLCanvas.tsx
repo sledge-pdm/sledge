@@ -1,7 +1,6 @@
-import { flexCol } from '@sledge/core';
+import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, Show } from 'solid-js';
-import { Consts } from '~/Consts';
 import { allLayers } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -9,6 +8,14 @@ import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
+
+const errorOverlayContent = css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+`;
 
 export let webGLRenderer: WebGLRenderer | undefined;
 
@@ -106,7 +113,7 @@ const WebGLCanvas: Component = () => {
         style={{
           position: 'absolute',
           'image-rendering': imageRendering(),
-          'z-index': Consts.zIndex.webGLcanvas,
+          'z-index': 'var(--zindex-webgl-canvas)',
         }}
       />
 
@@ -117,17 +124,14 @@ const WebGLCanvas: Component = () => {
             width: `${canvasStore.canvas.width}px`,
             height: `${canvasStore.canvas.height}px`,
             'background-color': '#00000050',
-            'z-index': Consts.zIndex.canvasErrorOverlay,
+            'z-index': 'var(--zindex-canvas-error-overlay)',
           }}
         >
           <div
-            class={flexCol}
+            class={errorOverlayContent}
             style={{
               width: `${canvasStore.canvas.width}px`,
               height: `${canvasStore.canvas.height}px`,
-              gap: '8px',
-              'align-items': 'center',
-              'justify-content': 'center',
               // 'transform-origin': '0 0',
               transform: `scale(${2 / interactStore.zoom})`,
             }}

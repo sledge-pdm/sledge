@@ -1,27 +1,89 @@
-import { FileLocation, flexRow } from '@sledge/core';
-import { vars, ZFB09 } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge/core';
+import { color } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Update } from '@tauri-apps/plugin-updater';
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
-import ExportDialog from '~/components/global/dialogs/ExportDialog';
-import SettingDialog from '~/components/global/dialogs/SettingDialog';
+import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasTempControls from '~/components/global/title_bar/CanvasTempControls';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
-import {
-  menuItem,
-  menuItemBackground,
-  menuItemText,
-  menuListCanvasControls,
-  menuListLeft,
-  menuListRight,
-  root,
-} from '~/styles/globals/top_menu_bar.css';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
+
+const topMenuBarRoot = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-controls);
+  height: 28px;
+  align-items: end;
+  z-index: var(--zindex-title-bar);
+`;
+
+const menuListLeft = css`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  padding-left: 16px;
+  gap: var(--spacing-xs);
+`;
+
+const menuListCanvasControls = css`
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  align-items: center;
+  margin-right: 6px;
+`;
+
+const menuListRight = css`
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-xs);
+`;
+
+const menuItem = css`
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  height: 26px;
+`;
+
+const menuItemText = css`
+  font-family: ZFB11;
+  font-size: 8px;
+  text-rendering: geometricPrecision;
+  margin: 0;
+  align-content: center;
+  text-align: center;
+  width: 100%;
+  height: 30px;
+  margin-left: 8px;
+  margin-right: 8px;
+`;
+
+const menuItemBackground = css`
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  align-items: center;
+  left: 0;
+  right: 0;
+  height: 26px;
+  z-index: -1;
+`;
+
+const versionContainer = css`
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+`;
 
 interface Item {
   text: string;
@@ -34,11 +96,6 @@ const TopMenuBar: Component = () => {
   const [isRecentMenuShown, setIsRecentMenuShown] = createSignal(false);
   const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
 
-  const [isExportShown, setIsExportShown] = createSignal(false);
-  const [isSettingShown, setIsSettingShown] = createSignal(false);
-  let exportDialog = null;
-  let settingDialog = null;
-
   const [isDecorated, setIsDecorated] = createSignal(true);
   const [availableUpdate, setAvailableUpdate] = createSignal<Update | undefined>();
 
@@ -48,22 +105,6 @@ const TopMenuBar: Component = () => {
     setAvailableUpdate(update);
   });
 
-  createEffect(() => {
-    if (isExportShown()) {
-      exportDialog = <ExportDialog open={isExportShown()} onClose={() => setIsExportShown(false)} />;
-    } else {
-      exportDialog = null;
-    }
-  });
-
-  createEffect(() => {
-    if (isSettingShown()) {
-      settingDialog = <SettingDialog open={isSettingShown()} onClose={() => setIsSettingShown(false)} />;
-    } else {
-      settingDialog = null;
-    }
-  });
-
   const leftItems: Item[] = [
     {
       text: 'START.',
@@ -71,9 +112,17 @@ const TopMenuBar: Component = () => {
         openWindow('start');
       },
     },
+    // {
+    //   text: '+ NEW',
+    //   action: () => {
+    //     createNew();
+    //   },
+    // },
     {
-      text: '> OPEN.',
-      action: () => setIsOpenMenuShown(true),
+      text: '+ OPEN.',
+      action: () => {
+        setIsOpenMenuShown(true);
+      },
     },
   ];
   const rightItems: Item[] = [
@@ -91,7 +140,7 @@ const TopMenuBar: Component = () => {
       },
     },
     {
-      text: 'ABOUT.',
+      text: '?',
       action: () => {
         openWindow('about');
         // setIsSettingShown(true);
@@ -123,14 +172,14 @@ const TopMenuBar: Component = () => {
 
   const openMenu: MenuListOption[] = [
     {
-      label: '> create...',
+      label: '+ new project.',
       onSelect: () => {
         setIsOpenMenuShown(false);
         createNew();
       },
     },
     {
-      label: '> existing project.',
+      label: '> open project.',
       onSelect: () => {
         setIsOpenMenuShown(false);
         openProject();
@@ -146,7 +195,7 @@ const TopMenuBar: Component = () => {
   ];
 
   return (
-    <div class={root}>
+    <div class={topMenuBarRoot}>
       <div class={menuListLeft}>
         <For each={leftItems}>
           {(item, i) => {
@@ -160,7 +209,7 @@ const TopMenuBar: Component = () => {
                 <Show when={item.text === 'RECENT.' && isRecentMenuShown()}>
                   <MenuList options={startMenu} onClose={() => setIsRecentMenuShown(false)} />
                 </Show>
-                <Show when={item.text === '> OPEN.' && isOpenMenuShown()}>
+                <Show when={item.text === '+ OPEN.' && isOpenMenuShown()}>
                   <MenuList options={openMenu} onClose={() => setIsOpenMenuShown(false)} />
                 </Show>
               </div>
@@ -175,7 +224,7 @@ const TopMenuBar: Component = () => {
 
       <div class={menuListRight}>
         <Show when={isDecorated()}>
-          <div class={flexRow} style={{ 'align-self': 'center' }}>
+          <div class={versionContainer}>
             <SaveSection />
           </div>
         </Show>
@@ -198,11 +247,11 @@ const TopMenuBar: Component = () => {
           <a
             class={menuItemText}
             style={{
-              'font-family': ZFB09,
+              'font-family': 'ZFB09',
               'font-size': '8px',
               opacity: 1,
               'white-space': 'nowrap',
-              color: vars.color.active,
+              color: color.active,
             }}
             onClick={async (e) => {
               await askAndInstallUpdate();
@@ -216,11 +265,11 @@ const TopMenuBar: Component = () => {
           <a
             class={menuItemText}
             style={{
-              'font-family': ZFB09,
+              'font-family': 'ZFB09',
               'font-size': '8px',
               opacity: 1,
               'white-space': 'nowrap',
-              color: vars.color.muted,
+              color: color.muted,
             }}
             title={'You can restore skipped updates from settings.'}
             onClick={(e) => {
@@ -236,7 +285,6 @@ const TopMenuBar: Component = () => {
         </div>
       </Show>
       <div class={menuItem} style={{ 'margin-right': '8px' }}></div>
-      {exportDialog}
     </div>
   );
 };

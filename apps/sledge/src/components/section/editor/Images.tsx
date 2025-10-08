@@ -1,12 +1,29 @@
-import { flexCol } from '@sledge/core';
+import { css } from '@acab/ecsstatic';
 import { Checkbox } from '@sledge/ui';
 import { Component, createMemo, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/item/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
-import { addToImagePool, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
+import { addToImagePool, getEntries, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent } from '../SectionStyles';
+
+const gridContainer = css`
+  margin: 4px 0;
+`;
+
+const optionsContainer = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  gap: 4px;
+`;
+
+const noImageText = css`
+  align-self: center;
+  justify-self: center;
+  color: var(--color-muted);
+`;
 
 const Images: Component<{}> = () => {
   const selectedEntry = createMemo<ImagePoolEntry | undefined>(() =>
@@ -18,7 +35,7 @@ const Images: Component<{}> = () => {
       title='images.'
       subHeaderIcons={[
         {
-          src: '/icons/misc/plus_12.png',
+          src: '/icons/misc/add.png',
           onClick: async () => {
             const path = await openImageImportDialog();
             if (path !== undefined) {
@@ -27,7 +44,7 @@ const Images: Component<{}> = () => {
           },
         },
         {
-          src: '/icons/misc/minus_12.png',
+          src: '/icons/misc/remove_minus.png',
           onClick: async () => {
             const id = selectedEntry()?.id;
             if (id) removeEntry(id);
@@ -37,25 +54,21 @@ const Images: Component<{}> = () => {
       ]}
     >
       <div class={sectionContent}>
-        <div style={{ margin: '4px 0' }}>
-          {/* <ImagePoolList /> */}
-          <ImagePoolGrid />
-        </div>
-        <Show when={imagePoolStore.selectedEntryId !== undefined}>
-          <div
-            class={flexCol}
-            style={{
-              'margin-top': '8px',
-              gap: '4px',
-            }}
-          >
-            <Checkbox
-              checked={imagePoolStore.preserveAspectRatio}
-              label='preserve ratio.'
-              labelMode='right'
-              onChange={(checked) => setImagePoolStore('preserveAspectRatio', checked)}
-            />
+        <Show when={getEntries().length > 0} fallback={<p class={noImageText}>no images</p>}>
+          <div class={gridContainer}>
+            {/* <ImagePoolList /> */}
+            <ImagePoolGrid />
           </div>
+          <Show when={imagePoolStore.selectedEntryId !== undefined}>
+            <div class={optionsContainer}>
+              <Checkbox
+                checked={imagePoolStore.preserveAspectRatio}
+                label='preserve ratio.'
+                labelMode='right'
+                onChange={(checked) => setImagePoolStore('preserveAspectRatio', checked)}
+              />
+            </div>
+          </Show>
         </Show>
       </div>
     </SectionItem>

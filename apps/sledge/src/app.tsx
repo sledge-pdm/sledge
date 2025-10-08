@@ -6,20 +6,27 @@ import About from './routes/about/index';
 import Editor from './routes/editor/index';
 import Home from './routes/start/index';
 
-import { flexCol, h100 } from '@sledge/core';
-import { getTheme } from '@sledge/theme';
+import { applyTheme } from '@sledge/theme';
 import { showContextMenu } from '@sledge/ui';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, onMount } from 'solid-js';
-import DebugViewer from '~/components/global/debug/DebugViewer';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { loadGlobalSettings } from '~/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
+
+import { css } from '@acab/ecsstatic';
+import '@sledge/theme/src/global.css';
+
+const appRoot = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
 
 export default function App() {
   // グローバルエラーハンドラーを設定
@@ -47,22 +54,12 @@ export default function App() {
     loadGlobalSettings();
   });
 
-  // テーマクラスを html 要素に付与して、Portal や body 直下にもトークンが届くようにする
-  let prevThemeClass: string | undefined;
-
   const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {
-    let cls;
     if (osTheme && globalConfig.appearance.theme === 'os') {
-      cls = getTheme(osTheme);
+      applyTheme(osTheme);
     } else {
-      cls = getTheme(globalConfig.appearance.theme);
+      applyTheme(globalConfig.appearance.theme);
     }
-    const html = document.documentElement;
-    if (prevThemeClass && html.classList.contains(prevThemeClass)) {
-      html.classList.remove(prevThemeClass);
-    }
-    html.classList.add(cls);
-    prevThemeClass = cls;
   };
 
   listen('tauri://theme-changed', (e) => {
@@ -86,7 +83,10 @@ export default function App() {
     // await checkForUpdates();
   });
 
-  createEffect(() => applyThemeToHtml());
+  createEffect(() => {
+    const theme = globalConfig.appearance.theme;
+    applyThemeToHtml();
+  });
 
   return (
     <Router
@@ -94,7 +94,7 @@ export default function App() {
         <MetaProvider>
           <title>Sledge</title>
           <div
-            class={[flexCol, h100].join(' ')}
+            class={appRoot}
             onContextMenu={(e) => {
               e.preventDefault();
               showContextMenu(
@@ -108,7 +108,6 @@ export default function App() {
           >
             <TitleBar />
             <main>{props.children}</main>
-            <DebugViewer />
           </div>
         </MetaProvider>
       )}

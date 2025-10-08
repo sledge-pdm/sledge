@@ -1,16 +1,9 @@
 {
+  "extends": "../../configs/ts/tsconfig.base.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "allowJs": true,
-    "strict": true,
-    "noEmit": true,
-    "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],

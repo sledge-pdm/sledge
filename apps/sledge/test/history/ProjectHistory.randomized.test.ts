@@ -5,15 +5,15 @@ import {
   ColorHistoryAction,
   ImagePoolEntryPropsHistoryAction,
   ImagePoolHistoryAction,
-  LayerBufferHistoryAction,
   LayerListHistoryAction,
   LayerPropsHistoryAction,
-  packRGBA,
   ProjectHistoryController,
 } from '~/features/history';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
-import { BlendMode, Layer, LayerType, resetLayerImage } from '~/features/layer';
-import { getBufferOf } from '~/features/layer/agent/LayerAgentManager';
+import { BlendMode, Layer, LayerType } from '~/features/layer';
+import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
+import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
@@ -37,8 +37,12 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     // Normalize color and image pool before each test
     selectPalette(PaletteType.primary);
     setColor(PaletteType.primary, '#000000');
+
+    const WIDTH = 16;
+    const HEIGHT = 16;
+
     // Keep canvas small to make layer buffers tiny
-    setCanvasStore('canvas', { width: 16, height: 16 });
+    setCanvasStore('canvas', { width: WIDTH, height: HEIGHT });
     // Seed 3 layers with agents (small buffers)
     const l = (id: string, name = id): Layer => ({
       id,
@@ -52,8 +56,10 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     });
     setLayerListStore('layers', [l('L1'), l('L2'), l('L3')]);
     setLayerListStore('activeLayerId', 'L1');
-    // Ensure agents exist for each layer id
-    layerListStore.layers.forEach((layer) => resetLayerImage(layer.id, layer.dotMagnification));
+    // Ensure anvils exist for each layer id
+    layerListStore.layers.forEach((layer) => {
+      anvilManager.registerAnvil(layer.id, new Uint8ClampedArray(WIDTH * HEIGHT * 4), WIDTH, HEIGHT);
+    });
     // Drop a few known test IDs if present
     ['rnd-a', 'rnd-b', 'rnd-c'].forEach((id) => {
       if (getEntry(id)) removeEntry(id);
@@ -215,7 +221,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
           if (layerListStore.layers.length > 1) {
             const idx = Math.floor(rng() * layerListStore.layers.length);
             const layer = layerListStore.layers[idx];
-            const snapshot: Layer & { buffer?: Uint8ClampedArray } = { ...layer, buffer: new Uint8ClampedArray(getBufferOf(layer.id)!) } as any;
+            const anvil = getAnvilOf(layer.id);
+            const snapshot: Layer & { buffer?: Uint8ClampedArray } = { ...layer, buffer: anvil?.getImageData() } as any;
             const a = new LayerListHistoryAction('delete', idx, snapshot, undefined, undefined, { from: 'rnd' });
             steps.push(() => {
               a.redo();
@@ -270,35 +277,27 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         // Layer buffer tiny pixel patch on a random layer
         if (layerListStore.layers.length > 0) {
           const layer = layerListStore.layers[Math.floor(rng() * layerListStore.layers.length)];
-          const buf = getBufferOf(layer.id);
-          if (buf) {
-            // pick up to 3 pixels in top-left tile
+          const anvil = getAnvilOf(layer.id);
+          if (anvil) {
+            const w = anvil.getWidth();
             const count = 1 + Math.floor(rng() * 3);
-            const idxs = new Uint16Array(Array.from({ length: count }, (_, k) => k));
-            const before = new Uint32Array(count);
-            const after = new Uint32Array(count);
-            const w = canvasStore.canvas.width;
             for (let k = 0; k < count; k++) {
-              const dx = idxs[k] % 32; // assume small within bounds
-              const dy = (idxs[k] / 32) | 0;
-              const x = dx;
-              const y = dy;
-              const ptr = (y * w + x) * 4;
-              const r = buf[ptr] ?? 0;
-              const g = buf[ptr + 1] ?? 0;
-              const b = buf[ptr + 2] ?? 0;
-              const a8 = buf[ptr + 3] ?? 0;
-              before[k] = packRGBA([r, g, b, a8]);
-              // new color: cycle channels a bit
-              after[k] = packRGBA([b, r, (g + 64) & 0xff, 255]);
+              const x = k % Math.min(4, w);
+              const y = 0;
+              const r = (k * 40) & 0xff;
+              const g = (k * 80) & 0xff;
+              const b = (k * 120) & 0xff;
+              setPixel(layer.id, x, y, [r, g, b, 255]);
             }
-            const patch = { layerId: layer.id, pixels: [{ type: 'pixels' as const, tile: { row: 0, column: 0 }, idx: idxs, before, after }] };
-            const a = new LayerBufferHistoryAction(layer.id, patch, { from: 'rnd' });
-            steps.push(() => {
-              a.redo();
-              hc.addAction(a);
-            });
-            stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
+            const patch = flushPatch(layer.id);
+            if (patch) {
+              const a = new AnvilLayerHistoryAction(layer.id, patch, { from: 'rnd' });
+              steps.push(() => {
+                a.redo();
+                hc.addAction(a);
+              });
+              stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
+            }
           }
         }
       }

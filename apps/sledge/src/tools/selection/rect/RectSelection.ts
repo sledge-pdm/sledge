@@ -1,10 +1,9 @@
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { RectFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
-import { ToolArgs } from '~/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs } from '~/tools/ToolBehavior';
 import { SelectionBase } from '~/tools/selection/SelectionBase';
 
 export class RectSelection extends SelectionBase {
-  protected onStartSelection(agent: LayerImageAgent, args: ToolArgs, mode: SelectionEditMode) {
+  protected onStartSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.beginPreview(mode);
     this.startPosition = args.position;
     const newRect: RectFragment = {
@@ -16,7 +15,7 @@ export class RectSelection extends SelectionBase {
     selectionManager.setPreviewFragment(newRect);
   }
 
-  protected onMoveSelection(agent: LayerImageAgent, args: ToolArgs, mode: SelectionEditMode) {
+  protected onMoveSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.beginPreview(mode);
 
     const px = Math.max(0, args.position.x);
@@ -40,11 +39,11 @@ export class RectSelection extends SelectionBase {
     selectionManager.setPreviewFragment(newRect);
   }
 
-  protected onEndSelection(agent: LayerImageAgent, args: ToolArgs, mode: SelectionEditMode) {
+  protected onEndSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.commit();
   }
 
-  protected onCancelSelection(agent: LayerImageAgent, args: ToolArgs, mode: SelectionEditMode) {
+  protected onCancelSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.commit();
   }
 }

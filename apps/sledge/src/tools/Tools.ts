@@ -52,6 +52,7 @@ export type EraserPresetConfig = PresetConfig & {
 
 export type FillPresetConfig = PresetConfig & {
   threshold?: number;
+  fillMode?: 'area' | 'inside';
   // antialias?: boolean;
 };
 
@@ -96,6 +97,7 @@ export const toolCategories = {
       options: {
         [DEFAULT_PRESET]: {
           threshold: 0,
+          fillMode: 'area',
         } as FillPresetConfig,
       },
     },

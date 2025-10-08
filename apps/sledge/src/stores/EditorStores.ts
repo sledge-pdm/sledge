@@ -3,6 +3,7 @@ import { FileLocation, Size2D, Vec2 } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
 import { PaletteType, RGBAColor } from '~/features/color';
+import { DEFAULT, SMPTE, Swatch } from '~/features/color/swatch/swatches';
 import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
 
 type AppearanceStore = {
@@ -21,7 +22,8 @@ type ColorStore = {
   currentPalette: PaletteType;
   primary: string;
   secondary: string;
-  swatches: string[];
+  swatches: Swatch[];
+  currentSwatchName: string;
 };
 type FileStore = {
   openAs: 'project' | 'image';
@@ -46,6 +48,10 @@ type InteractStore = {
   rotation: number;
   verticalFlipped: boolean;
   horizontalFlipped: boolean;
+
+  isCanvasSizeFrameMode: boolean;
+  canvasSizeFrameOffset: Vec2;
+  canvasSizeFrameSize: Size2D;
 };
 type DebugPoint = Vec2 & {
   color: RGBAColor;
@@ -57,19 +63,17 @@ type LogStore = {
   canvasDebugPoints: DebugPoint[]; // デバッグ用の点の配列
 };
 export type SelectionLimitMode = 'none' | 'outside' | 'inside';
-export type SelectionFillMode = 'global' | 'boundary' | 'area'; // global: 全体参照, boundary: 範囲制限, area: 選択範囲塗りつぶし
 export type ToolStore = {
   tools: Record<ToolCategoryId, ToolCategory>;
   activeToolCategory: ToolCategoryId;
   prevActiveCategory: ToolCategoryId | undefined;
   selectionLimitMode: SelectionLimitMode;
-  selectionFillMode: SelectionFillMode;
 };
 
 const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: true,
-    tabs: ['editor', 'effects', 'danger'],
+    tabs: ['editor', 'effects', 'files', 'danger'],
     selectedIndex: 0,
   },
   rightSide: {
@@ -82,7 +86,8 @@ const defaultColorStore: ColorStore = {
   currentPalette: 'primary' as PaletteType,
   primary: '#000000', // 通常の描画色
   secondary: '#ffffff', // 背景・消しゴムなど
-  swatches: ['#000000', '#FFFFFF', '#ffff00', '#00ffff', '#00ff00', '#ff00ff', '#ff0000', '#0000ff', '#000080', '#400080'],
+  swatches: [DEFAULT, SMPTE],
+  currentSwatchName: DEFAULT.name,
 };
 const defaultFileStore: FileStore = {
   openAs: 'project',
@@ -101,7 +106,7 @@ const defaultInteractStore: InteractStore = {
   zoom: 1,
   zoomByReference: 1,
   // zoomMin: 0.5,
-  zoomMin: 0.01,
+  zoomMin: 1,
   // zoomMax: 8,
   zoomMax: 100,
   touchZoomSensitivity: 0.5,
@@ -116,6 +121,10 @@ const defaultInteractStore: InteractStore = {
   horizontalFlipped: false,
 
   isDragging: false,
+
+  isCanvasSizeFrameMode: false,
+  canvasSizeFrameOffset: { x: 0, y: 0 },
+  canvasSizeFrameSize: { width: 0, height: 0 },
 };
 const defaultLogStore: LogStore = {
   bottomBarText: 'rotate: shift+wheel / drag: ctrl+drag',
@@ -127,7 +136,6 @@ const defaultToolStore: ToolStore = {
   activeToolCategory: 'pen',
   prevActiveCategory: undefined,
   selectionLimitMode: 'inside',
-  selectionFillMode: 'area', // デフォルトは現在の動作（全体参照）
 };
 
 export const initEditorStore = () => {

@@ -1,9 +1,66 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
-import { redoIcon, topRightNav, undoIcon, undoRedoContainer } from '~/styles/components/canvas/canvas_controls.css';
 
+import { css } from '@acab/ecsstatic';
+import FrameResizeMenu from '~/components/canvas/overlays/resize_frame/FrameResizeMenu';
+import { interactStore } from '~/stores/EditorStores';
 import { layerListStore } from '~/stores/ProjectStores';
-// no longer relying on layerHistory:changed; use projectHistoryController.onChange
+
+const topRightNav = css`
+  display: flex;
+  flex-direction: row;
+  gap: 36px;
+  padding: 36px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+`;
+
+const undoRedoContainer = css`
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  padding: 12px;
+  z-index: var(--zindex-canvas-overlay);
+  pointer-events: auto;
+`;
+
+const undoIcon = css`
+  display: flex;
+  flex-direction: column;
+  width: 8px;
+  height: 8px;
+  image-rendering: pixelated;
+  shape-rendering: geometricPrecision;
+  align-content: center;
+  align-items: center;
+  backdrop-filter: invert();
+  scale: 2;
+`;
+
+const redoIcon = css`
+  display: flex;
+  flex-direction: column;
+  width: 8px;
+  height: 8px;
+  image-rendering: pixelated;
+  shape-rendering: geometricPrecision;
+  align-content: center;
+  align-items: center;
+  backdrop-filter: invert();
+  scale: 2;
+`;
+
+const bottomRightNav = css`
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  background-color: #000000a0;
+  border: 1px solid var(--color-border);
+  right: 8px;
+  bottom: 8px;
+`;
 
 const CanvasControls: Component = () => {
   const [activeCanUndo, setActiveCanUndo] = createSignal(projectHistoryController.canUndo());
@@ -24,8 +81,6 @@ const CanvasControls: Component = () => {
     setActiveCanUndo(projectHistoryController.canUndo());
     setActiveCanRedo(projectHistoryController.canRedo());
   });
-
-  const [isTempControlMenuOpen, setIsTempControlMenuOpen] = createSignal<boolean>(false);
   return (
     <>
       <div class={topRightNav}>
@@ -57,6 +112,10 @@ const CanvasControls: Component = () => {
             e.stopImmediatePropagation();
             projectHistoryController.undo();
           }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }}
         >
           <div
             class={undoIcon}
@@ -77,6 +136,10 @@ const CanvasControls: Component = () => {
             e.stopImmediatePropagation();
             projectHistoryController.redo();
           }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }}
         >
           <div
             class={redoIcon}
@@ -87,6 +150,11 @@ const CanvasControls: Component = () => {
           />
         </div>
       </div>
+      <Show when={interactStore.isCanvasSizeFrameMode}>
+        <div class={bottomRightNav} style={{ 'z-index': 'var(--zindex-canvas-overlay)' }}>
+          <FrameResizeMenu />
+        </div>
+      </Show>
     </>
   );
 };

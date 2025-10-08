@@ -1,8 +1,8 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { ZFB09 } from '@sledge/theme';
+import { fonts } from '@sledge/theme';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { getEntries, removeEntry } from '~/features/image_pool';
+import { flexCol, flexRow } from '~/styles/StyleSnippets';
 import { eventBus } from '~/utils/EventBus';
 
 const Item: Component<{ id: string; name: string; path: string; visible: boolean }> = (props) => {
@@ -33,7 +33,7 @@ const Item: Component<{ id: string; name: string; path: string; visible: boolean
           }}
         />
         <div style={{ overflow: 'hidden' }}>
-          <div style={{ 'font-family': ZFB09, 'font-size': '8px', 'text-overflow': 'ellipsis', overflow: 'hidden', 'white-space': 'nowrap' }}>
+          <div style={{ 'font-family': fonts.ZFB09, 'font-size': '8px', 'text-overflow': 'ellipsis', overflow: 'hidden', 'white-space': 'nowrap' }}>
             {props.name}
           </div>
           <div style={{ 'font-size': '8px', color: '#888', 'text-overflow': 'ellipsis', overflow: 'hidden', 'white-space': 'nowrap' }}>
@@ -58,7 +58,7 @@ const Item: Component<{ id: string; name: string; path: string; visible: boolean
             >
               relink
             </a> */}
-            <a style={{ 'font-family': ZFB09 }} title='remove' onClick={() => removeEntry(props.id)}>
+            <a style={{ 'font-family': fonts.ZFB09 }} title='remove' onClick={() => removeEntry(props.id)}>
               remove
             </a>
           </div>

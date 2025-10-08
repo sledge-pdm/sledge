@@ -1,17 +1,25 @@
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
-import CanvasOverlaySVG from './CanvasOverlaySVG';
 import { InteractCanvas } from './InteractCanvas';
 
-import { vars } from '@sledge/theme';
-import { OnCanvasSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
-import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
+import { css } from '@acab/ecsstatic';
+import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
+
+import { color } from '@sledge/theme';
+import '/patterns/CheckerboardPattern.svg';
+
+const canvasStack = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+`;
 
 export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);
 
@@ -42,11 +50,9 @@ const CanvasStack: Component = () => {
     });
   });
 
-  let orientationRef!: HTMLDivElement; // 内側: 回転+反転を適用
-  let rootRef!: HTMLDivElement; // 外側: サイズと背景のみ
+  let orientationRef!: HTMLDivElement;
+  let rootRef!: HTMLDivElement;
 
-  // 回転と flip の適用。順序: 回転 -> flip (scale) 。
-  // 逆変換では flip -> 逆回転 の順で戻す。ズレ防止のため順序を明示しておく。
   createEffect(() => {
     const w = canvasStore.canvas.width;
     const h = canvasStore.canvas.height;
@@ -81,7 +87,7 @@ const CanvasStack: Component = () => {
           left: '0',
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
-          'background-color': vars.color.canvas,
+          'background-color': color.canvas,
         }}
       >
         <div
@@ -90,6 +96,8 @@ const CanvasStack: Component = () => {
           style={{
             width: `${canvasStore.canvas.width}px`,
             height: `${canvasStore.canvas.height}px`,
+            'shape-rendering': 'crispEdges',
+            'background-image': `url(/patterns/CheckerboardPattern.svg)`,
             'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
             'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
           }}
@@ -98,9 +106,6 @@ const CanvasStack: Component = () => {
           <ImagePool />
           <WebGLCanvas />
         </div>
-        <OnCanvasSelectionMenu />
-
-        <CanvasOverlaySVG />
       </div>
     </div>
   );

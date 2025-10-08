@@ -1,5 +1,5 @@
 import { createStore } from 'solid-js/store';
-import { ExportSettings } from '~/components/global/dialogs/ExportDialog';
+import { ExportSettings } from '~/components/section/export/ExportContent';
 import { KeyConfigCommands } from '~/Consts';
 import { GlobalConfig } from '~/features/config/models/GlobalConfig';
 import { KeyConfigEntry } from '~/features/config/models/KeyConfig';

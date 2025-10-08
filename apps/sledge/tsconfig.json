@@ -1,24 +1,23 @@
 {
+  "extends": "../../configs/ts/tsconfig.base.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "allowJs": true,
-    "strict": true,
-    "noEmit": true,
-    "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
       "@sledge/ui": ["../../packages/ui"],
       "@sledge/theme": ["../../packages/theme"],
       "@sledge/core": ["../../packages/core"],
+      "@sledge/anvil": ["../../packages/anvil"],
       "@sledge/wasm": ["../../packages/wasm/pkg/sledge_wasm.js"]
     },
     "types": ["vite/client"],
     "rootDirs": ["src"]
-  }
+  },
+  "exclude": [
+    // Tauri が生成するバイナリ的 JS 資産群（型チェック不要 / 文字化けし ts エラーになる）
+    "src-tauri/target",
+    "**/out/tauri-codegen-assets/**"
+  ]
 }

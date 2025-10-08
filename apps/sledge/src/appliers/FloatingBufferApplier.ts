@@ -2,17 +2,15 @@ import { patch_buffer_rgba } from '@sledge/wasm';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 
 export interface FloatingBufferApplyParams {
-  width: number;
-  height: number;
+  width: number; // target full width
+  height: number; // target full height
   floatingBuffer: FloatingBuffer;
-  target: Uint8ClampedArray;
+  target: Uint8ClampedArray; // base buffer to patch (copied by caller if needed)
 }
 
+// Pure helper: returns new patched buffer (does NOT touch Anvil or history)
 export function applyFloatingBuffer({ width, height, floatingBuffer, target }: FloatingBufferApplyParams): Uint8ClampedArray {
-  // TODO: implement apply floating buffer
   const offset = floatingBuffer.offset;
-  // target is Uint8ClampedArray, wasm.patch_buffer expects Uint8Array inputs and returns Uint8Array
-  // width and height are provided by caller (target dimensions)
   try {
     const res = patch_buffer_rgba(
       new Uint8Array(target.buffer, target.byteOffset, target.byteLength),

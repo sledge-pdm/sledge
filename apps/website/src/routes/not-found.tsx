@@ -1,5 +1,5 @@
 import { type Component } from 'solid-js';
-import { heroHeading, pageRoot, scrollContent, subHeading } from '~/styles/page.css';
+import { heroHeading, pageRoot, scrollContent, subHeading } from '~/styles/SharedStyles';
 
 export const NotFound: Component = () => {
   return (

@@ -4,8 +4,10 @@ import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { projectHistoryController } from '~/features/history';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
+import { allLayers } from '~/features/layer';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export function isValidCanvasSize(size: Size2D): boolean {
@@ -21,11 +23,11 @@ export function isValidCanvasSize(size: Size2D): boolean {
     const safeSideLength = theoreticalMaxSideLength - Consts.webGLTextureSizeLimitMargin;
     const bufferSizeLimit = safeSideLength * safeSideLength * 4; // width * height * 4 bytes (RGBA)
 
-    console.log(`WebGL limit analysis:`);
-    console.log(`  MAX_TEXTURE_SIZE: ${maxTextureSize}`);
-    console.log(`  Theoretical max side: ${theoreticalMaxSideLength.toFixed(2)} pixels`);
-    console.log(`  Safe side length: ${safeSideLength.toFixed(2)} pixels`);
-    console.log(`  Buffer size limit: ${(bufferSizeLimit / 1024 / 1024).toFixed(2)} MB`);
+    // console.log(`WebGL limit analysis:`);
+    // console.log(`  MAX_TEXTURE_SIZE: ${maxTextureSize}`);
+    // console.log(`  Theoretical max side: ${theoreticalMaxSideLength.toFixed(2)} pixels`);
+    // console.log(`  Safe side length: ${safeSideLength.toFixed(2)} pixels`);
+    // console.log(`  Buffer size limit: ${(bufferSizeLimit / 1024 / 1024).toFixed(2)} MB`);
 
     const requestedBufferSize = size.width * size.height * 4; // RGBA bytes
 
@@ -54,20 +56,40 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
   return true;
 }
 
-export async function changeCanvasSize(newSize: Size2D, noDiff?: boolean): Promise<boolean> {
+export async function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?: boolean): Promise<boolean> {
   if (!isValidCanvasSize(newSize)) return false;
 
-  const current = canvasStore.canvas;
-  if (current.width === newSize.width && current.height === newSize.height) return false;
+  if (canvasStore.canvas.width === newSize.width && canvasStore.canvas.height === newSize.height) return false;
 
-  // Use history action so that undo/redo works and buffers are snapshotted/restored
-  const act = new CanvasSizeHistoryAction({ ...current }, { ...newSize }, { from: 'CanvasController.changeCanvasSize' });
-  // Apply immediately (user intent)
-  act.redo();
-  if (!noDiff) {
-    // Then push onto history stack
+  const act = new CanvasSizeHistoryAction(
+    {
+      width: canvasStore.canvas.width,
+      height: canvasStore.canvas.height,
+    },
+    {
+      width: newSize.width,
+      height: newSize.height,
+    },
+    { from: 'changeCanvasSizeWithNoOffset' }
+  );
+
+  if (!skipHistory) act.registerBefore();
+
+  setCanvasStore('canvas', newSize);
+  eventBus.emit('canvas:sizeChanged', { newSize });
+
+  for (const l of allLayers()) {
+    const anvil = getAnvilOf(l.id)!;
+    anvil.resize(newSize.width, newSize.height);
+    eventBus.emit('preview:requestUpdate', { layerId: l.id });
+  }
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'changeCanvasSizeWithNoOffset' });
+
+  if (!skipHistory) {
+    act.registerAfter();
     projectHistoryController.addAction(act);
   }
+
   return true;
 }
 

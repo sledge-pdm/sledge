@@ -355,8 +355,8 @@ class CanvasAreaInteract {
     const canvasMidX = (midX - rect.left) / zoomOld;
     const canvasMidY = (midY - rect.top) / zoomOld;
 
-    const dxCanvas = (midX - prevMidX) / zoomOld;
-    const dyCanvas = (midY - prevMidY) / zoomOld;
+    const dxCanvas = midX - prevMidX;
+    const dyCanvas = midY - prevMidY;
 
     setOffset({
       x: interactStore.offset.x + canvasMidX * (zoomOld - zoomApplied) + dxCanvas,

@@ -1,8 +1,4 @@
-import { Consts as CoreConfig } from '@sledge/core';
-
 export const Consts = {
-  ...CoreConfig,
-
   maxPenSize: 100,
   minCanvasWidth: 1,
   maxCanvasWidth: 10000, // may limited even smaller by webgl's max texture size
@@ -20,6 +16,8 @@ export const Consts = {
 
   globalConfigFileName: 'global.sledgeconfig',
   toolPresetsConfigFileName: 'tools.sledgeconfig',
+
+  fileItemIndent: 8,
 };
 
 export type KeyConfigCommands =

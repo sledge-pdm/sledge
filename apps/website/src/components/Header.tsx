@@ -1,8 +1,93 @@
+import { css } from '@acab/ecsstatic';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onMount } from 'solid-js';
 import SideBarMenu from '~/components/HeaderMenu';
 import TypewriterText from '~/components/TypewriterText';
-import { flavorText, flavorTextContainer, headerContentContainer, headerRoot, menuContainer, sledgeText } from '~/styles/header.css';
+
+// Styles
+const headerRoot = css`
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 500px;
+  box-sizing: content-box;
+  height: auto;
+  padding: 3rem 0 0.25rem 0;
+  margin-bottom: 3rem;
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border-secondary);
+  z-index: 10;
+  @media (max-width: 599px) {
+    justify-content: auto;
+    padding: 2.5rem 0 0.25rem 0;
+  }
+`;
+
+const headerContentContainer = css`
+  display: flex;
+  flex-direction: column;
+  justify-self: center;
+  height: auto;
+  padding: 0 4rem 0 3rem;
+  @media (max-width: 599px) {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 2rem 0 2rem;
+  }
+`;
+
+const sledgeText = css`
+  font-family: ZFB31, k12x8;
+  font-size: 36px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  @media (max-width: 400px) {
+    font-size: 32px;
+  }
+`;
+
+const flavorTextContainer = css`
+  display: flex;
+  flex-direction: column;
+  height: 24px;
+`;
+
+const flavorText = css`
+  font-family: k12x8;
+  font-size: 8px;
+  color: var(--color-active);
+  font-style: italic;
+  @media (max-width: 599px) {
+    font-size: 12px;
+    margin-bottom: 0.25rem;
+  }
+`;
+
+const menuContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  margin: 0 4rem 0 3rem;
+  touch-action: auto;
+
+  &::-webkit-scrollbar {
+    height: 2px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #dddddd75;
+  }
+
+  @media (max-width: 599px) {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0 2rem 0 2rem;
+  }
+`;
 
 const Header: Component = () => {
   const descriptionFlavors: string[] = [

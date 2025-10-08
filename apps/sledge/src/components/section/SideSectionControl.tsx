@@ -1,19 +1,68 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { adjustZoomToFit, setOffset, setZoomByReference } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
-import {
-  sideSectionControlItem,
-  sideSectionControlList,
-  sideSectionControlRoot,
-  sideSectionControlText,
-  sideSectionControlTextActive,
-} from '~/styles/section/side_section_control.css';
+import { flexRow } from '~/styles/StyleSnippets';
 import { eventBus } from '~/utils/EventBus';
+
+const sideSectionControlRoot = css`
+  display: flex;
+  flex-direction: column;
+  box-sizing: content-box;
+  padding-bottom: 12px;
+  justify-content: start;
+  align-items: center;
+  background-color: var(--color-background);
+`;
+
+const sideSectionControlList = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center;
+`;
+
+const sideSectionControlItem = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(180deg);
+  width: 100%;
+  padding: 14px 10px 14px 10px;
+  box-sizing: border-box;
+
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-surface);
+  }
+  &:hover > p {
+    color: var(--color-accent);
+  }
+`;
+
+const sideSectionControlText = css`
+  font-family: ZFB09;
+  font-size: 8px;
+  white-space: nowrap;
+  writing-mode: vertical-lr;
+  color: var(--color-on-background);
+  opacity: 0.5;
+`;
+
+const sideSectionControlTextActive = css`
+  font-family: ZFB09;
+  font-size: 8px;
+  white-space: nowrap;
+  writing-mode: vertical-lr;
+  color: var(--color-accent);
+  opacity: 1;
+`;
 
 interface ItemProps {
   side: 'leftSide' | 'rightSide';
@@ -27,25 +76,25 @@ const ControlItem: Component<ItemProps> = (props) => {
     <div
       class={sideSectionControlItem}
       style={{ 'margin-top': props.tab === 'danger' ? 'auto' : undefined, 'margin-bottom': props.tab === 'danger' ? '0px' : undefined }}
+      onClick={() => {
+        if (!appearanceStore[props.side].shown) {
+          setAppearanceStore(props.side, 'shown', true);
+        } else {
+          if (selected()) {
+            setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
+          } else {
+            setAppearanceStore(props.side, 'shown', true);
+          }
+        }
+        setAppearanceStore(props.side, 'selectedIndex', props.index);
+      }}
     >
-      <a
+      <p
         class={selected() ? sideSectionControlTextActive : sideSectionControlText}
         style={{ color: props.tab === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
-        onClick={() => {
-          if (!appearanceStore[props.side].shown) {
-            setAppearanceStore(props.side, 'shown', true);
-          } else {
-            if (selected()) {
-              setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
-            } else {
-              setAppearanceStore(props.side, 'shown', true);
-            }
-          }
-          setAppearanceStore(props.side, 'selectedIndex', props.index);
-        }}
       >
         {props.tab}.
-      </a>
+      </p>
     </div>
   );
 };
@@ -67,28 +116,12 @@ const SideSectionControl: Component<Props> = (props) => {
       id={`side-section-control-${props.side}`}
       class={sideSectionControlRoot}
       style={{
-        'padding-left': props.side === 'leftSide' ? '5px' : '3px',
-        'padding-right': props.side === 'leftSide' ? '3px' : '5px',
+        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
+        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
 
-        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
-
-        'z-index': Consts.zIndex.sideSection,
+        'z-index': 'var(--zindex-side-section)',
       }}
-      // onContextMenu={(e) => {
-      //   e.preventDefault();
-      //   e.stopImmediatePropagation();
-      // }}
     >
-      {/* <p
-        class={sideSectionControlToggle}
-        onClick={() => {
-          setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
-        }}
-      >
-        {showToggle()}
-      </p> */}
-
       <div class={sideSectionControlList}>
         <For each={appearanceStore[props.side].tabs}>{(tab, index) => <ControlItem side={props.side} tab={tab} index={index()} />}</For>
 
@@ -108,8 +141,8 @@ const SideSectionControl: Component<Props> = (props) => {
                 orientation='vertical'
                 labelMode='none'
                 value={interactStore.zoomByReference}
-                min={0.1}
-                max={10}
+                min={interactStore.zoomMin}
+                max={interactStore.zoomMax}
                 wheelSpin={true}
                 wheelStep={0.1}
                 allowFloat={true}

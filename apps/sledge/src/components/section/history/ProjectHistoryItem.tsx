@@ -1,73 +1,43 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
-import { Accessor, Component, For, onMount, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import SectionItem from '~/components/section/SectionItem';
+import { Accessor, Component, Show } from 'solid-js';
 import { RGBAToHex } from '~/features/color';
-import { BaseHistoryAction, projectHistoryController } from '~/features/history';
+import { BaseHistoryAction } from '~/features/history';
+import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
-import { LayerBufferHistoryAction } from '~/features/history/actions/LayerBufferHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
 import { toolCategories } from '~/tools/Tools';
 
-const ProjectHistoryItem: Component = () => {
-  const [historyStore, setHistoryStore] = createStore<{
-    undoStack: BaseHistoryAction[];
-    redoStack: BaseHistoryAction[];
-  }>({
-    undoStack: projectHistoryController.getUndoStack(),
-    redoStack: projectHistoryController.getRedoStack(),
-  });
+const historyRowStyle = css`
+  display: flex;
+  box-sizing: border-box;
+  height: auto;
+  gap: 8px;
+  align-items: center;
+  overflow: hidden;
+`;
 
-  onMount(() => {
-    const dispose = projectHistoryController.onChange(() => {
-      setHistoryStore({ undoStack: [...projectHistoryController.getUndoStack()], redoStack: [...projectHistoryController.getRedoStack()] });
-    });
+const colorIconStyle = css`
+  width: 8px;
+  height: 8px;
+  position: relative;
+  overflow: hidden;
+`;
 
-    return () => dispose();
-  });
+const indexStyle = css`
+  width: 18px;
+`;
 
-  return (
-    <SectionItem title={`history`}>
-      <div class={sectionContent} style={{ gap: '8px', 'margin-bottom': '8px', 'padding-top': '8px' }}>
-        {/* <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-          <p style={{ color: vars.color.active }}>top = recent / bottom = oldest</p>
-        </div> */}
-
-        <p class={sectionSubCaption}>redo stack ({historyStore.redoStack.length})</p>
-        <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
-          <Show when={historyStore.redoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no redo stack &gt;</p>}>
-            <For each={historyStore.redoStack}>
-              {(action, i) => {
-                const index = () => historyStore.redoStack.length - i();
-                return <HistoryRow undo={false} action={action} index={index} />;
-              }}
-            </For>
-          </Show>
-        </div>
-
-        <p class={sectionSubCaption}>{`undo stack (${historyStore.undoStack.length})`}</p>
-        <div class={sectionSubContent} style={{ 'flex-direction': 'column-reverse' }}>
-          <Show when={historyStore.undoStack.length > 0} fallback={<p style={{ color: vars.color.muted }}>&lt; no undo stack &gt;</p>}>
-            <For each={historyStore.undoStack}>
-              {(action, i) => {
-                const index = () => i() + 1;
-                return <HistoryRow undo={true} action={action} index={index} />;
-              }}
-            </For>
-          </Show>
-        </div>
-      </div>
-    </SectionItem>
-  );
-};
+const descriptionStyle = css`
+  white-space: pre-line;
+  text-overflow: ellipsis;
+  overflow: visible;
+`;
 
 function getIconForTool(tool?: string) {
   if (!tool) return '';
@@ -86,7 +56,11 @@ function getIconForTool(tool?: string) {
   return '';
 }
 
-const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({ undo = true, action, index }) => {
+const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({
+  undo = true,
+  action,
+  index,
+}) => {
   action = action ?? {};
   const { context } = action ?? {};
   let colorIcon:
@@ -100,9 +74,9 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
   switch (action?.type) {
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
-      const bigger = csaction.newSize.width * csaction.newSize.height >= csaction.oldSize.width * csaction.oldSize.height;
+      const bigger = csaction.afterSize.width * csaction.afterSize.height >= csaction.beforeSize.width * csaction.beforeSize.height;
       icon = bigger ? '/icons/misc/canvas_size_bigger.png' : '/icons/misc/canvas_size_smaller.png';
-      description = `${csaction.oldSize.width}x${csaction.oldSize.height} -> ${csaction.newSize.width}x${csaction.newSize.height}`;
+      description = `${csaction.beforeSize.width}x${csaction.beforeSize.height} -> ${csaction.afterSize.width}x${csaction.afterSize.height}`;
       break;
     case 'image_pool':
       icon = '/icons/misc/image.png';
@@ -129,15 +103,15 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.layerSnapshot?.name}`;
       break;
-    case 'layer_buffer':
-      const lbaction = action as LayerBufferHistoryAction;
+    case 'layer_buffer': {
+      const anvilAction = action as AnvilLayerHistoryAction;
       if (context?.tool === 'fx') {
-        description = `${findLayerById(lbaction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
+        description = `${findLayerById(anvilAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
       } else {
-        const patch = lbaction.patch;
+        const patch: any = anvilAction.patch;
         const pixels = patch.pixels
           ? `${
-              patch.pixels.reduce((prev, pixelList) => {
+              patch.pixels.reduce((prev: number, pixelList: any) => {
                 prev += pixelList.idx.length;
                 return prev;
               }, 0) ?? 0
@@ -145,9 +119,11 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
           : '';
         const tiles = patch.tiles ? `${patch.tiles.length ?? 0} tiles` : '';
         const whole = patch.whole ? `whole` : '';
-        description = `${findLayerById(lbaction.layerId)?.name} / ${[pixels, tiles, whole].join(' ')}`;
+        const partial = patch.partial ? `partial(${patch.partial.boundBox.width}x${patch.partial.boundBox.height})` : '';
+        description = `${findLayerById(anvilAction.layerId)?.name} / ${[pixels, tiles, whole, partial].filter(Boolean).join(' ')}`;
       }
       break;
+    }
     case 'layer_props':
       icon = '/icons/misc/layer.png';
       const lpaction = action as LayerPropsHistoryAction;
@@ -158,32 +134,28 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
   }
 
   return (
-    <div
-      class={flexRow}
-      style={{ 'box-sizing': 'border-box', height: 'auto', gap: '8px', 'align-items': 'center', overflow: 'hidden' }}
-      title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}
-    >
-      <p style={{ width: '18px' }}>{typeof index === 'function' ? index() : index}</p>
+    <div class={historyRowStyle} title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}>
+      <p class={indexStyle}>{typeof index === 'function' ? index() : index}</p>
       {/* <div>
-        <Icon src={undo ? '/icons/misc/undo.png' : '/icons/misc/redo.png'} color={vars.color.onBackground} base={8} scale={1} />
+        <Icon src={undo ? '/icons/misc/undo.png' : '/icons/misc/redo.png'} color={var(--color-on-background)} base={8} scale={1} />
       </div> */}
       <Show
         when={colorIcon}
         fallback={
           <div>
-            <Icon src={icon || ''} color={vars.color.onBackground} base={8} scale={1} />
+            <Icon src={icon || ''} color={'var(--color-on-background)'} base={8} scale={1} />
           </div>
         }
       >
-        <div style={{ width: '8px', height: '8px', position: 'relative', overflow: 'hidden', 'background-color': colorIcon!.new }}>
+        <div class={colorIconStyle} style={{ 'background-color': colorIcon!.new }}>
           {/* <div style={{ width: '6px', height: '6px', position: 'absolute', top: 0, left: 0, 'background-color': colorIcon!.old }} />
           <div style={{ width: '6px', height: '6px', position: 'absolute', top: '2px', left: '2px', 'background-color': colorIcon!.new }} /> */}
         </div>
       </Show>
       {/* <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p> */}
-      <p style={{ 'white-space': 'pre-line', 'text-overflow': 'ellipsis', overflow: 'visible' }}>{description}</p>
+      <p class={descriptionStyle}>{description}</p>
     </div>
   );
 };
 
-export default ProjectHistoryItem;
+export default HistoryItemRow;

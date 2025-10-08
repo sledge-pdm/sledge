@@ -1,5 +1,5 @@
-import { componentProps, flexCol, flexRow } from '@sledge/core';
-import { accentedButton, vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { componentProps } from '@sledge/core';
 import { Button, Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
@@ -12,26 +12,157 @@ import { loadGlobalSettings } from '~/io/config/load';
 import { resetToDefaultConfig } from '~/io/config/reset';
 import { saveGlobalSettings } from '~/io/config/save';
 import { globalConfig, KeyConfigStore, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
-import {
-  configFormFieldControlLabel,
-  configFormFieldControlWrapper,
-  configFormFieldHeader,
-  configFormFieldItem,
-  configFormFieldLabel,
-  configFormFieldLabelTooltip,
-  configFormFields,
-  configFormInfoAreaBottom,
-  configFormInfoAreaTop,
-  configFormLoadDefaults,
-  configFormRoot,
-  configFormScrollContent,
-  configFormSectionItem,
-  configFormSectionLabel,
-  configFormSections,
-} from '~/styles/components/config/config_form.css';
+import { accentedButton, flexRow } from '~/styles/StyleSnippets';
 import { join } from '~/utils/FileUtils';
 import { listenEvent } from '~/utils/TauriUtils';
 import KeyConfigSettings from './KeyConfigSettings';
+
+// Ecsstatic styles
+const configFormRoot = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+`;
+
+const configFormSections = css`
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border-secondary);
+  width: 170px;
+  padding-top: 20px;
+`;
+
+const configFormSectionItem = css`
+  display: flex;
+  flex-direction: row;
+  padding: var(--spacing-md);
+  padding-right: var(--spacing-lg);
+  padding-left: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  align-items: center;
+  cursor: pointer;
+  pointer-events: all;
+
+  &:hover {
+    background-color: var(--color-surface);
+  }
+`;
+
+const configFormSectionLabel = css`
+  font-family: ZFB11;
+  font-size: 8px;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--color-on-background);
+  }
+`;
+
+const configFormFields = css`
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 170px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: scroll;
+  box-sizing: border-box;
+  gap: var(--spacing-xl);
+
+  &::-webkit-scrollbar {
+    width: 2px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: #888;
+  }
+`;
+
+const configFormScrollContent = css`
+  display: flex;
+  flex-direction: column;
+  overflow-y: visible;
+  gap: var(--spacing-xl);
+  margin: 32px 28px;
+  padding-bottom: var(--spacing-md);
+`;
+
+const configFormFieldHeader = css`
+  margin-bottom: var(--spacing-xs);
+  font-size: 12px;
+  font-family: ZFB31;
+  color: var(--color-accent);
+`;
+
+const configFormFieldItem = css`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spacing-lg);
+`;
+
+const configFormFieldLabelTooltip = css`
+  width: fit-content;
+  font-family: ZFB09;
+  color: var(--color-muted);
+
+  &:hover {
+    color: var(--color-active);
+  }
+`;
+
+const configFormFieldLabel = css`
+  font-family: ZFB09;
+  vertical-align: middle;
+  margin-bottom: -1px;
+  text-align: left;
+  margin-right: 8px;
+`;
+
+const configFormFieldControlWrapper = css`
+  display: flex;
+  flex-direction: row;
+  max-width: 260px;
+  margin-left: var(--spacing-md);
+  align-items: center;
+`;
+
+const configFormFieldControlLabel = css`
+  min-width: 64px;
+  cursor: pointer;
+`;
+
+const configFormInfoAreaTop = css`
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: var(--spacing-xl);
+  right: var(--spacing-xl);
+  align-items: center;
+  gap: var(--spacing-md);
+`;
+
+const configFormInfoAreaBottom = css`
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: var(--spacing-xl);
+  left: var(--spacing-xl);
+  gap: var(--spacing-md);
+`;
+
+const configFormLoadDefaults = css`
+  color: #ccc;
+`;
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
 
@@ -88,9 +219,27 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
       return <ToggleSwitch id={meta.path.toString()} checked={value()} onChange={onChange} />;
     case 'Button':
       return (
-        <div class={flexCol} style={{ gap: '8px' }}>
-          <p style={{ 'white-space': 'pre', 'white-space-trim': 'none' }}>{meta.props?.preContent?.()}</p>
-          <Button id={meta.path.toString()} onClick={meta.props?.onClick} style={{ padding: '4px 4px' }}>
+        <div
+          class={css`
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          `}
+        >
+          <p
+            class={css`
+              white-space: pre;
+            `}
+          >
+            {meta.props?.preContent?.()}
+          </p>
+          <Button
+            id={meta.path.toString()}
+            onClick={meta.props?.onClick}
+            class={css`
+              padding: 4px 4px;
+            `}
+          >
             {meta.props?.content}
           </Button>
         </div>
@@ -208,8 +357,8 @@ const ConfigForm: Component<Props> = (props) => {
         <For each={Object.values(Sections)}>
           {(section) => (
             <div class={configFormSectionItem} onClick={() => setSection(section)}>
-              <Light on={section === currentSection()} color={vars.color.accent} />
-              <a class={configFormSectionLabel} style={section === currentSection() ? { color: vars.color.accent } : {}}>
+              <Light on={section === currentSection()} color='var(--color-accent)' />
+              <a class={configFormSectionLabel} style={section === currentSection() ? { color: 'var(--color-accent)' } : {}}>
                 {section.toUpperCase()}.
               </a>
             </div>
@@ -247,7 +396,7 @@ const ConfigForm: Component<Props> = (props) => {
                         </Show>
                         <FieldRenderer meta={meta} onChange={(v) => onFieldChange(meta, v)}></FieldRenderer>
                         <Show when={shouldShowRightLabel}>
-                          <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': vars.spacing.sm }}>
+                          <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': 'var(--spacing-sm)' }}>
                             {getParsedValueFromMetaPath(meta)}.
                           </label>
                         </Show>

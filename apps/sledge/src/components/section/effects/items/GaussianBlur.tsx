@@ -1,13 +1,19 @@
-import { flexCol } from '@sledge/core';
-import { accentedButton } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
 import { Slider, ToggleSwitch } from '@sledge/ui';
-import { AlphaBlurMode, gaussian_blur, GaussianBlurOption } from '@sledge/wasm';
+import { AlphaBlurMode, GaussianBlurOption } from '@sledge/wasm';
 import { Component, createSignal } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import SectionItem from '~/components/section/SectionItem';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
-import { canvasStore } from '~/stores/ProjectStores';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
+import { applyEffect } from '~/features/effect/Effects';
+import { accentedButton } from '~/styles/StyleSnippets';
+import { sectionContent, sectionSubCaption, sectionSubContent } from '../../SectionStyles';
+
+const applyButtonContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: end;
+`;
 
 const GaussianBlur: Component<EffectSectionProps> = (props) => {
   const [blurOptions, setBlurOptions] = createSignal<GaussianBlurOption>(new GaussianBlurOption(1000, AlphaBlurMode.Blur));
@@ -38,25 +44,11 @@ const GaussianBlur: Component<EffectSectionProps> = (props) => {
           />
         </div>
 
-        <div
-          class={flexCol}
-          style={{
-            width: '100%',
-            'align-items': 'end',
-          }}
-        >
+        <div class={applyButtonContainer}>
           <button
             class={accentedButton}
             onClick={() => {
-              const agent = getAgentOf(props.selectedLayerId());
-              if (agent) {
-                const originalBuffer = new Uint8ClampedArray(agent.getBuffer());
-                gaussian_blur(agent.getNonClampedBuffer(), canvasStore.canvas.width, canvasStore.canvas.height, blurOptions());
-                agent.forceUpdate();
-
-                agent.getDiffManager().setWhole(originalBuffer, agent.getBuffer());
-                agent.registerToHistory({ tool: 'fx', fxName: 'GaussianBlur' });
-              }
+              applyEffect(props.selectedLayerId(), 'gaussian_blur', blurOptions());
             }}
           >
             Apply.

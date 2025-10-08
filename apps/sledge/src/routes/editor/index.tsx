@@ -1,5 +1,4 @@
-import { flexCol } from '@sledge/core';
-import { pageRoot, vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation, useSearchParams } from '@solidjs/router';
 import { UnlistenFn } from '@tauri-apps/api/event';
@@ -12,9 +11,10 @@ import ClipboardListener from '~/components/global/ClipboardListener';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
-import { adjustZoomToFit, changeCanvasSize } from '~/features/canvas';
+import { adjustZoomToFit, changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { loadToolPresets, setLocation } from '~/features/config';
-import { addLayer, LayerType, resetLayerImage } from '~/features/layer';
+import { addLayer, LayerType } from '~/features/layer';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { AutoSaveManager } from '~/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/io/config/load';
 import { importImageFromPath } from '~/io/image/in/import';
@@ -23,6 +23,7 @@ import { loadProjectJson } from '~/io/project/in/load';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
+import { flexCol, pageRoot } from '~/styles/StyleSnippets';
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
@@ -54,10 +55,12 @@ export default function Editor() {
     await loadToolPresets();
 
     if (isNewProject) {
-      changeCanvasSize(globalConfig.default.canvasSize, true);
+      changeCanvasSizeWithNoOffset(globalConfig.default.canvasSize, true);
       setCanvasStore('canvas', globalConfig.default.canvasSize);
+      const canvasSize = globalConfig.default.canvasSize;
       layerListStore.layers.forEach((layer) => {
-        resetLayerImage(layer.id, 1);
+        const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
+        anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
       });
     }
     setProjectStore('isProjectChangedAfterSave', false);
@@ -179,7 +182,7 @@ export default function Editor() {
         <SideSectionControl side='leftSide' />
 
         <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
-          <div style={{ 'flex-grow': 1, 'background-color': vars.color.canvasArea }}>
+          <div style={{ 'flex-grow': 1, 'background-color': color.canvasArea }}>
             <CanvasArea />
           </div>
         </div>

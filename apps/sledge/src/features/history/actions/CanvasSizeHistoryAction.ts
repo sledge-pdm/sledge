@@ -1,8 +1,9 @@
 import { Size2D } from '@sledge/core';
 import { adjustZoomToFit } from '~/features/canvas';
-import { allLayers, resetLayerImage } from '~/features/layer';
-import { getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager';
-import { setCanvasStore } from '~/stores/ProjectStores';
+import { allLayers } from '~/features/layer';
+import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';
 
@@ -12,48 +13,63 @@ type LayerBufferSnapshot = { layerId: string; dotMag: number; buffer: Uint8Clamp
 export class CanvasSizeHistoryAction extends BaseHistoryAction {
   readonly type = 'canvas_size' as const;
 
+  // length = number of layers
+  private beforeSnapshots: LayerBufferSnapshot[] | undefined;
+  private afterSnapshots?: LayerBufferSnapshot[] | undefined;
+
   constructor(
-    public readonly oldSize: Size2D,
-    public readonly newSize: Size2D,
+    public readonly beforeSize: Size2D,
+    public readonly afterSize: Size2D,
     context?: any
   ) {
     super(context);
-    // Snapshot all layers' buffers for the old size immediately
-    this.oldSnapshots = allLayers().map((l) => ({ layerId: l.id, dotMag: l.dotMagnification, buffer: new Uint8ClampedArray(getBufferOf(l.id)!) }));
   }
 
-  private oldSnapshots: LayerBufferSnapshot[] = [];
-  private newSnapshots?: LayerBufferSnapshot[];
+  createSnapshots() {
+    return allLayers().map((l) => {
+      const buf = getBufferCopy(l.id);
+      const w = Math.round(canvasStore.canvas.width / l.dotMagnification);
+      const h = Math.round(canvasStore.canvas.height / l.dotMagnification);
+      return {
+        layerId: l.id,
+        dotMag: l.dotMagnification,
+        buffer: buf ? new Uint8ClampedArray(buf) : new Uint8ClampedArray(w * h * 4),
+      };
+    });
+  }
+
+  // call before resizing buffers
+  registerBefore() {
+    this.beforeSnapshots = this.createSnapshots();
+  }
+
+  // call after resizing buffers
+  registerAfter() {
+    this.afterSnapshots = this.createSnapshots();
+  }
 
   undo(): void {
-    this.applyState(this.oldSize, this.oldSnapshots);
+    if (!this.beforeSnapshots) {
+      console.warn('CanvasSizeHistoryAction.undo: beforeSnapshots is not set');
+      return;
+    }
+    this.applyState(this.beforeSize, this.beforeSnapshots);
   }
 
   redo(): void {
-    // On first redo, capture "new" snapshots after resizing once
-    if (!this.newSnapshots) {
-      // Resize all layers and canvas to new size first
-      this.resizeAllLayers(this.newSize);
-      // Capture buffers for the new size
-      this.newSnapshots = allLayers().map((l) => ({ layerId: l.id, dotMag: l.dotMagnification, buffer: new Uint8ClampedArray(getBufferOf(l.id)!) }));
-      // Then restore precisely from snapshots to make it deterministic
-      this.restoreSnapshots(this.newSize, this.newSnapshots);
-    } else {
-      this.applyState(this.newSize, this.newSnapshots);
+    if (!this.afterSnapshots) {
+      console.warn('CanvasSizeHistoryAction.redo: afterSnapshots is not set');
+      return;
     }
+    this.applyState(this.afterSize, this.afterSnapshots);
   }
 
   private applyState(size: Size2D, snapshots: LayerBufferSnapshot[]) {
-    this.resizeAllLayers(size);
+    this.applySize(size);
     this.restoreSnapshots(size, snapshots);
   }
 
-  private resizeAllLayers(size: Size2D) {
-    const layers = allLayers();
-    layers.forEach((l) => {
-      const agent = getAgentOf(l.id);
-      agent?.changeBufferSize(size, false);
-    });
+  private applySize(size: Size2D) {
     setCanvasStore('canvas', size);
     adjustZoomToFit();
     eventBus.emit('canvas:sizeChanged', { newSize: size });
@@ -61,7 +77,9 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   private restoreSnapshots(size: Size2D, snapshots: LayerBufferSnapshot[]) {
     for (const snap of snapshots) {
-      resetLayerImage(snap.layerId, snap.dotMag, snap.buffer);
+      const anvil = getAnvilOf(snap.layerId);
+      if (!anvil) continue;
+      anvil.replaceBuffer(snap.buffer, size.width, size.height);
     }
   }
 }

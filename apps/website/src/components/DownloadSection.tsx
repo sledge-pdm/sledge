@@ -1,9 +1,89 @@
-import { Asset, flexCol, flexRow, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
-import { k12x8, vars, ZFB08 } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { Asset, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
 import { Button, Icon } from '@sledge/ui';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
-import { downloadButton, mainLink } from '~/styles/buttons.css';
-import { assetText, informationText, loadingText, osInfoText, versionInfoText } from '~/styles/download_section.css';
+
+// Styles
+const flexCol = css`
+  display: flex;
+  flex-direction: column;
+`;
+
+const flexRow = css`
+  display: flex;
+  flex-direction: row;
+`;
+
+const versionInfoText = css`
+  font-family: k12x8;
+  font-size: 8px;
+`;
+
+const osInfoText = css`
+  font-family: ZFB09;
+  font-size: 8px;
+`;
+
+const informationText = css`
+  font-size: 16px;
+  user-select: text;
+  @media (max-width: 599px) {
+    font-size: 8px;
+  }
+`;
+
+const loadingText = css`
+  font-size: 8px;
+  color: var(--color-muted);
+  @media (max-width: 599px) {
+    font-size: 8px;
+  }
+`;
+
+const assetText = css`
+  width: fit-content;
+  font-family: k12x8;
+  font-size: 8px;
+  opacity: 0.5;
+  line-height: 1.5;
+  overflow: hidden;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-all;
+  user-select: text;
+`;
+
+const downloadButton = css`
+  min-width: 120px;
+  font-size: 16px;
+  padding: 8px 20px;
+  border-width: 2px;
+  border-radius: 4px;
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-button-text-on-accent);
+  @media (any-hover: hover) {
+    &:hover {
+      background-color: var(--color-button-bg);
+      border-color: var(--color-accent);
+      color: var(--color-button-text);
+    }
+  }
+`;
+
+const mainLink = css`
+  font-family: k12x8;
+  font-size: 8px;
+  letter-spacing: 0px;
+  color: var(--color-accent);
+  text-decoration: underline;
+  @media (any-hover: hover) {
+    &:hover {
+      color: var(--color-active);
+      text-decoration: none;
+    }
+  }
+`;
 
 const DownloadSection: Component<{}> = () => {
   const releaseApiUrl =
@@ -86,18 +166,18 @@ const DownloadSection: Component<{}> = () => {
         <div class={flexCol} style={{ width: '100%', 'margin-top': '12px' }}>
           <p class={versionInfoText} style={{ 'margin-bottom': '36px' }}>
             Latest Build:{' '}
-            <span class={versionInfoText} style={{ color: releaseData()?.name ? vars.color.accent : vars.color.error }}>
+            <span class={versionInfoText} style={{ color: releaseData()?.name ? 'var(--color-accent)' : 'var(--color-error)' }}>
               {releaseData()?.name ?? '[ fetch failed ]'}
             </span>
           </p>
 
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-              <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+              <Icon src='/icons/misc/dot.png' base={8} color={'var(--color-on-background)'} />
               <p class={osInfoText}>
                 {' '}
                 for{' '}
-                <span class={osInfoText} style={{ color: vars.color.accent }}>
+                <span class={osInfoText} style={{ color: 'var(--color-accent)' }}>
                   {userOS()}
                 </span>
               </p>
@@ -111,10 +191,10 @@ const DownloadSection: Component<{}> = () => {
 
           <a
             onClick={() => {
-              window.open('https://github.com/Innsbluck-rh/sledge/releases', '_blank')?.focus();
+              window.open('https://github.com/sledge-pdm/sledge/releases', '_blank')?.focus();
             }}
             class={mainLink}
-            style={{ 'margin-top': '48px', color: vars.color.muted }}
+            style={{ 'margin-top': '48px', color: 'var(--color-muted)' }}
           >
             &gt; OTHER DOWNLOADS.
           </a>
@@ -157,19 +237,19 @@ const DownloadSection: Component<{}> = () => {
         <div
           style={{
             width: '100%',
-            'background-color': vars.color.surface,
-            padding: vars.spacing.lg,
-            color: vars.color.onBackground,
+            'background-color': 'var(--color-surface)',
+            padding: 'var(--spacing-lg)',
+            color: 'var(--color-on-background)',
           }}
         >
           <p
             class={informationText}
             style={{
-              'font-family': ZFB08,
+              'font-family': 'ZFB08',
               'white-space': 'pre',
               'font-size': '8px',
               'margin-bottom': '8px',
-              color: vars.color.accent,
+              color: 'var(--color-accent)',
             }}
           >
             for {userOS()} users
@@ -177,7 +257,7 @@ const DownloadSection: Component<{}> = () => {
           <p
             class={informationText}
             style={{
-              'font-family': k12x8,
+              'font-family': 'k12x8',
               'line-height': '1.5',
               'letter-spacing': '1px',
               'font-size': '8px',

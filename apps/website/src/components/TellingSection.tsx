@@ -1,7 +1,26 @@
+import { css } from '@acab/ecsstatic';
 import { Component, JSX, onCleanup } from 'solid-js';
 import SectionTag from '~/components/SectionTag';
 import { setGlobalStore } from '~/store/GlobalStore';
-import { panel, panelInner } from '~/styles/telling_section.css';
+
+// Styles
+const panel = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: 12px;
+`;
+
+const panelInner = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+`;
 
 interface Props {
   pageNumber: number;

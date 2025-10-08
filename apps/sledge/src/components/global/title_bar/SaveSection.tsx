@@ -1,5 +1,5 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
@@ -7,9 +7,65 @@ import { Component, createEffect, createMemo, createSignal, onMount, Show } from
 import { saveProject } from '~/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
-import { saveButtonMainButton, saveButtonRoot, saveButtonSide } from '~/styles/globals/save_section.css';
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/FileUtils';
+
+const saveSectionContainer = css`
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  align-items: center;
+  overflow: visible;
+  gap: 8px;
+  pointer-events: all;
+`;
+
+const saveButtonRoot = css`
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  border-radius: 4px;
+  border: 1px solid var(--color-accent);
+  overflow: hidden;
+  margin: 0;
+  margin-left: 4px;
+`;
+
+const saveButtonMainButton = css`
+  display: flex;
+  flex-direction: row;
+  padding: 4px 12px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: all;
+  &:hover {
+    background-color: var(--color-button-hover);
+  }
+`;
+
+const saveButtonSide = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 4px;
+  border-left: 1px solid var(--color-border);
+  cursor: pointer;
+  &:hover {
+    background-color: var(--color-button-hover);
+  }
+`;
+
+const autoSaveProgressBar = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--color-accent);
+  opacity: 0.25;
+  pointer-events: none;
+`;
 
 const SaveSection: Component = () => {
   const [isSaveMenuShown, setIsSaveMenuShown] = createSignal(false);
@@ -96,7 +152,7 @@ const SaveSection: Component = () => {
   });
 
   const saveMenu = createMemo<MenuListOption[]>(() => [
-    { label: 'Save As...', onSelect: () => save(), color: vars.color.onBackground },
+    { label: 'Save As...', onSelect: () => save(), color: color.onBackground },
     {
       label: 'Open Saved Folder',
       onSelect: () => {
@@ -104,7 +160,7 @@ const SaveSection: Component = () => {
         revealItemInDir(join(fileStore.savedLocation.path, fileStore.savedLocation.name));
       },
       disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
-      color: vars.color.onBackground,
+      color: color.onBackground,
     },
   ]);
 
@@ -153,17 +209,7 @@ const SaveSection: Component = () => {
   });
 
   return (
-    <div
-      class={flexRow}
-      style={{
-        position: 'relative',
-        'align-items': 'center',
-        overflow: 'visible',
-        gap: '8px',
-        'pointer-events': 'all',
-      }}
-      data-tauri-drag-region-exclude
-    >
+    <div class={saveSectionContainer} data-tauri-drag-region-exclude>
       <Show when={saveLog()} fallback={<p style={{ 'white-space': 'nowrap', opacity: 0.6 }}>{saveTimeText()}</p>}>
         <p style={{ 'white-space': 'nowrap', opacity: 0.8 }}>{saveLog()}</p>
       </Show>
@@ -171,7 +217,7 @@ const SaveSection: Component = () => {
         <div class={saveButtonMainButton} onClick={() => save()}>
           <p
             style={{
-              color: vars.color.accent,
+              color: color.accent,
               'white-space': 'nowrap',
               // 'text-transform': 'uppercase',
               // 'margin-top': '1px',
@@ -187,19 +233,13 @@ const SaveSection: Component = () => {
               transform: isSaveMenuShown() ? 'rotate(180deg)' : 'rotate(0deg)',
             }}
           >
-            <Icon src={'/icons/misc/triangle_5.png'} color={vars.color.onBackground} base={5} scale={1} />
+            <Icon src={'/icons/misc/triangle_5.png'} color={color.onBackground} base={5} scale={1} />
           </div>
         </div>
         <div
+          class={autoSaveProgressBar}
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
             width: `${autoSaveIntervalRatio() * 100}%`,
-            height: '100%',
-            'background-color': vars.color.accent,
-            opacity: 0.25,
-            'pointer-events': 'none',
           }}
         />
       </div>
@@ -211,7 +251,7 @@ const SaveSection: Component = () => {
           align={'right'}
           style={{
             'margin-top': '4px',
-            'border-color': vars.color.onBackground,
+            'border-color': color.onBackground,
             'border-radius': '4px',
           }}
         />
@@ -219,7 +259,7 @@ const SaveSection: Component = () => {
 
       {/* <Show when={projectStore.autoSaveEnabled && fileStore.savedLocation.name && fileStore.savedLocation.path && projectStore.lastSavedAt}>
         <div style={{ opacity: 0.3 }}>
-          <Icon src={iconSrc() ?? ''} color={vars.color.onBackground} base={12} scale={1} />
+          <Icon src={iconSrc() ?? ''} color={color.onBackground} base={12} scale={1} />
         </div>
       </Show> */}
     </div>

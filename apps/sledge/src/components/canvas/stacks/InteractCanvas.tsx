@@ -1,11 +1,8 @@
 import { Vec2 } from '@sledge/core';
-import { showContextMenu } from '@sledge/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
-import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
-import { Consts } from '~/Consts';
 import { clientPositionToCanvasPosition } from '~/features/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { activeLayer } from '~/features/layer';
@@ -67,9 +64,9 @@ export const InteractCanvas: Component<Props> = (props) => {
       return false;
     }
 
-    // マウスおよびペンにおいては左クリック相当のクリックだけを描画可能なクリックとする
-    // （右クリック、中クリックなどは弾く）
-    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1) {
+    // マウスおよびペンにおいては右、左クリック相当のクリックだけを描画可能なクリックとする（中クリックは弾く）
+    // 右クリックはツールのallowRightClickによってほぼ弾かれる
+    if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1 && e.buttons !== 2) {
       return false;
     }
 
@@ -258,12 +255,11 @@ export const InteractCanvas: Component<Props> = (props) => {
         height: `${styleHeight()}px`,
         'pointer-events': 'all',
         cursor: cursor(),
-        'z-index': Consts.zIndex.interactCanvas,
+        'z-index': 'var(--zindex-interact-canvas)',
       }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        showContextMenu('canvas', [ContextMenuItems.Undo, ContextMenuItems.Redo], e);
       }}
     />
   );

@@ -1,9 +1,9 @@
 import { Vec2 } from '@sledge/core';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+// import LayerImageAgent from '~/features/layer/agent/LayerImageAgent'; // legacy
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMove } from '~/features/selection/SelectionOperator';
-import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class MoveTool implements ToolBehavior {
   acceptStartOnOutCanvas = true;
@@ -12,7 +12,7 @@ export class MoveTool implements ToolBehavior {
   private startOffset: Vec2 = { x: 0, y: 0 };
   private startPosition: Vec2 = { x: 0, y: 0 };
 
-  onStart(agent: LayerImageAgent, args: ToolArgs) {
+  onStart(ctx: AnvilToolContext, args: ToolArgs) {
     selectionManager.commitOffset();
     selectionManager.commit();
     if (!floatingMoveManager.isMoving()) {
@@ -30,7 +30,7 @@ export class MoveTool implements ToolBehavior {
     };
   }
 
-  onMove(agent: LayerImageAgent, args: ToolArgs) {
+  onMove(ctx: AnvilToolContext, args: ToolArgs) {
     if (!isSelectionAvailable()) {
       return {
         shouldUpdate: false,
@@ -57,7 +57,7 @@ export class MoveTool implements ToolBehavior {
     };
   }
 
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+  onEnd(ctx: AnvilToolContext, args: ToolArgs) {
     // commitは手動で行うのでここでは呼ばない
     // floatingMoveManager.commit();
 

@@ -10,7 +10,6 @@ import {
 import { saveProject } from '~/io/project/out/save';
 import { fileStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { openDebugViewer } from '~/utils/DebugViewer';
 import { isKeyMatchesToEntry } from '../../features/config/KeyConfigController';
 
 const KeyListener: Component = () => {
@@ -39,12 +38,6 @@ const KeyListener: Component = () => {
     if (isKeyMatchesToEntry(e, keyConfigStore['save']) && !e.repeat) {
       e.preventDefault(); // Prevent default save action
       saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
-    }
-
-    // デバッグビューア用ショートカット (Ctrl+Shift+D) - always allow this
-    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-      e.preventDefault();
-      openDebugViewer();
     }
 
     // Skip other shortcuts if an input field is focused

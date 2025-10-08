@@ -31,15 +31,15 @@ Thumbs.db
 # repomix
 repomix-output.txt
 repomix-output.xml
+*-repomix.txt
+*-repomix.xml
 
 *.heapprofile
 
 node_modules
 
 *.lnk
-.github/instructions
 .repomix
-# .vscode
 
 target
 

@@ -1,6 +1,5 @@
 import { isTransparent, RGBAColor, RGBToHex, setCurrentColor, transparent } from '~/features/color';
-import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
-import { ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/tools/ToolBehavior';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;
@@ -8,10 +7,10 @@ export class PipetteTool implements ToolBehavior {
 
   private color: RGBAColor = transparent;
 
-  onStart(agent: LayerImageAgent, args: ToolArgs) {
-    const color = agent.getPixelBufferManager().getPixel(args.position);
-    if (!isTransparent(color)) {
-      this.color = color;
+  onStart(ctx: AnvilToolContext, args: ToolArgs) {
+    const c = ctx.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
+    if (c && !isTransparent(c)) {
+      this.color = c;
     }
     return {
       shouldUpdate: false,
@@ -19,10 +18,10 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onMove(agent: LayerImageAgent, args: ToolArgs) {
-    const color = agent.getPixelBufferManager().getPixel(args.position);
-    if (!isTransparent(color)) {
-      this.color = color;
+  onMove(ctx: AnvilToolContext, args: ToolArgs) {
+    const c = ctx.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
+    if (c && !isTransparent(c)) {
+      this.color = c;
     }
     return {
       shouldUpdate: false,
@@ -30,7 +29,7 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onEnd(agent: LayerImageAgent, args: ToolArgs) {
+  onEnd(_ctx: AnvilToolContext, args: ToolArgs) {
     if (!isTransparent(this.color)) {
       setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
     }
@@ -42,7 +41,7 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onCancel(agent: LayerImageAgent, args: ToolArgs) {
+  onCancel(_ctx: AnvilToolContext, _args: ToolArgs) {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,

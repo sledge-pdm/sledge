@@ -1,4 +1,4 @@
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
+import { ecsstatic } from '@acab/ecsstatic/vite';
 import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
@@ -9,15 +9,7 @@ import wasmPlugin from 'vite-plugin-wasm';
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [
-    wasmPlugin(),
-    vanillaExtractPlugin({
-      devStyleRuntime: 'vanilla-extract',
-    }),
-    solidPlugin(),
-    glsl(),
-    topLevelAwait(),
-  ],
+  plugins: [wasmPlugin(), ecsstatic(), solidPlugin(), glsl(), topLevelAwait()],
   build: {
     outDir: 'dist',
     // Tauri uses Chromium on Windows and WebKit on macOS and Linux
@@ -90,7 +82,9 @@ export default defineConfig({
       '@sledge/core': path.join(__dirname, '../../packages/core'),
       '@sledge/theme': path.join(__dirname, '../../packages/theme'),
       '@sledge/ui': path.join(__dirname, '../../packages/ui'),
+      '@sledge/anvil': path.join(__dirname, '../../packages/anvil'),
       '@sledge/wasm': path.join(__dirname, '../../packages/wasm/pkg/sledge_wasm.js'),
+      '@assets': path.join(__dirname, '../../assets'),
     },
   },
 });

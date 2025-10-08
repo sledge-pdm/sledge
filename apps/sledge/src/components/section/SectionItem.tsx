@@ -1,7 +1,13 @@
-import { flexCol } from '@sledge/core';
+import { css } from '@acab/ecsstatic';
 import { Component, createSignal, JSX, Show } from 'solid-js';
 import { SectionSubHeader, SubHeaderIcon } from '~/components/section/SubHeader';
-import { sectionRoot } from '~/styles/section/section_item.css';
+import { sectionRoot } from './SectionStyles';
+
+const sectionContent = css`
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+`;
 
 interface Props {
   title?: string;
@@ -18,14 +24,7 @@ const SectionItem: Component<Props> = (props) => {
         {props.title}
       </SectionSubHeader>
       <Show when={expanded()}>
-        <div
-          class={flexCol}
-          style={{
-            overflow: 'visible',
-          }}
-        >
-          {props.children}
-        </div>
+        <div class={sectionContent}>{props.children}</div>
       </Show>
     </div>
   );

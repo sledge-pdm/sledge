@@ -1,13 +1,17 @@
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { Consts } from '~/Consts';
 import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { Layer } from '~/features/layer';
-import { getAgentOf } from '~/features/layer/agent/LayerAgentManager';
 import { canvasStore } from '~/stores/ProjectStores';
-import '~/styles/components/layer_preview.css';
 import { eventBus, Events } from '~/utils/EventBus';
+
+const canvas = css`
+  width: 100%;
+  height: 100%;
+  image-rendering: crisp-edges;
+`;
 
 interface Props {
   layer: Layer;
@@ -15,6 +19,8 @@ interface Props {
   height?: number;
   maxWidth?: number;
   maxHeight?: number;
+  updateInterval?: number; // ms, default: on demand
+
   onClick?: (e: MouseEvent) => void;
 }
 
@@ -33,7 +39,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
         performUpdate();
         setNeedsUpdate(false);
       }
-    }, 2)
+    }, props.updateInterval ?? 2)
   );
 
   // Cache last computed dimensions to avoid unnecessary canvas resizing
@@ -102,14 +108,11 @@ const LayerPreview: Component<Props> = (props: Props) => {
       lastPreviewHeight = previewHeight;
     }
 
-    const agent = getAgentOf(props.layer.id);
-    if (agent) {
-      const preview = thumbnailGen.generateLayerThumbnail(agent, previewWidth, previewHeight);
-      if (preview) {
-        // ctx.imageSmoothingEnabled = true;
-        // ctx.imageSmoothingQuality = 'high';
-        ctx.putImageData(preview, 0, 0);
-      }
+    const preview = thumbnailGen.generateLayerThumbnail(props.layer.id, previewWidth, previewHeight);
+    if (preview) {
+      // ctx.imageSmoothingEnabled = true;
+      // ctx.imageSmoothingQuality = 'high';
+      ctx.putImageData(preview, 0, 0);
     }
   };
 
@@ -122,21 +125,23 @@ const LayerPreview: Component<Props> = (props: Props) => {
       style={{
         width: props.width ? `${props.width}px` : undefined,
         height: props.height ? `${props.height}px` : undefined,
-        'background-color': vars.color.canvas,
-        'z-index': Consts.zIndex.layerPreview,
+        'max-width': props.maxWidth ? `${props.maxWidth}px` : undefined,
+        'max-height': props.maxHeight ? `${props.maxHeight}px` : undefined,
+        'background-color': color.canvas,
+        'z-index': 'var(--zindex-layer-preview)',
       }}
     >
       <canvas
-        class='layer-preview-canvas'
+        class={canvas}
         ref={(el) => {
           canvasRef = el;
           ctx = canvasRef.getContext('2d')!;
         }}
         style={{
+          'max-width': props.maxWidth ? `${props.maxWidth}px` : undefined,
+          'max-height': props.maxHeight ? `${props.maxHeight}px` : undefined,
           'image-rendering': 'pixelated',
-          'background-image':
-            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%),` +
-            `linear-gradient(45deg, ${transparent_bg_color} 25%, transparent 25%, transparent 75%, ${transparent_bg_color} 75%)`,
+          'background-image': `url(/patterns/CheckerboardPattern.svg)`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}

@@ -1,6 +1,7 @@
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { check, Update } from '@tauri-apps/plugin-updater';
+import { projectStore } from '~/stores/ProjectStores';
 
 function isValidUpdate(update: Update): boolean {
   if (update.version.includes('dev') || update.version.includes('test')) {
@@ -32,6 +33,19 @@ export async function getUpdate(): Promise<Update | undefined> {
 
 export async function askAndInstallUpdate() {
   console.log('checking for updates...');
+
+  if (projectStore.isProjectChangedAfterSave) {
+    const confirmed = await confirm('There are unsaved changes.\nSure to update without save?', {
+      kind: 'warning',
+      title: 'Unsaved Changes',
+      okLabel: 'update without save.',
+      cancelLabel: 'CANCEL.',
+    });
+    if (!confirmed) {
+      return;
+    }
+  }
+
   try {
     const update = await check({
       timeout: 5000,

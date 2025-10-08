@@ -1,9 +1,9 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color, spacing, text } from '@sledge/theme';
 import { ColorBox, Dropdown } from '@sledge/ui';
 import { Component, createSignal } from 'solid-js';
 import { BaseLayerColorMode, setBaseLayerColorMode, setBaseLayerCustomColor } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
+import { flexRow } from '~/styles/StyleSnippets';
 
 interface BaseLayerItemProps {}
 
@@ -38,8 +38,9 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
     <div
       class={flexRow}
       style={{
-        padding: `${vars.spacing.sm} ${vars.spacing.md}`,
-        'background-color': vars.color.surface,
+        padding: `${spacing.xs} ${spacing.sm} ${spacing.xs}  ${spacing.md}`,
+        'background-color': color.surface,
+        border: `1px solid ${color.borderSecondary}`,
         'align-items': 'center',
       }}
     >
@@ -47,8 +48,8 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
         style={{
           'flex-grow': 1,
           width: '100%',
-          'font-size': vars.text.sm,
-          color: vars.color.onBackground,
+          'font-size': text.sm,
+          color: color.onBackground,
           height: 'fit-content',
           'white-space': 'nowrap',
         }}
@@ -57,7 +58,7 @@ const BaseLayerItem: Component<BaseLayerItemProps> = () => {
       </p>
 
       <div class={flexRow}>
-        <Dropdown value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} wheelSpin={true} />
+        <Dropdown noBackground value={baseLayer().colorMode} options={colorModeOptions} onChange={handleColorModeChange} wheelSpin={true} />
       </div>
 
       {baseLayer().colorMode === 'custom' && (

@@ -1,21 +1,22 @@
-import { flexCol } from '@sledge/core';
+import { css } from '@acab/ecsstatic';
 import { Component, For } from 'solid-js';
 import FileItem from '~/components/section/files/item/FileItem';
 import { openExistingProject } from '~/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 
+const recentFilesContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8px;
+  margin-left: 4px;
+  margin-bottom: 8px;
+`;
+
 const RecentFiles: Component = () => {
   return (
-    <div
-      class={flexCol}
-      style={{
-        width: '100%',
-        gap: '8px',
-        'margin-left': '4px',
-        'margin-bottom': '8px',
-      }}
-    >
+    <div class={recentFilesContainer}>
       <For each={globalConfig.misc.recentFiles}>
         {(location) => {
           if (!location.path || !location.name) return;

@@ -1,5 +1,6 @@
-import { FileLocation, flexCol, flexRow } from '@sledge/core';
-import { PM10, vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge/core';
+import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { pictureDir } from '@tauri-apps/api/path';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
@@ -13,6 +14,93 @@ import { join, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 interface Props {
   defaultPath?: string;
 }
+
+// Styles
+const breadcrumbsContainer = css`
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  flex-wrap: wrap;
+`;
+
+const breadcrumbItem = css`
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+`;
+
+const breadcrumbLink = css`
+  font-family: PM10;
+  font-size: 10px;
+`;
+
+const explorerContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  gap: 8px;
+`;
+
+const explorerInner = css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const navigationPanel = css`
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+  background: var(--color-surface);
+`;
+
+const navigationRow = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+`;
+
+const flexGrow = css`
+  flex-grow: 1;
+`;
+
+const editButton = css`
+  padding: 2px;
+  cursor: pointer;
+`;
+
+const pathInput = css`
+  font-family: PM10;
+  font-size: 10px;
+  letter-spacing: 1px;
+  flex-grow: 1;
+`;
+
+const controlsRow = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 6px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: right;
+`;
+
+const entriesContainer = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  gap: 4px 0;
+  margin-left: 4px;
+  overflow: hidden;
+  flex-wrap: wrap;
+`;
 
 const Explorer: Component<Props> = (props) => {
   let inputRef: HTMLInputElement | undefined = undefined;
@@ -64,11 +152,11 @@ const Explorer: Component<Props> = (props) => {
         .filter((p) => p);
     });
     return (
-      <div class={flexRow} style={{ gap: '4px', 'flex-wrap': 'wrap' }}>
+      <div class={breadcrumbsContainer}>
         <For each={parts()}>
           {(part, index) => {
             return (
-              <div class={flexRow} style={{ gap: '4px', 'align-items': 'center' }}>
+              <div class={breadcrumbItem}>
                 {index() > 0 && <p>&gt;</p>}
                 <a
                   onClick={() => {
@@ -77,9 +165,8 @@ const Explorer: Component<Props> = (props) => {
                       .join('/');
                     setPath(newPath);
                   }}
+                  class={breadcrumbLink}
                   style={{
-                    'font-family': `${PM10}`,
-                    'font-size': '10px',
                     'pointer-events': index() === parts().length - 1 ? 'none' : 'auto',
                   }}
                 >
@@ -95,23 +182,23 @@ const Explorer: Component<Props> = (props) => {
   };
 
   return (
-    <div class={flexCol} style={{ width: '100%', height: 'auto', gap: '8px' }}>
+    <div class={explorerContainer}>
       {/* <p class={sectionCaption} style={{ margin: 0 }}>
         explorer.
       </p> */}
-      <div class={flexCol} style={{ gap: '8px', 'margin-bottom': '16px' }}>
-        <div class={flexCol} style={{ padding: '8px', gap: '8px', background: vars.color.surface }}>
-          <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
+      <div class={explorerInner}>
+        <div class={navigationPanel}>
+          <div class={navigationRow}>
             <Show
               when={configStore.pathEditMode}
               fallback={
                 <>
-                  <div style={{ 'flex-grow': 1 }}>
+                  <div class={flexGrow}>
                     <Breadcrumbs path={currentPath()} />
                   </div>
 
                   <div
-                    style={{ padding: '2px', cursor: 'pointer' }}
+                    class={editButton}
                     onClick={() => {
                       setConfigStore('pathEditMode', true);
                       inputRef?.focus();
@@ -136,20 +223,17 @@ const Explorer: Component<Props> = (props) => {
                   }
                 }}
                 onBlur={() => setConfigStore('pathEditMode', false)}
+                class={pathInput}
                 style={{
-                  'font-family': `${PM10}`,
-                  'font-size': '10px',
-                  'letter-spacing': '1px',
-                  'flex-grow': 1,
                   opacity: configStore.pathEditMode ? 1 : 0.4,
                 }}
               />
             </Show>
           </div>
 
-          <div class={flexRow} style={{ width: '100%', gap: '6px', overflow: 'hidden', 'align-items': 'center', 'justify-content': 'right' }}>
+          <div class={controlsRow}>
             <div
-              style={{ padding: '2px', cursor: 'pointer' }}
+              class={editButton}
               onClick={() => {
                 const path = currentPath();
                 const parts = normalizePath(path).split('/');
@@ -164,7 +248,7 @@ const Explorer: Component<Props> = (props) => {
               <Icon src={'/icons/misc/folder_up.png'} base={8} hoverColor={vars.color.accent} />
             </div>
             <div
-              style={{ padding: '2px', cursor: 'pointer' }}
+              class={editButton}
               onClick={() => {
                 setConfigStore('twoColumns', (v) => !v);
               }}
@@ -185,17 +269,7 @@ const Explorer: Component<Props> = (props) => {
             }
           }
         >
-          <div
-            class={flexRow}
-            style={{
-              width: '100%',
-              height: 'auto',
-              gap: '4px 0',
-              'margin-left': '4px',
-              overflow: 'hidden',
-              'flex-wrap': 'wrap',
-            }}
-          >
+          <div class={entriesContainer}>
             <Switch
               fallback={
                 <For each={entries()}>

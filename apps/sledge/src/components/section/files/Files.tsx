@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { flexCol, flexRow } from '@sledge/core';
+import { clsx } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import Explorer from '~/components/section/files/Explorer';
@@ -13,27 +13,53 @@ const sectionCaption = css`
   white-space: nowrap;
 `;
 
+const filesContainer = css`
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  gap: 8px;
+  margin-top: 4px;
+`;
+
+const tabsContainer = css`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+`;
+
+const tabButton = css`
+  padding: 4px;
+`;
+
+const divider = css`
+  height: 8px;
+  width: 1px;
+  background-color: var(--color-muted);
+`;
+
 type Tab = 'recent' | 'explore';
 
 const Files: Component = () => {
   const [tab, setTab] = createSignal<Tab>('recent');
 
   return (
-    <div class={flexCol} style={{ padding: '4px', gap: '8px', 'margin-top': '4px' }}>
-      <div class={flexRow} style={{ gap: '8px', 'align-items': 'center', 'margin-bottom': '4px' }}>
+    <div class={filesContainer}>
+      <div class={tabsContainer}>
         <a
-          class={sectionCaption}
-          style={{ padding: '4px', color: tab() === 'recent' ? vars.color.active : vars.color.muted }}
+          class={clsx(sectionCaption, tabButton)}
+          style={{ color: tab() === 'recent' ? vars.color.active : vars.color.muted }}
           onClick={() => setTab('recent')}
         >
           recent
         </a>
 
-        <div style={{ height: '8px', width: '1px', 'background-color': vars.color.muted }} />
+        <div class={divider} />
 
         <a
-          class={sectionCaption}
-          style={{ padding: '4px', color: tab() === 'explore' ? vars.color.active : vars.color.muted }}
+          class={clsx(sectionCaption, tabButton)}
+          style={{ color: tab() === 'explore' ? vars.color.active : vars.color.muted }}
           onClick={() => setTab('explore')}
         >
           explore

@@ -43,11 +43,11 @@ packages/ui内のスタイルを試験的にecsstaticに移行した結果：
 import { myStyle } from './Component.css.ts';
 
 // After (ecsstatic)
-import { css } from '@sledge/theme/ecsstatic';
+import { css } from '@acab/ecsstatic';
 
-const myStyle = css({
+const myStyle = css`
   // スタイル定義
-});
+`;
 ```
 
 #### style propsからの移行
@@ -79,8 +79,10 @@ const dynamicStyle = css`
   - vars.color.camelCase = var(--color-snake-case) ※color以外でも同様
   - Consts.zIndex.camelCase = var(--zindex-snake-case)
 
-- font-familyについては、vanilla-extractと同名での定義をcssで行っています(ZFB09 = ZFB09, PM12 = PM12)。font名についてはvar()ではなく、そのままフォント変数名をcss内に記述できます。
+- font-familyについては、vanilla-extractと同名での定義をcssで行っています(ZFB09 = ZFB09, PM12 = PM12)。font名についてはvar()ではなく、そのままフォント変数名をcss内に記述できます。この際、font-family: ${font}ではなくfont-family: fontのように記述してください。
 - 同名同様のスタイルが複数のコンポーネントにまたがっている場合は、XXStyles.tsのようなファイルを作成し、共通スタイルをexport const someStyle = css`...`のような形でexportすることも検討してください。ただし、部分的に共通している部分がある場合は共通化せず、全く同一のスタイルである場合のみこれを行ってください。
+
+- flexRow, flexCol, w100, h100, wh100といったスニペットクラスはvanilla-extract定義のクラスなので、基本的にこれらは撤廃してcss内部にdisplay:flex等の内容をそのまま記述してください。
 
 ## 移行状況
 - [x] packages/ui - 完了（試験移行）

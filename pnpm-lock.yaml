@@ -227,9 +227,6 @@ importers:
       '@acab/ecsstatic':
         specifier: ^0.9.0
         version: 0.9.0
-      '@vanilla-extract/css':
-        specifier: ^1.17.4
-        version: 1.17.4
 
 packages:
 

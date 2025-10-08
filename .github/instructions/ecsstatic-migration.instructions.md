@@ -72,8 +72,7 @@ const dynamicStyle = css`
 - テーマシステム（`packages/theme`）との互換性を維持
 - 既存のコンポーネントAPIは変更しない
 - パフォーマンステストを各移行段階で実施
-- ecsstaticはテンプレートリテラルを用いてスタイル定義を行いますが、その中でexpression(${...})を用いるとviteプラグインのpre-transformにおいてエラーになります。そのため、スタイルの中でexpressionを用いることは一切しないでください。
-- 継承についても上述の通り行うことができません。その場合は継承元のスタイルを継承先のスタイルにそのまま分配し、継承元のスタイルは削除してください。
+- 継承について、css`${継承元} ...`では行うことができません。それぞれを定義したうえで、jsx側でclass={clsx(a, b)}を用いてください。
 - solidJSのstoreやsignalによるリアクティビティが適用されているstyle propsについてはそのまま残してください。
 - vars.xxx.yyyはvanilla-extract依存のcss変数であり、ecsstaticの移行の際、これらは以下の対応でpureなcss変数に置き換えが可能です。
   

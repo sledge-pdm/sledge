@@ -8,3 +8,5 @@ export * from './src/versions/Release';
 export * from './src/versions/versions';
 
 export * from './src/snippets.css';
+
+export { clsx } from './src/StyleUtils';

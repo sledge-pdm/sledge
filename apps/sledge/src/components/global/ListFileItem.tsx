@@ -1,7 +1,54 @@
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge/core';
 import { Component, createSignal, Show } from 'solid-js';
-import { rflItem, rflName, rflPath, rflThumb } from '~/styles/components/file_item/list.css';
-import { FileItemProps } from './FileItemBase';
+
+const thumb = css`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  max-width: 150px;
+  max-height: 150px;
+  overflow: hidden;
+  opacity: 0.8;
+  position: fixed;
+  image-rendering: pixelated;
+  pointer-events: none;
+  background-color: var(--color-canvas);
+`;
+
+const thumbImg = css`
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+`;
+
+const item = css`
+  position: relative;
+  width: fit-content;
+  padding: var(--spacing-sm);
+  margin-left: -8px;
+`;
+
+const name = css`
+  font-family: ZFB09;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const path = css`
+  font-family: ZFB03B;
+  font-size: var(--text-md);
+  opacity: 0.4;
+`;
+
+export interface FileItemProps {
+  thumbnail: string;
+  onClick: (file: FileLocation) => void;
+  file: FileLocation;
+}
 
 const ListFileItem: Component<FileItemProps> = (props) => {
   const [hovered, setHovered] = createSignal(false);
@@ -11,9 +58,9 @@ const ListFileItem: Component<FileItemProps> = (props) => {
   const gridSize = () => 10;
 
   return (
-    <div class={rflItem}>
+    <div class={item}>
       <a
-        class={rflName}
+        class={name}
         onClick={(e) => {
           if (props.onClick) props.onClick(props.file);
         }}
@@ -28,17 +75,13 @@ const ListFileItem: Component<FileItemProps> = (props) => {
       >
         {props.file.name?.substring(0, props.file.name.lastIndexOf('.'))}
       </a>
-      <p class={rflPath}>{props.file.path}</p>
+      <p class={path}>{props.file.path}</p>
       <Show when={hovered()}>
         <div
-          class={rflThumb}
+          class={thumb}
           style={{
-            position: 'fixed',
             top: `${pos().y}px`,
             left: `${pos().x}px`,
-            'image-rendering': 'pixelated',
-            'pointer-events': 'none',
-            'background-color': vars.color.canvas,
           }}
         >
           <div
@@ -52,14 +95,7 @@ const ListFileItem: Component<FileItemProps> = (props) => {
           >
             <Show when={props.thumbnail} fallback={<p>loading...</p>}>
               <Show when={props.thumbnail !== 'failed'} fallback={<p>NO IMAGE</p>}>
-                <img
-                  style={{
-                    'max-width': '100%',
-                    height: 'auto',
-                    'object-fit': 'cover',
-                  }}
-                  src={props.thumbnail}
-                />
+                <img class={thumbImg} src={props.thumbnail} />
               </Show>
             </Show>
           </div>

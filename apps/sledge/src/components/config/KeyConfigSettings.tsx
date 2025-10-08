@@ -1,5 +1,6 @@
+import { css } from '@acab/ecsstatic';
 import { flexCol } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { KeyConfigCommands } from '~/Consts';
@@ -14,7 +15,29 @@ import {
 } from '~/features/config/KeyConfigController';
 import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { keyConfigName, keyConfigRow, keyConfigValue } from '~/styles/components/config/key_config_settings.css';
+import { accentedText } from '~/styles/StyleSnippets';
+
+const row = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--color-surface);
+  align-items: center;
+  padding: 8px 8px;
+`;
+const rowName = css`
+  font-family: ZFB09;
+  font-size: 8px;
+  width: 50%;
+`;
+const rowValue = css`
+  font-family: ZFB08;
+  font-size: 8px;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+`;
 
 interface Props {
   onKeyConfigChange?: () => void;
@@ -64,23 +87,23 @@ const KeyConfigSettings: Component<Props> = (props) => {
   return (
     <div class={flexCol}>
       <p style={{ 'margin-bottom': '16px' }}>
-        <span style={{ color: vars.color.accent }}>enter</span> to confirm.&nbsp;
-        <span style={{ color: vars.color.accent }}>esc</span> to abort.
+        <span class={accentedText}>enter</span> to confirm.&nbsp;
+        <span style={{ color: color.accent }}>esc</span> to abort.
       </p>
       <div class={flexCol} style={{ gap: '4px', width: '100%' }}>
         <For each={Object.entries(keyConfigStore)}>
           {([name, entry]) => {
             const isRecording = () => name === recordingName();
             return (
-              <div class={keyConfigRow}>
-                <p class={keyConfigName}>{name}</p>
+              <div class={row}>
+                <p class={rowName}>{name}</p>
                 <a
-                  class={keyConfigValue}
+                  class={rowValue}
                   onClick={(e) => {
                     if (!isRecording()) startRecord(name as KeyConfigCommands);
                   }}
                   style={{
-                    color: isRecording() ? vars.color.active : vars.color.onBackground,
+                    color: isRecording() ? color.active : color.onBackground,
                     'pointer-events': isRecording() ? 'none' : 'all',
                   }}
                 >

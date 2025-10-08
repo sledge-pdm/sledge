@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createSignal, For, JSX, Show } from 'solid-js';
 import { sectionCaption } from '~/components/section/SectionStyles';
@@ -66,7 +66,7 @@ export const SectionSubHeader: Component<Props> = (props) => {
                     src={item.src}
                     base={12}
                     scale={1}
-                    color={disabled ? vars.color.muted : vars.color.onBackground}
+                    color={disabled ? color.muted : color.onBackground}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();

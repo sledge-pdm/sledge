@@ -1,7 +1,7 @@
 import { Component, onMount } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import interact from 'interactjs';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import { EditorTab, EffectsTab, ExportTab, FilesTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
@@ -147,8 +147,8 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         left: props.side === 'leftSide' ? '0' : 'unset',
         right: props.side === 'rightSide' ? '0' : 'unset',
 
-        'border-right': props.side === 'leftSide' && appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
+        'border-right': props.side === 'leftSide' && appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
+        'border-left': props.side === 'rightSide' && appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
       }}
     >
       <div

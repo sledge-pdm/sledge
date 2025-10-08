@@ -1,5 +1,5 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
@@ -7,19 +7,108 @@ import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
 import { fileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
-import {
-  titleBarControlButtonContainer,
-  titleBarControlButtonImg,
-  titleBarControlCloseButtonContainer,
-  titleBarControls,
-  titleBarRoot,
-  titleBarSaveSection,
-  titleBarSize,
-  titleBarTitle,
-  titleBarTitleContainer,
-  titleBarTitleSub,
-} from '~/styles/globals/title_bar.css';
-import '~/styles/globals/title_bar_region.css';
+import './title_bar_region.css';
+
+const titleBarRoot = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+  pointer-events: all;
+  background-color: var(--color-controls);
+  align-items: center;
+`;
+
+const titleBarTitleContainer = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  margin-right: auto;
+  padding-left: 24px;
+  align-items: center;
+`;
+
+const titleBarTitle = css`
+  width: fit-content;
+  font-family: k12x8;
+  font-size: 8px;
+  height: 8px;
+  vertical-align: bottom;
+  white-space: pre;
+`;
+
+const titleBarTitleSub = css`
+  width: fit-content;
+  font-family: ZFB03;
+  font-size: var(--text-sm);
+  white-space: pre;
+  height: 8px;
+  vertical-align: bottom;
+  opacity: 0.5;
+`;
+
+const titleBarSize = css`
+  width: fit-content;
+  font-family: ZFB08;
+  font-size: 8px;
+  white-space: pre;
+`;
+
+const titleBarSaveSection = css`
+  display: flex;
+  flex-direction: row;
+  width: fit-content;
+  height: 100%;
+  align-items: center;
+  margin: 0 12px;
+`;
+
+const titleBarControls = css`
+  display: flex;
+  flex-direction: row;
+`;
+
+const titleBarControlButtonContainer = css`
+  display: flex;
+  flex-direction: column;
+  height: 36px;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  padding-left: 16px;
+  padding-right: 16px;
+  pointer-events: all;
+  &:hover {
+    background-color: var(--color-button-hover);
+  }
+`;
+
+const titleBarControlCloseButtonContainer = css`
+  display: flex;
+  flex-direction: column;
+  height: 36px;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  padding-left: 16px;
+  padding-right: 16px;
+  pointer-events: all;
+  &:hover {
+    background-color: #ff0000b0;
+  }
+`;
+
+const titleBarControlButtonImg = css`
+  border: none;
+  image-rendering: pixelated;
+`;
+
+const titleInfo = css`
+  display: flex;
+  flex-direction: row;
+`;
 
 export default function TitleBar() {
   const [isMaximizable, setIsMaximizable] = createSignal(false);
@@ -78,7 +167,7 @@ export default function TitleBar() {
     <header>
       <div
         style={{
-          'border-bottom': shouldShowBorder() ? `1px solid ${vars.color.border}` : 'none',
+          'border-bottom': shouldShowBorder() ? `1px solid ${color.border}` : 'none',
           'pointer-events': 'all',
         }}
       >
@@ -88,7 +177,7 @@ export default function TitleBar() {
               <Show when={shouldShowTitle()}>
                 <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
                   <div
-                    class={flexRow}
+                    class={titleInfo}
                     style={{
                       height: '8px',
                     }}
@@ -106,9 +195,7 @@ export default function TitleBar() {
                     </Show>
                     <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
-                  <div
-                    style={{ height: '8px', width: '1px', 'background-color': vars.color.border, 'margin-left': '12px', 'margin-right': '12px' }}
-                  />
+                  <div style={{ height: '8px', width: '1px', 'background-color': color.border, 'margin-left': '12px', 'margin-right': '12px' }} />
                   <p class={titleBarSize} style={{ opacity: 0.9 }}>
                     {canvasStore.canvas.width} x {canvasStore.canvas.height}
                   </p>
@@ -121,7 +208,7 @@ export default function TitleBar() {
                 <SaveSection />
               </div>
 
-              <div style={{ height: '18px', width: '1px', 'background-color': vars.color.border, 'margin-left': '0px', 'margin-right': '12px' }} />
+              <div style={{ height: '18px', width: '1px', 'background-color': color.border, 'margin-left': '0px', 'margin-right': '12px' }} />
             </Show>
             <div class={titleBarControls} data-tauri-drag-region-exclude>
               <Show when={isMinimizable()}>
@@ -136,7 +223,7 @@ export default function TitleBar() {
                   <Icon
                     class={titleBarControlButtonImg}
                     src={'/icons/title_bar/minimize_2.png'}
-                    color={vars.color.onBackground}
+                    color={color.onBackground}
                     base={12}
                     data-tauri-drag-region-exclude
                   />
@@ -155,7 +242,7 @@ export default function TitleBar() {
                   <Icon
                     class={titleBarControlButtonImg}
                     src={isMaximized() ? '/icons/title_bar/quit_maximize_2.png' : '/icons/title_bar/maximize_2.png'}
-                    color={vars.color.onBackground}
+                    color={color.onBackground}
                     base={12}
                     data-tauri-drag-region-exclude
                   />
@@ -174,7 +261,7 @@ export default function TitleBar() {
                   <Icon
                     class={titleBarControlButtonImg}
                     src={'/icons/title_bar/close_2.png'}
-                    color={vars.color.onBackground}
+                    color={color.onBackground}
                     base={12}
                     data-tauri-drag-region-exclude
                   />

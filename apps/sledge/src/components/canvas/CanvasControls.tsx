@@ -2,7 +2,7 @@ import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
 
 import { css } from '@acab/ecsstatic';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Consts } from '~/Consts';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
@@ -197,7 +197,7 @@ const CanvasControls: Component = () => {
       <Show when={interactStore.isCanvasSizeFrameMode}>
         {/* <div class={topLeftNav}>
           <div class={flexCol}>
-            <p style={{ color: vars.color.accent, 'font-size': '16px' }}>FRAME MODE.</p>
+            <p style={{ color: color.accent, 'font-size': '16px' }}>FRAME MODE.</p>
           </div>
         </div> */}
 
@@ -281,9 +281,9 @@ const Item: Component<ItemProps> = (props) => {
   const [hover, setHover] = createSignal(false);
   return (
     <div class={itemContainer} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={props.onClick} title={props.title}>
-      <Icon src={props.src} color={hover() ? vars.color.enabled : 'white'} base={10} />
+      <Icon src={props.src} color={hover() ? color.enabled : 'white'} base={10} />
       <Show when={props.label}>
-        <p style={{ color: hover() ? vars.color.enabled : 'white' }}>{props.label}</p>
+        <p style={{ color: hover() ? color.enabled : 'white' }}>{props.label}</p>
       </Show>
     </div>
   );

@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import Explorer from '~/components/section/files/Explorer';
 import RecentFiles from '~/components/section/files/RecentFiles';
@@ -50,7 +50,7 @@ const Files: Component = () => {
       <div class={tabsContainer}>
         <a
           class={clsx(sectionCaption, tabButton)}
-          style={{ color: tab() === 'recent' ? vars.color.active : vars.color.muted }}
+          style={{ color: tab() === 'recent' ? color.active : color.muted }}
           onClick={() => setTab('recent')}
         >
           recent
@@ -60,7 +60,7 @@ const Files: Component = () => {
 
         <a
           class={clsx(sectionCaption, tabButton)}
-          style={{ color: tab() === 'explore' ? vars.color.active : vars.color.muted }}
+          style={{ color: tab() === 'explore' ? color.active : color.muted }}
           onClick={() => setTab('explore')}
         >
           explore

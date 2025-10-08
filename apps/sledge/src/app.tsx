@@ -7,7 +7,7 @@ import Editor from './routes/editor/index';
 import Home from './routes/start/index';
 
 import { flexCol, h100 } from '@sledge/core';
-import { applyTheme, getTheme } from '@sledge/theme';
+import { applyTheme } from '@sledge/theme';
 import { showContextMenu } from '@sledge/ui';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
@@ -52,20 +52,11 @@ export default function App() {
   let prevThemeClass: string | undefined;
 
   const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {
-    let cls;
     if (osTheme && globalConfig.appearance.theme === 'os') {
-      cls = getTheme(osTheme);
       applyTheme(osTheme);
     } else {
-      cls = getTheme(globalConfig.appearance.theme);
       applyTheme(globalConfig.appearance.theme);
     }
-    const html = document.documentElement;
-    if (prevThemeClass && html.classList.contains(prevThemeClass)) {
-      html.classList.remove(prevThemeClass);
-    }
-    html.classList.add(cls);
-    prevThemeClass = cls;
   };
 
   listen('tauri://theme-changed', (e) => {

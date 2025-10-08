@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { flexCol } from '@sledge/core';
-import { accentedButton, k12x8 } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Slider } from '@sledge/ui';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
 import { exists } from '@tauri-apps/plugin-fs';
@@ -12,6 +11,7 @@ import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { accentedButton } from '~/styles/StyleSnippets';
 import { getFileNameWithoutExtension, join } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
@@ -200,7 +200,7 @@ const ExportContent: Component = () => {
             value={lastSettingsStore.exportedDirPaths.find((p) => p === (settings.dirPath ?? '')) ?? ''}
             onChange={(path) => setSettings('dirPath', path as string)}
             align='right'
-            fontFamily={k12x8}
+            fontFamily={'k12x8'}
             fullWidth={true}
           />
         </div>

@@ -1,12 +1,20 @@
+import { css } from '@acab/ecsstatic';
 import { componentProps, flexCol, flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { spacing } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { toolStore } from '~/stores/EditorStores';
-import { configFormFieldLabel } from '~/styles/components/config/config_form.css';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/tools/presets';
 import { ToolCategoryId } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
+
+const label = css`
+  font-family: ZFB09;
+  vertical-align: middle;
+  margin-bottom: -1px;
+  text-align: left;
+  margin-right: 8px;
+`;
 
 interface Props {
   toolId: ToolCategoryId;
@@ -97,7 +105,7 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
   });
 
   return (
-    <div class={flexCol} style={{ gap: vars.spacing.sm }}>
+    <div class={flexCol} style={{ gap: spacing.sm }}>
       <Show when={presetMeta()?.fields}>
         <For each={presetMeta()!.fields}>
           {(fieldMeta) => {
@@ -109,7 +117,7 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
             return (
               <div class={flexRow} style={{ width: '100%', 'min-height': '20px', 'align-items': 'center' }}>
                 <div class={flexRow} style={{ width: '80px' }}>
-                  <label class={configFormFieldLabel} for={fieldMeta.key}>
+                  <label class={label} for={fieldMeta.key}>
                     {fieldMeta.label}
                   </label>
                 </div>

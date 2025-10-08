@@ -1,4 +1,3 @@
-import { getTheme } from '@sledge/theme';
 import { onMount } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
@@ -10,13 +9,14 @@ import { openWindow, reportWindowStartError, showMainWindow } from '~/utils/Wind
 import {
   header as menuContainer,
   headerItem as menuItem,
+  openButtonMargin,
   recentFilesCaption,
   recentFilesContainerScroll,
   rightTopArea,
   startContent,
   startHeader,
   startRoot,
-} from './start.css';
+} from './style';
 
 export default function Home() {
   onMount(async () => {
@@ -29,7 +29,7 @@ export default function Home() {
   });
 
   return (
-    <div class={`${startRoot} ${getTheme(globalConfig.appearance.theme)}`}>
+    <div class={startRoot}>
       <div class={startContent}>
         <p class={startHeader}>HELLO.</p>
 
@@ -37,7 +37,7 @@ export default function Home() {
           <a class={menuItem} onClick={() => createNew()}>
             +&ensp;new.
           </a>
-          <a class={menuItem} style={{ 'margin-left': '2px' }} onClick={(e) => openProject()}>
+          <a class={`${menuItem} ${openButtonMargin}`} onClick={(e) => openProject()}>
             &gt;&ensp;open.
           </a>
         </div>

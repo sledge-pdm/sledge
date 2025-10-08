@@ -1,4 +1,3 @@
-import { vars } from '@sledge/theme';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onCleanup, onMount, Show } from 'solid-js';
@@ -11,7 +10,6 @@ import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrent
 import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import '~/styles/misc/marching_ants.css';
 import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus } from '~/utils/EventBus';
@@ -21,6 +19,9 @@ import rawPattern45border8 from '@assets/patterns/45border8.svg?raw';
 import { ShapeMask } from '@sledge/anvil';
 import { Circle } from '~/tools/draw/pen/shape/Circle';
 import { Square } from '~/tools/draw/pen/shape/Square';
+
+import { color } from '@sledge/theme';
+import './marching_ants.css';
 
 // raw SVG 文字列から最初の <path .../> だけを抽出（self-closing想定）。失敗時は全体を返す。
 const extractFirstPath = (svg: string) => {
@@ -195,7 +196,7 @@ const CanvasOverlaySVG: Component = () => {
               width={logicalWidth() * interactStore.zoom}
               height={logicalHeight() * interactStore.zoom}
               fill='none'
-              stroke={vars.color.canvasBorder}
+              stroke={color.canvasBorder}
               stroke-width={1}
               vector-effect='non-scaling-stroke'
               pointer-events='none'
@@ -206,7 +207,7 @@ const CanvasOverlaySVG: Component = () => {
               <path
                 d={penOutlinePath()}
                 fill='none'
-                stroke={vars.color.border}
+                stroke={color.border}
                 stroke-width={1}
                 vector-effect='non-scaling-stroke'
                 pointer-events='none'
@@ -235,7 +236,7 @@ const CanvasOverlaySVG: Component = () => {
               fill='url(#45border16-svg)'
               fill-rule='evenodd'
               clip-rule='evenodd'
-              stroke={moveState() === 'layer' ? '#FF0000' : vars.color.selectionBorder}
+              stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}
               stroke-width='1'
               vector-effect='non-scaling-stroke'
               stroke-dasharray={`${borderDash} ${borderDash}`}

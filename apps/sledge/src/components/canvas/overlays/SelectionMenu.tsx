@@ -1,4 +1,3 @@
-import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
@@ -14,6 +13,7 @@ import { eventBus, Events } from '~/utils/EventBus';
 
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
+import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/Consts';
 import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
@@ -64,7 +64,7 @@ interface ItemProps {
 const Item: Component<ItemProps> = (props) => {
   return (
     <div class={item} onClick={props.onClick} title={props.title}>
-      <Icon src={props.src} color={vars.color.onBackground} base={10} />
+      <Icon src={props.src} color={color.onBackground} base={10} />
       <Show when={props.label}>
         <p>{props.label}</p>
       </Show>

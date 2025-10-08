@@ -5,7 +5,7 @@ import { createStore } from 'solid-js/store';
 import { thumbnailDir } from '~/io/project/out/save';
 import { recentFilesContainerCol } from '~/routes/start/start.css';
 import { getFileUniqueId, join } from '~/utils/FileUtils';
-import ListFileItem from './file_item/ListFileItem';
+import ListFileItem from './ListFileItem';
 
 const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLocation) => void }> = (props) => {
   const [thumbnails, setThumbnails] = createStore<Record<string, string>>({});

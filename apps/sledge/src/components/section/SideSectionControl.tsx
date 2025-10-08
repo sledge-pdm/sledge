@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
@@ -109,8 +109,8 @@ const SideSectionControl: Component<Props> = (props) => {
         'padding-left': '4px',
         'padding-right': '4px',
 
-        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${vars.color.border}` : 'none',
+        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
+        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
 
         'z-index': Consts.zIndex.sideSection,
       }}

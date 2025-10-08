@@ -12,7 +12,7 @@ import { saveGlobalSettings } from '~/io/config/save';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { canvasSizeButton, canvasSizeForm, canvasSizeInput, canvasSizeLabel, canvasSizeTimes } from '~/styles/section/project/canvas.css';
-import { sectionContent, sectionSubCaption } from '~/styles/section/section_item.css';
+import { sectionContent, sectionSubCaption } from '../SectionStyles';
 
 const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;

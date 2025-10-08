@@ -14,8 +14,8 @@ import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHist
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
 import { toolCategories } from '~/tools/Tools';
+import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
 const ProjectHistoryItem: Component = () => {
   const [historyStore, setHistoryStore] = createStore<{

@@ -10,7 +10,7 @@ import { currentColor, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
 import { colorElemDescription, swatchContainer, swatchHeader } from '~/styles/section/editor/color.css';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent } from '../SectionStyles';
 
 const Color: Component = () => {
   let hexInputRef: HTMLInputElement;

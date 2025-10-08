@@ -8,9 +8,9 @@ import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHi
 import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
 import { layerList } from '~/styles/section/editor/layer.css';
-import { sectionContent } from '~/styles/section/section_item.css';
 import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
+import { sectionContent } from '../SectionStyles';
 import BaseLayerItem from './item/BaseLayerItem';
 import LayerItem from './item/LayerItem';
 

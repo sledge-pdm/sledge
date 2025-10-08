@@ -3,8 +3,8 @@ import { vars, ZFB03, ZFB09 } from '@sledge/theme';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
 import { fileStore } from '~/stores/EditorStores';
-import { sectionSubCaption } from '~/styles/section/section_item.css';
 import { join } from '~/utils/FileUtils';
+import { sectionSubCaption } from '../../SectionStyles';
 
 const ProjectLocation: Component = () => {
   return (

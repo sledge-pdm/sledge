@@ -2,7 +2,7 @@ import { flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createSignal, For, JSX, Show } from 'solid-js';
-import { sectionCaption } from '~/styles/section/section_item.css';
+import { sectionCaption } from '~/components/section/SectionStyles';
 
 export interface SubHeaderIcon {
   src: string;

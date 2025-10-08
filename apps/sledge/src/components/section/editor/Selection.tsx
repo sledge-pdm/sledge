@@ -7,8 +7,8 @@ import SectionItem from '~/components/section/SectionItem';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
-import { sectionContent } from '~/styles/section/section_item.css';
 import { eventBus, Events } from '~/utils/EventBus';
+import { sectionContent } from '../SectionStyles';
 
 const Selection: Component = () => {
   const [selectionStatus, setSelectionStatus] = createStore({

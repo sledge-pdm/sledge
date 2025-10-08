@@ -1,5 +1,6 @@
 import { Component, onMount } from 'solid-js';
 
+import { css } from '@acab/ecsstatic';
 import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import interact from 'interactjs';
@@ -7,8 +8,50 @@ import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import { EditorTab, EffectsTab, ExportTab, FilesTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { appearanceStore } from '~/stores/EditorStores';
-import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
 import { eventBus } from '~/utils/EventBus';
+
+const sideAreaRoot = css`
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background-color: var(--color-background);
+  z-index: var(--zindex-side-section);
+  overflow-x: visible;
+`;
+
+const sideAreaContentWrapper = css`
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 16px;
+  padding-bottom: 48px;
+  overflow-x: visible;
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    width: 2px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: #888;
+  }
+`;
+
+const sideAreaContent = css`
+  display: flex;
+  flex-direction: column;
+  overflow-x: visible;
+  gap: 8px;
+`;
 
 interface Props {
   side: 'leftSide' | 'rightSide';

@@ -6,7 +6,7 @@ import SectionItem from '~/components/section/SectionItem';
 import { addToImagePool, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent } from '../SectionStyles';
 
 const Images: Component<{}> = () => {
   const selectedEntry = createMemo<ImagePoolEntry | undefined>(() =>

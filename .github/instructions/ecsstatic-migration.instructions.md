@@ -2,7 +2,7 @@
 applyTo: '**/*'
 ---
 
-# ECSSStatic Migration Instructions
+# ECSStatic Migration Instructions
 
 ## 背景と目的
 
@@ -56,7 +56,7 @@ const myStyle = css({
 <div style={{ color: 'red', padding: '8px' }}>
 
 // After (ecsstatic)
-const dynamicStyle = css``
+const dynamicStyle = css`
   color: red;
   padding: 8px;
 `;
@@ -79,6 +79,8 @@ const dynamicStyle = css``
   
   - vars.color.camelCase = var(--color-snake-case) ※color以外でも同様
   - Consts.zIndex.camelCase = var(--zindex-snake-case)
+
+- font-familyについては、vanilla-extractと同名での定義をcssで行っています(ZFB09 = ZFB09, PM12 = PM12)。font名についてはvar()ではなく、そのまま
 
 ## 移行状況
 - [x] packages/ui - 完了（試験移行）

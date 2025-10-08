@@ -4,8 +4,8 @@ import { Component, For, Show } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManager';
 import { toolStore } from '~/stores/EditorStores';
-import { sectionContent } from '~/styles/section/section_item.css';
 import { ToolCategoryId } from '~/tools/Tools';
+import { sectionContent } from '../SectionStyles';
 import ToolItem from './item/ToolItem';
 
 const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'autoSelection', 'move'];

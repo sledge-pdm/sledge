@@ -6,7 +6,7 @@ import { Component, createSignal } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import SectionItem from '~/components/section/SectionItem';
 import { applyEffect } from '~/features/effect/Effects';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '~/styles/section/section_item.css';
+import { sectionContent, sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
 const GaussianBlur: Component<EffectSectionProps> = (props) => {
   const [blurOptions, setBlurOptions] = createSignal<GaussianBlurOption>(new GaussianBlurOption(1000, AlphaBlurMode.Blur));

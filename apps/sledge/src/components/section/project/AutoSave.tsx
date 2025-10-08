@@ -4,7 +4,7 @@ import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent } from '../SectionStyles';
 
 const autoSaveIntervalOptions: DropdownOption<number>[] = [
   { label: '15 sec', value: 15 },

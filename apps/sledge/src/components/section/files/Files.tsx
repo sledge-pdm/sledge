@@ -1,9 +1,17 @@
+import { css } from '@acab/ecsstatic';
 import { flexCol, flexRow } from '@sledge/core';
 import { vars } from '@sledge/theme';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import Explorer from '~/components/section/files/Explorer';
 import RecentFiles from '~/components/section/files/RecentFiles';
-import { sectionCaption } from '~/styles/section/section_item.css';
+
+const sectionCaption = css`
+  font-family: ZFB09;
+  letter-spacing: 3px;
+  font-size: 8px;
+  opacity: 1;
+  white-space: nowrap;
+`;
 
 type Tab = 'recent' | 'explore';
 

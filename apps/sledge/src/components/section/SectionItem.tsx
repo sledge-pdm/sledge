@@ -1,7 +1,7 @@
 import { flexCol } from '@sledge/core';
 import { Component, createSignal, JSX, Show } from 'solid-js';
 import { SectionSubHeader, SubHeaderIcon } from '~/components/section/SubHeader';
-import { sectionRoot } from '~/styles/section/section_item.css';
+import { sectionRoot } from './SectionStyles';
 
 interface Props {
   title?: string;

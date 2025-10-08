@@ -4,7 +4,7 @@ import { Component } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import SectionItem from '~/components/section/SectionItem';
 import { applyEffect } from '~/features/effect/Effects';
-import { sectionContent } from '~/styles/section/section_item.css';
+import { sectionContent } from '../../SectionStyles';
 
 const Invert: Component<EffectSectionProps> = (props) => {
   return (

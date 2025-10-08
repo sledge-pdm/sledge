@@ -1,10 +1,8 @@
 import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
-import { Accessor, Component, For, onMount, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import SectionItem from '~/components/section/SectionItem';
+import { Accessor, Component, Show } from 'solid-js';
 import { RGBAToHex } from '~/features/color';
-import { BaseHistoryAction, projectHistoryController } from '~/features/history';
+import { BaseHistoryAction } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
@@ -14,21 +12,6 @@ import { LayerListHistoryAction } from '~/features/history/actions/LayerListHist
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
 import { toolCategories } from '~/tools/Tools';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
-
-const historyContentStyle = css`
-  gap: 8px;
-  margin-bottom: 8px;
-  padding-top: 8px;
-`;
-
-const redoUndoContentStyle = css`
-  flex-direction: column-reverse;
-`;
-
-const mutedTextStyle = css`
-  color: var(--color-muted);
-`;
 
 const historyRowStyle = css`
   display: flex;
@@ -56,58 +39,6 @@ const descriptionStyle = css`
   overflow: visible;
 `;
 
-const ProjectHistoryItem: Component = () => {
-  const [historyStore, setHistoryStore] = createStore<{
-    undoStack: BaseHistoryAction[];
-    redoStack: BaseHistoryAction[];
-  }>({
-    undoStack: projectHistoryController.getUndoStack(),
-    redoStack: projectHistoryController.getRedoStack(),
-  });
-
-  onMount(() => {
-    const dispose = projectHistoryController.onChange(() => {
-      setHistoryStore({ undoStack: [...projectHistoryController.getUndoStack()], redoStack: [...projectHistoryController.getRedoStack()] });
-    });
-
-    return () => dispose();
-  });
-
-  return (
-    <SectionItem title={`history`}>
-      <div class={`${sectionContent} ${historyContentStyle}`}>
-        {/* <div class={flexRow} style={{ gap: '8px', 'align-items': 'center' }}>
-          <p style={{ color: var(--color-active) }}>top = recent / bottom = oldest</p>
-        </div> */}
-
-        <p class={sectionSubCaption}>redo stack ({historyStore.redoStack.length})</p>
-        <div class={`${sectionSubContent} ${redoUndoContentStyle}`}>
-          <Show when={historyStore.redoStack.length > 0} fallback={<p class={mutedTextStyle}>&lt; no redo stack &gt;</p>}>
-            <For each={historyStore.redoStack}>
-              {(action, i) => {
-                const index = () => historyStore.redoStack.length - i();
-                return <HistoryRow undo={false} action={action} index={index} />;
-              }}
-            </For>
-          </Show>
-        </div>
-
-        <p class={sectionSubCaption}>{`undo stack (${historyStore.undoStack.length})`}</p>
-        <div class={`${sectionSubContent} ${redoUndoContentStyle}`}>
-          <Show when={historyStore.undoStack.length > 0} fallback={<p class={mutedTextStyle}>&lt; no undo stack &gt;</p>}>
-            <For each={historyStore.undoStack}>
-              {(action, i) => {
-                const index = () => i() + 1;
-                return <HistoryRow undo={true} action={action} index={index} />;
-              }}
-            </For>
-          </Show>
-        </div>
-      </div>
-    </SectionItem>
-  );
-};
-
 function getIconForTool(tool?: string) {
   if (!tool) return '';
 
@@ -125,7 +56,11 @@ function getIconForTool(tool?: string) {
   return '';
 }
 
-const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({ undo = true, action, index }) => {
+const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({
+  undo = true,
+  action,
+  index,
+}) => {
   action = action ?? {};
   const { context } = action ?? {};
   let colorIcon:
@@ -223,4 +158,4 @@ const HistoryRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?:
   );
 };
 
-export default ProjectHistoryItem;
+export default HistoryItemRow;

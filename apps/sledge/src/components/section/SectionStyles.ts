@@ -28,9 +28,9 @@ export const sectionCaption = css`
 `;
 
 export const sectionSubCaption = css`
-  font-family: ZFB03B;
+  font-family: ZFB03;
   font-size: var(--text-sm);
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
   opacity: 0.8;
 `;
@@ -40,7 +40,7 @@ export const sectionSubContent = css`
   flex-direction: column;
   width: 100%;
   gap: 8px;
-  padding-left: 8px;
+  padding-left: 12px;
   box-sizing: border-box;
   overflow: visible;
 `;

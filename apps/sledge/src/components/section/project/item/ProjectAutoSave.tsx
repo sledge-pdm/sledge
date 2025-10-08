@@ -1,9 +1,8 @@
 import { css } from '@acab/ecsstatic';
 import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
-import SectionItem from '~/components/section/SectionItem';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
-import { sectionContent } from '../SectionStyles';
+import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
 const autoSaveContentStyle = css`
   gap: 12px;
@@ -33,11 +32,11 @@ const autoSaveIntervalOptions: DropdownOption<number>[] = [
   { label: '10 min', value: 600 },
 ];
 
-const AutoSave: Component = () => {
+const ProjectAutoSave: Component = () => {
   return (
-    <SectionItem title='autosave.'>
-      <div class={`${sectionContent} ${autoSaveContentStyle}`}>
-        {/* <p>configure periodic save.</p> */}
+    <>
+      <p class={sectionSubCaption}>Auto Save.</p>
+      <div class={sectionSubContent}>
         <ToggleSwitch
           checked={projectStore.autoSaveEnabled || false}
           onChange={(checked: boolean) => setProjectStore('autoSaveEnabled', checked)}
@@ -73,8 +72,8 @@ const AutoSave: Component = () => {
           </div>
         </div>
       </div>
-    </SectionItem>
+    </>
   );
 };
 
-export default AutoSave;
+export default ProjectAutoSave;

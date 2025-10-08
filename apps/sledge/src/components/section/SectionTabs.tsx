@@ -9,7 +9,6 @@ import Export from '~/components/section/export/Export';
 import Files from '~/components/section/files/Files';
 import History from '~/components/section/history/History';
 import PerilousLayers from '~/components/section/perilous/PerilousLayers';
-import AutoSave from '~/components/section/project/AutoSave';
 import CanvasSettings from '~/components/section/project/CanvasSettings';
 import Project from '~/components/section/project/Project';
 
@@ -55,7 +54,6 @@ export const ProjectTab: Component = () => {
   return (
     <>
       <Project />
-      <AutoSave />
       <CanvasSettings />
     </>
   );

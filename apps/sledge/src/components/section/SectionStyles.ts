@@ -1,10 +1,20 @@
 import { css } from '@acab/ecsstatic';
 
+export const sectionRoot = css`
+  display: flex;
+  flex-direction: column;
+  z-index: var(--zindex-side-section);
+  box-sizing: border-box;
+  overflow: visible;
+`;
+
 export const sectionContent = css`
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding-left: 8px;
+  padding-top: 4px;
+  padding-left: 16px;
+  padding-bottom: 12px;
   box-sizing: border-box;
   overflow: visible;
 `;
@@ -22,7 +32,7 @@ export const sectionSubCaption = css`
   font-size: var(--text-sm);
   margin-top: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
-  opacity: 0.7;
+  opacity: 0.8;
 `;
 
 export const sectionSubContent = css`
@@ -31,15 +41,6 @@ export const sectionSubContent = css`
   width: 100%;
   gap: 8px;
   padding-left: 8px;
-  box-sizing: border-box;
-  overflow: visible;
-`;
-
-export const sectionRoot = css`
-  display: flex;
-  flex-direction: column;
-  z-index: var(--zindex-side-section);
-  padding: 8px;
   box-sizing: border-box;
   overflow: visible;
 `;

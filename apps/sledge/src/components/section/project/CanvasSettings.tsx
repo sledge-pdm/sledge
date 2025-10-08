@@ -14,12 +14,13 @@ import { sectionContent, sectionSubCaption } from '../SectionStyles';
 
 const canvasContentStyle = css`
   gap: 10px;
-  margin-top: 8px;
   padding-bottom: 24px;
 `;
 
 const sizeRowStyle = css`
   display: flex;
+  flex-direction: row;
+  align-items: center;
 `;
 
 const frameModeButtonContainerStyle = css`

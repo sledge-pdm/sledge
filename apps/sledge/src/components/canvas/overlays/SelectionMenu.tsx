@@ -12,13 +12,47 @@ import {
 } from '~/features/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
+import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/Consts';
 import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { container, divider, item } from '~/styles/components/canvas/overlays/selection_menu.css';
+
+const container = css`
+  display: flex;
+  flex-direction: row;
+  border: 1px solid var(--color-on-background);
+  background-color: var(--color-surface);
+  pointer-events: all;
+  z-index: var(--zindex-canvas-overlay);
+`;
+
+const item = css`
+  display: flex;
+  flex-direction: row;
+  box-sizing: content-box;
+  align-items: center;
+  pointer-events: all;
+  cursor: pointer;
+  padding: 6px;
+  gap: 6px;
+  background-color: var(--color-surface);
+  &:hover {
+    filter: brightness(0.85);
+  }
+`;
+
+const divider = css`
+  display: flex;
+  flex-direction: row;
+  width: 1px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  box-sizing: content-box;
+  background-color: var(--color-muted);
+`;
 
 interface ItemProps {
   src: string;

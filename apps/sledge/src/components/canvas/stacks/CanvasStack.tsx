@@ -2,16 +2,24 @@ import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import { InteractCanvas } from './InteractCanvas';
 
+import { css } from '@acab/ecsstatic';
 import { vars } from '@sledge/theme';
 import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { canvasStack } from '~/styles/components/canvas/canvas_stack.css';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
 import '/patterns/CheckerboardPattern.svg';
+
+const canvasStack = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+`;
 
 export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);
 

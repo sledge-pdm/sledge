@@ -1,4 +1,4 @@
-import { flexCol } from '@sledge/core';
+import { css } from '@acab/ecsstatic';
 import { SparkLine } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -6,8 +6,34 @@ import { DebugLogger } from '~/features/log/service';
 import { getCurrentSelection } from '~/features/selection/SelectionAreaManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasDebugOverlayBottomLeft, canvasDebugOverlayTopLeft } from '~/styles/components/canvas/canvas_debug_overlay.css';
 import { eventBus, Events } from '~/utils/EventBus';
+
+const canvasDebugOverlayTopLeft = css`
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: var(--spacing-sm);
+  top: var(--spacing-sm);
+  pointer-events: none;
+  z-index: var(--zindex-canvas-overlay);
+`;
+
+const canvasDebugOverlayBottomLeft = css`
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  left: var(--spacing-sm);
+  bottom: var(--spacing-sm);
+  align-items: end;
+  gap: var(--spacing-md);
+  pointer-events: none;
+  z-index: var(--zindex-canvas-overlay);
+`;
+
+const flexCol = css`
+  display: flex;
+  flex-direction: column;
+`;
 
 // interface TauriMemInfo {
 //   total_bytes: number;

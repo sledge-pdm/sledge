@@ -74,3 +74,7 @@ vi.mock('~/webgl/WebGLRenderer', () => ({
     constructor() {}
   },
 }));
+
+vi.mock('@acab/ecsstatic', () => ({
+  css: vi.fn(),
+}));

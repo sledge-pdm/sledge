@@ -1,4 +1,4 @@
-import { flexCol } from '@sledge/core';
+import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, Show } from 'solid-js';
 import { Consts } from '~/Consts';
@@ -9,6 +9,11 @@ import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
+
+const flexCol = css`
+  display: flex;
+  flex-direction: column;
+`;
 
 export let webGLRenderer: WebGLRenderer | undefined;
 

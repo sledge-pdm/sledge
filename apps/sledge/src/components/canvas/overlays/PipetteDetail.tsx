@@ -1,10 +1,20 @@
-import { flexCol, flexRow } from '@sledge/core';
+import { css } from '@acab/ecsstatic';
 import { vars, ZFB08, ZFB09 } from '@sledge/theme';
 import { ColorBox } from '@sledge/ui';
 import { useMousePosition } from '@solid-primitives/mouse';
 import { Component, Show } from 'solid-js';
 import { currentColor, isTransparent, transparent } from '~/features/color';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';
+
+const flexRow = css`
+  display: flex;
+  flex-direction: row;
+`;
+
+const flexCol = css`
+  display: flex;
+  flex-direction: column;
+`;
 
 const PipetteDetail: Component = (props: {}) => {
   const pos = useMousePosition();

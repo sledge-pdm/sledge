@@ -3,14 +3,13 @@ import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
 
+import { css } from '@acab/ecsstatic';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasArea } from '~/styles/components/canvas/canvas_area.css';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
-import { flexCol, flexRow } from '@sledge/core';
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
@@ -19,6 +18,23 @@ import BottomInfo from '~/components/global/BottomInfo';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
 import { Consts } from '~/Consts';
 import { globalConfig } from '~/stores/GlobalStores';
+
+const canvasArea = css`
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+`;
+
+const flexCol = css`
+  display: flex;
+  flex-direction: column;
+`;
+
+const flexRow = css`
+  display: flex;
+  flex-direction: row;
+`;
 
 const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;

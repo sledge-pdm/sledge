@@ -1,7 +1,7 @@
-import { pageRoot } from '@sledge/theme';
 import { onMount } from 'solid-js';
 import ConfigForm from '~/components/config/ConfigForm';
 import { loadGlobalSettings } from '~/io/config/load';
+import { pageRoot } from '~/styles/StyleSnippets';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Settings() {

@@ -1,4 +1,4 @@
-import { pageRoot, scrollContent } from '~/styles/page.css';
+import { pageRoot, scrollContent } from '~/styles/SharedStyles';
 
 export function Playground() {
   return (

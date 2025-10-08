@@ -1,5 +1,5 @@
 import { Size2D, Vec2 } from '@sledge/core';
-import { ZFB08 } from '@sledge/theme';
+import { fonts } from '@sledge/theme';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { canvasToScreen } from '~/features/canvas/CanvasPositionCalculator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
@@ -182,7 +182,7 @@ export const CanvasResizeFrame: Component = () => {
             }}
           />
           {/* 情報表示: 1行目 = 表示上のピクセルサイズ (スクリーン), 2行目 = 論理キャンバスサイズ + オフセット */}
-          <g font-size={16} style={{ 'font-family': ZFB08 }} fill='white' stroke='none'>
+          <g font-size={16} style={{ 'font-family': fonts.ZFB08 }} fill='white' stroke='none'>
             {/* <text x={10} y={25}>
               screen: {Math.round(size()!.width)} x {Math.round(size()!.height)}
             </text> */}

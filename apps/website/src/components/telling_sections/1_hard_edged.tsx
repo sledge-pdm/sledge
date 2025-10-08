@@ -1,7 +1,6 @@
 import { Component } from 'solid-js';
 import { TellingSection } from '~/components/TellingSection';
-import { heroHeading, subHeading } from '~/styles/page.css';
-import { sectionContainer, sectionImage } from '~/styles/telling_section.css';
+import { heroHeading, sectionContainer, sectionImage, subHeading } from '~/styles/SharedStyles';
 
 interface Props {
   attachPanelRef: (el: HTMLElement) => void;

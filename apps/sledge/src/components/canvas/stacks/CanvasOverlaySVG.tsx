@@ -1,7 +1,6 @@
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onCleanup, onMount, Show } from 'solid-js';
-import { Consts } from '~/Consts';
 import { RGBAToHex } from '~/features/color';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -136,7 +135,7 @@ const CanvasOverlaySVG: Component = () => {
     transform: `translate(${interactStore.offsetOrigin.x + interactStore.offset.x}px, ${interactStore.offsetOrigin.y + interactStore.offset.y}px)`,
     'transform-origin': '0 0',
     'pointer-events': 'none',
-    'z-index': Consts.zIndex.canvasOverlay,
+    'z-index': 'var(--zindex-canvas-overlay)',
   });
 
   // rotate + flip (中心基準)  ※ zoom は含まない

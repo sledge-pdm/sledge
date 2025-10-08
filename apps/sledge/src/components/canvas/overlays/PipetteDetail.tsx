@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { vars, ZFB08, ZFB09 } from '@sledge/theme';
+import { color, fonts, spacing, text } from '@sledge/theme';
 import { ColorBox } from '@sledge/ui';
 import { useMousePosition } from '@solid-primitives/mouse';
 import { Component, Show } from 'solid-js';
@@ -33,12 +33,12 @@ const PipetteDetail: Component = (props: {}) => {
       style={{
         top: `${pos.y}px`,
         left: `${pos.x}px`,
-        'margin-top': vars.spacing.md,
-        'margin-left': vars.spacing.md,
-        padding: vars.spacing.xs,
-        gap: vars.spacing.md,
-        border: `1px solid ${vars.color.border}`,
-        'background-color': vars.color.background,
+        'margin-top': spacing.md,
+        'margin-left': spacing.md,
+        padding: spacing.xs,
+        gap: spacing.md,
+        border: `1px solid ${color.border}`,
+        'background-color': color.background,
       }}
     >
       <Show
@@ -46,9 +46,9 @@ const PipetteDetail: Component = (props: {}) => {
         fallback={
           <p
             style={{
-              'font-family': ZFB08,
-              'font-size': vars.text.sm,
-              color: vars.color.onBackground,
+              'font-family': fonts.ZFB08,
+              'font-size': text.sm,
+              color: color.onBackground,
               opacity: 0.7,
             }}
           >
@@ -56,19 +56,19 @@ const PipetteDetail: Component = (props: {}) => {
           </p>
         }
       >
-        <ColorBox currentColor={currentColor} color={getCurrentPointingColorHex()!} sizePx={24} forceBorderColor={vars.color.onBackground} />
-        <div class={pipetteInfo} style={{ gap: vars.spacing.xs }}>
+        <ColorBox currentColor={currentColor} color={getCurrentPointingColorHex()!} sizePx={24} forceBorderColor={color.onBackground} />
+        <div class={pipetteInfo} style={{ gap: spacing.xs }}>
           <div
             class={pipetteHeader}
             style={{
-              gap: vars.spacing.sm,
+              gap: spacing.sm,
             }}
           >
-            {/* <Icon src='/icons/tool_bar/tool/pipette.png' base={10} scale={1} color={vars.color.onBackground} /> */}
+            {/* <Icon src='/icons/tool_bar/tool/pipette.png' base={10} scale={1} color={color.onBackground} /> */}
             <p
               style={{
-                'font-family': ZFB08,
-                color: vars.color.onBackground,
+                'font-family': fonts.ZFB08,
+                color: color.onBackground,
               }}
             >
               pipette.
@@ -76,9 +76,9 @@ const PipetteDetail: Component = (props: {}) => {
           </div>
           <p
             style={{
-              'font-family': ZFB09,
-              'font-size': vars.text.md,
-              color: vars.color.onBackground,
+              'font-family': fonts.ZFB09,
+              'font-size': text.md,
+              color: color.onBackground,
             }}
           >
             {getCurrentPointingColorHex()!.toUpperCase()}

@@ -1,9 +1,7 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, JSX } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
-import { heroHeading, pageImage, pageRoot, subHeading } from '~/styles/page.css';
+import { flexRow, heroHeading, pageImage, pageRoot, subHeading } from '~/styles/SharedStyles';
 
 export function About() {
   const imageSrc = () => {
@@ -48,7 +46,7 @@ export function About() {
 const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
     <div class={flexRow} style={{ 'align-items': 'center', gap: '6px', 'margin-bottom': '8px' }}>
-      <Icon src='/icons/misc/dot.png' base={8} color={vars.color.onBackground} />
+      <Icon src='/icons/misc/dot.png' base={8} color={'var(--color-on-background)'} />
       <p class={subHeading} {...props} style={{ 'margin-bottom': 0, 'vertical-align': 'middle' }}>
         {props.children}
       </p>

@@ -1,11 +1,17 @@
+import { css } from '@acab/ecsstatic';
 import { onMount } from 'solid-js';
 import HardEdgedSection from '~/components/telling_sections/1_hard_edged';
 import ChaosEngineSection from '~/components/telling_sections/2_chaos_engine';
 import OpenCoreSection from '~/components/telling_sections/3_open_core';
 import CodeYourCanvasSection from '~/components/telling_sections/4_code_your_canvas';
 import { globalStore } from '~/store/GlobalStore';
-import { pageRoot, scrollContent } from '~/styles/page.css';
-import { animatedActive } from '~/styles/telling_section.css';
+import { pageRoot, scrollContent } from '~/styles/SharedStyles';
+
+// Component-specific styles
+const animatedActive = css`
+  opacity: 1;
+  transform: translateY(0);
+`;
 
 export function Features() {
   const imageSrc = () => {

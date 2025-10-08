@@ -3,7 +3,6 @@ import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
-import { Consts } from '~/Consts';
 import { clientPositionToCanvasPosition } from '~/features/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { activeLayer } from '~/features/layer';
@@ -256,7 +255,7 @@ export const InteractCanvas: Component<Props> = (props) => {
         height: `${styleHeight()}px`,
         'pointer-events': 'all',
         cursor: cursor(),
-        'z-index': Consts.zIndex.interactCanvas,
+        'z-index': 'var(--zindex-interact-canvas)',
       }}
       onContextMenu={(e) => {
         e.preventDefault();

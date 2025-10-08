@@ -3,7 +3,6 @@ import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import { InteractCanvas } from './InteractCanvas';
 
 import { css } from '@acab/ecsstatic';
-import { vars } from '@sledge/theme';
 import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
@@ -11,6 +10,7 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
+import { color } from '@sledge/theme';
 import '/patterns/CheckerboardPattern.svg';
 
 const canvasStack = css`
@@ -87,7 +87,7 @@ const CanvasStack: Component = () => {
           left: '0',
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
-          'background-color': vars.color.canvas,
+          'background-color': color.canvas,
         }}
       >
         <div

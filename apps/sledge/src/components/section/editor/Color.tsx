@@ -2,14 +2,14 @@ import { css } from '@acab/ecsstatic';
 import { Component, createMemo, For } from 'solid-js';
 import ColorPicker from '~/components/section/editor/item/ColorPicker';
 
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { ColorBox, DropdownOption, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
 import SectionItem from '~/components/section/SectionItem';
 import { currentColor, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tool/ToolController';
 import { colorStore } from '~/stores/EditorStores';
+import { flexRow } from '~/styles/StyleSnippets';
 import { sectionContent } from '../SectionStyles';
 
 const swatchHeader = css`
@@ -131,17 +131,17 @@ const Color: Component = () => {
                   src={'/icons/misc/pipette.png'}
                   base={8}
                   scale={2}
-                  color={getActiveToolCategoryId() === 'pipette' ? vars.color.active : vars.color.onBackground}
+                  color={getActiveToolCategoryId() === 'pipette' ? color.active : color.onBackground}
                 />
               </div>
             </div>
           </div>
         </div>
         {/* <div class={flexRow} style={{ height: 'fit-content', 'min-width': '90px', 'margin-left': 'auto' }}>
-          <p style={{ 'font-size': vars.text.md }}>#</p>
+          <p style={{ 'font-size': text.md }}>#</p>
           <input
             ref={(el) => (hexInputRef = el)}
-            style={{ 'font-family': ZFB11, 'font-size': vars.text.md, width: '56px', border: 'none' }}
+            style={{ 'font-family': ZFB11, 'font-size': text.md, width: '56px', border: 'none' }}
             maxLength={6}
             value={currentColor().substring(1)}
             onChange={(e) => {

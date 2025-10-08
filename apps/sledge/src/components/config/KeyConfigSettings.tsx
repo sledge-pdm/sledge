@@ -1,5 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { flexCol } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
@@ -15,7 +14,7 @@ import {
 } from '~/features/config/KeyConfigController';
 import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { accentedText } from '~/styles/StyleSnippets';
+import { accentedText, flexCol } from '~/styles/StyleSnippets';
 
 const row = css`
   display: flex;

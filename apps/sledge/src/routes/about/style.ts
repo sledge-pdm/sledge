@@ -81,13 +81,6 @@ export const aboutFeedback = css`
   line-height: 1.5;
 `;
 
-export const pageRoot = css`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-`;
-
 export const rowContainer = css`
   display: flex;
   flex-direction: row;

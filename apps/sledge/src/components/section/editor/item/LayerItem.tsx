@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { flexCol, flexRow, w100 } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
@@ -17,6 +16,7 @@ import {
   setLayerName,
 } from '~/features/layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { flexCol, flexRow } from '~/styles/StyleSnippets';
 import { eventBus } from '~/utils/EventBus';
 
 const layerItem = css`
@@ -153,8 +153,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         `}
       </style>
       <div
-        class={w100}
         style={{
+          width: '100%',
           position: 'relative',
         }}
       >
@@ -165,7 +165,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             left: 0,
             bottom: 0,
             right: 0,
-            'background-color': isActive() ? vars.color.active : vars.color.surface,
+            'background-color': isActive() ? color.active : color.surface,
             opacity: isActive() ? 0.15 : 1.0,
             'pointer-events': 'none',
             'z-index': -1,
@@ -198,7 +198,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           }}
         >
           {/* <div class={`${layerItemHandle} handle`} {...sortable.dragActivators}>
-          <Icon src='/icons/misc/handle.png' base={8} color={vars.color.background} />
+          <Icon src='/icons/misc/handle.png' base={8} color={color.background} />
         </div> */}
           <div
             class={layerItemHandle}
@@ -207,22 +207,23 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
           >
             <div class={layerItemSpinner} onClick={handleMoveUp}>
-              <Icon src='/icons/misc/triangle_7.png' base={7} color={vars.color.surface} transform='rotate(180deg)' />
+              <Icon src='/icons/misc/triangle_7.png' base={7} color={color.surface} transform='rotate(180deg)' />
             </div>
             <div class={layerItemSpinner} onClick={handleMoveDown}>
-              <Icon src='/icons/misc/triangle_7.png' base={7} color={vars.color.surface} />
+              <Icon src='/icons/misc/triangle_7.png' base={7} color={color.surface} />
             </div>
           </div>
           <LayerPreview layer={props.layer} onClick={onPreviewClicked} height={40} maxWidth={80} />
           <div
-            class={`${flexCol} ${w100}`}
+            class={flexCol}
             style={{
+              width: '100%',
               'flex-grow': 1,
               'padding-left': '6px',
               'justify-content': 'center',
               gap: '1px',
               overflow: 'hidden',
-              'border-left': `1px solid ${vars.color.border}`,
+              'border-left': `1px solid ${color.border}`,
               'pointer-events': props.layer.enabled ? 'auto' : 'none',
             }}
           >
@@ -241,7 +242,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                   outline: 'none',
                   border: 'none',
                   'letter-spacing': '1px',
-                  'border-bottom': `1px solid ${vars.color.onBackground}`,
+                  'border-bottom': `1px solid ${color.onBackground}`,
                 }}
                 value={props.layer.name}
                 onInput={(e) => {

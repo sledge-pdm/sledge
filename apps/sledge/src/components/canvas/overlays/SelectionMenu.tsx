@@ -15,7 +15,6 @@ import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Consts } from '~/Consts';
 import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -207,7 +206,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         visibility: outerPosition() === undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
         'pointer-events': 'all',
         'transform-origin': '0 0',
-        'z-index': Consts.zIndex.canvasOverlay,
+        'z-index': 'var(--zindex-canvas-overlay)',
       }}
       onPointerDown={(e) => {
         e.stopPropagation();
@@ -234,7 +233,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         top: `${outerPosition()?.y ?? 0}px`,
         opacity: 0.8,
         'pointer-events': 'all',
-        'z-index': Consts.zIndex.canvasOverlay,
+        'z-index': 'var(--zindex-canvas-overlay)',
         visibility: outerPosition() !== undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
       }}
       onPointerDown={(e) => {

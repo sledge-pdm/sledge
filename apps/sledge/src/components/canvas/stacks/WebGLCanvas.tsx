@@ -1,7 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, Show } from 'solid-js';
-import { Consts } from '~/Consts';
 import { allLayers } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -114,7 +113,7 @@ const WebGLCanvas: Component = () => {
         style={{
           position: 'absolute',
           'image-rendering': imageRendering(),
-          'z-index': Consts.zIndex.webGLcanvas,
+          'z-index': 'var(--zindex-webgl-canvas)',
         }}
       />
 
@@ -125,7 +124,7 @@ const WebGLCanvas: Component = () => {
             width: `${canvasStore.canvas.width}px`,
             height: `${canvasStore.canvas.height}px`,
             'background-color': '#00000050',
-            'z-index': Consts.zIndex.canvasErrorOverlay,
+            'z-index': 'var(--zindex-canvas-error-overlay)',
           }}
         >
           <div

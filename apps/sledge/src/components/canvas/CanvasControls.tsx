@@ -4,7 +4,6 @@ import { projectHistoryController } from '~/features/history';
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
-import { Consts } from '~/Consts';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { allLayers } from '~/features/layer';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -201,7 +200,7 @@ const CanvasControls: Component = () => {
           </div>
         </div> */}
 
-        <div class={bottomRightNav} style={{ 'z-index': Consts.zIndex.canvasOverlay }}>
+        <div class={bottomRightNav} style={{ 'z-index': 'var(--zindex-canvas-overlay)' }}>
           <div class={frameContainer}>
             <div class={frameSizeInfo}>
               <p style={{ 'font-size': '8px', color: 'white' }}>new canvas size.</p>

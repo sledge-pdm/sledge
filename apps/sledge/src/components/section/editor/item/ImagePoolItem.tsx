@@ -1,10 +1,10 @@
-import { flexCol, flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { color, spacing } from '@sledge/theme';
 import { Icon, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { addToImagePool } from '~/features/image_pool';
 import { isImagePoolActive, setImagePoolActive } from '~/features/layer';
 import { openImageImportDialog } from '~/io/image_pool/import';
+import { flexCol, flexRow } from '~/styles/StyleSnippets';
 
 const ImagePoolItem: Component = () => {
   return (
@@ -23,9 +23,9 @@ const ImagePoolItem: Component = () => {
           height: '16px',
           'justify-content': 'center',
           'align-items': 'center',
-          gap: vars.spacing.md,
-          'margin-left': vars.spacing.xs,
-          'margin-right': vars.spacing.xs,
+          gap: spacing.md,
+          'margin-left': spacing.xs,
+          'margin-right': spacing.xs,
           cursor: 'pointer',
           'pointer-events': isImagePoolActive() ? 'all' : 'none',
         }}
@@ -33,7 +33,7 @@ const ImagePoolItem: Component = () => {
         <Icon
           src={'/icons/misc/add_image.png'}
           base={16}
-          color={vars.color.onBackground}
+          color={color.onBackground}
           onClick={async (e) => {
             e.stopImmediatePropagation();
             e.stopPropagation();

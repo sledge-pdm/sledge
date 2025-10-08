@@ -1,9 +1,10 @@
 import { css } from '@acab/ecsstatic';
-import { componentProps, flexCol, flexRow } from '@sledge/core';
+import { componentProps } from '@sledge/core';
 import { spacing } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { toolStore } from '~/stores/EditorStores';
+import { flexCol, flexRow } from '~/styles/StyleSnippets';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/tools/presets';
 import { ToolCategoryId } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';

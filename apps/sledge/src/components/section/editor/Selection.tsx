@@ -1,5 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { flexCol } from '@sledge/core';
 import { Dropdown } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -7,6 +6,7 @@ import SectionItem from '~/components/section/SectionItem';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
+import { flexCol } from '~/styles/StyleSnippets';
 import { eventBus, Events } from '~/utils/EventBus';
 import { sectionContent } from '../SectionStyles';
 

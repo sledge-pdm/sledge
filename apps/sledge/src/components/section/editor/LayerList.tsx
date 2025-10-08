@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { spacing } from '@sledge/theme';
 import { Dropdown, Slider } from '@sledge/ui';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
@@ -8,6 +7,7 @@ import { projectHistoryController } from '~/features/history';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
+import { flexRow } from '~/styles/StyleSnippets';
 import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
 import { sectionContent } from '../SectionStyles';
@@ -92,8 +92,8 @@ const LayerList: Component<{}> = () => {
           class={flexRow}
           style={{
             'align-items': 'center',
-            gap: vars.spacing.sm,
-            'margin-bottom': vars.spacing.sm,
+            gap: spacing.sm,
+            'margin-bottom': spacing.sm,
           }}
         >
           <div

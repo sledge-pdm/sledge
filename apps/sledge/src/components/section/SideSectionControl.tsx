@@ -1,5 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { flexRow } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
@@ -7,6 +6,7 @@ import { SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { adjustZoomToFit, setOffset, setZoomByReference } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
+import { flexRow } from '~/styles/StyleSnippets';
 import { eventBus } from '~/utils/EventBus';
 
 const sideSectionControlRoot = css`
@@ -112,7 +112,7 @@ const SideSectionControl: Component<Props> = (props) => {
         'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
         'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
 
-        'z-index': Consts.zIndex.sideSection,
+        'z-index': 'var(--zindex-side-section)',
       }}
     >
       <div class={sideSectionControlList}>

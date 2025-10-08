@@ -1,8 +1,8 @@
-import { flexCol, flexRow } from '@sledge/core';
 import { Slider } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { updateToolPresetConfig } from '~/features/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
+import { flexCol, flexRow } from '~/styles/StyleSnippets';
 import { DEFAULT_PRESET, ToolCategoryId } from '~/tools/Tools';
 
 interface Props {

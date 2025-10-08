@@ -4,7 +4,6 @@ import { Component, createMemo, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
-import { Consts } from '~/Consts';
 import { getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
@@ -120,7 +119,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         margin: 0,
         padding: 0,
         cursor: selected() ? 'all-scroll' : undefined,
-        'z-index': Consts.zIndex.imagePoolImage,
+        'z-index': 'var(--zindex-image-pool-image)',
       }}
       tabIndex={props.index}
       onClick={(e) => {
@@ -188,7 +187,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
             padding: 0,
             width: `${stateStore.baseW}px`,
             height: `${stateStore.baseH}px`,
-            'z-index': Consts.zIndex.imagePoolImage,
+            'z-index': 'var(--zindex-image-pool-image)',
             opacity: stateStore.visible ? 1 : selected() ? 0.5 : 0,
             'pointer-events': 'none',
             'touch-action': 'none',
@@ -208,7 +207,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           'image-rendering': 'pixelated',
           'shape-rendering': 'geometricPrecision',
           overflow: 'visible',
-          'z-index': Consts.zIndex.imagePoolControl,
+          'z-index': 'var(--zindex-image-pool-control)',
           width: `${stateStore.baseW * stateStore.sx}px`,
           height: `${stateStore.baseH * stateStore.sy}px`,
         }}

@@ -1,4 +1,4 @@
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Accessor, onCleanup } from 'solid-js';
 
 type Id = string;
@@ -110,7 +110,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
       dropLineEl.style.position = 'absolute';
       dropLineEl.style.left = '0';
       dropLineEl.style.height = '2px';
-      dropLineEl.style.background = vars.color.accent;
+      dropLineEl.style.background = color.accent;
       dropLineEl.style.opacity = '0.5';
       dropLineEl.style.borderRadius = '2px';
       dropLineEl.style.pointerEvents = 'none';
@@ -170,7 +170,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
 
     // tint original instead of hiding
     el.style.opacity = '0.5';
-    el.style.backgroundColor = vars.color.surface;
+    el.style.backgroundColor = color.surface;
     // suppress interactions on original
     el.style.pointerEvents = 'none';
     (document.body as any).style.userSelect = 'none';

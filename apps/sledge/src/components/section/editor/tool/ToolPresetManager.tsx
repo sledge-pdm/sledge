@@ -1,8 +1,8 @@
-import { flexCol } from '@sledge/core';
 import { Component, Show } from 'solid-js';
 import ToolPresetDropDown from '~/components/section/editor/tool/ToolPresetDropDown';
 import { updateToolPresetConfig } from '~/features/tool/ToolController';
 import { toolStore } from '~/stores/EditorStores';
+import { flexCol } from '~/styles/StyleSnippets';
 import { ToolCategoryId } from '~/tools/Tools';
 import ToolPresetConfigForm from './ToolPresetConfigForm';
 

@@ -1,11 +1,11 @@
 import { css } from '@acab/ecsstatic';
-import { accentedButton } from '@sledge/theme';
 import { Slider, ToggleSwitch } from '@sledge/ui';
 import { AlphaBlurMode, GaussianBlurOption } from '@sledge/wasm';
 import { Component, createSignal } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import SectionItem from '~/components/section/SectionItem';
 import { applyEffect } from '~/features/effect/Effects';
+import { accentedButton } from '~/styles/StyleSnippets';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
 const applyButtonContainer = css`

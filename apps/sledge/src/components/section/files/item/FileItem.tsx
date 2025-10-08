@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { DirEntry } from '@tauri-apps/plugin-fs';
 import { Component, Show } from 'solid-js';
@@ -64,7 +64,7 @@ const FileItem: Component<{
       }}
     >
       <div class={iconContainer}>
-        <Icon src={getIconForName(entry.name, entry.isDirectory)} base={8} color={isMe || isPartOfMe ? vars.color.active : undefined} />
+        <Icon src={getIconForName(entry.name, entry.isDirectory)} base={8} color={isMe || isPartOfMe ? color.active : undefined} />
       </div>
       <a
         onClick={() => {
@@ -73,7 +73,7 @@ const FileItem: Component<{
         class={fileName}
         style={{
           'text-decoration': entry.isDirectory ? 'underline' : 'none',
-          color: isMe ? vars.color.active : undefined,
+          color: isMe ? color.active : undefined,
           'pointer-events': isMe ? 'none' : 'auto',
         }}
       >

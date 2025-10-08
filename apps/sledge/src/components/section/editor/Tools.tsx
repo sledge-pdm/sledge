@@ -1,9 +1,9 @@
-import { flexRow } from '@sledge/core';
-import { vars } from '@sledge/theme';
+import { spacing } from '@sledge/theme';
 import { Component, For, Show } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManager';
 import { toolStore } from '~/stores/EditorStores';
+import { flexRow } from '~/styles/StyleSnippets';
 import { ToolCategoryId } from '~/tools/Tools';
 import { sectionContent } from '../SectionStyles';
 import ToolItem from './item/ToolItem';
@@ -14,7 +14,7 @@ const Tools: Component = () => {
   return (
     <SectionItem title='tool.'>
       <div class={sectionContent}>
-        <div class={flexRow} style={{ 'margin-bottom': vars.spacing.xs, gap: vars.spacing.lg }}>
+        <div class={flexRow} style={{ 'margin-bottom': spacing.xs, gap: spacing.lg }}>
           <For each={mainTools}>
             {(categoryId) => {
               const isInUse = () => categoryId === toolStore.activeToolCategory;

@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { vars } from '@sledge/theme';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, Show } from 'solid-js';
 import { setActiveToolCategory } from '~/features/tool/ToolController';
@@ -52,13 +52,13 @@ const ToolItem: Component<Props> = (props: Props) => {
       {/* <Light on={props.isInUse} /> */}
       <div class={toolConfigRowClickable} onClick={() => setActiveToolCategory(category.id)}>
         <div class={iconWrapper}>
-          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? vars.color.active : vars.color.onBackground} />
+          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} />
         </div>
         <Show when={shouldShowLabel()}>
           <p
             class={toolConfigRowName}
             style={{
-              color: props.isInUse ? vars.color.active : vars.color.onBackground,
+              color: props.isInUse ? color.active : color.onBackground,
             }}
           >
             {category.name}.

@@ -13,7 +13,6 @@ import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, onMount } from 'solid-js';
-import DebugViewer from '~/components/global/debug/DebugViewer';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { loadGlobalSettings } from '~/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -115,7 +114,6 @@ export default function App() {
           >
             <TitleBar />
             <main>{props.children}</main>
-            <DebugViewer />
           </div>
         </MetaProvider>
       )}

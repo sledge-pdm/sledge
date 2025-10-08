@@ -1,13 +1,12 @@
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, onMount } from 'solid-js';
 
 import { flexCol } from '@sledge/core';
 import { vars } from '@sledge/theme';
-import { createScrollPosition } from '@solid-primitives/scroll';
 import interact from 'interactjs';
+import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import { EditorTab, EffectsTab, ExportTab, FilesTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { appearanceStore } from '~/stores/EditorStores';
-import { fadeBottom, fadeTop } from '~/styles/components/scroll_fade.css';
 import { sideAreaContent, sideAreaContentWrapper, sideAreaRoot } from '~/styles/section/side_sections.css';
 import { eventBus } from '~/utils/EventBus';
 
@@ -16,20 +15,6 @@ interface Props {
 }
 
 const SideSectionsOverlay: Component<Props> = (props) => {
-  let scrollRef: HTMLDivElement | undefined;
-  const scroll = createScrollPosition(() => scrollRef);
-
-  const [canScrollTop, setCanScrollTop] = createSignal(false);
-  const [canScrollBottom, setCanScrollBottom] = createSignal(false);
-
-  createEffect(() => {
-    scroll.y;
-    if (scrollRef) {
-      setCanScrollTop(scrollRef.scrollTop > 0);
-      setCanScrollBottom(scrollRef.scrollTop + scrollRef.clientHeight < scrollRef.scrollHeight);
-    }
-  });
-
   onMount(() => {
     interact('#side-sections-leftSide').resizable({
       edges: { right: true, left: false },
@@ -129,25 +114,18 @@ const SideSectionsOverlay: Component<Props> = (props) => {
           width: appearanceStore[props.side].shown ? '300px' : '0px',
         }}
       >
-        <div class={flexCol} style={{ position: 'relative', height: '100%', 'flex-grow': 1 }}>
-          <div
-            class={sideAreaContentWrapper}
-            ref={(el) => (scrollRef = el)}
-            style={{
-              'padding-left': props.side === 'leftSide' ? '8px' : '24px',
-              'padding-right': props.side === 'rightSide' ? '8px' : '24px',
-            }}
-          >
-            <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
-          </div>
-
-          <Show when={canScrollTop()}>
-            <div class={fadeTop} />
-          </Show>
-
-          <Show when={canScrollBottom()}>
-            <div class={fadeBottom} />
-          </Show>
+        <div class={flexCol} style={{ height: '100%' }}>
+          <ScrollFadeContainer class={sideAreaContentWrapper}>
+            <div
+              class={sideAreaContent}
+              style={{
+                'padding-left': props.side === 'leftSide' ? '8px' : '16px',
+                'padding-right': props.side === 'rightSide' ? '8px' : '16px',
+              }}
+            >
+              {tabContent(selectedTab())}
+            </div>
+          </ScrollFadeContainer>
         </div>
       </div>
     </div>

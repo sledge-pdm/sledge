@@ -73,8 +73,9 @@ const dynamicStyle = css`
 - 既存のコンポーネントAPIは変更しない
 - パフォーマンステストを各移行段階で実施
 - 継承について、css`${継承元} ...`では行うことができません。それぞれを定義したうえで、jsx側でclass={clsx(a, b)}を用いてください。
+- クラスを複数利用する場合も同様にclsx(a, b)を使って連結し、テンプレートリテラルの使用は避けてください。
 - solidJSのstoreやsignalによるリアクティビティが適用されているstyle propsについてはそのまま残してください。
-- vars.xxx.yyyはvanilla-extract依存のcss変数であり、ecsstaticの移行の際、これらは以下の対応でpureなcss変数に置き換えが可能です。
+- vars.xxx.yyyはvanilla-extract依存のcss変数であり、撤廃すべきです。ecsstaticの移行への際、これらは以下の対応でpureなcss変数に置き換えが可能です。
   
   - vars.color.camelCase = var(--color-snake-case) ※color以外でも同様
   - Consts.zIndex.camelCase = var(--zindex-snake-case)

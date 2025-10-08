@@ -10,16 +10,17 @@ import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/
 import { saveGlobalSettings } from '~/io/config/save';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
-import { sectionContent, sectionSubCaption } from '../SectionStyles';
+import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
 const canvasContentStyle = css`
   gap: 10px;
-  margin-top: 8px;
   padding-bottom: 24px;
 `;
 
 const sizeRowStyle = css`
   display: flex;
+  flex-direction: row;
+  align-items: center;
 `;
 
 const frameModeButtonContainerStyle = css`
@@ -87,13 +88,6 @@ const defaultInfoStyle = css`
 const actionsSectionStyle = css`
   margin-top: 12px;
   margin-bottom: 4px;
-`;
-
-const actionsContainerStyle = css`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow: hidden;
 `;
 
 const adjustZoomButtonStyle = css`
@@ -189,62 +183,64 @@ const CanvasSettings: Component = () => {
             </Button>
           </div>
         </div>
-        <div class={presetRowStyle}>
-          <p class={presetLabelStyle}>presets.</p>
-          <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
-        </div>
-        <div class={canvasSizeFormStyle}>
-          <div>
-            <p class={canvasSizeLabelStyle}>width</p>
-            <input
-              ref={(el) => (widthInputRef = el)}
-              class={canvasSizeInputStyle}
-              type='number'
-              name='width'
-              value={canvasStore.canvas.width}
-              min={Consts.minCanvasWidth}
-              max={Consts.maxCanvasWidth}
-              onInput={() => {
-                updateButtonState();
-                updateCurrentPreset();
-              }}
-              required
-            />
+        <div class={sectionSubContent}>
+          <div class={presetRowStyle}>
+            <p class={presetLabelStyle}>presets.</p>
+            <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
           </div>
+          <div class={canvasSizeFormStyle}>
+            <div>
+              <p class={canvasSizeLabelStyle}>width</p>
+              <input
+                ref={(el) => (widthInputRef = el)}
+                class={canvasSizeInputStyle}
+                type='number'
+                name='width'
+                value={canvasStore.canvas.width}
+                min={Consts.minCanvasWidth}
+                max={Consts.maxCanvasWidth}
+                onInput={() => {
+                  updateButtonState();
+                  updateCurrentPreset();
+                }}
+                required
+              />
+            </div>
 
-          <p class={canvasSizeTimesStyle}>x</p>
+            <p class={canvasSizeTimesStyle}>x</p>
 
-          <div>
-            <p class={canvasSizeLabelStyle}>height</p>
-            <input
-              ref={(el) => (heightInputRef = el)}
-              class={canvasSizeInputStyle}
-              type='number'
-              name='height'
-              value={canvasStore.canvas.height}
-              min={Consts.minCanvasHeight}
-              max={Consts.maxCanvasHeight}
-              onInput={() => {
-                updateButtonState();
-                updateCurrentPreset();
+            <div>
+              <p class={canvasSizeLabelStyle}>height</p>
+              <input
+                ref={(el) => (heightInputRef = el)}
+                class={canvasSizeInputStyle}
+                type='number'
+                name='height'
+                value={canvasStore.canvas.height}
+                min={Consts.minCanvasHeight}
+                max={Consts.maxCanvasHeight}
+                onInput={() => {
+                  updateButtonState();
+                  updateCurrentPreset();
+                }}
+                required
+              />
+            </div>
+            <button
+              class={canvasSizeButtonStyle}
+              onClick={(e) => {
+                e.preventDefault();
+                submitSizeChange();
               }}
-              required
-            />
+              disabled={!isChangable()}
+              style={{
+                color: isChangable() ? 'var(--color-active)' : undefined,
+                'border-color': isChangable() ? 'var(--color-active)' : undefined,
+              }}
+            >
+              apply
+            </button>
           </div>
-          <button
-            class={canvasSizeButtonStyle}
-            onClick={(e) => {
-              e.preventDefault();
-              submitSizeChange();
-            }}
-            disabled={!isChangable()}
-            style={{
-              color: isChangable() ? 'var(--color-active)' : undefined,
-              'border-color': isChangable() ? 'var(--color-active)' : undefined,
-            }}
-          >
-            apply
-          </button>
         </div>
         <div class={defaultButtonContainerStyle}>
           <Button
@@ -275,7 +271,7 @@ const CanvasSettings: Component = () => {
           </div>
         </div> */}
         <p class={`${sectionSubCaption} ${actionsSectionStyle}`}>actions.</p>
-        <div class={actionsContainerStyle}>
+        <div class={sectionSubContent}>
           <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 
           <Button onClick={() => adjustZoomToFit()} class={adjustZoomButtonStyle}>

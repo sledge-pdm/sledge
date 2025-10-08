@@ -33,7 +33,7 @@ const sideAreaContentWrapper = css`
   bottom: 0;
   left: 0;
   right: 0;
-  padding-top: 16px;
+  padding-top: 24px;
   padding-bottom: 48px;
   overflow-x: visible;
   overflow-y: scroll;
@@ -57,6 +57,8 @@ const sideAreaContent = css`
   flex-direction: column;
   overflow-x: visible;
   gap: 8px;
+  padding-left: 12px;
+  padding-right: 12px;
 `;
 
 interface Props {
@@ -160,15 +162,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         }}
       >
         <ScrollFadeContainer class={sideAreaContentWrapper}>
-          <div
-            class={sideAreaContent}
-            style={{
-              'padding-left': props.side === 'leftSide' ? '8px' : '16px',
-              'padding-right': props.side === 'rightSide' ? '8px' : '16px',
-            }}
-          >
-            {tabContent(selectedTab())}
-          </div>
+          <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
         </ScrollFadeContainer>
       </div>
     </div>

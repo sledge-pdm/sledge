@@ -67,14 +67,14 @@ const LayerList: Component<{}> = () => {
       title='layers.'
       subHeaderIcons={[
         {
-          src: '/icons/misc/plus_12.png',
+          src: '/icons/misc/add.png',
           onClick: () => {
             addLayer({ name: 'layer1' });
             setItems(allLayers());
           },
         },
         {
-          src: '/icons/misc/minus_12.png',
+          src: '/icons/misc/remove_minus.png',
           onClick: () => {
             const id = activeLayer()?.id;
             if (id) {

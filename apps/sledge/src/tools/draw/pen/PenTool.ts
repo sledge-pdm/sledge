@@ -48,11 +48,6 @@ export class PenTool implements ToolBehavior {
     this.lastPreviewDiff = [];
     this.strokeChunk.clear();
 
-    // バッチモード開始 (stroke 全体をまとめる). レイヤが変わる可能性はほぼ無い前提で開始。
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
-    anvil?.beginBatch();
-
     if (!this.isShift) {
       return this.draw(ctx, args, args.color);
     } else {
@@ -262,7 +257,6 @@ export class PenTool implements ToolBehavior {
             swapBuffer[localIdx + 3] = a;
           }
           anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
-          anvil.endBatch();
         }
       }
     }
@@ -287,9 +281,6 @@ export class PenTool implements ToolBehavior {
 
     this.lastPreviewDiff = [];
 
-    // diff 破棄 & バッチ終了(変更はプレビューのみなので endBatch 前に discard されているような構造)
-    const anvil = getAnvilOf(args.layerId);
-    anvil?.endBatch();
     this.strokeChunk.clear();
 
     return {

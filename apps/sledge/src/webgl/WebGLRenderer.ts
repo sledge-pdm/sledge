@@ -13,7 +13,9 @@ const MAX_LAYERS = 16;
 const LOG_LABEL = 'WebGLRenderer';
 const logger = new DebugLogger(LOG_LABEL, false);
 
-const CHECK_ERROR = false;
+// エラーチェック最適化: 開発環境でのみ有効化し、さらに細かく制御
+const CHECK_ERROR = import.meta.env.DEV && false; // 通常は無効、デバッグ時のみ手動で有効化
+const CHECK_ERROR_BATCH = import.meta.env.DEV && true; // バッチエラーチェック（軽量）
 
 function checkGLError(gl: WebGL2RenderingContext, operation: string): boolean {
   if (CHECK_ERROR) {
@@ -26,6 +28,19 @@ function checkGLError(gl: WebGL2RenderingContext, operation: string): boolean {
   } else {
     return true;
   }
+}
+
+// バッチエラーチェック: 複数の操作後に一括でエラーをチェック
+function batchCheckGLError(gl: WebGL2RenderingContext, operation: string): boolean {
+  if (CHECK_ERROR_BATCH) {
+    const error = gl.getError();
+    if (error !== gl.NO_ERROR) {
+      logger.debugError(`Batch operation failed: ${operation} - ${error} (0x${error.toString(16)})`);
+      return false;
+    }
+    return true;
+  }
+  return true;
 }
 
 export class WebGLRenderer {
@@ -97,14 +112,13 @@ export class WebGLRenderer {
     this.texArray = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
 
-    checkGLError(gl, 'texture creation and binding');
-
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    checkGLError(gl, 'texture parameter setup');
+    // 初期化完了後の一括エラーチェック
+    batchCheckGLError(gl, 'WebGL texture setup and parameters');
 
     // --- フルスクリーンクワッド用 VAO ---
     this.vao = this.createFullscreenQuad();
@@ -280,8 +294,14 @@ export class WebGLRenderer {
       }
 
       const dirtyTiles = getDirtyTiles(layer.id);
-      if (onlyDirty && dirtyTiles.length !== 0) {
+      if (onlyDirty && dirtyTiles.length === 0) {
+        logger.debugLog(`🔧 onlyDirty render called, but no dirty tiles for layer ${i}`);
+      } else if (onlyDirty && dirtyTiles.length > 0) {
         logger.debugLog(`🔧 Processing ${dirtyTiles.length} dirty tiles for layer ${i}`);
+
+        // タイル処理前の単一エラーチェック
+        if (CHECK_ERROR) checkGLError(gl, `before batch tile upload layer ${i}`);
+
         dirtyTiles.forEach((tile) => {
           const tileSize = anvil?.getTileSize() ?? 0;
           const col = (tile as any).col;
@@ -300,25 +320,18 @@ export class WebGLRenderer {
             tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
           }
 
-          // macOSでのWebGLエラーをチェック
-          checkGLError(gl, `before texSubImage3D tile upload layer ${i}`);
-
+          // エラーチェックなしで高速アップロード
           gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
-
-          if (!checkGLError(gl, `texSubImage3D tile upload layer ${i}, pos(${ox},${oy}), size(${w},${h})`)) {
-            logger.debugError(
-              LOG_LABEL,
-              `Tile upload failed: layer=${i}, offset=(${ox},${oy}), size=(${w},${h}), buffer.length=${tileBuffer.length}`
-            );
-          }
         });
+
+        // バッチ処理後の単一エラーチェック
+        if (!batchCheckGLError(gl, `batch tile upload layer ${i} (${dirtyTiles.length} tiles)`)) {
+          logger.debugError(LOG_LABEL, `Batch tile upload failed: layer=${i}, tiles=${dirtyTiles.length}`);
+        }
       } else {
         logger.debugLog(`📤 Full upload for layer ${i}`);
 
-        // macOSでのWebGLエラーをチェック
-        checkGLError(gl, `before full texSubImage3D upload layer ${i}`);
-
-        // フルアップデート
+        // フルアップデート（エラーチェックなしで高速実行）
         gl.texSubImage3D(
           gl.TEXTURE_2D_ARRAY,
           0,
@@ -333,7 +346,8 @@ export class WebGLRenderer {
           buf
         );
 
-        if (!checkGLError(gl, `full texSubImage3D upload layer ${i}, size(${this.width},${this.height})`)) {
+        // バッチエラーチェック（軽量）
+        if (!batchCheckGLError(gl, `full upload layer ${i}, size(${this.width},${this.height})`)) {
           logger.debugError(`Full upload failed: layer=${i}, size=(${this.width},${this.height}), buffer.length=${buf.length}`);
         }
 
@@ -355,16 +369,10 @@ export class WebGLRenderer {
       blendModes: Array.from(blendModes.slice(0, activeLayers.length)),
     });
 
-    checkGLError(gl, 'before setting uniforms');
-
+    // Uniform設定（エラーチェックなしで高速実行）
     gl.uniform1i(this.uLayerCountLoc, activeLayers.length);
-    checkGLError(gl, 'after setting layer count uniform');
-
     gl.uniform1fv(this.uOpacitiesLoc, opacities);
-    checkGLError(gl, 'after setting opacities uniform');
-
     gl.uniform1iv(this.uBlendModesLoc, blendModes);
-    checkGLError(gl, 'after setting blend modes uniform');
 
     if (this.includeBaseLayer) {
       // ベースレイヤーの設定
@@ -384,23 +392,16 @@ export class WebGLRenderer {
       logger.debugLog('🎨 Base layer disabled for this render');
     }
 
-    checkGLError(gl, 'after setting base layer uniforms');
-
     // フルスクリーンクワッドを描画
     logger.debugLog(`🖌️ Drawing fullscreen quad...`);
 
-    checkGLError(gl, 'before binding VAO');
+    // VAO binding and drawing（エラーチェックなしで高速実行）
     gl.bindVertexArray(this.vao);
-    checkGLError(gl, 'after binding VAO');
-
-    checkGLError(gl, 'before drawArrays');
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    checkGLError(gl, 'after drawArrays');
 
-    // WebGLエラーをチェック
-    const error = gl.getError();
-    if (error !== gl.NO_ERROR) {
-      logger.debugError('❌ WebGL Error:', error);
+    // 最終的なエラーチェック（バッチ方式）
+    if (!batchCheckGLError(gl, `render completion for ${activeLayers.length} layers`)) {
+      logger.debugError('❌ WebGL render failed');
     } else {
       logger.debugLog(`✅ Render completed successfully`);
     }
@@ -455,7 +456,8 @@ export class WebGLRenderer {
       logger.debugWarn('Attribute a_pos not found in shader program');
     }
 
-    checkGLError(gl, 'fullscreen quad VAO setup');
+    // 軽量バッチエラーチェック
+    batchCheckGLError(gl, 'fullscreen quad VAO setup');
 
     gl.bindVertexArray(null);
     return vao;
@@ -603,18 +605,18 @@ export class WebGLRenderer {
 
     logger.debugLog(`🔄 Updating texture array: ${this.width}x${this.height}x${requiredDepth} (was ${oldDepth})`);
 
-    checkGLError(gl, `before texImage3D resize to depth ${requiredDepth}`);
+    // より詳細なエラーチェックを追加（開発時のみ）
+    if (CHECK_ERROR_BATCH) {
+      const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+      const maxTextureLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
 
-    // より詳細なエラーチェックを追加
-    const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    const maxTextureLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
+      if (this.width > maxTextureSize || this.height > maxTextureSize) {
+        logger.debugError(`❌ Texture size (${this.width}x${this.height}) exceeds MAX_TEXTURE_SIZE (${maxTextureSize})`);
+      }
 
-    if (this.width > maxTextureSize || this.height > maxTextureSize) {
-      logger.debugError(`❌ Texture size (${this.width}x${this.height}) exceeds MAX_TEXTURE_SIZE (${maxTextureSize})`);
-    }
-
-    if (requiredDepth > maxTextureLayers) {
-      logger.debugError(`❌ Required depth (${requiredDepth}) exceeds MAX_ARRAY_TEXTURE_LAYERS (${maxTextureLayers})`);
+      if (requiredDepth > maxTextureLayers) {
+        logger.debugError(`❌ Required depth (${requiredDepth}) exceeds MAX_ARRAY_TEXTURE_LAYERS (${maxTextureLayers})`);
+      }
     }
 
     try {
@@ -631,34 +633,33 @@ export class WebGLRenderer {
         null
       );
 
-      const error = gl.getError();
-      if (error === gl.NO_ERROR) {
-        logger.debugLog(`✅ Texture array resize successful: ${this.width}x${this.height}x${requiredDepth}`);
-      } else {
-        logger.debugError(`❌ Texture array resize failed with WebGL error: ${error} (0x${error.toString(16)})`);
+      // 軽量なバッチエラーチェック
+      if (!batchCheckGLError(gl, `texture array resize to ${this.width}x${this.height}x${requiredDepth}`)) {
+        logger.debugError(`Texture array resize failed: depth=${requiredDepth}, size=(${this.width},${this.height})`);
 
-        // エラーの詳細分析
-        switch (error) {
-          case gl.INVALID_VALUE:
-            logger.debugError('  → INVALID_VALUE: One or more parameters are invalid');
-            logger.debugError(`    Width: ${this.width}, Height: ${this.height}, Depth: ${this.currentTextureDepth}`);
-            break;
-          case gl.INVALID_OPERATION:
-            logger.debugError('  → INVALID_OPERATION: Operation not allowed in current state');
-            break;
-          case gl.OUT_OF_MEMORY:
-            logger.debugError('  → OUT_OF_MEMORY: Insufficient memory for texture');
-            const estimatedMemory = (this.width * this.height * 4 * this.currentTextureDepth) / 1024 / 1024;
-            logger.debugError(`    Estimated memory needed: ${estimatedMemory.toFixed(2)} MB`);
-            break;
+        // 詳細エラー分析（失敗時のみ）
+        if (CHECK_ERROR_BATCH) {
+          const error = gl.getError();
+          switch (error) {
+            case gl.INVALID_VALUE:
+              logger.debugError('  → INVALID_VALUE: One or more parameters are invalid');
+              logger.debugError(`    Width: ${this.width}, Height: ${this.height}, Depth: ${this.currentTextureDepth}`);
+              break;
+            case gl.INVALID_OPERATION:
+              logger.debugError('  → INVALID_OPERATION: Operation not allowed in current state');
+              break;
+            case gl.OUT_OF_MEMORY:
+              logger.debugError('  → OUT_OF_MEMORY: Insufficient memory for texture');
+              const estimatedMemory = (this.width * this.height * 4 * this.currentTextureDepth) / 1024 / 1024;
+              logger.debugError(`    Estimated memory needed: ${estimatedMemory.toFixed(2)} MB`);
+              break;
+          }
         }
+      } else {
+        logger.debugLog(`✅ Texture array resize successful: ${this.width}x${this.height}x${requiredDepth}`);
       }
     } catch (e) {
       logger.debugError('❌ Exception during texture array resize:', e);
-    }
-
-    if (!checkGLError(gl, `texImage3D resize to depth ${requiredDepth}, size(${this.width},${this.height})`)) {
-      logger.debugError(`Texture array resize failed: depth=${requiredDepth}, size=(${this.width},${this.height})`);
     }
 
     // WASM関数を使ったメモリ使用量計算

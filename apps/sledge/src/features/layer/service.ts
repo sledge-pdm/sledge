@@ -207,7 +207,7 @@ export const addLayerTo = (
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${newLayer.id}) added` });
 
   if (!options?.noDiff) {
-    const snapshot: LayerSnapshot = { layer: newLayer, image: { buffer: anvil.getImageData(), width: anvil.getWidth(), height: anvil.getHeight() } };
+    const snapshot: LayerSnapshot = { layer: newLayer, image: { buffer: anvil.getBufferData(), width: anvil.getWidth(), height: anvil.getHeight() } };
 
     const act = new LayerListHistoryAction('add', index, snapshot, undefined, undefined, { from: 'LayerService.addLayerTo' });
     projectHistoryController.addAction(act);
@@ -298,7 +298,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   const toRemove = layers[index];
   const anvil = getAnvilOf(toRemove.id);
   if (!anvil) return;
-  const snapshot: LayerSnapshot = { layer: toRemove, image: { buffer: anvil.getImageData(), width: anvil.getWidth(), height: anvil.getHeight() } };
+  const snapshot: LayerSnapshot = { layer: toRemove, image: { buffer: anvil.getBufferData(), width: anvil.getWidth(), height: anvil.getHeight() } };
 
   layers.splice(index, 1);
 

@@ -2,7 +2,7 @@ import { rawToWebp, webpToRaw } from '@sledge/anvil';
 import { Size2D } from '@sledge/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers } from '~/features/layer';
-import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
+import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -30,7 +30,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
     return allLayers().map((l) => {
       const w = Math.round(canvasStore.canvas.width / l.dotMagnification);
       const h = Math.round(canvasStore.canvas.height / l.dotMagnification);
-      const buf = getBufferCopy(l.id) ?? new Uint8ClampedArray(w * h * 4);
+      const buf = getBufferPointer(l.id) ?? new Uint8ClampedArray(w * h * 4);
       const webp = rawToWebp(new Uint8Array(buf.buffer), w, h);
       return {
         layerId: l.id,

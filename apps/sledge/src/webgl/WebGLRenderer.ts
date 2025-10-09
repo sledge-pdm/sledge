@@ -268,7 +268,6 @@ export class WebGLRenderer {
       const anvil = getAnvilOf(layer.id);
       if (!anvil) return;
       const usePreviewBuffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving();
-      console.log(usePreviewBuffer);
       const buf = usePreviewBuffer ? floatingMoveManager.getPreviewBuffer() : getBufferPointer(layer.id);
       if (!buf) return;
 

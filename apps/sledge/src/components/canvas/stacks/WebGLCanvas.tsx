@@ -52,7 +52,7 @@ const WebGLCanvas: Component = () => {
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
-    console.log('[WebGLCanvas] Requesting update:', e.context);
+    /* console.log('[WebGLCanvas] Requesting update:', e.context); */
     setUpdateRender(true);
     setOnlyDirtyUpdate(e.onlyDirty);
   };

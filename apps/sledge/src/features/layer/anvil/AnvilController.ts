@@ -85,11 +85,6 @@ export function getTileUniformColor(layerId: string, tile: { row: number; col: n
   return anvil.getTileUniformColor(tile as any);
 }
 
-// ----- helpers -----
-function packRGBA(r: number, g: number, b: number, a: number) {
-  return (a << 24) | (r << 16) | (g << 8) | b;
-}
-
 export function getWidth(layerId: string) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;

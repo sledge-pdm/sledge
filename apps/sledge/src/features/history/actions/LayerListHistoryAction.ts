@@ -1,9 +1,18 @@
 import type { Layer } from '~/features/layer';
 import { removeLayer } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';
+
+export interface LayerSnapshot {
+  layer: Layer;
+  image?: {
+    buffer: Uint8ClampedArray;
+    width: number;
+    height: number;
+  };
+}
 
 export class LayerListHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_list' as const;
@@ -11,7 +20,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
   constructor(
     public readonly kind: 'add' | 'delete' | 'reorder',
     public readonly index: number,
-    public readonly layerSnapshot?: Layer & { buffer?: Uint8ClampedArray },
+    public readonly layerSnapshot?: LayerSnapshot,
     public readonly beforeOrder?: string[],
     public readonly afterOrder?: string[],
     context?: any
@@ -22,7 +31,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
   undo(): void {
     switch (this.kind) {
       case 'add': {
-        const id = this.layerSnapshot?.id;
+        const id = this.layerSnapshot?.layer.id;
         if (!id) return;
         removeLayer(id, { noDiff: true });
         break;
@@ -48,7 +57,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
         break;
       }
       case 'delete': {
-        const id = this.layerSnapshot?.id ?? layerListStore.layers[this.index]?.id;
+        const id = this.layerSnapshot?.layer.id ?? layerListStore.layers[this.index]?.id;
         if (!id) return;
         removeLayer(id, { noDiff: true });
         break;
@@ -62,13 +71,17 @@ export class LayerListHistoryAction extends BaseHistoryAction {
   }
 }
 
-function insertAt(index: number, layer: Layer & { buffer?: Uint8ClampedArray }) {
-  const { buffer, ...layerProps } = layer as any;
+function insertAt(index: number, snapshot: LayerSnapshot) {
   const arr = [...layerListStore.layers];
-  arr.splice(index, 0, layerProps as Layer);
+  arr.splice(index, 0, snapshot.layer);
   setLayerListStore('layers', arr);
-  if (buffer) getAnvilOf(layer.id)?.replaceBuffer(buffer);
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${layer.id}) inserted` });
+  if (snapshot.image) {
+    const anvil = getAnvilOf(snapshot.layer.id);
+    if (anvil) anvil.replaceBuffer(snapshot.image.buffer);
+    else anvilManager.registerAnvil(snapshot.layer.id, snapshot.image.buffer, snapshot.image.width, snapshot.image.height);
+  }
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${snapshot.layer.id}) inserted` });
+  eventBus.emit('preview:requestUpdate', { layerId: snapshot.layer.id });
 }
 
 function setOrder(order: string[]) {

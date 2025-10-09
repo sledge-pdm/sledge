@@ -15,7 +15,7 @@ const logger = new DebugLogger(LOG_LABEL, false);
 
 // エラーチェック最適化: 開発環境でのみ有効化し、さらに細かく制御
 const CHECK_ERROR = import.meta.env.DEV && false; // 通常は無効、デバッグ時のみ手動で有効化
-const CHECK_ERROR_BATCH = import.meta.env.DEV && true; // バッチエラーチェック（軽量）
+const CHECK_ERROR_BATCH = import.meta.env.DEV && false; // バッチエラーチェック（軽量）
 
 function checkGLError(gl: WebGL2RenderingContext, operation: string): boolean {
   if (CHECK_ERROR) {
@@ -294,7 +294,7 @@ export class WebGLRenderer {
       }
 
       const dirtyTiles = getDirtyTiles(layer.id);
-      if (onlyDirty && dirtyTiles.length === 0) {
+      if (!anvil || (onlyDirty && dirtyTiles.length === 0)) {
         logger.debugLog(`🔧 onlyDirty render called, but no dirty tiles for layer ${i}`);
       } else if (onlyDirty && dirtyTiles.length > 0) {
         logger.debugLog(`🔧 Processing ${dirtyTiles.length} dirty tiles for layer ${i}`);
@@ -304,23 +304,19 @@ export class WebGLRenderer {
 
         dirtyTiles.forEach((tile) => {
           const tileSize = anvil?.getTileSize() ?? 0;
-          const col = (tile as any).col;
-          const row = (tile as any).row;
+          const col = tile.col;
+          const row = tile.row;
           const ox = col * tileSize;
           const oy = row * tileSize;
           const w = Math.min(this.width - ox, tileSize);
           const h = Math.min(this.height - oy, tileSize);
 
-          // フォールバック: 元のJavaScript実装
-          const tileByteLength = w * h * 4;
-          const tileBuffer = new Uint8Array(tileByteLength);
-          for (let dy = 0; dy < h; dy++) {
-            const srcStart = ((oy + dy) * this.width + ox) * 4;
-            const dstStart = dy * w * 4;
-            tileBuffer.set(buf.subarray(srcStart, srcStart + w * 4), dstStart);
-          }
-
-          // エラーチェックなしで高速アップロード
+          const tileBuffer = anvil.getPartialBuffer({
+            x: ox,
+            y: oy,
+            width: w,
+            height: h,
+          });
           gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, ox, oy, i, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, tileBuffer);
         });
 
@@ -486,9 +482,6 @@ export class WebGLRenderer {
       );
     }
 
-    // ① WebGL の描画バッファが現在の描画結果を保持している前提で、
-    //    gl.readPixels() ですぐにピクセルデータを取得する。
-    //    （※たとえば export ボタンを押した直後に呼べば、次のクリア前の状態を取れる）
     const pixels = new Uint8Array(this.width * this.height * 4);
 
     try {

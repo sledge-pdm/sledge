@@ -1,5 +1,6 @@
 // src/renderer/WebGLRenderer.ts
 import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
+import { Consts } from '~/Consts';
 import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
 import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -266,6 +267,7 @@ export class WebGLRenderer {
       logger.debugLog(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
 
       const anvil = getAnvilOf(layer.id);
+      if (!anvil) return;
       const buf =
         layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving()
           ? floatingMoveManager.getPreviewBuffer()
@@ -293,17 +295,33 @@ export class WebGLRenderer {
         return;
       }
 
+      // Dirty tiles optimization: calculate coverage ratio
       const dirtyTiles = getDirtyTiles(layer.id);
-      if (!anvil || (onlyDirty && dirtyTiles.length === 0)) {
+      const tileSize = anvil.getTileSize();
+
+      // Calculate dirty pixels coverage as percentage
+      // dirtyTiles.length = number of dirty tiles
+      // tileSize * tileSize = pixels per tile
+      // this.width * this.height = total canvas pixels
+      const dirtyPixelsCount = dirtyTiles.length * tileSize * tileSize;
+      const totalPixelsCount = this.width * this.height;
+      const dirtyTilesCoverage = (dirtyPixelsCount / totalPixelsCount) * 100;
+
+      logger.debugLog(
+        `🔧 Dirty tiles coverage: ${dirtyTilesCoverage.toFixed(2)}% (${dirtyTiles.length} tiles, ${dirtyPixelsCount} pixels of ${totalPixelsCount})`
+      );
+
+      const shouldDirty = onlyDirty && dirtyTilesCoverage < Consts.webGLFullUploadThresholdPercent;
+
+      if (shouldDirty && dirtyTiles.length === 0) {
         logger.debugLog(`🔧 onlyDirty render called, but no dirty tiles for layer ${i}`);
-      } else if (onlyDirty && dirtyTiles.length > 0) {
+      } else if (shouldDirty && dirtyTiles.length > 0) {
         logger.debugLog(`🔧 Processing ${dirtyTiles.length} dirty tiles for layer ${i}`);
 
         // タイル処理前の単一エラーチェック
         if (CHECK_ERROR) checkGLError(gl, `before batch tile upload layer ${i}`);
 
         dirtyTiles.forEach((tile) => {
-          const tileSize = anvil?.getTileSize() ?? 0;
           const col = tile.col;
           const row = tile.row;
           const ox = col * tileSize;

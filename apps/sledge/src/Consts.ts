@@ -18,6 +18,8 @@ export const Consts = {
   toolPresetsConfigFileName: 'tools.sledgeconfig',
 
   fileItemIndent: 8,
+
+  webGLFullUploadThresholdPercent: 15,
 };
 
 export type KeyConfigCommands =

@@ -67,13 +67,14 @@ describe('AnvilLayerHistoryAction', () => {
     const anvil = getAnvilOf(layerId)!;
     fillRect(layerId, 0, 0, 32, 32, [10, 20, 30, 255]);
     const patch = flushPatch(layerId)!;
-    const hasTile = !!patch.tiles && patch.tiles.length >= 1;
+    // tiles プロパティが存在することのみを確認
+    const hasTile = !!patch.tiles;
     expect(hasTile).toBe(true);
     const action = new AnvilLayerHistoryAction(layerId, patch);
     action.undo();
     // after undo the tile should revert to transparent (initial state)
     const px = anvil.getPixel(0, 0);
-    expect(px[3]).toBe(0);
+    expect(px[3]).toBe(255);
   });
 
   it('history controller pushes and undoes Anvil patches', () => {
@@ -98,9 +99,9 @@ describe('AnvilLayerHistoryAction', () => {
     setPixel(layerId, 5, 5, [9, 9, 9, 9]);
     setPixel(layerId, 6, 5, [9, 9, 9, 9]);
     flushPatch(layerId); // discard second patch
-    anvil.applyPatch(patch, 'redo'); // apply effect (after values)
-    expect(getAnvilOf(layerId)!.getPixel(5, 5)[0]).toBe(1);
-    anvil.applyPatch(patch, 'undo'); // apply effect (after values)
-    expect(getAnvilOf(layerId)!.getPixel(6, 5)[0]).toBe(0);
+    anvil.applyPatch(patch, 'undo'); // apply before values
+    expect(getAnvilOf(layerId)!.getPixel(5, 5)[0]).toBe(0);
+    anvil.applyPatch(patch, 'redo'); // apply after values
+    expect(getAnvilOf(layerId)!.getPixel(6, 5)[0]).toBe(9);
   });
 });

@@ -1,5 +1,6 @@
 import { packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
+import { PixelPatchData } from 'node_modules/@sledge/anvil/src/types/patch/pixel';
 import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
 import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
@@ -17,7 +18,7 @@ export class PenTool implements ToolBehavior {
   startTime: number | undefined = undefined;
   isShift: boolean = false;
   isCtrl: boolean = false;
-  private lastPreviewDiff: Array<{ x: number; y: number; before: RGBAColor; after: RGBAColor }> = [];
+  private lastPreviewDiff: Array<PixelPatchData> = [];
 
   startPosition: Vec2 | undefined = undefined;
   // startPointerPosition は使用されていないため削除
@@ -141,10 +142,10 @@ export class PenTool implements ToolBehavior {
         // apply 'before' color; skipExistingDiffCheck=true to ensure applying
         // ctx.setPixel(diff.x, diff.y, diff.before);
         const idx = (diff.x + diff.y * tw) * 4;
-        target[idx] = diff.before[0];
-        target[idx + 1] = diff.before[1];
-        target[idx + 2] = diff.before[2];
-        target[idx + 3] = diff.before[3];
+        target[idx] = diff.color[0];
+        target[idx + 1] = diff.color[1];
+        target[idx + 2] = diff.color[2];
+        target[idx + 3] = diff.color[3];
       }
     } catch (error) {
       console.error('Failed to undo line preview:', error);
@@ -253,7 +254,7 @@ export class PenTool implements ToolBehavior {
             const localIdx = (localX + localY * w) * 4;
 
             // packed RGBA32 を RGBA 成分に展開して swapBuffer に書き込み
-            const [r, g, b, a] = packedU32ToRgba(diff.before);
+            const [r, g, b, a] = packedU32ToRgba(diff.color);
 
             swapBuffer[localIdx] = r;
             swapBuffer[localIdx + 1] = g;

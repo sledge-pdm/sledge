@@ -2,8 +2,7 @@ import { rgbaToPackedU32 } from '@sledge/anvil';
 import { PixelPatchData } from 'node_modules/@sledge/anvil/src/types/patch/pixel';
 
 export interface CompactPixelDiff {
-  before: number; // packed RGBA32
-  // after: number は履歴作成時に未使用のため削除してメモリ節約
+  color: number; // packed RGBA32
 }
 
 export class StrokeChunk {
@@ -22,18 +21,16 @@ export class StrokeChunk {
   }
 
   private addSingle(layerWidth: number, unpacked: PixelPatchData) {
-    const { x, y, before, after } = unpacked;
+    const { x, y, color } = unpacked;
 
     const index = (y * layerWidth + x) * 4;
     const packed: CompactPixelDiff = {
-      before: rgbaToPackedU32(before),
-      // after は履歴作成時に不要なので削除
+      color: rgbaToPackedU32(color),
     };
-    // すでにある場合はそのbeforeを持ってくる
-    const pastDiff = this.diffs.get(index);
-    if (pastDiff) packed.before = pastDiff.before;
-
-    this.diffs.set(index, packed);
+    // すでにある場合はスキップ
+    if (!this.diffs.has(index)) {
+      this.diffs.set(index, packed);
+    }
 
     // bounding box 更新
     if (!this.boundBox) {

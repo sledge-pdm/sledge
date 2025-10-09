@@ -20,7 +20,7 @@ export class PenTool implements ToolBehavior {
   private lastPreviewDiff: Array<{ x: number; y: number; before: RGBAColor; after: RGBAColor }> = [];
 
   startPosition: Vec2 | undefined = undefined;
-  startPointerPosition: Vec2 | undefined = undefined;
+  // startPointerPosition は使用されていないため削除
 
   shapeStore = new ShapeStore();
   strokeChunk = new StrokeChunk();
@@ -42,12 +42,7 @@ export class PenTool implements ToolBehavior {
     this.startTime = Date.now();
     this.isShift = args.event?.shiftKey ?? false;
     this.isCtrl = args.event?.ctrlKey ?? false;
-    this.startPosition = args.position;
-    if (args.event)
-      this.startPointerPosition = {
-        x: args.event.clientX,
-        y: args.event.clientY,
-      };
+    this.startPosition = args.rawPosition;
 
     this.lastPreviewDiff = [];
     this.strokeChunk.clear();
@@ -169,7 +164,7 @@ export class PenTool implements ToolBehavior {
     this.undoLastLineDiff(layerId);
 
     // ctrl+shiftの場合は角度固定
-    const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(position, this.startPosition) : position;
+    const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(rawPosition, this.startPosition) : rawPosition;
 
     const preset = getPresetOf(this.categoryId, presetName) as any;
     const size = preset?.size ?? 1;
@@ -180,7 +175,7 @@ export class PenTool implements ToolBehavior {
     if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     const fromCp = this.centerPosition(this.startPosition, size);
-    const cp = this.centerPosition(rawPosition, size);
+    const cp = this.centerPosition(targetPosition, size);
     const diffs = putShapeLine({
       anvil,
       posX: cp.x,
@@ -228,6 +223,12 @@ export class PenTool implements ToolBehavior {
       if (bbox) {
         const w = bbox.maxX - bbox.minX + 1;
         const h = bbox.maxY - bbox.minY + 1;
+        if (w <= 0 || h <= 0) {
+          console.warn('Invalid bbox dimensions:', { w, h, bbox });
+          anvil.endBatch();
+          this.strokeChunk.clear();
+          return { result: resultText, shouldUpdate: true, shouldRegisterToHistory: true };
+        }
         const swapBuffer = new Uint8ClampedArray(w * h * 4);
         // Layer全体バッファ取得
         const layerBuffer = getBufferPointer(layerId);
@@ -281,7 +282,6 @@ export class PenTool implements ToolBehavior {
     this.isShift = false;
     this.isCtrl = false;
     this.startPosition = undefined;
-    // this.originalBuffer = undefined;
     this.startTime = undefined;
 
     this.lastPreviewDiff = [];

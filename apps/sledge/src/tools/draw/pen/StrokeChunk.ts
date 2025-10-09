@@ -3,7 +3,7 @@ import { PixelPatchData } from 'node_modules/@sledge/anvil/src/types/patch/pixel
 
 export interface CompactPixelDiff {
   before: number; // packed RGBA32
-  after: number; // packed RGBA32
+  // after: number は履歴作成時に未使用のため削除してメモリ節約
 }
 
 export class StrokeChunk {
@@ -27,7 +27,7 @@ export class StrokeChunk {
     const index = (y * layerWidth + x) * 4;
     const packed: CompactPixelDiff = {
       before: rgbaToPackedU32(before),
-      after: rgbaToPackedU32(after),
+      // after は履歴作成時に不要なので削除
     };
     // すでにある場合はそのbeforeを持ってくる
     const pastDiff = this.diffs.get(index);

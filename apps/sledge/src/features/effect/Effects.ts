@@ -24,6 +24,5 @@ export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, optio
     if (patch) {
       projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch, { tool: 'fx', fxName: effect }));
     }
-    // 追加の anvil.flush() は不要: flushPatch 内で flush 済み & dirty タイルクリア済み。
   }
 }

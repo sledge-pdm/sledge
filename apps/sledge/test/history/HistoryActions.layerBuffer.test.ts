@@ -32,7 +32,7 @@ describe('AnvilLayerHistoryAction', () => {
     // Apply the change to the actual buffer first
     anvil.replaceBuffer(after);
     // Then register the original buffer as swap buffer for undo
-    anvil.addWholeDiff(originalCopy);
+    anvil.addWholeDiff(originalCopy, anvil.getWidth(), anvil.getHeight());
 
     const patch = flushPatch(layerId);
     expect(patch).not.toBeNull();

@@ -1,4 +1,4 @@
-import type { LayerPatch } from '@sledge/anvil';
+import { PackedDiffs } from 'node_modules/@sledge/anvil/src/types/patch/Patch';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
 
@@ -49,23 +49,22 @@ export function fillRect(layerId: string, x: number, y: number, w: number, h: nu
   anvil.fillRect(x, y, w, h, rgba);
 }
 
-export function flushPatch(layerId: string): LayerPatch | null {
+export function flushPatch(layerId: string): PackedDiffs | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;
   const raw = anvil.flush();
-  const patch = raw ? convertLayerPatch(raw) : undefined;
-  if (patch) {
+  if (raw) {
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${layerId}) flush` });
     eventBus.emit('preview:requestUpdate', { layerId });
   }
-  return patch ?? null;
+  return raw ?? null;
 }
 
-export function previewPatch(layerId: string): LayerPatch | null {
+export function previewPatch(layerId: string): PackedDiffs | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;
   const raw = anvil.previewPatch();
-  return raw ? convertLayerPatch(raw) : null;
+  return raw;
 }
 
 export function getDirtyTiles(layerId: string) {
@@ -89,31 +88,6 @@ export function getTileUniformColor(layerId: string, tile: { row: number; col: n
 // ----- helpers -----
 function packRGBA(r: number, g: number, b: number, a: number) {
   return (a << 24) | (r << 16) | (g << 8) | b;
-}
-
-// Anvil の LayerPatch (RGBA配列ベース) を public Patch (packed u32) へ変換
-function convertLayerPatch(raw: any): LayerPatch {
-  const out: LayerPatch = {};
-  if (raw.whole) out.whole = raw.whole; // before/after は Uint8ClampedArray で同型
-  if (raw.partial) {
-    out.partial = raw.partial; // { boundBox, before, after }
-  }
-  if (raw.tiles) {
-    out.tiles = raw.tiles.map((t: any) => ({
-      tile: t.tile,
-      before: t.before ? packRGBA(t.before[0], t.before[1], t.before[2], t.before[3]) : undefined,
-      after: packRGBA(t.after[0], t.after[1], t.after[2], t.after[3]),
-    }));
-  }
-  if (raw.pixels) {
-    out.pixels = raw.pixels.map((p: any) => ({
-      tile: p.tile,
-      idx: p.idx,
-      before: new Uint32Array(p.before),
-      after: new Uint32Array(p.after),
-    }));
-  }
-  return out;
 }
 
 export function getWidth(layerId: string) {

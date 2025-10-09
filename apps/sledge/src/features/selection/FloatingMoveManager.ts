@@ -183,14 +183,11 @@ class FloatingMoveManager {
       target: this.targetBuffer,
     });
 
-    const beforeBuffer = getBufferCopy(this.targetLayerId);
-    if (beforeBuffer) {
-      setBuffer(this.targetLayerId, this.movePreviewBuffer);
-      registerWholeChange(this.targetLayerId, beforeBuffer, this.movePreviewBuffer.slice());
-      const patch = flushPatch(this.targetLayerId);
-      if (patch) {
-        projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
-      }
+    setBuffer(this.targetLayerId, this.movePreviewBuffer);
+    registerWholeChange(this.targetLayerId, this.movePreviewBuffer.slice());
+    const patch = flushPatch(this.targetLayerId);
+    if (patch) {
+      projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
     }
 
     // Emit the commit event

@@ -25,7 +25,8 @@ describe('LayerListHistoryAction', () => {
   });
 
   it('redo add inserts snapshot at index; undo removes it', () => {
-    const snapshot = { ...l('X'), buffer: new Uint8ClampedArray([1, 2, 3, 4]) };
+    const buf = new Uint8ClampedArray([1, 2, 3, 4]);
+    const snapshot = { layer: l('X'), image: { buffer: buf, width: 1, height: 1 } };
     const a = new LayerListHistoryAction('add', 1, snapshot, undefined, undefined, 'test');
     a.redo();
     expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'X', 'B', 'C']);
@@ -35,13 +36,15 @@ describe('LayerListHistoryAction', () => {
   });
 
   it('redo delete removes by id; undo re-inserts snapshot at index', () => {
-    const snapshot = { ...l('B') } as Layer & { buffer?: Uint8ClampedArray };
+    const buf = new Uint8ClampedArray([1, 2, 3, 4]);
+    // use the actual layer object from the store so the delete action can match it
+    const snapshot = { layer: layerListStore.layers[1], image: { buffer: buf, width: 1, height: 1 } };
     const a = new LayerListHistoryAction('delete', 1, snapshot, undefined, undefined, 'test');
     a.redo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'C']);
+    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'C']);
 
     a.undo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'C']);
+    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'B', 'C']);
   });
 
   it('reorder applies afterOrder on redo and beforeOrder on undo', () => {

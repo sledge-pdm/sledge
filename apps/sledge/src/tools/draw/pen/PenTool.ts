@@ -1,12 +1,12 @@
-import { putShape, putShapeLine } from '@sledge/anvil';
+import { packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { PixelPatchData } from 'node_modules/@sledge/anvil/src/types/patch/pixel';
 import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
 import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { getPresetOf } from '~/features/tool/ToolController';
 import { ShapeStore } from '~/tools/draw/pen/ShapeStore';
+import { StrokeChunk } from '~/tools/draw/pen/StrokeChunk';
 import { AnvilToolContext, ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/tools/Tools';
 
@@ -23,31 +23,7 @@ export class PenTool implements ToolBehavior {
   startPointerPosition: Vec2 | undefined = undefined;
 
   shapeStore = new ShapeStore();
-
-  // key=x,y
-  diffsWhileStroke: Map<string, PixelPatchData> = new Map();
-  strokeBoundBox: { minX: number; minY: number; maxX: number; maxY: number } | undefined = undefined;
-
-  addStrokeDiffs(diffs: PixelPatchData[]) {
-    diffs?.forEach((d) => {
-      const k = `${d.x},${d.y}`;
-      // すでにある場合はそのbeforeを持ってくる
-      const pastDiff = this.diffsWhileStroke.get(k);
-      if (pastDiff) d.before = pastDiff.before;
-
-      this.diffsWhileStroke.set(k, d);
-
-      // bounding box 更新
-      if (!this.strokeBoundBox) {
-        this.strokeBoundBox = { minX: d.x, minY: d.y, maxX: d.x, maxY: d.y };
-      } else {
-        if (d.x < this.strokeBoundBox.minX) this.strokeBoundBox.minX = d.x;
-        if (d.y < this.strokeBoundBox.minY) this.strokeBoundBox.minY = d.y;
-        if (d.x > this.strokeBoundBox.maxX) this.strokeBoundBox.maxX = d.x;
-        if (d.y > this.strokeBoundBox.maxY) this.strokeBoundBox.maxY = d.y;
-      }
-    });
-  }
+  strokeChunk = new StrokeChunk();
 
   centerPosition(rawPos: Vec2, size: number): Vec2 {
     const even = size % 2 === 0;
@@ -74,8 +50,7 @@ export class PenTool implements ToolBehavior {
       };
 
     this.lastPreviewDiff = [];
-    this.diffsWhileStroke = new Map();
-    this.strokeBoundBox = undefined;
+    this.strokeChunk.clear();
 
     // バッチモード開始 (stroke 全体をまとめる). レイヤが変わる可能性はほぼ無い前提で開始。
     const layer = activeLayer();
@@ -136,7 +111,7 @@ export class PenTool implements ToolBehavior {
     const cp = this.centerPosition(rawPosition, size);
 
     const diffs = putShape({ anvil, posX: cp.x, posY: cp.y, shape: this.shapeStore.get(shape, size)!, color, manualDiff: true });
-    if (diffs) this.addStrokeDiffs(diffs);
+    if (diffs) this.strokeChunk.add(anvil.getWidth(), diffs);
 
     if (rawLastPosition !== undefined) {
       const fromCp = this.centerPosition(rawLastPosition, size);
@@ -150,7 +125,7 @@ export class PenTool implements ToolBehavior {
         color,
         manualDiff: true,
       });
-      if (diffs) this.addStrokeDiffs(diffs);
+      if (diffs) this.strokeChunk.add(anvil.getWidth(), diffs);
     }
 
     return {
@@ -218,7 +193,7 @@ export class PenTool implements ToolBehavior {
     });
     if (diffs) {
       if (commit) {
-        this.addStrokeDiffs(diffs);
+        this.strokeChunk.add(anvil.getWidth(), diffs);
       } else {
         this.lastPreviewDiff = diffs;
       }
@@ -249,8 +224,8 @@ export class PenTool implements ToolBehavior {
     // diff をまとめて登録
     const anvil = getAnvilOf(layerId);
     if (anvil) {
-      if (this.strokeBoundBox) {
-        const bbox = this.strokeBoundBox;
+      const bbox = this.strokeChunk.boundBox;
+      if (bbox) {
         const w = bbox.maxX - bbox.minX + 1;
         const h = bbox.maxY - bbox.minY + 1;
         const swapBuffer = new Uint8ClampedArray(w * h * 4);
@@ -265,21 +240,31 @@ export class PenTool implements ToolBehavior {
             swapBuffer.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
           }
           // ストロークによる変更を適用して「変更前の状態」を作成
-          for (const diff of this.diffsWhileStroke.values()) {
-            const lx = diff.x - bbox.minX;
-            const ly = diff.y - bbox.minY;
-            const di = (lx + ly * w) * 4;
-            swapBuffer[di] = diff.before[0];
-            swapBuffer[di + 1] = diff.before[1];
-            swapBuffer[di + 2] = diff.before[2];
-            swapBuffer[di + 3] = diff.before[3];
+          for (const [layerIdx, diff] of this.strokeChunk.diffs) {
+            // layerIdx からピクセル座標を逆算
+            const pixelIdx = layerIdx / 4;
+            const x = pixelIdx % layerWidth;
+            const y = Math.floor(pixelIdx / layerWidth);
+
+            // bbox内でのローカル座標に変換
+            const localX = x - bbox.minX;
+            const localY = y - bbox.minY;
+            const localIdx = (localX + localY * w) * 4;
+
+            // packed RGBA32 を RGBA 成分に展開して swapBuffer に書き込み
+            const [r, g, b, a] = packedU32ToRgba(diff.before);
+
+            swapBuffer[localIdx] = r;
+            swapBuffer[localIdx + 1] = g;
+            swapBuffer[localIdx + 2] = b;
+            swapBuffer[localIdx + 3] = a;
           }
           anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
           anvil.endBatch();
         }
       }
     }
-    this.strokeBoundBox = undefined;
+    this.strokeChunk.clear();
 
     return {
       result: resultText,
@@ -304,8 +289,7 @@ export class PenTool implements ToolBehavior {
     // diff 破棄 & バッチ終了(変更はプレビューのみなので endBatch 前に discard されているような構造)
     const anvil = getAnvilOf(args.layerId);
     anvil?.endBatch();
-    this.strokeBoundBox = undefined;
-    this.diffsWhileStroke = new Map();
+    this.strokeChunk.clear();
 
     return {
       shouldUpdate: false,

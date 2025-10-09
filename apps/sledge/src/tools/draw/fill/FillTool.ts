@@ -90,8 +90,7 @@ export class FillTool implements ToolBehavior {
       }
     }
 
-    const after = getBufferCopy(ctx.layerId);
-    if (before && after) registerWholeChange(ctx.layerId, before, after);
+    if (before) registerWholeChange(ctx.layerId, before);
 
     const endTime = Date.now();
 

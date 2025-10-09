@@ -52,7 +52,7 @@ export class PenTool implements ToolBehavior {
     // diffMode 切替判定（閾値 10000 ピクセル）: 既に partial の場合は何もしない
     if (this.diffMode === 'pixels') {
       const count = this.diffsWhileStroke.size;
-      if (count >= 10000) {
+      if (count >= 1000) {
         this.diffMode = 'partial';
       }
     }
@@ -269,39 +269,33 @@ export class PenTool implements ToolBehavior {
         anvil.addPixelDiffs(Array.from(this.diffsWhileStroke.values()));
         anvil.endBatch();
       } else {
-        // big change = partial buffer diff
+        // big change = partial buffer diff (swap method)
         if (this.strokeBoundBox) {
           const bbox = this.strokeBoundBox;
           const w = bbox.maxX - bbox.minX + 1;
           const h = bbox.maxY - bbox.minY + 1;
-          const before = new Uint8ClampedArray(w * h * 4);
-          const after = new Uint8ClampedArray(w * h * 4);
+          const swapBuffer = new Uint8ClampedArray(w * h * 4);
           // Layer全体バッファ取得
           const layerBuffer = getBufferPointer(layerId);
           const layerWidth = getWidth(layerId);
           if (layerBuffer && layerWidth) {
-            // まず after を現バッファから丸ごとコピー
+            // 現バッファから変更前の状態を取得・保存
             for (let yy = 0; yy < h; yy++) {
               const srcRowStart = (bbox.minX + (bbox.minY + yy) * layerWidth) * 4;
               const dstRowStart = yy * w * 4;
-              after.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
+              swapBuffer.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
             }
-            // 未変更領域は after と同一なので最初にコピーしてから変更ピクセルの before を上書き
-            before.set(after);
+            // ストロークによる変更を適用して「変更前の状態」を作成
             for (const diff of this.diffsWhileStroke.values()) {
               const lx = diff.x - bbox.minX;
               const ly = diff.y - bbox.minY;
               const di = (lx + ly * w) * 4;
-              before[di] = diff.before[0];
-              before[di + 1] = diff.before[1];
-              before[di + 2] = diff.before[2];
-              before[di + 3] = diff.before[3];
+              swapBuffer[di] = diff.before[0];
+              swapBuffer[di + 1] = diff.before[1];
+              swapBuffer[di + 2] = diff.before[2];
+              swapBuffer[di + 3] = diff.before[3];
             }
-            anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, before, after);
-            anvil.endBatch();
-          } else {
-            // フォールバック: pixel diff に戻す
-            anvil.addPixelDiffs(Array.from(this.diffsWhileStroke.values()));
+            anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
             anvil.endBatch();
           }
         } else {

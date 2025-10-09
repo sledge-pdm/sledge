@@ -18,7 +18,7 @@ export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, optio
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Apply FX for ${layerId}` });
     eventBus.emit('preview:requestUpdate', { layerId: layerId });
 
-    registerWholeChange(layerId, originalBuffer, anvil.getBufferData());
+    registerWholeChange(layerId, originalBuffer);
 
     const patch = flushPatch(layerId);
     if (patch) {

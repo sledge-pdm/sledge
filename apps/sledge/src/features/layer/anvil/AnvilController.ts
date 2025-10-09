@@ -20,11 +20,11 @@ export function setBuffer(layerId: string, buffer: Uint8ClampedArray) {
   anvil.replaceBuffer(buffer);
 }
 
-// Whole buffer diff 登録 (clear, FX など)
-export function registerWholeChange(layerId: string, before: Uint8ClampedArray, after: Uint8ClampedArray) {
+// Whole buffer diff 登録 (clear, FX など) - swap method
+export function registerWholeChange(layerId: string, swapBuffer: Uint8ClampedArray) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return;
-  anvil.addWholeDiff(before, after);
+  anvil.addWholeDiff(swapBuffer);
 }
 
 export function setPixel(layerId: string, x: number, y: number, rgba: [number, number, number, number]) {

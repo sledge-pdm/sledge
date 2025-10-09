@@ -27,6 +27,8 @@ export type Events = {
   'imagePool:entryPropChanged': { id: string };
 
   'webgl:requestUpdate': { onlyDirty: boolean; context: string };
+  'webgl:requestResume': {};
+  'webgl:renderPaused': {};
 
   'preview:requestUpdate': { layerId?: string };
 

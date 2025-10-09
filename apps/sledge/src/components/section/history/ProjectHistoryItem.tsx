@@ -101,7 +101,7 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
     case 'layer_list':
       icon = '/icons/misc/layer.png';
       const llaction = action as LayerListHistoryAction;
-      description = `${llaction.kind} / ${llaction.layerSnapshot?.name}`;
+      description = `${llaction.kind} / ${llaction.packedSnapshot?.layer.name}`;
       break;
     case 'layer_buffer': {
       const anvilAction = action as AnvilLayerHistoryAction;

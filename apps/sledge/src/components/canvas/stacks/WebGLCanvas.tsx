@@ -1,6 +1,5 @@
-import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { allLayers } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -8,14 +7,6 @@ import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { listenEvent } from '~/utils/TauriUtils';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
-
-const errorOverlayContent = css`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-`;
 
 export let webGLRenderer: WebGLRenderer | undefined;
 
@@ -52,9 +43,15 @@ const WebGLCanvas: Component = () => {
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
-    console.log('[WebGLCanvas] Requesting update:', e.context);
+    /* console.log('[WebGLCanvas] Requesting update:', e.context); */
     setUpdateRender(true);
     setOnlyDirtyUpdate(e.onlyDirty);
+  };
+
+  const handleResumeRequest = (e: Events['webgl:requestResume']) => {
+    if (!isRunning()) {
+      init();
+    }
   };
 
   const init = () => {
@@ -64,21 +61,19 @@ const WebGLCanvas: Component = () => {
     }
 
     const { width, height } = canvasStore.canvas;
-    startRenderLoop();
-    console.log('WebGLCanvas: Starting render loop');
     try {
       webGLRenderer = new WebGLRenderer(canvasEl);
       webGLRenderer?.setLayers(allLayers());
       webGLRenderer.resize(width, height);
-      setUpdateRender(true); // rise flag for init render
       setOnlyDirtyUpdate(false);
+      setUpdateRender(true); // rise flag for init render
+
+      startRenderLoop();
+      console.log('WebGLCanvas: Starting render loop');
     } catch (error) {
       console.error('WebGLCanvas: Failed to initialize WebGLRenderer', error);
       webGLRenderer = undefined;
     }
-
-    eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
-    eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
   };
 
   listenEvent('onSetup', () => {
@@ -90,6 +85,18 @@ const WebGLCanvas: Component = () => {
     webGLRenderer?.setLayers(layers);
   });
 
+  createEffect(() => {
+    if (!isRunning()) {
+      eventBus.emit('webgl:renderPaused', {});
+    }
+  });
+
+  onMount(() => {
+    eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+    eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
+    eventBus.on('webgl:requestResume', handleResumeRequest);
+  });
+
   onCleanup(() => {
     if (import.meta.hot) return;
     webGLRenderer?.dispose();
@@ -97,6 +104,7 @@ const WebGLCanvas: Component = () => {
     stopRenderLoop();
     eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
     eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
+    eventBus.off('webgl:requestResume', handleResumeRequest);
   });
 
   const imageRendering = () => {
@@ -116,33 +124,6 @@ const WebGLCanvas: Component = () => {
           'z-index': 'var(--zindex-webgl-canvas)',
         }}
       />
-
-      <Show when={!isRunning()}>
-        <div
-          style={{
-            position: 'absolute',
-            width: `${canvasStore.canvas.width}px`,
-            height: `${canvasStore.canvas.height}px`,
-            'background-color': '#00000050',
-            'z-index': 'var(--zindex-canvas-error-overlay)',
-          }}
-        >
-          <div
-            class={errorOverlayContent}
-            style={{
-              width: `${canvasStore.canvas.width}px`,
-              height: `${canvasStore.canvas.height}px`,
-              // 'transform-origin': '0 0',
-              transform: `scale(${2 / interactStore.zoom})`,
-            }}
-          >
-            <p style={{ 'white-space': 'nowrap' }}>Render Paused.</p>
-            <button onClick={init} style={{ 'white-space': 'nowrap' }}>
-              RESTART
-            </button>
-          </div>
-        </div>
-      </Show>
     </>
   );
 };

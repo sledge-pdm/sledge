@@ -52,7 +52,7 @@ export function fillRect(layerId: string, x: number, y: number, w: number, h: nu
 export function flushPatch(layerId: string): PackedDiffs | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;
-  const raw = anvil.flush();
+  const raw = anvil.flushDiffs();
   if (raw) {
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${layerId}) flush` });
     eventBus.emit('preview:requestUpdate', { layerId });

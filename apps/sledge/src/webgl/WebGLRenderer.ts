@@ -14,7 +14,6 @@ const MAX_LAYERS = 16;
 const LOG_LABEL = 'WebGLRenderer';
 const logger = new DebugLogger(LOG_LABEL, false);
 
-// エラーチェック最適化: 開発環境でのみ有効化し、さらに細かく制御
 const CHECK_ERROR = import.meta.env.DEV && false; // 通常は無効、デバッグ時のみ手動で有効化
 const CHECK_ERROR_BATCH = import.meta.env.DEV && false; // バッチエラーチェック（軽量）
 
@@ -268,10 +267,9 @@ export class WebGLRenderer {
 
       const anvil = getAnvilOf(layer.id);
       if (!anvil) return;
-      const buf =
-        layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving()
-          ? floatingMoveManager.getPreviewBuffer()
-          : getBufferPointer(layer.id);
+      const usePreviewBuffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving();
+      console.log(usePreviewBuffer);
+      const buf = usePreviewBuffer ? floatingMoveManager.getPreviewBuffer() : getBufferPointer(layer.id);
       if (!buf) return;
 
       // バッファサイズの整合性をチェック
@@ -300,9 +298,6 @@ export class WebGLRenderer {
       const tileSize = anvil.getTileSize();
 
       // Calculate dirty pixels coverage as percentage
-      // dirtyTiles.length = number of dirty tiles
-      // tileSize * tileSize = pixels per tile
-      // this.width * this.height = total canvas pixels
       const dirtyPixelsCount = dirtyTiles.length * tileSize * tileSize;
       const totalPixelsCount = this.width * this.height;
       const dirtyTilesCoverage = (dirtyPixelsCount / totalPixelsCount) * 100;

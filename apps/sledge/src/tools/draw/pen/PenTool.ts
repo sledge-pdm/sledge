@@ -48,11 +48,6 @@ export class PenTool implements ToolBehavior {
     this.lastPreviewDiff = [];
     this.strokeChunk.clear();
 
-    // バッチモード開始 (stroke 全体をまとめる). レイヤが変わる可能性はほぼ無い前提で開始。
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
-    anvil?.beginBatch();
-
     if (!this.isShift) {
       return this.draw(ctx, args, args.color);
     } else {
@@ -134,18 +129,12 @@ export class PenTool implements ToolBehavior {
     // 前回のプレビューが残っていた場合はundo
     if (this.lastPreviewDiff.length === 0) return;
     try {
-      const target = getBufferPointer(layerId);
-      const tw = getWidth(layerId);
-      if (!target || !tw) return;
+      const layer = activeLayer();
+      const anvil = layer ? getAnvilOf(layer.id) : undefined;
+      if (!anvil) return;
 
       for (const diff of this.lastPreviewDiff) {
-        // apply 'before' color; skipExistingDiffCheck=true to ensure applying
-        // ctx.setPixel(diff.x, diff.y, diff.before);
-        const idx = (diff.x + diff.y * tw) * 4;
-        target[idx] = diff.color[0];
-        target[idx + 1] = diff.color[1];
-        target[idx + 2] = diff.color[2];
-        target[idx + 3] = diff.color[3];
+        anvil.setPixel(diff.x, diff.y, diff.color);
       }
     } catch (error) {
       console.error('Failed to undo line preview:', error);
@@ -217,7 +206,6 @@ export class PenTool implements ToolBehavior {
     this.startPosition = undefined;
     this.lastPreviewDiff = [];
 
-    // diff をまとめて登録
     const anvil = getAnvilOf(layerId);
     if (anvil) {
       const bbox = this.strokeChunk.boundBox;
@@ -226,7 +214,6 @@ export class PenTool implements ToolBehavior {
         const h = bbox.maxY - bbox.minY + 1;
         if (w <= 0 || h <= 0) {
           console.warn('Invalid bbox dimensions:', { w, h, bbox });
-          anvil.endBatch();
           this.strokeChunk.clear();
           return { result: resultText, shouldUpdate: true, shouldRegisterToHistory: true };
         }
@@ -262,7 +249,6 @@ export class PenTool implements ToolBehavior {
             swapBuffer[localIdx + 3] = a;
           }
           anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
-          anvil.endBatch();
         }
       }
     }
@@ -287,9 +273,6 @@ export class PenTool implements ToolBehavior {
 
     this.lastPreviewDiff = [];
 
-    // diff 破棄 & バッチ終了(変更はプレビューのみなので endBatch 前に discard されているような構造)
-    const anvil = getAnvilOf(args.layerId);
-    anvil?.endBatch();
     this.strokeChunk.clear();
 
     return {

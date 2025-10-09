@@ -15,8 +15,6 @@ export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, optio
   if (anvil) {
     const originalBuffer = anvil.getImageData().slice();
     EFFECTS[effect](new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight(), options);
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Apply FX for ${layerId}` });
-    eventBus.emit('preview:requestUpdate', { layerId: layerId });
 
     registerWholeChange(layerId, originalBuffer);
 
@@ -24,5 +22,7 @@ export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, optio
     if (patch) {
       projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch, { tool: 'fx', fxName: effect }));
     }
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Apply FX for ${layerId}` });
+    eventBus.emit('preview:requestUpdate', { layerId: layerId });
   }
 }

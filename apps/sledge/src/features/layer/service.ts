@@ -204,7 +204,7 @@ export const addLayerTo = (
   setLayerListStore('layers', layers);
   setActiveLayerId(newLayer.id);
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${newLayer.id}) added` });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${newLayer.id}) added` });
 
   if (!options?.noDiff) {
     // push history (add) with snapshot including optional buffer

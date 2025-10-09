@@ -2,7 +2,7 @@ import { Anvil } from '@sledge/anvil';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { fillRect, flushPatch, registerWholeChange, setPixel } from '~/features/layer/anvil/AnvilController';
+import { fillRect, flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf, registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
 
 vi.mock('~/features/selection/FloatingMoveManager', () => ({
@@ -28,9 +28,15 @@ describe('AnvilLayerHistoryAction', () => {
     const originalCopy = before.slice();
     const after = before.slice();
     after.fill(128);
-    registerWholeChange(layerId, originalCopy, after);
-    const patch = flushPatch(layerId)!;
-    const action = new AnvilLayerHistoryAction(layerId, patch);
+
+    // Apply the change to the actual buffer first
+    anvil.replaceBuffer(after);
+    // Then register the original buffer as swap buffer for undo
+    anvil.addWholeDiff(originalCopy);
+
+    const patch = flushPatch(layerId);
+    expect(patch).not.toBeNull();
+    const action = new AnvilLayerHistoryAction(layerId, patch!);
 
     // apply redo (already applied logically, but test revert path)
     action.undo();

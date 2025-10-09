@@ -282,9 +282,7 @@ export class WebGLRenderer {
       const dirtyTiles = getDirtyTiles(layer.id);
       if (onlyDirty && dirtyTiles.length !== 0) {
         logger.debugLog(`🔧 Processing ${dirtyTiles.length} dirty tiles for layer ${i}`);
-        // dirtyなタイルがなければフォールバック
         dirtyTiles.forEach((tile) => {
-          // 差分アップデート - WASM関数を使って高速化
           const tileSize = anvil?.getTileSize() ?? 0;
           const col = (tile as any).col;
           const row = (tile as any).row;

@@ -91,8 +91,8 @@ export function clearLayer(layerId: string) {
   const h = getHeight(layerId);
   if (!before || w == null || h == null) return;
   const after = new Uint8ClampedArray(w * h * 4);
-  registerWholeChange(layerId, before, after);
   setBuffer(layerId, after);
+  registerWholeChange(layerId, before);
   const patch = flushPatch(layerId);
   if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch, { tool: 'clear' }));
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) cleared` });

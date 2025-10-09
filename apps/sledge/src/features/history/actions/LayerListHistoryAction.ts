@@ -1,3 +1,4 @@
+import { rawToWebp, webpToRaw } from '@sledge/anvil';
 import type { Layer } from '~/features/layer';
 import { removeLayer } from '~/features/layer';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -13,32 +14,54 @@ export interface LayerSnapshot {
     height: number;
   };
 }
+export interface PackedLayerSnapshot {
+  layer: Layer;
+  image?: {
+    webpBuffer: Uint8Array;
+    width: number;
+    height: number;
+  };
+}
 
 export class LayerListHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_list' as const;
+  readonly packedSnapshot: PackedLayerSnapshot | undefined;
 
   constructor(
     public readonly kind: 'add' | 'delete' | 'reorder',
     public readonly index: number,
-    public readonly layerSnapshot?: LayerSnapshot,
+    layerSnapshot?: LayerSnapshot,
     public readonly beforeOrder?: string[],
     public readonly afterOrder?: string[],
     context?: any
   ) {
     super(context);
+
+    if (layerSnapshot?.image) {
+      const image = layerSnapshot.image;
+      const webpBuffer = rawToWebp(new Uint8Array(image.buffer.buffer), image.width, image.height);
+      this.packedSnapshot = {
+        layer: layerSnapshot.layer,
+        image: {
+          webpBuffer,
+          width: image.width,
+          height: image.height,
+        },
+      };
+    }
   }
 
   undo(): void {
     switch (this.kind) {
       case 'add': {
-        const id = this.layerSnapshot?.layer.id;
+        const id = this.packedSnapshot?.layer.id;
         if (!id) return;
         removeLayer(id, { noDiff: true });
         break;
       }
       case 'delete': {
-        if (!this.layerSnapshot) return;
-        insertAt(this.index, this.layerSnapshot);
+        if (!this.packedSnapshot) return;
+        insertAt(this.index, this.packedSnapshot);
         break;
       }
       case 'reorder': {
@@ -52,12 +75,12 @@ export class LayerListHistoryAction extends BaseHistoryAction {
   redo(): void {
     switch (this.kind) {
       case 'add': {
-        if (!this.layerSnapshot) return;
-        insertAt(this.index, this.layerSnapshot);
+        if (!this.packedSnapshot) return;
+        insertAt(this.index, this.packedSnapshot);
         break;
       }
       case 'delete': {
-        const id = this.layerSnapshot?.layer.id ?? layerListStore.layers[this.index]?.id;
+        const id = this.packedSnapshot?.layer.id ?? layerListStore.layers[this.index]?.id;
         if (!id) return;
         removeLayer(id, { noDiff: true });
         break;
@@ -71,14 +94,15 @@ export class LayerListHistoryAction extends BaseHistoryAction {
   }
 }
 
-function insertAt(index: number, snapshot: LayerSnapshot) {
+function insertAt(index: number, snapshot: PackedLayerSnapshot) {
   const arr = [...layerListStore.layers];
   arr.splice(index, 0, snapshot.layer);
   setLayerListStore('layers', arr);
   if (snapshot.image) {
     const anvil = getAnvilOf(snapshot.layer.id);
-    if (anvil) anvil.replaceBuffer(snapshot.image.buffer);
-    else anvilManager.registerAnvil(snapshot.layer.id, snapshot.image.buffer, snapshot.image.width, snapshot.image.height);
+    const rawBuffer = new Uint8ClampedArray(webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height).buffer);
+    if (anvil) anvil.replaceBuffer(rawBuffer);
+    else anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
   }
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${snapshot.layer.id}) inserted` });
   eventBus.emit('preview:requestUpdate', { layerId: snapshot.layer.id });

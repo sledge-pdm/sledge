@@ -199,7 +199,7 @@ export const setRotation = (rotation: number) => {
   let r = rotation % 360; // JS の % は符号を保持する
   if (r > 180) r -= 360; // 181..359 -> -179..-1
   if (r <= -180) r += 360; // ... -360..-180 -> 0..180 ( -180 は 180 に統一 )
-  r = Math.round(r);
+  r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
 

@@ -1,11 +1,11 @@
 import { packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { PixelPatchData } from 'node_modules/@sledge/anvil/src/types/patch/pixel';
 import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
 import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { getPresetOf } from '~/features/tool/ToolController';
+import { LineChunk } from '~/tools/draw/pen/LineChunk';
 import { ShapeStore } from '~/tools/draw/pen/ShapeStore';
 import { StrokeChunk } from '~/tools/draw/pen/StrokeChunk';
 import { AnvilToolContext, ToolArgs, ToolBehavior, ToolResult } from '~/tools/ToolBehavior';
@@ -18,12 +18,12 @@ export class PenTool implements ToolBehavior {
   startTime: number | undefined = undefined;
   isShift: boolean = false;
   isCtrl: boolean = false;
-  private lastPreviewDiff: Array<PixelPatchData> = [];
 
   startPosition: Vec2 | undefined = undefined;
-  // startPointerPosition は使用されていないため削除
 
   shapeStore = new ShapeStore();
+
+  lineChunk = new LineChunk();
   strokeChunk = new StrokeChunk();
 
   centerPosition(rawPos: Vec2, size: number): Vec2 {
@@ -35,23 +35,26 @@ export class PenTool implements ToolBehavior {
 
   onStart(ctx: AnvilToolContext, args: ToolArgs) {
     // 前回の状態が残っている場合はクリーンアップ
-    if (this.lastPreviewDiff.length > 0) {
+    if (this.lineChunk.getBoundingBox()) {
       console.warn('PenTool: Cleaning up previous preview state');
-      this.undoLastLineDiff(args.layerId);
+      this.undoLastLineDiff();
     }
 
     this.startTime = Date.now();
-    this.isShift = args.event?.shiftKey ?? false;
     this.isCtrl = args.event?.ctrlKey ?? false;
     this.startPosition = args.rawPosition;
 
-    this.lastPreviewDiff = [];
     this.strokeChunk.clear();
 
-    if (!this.isShift) {
-      return this.draw(ctx, args, args.color);
-    } else {
+    if (args.event?.shiftKey) {
+      this.isShift = true;
+      const anvil = getAnvilOf(args.layerId);
+      if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
+      this.lineChunk.start(anvil.getImageData(), anvil.getWidth(), anvil.getHeight());
       return this.drawLine(false, ctx, args, args.color);
+    } else {
+      this.isShift = false;
+      return this.draw(ctx, args, args.color);
     }
   }
 
@@ -125,22 +128,16 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  private undoLastLineDiff(layerId: string) {
-    // 前回のプレビューが残っていた場合はundo
-    if (this.lastPreviewDiff.length === 0) return;
-    try {
-      const layer = activeLayer();
-      const anvil = layer ? getAnvilOf(layer.id) : undefined;
-      if (!anvil) return;
+  private undoLastLineDiff() {
+    const layer = activeLayer();
+    const anvil = layer ? getAnvilOf(layer.id) : undefined;
+    if (!anvil) return;
 
-      for (const diff of this.lastPreviewDiff) {
-        anvil.setPixel(diff.x, diff.y, diff.color);
-      }
-    } catch (error) {
-      console.error('Failed to undo line preview:', error);
-    } finally {
-      this.lastPreviewDiff = [];
-    }
+    const patch = this.lineChunk.getPatch();
+    if (patch) anvil.setPartialBuffer(patch.bbox, patch.patch);
+    anvil.setAllDirty();
+
+    this.lineChunk.resetBoundary();
   }
 
   // 始点からの直線を描画
@@ -151,7 +148,7 @@ export class PenTool implements ToolBehavior {
       color = transparent;
     }
 
-    this.undoLastLineDiff(layerId);
+    this.undoLastLineDiff();
 
     // ctrl+shiftの場合は角度固定
     const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(rawPosition, this.startPosition) : rawPosition;
@@ -180,7 +177,9 @@ export class PenTool implements ToolBehavior {
       if (commit) {
         this.strokeChunk.add(anvil.getWidth(), diffs);
       } else {
-        this.lastPreviewDiff = diffs;
+        diffs.forEach((d) => {
+          this.lineChunk.add(d.x, d.y);
+        });
       }
     }
 
@@ -204,7 +203,7 @@ export class PenTool implements ToolBehavior {
     this.isShift = false;
     this.isCtrl = false;
     this.startPosition = undefined;
-    this.lastPreviewDiff = [];
+    this.lineChunk.clear();
 
     const anvil = getAnvilOf(layerId);
     if (anvil) {
@@ -263,7 +262,7 @@ export class PenTool implements ToolBehavior {
 
   onCancel(ctx: AnvilToolContext, args: ToolArgs) {
     if (this.isShift) {
-      this.undoLastLineDiff(args.layerId);
+      this.undoLastLineDiff();
     }
 
     this.isShift = false;
@@ -271,8 +270,7 @@ export class PenTool implements ToolBehavior {
     this.startPosition = undefined;
     this.startTime = undefined;
 
-    this.lastPreviewDiff = [];
-
+    this.lineChunk.clear();
     this.strokeChunk.clear();
 
     return {

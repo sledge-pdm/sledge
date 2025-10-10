@@ -2,6 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { applyTheme } from '@sledge/theme';
 import { MetaProvider } from '@solidjs/meta';
 import { Navigate, Route, Router } from '@solidjs/router';
+import { inject } from '@vercel/analytics';
 import { createEffect, onMount, Suspense, type Component } from 'solid-js';
 import Header from '~/components/Header';
 import ThemeToggle from '~/components/ThemeToggle';
@@ -104,6 +105,7 @@ import '@sledge/theme/src/global.css';
 
 const App: Component = () => {
   onMount(() => {
+    inject();
     applyThemeToHtml();
   });
 

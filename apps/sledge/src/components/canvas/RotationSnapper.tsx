@@ -4,6 +4,8 @@
 // After threshold is exceeded once in that gesture, all subsequent rotations are passed through.
 // If gesture starts from a non-zero angle, rotations are applied immediately (no gating).
 
+import { Consts } from '~/Consts';
+
 const THRESHOLD_DEG = 5; // Minimum deviation from baseline needed to start applying rotation
 const NEAR_ZERO_EPS = 0.01; // Values within this of 0 are treated as exactly 0
 
@@ -11,6 +13,7 @@ function normalizeDeg(a: number): number {
   let r = a % 360;
   if (r > 180) r -= 360;
   if (r <= -180) r += 360;
+  r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
   return r;
 }
 

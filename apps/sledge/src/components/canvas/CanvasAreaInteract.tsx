@@ -340,7 +340,9 @@ class CanvasAreaInteract {
     const angleNew = Math.atan2(p1.y - p0.y, p1.x - p0.x);
     const deltaRad = angleNew - this.lastAppliedAngle;
     const rotOldDeg = interactStore.rotation;
-    const rotCandidate = Math.round(rotOldDeg + (deltaRad * 180) / Math.PI) % 360;
+    const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
+    const rotCandidate =
+      Math.round(rotCandidateRaw * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
 
     const rotProcessed = this.rotationSnapper.process(rotCandidate);
 

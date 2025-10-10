@@ -16,7 +16,7 @@ import {
   setLayerName,
 } from '~/features/layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { flexCol, flexRow } from '~/styles/StyleSnippets';
+import { flexCol, flexRow } from '~/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const layerItem = css`

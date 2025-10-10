@@ -1,13 +1,14 @@
+import { rawToWebp, webpToRaw } from '@sledge/anvil';
 import { Size2D } from '@sledge/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers } from '~/features/layer';
-import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
+import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction } from '../base';
 
-type LayerBufferSnapshot = { layerId: string; dotMag: number; buffer: Uint8ClampedArray };
+type LayerBufferSnapshot = { layerId: string; dotMag: number; webpBuffer: Uint8Array };
 
 // history action for canvas size changes including full buffer restoration per layer
 export class CanvasSizeHistoryAction extends BaseHistoryAction {
@@ -27,13 +28,14 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   createSnapshots() {
     return allLayers().map((l) => {
-      const buf = getBufferCopy(l.id);
       const w = Math.round(canvasStore.canvas.width / l.dotMagnification);
       const h = Math.round(canvasStore.canvas.height / l.dotMagnification);
+      const buf = getBufferPointer(l.id) ?? new Uint8ClampedArray(w * h * 4);
+      const webp = rawToWebp(new Uint8Array(buf.buffer), w, h);
       return {
         layerId: l.id,
         dotMag: l.dotMagnification,
-        buffer: buf ? new Uint8ClampedArray(buf) : new Uint8ClampedArray(w * h * 4),
+        webpBuffer: webp,
       };
     });
   }
@@ -79,7 +81,8 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
     for (const snap of snapshots) {
       const anvil = getAnvilOf(snap.layerId);
       if (!anvil) continue;
-      anvil.replaceBuffer(snap.buffer, size.width, size.height);
+      const buffer = webpToRaw(snap.webpBuffer, size.width, size.height);
+      anvil.replaceBuffer(new Uint8ClampedArray(buffer.buffer), size.width, size.height);
     }
   }
 }

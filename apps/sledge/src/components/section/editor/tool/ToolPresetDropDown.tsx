@@ -1,7 +1,7 @@
 import { Dropdown } from '@sledge/ui';
 import { Component } from 'solid-js';
+import { ToolCategoryId } from '~/features/tools/Tools';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { ToolCategoryId } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
 interface Props {

@@ -3,7 +3,7 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
 import { fileStore } from '~/stores/EditorStores';
 import { join } from '~/utils/FileUtils';
-import { sectionSubCaption } from '../../SectionStyles';
+import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
 const locationHeaderStyle = css`
   display: flex;
@@ -16,10 +16,6 @@ const explorerLinkStyle = css`
   color: var(--color-muted);
   text-decoration: none;
   font-family: ZFB03;
-`;
-
-const locationContentStyle = css`
-  padding-left: 4px;
 `;
 
 const locationInfoStyle = css`
@@ -68,7 +64,7 @@ const ProjectLocation: Component = () => {
           </a>
         </Show>
       </div>
-      <div class={locationContentStyle}>
+      <div class={sectionSubContent}>
         <div class={locationInfoStyle}>
           <div class={locationRowStyle}>
             <p class={locationLabelStyle}>path</p>

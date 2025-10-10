@@ -1,6 +1,6 @@
 import { getLatestVersion } from '@sledge/core';
 import { getVersion } from '@tauri-apps/api/app';
-import { saveGlobalSettings } from '~/io/config/save';
+import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 export const getReleaseApiUrl = () => {

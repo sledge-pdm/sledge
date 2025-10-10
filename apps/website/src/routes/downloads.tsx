@@ -1,5 +1,5 @@
 import DownloadSection from '~/components/DownloadSection';
-import { heroHeading, pageRoot, scrollContent } from '~/styles/SharedStyles';
+import { heroHeading, pageRoot, scrollContent } from '~/styles';
 
 export function Download() {
   return (

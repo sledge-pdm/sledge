@@ -31,6 +31,7 @@ const layerSelectContainer = css`
   align-items: center;
   gap: 12px;
   margin-left: 16px;
+  margin-bottom: 16px;
 `;
 
 export interface EffectSectionProps {

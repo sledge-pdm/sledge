@@ -13,7 +13,7 @@ import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, onMount } from 'solid-js';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
-import { loadGlobalSettings } from '~/io/config/load';
+import { loadGlobalSettings } from '~/features/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';

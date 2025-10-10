@@ -6,16 +6,14 @@ import { SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { adjustZoomToFit, setOffset, setZoomByReference } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
-import { flexRow } from '~/styles/StyleSnippets';
+import { flexRow } from '~/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const sideSectionControlRoot = css`
   display: flex;
   flex-direction: column;
   box-sizing: content-box;
-  padding-top: 20px;
-  padding-bottom: 16px;
-  width: 23px;
+  padding-bottom: 12px;
   justify-content: start;
   align-items: center;
   background-color: var(--color-background);
@@ -26,14 +24,26 @@ const sideSectionControlList = css`
   flex-direction: column;
   height: 100%;
   align-items: center;
-  gap: 24px;
 `;
 
 const sideSectionControlItem = css`
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: center;
   transform: rotate(180deg);
+  width: 100%;
+  padding: 14px 10px 14px 10px;
+  box-sizing: border-box;
+
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-surface);
+  }
+  &:hover > p {
+    color: var(--color-accent);
+  }
 `;
 
 const sideSectionControlText = css`
@@ -66,25 +76,25 @@ const ControlItem: Component<ItemProps> = (props) => {
     <div
       class={sideSectionControlItem}
       style={{ 'margin-top': props.tab === 'danger' ? 'auto' : undefined, 'margin-bottom': props.tab === 'danger' ? '0px' : undefined }}
+      onClick={() => {
+        if (!appearanceStore[props.side].shown) {
+          setAppearanceStore(props.side, 'shown', true);
+        } else {
+          if (selected()) {
+            setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
+          } else {
+            setAppearanceStore(props.side, 'shown', true);
+          }
+        }
+        setAppearanceStore(props.side, 'selectedIndex', props.index);
+      }}
     >
-      <a
+      <p
         class={selected() ? sideSectionControlTextActive : sideSectionControlText}
         style={{ color: props.tab === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
-        onClick={() => {
-          if (!appearanceStore[props.side].shown) {
-            setAppearanceStore(props.side, 'shown', true);
-          } else {
-            if (selected()) {
-              setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
-            } else {
-              setAppearanceStore(props.side, 'shown', true);
-            }
-          }
-          setAppearanceStore(props.side, 'selectedIndex', props.index);
-        }}
       >
         {props.tab}.
-      </a>
+      </p>
     </div>
   );
 };
@@ -106,9 +116,6 @@ const SideSectionControl: Component<Props> = (props) => {
       id={`side-section-control-${props.side}`}
       class={sideSectionControlRoot}
       style={{
-        'padding-left': '4px',
-        'padding-right': '4px',
-
         'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
         'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
 

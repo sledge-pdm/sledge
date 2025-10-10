@@ -1,7 +1,7 @@
 import { BaseDirectory, exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
+import { ToolCategoryId, ToolPresets } from '~/features/tools/Tools';
 import { setFileStore, setToolStore, toolStore } from '~/stores/EditorStores';
-import { ToolCategoryId, ToolPresets } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 import { pathToFileLocation } from '~/utils/FileUtils';
 

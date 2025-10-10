@@ -3,10 +3,10 @@ import { componentProps } from '@sledge/core';
 import { spacing } from '@sledge/theme';
 import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { getPresetMetaByToolId, PresetFieldMeta } from '~/features/tools/presets';
+import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { flexCol, flexRow } from '~/styles/StyleSnippets';
-import { getPresetMetaByToolId, PresetFieldMeta } from '~/tools/presets';
-import { ToolCategoryId } from '~/tools/Tools';
+import { flexCol, flexRow } from '~/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const label = css`

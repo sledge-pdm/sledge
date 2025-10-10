@@ -11,6 +11,7 @@ import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './CanvasDebugOverlay';
 
 import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
+import CanvasError from '~/components/canvas/overlays/CanvasError';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
@@ -183,6 +184,7 @@ const CanvasArea: Component = () => {
             <CanvasControls />
             <OuterSelectionMenu />
             <CanvasDebugOverlay />
+            <CanvasError />
           </div>
           <BottomInfo />
         </div>

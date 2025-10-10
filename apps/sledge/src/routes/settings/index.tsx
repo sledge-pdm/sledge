@@ -1,7 +1,7 @@
 import { onMount } from 'solid-js';
 import ConfigForm from '~/components/config/ConfigForm';
-import { loadGlobalSettings } from '~/io/config/load';
-import { pageRoot } from '~/styles/StyleSnippets';
+import { loadGlobalSettings } from '~/features/io/config/load';
+import { pageRoot } from '~/styles';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Settings() {

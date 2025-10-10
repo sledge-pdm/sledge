@@ -7,7 +7,7 @@ import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import FileItem, { FilesConfig } from '~/components/section/files/item/FileItem';
-import { openExistingProject } from '~/io/window';
+import { openExistingProject } from '~/features/io/window';
 import { fileStore } from '~/stores/EditorStores';
 import { join, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 

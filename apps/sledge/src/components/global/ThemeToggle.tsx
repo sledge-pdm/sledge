@@ -1,7 +1,7 @@
 import { Theme, themeOptions } from '@sledge/theme';
 import { Dropdown } from '@sledge/ui';
 import { Component } from 'solid-js';
-import { saveGlobalSettings } from '~/io/config/save';
+import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 const ThemeToggle: Component<{ noBackground?: boolean }> = (props) => {

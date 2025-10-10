@@ -7,12 +7,13 @@ import {
   getHeight as getLayerHeight,
   getWidth as getLayerWidth,
   registerWholeChange,
+  setBuffer,
 } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
-import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
@@ -131,7 +132,8 @@ export function deletePixelInSelection(layerId?: string): boolean {
 
   const after = new Uint8ClampedArray(filter_by_selection_mask(new Uint8Array(before), mask, 'outside', width, height));
 
-  registerWholeChange(lid, before, after.slice()); // also set all tiles dirty
+  setBuffer(lid, after); // apply the change
+  registerWholeChange(lid, before); // swap method: register original after applying change
   buf.set(after);
 
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'delete in selection' });

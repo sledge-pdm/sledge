@@ -1,7 +1,7 @@
 import { themeOptions } from '@sledge/theme';
 import { FieldMeta } from '~/features/config/models/GlobalConfig';
 import { Sections } from '~/features/config/models/Sections';
-import { saveGlobalSettings } from '~/io/config/save';
+import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 export const generalMetas: FieldMeta[] = [

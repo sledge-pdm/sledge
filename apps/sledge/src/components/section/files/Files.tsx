@@ -16,9 +16,7 @@ const sectionCaption = css`
 const filesContainer = css`
   display: flex;
   flex-direction: column;
-  padding: 4px;
   gap: 8px;
-  margin-top: 4px;
   margin-left: 8px;
 `;
 

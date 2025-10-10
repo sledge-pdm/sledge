@@ -7,7 +7,7 @@ import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { isMacOS } from '~/utils/OSUtils';
-import RotationSnapper from './RotationSnapper';
+import TouchRotationSnapper from './TouchRotationSnapper';
 
 const LOG_LABEL = 'CanvasAreaInteract';
 const logger = new DebugLogger(LOG_LABEL, false);
@@ -33,7 +33,7 @@ class CanvasAreaInteract {
   private stopRaf?: () => void;
 
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
-  private rotationSnapper = new RotationSnapper();
+  private rotationSnapper = new TouchRotationSnapper();
 
   private offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
   private offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;

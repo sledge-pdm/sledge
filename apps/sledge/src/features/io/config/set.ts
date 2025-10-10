@@ -1,5 +1,6 @@
 import { defaultConfig } from '~/features/config/models/GlobalConfig';
 import { defaultLastSettingsStore, makeDefaultKeyConfigStore } from '~/stores/GlobalStores';
+import { SavingConfig } from '~/types/SavingConfig';
 
 function deepObjectAssign(target: any, ...sources: any[]) {
   sources.forEach((source) => {
@@ -12,7 +13,7 @@ function deepObjectAssign(target: any, ...sources: any[]) {
   return target;
 }
 
-export function getDefaultSettings() {
+export function getDefaultSettings(): SavingConfig {
   const globalConfigStore = JSON.parse(JSON.stringify(defaultConfig));
   const keyConfigStore = JSON.parse(JSON.stringify(makeDefaultKeyConfigStore()));
   const lastSettingsStore = JSON.parse(JSON.stringify(defaultLastSettingsStore));

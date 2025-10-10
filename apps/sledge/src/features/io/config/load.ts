@@ -7,9 +7,9 @@ import { loadConfigToGlobalStore } from '~/stores/GlobalStores';
 
 export async function loadGlobalSettings() {
   const isConfigExists = await exists(Consts.globalConfigFileName, { baseDir: BaseDirectory.AppConfig });
+  const defaultSettings = getDefaultSettings();
   if (!isConfigExists) {
     console.warn('No global settings found, create one with default values.');
-    const defaultSettings = getDefaultSettings();
     loadConfigToGlobalStore(defaultSettings);
     await saveGlobalSettings(false);
     return defaultSettings;
@@ -29,13 +29,17 @@ export async function loadGlobalSettings() {
 
     if (!configJson) {
       console.warn('create config with default values.');
-      const defaultSettings = getDefaultSettings();
       loadConfigToGlobalStore(defaultSettings);
       await saveGlobalSettings(false);
       return defaultSettings;
     } else {
-      loadConfigToGlobalStore(configJson);
-      return configJson;
+      const fallbackedConfigJson = {
+        ...defaultSettings,
+        ...configJson,
+      };
+      loadConfigToGlobalStore(fallbackedConfigJson);
+      await saveGlobalSettings(false);
+      return fallbackedConfigJson;
     }
   }
 }

@@ -70,7 +70,7 @@ export const editorMetas: FieldMeta[] = [
     label: '0 degree snap threshold (2 finger touch)',
     component: 'Slider',
     props: {
-      min: 0,
+      min: 1,
       max: 90,
       step: 1,
       allowFloat: false,

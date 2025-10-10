@@ -16,8 +16,8 @@ export const Consts = {
 
   projectThumbnailSize: 500,
 
-  globalConfigFileName: 'global.sledgeconfig',
-  toolPresetsConfigFileName: 'tools.sledgeconfig',
+  globalConfigFileName: 'global.json',
+  toolPresetsConfigFileName: 'tools.json',
 
   fileItemIndent: 8,
 

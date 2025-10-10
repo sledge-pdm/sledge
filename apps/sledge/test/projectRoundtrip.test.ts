@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { loadProjectJson } from '~/features/io/project/in/load';
+import { dumpProject, type Project } from '~/features/io/project/out/dump';
 import { BlendMode, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { loadProjectJson } from '~/io/project/in/load';
-import { dumpProject, type Project } from '~/io/project/out/dump';
 import { layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 
 describe('Project dump/load roundtrip', () => {

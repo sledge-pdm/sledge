@@ -6,7 +6,7 @@ import { createStore } from 'solid-js/store';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { getEntries, getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { imagePoolStore } from '~/stores/ProjectStores';
-import { flexCol, flexRow } from '~/styles/StyleSnippets';
+import { flexCol, flexRow } from '~/styles';
 import { eventBus, Events } from '~/utils/EventBus';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {

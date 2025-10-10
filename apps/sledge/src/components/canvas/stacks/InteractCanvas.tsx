@@ -7,7 +7,7 @@ import { clientPositionToCanvasPosition } from '~/features/canvas/CanvasPosition
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { activeLayer } from '~/features/layer';
 import { DebugLogger } from '~/features/log/service';
-import { getActiveToolCategory } from '~/features/tool/ToolController';
+import { getActiveToolCategory } from '~/features/tools/ToolController';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 

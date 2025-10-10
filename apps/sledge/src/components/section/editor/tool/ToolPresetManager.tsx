@@ -1,9 +1,9 @@
 import { Component, Show } from 'solid-js';
 import ToolPresetDropDown from '~/components/section/editor/tool/ToolPresetDropDown';
-import { updateToolPresetConfig } from '~/features/tool/ToolController';
+import { updateToolPresetConfig } from '~/features/tools/ToolController';
+import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { flexCol } from '~/styles/StyleSnippets';
-import { ToolCategoryId } from '~/tools/Tools';
+import { flexCol } from '~/styles';
 import ToolPresetConfigForm from './ToolPresetConfigForm';
 
 interface Props {

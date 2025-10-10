@@ -4,7 +4,7 @@ import { createStore } from 'solid-js/store';
 import { SectionTab } from '~/components/section/SectionTabs';
 import { PaletteType, RGBAColor } from '~/features/color';
 import { DEFAULT, SMPTE, Swatch } from '~/features/color/swatch/swatches';
-import { toolCategories, ToolCategory, ToolCategoryId } from '~/tools/Tools';
+import { toolCategories, ToolCategory, ToolCategoryId } from '~/features/tools/Tools';
 
 type AppearanceStore = {
   leftSide: {

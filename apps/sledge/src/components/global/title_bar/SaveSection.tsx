@@ -4,7 +4,7 @@ import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
-import { saveProject } from '~/io/project/out/save';
+import { saveProject } from '~/features/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';

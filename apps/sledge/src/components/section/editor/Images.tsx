@@ -4,7 +4,7 @@ import { Component, createMemo, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/item/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
 import { addToImagePool, getEntries, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
-import { openImageImportDialog } from '~/io/image_pool/import';
+import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { sectionContent } from '../SectionStyles';
 

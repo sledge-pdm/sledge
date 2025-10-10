@@ -11,7 +11,7 @@ import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHist
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { toolCategories } from '~/tools/Tools';
+import { toolCategories } from '~/features/tools/Tools';
 
 const historyRowStyle = css`
   display: flex;

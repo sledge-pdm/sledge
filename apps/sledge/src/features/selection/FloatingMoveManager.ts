@@ -19,8 +19,8 @@ import {
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { canvasStore } from '~/stores/ProjectStores';
-import { TOOL_CATEGORIES } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
 export type MoveMode = 'selection' | 'layer' | 'pasted';

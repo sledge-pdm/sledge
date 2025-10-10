@@ -5,8 +5,8 @@
 // If gesture starts from a non-zero angle, rotations are applied immediately (no gating).
 
 import { Consts } from '~/Consts';
+import { globalConfig } from '~/stores/GlobalStores';
 
-const THRESHOLD_DEG = 5; // Minimum deviation from baseline needed to start applying rotation
 const NEAR_ZERO_EPS = 0.01; // Values within this of 0 are treated as exactly 0
 
 function normalizeDeg(a: number): number {
@@ -44,7 +44,7 @@ export class RotationSnapper {
       const deltaFromStart = normalizeDeg(normalizedDeg - this.rotationOnStart);
       this.rotationFromStart += deltaFromStart;
 
-      if (Math.abs(this.rotationFromStart) >= THRESHOLD_DEG) {
+      if (Math.abs(this.rotationFromStart) >= globalConfig.editor.touchRotationZeroSnapThreshold) {
         this.rotationAllowed = true;
         return this.rotationFromStart;
       } else {

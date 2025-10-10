@@ -64,4 +64,18 @@ export const editorMetas: FieldMeta[] = [
     },
     tips: `the maximum number of history items to keep.`,
   },
+  {
+    section: Sections.Editor,
+    path: ['editor', 'touchRotationZeroSnapThreshold'],
+    label: '0 degree snap threshold (2 finger touch)',
+    component: 'Slider',
+    props: {
+      min: 0,
+      max: 90,
+      step: 1,
+      allowFloat: false,
+      customFormat: '[value]',
+    },
+    tips: `Available in two-finger touch rotation only.\ncanvas rotation degree will be snapped to 0° until this threshold.`,
+  },
 ];

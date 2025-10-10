@@ -43,7 +43,7 @@ const menuListCanvasControls = css`
 const menuListRight = css`
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xs);
+  margin-right: 6px;
 `;
 
 const menuItem = css`
@@ -136,13 +136,6 @@ const TopMenuBar: Component = () => {
       text: 'SETTINGS.',
       action: () => {
         openWindow('settings');
-        // setIsSettingShown(true);
-      },
-    },
-    {
-      text: '?',
-      action: () => {
-        openWindow('about');
         // setIsSettingShown(true);
       },
     },
@@ -261,7 +254,7 @@ const TopMenuBar: Component = () => {
           </a>
           <div class={menuItemBackground} />
         </div>
-        <div class={menuItem} style={{ 'margin-left': '-4px', 'margin-right': '0px' }}>
+        <div class={menuItem}>
           <a
             class={menuItemText}
             style={{
@@ -284,7 +277,6 @@ const TopMenuBar: Component = () => {
           <div class={menuItemBackground} />
         </div>
       </Show>
-      <div class={menuItem} style={{ 'margin-right': '8px' }}></div>
     </div>
   );
 };

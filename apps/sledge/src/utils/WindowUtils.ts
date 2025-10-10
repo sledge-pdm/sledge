@@ -82,13 +82,6 @@ export async function reportAppStartupError(e: any) {
     }
   );
 
-  // TODO: there should be some hints/actions for fix by each causes.
-  // e.g.: broken config -> "open global config and fix" (open notepad/vscode/etc and fix json problem or something)
-  //       cannot read image -> "try open the image in other apps" (opening the path in photo/explorer/gimp/etc. to make sure that is not broken.)
-  //       [unknown error] -> "report as issue" (to github issue pages)
-
-  // if this is "actual first startup", there's no need to save states.
-
   alreadyShownErrors.delete(errorMessage);
   // kill process
   await exit(0);

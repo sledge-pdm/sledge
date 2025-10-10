@@ -99,10 +99,27 @@ const otherDownloadsContainer = css`
   flex-direction: column;
   width: 100%;
   gap: 16px;
-  margin-left: 2px;
   margin-top: 8px;
   padding: 24px 16px;
   border-left: 1px solid var(--color-border-secondary);
+`;
+
+const otherDownloadButton = css`
+  min-width: 80px;
+  font-size: 8px;
+  padding: 6px 12px;
+  border-width: 1px;
+  border-radius: 4px;
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-button-text-on-accent);
+  @media (any-hover: hover) {
+    &:hover {
+      background-color: var(--color-button-bg);
+      border-color: var(--color-accent);
+      color: var(--color-button-text);
+    }
+  }
 `;
 
 const DownloadSection: Component<{}> = () => {
@@ -206,7 +223,7 @@ const DownloadSection: Component<{}> = () => {
           </Show>
           <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
             <div class={downloadsContainer}>
-              <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
+              <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} type='main' />}</For>
             </div>
           </Show>
           <a
@@ -251,7 +268,7 @@ const DownloadSection: Component<{}> = () => {
                       </p>
                     </div>
                     <div class={downloadsContainer}>
-                      <For each={assets}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} />}</For>
+                      <For each={assets}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} type='other' />}</For>
                     </div>
                   </div>
                 );
@@ -303,7 +320,8 @@ const DownloadButton: Component<{
     asset: Asset;
     extension: string;
   };
-}> = ({ os, assetItem }) => {
+  type: 'main' | 'other';
+}> = ({ os, assetItem, type }) => {
   const { asset, extension } = assetItem;
   const [showDigest, setShowDigest] = createSignal(false);
 
@@ -314,15 +332,15 @@ const DownloadButton: Component<{
         onClick={() => {
           window.open(asset.browser_download_url, '_blank')?.focus();
         }}
-        class={downloadButton}
+        class={type === 'main' ? downloadButton : otherDownloadButton}
         style={{
           display: 'flex',
           'flex-direction': 'row',
           'text-align': 'start',
-          gap: '4px',
+          gap: '6px',
         }}
       >
-        <Icon src='/icons/misc/save.png' style={{ width: '16px', height: '16px', 'margin-bottom': '-4px' }} />
+        <Icon src='/icons/misc/save.png' base={type === 'main' ? 16 : 8} style={{ width: '16px', height: '16px', 'margin-bottom': '-4px' }} />
         DOWNLOAD
       </Button>
       <p class={assetText} style={{ 'margin-top': '8px' }}>

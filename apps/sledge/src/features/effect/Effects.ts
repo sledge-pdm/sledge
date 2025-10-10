@@ -13,10 +13,8 @@ const EFFECTS = {
 export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, options?: any) {
   const anvil = getAnvilOf(layerId);
   if (anvil) {
-    const originalBuffer = anvil.getImageData().slice();
+    registerWholeChange(layerId, anvil.getImageData());
     EFFECTS[effect](new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight(), options);
-
-    registerWholeChange(layerId, originalBuffer);
 
     const patch = flushPatch(layerId);
     if (patch) {

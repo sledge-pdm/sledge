@@ -10,12 +10,14 @@ export const Consts = {
   zoomPrecisionSignificantDigits: 4,
   zoomByReferencePrecisionSignificantDigits: 2,
 
+  rotationPrecisionSignificantDigits: 1,
+
   maxLayerSize: 64,
 
   projectThumbnailSize: 500,
 
-  globalConfigFileName: 'global.sledgeconfig',
-  toolPresetsConfigFileName: 'tools.sledgeconfig',
+  globalConfigFileName: 'global.json',
+  toolPresetsConfigFileName: 'tools.json',
 
   fileItemIndent: 8,
 

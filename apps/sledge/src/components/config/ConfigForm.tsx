@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { componentProps } from '@sledge/core';
-import { Button, Checkbox, Dropdown, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
+import { Button, Checkbox, Dropdown, Icon, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
@@ -15,6 +15,7 @@ import { globalConfig, KeyConfigStore, keyConfigStore, setGlobalConfig } from '~
 import { accentedButton, flexRow } from '~/styles';
 import { join } from '~/utils/FileUtils';
 import { listenEvent } from '~/utils/TauriUtils';
+import { openWindow } from '~/utils/WindowUtils';
 import KeyConfigSettings from './KeyConfigSettings';
 
 // Ecsstatic styles
@@ -52,7 +53,7 @@ const configFormSectionItem = css`
 `;
 
 const configFormSectionLabel = css`
-  font-family: ZFB11;
+  font-family: ZFB09;
   font-size: 8px;
   white-space: nowrap;
 
@@ -92,15 +93,14 @@ const configFormScrollContent = css`
   flex-direction: column;
   overflow-y: visible;
   gap: var(--spacing-xl);
-  margin: 32px 28px;
+  margin: 28px 20px;
   padding-bottom: var(--spacing-md);
 `;
 
 const configFormFieldHeader = css`
-  margin-bottom: var(--spacing-xs);
   font-size: 12px;
   font-family: ZFB31;
-  color: var(--color-accent);
+  letter-spacing: 1px;
 `;
 
 const configFormFieldItem = css`
@@ -113,18 +113,15 @@ const configFormFieldItem = css`
 const configFormFieldLabelTooltip = css`
   width: fit-content;
   font-family: ZFB09;
-  color: var(--color-muted);
-
-  &:hover {
-    color: var(--color-active);
-  }
+  opacity: 0.2;
+  cursor: help;
 `;
 
 const configFormFieldLabel = css`
-  font-family: ZFB09;
+  font-family: ZFB21;
   vertical-align: middle;
-  margin-bottom: -1px;
   text-align: left;
+  margin-left: 8px;
   margin-right: 8px;
 `;
 
@@ -132,7 +129,7 @@ const configFormFieldControlWrapper = css`
   display: flex;
   flex-direction: row;
   max-width: 260px;
-  margin-left: var(--spacing-md);
+  margin-left: 16px;
   align-items: center;
 `;
 
@@ -160,8 +157,15 @@ const configFormInfoAreaBottom = css`
   gap: var(--spacing-md);
 `;
 
-const configFormLoadDefaults = css`
+const configFormLink = css`
+  width: fit-content;
   color: #ccc;
+`;
+
+const configFormAbout = css`
+  width: fit-content;
+  color: #ccc;
+  margin-top: 8px;
 `;
 
 const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
@@ -281,33 +285,6 @@ const ConfigForm: Component<Props> = (props) => {
   const onKeyConfigChange = () => checkDirty();
 
   const checkDirty = () => {
-    console.log(
-      'original globalConfig:',
-      JSON.stringify({
-        ...originalConfig,
-        misc: undefined,
-      })
-    );
-    console.log(
-      'globalConfig:',
-      JSON.stringify({
-        ...globalConfig,
-        misc: undefined,
-      })
-    );
-    console.log(
-      JSON.stringify({
-        ...originalConfig,
-        misc: undefined,
-      }) !==
-        JSON.stringify({
-          ...globalConfig,
-          misc: undefined,
-        })
-    );
-    console.log('original keyConfigStore:', originalKeyConfig);
-    console.log('keyConfigStore:', keyConfigStore);
-    console.log(JSON.stringify(originalKeyConfig) !== JSON.stringify(keyConfigStore));
     if (
       JSON.stringify({
         ...originalConfig,
@@ -320,10 +297,8 @@ const ConfigForm: Component<Props> = (props) => {
       JSON.stringify(originalKeyConfig) !== JSON.stringify(keyConfigStore)
     ) {
       setIsDirty(true);
-      console.log('dirty');
     } else {
       setIsDirty(false);
-      console.log('clean');
     }
   };
 
@@ -368,7 +343,7 @@ const ConfigForm: Component<Props> = (props) => {
       <div class={configFormFields}>
         <div class={configFormScrollContent}>
           <Show when={currentSection() !== undefined}>
-            <p class={configFormFieldHeader}>{currentSection().toUpperCase()}.</p>
+            {/* <p class={configFormFieldHeader}>{currentSection().toUpperCase()}.</p> */}
             <Show when={currentSection() === Sections.KeyConfig}>
               <KeyConfigSettings onKeyConfigChange={onKeyConfigChange} />
             </Show>
@@ -381,7 +356,8 @@ const ConfigForm: Component<Props> = (props) => {
                   return (
                     <div class={configFormFieldItem}>
                       <div class={flexRow}>
-                        <p class={configFormFieldLabel}>{meta.label}</p>
+                        <Icon src={'/icons/misc/bullet_s_8.png'} base={8} />
+                        <p class={configFormFieldLabel}>{meta.label.toUpperCase()}</p>
                         <Show when={meta.tips !== undefined}>
                           <p class={configFormFieldLabelTooltip} title={meta.tips ?? undefined}>
                             ?
@@ -421,16 +397,25 @@ const ConfigForm: Component<Props> = (props) => {
       </div>
 
       <div class={configFormInfoAreaBottom}>
+        <a class={configFormLink} onClick={loadDefaults}>
+          load defaults.
+        </a>
         <a
-          class={configFormLoadDefaults}
+          class={configFormLink}
           onClick={async () => {
             revealItemInDir(join(await appConfigDir(), Consts.globalConfigFileName));
           }}
         >
-          Open Config File
+          Open Config File.
         </a>
-        <a class={configFormLoadDefaults} onClick={loadDefaults}>
-          load defaults
+
+        <a
+          class={configFormAbout}
+          onClick={() => {
+            openWindow('about');
+          }}
+        >
+          about.
         </a>
       </div>
     </div>

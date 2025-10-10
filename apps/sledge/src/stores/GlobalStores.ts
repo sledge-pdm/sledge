@@ -3,7 +3,7 @@ import { ExportSettings } from '~/components/section/export/ExportContent';
 import { KeyConfigCommands } from '~/Consts';
 import { GlobalConfig } from '~/features/config/models/GlobalConfig';
 import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
-import { getDefaultSettings } from '~/io/config/set';
+import { getDefaultSettings } from '~/features/io/config/set';
 import { isMacOS } from '~/utils/OSUtils';
 
 // global

@@ -7,9 +7,9 @@ import { ColorBox, DropdownOption, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/item/Palette';
 import SectionItem from '~/components/section/SectionItem';
 import { currentColor, setCurrentColor } from '~/features/color';
-import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tool/ToolController';
+import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools/ToolController';
 import { colorStore } from '~/stores/EditorStores';
-import { flexRow } from '~/styles/StyleSnippets';
+import { flexRow } from '~/styles';
 import { sectionContent } from '../SectionStyles';
 
 const swatchHeader = css`

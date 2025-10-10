@@ -2,9 +2,9 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, Show } from 'solid-js';
-import { setActiveToolCategory } from '~/features/tool/ToolController';
+import { setActiveToolCategory } from '~/features/tools/ToolController';
+import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { ToolCategoryId } from '~/tools/Tools';
 
 const toolConfigRow = css`
   display: flex;

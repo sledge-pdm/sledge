@@ -1,8 +1,8 @@
 import { css } from '@acab/ecsstatic';
 import { open } from '@tauri-apps/plugin-shell';
 import { createSignal, onMount } from 'solid-js';
-import { loadGlobalSettings } from '~/io/config/load';
-import { pageRoot } from '~/styles/StyleSnippets';
+import { loadGlobalSettings } from '~/features/io/config/load';
+import { pageRoot } from '~/styles';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 import {

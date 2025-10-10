@@ -7,7 +7,7 @@ import { Button, Dropdown } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
-import { saveGlobalSettings } from '~/io/config/save';
+import { saveGlobalSettings } from '~/features/io/config/save';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';

@@ -7,7 +7,7 @@ import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasTempControls from '~/components/global/title_bar/CanvasTempControls';
 import SaveSection from '~/components/global/title_bar/SaveSection';
-import { createNew, openExistingProject, openProject } from '~/io/window';
+import { createNew, openExistingProject, openProject } from '~/features/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';

@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Component, For } from 'solid-js';
 import FileItem from '~/components/section/files/item/FileItem';
-import { openExistingProject } from '~/io/window';
+import { openExistingProject } from '~/features/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 

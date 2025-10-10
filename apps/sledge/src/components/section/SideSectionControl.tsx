@@ -6,7 +6,7 @@ import { SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { adjustZoomToFit, setOffset, setZoomByReference } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
-import { flexRow } from '~/styles/StyleSnippets';
+import { flexRow } from '~/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const sideSectionControlRoot = css`

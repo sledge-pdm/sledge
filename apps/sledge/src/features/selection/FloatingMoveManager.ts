@@ -1,5 +1,6 @@
 // controllers/layer/SelectionManager.ts
 
+import { rawToWebp, webpToRaw } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { crop_patch_rgba } from '@sledge/wasm';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
@@ -15,6 +16,7 @@ import {
   registerWholeChange,
   setBuffer,
 } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -30,29 +32,21 @@ export interface FloatingBuffer {
   offset: Vec2;
 }
 
-// Usage:
-//
-// ```ts
-// const manager = new FloatingMoveManager();
-// // Let's create a new floating buffer (paste)
-// const floatingBuffer = { buffer: new Uint8ClampedArray(100 * 100 * 4), width: 100, height: 100, startOffset: { x: 0, y: 0 } };
-// manager.startMove(floatingBuffer, 'selection');
-// manager.move({ x: 10, y: 10 }); // moveOffset is now {x: 10, y: 10}.
-// manager.commit(); // commit the move (floatingBuffer is pasted to the active layer in (10, 10))
-// ```
-
 class FloatingMoveManager {
   private readonly LOG_LABEL = 'FloatingMoveManager';
   private logger = new DebugLogger(this.LOG_LABEL, false);
 
   private targetLayerId: string | undefined = undefined;
+  private targetBufferOriginal:
+    | {
+        buffer: Uint8Array;
+        width: number;
+        height: number;
+      }
+    | undefined = undefined;
   private targetBuffer: Uint8ClampedArray | undefined = undefined;
-  // moveOffsetを扱う代わりに、FloatingBufferにoffsetを持たせるようにする。
-  // これにより、選択範囲のoffsetをmoveに引きついで扱える。
   private floatingBuffer: FloatingBuffer | undefined = undefined;
 
-  // Don't modify original layer buffer while moving.
-  // instead, create a preview buffer and conditionally use it.
   private movePreviewBuffer: Uint8ClampedArray | undefined = undefined; // should be same size as layer/canvas.
   private state: MoveMode | undefined = undefined;
 
@@ -93,6 +87,15 @@ class FloatingMoveManager {
   }
 
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
+    const anvil = getAnvilOf(targetLayerId);
+    if (!anvil) return;
+    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight());
+    if (!webpBuffer) return;
+    this.targetBufferOriginal = {
+      buffer: webpBuffer,
+      width: anvil.getWidth(),
+      height: anvil.getHeight(),
+    };
     this.targetBuffer = this.getBaseBuffer(state, targetLayerId);
     if (!this.targetBuffer) return;
 
@@ -166,7 +169,7 @@ class FloatingMoveManager {
 
   public commit() {
     this.logger.debugLog('commit', {});
-    if (!this.targetLayerId || !this.targetBuffer) {
+    if (!this.targetLayerId || !this.targetBuffer || !this.targetBufferOriginal) {
       console.error('attempt to commit, but no target layer or buffer is set.');
       return;
     }
@@ -184,15 +187,13 @@ class FloatingMoveManager {
     });
 
     setBuffer(this.targetLayerId, this.movePreviewBuffer);
-    registerWholeChange(this.targetLayerId, this.movePreviewBuffer.slice());
+    const orig = webpToRaw(this.targetBufferOriginal.buffer, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
+    if (orig) registerWholeChange(this.targetLayerId, new Uint8ClampedArray(orig.buffer));
     const patch = flushPatch(this.targetLayerId);
     if (patch) {
       projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
     }
-
-    // Emit the commit event
     eventBus.emit('floatingMove:committed', {});
-
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
     } else {

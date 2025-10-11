@@ -59,9 +59,6 @@ importers:
       '@solid-primitives/map':
         specifier: ^0.7.2
         version: 0.7.2(solid-js@1.9.9)
-      '@solid-primitives/mouse':
-        specifier: ^2.1.4
-        version: 2.1.4(solid-js@1.9.9)
       '@solid-primitives/raf':
         specifier: ^2.3.2
         version: 2.3.2(solid-js@1.9.9)
@@ -915,11 +912,6 @@ packages:
 
   '@solid-primitives/memo@1.4.3':
     resolution: {integrity: sha512-CA+n9yaoqbYm+My5tY2RWb6EE16tVyehM4GzwQF4vCwvjYPAYk1JSRIVuMC0Xuj5ExD2XQJE5E2yAaKY2HTUsg==}
-    peerDependencies:
-      solid-js: ^1.6.12
-
-  '@solid-primitives/mouse@2.1.4':
-    resolution: {integrity: sha512-qZNh7FedzJMSrUX/BSd5Pjkv+Ct7vDr9TXVbXSdAKa4xMri0mwNi1eCbNbcEsq/FOsPVQLyt2d5oR7cQHBOg0A==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -3315,14 +3307,6 @@ snapshots:
   '@solid-primitives/memo@1.4.3(solid-js@1.9.9)':
     dependencies:
       '@solid-primitives/scheduled': 1.5.2(solid-js@1.9.9)
-      '@solid-primitives/utils': 6.3.2(solid-js@1.9.9)
-      solid-js: 1.9.9
-
-  '@solid-primitives/mouse@2.1.4(solid-js@1.9.9)':
-    dependencies:
-      '@solid-primitives/event-listener': 2.4.3(solid-js@1.9.9)
-      '@solid-primitives/rootless': 1.5.2(solid-js@1.9.9)
-      '@solid-primitives/static-store': 0.1.2(solid-js@1.9.9)
       '@solid-primitives/utils': 6.3.2(solid-js@1.9.9)
       solid-js: 1.9.9
 

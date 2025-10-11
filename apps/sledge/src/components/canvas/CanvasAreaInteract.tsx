@@ -2,6 +2,7 @@ import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/Consts';
 import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/features/canvas';
+import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
@@ -130,6 +131,22 @@ class CanvasAreaInteract {
       }
     } else {
       // タッチ以外
+      if (e.pointerType === 'mouse') {
+        if (e.button === 3) {
+          e.preventDefault();
+          if (projectHistoryController.canUndo()) {
+            projectHistoryController.undo();
+          }
+          return;
+        } else if (e.button === 4) {
+          e.preventDefault();
+          if (projectHistoryController.canRedo()) {
+            projectHistoryController.redo();
+          }
+          return;
+        }
+      }
+
       if (CanvasAreaInteract.isDraggable(e)) {
         this.wrapperRef.setPointerCapture(e.pointerId);
         setInteractStore('isDragging', true);

@@ -1,5 +1,4 @@
 import { Vec2 } from '@sledge/core';
-import { useMousePosition } from '@solid-primitives/mouse';
 import { Component, createMemo, Show } from 'solid-js';
 import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
 import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
@@ -10,8 +9,6 @@ import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CursorOverlay: Component = () => {
-  const pos = useMousePosition();
-
   const canShowCursor = createMemo(() => interactStore.isMouseOnCanvas && isToolAllowedInCurrentLayer(getActiveToolCategory()));
 
   const cursorElement = (pos: Vec2) => {
@@ -35,7 +32,7 @@ const CursorOverlay: Component = () => {
 
   return (
     <>
-      <Show when={canShowCursor()}>{cursorElement(pos)}</Show>
+      <Show when={canShowCursor()}>{cursorElement(interactStore.lastMouseWindow)}</Show>
     </>
   );
 };

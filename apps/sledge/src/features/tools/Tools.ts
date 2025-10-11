@@ -19,6 +19,9 @@ export const TOOL_CATEGORIES = {
   MOVE: 'move',
 } as const;
 
+// 選択範囲の移動中に使えるもの
+export const TOOLS_ALLOWED_IN_MOVE_MODE: ToolCategoryId[] = [TOOL_CATEGORIES.MOVE];
+
 export type ToolCategoryId = (typeof TOOL_CATEGORIES)[keyof typeof TOOL_CATEGORIES];
 
 export type ToolCategory<TPresetConfig = any> = {

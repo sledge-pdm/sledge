@@ -7,7 +7,9 @@ import { clientPositionToCanvasPosition } from '~/features/canvas/CanvasPosition
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { activeLayer } from '~/features/layer';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getActiveToolCategory } from '~/features/tools/ToolController';
+import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -59,6 +61,9 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (interactStore.isCanvasSizeFrameMode) {
       return false;
     }
+    if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
+      return false;
+    }
     if (e.pointerType === 'touch') return false;
 
     // 基本的にはCanvasAreaInteractのisDraggableと逆の関係
@@ -90,6 +95,11 @@ export const InteractCanvas: Component<Props> = (props) => {
           kind: 'error',
         });
       }
+      if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
+        setBottomBarText('commit or cancel move first!', {
+          kind: 'error',
+        });
+      }
       logger.debugWarn(`handleOutCanvasAreaPointerDown cancelled because not drawable click`);
       return;
     }
@@ -113,6 +123,11 @@ export const InteractCanvas: Component<Props> = (props) => {
     if (!isDrawableClick(e)) {
       if (interactStore.isCanvasSizeFrameMode) {
         setBottomBarText('quit frame resize mode first!', {
+          kind: 'error',
+        });
+      }
+      if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
+        setBottomBarText('commit or cancel move first!', {
           kind: 'error',
         });
       }

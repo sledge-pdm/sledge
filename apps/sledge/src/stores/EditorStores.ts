@@ -35,7 +35,6 @@ type InteractStore = {
   lastMouseOnCanvas: Vec2;
   isMouseOnCanvas: boolean;
   isInStroke: boolean;
-  isPenOut: boolean;
   zoom: number;
   zoomByReference: number;
   zoomMin: number;
@@ -101,7 +100,6 @@ const defaultInteractStore: InteractStore = {
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
   isMouseOnCanvas: false,
-  isPenOut: false,
   isInStroke: false,
   zoom: 1,
   zoomByReference: 1,

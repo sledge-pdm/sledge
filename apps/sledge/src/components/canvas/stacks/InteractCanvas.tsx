@@ -89,8 +89,6 @@ export const InteractCanvas: Component<Props> = (props) => {
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    setInteractStore('isPenOut', false);
-
     const position = getCanvasMousePosition(e);
     // ! note that PointerEvent is the event on CanvasArea (not on InteractCanvas)
     //   This may cause unexpected behavior if the tool use element-specific values.
@@ -108,8 +106,6 @@ export const InteractCanvas: Component<Props> = (props) => {
       logger.debugWarn(`handlePointerDown cancelled because not drawable click`);
       return;
     }
-
-    setInteractStore('isPenOut', false);
 
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.start, e, getActiveToolCategory(), position, lastPos());

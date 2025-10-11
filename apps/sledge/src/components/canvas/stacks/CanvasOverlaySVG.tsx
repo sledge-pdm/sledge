@@ -201,18 +201,6 @@ const CanvasOverlaySVG: Component = () => {
               pointer-events='none'
             />
 
-            {/* Pen hover preview */}
-            <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas}>
-              <path
-                d={penOutlinePath()}
-                fill='none'
-                stroke={color.border}
-                stroke-width={1}
-                vector-effect='non-scaling-stroke'
-                pointer-events='none'
-              />
-            </Show>
-
             {/* Debug points */}
             <For each={logStore.canvasDebugPoints}>
               {(p) => (
@@ -228,20 +216,35 @@ const CanvasOverlaySVG: Component = () => {
               )}
             </For>
 
-            {/* Selection outline */}
-            <path
-              id='selection-outline'
-              d={pathCmdList().toString(interactStore.zoom)}
-              fill='url(#45border16-svg)'
-              fill-rule='evenodd'
-              clip-rule='evenodd'
-              stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}
-              stroke-width='1'
-              vector-effect='non-scaling-stroke'
-              stroke-dasharray={`${borderDash} ${borderDash}`}
-              pointer-events='none'
-              class='marching-ants-animation'
-            />
+            {/* ペン形状と選択範囲はリサイズ中は表示しない */}
+            <Show when={interactStore.isCanvasSizeFrameMode === false}>
+              {/* Pen hover preview */}
+              <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas}>
+                <path
+                  d={penOutlinePath()}
+                  fill='none'
+                  stroke={color.border}
+                  stroke-width={1}
+                  vector-effect='non-scaling-stroke'
+                  pointer-events='none'
+                />
+              </Show>
+
+              {/* Selection outline */}
+              <path
+                id='selection-outline'
+                d={pathCmdList().toString(interactStore.zoom)}
+                fill='url(#45border16-svg)'
+                fill-rule='evenodd'
+                clip-rule='evenodd'
+                stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}
+                stroke-width='1'
+                vector-effect='non-scaling-stroke'
+                stroke-dasharray={`${borderDash} ${borderDash}`}
+                pointer-events='none'
+                class='marching-ants-animation'
+              />
+            </Show>
           </svg>
         </div>
       </div>

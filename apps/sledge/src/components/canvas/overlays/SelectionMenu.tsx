@@ -1,5 +1,5 @@
 import { Icon } from '@sledge/ui';
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
 import {
   cancelMove,
@@ -197,13 +197,24 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }
   };
 
+  const visibility = createMemo(() => {
+    // idle状態の場合は表示しない
+    if (selectionState() === 'idle') return 'collapse';
+    // 外側メニューがある場合は表示しない
+    if (outerPosition() !== undefined) return 'collapse';
+    // キャンバスをリサイズ中の場合は表示しない
+    if (interactStore.isCanvasSizeFrameMode) return 'collapse';
+
+    return 'visible';
+  });
+
   return (
     <div
       style={{
         position: 'absolute',
         left: `${selectionMenuPos().x}px`,
         top: `${selectionMenuPos().y}px`,
-        visibility: outerPosition() === undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
+        visibility: visibility(),
         'pointer-events': 'all',
         'transform-origin': '0 0',
         'z-index': 'var(--zindex-canvas-overlay)',
@@ -225,6 +236,17 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
 };
 
 export const OuterSelectionMenu: Component<{}> = (props) => {
+  const visibility = createMemo(() => {
+    // idle状態の場合は表示しない
+    if (selectionState() === 'idle') return 'collapse';
+    // 外側メニューの座標がない場合は表示しない
+    if (outerPosition() === undefined) return 'collapse';
+    // キャンバスをリサイズ中の場合は表示しない
+    if (interactStore.isCanvasSizeFrameMode) return 'collapse';
+
+    return 'visible';
+  });
+
   return (
     <div
       style={{
@@ -234,7 +256,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         opacity: 0.8,
         'pointer-events': 'all',
         'z-index': 'var(--zindex-canvas-overlay)',
-        visibility: outerPosition() !== undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
+        visibility: visibility(),
       }}
       onPointerDown={(e) => {
         e.stopPropagation();

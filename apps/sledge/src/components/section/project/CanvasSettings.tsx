@@ -183,7 +183,7 @@ const CanvasSettings: Component = () => {
                 'border-color': interactStore.isCanvasSizeFrameMode ? 'var(--color-error)' : 'var(--color-accent)',
               }}
             >
-              {interactStore.isCanvasSizeFrameMode ? 'QUIT FRAME MODE.' : 'RESIZE WITH FRAME.'}
+              {interactStore.isCanvasSizeFrameMode ? 'quit resize.' : 'resize with frame.'}
             </Button>
           </div>
         </div>

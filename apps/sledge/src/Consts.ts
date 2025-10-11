@@ -10,7 +10,7 @@ export const Consts = {
   zoomPrecisionSignificantDigits: 4,
   zoomByReferencePrecisionSignificantDigits: 2,
 
-  rotationPrecisionSignificantDigits: 0,
+  rotationPrecisionSignificantDigits: 1,
 
   maxLayerSize: 64,
 

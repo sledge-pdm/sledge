@@ -16,8 +16,8 @@ import { eventBus } from '~/utils/EventBus';
 import rawPattern45border16 from '@assets/patterns/45border16.svg?raw';
 import rawPattern45border8 from '@assets/patterns/45border8.svg?raw';
 import { ShapeMask } from '@sledge/anvil';
-import { Circle } from '~/features/tools/draw/pen/shape/Circle';
-import { Square } from '~/features/tools/draw/pen/shape/Square';
+import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
+import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 
 import { color } from '@sledge/theme';
 import './marching_ants.css';

@@ -1,6 +1,6 @@
 import { RectFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
-import { AnvilToolContext, ToolArgs } from '~/features/tools/ToolBehavior';
-import { SelectionBase } from '~/features/tools/selection/SelectionBase';
+import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
+import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 
 export class RectSelection extends SelectionBase {
   protected onStartSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {

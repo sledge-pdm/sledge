@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 
 export class SelectionMoveTool implements ToolBehavior {
   acceptStartOnOutCanvas = true;

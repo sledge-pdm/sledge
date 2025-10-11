@@ -110,6 +110,11 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
       <Show when={presetMeta()?.fields}>
         <For each={presetMeta()!.fields}>
           {(fieldMeta) => {
+            if (fieldMeta.condition) {
+              const condition = fieldMeta.condition();
+              if (!condition) return null;
+            }
+
             const value = () => options()[fieldMeta.key] ?? '';
             const onChange = (newValue: any) => {
               props.onConfigChange(fieldMeta.key, newValue);

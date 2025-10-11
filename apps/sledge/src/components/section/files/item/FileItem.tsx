@@ -44,6 +44,7 @@ const fileName = css`
 const openIndicator = css`
   font-family: ZFB03;
   opacity: 0.5;
+  align-self: flex-end;
 `;
 
 const FileItem: Component<{
@@ -74,14 +75,14 @@ const FileItem: Component<{
         class={fileName}
         style={{
           'text-decoration': entry.isDirectory ? 'underline' : 'none',
-          color: isMe ? color.active : undefined,
+          color: isMe || isPartOfMe ? color.active : undefined,
           'pointer-events': isMe ? 'none' : 'auto',
         }}
       >
         {entry.name}
       </a>
       <Show when={isMe}>
-        <p class={openIndicator}>(open)</p>
+        <p class={openIndicator}>(opened)</p>
       </Show>
     </div>
   );

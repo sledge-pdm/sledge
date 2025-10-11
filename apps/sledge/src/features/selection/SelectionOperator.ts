@@ -1,14 +1,9 @@
 import { Vec2 } from '@sledge/core';
-import { apply_mask_offset, combine_masks_subtract, filter_by_selection_mask } from '@sledge/wasm';
+import { combine_masks_subtract } from '@sledge/wasm';
+import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { activeLayer } from '~/features/layer';
 // import { getActiveAgent } from '~/features/layer/agent/LayerAgentManager'; // legacy (will be removed)
-import {
-  getBufferPointer,
-  getHeight as getLayerHeight,
-  getWidth as getLayerWidth,
-  registerWholeChange,
-  setBuffer,
-} from '~/features/layer/anvil/AnvilController';
+import { getBufferPointer, getHeight as getLayerHeight, getWidth as getLayerWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -114,27 +109,28 @@ export function cancelMove() {
   floatingMoveManager.cancel();
 }
 
-export function deletePixelInSelection(layerId?: string): boolean {
+export function deleteSelectedArea(layerId?: string): boolean {
   const selection = getCurrentSelection();
   const lid = layerId ?? activeLayer().id;
   const anvil = getAnvilOf(lid);
   if (!anvil) return false;
 
-  const buf = anvil.getBufferData();
-  const width = anvil.getWidth();
-  const height = anvil.getHeight();
-  if (!buf || width == null || height == null) return false;
-
-  const before = buf.slice();
-  const baseMask = selection.getMask();
-  const { x: offX, y: offY } = selectionManager.getAreaOffset();
-  const mask = offX === 0 && offY === 0 ? baseMask : new Uint8Array(apply_mask_offset(baseMask, width, height, offX, offY));
-
-  const after = new Uint8ClampedArray(filter_by_selection_mask(new Uint8Array(before), mask, 'outside', width, height));
-
-  setBuffer(lid, after); // apply the change
-  registerWholeChange(lid, before); // swap method: register original after applying change
-  buf.set(after);
+  const bBox = selection.getBoundBox();
+  if (!bBox) return false;
+  const selectionBoundBox = {
+    x: bBox.left,
+    y: bBox.top,
+    width: bBox.right - bBox.left,
+    height: bBox.bottom - bBox.top,
+  };
+  anvil.addWholeDiff(anvil.getImageData());
+  const deletedArea = new Uint8ClampedArray(selectionBoundBox.width * selectionBoundBox.height * 4);
+  anvil.setPartialBuffer(selectionBoundBox, deletedArea);
+  const diffs = anvil.flushDiffs();
+  if (diffs) {
+    const acc = new AnvilLayerHistoryAction(lid, diffs, { tool: TOOL_CATEGORIES.RECT_SELECTION });
+    projectHistoryController.addAction(acc);
+  }
 
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'delete in selection' });
   eventBus.emit('preview:requestUpdate', { layerId: lid });

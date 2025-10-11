@@ -5,7 +5,7 @@ import {
   cancelMove,
   cancelSelection,
   commitMove,
-  deletePixelInSelection,
+  deleteSelectedArea,
   getSelectionOffset,
   invertSelectionArea,
 } from '~/features/selection/SelectionOperator';
@@ -293,7 +293,7 @@ const MenuContent = () => {
         <Item
           src='/icons/selection/delete_10.png'
           onClick={() => {
-            deletePixelInSelection();
+            deleteSelectedArea();
           }}
           title='delete.'
         />

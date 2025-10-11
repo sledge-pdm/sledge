@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component } from 'solid-js';
-import { pageRoot } from '~/styles';
+import { pageRoot } from '~/styles/styles';
 
 const loadingText = css`
   font-family: ZFB31;

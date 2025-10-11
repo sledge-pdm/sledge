@@ -2,7 +2,7 @@ import { fonts } from '@sledge/theme';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { getEntries, removeEntry } from '~/features/image_pool';
-import { flexCol, flexRow } from '~/styles';
+import { flexCol, flexRow } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const Item: Component<{ id: string; name: string; path: string; visible: boolean }> = (props) => {

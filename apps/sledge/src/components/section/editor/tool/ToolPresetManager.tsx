@@ -3,7 +3,7 @@ import ToolPresetDropDown from '~/components/section/editor/tool/ToolPresetDropD
 import { updateToolPresetConfig } from '~/features/tools/ToolController';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { flexCol } from '~/styles';
+import { flexCol } from '~/styles/styles';
 import ToolPresetConfigForm from './ToolPresetConfigForm';
 
 interface Props {

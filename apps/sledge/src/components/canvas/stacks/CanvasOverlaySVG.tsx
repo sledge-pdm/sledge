@@ -1,6 +1,6 @@
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, For, JSX, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
 import { RGBAToHex } from '~/features/color';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -14,19 +14,21 @@ import { PathCmdList } from '~/types/PathCommand';
 import { eventBus } from '~/utils/EventBus';
 
 import rawPattern45border16 from '@assets/patterns/45border16.svg?raw';
+import rawPattern45border16x2 from '@assets/patterns/45border16x2.svg?raw';
 import rawPattern45border8 from '@assets/patterns/45border8.svg?raw';
 import { ShapeMask } from '@sledge/anvil';
 import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 
 import { color } from '@sledge/theme';
-import './marching_ants.css';
+import '~/styles/selection_animations.css';
 
 // raw SVG 文字列から最初の <path .../> だけを抽出（self-closing想定）。失敗時は全体を返す。
 const extractFirstPath = (svg: string) => {
   const m = svg.match(/<path[\s\S]*?>/i); // self-closing or standard 最短
   return m ? m[0] : svg;
 };
+const pattern45border16x2Path = extractFirstPath(rawPattern45border16x2);
 const pattern45border16Path = extractFirstPath(rawPattern45border16);
 const pattern45border8Path = extractFirstPath(rawPattern45border8);
 
@@ -69,6 +71,11 @@ const CanvasOverlaySVG: Component = () => {
     setPathCmdList(PathCmdList.parse(pathString));
   };
 
+  const [patternOffset, setPatternOffset] = createSignal(0);
+  const updatePatternOffset = () => {
+    setPatternOffset((prev) => (prev + 0.3) % 16);
+  };
+
   // Events
   onMount(() => {
     startRenderLoop();
@@ -78,14 +85,18 @@ const CanvasOverlaySVG: Component = () => {
     eventBus.on('floatingMove:moved', () => setMoveState(floatingMoveManager.getState()));
     eventBus.on('floatingMove:stateChanged', () => setMoveState(floatingMoveManager.getState()));
     setSelectionChanged(true);
-  });
-  onCleanup(() => {
-    eventBus.off('selection:maskChanged');
-    eventBus.off('selection:offsetChanged');
-    eventBus.off('selection:stateChanged');
-    eventBus.off('floatingMove:moved');
-    eventBus.off('floatingMove:stateChanged');
-    stopRenderLoop();
+
+    const updatePatternInterval = setInterval(updatePatternOffset, 30);
+
+    return () => {
+      eventBus.off('selection:maskChanged');
+      eventBus.off('selection:offsetChanged');
+      eventBus.off('selection:stateChanged');
+      eventBus.off('floatingMove:moved');
+      eventBus.off('floatingMove:stateChanged');
+      stopRenderLoop();
+      clearInterval(updatePatternInterval);
+    };
   });
 
   // Cache local pen shape path
@@ -183,11 +194,16 @@ const CanvasOverlaySVG: Component = () => {
             }
           >
             <defs>
-              <pattern id='45border8-svg' width='8' height='8' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-                <g innerHTML={pattern45border8Path} />
-              </pattern>
-              <pattern id='45border16-svg' width='16' height='16' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-                <g innerHTML={pattern45border16Path} />
+              <pattern
+                id='45border16x2-svg'
+                x={patternOffset()}
+                y={patternOffset()}
+                width='32'
+                height='32'
+                patternUnits='userSpaceOnUse'
+                patternContentUnits='userSpaceOnUse'
+              >
+                <g innerHTML={pattern45border16x2Path} />
               </pattern>
             </defs>
             {/* Canvas border (debug) */}
@@ -234,7 +250,7 @@ const CanvasOverlaySVG: Component = () => {
               <path
                 id='selection-outline'
                 d={pathCmdList().toString(interactStore.zoom)}
-                fill='url(#45border16-svg)'
+                fill='url(#45border16x2-svg)'
                 fill-rule='evenodd'
                 clip-rule='evenodd'
                 stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}

@@ -23,7 +23,7 @@ import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
-import { flexCol, pageRoot } from '~/styles';
+import { flexCol, pageRoot } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';

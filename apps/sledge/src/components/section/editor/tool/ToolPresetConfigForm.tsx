@@ -6,7 +6,7 @@ import { Component, createEffect, createMemo, createSignal, For, onMount, Show }
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/features/tools/presets';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { flexCol, flexRow } from '~/styles';
+import { flexCol, flexRow } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const label = css`

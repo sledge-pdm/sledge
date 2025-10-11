@@ -1,3 +1,4 @@
+import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
@@ -15,15 +16,17 @@ export const fillPresetFields: PresetFieldMeta[] = [
     tips: 'Color tolerance for fill operation',
   },
   {
-    key: 'fillMode',
-    label: 'Fill Mode',
+    key: 'selectionFillMode',
+    label: 'Selection Fill',
     component: 'Dropdown',
     props: {
       options: [
-        { value: 'area', label: 'area' },
-        { value: 'inside', label: 'inside' },
+        { value: 'area', label: 'selection rect' },
+        { value: 'inside', label: 'selection inside' },
+        { value: 'ignore', label: 'ignore selection' },
       ],
     },
+    condition: () => isSelectionAvailable(),
     tips: 'Pen brush shape',
   },
   // {

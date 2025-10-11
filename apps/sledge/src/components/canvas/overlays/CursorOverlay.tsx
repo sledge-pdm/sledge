@@ -4,22 +4,16 @@ import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
 import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
 import PipetteDetail from '~/components/canvas/overlays/cursors/PipetteDetail';
 import PixelCursor from '~/components/canvas/overlays/cursors/PixelCursor';
-import { getActiveToolCategory, getActiveToolCategoryId, isToolAllowedInCurrentLayer } from '~/features/tools/ToolController';
-import { interactStore } from '~/stores/EditorStores';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { getActiveToolCategory, isToolAllowedInCurrentLayer } from '~/features/tools/ToolController';
+import { TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { interactStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CursorOverlay: Component = () => {
   const canShowCursor = createMemo(() => interactStore.isMouseOnCanvas && isToolAllowedInCurrentLayer(getActiveToolCategory()));
 
   const cursorElement = (pos: Vec2) => {
-    if (getActiveToolCategoryId() === 'pipette') {
-      return (
-        <>
-          <PipetteCursor mousePos={{ x: pos.x, y: pos.y }} />
-          <PipetteDetail />
-        </>
-      );
-    }
     switch (globalConfig.editor.cursor) {
       case 'pixel':
         return <PixelCursor mousePos={{ x: pos.x, y: pos.y }} />;
@@ -33,6 +27,11 @@ const CursorOverlay: Component = () => {
   return (
     <>
       <Show when={canShowCursor()}>{cursorElement(interactStore.lastMouseWindow)}</Show>
+
+      <Show when={toolStore.activeToolCategory === TOOL_CATEGORIES.PIPETTE && !floatingMoveManager.isMoving()}>
+        <PipetteCursor mousePos={interactStore.lastMouseWindow} />
+        <PipetteDetail />
+      </Show>
     </>
   );
 };

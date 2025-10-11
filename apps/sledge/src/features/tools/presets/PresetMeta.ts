@@ -7,6 +7,7 @@ export type PresetFieldMeta = {
   props?: Record<string, any>; // min/max/step/options など
   tips?: string;
   customFormat?: string; // format: [value] => value
+  condition?: () => boolean;
 };
 
 export type ToolPresetMeta = {

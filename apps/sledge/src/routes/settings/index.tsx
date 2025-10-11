@@ -1,7 +1,7 @@
 import { createSignal, onMount, Show } from 'solid-js';
 import ConfigForm from '~/components/config/ConfigForm';
 import { loadGlobalSettings } from '~/features/io/config/load';
-import { pageRoot } from '~/styles';
+import { pageRoot } from '~/styles/styles';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Settings() {

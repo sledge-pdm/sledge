@@ -2,12 +2,9 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createSignal, Show } from 'solid-js';
-import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
-import { allLayers } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { changeCanvasSize } from '~/features/canvas';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { canvasStore } from '~/stores/ProjectStores';
 
 const frameContainer = css`
   display: flex;
@@ -48,32 +45,8 @@ const FrameResizeMenu: Component = () => {
               setInteractStore('isCanvasSizeFrameMode', false);
               return; // no-op
             }
-
-            // CanvasSizeHistoryAction uses the "current" canvas size and buffer as an old state, so must be called before resizing buffers.
-            const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'CanvasControls.frameCommit' });
-            act.registerBefore();
-
-            setCanvasStore('canvas', newSize);
-            eventBus.emit('canvas:sizeChanged', { newSize });
-
-            const startX = offset.x;
-            const startY = offset.y;
-            for (const l of allLayers()) {
-              const anvil = getAnvilOf(l.id)!;
-              anvil.resizeWithOffset(newSize, {
-                srcOrigin: { x: startX, y: startY },
-                destOrigin: { x: 0, y: 0 },
-              });
-              eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'CanvasControls.frameCommit' });
-              eventBus.emit('preview:requestUpdate', { layerId: l.id });
-            }
-
-            act.registerAfter();
-
-            projectHistoryController.addAction(act);
-            setInteractStore('isCanvasSizeFrameMode', false);
-            setInteractStore('canvasSizeFrameOffset', { x: 0, y: 0 });
-            setInteractStore('canvasSizeFrameSize', { width: 0, height: 0 });
+            const res = changeCanvasSize(newSize, offset, { x: 0, y: 0 }, false);
+            console.log(res);
           }}
           label='commit.'
           title='commit.'

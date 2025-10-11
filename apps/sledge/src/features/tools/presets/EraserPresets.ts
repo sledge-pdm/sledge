@@ -8,7 +8,7 @@ export const eraserPresetFields: PresetFieldMeta[] = [
     component: 'Slider',
     props: {
       min: 1,
-      max: 50,
+      max: 100,
       step: 1,
       allowFloat: false,
     },

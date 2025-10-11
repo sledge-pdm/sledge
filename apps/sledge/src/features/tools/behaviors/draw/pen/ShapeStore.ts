@@ -1,7 +1,7 @@
 import { ShapeMask } from '@sledge/anvil';
-import { BaseShape } from '~/features/tools/draw/pen/shape/BaseShape';
-import { Circle } from '~/features/tools/draw/pen/shape/Circle';
-import { Square } from '~/features/tools/draw/pen/shape/Square';
+import { BaseShape } from '~/features/tools/behaviors/draw/pen/shape/BaseShape';
+import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
+import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 
 export class ShapeStore {
   private store: Map<string, ShapeMask>;

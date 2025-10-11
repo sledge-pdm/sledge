@@ -1,5 +1,5 @@
 import { isTransparent, RGBAColor, RGBToHex, setCurrentColor, transparent } from '~/features/color';
-import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;

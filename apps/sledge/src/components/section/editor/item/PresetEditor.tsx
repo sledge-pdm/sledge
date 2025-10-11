@@ -3,7 +3,7 @@ import { Component } from 'solid-js';
 import { updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { flexCol, flexRow } from '~/styles';
+import { flexCol, flexRow } from '~/styles/styles';
 
 interface Props {
   categoryId: ToolCategoryId;

@@ -4,7 +4,7 @@ import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManage
 import SectionItem from '~/components/section/SectionItem';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { flexRow } from '~/styles';
+import { flexRow } from '~/styles/styles';
 import { sectionContent } from '../SectionStyles';
 import ToolItem from './item/ToolItem';
 

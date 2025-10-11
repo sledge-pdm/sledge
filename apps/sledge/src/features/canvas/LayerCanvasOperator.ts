@@ -5,7 +5,7 @@ import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHi
 import { findLayerById } from '~/features/layer';
 import { flushPatch } from '~/features/layer/anvil/AnvilController';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
-import { AnvilToolContext, ToolArgs, ToolResult, createAnvilToolContext } from '~/features/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolResult, createAnvilToolContext } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';

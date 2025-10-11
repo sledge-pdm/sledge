@@ -9,7 +9,7 @@ import SectionItem from '~/components/section/SectionItem';
 import { currentColor, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools/ToolController';
 import { colorStore } from '~/stores/EditorStores';
-import { flexRow } from '~/styles';
+import { flexRow } from '~/styles/styles';
 import { sectionContent } from '../SectionStyles';
 
 const swatchHeader = css`

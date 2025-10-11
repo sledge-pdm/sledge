@@ -6,7 +6,7 @@ import { Component, createEffect, createMemo, createSignal, For, onMount, Show }
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/features/tools/presets';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
-import { flexCol, flexRow } from '~/styles';
+import { flexCol, flexRow } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const label = css`
@@ -110,6 +110,11 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
       <Show when={presetMeta()?.fields}>
         <For each={presetMeta()!.fields}>
           {(fieldMeta) => {
+            if (fieldMeta.condition) {
+              const condition = fieldMeta.condition();
+              if (!condition) return null;
+            }
+
             const value = () => options()[fieldMeta.key] ?? '';
             const onChange = (newValue: any) => {
               props.onConfigChange(fieldMeta.key, newValue);

@@ -12,7 +12,7 @@ import { loadGlobalSettings } from '~/features/io/config/load';
 import { resetToDefaultConfig } from '~/features/io/config/reset';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, KeyConfigStore, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
-import { accentedButton, flexRow } from '~/styles';
+import { accentedButton, flexRow } from '~/styles/styles';
 import { join } from '~/utils/FileUtils';
 import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';

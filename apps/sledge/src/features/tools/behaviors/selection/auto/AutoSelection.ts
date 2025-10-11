@@ -2,9 +2,9 @@ import { Anvil } from '@sledge/anvil';
 import { auto_select_region_mask } from '@sledge/wasm';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
-import { AnvilToolContext, ToolArgs } from '~/features/tools/ToolBehavior';
+import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
+import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
-import { SelectionBase } from '~/features/tools/selection/SelectionBase';
 import { eventBus } from '~/utils/EventBus';
 
 export class AutoSelection extends SelectionBase {

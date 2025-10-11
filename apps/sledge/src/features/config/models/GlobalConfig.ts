@@ -60,7 +60,7 @@ export const defaultConfig: GlobalConfig = {
     centerCanvasOnResize: 'offset',
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
-    touchRotationZeroSnapThreshold: 7,
+    touchRotationZeroSnapThreshold: 5,
   },
   performance: {
     canvasRenderingMode: 'adaptive',

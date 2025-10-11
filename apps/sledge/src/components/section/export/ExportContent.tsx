@@ -11,7 +11,7 @@ import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { accentedButton, flexCol } from '~/styles';
+import { accentedButton, flexCol } from '~/styles/styles';
 import { getFileNameWithoutExtension, join } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 

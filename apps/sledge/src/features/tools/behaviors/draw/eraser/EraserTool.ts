@@ -1,5 +1,5 @@
 import { transparent } from '~/features/color';
-import { AnvilToolContext, ToolArgs } from '~/features/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
 import { PenTool } from '../pen/PenTool';
 

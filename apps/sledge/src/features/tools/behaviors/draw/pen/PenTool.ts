@@ -4,12 +4,12 @@ import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
 import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { AnvilToolContext, ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/ToolBehavior';
+import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
+import { ShapeStore } from '~/features/tools/behaviors/draw/pen/ShapeStore';
+import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
+import { AnvilToolContext, ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
-import { LineChunk } from '~/features/tools/draw/pen/LineChunk';
-import { ShapeStore } from '~/features/tools/draw/pen/ShapeStore';
-import { StrokeChunk } from '~/features/tools/draw/pen/StrokeChunk';
 
 export class PenTool implements ToolBehavior {
   allowRightClick = true;

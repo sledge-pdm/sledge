@@ -3,7 +3,7 @@ import { ColorBox, Dropdown } from '@sledge/ui';
 import { Component, createSignal } from 'solid-js';
 import { BaseLayerColorMode, setBaseLayerColorMode, setBaseLayerCustomColor } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { flexRow } from '~/styles';
+import { flexRow } from '~/styles/styles';
 
 interface BaseLayerItemProps {}
 

@@ -8,6 +8,7 @@ import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
 import { saveGlobalSettings } from '~/features/io/config/save';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
@@ -98,12 +99,12 @@ const CanvasSettings: Component = () => {
   let widthInputRef: HTMLInputElement;
   let heightInputRef: HTMLInputElement;
 
-  const submitSizeChange = async () => {
+  const submitSizeChange = () => {
     const width = Number(widthInputRef.value);
     const height = Number(heightInputRef.value);
     const newSize = { width, height };
 
-    const result = await changeCanvasSizeWithNoOffset(newSize, false);
+    const result = changeCanvasSizeWithNoOffset(newSize, false);
     if (result) adjustZoomToFit();
   };
 
@@ -173,13 +174,16 @@ const CanvasSettings: Component = () => {
             <Button
               onClick={async () => {
                 setInteractStore('isCanvasSizeFrameMode', (v) => !v);
+                if (interactStore.isCanvasSizeFrameMode) {
+                  selectionManager.clear();
+                }
               }}
               style={{
                 color: interactStore.isCanvasSizeFrameMode ? 'var(--color-error)' : 'var(--color-accent)',
                 'border-color': interactStore.isCanvasSizeFrameMode ? 'var(--color-error)' : 'var(--color-accent)',
               }}
             >
-              {interactStore.isCanvasSizeFrameMode ? 'QUIT FRAME MODE.' : 'RESIZE WITH FRAME.'}
+              {interactStore.isCanvasSizeFrameMode ? 'quit resize.' : 'resize with frame.'}
             </Button>
           </div>
         </div>

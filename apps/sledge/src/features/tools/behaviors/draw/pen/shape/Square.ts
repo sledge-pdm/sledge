@@ -1,55 +1,30 @@
 import { ShapeMask } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { BaseShape } from '~/features/tools/draw/pen/shape/BaseShape';
+import { BaseShape } from '~/features/tools/behaviors/draw/pen/shape/BaseShape';
 
-export class Circle extends BaseShape {
-  readonly SHAPE_ID = 'circle';
+export class Square extends BaseShape {
+  readonly SHAPE_ID = 'square';
 
-  private drawCirclePixel(p: Vec2, rawP: Vec2 | undefined, size: number, dotMagnification: number, drawFn: (x: number, y: number) => void) {
+  private drawSquarePixel(p: Vec2, rawP: Vec2 | undefined, size: number, dotMagnification: number, drawFn: (x: number, y: number) => void) {
     let centerX: number, centerY: number;
 
     if (size % 2 === 0 && rawP) {
-      // 偶数サイズ: rawPositionを基準にピクセル境界の中心を計算
+      // 偶数サイズ: rawPositionを基準に最適な中心を計算
       centerX = Math.round(rawP.x / dotMagnification);
       centerY = Math.round(rawP.y / dotMagnification);
     } else {
-      // 奇数サイズ: 従来通りピクセル中心（整数座標）
+      // 奇数サイズ: 従来通りピクセル中心
       centerX = p.x;
       centerY = p.y;
     }
 
-    const radius = size / 2;
-    const radiusSquared = radius * radius;
+    const half = Math.floor(size / 2);
+    const start = -half;
+    const end = size - half - 1;
 
-    const bound = Math.ceil((size - 1) / 2);
-
-    for (let dy = -bound; dy <= bound; dy++) {
-      for (let dx = -bound; dx <= bound; dx++) {
-        let pixelX: number, pixelY: number;
-
-        if (size % 2 === 0) {
-          // 偶数サイズ：整数ピクセル座標に変換
-          pixelX = Math.floor(centerX + dx);
-          pixelY = Math.floor(centerY + dy);
-
-          // ピクセル中心から円の中心への距離を計算
-          const deltaX = pixelX + 0.5 - centerX;
-          const deltaY = pixelY + 0.5 - centerY;
-          const distanceSquared = deltaX * deltaX + deltaY * deltaY;
-
-          if (distanceSquared <= radiusSquared) {
-            drawFn(pixelX, pixelY);
-          }
-        } else {
-          // 奇数サイズ：従来通り
-          pixelX = centerX + dx;
-          pixelY = centerY + dy;
-          const distanceSquared = dx * dx + dy * dy;
-
-          if (distanceSquared <= radiusSquared) {
-            drawFn(pixelX, pixelY);
-          }
-        }
+    for (let dy = start; dy <= end; dy++) {
+      for (let dx = start; dx <= end; dx++) {
+        drawFn(centerX + dx, centerY + dy);
       }
     }
   }
@@ -64,7 +39,7 @@ export class Circle extends BaseShape {
     const p = { x: 0, y: 0 } as Vec2;
     const rawP = size % 2 === 0 ? ({ x: 0, y: 0 } as Vec2) : undefined; // 偶数サイズ時の中心決定を実描画と揃える
 
-    this.drawCirclePixel(p, rawP, size, 1, (px, py) => {
+    this.drawSquarePixel(p, rawP, size, 1, (px, py) => {
       const key = `${px},${py}`;
       if (!seen.has(key)) {
         seen.add(key);

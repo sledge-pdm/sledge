@@ -40,15 +40,12 @@ const KeyListener: Component = () => {
       saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
     }
 
-    // Skip other shortcuts if an input field is focused
-    if (inputFocused) {
-      return;
-    }
-
     if (isKeyMatchesToEntry(e, keyConfigStore['undo'])) {
+      e.preventDefault(); // prevent conflict with input undo/redo
       projectHistoryController.undo();
     }
     if (isKeyMatchesToEntry(e, keyConfigStore['redo'])) {
+      e.preventDefault(); // prevent conflict with input undo/redo
       projectHistoryController.redo();
     }
 

@@ -10,7 +10,7 @@ export const Consts = {
   zoomPrecisionSignificantDigits: 4,
   zoomByReferencePrecisionSignificantDigits: 2,
 
-  rotationPrecisionSignificantDigits: 1,
+  rotationPrecisionSignificantDigits: 0,
 
   maxLayerSize: 64,
 
@@ -21,7 +21,7 @@ export const Consts = {
 
   fileItemIndent: 8,
 
-  webGLFullUploadThresholdPercent: 15,
+  webGLFullUploadThresholdPercent: 7,
 };
 
 export type KeyConfigCommands =

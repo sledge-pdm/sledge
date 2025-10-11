@@ -21,7 +21,7 @@ export const Consts = {
 
   fileItemIndent: 8,
 
-  webGLFullUploadThresholdPercent: 7,
+  webGLFullUploadThresholdPercent: 15,
 };
 
 export type KeyConfigCommands =

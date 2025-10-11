@@ -211,8 +211,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         visibility: visibility(),
         'pointer-events': 'all',
         'transform-origin': '100% 0',
-        translate: `0px 8px`,
-        rotate: `${interactStore.rotation}deg`,
+        transform: `rotate(${interactStore.rotation}deg) translateY(8px)`,
         'z-index': 'var(--zindex-canvas-overlay)',
       }}
       onPointerDown={(e) => {

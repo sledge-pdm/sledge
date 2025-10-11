@@ -79,33 +79,45 @@ const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefin
 
 export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   let containerRef: HTMLDivElement;
+  let sectionsBetweenAreaRef: HTMLElement | null = null;
   const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
+  const [pendingUpdate, setPendingUpdate] = createSignal<boolean>(false);
+  
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (!updatePosition()) return;
       updateMenuPos();
       setUpdatePosition(false);
+      setPendingUpdate(false);
     }, Number(globalConfig.performance.targetFPS))
   );
+
+  // 重複する更新リクエストを防ぐ
+  const requestUpdate = () => {
+    if (pendingUpdate()) return;
+    setPendingUpdate(true);
+    setUpdatePosition(true);
+  };
 
   const handleAreaChanged = (e: Events['selection:maskChanged']) => {
     if (e.commit) {
       updateMenuPos();
+      setPendingUpdate(false);
     } else {
-      setUpdatePosition(true);
+      requestUpdate();
     }
   };
-  const handleMoved = (e: Events['selection:offsetChanged']) => setUpdatePosition(true);
+  const handleMoved = (e: Events['selection:offsetChanged']) => requestUpdate();
   const handleStateChanged = (e: Events['selection:stateChanged']) => {
     setSelectionState(e.newState);
-    setUpdatePosition(true);
+    requestUpdate();
   };
   const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
     setFloatingMoveState(e.moving);
-    setUpdatePosition(true);
+    requestUpdate();
   };
   const handleRequestMenuUpdate = (e: Events['selection:requestMenuUpdate']) => {
-    setUpdatePosition(true);
+    requestUpdate();
   };
   onMount(() => {
     startRenderLoop();
@@ -116,11 +128,11 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
 
     const observer = new ResizeObserver(() => {
-      setUpdatePosition(true);
+      requestUpdate();
     });
-    const sectionsBetweenArea = document.getElementById('sections-between-area') as HTMLElement;
-    if (sectionsBetweenArea) {
-      observer.observe(sectionsBetweenArea);
+    sectionsBetweenAreaRef = document.getElementById('sections-between-area') as HTMLElement;
+    if (sectionsBetweenAreaRef) {
+      observer.observe(sectionsBetweenAreaRef);
     }
 
     return () => {
@@ -134,14 +146,19 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     };
   });
 
+  // 座標変換に影響する要素を監視
   createEffect(() => {
-    // canvasToScreenNoZoom で実際に使用される値のみ購読
     interactStore.rotation;
-    interactStore.offset.x;
-    interactStore.offset.y;
     interactStore.horizontalFlipped;
     interactStore.verticalFlipped;
-    setUpdatePosition(true);
+    requestUpdate();
+  });
+
+  // 平行移動のみを監視（頻度が高いため分離）
+  createEffect(() => {
+    interactStore.offset.x;
+    interactStore.offset.y;
+    requestUpdate();
   });
 
   const [selectionMenuPos, setSelectionMenuPos] = createSignal<Vec2>({ x: 0, y: 0 });
@@ -160,10 +177,9 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     setSelectionMenuPos(anchor);
 
     // Outer 領域 (sections-between-area) へのクランプ
-    const sectionsBetweenArea = document.getElementById('sections-between-area') as HTMLElement;
-    if (!sectionsBetweenArea) return;
+    if (!sectionsBetweenAreaRef) return;
 
-    const areaRect = sectionsBetweenArea.getBoundingClientRect();
+    const areaRect = sectionsBetweenAreaRef.getBoundingClientRect();
     const containerRect = containerRef.getBoundingClientRect();
     const outerMargin = 8;
     const clampedX = Math.max(areaRect.left + outerMargin, Math.min(containerRect.x, areaRect.right - containerWidth - outerMargin));

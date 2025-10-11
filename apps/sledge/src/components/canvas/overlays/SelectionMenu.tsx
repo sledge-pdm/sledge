@@ -5,7 +5,14 @@
 import { Icon } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
-import { cancelMove, cancelSelection, commitMove, deleteSelectedArea, invertSelectionArea } from '~/features/selection/SelectionOperator';
+import {
+  cancelMove,
+  cancelSelection,
+  commitMove,
+  deleteSelectedArea,
+  invertSelectionArea,
+  isSelectionAvailable,
+} from '~/features/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { css } from '@acab/ecsstatic';
@@ -81,43 +88,34 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
   const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
-  const [pendingUpdate, setPendingUpdate] = createSignal<boolean>(false);
-  
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (!updatePosition()) return;
       updateMenuPos();
       setUpdatePosition(false);
-      setPendingUpdate(false);
     }, Number(globalConfig.performance.targetFPS))
   );
-
-  // 重複する更新リクエストを防ぐ
-  const requestUpdate = () => {
-    if (pendingUpdate()) return;
-    setPendingUpdate(true);
-    setUpdatePosition(true);
-  };
 
   const handleAreaChanged = (e: Events['selection:maskChanged']) => {
     if (e.commit) {
       updateMenuPos();
-      setPendingUpdate(false);
     } else {
-      requestUpdate();
+      setUpdatePosition(true);
     }
   };
-  const handleMoved = (e: Events['selection:offsetChanged']) => requestUpdate();
+  const handleMoved = (e: Events['selection:offsetChanged']) => {
+    setUpdatePosition(true);
+  };
   const handleStateChanged = (e: Events['selection:stateChanged']) => {
     setSelectionState(e.newState);
-    requestUpdate();
+    setUpdatePosition(true);
   };
   const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
     setFloatingMoveState(e.moving);
-    requestUpdate();
+    setUpdatePosition(true);
   };
   const handleRequestMenuUpdate = (e: Events['selection:requestMenuUpdate']) => {
-    requestUpdate();
+    setUpdatePosition(true);
   };
   onMount(() => {
     startRenderLoop();
@@ -128,7 +126,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
 
     const observer = new ResizeObserver(() => {
-      requestUpdate();
+      setUpdatePosition(true);
     });
     sectionsBetweenAreaRef = document.getElementById('sections-between-area') as HTMLElement;
     if (sectionsBetweenAreaRef) {
@@ -151,19 +149,21 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     interactStore.rotation;
     interactStore.horizontalFlipped;
     interactStore.verticalFlipped;
-    requestUpdate();
+    setUpdatePosition(true);
   });
 
   // 平行移動のみを監視（頻度が高いため分離）
   createEffect(() => {
     interactStore.offset.x;
     interactStore.offset.y;
-    requestUpdate();
+    setUpdatePosition(true);
   });
 
   const [selectionMenuPos, setSelectionMenuPos] = createSignal<Vec2>({ x: 0, y: 0 });
 
   const updateMenuPos = () => {
+    if (!isSelectionAvailable()) return;
+
     if (!containerRef) return;
     const outlineBound = selectionManager.getSelectionMask().getBoundBox();
     if (!outlineBound) return;

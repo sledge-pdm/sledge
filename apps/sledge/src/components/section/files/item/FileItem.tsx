@@ -48,16 +48,17 @@ const openIndicator = css`
 
 const FileItem: Component<{
   entry: DirEntry;
+  title?: string;
   isMe: boolean;
   isPartOfMe: boolean;
   config: FilesConfig;
   onClick?: (entry: DirEntry) => void;
 }> = (props) => {
-  const { entry, isMe, isPartOfMe, config, onClick } = props;
+  const { entry, title, isMe, isPartOfMe, config, onClick } = props;
 
   return (
     <div
-      title={entry.name}
+      title={title ?? entry.name}
       class={fileItemContainer}
       style={{
         width: config.twoColumns ? '50%' : '100%',

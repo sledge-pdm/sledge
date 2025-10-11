@@ -1,10 +1,10 @@
 import { css } from '@acab/ecsstatic';
 import { color, fonts, spacing, text } from '@sledge/theme';
 import { ColorBox } from '@sledge/ui';
-import { useMousePosition } from '@solid-primitives/mouse';
 import { Component, Show } from 'solid-js';
 import { currentColor, isTransparent, transparent } from '~/features/color';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';
+import { interactStore } from '~/stores/EditorStores';
 
 const pipetteDetailContainer = css`
   display: flex;
@@ -26,13 +26,12 @@ const pipetteHeader = css`
 `;
 
 const PipetteDetail: Component = (props: {}) => {
-  const pos = useMousePosition();
   return (
     <div
       class={pipetteDetailContainer}
       style={{
-        top: `${pos.y}px`,
-        left: `${pos.x}px`,
+        top: `${interactStore.lastMouseWindow.y}px`,
+        left: `${interactStore.lastMouseWindow.x}px`,
         'margin-top': spacing.md,
         'margin-left': spacing.md,
         padding: spacing.xs,

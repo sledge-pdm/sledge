@@ -17,7 +17,6 @@
     "@sledge/anvil": "workspace:*",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
-    "@solid-primitives/mouse": "^2.1.4",
     "@solid-primitives/raf": "^2.3.2",
     "@solid-primitives/scroll": "^2.1.3",
     "@solid-primitives/timer": "^1.4.3",

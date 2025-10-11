@@ -7,22 +7,6 @@ interface Props {
 
 const PipetteCursor: Component<Props> = (props: Props) => {
   return (
-    // <div
-    //   style={{
-    //     position: 'fixed',
-    //     top: `${props.mousePos.y - 2}px`,
-    //     left: `${props.mousePos.x + 2}px`,
-    //     'transform-origin': '0 0',
-    //     transform: 'translate(0%, -100%)',
-    //     'touch-action': 'none',
-    //     'pointer-events': 'none',
-    //     'z-index': 1000,
-    //   }}
-    //   pointer-events='none'
-    // >
-    //   <Icon src={'/icons/misc/pipette_cursor.png'} base={7} scale={3} color={vars.color.onBackground} backdropFilter='invert()' />
-    // </div>
-
     <div
       style={{
         position: 'fixed',

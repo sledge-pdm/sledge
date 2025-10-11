@@ -39,7 +39,6 @@ const explorerContainer = css`
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: auto;
   gap: 8px;
 `;
 
@@ -88,7 +87,21 @@ const controlsRow = css`
   gap: 6px;
   overflow: hidden;
   align-items: center;
-  justify-content: right;
+`;
+
+const backToProjectLink = css`
+  font-family: ZFB03B;
+  opacity: 0.5;
+  align-self: flex-end;
+`;
+
+const controlButtonsRow = css`
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  overflow: hidden;
+  align-items: center;
+  margin-left: auto;
 `;
 
 const entriesContainer = css`
@@ -232,129 +245,96 @@ const Explorer: Component<Props> = (props) => {
           </div>
 
           <div class={controlsRow}>
-            <div
-              class={editButton}
-              onClick={() => {
-                const path = currentPath();
-                const parts = normalizePath(path).split('/');
-                if (parts.length <= 1) return;
-                let parent = parts.slice(0, -1).join('/');
-                if (parts.length === 2) parent += '/';
-                if (parent) {
-                  setPath(parent);
-                }
-              }}
-            >
-              <Icon src={'/icons/misc/folder_up.png'} base={8} hoverColor={color.accent} />
-            </div>
-            <div
-              class={editButton}
-              onClick={() => {
-                setConfigStore('twoColumns', (v) => !v);
-              }}
-            >
-              <Icon src={configStore.twoColumns ? '/icons/misc/two_column.png' : '/icons/misc/one_column.png'} base={8} hoverColor={color.accent} />
+            <Show when={fileStore.savedLocation.path}>
+              <a
+                class={backToProjectLink}
+                onClick={() => {
+                  if (fileStore.savedLocation.path) setPath(fileStore.savedLocation.path);
+                }}
+              >
+                &lt; back to project
+              </a>
+            </Show>
+
+            <div class={controlButtonsRow}>
+              <div
+                class={editButton}
+                onClick={() => {
+                  const path = currentPath();
+                  const parts = normalizePath(path).split('/');
+                  if (parts.length <= 1) return;
+                  let parent = parts.slice(0, -1).join('/');
+                  if (parts.length === 2) parent += '/';
+                  if (parent) {
+                    setPath(parent);
+                  }
+                }}
+              >
+                <Icon src={'/icons/misc/folder_up.png'} base={8} hoverColor={color.accent} />
+              </div>
+              <div
+                class={editButton}
+                onClick={() => {
+                  setConfigStore('twoColumns', (v) => !v);
+                }}
+              >
+                <Icon src={configStore.twoColumns ? '/icons/misc/two_column.png' : '/icons/misc/one_column.png'} base={8} hoverColor={color.accent} />
+              </div>
             </div>
           </div>
         </div>
 
-        <div
-          style={
-            {
-              // 'min-height': '500px',
-            }
-          }
-        >
-          <div class={entriesContainer}>
-            <Switch
-              fallback={
-                <For each={entries()}>
-                  {(entry) => {
-                    const path = normalizeJoin(currentPath(), entry.name);
-                    const location: FileLocation = {
-                      name: entry.name,
-                      path: currentPath(),
-                    };
+        <div class={entriesContainer}>
+          <Switch
+            fallback={
+              <For each={entries()}>
+                {(entry) => {
+                  const path = normalizeJoin(currentPath(), entry.name);
+                  const location: FileLocation = {
+                    name: entry.name,
+                    path: currentPath(),
+                  };
 
-                    const openPath =
-                      fileStore.savedLocation.path && fileStore.savedLocation.name
-                        ? normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name)
-                        : undefined;
-                    const isMe = openPath && openPath === path;
-                    const isPartOfMe = openPath && openPath.startsWith(path);
+                  const openPath =
+                    fileStore.savedLocation.path && fileStore.savedLocation.name
+                      ? normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name)
+                      : undefined;
+                  const isMe = openPath && openPath === path;
+                  const isPartOfMe = openPath && openPath.startsWith(path.endsWith('/') ? path : path + '/');
 
-                    return (
-                      <FileItem
-                        config={configStore}
-                        entry={entry}
-                        isMe={!!isMe}
-                        isPartOfMe={!!isPartOfMe}
-                        onClick={(e) => {
-                          if (entry.isDirectory) {
-                            setPath(path);
-                          } else if (entry.isFile) {
-                            const ext = ['sledge', 'png', 'jpg', 'jpeg'];
-                            if (ext.some((e) => entry.name.endsWith(`.${e}`))) {
-                              openExistingProject(location);
-                            } else {
-                              // TODO: show error toast
-                            }
+                  return (
+                    <FileItem
+                      config={configStore}
+                      entry={entry}
+                      isMe={!!isMe}
+                      isPartOfMe={!!isPartOfMe}
+                      onClick={(e) => {
+                        if (entry.isDirectory) {
+                          setPath(path);
+                        } else if (entry.isFile) {
+                          const ext = ['sledge', 'png', 'jpg', 'jpeg'];
+                          if (ext.some((e) => entry.name.endsWith(`.${e}`))) {
+                            openExistingProject(location);
+                          } else {
+                            // TODO: show error toast
                           }
-                        }}
-                      />
-                    );
-                  }}
-                </For>
-              }
-            >
-              <Match when={entries() === undefined}>
-                <p>failed to open directory.</p>
-              </Match>
-              <Match when={entries() !== undefined && entries()!.length === 0}>
-                <p>this directory is empty.</p>
-              </Match>
-            </Switch>
-          </div>
+                        }
+                      }}
+                    />
+                  );
+                }}
+              </For>
+            }
+          >
+            <Match when={entries() === undefined}>
+              <p>failed to open directory.</p>
+            </Match>
+            <Match when={entries() !== undefined && entries()!.length === 0}>
+              <p>this directory is empty.</p>
+            </Match>
+          </Switch>
         </div>
       </div>
-
-      {/* <SectionItem title='drives.' defaultExpanded={false}>
-        <div
-          class={flexCol}
-          style={{
-            width: '100%',
-            height: 'auto',
-            gap: '4px',
-            'margin-left': '12px',
-            overflow: 'hidden',
-          }}
-        >
-          <Item
-            entry={{
-              isDirectory: false,
-              isFile: false,
-              isDrive: true,
-              name: 'C:/',
-              isSymlink: false,
-            }}
-            config={configStore}
-            isMe={false}
-            isPartOfMe={false}
-          />
-          <Item
-            entry={{
-              isDirectory: false,
-              isFile: false,
-              isDrive: true,
-              name: 'D:/',
-              isSymlink: false,
-            }}
-            config={configStore}
-            isMe={false}
-            isPartOfMe={false}
-          />
-        </div>
-      </SectionItem> */}
     </div>
   );
 };

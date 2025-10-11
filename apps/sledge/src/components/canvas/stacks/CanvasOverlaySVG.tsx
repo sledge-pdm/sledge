@@ -202,7 +202,7 @@ const CanvasOverlaySVG: Component = () => {
             />
 
             {/* Pen hover preview */}
-            <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas && !interactStore.isPenOut}>
+            <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas}>
               <path
                 d={penOutlinePath()}
                 fill='none'

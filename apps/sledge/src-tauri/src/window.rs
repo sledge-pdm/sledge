@@ -131,8 +131,8 @@ pub async fn open_window(
                 .maximizable(false);
         }
         SledgeWindowKind::Settings => {
-            window_inner_width = 600.0;
-            window_inner_height = 400.0;
+            window_inner_width = 650.0;
+            window_inner_height = 500.0;
             builder = builder
                 .title("settings.")
                 .resizable(false)

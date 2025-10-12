@@ -122,7 +122,7 @@ pub async fn open_window(
         }
         SledgeWindowKind::About => {
             window_inner_width = 380.0;
-            window_inner_height = 260.0;
+            window_inner_height = 270.0;
             builder = builder
                 .title("about.")
                 .resizable(false)

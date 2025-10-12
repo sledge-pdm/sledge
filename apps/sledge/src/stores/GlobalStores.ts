@@ -4,7 +4,7 @@ import { KeyConfigCommands } from '~/Consts';
 import { GlobalConfig } from '~/features/config/models/GlobalConfig';
 import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
 import { getDefaultSettings } from '~/features/io/config/set';
-import { SavingConfig } from '~/types/SavingConfig';
+import { Config } from '~/features/io/types/Config';
 import { isMacOS } from '~/utils/OSUtils';
 
 // global
@@ -84,7 +84,7 @@ export const setKeyConfigStore = globalRootStore.setKeyConfigStore;
 export const lastSettingsStore = globalRootStore.lastSettingsStore;
 export const setLastSettingsStore = globalRootStore.setLastSettingsStore;
 
-export const loadConfigToGlobalStore = (store: SavingConfig) => {
+export const loadConfigToGlobalStore = (store: Config) => {
   setGlobalConfig(store.globalConfigStore);
   setKeyConfigStore(store.keyConfigStore);
   setLastSettingsStore(store.lastSettingsStore);

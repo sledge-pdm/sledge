@@ -1,7 +1,8 @@
 import { GlobalConfig } from '~/features/config/models/GlobalConfig';
 import { KeyConfigStore, LastSettingsStore } from '~/stores/GlobalStores';
 
-export interface SavingConfig {
+// config json saved to config.json
+export interface Config {
   globalConfigStore: GlobalConfig;
   keyConfigStore: KeyConfigStore;
   lastSettingsStore: LastSettingsStore;

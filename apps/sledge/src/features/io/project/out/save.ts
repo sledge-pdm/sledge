@@ -1,14 +1,15 @@
 import { FileLocation } from '@sledge/core';
 import { path } from '@tauri-apps/api';
 import { appDataDir } from '@tauri-apps/api/path';
-import { save } from '@tauri-apps/plugin-dialog';
+import { confirm, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { setLocation as setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { dumpProject } from '~/features/io/project/out/dump';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
-import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, getFileUniqueId, join, pathToFileLocation } from '~/utils/FileUtils';
@@ -59,10 +60,28 @@ export async function saveProject(name?: string, existingPath?: string): Promise
 
   let fileNameWOExtension = name ? getFileNameWithoutExtension(name) : 'new project';
 
-  console.log(fileNameWOExtension);
-  console.log(fileStore);
-
   if (fileStore.openAs === 'project' && existingPath && name) {
+    // alert if overwriting when current project version is not equal to loaded project version
+    const loadedProjectVersion = projectStore.loadProjectVersion?.project ?? 0;
+    const isOW = fileStore.savedLocation.path === existingPath && fileStore.savedLocation.name === name;
+    if (isOW && loadedProjectVersion !== CURRENT_PROJECT_VERSION) {
+      const confirmResult = await confirm(
+        `Trying to overwrite project that has outdated version.
+
+old: V${loadedProjectVersion}
+new: V${CURRENT_PROJECT_VERSION}
+        
+After overwrite, you cannot open this project in old version of sledge.`,
+        {
+          okLabel: 'Save Anyway',
+          cancelLabel: 'Cancel',
+          kind: 'warning',
+          title: 'Overwrite outdated project',
+        }
+      );
+
+      if (!confirmResult) return false;
+    }
     // overwrite existing project
     selectedPath = join(existingPath, name);
   } else if (fileStore.openAs === 'image' && name) {

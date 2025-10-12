@@ -36,8 +36,8 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   Save: {
     label: 'Save Project',
     icon: '/icons/misc/save.png',
-    onSelect: () => {
-      saveProject();
+    onSelect: async () => {
+      await saveProject();
     },
   },
   // BaseXxx = only label and icon. Use like: {...BaseXxx, onSelect: () => {} }

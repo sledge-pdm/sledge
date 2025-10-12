@@ -86,7 +86,7 @@ export default function Editor() {
             throw new Error('reading ' + fullPath);
           }
           setLocation(fullPath);
-          loadProjectJson(projectFile);
+          await loadProjectJson(projectFile);
           return false;
         } catch (error) {
           console.error('Failed to read project:', error);

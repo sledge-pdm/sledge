@@ -1,19 +1,44 @@
+import { webpToRaw } from '@sledge/anvil';
 import { replaceAllEntries } from '~/features/image_pool';
-import { Project } from '~/features/io/project/out/dump';
+import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
+import { allLayers } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
-export const loadProjectJson = (project: Project) => {
+export const loadProjectJson = async (project: any) => {
+  if (!project.version || !project.projectVersion) {
+    // handle as V0 if there's no info
+    project = project as ProjectV0;
+    loadV0(project);
+  } else {
+    switch (project.projectVersion) {
+      case 0:
+      default:
+        project = project as ProjectV0;
+        loadV0(project);
+        break;
+      case 1:
+        project = project as ProjectV1;
+        loadV1(project);
+        break;
+    }
+  }
+};
+
+export function loadV0(project: ProjectV0) {
   setCanvasStore(project.canvasStore);
   setLayerListStore(project.layerListStore);
   setProjectStore(project.projectStore);
+  setProjectStore('loadProjectVersion', {
+    sledge: undefined,
+    project: 0,
+  });
   setImagePoolStore(project.imagePoolStore);
 
   if (project.imagePool && Array.isArray(project.imagePool)) {
     replaceAllEntries(project.imagePool);
   }
-
   eventBus.emit('canvas:sizeChanged', { newSize: project.canvasStore.canvas });
 
   const canvasSize = project.canvasStore.canvas;
@@ -26,4 +51,36 @@ export const loadProjectJson = (project: Project) => {
       anvilManager.registerAnvil(layer.id, newBuffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height);
     }
   });
-};
+}
+
+export function loadV1(project: ProjectV1) {
+  setCanvasStore(project.canvas.store);
+  setLayerListStore(project.layers.store);
+  setProjectStore(project.project.store);
+  setProjectStore('loadProjectVersion', {
+    sledge: project.version,
+    project: 1,
+  });
+  setImagePoolStore(project.imagePool.store);
+
+  if (project.imagePool && Array.isArray(project.imagePool)) {
+    replaceAllEntries(project.imagePool);
+  }
+
+  const canvasSize = project.canvas.store.canvas;
+  eventBus.emit('canvas:sizeChanged', { newSize: canvasSize });
+
+  allLayers().forEach((layer) => {
+    const data = project.layers.buffers.get(layer.id);
+    if (!data) return;
+
+    const { webpBuffer } = data;
+    if (webpBuffer) {
+      const buffer = webpToRaw(webpBuffer, canvasSize.width, canvasSize.height);
+      anvilManager.registerAnvil(layer.id, new Uint8ClampedArray(buffer.buffer), canvasSize.width, canvasSize.height);
+    } else {
+      const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
+      anvilManager.registerAnvil(layer.id, newBuffer, canvasSize.width, canvasSize.height);
+    }
+  });
+}

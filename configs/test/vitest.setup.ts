@@ -11,7 +11,7 @@ vi.mock('~/utils/EventBus', () => ({
 }));
 
 // Mock bottom bar text function but keep other exports (e.g., DebugLogger)
-vi.mock('~/controllers/log/LogController', () => ({
+vi.mock('~/features/log/service', () => ({
   setBottomBarText: vi.fn(),
   DebugLogger: class {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -20,6 +20,10 @@ vi.mock('~/controllers/log/LogController', () => ({
     debugWarn() {}
     debugError() {}
   },
+}));
+
+vi.mock('~/utils/VersionUtils', () => ({
+  getCurrentVersion: vi.fn(async () => '0.1.0'),
 }));
 
 // Solid stores: we can import the real stores as they use solid-js/store (no DOM),

@@ -1,0 +1,34 @@
+[ scale x1.0 ]
+
+editor:
+size:  PhysicalSizeheight: 750type: "Physical"width: 1200[[Prototype]]: Object
+app.tsx:76 position:  PhysicalPositiontype: "Physical"x: 368y: 142[[Prototype]]: Object
+
+* call openWindow("settings") by user interact
+
+[parent] position: 368 142, size:  1200 750
+[child] position: tbd, size: 650x500
+calculated parent_center: 968 517
+scale factor: 1
+final position: 643, 267
+
+settings;
+size:  PhysicalSizeheight: 500type: "Physical"width: 650[[Prototype]]: Object
+app.tsx:76 position:  PhysicalPositiontype: "Physical"x: 651y: 268[[Prototype]]: Object
+
+[ scale x1.5 ]
+
+size:  PhysicalSizeheight: 1093type: "Physical"width: 1800[[Prototype]]: Object
+app.tsx:76 position:  PhysicalPositiontype: "Physical"x: 49y: 2[[Prototype]]: Object
+
+* call openWindow("settings") by user interact
+
+[parent] position: 49 2, size:  1800 1093
+[child] position: tbd, size: 650x500
+calculated parent_center: 949 548.5
+scale factor: 1.5
+final position: 624, 298.5
+
+settings;
+size:  PhysicalSizeheight: 750type: "Physical"width: 975[[Prototype]]: Object
+app.tsx:76 position:  PhysicalPositiontype: "Physical"x: 947y: 450[[Prototype]]: Object

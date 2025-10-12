@@ -1,0 +1,20 @@
+[ scale x1.5 ]
+
+* call openWindow("settings") by user interact
+
+editor:
+size:  PhysicalSizeheight: 750type: "Physical"width: 1200[[Prototype]]: Object
+app.tsx:76 position:  PhysicalPositiontype: "Physical"x: 371y: 131[[Prototype]]: Object
+
+[no parent] desired size: 1200x750, scale factor: 1.5, logical size: 800x500 // centered! OK
+
+* call openWindow("settings") by user interact
+[parent] physical position: 371 131, physical size: 1200 750
+[child] logical size: 433.3333333333333x333.3333333333333, physical size: 650x500
+calculated parent_center (physical): 971 506    
+scale factor: 1.5
+final position (physical): 646, 256
+
+settings:
+size:  PhysicalSizeheight: 500type: "Physical"width: 650[[Prototype]]: Object
+app.tsx:76 position:  PhysicalPositiontype: "Physical"x: 980y: 386[[Prototype]]: Object // slightly offcenter to right bottom

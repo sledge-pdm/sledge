@@ -17,7 +17,7 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 
 export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
 
-export function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
+export async function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
   const parent = kind === 'settings' || kind === 'about' ? getCurrentWindow().label : undefined;
   return safeInvoke('open_window', {
     kind,

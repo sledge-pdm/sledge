@@ -45,7 +45,8 @@ const Snapshots: Component = () => {
     const arr = snapshotStore.snapShots.values().toArray();
     return arr.sort((a, b) => b.createdAt - a.createdAt);
   };
-  const [snapShots, setSnapShots] = createSignal<ProjectSnapshot[]>(getSnapshotArray());
+  // リアクティブな計算プロパティとして定義
+  const snapShots = () => getSnapshotArray();
   const [backupBeforeRestore, setBackupBeforeRestore] = createSignal(false);
 
   return (
@@ -66,7 +67,6 @@ const Snapshots: Component = () => {
           <button
             onClick={async () => {
               await createSnapshotFromCurrentState();
-              setSnapShots(getSnapshotArray());
             }}
           >
             + add.
@@ -84,11 +84,9 @@ const Snapshots: Component = () => {
                       await loadSnapshot(snapshot, {
                         backup: backupBeforeRestore(),
                       });
-                      setSnapShots(getSnapshotArray());
                     }}
                     onDelete={async () => {
                       await deleteSnapshot(snapshot);
-                      setSnapShots(getSnapshotArray());
                     }}
                   />
                 );

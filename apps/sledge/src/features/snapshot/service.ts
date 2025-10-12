@@ -10,29 +10,35 @@ import { setSnapshotStore, snapshotStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
 export async function createSnapshotFromCurrentState(name?: string): Promise<ProjectSnapshot> {
-  const canvasSize: Size2D = { ...canvasStore.canvas };
-  // create thumbnail (actual size)
-  const thumbnailImageData = new ThumbnailGenerator().generateCanvasThumbnail(canvasSize.width, canvasSize.height);
+  try {
+    const canvasSize: Size2D = { ...canvasStore.canvas };
+    // create thumbnail (actual size)
+    const thumbnailImageData = new ThumbnailGenerator().generateCanvasThumbnail(canvasSize.width, canvasSize.height);
 
-  const snapShot: ProjectSnapshot = {
-    createdAt: Date.now(),
-    id: createUniqueId(),
-    name: name ?? new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString(),
-    description: undefined,
-    snapShot: await dumpProjectJson(),
-    thumbnail: thumbnailImageData
-      ? {
-          webpBuffer: rawToWebp(new Uint8Array(thumbnailImageData.data.buffer), thumbnailImageData.width, thumbnailImageData.height),
-          width: thumbnailImageData.width,
-          height: thumbnailImageData.height,
-        }
-      : undefined,
-  };
-  const newSnapshots = new Map(snapshotStore.snapShots);
-  newSnapshots.set(snapShot.id, snapShot);
-  setSnapshotStore('snapShots', newSnapshots);
+    const now = new Date();
+    const snapShot: ProjectSnapshot = {
+      createdAt: Date.now(),
+      id: createUniqueId(),
+      name: name ?? `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,
+      description: undefined,
+      snapShot: await dumpProjectJson(),
+      thumbnail: thumbnailImageData
+        ? {
+            webpBuffer: rawToWebp(new Uint8Array(thumbnailImageData.data.buffer), thumbnailImageData.width, thumbnailImageData.height),
+            width: thumbnailImageData.width,
+            height: thumbnailImageData.height,
+          }
+        : undefined,
+    };
+    const newSnapshots = new Map(snapshotStore.snapShots);
+    newSnapshots.set(snapShot.id, snapShot);
+    setSnapshotStore('snapShots', newSnapshots);
 
-  return snapShot;
+    return snapShot;
+  } catch (error) {
+    console.error('Failed to create snapshot:', error);
+    throw new Error('スナップショットの作成に失敗しました');
+  }
 }
 
 export async function deleteSnapshot(snapshot: ProjectSnapshot) {
@@ -89,9 +95,9 @@ Current state will discarded.`,
   }
 
   // load snapshot
-  const snapshotToLoad: ProjectSnapshot = snapshot;
-  // overwrite snapshots state to current
-  snapshotToLoad.snapShot.snapshots.store = snapshotStore;
+  const snapshotData = { ...snapshot.snapShot };
+  // preserve current snapshots state (avoid circular reference)
+  snapshotData.snapshots.store = snapshotStore;
   // load snapshot
-  await loadProjectJson(snapshotToLoad.snapShot);
+  await loadProjectJson(snapshotData);
 }

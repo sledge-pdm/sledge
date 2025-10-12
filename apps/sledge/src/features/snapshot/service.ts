@@ -9,7 +9,7 @@ import { ProjectSnapshot } from '~/stores/editor/SnapshotStore';
 import { setSnapshotStore, snapshotStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
-export async function createSnapshotFromCurrentState(name?: string): Promise<ProjectSnapshot> {
+export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {
     const canvasSize: Size2D = { ...canvasStore.canvas };
     // create thumbnail (actual size)
@@ -30,7 +30,6 @@ export async function createSnapshotFromCurrentState(name?: string): Promise<Pro
           }
         : undefined,
     };
-
     return snapshot;
   } catch (error) {
     console.error('Failed to create snapshot:', error);
@@ -38,13 +37,11 @@ export async function createSnapshotFromCurrentState(name?: string): Promise<Pro
   }
 }
 
-export async function registerCurrentAsSnapshot(name?: string): Promise<ProjectSnapshot> {
-  const snapshot = await createSnapshotFromCurrentState(name);
-
+export async function registerCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
+  const snapshot = await createCurrentProjectSnapshot(name);
   if (snapshot) {
     setSnapshotStore('snapshots', [...snapshotStore.snapshots, snapshot]);
   }
-
   return snapshot;
 }
 
@@ -87,15 +84,15 @@ Current state will be saved as backup.`,
     if (!confirmResult) return;
 
     // backup current state
-    const created = await registerCurrentAsSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
+    const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
     if (!created) return;
   } else {
     const confirmResult = await confirm(
       `Sure to load snapshot "${snapshot.name}"?
-Current state will discarded.`,
+This will NOT backup your current state (unless you did manually backup.)`,
       {
         cancelLabel: 'Cancel',
-        okLabel: 'Load',
+        okLabel: 'Discard and Load',
         kind: 'info',
         title: 'Load Snapshot',
       }
@@ -104,10 +101,9 @@ Current state will discarded.`,
     if (!confirmResult) return;
   }
 
+  const savedSnapshotStore = { ...snapshotStore };
   // load snapshot
-  const snapshotData = { ...snapshot.snapshot };
-  // preserve current snapshots state (avoid circular reference)
-  snapshotData.snapshots.store = snapshotStore;
-  // load snapshot
-  await loadProjectJson(snapshotData);
+  await loadProjectJson(snapshot.snapshot);
+
+  setSnapshotStore(savedSnapshotStore);
 }

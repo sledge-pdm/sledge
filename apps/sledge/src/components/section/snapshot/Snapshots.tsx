@@ -5,7 +5,7 @@ import { webpToRaw } from '@sledge/anvil';
 import { clsx } from '@sledge/core';
 import { Icon, ToggleSwitch } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
-import { deleteSnapshot, loadSnapshot, registerCurrentAsSnapshot } from '~/features/snapshot';
+import { deleteSnapshot, loadSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';
 import { ProjectSnapshot } from '~/stores/editor/SnapshotStore';
 import { snapshotStore } from '~/stores/EditorStores';
 import { errorButton } from '~/styles/styles';
@@ -63,10 +63,11 @@ const Snapshots: Component = () => {
         <div class={buttonsContainer}>
           <button
             onClick={async () => {
-              await registerCurrentAsSnapshot();
+              await registerCurrentProjectSnapshot();
             }}
+            title='save current project snapshot.'
           >
-            + add.
+            + save.
           </button>
         </div>
 

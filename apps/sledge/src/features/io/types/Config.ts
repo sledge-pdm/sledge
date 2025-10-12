@@ -1,5 +1,6 @@
 import { GlobalConfig } from '~/features/config/models/GlobalConfig';
-import { KeyConfigStore, LastSettingsStore } from '~/stores/GlobalStores';
+import { KeyConfigStore } from '~/stores/global/KeyConfigStore';
+import { LastSettingsStore } from '~/stores/global/LastSettingsStore';
 
 // config json saved to config.json
 export interface Config {

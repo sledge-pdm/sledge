@@ -1,7 +1,7 @@
 ---
 name: template/performance
 about: performance template
-title: 'perf: '
+title: ''
 labels: ''
 assignees: Innsbluck-rh
 ---

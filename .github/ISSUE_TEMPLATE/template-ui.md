@@ -1,7 +1,7 @@
 ---
 name: template/ui
 about: ui template
-title: 'ui: '
+title: ''
 labels: ui
 assignees: Innsbluck-rh
 ---

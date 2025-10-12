@@ -3,20 +3,18 @@ import { getEntries } from '~/features/image_pool';
 import { ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { snapshotStore } from '~/stores/EditorStores';
 import { canvasStore, imagePoolStore, layerListStore, projectStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 
-export function getLayerBuffers(): Map<string, Uint8ClampedArray> {
-  const map = new Map<string, Uint8ClampedArray>();
-  allLayers().forEach((layer) => {
-    map.set(layer.id, getAnvilOf(layer.id)!.getImageData());
-  });
-  return map;
-}
-
 export const dumpProject = async (): Promise<Uint8Array> => {
+  const project = await dumpProjectJson();
+  const packed = packr.pack(project);
+  return packed instanceof Uint8Array ? packed : Uint8Array.of(packed);
+};
+
+export const dumpProjectJson = async (): Promise<ProjectV1> => {
   const buffers = new Map<
     string,
     {
@@ -34,20 +32,23 @@ export const dumpProject = async (): Promise<Uint8Array> => {
     version: await getCurrentVersion(),
     projectVersion: 1,
     canvas: {
-      store: canvasStore,
+      store: { ...canvasStore },
     },
     project: {
-      store: projectStore,
+      store: { ...projectStore },
     },
     imagePool: {
-      store: imagePoolStore,
+      store: { ...imagePoolStore },
       entries: getEntries(),
     },
     layers: {
-      store: layerListStore,
+      store: { ...layerListStore },
       buffers: buffers,
     },
+    snapshots: {
+      store: { ...snapshotStore },
+    },
   };
-  const packed = packr.pack(project);
-  return packed instanceof Uint8Array ? packed : Uint8Array.of(packed);
+
+  return project;
 };

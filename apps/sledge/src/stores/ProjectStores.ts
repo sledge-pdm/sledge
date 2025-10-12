@@ -1,61 +1,9 @@
 // projectStore.ts
-import { Size2D } from '@sledge/core';
 import { createStore } from 'solid-js/store';
-import { BaseLayer, Layer } from '~/features/layer';
-
-export type CanvasStore = {
-  canvas: Size2D;
-};
-export type ImagePoolStore = {
-  selectedEntryId: string | undefined;
-  preserveAspectRatio: boolean;
-};
-export type ProjectStore = {
-  loadProjectVersion?: {
-    sledge: string; // semver
-    project: number; // VX
-  };
-
-  thumbnailPath: string | undefined;
-  isProjectChangedAfterSave: boolean;
-  lastSavedAt: Date | undefined;
-
-  autoSaveEnabled?: boolean;
-  autoSaveInterval?: number; // in seconds
-};
-export type LayerListStore = {
-  layers: Layer[];
-  baseLayer: BaseLayer;
-  activeLayerId: string;
-  isImagePoolActive: boolean;
-};
-
-const defaultCanvasStore: CanvasStore = {
-  canvas: {
-    width: 1024,
-    height: 1024,
-  },
-};
-const defaultImagePoolStore: ImagePoolStore = {
-  selectedEntryId: undefined,
-  preserveAspectRatio: true,
-};
-const defaultProjectStore: ProjectStore = {
-  loadProjectVersion: undefined,
-  thumbnailPath: undefined as string | undefined,
-  isProjectChangedAfterSave: false,
-  lastSavedAt: undefined as Date | undefined,
-  autoSaveEnabled: false,
-  autoSaveInterval: 60,
-};
-const defaultLayerListStore: LayerListStore = {
-  layers: new Array<Layer>(),
-  baseLayer: {
-    colorMode: 'transparent',
-  },
-  activeLayerId: '',
-  isImagePoolActive: true,
-};
+import { CanvasStore, defaultCanvasStore } from '~/stores/project/CanvasStore';
+import { ImagePoolStore, defaultImagePoolStore } from '~/stores/project/ImagePoolStore';
+import { LayerListStore, defaultLayerListStore } from '~/stores/project/LayerListStore';
+import { ProjectStore, defaultProjectStore } from '~/stores/project/ProjectStore';
 
 export const initProjectStore = () => {
   const [canvasStore, setCanvasStore] = createStore<CanvasStore>(defaultCanvasStore);

@@ -3,6 +3,7 @@ import { replaceAllEntries } from '~/features/image_pool';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { setSnapshotStore } from '~/stores/EditorStores';
 import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -62,6 +63,7 @@ export function loadV1(project: ProjectV1) {
     project: 1,
   });
   setImagePoolStore(project.imagePool.store);
+  setSnapshotStore(project.snapshots.store);
 
   if (project.imagePool && Array.isArray(project.imagePool)) {
     replaceAllEntries(project.imagePool);

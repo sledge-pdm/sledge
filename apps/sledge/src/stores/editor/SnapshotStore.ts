@@ -7,7 +7,7 @@ export interface ProjectSnapshot {
   name: string;
   description?: string;
   createdAt: number;
-  snapShot: ProjectV1;
+  snapshot: ProjectV1;
   thumbnail?: {
     webpBuffer: Uint8Array;
     width: number;
@@ -16,9 +16,9 @@ export interface ProjectSnapshot {
 }
 
 export type SnapshotStore = {
-  snapShots: Map<string /** snapshot id */, ProjectSnapshot>;
+  snapshots: ProjectSnapshot[];
 };
 
 export const defaultSnapshotStore: SnapshotStore = {
-  snapShots: new Map(),
+  snapshots: [],
 };

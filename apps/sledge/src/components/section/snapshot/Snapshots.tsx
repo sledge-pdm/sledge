@@ -1,17 +1,17 @@
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
 import { webpToRaw } from '@sledge/anvil';
 import { clsx } from '@sledge/core';
 import { Icon, ToggleSwitch } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
-import { createSnapshotFromCurrentState, deleteSnapshot, loadSnapshot } from '~/features/snapshot';
+import { deleteSnapshot, loadSnapshot, registerCurrentAsSnapshot } from '~/features/snapshot';
 import { ProjectSnapshot } from '~/stores/editor/SnapshotStore';
 import { snapshotStore } from '~/stores/EditorStores';
 import { errorButton } from '~/styles/styles';
 import { sectionContent } from '../SectionStyles';
 
-const snapShotSectionContent = css`
+const snapshotSectionContent = css`
   padding-left: 4px;
   gap: 8px;
 `;
@@ -41,17 +41,14 @@ const noSnapshotsText = css`
 `;
 
 const Snapshots: Component = () => {
-  const getSnapshotArray = () => {
-    const arr = snapshotStore.snapShots.values().toArray();
-    return arr.sort((a, b) => b.createdAt - a.createdAt);
-  };
-  // リアクティブな計算プロパティとして定義
-  const snapShots = () => getSnapshotArray();
   const [backupBeforeRestore, setBackupBeforeRestore] = createSignal(false);
+
+  // ソート処理をメモ化してパフォーマンス向上
+  const sortedSnapshots = createMemo(() => snapshotStore.snapshots.toSorted((a, b) => b.createdAt - a.createdAt));
 
   return (
     <SectionItem title='snapshots.'>
-      <div class={clsx(sectionContent, snapShotSectionContent)}>
+      <div class={clsx(sectionContent, snapshotSectionContent)}>
         <div class={settingsContainer}>
           <ToggleSwitch
             checked={backupBeforeRestore()}
@@ -66,7 +63,7 @@ const Snapshots: Component = () => {
         <div class={buttonsContainer}>
           <button
             onClick={async () => {
-              await createSnapshotFromCurrentState();
+              await registerCurrentAsSnapshot();
             }}
           >
             + add.
@@ -74,8 +71,8 @@ const Snapshots: Component = () => {
         </div>
 
         <div class={snapshotsContainer}>
-          <Show when={snapShots().length > 0} fallback={<p class={noSnapshotsText}>[ no snapshots ]</p>}>
-            <For each={snapShots()}>
+          <Show when={snapshotStore.snapshots.length > 0} fallback={<p class={noSnapshotsText}>[ no snapshots ]</p>}>
+            <For each={sortedSnapshots()}>
               {(snapshot) => {
                 return (
                   <SnapshotItem

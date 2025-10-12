@@ -16,12 +16,12 @@ export async function createSnapshotFromCurrentState(name?: string): Promise<Pro
     const thumbnailImageData = new ThumbnailGenerator().generateCanvasThumbnail(canvasSize.width, canvasSize.height);
 
     const now = new Date();
-    const snapShot: ProjectSnapshot = {
+    const snapshot: ProjectSnapshot = {
       createdAt: Date.now(),
       id: createUniqueId(),
       name: name ?? `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,
       description: undefined,
-      snapShot: await dumpProjectJson(),
+      snapshot: await dumpProjectJson(),
       thumbnail: thumbnailImageData
         ? {
             webpBuffer: rawToWebp(new Uint8Array(thumbnailImageData.data.buffer), thumbnailImageData.width, thumbnailImageData.height),
@@ -30,15 +30,22 @@ export async function createSnapshotFromCurrentState(name?: string): Promise<Pro
           }
         : undefined,
     };
-    const newSnapshots = new Map(snapshotStore.snapShots);
-    newSnapshots.set(snapShot.id, snapShot);
-    setSnapshotStore('snapShots', newSnapshots);
 
-    return snapShot;
+    return snapshot;
   } catch (error) {
     console.error('Failed to create snapshot:', error);
     throw new Error('スナップショットの作成に失敗しました');
   }
+}
+
+export async function registerCurrentAsSnapshot(name?: string): Promise<ProjectSnapshot> {
+  const snapshot = await createSnapshotFromCurrentState(name);
+
+  if (snapshot) {
+    setSnapshotStore('snapshots', [...snapshotStore.snapshots, snapshot]);
+  }
+
+  return snapshot;
 }
 
 export async function deleteSnapshot(snapshot: ProjectSnapshot) {
@@ -51,9 +58,12 @@ export async function deleteSnapshot(snapshot: ProjectSnapshot) {
 
   if (!confirmResult) return;
 
-  const newSnapshots = new Map(snapshotStore.snapShots);
-  newSnapshots.delete(snapshot.id);
-  setSnapshotStore('snapShots', newSnapshots);
+  setSnapshotStore(
+    'snapshots',
+    snapshotStore.snapshots.filter((s) => {
+      return s.id !== snapshot.id;
+    })
+  );
 }
 
 export async function loadSnapshot(
@@ -77,7 +87,7 @@ Current state will be saved as backup.`,
     if (!confirmResult) return;
 
     // backup current state
-    const created = await createSnapshotFromCurrentState('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
+    const created = await registerCurrentAsSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
     if (!created) return;
   } else {
     const confirmResult = await confirm(
@@ -95,7 +105,7 @@ Current state will discarded.`,
   }
 
   // load snapshot
-  const snapshotData = { ...snapshot.snapShot };
+  const snapshotData = { ...snapshot.snapshot };
   // preserve current snapshots state (avoid circular reference)
   snapshotData.snapshots.store = snapshotStore;
   // load snapshot

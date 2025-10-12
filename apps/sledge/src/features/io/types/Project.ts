@@ -1,5 +1,8 @@
 import { ImagePoolEntry } from '~/features/image_pool';
-import { CanvasStore, ImagePoolStore, LayerListStore, ProjectStore } from '~/stores/ProjectStores';
+import { CanvasStore } from '~/stores/project/CanvasStore';
+import { ImagePoolStore } from '~/stores/project/ImagePoolStore';
+import { LayerListStore } from '~/stores/project/LayerListStore';
+import { ProjectStore } from '~/stores/project/ProjectStore';
 
 interface ProjectBase {
   version?: string; // semver

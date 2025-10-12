@@ -8,7 +8,8 @@ import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
-import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
+import { SelectionLimitMode } from '~/stores/editor/ToolStore';
+import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.

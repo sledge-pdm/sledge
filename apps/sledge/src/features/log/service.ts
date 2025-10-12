@@ -1,4 +1,5 @@
-import { BottomBarKind, setLogStore, toolStore } from '~/stores/EditorStores';
+import { BottomBarKind } from '~/stores/editor/LogStore';
+import { setLogStore, toolStore } from '~/stores/EditorStores';
 
 let currentTimerId: ReturnType<typeof setTimeout> | null = null;
 

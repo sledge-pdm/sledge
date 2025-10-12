@@ -1,4 +1,4 @@
-import { LabelMode } from "@sledge/ui";
+import { LabelMode } from '@sledge/ui';
 
 export type ConfigComponentName = 'Dropdown' | 'Slider' | 'CheckBox' | 'RadioButton' | 'ToggleSwitch' | 'Custom';
 

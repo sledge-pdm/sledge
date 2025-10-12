@@ -1,9 +1,4 @@
 import { ConfigComponentName } from '~/features/config/models/ConfigComponent';
-import { debugMetas } from '~/features/config/models/meta/Debug';
-import { defaultMetas } from '~/features/config/models/meta/Default';
-import { editorMetas } from '~/features/config/models/meta/Editor';
-import { generalMetas } from '~/features/config/models/meta/General';
-import { performanceMetas } from '~/features/config/models/meta/Performance';
 
 export enum ConfigSections {
   General = 'GENERAL',

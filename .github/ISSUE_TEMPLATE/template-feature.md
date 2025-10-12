@@ -1,7 +1,7 @@
 ---
 name: template/feature
 about: feature template
-title: 'feat: '
+title: ''
 labels: feature
 assignees: Innsbluck-rh
 ---

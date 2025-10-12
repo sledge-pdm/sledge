@@ -1,7 +1,7 @@
 ---
 name: template/website
 about: website template
-title: 'website: '
+title: ''
 labels: website
 assignees: Innsbluck-rh
 ---

@@ -73,7 +73,6 @@ Current state will be saved as backup.`,
     // backup current state
     const created = await createSnapshotFromCurrentState('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
     if (!created) return;
-    
   } else {
     const confirmResult = await confirm(
       `Sure to load snapshot "${snapshot.name}"?

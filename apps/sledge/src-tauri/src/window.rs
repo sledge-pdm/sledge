@@ -170,10 +170,6 @@ pub async fn open_window(
             let px = physical_px / scale_factor;
             let py = physical_py / scale_factor;
             builder = builder.position(px, py);
-            builder = builder.inner_size(
-                window_inner_width / scale_factor,
-                window_inner_height / scale_factor,
-            );
         }
     } else {
         builder = builder.center();

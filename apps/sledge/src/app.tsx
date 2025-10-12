@@ -72,9 +72,6 @@ export default function App() {
     const webview = getCurrentWebview();
     const window = getCurrentWindow();
 
-    console.log("size: ", await window.innerSize());
-    console.log("position: ", await window.innerPosition());
-
     await webview.setZoom(zoomForIntegerize(await window.scaleFactor()));
 
     window.onScaleChanged(async ({ payload }) => {

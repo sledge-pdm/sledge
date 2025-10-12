@@ -24,7 +24,6 @@ const border = css`
   flex-grow: 1;
   width: 100%;
   margin-left: 8px;
-  background-color: vars(--color-border-secondary);
 `;
 
 const iconsContainer = css`

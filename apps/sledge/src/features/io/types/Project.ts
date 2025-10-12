@@ -1,4 +1,5 @@
 import { ImagePoolEntry } from '~/features/image_pool';
+import { SnapshotStore } from '~/stores/editor/SnapshotStore';
 import { CanvasStore } from '~/stores/project/CanvasStore';
 import { ImagePoolStore } from '~/stores/project/ImagePoolStore';
 import { LayerListStore } from '~/stores/project/LayerListStore';
@@ -11,7 +12,9 @@ interface ProjectBase {
 
 export const CURRENT_PROJECT_VERSION = 1;
 
-// <= 0.0.12
+/**
+ *  @deprecated ProjectV0 was used in sledge <= 0.0.12.
+ */
 export interface ProjectV0 {
   canvasStore: CanvasStore;
   projectStore: ProjectStore;
@@ -20,6 +23,7 @@ export interface ProjectV0 {
   layerBuffers: Map<string, Uint8ClampedArray>;
   imagePool: ImagePoolEntry[];
 }
+
 // present
 export interface ProjectV1 extends ProjectBase {
   canvas: {
@@ -40,5 +44,8 @@ export interface ProjectV1 extends ProjectBase {
   imagePool: {
     store: ImagePoolStore;
     entries: ImagePoolEntry[];
+  };
+  snapshots: {
+    store: SnapshotStore;
   };
 }

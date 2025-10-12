@@ -21,7 +21,7 @@ export const defaultAppearanceStore: AppearanceStore = {
   },
   rightSide: {
     shown: false,
-    tabs: ['project', 'export', 'history'],
+    tabs: ['project', 'export', 'snapshot', 'history'],
     selectedIndex: 0,
   },
 };

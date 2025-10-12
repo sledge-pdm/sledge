@@ -163,8 +163,8 @@ pub async fn open_window(
             let child_physical_height = window_inner_height;
 
             // Physical座標で計算してからLogical座標に変換
-            let physical_px = parent_center_x - child_physical_width / 2.0;
-            let physical_py = parent_center_y - child_physical_height / 2.0;
+            let physical_px = parent_center_x - child_physical_width * scale_factor / 2.0;
+            let physical_py = parent_center_y - child_physical_height * scale_factor / 2.0;
 
             // Logical座標に変換（position()メソッドはLogical座標を期待）
             let px = physical_px / scale_factor;

@@ -12,7 +12,7 @@ import {
 } from '~/features/layer/anvil/AnvilController';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionLimitMode, isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 
 export interface FillProps {
@@ -31,25 +31,14 @@ export class FillTool implements ToolBehavior {
   onStart(ctx: AnvilToolContext, { position, color, presetName, layerId }: ToolArgs) {
     const startTime = Date.now();
 
-    // Restrict by selection (a little bit harsh, so currently commented out)
-    //
-    // if (!isDrawingAllowed(position, true)) {
-    //   setBottomBarText('Click inside selection.', { kind: 'warn' });
-
-    //   return {
-    //     shouldUpdate: false,
-    //     shouldRegisterToHistory: false,
-    //   };
-    // }
-
     const preset = presetName ? (getPresetOf('fill', presetName) as any) : undefined;
     const threshold = preset?.threshold ?? 0;
     const limitMode = getSelectionLimitMode();
 
     const before = getBufferCopy(ctx.layerId);
 
-    // 選択範囲がない、または制限モードがnoneの場合は通常のフラッドフィル
-    if (!isSelectionAvailable()) {
+    const selectionFillMode = preset.selectionFillMode ?? 'inside';
+    if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
       floodFill({
         target: getBufferPointer(ctx.layerId)!,
         targetWidth: getLayerWidth(ctx.layerId)!,
@@ -61,8 +50,7 @@ export class FillTool implements ToolBehavior {
       });
     } else {
       const selectionMask = selectionManager.getSelectionMask();
-      const fillMode = preset.fillMode ?? 'area';
-      if (fillMode === 'inside') {
+      if (selectionFillMode === 'inside') {
         floodFill({
           target: getBufferPointer(ctx.layerId)!,
           targetWidth: getLayerWidth(ctx.layerId)!,
@@ -71,8 +59,10 @@ export class FillTool implements ToolBehavior {
           startX: position.x,
           startY: position.y,
           threshold,
-          maskBuffer: selectionMask.getMask(),
-          maskMode: limitMode,
+          mask: {
+            buffer: selectionMask.getMask(),
+            mode: 'inside',
+          },
         });
       } else {
         const maskBuffer = selectionMask.getMask();

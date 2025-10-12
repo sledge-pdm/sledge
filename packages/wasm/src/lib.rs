@@ -10,8 +10,6 @@ pub mod selection;
 pub mod buffer;
 // ユーティリティ
 pub mod utils;
-// FloodFill関連
-pub mod fill;
 
 #[wasm_bindgen]
 extern "C" {

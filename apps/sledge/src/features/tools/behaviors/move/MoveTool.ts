@@ -3,7 +3,7 @@ import { Vec2 } from '@sledge/core';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMove } from '~/features/selection/SelectionOperator';
-import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/ToolBehavior';
+import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 
 export class MoveTool implements ToolBehavior {
   acceptStartOnOutCanvas = true;

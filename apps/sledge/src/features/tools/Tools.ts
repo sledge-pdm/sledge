@@ -1,11 +1,11 @@
-import { EraserTool } from '~/features/tools/draw/eraser/EraserTool';
-import { FillTool } from '~/features/tools/draw/fill/FillTool';
-import { PenTool } from '~/features/tools/draw/pen/PenTool';
-import { MoveTool } from '~/features/tools/move/MoveTool';
-import { PipetteTool } from '~/features/tools/pipette/PipetteTool';
-import { AutoSelection } from '~/features/tools/selection/auto/AutoSelection';
-import { RectSelection } from '~/features/tools/selection/rect/RectSelection';
-import { ToolBehavior } from '~/features/tools/ToolBehavior';
+import { EraserTool } from '~/features/tools/behaviors/draw/eraser/EraserTool';
+import { FillTool } from '~/features/tools/behaviors/draw/fill/FillTool';
+import { PenTool } from '~/features/tools/behaviors/draw/pen/PenTool';
+import { MoveTool } from '~/features/tools/behaviors/move/MoveTool';
+import { PipetteTool } from '~/features/tools/behaviors/pipette/PipetteTool';
+import { AutoSelection } from '~/features/tools/behaviors/selection/auto/AutoSelection';
+import { RectSelection } from '~/features/tools/behaviors/selection/rect/RectSelection';
+import { ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 
 export const DEFAULT_PRESET = 'default';
 
@@ -18,6 +18,9 @@ export const TOOL_CATEGORIES = {
   AUTO_SELECTION: 'autoSelection',
   MOVE: 'move',
 } as const;
+
+// 選択範囲の移動中に使えるもの
+export const TOOLS_ALLOWED_IN_MOVE_MODE: ToolCategoryId[] = [TOOL_CATEGORIES.MOVE];
 
 export type ToolCategoryId = (typeof TOOL_CATEGORIES)[keyof typeof TOOL_CATEGORIES];
 
@@ -52,7 +55,7 @@ export type EraserPresetConfig = PresetConfig & {
 
 export type FillPresetConfig = PresetConfig & {
   threshold?: number;
-  fillMode?: 'area' | 'inside';
+  selectionFillMode?: 'area' | 'inside' | 'ignore';
   // antialias?: boolean;
 };
 
@@ -97,7 +100,7 @@ export const toolCategories = {
       options: {
         [DEFAULT_PRESET]: {
           threshold: 0,
-          fillMode: 'area',
+          selectionFillMode: 'inside',
         } as FillPresetConfig,
       },
     },

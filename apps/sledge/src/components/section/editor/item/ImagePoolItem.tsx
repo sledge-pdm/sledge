@@ -4,7 +4,7 @@ import { Component } from 'solid-js';
 import { addToImagePool } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { isImagePoolActive, setImagePoolActive } from '~/features/layer';
-import { flexCol, flexRow } from '~/styles';
+import { flexCol, flexRow } from '~/styles/styles';
 
 const ImagePoolItem: Component = () => {
   return (

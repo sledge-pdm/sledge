@@ -69,7 +69,6 @@ export default class SelectionMask {
     this.maxY = -1;
   }
 
-  /* ---------- ③ バウンディングボックス取得 ---------- */
   public getBoundBox(): BoundBox | undefined {
     if (this.maxX < this.minX || this.maxY < this.minY) return;
     return { left: this.minX, right: this.maxX, top: this.minY, bottom: this.maxY };

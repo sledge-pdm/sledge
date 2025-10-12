@@ -3,8 +3,7 @@ import { replaceAllEntries } from '~/features/image_pool';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { setSnapshotStore } from '~/stores/EditorStores';
-import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
+import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export const loadProjectJson = async (project: any) => {

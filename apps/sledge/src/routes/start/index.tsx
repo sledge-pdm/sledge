@@ -4,7 +4,7 @@ import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { createNew, openExistingProject, openProject } from '~/features/io/window';
-import { globalConfig } from '~/stores/GlobalStores';
+import { fileStore } from '~/stores/EditorStores';
 import { openWindow, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 import {
   header as menuContainer,
@@ -44,7 +44,7 @@ export default function Home() {
         <p class={recentFilesCaption}>recent files.</p>
 
         <ScrollFadeContainer class={recentFilesContainerScroll}>
-          <RecentFileList files={globalConfig.misc.recentFiles} onClick={(item) => openExistingProject(item)} />
+          <RecentFileList files={fileStore.recentFiles} onClick={(item) => openExistingProject(item)} />
         </ScrollFadeContainer>
       </div>
       <div class={rightTopArea}>

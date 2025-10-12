@@ -1,6 +1,6 @@
-export type LabelMode = 'none' | 'left' | 'right';
+import { LabelMode } from "@sledge/ui";
 
-export type ConfigComponentName = 'Dropdown' | 'Slider' | 'CheckBox' | 'RadioButton' | 'ToggleSwitch' | 'Button';
+export type ConfigComponentName = 'Dropdown' | 'Slider' | 'CheckBox' | 'RadioButton' | 'ToggleSwitch' | 'Custom';
 
 export type ConfigComponentProps = {
   labelByComponent: boolean;
@@ -44,7 +44,7 @@ export const componentProps = new Map<ConfigComponentName, ConfigComponentProps>
     },
   ],
   [
-    'Button',
+    'Custom',
     {
       labelByComponent: true,
       labelMode: 'none',

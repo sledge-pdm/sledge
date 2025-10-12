@@ -55,10 +55,10 @@ export default function App() {
   });
 
   const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {
-    if (osTheme && globalConfig.appearance.theme === 'os') {
+    if (osTheme && globalConfig.general.theme === 'os') {
       applyTheme(osTheme);
     } else {
-      applyTheme(globalConfig.appearance.theme);
+      applyTheme(globalConfig.general.theme);
     }
   };
 
@@ -84,7 +84,7 @@ export default function App() {
   });
 
   createEffect(() => {
-    const theme = globalConfig.appearance.theme;
+    const theme = globalConfig.general.theme;
     applyThemeToHtml();
   });
 

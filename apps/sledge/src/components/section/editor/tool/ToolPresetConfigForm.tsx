@@ -1,8 +1,8 @@
 import { css } from '@acab/ecsstatic';
-import { componentProps } from '@sledge/core';
 import { spacing } from '@sledge/theme';
-import { Button, Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
+import { Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { componentProps } from '~/features/config/models/ConfigComponent';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/features/tools/presets';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
@@ -67,15 +67,8 @@ function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v:
       return <Checkbox id={meta.key} checked={value()} onChange={onChange} />;
     case 'ToggleSwitch':
       return <ToggleSwitch id={meta.key} checked={value()} onChange={onChange} />;
-    case 'Button':
-      return (
-        <div class={flexCol} style={{ gap: '8px' }}>
-          <p style={{ 'white-space': 'pre', 'white-space-trim': 'none' }}>{meta.props?.preContent?.()}</p>
-          <Button id={meta.key} onClick={meta.props?.onClick}>
-            {meta.props?.content}
-          </Button>
-        </div>
-      );
+    case 'Custom':
+      return <div>{meta.props?.content?.() ?? null}</div>;
     default:
       return <div>Unsupported component: {meta.component}</div>;
   }

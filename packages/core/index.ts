@@ -1,4 +1,3 @@
-export * from './src/Config';
 export * from './src/types/FileLocation';
 export * from './src/types/Point';
 export * from './src/types/Size';

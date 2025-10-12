@@ -1,10 +1,9 @@
 import { Consts } from '~/Consts';
-import { FieldMeta } from '~/features/config/models/GlobalConfig';
-import { Sections } from '~/features/config/models/Sections';
+import { ConfigSections, FieldMeta } from '~/features/config/models/ConfigMeta';
 
 export const defaultMetas: FieldMeta[] = [
   {
-    section: Sections.ProjectDefaults,
+    section: ConfigSections.Default,
     path: ['default', 'canvasSize', 'width'],
     label: 'canvas width',
     component: 'Slider',
@@ -13,7 +12,7 @@ export const defaultMetas: FieldMeta[] = [
     customFormat: '[value] px',
   },
   {
-    section: Sections.ProjectDefaults,
+    section: ConfigSections.Default,
     path: ['default', 'canvasSize', 'height'],
     label: 'canvas height',
     component: 'Slider',

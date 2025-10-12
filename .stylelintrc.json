@@ -12,6 +12,8 @@
 
     "font-family-no-missing-generic-family-keyword": null,
 
+    "property-no-vendor-prefix": [true, { "ignoreProperties": ["user-select"] }],
+
     "declaration-property-value-no-unknown": [
       true,
       {

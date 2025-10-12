@@ -74,7 +74,7 @@ export const isNewVersionAvailable = async (considerSkip: boolean, pat?: string)
 
   if (!latestVersion) return undefined;
 
-  if (considerSkip && globalConfig.misc.skippedVersions.includes(latestVersion)) {
+  if (considerSkip && globalConfig.general.skippedVersions.includes(latestVersion)) {
     return false;
   }
 
@@ -82,7 +82,7 @@ export const isNewVersionAvailable = async (considerSkip: boolean, pat?: string)
 };
 
 export const addSkippedVersion = (version: string): void => {
-  setGlobalConfig('misc', 'skippedVersions', (prev: string[]) => {
+  setGlobalConfig('general', 'skippedVersions', (prev: string[]) => {
     if (!prev.includes(version)) {
       return [...prev, version];
     }

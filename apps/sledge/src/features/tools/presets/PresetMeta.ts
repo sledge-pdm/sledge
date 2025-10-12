@@ -1,4 +1,4 @@
-import { ConfigComponentName } from '@sledge/core';
+import { ConfigComponentName } from '~/features/config/models/ConfigComponent';
 
 export type PresetFieldMeta = {
   key: string;

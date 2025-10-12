@@ -3,6 +3,7 @@ import { FileLocation } from '@sledge/core';
 export type FileStore = {
   openAs: 'project' | 'image';
   savedLocation: FileLocation;
+  recentFiles: FileLocation[];
 };
 
 export const defaultFileStore: FileStore = {
@@ -11,4 +12,5 @@ export const defaultFileStore: FileStore = {
     name: undefined,
     path: undefined,
   },
+  recentFiles: [],
 };

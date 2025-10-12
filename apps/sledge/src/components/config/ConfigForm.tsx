@@ -1,13 +1,18 @@
 import { css } from '@acab/ecsstatic';
-import { componentProps } from '@sledge/core';
-import { Button, Checkbox, Dropdown, Icon, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
+import { Checkbox, Dropdown, Icon, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { Consts } from '~/Consts';
-import { FieldMeta, GlobalConfig, settingsMeta } from '~/features/config/models/GlobalConfig';
-import { Sections } from '~/features/config/models/Sections';
+import { componentProps } from '~/features/config/models/ConfigComponent';
+import { ConfigSections, FieldMeta } from '~/features/config/models/ConfigMeta';
+import { GlobalConfig } from '~/features/config/models/GlobalConfig';
+import { debugMetas } from '~/features/config/models/meta/Debug';
+import { defaultMetas } from '~/features/config/models/meta/Default';
+import { editorMetas } from '~/features/config/models/meta/Editor';
+import { generalMetas } from '~/features/config/models/meta/General';
+import { performanceMetas } from '~/features/config/models/meta/Performance';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { resetToDefaultConfig } from '~/features/io/config/reset';
 import { saveGlobalSettings } from '~/features/io/config/save';
@@ -222,33 +227,8 @@ function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) 
       return <RadioButton id={meta.path.toString()} value={value()} onChange={onChange} {...meta.props} />;
     case 'ToggleSwitch':
       return <ToggleSwitch id={meta.path.toString()} checked={value()} onChange={onChange} />;
-    case 'Button':
-      return (
-        <div
-          class={css`
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-          `}
-        >
-          <p
-            class={css`
-              white-space: pre;
-            `}
-          >
-            {meta.props?.preContent?.()}
-          </p>
-          <Button
-            id={meta.path.toString()}
-            onClick={meta.props?.onClick}
-            class={css`
-              padding: 4px 4px;
-            `}
-          >
-            {meta.props?.content}
-          </Button>
-        </div>
-      );
+    case 'Custom':
+      return <div>{meta.props?.content?.() ?? null}</div>;
   }
 }
 
@@ -257,7 +237,7 @@ interface Props {
 }
 
 const ConfigForm: Component<Props> = (props) => {
-  const [currentSection, setSection] = createSignal<Sections>(Sections.General);
+  const [currentSection, setSection] = createSignal<ConfigSections>(ConfigSections.General);
   const [isSaved, setIsSaved] = createSignal(false);
   const [isDirty, setIsDirty] = createSignal(false);
 
@@ -303,12 +283,21 @@ const ConfigForm: Component<Props> = (props) => {
     }
   };
 
-  const [grouped, setGrouped] = createSignal<Map<Sections, FieldMeta[]>>(new Map());
+  const [grouped, setGrouped] = createSignal<Map<ConfigSections, FieldMeta[]>>(new Map());
 
   let originalConfig: GlobalConfig | undefined;
   let originalKeyConfig: KeyConfigStore | undefined;
   onMount(async () => {
     await loadGlobalSettings();
+
+    const settingsMeta = [
+      ...generalMetas,
+      ...editorMetas,
+      ...performanceMetas,
+      ...defaultMetas,
+      ...debugMetas,
+    ] as const satisfies readonly FieldMeta[];
+
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
     originalKeyConfig = JSON.parse(JSON.stringify(keyConfigStore));
     const grouped = settingsMeta.reduce((map, field) => {
@@ -316,7 +305,7 @@ const ConfigForm: Component<Props> = (props) => {
       arr.push(field);
       map.set(field.section, arr);
       return map;
-    }, new Map<Sections, FieldMeta[]>());
+    }, new Map<ConfigSections, FieldMeta[]>());
     setGrouped(grouped);
   });
 
@@ -330,7 +319,7 @@ const ConfigForm: Component<Props> = (props) => {
   return (
     <div class={configFormRoot}>
       <div class={configFormSections}>
-        <For each={Object.values(Sections)}>
+        <For each={Object.values(ConfigSections)}>
           {(section) => (
             <div class={configFormSectionItem} onClick={() => setSection(section)}>
               <Light on={section === currentSection()} color='var(--color-accent)' />
@@ -345,10 +334,10 @@ const ConfigForm: Component<Props> = (props) => {
         <div class={configFormScrollContent}>
           <Show when={currentSection() !== undefined}>
             {/* <p class={configFormFieldHeader}>{currentSection().toUpperCase()}.</p> */}
-            <Show when={currentSection() === Sections.KeyConfig}>
+            <Show when={currentSection() === ConfigSections.KeyConfig}>
               <KeyConfigSettings onKeyConfigChange={onKeyConfigChange} />
             </Show>
-            <Show when={currentSection() !== Sections.KeyConfig}>
+            <Show when={currentSection() !== ConfigSections.KeyConfig}>
               <For each={grouped().get(currentSection())}>
                 {(meta) => {
                   const componentProp = componentProps.get(meta.component);

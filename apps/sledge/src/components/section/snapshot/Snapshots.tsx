@@ -6,8 +6,8 @@ import { clsx } from '@sledge/core';
 import { Icon, ToggleSwitch } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { deleteSnapshot, loadSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';
-import { ProjectSnapshot } from '~/stores/editor/SnapshotStore';
-import { snapshotStore } from '~/stores/EditorStores';
+import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
+import { snapshotStore } from '~/stores/ProjectStores';
 import { errorButton } from '~/styles/styles';
 import { sectionContent } from '../SectionStyles';
 

@@ -8,6 +8,7 @@ import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasTempControls from '~/components/global/title_bar/CanvasTempControls';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { createNew, openExistingProject, openProject } from '~/features/io/window';
+import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
@@ -141,7 +142,7 @@ const TopMenuBar: Component = () => {
     },
   ];
 
-  const recentFiles = globalConfig.misc.recentFiles.slice(0, 5);
+  const recentFiles = fileStore.recentFiles.slice(0, 5);
 
   const recentFilesMenuOptions = recentFiles.map((file: FileLocation) => ({
     label: file.name || '[error]',
@@ -235,7 +236,7 @@ const TopMenuBar: Component = () => {
         </For>
       </div>
 
-      <Show when={availableUpdate() && !globalConfig.misc.skippedVersions.includes(availableUpdate()?.version || '')}>
+      <Show when={availableUpdate() && !globalConfig.general.skippedVersions.includes(availableUpdate()?.version || '')}>
         <div class={menuItem}>
           <a
             class={menuItemText}

@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Component, For, Show } from 'solid-js';
 import FileItem from '~/components/section/files/item/FileItem';
 import { openExistingProject } from '~/features/io/window';
-import { globalConfig } from '~/stores/GlobalStores';
+import { fileStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 
 const recentFilesContainer = css`
@@ -21,8 +21,8 @@ const noFilesText = css`
 const RecentFiles: Component = () => {
   return (
     <div class={recentFilesContainer}>
-      <Show when={globalConfig.misc.recentFiles.length > 0} fallback={<p class={noFilesText}>[ no files ]</p>}>
-        <For each={globalConfig.misc.recentFiles}>
+      <Show when={fileStore.recentFiles.length > 0} fallback={<p class={noFilesText}>[ no files ]</p>}>
+        <For each={fileStore.recentFiles}>
           {(location) => {
             if (!location.path || !location.name) return;
             const path = normalizeJoin(location.path, location.name);

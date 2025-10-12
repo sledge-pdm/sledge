@@ -1,9 +1,22 @@
-import { FieldMeta } from '~/features/config/models/GlobalConfig';
-import { Sections } from '~/features/config/models/Sections';
+import { ConfigSections, FieldMeta } from '~/features/config/models/ConfigMeta';
 
 export const performanceMetas: FieldMeta[] = [
   {
-    section: Sections.Performance,
+    section: ConfigSections.Performance,
+    path: ['performance', 'targetFPS'],
+    label: 'target fps',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: '30', value: '30' },
+        { label: '60', value: '60' },
+        { label: '144', value: '144' },
+      ],
+    },
+    tips: `FPS for canvas and some of ui elements' update.`,
+  },
+  {
+    section: ConfigSections.Performance,
     path: ['performance', 'canvasRenderingMode'],
     label: 'rendering mode',
     component: 'Dropdown',
@@ -18,19 +31,5 @@ export const performanceMetas: FieldMeta[] = [
 "pixelated" shows sharp edges but misses some lines/shapes when zoomed out.
 "crispEdges" is stable, but does not show edges of pixels when zoomed in.
 "adaptive" will automatically changes those 2 modes (recommended).`,
-  },
-  {
-    section: Sections.Performance,
-    path: ['performance', 'targetFPS'],
-    label: 'target fps',
-    component: 'Dropdown',
-    props: {
-      options: [
-        { label: '30', value: '30' },
-        { label: '60', value: '60' },
-        { label: '144', value: '144' },
-      ],
-    },
-    tips: `cursor type.`,
   },
 ];

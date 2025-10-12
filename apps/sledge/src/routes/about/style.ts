@@ -26,7 +26,7 @@ export const contentContainer = css`
   flex-direction: column;
   width: 100%;
   margin: 0 28px;
-  margin-top: 16px;
+  margin-top: 12px;
   pointer-events: none;
 `;
 
@@ -48,7 +48,7 @@ export const aboutTitle = css`
 export const aboutSubTitle = css`
   font-family: k12x8;
   font-size: 8px;
-  font-style: italic;
+  /* font-style: italic; */
 `;
 
 export const newVersionText = css`
@@ -110,20 +110,26 @@ export const fontSectionTitle = css`
 `;
 
 export const fontItem = css`
-  margin-bottom: 4px;
+  margin-bottom: 5px;
   vertical-align: middle;
 `;
 
 export const fontDescription = css`
   font-family: ZFB08;
-  opacity: 0.5;
+  opacity: 0.6;
   margin-left: 8px;
+`;
+
+export const fontWebsite = css`
+  display: none;
+  font-family: ZFB08;
+  opacity: 0;
 `;
 
 export const linkSection = css`
   display: flex;
   flex-direction: column;
-  margin-top: 12px;
+  margin-top: 8px;
 `;
 
 export const linkContainer = css`

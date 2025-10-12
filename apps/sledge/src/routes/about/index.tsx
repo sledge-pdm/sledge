@@ -16,6 +16,7 @@ import {
   fontItem,
   fontSection,
   fontSectionTitle,
+  fontWebsite,
   fullWidth,
   linkContainer,
   linkSection,
@@ -63,6 +64,7 @@ const About = () => {
   `;
   const separatorStyle = css`
     margin: 0 4px;
+    opacity: 0.5;
   `;
 
   return (
@@ -96,30 +98,33 @@ const About = () => {
           <div class={titleRow}>
             <p class={aboutTitle}>SLEDGE.</p>
           </div>
-          <p class={`${aboutSubTitle} ${versionText}`}>v{version()}</p>
+          <p class={`${aboutSubTitle} ${versionText}`}>version {version()}</p>
 
           <div class={fontSection}>
             <p class={fontSectionTitle}>fontface</p>
 
             <p class={fontItem}>
               <a class={`${aboutLink} ${zfb09Style}`} onClick={(e) => openLink('http://www.04.jp.org')}>
-                04b_XX
+                04 fonts
               </a>
-              <span class={fontDescription}>by yuji oshimoto (04.jp.org)</span>
+              <span class={fontDescription}>by yuji oshimoto</span>
+              <span class={fontWebsite}>(04.jp.org)</span>
             </p>
 
             <p class={fontItem}>
               <a class={`${aboutLink} ${k12x8Style}`} onClick={(e) => openLink('https://littlelimit.net/k12x8.htm')}>
                 {'k12x8 / k8x12'}
               </a>
-              <span class={fontDescription}>by num_kadoma (littlelimit.net)</span>
+              <span class={fontDescription}>by num_kadoma</span>
+              <span class={fontWebsite}>(littlelimit.net)</span>
             </p>
 
             <p class={fontItem}>
               <a class={`${aboutLink} ${pm10Style}`} onClick={(e) => openLink('https://itouhiro.hatenablog.com/entry/20130602/font')}>
                 PixelMPlus
               </a>
-              <span class={fontDescription}>by itouhiro (itouhiro.hatenablog.com)</span>
+              <span class={fontDescription}>by itouhiro</span>
+              <span class={fontWebsite}>(itouhiro.hatenablog.com)</span>
             </p>
 
             <p class={fontItem}>
@@ -136,17 +141,17 @@ const About = () => {
               <a class={aboutLink} onClick={(e) => openLink('https://github.com/sledge-pdm/sledge')}>
                 Source (Github)
               </a>
-              <p class={separatorStyle}>|</p>
+              <p class={separatorStyle}>/</p>
               <a class={aboutLink} onClick={(e) => openLink('https://www.sledge-rules.app/')}>
                 website
               </a>
-              <p class={separatorStyle}>|</p>
+              <p class={separatorStyle}>/</p>
               <a class={aboutLink} onClick={(e) => openLink('https://www.x.com/sledge_app')}>
                 twitter
               </a>
-              <p class={separatorStyle}>|</p>
+              <p class={separatorStyle}>/</p>
               <a class={aboutLink} onClick={(e) => openLink('https://github.com/sledge-pdm/sledge/blob/main/LICENSE')}>
-                License (MIT)
+                License
               </a>
             </div>
           </div>

@@ -4,12 +4,14 @@ import { CanvasStore, defaultCanvasStore } from '~/stores/project/CanvasStore';
 import { ImagePoolStore, defaultImagePoolStore } from '~/stores/project/ImagePoolStore';
 import { LayerListStore, defaultLayerListStore } from '~/stores/project/LayerListStore';
 import { ProjectStore, defaultProjectStore } from '~/stores/project/ProjectStore';
+import { SnapshotStore, defaultSnapshotStore } from '~/stores/project/SnapshotStore';
 
 export const initProjectStore = () => {
   const [canvasStore, setCanvasStore] = createStore<CanvasStore>(defaultCanvasStore);
   const [imagePoolStore, setImagePoolStore] = createStore<ImagePoolStore>(defaultImagePoolStore);
   const [projectStore, setProjectStore] = createStore<ProjectStore>(defaultProjectStore);
   const [layerListStore, setLayerListStore] = createStore<LayerListStore>(defaultLayerListStore);
+  const [snapshotStore, setSnapshotStore] = createStore<SnapshotStore>(defaultSnapshotStore);
 
   return {
     canvasStore,
@@ -20,6 +22,8 @@ export const initProjectStore = () => {
     setLayerListStore,
     projectStore,
     setProjectStore,
+    snapshotStore,
+    setSnapshotStore,
   };
 };
 
@@ -36,3 +40,6 @@ export const setLayerListStore = projectRootStore.setLayerListStore;
 
 export const projectStore = projectRootStore.projectStore;
 export const setProjectStore = projectRootStore.setProjectStore;
+
+export const snapshotStore = projectRootStore.snapshotStore;
+export const setSnapshotStore = projectRootStore.setSnapshotStore;

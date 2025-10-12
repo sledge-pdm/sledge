@@ -5,9 +5,8 @@ import { createUniqueId } from 'solid-js';
 import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { loadProjectJson } from '~/features/io/project/in/load';
 import { dumpProjectJson } from '~/features/io/project/out/dump';
-import { ProjectSnapshot } from '~/stores/editor/SnapshotStore';
-import { setSnapshotStore, snapshotStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
+import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {

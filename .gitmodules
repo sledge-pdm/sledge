@@ -10,3 +10,6 @@
 [submodule "packages/anvil"]
 	path = packages/anvil
 	url = https://github.com/sledge-pdm/anvil.git
+[submodule "packages/core"]
+	path = packages/core
+	url = https://github.com/sledge-pdm/sledge-core.git

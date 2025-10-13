@@ -19,8 +19,8 @@ export interface PanZoomControllerOptions {
 }
 
 const defaultOptions: PanZoomControllerOptions = {
-  panSensitivity: 4.0,
-  zoomSensitivity: 0.02,
+  panSensitivity: -6.0,
+  zoomSensitivity: 0.05,
   returnSpeed: 0.12,
   maxDeviation: 20,
   deadzone: 1,

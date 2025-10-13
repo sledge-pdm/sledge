@@ -8,20 +8,33 @@ const root = css`
   position: fixed;
   display: flex;
   flex-direction: column;
-  background-color: #000000e0;
   border: 1px solid var(--color-border);
   border-radius: 2px;
   z-index: var(--zindex-floating-controller);
-  backdrop-filter: blur(8px);
+  touch-action: none;
   user-select: none;
 `;
+const rootBackground = css`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  touch-action: none;
+  user-select: none;
+  background-color: var(--color-background);
+  opacity: 0.7;
+`;
 const titlebar = css`
+  position: relative;
   display: flex;
   flex-direction: row;
   gap: 8px;
   padding: 6px;
   justify-content: end;
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-bottom: 1px solid var(--color-border);
+  touch-action: none;
+  user-select: none;
 `;
 const titlebarBackground = css`
   position: absolute;
@@ -29,6 +42,8 @@ const titlebarBackground = css`
   height: 100%;
   top: 0;
   left: 0;
+  touch-action: none;
+  user-select: none;
 `;
 
 const controlContainer = css`
@@ -36,28 +51,26 @@ const controlContainer = css`
   flex-direction: row;
   gap: 12px;
   padding: 12px;
+
+  zoom: 1.5;
 `;
 const iconContainer = css`
   cursor: pointer;
   z-index: calc(var(--zindex-floating-controller) + 2);
   padding: 2px;
-  opacity: 0.6;
-  :hover {
-    opacity: 1;
-  }
 `;
 const panContainer = css`
   position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px solid white;
+  border: 1px solid var(--color-on-background);
   border-radius: 50%;
   width: 48px;
   height: 48px;
 `;
 const panStick = css`
   position: absolute;
-  background-color: white;
+  background-color: var(--color-on-background);
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -74,13 +87,14 @@ const zoomContainer = css`
   align-items: center;
 `;
 const zoomBackground = css`
-  background-color: white;
+  background-color: var(--color-on-background);
   width: 1px;
   height: 100%;
+  touch-action: none;
 `;
 const zoomHandle = css`
   position: absolute;
-  background-color: white;
+  background-color: var(--color-on-background);
   width: 20px;
   height: 6px;
   transform: translateY(-50%);
@@ -135,36 +149,65 @@ const FloatingController: Component = () => {
 
   onCleanup(() => {
     panZoomController?.dispose();
+    // ドラッグ途中でコンポーネントが破棄された場合の後処理
+    if (windowDragState.pointerId !== null) {
+      window.removeEventListener('pointermove', handleWindowPointerMove);
+      window.removeEventListener('pointerup', finalizeWindowDrag);
+      window.removeEventListener('pointercancel', finalizeWindowDrag);
+      windowDragState.pointerId = null;
+    }
   });
 
-  // Window dragging handlers
+  const logPointerEvent = (e: PointerEvent) => {
+    console.log(`pointerEvent: ${e.type}
+pointer type: ${e.pointerType}
+button: ${e.button}
+buttons: ${e.buttons}
+client XY: ${e.clientX}, ${e.clientY}`);
+  };
+
+  // --- Window (controller) dragging state & handlers (re-implemented to support pen properly) ---
+  const windowDragState = {
+    pointerId: null as number | null,
+    lastX: 0,
+    lastY: 0,
+  };
+
+  const handleWindowPointerMove = (e: PointerEvent) => {
+    if (windowDragState.pointerId !== e.pointerId) return;
+    const dx = e.clientX - windowDragState.lastX;
+    const dy = e.clientY - windowDragState.lastY;
+    windowDragState.lastX = e.clientX;
+    windowDragState.lastY = e.clientY;
+    // 差分加算による滑らかな追従（ペン/タッチでも安定）
+    setPosition((p) => ({ x: p.x + dx, y: p.y + dy }));
+  };
+
+  const finalizeWindowDrag = (e: PointerEvent) => {
+    if (windowDragState.pointerId !== e.pointerId) return;
+    setIsDraggingWindow(false);
+    window.removeEventListener('pointermove', handleWindowPointerMove);
+    window.removeEventListener('pointerup', finalizeWindowDrag);
+    window.removeEventListener('pointercancel', finalizeWindowDrag);
+    windowDragState.pointerId = null;
+  };
+
+  // Window dragging handler (pointerdown)
   const handleWindowPointerDown = (e: PointerEvent) => {
     if (positionLocked()) return;
+    // 既に別ポインタでドラッグ中なら無視
+    if (windowDragState.pointerId !== null) return;
+
+    logPointerEvent(e);
     setIsDraggingWindow(true);
+    windowDragState.pointerId = e.pointerId;
+    windowDragState.lastX = e.clientX;
+    windowDragState.lastY = e.clientY;
 
-    const windowEl = e.currentTarget as HTMLElement;
-    windowEl.setPointerCapture(e.pointerId);
-
-    const startX = e.clientX - position().x;
-    const startY = e.clientY - position().y;
-
-    const handleWindowMove = (moveEvent: PointerEvent) => {
-      setPosition({
-        x: moveEvent.clientX - startX,
-        y: moveEvent.clientY - startY,
-      });
-    };
-
-    const handleWindowUp = () => {
-      setIsDraggingWindow(false);
-      windowEl.releasePointerCapture(e.pointerId);
-
-      windowEl.removeEventListener('pointermove', handleWindowMove);
-      windowEl.removeEventListener('pointerup', handleWindowUp);
-    };
-
-    windowEl.addEventListener('pointermove', handleWindowMove);
-    windowEl.addEventListener('pointerup', handleWindowUp);
+    // グローバル監視（ペンが要素外に出ても追跡するため）
+    window.addEventListener('pointermove', handleWindowPointerMove);
+    window.addEventListener('pointerup', finalizeWindowDrag);
+    window.addEventListener('pointercancel', finalizeWindowDrag);
   };
 
   // Pan stick handlers
@@ -255,6 +298,7 @@ const FloatingController: Component = () => {
           top: `${position().y}px`,
         }}
       >
+        <div class={rootBackground} />
         <div class={titlebar}>
           <div
             class={iconContainer}
@@ -263,7 +307,11 @@ const FloatingController: Component = () => {
             }}
             title={positionLocked() ? 'Unlock position' : 'Lock position'}
           >
-            <Icon src={positionLocked() ? '/icons/misc/lock_closed.png' : '/icons/misc/lock_opened.png'} base={8} />
+            <Icon
+              src={positionLocked() ? '/icons/misc/lock_closed.png' : '/icons/misc/lock_opened.png'}
+              base={8}
+              color={'var(--color-on-background)'}
+            />
           </div>
           <div
             class={iconContainer}
@@ -272,7 +320,7 @@ const FloatingController: Component = () => {
             }}
             title='Hide controller (Press F6 to show again)'
           >
-            <Icon src={'/icons/misc/remove.png'} base={8} />
+            <Icon src={'/icons/misc/remove.png'} base={8} color={'var(--color-on-background)'} />
           </div>
 
           <div
@@ -289,7 +337,6 @@ const FloatingController: Component = () => {
               style={{
                 left: `${panStickPosition().x * 100}%`,
                 top: `${panStickPosition().y * 100}%`,
-                opacity: isDraggingPan() ? 1 : 0.8,
               }}
               onPointerDown={handlePanPointerDown}
             ></div>
@@ -301,7 +348,6 @@ const FloatingController: Component = () => {
               class={zoomHandle}
               style={{
                 top: `${zoomFaderPosition() * 100}%`,
-                opacity: isDraggingZoom() ? 1 : 0.8,
               }}
               onPointerDown={handleZoomPointerDown}
             ></div>

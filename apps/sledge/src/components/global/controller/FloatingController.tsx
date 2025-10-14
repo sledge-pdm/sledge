@@ -106,7 +106,7 @@ const zoomHandle = css`
 const FloatingController: Component = () => {
   const [position, setPosition] = createSignal<Vec2>({ x: 0, y: 0 });
   const [positionLocked, setPositionLocked] = createSignal(false);
-  const [isVisible, setIsVisible] = createSignal(true);
+  const [isVisible, setIsVisible] = createSignal(false);
 
   // Pan stick state (0.5, 0.5 is center)
   const [panStickPosition, setPanStickPosition] = createSignal<Vec2>({ x: 0.5, y: 0.5 });

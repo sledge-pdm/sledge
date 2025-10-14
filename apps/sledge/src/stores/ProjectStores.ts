@@ -1,61 +1,17 @@
 // projectStore.ts
-import { Size2D } from '@sledge/core';
 import { createStore } from 'solid-js/store';
-import { BaseLayer, Layer } from '~/features/layer';
-
-export type CanvasStore = {
-  canvas: Size2D;
-};
-export type ImagePoolStore = {
-  selectedEntryId: string | undefined;
-  preserveAspectRatio: boolean;
-};
-export type ProjectStore = {
-  thumbnailPath: string | undefined;
-  isProjectChangedAfterSave: boolean;
-  lastSavedAt: Date | undefined;
-
-  autoSaveEnabled?: boolean;
-  autoSaveInterval?: number; // in seconds
-};
-export type LayerListStore = {
-  layers: Layer[];
-  baseLayer: BaseLayer;
-  activeLayerId: string;
-  isImagePoolActive: boolean;
-};
-
-const defaultCanvasStore: CanvasStore = {
-  canvas: {
-    width: 1024,
-    height: 1024,
-  },
-};
-const defaultImagePoolStore: ImagePoolStore = {
-  selectedEntryId: undefined,
-  preserveAspectRatio: true,
-};
-const defaultProjectStore: ProjectStore = {
-  thumbnailPath: undefined as string | undefined,
-  isProjectChangedAfterSave: false,
-  lastSavedAt: undefined as Date | undefined,
-  autoSaveEnabled: false,
-  autoSaveInterval: 60,
-};
-const defaultLayerListStore: LayerListStore = {
-  layers: new Array<Layer>(),
-  baseLayer: {
-    colorMode: 'transparent',
-  },
-  activeLayerId: '',
-  isImagePoolActive: true,
-};
+import { CanvasStore, defaultCanvasStore } from '~/stores/project/CanvasStore';
+import { ImagePoolStore, defaultImagePoolStore } from '~/stores/project/ImagePoolStore';
+import { LayerListStore, defaultLayerListStore } from '~/stores/project/LayerListStore';
+import { ProjectStore, defaultProjectStore } from '~/stores/project/ProjectStore';
+import { SnapshotStore, defaultSnapshotStore } from '~/stores/project/SnapshotStore';
 
 export const initProjectStore = () => {
   const [canvasStore, setCanvasStore] = createStore<CanvasStore>(defaultCanvasStore);
   const [imagePoolStore, setImagePoolStore] = createStore<ImagePoolStore>(defaultImagePoolStore);
   const [projectStore, setProjectStore] = createStore<ProjectStore>(defaultProjectStore);
   const [layerListStore, setLayerListStore] = createStore<LayerListStore>(defaultLayerListStore);
+  const [snapshotStore, setSnapshotStore] = createStore<SnapshotStore>(defaultSnapshotStore);
 
   return {
     canvasStore,
@@ -66,6 +22,8 @@ export const initProjectStore = () => {
     setLayerListStore,
     projectStore,
     setProjectStore,
+    snapshotStore,
+    setSnapshotStore,
   };
 };
 
@@ -82,3 +40,6 @@ export const setLayerListStore = projectRootStore.setLayerListStore;
 
 export const projectStore = projectRootStore.projectStore;
 export const setProjectStore = projectRootStore.setProjectStore;
+
+export const snapshotStore = projectRootStore.snapshotStore;
+export const setSnapshotStore = projectRootStore.setSnapshotStore;

@@ -2,12 +2,13 @@ import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/Consts';
 import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/features/canvas';
+import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { isMacOS } from '~/utils/OSUtils';
-import RotationSnapper from './RotationSnapper';
+import TouchRotationSnapper from './TouchRotationSnapper';
 
 const LOG_LABEL = 'CanvasAreaInteract';
 const logger = new DebugLogger(LOG_LABEL, false);
@@ -33,7 +34,7 @@ class CanvasAreaInteract {
   private stopRaf?: () => void;
 
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
-  private rotationSnapper = new RotationSnapper();
+  private rotationSnapper = new TouchRotationSnapper();
 
   private offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
   private offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
@@ -130,6 +131,22 @@ class CanvasAreaInteract {
       }
     } else {
       // タッチ以外
+      if (e.pointerType === 'mouse') {
+        if (e.button === 3) {
+          e.preventDefault();
+          if (projectHistoryController.canUndo()) {
+            projectHistoryController.undo();
+          }
+          return;
+        } else if (e.button === 4) {
+          e.preventDefault();
+          if (projectHistoryController.canRedo()) {
+            projectHistoryController.redo();
+          }
+          return;
+        }
+      }
+
       if (CanvasAreaInteract.isDraggable(e)) {
         this.wrapperRef.setPointerCapture(e.pointerId);
         setInteractStore('isDragging', true);
@@ -340,7 +357,9 @@ class CanvasAreaInteract {
     const angleNew = Math.atan2(p1.y - p0.y, p1.x - p0.x);
     const deltaRad = angleNew - this.lastAppliedAngle;
     const rotOldDeg = interactStore.rotation;
-    const rotCandidate = Math.round(rotOldDeg + (deltaRad * 180) / Math.PI) % 360;
+    const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
+    const rotCandidate =
+      Math.round(rotCandidateRaw * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
 
     const rotProcessed = this.rotationSnapper.process(rotCandidate);
 

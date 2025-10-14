@@ -17,13 +17,15 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 
 export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
 
-export function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
+export async function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
+  const parent = kind === 'settings' || kind === 'about' ? getCurrentWindow().label : undefined;
   return safeInvoke('open_window', {
     kind,
     options: {
       query: options?.query,
       open_path: options?.openPath,
       initialization_script: options?.initializationScript,
+      parent,
     },
   });
 }
@@ -81,13 +83,6 @@ export async function reportAppStartupError(e: any) {
       okLabel: 'Quit app',
     }
   );
-
-  // TODO: there should be some hints/actions for fix by each causes.
-  // e.g.: broken config -> "open global config and fix" (open notepad/vscode/etc and fix json problem or something)
-  //       cannot read image -> "try open the image in other apps" (opening the path in photo/explorer/gimp/etc. to make sure that is not broken.)
-  //       [unknown error] -> "report as issue" (to github issue pages)
-
-  // if this is "actual first startup", there's no need to save states.
 
   alreadyShownErrors.delete(errorMessage);
   // kill process

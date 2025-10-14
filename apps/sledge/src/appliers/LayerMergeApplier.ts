@@ -44,9 +44,9 @@ export async function mergeLayer({ originLayer, targetLayer }: LayerMergeParams)
   const renderer = ensureMergeRenderer(originLayer, targetLayer);
   const out = renderer.readPixelsFlipped();
 
-  // whole diff 登録 & 履歴
-  registerWholeChange(targetLayer.id, before, out);
+  // whole diff 登録 & 履歴 (swap method)
   setBuffer(targetLayer.id, out);
+  registerWholeChange(targetLayer.id, before);
   const patch = flushPatch(targetLayer.id);
   if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(targetLayer.id, patch, { tool: 'merge' }));
 

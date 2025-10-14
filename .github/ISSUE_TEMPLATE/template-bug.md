@@ -1,7 +1,7 @@
 ---
 name: template/bug
 about: bug template
-title: 'bug: '
+title: ''
 labels: bug
 assignees: Innsbluck-rh
 ---

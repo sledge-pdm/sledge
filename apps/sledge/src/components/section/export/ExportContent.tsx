@@ -6,12 +6,12 @@ import { exists } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { saveGlobalSettings } from '~/io/config/save';
-import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/io/image/out/export';
+import { saveGlobalSettings } from '~/features/io/config/save';
+import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/features/io/image/out/export';
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { accentedButton, flexCol } from '~/styles/StyleSnippets';
+import { accentedButton, flexCol } from '~/styles/styles';
 import { getFileNameWithoutExtension, join } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 

@@ -10,7 +10,7 @@ export type Events = {
 
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
-  'canvas:onZoomChanged': {};
+  'canvas:onTransformChanged': {};
 
   'selection:maskChanged': { commit: boolean };
   'selection:offsetChanged': { newOffset: Vec2 };
@@ -27,6 +27,8 @@ export type Events = {
   'imagePool:entryPropChanged': { id: string };
 
   'webgl:requestUpdate': { onlyDirty: boolean; context: string };
+  'webgl:requestResume': {};
+  'webgl:renderPaused': {};
 
   'preview:requestUpdate': { layerId?: string };
 

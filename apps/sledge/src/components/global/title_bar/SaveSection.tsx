@@ -4,7 +4,7 @@ import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
-import { saveProject } from '~/io/project/out/save';
+import { saveProject } from '~/features/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -73,8 +73,8 @@ const SaveSection: Component = () => {
   const isOWPossible = () =>
     fileStore.savedLocation.name !== undefined && fileStore.savedLocation.path !== undefined && fileStore.openAs === 'project';
 
-  const save = () => {
-    saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
+  const save = async () => {
+    await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
   };
 
   const getSaveTimeText = () => {
@@ -152,7 +152,7 @@ const SaveSection: Component = () => {
   });
 
   const saveMenu = createMemo<MenuListOption[]>(() => [
-    { label: 'Save As...', onSelect: () => save(), color: color.onBackground },
+    { label: 'Save As...', onSelect: async () => await saveProject(), color: color.onBackground },
     {
       label: 'Open Saved Folder',
       onSelect: () => {
@@ -214,7 +214,7 @@ const SaveSection: Component = () => {
         <p style={{ 'white-space': 'nowrap', opacity: 0.8 }}>{saveLog()}</p>
       </Show>
       <div class={saveButtonRoot} data-tauri-drag-region-exclude>
-        <div class={saveButtonMainButton} onClick={() => save()}>
+        <div class={saveButtonMainButton} onClick={async () => await save()}>
           <p
             style={{
               color: color.accent,

@@ -96,9 +96,9 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
     }
   }
 
-  // After 全体更新 & 履歴登録 (Anvil whole diff)
-  registerWholeChange(targetLayerId, originalBuffer, dstBuf);
+  // After 全体更新 & 履歴登録 (Anvil whole diff - swap method)
   setBuffer(targetLayerId, dstBuf);
+  registerWholeChange(targetLayerId, originalBuffer);
   const patch = flushPatch(targetLayerId);
   if (patch) {
     projectHistoryController.addAction(new AnvilLayerHistoryAction(targetLayerId, patch, { tool: 'image' }));

@@ -1,6 +1,6 @@
 import { Component, onCleanup, onMount, Show } from 'solid-js';
 import CanvasAreaInteract from './CanvasAreaInteract';
-import CanvasControls from './CanvasControls';
+import CanvasControls from './overlays/CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
 
 import { css } from '@acab/ecsstatic';
@@ -8,9 +8,10 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
-import CanvasDebugOverlay from './CanvasDebugOverlay';
+import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
-import CanvasAreaOverlay from '~/components/canvas/CanvasAreaOverlay';
+import CanvasError from '~/components/canvas/overlays/CanvasError';
+import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
@@ -132,7 +133,7 @@ const CanvasArea: Component = () => {
     eventBus.on('canvas:onAdjusted', (e) => {
       interact?.updateTransform();
     });
-    eventBus.on('canvas:onZoomChanged', (e) => {
+    eventBus.on('canvas:onTransformChanged', (e) => {
       interact?.updateTransform();
     });
 
@@ -173,7 +174,7 @@ const CanvasArea: Component = () => {
           <CanvasOverlaySVG />
           <OnCanvasSelectionMenu />
         </div>
-        <CanvasAreaOverlay />
+        <CursorOverlay />
       </div>
       <div class={sectionsContainer}>
         <SideSectionsOverlay side='leftSide' />
@@ -183,6 +184,7 @@ const CanvasArea: Component = () => {
             <CanvasControls />
             <OuterSelectionMenu />
             <CanvasDebugOverlay />
+            <CanvasError />
           </div>
           <BottomInfo />
         </div>

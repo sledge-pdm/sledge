@@ -8,22 +8,23 @@ import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import ClipboardListener from '~/components/global/ClipboardListener';
+import FloatingController from '~/components/global/controller/FloatingController';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit, changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { loadToolPresets, setLocation } from '~/features/config';
+import { AutoSaveManager } from '~/features/io/AutoSaveManager';
+import { loadGlobalSettings } from '~/features/io/config/load';
+import { importImageFromPath } from '~/features/io/image/in/import';
+import { readProjectFromPath } from '~/features/io/project/in/import';
+import { loadProjectJson } from '~/features/io/project/in/load';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { AutoSaveManager } from '~/io/AutoSaveManager';
-import { loadGlobalSettings } from '~/io/config/load';
-import { importImageFromPath } from '~/io/image/in/import';
-import { readProjectFromPath } from '~/io/project/in/import';
-import { loadProjectJson } from '~/io/project/in/load';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
-import { flexCol, pageRoot } from '~/styles/StyleSnippets';
+import { flexCol, pageRoot } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
@@ -86,7 +87,7 @@ export default function Editor() {
             throw new Error('reading ' + fullPath);
           }
           setLocation(fullPath);
-          loadProjectJson(projectFile);
+          await loadProjectJson(projectFile);
           return false;
         } catch (error) {
           console.error('Failed to read project:', error);
@@ -188,6 +189,8 @@ export default function Editor() {
         </div>
 
         <SideSectionControl side='rightSide' />
+
+        <FloatingController />
 
         <KeyListener />
         <ClipboardListener />

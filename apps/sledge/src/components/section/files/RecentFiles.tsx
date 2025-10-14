@@ -1,8 +1,8 @@
 import { css } from '@acab/ecsstatic';
-import { Component, For } from 'solid-js';
+import { Component, For, Show } from 'solid-js';
 import FileItem from '~/components/section/files/item/FileItem';
-import { openExistingProject } from '~/io/window';
-import { globalConfig } from '~/stores/GlobalStores';
+import { openExistingProject } from '~/features/io/window';
+import { fileStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 
 const recentFilesContainer = css`
@@ -14,39 +14,46 @@ const recentFilesContainer = css`
   margin-bottom: 8px;
 `;
 
+const noFilesText = css`
+  color: var(--color-muted);
+`;
+
 const RecentFiles: Component = () => {
   return (
     <div class={recentFilesContainer}>
-      <For each={globalConfig.misc.recentFiles}>
-        {(location) => {
-          if (!location.path || !location.name) return;
-          const path = normalizeJoin(location.path, location.name);
+      <Show when={fileStore.recentFiles.length > 0} fallback={<p class={noFilesText}>[ no files ]</p>}>
+        <For each={fileStore.recentFiles}>
+          {(location) => {
+            if (!location.path || !location.name) return;
+            const path = normalizeJoin(location.path, location.name);
 
-          return (
-            <FileItem
-              config={{ pathEditMode: false, twoColumns: false }}
-              entry={{
-                isDirectory: false,
-                isFile: true,
-                isSymlink: false,
-                name: location.name,
-              }}
-              isMe={false}
-              isPartOfMe={false}
-              onClick={() => {
-                if (!location.path || !location.name) return;
+            return (
+              <FileItem
+                config={{ pathEditMode: false, twoColumns: false }}
+                entry={{
+                  isDirectory: false,
+                  isFile: true,
+                  isSymlink: false,
+                  name: location.name,
+                }}
+                title={path}
+                isMe={false}
+                isPartOfMe={false}
+                onClick={() => {
+                  if (!location.path || !location.name) return;
 
-                const ext = ['sledge', 'png', 'jpg', 'jpeg'];
-                if (ext.some((e) => location.name?.endsWith(`.${e}`))) {
-                  openExistingProject(location);
-                } else {
-                  // TODO: show error toast
-                }
-              }}
-            />
-          );
-        }}
-      </For>
+                  const ext = ['sledge', 'png', 'jpg', 'jpeg'];
+                  if (ext.some((e) => location.name?.endsWith(`.${e}`))) {
+                    openExistingProject(location);
+                  } else {
+                    // TODO: show error toast
+                  }
+                }}
+              />
+            );
+          }}
+        </For>
+      </Show>
     </div>
   );
 };

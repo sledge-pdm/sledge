@@ -1,23 +1,13 @@
-import { ConfigComponentName, FileLocation } from '@sledge/core';
 import { Theme } from '@sledge/theme';
 import { CanvasRenderingMode } from '~/features/canvas';
 import { CanvasCenteringMode } from '~/features/canvas/model';
-import { debugMetas } from '~/features/config/models/meta/Debug';
-import { editorMetas } from '~/features/config/models/meta/Editor';
-import { generalMetas } from '~/features/config/models/meta/General';
-import { performanceMetas } from '~/features/config/models/meta/Performance';
-import { defaultMetas } from '~/features/config/models/meta/ProjectDefaults';
-import { Sections } from '~/features/config/models/Sections';
 import { Cursor } from '~/features/config/models/types/Cursor';
 import { FPS } from '~/features/config/models/types/FPS';
 
 export type GlobalConfig = {
-  misc: {
-    recentFiles: FileLocation[];
-    skippedVersions: string[];
-  };
-  appearance: {
+  general: {
     theme: Theme;
+    skippedVersions: string[];
     resetSkippedVersions: string;
   };
   default: {
@@ -29,25 +19,21 @@ export type GlobalConfig = {
     showPointedPixel: boolean;
     centerCanvasOnResize: CanvasCenteringMode;
     maxHistoryItemsCount: number;
+    touchRotationZeroSnapThreshold: number;
   };
   performance: {
-    canvasRenderingMode: CanvasRenderingMode;
     targetFPS: FPS;
+    canvasRenderingMode: CanvasRenderingMode;
   };
   debug: {
     showPerformanceMonitor: boolean;
-    showCanvasDebugOverlay: boolean;
-    showDirtyRects: boolean;
   };
 };
 
 export const defaultConfig: GlobalConfig = {
-  misc: {
-    recentFiles: [],
-    skippedVersions: [],
-  },
-  appearance: {
+  general: {
     theme: 'os',
+    skippedVersions: [],
     resetSkippedVersions: '',
   },
   default: {
@@ -56,9 +42,10 @@ export const defaultConfig: GlobalConfig = {
   editor: {
     cursor: 'cross',
     rotateDegreePerWheelScroll: 1,
-    centerCanvasOnResize: 'offset',
+    centerCanvasOnResize: 'disabled',
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
+    touchRotationZeroSnapThreshold: 5,
   },
   performance: {
     canvasRenderingMode: 'adaptive',
@@ -66,25 +53,5 @@ export const defaultConfig: GlobalConfig = {
   },
   debug: {
     showPerformanceMonitor: false,
-    showCanvasDebugOverlay: false,
-    showDirtyRects: false,
   },
 };
-
-export type FieldMeta = {
-  section: Sections;
-  path: readonly string[];
-  label: string;
-  component: ConfigComponentName;
-  props?: Record<string, any>; // min/max/step/options など
-  tips?: string;
-  customFormat?: string; // format: [value] => value
-};
-
-export const settingsMeta = [
-  ...generalMetas,
-  ...editorMetas,
-  ...performanceMetas,
-  ...defaultMetas,
-  ...debugMetas,
-] as const satisfies readonly FieldMeta[];

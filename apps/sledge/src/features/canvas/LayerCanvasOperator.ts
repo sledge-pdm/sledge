@@ -5,10 +5,10 @@ import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHi
 import { findLayerById } from '~/features/layer';
 import { flushPatch } from '~/features/layer/anvil/AnvilController';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
-import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tool/ToolController';
+import { AnvilToolContext, ToolArgs, ToolResult, createAnvilToolContext } from '~/features/tools/behaviors/ToolBehavior';
+import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
+import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';
-import { AnvilToolContext, ToolArgs, ToolResult, createAnvilToolContext } from '~/tools/ToolBehavior';
-import { ToolCategory } from '~/tools/Tools';
 import { eventBus } from '~/utils/EventBus';
 
 export enum DrawState {

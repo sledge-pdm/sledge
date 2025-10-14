@@ -7,7 +7,8 @@ import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasTempControls from '~/components/global/title_bar/CanvasTempControls';
 import SaveSection from '~/components/global/title_bar/SaveSection';
-import { createNew, openExistingProject, openProject } from '~/io/window';
+import { createNew, openExistingProject, openProject } from '~/features/io/window';
+import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
@@ -43,7 +44,7 @@ const menuListCanvasControls = css`
 const menuListRight = css`
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xs);
+  margin-right: 6px;
 `;
 
 const menuItem = css`
@@ -139,16 +140,9 @@ const TopMenuBar: Component = () => {
         // setIsSettingShown(true);
       },
     },
-    {
-      text: '?',
-      action: () => {
-        openWindow('about');
-        // setIsSettingShown(true);
-      },
-    },
   ];
 
-  const recentFiles = globalConfig.misc.recentFiles.slice(0, 5);
+  const recentFiles = fileStore.recentFiles.slice(0, 5);
 
   const recentFilesMenuOptions = recentFiles.map((file: FileLocation) => ({
     label: file.name || '[error]',
@@ -242,7 +236,7 @@ const TopMenuBar: Component = () => {
         </For>
       </div>
 
-      <Show when={availableUpdate() && !globalConfig.misc.skippedVersions.includes(availableUpdate()?.version || '')}>
+      <Show when={availableUpdate() && !globalConfig.general.skippedVersions.includes(availableUpdate()?.version || '')}>
         <div class={menuItem}>
           <a
             class={menuItemText}
@@ -261,7 +255,7 @@ const TopMenuBar: Component = () => {
           </a>
           <div class={menuItemBackground} />
         </div>
-        <div class={menuItem} style={{ 'margin-left': '-4px', 'margin-right': '0px' }}>
+        <div class={menuItem}>
           <a
             class={menuItemText}
             style={{
@@ -284,7 +278,6 @@ const TopMenuBar: Component = () => {
           <div class={menuItemBackground} />
         </div>
       </Show>
-      <div class={menuItem} style={{ 'margin-right': '8px' }}></div>
     </div>
   );
 };

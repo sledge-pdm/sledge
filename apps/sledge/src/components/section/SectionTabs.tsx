@@ -11,8 +11,9 @@ import History from '~/components/section/history/History';
 import PerilousLayers from '~/components/section/perilous/PerilousLayers';
 import CanvasSettings from '~/components/section/project/CanvasSettings';
 import Project from '~/components/section/project/Project';
+import Snapshots from '~/components/section/snapshot/Snapshots';
 
-export type SectionTab = 'editor' | 'effects' | 'files' | 'history' | 'project' | 'export' | 'danger';
+export type SectionTab = 'editor' | 'effects' | 'files' | 'history' | 'project' | 'snapshot' | 'export' | 'danger';
 
 export const EditorTab: Component = () => {
   return (
@@ -55,6 +56,14 @@ export const ProjectTab: Component = () => {
     <>
       <Project />
       <CanvasSettings />
+    </>
+  );
+};
+
+export const SnapshotTab: Component = () => {
+  return (
+    <>
+      <Snapshots />
     </>
   );
 };

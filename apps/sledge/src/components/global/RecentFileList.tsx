@@ -3,7 +3,7 @@ import { FileLocation } from '@sledge/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, For } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { thumbnailDir } from '~/io/project/out/save';
+import { thumbnailDir } from '~/features/io/project/out/save';
 import { getFileUniqueId, join } from '~/utils/FileUtils';
 import ListFileItem from './ListFileItem';
 

@@ -7,6 +7,7 @@ import {
   ImagePoolHistoryAction,
   LayerListHistoryAction,
   LayerPropsHistoryAction,
+  LayerSnapshot,
   ProjectHistoryController,
 } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
@@ -200,7 +201,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
           // add at random index with small blank buffer
           const idx = Math.floor(rng() * (layerListStore.layers.length + 1));
           const id = `LR-${Math.floor(rng() * 100000)}`;
-          const snapshot: Layer & { buffer?: Uint8ClampedArray } = {
+          const layer: Layer = {
             id,
             name: id,
             type: LayerType.Dot,
@@ -209,8 +210,15 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             opacity: 1,
             mode: BlendMode.normal,
             dotMagnification: 1,
-            buffer: new Uint8ClampedArray(canvasStore.canvas.width * canvasStore.canvas.height * 4),
-          } as any;
+          };
+          const snapshot: LayerSnapshot = {
+            layer,
+            image: {
+              buffer: new Uint8ClampedArray(canvasStore.canvas.width * canvasStore.canvas.height * 4),
+              width: canvasStore.canvas.width,
+              height: canvasStore.canvas.height,
+            },
+          };
           const a = new LayerListHistoryAction('add', idx, snapshot, undefined, undefined, { from: 'rnd' });
           steps.push(() => {
             a.redo();
@@ -222,7 +230,17 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             const idx = Math.floor(rng() * layerListStore.layers.length);
             const layer = layerListStore.layers[idx];
             const anvil = getAnvilOf(layer.id);
-            const snapshot: Layer & { buffer?: Uint8ClampedArray } = { ...layer, buffer: anvil?.getImageData() } as any;
+            const image = anvil
+              ? {
+                  buffer: anvil?.getImageData(),
+                  width: anvil.getWidth(),
+                  height: anvil.getHeight(),
+                }
+              : undefined;
+            const snapshot: LayerSnapshot = {
+              layer,
+              image,
+            };
             const a = new LayerListHistoryAction('delete', idx, snapshot, undefined, undefined, { from: 'rnd' });
             steps.push(() => {
               a.redo();

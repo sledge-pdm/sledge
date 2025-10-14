@@ -5,7 +5,7 @@ import ChaosEngineSection from '~/components/telling_sections/2_chaos_engine';
 import OpenCoreSection from '~/components/telling_sections/3_open_core';
 import CodeYourCanvasSection from '~/components/telling_sections/4_code_your_canvas';
 import { globalStore } from '~/store/GlobalStore';
-import { pageRoot, scrollContent } from '~/styles/SharedStyles';
+import { pageRoot, scrollContent } from '~/styles';
 
 // Component-specific styles
 const animatedActive = css`

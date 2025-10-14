@@ -2,9 +2,9 @@ import { color, spacing } from '@sledge/theme';
 import { Icon, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
 import { addToImagePool } from '~/features/image_pool';
+import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { isImagePoolActive, setImagePoolActive } from '~/features/layer';
-import { openImageImportDialog } from '~/io/image_pool/import';
-import { flexCol, flexRow } from '~/styles/StyleSnippets';
+import { flexCol, flexRow } from '~/styles/styles';
 
 const ImagePoolItem: Component = () => {
   return (

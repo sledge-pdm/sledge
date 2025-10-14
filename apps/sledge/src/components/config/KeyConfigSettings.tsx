@@ -14,7 +14,7 @@ import {
 } from '~/features/config/KeyConfigController';
 import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { accentedText, flexCol } from '~/styles/StyleSnippets';
+import { accentedText, flexCol } from '~/styles/styles';
 
 const row = css`
   display: flex;

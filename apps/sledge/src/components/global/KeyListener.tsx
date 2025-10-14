@@ -1,13 +1,14 @@
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, onCleanup, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
+import { saveProject } from '~/features/io/project/out/save';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
   getPrevActiveToolCategoryId,
   setActiveToolCategory,
   updateToolPresetConfig,
-} from '~/features/tool/ToolController';
-import { saveProject } from '~/io/project/out/save';
+} from '~/features/tools/ToolController';
 import { fileStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { isKeyMatchesToEntry } from '../../features/config/KeyConfigController';
@@ -40,15 +41,12 @@ const KeyListener: Component = () => {
       saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
     }
 
-    // Skip other shortcuts if an input field is focused
-    if (inputFocused) {
-      return;
-    }
-
     if (isKeyMatchesToEntry(e, keyConfigStore['undo'])) {
+      e.preventDefault(); // prevent conflict with input undo/redo
       projectHistoryController.undo();
     }
     if (isKeyMatchesToEntry(e, keyConfigStore['redo'])) {
+      e.preventDefault(); // prevent conflict with input undo/redo
       projectHistoryController.redo();
     }
 
@@ -76,8 +74,6 @@ const KeyListener: Component = () => {
       }
     }
 
-    if (isKeyMatchesToEntry(e, keyConfigStore['pipette'])) setActiveToolCategory('pipette');
-
     if (!e.repeat) {
       if (isKeyMatchesToEntry(e, keyConfigStore['pen'])) setActiveToolCategory('pen');
       if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) setActiveToolCategory('eraser');
@@ -85,29 +81,38 @@ const KeyListener: Component = () => {
       if (isKeyMatchesToEntry(e, keyConfigStore['rect_select'])) setActiveToolCategory('rectSelection');
       if (isKeyMatchesToEntry(e, keyConfigStore['auto_select'])) setActiveToolCategory('autoSelection');
       if (isKeyMatchesToEntry(e, keyConfigStore['move'])) setActiveToolCategory('move');
+      if (isKeyMatchesToEntry(e, keyConfigStore['pipette'])) {
+        e.preventDefault();
+        setActiveToolCategory('pipette');
+      }
     }
   };
 
   const handleKeyUp = (e: KeyboardEvent) => {
-    // Skip shortcuts if an input field is focused
-    if (isInputFocused()) {
-      return;
-    }
-
     if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategoryId() === 'pipette') {
+      e.preventDefault();
       console.log('Pipette tool deactivated');
       setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
     }
   };
 
-  onMount(() => {
+  onMount(async () => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    const unlistenUnfocusPipetteObserve = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+      if (!focused && getActiveToolCategoryId() === 'pipette') {
+        console.log('Pipette tool deactivated');
+        setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
+      }
+    });
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      unlistenUnfocusPipetteObserve();
+    };
   });
-  onCleanup(() => {
-    window.removeEventListener('keydown', handleKeyDown);
-    window.removeEventListener('keyup', handleKeyUp);
-  });
+  onCleanup(() => {});
 
   return null;
 };

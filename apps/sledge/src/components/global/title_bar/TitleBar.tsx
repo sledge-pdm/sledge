@@ -172,7 +172,17 @@ export default function TitleBar() {
         }}
       >
         <Show when={!isDecorated()}>
-          <nav class={titleBarRoot} data-tauri-drag-region>
+          <nav
+            class={titleBarRoot}
+            data-tauri-drag-region
+            style={
+              !shouldShowTitle()
+                ? {
+                    'background-color': 'transparent',
+                  }
+                : {}
+            }
+          >
             <div class={titleBarTitleContainer}>
               <Show when={shouldShowTitle()}>
                 <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>

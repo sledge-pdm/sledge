@@ -36,6 +36,7 @@ pub struct WindowOpenOptions {
     pub query: Option<String>,
     pub initialization_script: Option<String>,
     pub open_path: Option<String>,
+    pub parent: Option<String>,
 }
 
 #[tauri::command]
@@ -45,9 +46,9 @@ pub async fn open_window(
     options: Option<WindowOpenOptions>,
 ) -> Result<(), String> {
     println!("open_window called with kind: {:?}", kind);
-    // let splash_closer = Some(splash::show_splash_screen());
 
     let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
+    let parent = options.as_ref().and_then(|opts| opts.parent.clone());
 
     let path_script = format!(
         "window.__PATH__={};",
@@ -67,7 +68,6 @@ pub async fn open_window(
         .and_then(|opts| opts.query.as_ref())
         .cloned();
 
-    // 1. 開く先の `label` を決定
     let (label, url) = match kind {
         SledgeWindowKind::Start => ("start".into(), "/start".into()),
         SledgeWindowKind::About => ("about".into(), "/about".into()),
@@ -83,7 +83,7 @@ pub async fn open_window(
         }
     };
 
-    // 2. 既存ウィンドウがあれば再利用
+    // reuse if there's same window
     if let Some(existing) = app.get_webview_window(&label) {
         // ウィンドウを最前面に表示
         existing.show().map_err(|e| e.to_string())?;
@@ -91,17 +91,18 @@ pub async fn open_window(
         return Ok(());
     }
 
-    // 3. 新規ビルダー作成
     let mut builder = WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(url.into()))
         .additional_browser_args(COMMON_BROWSER_ARGS)
         .initialization_script(initialization_script);
 
-    // 各種設定（サイズや装飾など）をここで上書き
+    let window_inner_width: f64;
+    let window_inner_height: f64;
     match kind {
         SledgeWindowKind::Start => {
+            window_inner_width = 500.0;
+            window_inner_height = 400.0;
             builder = builder
                 .title("sledge.")
-                .inner_size(500.0, 400.0)
                 .resizable(false)
                 .accept_first_mouse(true)
                 .closable(true)
@@ -109,9 +110,10 @@ pub async fn open_window(
                 .minimizable(true);
         }
         SledgeWindowKind::Editor => {
+            window_inner_width = 1200.0;
+            window_inner_height = 750.0;
             builder = builder
                 .title("sledge.")
-                .inner_size(1200.0, 750.0)
                 .resizable(true)
                 .accept_first_mouse(true)
                 .closable(true)
@@ -119,23 +121,58 @@ pub async fn open_window(
                 .minimizable(true);
         }
         SledgeWindowKind::About => {
+            window_inner_width = 380.0;
+            window_inner_height = 270.0;
             builder = builder
                 .title("about.")
-                .inner_size(380.0, 260.0)
                 .resizable(false)
                 .closable(true)
                 .minimizable(false)
                 .maximizable(false);
         }
         SledgeWindowKind::Settings => {
+            window_inner_width = 650.0;
+            window_inner_height = 500.0;
             builder = builder
                 .title("settings.")
-                .inner_size(600.0, 400.0)
                 .resizable(false)
                 .closable(true)
                 .minimizable(false)
                 .maximizable(false);
         }
+    }
+
+    builder = builder.inner_size(window_inner_width, window_inner_height);
+
+    if let Some(parent) = parent {
+        if let Some(parent_window) = app.get_webview_window(&parent) {
+            builder = builder.parent(&parent_window).map_err(|e| e.to_string())?;
+
+            let scale_factor = parent_window.scale_factor().unwrap_or(1.0);
+
+            // Physical positionとPhysical sizeを使用して正確な位置を計算
+            let parent_position = parent_window.inner_position().unwrap_or_default();
+            let parent_size = parent_window.inner_size().unwrap_or_default();
+
+            // Physical coordinatesでの中央位置計算
+            let parent_center_x = parent_position.x as f64 + (parent_size.width as f64) / 2.0;
+            let parent_center_y = parent_position.y as f64 + (parent_size.height as f64) / 2.0;
+
+            // 子ウィンドウのサイズ
+            let child_physical_width = window_inner_width;
+            let child_physical_height = window_inner_height;
+
+            // Physical座標で計算してからLogical座標に変換
+            let physical_px = parent_center_x - child_physical_width * scale_factor / 2.0;
+            let physical_py = parent_center_y - child_physical_height * scale_factor / 2.0;
+
+            // Logical座標に変換（position()メソッドはLogical座標を期待）
+            let px = physical_px / scale_factor;
+            let py = physical_py / scale_factor;
+            builder = builder.position(px, py);
+        }
+    } else {
+        builder = builder.center();
     }
 
     #[cfg(target_os = "windows")]

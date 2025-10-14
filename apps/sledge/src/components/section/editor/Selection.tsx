@@ -5,8 +5,9 @@ import { createStore } from 'solid-js/store';
 import SectionItem from '~/components/section/SectionItem';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { SelectionLimitMode, setToolStore, toolStore } from '~/stores/EditorStores';
-import { flexCol } from '~/styles/StyleSnippets';
+import { SelectionLimitMode } from '~/stores/editor/ToolStore';
+import { setToolStore, toolStore } from '~/stores/EditorStores';
+import { flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
 import { sectionContent } from '../SectionStyles';
 
@@ -68,11 +69,6 @@ const Selection: Component = () => {
     setToolStore('selectionLimitMode', newMode);
   };
 
-  // const fillMode = () => toolStore.selectionFillMode;
-  // const setFillMode = (newMode: SelectionFillMode) => {
-  //   setToolStore('selectionFillMode', newMode);
-  // };
-
   const [isSelected, setIsSelected] = createSignal(isSelectionAvailable());
 
   onMount(() => {
@@ -111,44 +107,7 @@ const Selection: Component = () => {
                 onChange={(e) => setMode(e as SelectionLimitMode)}
               />
             </div>
-
-            {/* <Show when={mode() !== 'none' && toolStore.activeToolCategory === 'fill'}>
-              <div class={flexCol}>
-                <p style={{ 'margin-bottom': '6px' }}>Fill Mode</p>
-                <Dropdown
-                  options={[
-                    { label: 'Boundary (strict)', value: 'boundary' },
-                    { label: 'Boundary (diffract)', value: 'global' },
-                    { label: 'Area Fill (entire selection)', value: 'area' },
-                  ]}
-                  value={fillMode()}
-                  onChange={(e) => setFillMode(e as SelectionFillMode)}
-                />
-              </div>
-            </Show> */}
           </div>
-
-          {/* <div class={flexRow} style={{ 'flex-wrap': 'wrap', 'row-gap': '2px' }}>
-            <p>
-              {mode()}
-              &nbsp;/&nbsp;
-            </p>
-            <p>
-              {selectionStatus.state}
-              &nbsp;/&nbsp;
-            </p>
-            <p>
-              {selectionStatus.status}
-              &nbsp;/&nbsp;
-            </p>
-            <p>
-              {selectionStatus.size.width} x {selectionStatus.size.height}
-              &nbsp;/&nbsp;
-            </p>
-            <p>
-              Offset: {selectionStatus.offset.x}, {selectionStatus.offset.y}
-            </p>
-          </div> */}
         </div>
       </SectionItem>
     </Show>

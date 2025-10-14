@@ -1,4 +1,4 @@
-import { Size2D } from '@sledge/core';
+import { Size2D, Vec2 } from '@sledge/core';
 import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
@@ -6,6 +6,7 @@ import { projectHistoryController } from '~/features/history';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { allLayers } from '~/features/layer';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -56,22 +57,17 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
   return true;
 }
 
-export async function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?: boolean): Promise<boolean> {
+export function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?: boolean): boolean {
+  return changeCanvasSize(newSize, undefined, undefined, skipHistory);
+}
+
+export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?: Vec2, skipHistory?: boolean): boolean {
   if (!isValidCanvasSize(newSize)) return false;
-
-  if (canvasStore.canvas.width === newSize.width && canvasStore.canvas.height === newSize.height) return false;
-
-  const act = new CanvasSizeHistoryAction(
-    {
-      width: canvasStore.canvas.width,
-      height: canvasStore.canvas.height,
-    },
-    {
-      width: newSize.width,
-      height: newSize.height,
-    },
-    { from: 'changeCanvasSizeWithNoOffset' }
-  );
+  const oldSize = { width: canvasStore.canvas.width, height: canvasStore.canvas.height };
+  srcOrigin = srcOrigin ?? { x: 0, y: 0 };
+  if (oldSize.width === newSize.width && oldSize.height === newSize.height && srcOrigin.x === 0 && srcOrigin.y === 0) return false;
+  // CanvasSizeHistoryAction uses the "current" canvas size and buffer as an old state, so must be called before resizing buffers.
+  const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'changeCanvasSize' });
 
   if (!skipHistory) act.registerBefore();
 
@@ -80,15 +76,22 @@ export async function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?
 
   for (const l of allLayers()) {
     const anvil = getAnvilOf(l.id)!;
-    anvil.resize(newSize.width, newSize.height);
+    anvil.resizeWithOffset(newSize, {
+      srcOrigin,
+      destOrigin,
+    });
     eventBus.emit('preview:requestUpdate', { layerId: l.id });
   }
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'changeCanvasSizeWithNoOffset' });
-
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'changeCanvasSize' });
   if (!skipHistory) {
     act.registerAfter();
     projectHistoryController.addAction(act);
   }
+  setInteractStore('isCanvasSizeFrameMode', false);
+  setInteractStore('canvasSizeFrameOffset', { x: 0, y: 0 });
+  setInteractStore('canvasSizeFrameSize', { width: 0, height: 0 });
+
+  selectionManager.clear();
 
   return true;
 }
@@ -199,7 +202,7 @@ export const setRotation = (rotation: number) => {
   let r = rotation % 360; // JS の % は符号を保持する
   if (r > 180) r -= 360; // 181..359 -> -179..-1
   if (r <= -180) r += 360; // ... -360..-180 -> 0..180 ( -180 は 180 に統一 )
-  r = Math.round(r);
+  r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
 

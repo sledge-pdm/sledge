@@ -6,8 +6,10 @@ import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import { clientPositionToCanvasPosition } from '~/features/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { activeLayer } from '~/features/layer';
-import { DebugLogger } from '~/features/log/service';
-import { getActiveToolCategory } from '~/features/tool/ToolController';
+import { DebugLogger, setBottomBarText } from '~/features/log/service';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { getActiveToolCategory } from '~/features/tools/ToolController';
+import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -56,6 +58,12 @@ export const InteractCanvas: Component<Props> = (props) => {
   }
 
   function isDrawableClick(e: PointerEvent): boolean {
+    if (interactStore.isCanvasSizeFrameMode) {
+      return false;
+    }
+    if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
+      return false;
+    }
     if (e.pointerType === 'touch') return false;
 
     // 基本的にはCanvasAreaInteractのisDraggableと逆の関係
@@ -82,14 +90,22 @@ export const InteractCanvas: Component<Props> = (props) => {
       return;
     }
     if (!isDrawableClick(e)) {
+      if (interactStore.isCanvasSizeFrameMode) {
+        setBottomBarText('quit frame resize mode first!', {
+          kind: 'error',
+        });
+      }
+      if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
+        setBottomBarText('commit or cancel move first!', {
+          kind: 'error',
+        });
+      }
       logger.debugWarn(`handleOutCanvasAreaPointerDown cancelled because not drawable click`);
       return;
     }
 
     e.stopPropagation();
     e.stopImmediatePropagation();
-
-    setInteractStore('isPenOut', false);
 
     const position = getCanvasMousePosition(e);
     // ! note that PointerEvent is the event on CanvasArea (not on InteractCanvas)
@@ -105,11 +121,19 @@ export const InteractCanvas: Component<Props> = (props) => {
     const start = new Date().getTime();
     logger.debugLog(`handlePointerDown start`);
     if (!isDrawableClick(e)) {
+      if (interactStore.isCanvasSizeFrameMode) {
+        setBottomBarText('quit frame resize mode first!', {
+          kind: 'error',
+        });
+      }
+      if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
+        setBottomBarText('commit or cancel move first!', {
+          kind: 'error',
+        });
+      }
       logger.debugWarn(`handlePointerDown cancelled because not drawable click`);
       return;
     }
-
-    setInteractStore('isPenOut', false);
 
     const position = getCanvasMousePosition(e);
     props.operator.handleDraw(DrawState.start, e, getActiveToolCategory(), position, lastPos());

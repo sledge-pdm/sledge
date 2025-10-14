@@ -5,7 +5,7 @@ import { adjustZoomToFit } from '~/features/canvas';
 import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
+import { LayerListHistoryAction, LayerSnapshot } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -91,8 +91,8 @@ export function clearLayer(layerId: string) {
   const h = getHeight(layerId);
   if (!before || w == null || h == null) return;
   const after = new Uint8ClampedArray(w * h * 4);
-  registerWholeChange(layerId, before, after);
   setBuffer(layerId, after);
+  registerWholeChange(layerId, before);
   const patch = flushPatch(layerId);
   if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch, { tool: 'clear' }));
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) cleared` });
@@ -196,7 +196,7 @@ export const addLayerTo = (
   // Initialize anvil
   const width = canvasStore.canvas.width;
   const height = canvasStore.canvas.height;
-  anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
+  const anvil = anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
 
   const layers = [...allLayers()];
   layers.splice(index, 0, newLayer as any);
@@ -204,13 +204,11 @@ export const addLayerTo = (
   setLayerListStore('layers', layers);
   setActiveLayerId(newLayer.id);
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${newLayer.id}) added` });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${newLayer.id}) added` });
 
   if (!options?.noDiff) {
-    // push history (add) with snapshot including optional buffer
-    // Anvil 移行中: まずは Anvil バッファが存在すればそれを優先
-    const snapshotBuffer = getBufferCopy(newLayer.id);
-    const snapshot = { ...newLayer, buffer: snapshotBuffer } as any;
+    const snapshot: LayerSnapshot = { layer: newLayer, image: { buffer: anvil.getBufferData(), width: anvil.getWidth(), height: anvil.getHeight() } };
+
     const act = new LayerListHistoryAction('add', index, snapshot, undefined, undefined, { from: 'LayerService.addLayerTo' });
     projectHistoryController.addAction(act);
   }
@@ -266,6 +264,8 @@ interface MoveLayerOptions {
 }
 
 export const moveLayer = (fromIndex: number, targetIndex: number, options?: MoveLayerOptions) => {
+  const { noDiff = false } = options ?? {};
+
   const beforeOrder = layerListStore.layers.map((l) => l.id);
   const updated = [...layerListStore.layers];
   const [moved] = updated.splice(fromIndex, 1);
@@ -273,7 +273,7 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
   setLayerListStore('layers', updated);
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer moved from ${fromIndex} to ${targetIndex}` });
 
-  if (!options?.noDiff) {
+  if (!noDiff) {
     const afterOrder = updated.map((l) => l.id);
     const act = new LayerListHistoryAction('reorder', -1, undefined, beforeOrder, afterOrder, { from: 'LayerService.moveLayer' });
     projectHistoryController.addAction(act);
@@ -285,6 +285,8 @@ interface RemoveLayerOptions {
 }
 
 export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
+  const { noDiff = false } = options ?? {};
+
   if (layerId === undefined) return;
   const layers = [...allLayers()];
   if (layers.length <= 1) return;
@@ -294,9 +296,9 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   // snapshot before removal
   const toRemove = layers[index];
-  // Anvil 移行中: 削除時スナップショットも Anvil 優先
-  const removeSnapshotBuffer = getBufferCopy(toRemove.id);
-  const snapshot = { ...toRemove, buffer: removeSnapshotBuffer } as any;
+  const anvil = getAnvilOf(toRemove.id);
+  if (!anvil) return;
+  const snapshot: LayerSnapshot = { layer: toRemove, image: { buffer: anvil.getBufferData(), width: anvil.getWidth(), height: anvil.getHeight() } };
 
   layers.splice(index, 1);
 
@@ -304,7 +306,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) removed` });
 
-  if (!options?.noDiff) {
+  if (!noDiff) {
     const act = new LayerListHistoryAction('delete', index, snapshot, undefined, undefined, { from: 'LayerService.removeLayer' });
     projectHistoryController.addAction(act);
   }

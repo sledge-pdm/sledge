@@ -3,7 +3,7 @@ import { Component } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import SectionItem from '~/components/section/SectionItem';
 import { applyEffect } from '~/features/effect/Effects';
-import { accentedButton } from '~/styles/StyleSnippets';
+import { accentedButton } from '~/styles/styles';
 import { sectionContent } from '../../SectionStyles';
 
 const applyButtonContainer = css`

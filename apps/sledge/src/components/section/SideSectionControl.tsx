@@ -6,7 +6,7 @@ import { SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
 import { adjustZoomToFit, setOffset, setZoomByReference } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
-import { flexRow } from '~/styles/StyleSnippets';
+import { flexRow } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
 
 const sideSectionControlRoot = css`
@@ -157,7 +157,7 @@ const SideSectionControl: Component<Props> = (props) => {
                   const canvasStack = document.getElementById('canvas-stack');
                   const betweenArea = document.getElementById('sections-between-area');
                   if (!canvasStack || !betweenArea) {
-                    eventBus.emit('canvas:onZoomChanged', {});
+                    eventBus.emit('canvas:onTransformChanged', {});
                     return;
                   }
 
@@ -181,7 +181,7 @@ const SideSectionControl: Component<Props> = (props) => {
                     y: interactStore.offset.y + dy,
                   });
 
-                  eventBus.emit('canvas:onZoomChanged', {});
+                  eventBus.emit('canvas:onTransformChanged', {});
                 }}
                 onDoubleClick={() => {
                   adjustZoomToFit();

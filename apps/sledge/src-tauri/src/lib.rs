@@ -24,6 +24,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
                 query: None,
                 initialization_script: None,
                 open_path: None,
+                parent: None,
             }),
         );
         let _ = block_on(future);
@@ -43,6 +44,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
                 query: None,
                 initialization_script: None,
                 open_path: Some(file.to_string_lossy().into_owned()),
+                parent: None,
             }),
         );
 

@@ -44,20 +44,22 @@ const fileName = css`
 const openIndicator = css`
   font-family: ZFB03;
   opacity: 0.5;
+  align-self: flex-end;
 `;
 
 const FileItem: Component<{
   entry: DirEntry;
+  title?: string;
   isMe: boolean;
   isPartOfMe: boolean;
   config: FilesConfig;
   onClick?: (entry: DirEntry) => void;
 }> = (props) => {
-  const { entry, isMe, isPartOfMe, config, onClick } = props;
+  const { entry, title, isMe, isPartOfMe, config, onClick } = props;
 
   return (
     <div
-      title={entry.name}
+      title={title ?? entry.name}
       class={fileItemContainer}
       style={{
         width: config.twoColumns ? '50%' : '100%',
@@ -73,14 +75,14 @@ const FileItem: Component<{
         class={fileName}
         style={{
           'text-decoration': entry.isDirectory ? 'underline' : 'none',
-          color: isMe ? color.active : undefined,
+          color: isMe || isPartOfMe ? color.active : undefined,
           'pointer-events': isMe ? 'none' : 'auto',
         }}
       >
         {entry.name}
       </a>
       <Show when={isMe}>
-        <p class={openIndicator}>(open)</p>
+        <p class={openIndicator}>(opened)</p>
       </Show>
     </div>
   );

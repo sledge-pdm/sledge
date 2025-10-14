@@ -1,7 +1,7 @@
 import { Icon } from '@sledge/ui';
 import { Component, JSX } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
-import { flexRow, heroHeading, pageImage, pageRoot, subHeading } from '~/styles/SharedStyles';
+import { flexRow, heroHeading, pageImage, pageRoot, subHeading } from '~/styles';
 
 export function About() {
   const imageSrc = () => {

@@ -1,9 +1,8 @@
-import { FieldMeta } from '~/features/config/models/GlobalConfig';
-import { Sections } from '~/features/config/models/Sections';
+import { ConfigSections, FieldMeta } from '~/features/config/models/ConfigMeta';
 
 export const editorMetas: FieldMeta[] = [
   {
-    section: Sections.Editor,
+    section: ConfigSections.Editor,
     path: ['editor', 'cursor'],
     label: 'cursor',
     component: 'Dropdown',
@@ -17,7 +16,7 @@ export const editorMetas: FieldMeta[] = [
     tips: `cursor type.`,
   },
   {
-    section: Sections.Editor,
+    section: ConfigSections.Editor,
     path: ['editor', 'rotateDegreePerWheelScroll'],
     label: 'rotate degree per wheel',
     component: 'Slider',
@@ -30,14 +29,14 @@ export const editorMetas: FieldMeta[] = [
     tips: `the amount of rotation per wheel scroll.`,
   },
   {
-    section: Sections.Editor,
+    section: ConfigSections.Editor,
     path: ['editor', 'showPointedPixel'],
     label: 'show pointed pixel',
     component: 'ToggleSwitch',
     tips: `whether if shows pointed pixel as rect.`,
   },
   {
-    section: Sections.Editor,
+    section: ConfigSections.Editor,
     path: ['editor', 'centerCanvasOnResize'],
     label: 'center canvas on resize',
     component: 'Dropdown',
@@ -51,7 +50,7 @@ export const editorMetas: FieldMeta[] = [
     tips: `centering canvas when area resized.`,
   },
   {
-    section: Sections.Editor,
+    section: ConfigSections.Editor,
     path: ['editor', 'maxHistoryItemsCount'],
     label: 'max history items count',
     component: 'Slider',
@@ -63,5 +62,19 @@ export const editorMetas: FieldMeta[] = [
       customFormat: '[value]',
     },
     tips: `the maximum number of history items to keep.`,
+  },
+  {
+    section: ConfigSections.Editor,
+    path: ['editor', 'touchRotationZeroSnapThreshold'],
+    label: '0 degree snap threshold (2 finger touch)',
+    component: 'Slider',
+    props: {
+      min: 1,
+      max: 90,
+      step: 1,
+      allowFloat: false,
+      customFormat: '[value]',
+    },
+    tips: `Available in two-finger touch rotation only.\ncanvas rotation degree will be snapped to 0° until this threshold.`,
   },
 ];

@@ -1,7 +1,7 @@
 import { MenuListOption } from '@sledge/ui';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { projectHistoryController } from '~/features/history';
-import { saveProject } from '~/io/project/out/save';
+import { saveProject } from '~/features/io/project/out/save';
 import { openDevTools } from '~/utils/WindowUtils';
 
 export const ContextMenuItems: { [key: string]: MenuListOption } = {
@@ -36,8 +36,8 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   Save: {
     label: 'Save Project',
     icon: '/icons/misc/save.png',
-    onSelect: () => {
-      saveProject();
+    onSelect: async () => {
+      await saveProject();
     },
   },
   // BaseXxx = only label and icon. Use like: {...BaseXxx, onSelect: () => {} }

@@ -1,13 +1,17 @@
+/**
+ * Appearance is 100% OK.
+ */
+
 import { Icon } from '@sledge/ui';
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
 import {
   cancelMove,
   cancelSelection,
   commitMove,
-  deletePixelInSelection,
-  getSelectionOffset,
+  deleteSelectedArea,
   invertSelectionArea,
+  isSelectionAvailable,
 } from '~/features/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -82,6 +86,7 @@ const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefin
 
 export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   let containerRef: HTMLDivElement;
+  let sectionsBetweenAreaRef: HTMLElement | null = null;
   const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
@@ -94,10 +99,13 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   const handleAreaChanged = (e: Events['selection:maskChanged']) => {
     if (e.commit) {
       updateMenuPos();
+    } else {
+      setUpdatePosition(true);
     }
+  };
+  const handleMoved = (e: Events['selection:offsetChanged']) => {
     setUpdatePosition(true);
   };
-  const handleMoved = (e: Events['selection:offsetChanged']) => setUpdatePosition(true);
   const handleStateChanged = (e: Events['selection:stateChanged']) => {
     setSelectionState(e.newState);
     setUpdatePosition(true);
@@ -117,14 +125,12 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     eventBus.on('selection:requestMenuUpdate', handleRequestMenuUpdate);
     eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
 
-    const observer = new ResizeObserver((entries) => {
-      entries.forEach((el) => {
-        setUpdatePosition(true);
-      });
+    const observer = new ResizeObserver(() => {
+      setUpdatePosition(true);
     });
-    const sectionsBetweenArea = document.getElementById('sections-between-area') as HTMLElement;
-    if (sectionsBetweenArea) {
-      observer.observe(sectionsBetweenArea);
+    sectionsBetweenAreaRef = document.getElementById('sections-between-area') as HTMLElement;
+    if (sectionsBetweenAreaRef) {
+      observer.observe(sectionsBetweenAreaRef);
     }
 
     return () => {
@@ -138,64 +144,63 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     };
   });
 
+  // 座標変換に影響する要素を監視
   createEffect(() => {
-    // 位置に影響し得る要素を購読
-    interactStore.zoom; // zoom が変われば位置再計算 (ズームで位置は動くがメニュー自体はスケールしない)
     interactStore.rotation;
-    interactStore.offset.x;
-    interactStore.offset.y;
     interactStore.horizontalFlipped;
     interactStore.verticalFlipped;
+    setUpdatePosition(true);
+  });
+
+  // 平行移動のみを監視（頻度が高いため分離）
+  createEffect(() => {
+    interactStore.offset.x;
+    interactStore.offset.y;
     setUpdatePosition(true);
   });
 
   const [selectionMenuPos, setSelectionMenuPos] = createSignal<Vec2>({ x: 0, y: 0 });
 
   const updateMenuPos = () => {
+    if (!isSelectionAvailable()) return;
+
+    if (!containerRef) return;
     const outlineBound = selectionManager.getSelectionMask().getBoundBox();
     if (!outlineBound) return;
-    const selectionOffset = getSelectionOffset();
-
-    // 選択領域の4隅 (右+1, 下+1 を含めてピクセル境界の外側を含む) を列挙し、回転/flip/zoom 後の見かけ上の AABB を screen 上で取得
-    const cornersCanvas: Vec2[] = [
-      { x: outlineBound.left, y: outlineBound.top },
-      { x: outlineBound.right + 1, y: outlineBound.top },
-      { x: outlineBound.right + 1, y: outlineBound.bottom + 1 },
-      { x: outlineBound.left, y: outlineBound.bottom + 1 },
-    ].map((c) => ({ x: c.x + selectionOffset.x, y: c.y + selectionOffset.y }));
-
-    const cornersScreen = cornersCanvas.map((c) => canvasToScreenNoZoom(c));
-    const minX = Math.min(...cornersScreen.map((c) => c.x));
-    const minY = Math.min(...cornersScreen.map((c) => c.y));
-    const maxX = Math.max(...cornersScreen.map((c) => c.x));
-    const maxY = Math.max(...cornersScreen.map((c) => c.y));
-
-    const containerWidth = containerRef?.offsetWidth ?? 0;
-
-    const margin = 8;
-    const anchor = { x: maxX - containerWidth, y: maxY + margin };
+    const rightBottomOnScreen = canvasToScreenNoZoom({
+      x: interactStore.horizontalFlipped ? outlineBound.left : outlineBound.right + 1,
+      y: interactStore.verticalFlipped ? outlineBound.top : outlineBound.bottom + 1,
+    });
+    const containerWidth = containerRef.offsetWidth;
+    const containerHeight = containerRef.offsetHeight;
+    const anchor = { x: rightBottomOnScreen.x - containerWidth, y: rightBottomOnScreen.y };
     setSelectionMenuPos(anchor);
 
     // Outer 領域 (sections-between-area) へのクランプ
-    const sectionsBetweenArea = document.getElementById('sections-between-area') as HTMLElement;
-    if (sectionsBetweenArea && containerRef) {
-      const areaRect = sectionsBetweenArea.getBoundingClientRect();
-      const menuW = containerRef.offsetWidth;
-      const menuH = containerRef.offsetHeight;
-      const outerMargin = 8;
-      let clampedX = anchor.x;
-      let clampedY = anchor.y;
-      if (clampedX > areaRect.right - outerMargin - menuW) clampedX = areaRect.right - outerMargin - menuW;
-      if (clampedY > areaRect.bottom - outerMargin - menuH) clampedY = areaRect.bottom - outerMargin - menuH;
-      if (clampedX < areaRect.left + outerMargin) clampedX = areaRect.left + outerMargin;
-      if (clampedY < areaRect.top + outerMargin) clampedY = areaRect.top + outerMargin;
-      if (clampedX !== anchor.x || clampedY !== anchor.y) {
-        setOuterPosition({ x: clampedX - areaRect.left, y: clampedY - areaRect.top });
-      } else {
-        setOuterPosition(undefined);
-      }
+    if (!sectionsBetweenAreaRef) return;
+
+    const areaRect = sectionsBetweenAreaRef.getBoundingClientRect();
+    const containerRect = containerRef.getBoundingClientRect();
+    const outerMargin = 8;
+    const clampedX = Math.max(areaRect.left + outerMargin, Math.min(containerRect.x, areaRect.right - containerWidth - outerMargin));
+    const clampedY = Math.max(areaRect.top + outerMargin, Math.min(containerRect.y, areaRect.bottom - containerHeight - outerMargin));
+
+    if (clampedX !== containerRect.x || clampedY !== containerRect.y) {
+      setOuterPosition({ x: clampedX - areaRect.left, y: clampedY - areaRect.top });
+    } else {
+      setOuterPosition(undefined);
     }
   };
+
+  const visibility = createMemo(() => {
+    // idle状態の場合は表示しない
+    if (selectionState() === 'idle') return 'collapse';
+    // 外側メニューがある場合は表示しない
+    if (outerPosition() !== undefined) return 'collapse';
+    // キャンバスをリサイズ中の場合は表示しない
+    if (interactStore.isCanvasSizeFrameMode) return 'collapse';
+    return 'visible';
+  });
 
   return (
     <div
@@ -203,9 +208,10 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         position: 'absolute',
         left: `${selectionMenuPos().x}px`,
         top: `${selectionMenuPos().y}px`,
-        visibility: outerPosition() === undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
+        visibility: visibility(),
         'pointer-events': 'all',
-        'transform-origin': '0 0',
+        'transform-origin': '100% 0',
+        transform: `rotate(${interactStore.rotation}deg) translateY(8px)`,
         'z-index': 'var(--zindex-canvas-overlay)',
       }}
       onPointerDown={(e) => {
@@ -225,6 +231,17 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
 };
 
 export const OuterSelectionMenu: Component<{}> = (props) => {
+  const visibility = createMemo(() => {
+    // idle状態の場合は表示しない
+    if (selectionState() === 'idle') return 'collapse';
+    // 外側メニューの座標がない場合は表示しない
+    if (outerPosition() === undefined) return 'collapse';
+    // キャンバスをリサイズ中の場合は表示しない
+    if (interactStore.isCanvasSizeFrameMode) return 'collapse';
+
+    return 'visible';
+  });
+
   return (
     <div
       style={{
@@ -234,7 +251,7 @@ export const OuterSelectionMenu: Component<{}> = (props) => {
         opacity: 0.8,
         'pointer-events': 'all',
         'z-index': 'var(--zindex-canvas-overlay)',
-        visibility: outerPosition() !== undefined && selectionState() !== 'idle' ? 'visible' : 'collapse',
+        visibility: visibility(),
       }}
       onPointerDown={(e) => {
         e.stopPropagation();
@@ -293,7 +310,7 @@ const MenuContent = () => {
         <Item
           src='/icons/selection/delete_10.png'
           onClick={() => {
-            deletePixelInSelection();
+            deleteSelectedArea();
           }}
           title='delete.'
         />

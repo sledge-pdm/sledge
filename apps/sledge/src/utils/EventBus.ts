@@ -10,7 +10,7 @@ export type Events = {
 
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
-  'canvas:onZoomChanged': {};
+  'canvas:onTransformChanged': {};
 
   'selection:maskChanged': { commit: boolean };
   'selection:offsetChanged': { newOffset: Vec2 };

@@ -8,6 +8,7 @@ import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import ClipboardListener from '~/components/global/ClipboardListener';
+import FloatingController from '~/components/global/controller/FloatingController';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
@@ -188,6 +189,8 @@ export default function Editor() {
         </div>
 
         <SideSectionControl side='rightSide' />
+
+        <FloatingController />
 
         <KeyListener />
         <ClipboardListener />

@@ -157,7 +157,7 @@ const SideSectionControl: Component<Props> = (props) => {
                   const canvasStack = document.getElementById('canvas-stack');
                   const betweenArea = document.getElementById('sections-between-area');
                   if (!canvasStack || !betweenArea) {
-                    eventBus.emit('canvas:onZoomChanged', {});
+                    eventBus.emit('canvas:onTransformChanged', {});
                     return;
                   }
 
@@ -181,7 +181,7 @@ const SideSectionControl: Component<Props> = (props) => {
                     y: interactStore.offset.y + dy,
                   });
 
-                  eventBus.emit('canvas:onZoomChanged', {});
+                  eventBus.emit('canvas:onTransformChanged', {});
                 }}
                 onDoubleClick={() => {
                   adjustZoomToFit();

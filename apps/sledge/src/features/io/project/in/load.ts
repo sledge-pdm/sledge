@@ -3,7 +3,7 @@ import { replaceAllEntries } from '~/features/image_pool';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
+import { canvasStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export const loadProjectJson = async (project: any) => {
@@ -54,21 +54,21 @@ export function loadV0(project: ProjectV0) {
 }
 
 export function loadV1(project: ProjectV1) {
-  setCanvasStore(project.canvas.store);
-  setLayerListStore(project.layers.store);
-  setProjectStore(project.project.store);
+  if (project.canvas) setCanvasStore(project.canvas.store);
+  if (project.layers) setLayerListStore(project.layers.store);
+  if (project.project) setProjectStore(project.project.store);
   setProjectStore('loadProjectVersion', {
-    sledge: project.version,
+    sledge: project.version ?? undefined,
     project: 1,
   });
-  setImagePoolStore(project.imagePool.store);
-  setSnapshotStore(project.snapshots.store);
+  if (project.imagePool) setImagePoolStore(project.imagePool.store);
+  if (project.snapshots) setSnapshotStore(project.snapshots.store);
 
   if (project.imagePool && Array.isArray(project.imagePool)) {
     replaceAllEntries(project.imagePool);
   }
 
-  const canvasSize = project.canvas.store.canvas;
+  const canvasSize = canvasStore.canvas;
   eventBus.emit('canvas:sizeChanged', { newSize: canvasSize });
 
   allLayers().forEach((layer) => {

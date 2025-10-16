@@ -17,7 +17,7 @@ export const pageRoot = css`
   flex-direction: column;
   width: 320px;
   height: 100%;
-  padding: 3.5rem 4.5rem 3rem 4rem;
+  padding: 3.5rem 4.5rem 3rem 3.5rem;
 
   @media (max-width: 599px) {
     box-sizing: border-box;

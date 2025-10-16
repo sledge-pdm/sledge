@@ -10,6 +10,7 @@ export const defaultLastSettingsStore: LastSettingsStore = {
     dirPath: undefined,
     fileName: '',
     exportOptions: {
+      perLayer: false,
       format: 'png',
       quality: 95,
       scale: 1,

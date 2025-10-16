@@ -2,8 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Slider } from '@sledge/ui';
-import { confirm, message, open } from '@tauri-apps/plugin-dialog';
-import { exists } from '@tauri-apps/plugin-fs';
+import { message, open } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -167,20 +166,6 @@ const ExportContent: Component = () => {
       return;
     }
     if (settings.dirPath) {
-      const filePath = join(settings.dirPath, `${name}.${convertToExtension(settings.exportOptions.format)}`);
-      if (await exists(filePath)) {
-        const ok = await confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
-          kind: 'info',
-          okLabel: 'Overwrite',
-          cancelLabel: 'Cancel',
-          title: 'Export',
-        });
-        if (!ok) {
-          console.warn('export cancelled.');
-          return;
-        }
-      }
-
       const location = await exportImage(settings.dirPath, name, settings.exportOptions);
       if (location) {
         // setLastSettingsStore('exportSettings', 'dirPath', location.path);
@@ -234,6 +219,8 @@ const ExportContent: Component = () => {
           </button>
         </div>
       </div>
+
+      <Checkbox checked={settings.exportOptions.perLayer} onChange={(v) => setSettings('exportOptions', 'perLayer', v)} label='Export Per Layer.' />
 
       <div class={flexCol}>
         <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>

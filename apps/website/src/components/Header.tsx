@@ -1,75 +1,47 @@
 import { css } from '@acab/ecsstatic';
+import { Asset, os, ReleaseData } from '@sledge/core';
 import { makeTimer } from '@solid-primitives/timer';
-import { Component, createSignal, onMount } from 'solid-js';
+import { Accessor, Component, createSignal, onMount } from 'solid-js';
 
-// Styles
-const headerRoot = css`
+const flexRow = css`
+  display: flex;
+  flex-direction: row;
+`;
+
+const versionInfoSledge = css`
+  font-family: ZFB31;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 24px;
+`;
+const versionInfoText = css`
+  font-family: ZFB09;
+  font-size: 8px;
+`;
+
+const headerText = css`
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  max-width: 500px;
-  box-sizing: content-box;
-  height: auto;
-  padding: 3rem 0 0.25rem 0;
-  margin-bottom: 3rem;
-  background-color: var(--color-background);
-  z-index: 10;
-  @media (max-width: 599px) {
-    justify-content: auto;
-    padding: 2.5rem 0 0.25rem 0;
-  }
+  gap: 4px 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: baseline;
 `;
 
-const headerContentContainer = css`
-  display: flex;
-  flex-direction: column;
-  justify-self: center;
-  height: auto;
-  padding: 0 4rem 0 3rem;
-  @media (max-width: 599px) {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0 2rem 0 2rem;
-  }
-`;
+const Header: Component<{
+  releaseData: {
+    isLoading: Accessor<boolean>;
+    userOS: Accessor<os>;
+    releaseData: Accessor<ReleaseData | null>;
+    availableAssets: () => {
+      asset: Asset;
+      extension: string;
+    }[];
+    information: () => string | undefined;
+  };
+}> = ({ releaseData }) => {
+  const { isLoading, userOS, releaseData: data, availableAssets, information } = releaseData;
 
-const sledgeText = css`
-  font-family: ZFB31, k12x8;
-  font-size: 36px;
-  letter-spacing: 2px;
-  margin-bottom: 6px;
-  @media (max-width: 400px) {
-    font-size: 32px;
-  }
-`;
-
-const menuContainer = css`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: auto;
-  margin: 0 4rem 0 3rem;
-  touch-action: auto;
-
-  &::-webkit-scrollbar {
-    height: 2px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #dddddd75;
-  }
-
-  @media (max-width: 599px) {
-    box-sizing: border-box;
-    width: 100%;
-    margin: 0 2rem 0 2rem;
-  }
-`;
-
-const Header: Component = () => {
   const descriptionFlavors: string[] = [
     'Paint, rearmed.',
     `A tiny hooligan in your pocket.`,
@@ -98,16 +70,17 @@ const Header: Component = () => {
   });
 
   return (
-    // <header class={headerRoot}>
-    //   <div class={headerContentContainer}>
-    //     <p class={sledgeText}>SLEDGE.</p>
-    //   </div>
-
-    //   {/* <div class={menuContainer}>
-    //     <SideBarMenu />
-    //   </div> */}
-    // </header>
-    <></>
+    <p class={headerText}>
+      <span class={versionInfoSledge}>sledge</span>
+      <span
+        class={versionInfoText}
+        style={{
+          color: data()?.name ? 'var(--color-accent)' : 'var(--color-error)',
+        }}
+      >
+        {data()?.name ?? '[ fetch failed ]'}
+      </span>
+    </p>
   );
 };
 

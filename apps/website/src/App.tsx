@@ -11,6 +11,7 @@ import { About } from '~/routes/about';
 import NotFound from '~/routes/not-found';
 import { Playground } from '~/routes/play';
 import { globalStore } from '~/store/GlobalStore';
+import { useReleaseData } from '~/utils/useReleaseData';
 
 // Styles
 const flexRow = css`
@@ -138,7 +139,6 @@ const App: Component = () => {
                   'background-color': 'var(--color-surface)',
                 }}
               >
-                <Header />
 
                 <div class={pageContainer}>{props.children}</div>
               </div>

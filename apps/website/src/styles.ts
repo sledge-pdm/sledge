@@ -17,7 +17,6 @@ export const pageRoot = css`
   flex-direction: column;
   width: 320px;
   padding: 3rem 3.5rem 3rem 3.5rem;
-  gap: 16px;
   background-color: var(--color-surface);
 
   @media (max-width: 599px) {
@@ -70,16 +69,6 @@ export const sectionImage = css`
   border-radius: 8px;
   image-rendering: auto;
   max-height: 200px;
-`;
-
-export const pageImage = css`
-  width: 100%;
-  max-width: 95%;
-  height: auto;
-  object-fit: cover;
-  object-position: 0 0;
-  border: 1px solid var(--color-border-secondary);
-  image-rendering: auto;
 `;
 
 // Common link styles

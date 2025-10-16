@@ -1,39 +1,14 @@
 import { css } from '@acab/ecsstatic';
-import { Asset, getDebugReleaseData, getReleaseData, os, osBuildInfos, ReleaseData } from '@sledge/core';
+import { Asset, os, ReleaseData } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Button, Icon } from '@sledge/ui';
-import { makeTimer } from '@solid-primitives/timer';
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
-import { globalStore } from '~/store/GlobalStore';
-import { pageImage } from '~/styles';
+import { Accessor, Component, For, Show } from 'solid-js';
 
 // Styles
 const flexCol = css`
   display: flex;
   flex-direction: column;
 `;
-
-const flexRow = css`
-  display: flex;
-  flex-direction: row;
-`;
-
-const versionInfoSledge = css`
-  font-family: ZFB31;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 24px;
-`;
-const versionInfoText = css`
-  font-family: ZFB09;
-  font-size: 8px;
-`;
-
-const osInfoText = css`
-  font-family: ZFB09;
-  font-size: 8px;
-`;
-
 const informationContainer = css`
   width: 100%;
   background-color: var(--color-surface);
@@ -68,15 +43,16 @@ const loadingText = css`
 
 const assetText = css`
   width: fit-content;
-  font-family: k12x8;
+  font-family: ZFB03;
   font-size: 8px;
   opacity: 0.2;
-  line-height: 1.5;
+  margin-top: 8px;
   overflow: hidden;
   white-space: normal;
   word-wrap: break-word;
   word-break: break-all;
   user-select: text;
+  text-align: end;
 `;
 
 const downloadsContainer = css`
@@ -108,7 +84,7 @@ const otherDownloadsText = css`
   color: var(--color-active);
   text-decoration: none;
   align-self: flex-end;
-  opacity: 0.1;
+  opacity: 0.05;
   @media (any-hover: hover) {
     &:hover {
       color: var(--color-active);
@@ -117,197 +93,40 @@ const otherDownloadsText = css`
   }
 `;
 
-const flavorTextContainer = css`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 24px;
-  margin-bottom: 16px;
-`;
-
-const flavorText = css`
-  font-family: k12x8;
-  font-size: 8px;
-  color: var(--color-active);
-  font-style: italic;
-  white-space: pre-wrap;
-`;
-
-const DownloadSection: Component<{}> = () => {
-  const releaseApiUrl =
-    import.meta.env.VITE_GITHUB_REST_API_URL +
-    '/repos/' +
-    import.meta.env.VITE_GITHUB_OWNER +
-    '/' +
-    import.meta.env.VITE_GITHUB_REPO +
-    '/releases/latest';
-
-  const [isLoading, setIsLoading] = createSignal(true);
-
-  const [userOS, setUserOS] = createSignal<os>('none');
-  const [releaseData, setReleaseData] = createSignal<ReleaseData | null>(null);
-
-  const availableAssets = (): {
-    asset: Asset;
-    extension: string;
-  }[] => {
-    if (userOS() === 'none' || !releaseData()) return [];
-    const availableExtensions = osBuildInfos[userOS()].extensions;
-
-    return releaseData()!
-      .assets.map((asset) => {
-        const ext = availableExtensions.find((ext) => asset.name.endsWith(`.${ext}`));
-        if (ext) {
-          return {
-            asset,
-            extension: ext,
-          };
-        }
-      })
-      .filter((item): item is { asset: Asset; extension: string } => item !== undefined);
+const DownloadSection: Component<{
+  releaseData: {
+    isLoading: Accessor<boolean>;
+    userOS: Accessor<os>;
+    releaseData: Accessor<ReleaseData | null>;
+    availableAssets: () => {
+      asset: Asset;
+      extension: string;
+    }[];
+    information: () => string | undefined;
   };
-
-  const information = (): string | undefined => {
-    if (userOS() === 'none' || !releaseData()) return undefined;
-    const information = osBuildInfos[userOS()].information;
-    return information;
-  };
-
-  onMount(async () => {
-    setIsLoading(true);
-    const userAgent = navigator.userAgent;
-    if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
-      setUserOS('sp');
-    } else if (userAgent.includes('Mac OS X')) {
-      setUserOS('macOS');
-    } else if (userAgent.includes('Windows')) {
-      setUserOS('windows');
-    } else if (userAgent.includes('Linux')) {
-      setUserOS('linux');
-    } else {
-      setUserOS('none');
-    }
-
-    try {
-      let data: ReleaseData | undefined;
-      if (location.origin.includes('localhost')) {
-        data = getDebugReleaseData();
-      } else {
-        const githubPat = import.meta.env.VITE_GITHUB_PAT;
-        // github api refuses localhost by CORS.
-        data = await getReleaseData(releaseApiUrl, githubPat);
-      }
-      if (!data) {
-        console.error('Failed to fetch release data');
-      } else {
-        setReleaseData(data);
-      }
-    } catch (e) {
-      console.error('Failed to fetch release data', e);
-    }
-    setIsLoading(false);
-  });
-  const imageSrc = () => {
-    switch (globalStore.theme) {
-      case 'light':
-      default:
-        return './0827sledge_light.png';
-      case 'black':
-        return './0827sledge_black.png';
-      case 'dark':
-        return './0827sledge_dark.png';
-      case 'dark-gy-flip':
-        return './0827sledge_darkgyflip.png';
-    }
-  };
-  const isLight = () => globalStore.theme === 'light';
-  const descriptionFlavors: string[] = [
-    'Paint, rearmed.',
-    `A tiny hooligan in your pocket.`,
-    `Keep it in your pocket. Break when needed.`,
-    `Always at hand. Always unruly.`,
-    `A hammer with a master.`,
-    `Not a studio. A hammer.`,
-    `Strike pixels, not canvas.`,
-    `8 MB. Free. Always ready.`,
-    `The pocket-sized sidearm for your pixels.`,
-    `Small enough to carry. Sharp enough to cut.`,
-    `Notepad for images.`,
-    `A glitchpad for your desktop.`,
-  ];
-
-  const [flavor, setFlavor] = createSignal(descriptionFlavors[0]);
-
-  onMount(() => {
-    makeTimer(
-      () => {
-        setFlavor(descriptionFlavors[Math.floor(Math.random() * descriptionFlavors.length)]);
-      },
-      8000,
-      setInterval
-    );
-  });
-
+}> = ({ releaseData }) => {
+  const { isLoading, userOS, releaseData: data, availableAssets, information } = releaseData;
   return (
-    <div class={flexCol} style={{ width: '100%', gap: '2rem' }}>
+    <div class={flexCol}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
-        <div class={flexCol} style={{ width: '100%' }}>
-          <p
-            style={{
-              display: 'flex',
-              'flex-direction': 'column',
-              gap: '4px 8px',
-              'margin-bottom': '24px',
-              'flex-wrap': 'wrap',
-              'align-items': 'baseline',
-            }}
-          >
-            <span class={versionInfoSledge}>sledge</span>
-            <span
-              class={versionInfoText}
-              style={{
-                color: releaseData()?.name ? 'var(--color-accent)' : 'var(--color-error)',
-              }}
-            >
-              {releaseData()?.name ?? '[ fetch failed ]'}
-            </span>
-          </p>
-
-          <div
-            style={{
-              display: 'flex',
-              'flex-direction': 'column',
-              'align-items': 'center',
-              filter: `drop-shadow(0 3px 5px ${isLight() ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.2)'})`,
-              'margin-bottom': '24px',
-              'margin-top': '8px',
-            }}
-          >
-            <img class={pageImage} src={imageSrc()} />
+        <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
+          <div class={downloadsContainer}>
+            <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} type='main' />}</For>
           </div>
-          {/* <div class={flavorTextContainer}>
-            <TypewriterText class={flavorText} text={flavor()} durationPerCharacter={60} />
-          </div> */}
+        </Show>
 
-          <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
-            <div class={downloadsContainer}>
-              <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} type='main' />}</For>
-            </div>
-          </Show>
+        <Show when={information()}>
+          <div class={informationContainer}>
+            <p class={informationLabel} style={{}}>
+              for {userOS()} users
+            </p>
+            <p class={informationText}>{information()}</p>
+          </div>
+        </Show>
 
-          <Show when={information()}>
-            <div class={informationContainer}>
-              <p class={informationLabel} style={{}}>
-                for {userOS()} users
-              </p>
-              <p class={informationText}>{information()}</p>
-            </div>
-          </Show>
-
-          <a class={otherDownloadsText} href='https://github.com/sledge-pdm/sledge/releases'>
-            other releases
-          </a>
-        </div>
+        <a class={otherDownloadsText} href='https://github.com/sledge-pdm/sledge/releases' target='_blank'>
+          other releases
+        </a>
       </Show>
     </div>
   );
@@ -321,17 +140,14 @@ const DownloadButton: Component<{
   type: 'main' | 'other';
 }> = ({ os, assetItem, type }) => {
   const { asset, extension } = assetItem;
-  const [showDigest, setShowDigest] = createSignal(false);
 
   return (
     <div
       class={flexCol}
       style={{
-        gap: '8px',
         'align-items': 'end',
       }}
     >
-      <p class={assetText}>{asset.name}</p>
       <Button
         key={asset.id}
         onClick={() => {
@@ -349,6 +165,11 @@ const DownloadButton: Component<{
         <Icon src='/icons/misc/save.png' base={8} style={{ width: '16px', height: '16px', 'margin-bottom': '-4px' }} />
         Download
       </Button>
+      <p class={assetText}>
+        For {os}
+        <br />
+        {asset.name}
+      </p>
     </div>
   );
 };

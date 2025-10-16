@@ -2,30 +2,39 @@ import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
 import { Component, JSX } from 'solid-js';
 import DownloadSection from '~/components/DownloadSection';
+import Header from '~/components/Header';
+import PageImage from '~/components/PageImage';
 import { pageRoot } from '~/styles';
+import { useReleaseData } from '~/utils/useReleaseData';
 
 const mainText = css`
   font-size: 16px;
-  font-family: k12x8;
-  margin-top: 24px;
-  margin-bottom: 8px;
+  font-family: ZFB11;
+  margin-top: 16px;
   letter-spacing: 0px;
+  line-height: 1.2;
 `;
 
 export function About() {
+  const releaseData = useReleaseData();
+
   return (
     <main class={pageRoot}>
-      <DownloadSection />
+      <Header releaseData={releaseData} />
+      <PageImage />
+      <DownloadSection releaseData={releaseData} />
 
-      <p class={mainText}>sledge is a drawing tool.</p>
-      <div>
-        <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
-        <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
-        <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
+      <div style={{ display: 'flex', 'flex-direction': 'column', gap: '16px' }}>
+        <p class={mainText}>A Drawing Tool w/</p>
+        <div>
+          <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
+          <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
+          <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
+          <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
+          <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
+          <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
+          <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
+        </div>
       </div>
     </main>
   );
@@ -51,6 +60,7 @@ const subHeadingContainer = css`
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
+  margin-left: 8px;
 `;
 
 const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {

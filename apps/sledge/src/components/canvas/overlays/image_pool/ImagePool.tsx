@@ -9,7 +9,7 @@ export const ImagePool: Component = () => {
   const [entries, setEntries] = createSignal(getEntries());
 
   const handleEntriesChanged = (e: { newEntries: ReturnType<typeof getEntries> }) => {
-    setEntries(e.newEntries);
+    setEntries([...e.newEntries]);
   };
 
   onMount(() => {

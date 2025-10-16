@@ -143,6 +143,7 @@ const thumbCanvas = css`
     8px 8px;
   margin: 8px 0;
   align-self: end;
+  image-rendering: pixelated;
 `;
 const itemButtonContainer = css`
   display: flex;

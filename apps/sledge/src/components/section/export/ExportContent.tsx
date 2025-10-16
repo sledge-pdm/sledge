@@ -1,13 +1,15 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Slider } from '@sledge/ui';
-import { confirm, open } from '@tauri-apps/plugin-dialog';
+import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
-import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/features/io/image/out/export';
+import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
+import { CanvasExportOptions, defaultExportDir, exportImage } from '~/features/io/image/out/export';
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -15,19 +17,17 @@ import { accentedButton, flexCol } from '~/styles/styles';
 import { getFileNameWithoutExtension, join } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
-const exportDialogField = css`
+const qualityField = css`
   display: flex;
   flex-direction: column;
   max-width: 400px;
 `;
 
-const exportDialogFieldDisabled = css`
-  display: flex;
-  flex-direction: column;
-  max-width: 400px;
-  pointer-events: none;
+const qualityFieldDisabled = css`
+  display: none;
+  /* pointer-events: none;
   cursor: auto;
-  opacity: 0.4;
+  opacity: 0.25; */
 `;
 
 const exportDialogCustomScaleInput = css`
@@ -51,8 +51,16 @@ const browseButton = css`
   align-self: end;
 `;
 
+const fileNameContainer = css`
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+`;
+
 const fileNameInput = css`
-  width: auto;
+  flex-grow: 1;
+  min-width: 0;
   font-size: 16px;
   font-family: k12x8;
   border-bottom-color: var(--color-border);
@@ -94,11 +102,6 @@ const estimatedSize = css`
   width: fit-content;
 `;
 
-const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
-  { label: 'png', value: 'png' },
-  { label: 'jpeg', value: 'jpg' },
-  { label: 'svg', value: 'svg' },
-];
 const scaleOptions: DropdownOption<number>[] = [
   { label: 'x1', value: 1 },
   { label: 'x2', value: 2 },
@@ -106,6 +109,8 @@ const scaleOptions: DropdownOption<number>[] = [
   { label: 'x10', value: 10 },
   { label: 'CUSTOM', value: 0 },
 ];
+
+const qualityMutableExtensions: Partial<ExportableFileTypes>[] = ['webp_lossy', 'jpeg'];
 
 export interface ExportSettings {
   dirPath?: string;
@@ -115,6 +120,13 @@ export interface ExportSettings {
 }
 
 const ExportContent: Component = () => {
+  const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = exportableFileTypes.map((type) => {
+    return {
+      label: convertToLabel(type) ?? '[unknown]',
+      value: type,
+    };
+  });
+
   const nameWithoutExtension = () => getFileNameWithoutExtension(fileStore.savedLocation.name);
 
   const [settings, setSettings] = createStore<ExportSettings>({
@@ -145,12 +157,17 @@ const ExportContent: Component = () => {
   };
 
   const requestExport = async () => {
-    if (settings.exportOptions.scale === 0) return;
+    if (finalScale() === 0) return;
+
+    setSettings('exportOptions', 'scale', finalScale());
 
     const name = settings.fileName;
-    if (name === undefined) return;
+    if (!name) {
+      message('Export Error; File name is empty.');
+      return;
+    }
     if (settings.dirPath) {
-      const filePath = join(settings.dirPath, `${name}.${settings.exportOptions.format}`);
+      const filePath = join(settings.dirPath, `${name}.${convertToExtension(settings.exportOptions.format)}`);
       if (await exists(filePath)) {
         const ok = await confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
           kind: 'info',
@@ -220,21 +237,6 @@ const ExportContent: Component = () => {
 
       <div class={flexCol}>
         <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
-          File Name.
-        </p>
-        <div class={sectionSubContent}>
-          <input
-            class={fileNameInput}
-            placeholder='file name'
-            value={settings.fileName}
-            autocomplete='off'
-            onInput={(e) => setSettings('fileName', e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div class={flexCol}>
-        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
           Format.
         </p>
         <div class={sectionSubContent}>
@@ -242,7 +244,10 @@ const ExportContent: Component = () => {
         </div>
       </div>
 
-      <div class={settings.exportOptions.format === 'jpg' ? exportDialogField : exportDialogFieldDisabled} style={{ 'flex-grow': 1 }}>
+      <div
+        class={clsx(qualityField, qualityMutableExtensions.includes(settings.exportOptions.format) && qualityFieldDisabled)}
+        style={{ 'flex-grow': 1 }}
+      >
         <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
           Quality.
         </p>
@@ -256,6 +261,24 @@ const ExportContent: Component = () => {
             max={100}
             onChange={(v) => setSettings('exportOptions', 'quality', v)}
           />
+        </div>
+      </div>
+
+      <div class={flexCol}>
+        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
+          File Name.
+        </p>
+        <div class={sectionSubContent}>
+          <div class={fileNameContainer}>
+            <input
+              class={fileNameInput}
+              placeholder='image'
+              value={settings.fileName}
+              autocomplete='off'
+              onInput={(e) => setSettings('fileName', e.target.value)}
+            />
+            <p>.{convertToExtension(settings.exportOptions.format)}</p>
+          </div>
         </div>
       </div>
 
@@ -276,8 +299,16 @@ const ExportContent: Component = () => {
                 <input
                   class={exportDialogCustomScaleInput}
                   type='number'
-                  onInput={(e) => setCustomScale(Number(e.target.value))}
-                  min={0.1}
+                  onInput={(e) => {
+                    let roundedValue = Math.floor(Number(e.target.value));
+                    if (roundedValue < 1) roundedValue = 1;
+                    if (roundedValue > 20) roundedValue = 20;
+                    if (e.target.value.trim() === '') e.target.value = ``;
+                    else e.target.value = `${roundedValue}`;
+                    setCustomScale(roundedValue);
+                  }}
+                  value={customScale()}
+                  min={1}
                   max={20}
                   maxLength={2}
                 />

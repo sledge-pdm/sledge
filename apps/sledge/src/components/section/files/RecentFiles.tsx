@@ -1,6 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Component, For, Show } from 'solid-js';
 import FileItem from '~/components/section/files/item/FileItem';
+import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
 import { fileStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -42,7 +43,7 @@ const RecentFiles: Component = () => {
                 onClick={() => {
                   if (!location.path || !location.name) return;
 
-                  const ext = ['sledge', 'png', 'jpg', 'jpeg'];
+                  const ext = ['sledge', ...importableFileExtensions];
                   if (ext.some((e) => location.name?.endsWith(`.${e}`))) {
                     openExistingProject(location);
                   } else {

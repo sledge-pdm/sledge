@@ -1,7 +1,7 @@
 import { color } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation, useSearchParams } from '@solidjs/router';
-import { UnlistenFn } from '@tauri-apps/api/event';
+import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -14,11 +14,14 @@ import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit, changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { loadToolPresets, setLocation } from '~/features/config';
+import { addToImagePool } from '~/features/image_pool';
 import { AutoSaveManager } from '~/features/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/features/io/config/load';
+import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { importImageFromPath } from '~/features/io/image/in/import';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { loadProjectJson } from '~/features/io/project/in/load';
+import { openExistingProject } from '~/features/io/window';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
@@ -26,7 +29,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
-import { join } from '~/utils/FileUtils';
+import { join, pathToFileLocation } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
 import { getOpenLocation, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
@@ -175,6 +178,18 @@ export default function Editor() {
     if (import.meta.hot) {
       window.location.reload();
     }
+  });
+
+  listen('tauri://drag-drop', async (e: any) => {
+    const paths = e.payload.paths as string[];
+    addToImagePool(paths.filter((p) => importableFileExtensions.some((ext) => p.endsWith(`.${ext}`))));
+
+    paths
+      .filter((p) => p.endsWith('.sledge'))
+      .forEach((p) => {
+        const loc = pathToFileLocation(p);
+        if (loc) openExistingProject(loc);
+      });
   });
 
   return (

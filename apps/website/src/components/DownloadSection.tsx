@@ -102,17 +102,17 @@ const downloadButton = css`
 
 const otherDownloadsText = css`
   width: fit-content;
-  font-family: k12x8;
   font-size: 8px;
   letter-spacing: 0px;
-  margin-top: 16px;
-  color: var(--color-muted);
-  opacity: 0.5;
+  margin-top: 12px;
+  color: var(--color-active);
   text-decoration: none;
+  align-self: flex-end;
+  opacity: 0.1;
   @media (any-hover: hover) {
     &:hover {
       color: var(--color-active);
-      text-decoration: none;
+      opacity: 0.4;
     }
   }
 `;
@@ -280,7 +280,7 @@ const DownloadSection: Component<{}> = () => {
               'align-items': 'center',
               filter: `drop-shadow(0 3px 5px ${isLight() ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.2)'})`,
               'margin-bottom': '24px',
-              'margin-top': '16px',
+              'margin-top': '8px',
             }}
           >
             <img class={pageImage} src={imageSrc()} />

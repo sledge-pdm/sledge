@@ -1,53 +1,85 @@
+import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
 import { Component, JSX } from 'solid-js';
-import { globalStore } from '~/store/GlobalStore';
-import { flexRow, heroHeading, pageImage, pageRoot, subHeading } from '~/styles';
+import DownloadSection from '~/components/DownloadSection';
+import { pageRoot } from '~/styles';
+
+const mainText = css`
+  font-size: 16px;
+  font-family: k12x8;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  letter-spacing: 0px;
+`;
 
 export function About() {
-  const imageSrc = () => {
-    switch (globalStore.theme) {
-      case 'light':
-      default:
-        return './0827sledge_light.png';
-      case 'black':
-        return './0827sledge_black.png';
-      case 'dark':
-        return './0827sledge_dark.png';
-      case 'dark-gy-flip':
-        return './0827sledge_darkgyflip.png';
-    }
-  };
-  const isLight = () => globalStore.theme === 'light';
-
   return (
     <main class={pageRoot}>
-      <p class={heroHeading}>WHAT?</p>
-      <p class={subHeading}>Sledge is a pixel-based drawing tool.</p>
+      <DownloadSection />
 
-      <p class={heroHeading} style={{ 'margin-top': '1rem' }}>
-        WHY?
-      </p>
-      <SubHeadingWithDot>Because it's cool.</SubHeadingWithDot>
-      <SubHeadingWithDot>Because it's useful.</SubHeadingWithDot>
-      <SubHeadingWithDot>Because it's fast (maybe faster than you think).</SubHeadingWithDot>
-
-      <div
-        style={{
-          'margin-top': '2rem',
-          filter: `drop-shadow(0 5px 10px ${isLight() ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.2)'})`,
-        }}
-      >
-        <img class={pageImage} src={imageSrc()} />
+      <p class={mainText}>sledge is a drawing tool.</p>
+      <div>
+        <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
+        <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
+        <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
+        <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
+        <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
+        <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
+        <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
       </div>
     </main>
   );
 }
 
+const subHeading = css`
+  font-family: k12x8;
+  letter-spacing: 1px;
+  width: 100%;
+  line-height: 1.5;
+  color: var(--color-on-background);
+  opacity: 0.95;
+  vertical-align: middle;
+  user-select: text;
+  @media (max-width: 599px) {
+    font-size: 8px;
+  }
+`;
+
+const subHeadingContainer = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+`;
+
 const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
-    <div class={flexRow} style={{ 'align-items': 'center', gap: '6px', 'margin-bottom': '8px' }}>
+    <div class={subHeadingContainer}>
       <Icon src='/icons/misc/dot.png' base={8} color={'var(--color-on-background)'} />
-      <p class={subHeading} {...props} style={{ 'margin-bottom': 0, 'vertical-align': 'middle' }}>
+      <p class={subHeading} {...props}>
+        {props.children}
+      </p>
+    </div>
+  );
+};
+
+const SubHeadingWithCheck: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
+  return (
+    <div class={subHeadingContainer}>
+      <Icon src='/icons/misc/check_8.png' base={8} color={'var(--color-enabled)'} />
+      <p class={subHeading} {...props}>
+        {props.children}
+      </p>
+    </div>
+  );
+};
+
+const SubHeadingWithX: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
+  return (
+    <div class={subHeadingContainer}>
+      <Icon src='/icons/misc/remove.png' base={8} color={'var(--color-error)'} />
+      <p class={subHeading} {...props}>
         {props.children}
       </p>
     </div>

@@ -2,14 +2,12 @@ import { css } from '@acab/ecsstatic';
 import { applyTheme } from '@sledge/theme';
 import '@sledge/theme/src/global.css';
 import { MetaProvider } from '@solidjs/meta';
-import { Navigate, Route, Router } from '@solidjs/router';
+import { Route, Router } from '@solidjs/router';
 import { inject } from '@vercel/analytics';
 import { createEffect, onMount, Suspense, type Component } from 'solid-js';
-import Header from '~/components/Header';
 import ThemeToggle from '~/components/ThemeToggle';
-import { About } from '~/routes/about';
+import { Home } from '~/routes';
 import NotFound from '~/routes/not-found';
-import { Playground } from '~/routes/play';
 import { globalStore } from '~/store/GlobalStore';
 
 // Styles
@@ -22,11 +20,11 @@ const rootContainer = css`
   display: flex;
   flex-direction: column;
   width: auto;
-  height: 100dvh;
+  height: 100vh;
   overflow-x: hidden;
   overflow-y: visible;
   z-index: 2;
-  border-right: 1px solid var(--color-border-secondary);
+  background-color: var(--color-surface);
 
   &::-webkit-scrollbar {
     width: 2px;
@@ -38,32 +36,44 @@ const rootContainer = css`
   @media (max-width: 599px) {
     width: 100%;
     border-right: none;
+    height: auto;
   }
 `;
 
 const pageContainer = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: auto;
-  max-height: 500px;
-  box-sizing: content-box;
+  border-right: 1px solid var(--color-border-secondary);
+  background-color: var(--color-surface);
+
   @media (max-width: 599px) {
+    position: initial;
+    /* background-color: var(--color-background); */
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
     width: 100%;
+    height: fit-content;
   }
 `;
 
-const restContainer = css`
+const borderBg = css`
+  position: absolute;
   display: flex;
   flex-direction: column;
-  width: 0;
-  flex-grow: 1;
+  top: 0;
+  left: 0;
   height: 100dvh;
-  align-items: center;
-  justify-content: center;
-
-  @media (max-width: 599px) {
-    display: none;
-  }
+  width: 100dvw;
+  z-index: -1;
+  opacity: 0.2;
+  background: url(/icons/misc/tex_45border_16.png) left top;
+  background-repeat: repeat;
+  background-size: 16px 16px;
 `;
 
 const themeArea = css`
@@ -101,18 +111,14 @@ const rightBottomArea = css`
 `;
 
 const App: Component = () => {
-  const applyThemeToHtml = () => {
-    applyTheme(globalStore.theme);
-  };
-
   onMount(() => {
     inject();
-    applyThemeToHtml();
+    applyTheme(globalStore.theme);
   });
 
   createEffect(() => {
     localStorage.setItem('theme', globalStore.theme);
-    applyThemeToHtml();
+    applyTheme(globalStore.theme);
   });
 
   return (
@@ -123,46 +129,14 @@ const App: Component = () => {
 
           <Suspense>
             <div
-              class={flexRow}
+              class={rootContainer}
               style={{
-                width: '100%',
-                height: '100dvh',
-                'background-color': 'var(--color-surface)',
+                'overflow-x': 'hidden',
+                'overflow-y': 'auto',
               }}
             >
-              <div
-                class={rootContainer}
-                style={{
-                  'overflow-x': 'hidden',
-                  'overflow-y': 'auto',
-                  'background-color': 'var(--color-surface)',
-                }}
-              >
-                <Header />
+              <div class={borderBg} />
 
-                <div class={pageContainer}>{props.children}</div>
-              </div>
-
-              <div class={restContainer}>
-                {/* <p>Playground or Descripting matters goes here.</p> */}
-
-                <div
-                  style={{
-                    opacity: 0.2,
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                    background: 'url(/icons/misc/tex_45border_16.png) left top',
-                    'background-repeat': 'repeat',
-                    'background-size': '16px 16px',
-                    'z-index': 0,
-                  }}
-                />
-              </div>
-
-              {/* floating UI elements */}
               <div class={themeArea}>
                 <ThemeToggle noBackground={false} />
               </div>
@@ -177,14 +151,14 @@ const App: Component = () => {
                   2025 sledge all rights reserved.
                 </p>
               </div>
+
+              <div class={pageContainer}>{props.children}</div>
             </div>
           </Suspense>
         </MetaProvider>
       )}
     >
-      <Route path='/' component={() => <Navigate href={'/about'} />} />
-      <Route path='/about' component={About} />
-      <Route path='/play' component={Playground} />
+      <Route path='/' component={Home} />
       <Route path='*' component={NotFound} />
     </Router>
   );

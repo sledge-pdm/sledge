@@ -1,32 +1,59 @@
 import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
-import { Component, JSX } from 'solid-js';
-import DownloadSection from '~/components/DownloadSection';
+import { Component, JSX, Show } from 'solid-js';
+import DownloadSection from '~/components/top/DownloadSection';
+import Header from '~/components/top/Header';
+import PageImage from '~/components/top/PageImage';
 import { pageRoot } from '~/styles';
+import { useReleaseData } from '~/utils/useReleaseData';
 
 const mainText = css`
   font-size: 16px;
-  font-family: k12x8;
+  font-family: ZFB21;
+  text-transform: uppercase;
   margin-top: 24px;
-  margin-bottom: 8px;
   letter-spacing: 0px;
+  line-height: 1.2;
 `;
 
-export function About() {
+const pageImageContainer = css`
+  margin-bottom: 24px;
+  margin-top: 24px;
+`;
+
+const sectionContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export function Home() {
+  const releaseData = useReleaseData();
+
   return (
     <main class={pageRoot}>
-      <DownloadSection />
+      <Show when={!releaseData.isLoading()} fallback={<p>Loading...</p>}>
+        <Header releaseData={releaseData} />
 
-      <p class={mainText}>sledge is a drawing tool.</p>
-      <div>
-        <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
-        <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
-        <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
-        <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
-      </div>
+        <div class={pageImageContainer}>
+          <PageImage />
+        </div>
+
+        <DownloadSection releaseData={releaseData} />
+
+        <div class={sectionContainer}>
+          <p class={mainText}>...is a Drawing Tool.</p>
+          <div>
+            <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
+            <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
+            <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
+          </div>
+        </div>
+      </Show>
     </main>
   );
 }
@@ -37,7 +64,6 @@ const subHeading = css`
   width: 100%;
   line-height: 1.5;
   color: var(--color-on-background);
-  opacity: 0.95;
   vertical-align: middle;
   user-select: text;
   @media (max-width: 599px) {

@@ -17,9 +17,11 @@ import { loadToolPresets, setLocation } from '~/features/config';
 import { addToImagePool } from '~/features/image_pool';
 import { AutoSaveManager } from '~/features/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/features/io/config/load';
+import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { importImageFromPath } from '~/features/io/image/in/import';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { loadProjectJson } from '~/features/io/project/in/load';
+import { openExistingProject } from '~/features/io/window';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
@@ -27,7 +29,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
-import { join } from '~/utils/FileUtils';
+import { join, pathToFileLocation } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
 import { getOpenLocation, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
@@ -179,9 +181,15 @@ export default function Editor() {
   });
 
   listen('tauri://drag-drop', async (e: any) => {
-    console.log(e);
     const paths = e.payload.paths as string[];
-    addToImagePool(paths);
+    addToImagePool(paths.filter((p) => importableFileExtensions.some((ext) => p.endsWith(`.${ext}`))));
+
+    paths
+      .filter((p) => p.endsWith('.sledge'))
+      .forEach((p) => {
+        const loc = pathToFileLocation(p);
+        if (loc) openExistingProject(loc);
+      });
   });
 
   return (

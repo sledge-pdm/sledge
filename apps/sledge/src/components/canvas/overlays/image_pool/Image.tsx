@@ -136,6 +136,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
+        selectEntry(props.entry.id);
         const showHideItem: MenuListOption = stateStore.visible
           ? {
               ...ContextMenuItems.BaseImageHide,

@@ -1,8 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createSignal, onMount } from 'solid-js';
-import SideBarMenu from '~/components/HeaderMenu';
-import TypewriterText from '~/components/TypewriterText';
 
 // Styles
 const headerRoot = css`
@@ -18,7 +16,6 @@ const headerRoot = css`
   padding: 3rem 0 0.25rem 0;
   margin-bottom: 3rem;
   background-color: var(--color-background);
-  border-bottom: 1px solid var(--color-border-secondary);
   z-index: 10;
   @media (max-width: 599px) {
     justify-content: auto;
@@ -46,23 +43,6 @@ const sledgeText = css`
   margin-bottom: 6px;
   @media (max-width: 400px) {
     font-size: 32px;
-  }
-`;
-
-const flavorTextContainer = css`
-  display: flex;
-  flex-direction: column;
-  height: 24px;
-`;
-
-const flavorText = css`
-  font-family: k12x8;
-  font-size: 8px;
-  color: var(--color-active);
-  font-style: italic;
-  @media (max-width: 599px) {
-    font-size: 12px;
-    margin-bottom: 0.25rem;
   }
 `;
 
@@ -118,18 +98,16 @@ const Header: Component = () => {
   });
 
   return (
-    <header class={headerRoot}>
-      <div class={headerContentContainer}>
-        <p class={sledgeText}>SLEDGE.</p>
-        <div class={flavorTextContainer}>
-          <TypewriterText class={flavorText} text={flavor()} durationPerCharacter={60} />
-        </div>
-      </div>
+    // <header class={headerRoot}>
+    //   <div class={headerContentContainer}>
+    //     <p class={sledgeText}>SLEDGE.</p>
+    //   </div>
 
-      <div class={menuContainer}>
-        <SideBarMenu />
-      </div>
-    </header>
+    //   {/* <div class={menuContainer}>
+    //     <SideBarMenu />
+    //   </div> */}
+    // </header>
+    <></>
   );
 };
 

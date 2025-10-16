@@ -15,13 +15,15 @@ export const flexCol = css`
 export const pageRoot = css`
   display: flex;
   flex-direction: column;
-  width: 380px;
-  padding: 0 4rem 3rem 3rem;
+  width: 320px;
+  padding: 3rem 3.5rem 3rem 3.5rem;
+  gap: 16px;
+  background-color: var(--color-surface);
 
   @media (max-width: 599px) {
     box-sizing: border-box;
     width: 100%;
-    padding: 0 2rem 3rem 2rem;
+    padding: 3rem 2rem 6rem 2rem;
   }
 `;
 
@@ -49,20 +51,6 @@ export const heroHeading = css`
   }
 `;
 
-export const subHeading = css`
-  font-family: k12x8;
-  font-size: 8px;
-  letter-spacing: 1px;
-  width: 100%;
-  line-height: 1.6;
-  margin-bottom: 16px;
-  color: var(--color-on-background);
-  opacity: 0.95;
-  @media (max-width: 599px) {
-    font-size: 8px;
-  }
-`;
-
 // Common component styles
 export const sectionContainer = css`
   display: flex;
@@ -86,11 +74,11 @@ export const sectionImage = css`
 
 export const pageImage = css`
   width: 100%;
+  max-width: 95%;
   height: auto;
   object-fit: cover;
   object-position: 0 0;
-  border: 1px solid var(--color-muted);
-  border-radius: 8px;
+  border: 1px solid var(--color-border-secondary);
   image-rendering: auto;
 `;
 

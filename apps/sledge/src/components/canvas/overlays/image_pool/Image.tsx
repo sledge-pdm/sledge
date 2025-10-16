@@ -74,12 +74,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       }
     };
 
-    const canvasArea = document.getElementById('canvas-area');
-    if (canvasArea) canvasArea.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
 
     () => {
-      const canvasArea = document.getElementById('canvas-area');
-      if (canvasArea) canvasArea.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
       if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
       entryInteract?.removeInteractListeners();
     };

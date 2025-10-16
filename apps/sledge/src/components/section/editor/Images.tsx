@@ -1,11 +1,12 @@
 import { css } from '@acab/ecsstatic';
 import { Checkbox } from '@sledge/ui';
-import { Component, createMemo, Show } from 'solid-js';
+import { Component, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/item/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
 import { addToImagePool, getEntries, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { eventBus } from '~/utils/EventBus';
 import { sectionContent } from '../SectionStyles';
 
 const gridContainer = css`
@@ -29,6 +30,18 @@ const Images: Component<{}> = () => {
   const selectedEntry = createMemo<ImagePoolEntry | undefined>(() =>
     imagePoolStore.selectedEntryId ? getEntry(imagePoolStore.selectedEntryId) : undefined
   );
+  const [entries, setEntries] = createSignal(getEntries());
+
+  const handleEntriesChanged = (e: { newEntries: ReturnType<typeof getEntries> }) => {
+    setEntries([...e.newEntries]);
+  };
+
+  onMount(() => {
+    eventBus.on('imagePool:entriesChanged', handleEntriesChanged);
+  });
+  onCleanup(() => {
+    eventBus.off('imagePool:entriesChanged', handleEntriesChanged);
+  });
 
   return (
     <SectionItem
@@ -54,7 +67,7 @@ const Images: Component<{}> = () => {
       ]}
     >
       <div class={sectionContent}>
-        <Show when={getEntries().length > 0} fallback={<p class={noImageText}>no images</p>}>
+        <Show when={entries().length > 0} fallback={<p class={noImageText}>no images</p>}>
           <div class={gridContainer}>
             {/* <ImagePoolList /> */}
             <ImagePoolGrid />

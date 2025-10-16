@@ -1,7 +1,7 @@
 import { color } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
 import { useLocation, useSearchParams } from '@solidjs/router';
-import { UnlistenFn } from '@tauri-apps/api/event';
+import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -14,6 +14,7 @@ import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit, changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { loadToolPresets, setLocation } from '~/features/config';
+import { addToImagePool } from '~/features/image_pool';
 import { AutoSaveManager } from '~/features/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { importImageFromPath } from '~/features/io/image/in/import';
@@ -175,6 +176,12 @@ export default function Editor() {
     if (import.meta.hot) {
       window.location.reload();
     }
+  });
+
+  listen('tauri://drag-drop', async (e: any) => {
+    console.log(e);
+    const paths = e.payload.paths as string[];
+    addToImagePool(paths);
   });
 
   return (

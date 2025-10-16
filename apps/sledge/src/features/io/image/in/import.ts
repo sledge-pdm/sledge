@@ -7,6 +7,9 @@ import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import { join, pathToFileLocation } from '~/utils/FileUtils';
 
+export const importableFileExtensions = ['png', 'jpg', 'webp'] as const;
+export type ImportableFileExtensions = (typeof importableFileExtensions)[number];
+
 export async function importImageFromPath(location: FileLocation): Promise<boolean> {
   if (!location || !location.path || !location.name) {
     console.log('Invalid file location');

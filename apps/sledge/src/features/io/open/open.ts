@@ -1,5 +1,6 @@
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
+import { importableFileExtensions } from '~/features/io/image/in/import';
 
 export async function openNewFile(): Promise<string | undefined> {
   const home = await path.homeDir();
@@ -10,7 +11,7 @@ export async function openNewFile(): Promise<string | undefined> {
     filters: [
       {
         name: 'all files.',
-        extensions: ['sledge', 'jpg', 'png'],
+        extensions: ['sledge', ...importableFileExtensions],
       },
       {
         name: 'sledge files.',
@@ -18,7 +19,7 @@ export async function openNewFile(): Promise<string | undefined> {
       },
       {
         name: 'image files.',
-        extensions: ['jpg', 'png'],
+        extensions: [...importableFileExtensions],
       },
     ],
   });

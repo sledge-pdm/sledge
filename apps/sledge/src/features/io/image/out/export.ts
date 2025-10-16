@@ -7,10 +7,11 @@ import { setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { join } from '~/utils/FileUtils';
 
-export type ExportableFileTypes = 'png' | 'jpg' | 'svg';
+export const exportableFileExtensions = ['png', 'jpg', 'webp', 'svg'] as const;
+export type ExportableFileExtensions = (typeof exportableFileExtensions)[number];
 
 export interface CanvasExportOptions {
-  format: ExportableFileTypes;
+  format: ExportableFileExtensions;
   quality?: number; // jpeg 時の品質 0～1, png のときは無視
   scale: number; // 1（そのまま）～10 など
 }
@@ -28,6 +29,8 @@ export async function exportImage(dirPath: string, fileName: string, options: Ca
   let canvasBlob: Blob | undefined;
   if (options.format === 'svg') {
     canvasBlob = await getSVGBlob(options);
+  } else if (options.format === 'webp') {
+    canvasBlob = await getImageBlob(options);
   } else {
     canvasBlob = await getImageBlob(options);
   }
@@ -62,13 +65,15 @@ export async function getImageBlob(options: CanvasExportOptions): Promise<Blob |
     target = scaled;
   }
 
+  let mimeType: string = format;
+  if (format === 'jpg') mimeType = 'jpeg';
   return new Promise<Blob>((resolve, reject) => {
     target.toBlob(
       (blob) => {
         if (blob) resolve(blob);
         else reject(new Error('toBlob returned null'));
       },
-      `image/${format === 'jpg' ? 'jpeg' : 'png'}`,
+      `image/${mimeType}`,
       quality
     );
   });

@@ -7,7 +7,13 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
-import { CanvasExportOptions, defaultExportDir, ExportableFileTypes, exportImage } from '~/features/io/image/out/export';
+import {
+  CanvasExportOptions,
+  defaultExportDir,
+  exportableFileExtensions,
+  ExportableFileExtensions,
+  exportImage,
+} from '~/features/io/image/out/export';
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -15,13 +21,13 @@ import { accentedButton, flexCol } from '~/styles/styles';
 import { getFileNameWithoutExtension, join } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
-const exportDialogField = css`
+const qualityField = css`
   display: flex;
   flex-direction: column;
   max-width: 400px;
 `;
 
-const exportDialogFieldDisabled = css`
+const qualityFieldDisabled = css`
   display: flex;
   flex-direction: column;
   max-width: 400px;
@@ -94,11 +100,6 @@ const estimatedSize = css`
   width: fit-content;
 `;
 
-const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = [
-  { label: 'png', value: 'png' },
-  { label: 'jpeg', value: 'jpg' },
-  { label: 'svg', value: 'svg' },
-];
 const scaleOptions: DropdownOption<number>[] = [
   { label: 'x1', value: 1 },
   { label: 'x2', value: 2 },
@@ -106,6 +107,8 @@ const scaleOptions: DropdownOption<number>[] = [
   { label: 'x10', value: 10 },
   { label: 'CUSTOM', value: 0 },
 ];
+
+const qualityMutableExtensions: Partial<ExportableFileExtensions>[] = ['webp', 'jpg'];
 
 export interface ExportSettings {
   dirPath?: string;
@@ -115,6 +118,13 @@ export interface ExportSettings {
 }
 
 const ExportContent: Component = () => {
+  const fileTypeOptions: DropdownOption<ExportableFileExtensions>[] = exportableFileExtensions.map((ext) => {
+    return {
+      label: ext,
+      value: ext,
+    };
+  });
+
   const nameWithoutExtension = () => getFileNameWithoutExtension(fileStore.savedLocation.name);
 
   const [settings, setSettings] = createStore<ExportSettings>({
@@ -244,7 +254,10 @@ const ExportContent: Component = () => {
         </div>
       </div>
 
-      <div class={settings.exportOptions.format === 'jpg' ? exportDialogField : exportDialogFieldDisabled} style={{ 'flex-grow': 1 }}>
+      <div
+        class={qualityMutableExtensions.includes(settings.exportOptions.format) ? qualityField : qualityFieldDisabled}
+        style={{ 'flex-grow': 1 }}
+      >
         <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
           Quality.
         </p>

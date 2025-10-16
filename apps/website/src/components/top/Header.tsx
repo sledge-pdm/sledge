@@ -11,7 +11,7 @@ const flexRow = css`
 const versionInfoSledge = css`
   font-family: ZFB31;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0px;
   font-size: 36px;
 `;
 const versionInfoText = css`

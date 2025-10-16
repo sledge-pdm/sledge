@@ -38,7 +38,7 @@ const PageImage: Component = () => {
         filter: `drop-shadow(0 3px 10px ${isLight() ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'})`,
       }}
     >
-      <img class={pageImage} src={imageSrc()} />
+      <img class={pageImage} src={imageSrc()} loading={'lazy'} />
     </div>
   );
 };

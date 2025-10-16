@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
-import { Component, JSX } from 'solid-js';
+import { Component, JSX, Show } from 'solid-js';
 import DownloadSection from '~/components/top/DownloadSection';
 import Header from '~/components/top/Header';
 import PageImage from '~/components/top/PageImage';
@@ -32,26 +32,28 @@ export function Home() {
 
   return (
     <main class={pageRoot}>
-      <Header releaseData={releaseData} />
+      <Show when={!releaseData.isLoading()} fallback={<p>Loading...</p>}>
+        <Header releaseData={releaseData} />
 
-      <div class={pageImageContainer}>
-        <PageImage />
-      </div>
-
-      <DownloadSection releaseData={releaseData} />
-
-      <div class={sectionContainer}>
-        <p class={mainText}>...is a Drawing Tool.</p>
-        <div>
-          <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
-          <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
-          <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
-          <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
-          <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
-          <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
-          <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
+        <div class={pageImageContainer}>
+          <PageImage />
         </div>
-      </div>
+
+        <DownloadSection releaseData={releaseData} />
+
+        <div class={sectionContainer}>
+          <p class={mainText}>...is a Drawing Tool.</p>
+          <div>
+            <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
+            <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
+            <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
+          </div>
+        </div>
+      </Show>
     </main>
   );
 }

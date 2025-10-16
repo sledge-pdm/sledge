@@ -1,31 +1,47 @@
 import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge/ui';
 import { Component, JSX } from 'solid-js';
-import DownloadSection from '~/components/DownloadSection';
-import Header from '~/components/Header';
-import PageImage from '~/components/PageImage';
+import DownloadSection from '~/components/top/DownloadSection';
+import Header from '~/components/top/Header';
+import PageImage from '~/components/top/PageImage';
 import { pageRoot } from '~/styles';
 import { useReleaseData } from '~/utils/useReleaseData';
 
 const mainText = css`
   font-size: 16px;
-  font-family: ZFB11;
-  margin-top: 16px;
+  font-family: ZFB21;
+  text-transform: uppercase;
+  margin-top: 24px;
   letter-spacing: 0px;
   line-height: 1.2;
 `;
 
-export function About() {
+const pageImageContainer = css`
+  margin-bottom: 24px;
+  margin-top: 24px;
+`;
+
+const sectionContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export function Home() {
   const releaseData = useReleaseData();
 
   return (
     <main class={pageRoot}>
       <Header releaseData={releaseData} />
-      <PageImage />
+
+      <div class={pageImageContainer}>
+        <PageImage />
+      </div>
+
       <DownloadSection releaseData={releaseData} />
 
-      <div style={{ display: 'flex', 'flex-direction': 'column', gap: '16px' }}>
-        <p class={mainText}>A Drawing Tool w/</p>
+      <div class={sectionContainer}>
+        <p class={mainText}>...is a Drawing Tool.</p>
         <div>
           <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
           <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
@@ -46,7 +62,6 @@ const subHeading = css`
   width: 100%;
   line-height: 1.5;
   color: var(--color-on-background);
-  opacity: 0.95;
   vertical-align: middle;
   user-select: text;
   @media (max-width: 599px) {
@@ -60,7 +75,6 @@ const subHeadingContainer = css`
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
-  margin-left: 8px;
 `;
 
 const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {

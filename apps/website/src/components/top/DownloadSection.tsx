@@ -11,7 +11,6 @@ const flexCol = css`
 `;
 const informationContainer = css`
   width: 100%;
-  background-color: var(--color-surface);
   color: var(--color-on-background);
   margin-top: 16px;
 `;
@@ -22,7 +21,7 @@ const informationLabel = css`
   white-space: pre;
   font-size: 8px;
   margin-bottom: 8px;
-  color: var(--color-accent);
+  color: var(--color-active);
 `;
 const informationText = css`
   user-select: text;
@@ -41,20 +40,6 @@ const loadingText = css`
   }
 `;
 
-const assetText = css`
-  width: fit-content;
-  font-family: ZFB03;
-  font-size: 8px;
-  opacity: 0.2;
-  margin-top: 8px;
-  overflow: hidden;
-  white-space: normal;
-  word-wrap: break-word;
-  word-break: break-all;
-  user-select: text;
-  text-align: end;
-`;
-
 const downloadsContainer = css`
   display: flex;
   flex-direction: column;
@@ -68,10 +53,13 @@ const downloadButton = css`
   border-width: 1px;
   border-radius: 4px;
   background-color: var(--color-button-bg);
-  border-color: var(--color-active);
-  color: var(--color-active);
+  border-color: var(--color-enabled);
+  color: var(--color-enabled);
   @media (any-hover: hover) {
     &:hover {
+      background-color: var(--color-enabled);
+      border-color: var(--color-enabled);
+      color: var(--color-background);
     }
   }
 `;
@@ -81,14 +69,15 @@ const otherDownloadsText = css`
   font-size: 8px;
   letter-spacing: 0px;
   margin-top: 12px;
-  color: var(--color-active);
+  color: var(--color-enabled);
   text-decoration: none;
   align-self: flex-end;
-  opacity: 0.05;
+  opacity: 0.3;
+
   @media (any-hover: hover) {
     &:hover {
-      color: var(--color-active);
-      opacity: 0.4;
+      color: var(--color-enabled);
+      opacity: 0.6;
     }
   }
 `;
@@ -131,6 +120,34 @@ const DownloadSection: Component<{
     </div>
   );
 };
+
+const assetOSText = css`
+  width: fit-content;
+  font-family: ZFB03;
+  font-size: 8px;
+  opacity: 0.5;
+  margin-top: 8px;
+  overflow: hidden;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-all;
+  user-select: text;
+  text-align: end;
+`;
+
+const assetNameText = css`
+  width: fit-content;
+  font-family: ZFB03;
+  font-size: 8px;
+  opacity: 0.3;
+  overflow: hidden;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-all;
+  user-select: text;
+  text-align: end;
+`;
+
 const DownloadButton: Component<{
   os: os;
   assetItem: {
@@ -165,11 +182,8 @@ const DownloadButton: Component<{
         <Icon src='/icons/misc/save.png' base={8} style={{ width: '16px', height: '16px', 'margin-bottom': '-4px' }} />
         Download
       </Button>
-      <p class={assetText}>
-        For {os}
-        <br />
-        {asset.name}
-      </p>
+      <p class={assetOSText}>For {os}</p>
+      <p class={assetNameText}>{asset.name}</p>
     </div>
   );
 };

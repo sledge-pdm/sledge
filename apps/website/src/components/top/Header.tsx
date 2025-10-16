@@ -12,11 +12,13 @@ const versionInfoSledge = css`
   font-family: ZFB31;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-size: 24px;
+  font-size: 36px;
 `;
 const versionInfoText = css`
   font-family: ZFB09;
   font-size: 8px;
+  font-style: italic;
+  letter-spacing: 1.5px;
 `;
 
 const headerText = css`

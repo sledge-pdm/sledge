@@ -4,12 +4,12 @@ import { globalStore } from '~/store/GlobalStore';
 
 export const pageImage = css`
   width: 100%;
-  max-width: 100%;
+  max-width: 95%;
   height: auto;
   object-fit: cover;
   object-position: 0 0;
   border-radius: 3px;
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--color-border);
   image-rendering: auto;
 `;
 
@@ -30,20 +30,16 @@ const PageImage: Component = () => {
   const isLight = () => globalStore.theme === 'light';
 
   return (
-    <>
-      <div
-        style={{
-          display: 'flex',
-          'flex-direction': 'column',
-          'align-items': 'center',
-          filter: `drop-shadow(0 3px 5px ${isLight() ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.2)'})`,
-          'margin-bottom': '24px',
-          'margin-top': '8px',
-        }}
-      >
-        <img class={pageImage} src={imageSrc()} />
-      </div>
-    </>
+    <div
+      style={{
+        display: 'flex',
+        'flex-direction': 'column',
+        'align-items': 'center',
+        filter: `drop-shadow(0 3px 10px ${isLight() ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'})`,
+      }}
+    >
+      <img class={pageImage} src={imageSrc()} />
+    </div>
   );
 };
 

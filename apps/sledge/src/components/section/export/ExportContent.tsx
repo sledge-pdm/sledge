@@ -7,13 +7,8 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
-import {
-  CanvasExportOptions,
-  defaultExportDir,
-  exportableFileExtensions,
-  ExportableFileExtensions,
-  exportImage,
-} from '~/features/io/image/out/export';
+import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
+import { CanvasExportOptions, defaultExportDir, exportImage } from '~/features/io/image/out/export';
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -108,7 +103,7 @@ const scaleOptions: DropdownOption<number>[] = [
   { label: 'CUSTOM', value: 0 },
 ];
 
-const qualityMutableExtensions: Partial<ExportableFileExtensions>[] = ['webp', 'jpg'];
+const qualityMutableExtensions: Partial<ExportableFileTypes>[] = ['webp_lossy', 'jpeg'];
 
 export interface ExportSettings {
   dirPath?: string;
@@ -118,10 +113,10 @@ export interface ExportSettings {
 }
 
 const ExportContent: Component = () => {
-  const fileTypeOptions: DropdownOption<ExportableFileExtensions>[] = exportableFileExtensions.map((ext) => {
+  const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = exportableFileTypes.map((type) => {
     return {
-      label: ext,
-      value: ext,
+      label: convertToLabel(type) ?? '[unknown]',
+      value: type,
     };
   });
 
@@ -162,7 +157,7 @@ const ExportContent: Component = () => {
     const name = settings.fileName;
     if (name === undefined) return;
     if (settings.dirPath) {
-      const filePath = join(settings.dirPath, `${name}.${settings.exportOptions.format}`);
+      const filePath = join(settings.dirPath, `${name}.${convertToExtension(settings.exportOptions.format)}`);
       if (await exists(filePath)) {
         const ok = await confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
           kind: 'info',
@@ -254,10 +249,7 @@ const ExportContent: Component = () => {
         </div>
       </div>
 
-      <div
-        class={qualityMutableExtensions.includes(settings.exportOptions.format) ? qualityField : qualityFieldDisabled}
-        style={{ 'flex-grow': 1 }}
-      >
+      <div class={qualityMutableExtensions.includes(settings.exportOptions.format) ? qualityField : qualityFieldDisabled} style={{ 'flex-grow': 1 }}>
         <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
           Quality.
         </p>

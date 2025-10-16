@@ -1,6 +1,6 @@
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
-import { importableFileExtensions } from '~/features/io/image/in/import';
+import { importableFileExtensions } from '~/features/io/FileExtensions';
 
 export async function openNewFile(): Promise<string | undefined> {
   const home = await path.homeDir();

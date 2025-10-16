@@ -1,17 +1,16 @@
+import { rawToWebp } from '@sledge/anvil';
 import { FileLocation } from '@sledge/core';
 import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { convertToExtension, convertToMimetype as convertToMimeType, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { join } from '~/utils/FileUtils';
 
-export const exportableFileExtensions = ['png', 'jpg', 'webp', 'svg'] as const;
-export type ExportableFileExtensions = (typeof exportableFileExtensions)[number];
-
 export interface CanvasExportOptions {
-  format: ExportableFileExtensions;
+  format: ExportableFileTypes;
   quality?: number; // jpeg 時の品質 0～1, png のときは無視
   scale: number; // 1（そのまま）～10 など
 }
@@ -29,15 +28,20 @@ export async function exportImage(dirPath: string, fileName: string, options: Ca
   let canvasBlob: Blob | undefined;
   if (options.format === 'svg') {
     canvasBlob = await getSVGBlob(options);
-  } else if (options.format === 'webp') {
-    canvasBlob = await getImageBlob(options);
+  } else if ((options.format = 'webp_lossless')) {
+    if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
+    const buffer = webGLRenderer.readPixelsFlipped();
+    const webpBuffer = rawToWebp(new Uint8Array(buffer.buffer), canvasStore.canvas.width, canvasStore.canvas.height);
+    canvasBlob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });
   } else {
     canvasBlob = await getImageBlob(options);
   }
 
-  if (canvasBlob === undefined) return undefined;
+  if (canvasBlob === undefined) throw new Error('Export Error: Failed to create canvas image.');
 
-  return await saveBlobViaTauri(canvasBlob, dirPath, `${fileName}.${options.format}`);
+  const ext = convertToExtension(options.format);
+
+  return await saveBlobViaTauri(canvasBlob, dirPath, `${fileName}.${ext}`);
 }
 
 export async function getImageBlob(options: CanvasExportOptions): Promise<Blob | undefined> {
@@ -65,15 +69,18 @@ export async function getImageBlob(options: CanvasExportOptions): Promise<Blob |
     target = scaled;
   }
 
-  let mimeType: string = format;
-  if (format === 'jpg') mimeType = 'jpeg';
+  const mimeType = convertToMimeType(format);
+
+  if (!mimeType) {
+    throw new Error('Export Error: Mime Type not found.');
+  }
   return new Promise<Blob>((resolve, reject) => {
     target.toBlob(
       (blob) => {
         if (blob) resolve(blob);
-        else reject(new Error('toBlob returned null'));
+        else reject(new Error('Export Error: toBlob returned null'));
       },
-      `image/${mimeType}`,
+      mimeType,
       quality
     );
   });

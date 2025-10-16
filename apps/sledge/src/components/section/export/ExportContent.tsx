@@ -145,7 +145,9 @@ const ExportContent: Component = () => {
   };
 
   const requestExport = async () => {
-    if (settings.exportOptions.scale === 0) return;
+    if (finalScale() === 0) return;
+
+    setSettings('exportOptions', 'scale', finalScale());
 
     const name = settings.fileName;
     if (name === undefined) return;

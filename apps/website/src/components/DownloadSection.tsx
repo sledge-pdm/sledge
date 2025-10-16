@@ -70,7 +70,7 @@ const assetText = css`
   width: fit-content;
   font-family: k12x8;
   font-size: 8px;
-  opacity: 0.1;
+  opacity: 0.2;
   line-height: 1.5;
   overflow: hidden;
   white-space: normal;
@@ -105,6 +105,7 @@ const otherDownloadsText = css`
   font-family: k12x8;
   font-size: 8px;
   letter-spacing: 0px;
+  margin-top: 16px;
   color: var(--color-muted);
   opacity: 0.5;
   text-decoration: none;
@@ -293,9 +294,6 @@ const DownloadSection: Component<{}> = () => {
               <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} type='main' />}</For>
             </div>
           </Show>
-          <a class={otherDownloadsText} href='https://github.com/sledge-pdm/sledge/releases'>
-            other releases
-          </a>
 
           <Show when={information()}>
             <div class={informationContainer}>
@@ -305,6 +303,10 @@ const DownloadSection: Component<{}> = () => {
               <p class={informationText}>{information()}</p>
             </div>
           </Show>
+
+          <a class={otherDownloadsText} href='https://github.com/sledge-pdm/sledge/releases'>
+            other releases
+          </a>
         </div>
       </Show>
     </div>

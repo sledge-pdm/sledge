@@ -256,6 +256,8 @@ export const resetAllLayers = () => {
   layerListStore.layers.forEach((l) => {
     getAnvilOf(l.id)?.resetBuffer();
   });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Reset all layers` });
+
   adjustZoomToFit();
 };
 
@@ -304,7 +306,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) removed` });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${layerId}) removed` });
 
   if (!noDiff) {
     const act = new LayerListHistoryAction('delete', index, snapshot, undefined, undefined, { from: 'LayerService.removeLayer' });

@@ -272,7 +272,7 @@ const ExportContent: Component = () => {
           <div class={fileNameContainer}>
             <input
               class={fileNameInput}
-              placeholder='file name'
+              placeholder='image'
               value={settings.fileName}
               autocomplete='off'
               onInput={(e) => setSettings('fileName', e.target.value)}

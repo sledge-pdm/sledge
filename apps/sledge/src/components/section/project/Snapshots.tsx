@@ -19,7 +19,7 @@ const settingsContainer = css`
   display: flex;
   flex-direction: row;
   gap: 8px;
-  margin-left: 4px;
+  margin-left: 12px;
   justify-content: start;
 `;
 const buttonsContainer = css`

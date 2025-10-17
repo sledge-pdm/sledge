@@ -13,7 +13,6 @@ import {
   PerilousTab,
   ProjectTab,
   SectionTab,
-  SnapshotTab,
 } from '~/components/section/SectionTabs';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
@@ -139,8 +138,6 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         return <HistoryTab />;
       case 'project':
         return <ProjectTab />;
-      case 'snapshot':
-        return <SnapshotTab />;
       case 'export':
         return <ExportTab />;
       case 'danger':

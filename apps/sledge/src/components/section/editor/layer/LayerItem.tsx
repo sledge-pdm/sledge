@@ -4,17 +4,8 @@ import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
 import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
-import {
-  allLayers,
-  clearLayer,
-  duplicateLayer,
-  Layer,
-  mergeToBelowLayer,
-  moveLayer,
-  removeLayer,
-  setActiveLayerId,
-  setLayerName,
-} from '~/features/layer';
+import { allLayers, clearLayer, duplicateLayer, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
+import { removeLayerFromUser } from '~/features/layer/service';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
@@ -186,7 +177,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               props.layer.name,
               [
                 { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
-                { ...ContextMenuItems.BaseRemove, onSelect: () => removeLayer(layerId) },
+                { ...ContextMenuItems.BaseRemove, onSelect: async () => await removeLayerFromUser(layerId) },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },
               ],

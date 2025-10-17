@@ -51,6 +51,27 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Editor,
+    path: ['editor', 'centerCanvasOnMaximize'],
+    label: 'center canvas on window maximize',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: 'disabled', value: 'disabled' },
+        { label: 'offset only', value: 'offset' },
+        { label: 'offset+zoom', value: 'offset_zoom' },
+      ],
+    },
+    tips: `centering canvas when window maximized.`,
+  },
+  {
+    section: ConfigSections.Editor,
+    path: ['editor', 'requireConfirmBeforeLayerRemove'],
+    label: 'require confirm before removing layer',
+    component: 'ToggleSwitch',
+    tips: `require confirm before removing layer. if disabled, skip confirm.`,
+  },
+  {
+    section: ConfigSections.Editor,
     path: ['editor', 'maxHistoryItemsCount'],
     label: 'max history items count',
     component: 'Slider',

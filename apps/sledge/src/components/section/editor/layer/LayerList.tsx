@@ -5,9 +5,10 @@ import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import { projectHistoryController } from '~/features/history';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
+import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, setLayerProp } from '~/features/layer';
+import { removeLayerFromUser } from '~/features/layer/service';
 import { layerListStore } from '~/stores/ProjectStores';
-import { flexRow } from '~/styles/styles';
+import { errorButton, flexRow } from '~/styles/styles';
 import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
 import { sectionContent } from '../../SectionStyles';
@@ -16,6 +17,7 @@ import LayerItem from './LayerItem';
 
 const layerListSectionContent = css`
   padding-left: 0px;
+  gap: 6px;
 `;
 
 const configRow = css`
@@ -23,7 +25,12 @@ const configRow = css`
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+`;
+const addRemoveContainer = css`
+  display: flex;
+  flex-direction: row;
+  margin-left: auto;
+  gap: 8px;
 `;
 
 const layerList = css`
@@ -75,31 +82,32 @@ const LayerList: Component<{}> = () => {
   });
 
   return (
-    <SectionItem
-      title='layers.'
-      subHeaderIcons={[
-        {
-          src: '/icons/misc/add.png',
-          onClick: () => {
-            addLayer({ name: 'layer1' });
-            setItems(allLayers());
-          },
-        },
-        {
-          src: '/icons/misc/remove_minus.png',
-          onClick: () => {
-            const id = activeLayer()?.id;
-            if (id) {
-              // LayerListController.removeLayer already adds history; just call it
-              removeLayer(id);
-            }
-            setItems(allLayers());
-          },
-          disabled: layerListStore.layers.length <= 1,
-        },
-      ]}
-    >
+    <SectionItem title='layers.'>
       <div class={clsx(sectionContent, layerListSectionContent)}>
+        <div class={configRow}>
+          <div class={addRemoveContainer}>
+            <button
+              onClick={() => {
+                addLayer({ name: 'layer 1' });
+                setItems(allLayers());
+              }}
+            >
+              + ADD.
+            </button>
+            <button
+              class={errorButton}
+              onClick={async () => {
+                const active = activeLayer();
+                if (active) {
+                  await removeLayerFromUser(active.id);
+                }
+                setItems(allLayers());
+              }}
+            >
+              - REMOVE.
+            </button>
+          </div>
+        </div>
         <div class={configRow}>
           <div
             class={flexRow}

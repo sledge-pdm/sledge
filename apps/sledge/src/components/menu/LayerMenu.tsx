@@ -1,6 +1,7 @@
 import { IconMenuItem, Menu } from '@tauri-apps/api/menu';
 import { resolveResource } from '@tauri-apps/api/path';
-import { clearLayer, duplicateLayer, removeLayer } from '~/features/layer';
+import { clearLayer, duplicateLayer } from '~/features/layer';
+import { removeLayerFromUser } from '~/features/layer/service';
 import RightClickMenu from './RightClickMenu';
 
 export class LayerMenu extends RightClickMenu {
@@ -24,8 +25,8 @@ export class LayerMenu extends RightClickMenu {
       id: 'remove',
       text: 'remove.',
       icon: await resolveResource(dir + '/remove.png'),
-      action: () => {
-        removeLayer(layerId);
+      action: async () => {
+        await removeLayerFromUser(layerId);
       },
     });
 

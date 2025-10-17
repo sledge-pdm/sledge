@@ -4,7 +4,6 @@ import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
 import { message } from '@tauri-apps/plugin-dialog';
 import { exit } from '@tauri-apps/plugin-process';
-import { saveEmergencyBackup } from '~/features/backup';
 import { globalConfig } from '~/stores/GlobalStores';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
@@ -81,7 +80,8 @@ export async function reportAppStartupError(e: any) {
     return; // Avoid reporting the same error multiple times
   }
 
-  await saveEmergencyBackup();
+  // startup error won't affect project file
+  // await saveEmergencyBackup();
 
   console.error('Reporting startup error:', {
     message: errorMessage,

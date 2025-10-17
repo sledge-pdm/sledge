@@ -39,7 +39,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
         performUpdate();
         setNeedsUpdate(false);
       }
-    }, props.updateInterval ?? 2)
+    }, props.updateInterval ?? 10)
   );
 
   // Cache last computed dimensions to avoid unnecessary canvas resizing

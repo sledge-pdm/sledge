@@ -1,4 +1,4 @@
-import { Component, onCleanup, onMount, Show } from 'solid-js';
+import { Component, onMount, Show } from 'solid-js';
 import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './overlays/CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
@@ -95,15 +95,18 @@ const CanvasArea: Component = () => {
   let interact: CanvasAreaInteract | undefined = undefined;
 
   onMount(() => {
-    getCurrentWindow().onResized(() => {
+    const unlistenOnResized = getCurrentWindow().onResized(async (e) => {
       setInteractStore('canvasAreaSize', {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
-      if (globalConfig.editor.centerCanvasOnResize === 'offset') {
+
+      const isMaximize = await getCurrentWindow().isMaximized();
+      const flag = isMaximize ? globalConfig.editor.centerCanvasOnMaximize : globalConfig.editor.centerCanvasOnResize;
+      if (flag === 'offset') {
         centeringCanvas();
       }
-      if (globalConfig.editor.centerCanvasOnResize === 'offset_zoom') {
+      if (flag === 'offset_zoom') {
         adjustZoomToFit();
       }
     });
@@ -129,7 +132,6 @@ const CanvasArea: Component = () => {
     eventBus.on('canvas:sizeChanged', (e) => {
       interact?.updateTransform();
     });
-
     eventBus.on('canvas:onAdjusted', (e) => {
       interact?.updateTransform();
     });
@@ -140,10 +142,11 @@ const CanvasArea: Component = () => {
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();
     interact.updateTransform();
-  });
 
-  onCleanup(() => {
-    if (!import.meta.hot) interact?.removeInteractListeners();
+    return () => {
+      unlistenOnResized.then((callback) => callback());
+      if (!import.meta.hot) interact?.removeInteractListeners();
+    };
   });
 
   return (

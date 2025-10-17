@@ -8,7 +8,7 @@ export class JPEGExporter extends Exporter {
     return blob;
   }
 
-  async layerToBlob(layer: Layer, scale: number = 1): Promise<Blob> {
+  async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
     const blob = await convertLayerToBlob(layer, 'jpeg', 100, scale);
     if (!blob) throw new Error('Failed to export JPEF: blob is undefined');
     return blob;

@@ -30,7 +30,7 @@ export const sectionCaption = css`
 export const sectionSubCaption = css`
   font-family: ZFB03;
   font-size: var(--text-sm);
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
   opacity: 0.8;
 `;

@@ -1,16 +1,16 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createMemo, For } from 'solid-js';
-import ColorPicker from '~/components/section/editor/item/ColorPicker';
+import ColorPicker from '~/components/section/editor/color/ColorPicker';
 
 import { color } from '@sledge/theme';
 import { ColorBox, DropdownOption, Icon } from '@sledge/ui';
-import Palette from '~/components/section/editor/item/Palette';
+import Palette from '~/components/section/editor/color/Palette';
 import SectionItem from '~/components/section/SectionItem';
+import { sectionContent } from '~/components/section/SectionStyles';
 import { currentColor, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools/ToolController';
 import { colorStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
-import { sectionContent } from '../SectionStyles';
 
 const swatchHeader = css`
   display: flex;

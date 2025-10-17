@@ -5,7 +5,7 @@ import { Layer } from '~/features/layer';
 import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
 
 export class LosslessWebPExporter extends Exporter {
-  async canvasToBlob(quality: number = 0.92, scale: number = 1): Promise<Blob> {
+  async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
     const buffer = webGLRenderer.readPixelsFlipped();
     const scaledBuffer = getScaledBuffer(buffer, scale);

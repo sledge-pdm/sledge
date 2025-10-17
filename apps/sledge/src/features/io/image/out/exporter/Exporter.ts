@@ -30,6 +30,7 @@ export async function convertCanvasToBlob(format: 'png' | 'jpeg' | 'webp_lossy',
     );
   });
 }
+
 export async function convertLayerToBlob(
   layer: Layer,
   format: 'png' | 'jpeg' | 'webp_lossy',

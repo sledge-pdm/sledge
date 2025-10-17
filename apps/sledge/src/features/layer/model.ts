@@ -3,6 +3,7 @@
 import { DropdownOption } from '@sledge/ui';
 import { v4 } from 'uuid';
 import { hexToRGBA } from '~/features/color';
+import { layerListStore } from '~/stores/ProjectStores';
 import { BaseLayer, BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 
 // BlendMode utilities
@@ -104,17 +105,8 @@ function getTypeString(type: LayerType): string {
   }
 }
 
-/**
- * Get a unique layer name by appending a number if needed
- */
-function getNumberUniqueLayerName(baseName: string): string {
-  // Note: This function needs to be implemented based on current layer list state
-  // For now, returning the base name - will be properly implemented in service
-  return baseName;
-}
-
-export const createLayer = (props: CreateLayerProps, layerNameCheck?: (name: string) => string): Layer => {
-  const name = layerNameCheck ? layerNameCheck(props.name) : props.name;
+export const createLayer = (props: CreateLayerProps, checkUnique?: boolean): Layer => {
+  const name = checkUnique ? getNumberUniqueLayerName(props.name) : props.name;
   const id = v4();
 
   return {
@@ -128,3 +120,37 @@ export const createLayer = (props: CreateLayerProps, layerNameCheck?: (name: str
     dotMagnification: props.dotMagnification,
   };
 };
+
+/**
+ * Get a unique layer name by appending a number if needed
+ */
+function getNumberUniqueLayerName(baseName: string): string {
+  const existingNames = layerListStore.layers.map((l) => l.name);
+
+  // Extract base part and existing number from baseName
+  const match = baseName.match(/^(.+?)\s+(\d+)$/);
+  const baseNamePart = match ? match[1] : baseName;
+
+  // Find all existing numbers for this base
+  const pattern = new RegExp(`^${baseNamePart.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\s+(\\d+))?$`);
+  const existingNumbers = existingNames
+    .map((name) => {
+      const nameMatch = name.match(pattern);
+      if (!nameMatch) return null;
+      return nameMatch[1] ? parseInt(nameMatch[1], 10) : 1;
+    })
+    .filter((num) => num !== null)
+    .sort((a, b) => a - b);
+
+  // Find the next available number
+  let nextNumber = 1;
+  for (const num of existingNumbers) {
+    if (num === nextNumber) {
+      nextNumber++;
+    } else {
+      break;
+    }
+  }
+
+  return nextNumber === 1 ? baseNamePart : `${baseNamePart} ${nextNumber}`;
+}

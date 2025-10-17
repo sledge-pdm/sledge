@@ -2,11 +2,11 @@ import { spacing } from '@sledge/theme';
 import { Component, For, Show } from 'solid-js';
 import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManager';
 import SectionItem from '~/components/section/SectionItem';
+import { sectionContent } from '~/components/section/SectionStyles';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
-import { sectionContent } from '../SectionStyles';
-import ToolItem from './item/ToolItem';
+import ToolItem from './ToolItem';
 
 const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'autoSelection', 'move'];
 

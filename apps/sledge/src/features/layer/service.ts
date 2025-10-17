@@ -1,5 +1,6 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
+import { confirm } from '@tauri-apps/plugin-dialog';
 import { mergeLayer } from '~/appliers/LayerMergeApplier';
 import { adjustZoomToFit } from '~/features/canvas';
 import { RGBAColor, RGBAToHex } from '~/features/color';
@@ -13,6 +14,7 @@ import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { interactStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { changeBaseLayerColor, createLayer } from './model';
@@ -134,22 +136,7 @@ export function getCurrentPointingColorHex(): string | undefined {
 interface AddLayerOptions {
   initImage?: Uint8ClampedArray;
   noDiff?: boolean;
-}
-
-/**
- * Get a unique layer name by appending a number if needed
- */
-function getNumberUniqueLayerName(baseName: string): string {
-  const existingNames = layerListStore.layers.map((l) => l.name);
-  let counter = 1;
-  let candidateName = baseName;
-
-  while (existingNames.includes(candidateName)) {
-    candidateName = `${baseName} ${counter}`;
-    counter++;
-  }
-
-  return candidateName;
+  uniqueName?: boolean;
 }
 
 export const addLayer = (
@@ -178,8 +165,8 @@ export const addLayerTo = (
   },
   options?: AddLayerOptions
 ) => {
-  const { name = 'layer', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal } = layer;
-
+  const { name = 'layer 1', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal } = layer;
+  const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
   const newLayer = createLayer(
     {
       name,
@@ -190,7 +177,7 @@ export const addLayerTo = (
       mode,
       initImage: options?.initImage,
     },
-    getNumberUniqueLayerName
+    uniqueName
   );
 
   // Initialize anvil
@@ -285,6 +272,22 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
 interface RemoveLayerOptions {
   noDiff?: boolean;
 }
+export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
+  if (!findLayerById(layerId)) {
+    setBottomBarText(`layer ${layerId} not found.`, { kind: 'error' });
+    return;
+  }
+
+  if (globalConfig.editor.requireConfirmBeforeLayerRemove) {
+    const removeConfirmed = await confirm(`Sure to remove layer "${findLayerById(layerId)?.name}"?`, {
+      title: 'Remove Layer',
+    });
+    // LayerListController.removeLayer already adds history; just call it
+    if (removeConfirmed) removeLayer(layerId, options);
+  } else {
+    removeLayer(layerId, options);
+  }
+};
 
 export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   const { noDiff = false } = options ?? {};

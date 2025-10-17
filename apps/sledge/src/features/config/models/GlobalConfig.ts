@@ -18,6 +18,8 @@ export type GlobalConfig = {
     rotateDegreePerWheelScroll: number;
     showPointedPixel: boolean;
     centerCanvasOnResize: CanvasCenteringMode;
+    centerCanvasOnMaximize: CanvasCenteringMode;
+    requireConfirmBeforeLayerRemove: boolean;
     maxHistoryItemsCount: number;
     touchRotationZeroSnapThreshold: number;
   };
@@ -43,6 +45,8 @@ export const defaultConfig: GlobalConfig = {
     cursor: 'cross',
     rotateDegreePerWheelScroll: 1,
     centerCanvasOnResize: 'disabled',
+    centerCanvasOnMaximize: 'offset',
+    requireConfirmBeforeLayerRemove: true,
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
     touchRotationZeroSnapThreshold: 5,

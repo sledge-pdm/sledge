@@ -4,10 +4,10 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createMemo, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
-import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
 
 const imageElement = css`
@@ -64,8 +64,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     entryInteract = new ImageEntryInteract(svgRef, () => getEntry(props.entry.id) ?? props.entry);
     entryInteract.setInteractListeners();
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef && !containerRef.contains(e.target as Node)) {
+    const handleImageSelection = (e: MouseEvent) => {
+      if (containerRef && !containerRef.contains(e.target as HTMLElement)) {
         if (selected()) {
           selectEntry(undefined);
         }
@@ -74,10 +74,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleImageSelection);
 
     () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('click', handleImageSelection);
       if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
       entryInteract?.removeInteractListeners();
     };
@@ -135,6 +135,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       }}
       onContextMenu={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         e.stopImmediatePropagation();
         selectEntry(props.entry.id);
         const showHideItem: MenuListOption = stateStore.visible

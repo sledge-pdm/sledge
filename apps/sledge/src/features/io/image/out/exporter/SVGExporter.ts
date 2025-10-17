@@ -6,7 +6,7 @@ import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
 import { canvasStore } from '~/stores/ProjectStores';
 
 export class SVGExporter extends Exporter {
-  async canvasToBlob(scale: number = 1): Promise<Blob> {
+  async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
     const { width, height } = canvasStore.canvas;
 
     // 64x64以内の制限チェック
@@ -39,7 +39,7 @@ export class SVGExporter extends Exporter {
     return new Blob([svgContent], { type: 'image/svg+xml' });
   }
 
-  async layerToBlob(layer: Layer, scale: number = 1): Promise<Blob> {
+  async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
     const { width, height } = canvasStore.canvas;
 
     // 64x64以内の制限チェック

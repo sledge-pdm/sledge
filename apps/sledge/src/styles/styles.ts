@@ -14,6 +14,25 @@ export const accentedText = css`
   color: var(--color-accent);
 `;
 
+export const enabledButton = css`
+  width: fit-content;
+  border: 1px solid var(--color-enabled);
+  background: var(--color-button-bg);
+  color: var(--color-enabled);
+  pointer-events: all;
+
+  &:hover {
+    color: #ffffff;
+    background: var(--color-enabled);
+  }
+
+  &:disabled {
+    color: var(--color-muted);
+    border: 1px solid var(--color-muted);
+    pointer-events: none;
+  }
+`;
+
 export const errorButton = css`
   width: fit-content;
   border: 1px solid var(--color-error);

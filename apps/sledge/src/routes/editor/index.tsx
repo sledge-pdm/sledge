@@ -12,7 +12,7 @@ import FloatingController from '~/components/global/controller/FloatingControlle
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
-import { getLastOpenedProjects, saveLastProject } from '~/features/backup';
+import { getEmergencyBackups, getLastOpenedProjects, saveLastProject } from '~/features/backup';
 import { adjustZoomToFit, changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { loadToolPresets, setLocation } from '~/features/config';
 import { addToImagePool } from '~/features/image_pool';
@@ -32,7 +32,7 @@ import { flexCol, pageRoot } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
 import { join, pathToFileLocation } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
-import { getNewProjectQuery, getOpenLocation, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+import { getNewProjectQuery, getOpenLocation, openWindow, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Editor() {
   const [sp, setSp] = useSearchParams();
@@ -85,13 +85,17 @@ export default function Editor() {
     const openingLocation = getOpenLocation();
     const newProjectQuery = getNewProjectQuery();
 
+    const emergencyBackups = await getEmergencyBackups();
+    if (emergencyBackups && emergencyBackups.length > 0) {
+      await openWindow('restore');
+    }
+
     let lastLocation = undefined;
     // If not launched from file + not new project + default open is last, check if backup exists
     if (!openingLocation && !newProjectQuery.new && globalConfig.default.open === 'last') {
-      const backups = await getLastOpenedProjects();
-      if (backups && backups.length > 0) {
-        console.log(backups);
-        lastLocation = backups[0];
+      const lastOpenedProjects = await getLastOpenedProjects();
+      if (lastOpenedProjects && lastOpenedProjects.length > 0) {
+        lastLocation = lastOpenedProjects[0];
       }
     }
 

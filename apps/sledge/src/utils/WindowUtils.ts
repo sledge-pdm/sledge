@@ -4,6 +4,7 @@ import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
 import { message } from '@tauri-apps/plugin-dialog';
 import { exit } from '@tauri-apps/plugin-process';
+import { saveEmergencyBackup } from '~/features/backup';
 import { globalConfig } from '~/stores/GlobalStores';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
@@ -15,7 +16,7 @@ export function zoomForIntegerize(dpr: number) {
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
 
-export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
+export type WindowKind = 'start' | 'editor' | 'restore' | 'settings' | 'about';
 
 export async function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
   const parent = kind === 'settings' || kind === 'about' ? getCurrentWindow().label : undefined;
@@ -79,6 +80,8 @@ export async function reportAppStartupError(e: any) {
     console.warn('Critical error already reported:', errorMessage);
     return; // Avoid reporting the same error multiple times
   }
+
+  await saveEmergencyBackup();
 
   console.error('Reporting startup error:', {
     message: errorMessage,

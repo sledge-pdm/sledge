@@ -1,13 +1,13 @@
 import { css } from '@acab/ecsstatic';
 import { Checkbox } from '@sledge/ui';
 import { Component, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import ImagePoolGrid from '~/components/section/editor/item/ImagePoolGrid';
+import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
+import { sectionContent } from '~/components/section/SectionStyles';
 import { addToImagePool, getEntries, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { sectionContent } from '../SectionStyles';
 
 const gridContainer = css`
   margin: 4px 0;

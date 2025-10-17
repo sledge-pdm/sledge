@@ -55,7 +55,7 @@ const layerItemIndex = css`
   font-size: var(--text-sm);
   opacity: 0.3;
   margin-left: 2px;
-  width: 14px;
+  width: 16px;
 `;
 
 const layerItemType = css`

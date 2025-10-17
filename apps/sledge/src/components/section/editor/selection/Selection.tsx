@@ -9,7 +9,7 @@ import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
-import { sectionContent } from '../SectionStyles';
+import { sectionContent } from '../../SectionStyles';
 
 const selectionControlContainer = css`
   display: flex;

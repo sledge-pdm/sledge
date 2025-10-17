@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { spacing } from '@sledge/theme';
+import { clsx } from '@sledge/core';
 import { Dropdown, Slider } from '@sledge/ui';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
@@ -10,9 +10,21 @@ import { layerListStore } from '~/stores/ProjectStores';
 import { flexRow } from '~/styles/styles';
 import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
-import { sectionContent } from '../SectionStyles';
-import BaseLayerItem from './item/BaseLayerItem';
-import LayerItem from './item/LayerItem';
+import { sectionContent } from '../../SectionStyles';
+import BaseLayerItem from './BaseLayerItem';
+import LayerItem from './LayerItem';
+
+const layerListSectionContent = css`
+  padding-left: 0px;
+`;
+
+const configRow = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
 
 const layerList = css`
   display: flex;
@@ -87,25 +99,19 @@ const LayerList: Component<{}> = () => {
         },
       ]}
     >
-      <div class={sectionContent}>
-        <div
-          class={flexRow}
-          style={{
-            'align-items': 'center',
-            gap: spacing.sm,
-            'margin-bottom': spacing.sm,
-          }}
-        >
+      <div class={clsx(sectionContent, layerListSectionContent)}>
+        <div class={configRow}>
           <div
             class={flexRow}
             style={{
-              width: '120px',
+              width: '200px',
               height: 'auto',
             }}
           >
             <Dropdown
               value={activeLayer().mode}
               options={blendModeOptions}
+              wheelSpin={true}
               onChange={(e) => {
                 setLayerProp(activeLayer().id, 'mode', e);
               }}

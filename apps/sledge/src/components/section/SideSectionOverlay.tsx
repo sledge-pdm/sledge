@@ -4,16 +4,7 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import interact from 'interactjs';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
-import {
-  EditorTab,
-  EffectsTab,
-  ExportTab,
-  FilesTab,
-  HistoryTab,
-  PerilousTab,
-  ProjectTab,
-  SectionTab,
-} from '~/components/section/SectionTabs';
+import { EditorTab, EffectsTab, ExportTab, FilesTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 

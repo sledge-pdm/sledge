@@ -1,9 +1,9 @@
 import { Component } from 'solid-js';
-import Color from '~/components/section/editor/Color';
-import Images from '~/components/section/editor/Images';
-import LayerList from '~/components/section/editor/LayerList';
-import Selection from '~/components/section/editor/Selection';
-import Tools from '~/components/section/editor/Tools';
+import Color from '~/components/section/editor/color/Color';
+import Images from '~/components/section/editor/image_pool/Images';
+import LayerList from '~/components/section/editor/layer/LayerList';
+import Selection from '~/components/section/editor/selection/Selection';
+import Tools from '~/components/section/editor/tool/Tools';
 import Effects from '~/components/section/effects/Effects';
 import Export from '~/components/section/export/Export';
 import Files from '~/components/section/files/Files';

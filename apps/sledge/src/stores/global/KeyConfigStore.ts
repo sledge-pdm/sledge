@@ -1,5 +1,5 @@
 import { KeyConfigCommands } from '~/Consts';
-import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
+import { KeyConfigEntry } from '~/config/KeyConfig';
 import { isMacOS } from '~/utils/OSUtils';
 
 export type KeyConfigStore = {

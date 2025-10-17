@@ -14,6 +14,7 @@ const Project: Component = () => {
     <SectionItem title='project.'>
       <div class={`${sectionContent} ${projectContentStyle}`}>
         <ProjectLocation />
+
         <AutoSave />
       </div>
     </SectionItem>

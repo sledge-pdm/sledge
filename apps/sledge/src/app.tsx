@@ -21,6 +21,7 @@ import { listenEvent } from './utils/TauriUtils';
 
 import { css } from '@acab/ecsstatic';
 import '@sledge/theme/src/global.css';
+import Restore from '~/routes/restore';
 
 const appRoot = css`
   display: flex;
@@ -114,6 +115,7 @@ export default function App() {
     >
       <Route path='/start' component={Home} />
       <Route path='/editor' component={Editor} />
+      <Route path='/restore' component={Restore} />
       <Route path='/settings' component={Settings} />
       <Route path='/about' component={About} />
     </Router>

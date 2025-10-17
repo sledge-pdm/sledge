@@ -17,7 +17,7 @@ export const pathToFileLocation = (fullPath: string): FileLocation | undefined =
 
   const rejoinedPath = join(...filePath.split('\\'));
 
-  if (filePath === undefined || fileName === undefined) return undefined;
+  if (!filePath || !filePath?.trim() || !fileName || !fileName?.trim()) return undefined;
   else {
     return {
       path: rejoinedPath,

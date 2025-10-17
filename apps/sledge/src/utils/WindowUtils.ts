@@ -15,7 +15,7 @@ export function zoomForIntegerize(dpr: number) {
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
 
-export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
+export type WindowKind = 'start' | 'editor' | 'restore' | 'settings' | 'about';
 
 export async function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
   const parent = kind === 'settings' || kind === 'about' ? getCurrentWindow().label : undefined;
@@ -57,6 +57,19 @@ export function getOpenLocation(): FileLocation | undefined {
   return pathToFileLocation(openPath);
 }
 
+export function getNewProjectQuery(): {
+  new: boolean;
+  width?: number;
+  height?: number;
+} {
+  const sp = new URLSearchParams(window.location.search);
+  return {
+    new: !!sp.get('new'),
+    width: sp.get('width') ? Number(sp.get('width')) : undefined,
+    height: sp.get('height') ? Number(sp.get('height')) : undefined,
+  };
+}
+
 const alreadyShownErrors: Set<string> = new Set();
 
 export async function reportAppStartupError(e: any) {
@@ -66,6 +79,9 @@ export async function reportAppStartupError(e: any) {
     console.warn('Critical error already reported:', errorMessage);
     return; // Avoid reporting the same error multiple times
   }
+
+  // startup error won't affect project file
+  // await saveEmergencyBackup();
 
   console.error('Reporting startup error:', {
     message: errorMessage,

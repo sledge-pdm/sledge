@@ -1,4 +1,4 @@
-import { ConfigComponentName } from '~/features/config/models/ConfigComponent';
+import { ConfigComponentName } from '~/config/ConfigComponent';
 
 export type PresetFieldMeta = {
   key: string;

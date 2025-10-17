@@ -4,6 +4,7 @@ import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
 import SectionItem from '~/components/section/SectionItem';
 import { resetAllLayers } from '~/features/layer';
+import { reportAppStartupError } from '~/utils/WindowUtils';
 import { sectionContent, sectionRoot } from '../SectionStyles';
 
 const dangerHeaderStyle = css`
@@ -43,6 +44,8 @@ const resetButtonStyle = css`
 `;
 
 const RESET_ALL_MSG = 'Sure to RESET ALL LAYERS?';
+const REPORT_FATAL_ERROR_MSG = 'Sure to REPORT FATAL ERROR and KILL PROCESS IMMEDIATELY?';
+
 const PerilousLayers: Component = () => {
   return (
     <div class={sectionRoot}>
@@ -67,6 +70,25 @@ const PerilousLayers: Component = () => {
           </div>
         </div>
       </SectionItem>
+      {import.meta.env.DEV && (
+        <SectionItem title='error.'>
+          <div class={`${sectionContent} ${layerContentStyle}`}>
+            <div class={resetButtonContainerStyle}>
+              <Button
+                class={resetButtonStyle}
+                hoverContent='!!!!!!!!!!!!!'
+                onClick={() => {
+                  confirmOperation(REPORT_FATAL_ERROR_MSG, () => {
+                    reportAppStartupError('FAKE FATAL ERROR!');
+                  });
+                }}
+              >
+                REPORT FAKE FATAL ERROR.
+              </Button>
+            </div>
+          </div>
+        </SectionItem>
+      )}
     </div>
   );
 };

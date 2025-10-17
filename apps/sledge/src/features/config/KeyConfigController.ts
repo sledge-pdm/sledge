@@ -1,6 +1,6 @@
 import { reconcile } from 'solid-js/store';
+import { KeyConfigEntry } from '~/config/KeyConfig';
 import { KeyConfigCommands } from '~/Consts';
-import { KeyConfigEntry } from '~/features/config/models/KeyConfig';
 import { makeDefaultKeyConfigStore } from '~/stores/global/KeyConfigStore';
 import { setKeyConfigStore } from '~/stores/GlobalStores';
 

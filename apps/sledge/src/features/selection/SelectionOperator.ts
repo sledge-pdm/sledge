@@ -121,8 +121,8 @@ export function deleteSelectedArea(layerId?: string): boolean {
   const selectionBoundBox = {
     x: bBox.left,
     y: bBox.top,
-    width: bBox.right - bBox.left,
-    height: bBox.bottom - bBox.top,
+    width: bBox.right - bBox.left + 1,
+    height: bBox.bottom - bBox.top + 1,
   };
   anvil.addWholeDiff(anvil.getImageData());
   const deletedArea = new Uint8ClampedArray(selectionBoundBox.width * selectionBoundBox.height * 4);

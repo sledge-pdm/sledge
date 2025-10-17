@@ -106,6 +106,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       // @ts-ignore
       window.__PATH__ = selectedPath;
 
+      setProjectStore('lastSavedPath', selectedPath);
       setProjectStore('lastSavedAt', new Date());
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });

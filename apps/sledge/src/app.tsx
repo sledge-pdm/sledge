@@ -12,15 +12,16 @@ import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, onMount } from 'solid-js';
-import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { globalConfig } from '~/stores/GlobalStores';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
 import { css } from '@acab/ecsstatic';
 import '@sledge/theme/src/global.css';
+import Restore from '~/routes/restore';
 
 const appRoot = css`
   display: flex;
@@ -114,6 +115,7 @@ export default function App() {
     >
       <Route path='/start' component={Home} />
       <Route path='/editor' component={Editor} />
+      <Route path='/restore' component={Restore} />
       <Route path='/settings' component={Settings} />
       <Route path='/about' component={About} />
     </Router>

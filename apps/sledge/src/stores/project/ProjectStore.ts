@@ -6,6 +6,7 @@ export type ProjectStore = {
 
   thumbnailPath: string | undefined;
   isProjectChangedAfterSave: boolean;
+  lastSavedPath: string | undefined;
   lastSavedAt: Date | undefined;
 
   autoSaveEnabled?: boolean;
@@ -16,6 +17,7 @@ export const defaultProjectStore: ProjectStore = {
   loadProjectVersion: undefined,
   thumbnailPath: undefined as string | undefined,
   isProjectChangedAfterSave: false,
+  lastSavedPath: undefined,
   lastSavedAt: undefined as Date | undefined,
   autoSaveEnabled: false,
   autoSaveInterval: 60,

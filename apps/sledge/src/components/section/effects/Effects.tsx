@@ -2,9 +2,9 @@ import { css } from '@acab/ecsstatic';
 import { Dropdown, DropdownOption } from '@sledge/ui';
 import { Accessor, Component, createMemo, createSignal } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import GaussianBlur from '~/components/section/effects/items/GaussianBlur';
-import GrayScale from '~/components/section/effects/items/GrayScale';
-import Invert from '~/components/section/effects/items/Invert';
+import GaussianBlur from '~/components/section/effects/effects/GaussianBlur';
+import GrayScale from '~/components/section/effects/effects/GrayScale';
+import Invert from '~/components/section/effects/effects/Invert';
 import { activeLayer, findLayerById } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
 

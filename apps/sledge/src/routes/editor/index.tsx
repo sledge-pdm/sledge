@@ -1,7 +1,7 @@
 import { color } from '@sledge/theme';
 import { trackStore } from '@solid-primitives/deep';
-import { useLocation, useSearchParams } from '@solidjs/router';
-import { UnlistenFn } from '@tauri-apps/api/event';
+import { useSearchParams } from '@solidjs/router';
+import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
@@ -12,13 +12,17 @@ import FloatingController from '~/components/global/controller/FloatingControlle
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
+import { getEmergencyBackups, getLastOpenedProjects, saveLastProject } from '~/features/backup';
 import { adjustZoomToFit, changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { loadToolPresets, setLocation } from '~/features/config';
+import { addToImagePool } from '~/features/image_pool';
 import { AutoSaveManager } from '~/features/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/features/io/config/load';
+import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { importImageFromPath } from '~/features/io/image/in/import';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { loadProjectJson } from '~/features/io/project/in/load';
+import { openExistingProject } from '~/features/io/window';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
@@ -26,12 +30,11 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, projectStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
-import { join } from '~/utils/FileUtils';
+import { join, pathToFileLocation } from '~/utils/FileUtils';
 import { emitEvent } from '~/utils/TauriUtils';
-import { getOpenLocation, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+import { getNewProjectQuery, getOpenLocation, openWindow, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 export default function Editor() {
-  const location = useLocation();
   const [sp, setSp] = useSearchParams();
   const isFirstStartup = sp.startup === 'true';
 
@@ -63,8 +66,12 @@ export default function Editor() {
         const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
         anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
       });
+      setProjectStore('isProjectChangedAfterSave', false);
+    } else {
+      // if it's not a new project, explicitly set project dirty
+      // (in order to prevent backup loss)
+      setProjectStore('isProjectChangedAfterSave', true);
     }
-    setProjectStore('isProjectChangedAfterSave', false);
 
     setIsLoading(false);
 
@@ -75,11 +82,26 @@ export default function Editor() {
   };
 
   const tryLoadProject = async (): Promise<boolean> => {
-    const fileLocation = getOpenLocation();
+    const openingLocation = getOpenLocation();
+    const newProjectQuery = getNewProjectQuery();
 
-    if (fileLocation && fileLocation.path && fileLocation.name) {
-      const fullPath = join(fileLocation.path, fileLocation.name);
-      if (fileLocation.name?.endsWith('.sledge')) {
+    const emergencyBackups = await getEmergencyBackups();
+    if (emergencyBackups && emergencyBackups.length > 0) {
+      await openWindow('restore');
+    }
+
+    let lastLocation = undefined;
+    // If not launched from file + not new project + default open is last, check if backup exists
+    if (!openingLocation && !newProjectQuery.new && globalConfig.default.open === 'last') {
+      const lastOpenedProjects = await getLastOpenedProjects();
+      if (lastOpenedProjects && lastOpenedProjects.length > 0) {
+        lastLocation = lastOpenedProjects[0];
+      }
+    }
+
+    if (openingLocation && openingLocation.path && openingLocation.name) {
+      const fullPath = join(openingLocation.path, openingLocation.name);
+      if (openingLocation.name?.endsWith('.sledge')) {
         try {
           const projectFile = await readProjectFromPath(fullPath);
           if (!projectFile) {
@@ -95,33 +117,55 @@ export default function Editor() {
         }
       } else {
         // image file
-        const isImportSuccessful = await importImageFromPath(fileLocation);
+        const isImportSuccessful = await importImageFromPath(openingLocation);
         if (isImportSuccessful) {
           return false;
         } else {
-          console.error('Failed to import image from path:', fileLocation);
-          throw new Error('Failed to import image from path:' + join(fileLocation.path ?? '<unknown path>', fileLocation.name ?? '<unknown file>'));
+          console.error('Failed to import image from path:', openingLocation);
+          throw new Error(
+            'Failed to import image from path:' + join(openingLocation.path ?? '<unknown path>', openingLocation.name ?? '<unknown file>')
+          );
+        }
+      }
+    } else if (lastLocation && lastLocation.path && lastLocation.name) {
+      const fullPath = join(lastLocation.path, lastLocation.name);
+      if (lastLocation.name?.endsWith('.sledge')) {
+        try {
+          const projectFile = await readProjectFromPath(fullPath);
+          if (!projectFile) {
+            console.error('Failed to read project from path:', fullPath);
+            throw new Error('reading ' + fullPath);
+          }
+          // Don't set location to backup
+          // setLocation(fullPath);
+          await loadProjectJson(projectFile);
+
+          // if restored project that already saved, set its path (not backup path!) to location
+          if (projectStore.lastSavedPath) setLocation(projectStore.lastSavedPath);
+          // set project as dirty because it's just a backup
+          setProjectStore('isProjectChangedAfterSave', true);
+          return false;
+        } catch (error) {
+          console.error('Failed to read project:', error);
+          throw new Error('Failed to read project.\n' + error);
         }
       }
     } else {
-      const sp = new URLSearchParams(location.search);
       // create new
       setFileStore('savedLocation', {
         name: undefined,
         path: undefined,
       });
-
-      if (sp.has('width') && sp.has('height')) {
-        const width = Number(sp.get('width'));
-        const height = Number(sp.get('height'));
-        setCanvasStore('canvas', 'width', width);
-        setCanvasStore('canvas', 'height', height);
-        eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
-      }
+      const width = newProjectQuery.width ?? globalConfig.default.canvasSize.width;
+      const height = newProjectQuery.height ?? globalConfig.default.canvasSize.height;
+      setCanvasStore('canvas', 'width', width);
+      setCanvasStore('canvas', 'height', height);
+      eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
       addLayer(
-        { name: 'layer1', type: LayerType.Dot, enabled: true, dotMagnification: 1 },
+        { name: 'layer 1', type: LayerType.Dot, enabled: true, dotMagnification: 1 },
         {
           noDiff: true,
+          uniqueName: false,
         }
       );
       return true;
@@ -134,18 +178,32 @@ export default function Editor() {
 
   onMount(async () => {
     unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
-      if (!isLoading() && projectStore.isProjectChangedAfterSave) {
-        const confirmed = await confirm('There are unsaved changes.\nSure to quit without save?', {
-          kind: 'warning',
-          title: 'Unsaved Changes',
-          okLabel: 'Quit without save.',
-          cancelLabel: 'Cancel.',
+      const loc = await saveLastProject();
+
+      if (loc === undefined) {
+        const confirmed = await confirm('Failed to save unsaved state. Quit sledge anyway?\n(unsaved changes will be discarded.)', {
+          kind: 'error',
+          okLabel: 'Discard and quit',
+          cancelLabel: 'Cancel',
         });
         if (!confirmed) {
           event.preventDefault();
           return;
         }
       }
+
+      // if (!isLoading() && projectStore.isProjectChangedAfterSave) {
+      //   const confirmed = await confirm('There are unsaved changes.\nSure to quit without save?', {
+      //     kind: 'warning',
+      //     title: 'Unsaved Changes',
+      //     okLabel: 'Quit without save.',
+      //     cancelLabel: 'Cancel.',
+      //   });
+      //   if (!confirmed) {
+      //     event.preventDefault();
+      //     return;
+      //   }
+      // }
     });
 
     try {
@@ -175,6 +233,18 @@ export default function Editor() {
     if (import.meta.hot) {
       window.location.reload();
     }
+  });
+
+  listen('tauri://drag-drop', async (e: any) => {
+    const paths = e.payload.paths as string[];
+    addToImagePool(paths.filter((p) => importableFileExtensions.some((ext) => p.endsWith(`.${ext}`))));
+
+    paths
+      .filter((p) => p.endsWith('.sledge'))
+      .forEach((p) => {
+        const loc = pathToFileLocation(p);
+        if (loc) openExistingProject(loc);
+      });
   });
 
   return (

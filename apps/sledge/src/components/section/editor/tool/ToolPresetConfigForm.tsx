@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { spacing } from '@sledge/theme';
 import { Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
-import { componentProps } from '~/features/config/models/ConfigComponent';
+import { componentProps } from '~/config/ConfigComponent';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/features/tools/presets';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';

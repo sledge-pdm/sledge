@@ -52,7 +52,7 @@ const TypewriterText: Component<Props> = (props) => {
   return (
     <p {...props}>
       {writingText()}
-      {shouldShowCursor() ? '|' : ''}
+      {shouldShowCursor() ? '|' : ' '}
     </p>
   );
 };

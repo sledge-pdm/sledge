@@ -10,9 +10,9 @@ export const createNew = () => {
   });
 };
 
-export const openExistingProject = (selectedFile: FileLocation) => {
+export const openExistingProject = async (selectedFile: FileLocation) => {
   if (!selectedFile.path || !selectedFile.name) return;
-  openWindow('editor', { openPath: join(selectedFile.path, selectedFile.name) }).then(() => {
+  await openWindow('editor', { openPath: join(selectedFile.path, selectedFile.name) }).then(() => {
     // closeWindowsByLabel('start');
   });
 };

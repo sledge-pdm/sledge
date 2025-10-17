@@ -1,13 +1,23 @@
+import { css } from '@acab/ecsstatic';
 import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createMemo, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
-import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
+
+const imageElement = css`
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  touch-action: none;
+  z-index: var(--zindex-image-pool-image);
+  image-rendering: pixelated;
+`;
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   const [stateStore, setStateStore] = createStore({
@@ -54,8 +64,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     entryInteract = new ImageEntryInteract(svgRef, () => getEntry(props.entry.id) ?? props.entry);
     entryInteract.setInteractListeners();
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef && !containerRef.contains(e.target as Node)) {
+    const handleImageSelection = (e: MouseEvent) => {
+      if (containerRef && !containerRef.contains(e.target as HTMLElement)) {
         if (selected()) {
           selectEntry(undefined);
         }
@@ -64,12 +74,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       }
     };
 
-    const canvasArea = document.getElementById('canvas-area');
-    if (canvasArea) canvasArea.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleImageSelection);
 
     () => {
-      const canvasArea = document.getElementById('canvas-area');
-      if (canvasArea) canvasArea.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('click', handleImageSelection);
       if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
       entryInteract?.removeInteractListeners();
     };
@@ -127,7 +135,9 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
       }}
       onContextMenu={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         e.stopImmediatePropagation();
+        selectEntry(props.entry.id);
         const showHideItem: MenuListOption = stateStore.visible
           ? {
               ...ContextMenuItems.BaseImageHide,
@@ -180,17 +190,13 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         <img
           ref={(el) => (imageRef = el)}
           src={convertFileSrc(props.entry.originalPath)}
+          class={imageElement}
           width={stateStore.baseW}
           height={stateStore.baseH}
           style={{
-            margin: 0,
-            padding: 0,
             width: `${stateStore.baseW}px`,
             height: `${stateStore.baseH}px`,
-            'z-index': 'var(--zindex-image-pool-image)',
             opacity: stateStore.visible ? 1 : selected() ? 0.5 : 0,
-            'pointer-events': 'none',
-            'touch-action': 'none',
           }}
         />
       </div>

@@ -1,4 +1,4 @@
-import { GlobalConfig } from '~/features/config/models/GlobalConfig';
+import { GlobalConfig } from '~/config/GlobalConfig';
 import { KeyConfigStore } from '~/stores/global/KeyConfigStore';
 import { LastSettingsStore } from '~/stores/global/LastSettingsStore';
 

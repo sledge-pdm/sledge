@@ -1,7 +1,11 @@
 import { css } from '@acab/ecsstatic';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { confirm } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
+import { openExistingProject } from '~/features/io/window';
 import { fileStore } from '~/stores/EditorStores';
+import { setProjectStore } from '~/stores/ProjectStores';
 import { join } from '~/utils/FileUtils';
 import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
@@ -10,12 +14,6 @@ const locationHeaderStyle = css`
   gap: 4px;
   align-items: center;
   justify-content: space-between;
-`;
-
-const explorerLinkStyle = css`
-  color: var(--color-muted);
-  text-decoration: none;
-  font-family: ZFB03;
 `;
 
 const locationInfoStyle = css`
@@ -44,25 +42,29 @@ const placeholderStyle = css`
   opacity: 0.3;
 `;
 
+const reopenProjectLink = css`
+  font-family: ZFB03B;
+  opacity: 0.75;
+`;
+
+const explorerLinkStyle = css`
+  color: var(--color-muted);
+  text-decoration: none;
+  font-family: ZFB08;
+`;
+
+const linksContainer = css`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 9px;
+`;
+
 const ProjectLocation: Component = () => {
   return (
     <>
       <div class={locationHeaderStyle}>
         <p class={sectionSubCaption}>Location.</p>
-
-        <Show when={fileStore.savedLocation.name && fileStore.savedLocation.path}>
-          <a
-            href='#'
-            onClick={(e) => {
-              const loc = fileStore.savedLocation;
-              if (!loc || !loc.path || !loc.name) return;
-              revealItemInDir(join(loc.path, loc.name));
-            }}
-            class={explorerLinkStyle}
-          >
-            Open in Explorer
-          </a>
-        </Show>
       </div>
       <div class={sectionSubContent}>
         <div class={locationInfoStyle}>
@@ -78,6 +80,38 @@ const ProjectLocation: Component = () => {
               <p class={locationValueStyle}>{fileStore.savedLocation.name || '<unknown>'}</p>
             </Show>
           </div>
+        </div>
+
+        <div class={linksContainer}>
+          <Show when={fileStore.savedLocation.name && fileStore.savedLocation.path}>
+            <a
+              href='#'
+              onClick={(e) => {
+                const loc = fileStore.savedLocation;
+                if (!loc || !loc.path || !loc.name) return;
+                revealItemInDir(join(loc.path, loc.name));
+              }}
+              class={explorerLinkStyle}
+            >
+              Open in Explorer
+            </a>
+            <a
+              class={reopenProjectLink}
+              title={'reopen project'}
+              onClick={async () => {
+                const confirmed = await confirm(`Sure to reopen this project?
+Unsaved changes will be discarded!`);
+                if (confirmed) {
+                  await openExistingProject(fileStore.savedLocation);
+                  // clear dirty and close
+                  setProjectStore('isProjectChangedAfterSave', false);
+                  getCurrentWindow().close();
+                }
+              }}
+            >
+              reopen project.
+            </a>
+          </Show>
         </div>
       </div>
     </>

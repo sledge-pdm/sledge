@@ -8,7 +8,6 @@ import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { readProjectFromPath } from '~/features/io/project/in/import';
-import { ProjectV1 } from '~/features/io/types/Project';
 import { pageRoot } from '~/styles/styles';
 import { join } from '~/utils/FileUtils';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';

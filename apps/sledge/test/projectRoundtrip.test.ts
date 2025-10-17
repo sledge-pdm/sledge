@@ -151,6 +151,7 @@ describe('Project dump/load roundtrip', () => {
         thumbnailPath: undefined,
         isProjectChangedAfterSave: true,
         lastSavedAt: new Date(),
+        lastSavedPath: undefined,
         autoSaveEnabled: false,
         autoSaveInterval: 60,
       },

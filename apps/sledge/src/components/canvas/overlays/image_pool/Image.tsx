@@ -4,10 +4,10 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createMemo, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
-import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
 
 const imageElement = css`

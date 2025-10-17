@@ -1,14 +1,11 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
-import { Dropdown, Slider } from '@sledge/ui';
 import { Component, createEffect, createSignal, For } from 'solid-js';
+import LayerListButtonsRow from '~/components/section/editor/layer/row/LayerListButtonsRow';
+import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';
 import SectionItem from '~/components/section/SectionItem';
-import { projectHistoryController } from '~/features/history';
-import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { activeLayer, addLayer, allLayers, blendModeOptions, moveLayer, setLayerProp } from '~/features/layer';
-import { removeLayerFromUser } from '~/features/layer/service';
+import { allLayers, moveLayer } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { errorButton, flexRow } from '~/styles/styles';
 import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
 import { sectionContent } from '../../SectionStyles';
@@ -17,20 +14,7 @@ import LayerItem from './LayerItem';
 
 const layerListSectionContent = css`
   padding-left: 0px;
-  gap: 6px;
-`;
-
-const configRow = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-`;
-const addRemoveContainer = css`
-  display: flex;
-  flex-direction: row;
-  margin-left: auto;
-  gap: 8px;
+  padding-top: 2px;
 `;
 
 const layerList = css`
@@ -39,6 +23,7 @@ const layerList = css`
   width: 100%;
   position: relative;
   gap: 4px;
+  margin-top: 8px;
   width: 100%;
 `;
 
@@ -65,10 +50,6 @@ const LayerList: Component<{}> = () => {
 
   // DnD hook wiring
   let listRef: HTMLDivElement | undefined;
-  // Debounce state for opacity change history aggregation
-  let opacityCommitTimer: number | undefined;
-  let opacityHistoryBefore: Omit<ReturnType<typeof activeLayer>, 'id'> | null = null;
-  let opacityHistoryLayerId: string | null = null;
   const dnd = useLongPressReorder({
     getItems: items,
     getId: (l) => l.id,
@@ -84,97 +65,10 @@ const LayerList: Component<{}> = () => {
   return (
     <SectionItem title='layers.'>
       <div class={clsx(sectionContent, layerListSectionContent)}>
-        <div class={configRow}>
-          <div class={addRemoveContainer}>
-            <button
-              onClick={() => {
-                addLayer({ name: 'layer 1' });
-                setItems(allLayers());
-              }}
-            >
-              + ADD.
-            </button>
-            <button
-              class={errorButton}
-              onClick={async () => {
-                const active = activeLayer();
-                if (active) {
-                  await removeLayerFromUser(active.id);
-                }
-                setItems(allLayers());
-              }}
-            >
-              - REMOVE.
-            </button>
-          </div>
-        </div>
-        <div class={configRow}>
-          <div
-            class={flexRow}
-            style={{
-              width: '200px',
-              height: 'auto',
-            }}
-          >
-            <Dropdown
-              value={activeLayer().mode}
-              options={blendModeOptions}
-              wheelSpin={true}
-              onChange={(e) => {
-                setLayerProp(activeLayer().id, 'mode', e);
-              }}
-            />
-          </div>
-          <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
-            <p style={{ width: '36px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
-            <Slider
-              value={activeLayer().opacity}
-              min={0}
-              max={1}
-              allowFloat={true}
-              floatSignificantDigits={2}
-              labelMode={'none'}
-              onChange={(newValue) => {
-                // Debounced history: apply change immediately without diff, then commit once after 500ms idle
-                const layer = activeLayer();
-                // capture BEFORE snapshot only at the beginning of a burst
-                if (!opacityCommitTimer) {
-                  const { id: _id, ...beforeProps } = layer as any;
-                  opacityHistoryBefore = beforeProps;
-                  opacityHistoryLayerId = layer.id;
-                }
-
-                setLayerProp(layer.id, 'opacity', newValue, {
-                  noDiff: true, // Don't record per-change: commit a single history entry after debounce
-                });
-
-                if (opacityCommitTimer) window.clearTimeout(opacityCommitTimer);
-                opacityCommitTimer = window.setTimeout(() => {
-                  try {
-                    if (!opacityHistoryLayerId || !opacityHistoryBefore) return;
-                    const latest = layerListStore.layers.find((l) => l.id === opacityHistoryLayerId);
-                    if (!latest) return;
-                    const { id: _id2, ...afterProps } = latest as any;
-                    const act = new LayerPropsHistoryAction(opacityHistoryLayerId, opacityHistoryBefore as any, afterProps as any, {
-                      from: 'LayerList.opacitySlider(debounced 500ms)',
-                      propName: 'opacity',
-                      before: String(opacityHistoryBefore.opacity),
-                      after: String(afterProps.opacity),
-                    });
-                    projectHistoryController.addAction(act);
-                  } finally {
-                    opacityCommitTimer = undefined as any;
-                    opacityHistoryBefore = null;
-                    opacityHistoryLayerId = null;
-                  }
-                }, 200) as any;
-              }}
-            />
-          </div>
-        </div>
+        <LayerListButtonsRow onUpdate={(type) => setItems(allLayers())} />
+        <LayerListPropsRow />
 
         <div class={layerList} ref={(el) => (listRef = el)}>
-          {/* <ImagePoolItem /> */}
           <For each={items()}>
             {(layer, index) => {
               return (

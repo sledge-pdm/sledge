@@ -3,11 +3,11 @@ import { color } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { ContextMenuItems } from '~/components/menu/ContextMenuItems';
 import { allLayers, clearLayer, duplicateLayer, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
 import { removeLayerFromUser } from '~/features/layer/service';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
 
 const layerItem = css`
@@ -176,10 +176,10 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             showContextMenu(
               props.layer.name,
               [
-                { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
-                { ...ContextMenuItems.BaseRemove, onSelect: async () => await removeLayerFromUser(layerId) },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
+                { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },
+                { ...ContextMenuItems.BaseRemove, onSelect: async () => await removeLayerFromUser(layerId) },
               ],
               e
             );
@@ -221,8 +221,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             <div class={flexRow}>
               <p class={layerItemIndex}>{allLayers().length - props.index}.</p>
               <p class={layerItemType}>
-                {Math.ceil(props.layer.opacity * 100)}%, {props.layer.mode}
-                {props.layer.enabled ? '' : ` (inactive)`}
+                {props.layer.mode}. {Math.ceil(props.layer.opacity * 100)}%{props.layer.enabled ? '' : ` (inactive)`}
               </p>
             </div>
             {isNameChanging() ? (

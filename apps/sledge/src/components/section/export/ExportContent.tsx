@@ -232,7 +232,7 @@ const ExportContent: Component = () => {
       </div>
 
       <div
-        class={clsx(qualityField, qualityMutableExtensions.includes(settings.exportOptions.format) && qualityFieldDisabled)}
+        class={clsx(qualityField, !qualityMutableExtensions.includes(settings.exportOptions.format) && qualityFieldDisabled)}
         style={{ 'flex-grow': 1 }}
       >
         <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>

@@ -136,6 +136,7 @@ export function getCurrentPointingColorHex(): string | undefined {
 interface AddLayerOptions {
   initImage?: Uint8ClampedArray;
   noDiff?: boolean;
+  uniqueName?: boolean;
 }
 
 export const addLayer = (
@@ -165,7 +166,7 @@ export const addLayerTo = (
   options?: AddLayerOptions
 ) => {
   const { name = 'layer 1', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal } = layer;
-
+  const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
   const newLayer = createLayer(
     {
       name,
@@ -176,7 +177,7 @@ export const addLayerTo = (
       mode,
       initImage: options?.initImage,
     },
-    true
+    uniqueName
   );
 
   // Initialize anvil

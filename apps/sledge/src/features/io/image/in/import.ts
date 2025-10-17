@@ -46,6 +46,7 @@ export async function importImageFromPath(location: FileLocation): Promise<boole
     },
     {
       noDiff: true,
+      uniqueName: false,
     }
   );
 

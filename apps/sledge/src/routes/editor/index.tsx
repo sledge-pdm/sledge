@@ -125,6 +125,7 @@ export default function Editor() {
         { name: 'layer 1', type: LayerType.Dot, enabled: true, dotMagnification: 1 },
         {
           noDiff: true,
+          uniqueName: false,
         }
       );
       return true;

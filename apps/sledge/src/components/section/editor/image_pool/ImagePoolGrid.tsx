@@ -100,7 +100,14 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
             e.currentTarget.alt = 'missing';
           }}
           onClick={(e) => {
-            selectEntry(props.entry.id);
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            if (imagePoolStore.selectedEntryId === props.entry.id) {
+              selectEntry(undefined);
+            } else {
+              selectEntry(props.entry.id);
+            }
           }}
         />
       </div>

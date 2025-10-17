@@ -178,20 +178,32 @@ export default function Editor() {
 
   onMount(async () => {
     unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
-      await saveLastProject();
+      const loc = await saveLastProject();
 
-      if (!isLoading() && projectStore.isProjectChangedAfterSave) {
-        const confirmed = await confirm('There are unsaved changes.\nSure to quit without save?', {
-          kind: 'warning',
-          title: 'Unsaved Changes',
-          okLabel: 'Quit without save.',
-          cancelLabel: 'Cancel.',
+      if (loc === undefined) {
+        const confirmed = await confirm('Failed to save unsaved state. Quit sledge anyway?\n(unsaved changes will be discarded.)', {
+          kind: 'error',
+          okLabel: 'Discard and quit',
+          cancelLabel: 'Cancel',
         });
         if (!confirmed) {
           event.preventDefault();
           return;
         }
       }
+
+      // if (!isLoading() && projectStore.isProjectChangedAfterSave) {
+      //   const confirmed = await confirm('There are unsaved changes.\nSure to quit without save?', {
+      //     kind: 'warning',
+      //     title: 'Unsaved Changes',
+      //     okLabel: 'Quit without save.',
+      //     cancelLabel: 'Cancel.',
+      //   });
+      //   if (!confirmed) {
+      //     event.preventDefault();
+      //     return;
+      //   }
+      // }
     });
 
     try {

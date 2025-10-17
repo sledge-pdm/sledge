@@ -1,4 +1,4 @@
-import { ConfigComponentName } from '~/features/config/models/ConfigComponent';
+import { ConfigComponentName } from '~/config/ConfigComponent';
 
 export enum ConfigSections {
   General = 'GENERAL',

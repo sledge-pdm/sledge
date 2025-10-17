@@ -1,8 +1,8 @@
 import { Theme } from '@sledge/theme';
+import { Cursor } from '~/config/types/Cursor';
+import { FPS } from '~/config/types/FPS';
 import { CanvasRenderingMode } from '~/features/canvas';
 import { CanvasCenteringMode } from '~/features/canvas/model';
-import { Cursor } from '~/features/config/models/types/Cursor';
-import { FPS } from '~/features/config/models/types/FPS';
 
 export type GlobalConfig = {
   general: {
@@ -11,6 +11,7 @@ export type GlobalConfig = {
     resetSkippedVersions: string;
   };
   default: {
+    open: 'new' | 'last';
     canvasSize: { width: number; height: number };
   };
   editor: {
@@ -39,6 +40,7 @@ export const defaultConfig: GlobalConfig = {
     resetSkippedVersions: '',
   },
   default: {
+    open: 'last',
     canvasSize: { width: 1024, height: 1024 },
   },
   editor: {

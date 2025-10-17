@@ -1,5 +1,5 @@
 import { createStore } from 'solid-js/store';
-import { GlobalConfig } from '~/features/config/models/GlobalConfig';
+import { GlobalConfig } from '~/config/GlobalConfig';
 import { getDefaultSettings } from '~/features/io/config/set';
 import { Config } from '~/features/io/types/Config';
 import { KeyConfigStore } from '~/stores/global/KeyConfigStore';

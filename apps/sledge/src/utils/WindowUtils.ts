@@ -57,6 +57,19 @@ export function getOpenLocation(): FileLocation | undefined {
   return pathToFileLocation(openPath);
 }
 
+export function getNewProjectQuery(): {
+  new: boolean;
+  width?: number;
+  height?: number;
+} {
+  const sp = new URLSearchParams(window.location.search);
+  return {
+    new: !!sp.get('new'),
+    width: sp.get('width') ? Number(sp.get('width')) : undefined,
+    height: sp.get('height') ? Number(sp.get('height')) : undefined,
+  };
+}
+
 const alreadyShownErrors: Set<string> = new Set();
 
 export async function reportAppStartupError(e: any) {

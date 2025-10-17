@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { themeOptions } from '@sledge/theme';
 import { Show } from 'solid-js';
-import { ConfigSections, FieldMeta } from '~/features/config/models/ConfigMeta';
+import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 

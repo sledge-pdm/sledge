@@ -1,4 +1,4 @@
-import { ConfigSections, FieldMeta } from '~/features/config/models/ConfigMeta';
+import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 
 export const debugMetas: FieldMeta[] = [
   {

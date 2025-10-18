@@ -40,6 +40,12 @@ export const useReleaseData = () => {
     return information;
   };
 
+  const extensionLabels = (): { [ext: string]: string } | undefined => {
+    if (userOS() === 'none' || !releaseData()) return undefined;
+    const extensionLabels = osBuildInfos[userOS()].extensionLabels;
+    return extensionLabels;
+  };
+
   onMount(async () => {
     setIsLoading(true);
     const userAgent = navigator.userAgent;
@@ -75,5 +81,5 @@ export const useReleaseData = () => {
     setIsLoading(false);
   });
 
-  return { isLoading, userOS, releaseData, availableAssets, information };
+  return { isLoading, userOS, releaseData, availableAssets, information, extensionLabels };
 };

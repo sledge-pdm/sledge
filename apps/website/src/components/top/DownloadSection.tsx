@@ -3,6 +3,7 @@ import { Asset, os, ReleaseData } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Button, Icon } from '@sledge/ui';
 import { Accessor, Component, For, Show } from 'solid-js';
+import { globalStore } from '~/store/GlobalStore';
 
 // Styles
 const flexCol = css`
@@ -63,6 +64,22 @@ const downloadButton = css`
     }
   }
 `;
+const downloadButtonInversed = css`
+  font-size: 8px;
+  padding: 8px 12px;
+  border-width: 1px;
+  border-radius: 4px;
+  background-color: var(--color-enabled);
+  border-color: var(--color-enabled);
+  color: #00000090;
+  @media (any-hover: hover) {
+    &:hover {
+      background-color: var(--color-button-bg);
+      border-color: var(--color-enabled);
+      color: var(--color-enabled);
+    }
+  }
+`;
 
 const otherDownloadsText = css`
   width: fit-content;
@@ -92,30 +109,35 @@ const DownloadSection: Component<{
       extension: string;
     }[];
     information: () => string | undefined;
+    extensionLabels: () => { [ext: string]: string } | undefined;
   };
 }> = ({ releaseData }) => {
-  const { isLoading, userOS, releaseData: data, availableAssets, information } = releaseData;
+  const { isLoading, userOS, releaseData: data, availableAssets, information, extensionLabels } = releaseData;
   return (
     <div class={flexCol}>
       <Show when={!isLoading()} fallback={<p class={loadingText}>Loading...</p>}>
         <Show when={userOS() !== 'none' && userOS() !== 'sp'}>
           <div class={downloadsContainer}>
-            <For each={availableAssets()}>{(assetItem) => <DownloadButton os={userOS()} assetItem={assetItem} type='main' />}</For>
+            <For each={availableAssets()}>
+              {(assetItem) => (
+                <DownloadButton os={userOS()} assetItem={assetItem} label={extensionLabels()?.[assetItem.extension] ?? undefined} type='main' />
+              )}
+            </For>
           </div>
         </Show>
 
         <Show when={information()}>
           <div class={informationContainer}>
-            <p class={informationLabel} style={{}}>
-              for {userOS()} users
-            </p>
+            <p class={informationLabel}>for {userOS()} users</p>
             <p class={informationText}>{information()}</p>
           </div>
         </Show>
 
-        <a class={otherDownloadsText} href='https://github.com/sledge-pdm/sledge/releases' target='_blank'>
-          other releases
-        </a>
+        <Show when={availableAssets().length > 0}>
+          <a class={otherDownloadsText} href='https://github.com/sledge-pdm/sledge/releases' target='_blank'>
+            other releases
+          </a>
+        </Show>
       </Show>
     </div>
   );
@@ -127,6 +149,20 @@ const assetOSText = css`
   font-size: 8px;
   opacity: 0.5;
   margin-top: 8px;
+  overflow: hidden;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-all;
+  user-select: text;
+  text-align: end;
+`;
+
+const assetNameLabel = css`
+  width: fit-content;
+  font-family: ZFB09;
+  font-size: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
   overflow: hidden;
   white-space: normal;
   word-wrap: break-word;
@@ -154,8 +190,9 @@ const DownloadButton: Component<{
     asset: Asset;
     extension: string;
   };
+  label?: string;
   type: 'main' | 'other';
-}> = ({ os, assetItem, type }) => {
+}> = ({ os, assetItem, type, label }) => {
   const { asset, extension } = assetItem;
 
   return (
@@ -165,12 +202,16 @@ const DownloadButton: Component<{
         'align-items': 'end',
       }}
     >
+      <Show when={label}>
+        <p class={assetNameLabel}>{label}</p>
+      </Show>
+
       <Button
         key={asset.id}
         onClick={() => {
           window.open(asset.browser_download_url, '_blank')?.focus();
         }}
-        class={downloadButton}
+        class={globalStore.theme === 'light' ? downloadButtonInversed : downloadButton}
         style={{
           display: 'flex',
           'font-family': fonts.ZFB09,

@@ -1,14 +1,37 @@
 import { fill_lasso_selection } from '@sledge/wasm';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { PartialFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
-import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
+import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
+import { LassoDisplayMode } from '~/features/tools/presets';
+import { getPresetOf } from '~/features/tools/ToolController';
+import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { eventBus } from '~/utils/EventBus';
 
 export class LassoSelection extends SelectionBase {
+  readonly categoryId = TOOL_CATEGORIES.LASSO_SELECTION;
   previewFragment: PartialFragment | undefined = undefined;
   private points: number[] = [];
   private lastUpdateTime = 0;
   private readonly UPDATE_INTERVAL = 16; // 60fps相当
+
+  getPoints() {
+    return this.points;
+  }
+
+  getPath(displayMode: LassoDisplayMode): string {
+    if (this.points.length < 4) return '';
+
+    let path = `M ${this.points[0]} ${this.points[1]}`;
+    for (let i = 2; i < this.points.length; i += 2) {
+      path += ` L ${this.points[i]} ${this.points[i + 1]}`;
+    }
+    // ポリゴンを閉じる
+    if (this.points.length >= 6 && displayMode !== 'trail') {
+      path += ' Z';
+    }
+    return path;
+  }
 
   private calculateBoundingBox(points: number[], padding = 2): { x: number; y: number; width: number; height: number } {
     if (points.length < 2) {
@@ -79,7 +102,7 @@ export class LassoSelection extends SelectionBase {
 
     // WASM関数を使用してマスクを更新
     try {
-      fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints));
+      fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints), 'nonzero');
     } catch (error) {
       console.warn('Lasso selection WASM call failed:', error);
     }
@@ -106,7 +129,13 @@ export class LassoSelection extends SelectionBase {
       height: 1,
     };
 
-    selectionManager.setPreviewFragment(this.previewFragment);
+    const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
+    const displayMode = preset?.displayMode ?? 'trail';
+    if (displayMode === 'fill') {
+      selectionManager.setPreviewFragment(this.previewFragment);
+    } else {
+      eventBus.emit('selection:updateLassoOutline', {});
+    }
   }
 
   protected onMoveSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
@@ -132,12 +161,18 @@ export class LassoSelection extends SelectionBase {
       this.points.push(args.position.x, args.position.y);
     }
 
-    // 最低3点必要（線分を作るため）
-    if (this.points.length >= 6) {
-      this.updatePartialMask(anvil);
-    }
+    const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
+    const displayMode = preset?.displayMode ?? 'trail';
+    if (displayMode === 'fill') {
+      // 最低3点必要（線分を作るため）
+      if (this.points.length >= 6) {
+        this.updatePartialMask(anvil);
+      }
 
-    selectionManager.setPreviewFragment(this.previewFragment);
+      selectionManager.setPreviewFragment(this.previewFragment);
+    } else {
+      eventBus.emit('selection:updateLassoOutline', {});
+    }
   }
 
   protected onEndSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
@@ -166,6 +201,9 @@ export class LassoSelection extends SelectionBase {
       // 最終マスクを生成
       this.updatePartialMask(anvil);
     }
+
+    this.points = [];
+    eventBus.emit('selection:updateLassoOutline', {});
 
     selectionManager.setPreviewFragment(this.previewFragment);
     selectionManager.commit();

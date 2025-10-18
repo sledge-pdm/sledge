@@ -7,12 +7,14 @@ use wasm_bindgen::prelude::*;
 /// - Point-in-polygon アルゴリズムによる正確な内部判定
 /// - バウンディングボックスによる計算範囲の最適化
 /// - メモリ効率的な実装
+/// - evenodd/nonzero塗りつぶし規則の選択
 #[wasm_bindgen]
 pub fn fill_lasso_selection(
     mask: &mut [u8],
     width: u32,
     height: u32,
-    points: &[f32], // [x1, y1, x2, y2, ...]
+    points: &[f32],  // [x1, y1, x2, y2, ...]
+    fill_rule: &str, // "evenodd" or "nonzero"
 ) -> bool {
     let width = width as usize;
     let height = height as usize;
@@ -37,9 +39,20 @@ pub fn fill_lasso_selection(
     let end_y = ((max_y.ceil() as usize) + 2).min(height);
 
     // スキャンライン方式でポリゴン内部を塗りつぶし
-    for y in start_y..end_y {
-        let intersections = find_intersections(&polygon, y as f32);
-        fill_scanline_mask(mask, width, y, &intersections, start_x, end_x);
+    match fill_rule {
+        "nonzero" => {
+            for y in start_y..end_y {
+                let intersections = find_intersections_with_direction(&polygon, y as f32);
+                fill_scanline_mask_nonzero(mask, width, y, &intersections, start_x, end_x);
+            }
+        }
+        _ => {
+            // "evenodd" またはデフォルト
+            for y in start_y..end_y {
+                let intersections = find_intersections(&polygon, y as f32);
+                fill_scanline_mask(mask, width, y, &intersections, start_x, end_x);
+            }
+        }
     }
 
     true
@@ -176,6 +189,31 @@ fn find_intersections(polygon: &[(f32, f32)], y: f32) -> Vec<f32> {
     intersections
 }
 
+/// 方向情報付きの交点を求める（nonzero規則用）
+fn find_intersections_with_direction(polygon: &[(f32, f32)], y: f32) -> Vec<(f32, i32)> {
+    let mut intersections = Vec::new();
+    let n = polygon.len();
+
+    for i in 0..n {
+        let j = (i + 1) % n;
+        let (x1, y1) = polygon[i];
+        let (x2, y2) = polygon[j];
+
+        // 水平線との交点を計算
+        if (y1 <= y && y < y2) || (y2 <= y && y < y1) {
+            if (y2 - y1).abs() > f32::EPSILON {
+                let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+                let direction = if y2 > y1 { 1 } else { -1 };
+                intersections.push((x, direction));
+            }
+        }
+    }
+
+    // X座標でソート
+    intersections.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+    intersections
+}
+
 /// スキャンラインを使ってマスクを塗りつぶす
 fn fill_scanline_mask(
     mask: &mut [u8],
@@ -196,6 +234,48 @@ fn fill_scanline_mask(
         for x in left..right {
             if x < width {
                 mask[y * width + x] = 255;
+            }
+        }
+    }
+}
+
+/// Nonzero規則でのスキャンライン塗りつぶし
+fn fill_scanline_mask_nonzero(
+    mask: &mut [u8],
+    width: usize,
+    y: usize,
+    intersections: &[(f32, i32)],
+    start_x: usize,
+    end_x: usize,
+) {
+    let mut winding = 0i32;
+    let mut last_x = start_x as f32;
+
+    for &(x, direction) in intersections {
+        // 前の位置から現在の位置まで、winding_numberが0でない場合は塗りつぶし
+        if winding != 0 {
+            let fill_start = (last_x.floor() as usize).max(start_x).min(width);
+            let fill_end = (x.floor() as usize).max(start_x).min(end_x).min(width);
+
+            for fill_x in fill_start..fill_end {
+                if fill_x < width {
+                    mask[y * width + fill_x] = 255;
+                }
+            }
+        }
+
+        winding += direction;
+        last_x = x;
+    }
+
+    // 最後の交点から右端まで、winding_numberが0でない場合は塗りつぶし
+    if winding != 0 {
+        let fill_start = (last_x.floor() as usize).max(start_x).min(width);
+        let fill_end = end_x.min(width);
+
+        for fill_x in fill_start..fill_end {
+            if fill_x < width {
+                mask[y * width + fill_x] = 255;
             }
         }
     }

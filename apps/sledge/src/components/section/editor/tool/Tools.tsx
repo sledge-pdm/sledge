@@ -11,7 +11,7 @@ import { flexRow } from '~/styles/styles';
 import ToolItem from './ToolItem';
 
 const toolsSectionContent = css`
-  padding-left: 4px;
+  padding-left: 8px;
 `;
 
 const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'lassoSelection', 'autoSelection', 'move'];

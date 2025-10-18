@@ -66,6 +66,10 @@ export type AutoSelectionPresetConfig = PresetConfig & {
   // antialias?: boolean;
 };
 
+export type LassoSelectionPresetConfig = PresetConfig & {
+  displayMode?: 'fill' | 'outline' | 'trail';
+};
+
 // ツールカテゴリの定義
 export const toolCategories = {
   [TOOL_CATEGORIES.PEN]: {
@@ -140,7 +144,15 @@ export const toolCategories = {
     name: 'Lasso Select',
     iconSrc: '/icons/tool_bar/tool/lasso_select.png',
     behavior: new LassoSelection(),
-  },
+    presets: {
+      selected: DEFAULT_PRESET,
+      options: {
+        [DEFAULT_PRESET]: {
+          displayMode: 'trail',
+        } as LassoSelectionPresetConfig,
+      },
+    },
+  } as ToolCategory<LassoSelectionPresetConfig>,
   [TOOL_CATEGORIES.MOVE]: {
     id: TOOL_CATEGORIES.MOVE,
     name: 'Move',

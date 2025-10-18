@@ -11,7 +11,8 @@ export type Events = {
   'canvas:onAdjusted': {};
   'canvas:onTransformChanged': {};
 
-  'selection:updateSVGRect': { immediate?: boolean };
+  'selection:updateSelectionPath': { immediate?: boolean };
+  'selection:updateLassoOutline': { };
   'selection:updateSelectionMenu': { immediate?: boolean };
 
   'tools:presetLoaded': { toolId?: string };

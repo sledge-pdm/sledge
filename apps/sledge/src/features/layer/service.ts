@@ -1,7 +1,6 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { mergeLayer } from '~/appliers/LayerMergeApplier';
 import { adjustZoomToFit } from '~/features/canvas';
 import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
@@ -17,6 +16,7 @@ import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { changeBaseLayerColor, createLayer } from './model';
 import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 
@@ -109,14 +109,8 @@ export async function mergeToBelowLayer(layerId: string) {
   const originLayer = layerListStore.layers[originLayerIndex];
   const targetLayer = layerListStore.layers[targetLayerIndex];
 
-  await mergeLayer({ originLayer, targetLayer });
-
-  setLayerProp(layerId, 'enabled', false, { noDiff: true });
-  if (layerListStore.activeLayerId === layerId) {
-    setLayerListStore('activeLayerId', targetLayer.id);
-  }
-
-  // TODO: add Merge history action which provides undo/redo for both layers
+  const mergeRenderer = new LayerMergeRenderer(originLayer, targetLayer);
+  await mergeRenderer.mergeLayer();
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {

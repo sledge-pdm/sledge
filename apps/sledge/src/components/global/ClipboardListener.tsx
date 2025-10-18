@@ -157,13 +157,13 @@ const ClipboardListener: Component = () => {
     if (inputFocused) return;
     e?.preventDefault();
 
-    const copyMode = await handleCopy(e);
+    const copyMode = await handleCopy(e); // this doesn't add history
     if (!copyMode) return;
 
     if (copyMode === 'layer') {
-      removeLayer(layerListStore.activeLayerId);
+      removeLayer(layerListStore.activeLayerId); // history added
     } else {
-      deleteSelectedArea(layerListStore.activeLayerId);
+      deleteSelectedArea(layerListStore.activeLayerId); // history added
     }
   };
 
@@ -190,14 +190,14 @@ const ClipboardListener: Component = () => {
           // Start floating move with pasted buffer
           const targetLayerId = layerListStore.activeLayerId;
           if (targetLayerId && meta.bbox) {
-            startMoveFromPasted(imageData, meta.bbox);
+            startMoveFromPasted(imageData, meta.bbox); // history will be added when move confirmed. selection cut(delete) is currently stored as individual history, so deleted area will not be restored by one undo.
           } else {
             // Fallback: add as a new layer
-            addLayerTo(activeIndex(), { name: meta?.sourceName ?? 'pasted selection' }, { initImage: new Uint8ClampedArray(imageData.data) });
+            addLayerTo(activeIndex(), { name: meta?.sourceName ?? 'pasted selection' }, { initImage: new Uint8ClampedArray(imageData.data) }); // history added(LayerList)
           }
         } else {
           // Default: paste as a new layer
-          addLayerTo(activeIndex(), { name: meta?.sourceName ?? 'pasted layer' }, { initImage: new Uint8ClampedArray(imageData.data) });
+          addLayerTo(activeIndex(), { name: meta?.sourceName ?? 'pasted layer' }, { initImage: new Uint8ClampedArray(imageData.data) }); // history added(LayerList)
         }
 
         break; // Assuming only one image is needed

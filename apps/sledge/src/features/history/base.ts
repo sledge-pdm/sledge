@@ -6,6 +6,7 @@ export type HistoryActionTypes =
   | 'image_pool_entry_props'
   | 'layer_buffer'
   | 'layer_list'
+  | 'layer_merge'
   | 'layer_props'
   | 'unknown';
 

@@ -9,6 +9,7 @@ import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryActio
 import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
+import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
 import { toolCategories } from '~/features/tools/Tools';
@@ -102,6 +103,11 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       icon = '/icons/misc/layer.png';
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.packedSnapshot?.layer.name}`;
+      break;
+    case 'layer_merge':
+      icon = '/icons/misc/layer.png';
+      const lmaction = action as LayerMergeHistoryAction;
+      description = `Merge / ${lmaction.originPackedSnapshot?.layer.name} > ${lmaction.targetPackedSnapshot?.layer.name}`;
       break;
     case 'layer_buffer': {
       const anvilAction = action as AnvilLayerHistoryAction;

@@ -1,4 +1,4 @@
-import { FileLocation, Size2D, Vec2 } from '@sledge/core';
+import { FileLocation, Size2D } from '@sledge/core';
 import mitt from 'mitt';
 import { ImagePoolEntry } from '~/features/image_pool';
 

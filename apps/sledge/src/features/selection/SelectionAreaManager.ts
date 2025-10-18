@@ -282,6 +282,8 @@ class SelectionAreaManager {
     this.previewMask = undefined;
     this.selectionMask.clear();
     this.setState('idle');
+
+    eventBus.emit('selection:stateChanged', { newState: 'idle' });
     eventBus.emit('selection:maskChanged', { commit: true });
   }
 

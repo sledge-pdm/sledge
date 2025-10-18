@@ -1,5 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -7,9 +6,9 @@ import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasTempControls from '~/components/global/title_bar/CanvasTempControls';
 import SaveSection from '~/components/global/title_bar/SaveSection';
-import { createNew, openExistingProject, openProject } from '~/features/io/window';
-import { fileStore } from '~/stores/EditorStores';
+import { createNew, openProject } from '~/features/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
+import { eventBus } from '~/utils/EventBus';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
@@ -80,22 +79,22 @@ const menuItemBackground = css`
   z-index: -1;
 `;
 
-const versionContainer = css`
+const saveSectionContainer = css`
   display: flex;
   flex-direction: row;
   align-self: center;
+  margin-right: 8px;
 `;
 
 interface Item {
+  id: string;
   text: string;
   action: () => void;
+  menu?: MenuListOption[];
 }
 
 const TopMenuBar: Component = () => {
   let canvasControlsRef: HTMLDivElement | undefined;
-
-  const [isRecentMenuShown, setIsRecentMenuShown] = createSignal(false);
-  const [isOpenMenuShown, setIsOpenMenuShown] = createSignal(false);
 
   const [isDecorated, setIsDecorated] = createSignal(true);
   const [availableUpdate, setAvailableUpdate] = createSignal<Update | undefined>();
@@ -108,84 +107,58 @@ const TopMenuBar: Component = () => {
 
   const leftItems: Item[] = [
     {
-      text: 'START.',
-      action: () => {
-        openWindow('start');
-      },
+      id: 'project',
+      text: 'Files.',
+      action: () => {},
+      menu: [
+        {
+          label: '+ new project.',
+          onSelect: () => {
+            createNew();
+          },
+        },
+        {
+          label: '> open project.',
+          onSelect: () => {
+            openProject();
+          },
+        },
+      ],
     },
-    // {
-    //   text: '+ NEW',
-    //   action: () => {
-    //     createNew();
-    //   },
-    // },
     {
-      text: '+ OPEN.',
-      action: () => {
-        setIsOpenMenuShown(true);
-      },
+      id: 'edit',
+      text: 'Edit.',
+      action: () => {},
+      menu: [
+        {
+          label: 'Copy.',
+          onSelect: () => {
+            eventBus.emit("clipboard:doCopy", {});
+          },
+        },
+        {
+          label: 'Cut.',
+          onSelect: () => {
+            eventBus.emit("clipboard:doCut", {});
+          },
+        },
+        {
+          label: 'Paste.',
+          onSelect: () => {
+            eventBus.emit("clipboard:doPaste", {});
+          },
+        },
+      ],
     },
   ];
   const rightItems: Item[] = [
-    // {
-    //   text: 'EXPORT.',
-    //   action: () => {
-    //     setIsExportShown(true);
-    //   },
-    // },
     {
+      id: 'settings',
       text: 'SETTINGS.',
       action: () => {
         openWindow('settings');
-        // setIsSettingShown(true);
       },
     },
-  ];
-
-  const recentFiles = fileStore.recentFiles.slice(0, 5);
-
-  const recentFilesMenuOptions = recentFiles.map((file: FileLocation) => ({
-    label: file.name || '[error]',
-    onSelect: () => {
-      openExistingProject(file);
-      setIsRecentMenuShown(false);
-    },
-  }));
-
-  const startMenu: MenuListOption[] = [
-    ...recentFilesMenuOptions,
-
-    {
-      label: 'close.',
-      onSelect: () => {
-        setIsRecentMenuShown(false);
-        createNew();
-      },
-    },
-  ];
-
-  const openMenu: MenuListOption[] = [
-    {
-      label: '+ new project.',
-      onSelect: () => {
-        setIsOpenMenuShown(false);
-        createNew();
-      },
-    },
-    {
-      label: '> open project.',
-      onSelect: () => {
-        setIsOpenMenuShown(false);
-        openProject();
-      },
-    },
-    // {
-    //   label: '> from clipboard.',
-    //   onSelect: () => {
-    //     setIsOpenMenuShown(false);
-    //     openProject();
-    //   },
-    // },
   ];
 
   return (
@@ -194,17 +167,30 @@ const TopMenuBar: Component = () => {
         <For each={leftItems}>
           {(item, i) => {
             let containerRef: HTMLDivElement;
+            const [menuOpen, setMenuOpen] = createSignal(false);
             return (
               <div ref={(el) => (containerRef = el)} class={menuItem}>
-                <a class={menuItemText} onClick={(e) => item.action()}>
+                <a
+                  class={menuItemText}
+                  onClick={(e) => {
+                    if (item.menu) setMenuOpen(true);
+                    item.action();
+                  }}
+                >
                   {item.text}
                 </a>
                 <div class={menuItemBackground} />
-                <Show when={item.text === 'RECENT.' && isRecentMenuShown()}>
-                  <MenuList options={startMenu} onClose={() => setIsRecentMenuShown(false)} />
-                </Show>
-                <Show when={item.text === '+ OPEN.' && isOpenMenuShown()}>
-                  <MenuList options={openMenu} onClose={() => setIsOpenMenuShown(false)} />
+                <Show when={item.menu && menuOpen()}>
+                  <MenuList
+                    options={item.menu!}
+                    onClose={() => setMenuOpen(false)}
+                    style={{
+                      'margin-top': '4px',
+                      'border-color': color.onBackground,
+                      'border-radius': '4px',
+                      'min-width': '120px',
+                    }}
+                  />
                 </Show>
               </div>
             );
@@ -212,16 +198,17 @@ const TopMenuBar: Component = () => {
         </For>
       </div>
 
+      <Show when={isDecorated()}>
+        <div class={saveSectionContainer}>
+          <SaveSection />
+        </div>
+      </Show>
+
       <div class={menuListCanvasControls} ref={canvasControlsRef}>
         <CanvasTempControls />
       </div>
 
       <div class={menuListRight}>
-        <Show when={isDecorated()}>
-          <div class={versionContainer}>
-            <SaveSection />
-          </div>
-        </Show>
         <For each={rightItems}>
           {(item, i) => {
             return (

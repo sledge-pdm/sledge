@@ -37,6 +37,10 @@ class FloatingMoveManager {
   private logger = new DebugLogger(this.LOG_LABEL, false);
 
   private targetLayerId: string | undefined = undefined;
+
+  public getTargetLayerId(): string | undefined {
+    return this.targetLayerId;
+  }
   private targetBufferOriginal:
     | {
         buffer: Uint8Array;
@@ -216,17 +220,13 @@ class FloatingMoveManager {
   }
 
   public cancel() {
-    //cancel
-    if (this.getState() === 'layer' || this.getState() === 'pasted') {
-      selectionManager.clear();
-    }
     // Reset the state
     this.state = undefined;
     this.floatingBuffer = undefined;
-    this.targetLayerId = undefined;
-    this.targetBuffer = undefined;
 
+    eventBus.emit('selection:stateChanged', { newState: 'selected' });
     eventBus.emit('floatingMove:stateChanged', { moving: false });
+    eventBus.emit('floatingMove:committed', {});
   }
 }
 

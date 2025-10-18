@@ -33,6 +33,10 @@ export type Events = {
   'preview:requestUpdate': { layerId?: string };
 
   'window:sideSectionSideChanged': {};
+
+  'clipboard:doCopy': {};
+  'clipboard:doCut': {};
+  'clipboard:doPaste': {};
 };
 
 export const eventBus = mitt<Events>();

@@ -101,8 +101,8 @@ export default function App() {
               showContextMenu(
                 undefined,
                 import.meta.env.DEV
-                  ? [ContextMenuItems.Save, ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools]
-                  : [ContextMenuItems.Save],
+                  ? [ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools]
+                  : [],
                 e
               );
             }}

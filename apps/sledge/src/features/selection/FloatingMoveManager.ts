@@ -116,12 +116,11 @@ class FloatingMoveManager {
       target: this.targetBuffer,
     });
 
-    eventBus.emit('floatingMove:moved', {});
-    eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
 
-    eventBus.emit('floatingMove:stateChanged', { moving: true });
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSVGRect', {});
   }
 
   public async moveDelta(delta: Vec2) {
@@ -163,10 +162,10 @@ class FloatingMoveManager {
       target: this.targetBuffer,
     });
 
-    eventBus.emit('floatingMove:moved', {});
-    eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSVGRect', {});
 
     return this.floatingBuffer;
   }
@@ -197,16 +196,12 @@ class FloatingMoveManager {
     if (patch) {
       projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
     }
-    eventBus.emit('floatingMove:committed', {});
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
     } else {
       const newOffset = this.floatingBuffer.offset;
       selectionManager.shiftOffset(newOffset);
       selectionManager.commitOffset();
-
-      eventBus.emit('selection:offsetChanged', { newOffset });
-      eventBus.emit('selection:maskChanged', { commit: true });
     }
 
     // Reset the state
@@ -214,9 +209,12 @@ class FloatingMoveManager {
     this.floatingBuffer = undefined;
     this.targetLayerId = undefined;
     this.targetBuffer = undefined;
-    eventBus.emit('floatingMove:stateChanged', { moving: false });
+
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
+
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSVGRect', { immediate: true });
   }
 
   public cancel() {
@@ -224,9 +222,8 @@ class FloatingMoveManager {
     this.state = undefined;
     this.floatingBuffer = undefined;
 
-    eventBus.emit('selection:stateChanged', { newState: 'selected' });
-    eventBus.emit('floatingMove:stateChanged', { moving: false });
-    eventBus.emit('floatingMove:committed', {});
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSVGRect', { immediate: true });
   }
 }
 

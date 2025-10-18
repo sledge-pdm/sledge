@@ -170,5 +170,7 @@ export function invertSelectionArea() {
 
   // 4) 状態更新とイベント発火
   selectionManager.setState(isSelectionAvailable() ? 'selected' : 'idle');
-  eventBus.emit('selection:maskChanged', { commit: true });
+
+  eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+  eventBus.emit('selection:updateSVGRect', { immediate: true });
 }

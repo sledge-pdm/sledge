@@ -11,7 +11,7 @@ import { interactStore, logStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 
 import rawPattern45border16 from '@assets/patterns/45border16.svg?raw';
 import rawPattern45border16x2 from '@assets/patterns/45border16x2.svg?raw';
@@ -76,24 +76,26 @@ const CanvasOverlaySVG: Component = () => {
     setPatternOffset((prev) => (prev + 0.3) % 16);
   };
 
+  // Memoize handleUpdate to keep a stable reference
+  const handleUpdate = ((e: Events['selection:updateSVGRect']) => {
+    setMoveState(floatingMoveManager.getState());
+    if (e.immediate) {
+      updateSelectionOutline();
+    } else {
+      setSelectionChanged(true);
+    }
+  }) as (e: Events['selection:updateSVGRect']) => void;
+
   // Events
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:maskChanged', () => setSelectionChanged(true));
-    eventBus.on('selection:offsetChanged', () => setSelectionChanged(true));
-    eventBus.on('selection:stateChanged', () => setSelectionChanged(true));
-    eventBus.on('floatingMove:moved', () => setMoveState(floatingMoveManager.getState()));
-    eventBus.on('floatingMove:stateChanged', () => setMoveState(floatingMoveManager.getState()));
+    eventBus.on('selection:updateSVGRect', handleUpdate);
     setSelectionChanged(true);
 
     const updatePatternInterval = setInterval(updatePatternOffset, 30);
 
     return () => {
-      eventBus.off('selection:maskChanged');
-      eventBus.off('selection:offsetChanged');
-      eventBus.off('selection:stateChanged');
-      eventBus.off('floatingMove:moved');
-      eventBus.off('floatingMove:stateChanged');
+      eventBus.off('selection:updateSVGRect', handleUpdate);
       stopRenderLoop();
       clearInterval(updatePatternInterval);
     };

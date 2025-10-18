@@ -133,19 +133,19 @@ const TopMenuBar: Component = () => {
         {
           label: 'Copy.',
           onSelect: () => {
-            eventBus.emit("clipboard:doCopy", {});
+            eventBus.emit('clipboard:doCopy', {});
           },
         },
         {
           label: 'Cut.',
           onSelect: () => {
-            eventBus.emit("clipboard:doCut", {});
+            eventBus.emit('clipboard:doCut', {});
           },
         },
         {
           label: 'Paste.',
           onSelect: () => {
-            eventBus.emit("clipboard:doPaste", {});
+            eventBus.emit('clipboard:doPaste', {});
           },
         },
       ],

@@ -97,38 +97,19 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }, Number(globalConfig.performance.targetFPS))
   );
 
-  const handleAreaChanged = (e: Events['selection:maskChanged']) => {
-    if (e.commit) {
+  // Move handleUpdate outside the component to keep its reference stable
+  const handleUpdate = (e: Events['selection:updateSelectionMenu']) => {
+    setSelectionState(selectionManager.getState());
+    setFloatingMoveState(floatingMoveManager.isMoving());
+    if (e.immediate) {
       updateMenuPos();
     } else {
       setUpdatePosition(true);
     }
   };
-  const handleOffsetChanged = (e: Events['selection:offsetChanged']) => {
-    setUpdatePosition(true);
-  };
-  const handleStateChanged = (e: Events['selection:stateChanged']) => {
-    setSelectionState(e.newState);
-    setUpdatePosition(true);
-  };
-  const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
-    setFloatingMoveState(e.moving);
-    setUpdatePosition(true);
-  };
-  const handleMoved = (e: Events['floatingMove:moved']) => {
-    setUpdatePosition(true);
-  };
-  const handleRequestMenuUpdate = (e: Events['selection:requestMenuUpdate']) => {
-    setUpdatePosition(true);
-  };
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:maskChanged', handleAreaChanged);
-    eventBus.on('selection:offsetChanged', handleOffsetChanged);
-    eventBus.on('selection:stateChanged', handleStateChanged);
-    eventBus.on('selection:requestMenuUpdate', handleRequestMenuUpdate);
-    eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
-    eventBus.on('floatingMove:moved', handleMoved);
+    eventBus.on('selection:updateSelectionMenu', handleUpdate);
 
     const observer = new ResizeObserver(() => {
       setUpdatePosition(true);
@@ -140,12 +121,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
 
     return () => {
       stopRenderLoop();
-      eventBus.off('selection:maskChanged', handleAreaChanged);
-      eventBus.off('selection:offsetChanged', handleOffsetChanged);
-      eventBus.off('selection:stateChanged', handleStateChanged);
-      eventBus.off('selection:requestMenuUpdate', handleRequestMenuUpdate);
-      eventBus.off('floatingMove:stateChanged', handleMoveStateChanged);
-      eventBus.off('floatingMove:moved', handleMoved);
+      eventBus.off('selection:updateSelectionMenu', handleUpdate);
       observer.disconnect();
     };
   });

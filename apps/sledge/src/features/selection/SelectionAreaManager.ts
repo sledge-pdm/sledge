@@ -47,7 +47,9 @@ class SelectionAreaManager {
 
   public setState(state: SelectionState) {
     this.state = state;
-    eventBus.emit('selection:stateChanged', { newState: state });
+
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSVGRect', {});
   }
 
   private areaOffset: Vec2 = { x: 0, y: 0 };
@@ -61,13 +63,17 @@ class SelectionAreaManager {
   public shiftOffset(delta: Vec2) {
     this.areaOffset.x += delta.x;
     this.areaOffset.y += delta.y;
-    eventBus.emit('selection:offsetChanged', { newOffset: this.areaOffset });
+
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSVGRect', {});
     return this.areaOffset;
   }
 
   public setOffset(pos: Vec2) {
     this.areaOffset = pos;
-    eventBus.emit('selection:offsetChanged', { newOffset: this.areaOffset });
+
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSVGRect', {});
     return this.areaOffset;
   }
 
@@ -117,7 +123,9 @@ class SelectionAreaManager {
   beginPreview(mode: SelectionEditMode) {
     this.editMode = mode;
     this.areaOffset = { x: 0, y: 0 };
-    eventBus.emit('selection:offsetChanged', { newOffset: this.areaOffset });
+
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSVGRect', {});
 
     if (this.selectionMask.getWidth() === 0 || this.selectionMask.getHeight() === 0) {
       console.warn('SelectionManager: SelectionMask size is 0x0. Canvas size may not be initialized properly.');
@@ -185,7 +193,10 @@ class SelectionAreaManager {
     }
 
     // 毎回プレビュー更新イベント
-    if (changed) eventBus.emit('selection:maskChanged', { commit: false });
+    if (changed) {
+      eventBus.emit('selection:updateSelectionMenu', {});
+      eventBus.emit('selection:updateSVGRect', {});
+    }
   }
 
   /** onEnd で呼ぶ */
@@ -217,7 +228,8 @@ class SelectionAreaManager {
     // 状態を更新: 選択範囲があればselected、なければidle
     this.updateStateBasedOnSelection();
 
-    eventBus.emit('selection:maskChanged', { commit: true });
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSVGRect', { immediate: true });
   }
 
   selectAll() {
@@ -225,7 +237,9 @@ class SelectionAreaManager {
 
     this.previewMask = undefined;
     this.updateStateBasedOnSelection();
-    eventBus.emit('selection:maskChanged', { commit: true });
+
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSVGRect', { immediate: true });
   }
 
   /** プレビューをキャンセル */
@@ -235,7 +249,8 @@ class SelectionAreaManager {
     // 状態を更新: キャンセル後は選択状況に基づいて状態を決定
     this.updateStateBasedOnSelection();
 
-    eventBus.emit('selection:maskChanged', { commit: false });
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSVGRect', { immediate: true });
   }
 
   public getCombinedMask(): Uint8Array {
@@ -275,7 +290,8 @@ class SelectionAreaManager {
       this.setState('selected');
     }
 
-    eventBus.emit('selection:maskChanged', { commit: true });
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSVGRect', { immediate: true });
   }
 
   clear() {
@@ -283,8 +299,8 @@ class SelectionAreaManager {
     this.selectionMask.clear();
     this.setState('idle');
 
-    eventBus.emit('selection:stateChanged', { newState: 'idle' });
-    eventBus.emit('selection:maskChanged', { commit: true });
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSVGRect', { immediate: true });
   }
 
   /**

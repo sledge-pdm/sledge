@@ -23,8 +23,9 @@ export class AutoSelection extends SelectionBase {
     const preview = selectionManager.getPreviewMask();
     if (preview && mask) {
       preview.setMask(mask);
-      // プレビュー更新イベント（UI反映用）
-      eventBus.emit('selection:maskChanged', { commit: false });
+
+      eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+      eventBus.emit('selection:updateSVGRect', { immediate: true });
     }
   }
 

@@ -16,7 +16,7 @@ export const paletteColorBoxContainer = css`
 `;
 
 export const paletteColorBoxCaption = css`
-  width: 12px;
+  width: 10px;
   color: var(--color-muted);
 `;
 
@@ -24,7 +24,7 @@ const Palette: Component = () => {
   return (
     <div class={paletteRoot}>
       <div class={paletteColorBoxContainer}>
-        <p class={paletteColorBoxCaption}>1.</p>
+        <p class={paletteColorBoxCaption}>1</p>
         <ColorBox
           color={colorStore.primary}
           sizePx={30}
@@ -34,7 +34,7 @@ const Palette: Component = () => {
         />
       </div>
       <div class={paletteColorBoxContainer}>
-        <p class={paletteColorBoxCaption}>2.</p>
+        <p class={paletteColorBoxCaption}>2</p>
         <ColorBox
           color={colorStore.secondary}
           sizePx={30}

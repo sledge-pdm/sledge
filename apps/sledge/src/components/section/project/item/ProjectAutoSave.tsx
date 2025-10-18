@@ -4,11 +4,6 @@ import { Component } from 'solid-js';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
-const autoSaveContentStyle = css`
-  gap: 12px;
-  margin-top: 8px;
-`;
-
 const intervalContainerStyle = css`
   display: flex;
 `;

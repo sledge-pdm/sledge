@@ -14,6 +14,7 @@ import LayerItem from './LayerItem';
 
 const layerListSectionContent = css`
   padding-left: 2px;
+  padding-right: 4px;
   padding-top: 2px;
 `;
 

@@ -49,7 +49,7 @@ const ToolItem: Component<Props> = (props: Props) => {
       {/* <Light on={props.isInUse} /> */}
       <div class={toolConfigRowClickable} onClick={() => setActiveToolCategory(category.id)}>
         <div class={iconWrapper}>
-          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} />
+          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} hoverColor={color.active} />
         </div>
         <Show when={shouldShowLabel()}>
           <p

@@ -183,16 +183,10 @@ export const CanvasResizeFrame: Component = () => {
           />
           {/* 情報表示: 1行目 = 表示上のピクセルサイズ (スクリーン), 2行目 = 論理キャンバスサイズ + オフセット */}
           <g font-size={16} style={{ 'font-family': fonts.ZFB08 }} fill='white' stroke='none'>
-            {/* <text x={10} y={25}>
-              screen: {Math.round(size()!.width)} x {Math.round(size()!.height)}
-            </text> */}
             <Show when={logicalFrame()}>
               <text x={8} y={20}>
-                ({logicalFrame()!.offsetX}, {logicalFrame()!.offsetY})
+                {logicalFrame()!.offsetX}, {logicalFrame()!.offsetY}
               </text>
-              {/* <text x={size()!.width - 10} y={20} text-anchor='end'>
-                {logicalFrame()!.canvasWidth} x {logicalFrame()!.canvasHeight}
-              </text> */}
             </Show>
           </g>
           {/* 四隅 */}

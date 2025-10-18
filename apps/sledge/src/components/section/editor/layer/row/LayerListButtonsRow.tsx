@@ -3,7 +3,7 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component } from 'solid-js';
 import LayerListIconButton from '~/components/section/editor/layer/row/LayerListIconButton';
 import { activeLayer, addLayer } from '~/features/layer';
-import { clearLayer, duplicateLayer, removeLayerFromUser, setLayerProp } from '~/features/layer/service';
+import { clearLayer, duplicateLayer, mergeToBelowLayer, removeLayerFromUser, setLayerProp } from '~/features/layer/service';
 import { layerListStore } from '~/stores/ProjectStores';
 import { errorButton, flexRow } from '~/styles/styles';
 
@@ -46,6 +46,13 @@ const LayerListButtonsRow: Component<Props> = (props) => {
             if (active) {
               setLayerProp(active.id, 'enabled', !active.enabled);
             }
+          }}
+        />
+        <LayerListIconButton
+          iconSrc={'/icons/sections/layer/merge_down_9.png'}
+          title={'merge down to below layer.'}
+          onClick={async () => {
+            await mergeToBelowLayer(layerListStore.activeLayerId);
           }}
         />
         <LayerListIconButton

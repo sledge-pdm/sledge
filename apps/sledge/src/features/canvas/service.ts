@@ -208,20 +208,20 @@ export const setRotation = (rotation: number) => {
 
 export const toggleVerticalFlip = () => {
   setInteractStore('verticalFlipped', (v) => !v);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 export const setVerticalFlip = (flipped: boolean) => {
   setInteractStore('verticalFlipped', flipped);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const toggleHorizontalFlip = () => {
   setInteractStore('horizontalFlipped', (v) => !v);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 export const setHorizontalFlip = (flipped: boolean) => {
   setInteractStore('horizontalFlipped', flipped);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const resetOrientation = () => {

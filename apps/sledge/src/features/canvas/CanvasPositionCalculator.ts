@@ -142,7 +142,7 @@ export function getRelativeCanvasAreaPosition(canvasPos: Vec2) {
 
 export function clientPositionToCanvasPosition(clientPos: Vec2): Vec2 {
   const canvasRef = document.getElementById('interact-canvas') as HTMLCanvasElement | undefined;
-  if (canvasRef === undefined) return { x: 0, y: 0 };
+  if (!canvasRef) return { x: 0, y: 0 };
   // pointer 座標
   const clientX = clientPos.x;
   const clientY = clientPos.y;
@@ -179,7 +179,7 @@ export function clientPositionToCanvasPosition(clientPos: Vec2): Vec2 {
 
 export function clientPositionToCanvasPositionWithoutRotation(clientPos: Vec2): Vec2 {
   const canvasRef = document.getElementById('interact-canvas') as HTMLCanvasElement | undefined;
-  if (canvasRef === undefined) return { x: 0, y: 0 };
+  if (!canvasRef) return { x: 0, y: 0 };
   // pointer 座標
   const clientX = clientPos.x;
   const clientY = clientPos.y;

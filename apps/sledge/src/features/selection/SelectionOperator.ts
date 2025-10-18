@@ -96,10 +96,14 @@ export function getSelectionOffset() {
 }
 
 export function cancelSelection() {
+  const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
   if (floatingMoveManager.isMoving()) {
     floatingMoveManager.cancel();
   }
   selectionManager.clear();
+
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'selection cancelled' });
+  eventBus.emit('preview:requestUpdate', { layerId });
 }
 
 export function commitMove() {
@@ -107,7 +111,11 @@ export function commitMove() {
 }
 
 export function cancelMove() {
+  const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
   floatingMoveManager.cancel();
+
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'move cancelled' });
+  eventBus.emit('preview:requestUpdate', { layerId });
 }
 
 export function deleteSelectedArea(layerId?: string): boolean {
@@ -162,5 +170,7 @@ export function invertSelectionArea() {
 
   // 4) 状態更新とイベント発火
   selectionManager.setState(isSelectionAvailable() ? 'selected' : 'idle');
-  eventBus.emit('selection:maskChanged', { commit: true });
+
+  eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+  eventBus.emit('selection:updateSVGRect', { immediate: true });
 }

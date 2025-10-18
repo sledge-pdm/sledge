@@ -80,10 +80,10 @@ const defaultButtonContainerStyle = css`
 `;
 
 const defaultInfoStyle = css`
-  font-family: ZFB03B;
+  font-family: ZFB08;
   font-size: 8px;
   margin-left: 4px;
-  opacity: 0.5;
+  opacity: 0.75;
 `;
 
 const actionsSectionStyle = css`
@@ -255,7 +255,7 @@ const CanvasSettings: Component = () => {
           >
             Set as Default.
           </Button>
-          <p class={defaultInfoStyle}>[ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]</p>
+          <p class={defaultInfoStyle}>current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`}</p>
         </div>
         {/* <p class={sectionSubCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
           info.

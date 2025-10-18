@@ -145,10 +145,10 @@ const App: Component = () => {
                 <p
                   style={{
                     'font-family': 'ZFB03B',
-                    opacity: 0.6,
+                    opacity: 0.15,
                   }}
                 >
-                  2025 sledge all rights reserved.
+                  2025 innsbluck.
                 </p>
               </div>
 

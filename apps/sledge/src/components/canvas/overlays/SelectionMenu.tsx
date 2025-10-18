@@ -20,6 +20,7 @@ import { Vec2 } from '@sledge/core';
 import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 
@@ -96,34 +97,19 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     }, Number(globalConfig.performance.targetFPS))
   );
 
-  const handleAreaChanged = (e: Events['selection:maskChanged']) => {
-    if (e.commit) {
+  // Move handleUpdate outside the component to keep its reference stable
+  const handleUpdate = (e: Events['selection:updateSelectionMenu']) => {
+    setSelectionState(selectionManager.getState());
+    setFloatingMoveState(floatingMoveManager.isMoving());
+    if (e.immediate) {
       updateMenuPos();
     } else {
       setUpdatePosition(true);
     }
   };
-  const handleMoved = (e: Events['selection:offsetChanged']) => {
-    setUpdatePosition(true);
-  };
-  const handleStateChanged = (e: Events['selection:stateChanged']) => {
-    setSelectionState(e.newState);
-    setUpdatePosition(true);
-  };
-  const handleMoveStateChanged = (e: Events['floatingMove:stateChanged']) => {
-    setFloatingMoveState(e.moving);
-    setUpdatePosition(true);
-  };
-  const handleRequestMenuUpdate = (e: Events['selection:requestMenuUpdate']) => {
-    setUpdatePosition(true);
-  };
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:maskChanged', handleAreaChanged);
-    eventBus.on('selection:offsetChanged', handleMoved);
-    eventBus.on('selection:stateChanged', handleStateChanged);
-    eventBus.on('selection:requestMenuUpdate', handleRequestMenuUpdate);
-    eventBus.on('floatingMove:stateChanged', handleMoveStateChanged);
+    eventBus.on('selection:updateSelectionMenu', handleUpdate);
 
     const observer = new ResizeObserver(() => {
       setUpdatePosition(true);
@@ -135,11 +121,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
 
     return () => {
       stopRenderLoop();
-      eventBus.off('selection:maskChanged', handleAreaChanged);
-      eventBus.off('selection:offsetChanged', handleMoved);
-      eventBus.off('selection:stateChanged', handleStateChanged);
-      eventBus.off('selection:requestMenuUpdate', handleRequestMenuUpdate);
-      eventBus.off('floatingMove:stateChanged', handleMoveStateChanged);
+      eventBus.off('selection:updateSelectionMenu', handleUpdate);
       observer.disconnect();
     };
   });
@@ -165,11 +147,24 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     if (!isSelectionAvailable()) return;
 
     if (!containerRef) return;
-    const outlineBound = selectionManager.getSelectionMask().getBoundBox();
-    if (!outlineBound) return;
+    const boundbox = selectionManager.getSelectionMask().getBoundBox();
+    if (!boundbox) return;
+    const width = boundbox.right - boundbox.left + 1;
+    const height = boundbox.bottom - boundbox.top + 1;
+    const movingOffset = floatingMoveManager.isMoving() ? floatingMoveManager.getFloatingBuffer()!.offset : { x: 0, y: 0 };
+    const offset = {
+      x: boundbox.left + movingOffset.x,
+      y: boundbox.top + movingOffset.y,
+    };
+
+    const left = offset.x;
+    const top = offset.y;
+    const right = left + width;
+    const bottom = top + height;
+
     const rightBottomOnScreen = canvasToScreenNoZoom({
-      x: interactStore.horizontalFlipped ? outlineBound.left : outlineBound.right + 1,
-      y: interactStore.verticalFlipped ? outlineBound.top : outlineBound.bottom + 1,
+      x: interactStore.horizontalFlipped ? left : right,
+      y: interactStore.verticalFlipped ? top : bottom,
     });
     const containerWidth = containerRef.offsetWidth;
     const containerHeight = containerRef.offsetHeight;

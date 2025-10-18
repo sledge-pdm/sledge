@@ -279,6 +279,7 @@ const MenuContent = () => {
           src='/icons/selection/cancel_10.png'
           onClick={() => {
             cancelMove();
+            cancelSelection();
           }}
           label='cancel.'
           title='cancel.'

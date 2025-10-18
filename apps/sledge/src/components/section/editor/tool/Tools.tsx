@@ -1,3 +1,5 @@
+import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { spacing } from '@sledge/theme';
 import { Component, For, Show } from 'solid-js';
 import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManager';
@@ -8,21 +10,21 @@ import { toolStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
 import ToolItem from './ToolItem';
 
-const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'autoSelection', 'move'];
+const toolsSectionContent = css`
+  padding-left: 8px;
+`;
+
+const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'lassoSelection', 'autoSelection', 'move'];
 
 const Tools: Component = () => {
   return (
     <SectionItem title='tool.'>
-      <div class={sectionContent}>
-        <div class={flexRow} style={{ 'margin-bottom': spacing.xs, gap: spacing.lg }}>
+      <div class={clsx(sectionContent, toolsSectionContent)}>
+        <div class={flexRow} style={{ 'margin-bottom': spacing.xs, gap: '16px' }}>
           <For each={mainTools}>
             {(categoryId) => {
               const isInUse = () => categoryId === toolStore.activeToolCategory;
-              return (
-                <div>
-                  <ToolItem categoryId={categoryId} withLabel='inUse' isInUse={isInUse()} />
-                </div>
-              );
+              return <ToolItem categoryId={categoryId} withLabel='inUse' isInUse={isInUse()} />;
             }}
           </For>
         </div>

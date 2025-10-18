@@ -29,7 +29,20 @@ export type TileFragment = {
   index: TileIndex;
 };
 
-export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
+export type WholeFragment = {
+  kind: 'whole';
+  mask: Uint8Array; // should be sized to layer width * layer height
+};
+export type PartialFragment = {
+  kind: 'partial';
+  partialMask: Uint8Array; // should be sized to bbox width * bbox height
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type SelectionFragment = PixelFragment | RectFragment | TileFragment | WholeFragment | PartialFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type SelectionState = 'idle' | 'selected';
 
@@ -49,7 +62,7 @@ class SelectionAreaManager {
     this.state = state;
 
     eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSVGRect', {});
+    eventBus.emit('selection:updateSelectionPath', {});
   }
 
   private areaOffset: Vec2 = { x: 0, y: 0 };
@@ -65,7 +78,7 @@ class SelectionAreaManager {
     this.areaOffset.y += delta.y;
 
     eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSVGRect', {});
+    eventBus.emit('selection:updateSelectionPath', {});
     return this.areaOffset;
   }
 
@@ -73,7 +86,7 @@ class SelectionAreaManager {
     this.areaOffset = pos;
 
     eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSVGRect', {});
+    eventBus.emit('selection:updateSelectionPath', {});
     return this.areaOffset;
   }
 
@@ -125,7 +138,7 @@ class SelectionAreaManager {
     this.areaOffset = { x: 0, y: 0 };
 
     eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSVGRect', {});
+    eventBus.emit('selection:updateSelectionPath', {});
 
     if (this.selectionMask.getWidth() === 0 || this.selectionMask.getHeight() === 0) {
       console.warn('SelectionManager: SelectionMask size is 0x0. Canvas size may not be initialized properly.');
@@ -164,6 +177,11 @@ class SelectionAreaManager {
         changed = true;
         break;
       }
+      case 'whole': {
+        this.previewMask.setMask(frag.mask);
+        changed = true;
+        break;
+      }
       case 'tile': {
         if (!anvil) break;
         const tileSize = anvil.getTileSize();
@@ -190,12 +208,33 @@ class SelectionAreaManager {
         changed = true;
         break;
       }
+      case 'partial': {
+        // PartialFragmentから全体マスクに部分的にコピー
+        const fullMask = this.previewMask.getMask();
+        const fullWidth = this.previewMask.getWidth();
+        const fullHeight = this.previewMask.getHeight();
+
+        for (let py = 0; py < frag.height; py++) {
+          for (let px = 0; px < frag.width; px++) {
+            const srcIndex = py * frag.width + px;
+            const destX = frag.x + px;
+            const destY = frag.y + py;
+
+            if (destX >= 0 && destX < fullWidth && destY >= 0 && destY < fullHeight) {
+              const destIndex = destY * fullWidth + destX;
+              fullMask[destIndex] = frag.partialMask[srcIndex];
+            }
+          }
+        }
+        changed = true;
+        break;
+      }
     }
 
     // 毎回プレビュー更新イベント
     if (changed) {
       eventBus.emit('selection:updateSelectionMenu', {});
-      eventBus.emit('selection:updateSVGRect', {});
+      eventBus.emit('selection:updateSelectionPath', {});
     }
   }
 
@@ -229,7 +268,7 @@ class SelectionAreaManager {
     this.updateStateBasedOnSelection();
 
     eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSVGRect', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 
   selectAll() {
@@ -239,7 +278,7 @@ class SelectionAreaManager {
     this.updateStateBasedOnSelection();
 
     eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSVGRect', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 
   /** プレビューをキャンセル */
@@ -250,7 +289,7 @@ class SelectionAreaManager {
     this.updateStateBasedOnSelection();
 
     eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSVGRect', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 
   public getCombinedMask(): Uint8Array {
@@ -291,7 +330,7 @@ class SelectionAreaManager {
     }
 
     eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSVGRect', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 
   clear() {
@@ -300,7 +339,7 @@ class SelectionAreaManager {
     this.setState('idle');
 
     eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSVGRect', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 
   /**

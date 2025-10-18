@@ -172,5 +172,5 @@ export function invertSelectionArea() {
   selectionManager.setState(isSelectionAvailable() ? 'selected' : 'idle');
 
   eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-  eventBus.emit('selection:updateSVGRect', { immediate: true });
+  eventBus.emit('selection:updateSelectionPath', { immediate: true });
 }

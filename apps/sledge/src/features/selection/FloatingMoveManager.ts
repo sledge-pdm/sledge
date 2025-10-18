@@ -120,7 +120,7 @@ class FloatingMoveManager {
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
 
     eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSVGRect', {});
+    eventBus.emit('selection:updateSelectionPath', {});
   }
 
   public async moveDelta(delta: Vec2) {
@@ -165,7 +165,7 @@ class FloatingMoveManager {
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
     eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSVGRect', {});
+    eventBus.emit('selection:updateSelectionPath', {});
 
     return this.floatingBuffer;
   }
@@ -214,7 +214,7 @@ class FloatingMoveManager {
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
 
     eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSVGRect', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 
   public cancel() {
@@ -223,7 +223,7 @@ class FloatingMoveManager {
     this.floatingBuffer = undefined;
 
     eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSVGRect', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 }
 

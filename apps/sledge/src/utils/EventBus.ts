@@ -12,7 +12,7 @@ export type Events = {
   'canvas:onTransformChanged': {};
 
   'selection:updateSelectionPath': { immediate?: boolean };
-  'selection:updateLassoOutline': { };
+  'selection:updateLassoOutline': {};
   'selection:updateSelectionMenu': { immediate?: boolean };
 
   'tools:presetLoaded': { toolId?: string };

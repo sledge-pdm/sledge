@@ -231,22 +231,14 @@ const CanvasOverlaySVG: Component = () => {
               </pattern>
             </defs>
             <defs>
-              <pattern
-                id='45border16x2-svg'
-                x={0}
-                y={0}
-                width='32'
-                height='32'
-                patternUnits='userSpaceOnUse'
-                patternContentUnits='userSpaceOnUse'
-              >
+              <pattern id='45border16x2-svg' x={0} y={0} width='32' height='32' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
                 <g innerHTML={pattern45border16x2Path} />
               </pattern>
             </defs>
 
             <path
               d={lassoOutlinePath()}
-              fill={lassoDisplayMode() === 'outline' ? "#00000050" : 'none'}
+              fill={lassoDisplayMode() === 'outline' ? '#00000050' : 'none'}
               fill-rule='nonzero'
               clip-rule='evenodd'
               stroke={lassoDisplayMode() === 'outline' ? color.selectionBorder : 'red'}
@@ -254,7 +246,7 @@ const CanvasOverlaySVG: Component = () => {
               vector-effect='non-scaling-stroke'
               pointer-events='none'
               stroke-dasharray={lassoDisplayMode() === 'outline' ? `${borderDash} ${borderDash}` : undefined}
-              class={lassoDisplayMode() === 'outline' ? "marching-ants-animation" : undefined}
+              class={lassoDisplayMode() === 'outline' ? 'marching-ants-animation' : undefined}
               transform={`scale(${interactStore.zoom})`}
             />
 

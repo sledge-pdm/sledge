@@ -29,7 +29,12 @@ export type TileFragment = {
   index: TileIndex;
 };
 
-export type SelectionFragment = PixelFragment | RectFragment | TileFragment;
+export type WholeFragment = {
+  kind: 'whole';
+  mask: Uint8Array; // should be layer sized to width * layer height
+};
+
+export type SelectionFragment = PixelFragment | RectFragment | TileFragment | WholeFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type SelectionState = 'idle' | 'selected';
 
@@ -161,6 +166,11 @@ class SelectionAreaManager {
     switch (frag.kind) {
       case 'pixel': {
         this.previewMask.setFlag(frag.position, 1);
+        changed = true;
+        break;
+      }
+      case 'whole': {
+        this.previewMask.setMask(frag.mask);
         changed = true;
         break;
       }

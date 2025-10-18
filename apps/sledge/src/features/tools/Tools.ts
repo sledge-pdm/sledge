@@ -4,6 +4,7 @@ import { PenTool } from '~/features/tools/behaviors/draw/pen/PenTool';
 import { MoveTool } from '~/features/tools/behaviors/move/MoveTool';
 import { PipetteTool } from '~/features/tools/behaviors/pipette/PipetteTool';
 import { AutoSelection } from '~/features/tools/behaviors/selection/auto/AutoSelection';
+import { LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import { RectSelection } from '~/features/tools/behaviors/selection/rect/RectSelection';
 import { ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 
@@ -16,6 +17,7 @@ export const TOOL_CATEGORIES = {
   PIPETTE: 'pipette',
   RECT_SELECTION: 'rectSelection',
   AUTO_SELECTION: 'autoSelection',
+  LASSO_SELECTION: 'lassoSelection',
   MOVE: 'move',
 } as const;
 
@@ -133,6 +135,12 @@ export const toolCategories = {
       },
     },
   } as ToolCategory<AutoSelectionPresetConfig>,
+  [TOOL_CATEGORIES.LASSO_SELECTION]: {
+    id: TOOL_CATEGORIES.LASSO_SELECTION,
+    name: 'Lasso Select',
+    iconSrc: '/icons/tool_bar/tool/lasso_select.png',
+    behavior: new LassoSelection(),
+  },
   [TOOL_CATEGORIES.MOVE]: {
     id: TOOL_CATEGORIES.MOVE,
     name: 'Move',

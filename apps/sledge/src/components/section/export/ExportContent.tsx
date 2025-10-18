@@ -9,6 +9,7 @@ import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { CanvasExportOptions, defaultExportDir, exportImage } from '~/features/io/image/out/export';
+import { allLayers } from '~/features/layer';
 import { fileStore } from '~/stores/EditorStores';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -23,10 +24,9 @@ const qualityField = css`
 `;
 
 const qualityFieldDisabled = css`
-  display: none;
-  /* pointer-events: none;
+  pointer-events: none;
   cursor: auto;
-  opacity: 0.25; */
+  opacity: 0.15;
 `;
 
 const exportDialogCustomScaleInput = css`
@@ -89,16 +89,18 @@ const exportSection = css`
 
 const exportControls = css`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
-  justify-content: end;
-  align-items: center;
+  align-items: end;
   gap: 8px;
   margin-bottom: 8px;
 `;
 
 const estimatedSize = css`
   width: fit-content;
+  margin-bottom: 8px;
+  margin-left: 16px;
+  opacity: 0.75;
 `;
 
 const scaleOptions: DropdownOption<number>[] = [
@@ -130,7 +132,11 @@ const ExportContent: Component = () => {
 
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
-    fileName: nameWithoutExtension() ?? 'new project',
+    fileName: fileStore.savedLocation.name ? nameWithoutExtension() : 'new project',
+    exportOptions: {
+      ...lastSettingsStore.exportSettings.exportOptions,
+      perLayer: false,
+    },
   });
   const [customScale, setCustomScale] = createSignal(1);
 
@@ -193,9 +199,7 @@ const ExportContent: Component = () => {
   return (
     <div class={sectionContent} style={{ gap: '12px', 'box-sizing': 'border-box' }}>
       <div class={flexCol}>
-        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px', width: '100%' }}>
-          Recent folders.
-        </p>
+        <p class={sectionSubCaption}>Recent folders.</p>
         <div class={sectionSubContent}>
           <Dropdown
             options={exportDirHistoryOptions() ?? []}
@@ -209,9 +213,7 @@ const ExportContent: Component = () => {
       </div>
 
       <div class={flexCol}>
-        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
-          Output Directory.
-        </p>
+        <p class={sectionSubCaption}>Output Directory.</p>
         <div class={sectionSubContent}>
           <p class={directoryPath}>{settings.dirPath}\</p>
           <button class={browseButton} onClick={openDirSelectionDialog}>
@@ -220,12 +222,26 @@ const ExportContent: Component = () => {
         </div>
       </div>
 
-      <Checkbox checked={settings.exportOptions.perLayer} onChange={(v) => setSettings('exportOptions', 'perLayer', v)} label='Export Per Layer.' />
+      <div class={flexCol}>
+        <p class={sectionSubCaption}>File Name.</p>
+        <div class={sectionSubContent}>
+          <div class={fileNameContainer}>
+            <input
+              class={fileNameInput}
+              placeholder='image'
+              value={settings.fileName}
+              autocomplete='off'
+              onInput={(e) => setSettings('fileName', e.target.value)}
+            />
+            <Show when={!settings.exportOptions.perLayer}>
+              <p>.{convertToExtension(settings.exportOptions.format)}</p>
+            </Show>
+          </div>
+        </div>
+      </div>
 
       <div class={flexCol}>
-        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
-          Format.
-        </p>
+        <p class={sectionSubCaption}>Format.</p>
         <div class={sectionSubContent}>
           <Dropdown options={fileTypeOptions} value={settings.exportOptions.format} onChange={(e) => setSettings('exportOptions', 'format', e)} />
         </div>
@@ -235,9 +251,7 @@ const ExportContent: Component = () => {
         class={clsx(qualityField, !qualityMutableExtensions.includes(settings.exportOptions.format) && qualityFieldDisabled)}
         style={{ 'flex-grow': 1 }}
       >
-        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
-          Quality.
-        </p>
+        <p class={sectionSubCaption}>Quality.</p>
         <div class={sectionSubContent}>
           <Slider
             labelMode={'left'}
@@ -252,27 +266,7 @@ const ExportContent: Component = () => {
       </div>
 
       <div class={flexCol}>
-        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
-          File Name.
-        </p>
-        <div class={sectionSubContent}>
-          <div class={fileNameContainer}>
-            <input
-              class={fileNameInput}
-              placeholder='image'
-              value={settings.fileName}
-              autocomplete='off'
-              onInput={(e) => setSettings('fileName', e.target.value)}
-            />
-            <p>.{convertToExtension(settings.exportOptions.format)}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class={flexCol}>
-        <p class={sectionSubCaption} style={{ 'margin-bottom': '8px' }}>
-          Scale.
-        </p>
+        <p class={sectionSubCaption}>Scale.</p>
         <div class={sectionSubContent}>
           <div class={scaleContainer}>
             <Dropdown
@@ -305,11 +299,32 @@ const ExportContent: Component = () => {
         </div>
       </div>
 
+      <p class={estimatedSize}>
+        estimated: {canvasStore.canvas.width * finalScale()} x {canvasStore.canvas.height * finalScale()}
+      </p>
+
       <div class={exportSection}>
-        <p class={estimatedSize}>
-          estimated size: {canvasStore.canvas.width * finalScale()} x {canvasStore.canvas.height * finalScale()}
-        </p>
         <div class={exportControls}>
+          <Checkbox
+            checked={settings.exportOptions.perLayer}
+            onChange={(v) => setSettings('exportOptions', 'perLayer', v)}
+            label='Export Per Layer.'
+            labelMode='left'
+            title={
+              !settings.fileName || !settings.dirPath
+                ? undefined
+                : 'Layer images will be exported in:\n' +
+                  allLayers()
+                    .map((layer) => {
+                      return join(
+                        settings.dirPath!,
+                        settings.fileName!,
+                        `${settings.fileName}_${layer.name}.${convertToExtension(settings.exportOptions.format)}`
+                      );
+                    })
+                    .join('\n')
+            }
+          />
           <Checkbox
             checked={settings.showDirAfterSave}
             onChange={(checked) => setSettings('showDirAfterSave', checked)}
@@ -318,7 +333,7 @@ const ExportContent: Component = () => {
           />
         </div>
 
-        <button class={accentedButton} onClick={(e) => requestExport()}>
+        <button class={accentedButton} onClick={(e) => requestExport()} disabled={!settings.dirPath || !settings.fileName}>
           Export
         </button>
       </div>

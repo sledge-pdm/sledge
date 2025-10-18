@@ -58,7 +58,7 @@ const layerItemType = css`
 const layerItemName = css`
   font-family: ZFB03B, k8x12;
   font-size: 16px;
-  margin-left: 16px;
+  margin-left: 18px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;

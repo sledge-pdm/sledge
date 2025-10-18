@@ -104,7 +104,7 @@ export function clearLayer(layerId: string) {
 export async function mergeToBelowLayer(layerId: string) {
   const originLayerIndex = getLayerIndex(layerId);
   const targetLayerIndex = originLayerIndex + 1;
-  if (originLayerIndex >= layerListStore.layers.length) return;
+  if (targetLayerIndex >= layerListStore.layers.length) return;
 
   const originLayer = layerListStore.layers[originLayerIndex];
   const targetLayer = layerListStore.layers[targetLayerIndex];

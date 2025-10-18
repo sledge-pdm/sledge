@@ -14,7 +14,7 @@ const toolsSectionContent = css`
   padding-left: 4px;
 `;
 
-const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'autoSelection', 'lassoSelection', 'move'];
+const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'lassoSelection', 'autoSelection', 'move'];
 
 const Tools: Component = () => {
   return (

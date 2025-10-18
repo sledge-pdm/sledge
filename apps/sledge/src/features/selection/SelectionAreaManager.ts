@@ -31,10 +31,18 @@ export type TileFragment = {
 
 export type WholeFragment = {
   kind: 'whole';
-  mask: Uint8Array; // should be layer sized to width * layer height
+  mask: Uint8Array; // should be sized to layer width * layer height
+};
+export type PartialFragment = {
+  kind: 'partial';
+  partialMask: Uint8Array; // should be sized to bbox width * bbox height
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 };
 
-export type SelectionFragment = PixelFragment | RectFragment | TileFragment | WholeFragment;
+export type SelectionFragment = PixelFragment | RectFragment | TileFragment | WholeFragment | PartialFragment;
 export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type SelectionState = 'idle' | 'selected';
 
@@ -197,6 +205,27 @@ class SelectionAreaManager {
         // wasmで矩形を高速描画
         const mask = this.previewMask.getMask();
         fill_rect_mask(mask, this.previewMask.getWidth(), this.previewMask.getHeight(), sx, sy, frag.width, frag.height);
+        changed = true;
+        break;
+      }
+      case 'partial': {
+        // PartialFragmentから全体マスクに部分的にコピー
+        const fullMask = this.previewMask.getMask();
+        const fullWidth = this.previewMask.getWidth();
+        const fullHeight = this.previewMask.getHeight();
+
+        for (let py = 0; py < frag.height; py++) {
+          for (let px = 0; px < frag.width; px++) {
+            const srcIndex = py * frag.width + px;
+            const destX = frag.x + px;
+            const destY = frag.y + py;
+
+            if (destX >= 0 && destX < fullWidth && destY >= 0 && destY < fullHeight) {
+              const destIndex = destY * fullWidth + destX;
+              fullMask[destIndex] = frag.partialMask[srcIndex];
+            }
+          }
+        }
         changed = true;
         break;
       }

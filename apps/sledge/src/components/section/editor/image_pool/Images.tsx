@@ -71,7 +71,7 @@ const Images: Component<{}> = () => {
         },
       ]}
     >
-      <div class={clsx(sectionContent, imagesSectionsContent)}>
+      <div class={clsx('ignore-image-select', sectionContent, imagesSectionsContent)}>
         <Show when={entries().length > 0} fallback={<p class={noImageText}>no images</p>}>
           <div class={gridContainer}>
             {/* <ImagePoolList /> */}

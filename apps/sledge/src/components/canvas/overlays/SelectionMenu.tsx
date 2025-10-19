@@ -270,6 +270,7 @@ const MenuContent = () => {
           src='/icons/selection/commit_10.png'
           onClick={() => {
             commitMove();
+            cancelSelection();
           }}
           label='commit.'
           title='commit.'

@@ -32,7 +32,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
   });
 
   let containerRef: HTMLDivElement;
-  let imageRef: HTMLImageElement;
   let svgRef: SVGSVGElement;
   let onEntryChangedHandler: ((e: { id: string }) => void) | undefined;
   let entryInteract: ImageEntryInteract | undefined;
@@ -64,7 +63,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
     entryInteract = new ImageEntryInteract(svgRef, () => getEntry(props.entry.id) ?? props.entry);
     entryInteract.setInteractListeners();
 
+    const canvasArea = document.getElementById('canvas-area');
     const handleImageSelection = (e: MouseEvent) => {
+      if (!canvasArea?.contains(e.target as HTMLElement)) return;
+
       if (containerRef && !containerRef.contains(e.target as HTMLElement)) {
         if (selected()) {
           selectEntry(undefined);
@@ -188,7 +190,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         }}
       >
         <img
-          ref={(el) => (imageRef = el)}
           src={convertFileSrc(props.entry.originalPath)}
           class={imageElement}
           width={stateStore.baseW}

@@ -96,6 +96,16 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   return true;
 }
 
+export function getMinZoom() {
+  return interactStore.zoomMinFromInitial * interactStore.initialZoom;
+}
+export function getMaxZoom() {
+  return interactStore.zoomMaxFromInitial * interactStore.initialZoom;
+}
+export function clipZoom(zoom: number) {
+  return Math.max(getMinZoom(), Math.min(getMaxZoom(), zoom));
+}
+
 const referenceLengthRatio = 0.85;
 const referenceLength = () => {
   const sectionBetweenArea = document.getElementById('sections-between-area');
@@ -131,6 +141,8 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
   if (!referencedZoom) return;
 
   setZoom(referencedZoom);
+  // reset initialzoom
+  setInteractStore('initialZoom', referencedZoom);
   centeringCanvas();
 };
 
@@ -153,28 +165,11 @@ export const centeringCanvas = () => {
     y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
   });
   setRotation(0);
-
-  eventBus.emit('canvas:onAdjusted', {});
-};
-
-export const setZoomByReference = (zoomByReference: number): boolean => {
-  const referencedZoom = getReferencedZoom() ?? 1;
-  let zoom = zoomByReference * referencedZoom;
-  if (zoom > 0 && zoom !== interactStore.zoom) {
-    setInteractStore('zoom', zoom);
-    setInteractStore('zoomByReference', zoomByReference);
-    return true;
-  }
-  return false;
 };
 
 export const setZoom = (zoom: number): boolean => {
   if (zoom > 0 && zoom !== interactStore.zoom) {
     setInteractStore('zoom', zoom);
-
-    const referencedZoom = getReferencedZoom() ?? 1;
-    let zoomByReference = zoom / referencedZoom;
-    setInteractStore('zoomByReference', zoomByReference);
     return true;
   }
   return false;
@@ -202,10 +197,9 @@ export const setRotation = (rotation: number) => {
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
 
-export function zoomTowardAreaCenter(newReferenceZoom: number) {
+export function zoomTowardAreaCenter(zoomNew: number) {
   const zoomOld = interactStore.zoom;
-  const zoomChanged = setZoomByReference(newReferenceZoom);
-  const zoomNew = interactStore.zoom;
+  const zoomChanged = setZoom(zoomNew);
 
   const betweenAreaCenter = document.getElementById('between-area-center');
   const canvasStack = document.getElementById('canvas-stack');

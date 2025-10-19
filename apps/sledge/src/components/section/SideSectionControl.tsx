@@ -3,7 +3,7 @@ import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
-import { adjustZoomToFit, zoomTowardAreaCenter } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
 
@@ -132,33 +132,24 @@ const SideSectionControl: Component<Props> = (props) => {
                 height: '56px',
               }}
             >
-              x {interactStore.zoomByReference.toFixed(2)}
+              x {(interactStore.zoom / interactStore.initialZoom).toFixed(2)}
             </p>
             <div class={flexRow} style={{ height: '100%', 'justify-content': 'center' }}>
               <Slider
                 orientation='vertical'
                 labelMode='none'
-                value={interactStore.zoomByReference}
-                min={interactStore.zoomMin}
-                max={interactStore.zoomMax}
+                value={interactStore.zoom}
+                min={getMinZoom()}
+                max={getMaxZoom()}
                 wheelSpin={true}
                 wheelStep={0.1}
                 allowFloat={true}
                 onChange={(v) => {
+                  centeringCanvas();
                   zoomTowardAreaCenter(v);
                 }}
                 onDoubleClick={() => {
                   adjustZoomToFit();
-                }}
-                onPointerDownOnValidArea={(e) => {
-                  if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    adjustZoomToFit();
-                    return false;
-                  }
-                  return true;
                 }}
               />
             </div>

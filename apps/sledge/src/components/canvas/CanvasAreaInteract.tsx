@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { getReferencedZoom, rotateInAreaCenter, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
+import { clipZoom, rotateInAreaCenter, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -262,12 +262,11 @@ class CanvasAreaInteract {
   }
 
   private zoom(deltaY: number, multiply: number): boolean {
-    const referencedZoom = getReferencedZoom() ?? 1;
     const delta = (deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep) * multiply;
 
     const zoomOld = interactStore.zoom;
     let zoomNew = interactStore.zoom + interactStore.zoom * delta;
-    zoomNew = Math.min(Math.max(zoomNew, interactStore.zoomMin * referencedZoom), interactStore.zoomMax * referencedZoom);
+    zoomNew = clipZoom(zoomNew);
 
     const rect = this.canvasStack.getBoundingClientRect();
     const canvasX = (this.lastPointX - rect.left) / zoomOld;

@@ -1,6 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { createRAF, targetFPS } from '@solid-primitives/raf';
-import { setOffset, zoomTowardAreaCenter } from '~/features/canvas';
+import { clipZoom, setOffset, zoomTowardAreaCenter } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';
 
 export interface AnalogSticksControllerOptions {
@@ -52,9 +52,6 @@ export class AnalogSticksController {
   private isRunning: boolean = false;
   private startRAF: () => void;
   private stopRAF: () => void;
-
-  // Base values to calculate relative changes from
-  private baseZoom: number = 1;
 
   constructor(options: Partial<AnalogSticksControllerOptions> = {}) {
     this.options = { ...defaultOptions, ...options };
@@ -124,7 +121,6 @@ export class AnalogSticksController {
    */
   public start(): void {
     if (!this.isRunning) {
-      this.baseZoom = interactStore.zoomByReference;
       this.isRunning = true;
       this.startRAF();
     }
@@ -199,12 +195,9 @@ export class AnalogSticksController {
     // Apply zoom if beyond deadzone
     if (Math.abs(this.zoomPosition) > this.options.deadzone / this.options.maxDeviation) {
       const zoomDelta = this.zoomPosition * this.options.zoomSensitivity;
-      const currentZoom = interactStore.zoomByReference;
-      const newZoom = Math.max(interactStore.zoomMin, Math.min(interactStore.zoomMax, currentZoom + zoomDelta));
-
-      if (newZoom !== currentZoom) {
-        zoomTowardAreaCenter(newZoom);
-      }
+      if (zoomDelta === 0) return;
+      const newZoom = clipZoom(interactStore.zoom + zoomDelta);
+      zoomTowardAreaCenter(newZoom);
     }
 
     // Stop RAF if no movement needed

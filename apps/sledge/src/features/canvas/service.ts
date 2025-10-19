@@ -196,13 +196,19 @@ export const setOffset = (offset: { x: number; y: number }) => {
   }
 };
 
-export const setRotation = (rotation: number) => {
+export const normalizeRotation = (rotation: number) => {
   // 内部表現を (-180, 180] の範囲に正規化して管理する
   // 例: 270 -> -90, -181 -> 179
   let r = rotation % 360; // JS の % は符号を保持する
-  if (r > 180) r -= 360; // 181..359 -> -179..-1
-  if (r <= -180) r += 360; // ... -360..-180 -> 0..180 ( -180 は 180 に統一 )
+  if (r > 180) r -= 360;
+  if (r < -180) r += 360;
   r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
+
+  return r;
+};
+
+export const setRotation = (rotation: number) => {
+  const r = normalizeRotation(rotation);
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
 

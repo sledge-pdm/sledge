@@ -4,18 +4,10 @@
 // After threshold is exceeded once in that gesture, all subsequent rotations are passed through.
 // If gesture starts from a non-zero angle, rotations are applied immediately (no gating).
 
-import { Consts } from '~/Consts';
+import { normalizeRotation } from '~/features/canvas';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const NEAR_ZERO_EPS = 0.01; // Values within this of 0 are treated as exactly 0
-
-function normalizeDeg(a: number): number {
-  let r = a % 360;
-  if (r > 180) r -= 360;
-  if (r <= -180) r += 360;
-  r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
-  return r;
-}
 
 export class TouchRotationSnapper {
   private rotationOnStart = 0;
@@ -24,7 +16,7 @@ export class TouchRotationSnapper {
 
   /** Called when the two-finger gesture starts */
   public onGestureStart(initialRotationDeg: number) {
-    this.rotationOnStart = normalizeDeg(initialRotationDeg);
+    this.rotationOnStart = normalizeRotation(initialRotationDeg);
     this.rotationFromStart = this.rotationOnStart;
     this.rotationAllowed = Math.abs(this.rotationOnStart) > NEAR_ZERO_EPS;
   }
@@ -36,7 +28,7 @@ export class TouchRotationSnapper {
   }
 
   public process(candidateDeg: number): number {
-    const normalizedDeg = normalizeDeg(candidateDeg);
+    const normalizedDeg = normalizeRotation(candidateDeg);
 
     // round -1 ~ 1 to 0 to avoid tiny deviations
     if (Math.abs(normalizedDeg) < 1) {
@@ -46,7 +38,7 @@ export class TouchRotationSnapper {
     if (this.rotationAllowed) {
       return normalizedDeg;
     } else {
-      const deltaFromStart = normalizeDeg(normalizedDeg - this.rotationOnStart);
+      const deltaFromStart = normalizeRotation(normalizedDeg - this.rotationOnStart);
       this.rotationFromStart += deltaFromStart;
 
       if (Math.abs(this.rotationFromStart) >= globalConfig.editor.touchRotationZeroSnapThreshold) {

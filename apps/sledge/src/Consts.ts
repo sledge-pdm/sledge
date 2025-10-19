@@ -10,8 +10,6 @@ export const Consts = {
   zoomPrecisionSignificantDigits: 4,
   zoomByReferencePrecisionSignificantDigits: 2,
 
-  rotationPrecisionSignificantDigits: 1,
-
   maxLayerSize: 64,
 
   projectThumbnailSize: 500,

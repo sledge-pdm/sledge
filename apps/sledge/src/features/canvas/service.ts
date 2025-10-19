@@ -202,7 +202,7 @@ export const normalizeRotation = (rotation: number) => {
   let r = rotation % 360; // JS の % は符号を保持する
   if (r > 180) r -= 360;
   if (r < -180) r += 360;
-  r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
+  // r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
 
   return r;
 };

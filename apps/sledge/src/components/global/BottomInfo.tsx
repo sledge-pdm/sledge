@@ -82,6 +82,7 @@ const BottomInfo: Component = () => {
               value={interactStore.rotation}
               min={-180}
               max={180}
+              floatSignificantDigits={1}
               wheelSpin={true}
               allowFloat={false}
               customFormat='[value]°'

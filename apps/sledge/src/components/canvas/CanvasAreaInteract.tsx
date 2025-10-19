@@ -1,5 +1,4 @@
 import { Vec2 } from '@sledge/core';
-import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/Consts';
 import { getReferencedZoom, rotateInAreaCenter, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
@@ -22,16 +21,10 @@ class CanvasAreaInteract {
   private lastDist: number = 0;
   private lastAngle: number = 0;
 
-  // --- RAF based pinch processing state ---
-  private pinchDirty = false; // true when new 2-finger data arrived since last RAF application
   private lastAppliedDist = 0; // distance at last applied frame
   private lastAppliedAngle = 0; // angle (radian) at last applied frame
   private lastAppliedMidX = 0; // midpoint (screen) at last applied frame
   private lastAppliedMidY = 0;
-
-  private rafRunning?: () => boolean; // accessor from createRAF
-  private startRaf?: () => void;
-  private stopRaf?: () => void;
 
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
@@ -54,15 +47,6 @@ class CanvasAreaInteract {
     // コンポジタ昇格して transform の適用を安定化
     this.canvasStack.style.willChange = 'transform';
     this.canvasStack.style.backfaceVisibility = 'hidden';
-
-    const [isRunning, start, stop] = createRAF(
-      targetFPS(() => {
-        this.onRaf();
-      }, 30)
-    );
-    this.rafRunning = isRunning;
-    this.startRaf = start;
-    this.stopRaf = stop;
   }
 
   static isDragKey(e: PointerEvent): boolean {
@@ -115,8 +99,6 @@ class CanvasAreaInteract {
         this.lastAppliedAngle = this.lastAngle;
         this.lastAppliedMidX = (p0.x + p1.x) / 2;
         this.lastAppliedMidY = (p0.y + p1.y) / 2;
-        this.pinchDirty = false;
-        this.startRaf?.();
       }
     } else {
       // タッチ以外
@@ -174,7 +156,48 @@ class CanvasAreaInteract {
       } else if (this.pointers.size === 2) {
         // 2本指: 位置だけ更新し、実処理は RAF でまとめて行う
         this.pointers.set(e.pointerId, now);
-        this.pinchDirty = true;
+
+        if (this.pointers.size !== 2) return;
+
+        const pts = Array.from(this.pointers.values());
+        if (pts.length !== 2) return;
+        const [p0, p1] = pts;
+
+        // 現在値計算
+        const distNew = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        if (this.lastAppliedDist === 0) this.lastAppliedDist = distNew; // 初期防御
+        const scaleFact = distNew / this.lastAppliedDist;
+        const zoomOld = interactStore.zoom;
+        const newZoomRaw = zoomOld * scaleFact;
+
+        // 中点
+        const midX = (p0.x + p1.x) / 2;
+        const midY = (p0.y + p1.y) / 2;
+        const prevMidX = this.lastAppliedMidX;
+        const prevMidY = this.lastAppliedMidY;
+
+        // 角度
+        const angleNew = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+        const deltaRad = angleNew - this.lastAppliedAngle;
+        const rotOldDeg = interactStore.rotation;
+        const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
+        const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
+        setZoom(newZoomRaw);
+        const zoomApplied = interactStore.zoom; // 丸め後
+
+        // キャンバス座標へ変換
+        const rect = this.canvasStack.getBoundingClientRect();
+        const canvasMidX = (midX - rect.left) / zoomOld;
+        const canvasMidY = (midY - rect.top) / zoomOld;
+
+        const dxCanvas = midX - prevMidX;
+        const dyCanvas = midY - prevMidY;
+
+        setOffset({
+          x: interactStore.offset.x + canvasMidX * (zoomOld - zoomApplied) + dxCanvas,
+          y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
+        });
+        rotateInCenter({ x: midX, y: midY }, rotProcessed);
       }
     } else {
       // タッチ以外
@@ -209,11 +232,6 @@ class CanvasAreaInteract {
     if (this.pointers.size < 2) {
       // 2本指ピンチ終了時にスナップ状態リセット
       this.rotationSnapper.onGestureEnd();
-      this.pinchDirty = false;
-      // 停止条件: 完全に指が離れたら RAF を止める（無駄なループを避ける）
-      if (this.pointers.size === 0) {
-        this.stopRaf?.();
-      }
     }
     if (this.pointers.size === 0) {
       setInteractStore('isDragging', false);
@@ -317,58 +335,6 @@ class CanvasAreaInteract {
     this.wrapperRef.removeEventListener('wheel', this.onWheel);
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
-  }
-
-  private onRaf() {
-    if (!this.pinchDirty) return;
-    if (this.pointers.size !== 2) return;
-
-    const pts = Array.from(this.pointers.values());
-    if (pts.length !== 2) return;
-    const [p0, p1] = pts;
-
-    // 現在値計算
-    const distNew = Math.hypot(p1.x - p0.x, p1.y - p0.y);
-    if (this.lastAppliedDist === 0) this.lastAppliedDist = distNew; // 初期防御
-    const scaleFact = distNew / this.lastAppliedDist;
-    const zoomOld = interactStore.zoom;
-    const newZoomRaw = zoomOld * scaleFact;
-
-    // 中点
-    const midX = (p0.x + p1.x) / 2;
-    const midY = (p0.y + p1.y) / 2;
-    const prevMidX = this.lastAppliedMidX;
-    const prevMidY = this.lastAppliedMidY;
-
-    // 角度
-    const angleNew = Math.atan2(p1.y - p0.y, p1.x - p0.x);
-    const deltaRad = angleNew - this.lastAppliedAngle;
-    const rotOldDeg = interactStore.rotation;
-    const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
-    const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
-    setZoom(newZoomRaw);
-    const zoomApplied = interactStore.zoom; // 丸め後
-
-    // キャンバス座標へ変換
-    const rect = this.canvasStack.getBoundingClientRect();
-    const canvasMidX = (midX - rect.left) / zoomOld;
-    const canvasMidY = (midY - rect.top) / zoomOld;
-
-    const dxCanvas = midX - prevMidX;
-    const dyCanvas = midY - prevMidY;
-
-    setOffset({
-      x: interactStore.offset.x + canvasMidX * (zoomOld - zoomApplied) + dxCanvas,
-      y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
-    });
-    rotateInCenter({ x: midX, y: midY }, rotProcessed);
-
-    // 状態更新
-    this.lastAppliedDist = distNew;
-    this.lastAppliedAngle = angleNew;
-    this.lastAppliedMidX = midX;
-    this.lastAppliedMidY = midY;
-    this.pinchDirty = false;
   }
 }
 

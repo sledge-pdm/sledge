@@ -3,7 +3,7 @@ import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
-import { clientPositionToCanvasPosition, getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/CanvasPositionCalculator';
+import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { activeLayer } from '~/features/layer';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
@@ -31,7 +31,6 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
   const [temporaryOut, setTemporaryOut] = createSignal(false);
-
 
   function isDrawableClick(e: PointerEvent): boolean {
     if (interactStore.isCanvasSizeFrameMode) {

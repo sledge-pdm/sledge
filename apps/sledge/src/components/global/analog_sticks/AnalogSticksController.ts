@@ -3,7 +3,6 @@ import { createRAF, targetFPS } from '@solid-primitives/raf';
 import { setOffset, zoomTowardAreaCenter } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { eventBus } from '~/utils/EventBus';
 
 export interface AnalogSticksControllerOptions {
   // Pan sensitivity (pixels per tick when at maximum deviation)
@@ -212,7 +211,7 @@ export class AnalogSticksController {
     // Stop RAF if no movement needed
     if (!needsUpdate && Math.abs(this.panPosition.x) < 0.001 && Math.abs(this.panPosition.y) < 0.001 && Math.abs(this.zoomPosition) < 0.001) {
       this.stop();
-    } 
+    }
   }
 
   /**

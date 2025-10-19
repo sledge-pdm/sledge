@@ -4,7 +4,7 @@ export const performanceMetas: FieldMeta[] = [
   {
     section: ConfigSections.Performance,
     path: ['performance', 'targetFPS'],
-    label: 'target fps',
+    label: 'canvas target fps',
     component: 'Dropdown',
     props: {
       options: [
@@ -13,7 +13,7 @@ export const performanceMetas: FieldMeta[] = [
         { label: '144', value: '144' },
       ],
     },
-    tips: `FPS for canvas and some of ui elements' update.`,
+    tips: `canvas update FPS.`,
   },
   {
     section: ConfigSections.Performance,

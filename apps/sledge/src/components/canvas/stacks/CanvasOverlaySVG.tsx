@@ -67,7 +67,7 @@ const CanvasOverlaySVG: Component = () => {
         updateSelectionOutline();
         setSelectionChanged(false);
       }
-    }, Number(globalConfig.performance.targetFPS))
+    }, 60)
   );
 
   const updateSelectionOutline = () => {

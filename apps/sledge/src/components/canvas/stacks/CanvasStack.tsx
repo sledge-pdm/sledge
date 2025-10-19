@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createSignal, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import { InteractCanvas } from './InteractCanvas';
 

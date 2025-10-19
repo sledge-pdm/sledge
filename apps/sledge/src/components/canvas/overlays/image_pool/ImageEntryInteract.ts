@@ -38,7 +38,7 @@ class ImageEntryInteract {
   }
 
   private applyPending = (ts: number) => {
-    const fps = Number(globalConfig.performance.targetFPS || 60);
+    const fps = 60;
     const interval = 1000 / (fps > 0 ? fps : 60);
     if (this.lastTs && ts - this.lastTs < interval) {
       // throttle to target FPS

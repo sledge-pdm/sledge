@@ -2,7 +2,6 @@ import { Vec2 } from '@sledge/core';
 import { createRAF, targetFPS } from '@solid-primitives/raf';
 import { setOffset, zoomTowardAreaCenter } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
 
 export interface AnalogSticksControllerOptions {
   // Pan sensitivity (pixels per tick when at maximum deviation)
@@ -64,7 +63,7 @@ export class AnalogSticksController {
     const [isRunning, start, stop] = createRAF(
       targetFPS(() => {
         this.tick();
-      }, Number(globalConfig.performance.targetFPS))
+      }, 60)
     );
 
     this.startRAF = start;

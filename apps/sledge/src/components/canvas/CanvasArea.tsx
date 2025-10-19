@@ -117,7 +117,7 @@ const CanvasArea: Component = () => {
         lastTransformValues.offsetY !== currentOffsetY ||
         lastTransformValues.zoom !== currentZoom
       ) {
-        interact?.updateTransform();
+        canvasStack.style.transform = `translate(${currentOffsetX}px, ${currentOffsetY}px) scale(${currentZoom})`;
         lastTransformValues = {
           offsetX: currentOffsetX,
           offsetY: currentOffsetY,
@@ -177,7 +177,7 @@ const CanvasArea: Component = () => {
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();
-    interact.updateTransform();
+    scheduleTransformUpdate();
 
     // interactStoreの変更を監視して自動更新
     createEffect(() => {

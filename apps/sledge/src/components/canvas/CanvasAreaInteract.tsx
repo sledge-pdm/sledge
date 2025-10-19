@@ -36,15 +36,6 @@ class CanvasAreaInteract {
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
 
-  private offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
-  private offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
-  private transform = (x: number, y: number, zoom: number) => {
-    return `translate(${x}px, ${y}px) scale(${zoom})`;
-  };
-
-  public updateTransform = () => {
-    this.canvasStack.style.transform = this.transform(this.offsetX(), this.offsetY(), interactStore.zoom);
-  };
 
   public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
     this.canvasStack.style.cursor = cursor;
@@ -362,9 +353,6 @@ class CanvasAreaInteract {
 
     const rotProcessed = this.rotationSnapper.process(rotCandidate);
 
-    // 適用前にズーム (clamp は setZoom 内部で処理)
-    // const referencedZoom = getReferencedZoom() ?? 1; // clamp 計算と整合性保つため参照可
-    // 直接 setZoom(newZoomRaw) すると内部丸めされる
     setZoom(newZoomRaw);
     const zoomApplied = interactStore.zoom; // 丸め後
 
@@ -381,8 +369,6 @@ class CanvasAreaInteract {
       y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
     });
     setRotation(rotProcessed);
-    // updateTransform は CanvasArea の createEffect で自動実行（ただし2本指では即座更新も可能）
-    this.updateTransform();
 
     // 状態更新
     this.lastAppliedDist = distNew;

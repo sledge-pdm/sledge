@@ -211,26 +211,24 @@ export function zoomTowardAreaCenter(newReferenceZoom: number) {
   const zoomChanged = setZoomByReference(newReferenceZoom);
   const zoomNew = interactStore.zoom;
 
+  const betweenAreaCenter = document.getElementById('between-area-center');
   const canvasStack = document.getElementById('canvas-stack');
-  const betweenArea = document.getElementById('sections-between-area');
-  if (!canvasStack || !betweenArea) {
+  if (!canvasStack || !betweenAreaCenter) {
     eventBus.emit('canvas:onTransformChanged', {});
     return;
   }
   const stackRect = canvasStack.getBoundingClientRect();
-  const areaRect = betweenArea.getBoundingClientRect();
+  const betweenAreaCenterRect = betweenAreaCenter.getBoundingClientRect();
 
-  // 可視領域中心 (ビューポート中心 in between area)
-  const viewCenterX = areaRect.left + areaRect.width / 2;
-  const viewCenterY = areaRect.top + areaRect.height / 2;
   // 旧ズームでの view 中心がキャンバス座標でどこだったか
-  const canvasCenterX = (viewCenterX - stackRect.left) / zoomOld;
-  const canvasCenterY = (viewCenterY - stackRect.top) / zoomOld;
+  const canvasCenterX = (betweenAreaCenterRect.left - stackRect.left) / zoomOld;
+  const canvasCenterY = (betweenAreaCenterRect.top - stackRect.top) / zoomOld;
 
   // 新ズーム適用後も同じキャンバス座標が中心に来るようにオフセット調整
   // stackRect.left/top は transform 由来で後続再描画まで旧値なので、相対変化のみ計算
   const dx = canvasCenterX * (zoomOld - zoomNew);
   const dy = canvasCenterY * (zoomOld - zoomNew);
+  
   setOffset({
     x: interactStore.offset.x + dx,
     y: interactStore.offset.y + dy,
@@ -241,17 +239,13 @@ export function zoomTowardAreaCenter(newReferenceZoom: number) {
 }
 
 export function rotateInAreaCenter(rotation: number) {
-  const betweenArea = document.getElementById('sections-between-area');
-  if (!betweenArea) {
+  const betweenAreaCenter = document.getElementById('between-area-center');
+  if (!betweenAreaCenter) {
     eventBus.emit('canvas:onTransformChanged', {});
     return;
   }
-  const areaRect = betweenArea.getBoundingClientRect();
-  // 可視領域中心 (ビューポート中心 in between area)
-  const viewCenterX = (areaRect.left + areaRect.right) / 2;
-  const viewCenterY = (areaRect.top + areaRect.bottom) / 2;
-
-  rotateInCenter({ x: viewCenterX, y: viewCenterY }, rotation);
+  const betweenAreaCenterRect = betweenAreaCenter.getBoundingClientRect();
+  rotateInCenter({ x: betweenAreaCenterRect.left, y: betweenAreaCenterRect.top }, rotation);
 }
 
 // centerWindowPositionを中心としたrotationを行う
@@ -269,7 +263,6 @@ export function rotateInCenter(centerWindowPosition: Vec2, rotation: number) {
   // 回転の中心点を画面座標からキャンバス座標に変換
   const canvasStack = document.getElementById('canvas-stack');
   if (!canvasStack) {
-    eventBus.emit('canvas:onTransformChanged', {});
     return;
   }
 
@@ -309,7 +302,6 @@ export function rotateInCenter(centerWindowPosition: Vec2, rotation: number) {
     x: interactStore.offset.x + deltaX,
     y: interactStore.offset.y + deltaY,
   });
-  eventBus.emit('canvas:onTransformChanged', {});
 }
 
 export const toggleVerticalFlip = () => {

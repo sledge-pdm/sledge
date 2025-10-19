@@ -88,6 +88,15 @@ const canvasOverlayRoot = css`
   z-index: var(--zindex-canvas-overlay);
 `;
 
+const centerMarker = css`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0px;
+  height: 0px;
+  background-color: red;
+`;
+
 const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
@@ -232,6 +241,9 @@ const CanvasArea: Component = () => {
         {/* content between side sections */}
         <div class={sectionsBetweenAreaContainer}>
           <div id='sections-between-area' class={sectionsBetweenArea}>
+            
+            <div id='between-area-center' class={centerMarker} />
+
             <CanvasControls />
             <OuterSelectionMenu />
             <CanvasDebugOverlay />

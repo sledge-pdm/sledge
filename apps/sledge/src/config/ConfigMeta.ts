@@ -16,5 +16,5 @@ export type FieldMeta = {
   component: ConfigComponentName;
   props?: Record<string, any>; // min/max/step/options など
   tips?: string;
-  customFormat?: string; // format: [value] => value
+  customFormat?: (v: number) => string; // format: [value] => value
 };

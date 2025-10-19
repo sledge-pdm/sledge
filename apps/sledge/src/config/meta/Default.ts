@@ -14,7 +14,6 @@ export const defaultMetas: FieldMeta[] = [
       ],
     },
     tips: 'the behavior on startup.',
-    customFormat: '[value] px',
   },
   {
     section: ConfigSections.Default,
@@ -23,7 +22,7 @@ export const defaultMetas: FieldMeta[] = [
     component: 'Slider',
     props: { min: Consts.minCanvasHeight, max: Consts.maxCanvasHeight, step: 1 },
     tips: 'the default canvas size when new project created.',
-    customFormat: '[value] px',
+    customFormat: (v) => v + ' px',
   },
   {
     section: ConfigSections.Default,
@@ -32,6 +31,6 @@ export const defaultMetas: FieldMeta[] = [
     component: 'Slider',
     props: { min: Consts.minCanvasHeight, max: Consts.maxCanvasHeight, step: 1 },
     tips: 'the default canvas size when new project created.',
-    customFormat: '[value] px',
+    customFormat: (v) => v + ' px',
   },
 ];

@@ -185,10 +185,6 @@ function getParsedValueFromMetaPath(meta: FieldMeta) {
       v = v ? 'enabled' : 'disabled';
       break;
   }
-  // format (like "[value]px" -> "1200px")
-  if (meta.customFormat !== undefined) {
-    v = meta.customFormat.replaceAll('[value]', v);
-  }
 
   return v;
 }

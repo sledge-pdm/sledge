@@ -235,18 +235,13 @@ export function rotateInAreaCenter(rotation: number) {
   rotateInCenter({ x: betweenAreaCenterRect.left, y: betweenAreaCenterRect.top }, rotation);
 }
 
-// centerWindowPositionを中心としたrotationを行う
-// (通常のsetRotationはキャンバスの中心を中心に回転している点に注意)
 export function rotateInCenter(centerWindowPosition: Vec2, rotation: number) {
   const rotOld = interactStore.rotation;
-
-  // 新しい回転角度を設定
   setRotation(rotation);
   const rotNew = interactStore.rotation;
 
   // 回転角度の差分（ラジアン）
   const deltaRad = ((rotNew - rotOld) * Math.PI) / 180;
-
   // 回転の中心点を画面座標からキャンバス座標に変換
   const canvasStack = document.getElementById('canvas-stack');
   if (!canvasStack) {

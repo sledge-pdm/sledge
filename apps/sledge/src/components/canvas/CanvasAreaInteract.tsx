@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { clipZoom, rotateInAreaCenter, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
+import { clipZoom, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -181,6 +181,7 @@ class CanvasAreaInteract {
         const rotOldDeg = interactStore.rotation;
         const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
         const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
+
         setZoom(newZoomRaw);
         const zoomApplied = interactStore.zoom; // 丸め後
 
@@ -250,10 +251,14 @@ class CanvasAreaInteract {
   private handleWheel(e: WheelEvent) {
     if (e.shiftKey) {
       const amount = globalConfig.editor.rotateDegreePerWheelScroll;
+      const mousePos: Vec2 = {
+        x: this.lastPointX,
+        y: this.lastPointY,
+      };
       if (e.deltaY > 0) {
-        rotateInAreaCenter(interactStore.rotation + amount);
+        rotateInCenter(mousePos, interactStore.rotation + amount);
       } else {
-        rotateInAreaCenter(interactStore.rotation - amount);
+        rotateInCenter(mousePos, interactStore.rotation - amount);
       }
       return;
     }

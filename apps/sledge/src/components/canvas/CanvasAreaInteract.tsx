@@ -58,7 +58,7 @@ class CanvasAreaInteract {
     const [isRunning, start, stop] = createRAF(
       targetFPS(() => {
         this.onRaf();
-      }, 60)
+      }, 30)
     );
     this.rafRunning = isRunning;
     this.startRaf = start;
@@ -319,10 +319,9 @@ class CanvasAreaInteract {
     window.removeEventListener('keyup', this.onKeyUp);
   }
 
-  // RAF コールバック: 最新の 2本指ピンチ状態を元に一回分の zoom / rotate / pan を適用
   private onRaf() {
-    if (!this.pinchDirty) return; // 変更なし
-    if (this.pointers.size !== 2) return; // 安全策
+    if (!this.pinchDirty) return;
+    if (this.pointers.size !== 2) return;
 
     const pts = Array.from(this.pointers.values());
     if (pts.length !== 2) return;
@@ -346,11 +345,7 @@ class CanvasAreaInteract {
     const deltaRad = angleNew - this.lastAppliedAngle;
     const rotOldDeg = interactStore.rotation;
     const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
-    const rotCandidate =
-      Math.round(rotCandidateRaw * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
-
-    const rotProcessed = this.rotationSnapper.process(rotCandidate);
-
+    const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
     setZoom(newZoomRaw);
     const zoomApplied = interactStore.zoom; // 丸め後
 

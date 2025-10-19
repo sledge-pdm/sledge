@@ -96,7 +96,7 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   return true;
 }
 
-const referenceLengthRatio = 0.75;
+const referenceLengthRatio = 0.85;
 const referenceLength = () => {
   const sectionBetweenArea = document.getElementById('sections-between-area');
   if (!sectionBetweenArea) return 800 * referenceLengthRatio;

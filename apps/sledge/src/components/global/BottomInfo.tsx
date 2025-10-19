@@ -85,7 +85,6 @@ const BottomInfo: Component = () => {
               floatSignificantDigits={1}
               wheelSpin={true}
               allowFloat={false}
-              customFormat='[value]°'
               onChange={(v) => setRotation(v)}
               onDoubleClick={() => {
                 setRotation(0);

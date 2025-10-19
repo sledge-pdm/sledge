@@ -129,10 +129,10 @@ const SideSectionControl: Component<Props> = (props) => {
               style={{
                 'writing-mode': 'vertical-lr',
                 'vertical-align': 'middle',
-                height: '48px',
+                height: '56px',
               }}
             >
-              x{interactStore.zoomByReference}
+              x {interactStore.zoomByReference.toFixed(2)}
             </p>
             <div class={flexRow} style={{ height: '100%', 'justify-content': 'center' }}>
               <Slider
@@ -144,7 +144,6 @@ const SideSectionControl: Component<Props> = (props) => {
                 wheelSpin={true}
                 wheelStep={0.1}
                 allowFloat={true}
-                floatSignificantDigits={1}
                 onChange={(v) => {
                   zoomTowardAreaCenter(v);
                 }}

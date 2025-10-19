@@ -91,10 +91,9 @@ export const editorMetas: FieldMeta[] = [
     component: 'Slider',
     props: {
       min: 1,
-      max: 90,
+      max: 15,
       step: 1,
       allowFloat: false,
-      customFormat: '[value]',
     },
     tips: `Available in two-finger touch rotation only.\ncanvas rotation degree will be snapped to 0° until this threshold.`,
   },

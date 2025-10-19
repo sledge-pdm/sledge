@@ -7,7 +7,7 @@ const root = css`
   width: 3px;
   height: 3px;
   margin-top: -1.5px;
-  margin-top: -1.5px;
+  margin-left: -1.5px;
   backdrop-filter: invert();
   touch-action: none;
   pointer-events: none;

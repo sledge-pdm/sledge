@@ -33,7 +33,7 @@ export const defaultInteractStore: InteractStore = {
   zoom: 1,
   zoomByReference: 1,
   zoomMin: 0.5,
-  zoomMax: 100,
+  zoomMax: 50,
   touchZoomSensitivity: 0.5,
   wheelZoomStep: 0.05,
   // オフセットの初期値

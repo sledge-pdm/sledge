@@ -9,7 +9,6 @@ export type Events = {
 
   'canvas:sizeChanged': { newSize: Size2D };
   'canvas:onAdjusted': {};
-  'canvas:onTransformChanged': {};
 
   'selection:updateSelectionPath': { immediate?: boolean };
   'selection:updateLassoOutline': {};

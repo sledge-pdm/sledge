@@ -1,4 +1,4 @@
-import { Component, createEffect, onMount, Show } from 'solid-js';
+import { Component, onMount, Show } from 'solid-js';
 import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './overlays/CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
@@ -10,6 +10,7 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
+import createRAF, { targetFPS } from '@solid-primitives/raf';
 import CanvasError from '~/components/canvas/overlays/CanvasError';
 import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
@@ -103,39 +104,36 @@ const CanvasArea: Component = () => {
 
   let interact: CanvasAreaInteract | undefined = undefined;
 
-  // Transform更新の統一制御
-  let transformUpdateScheduled = false;
   let lastTransformValues = {
     offsetX: 0,
     offsetY: 0,
     zoom: 1,
   };
 
-  const scheduleTransformUpdate = () => {
-    if (transformUpdateScheduled) return;
-    transformUpdateScheduled = true;
+  const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
+    targetFPS(() => {
+      updateTransform();
+    }, 60)
+  );
 
-    requestAnimationFrame(() => {
-      const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
-      const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
-      const currentZoom = interactStore.zoom;
+  const updateTransform = () => {
+    const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
+    const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
+    const currentZoom = interactStore.zoom;
 
-      // 差分検出による最適化
-      if (
-        lastTransformValues.offsetX !== currentOffsetX ||
-        lastTransformValues.offsetY !== currentOffsetY ||
-        lastTransformValues.zoom !== currentZoom
-      ) {
-        canvasStack.style.transform = `translate(${currentOffsetX}px, ${currentOffsetY}px) scale(${currentZoom})`;
-        lastTransformValues = {
-          offsetX: currentOffsetX,
-          offsetY: currentOffsetY,
-          zoom: currentZoom,
-        };
-      }
-
-      transformUpdateScheduled = false;
-    });
+    // 差分検出による最適化
+    if (
+      lastTransformValues.offsetX !== currentOffsetX ||
+      lastTransformValues.offsetY !== currentOffsetY ||
+      lastTransformValues.zoom !== currentZoom
+    ) {
+      canvasStack.style.transform = `translate(${currentOffsetX}px, ${currentOffsetY}px) scale(${currentZoom})`;
+      lastTransformValues = {
+        offsetX: currentOffsetX,
+        offsetY: currentOffsetY,
+        zoom: currentZoom,
+      };
+    }
   };
 
   onMount(() => {
@@ -173,36 +171,16 @@ const CanvasArea: Component = () => {
     });
     adjustZoomToFit();
 
-    // イベントバス経由の更新も統一制御に変更
-    eventBus.on('canvas:sizeChanged', (e) => {
-      scheduleTransformUpdate();
-    });
-    eventBus.on('canvas:onAdjusted', (e) => {
-      scheduleTransformUpdate();
-    });
-
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();
-    scheduleTransformUpdate();
 
-    // interactStoreの変更を監視して自動更新
-    createEffect(() => {
-      // ストアの値を参照して依存関係を作成
-      interactStore.offset.x;
-      interactStore.offset.y;
-      interactStore.offsetOrigin.x;
-      interactStore.offsetOrigin.y;
-      interactStore.zoom;
-
-      // 初回は除外（onMount内で明示的に呼び出すため）
-      if (interact) {
-        scheduleTransformUpdate();
-      }
-    });
+    updateTransform();
+    startTransformUpdate();
 
     return () => {
       unlistenOnResized.then((callback) => callback());
-      if (!import.meta.hot) interact?.removeInteractListeners();
+      interact?.removeInteractListeners();
+      stopTransformUpdate();
     };
   });
 
@@ -241,7 +219,6 @@ const CanvasArea: Component = () => {
         {/* content between side sections */}
         <div class={sectionsBetweenAreaContainer}>
           <div id='sections-between-area' class={sectionsBetweenArea}>
-            
             <div id='between-area-center' class={centerMarker} />
 
             <CanvasControls />

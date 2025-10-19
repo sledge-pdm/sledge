@@ -7,7 +7,6 @@ import { Consts } from '~/Consts';
 import { adjustZoomToFit, zoomTowardAreaCenter } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
-import { eventBus } from '~/utils/EventBus';
 
 const sideSectionControlRoot = css`
   display: flex;
@@ -149,7 +148,6 @@ const SideSectionControl: Component<Props> = (props) => {
                 floatSignificantDigits={Consts.zoomByReferencePrecisionSignificantDigits}
                 onChange={(v) => {
                   zoomTowardAreaCenter(v);
-                  eventBus.emit('canvas:onTransformChanged', {});
                 }}
                 onDoubleClick={() => {
                   adjustZoomToFit();

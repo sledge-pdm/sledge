@@ -45,9 +45,7 @@ export default function Editor() {
   });
 
   onCleanup(() => {
-    if (!import.meta.hot) {
-      webGLRenderer?.dispose();
-    }
+    webGLRenderer?.dispose();
   });
 
   const [isLoading, setIsLoading] = createSignal(true);

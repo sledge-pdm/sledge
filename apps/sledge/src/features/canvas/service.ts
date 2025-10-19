@@ -214,7 +214,6 @@ export function zoomTowardAreaCenter(newReferenceZoom: number) {
   const betweenAreaCenter = document.getElementById('between-area-center');
   const canvasStack = document.getElementById('canvas-stack');
   if (!canvasStack || !betweenAreaCenter) {
-    eventBus.emit('canvas:onTransformChanged', {});
     return;
   }
   const stackRect = canvasStack.getBoundingClientRect();
@@ -228,20 +227,18 @@ export function zoomTowardAreaCenter(newReferenceZoom: number) {
   // stackRect.left/top は transform 由来で後続再描画まで旧値なので、相対変化のみ計算
   const dx = canvasCenterX * (zoomOld - zoomNew);
   const dy = canvasCenterY * (zoomOld - zoomNew);
-  
+
   setOffset({
     x: interactStore.offset.x + dx,
     y: interactStore.offset.y + dy,
   });
 
-  eventBus.emit('canvas:onTransformChanged', {});
   return zoomChanged;
 }
 
 export function rotateInAreaCenter(rotation: number) {
   const betweenAreaCenter = document.getElementById('between-area-center');
   if (!betweenAreaCenter) {
-    eventBus.emit('canvas:onTransformChanged', {});
     return;
   }
   const betweenAreaCenterRect = betweenAreaCenter.getBoundingClientRect();

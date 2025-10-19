@@ -6,8 +6,8 @@ const root = css`
   position: fixed;
   width: 3px;
   height: 3px;
-  transform-origin: 0 0;
-  transform: translate(-50%, -50%);
+  margin-top: -1.5px;
+  margin-top: -1.5px;
   backdrop-filter: invert();
   touch-action: none;
   pointer-events: none;

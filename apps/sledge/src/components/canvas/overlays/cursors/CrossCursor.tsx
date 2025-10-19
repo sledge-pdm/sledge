@@ -4,10 +4,10 @@ import { Component } from 'solid-js';
 
 const root = css`
   position: fixed;
+  margin-top: -5.5px;
+  margin-left: -5.5px;
   width: 11px;
   height: 11px;
-  transform-origin: 0 0;
-  transform: translate(-50%, -50%);
   touch-action: none;
   pointer-events: none;
 `;
@@ -17,10 +17,8 @@ const horizontalBar = css`
   position: absolute;
   width: 11px;
   height: 1px;
-  top: 50%;
-  left: 50%;
-  transform-origin: 0 0;
-  transform: translate(-50%, -50%);
+  top: 5.5px;
+  left: 0.5px;
   backdrop-filter: invert();
 `;
 
@@ -29,10 +27,8 @@ const verticalBar = css`
   position: absolute;
   width: 1px;
   height: 11px;
-  top: 50%;
-  left: 50%;
-  transform-origin: 0 0;
-  transform: translate(-50%, -50%);
+  top: 0.5px;
+  left: 5.5px;
   backdrop-filter: invert();
 `;
 

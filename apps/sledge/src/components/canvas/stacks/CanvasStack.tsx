@@ -7,10 +7,11 @@ import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
 import { color } from '@sledge/theme';
+import createRAF, { targetFPS } from '@solid-primitives/raf';
 import '/patterns/CheckerboardPattern.svg';
 
 const canvasStack = css`
@@ -43,8 +44,6 @@ const CanvasStack: Component = () => {
 
   let orientationRef!: HTMLDivElement;
 
-  // Orientation transform の RAF制御
-  let orientationUpdateScheduled = false;
   let lastOrientationValues = {
     width: 0,
     height: 0,
@@ -53,72 +52,64 @@ const CanvasStack: Component = () => {
     rotation: 0,
   };
 
-  const scheduleOrientationUpdate = () => {
-    if (orientationUpdateScheduled) return;
-    orientationUpdateScheduled = true;
+  const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
+    targetFPS(() => {
+      updateTransform();
+    }, 60)
+  );
 
-    requestAnimationFrame(() => {
-      const w = canvasStore.canvas.width;
-      const h = canvasStore.canvas.height;
-      const sx = interactStore.horizontalFlipped ? -1 : 1;
-      const sy = interactStore.verticalFlipped ? -1 : 1;
-      const rot = interactStore.rotation;
+  const updateTransform = () => {
+    const w = canvasStore.canvas.width;
+    const h = canvasStore.canvas.height;
+    const sx = interactStore.horizontalFlipped ? -1 : 1;
+    const sy = interactStore.verticalFlipped ? -1 : 1;
+    const rot = interactStore.rotation;
 
-      // 差分検出による最適化
-      if (
-        lastOrientationValues.width !== w ||
-        lastOrientationValues.height !== h ||
-        lastOrientationValues.horizontalFlipped !== interactStore.horizontalFlipped ||
-        lastOrientationValues.verticalFlipped !== interactStore.verticalFlipped ||
-        lastOrientationValues.rotation !== rot
-      ) {
-        if (orientationRef) {
-          const cx = w / 2;
-          const cy = h / 2;
-          // translate -> rotate -> scale -> translate back
-          orientationRef.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`;
-          orientationRef.style.transformOrigin = '0 0';
-        }
-
-        lastOrientationValues = {
-          width: w,
-          height: h,
-          horizontalFlipped: interactStore.horizontalFlipped,
-          verticalFlipped: interactStore.verticalFlipped,
-          rotation: rot,
-        };
+    // 差分検出による最適化
+    if (
+      lastOrientationValues.width !== w ||
+      lastOrientationValues.height !== h ||
+      lastOrientationValues.horizontalFlipped !== interactStore.horizontalFlipped ||
+      lastOrientationValues.verticalFlipped !== interactStore.verticalFlipped ||
+      lastOrientationValues.rotation !== rot
+    ) {
+      if (orientationRef) {
+        const cx = w / 2;
+        const cy = h / 2;
+        // translate -> rotate -> scale -> translate back
+        orientationRef.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`;
+        orientationRef.style.transformOrigin = '0 0';
       }
 
-      orientationUpdateScheduled = false;
-    });
+      lastOrientationValues = {
+        width: w,
+        height: h,
+        horizontalFlipped: interactStore.horizontalFlipped,
+        verticalFlipped: interactStore.verticalFlipped,
+        rotation: rot,
+      };
+    }
+  };
+
+  const handleCanvasSizeChanged = ({ newSize }: Events['canvas:sizeChanged']) => {
+    const { width, height } = newSize;
+    updateGridSize(width, height);
   };
 
   onMount(() => {
     const { width, height } = canvasStore.canvas;
     updateGridSize(width, height);
 
-    // キャンバスサイズ変更はeventBus経由で適切に処理
-    eventBus.on('canvas:sizeChanged', ({ newSize }) => {
-      const { width, height } = newSize;
-      updateGridSize(width, height);
-      scheduleOrientationUpdate();
-    });
+    eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
 
     // 初回orientation更新
-    scheduleOrientationUpdate();
-  });
+    updateTransform();
+    startTransformUpdate();
 
-  // interactStoreの変更を監視してorientation更新
-  createEffect(() => {
-    // ストアの値を参照して依存関係を作成
-    interactStore.horizontalFlipped;
-    interactStore.verticalFlipped;
-    interactStore.rotation;
-
-    // 初回は除外（onMount内で明示的に呼び出すため）
-    if (orientationRef) {
-      scheduleOrientationUpdate();
-    }
+    return () => {
+      eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
+      stopTransformUpdate();
+    };
   });
 
   return (

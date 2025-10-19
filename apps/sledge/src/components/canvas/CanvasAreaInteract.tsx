@@ -198,6 +198,11 @@ class CanvasAreaInteract {
           y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
         });
         rotateInCenter({ x: midX, y: midY }, rotProcessed);
+
+        this.lastAppliedDist = distNew;
+        this.lastAppliedAngle = angleNew;
+        this.lastAppliedMidX = midX;
+        this.lastAppliedMidY = midY;
       }
     } else {
       // タッチ以外

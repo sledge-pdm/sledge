@@ -46,7 +46,6 @@ const CrossCursor: Component<Props> = (props: Props) => {
       }}
     >
       <div class={horizontalBar} />
-
       <div class={verticalBar} />
     </div>
   );

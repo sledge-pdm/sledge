@@ -1,5 +1,4 @@
 import { Vec2 } from '@sledge/core';
-import { Consts } from '~/Consts';
 import { getReferencedZoom, rotateInAreaCenter, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
@@ -267,9 +266,7 @@ class CanvasAreaInteract {
     const delta = (deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep) * multiply;
 
     const zoomOld = interactStore.zoom;
-    let zoomNew =
-      Math.round((interactStore.zoom + interactStore.zoom * delta) * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) /
-      Math.pow(10, Consts.zoomPrecisionSignificantDigits);
+    let zoomNew = interactStore.zoom + interactStore.zoom * delta;
     zoomNew = Math.min(Math.max(zoomNew, interactStore.zoomMin * referencedZoom), interactStore.zoomMax * referencedZoom);
 
     const rect = this.canvasStack.getBoundingClientRect();

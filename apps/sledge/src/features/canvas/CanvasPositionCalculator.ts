@@ -208,3 +208,27 @@ export function clientPositionToCanvasPositionWithoutRotation(clientPos: Vec2): 
     y: canvasPos.y,
   };
 }
+
+export function getWindowMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
+  let x = 0;
+  let y = 0;
+
+  if ('clientX' in e && 'clientY' in e) {
+    x = e.clientX;
+    y = e.clientY;
+  } else if ('touches' in e && e.touches.length > 0) {
+    x = e.touches[0].clientX;
+    y = e.touches[0].clientY;
+  }
+  return { x, y };
+}
+
+export function getCanvasMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
+  // pointer 座標
+  const clientX = 'clientX' in e ? e.clientX : e.touches[0].clientX;
+  const clientY = 'clientY' in e ? e.clientY : e.touches[0].clientY;
+  return clientPositionToCanvasPosition({
+    x: clientX,
+    y: clientY,
+  });
+}

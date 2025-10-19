@@ -206,6 +206,112 @@ export const setRotation = (rotation: number) => {
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
 
+export function zoomTowardAreaCenter(newReferenceZoom: number) {
+  const zoomOld = interactStore.zoom;
+  const zoomChanged = setZoomByReference(newReferenceZoom);
+  const zoomNew = interactStore.zoom;
+
+  const canvasStack = document.getElementById('canvas-stack');
+  const betweenArea = document.getElementById('sections-between-area');
+  if (!canvasStack || !betweenArea) {
+    eventBus.emit('canvas:onTransformChanged', {});
+    return;
+  }
+  const stackRect = canvasStack.getBoundingClientRect();
+  const areaRect = betweenArea.getBoundingClientRect();
+
+  // 可視領域中心 (ビューポート中心 in between area)
+  const viewCenterX = areaRect.left + areaRect.width / 2;
+  const viewCenterY = areaRect.top + areaRect.height / 2;
+  // 旧ズームでの view 中心がキャンバス座標でどこだったか
+  const canvasCenterX = (viewCenterX - stackRect.left) / zoomOld;
+  const canvasCenterY = (viewCenterY - stackRect.top) / zoomOld;
+
+  // 新ズーム適用後も同じキャンバス座標が中心に来るようにオフセット調整
+  // stackRect.left/top は transform 由来で後続再描画まで旧値なので、相対変化のみ計算
+  const dx = canvasCenterX * (zoomOld - zoomNew);
+  const dy = canvasCenterY * (zoomOld - zoomNew);
+  setOffset({
+    x: interactStore.offset.x + dx,
+    y: interactStore.offset.y + dy,
+  });
+
+  eventBus.emit('canvas:onTransformChanged', {});
+  return zoomChanged;
+}
+
+export function rotateInAreaCenter(rotation: number) {
+  const betweenArea = document.getElementById('sections-between-area');
+  if (!betweenArea) {
+    eventBus.emit('canvas:onTransformChanged', {});
+    return;
+  }
+  const areaRect = betweenArea.getBoundingClientRect();
+  // 可視領域中心 (ビューポート中心 in between area)
+  const viewCenterX = (areaRect.left + areaRect.right) / 2;
+  const viewCenterY = (areaRect.top + areaRect.bottom) / 2;
+
+  rotateInCenter({ x: viewCenterX, y: viewCenterY }, rotation);
+}
+
+// centerWindowPositionを中心としたrotationを行う
+// (通常のsetRotationはキャンバスの中心を中心に回転している点に注意)
+export function rotateInCenter(centerWindowPosition: Vec2, rotation: number) {
+  const rotOld = interactStore.rotation;
+
+  // 新しい回転角度を設定
+  setRotation(rotation);
+  const rotNew = interactStore.rotation;
+
+  // 回転角度の差分（ラジアン）
+  const deltaRad = ((rotNew - rotOld) * Math.PI) / 180;
+
+  // 回転の中心点を画面座標からキャンバス座標に変換
+  const canvasStack = document.getElementById('canvas-stack');
+  if (!canvasStack) {
+    eventBus.emit('canvas:onTransformChanged', {});
+    return;
+  }
+
+  const rect = canvasStack.getBoundingClientRect();
+  const zoom = interactStore.zoom;
+
+  // 回転中心の画面座標からキャンバススタック内の相対座標を計算
+  const centerRelativeX = centerWindowPosition.x - rect.left;
+  const centerRelativeY = centerWindowPosition.y - rect.top;
+
+  // キャンバススタック内座標をキャンバス論理座標に変換（回転前）
+  const centerCanvasX = centerRelativeX / zoom;
+  const centerCanvasY = centerRelativeY / zoom;
+
+  // キャンバスの中心座標
+  const canvasCenterX = canvasStore.canvas.width / 2;
+  const canvasCenterY = canvasStore.canvas.height / 2;
+
+  // 回転中心からキャンバス中心へのベクトル
+  const vecX = canvasCenterX - centerCanvasX;
+  const vecY = canvasCenterY - centerCanvasY;
+
+  // 回転による変位を計算
+  const cosTheta = Math.cos(deltaRad);
+  const sinTheta = Math.sin(deltaRad);
+
+  // 回転後のベクトル
+  const rotatedVecX = vecX * cosTheta - vecY * sinTheta;
+  const rotatedVecY = vecX * sinTheta + vecY * cosTheta;
+
+  // 変位量（ズーム適用済み画面座標）
+  const deltaX = (rotatedVecX - vecX) * zoom;
+  const deltaY = (rotatedVecY - vecY) * zoom;
+
+  // オフセットを調整して回転中心を維持
+  setOffset({
+    x: interactStore.offset.x + deltaX,
+    y: interactStore.offset.y + deltaY,
+  });
+  eventBus.emit('canvas:onTransformChanged', {});
+}
+
 export const toggleVerticalFlip = () => {
   setInteractStore('verticalFlipped', (v) => !v);
   eventBus.emit('selection:updateSelectionMenu', {});

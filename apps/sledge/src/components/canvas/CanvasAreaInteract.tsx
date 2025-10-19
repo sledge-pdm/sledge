@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Consts } from '~/Consts';
-import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/features/canvas';
+import { getReferencedZoom, rotateInAreaCenter, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -35,7 +35,6 @@ class CanvasAreaInteract {
 
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
-
 
   public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
     this.canvasStack.style.cursor = cursor;
@@ -230,9 +229,9 @@ class CanvasAreaInteract {
     if (e.shiftKey) {
       const amount = globalConfig.editor.rotateDegreePerWheelScroll;
       if (e.deltaY > 0) {
-        setRotation(interactStore.rotation + amount);
+        rotateInAreaCenter(interactStore.rotation + amount);
       } else {
-        setRotation(interactStore.rotation - amount);
+        rotateInAreaCenter(interactStore.rotation - amount);
       }
       return;
     }
@@ -262,7 +261,6 @@ class CanvasAreaInteract {
       y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
     });
 
-    // updateTransform は CanvasArea の createEffect で自動実行
     return true;
   }
 
@@ -368,7 +366,7 @@ class CanvasAreaInteract {
       x: interactStore.offset.x + canvasMidX * (zoomOld - zoomApplied) + dxCanvas,
       y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
     });
-    setRotation(rotProcessed);
+    rotateInCenter({ x: midX, y: midY }, rotProcessed);
 
     // 状態更新
     this.lastAppliedDist = distNew;

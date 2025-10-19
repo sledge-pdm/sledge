@@ -4,7 +4,7 @@ import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
 import { Consts } from '~/Consts';
-import { adjustZoomToFit, setOffset, setZoomByReference } from '~/features/canvas';
+import { adjustZoomToFit, zoomTowardAreaCenter } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
 import { eventBus } from '~/utils/EventBus';
@@ -148,39 +148,7 @@ const SideSectionControl: Component<Props> = (props) => {
                 allowFloat={true}
                 floatSignificantDigits={Consts.zoomByReferencePrecisionSignificantDigits}
                 onChange={(v) => {
-                  // 既存ズーム値を基に、可視領域中心へ向かうオフセット補正を行いながら zoomByReference を更新
-                  const zoomOld = interactStore.zoom;
-                  const zoomChanged = setZoomByReference(v); // interactStore.zoom が更新される
-                  const zoomNew = interactStore.zoom;
-                  if (!zoomChanged) return;
-
-                  const canvasStack = document.getElementById('canvas-stack');
-                  const betweenArea = document.getElementById('sections-between-area');
-                  if (!canvasStack || !betweenArea) {
-                    eventBus.emit('canvas:onTransformChanged', {});
-                    return;
-                  }
-
-                  const stackRect = canvasStack.getBoundingClientRect();
-                  const areaRect = betweenArea.getBoundingClientRect();
-
-                  // 可視領域中心 (ビューポート中心 in between area)
-                  const viewCenterX = areaRect.left + areaRect.width / 2;
-                  const viewCenterY = areaRect.top + areaRect.height / 2;
-
-                  // 旧ズームでの view 中心がキャンバス座標でどこだったか
-                  const canvasCenterX = (viewCenterX - stackRect.left) / zoomOld;
-                  const canvasCenterY = (viewCenterY - stackRect.top) / zoomOld;
-
-                  // 新ズーム適用後も同じキャンバス座標が中心に来るようにオフセット調整
-                  // stackRect.left/top は transform 由来で後続再描画まで旧値なので、相対変化のみ計算
-                  const dx = canvasCenterX * (zoomOld - zoomNew);
-                  const dy = canvasCenterY * (zoomOld - zoomNew);
-                  setOffset({
-                    x: interactStore.offset.x + dx,
-                    y: interactStore.offset.y + dy,
-                  });
-
+                  zoomTowardAreaCenter(v);
                   eventBus.emit('canvas:onTransformChanged', {});
                 }}
                 onDoubleClick={() => {

@@ -7,8 +7,8 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import AnalogSticks from '~/components/global/analog_sticks/AnalogSticks';
 import ClipboardListener from '~/components/global/ClipboardListener';
-import FloatingController from '~/components/global/controller/FloatingController';
 import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
@@ -260,7 +260,7 @@ export default function Editor() {
 
         <SideSectionControl side='rightSide' />
 
-        <FloatingController />
+        <AnalogSticks />
 
         <KeyListener />
         <ClipboardListener />

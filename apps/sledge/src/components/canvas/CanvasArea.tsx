@@ -171,9 +171,6 @@ const CanvasArea: Component = () => {
     eventBus.on('canvas:onAdjusted', (e) => {
       scheduleTransformUpdate();
     });
-    eventBus.on('canvas:onTransformChanged', (e) => {
-      scheduleTransformUpdate();
-    });
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();

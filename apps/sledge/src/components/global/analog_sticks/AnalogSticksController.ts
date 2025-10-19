@@ -1,11 +1,11 @@
 import { Vec2 } from '@sledge/core';
 import { createRAF, targetFPS } from '@solid-primitives/raf';
-import { setOffset, setZoomByReference } from '~/features/canvas';
+import { setOffset, zoomTowardAreaCenter } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
 
-export interface PanZoomControllerOptions {
+export interface AnalogSticksControllerOptions {
   // Pan sensitivity (pixels per tick when at maximum deviation)
   panSensitivity: number;
   // Zoom sensitivity (zoom change per tick when at maximum deviation)
@@ -18,7 +18,7 @@ export interface PanZoomControllerOptions {
   deadzone: number;
 }
 
-const defaultOptions: PanZoomControllerOptions = {
+const defaultOptions: AnalogSticksControllerOptions = {
   panSensitivity: -6.0,
   zoomSensitivity: 0.05,
   returnSpeed: 0.12,
@@ -27,7 +27,7 @@ const defaultOptions: PanZoomControllerOptions = {
 };
 
 /**
- * PanZoomController - アナログスティック風のパン・ズーム操作を管理するクラス
+ * AnalogSticksController - アナログスティック風のパン・ズーム操作を管理するクラス
  *
  * パン操作:
  * - 2Dスティックの位置に応じてキャンバスをパン
@@ -39,8 +39,8 @@ const defaultOptions: PanZoomControllerOptions = {
  * - 中心(0.5)が基準ズーム、上下で拡大/縮小
  * - 離すと自動的に中心に戻る
  */
-export class PanZoomController {
-  private options: PanZoomControllerOptions;
+export class AnalogSticksController {
+  private options: AnalogSticksControllerOptions;
 
   // Current positions: pan is 2D (-1 to 1), zoom is 1D (-1 to 1, where 0 is center)
   private panPosition: Vec2 = { x: 0, y: 0 };
@@ -58,7 +58,7 @@ export class PanZoomController {
   // Base values to calculate relative changes from
   private baseZoom: number = 1;
 
-  constructor(options: Partial<PanZoomControllerOptions> = {}) {
+  constructor(options: Partial<AnalogSticksControllerOptions> = {}) {
     this.options = { ...defaultOptions, ...options };
 
     // Setup RAF loop
@@ -205,44 +205,14 @@ export class PanZoomController {
       const newZoom = Math.max(interactStore.zoomMin, Math.min(interactStore.zoomMax, currentZoom + zoomDelta));
 
       if (newZoom !== currentZoom) {
-        const zoomOld = interactStore.zoom;
-        const zoomChanged = setZoomByReference(newZoom);
-        const zoomNew = interactStore.zoom;
-
-        const canvasStack = document.getElementById('canvas-stack');
-        const betweenArea = document.getElementById('sections-between-area');
-        if (!canvasStack || !betweenArea) {
-          eventBus.emit('canvas:onTransformChanged', {});
-          return;
-        }
-        const stackRect = canvasStack.getBoundingClientRect();
-        const areaRect = betweenArea.getBoundingClientRect();
-
-        // 可視領域中心 (ビューポート中心 in between area)
-        const viewCenterX = areaRect.left + areaRect.width / 2;
-        const viewCenterY = areaRect.top + areaRect.height / 2;
-
-        // 旧ズームでの view 中心がキャンバス座標でどこだったか
-        const canvasCenterX = (viewCenterX - stackRect.left) / zoomOld;
-        const canvasCenterY = (viewCenterY - stackRect.top) / zoomOld;
-
-        // 新ズーム適用後も同じキャンバス座標が中心に来るようにオフセット調整
-        // stackRect.left/top は transform 由来で後続再描画まで旧値なので、相対変化のみ計算
-        const dx = canvasCenterX * (zoomOld - zoomNew);
-        const dy = canvasCenterY * (zoomOld - zoomNew);
-        setOffset({
-          x: interactStore.offset.x + dx,
-          y: interactStore.offset.y + dy,
-        });
+        zoomTowardAreaCenter(newZoom);
       }
     }
 
     // Stop RAF if no movement needed
     if (!needsUpdate && Math.abs(this.panPosition.x) < 0.001 && Math.abs(this.panPosition.y) < 0.001 && Math.abs(this.zoomPosition) < 0.001) {
       this.stop();
-    } else {
-      eventBus.emit('canvas:onTransformChanged', {});
-    }
+    } 
   }
 
   /**

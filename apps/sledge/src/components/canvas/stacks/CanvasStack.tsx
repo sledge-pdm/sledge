@@ -41,36 +41,88 @@ const CanvasStack: Component = () => {
     setGridSize(gridSize);
   };
 
+  let orientationRef!: HTMLDivElement;
+
+  // Orientation transform の RAF制御
+  let orientationUpdateScheduled = false;
+  let lastOrientationValues = {
+    width: 0,
+    height: 0,
+    horizontalFlipped: false,
+    verticalFlipped: false,
+    rotation: 0,
+  };
+
+  const scheduleOrientationUpdate = () => {
+    if (orientationUpdateScheduled) return;
+    orientationUpdateScheduled = true;
+
+    requestAnimationFrame(() => {
+      const w = canvasStore.canvas.width;
+      const h = canvasStore.canvas.height;
+      const sx = interactStore.horizontalFlipped ? -1 : 1;
+      const sy = interactStore.verticalFlipped ? -1 : 1;
+      const rot = interactStore.rotation;
+
+      // 差分検出による最適化
+      if (
+        lastOrientationValues.width !== w ||
+        lastOrientationValues.height !== h ||
+        lastOrientationValues.horizontalFlipped !== interactStore.horizontalFlipped ||
+        lastOrientationValues.verticalFlipped !== interactStore.verticalFlipped ||
+        lastOrientationValues.rotation !== rot
+      ) {
+        if (orientationRef) {
+          const cx = w / 2;
+          const cy = h / 2;
+          // translate -> rotate -> scale -> translate back
+          orientationRef.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`;
+          orientationRef.style.transformOrigin = '0 0';
+        }
+
+        lastOrientationValues = {
+          width: w,
+          height: h,
+          horizontalFlipped: interactStore.horizontalFlipped,
+          verticalFlipped: interactStore.verticalFlipped,
+          rotation: rot,
+        };
+      }
+
+      orientationUpdateScheduled = false;
+    });
+  };
+
   onMount(() => {
     const { width, height } = canvasStore.canvas;
     updateGridSize(width, height);
+
+    // キャンバスサイズ変更はeventBus経由で適切に処理
     eventBus.on('canvas:sizeChanged', ({ newSize }) => {
       const { width, height } = newSize;
       updateGridSize(width, height);
+      scheduleOrientationUpdate();
     });
+
+    // 初回orientation更新
+    scheduleOrientationUpdate();
   });
 
-  let orientationRef!: HTMLDivElement;
-  let rootRef!: HTMLDivElement;
-
+  // interactStoreの変更を監視してorientation更新
   createEffect(() => {
-    const w = canvasStore.canvas.width;
-    const h = canvasStore.canvas.height;
-    const cx = w / 2;
-    const cy = h / 2;
-    const sx = interactStore.horizontalFlipped ? -1 : 1;
-    const sy = interactStore.verticalFlipped ? -1 : 1;
-    const rot = interactStore.rotation; // deg
+    // ストアの値を参照して依存関係を作成
+    interactStore.horizontalFlipped;
+    interactStore.verticalFlipped;
+    interactStore.rotation;
+
+    // 初回は除外（onMount内で明示的に呼び出すため）
     if (orientationRef) {
-      // translate -> rotate -> scale -> translate back
-      orientationRef.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`;
-      orientationRef.style.transformOrigin = '0 0';
+      scheduleOrientationUpdate();
     }
   });
 
   return (
     <div
-      ref={(el) => (rootRef = el)}
       style={{
         position: 'relative',
         width: `${canvasStore.canvas.width}px`,

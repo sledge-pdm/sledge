@@ -1,4 +1,4 @@
-import { Component, onMount, Show } from 'solid-js';
+import { Component, createEffect, onMount, Show } from 'solid-js';
 import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './overlays/CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
@@ -94,6 +94,41 @@ const CanvasArea: Component = () => {
 
   let interact: CanvasAreaInteract | undefined = undefined;
 
+  // Transform更新の統一制御
+  let transformUpdateScheduled = false;
+  let lastTransformValues = {
+    offsetX: 0,
+    offsetY: 0,
+    zoom: 1,
+  };
+
+  const scheduleTransformUpdate = () => {
+    if (transformUpdateScheduled) return;
+    transformUpdateScheduled = true;
+
+    requestAnimationFrame(() => {
+      const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
+      const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
+      const currentZoom = interactStore.zoom;
+
+      // 差分検出による最適化
+      if (
+        lastTransformValues.offsetX !== currentOffsetX ||
+        lastTransformValues.offsetY !== currentOffsetY ||
+        lastTransformValues.zoom !== currentZoom
+      ) {
+        interact?.updateTransform();
+        lastTransformValues = {
+          offsetX: currentOffsetX,
+          offsetY: currentOffsetY,
+          zoom: currentZoom,
+        };
+      }
+
+      transformUpdateScheduled = false;
+    });
+  };
+
   onMount(() => {
     const unlistenOnResized = getCurrentWindow().onResized(async (e) => {
       setInteractStore('canvasAreaSize', {
@@ -129,19 +164,35 @@ const CanvasArea: Component = () => {
     });
     adjustZoomToFit();
 
+    // イベントバス経由の更新も統一制御に変更
     eventBus.on('canvas:sizeChanged', (e) => {
-      interact?.updateTransform();
+      scheduleTransformUpdate();
     });
     eventBus.on('canvas:onAdjusted', (e) => {
-      interact?.updateTransform();
+      scheduleTransformUpdate();
     });
     eventBus.on('canvas:onTransformChanged', (e) => {
-      interact?.updateTransform();
+      scheduleTransformUpdate();
     });
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();
     interact.updateTransform();
+
+    // interactStoreの変更を監視して自動更新
+    createEffect(() => {
+      // ストアの値を参照して依存関係を作成
+      interactStore.offset.x;
+      interactStore.offset.y;
+      interactStore.offsetOrigin.x;
+      interactStore.offsetOrigin.y;
+      interactStore.zoom;
+
+      // 初回は除外（onMount内で明示的に呼び出すため）
+      if (interact) {
+        scheduleTransformUpdate();
+      }
+    });
 
     return () => {
       unlistenOnResized.then((callback) => callback());

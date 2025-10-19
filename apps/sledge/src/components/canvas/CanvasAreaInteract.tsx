@@ -65,11 +65,10 @@ class CanvasAreaInteract {
     this.canvasStack.style.willChange = 'transform';
     this.canvasStack.style.backfaceVisibility = 'hidden';
 
-    // Setup RAF loop (lazy usage: only meaningful during pinch)
     const [isRunning, start, stop] = createRAF(
       targetFPS(() => {
         this.onRaf();
-      }, Number(globalConfig.performance.targetFPS))
+      }, 60)
     );
     this.rafRunning = isRunning;
     this.startRaf = start;
@@ -181,7 +180,7 @@ class CanvasAreaInteract {
           x: interactStore.offset.x + dx,
           y: interactStore.offset.y + dy,
         });
-        this.updateTransform();
+        // updateTransform は CanvasArea の createEffect で自動実行
       } else if (this.pointers.size === 2) {
         // 2本指: 位置だけ更新し、実処理は RAF でまとめて行う
         this.pointers.set(e.pointerId, now);
@@ -198,7 +197,7 @@ class CanvasAreaInteract {
             x: interactStore.offset.x + dx,
             y: interactStore.offset.y + dy,
           });
-          this.updateTransform();
+          // updateTransform は CanvasArea の createEffect で自動実行
           this.updateCursor('move');
         } else {
           this.updateCursor('auto');
@@ -272,7 +271,7 @@ class CanvasAreaInteract {
       y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
     });
 
-    this.updateTransform();
+    // updateTransform は CanvasArea の createEffect で自動実行
     return true;
   }
 
@@ -382,6 +381,7 @@ class CanvasAreaInteract {
       y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
     });
     setRotation(rotProcessed);
+    // updateTransform は CanvasArea の createEffect で自動実行（ただし2本指では即座更新も可能）
     this.updateTransform();
 
     // 状態更新

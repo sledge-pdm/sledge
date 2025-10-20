@@ -189,21 +189,44 @@ class CanvasAreaInteract {
         const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
         const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
 
+        // 統合された2本指ジェスチャ処理
+        console.log('2本指ジェスチャ Debug:', {
+          zoomOld,
+          newZoomRaw,
+          midPoint: { current: { x: midX, y: midY }, prev: { x: prevMidX, y: prevMidY } },
+          deltaPixels: { x: midX - prevMidX, y: midY - prevMidY },
+          rotOldDeg,
+          rotProcessed,
+        });
+
+        // 1. ズーム適用
         setZoom(newZoomRaw);
         const zoomApplied = interactStore.zoom; // 丸め後
 
-        // 統一座標系を使用した最適化計算
-        const windowMid = { x: midX, y: midY };
-        const canvasMid = coordinateTransform.windowToCanvasVec2(windowMid);
+        // 2. 併進処理（ウィンドウ座標の変化をそのままオフセットに反映）
+        const deltaWindowX = midX - prevMidX;
+        const deltaWindowY = midY - prevMidY;
 
-        const dxCanvas = midX - prevMidX;
-        const dyCanvas = midY - prevMidY;
+        // 3. ズーム中心維持の計算（前回の中点基準）
+        const prevMidWindowPos = WindowPos.create(prevMidX, prevMidY);
+        const prevMidCanvasPos = coordinateTransform.windowToCanvas(prevMidWindowPos);
+        const zoomOffsetX = prevMidCanvasPos.x * (zoomOld - zoomApplied);
+        const zoomOffsetY = prevMidCanvasPos.y * (zoomOld - zoomApplied);
 
+        // 4. 統合オフセット更新（併進 + ズーム調整）
         setOffset({
-          x: interactStore.offset.x + canvasMid.x * (zoomOld - zoomApplied) + dxCanvas,
-          y: interactStore.offset.y + canvasMid.y * (zoomOld - zoomApplied) + dyCanvas,
+          x: interactStore.offset.x + deltaWindowX + zoomOffsetX,
+          y: interactStore.offset.y + deltaWindowY + zoomOffsetY,
         });
+
+        // 5. 回転処理（現在の中点を基準に）
         rotateInCenter(WindowPos.from({ x: midX, y: midY }), rotProcessed);
+
+        console.log('2本指ジェスチャ Result:', {
+          deltaWindow: { x: deltaWindowX, y: deltaWindowY },
+          zoomOffset: { x: zoomOffsetX, y: zoomOffsetY },
+          finalOffset: { x: interactStore.offset.x, y: interactStore.offset.y },
+        });
 
         this.lastAppliedDist = distNew;
         this.lastAppliedAngle = angleNew;

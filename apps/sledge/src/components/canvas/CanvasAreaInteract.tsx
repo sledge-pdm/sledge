@@ -189,16 +189,6 @@ class CanvasAreaInteract {
         const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
         const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
 
-        // 統合された2本指ジェスチャ処理（簡潔版）
-        console.log('2本指ジェスチャ Debug:', {
-          zoomOld,
-          newZoomRaw,
-          midPoint: { current: { x: midX, y: midY }, prev: { x: prevMidX, y: prevMidY } },
-          deltaPixels: { x: midX - prevMidX, y: midY - prevMidY },
-          rotOldDeg,
-          rotProcessed,
-        });
-
         // 1. ズーム処理（中心維持を含む）
         const midWindowPos = WindowPos.from({ x: midX, y: midY });
         zoomTowardWindowPos(midWindowPos, newZoomRaw);
@@ -213,12 +203,6 @@ class CanvasAreaInteract {
         setOffset({
           x: interactStore.offset.x + deltaWindowX,
           y: interactStore.offset.y + deltaWindowY,
-        });
-
-        console.log('2本指ジェスチャ Result:', {
-          deltaWindow: { x: deltaWindowX, y: deltaWindowY },
-          appliedOffset: { x: deltaWindowX, y: deltaWindowY },
-          finalOffset: { x: interactStore.offset.x, y: interactStore.offset.y },
         });
 
         this.lastAppliedDist = distNew;

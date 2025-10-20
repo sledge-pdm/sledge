@@ -1,9 +1,10 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { canvasToScreen } from '~/features/canvas/CanvasPositionCalculator';
+import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { CanvasPos } from '~/types/CoordinateTypes';
 import ResizeFrameInteract, { ResizeFrameRect } from './ResizeFrameInteract';
 
 export const CanvasResizeFrame: Component = () => {
@@ -16,9 +17,9 @@ export const CanvasResizeFrame: Component = () => {
   const recomputeScreenBox = () => {
     const r = rect();
     if (!r) return;
-    const s = canvasToScreen({ x: r.x, y: r.y });
-    const e = canvasToScreen({ x: r.x + r.width, y: r.y + r.height });
-    setStart(s);
+    const s = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x, r.y));
+    const e = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x + r.width, r.y + +r.height));
+    setStart({ x: Math.min(s.x, e.x), y: Math.min(s.y, e.y) });
     setSize({ width: Math.abs(e.x - s.x), height: Math.abs(e.y - s.y) });
   };
 

@@ -19,9 +19,10 @@ import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
+import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { interactStore } from '~/stores/EditorStores';
+import { CanvasPos } from '~/types/CoordinateTypes';
 
 const container = css`
   display: flex;
@@ -161,10 +162,9 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     const right = left + width;
     const bottom = top + height;
 
-    const rightBottomOnScreen = canvasToScreenNoZoom({
-      x: interactStore.horizontalFlipped ? left : right,
-      y: interactStore.verticalFlipped ? top : bottom,
-    });
+    const rightBottomOnScreen = coordinateTransform.canvasToWindowForOverlay(
+      CanvasPos.create(interactStore.horizontalFlipped ? left : right, interactStore.verticalFlipped ? top : bottom)
+    );
     const containerWidth = containerRef.offsetWidth;
     const containerHeight = containerRef.offsetHeight;
     const anchor = { x: rightBottomOnScreen.x - containerWidth, y: rightBottomOnScreen.y };

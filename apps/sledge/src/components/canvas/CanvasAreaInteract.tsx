@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import { clipZoom, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
+import { clearCoordinateCache, coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -11,6 +12,12 @@ import TouchRotationSnapper from './TouchRotationSnapper';
 const LOG_LABEL = 'CanvasAreaInteract';
 const logger = new DebugLogger(LOG_LABEL, false);
 
+/**
+ * 最適化されたCanvasAreaInteract
+ * - getBoundingClientRect呼び出しを最小化
+ * - 統一座標変換システムを使用
+ * - 不要な計算を削減
+ */
 class CanvasAreaInteract {
   private pointers = new Map<number, Vec2>();
 
@@ -28,6 +35,11 @@ class CanvasAreaInteract {
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
 
+  // getBoundingClientRectのキャッシュ
+  private rectCache: DOMRect | null = null;
+  private rectCacheTime = 0;
+  private readonly RECT_CACHE_DURATION = 100; // 100ms
+
   public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
     this.canvasStack.style.cursor = cursor;
     this.wrapperRef.style.cursor = cursor;
@@ -43,9 +55,27 @@ class CanvasAreaInteract {
     this.canvasStack.style.touchAction = 'none';
     (this.canvasStack.style as any).msTouchAction = 'none';
 
-    // コンポジタ昇格して transform の適用を安定化
-    this.canvasStack.style.willChange = 'transform';
-    this.canvasStack.style.backfaceVisibility = 'hidden';
+    // コンポジタ昇格は新しいCanvasAreaで管理
+  }
+
+  /**
+   * キャッシュされたBoundingClientRectを取得
+   * 頻繁な呼び出しを避けるため
+   */
+  private getCachedRect(): DOMRect {
+    const now = Date.now();
+    if (!this.rectCache || now - this.rectCacheTime > this.RECT_CACHE_DURATION) {
+      this.rectCache = this.canvasStack.getBoundingClientRect();
+      this.rectCacheTime = now;
+    }
+    return this.rectCache;
+  }
+
+  /**
+   * rectキャッシュを無効化
+   */
+  private invalidateRectCache(): void {
+    this.rectCache = null;
   }
 
   static isDragKey(e: PointerEvent): boolean {
@@ -151,9 +181,10 @@ class CanvasAreaInteract {
           x: interactStore.offset.x + dx,
           y: interactStore.offset.y + dy,
         });
-        // updateTransform は CanvasArea の createEffect で自動実行
+        // キャッシュをクリア（状態変更のため）
+        clearCoordinateCache();
       } else if (this.pointers.size === 2) {
-        // 2本指: 位置だけ更新し、実処理は RAF でまとめて行う
+        // 2本指: 統一座標系を使用した最適化
         this.pointers.set(e.pointerId, now);
 
         if (this.pointers.size !== 2) return;
@@ -185,17 +216,16 @@ class CanvasAreaInteract {
         setZoom(newZoomRaw);
         const zoomApplied = interactStore.zoom; // 丸め後
 
-        // キャンバス座標へ変換
-        const rect = this.canvasStack.getBoundingClientRect();
-        const canvasMidX = (midX - rect.left) / zoomOld;
-        const canvasMidY = (midY - rect.top) / zoomOld;
+        // 統一座標系を使用した最適化計算
+        const windowMid = { x: midX, y: midY };
+        const canvasMid = coordinateTransform.windowToCanvasVec2(windowMid);
 
         const dxCanvas = midX - prevMidX;
         const dyCanvas = midY - prevMidY;
 
         setOffset({
-          x: interactStore.offset.x + canvasMidX * (zoomOld - zoomApplied) + dxCanvas,
-          y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
+          x: interactStore.offset.x + canvasMid.x * (zoomOld - zoomApplied) + dxCanvas,
+          y: interactStore.offset.y + canvasMid.y * (zoomOld - zoomApplied) + dyCanvas,
         });
         rotateInCenter({ x: midX, y: midY }, rotProcessed);
 
@@ -203,6 +233,10 @@ class CanvasAreaInteract {
         this.lastAppliedAngle = angleNew;
         this.lastAppliedMidX = midX;
         this.lastAppliedMidY = midY;
+
+        // 大きな変更時はキャッシュクリア
+        clearCoordinateCache();
+        this.invalidateRectCache();
       }
     } else {
       // タッチ以外
@@ -215,7 +249,7 @@ class CanvasAreaInteract {
             x: interactStore.offset.x + dx,
             y: interactStore.offset.y + dy,
           });
-          // updateTransform は CanvasArea の createEffect で自動実行
+          clearCoordinateCache();
           this.updateCursor('move');
         } else {
           this.updateCursor('auto');
@@ -260,6 +294,7 @@ class CanvasAreaInteract {
       } else {
         rotateInCenter(mousePos, interactStore.rotation - amount);
       }
+      clearCoordinateCache();
       return;
     }
 
@@ -273,17 +308,21 @@ class CanvasAreaInteract {
     let zoomNew = interactStore.zoom + interactStore.zoom * delta;
     zoomNew = clipZoom(zoomNew);
 
-    const rect = this.canvasStack.getBoundingClientRect();
-    const canvasX = (this.lastPointX - rect.left) / zoomOld;
-    const canvasY = (this.lastPointY - rect.top) / zoomOld;
+    // 統一座標系を使用した最適化
+    const mouseWindow = { x: this.lastPointX, y: this.lastPointY };
+    const mouseCanvas = coordinateTransform.windowToCanvasVec2(mouseWindow);
+
     const zoomed = setZoom(zoomNew);
 
     if (!zoomed) return false;
 
     setOffset({
-      x: interactStore.offset.x + canvasX * (zoomOld - zoomNew),
-      y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
+      x: interactStore.offset.x + mouseCanvas.x * (zoomOld - zoomNew),
+      y: interactStore.offset.y + mouseCanvas.y * (zoomOld - zoomNew),
     });
+
+    clearCoordinateCache();
+    this.invalidateRectCache();
 
     return true;
   }
@@ -303,13 +342,7 @@ class CanvasAreaInteract {
   }
 
   private handleKeyUp(e: KeyboardEvent) {
-    if (e.ctrlKey) {
-      if (e.key === '+') {
-        // in
-      } else if (e.key === '-') {
-        // out
-      }
-    }
+    // キーアップ処理は現状不要
   }
 
   private onPointerDown = this.handlePointerDown.bind(this);

@@ -32,10 +32,10 @@ const CursorOverlay: Component = () => {
         fallback={
           <Show when={canShowCursor()}>
             <Show when={globalConfig.editor.cursor === 'pixel'}>
-              <PixelCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />;
+              <PixelCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
             </Show>
             <Show when={globalConfig.editor.cursor === 'cross'}>
-              <CrossCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />;
+              <CrossCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
             </Show>
           </Show>
         }

@@ -203,21 +203,44 @@ class CanvasAreaInteract {
         const midWindowPos = WindowPos.from({ x: midX, y: midY });
         zoomTowardWindowPos(midWindowPos, newZoomRaw);
 
-        // 2. 併進処理（純粋な移動のみ）
-        const deltaWindowX = midX - prevMidX;
-        const deltaWindowY = midY - prevMidY;
+        // 2. 併進処理（Mutual Move方式）
+        // 前フレームでの各指の位置を復元
+        const prevP0 = {
+          x: prevMidX - (this.lastAppliedDist / 2) * Math.cos(this.lastAppliedAngle),
+          y: prevMidY - (this.lastAppliedDist / 2) * Math.sin(this.lastAppliedAngle),
+        };
+        const prevP1 = {
+          x: prevMidX + (this.lastAppliedDist / 2) * Math.cos(this.lastAppliedAngle),
+          y: prevMidY + (this.lastAppliedDist / 2) * Math.sin(this.lastAppliedAngle),
+        };
+
+        const dx0 = p0.x - prevP0.x;
+        const dy0 = p0.y - prevP0.y;
+        const dx1 = p1.x - prevP1.x;
+        const dy1 = p1.y - prevP1.y;
+
+        // 共通移動成分を抽出（純粋な併進）
+        const mutualDx = Math.sign(dx0) === Math.sign(dx1) && dx0 !== 0 && dx1 !== 0 ? Math.min(Math.abs(dx0), Math.abs(dx1)) * Math.sign(dx0) : 0;
+        const mutualDy = Math.sign(dy0) === Math.sign(dy1) && dy0 !== 0 && dy1 !== 0 ? Math.min(Math.abs(dy0), Math.abs(dy1)) * Math.sign(dy0) : 0;
+
+        console.log('Mutual Move Debug:', {
+          p0Move: { dx: dx0, dy: dy0 },
+          p1Move: { dx: dx1, dy: dy1 },
+          mutualMove: { dx: mutualDx, dy: mutualDy },
+          midpointMove: { dx: midX - prevMidX, dy: midY - prevMidY },
+        });
 
         setOffset({
-          x: interactStore.offset.x + deltaWindowX,
-          y: interactStore.offset.y + deltaWindowY,
+          x: interactStore.offset.x + mutualDx,
+          y: interactStore.offset.y + mutualDy,
         });
 
         // 3. 回転処理（現在の中点を基準に）
         rotateInCenter(midWindowPos, rotProcessed);
 
         console.log('2本指ジェスチャ Result:', {
-          deltaWindow: { x: deltaWindowX, y: deltaWindowY },
-          appliedOffset: { x: deltaWindowX, y: deltaWindowY },
+          mutualOffset: { x: mutualDx, y: mutualDy },
+          appliedOffset: { x: mutualDx, y: mutualDy },
           finalOffset: { x: interactStore.offset.x, y: interactStore.offset.y },
         });
 

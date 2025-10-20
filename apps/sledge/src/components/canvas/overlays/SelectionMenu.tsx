@@ -173,8 +173,9 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     // Outer 領域 (sections-between-area) へのクランプ
     if (!sectionsBetweenAreaRef) return;
 
-    const areaRect = sectionsBetweenAreaRef.getBoundingClientRect();
-    const containerRect = containerRef.getBoundingClientRect();
+    // 統合座標システムのキャッシュを活用してgetBoundingClientRect呼び出しを最適化
+    const areaRect = coordinateTransform.getBoundingClientRect(sectionsBetweenAreaRef);
+    const containerRect = coordinateTransform.getBoundingClientRect(containerRef);
     const outerMargin = 8;
     const clampedX = Math.max(areaRect.left + outerMargin, Math.min(containerRect.x, areaRect.right - containerWidth - outerMargin));
     const clampedY = Math.max(areaRect.top + outerMargin, Math.min(containerRect.y, areaRect.bottom - containerHeight - outerMargin));

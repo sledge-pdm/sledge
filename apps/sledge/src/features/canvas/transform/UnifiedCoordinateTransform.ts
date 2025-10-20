@@ -219,6 +219,23 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   }
 
   /**
+   * 要素のgetBoundingClientRectをキャッシュ付きで取得
+   * 統合キャッシュシステムを活用して性能向上
+   */
+  getBoundingClientRect(element: Element): DOMRect {
+    // 既存のcanvas-areaキャッシュを活用
+    if (element.id === 'canvas-area') {
+      const rect = this.getCachedCanvasAreaRect();
+      if (rect) {
+        return new DOMRect(rect.left, rect.top, rect.width, rect.height);
+      }
+    }
+    
+    // 他の要素は直接取得（将来的にキャッシュ拡張可能）
+    return element.getBoundingClientRect();
+  }
+
+  /**
    * キャンバス座標 → ウィンドウ座標（オーバーレイ用・ページ絶対座標）
    * 選択範囲メニューやその他のオーバーレイで使用
    */

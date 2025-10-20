@@ -1,6 +1,6 @@
 import { Vec2 } from '@sledge/core';
-import { clipZoom, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
-import { clearCoordinateCache, coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
+import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
+import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -189,7 +189,7 @@ class CanvasAreaInteract {
         const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
         const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
 
-        // 統合された2本指ジェスチャ処理
+        // 統合された2本指ジェスチャ処理（簡潔版）
         console.log('2本指ジェスチャ Debug:', {
           zoomOld,
           newZoomRaw,
@@ -199,32 +199,25 @@ class CanvasAreaInteract {
           rotProcessed,
         });
 
-        // 1. ズーム適用
-        setZoom(newZoomRaw);
-        const zoomApplied = interactStore.zoom; // 丸め後
+        // 1. ズーム処理（中心維持を含む）
+        const midWindowPos = WindowPos.from({ x: midX, y: midY });
+        zoomTowardWindowPos(midWindowPos, newZoomRaw);
 
-        // 2. 併進処理（ウィンドウ座標の変化をそのままオフセットに反映）
+        // 2. 併進処理（純粋な移動のみ）
         const deltaWindowX = midX - prevMidX;
         const deltaWindowY = midY - prevMidY;
 
-        // 3. ズーム中心維持の計算（前回の中点基準）
-        const prevMidWindowPos = WindowPos.create(prevMidX, prevMidY);
-        const prevMidCanvasPos = coordinateTransform.windowToCanvas(prevMidWindowPos);
-        const zoomOffsetX = prevMidCanvasPos.x * (zoomOld - zoomApplied);
-        const zoomOffsetY = prevMidCanvasPos.y * (zoomOld - zoomApplied);
-
-        // 4. 統合オフセット更新（併進 + ズーム調整）
         setOffset({
-          x: interactStore.offset.x + deltaWindowX + zoomOffsetX,
-          y: interactStore.offset.y + deltaWindowY + zoomOffsetY,
+          x: interactStore.offset.x + deltaWindowX,
+          y: interactStore.offset.y + deltaWindowY,
         });
 
-        // 5. 回転処理（現在の中点を基準に）
-        rotateInCenter(WindowPos.from({ x: midX, y: midY }), rotProcessed);
+        // 3. 回転処理（現在の中点を基準に）
+        rotateInCenter(midWindowPos, rotProcessed);
 
         console.log('2本指ジェスチャ Result:', {
           deltaWindow: { x: deltaWindowX, y: deltaWindowY },
-          zoomOffset: { x: zoomOffsetX, y: zoomOffsetY },
+          appliedOffset: { x: deltaWindowX, y: deltaWindowY },
           finalOffset: { x: interactStore.offset.x, y: interactStore.offset.y },
         });
 
@@ -306,22 +299,15 @@ class CanvasAreaInteract {
     let zoomNew = interactStore.zoom + interactStore.zoom * delta;
     zoomNew = clipZoom(zoomNew);
 
-    // 統一座標系を使用した最適化
-    const mouseWindow = { x: this.lastPointX, y: this.lastPointY };
-    const mouseCanvas = coordinateTransform.windowToCanvasVec2(mouseWindow);
+    // 統一座標系を使用：zoomTowardWindowPosで一括処理
+    const mouseWindowPos = WindowPos.from({ x: this.lastPointX, y: this.lastPointY });
+    const zoomed = zoomTowardWindowPos(mouseWindowPos, zoomNew);
 
-    const zoomed = setZoom(zoomNew);
+    if (zoomed) {
+      clearCoordinateCache();
+    }
 
-    if (!zoomed) return false;
-
-    setOffset({
-      x: interactStore.offset.x + mouseCanvas.x * (zoomOld - zoomNew),
-      y: interactStore.offset.y + mouseCanvas.y * (zoomOld - zoomNew),
-    });
-
-    clearCoordinateCache();
-
-    return true;
+    return zoomed;
   }
 
   private KEY_ZOOM_MULT = 1.3;

@@ -199,6 +199,27 @@ export const setRotation = (rotation: number) => {
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
 
+export function zoomTowardWindowPos(centerWindowPos: WindowPos, zoomNew: number) {
+  const zoomOld = interactStore.zoom;
+
+  // ズーム前の座標系でキャンバス座標を計算
+  const centerCanvasPos = coordinateTransform.windowToCanvas(centerWindowPos);
+
+  // ズームを適用
+  const zoomChanged = setZoom(zoomNew);
+
+  // ズーム中心を維持するための標準的な計算式
+  const dx = centerCanvasPos.x * (zoomOld - zoomNew);
+  const dy = centerCanvasPos.y * (zoomOld - zoomNew);
+
+  setOffset({
+    x: interactStore.offset.x + dx,
+    y: interactStore.offset.y + dy,
+  });
+
+  return zoomChanged;
+}
+
 export function zoomTowardAreaCenter(zoomNew: number) {
   const zoomOld = interactStore.zoom;
 

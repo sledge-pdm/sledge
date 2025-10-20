@@ -10,10 +10,10 @@ export interface FilesConfig {
 }
 
 const getIconForName = (name: string, isDirectory: boolean) => {
-  if (isDirectory) return '/icons/misc/folder.png';
-  if (name.endsWith('.sledge')) return '/icons/misc/file_sledge.png';
-  if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) return '/icons/misc/image.png';
-  return '/icons/misc/file.png';
+  if (isDirectory) return '/icons/files/folder.png';
+  if (name.endsWith('.sledge')) return '/icons/files/file_sledge.png';
+  if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) return '/icons/files/image.png';
+  return '/icons/files/file.png';
 };
 
 const fileItemContainer = css`

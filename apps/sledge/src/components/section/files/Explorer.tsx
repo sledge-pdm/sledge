@@ -219,7 +219,7 @@ const Explorer: Component<Props> = (props) => {
                       // inputRef?.select();
                     }}
                   >
-                    <Icon src={'/icons/misc/edit.png'} base={8} hoverColor={color.accent} />
+                    <Icon src={'/icons/files/edit.png'} base={8} hoverColor={color.accent} />
                   </div>
                 </>
               }
@@ -271,7 +271,7 @@ const Explorer: Component<Props> = (props) => {
                   }
                 }}
               >
-                <Icon src={'/icons/misc/folder_up.png'} base={8} hoverColor={color.accent} />
+                <Icon src={'/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
               </div>
               <div
                 class={editButton}
@@ -279,7 +279,11 @@ const Explorer: Component<Props> = (props) => {
                   setConfigStore('twoColumns', (v) => !v);
                 }}
               >
-                <Icon src={configStore.twoColumns ? '/icons/misc/two_column.png' : '/icons/misc/one_column.png'} base={8} hoverColor={color.accent} />
+                <Icon
+                  src={configStore.twoColumns ? '/icons/files/two_column.png' : '/icons/files/one_column.png'}
+                  base={8}
+                  hoverColor={color.accent}
+                />
               </div>
             </div>
           </div>

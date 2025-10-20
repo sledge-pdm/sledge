@@ -188,9 +188,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             animation: isHighlighted() ? 'blink 0.2s ease-in-out 0s 2' : 'none',
           }}
         >
-          {/* <div class={`${layerItemHandle} handle`} {...sortable.dragActivators}>
-          <Icon src='/icons/misc/handle.png' base={8} color={color.background} />
-        </div> */}
           <div
             class={layerItemHandle}
             style={{

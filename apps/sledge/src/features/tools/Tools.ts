@@ -75,7 +75,7 @@ export const toolCategories = {
   [TOOL_CATEGORIES.PEN]: {
     id: TOOL_CATEGORIES.PEN,
     name: 'Pen',
-    iconSrc: '/icons/tool_bar/tool/pen.png',
+    iconSrc: '/icons/tools/pen.png',
     behavior: new PenTool(),
     presets: {
       selected: DEFAULT_PRESET,
@@ -87,7 +87,7 @@ export const toolCategories = {
   [TOOL_CATEGORIES.ERASER]: {
     id: TOOL_CATEGORIES.ERASER,
     name: 'Eraser',
-    iconSrc: '/icons/tool_bar/tool/eraser.png',
+    iconSrc: '/icons/tools/eraser.png',
     behavior: new EraserTool(),
     presets: {
       selected: DEFAULT_PRESET,
@@ -99,7 +99,7 @@ export const toolCategories = {
   [TOOL_CATEGORIES.FILL]: {
     id: TOOL_CATEGORIES.FILL,
     name: 'Fill',
-    iconSrc: '/icons/tool_bar/tool/fill.png',
+    iconSrc: '/icons/tools/fill.png',
     behavior: new FillTool(),
     presets: {
       selected: DEFAULT_PRESET,
@@ -114,21 +114,21 @@ export const toolCategories = {
   [TOOL_CATEGORIES.PIPETTE]: {
     id: TOOL_CATEGORIES.PIPETTE,
     name: 'Pipette',
-    iconSrc: '/icons/tool_bar/tool/pipette.png',
+    iconSrc: '/icons/tools/pipette.png',
     behavior: new PipetteTool(),
     // プリセット不要
   } as ToolCategory,
   [TOOL_CATEGORIES.RECT_SELECTION]: {
     id: TOOL_CATEGORIES.RECT_SELECTION,
     name: 'Rect Select',
-    iconSrc: '/icons/tool_bar/tool/rect_select.png',
+    iconSrc: '/icons/tools/rect_select.png',
     behavior: new RectSelection(),
     // プリセット不要
   } as ToolCategory,
   [TOOL_CATEGORIES.AUTO_SELECTION]: {
     id: TOOL_CATEGORIES.AUTO_SELECTION,
     name: 'Auto Select',
-    iconSrc: '/icons/tool_bar/tool/auto_select.png',
+    iconSrc: '/icons/tools/auto_select.png',
     behavior: new AutoSelection(),
     presets: {
       selected: DEFAULT_PRESET,
@@ -142,7 +142,7 @@ export const toolCategories = {
   [TOOL_CATEGORIES.LASSO_SELECTION]: {
     id: TOOL_CATEGORIES.LASSO_SELECTION,
     name: 'Lasso Select',
-    iconSrc: '/icons/tool_bar/tool/lasso_select.png',
+    iconSrc: '/icons/tools/lasso_select.png',
     behavior: new LassoSelection(),
     presets: {
       selected: DEFAULT_PRESET,
@@ -156,7 +156,7 @@ export const toolCategories = {
   [TOOL_CATEGORIES.MOVE]: {
     id: TOOL_CATEGORIES.MOVE,
     name: 'Move',
-    iconSrc: '/icons/tool_bar/tool/move.png',
+    iconSrc: '/icons/tools/move.png',
     behavior: new MoveTool(),
     // プリセット不要
   } as ToolCategory,

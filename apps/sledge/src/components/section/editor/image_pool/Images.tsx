@@ -62,7 +62,7 @@ const Images: Component<{}> = () => {
           },
         },
         {
-          src: '/icons/misc/remove_minus.png',
+          src: '/icons/misc/minus.png',
           onClick: async () => {
             const id = selectedEntry()?.id;
             if (id) removeEntry(id);
@@ -74,7 +74,6 @@ const Images: Component<{}> = () => {
       <div class={clsx('ignore-image-select', sectionContent, imagesSectionsContent)}>
         <Show when={entries().length > 0} fallback={<p class={noImageText}>no images</p>}>
           <div class={gridContainer}>
-            {/* <ImagePoolList /> */}
             <ImagePoolGrid />
           </div>
           <Show when={imagePoolStore.selectedEntryId !== undefined}>

@@ -57,7 +57,7 @@ const linksContainer = css`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-top: 9px;
+  margin-top: 4px;
 `;
 
 const ProjectLocation: Component = () => {

@@ -36,7 +36,7 @@ const CanvasTempControls: Component = () => {
         }}
       >
         <Icon
-          src='/icons/misc/flip_vertical_9.png'
+          src='/icons/canvas/flip_vertical_9.png'
           base={9}
           scale={1}
           color={interactStore.verticalFlipped ? color.enabled : color.onBackground}
@@ -59,7 +59,7 @@ const CanvasTempControls: Component = () => {
         }}
       >
         <Icon
-          src='/icons/misc/flip_horizontal_9.png'
+          src='/icons/canvas/flip_horizontal_9.png'
           base={9}
           scale={1}
           color={interactStore.horizontalFlipped ? color.enabled : color.onBackground}
@@ -81,7 +81,7 @@ const CanvasTempControls: Component = () => {
           setRotation((currentNearestRightAngle + 1) * 90);
         }}
       >
-        <Icon src='/icons/misc/rotate_clockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
+        <Icon src='/icons/canvas/rotate_clockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
       <div
         class={iconContainer}
@@ -98,7 +98,7 @@ const CanvasTempControls: Component = () => {
           setRotation((currentNearestRightAngle - 1) * 90);
         }}
       >
-        <Icon src='/icons/misc/rotate_counterclockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
+        <Icon src='/icons/canvas/rotate_counterclockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
       <div
         class={iconContainer}
@@ -116,7 +116,7 @@ const CanvasTempControls: Component = () => {
           resetOrientation();
         }}
       >
-        <Icon src='/icons/misc/reset_orientation_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
+        <Icon src='/icons/canvas/reset_orientation_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
     </>
   );

@@ -1,7 +1,5 @@
-import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { CanvasPos, WindowPos } from '~/types/CoordinateTypes';
 
 /**
  * Rulerの座標計算に関する型定義
@@ -55,7 +53,7 @@ function getMarkInterval(zoom: number): { majorInterval: number; minorInterval: 
 }
 
 /**
- * 指定した範囲とインターバルに基づいてマークを生成
+ * 指定した範囲とインターバルに基づいてマークを生成（回転なし変換を使用）
  */
 function generateMarks(start: number, end: number, majorInterval: number, minorInterval: number, isHorizontal: boolean): RulerMark[] {
   const marks: RulerMark[] = [];
@@ -64,23 +62,38 @@ function generateMarks(start: number, end: number, majorInterval: number, minorI
   const startMinor = Math.floor(start / minorInterval) * minorInterval;
   const endMinor = Math.ceil(end / minorInterval) * minorInterval;
 
+  // 回転なし変換を取得
+  const noRotationTransform = createNoRotationTransform();
+
+  // 必要な要素を取得
+  const canvasAreaElement = document.getElementById('canvas-area');
+  const sectionsBetweenAreaElement = document.getElementById('sections-between-area');
+  const canvasAreaRect = canvasAreaElement?.getBoundingClientRect();
+  const sectionsBetweenAreaRect = sectionsBetweenAreaElement?.getBoundingClientRect();
+
+  if (!canvasAreaRect || !sectionsBetweenAreaRect) {
+    return marks;
+  }
+
   for (let canvasPos = startMinor; canvasPos <= endMinor; canvasPos += minorInterval) {
     const isMajor = canvasPos % majorInterval === 0;
 
-    // キャンバス座標から画面座標への変換（sections-between-area相対）
+    // キャンバス座標から画面座標への変換（回転なし、sections-between-area相対）
     let windowPos: number;
     if (isHorizontal) {
-      const winPos = coordinateTransform.canvasToWindow(CanvasPos.create(canvasPos, 0));
-      // sections-between-area要素の左上を基準とした相対座標に変換
-      const sectionsBetweenAreaElement = document.getElementById('sections-between-area');
-      const sectionsBetweenAreaRect = sectionsBetweenAreaElement?.getBoundingClientRect();
-      windowPos = sectionsBetweenAreaRect ? winPos.x - sectionsBetweenAreaRect.left : winPos.x;
+      // キャンバス座標 → canvas-area相対座標（回転なし）
+      const canvasAreaRelative = noRotationTransform.forward.transformPoint(new DOMPoint(canvasPos, 0));
+      // canvas-area相対座標 → window座標
+      const windowX = canvasAreaRect.left + canvasAreaRelative.x;
+      // window座標 → sections-between-area相対座標
+      windowPos = windowX - sectionsBetweenAreaRect.left;
     } else {
-      const winPos = coordinateTransform.canvasToWindow(CanvasPos.create(0, canvasPos));
-      // sections-between-area要素の左上を基準とした相対座標に変換
-      const sectionsBetweenAreaElement = document.getElementById('sections-between-area');
-      const sectionsBetweenAreaRect = sectionsBetweenAreaElement?.getBoundingClientRect();
-      windowPos = sectionsBetweenAreaRect ? winPos.y - sectionsBetweenAreaRect.top : winPos.y;
+      // キャンバス座標 → canvas-area相対座標（回転なし）
+      const canvasAreaRelative = noRotationTransform.forward.transformPoint(new DOMPoint(0, canvasPos));
+      // canvas-area相対座標 → window座標
+      const windowY = canvasAreaRect.top + canvasAreaRelative.y;
+      // window座標 → sections-between-area相対座標
+      windowPos = windowY - sectionsBetweenAreaRect.top;
     }
 
     marks.push({
@@ -95,7 +108,43 @@ function generateMarks(start: number, end: number, majorInterval: number, minorI
 }
 
 /**
+ * 回転を無視した座標変換を行う（ルーラー専用）
+ * パン・ズーム・反転は適用するが、回転は0°として扱う
+ */
+function createNoRotationTransform() {
+  const { zoom, offset, offsetOrigin, horizontalFlipped, verticalFlipped } = interactStore;
+  const { width, height } = canvasStore.canvas;
+
+  const Matrix = globalThis.DOMMatrix ?? (globalThis as any).WebKitCSSMatrix;
+  if (!Matrix) {
+    return { forward: new DOMMatrix(), inverse: new DOMMatrix() };
+  }
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const sx = horizontalFlipped ? -1 : 1;
+  const sy = verticalFlipped ? -1 : 1;
+  const totalOffsetX = offsetOrigin.x + offset.x;
+  const totalOffsetY = offsetOrigin.y + offset.y;
+
+  // 回転を0として変換行列を構築
+  const matrix = new Matrix()
+    .translate(totalOffsetX, totalOffsetY)
+    .scale(zoom)
+    .translate(cx, cy)
+    .rotate(0) // 回転は常に0
+    .scale(sx, sy)
+    .translate(-cx, -cy);
+
+  return {
+    forward: matrix,
+    inverse: matrix.inverse(),
+  };
+}
+
+/**
  * 現在の表示範囲に基づいてRulerに表示すべき座標情報を計算
+ * 回転時でも常に0°（水平・垂直）基準で表示する
  */
 export function calculateRulerMarks(): RulerCalculationResult {
   const { zoom } = interactStore;
@@ -106,29 +155,44 @@ export function calculateRulerMarks(): RulerCalculationResult {
   const containerWidth = sectionsBetweenAreaElement?.clientWidth || 1000;
   const containerHeight = sectionsBetweenAreaElement?.clientHeight || 1000;
 
-  // sections-between-area相対座標でビューポートの四隅をキャンバス座標に変換
-  // sections-between-areaの左上(0,0)から右下まで
-  const topLeft = coordinateTransform.windowToCanvas(
-    WindowPos.create(sectionsBetweenAreaElement?.getBoundingClientRect().left || 0, sectionsBetweenAreaElement?.getBoundingClientRect().top || 0)
-  );
-  const topRight = coordinateTransform.windowToCanvas(
-    WindowPos.create(
-      (sectionsBetweenAreaElement?.getBoundingClientRect().left || 0) + containerWidth,
-      sectionsBetweenAreaElement?.getBoundingClientRect().top || 0
-    )
-  );
-  const bottomLeft = coordinateTransform.windowToCanvas(
-    WindowPos.create(
-      sectionsBetweenAreaElement?.getBoundingClientRect().left || 0,
-      (sectionsBetweenAreaElement?.getBoundingClientRect().top || 0) + containerHeight
-    )
-  );
-  const bottomRight = coordinateTransform.windowToCanvas(
-    WindowPos.create(
-      (sectionsBetweenAreaElement?.getBoundingClientRect().left || 0) + containerWidth,
-      (sectionsBetweenAreaElement?.getBoundingClientRect().top || 0) + containerHeight
-    )
-  );
+  // 回転を無視した座標変換を使用
+  const noRotationTransform = createNoRotationTransform();
+
+  // canvas-area要素の位置を取得
+  const canvasAreaElement = document.getElementById('canvas-area');
+  const canvasAreaRect = canvasAreaElement?.getBoundingClientRect();
+  const sectionsBetweenAreaRect = sectionsBetweenAreaElement?.getBoundingClientRect();
+
+  if (!canvasAreaRect || !sectionsBetweenAreaRect) {
+    return {
+      horizontalMarks: [],
+      verticalMarks: [],
+      startCanvasX: 0,
+      startCanvasY: 0,
+      endCanvasX: 0,
+      endCanvasY: 0,
+    };
+  }
+
+  // sections-between-area相対座標でビューポートの四隅を回転なしでキャンバス座標に変換
+  const transformPoint = (x: number, y: number) => {
+    // sections-between-area相対座標をwindow座標に変換
+    const windowX = sectionsBetweenAreaRect.left + x;
+    const windowY = sectionsBetweenAreaRect.top + y;
+
+    // canvas-area相対座標に変換
+    const canvasRelativeX = windowX - canvasAreaRect.left;
+    const canvasRelativeY = windowY - canvasAreaRect.top;
+
+    // 回転なしでキャンバス座標に変換
+    const result = noRotationTransform.inverse.transformPoint(new DOMPoint(canvasRelativeX, canvasRelativeY));
+    return { x: result.x, y: result.y };
+  };
+
+  const topLeft = transformPoint(0, 0);
+  const topRight = transformPoint(containerWidth, 0);
+  const bottomLeft = transformPoint(0, containerHeight);
+  const bottomRight = transformPoint(containerWidth, containerHeight);
 
   // 表示範囲の最小・最大値を計算
   const startCanvasX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);

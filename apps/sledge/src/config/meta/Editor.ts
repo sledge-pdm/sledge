@@ -96,17 +96,17 @@ export const editorMetas: FieldMeta[] = [
     },
     tips: `Available in two-finger touch rotation only.\ncanvas rotation degree will be snapped to 0° until this threshold.`,
   },
-  // {
-  //   section: ConfigSections.Editor,
-  //   path: ['editor', 'rulerMarkDirection'],
-  //   label: 'ruler mark direction',
-  //   component: 'Dropdown',
-  //   props: {
-  //     options: [
-  //       { label: 'outward', value: 'outward' },
-  //       { label: 'inward', value: 'inward' },
-  //     ],
-  //   },
-  //   tips: `direction of ruler marks. outward: marks extend away from canvas, inward: marks extend into canvas area.`,
-  // },
+  {
+    section: ConfigSections.Editor,
+    path: ['editor', 'rulerMarkDirection'],
+    label: 'ruler mark direction',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: 'outward', value: 'outward' },
+        { label: 'inward', value: 'inward' },
+      ],
+    },
+    tips: `direction of ruler marks. outward: marks extend away from canvas, inward: marks extend into canvas area.`,
+  },
 ];

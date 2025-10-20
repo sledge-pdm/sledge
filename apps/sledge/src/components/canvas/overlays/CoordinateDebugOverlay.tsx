@@ -34,6 +34,10 @@ const coordinateRow = css`
   display: flex;
   justify-content: space-between;
   gap: 12px;
+
+  & > span {
+    color: white;
+  }
 `;
 
 const matrixDisplay = css`

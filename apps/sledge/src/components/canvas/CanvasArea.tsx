@@ -13,7 +13,6 @@ import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import CanvasError from '~/components/canvas/overlays/CanvasError';
-import CoordinateDebugOverlay from '~/components/canvas/overlays/CoordinateDebugOverlay';
 import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
@@ -233,7 +232,8 @@ const CanvasArea: Component = () => {
           <OnCanvasSelectionMenu />
         </div>
         <CursorOverlay />
-        <CoordinateDebugOverlay />
+
+        {/* <CoordinateDebugOverlay /> */}
       </div>
       <div class={sectionsContainer}>
         <SideSectionsOverlay side='leftSide' />

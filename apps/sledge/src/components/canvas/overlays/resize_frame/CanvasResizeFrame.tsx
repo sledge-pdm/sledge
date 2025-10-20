@@ -2,7 +2,7 @@ import { Size2D, Vec2 } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { CanvasPos } from '~/types/CoordinateTypes';
 import ResizeFrameInteract, { ResizeFrameRect } from './ResizeFrameInteract';
@@ -18,14 +18,14 @@ export const CanvasResizeFrame: Component = () => {
   const screenBox = createMemo(() => {
     const r = rect();
     if (!r) return undefined;
-    
+
     // 矩形の左上と右下をオーバーレイ座標系に変換
     const topLeft = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x, r.y));
     const bottomRight = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x + r.width, r.y + r.height));
-    
+
     return {
       start: { x: Math.min(topLeft.x, bottomRight.x), y: Math.min(topLeft.y, bottomRight.y) },
-      size: { width: Math.abs(bottomRight.x - topLeft.x), height: Math.abs(bottomRight.y - topLeft.y) }
+      size: { width: Math.abs(bottomRight.x - topLeft.x), height: Math.abs(bottomRight.y - topLeft.y) },
     };
   });
 
@@ -76,7 +76,7 @@ export const CanvasResizeFrame: Component = () => {
   onCleanup(() => {
     interact?.removeInteractListeners();
   });
-  
+
   // キャンバスサイズが外部変更された場合、未操作時のみ矩形を追従
   createEffect(() => {
     const w = canvasStore.canvas.width;

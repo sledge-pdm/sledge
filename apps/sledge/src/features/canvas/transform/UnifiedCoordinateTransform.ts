@@ -230,7 +230,7 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
         return new DOMRect(rect.left, rect.top, rect.width, rect.height);
       }
     }
-    
+
     // 他の要素は直接取得（将来的にキャッシュ拡張可能）
     return element.getBoundingClientRect();
   }

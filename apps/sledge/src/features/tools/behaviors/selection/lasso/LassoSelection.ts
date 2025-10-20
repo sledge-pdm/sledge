@@ -3,11 +3,12 @@ import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { PartialFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
-import { LassoDisplayMode } from '~/features/tools/presets';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
+export type LassoDisplayMode = 'fill' | 'outline';
 export class LassoSelection extends SelectionBase {
   readonly categoryId = TOOL_CATEGORIES.LASSO_SELECTION;
   previewFragment: PartialFragment | undefined = undefined;
@@ -15,11 +16,17 @@ export class LassoSelection extends SelectionBase {
   private lastUpdateTime = 0;
   private readonly UPDATE_INTERVAL = 16; // 60fps相当
 
+  getDisplayMode(preset: LassoSelectionPresetConfig): LassoDisplayMode {
+    if (canvasStore.canvas.width * canvasStore.canvas.height <= 1024 * 1024) return 'fill';
+
+    return 'outline';
+  }
+
   getPoints() {
     return this.points;
   }
 
-  getPath(displayMode: LassoDisplayMode): string {
+  getPath(): string {
     if (this.points.length < 4) return '';
 
     let path = `M ${this.points[0]} ${this.points[1]}`;
@@ -27,7 +34,7 @@ export class LassoSelection extends SelectionBase {
       path += ` L ${this.points[i]} ${this.points[i + 1]}`;
     }
     // ポリゴンを閉じる
-    if (this.points.length >= 6 && displayMode !== 'trail') {
+    if (this.points.length >= 6) {
       path += ' Z';
     }
     return path;
@@ -130,7 +137,7 @@ export class LassoSelection extends SelectionBase {
     };
 
     const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
-    const displayMode = preset?.displayMode ?? 'trail';
+    const displayMode = this.getDisplayMode(preset);
     if (displayMode === 'fill') {
       selectionManager.setPreviewFragment(this.previewFragment);
     } else {
@@ -162,7 +169,7 @@ export class LassoSelection extends SelectionBase {
     }
 
     const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
-    const displayMode = preset?.displayMode ?? 'trail';
+    const displayMode = this.getDisplayMode(preset);
     if (displayMode === 'fill') {
       // 最低3点必要（線分を作るため）
       if (this.points.length >= 6) {

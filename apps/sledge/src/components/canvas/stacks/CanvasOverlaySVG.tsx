@@ -25,8 +25,7 @@ import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 
 import { color } from '@sledge/theme';
-import { LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
-import { LassoDisplayMode } from '~/features/tools/presets';
+import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import '~/styles/selection_animations.css';
 
 // raw SVG 文字列から最初の <path .../> だけを抽出（self-closing想定）。失敗時は全体を返す。
@@ -100,10 +99,10 @@ const CanvasOverlaySVG: Component = () => {
         TOOL_CATEGORIES.LASSO_SELECTION,
         toolStore.tools.lassoSelection.presets?.selected ?? 'default'
       ) as LassoSelectionPresetConfig;
-      const displayMode = preset?.displayMode ?? 'trail';
+      const displayMode = lassoTool.getDisplayMode(preset);
       setLassoDisplayMode(displayMode);
       if (displayMode === 'fill') return;
-      const path = lassoTool.getPath(displayMode);
+      const path = lassoTool.getPath();
       setLassoOutlinePath(path.toString());
     }
   }) as (e: Events['selection:updateLassoOutline']) => void;

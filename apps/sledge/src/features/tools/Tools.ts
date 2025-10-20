@@ -66,9 +66,7 @@ export type AutoSelectionPresetConfig = PresetConfig & {
   // antialias?: boolean;
 };
 
-export type LassoSelectionPresetConfig = PresetConfig & {
-  displayMode?: 'fill' | 'outline' | 'trail';
-};
+export type LassoSelectionPresetConfig = PresetConfig & {};
 
 // ツールカテゴリの定義
 export const toolCategories = {
@@ -147,9 +145,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: {
-          displayMode: 'trail',
-        } as LassoSelectionPresetConfig,
+        [DEFAULT_PRESET]: {} as LassoSelectionPresetConfig,
       },
     },
   } as ToolCategory<LassoSelectionPresetConfig>,

@@ -4,7 +4,7 @@ import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
-import CanvasTempControls from '~/components/global/title_bar/CanvasTempControls';
+import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { createNew, openProject } from '~/features/io/window';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -205,7 +205,7 @@ const TopMenuBar: Component = () => {
       </Show>
 
       <div class={menuListCanvasControls} ref={canvasControlsRef}>
-        <CanvasTempControls />
+        <CanvasControlMenu />
       </div>
 
       <div class={menuListRight}>

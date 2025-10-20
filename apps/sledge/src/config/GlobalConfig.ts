@@ -23,6 +23,7 @@ export type GlobalConfig = {
     requireConfirmBeforeLayerRemove: boolean;
     maxHistoryItemsCount: number;
     touchRotationZeroSnapThreshold: number;
+    rulerMarkDirection: 'outward' | 'inward';
   };
   performance: {
     targetFPS: FPS;
@@ -52,6 +53,7 @@ export const defaultConfig: GlobalConfig = {
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
     touchRotationZeroSnapThreshold: 5,
+    rulerMarkDirection: 'inward',
   },
   performance: {
     canvasRenderingMode: 'adaptive',

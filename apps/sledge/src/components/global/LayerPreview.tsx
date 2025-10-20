@@ -15,17 +15,27 @@ const canvas = css`
 
 interface Props {
   layer: Layer;
-  width?: number;
-  height?: number;
+
+  // どちらを基準にするかを明示的に指定
+  sizingMode: 'width-based' | 'height-based';
+
+  // 基準となる値
+  referenceSize: number;
+
+  // 最大値制限（オプション）
   maxWidth?: number;
   maxHeight?: number;
-  updateInterval?: number; // ms, default: on demand
 
+  // maxに抵触した際の挙動
+  fitMode?: 'contain' | 'cover'; // default: 'contain'
+
+  withBorder?: boolean;
+
+  updateInterval?: number; // ms, default: on demand
   onClick?: (e: MouseEvent) => void;
 }
 
 const LayerPreview: Component<Props> = (props: Props) => {
-  let wrapperRef: HTMLDivElement;
   let canvasRef: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
@@ -81,29 +91,80 @@ const LayerPreview: Component<Props> = (props: Props) => {
   });
 
   const performUpdate = async () => {
-    if (!wrapperRef || !canvasRef || !ctx) return;
+    if (!canvasRef || !ctx) return;
 
-    const targetHeight = wrapperRef.clientHeight;
-    const aspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
-    const targetWidth = Math.round(targetHeight * aspectRatio);
+    const canvasAspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
+    const fitMode = props.fitMode ?? 'contain';
+
+    let targetWidth: number;
+    let targetHeight: number;
+
+    // sizingModeに基づいて基準サイズを決定
+    if (props.sizingMode === 'width-based') {
+      targetWidth = props.referenceSize;
+      targetHeight = Math.round(targetWidth / canvasAspectRatio);
+    } else {
+      // height-based
+      targetHeight = props.referenceSize;
+      targetWidth = Math.round(targetHeight * canvasAspectRatio);
+    }
 
     if (targetWidth === 0 || targetHeight === 0) return;
 
+    // 最大値制限の適用とfitModeの処理
     const maxWidth = props.maxWidth;
     const maxHeight = props.maxHeight;
-    let zoom = 1;
-    if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-    if (maxHeight && targetHeight > maxHeight && zoom < maxHeight / targetHeight) zoom = maxHeight / targetHeight;
 
-    const previewWidth = targetWidth * zoom;
-    const previewHeight = targetHeight * zoom;
+    let finalWidth = targetWidth;
+    let finalHeight = targetHeight;
+
+    // maxWidth/maxHeightに引っかかった場合の処理
+    if ((maxWidth && targetWidth > maxWidth) || (maxHeight && targetHeight > maxHeight)) {
+      if (fitMode === 'contain') {
+        // contain: アスペクト比を保ったまま制限内に収める（従来の動作）
+        let zoom = 1;
+        if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
+        if (maxHeight && targetHeight > maxHeight && zoom > maxHeight / targetHeight) zoom = maxHeight / targetHeight;
+
+        finalWidth = Math.round(targetWidth * zoom);
+        finalHeight = Math.round(targetHeight * zoom);
+      } else {
+        // cover: referenceSize を満たすように他方を調整
+        if (props.sizingMode === 'width-based') {
+          finalWidth = Math.min(targetWidth, maxWidth || targetWidth);
+          if (maxHeight && targetHeight > maxHeight) {
+            // 高さ制限に引っかかった場合、referenceSize（幅）を維持して高さを制限
+            finalHeight = maxHeight;
+            finalWidth = props.referenceSize; // 幅は必ずreferenceSize
+          } else {
+            finalHeight = targetHeight;
+          }
+        } else {
+          // height-based
+          finalHeight = Math.min(targetHeight, maxHeight || targetHeight);
+          if (maxWidth && targetWidth > maxWidth) {
+            // 幅制限に引っかかった場合、referenceSize（高さ）を維持して幅を制限
+            finalWidth = maxWidth;
+            finalHeight = props.referenceSize; // 高さは必ずreferenceSize
+          } else {
+            finalWidth = targetWidth;
+          }
+        }
+      }
+    }
+
+    const previewWidth = Math.round(finalWidth);
+    const previewHeight = Math.round(finalHeight);
 
     // Only resize canvas if dimensions actually changed
     if (canvasRef.width !== previewWidth || canvasRef.height !== previewHeight) {
       canvasRef.width = previewWidth;
       canvasRef.height = previewHeight;
-      canvasRef.style.width = `${targetWidth}px`;
-      canvasRef.style.height = `${targetHeight}px`;
+
+      // スタイル設定も新しい設計に合わせて調整
+      canvasRef.style.width = `${previewWidth}px`;
+      canvasRef.style.height = `${previewHeight}px`;
+
       lastPreviewWidth = previewWidth;
       lastPreviewHeight = previewHeight;
     }
@@ -121,12 +182,10 @@ const LayerPreview: Component<Props> = (props: Props) => {
 
   return (
     <div
-      ref={(el) => (wrapperRef = el)}
       style={{
-        width: props.width ? `${props.width}px` : undefined,
-        height: props.height ? `${props.height}px` : undefined,
-        'max-width': props.maxWidth ? `${props.maxWidth}px` : undefined,
-        'max-height': props.maxHeight ? `${props.maxHeight}px` : undefined,
+        display: 'flex',
+        width: 'fit-content',
+        height: 'fit-content',
         'background-color': color.canvas,
         'z-index': 'var(--zindex-layer-preview)',
       }}
@@ -138,12 +197,11 @@ const LayerPreview: Component<Props> = (props: Props) => {
           ctx = canvasRef.getContext('2d')!;
         }}
         style={{
-          'max-width': props.maxWidth ? `${props.maxWidth}px` : undefined,
-          'max-height': props.maxHeight ? `${props.maxHeight}px` : undefined,
           'image-rendering': 'pixelated',
           'background-image': `url(/patterns/CheckerboardPattern.svg)`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
+          border: props.withBorder ? `1px solid ${color.canvasBorder}` : undefined,
         }}
         onClick={(e) => {
           if (props.onClick) props.onClick(e);

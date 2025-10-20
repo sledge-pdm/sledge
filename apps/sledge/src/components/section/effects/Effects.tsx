@@ -14,14 +14,14 @@ const effectsContainer = css`
   width: 100%;
   height: auto;
   gap: 8px;
-  margin-top: 16px;
 `;
 
 const previewContainer = css`
+  display: flex;
+  flex-direction: column;
   align-self: center;
   width: fit-content;
-  height: auto;
-  border: 1px solid var(--color-border);
+  height: fit-content;
   margin-bottom: 12px;
 `;
 
@@ -55,7 +55,16 @@ const Effects: Component = () => {
     <>
       <div class={effectsContainer}>
         <div class={previewContainer}>
-          <LayerPreview layer={selectedLayer()} onClick={() => {}} height={140} maxWidth={250} updateInterval={20} />
+          <LayerPreview
+            layer={selectedLayer()}
+            onClick={() => {}}
+            withBorder
+            sizingMode='width-based'
+            referenceSize={250}
+            maxHeight={200}
+            fitMode='contain'
+            updateInterval={20}
+          />
         </div>
         <div class={layerSelectContainer}>
           <p>apply to</p>

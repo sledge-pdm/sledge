@@ -1,0 +1,22 @@
+{
+  "name": "sledge-wasm",
+  "type": "module",
+  "collaborators": [
+    "innsbluck <innsbluck@gmail.com>"
+  ],
+  "description": "wasm module for sledge",
+  "version": "0.1.0",
+  "license": "MIT/Apache-2.0",
+  "files": [
+    "sledge_wasm_bg.wasm",
+    "sledge_wasm.js",
+    "sledge_wasm_bg.js",
+    "sledge_wasm.d.ts"
+  ],
+  "main": "sledge_wasm.js",
+  "types": "sledge_wasm.d.ts",
+  "sideEffects": [
+    "./sledge_wasm.js",
+    "./snippets/*"
+  ]
+}

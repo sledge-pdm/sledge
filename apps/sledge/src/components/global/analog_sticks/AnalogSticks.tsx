@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { Icon } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { PanZoomController } from './PanZoomController';
+import { AnalogSticksController } from './AnalogSticksController';
 
 const root = css`
   position: fixed;
@@ -103,7 +103,7 @@ const zoomHandle = css`
 `;
 
 // floating(movable) canvas pan/zoom controller that imitates analog sticks by 2d pixels
-const FloatingController: Component = () => {
+const AnalogSticks: Component = () => {
   const [position, setPosition] = createSignal<Vec2>({ x: 0, y: 0 });
   const [positionLocked, setPositionLocked] = createSignal(false);
   const [isVisible, setIsVisible] = createSignal(false);
@@ -114,7 +114,7 @@ const FloatingController: Component = () => {
   const [zoomFaderPosition, setZoomFaderPosition] = createSignal(0.5);
 
   // Controller instance
-  let panZoomController: PanZoomController;
+  let panZoomController: AnalogSticksController;
 
   // Drag states
   const [isDraggingPan, setIsDraggingPan] = createSignal(false);
@@ -130,7 +130,7 @@ const FloatingController: Component = () => {
     }
 
     // Initialize controller
-    panZoomController = new PanZoomController();
+    panZoomController = new AnalogSticksController();
 
     // Keyboard shortcut to toggle visibility (F6)
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -358,4 +358,4 @@ client XY: ${e.clientX}, ${e.clientY}`);
   );
 };
 
-export default FloatingController;
+export default AnalogSticks;

@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createSignal, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import { InteractCanvas } from './InteractCanvas';
 
@@ -7,10 +7,11 @@ import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
 import { color } from '@sledge/theme';
+import createRAF, { targetFPS } from '@solid-primitives/raf';
 import '/patterns/CheckerboardPattern.svg';
 
 const canvasStack = css`
@@ -41,36 +42,78 @@ const CanvasStack: Component = () => {
     setGridSize(gridSize);
   };
 
+  let orientationRef!: HTMLDivElement;
+
+  let lastOrientationValues = {
+    width: 0,
+    height: 0,
+    horizontalFlipped: false,
+    verticalFlipped: false,
+    rotation: 0,
+  };
+
+  const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
+    targetFPS(() => {
+      updateTransform();
+    }, 60)
+  );
+
+  const updateTransform = () => {
+    const w = canvasStore.canvas.width;
+    const h = canvasStore.canvas.height;
+    const sx = interactStore.horizontalFlipped ? -1 : 1;
+    const sy = interactStore.verticalFlipped ? -1 : 1;
+    const rot = interactStore.rotation;
+
+    // 差分検出による最適化
+    if (
+      lastOrientationValues.width !== w ||
+      lastOrientationValues.height !== h ||
+      lastOrientationValues.horizontalFlipped !== interactStore.horizontalFlipped ||
+      lastOrientationValues.verticalFlipped !== interactStore.verticalFlipped ||
+      lastOrientationValues.rotation !== rot
+    ) {
+      if (orientationRef) {
+        const cx = w / 2;
+        const cy = h / 2;
+        // translate -> rotate -> scale -> translate back
+        orientationRef.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`;
+        orientationRef.style.transformOrigin = '0 0';
+      }
+
+      lastOrientationValues = {
+        width: w,
+        height: h,
+        horizontalFlipped: interactStore.horizontalFlipped,
+        verticalFlipped: interactStore.verticalFlipped,
+        rotation: rot,
+      };
+    }
+  };
+
+  const handleCanvasSizeChanged = ({ newSize }: Events['canvas:sizeChanged']) => {
+    const { width, height } = newSize;
+    updateGridSize(width, height);
+  };
+
   onMount(() => {
     const { width, height } = canvasStore.canvas;
     updateGridSize(width, height);
-    eventBus.on('canvas:sizeChanged', ({ newSize }) => {
-      const { width, height } = newSize;
-      updateGridSize(width, height);
-    });
-  });
 
-  let orientationRef!: HTMLDivElement;
-  let rootRef!: HTMLDivElement;
+    eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
 
-  createEffect(() => {
-    const w = canvasStore.canvas.width;
-    const h = canvasStore.canvas.height;
-    const cx = w / 2;
-    const cy = h / 2;
-    const sx = interactStore.horizontalFlipped ? -1 : 1;
-    const sy = interactStore.verticalFlipped ? -1 : 1;
-    const rot = interactStore.rotation; // deg
-    if (orientationRef) {
-      // translate -> rotate -> scale -> translate back
-      orientationRef.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`;
-      orientationRef.style.transformOrigin = '0 0';
-    }
+    // 初回orientation更新
+    updateTransform();
+    startTransformUpdate();
+
+    return () => {
+      eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
+      stopTransformUpdate();
+    };
   });
 
   return (
     <div
-      ref={(el) => (rootRef = el)}
       style={{
         position: 'relative',
         width: `${canvasStore.canvas.width}px`,

@@ -10,6 +10,7 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
+import createRAF, { targetFPS } from '@solid-primitives/raf';
 import CanvasError from '~/components/canvas/overlays/CanvasError';
 import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
@@ -88,11 +89,52 @@ const canvasOverlayRoot = css`
   z-index: var(--zindex-canvas-overlay);
 `;
 
+const centerMarker = css`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0px;
+  height: 0px;
+  background-color: red;
+`;
+
 const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
   let interact: CanvasAreaInteract | undefined = undefined;
+
+  let lastTransformValues = {
+    offsetX: 0,
+    offsetY: 0,
+    zoom: 1,
+  };
+
+  const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
+    targetFPS(() => {
+      updateTransform();
+    }, 60)
+  );
+
+  const updateTransform = () => {
+    const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
+    const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
+    const currentZoom = interactStore.zoom;
+
+    // 差分検出による最適化
+    if (
+      lastTransformValues.offsetX !== currentOffsetX ||
+      lastTransformValues.offsetY !== currentOffsetY ||
+      lastTransformValues.zoom !== currentZoom
+    ) {
+      canvasStack.style.transform = `translate(${currentOffsetX}px, ${currentOffsetY}px) scale(${currentZoom})`;
+      lastTransformValues = {
+        offsetX: currentOffsetX,
+        offsetY: currentOffsetY,
+        zoom: currentZoom,
+      };
+    }
+  };
 
   onMount(() => {
     const unlistenOnResized = getCurrentWindow().onResized(async (e) => {
@@ -129,23 +171,16 @@ const CanvasArea: Component = () => {
     });
     adjustZoomToFit();
 
-    eventBus.on('canvas:sizeChanged', (e) => {
-      interact?.updateTransform();
-    });
-    eventBus.on('canvas:onAdjusted', (e) => {
-      interact?.updateTransform();
-    });
-    eventBus.on('canvas:onTransformChanged', (e) => {
-      interact?.updateTransform();
-    });
-
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();
-    interact.updateTransform();
+
+    updateTransform();
+    startTransformUpdate();
 
     return () => {
       unlistenOnResized.then((callback) => callback());
-      if (!import.meta.hot) interact?.removeInteractListeners();
+      interact?.removeInteractListeners();
+      stopTransformUpdate();
     };
   });
 
@@ -184,6 +219,8 @@ const CanvasArea: Component = () => {
         {/* content between side sections */}
         <div class={sectionsBetweenAreaContainer}>
           <div id='sections-between-area' class={sectionsBetweenArea}>
+            <div id='between-area-center' class={centerMarker} />
+
             <CanvasControls />
             <OuterSelectionMenu />
             <CanvasDebugOverlay />

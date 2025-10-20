@@ -1,5 +1,36 @@
+import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { Component } from 'solid-js';
+
+const root = css`
+  position: fixed;
+  margin-top: -8.5px;
+  margin-left: -8.5px;
+  width: 17px;
+  height: 17px;
+  touch-action: none;
+  pointer-events: none;
+`;
+
+const horizontalBar = css`
+  display: block;
+  position: absolute;
+  width: 17px;
+  height: 1px;
+  top: 8.5px;
+  left: 0.5px;
+  backdrop-filter: invert();
+`;
+
+const verticalBar = css`
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 17px;
+  top: 0.5px;
+  left: 8.5px;
+  backdrop-filter: invert();
+`;
 
 interface Props {
   mousePos: Vec2;
@@ -8,47 +39,14 @@ interface Props {
 const PipetteCursor: Component<Props> = (props: Props) => {
   return (
     <div
+      class={root}
       style={{
-        position: 'fixed',
         top: `${props.mousePos.y}px`,
         left: `${props.mousePos.x}px`,
-        width: '17px',
-        height: '17px',
-
-        'transform-origin': '0 0',
-        transform: 'translate(-50%, -50%)',
-
-        'touch-action': 'none',
-        'pointer-events': 'none',
       }}
     >
-      <div
-        style={{
-          display: 'block',
-          position: 'absolute',
-          width: '17px',
-          height: '1px',
-          top: '50%',
-          left: '50%',
-          'transform-origin': '0 0',
-          transform: 'translate(-50%, -50%)',
-          'backdrop-filter': 'invert()',
-        }}
-      />
-
-      <div
-        style={{
-          display: 'block',
-          position: 'absolute',
-          width: '1px',
-          height: '17px',
-          top: '50%',
-          left: '50%',
-          'transform-origin': '0 0',
-          transform: 'translate(-50%, -50%)',
-          'backdrop-filter': 'invert()',
-        }}
-      />
+      <div class={horizontalBar} />
+      <div class={verticalBar} />
     </div>
   );
 };

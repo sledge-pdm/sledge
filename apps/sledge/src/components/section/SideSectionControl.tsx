@@ -3,11 +3,9 @@ import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
-import { Consts } from '~/Consts';
-import { adjustZoomToFit, setOffset, setZoomByReference } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
-import { eventBus } from '~/utils/EventBus';
 
 const sideSectionControlRoot = css`
   display: flex;
@@ -131,70 +129,27 @@ const SideSectionControl: Component<Props> = (props) => {
               style={{
                 'writing-mode': 'vertical-lr',
                 'vertical-align': 'middle',
-                height: '48px',
+                height: '56px',
               }}
             >
-              x{interactStore.zoomByReference}
+              x {(interactStore.zoom / interactStore.initialZoom).toFixed(2)}
             </p>
             <div class={flexRow} style={{ height: '100%', 'justify-content': 'center' }}>
               <Slider
                 orientation='vertical'
                 labelMode='none'
-                value={interactStore.zoomByReference}
-                min={interactStore.zoomMin}
-                max={interactStore.zoomMax}
+                value={interactStore.zoom}
+                min={getMinZoom()}
+                max={getMaxZoom()}
                 wheelSpin={true}
                 wheelStep={0.1}
                 allowFloat={true}
-                floatSignificantDigits={Consts.zoomByReferencePrecisionSignificantDigits}
                 onChange={(v) => {
-                  // 既存ズーム値を基に、可視領域中心へ向かうオフセット補正を行いながら zoomByReference を更新
-                  const zoomOld = interactStore.zoom;
-                  const zoomChanged = setZoomByReference(v); // interactStore.zoom が更新される
-                  const zoomNew = interactStore.zoom;
-                  if (!zoomChanged) return;
-
-                  const canvasStack = document.getElementById('canvas-stack');
-                  const betweenArea = document.getElementById('sections-between-area');
-                  if (!canvasStack || !betweenArea) {
-                    eventBus.emit('canvas:onTransformChanged', {});
-                    return;
-                  }
-
-                  const stackRect = canvasStack.getBoundingClientRect();
-                  const areaRect = betweenArea.getBoundingClientRect();
-
-                  // 可視領域中心 (ビューポート中心 in between area)
-                  const viewCenterX = areaRect.left + areaRect.width / 2;
-                  const viewCenterY = areaRect.top + areaRect.height / 2;
-
-                  // 旧ズームでの view 中心がキャンバス座標でどこだったか
-                  const canvasCenterX = (viewCenterX - stackRect.left) / zoomOld;
-                  const canvasCenterY = (viewCenterY - stackRect.top) / zoomOld;
-
-                  // 新ズーム適用後も同じキャンバス座標が中心に来るようにオフセット調整
-                  // stackRect.left/top は transform 由来で後続再描画まで旧値なので、相対変化のみ計算
-                  const dx = canvasCenterX * (zoomOld - zoomNew);
-                  const dy = canvasCenterY * (zoomOld - zoomNew);
-                  setOffset({
-                    x: interactStore.offset.x + dx,
-                    y: interactStore.offset.y + dy,
-                  });
-
-                  eventBus.emit('canvas:onTransformChanged', {});
+                  centeringCanvas();
+                  zoomTowardAreaCenter(v);
                 }}
                 onDoubleClick={() => {
                   adjustZoomToFit();
-                }}
-                onPointerDownOnValidArea={(e) => {
-                  if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    adjustZoomToFit();
-                    return false;
-                  }
-                  return true;
                 }}
               />
             </div>

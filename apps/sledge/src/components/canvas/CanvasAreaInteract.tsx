@@ -1,7 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Consts } from '~/Consts';
-import { getReferencedZoom, setOffset, setRotation, setZoom } from '~/features/canvas';
+import { clipZoom, rotateInCenter, setOffset, setZoom } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -22,29 +20,13 @@ class CanvasAreaInteract {
   private lastDist: number = 0;
   private lastAngle: number = 0;
 
-  // --- RAF based pinch processing state ---
-  private pinchDirty = false; // true when new 2-finger data arrived since last RAF application
   private lastAppliedDist = 0; // distance at last applied frame
   private lastAppliedAngle = 0; // angle (radian) at last applied frame
   private lastAppliedMidX = 0; // midpoint (screen) at last applied frame
   private lastAppliedMidY = 0;
 
-  private rafRunning?: () => boolean; // accessor from createRAF
-  private startRaf?: () => void;
-  private stopRaf?: () => void;
-
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
-
-  private offsetX = () => interactStore.offsetOrigin.x + interactStore.offset.x;
-  private offsetY = () => interactStore.offsetOrigin.y + interactStore.offset.y;
-  private transform = (x: number, y: number, zoom: number) => {
-    return `translate(${x}px, ${y}px) scale(${zoom})`;
-  };
-
-  public updateTransform = () => {
-    this.canvasStack.style.transform = this.transform(this.offsetX(), this.offsetY(), interactStore.zoom);
-  };
 
   public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
     this.canvasStack.style.cursor = cursor;
@@ -64,16 +46,6 @@ class CanvasAreaInteract {
     // コンポジタ昇格して transform の適用を安定化
     this.canvasStack.style.willChange = 'transform';
     this.canvasStack.style.backfaceVisibility = 'hidden';
-
-    // Setup RAF loop (lazy usage: only meaningful during pinch)
-    const [isRunning, start, stop] = createRAF(
-      targetFPS(() => {
-        this.onRaf();
-      }, Number(globalConfig.performance.targetFPS))
-    );
-    this.rafRunning = isRunning;
-    this.startRaf = start;
-    this.stopRaf = stop;
   }
 
   static isDragKey(e: PointerEvent): boolean {
@@ -126,8 +98,6 @@ class CanvasAreaInteract {
         this.lastAppliedAngle = this.lastAngle;
         this.lastAppliedMidX = (p0.x + p1.x) / 2;
         this.lastAppliedMidY = (p0.y + p1.y) / 2;
-        this.pinchDirty = false;
-        this.startRaf?.();
       }
     } else {
       // タッチ以外
@@ -181,11 +151,58 @@ class CanvasAreaInteract {
           x: interactStore.offset.x + dx,
           y: interactStore.offset.y + dy,
         });
-        this.updateTransform();
+        // updateTransform は CanvasArea の createEffect で自動実行
       } else if (this.pointers.size === 2) {
         // 2本指: 位置だけ更新し、実処理は RAF でまとめて行う
         this.pointers.set(e.pointerId, now);
-        this.pinchDirty = true;
+
+        if (this.pointers.size !== 2) return;
+
+        const pts = Array.from(this.pointers.values());
+        if (pts.length !== 2) return;
+        const [p0, p1] = pts;
+
+        // 現在値計算
+        const distNew = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        if (this.lastAppliedDist === 0) this.lastAppliedDist = distNew; // 初期防御
+        const scaleFact = distNew / this.lastAppliedDist;
+        const zoomOld = interactStore.zoom;
+        const newZoomRaw = zoomOld * scaleFact;
+
+        // 中点
+        const midX = (p0.x + p1.x) / 2;
+        const midY = (p0.y + p1.y) / 2;
+        const prevMidX = this.lastAppliedMidX;
+        const prevMidY = this.lastAppliedMidY;
+
+        // 角度
+        const angleNew = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+        const deltaRad = angleNew - this.lastAppliedAngle;
+        const rotOldDeg = interactStore.rotation;
+        const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
+        const rotProcessed = this.rotationSnapper.process(rotCandidateRaw);
+
+        setZoom(newZoomRaw);
+        const zoomApplied = interactStore.zoom; // 丸め後
+
+        // キャンバス座標へ変換
+        const rect = this.canvasStack.getBoundingClientRect();
+        const canvasMidX = (midX - rect.left) / zoomOld;
+        const canvasMidY = (midY - rect.top) / zoomOld;
+
+        const dxCanvas = midX - prevMidX;
+        const dyCanvas = midY - prevMidY;
+
+        setOffset({
+          x: interactStore.offset.x + canvasMidX * (zoomOld - zoomApplied) + dxCanvas,
+          y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
+        });
+        rotateInCenter({ x: midX, y: midY }, rotProcessed);
+
+        this.lastAppliedDist = distNew;
+        this.lastAppliedAngle = angleNew;
+        this.lastAppliedMidX = midX;
+        this.lastAppliedMidY = midY;
       }
     } else {
       // タッチ以外
@@ -198,7 +215,7 @@ class CanvasAreaInteract {
             x: interactStore.offset.x + dx,
             y: interactStore.offset.y + dy,
           });
-          this.updateTransform();
+          // updateTransform は CanvasArea の createEffect で自動実行
           this.updateCursor('move');
         } else {
           this.updateCursor('auto');
@@ -220,11 +237,6 @@ class CanvasAreaInteract {
     if (this.pointers.size < 2) {
       // 2本指ピンチ終了時にスナップ状態リセット
       this.rotationSnapper.onGestureEnd();
-      this.pinchDirty = false;
-      // 停止条件: 完全に指が離れたら RAF を止める（無駄なループを避ける）
-      if (this.pointers.size === 0) {
-        this.stopRaf?.();
-      }
     }
     if (this.pointers.size === 0) {
       setInteractStore('isDragging', false);
@@ -239,10 +251,14 @@ class CanvasAreaInteract {
   private handleWheel(e: WheelEvent) {
     if (e.shiftKey) {
       const amount = globalConfig.editor.rotateDegreePerWheelScroll;
+      const mousePos: Vec2 = {
+        x: this.lastPointX,
+        y: this.lastPointY,
+      };
       if (e.deltaY > 0) {
-        setRotation(interactStore.rotation + amount);
+        rotateInCenter(mousePos, interactStore.rotation + amount);
       } else {
-        setRotation(interactStore.rotation - amount);
+        rotateInCenter(mousePos, interactStore.rotation - amount);
       }
       return;
     }
@@ -251,14 +267,11 @@ class CanvasAreaInteract {
   }
 
   private zoom(deltaY: number, multiply: number): boolean {
-    const referencedZoom = getReferencedZoom() ?? 1;
     const delta = (deltaY > 0 ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep) * multiply;
 
     const zoomOld = interactStore.zoom;
-    let zoomNew =
-      Math.round((interactStore.zoom + interactStore.zoom * delta) * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) /
-      Math.pow(10, Consts.zoomPrecisionSignificantDigits);
-    zoomNew = Math.min(Math.max(zoomNew, interactStore.zoomMin * referencedZoom), interactStore.zoomMax * referencedZoom);
+    let zoomNew = interactStore.zoom + interactStore.zoom * delta;
+    zoomNew = clipZoom(zoomNew);
 
     const rect = this.canvasStack.getBoundingClientRect();
     const canvasX = (this.lastPointX - rect.left) / zoomOld;
@@ -272,7 +285,6 @@ class CanvasAreaInteract {
       y: interactStore.offset.y + canvasY * (zoomOld - zoomNew),
     });
 
-    this.updateTransform();
     return true;
   }
 
@@ -329,67 +341,6 @@ class CanvasAreaInteract {
     this.wrapperRef.removeEventListener('wheel', this.onWheel);
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
-  }
-
-  // RAF コールバック: 最新の 2本指ピンチ状態を元に一回分の zoom / rotate / pan を適用
-  private onRaf() {
-    if (!this.pinchDirty) return; // 変更なし
-    if (this.pointers.size !== 2) return; // 安全策
-
-    const pts = Array.from(this.pointers.values());
-    if (pts.length !== 2) return;
-    const [p0, p1] = pts;
-
-    // 現在値計算
-    const distNew = Math.hypot(p1.x - p0.x, p1.y - p0.y);
-    if (this.lastAppliedDist === 0) this.lastAppliedDist = distNew; // 初期防御
-    const scaleFact = distNew / this.lastAppliedDist;
-    const zoomOld = interactStore.zoom;
-    const newZoomRaw = zoomOld * scaleFact;
-
-    // 中点
-    const midX = (p0.x + p1.x) / 2;
-    const midY = (p0.y + p1.y) / 2;
-    const prevMidX = this.lastAppliedMidX;
-    const prevMidY = this.lastAppliedMidY;
-
-    // 角度
-    const angleNew = Math.atan2(p1.y - p0.y, p1.x - p0.x);
-    const deltaRad = angleNew - this.lastAppliedAngle;
-    const rotOldDeg = interactStore.rotation;
-    const rotCandidateRaw = rotOldDeg + (deltaRad * 180) / Math.PI;
-    const rotCandidate =
-      Math.round(rotCandidateRaw * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
-
-    const rotProcessed = this.rotationSnapper.process(rotCandidate);
-
-    // 適用前にズーム (clamp は setZoom 内部で処理)
-    // const referencedZoom = getReferencedZoom() ?? 1; // clamp 計算と整合性保つため参照可
-    // 直接 setZoom(newZoomRaw) すると内部丸めされる
-    setZoom(newZoomRaw);
-    const zoomApplied = interactStore.zoom; // 丸め後
-
-    // キャンバス座標へ変換
-    const rect = this.canvasStack.getBoundingClientRect();
-    const canvasMidX = (midX - rect.left) / zoomOld;
-    const canvasMidY = (midY - rect.top) / zoomOld;
-
-    const dxCanvas = midX - prevMidX;
-    const dyCanvas = midY - prevMidY;
-
-    setOffset({
-      x: interactStore.offset.x + canvasMidX * (zoomOld - zoomApplied) + dxCanvas,
-      y: interactStore.offset.y + canvasMidY * (zoomOld - zoomApplied) + dyCanvas,
-    });
-    setRotation(rotProcessed);
-    this.updateTransform();
-
-    // 状態更新
-    this.lastAppliedDist = distNew;
-    this.lastAppliedAngle = angleNew;
-    this.lastAppliedMidX = midX;
-    this.lastAppliedMidY = midY;
-    this.pinchDirty = false;
   }
 }
 

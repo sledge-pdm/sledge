@@ -25,24 +25,6 @@ interface Props {
 function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v: any) => void }) {
   const { meta, value, onChange } = props;
 
-  function getParsedValue() {
-    let v = value();
-
-    switch (meta.component) {
-      case 'CheckBox':
-      case 'ToggleSwitch':
-        v = v ? 'enabled' : 'disabled';
-        break;
-    }
-
-    // format (like "[value]px" -> "1200px")
-    if (meta.customFormat !== undefined) {
-      v = meta.customFormat.replaceAll('[value]', v);
-    }
-
-    return v;
-  }
-
   switch (meta.component) {
     case 'Dropdown':
       return <Dropdown value={value()} options={meta.props?.options} onChange={onChange} />;

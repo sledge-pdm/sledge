@@ -8,8 +8,6 @@ export type Events = {
   'project:saveCancelled': {};
 
   'canvas:sizeChanged': { newSize: Size2D };
-  'canvas:onAdjusted': {};
-  'canvas:onTransformChanged': {};
 
   'selection:updateSelectionPath': { immediate?: boolean };
   'selection:updateLassoOutline': {};

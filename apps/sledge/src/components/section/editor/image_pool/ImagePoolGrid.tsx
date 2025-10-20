@@ -89,6 +89,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
         }}
       >
         <img
+          class={'ignore-image-select'}
           src={convertFileSrc(props.entry.originalPath)}
           width={40}
           height={40}
@@ -100,9 +101,6 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
             e.currentTarget.alt = 'missing';
           }}
           onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
             if (imagePoolStore.selectedEntryId === props.entry.id) {
               selectEntry(undefined);
             } else {

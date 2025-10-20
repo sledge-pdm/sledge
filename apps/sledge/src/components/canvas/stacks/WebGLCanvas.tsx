@@ -98,7 +98,6 @@ const WebGLCanvas: Component = () => {
   });
 
   onCleanup(() => {
-    if (import.meta.hot) return;
     webGLRenderer?.dispose();
     webGLRenderer = undefined;
     stopRenderLoop();

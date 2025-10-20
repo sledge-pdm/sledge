@@ -6,10 +6,14 @@ export type InteractStore = {
   lastMouseOnCanvas: Vec2;
   isMouseOnCanvas: boolean;
   isInStroke: boolean;
+
+  initialZoom: number;
+
   zoom: number;
-  zoomByReference: number;
-  zoomMin: number;
-  zoomMax: number;
+
+  zoomMinFromInitial: number;
+  zoomMaxFromInitial: number;
+
   touchZoomSensitivity: number;
   wheelZoomStep: number;
   offsetOrigin: Vec2;
@@ -30,10 +34,10 @@ export const defaultInteractStore: InteractStore = {
   lastMouseOnCanvas: { x: 0, y: 0 },
   isMouseOnCanvas: false,
   isInStroke: false,
+  initialZoom: 1,
   zoom: 1,
-  zoomByReference: 1,
-  zoomMin: 0.5,
-  zoomMax: 100,
+  zoomMinFromInitial: 0.5,
+  zoomMaxFromInitial: 50,
   touchZoomSensitivity: 0.5,
   wheelZoomStep: 0.05,
   // オフセットの初期値

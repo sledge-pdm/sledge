@@ -96,7 +96,17 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   return true;
 }
 
-const referenceLengthRatio = 0.75;
+export function getMinZoom() {
+  return interactStore.zoomMinFromInitial * interactStore.initialZoom;
+}
+export function getMaxZoom() {
+  return interactStore.zoomMaxFromInitial * interactStore.initialZoom;
+}
+export function clipZoom(zoom: number) {
+  return Math.max(getMinZoom(), Math.min(getMaxZoom(), zoom));
+}
+
+const referenceLengthRatio = 0.85;
 const referenceLength = () => {
   const sectionBetweenArea = document.getElementById('sections-between-area');
   if (!sectionBetweenArea) return 800 * referenceLengthRatio;
@@ -131,6 +141,8 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
   if (!referencedZoom) return;
 
   setZoom(referencedZoom);
+  // reset initialzoom
+  setInteractStore('initialZoom', referencedZoom);
   centeringCanvas();
 };
 
@@ -153,38 +165,11 @@ export const centeringCanvas = () => {
     y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
   });
   setRotation(0);
-
-  eventBus.emit('canvas:onAdjusted', {});
-};
-
-export const setZoomByReference = (zoomByReference: number): boolean => {
-  const referencedZoom = getReferencedZoom() ?? 1;
-  let zoom = zoomByReference * referencedZoom;
-  zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
-  if (zoom > 0 && zoom !== interactStore.zoom) {
-    setInteractStore('zoom', zoom);
-    zoomByReference =
-      Math.round(zoomByReference * Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits)) /
-      Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits);
-    setInteractStore('zoomByReference', zoomByReference);
-    return true;
-  }
-  return false;
 };
 
 export const setZoom = (zoom: number): boolean => {
-  const rawZoom = zoom;
-  zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
   if (zoom > 0 && zoom !== interactStore.zoom) {
     setInteractStore('zoom', zoom);
-
-    const referencedZoom = getReferencedZoom() ?? 1;
-    let zoomByReference = rawZoom / referencedZoom;
-
-    zoomByReference =
-      Math.round(zoomByReference * Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits)) /
-      Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits);
-    setInteractStore('zoomByReference', zoomByReference);
     return true;
   }
   return false;
@@ -196,15 +181,110 @@ export const setOffset = (offset: { x: number; y: number }) => {
   }
 };
 
-export const setRotation = (rotation: number) => {
+export const normalizeRotation = (rotation: number) => {
   // 内部表現を (-180, 180] の範囲に正規化して管理する
   // 例: 270 -> -90, -181 -> 179
   let r = rotation % 360; // JS の % は符号を保持する
-  if (r > 180) r -= 360; // 181..359 -> -179..-1
-  if (r <= -180) r += 360; // ... -360..-180 -> 0..180 ( -180 は 180 に統一 )
-  r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
+  if (r > 180) r -= 360;
+  if (r < -180) r += 360;
+  // r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
+
+  return r;
+};
+
+export const setRotation = (rotation: number) => {
+  const r = normalizeRotation(rotation);
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
+
+export function zoomTowardAreaCenter(zoomNew: number) {
+  const zoomOld = interactStore.zoom;
+  const zoomChanged = setZoom(zoomNew);
+
+  const betweenAreaCenter = document.getElementById('between-area-center');
+  const canvasStack = document.getElementById('canvas-stack');
+  if (!canvasStack || !betweenAreaCenter) {
+    return;
+  }
+  const stackRect = canvasStack.getBoundingClientRect();
+  const betweenAreaCenterRect = betweenAreaCenter.getBoundingClientRect();
+
+  // 旧ズームでの view 中心がキャンバス座標でどこだったか
+  const canvasCenterX = (betweenAreaCenterRect.left - stackRect.left) / zoomOld;
+  const canvasCenterY = (betweenAreaCenterRect.top - stackRect.top) / zoomOld;
+
+  // 新ズーム適用後も同じキャンバス座標が中心に来るようにオフセット調整
+  // stackRect.left/top は transform 由来で後続再描画まで旧値なので、相対変化のみ計算
+  const dx = canvasCenterX * (zoomOld - zoomNew);
+  const dy = canvasCenterY * (zoomOld - zoomNew);
+
+  setOffset({
+    x: interactStore.offset.x + dx,
+    y: interactStore.offset.y + dy,
+  });
+
+  return zoomChanged;
+}
+
+export function rotateInAreaCenter(rotation: number) {
+  const betweenAreaCenter = document.getElementById('between-area-center');
+  if (!betweenAreaCenter) {
+    return;
+  }
+  const betweenAreaCenterRect = betweenAreaCenter.getBoundingClientRect();
+  rotateInCenter({ x: betweenAreaCenterRect.left, y: betweenAreaCenterRect.top }, rotation);
+}
+
+export function rotateInCenter(centerWindowPosition: Vec2, rotation: number) {
+  const rotOld = interactStore.rotation;
+  setRotation(rotation);
+  const rotNew = interactStore.rotation;
+
+  // 回転角度の差分（ラジアン）
+  const deltaRad = ((rotNew - rotOld) * Math.PI) / 180;
+  // 回転の中心点を画面座標からキャンバス座標に変換
+  const canvasStack = document.getElementById('canvas-stack');
+  if (!canvasStack) {
+    return;
+  }
+
+  const rect = canvasStack.getBoundingClientRect();
+  const zoom = interactStore.zoom;
+
+  // 回転中心の画面座標からキャンバススタック内の相対座標を計算
+  const centerRelativeX = centerWindowPosition.x - rect.left;
+  const centerRelativeY = centerWindowPosition.y - rect.top;
+
+  // キャンバススタック内座標をキャンバス論理座標に変換（回転前）
+  const centerCanvasX = centerRelativeX / zoom;
+  const centerCanvasY = centerRelativeY / zoom;
+
+  // キャンバスの中心座標
+  const canvasCenterX = canvasStore.canvas.width / 2;
+  const canvasCenterY = canvasStore.canvas.height / 2;
+
+  // 回転中心からキャンバス中心へのベクトル
+  const vecX = canvasCenterX - centerCanvasX;
+  const vecY = canvasCenterY - centerCanvasY;
+
+  // 回転による変位を計算
+  const cosTheta = Math.cos(deltaRad);
+  const sinTheta = Math.sin(deltaRad);
+
+  // 回転後のベクトル
+  const rotatedVecX = vecX * cosTheta - vecY * sinTheta;
+  const rotatedVecY = vecX * sinTheta + vecY * cosTheta;
+
+  // 変位量（ズーム適用済み画面座標）
+  const deltaX = (rotatedVecX - vecX) * zoom;
+  const deltaY = (rotatedVecY - vecY) * zoom;
+
+  // オフセットを調整して回転中心を維持
+  setOffset({
+    x: interactStore.offset.x + deltaX,
+    y: interactStore.offset.y + deltaY,
+  });
+}
 
 export const toggleVerticalFlip = () => {
   setInteractStore('verticalFlipped', (v) => !v);

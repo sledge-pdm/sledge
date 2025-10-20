@@ -22,7 +22,6 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { canvasToScreenNoZoom } from '~/features/canvas/CanvasPositionCalculator';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { interactStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
 
 const container = css`
   display: flex;
@@ -94,7 +93,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
       if (!updatePosition()) return;
       updateMenuPos();
       setUpdatePosition(false);
-    }, Number(globalConfig.performance.targetFPS))
+    }, 60)
   );
 
   // Move handleUpdate outside the component to keep its reference stable
@@ -270,6 +269,7 @@ const MenuContent = () => {
           src='/icons/selection/commit_10.png'
           onClick={() => {
             commitMove();
+            cancelSelection();
           }}
           label='commit.'
           title='commit.'

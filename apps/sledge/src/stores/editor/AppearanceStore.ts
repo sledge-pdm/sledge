@@ -27,5 +27,5 @@ export const defaultAppearanceStore: AppearanceStore = {
     selectedIndex: 0,
   },
 
-  ruler: false
+  ruler: false,
 };

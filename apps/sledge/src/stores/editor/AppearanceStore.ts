@@ -11,6 +11,8 @@ export type AppearanceStore = {
     tabs: SectionTab[];
     selectedIndex: number;
   };
+
+  ruler: boolean;
 };
 
 export const defaultAppearanceStore: AppearanceStore = {
@@ -24,4 +26,6 @@ export const defaultAppearanceStore: AppearanceStore = {
     tabs: ['project', 'export', 'history'],
     selectedIndex: 0,
   },
+
+  ruler: false,
 };

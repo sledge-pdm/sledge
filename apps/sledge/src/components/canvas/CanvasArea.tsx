@@ -7,11 +7,12 @@ import { css } from '@acab/ecsstatic';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { appearanceStore, interactStore, setInteractStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
+import Ruler from '~/components/canvas/measures/ruler/Ruler';
 import CanvasError from '~/components/canvas/overlays/CanvasError';
 import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
@@ -240,6 +241,9 @@ const CanvasArea: Component = () => {
         {/* content between side sections */}
         <div class={sectionsBetweenAreaContainer}>
           <div id='sections-between-area' class={sectionsBetweenArea}>
+            <Show when={appearanceStore.ruler}>
+              <Ruler />
+            </Show>
             <div id='between-area-center' class={centerMarker} />
 
             <CanvasControls />

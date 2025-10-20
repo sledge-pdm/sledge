@@ -207,13 +207,13 @@ class CanvasAreaInteract {
         const deltaWindowX = midX - prevMidX;
         const deltaWindowY = midY - prevMidY;
 
+        // 3. 回転処理（現在の中点を基準に）
+        rotateInCenter(midWindowPos, rotProcessed);
+
         setOffset({
           x: interactStore.offset.x + deltaWindowX,
           y: interactStore.offset.y + deltaWindowY,
         });
-
-        // 3. 回転処理（現在の中点を基準に）
-        rotateInCenter(midWindowPos, rotProcessed);
 
         console.log('2本指ジェスチャ Result:', {
           deltaWindow: { x: deltaWindowX, y: deltaWindowY },

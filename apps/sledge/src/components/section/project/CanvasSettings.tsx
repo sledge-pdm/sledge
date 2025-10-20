@@ -180,6 +180,9 @@ const CanvasSettings: Component = () => {
               onClick={async () => {
                 setInteractStore('isCanvasSizeFrameMode', (v) => !v);
                 if (interactStore.isCanvasSizeFrameMode) {
+                  setInteractStore('horizontalFlipped', false);
+                  setInteractStore('verticalFlipped', false);
+                  adjustZoomToFit();
                   selectionManager.clear();
                 }
               }}

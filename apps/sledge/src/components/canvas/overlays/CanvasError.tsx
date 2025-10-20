@@ -8,7 +8,6 @@ const errorLayout = css`
   left: 0;
   bottom: 0;
   right: 0;
-
   pointer-events: all;
   background-color: #000000b0;
   /* backdrop-filter: blur(3px); */

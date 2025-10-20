@@ -6,6 +6,7 @@ import CanvasStack from './stacks/CanvasStack';
 import { css } from '@acab/ecsstatic';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
+import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
@@ -79,6 +80,8 @@ const canvasStackWrapper = css`
   padding: 0;
   margin: 0;
   transform-origin: 0 0;
+  will-change: transform;
+  backface-visibility: hidden;
 `;
 
 const canvasOverlayRoot = css`
@@ -98,17 +101,20 @@ const centerMarker = css`
   background-color: red;
 `;
 
+/**
+ * 新しいCanvasArea実装
+ * - 単一のTransformMatrix使用
+ * - 二重transform構造の廃止
+ * - パフォーマンス最適化
+ */
 const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
   let interact: CanvasAreaInteract | undefined = undefined;
 
-  let lastTransformValues = {
-    offsetX: 0,
-    offsetY: 0,
-    zoom: 1,
-  };
+  // 最後に適用されたtransform値（差分検出用）
+  let lastTransformMatrix = '';
 
   const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
     targetFPS(() => {
@@ -116,23 +122,28 @@ const CanvasArea: Component = () => {
     }, 60)
   );
 
+  /**
+   * 統一されたTransform更新
+   * CanvasStackに単一のmatrix3d transformを適用
+   */
   const updateTransform = () => {
-    const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
-    const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
-    const currentZoom = interactStore.zoom;
+    try {
+      const matrix = coordinateTransform.getTransformMatrix();
+      const matrixString = matrix.toString();
 
-    // 差分検出による最適化
-    if (
-      lastTransformValues.offsetX !== currentOffsetX ||
-      lastTransformValues.offsetY !== currentOffsetY ||
-      lastTransformValues.zoom !== currentZoom
-    ) {
+      // 差分検出による最適化
+      if (lastTransformMatrix !== matrixString) {
+        // matrix3dを使用してより効率的な変換を実現
+        canvasStack.style.transform = matrixString;
+        lastTransformMatrix = matrixString;
+      }
+    } catch (error) {
+      console.warn('Transform update failed:', error);
+      // フォールバックとして従来の方式を使用
+      const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
+      const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
+      const currentZoom = interactStore.zoom;
       canvasStack.style.transform = `translate(${currentOffsetX}px, ${currentOffsetY}px) scale(${currentZoom})`;
-      lastTransformValues = {
-        offsetX: currentOffsetX,
-        offsetY: currentOffsetY,
-        zoom: currentZoom,
-      };
     }
   };
 
@@ -143,6 +154,9 @@ const CanvasArea: Component = () => {
         height: wrapper.clientHeight,
       });
 
+      // 座標変換キャッシュをクリア
+      coordinateTransform.clearCache();
+
       const isMaximize = await getCurrentWindow().isMaximized();
       const flag = isMaximize ? globalConfig.editor.centerCanvasOnMaximize : globalConfig.editor.centerCanvasOnResize;
       if (flag === 'offset') {
@@ -152,11 +166,16 @@ const CanvasArea: Component = () => {
         adjustZoomToFit();
       }
     });
+
     eventBus.on('window:sideSectionSideChanged', (e) => {
       setInteractStore('canvasAreaSize', {
         width: wrapper.clientWidth,
         height: wrapper.clientHeight,
       });
+
+      // 座標変換キャッシュをクリア
+      coordinateTransform.clearCache();
+
       if (globalConfig.editor.centerCanvasOnResize === 'offset') {
         centeringCanvas();
       }
@@ -213,6 +232,8 @@ const CanvasArea: Component = () => {
           <OnCanvasSelectionMenu />
         </div>
         <CursorOverlay />
+
+        {/* <CoordinateDebugOverlay /> */}
       </div>
       <div class={sectionsContainer}>
         <SideSectionsOverlay side='leftSide' />

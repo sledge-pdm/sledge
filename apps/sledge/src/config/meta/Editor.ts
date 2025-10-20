@@ -24,8 +24,8 @@ export const editorMetas: FieldMeta[] = [
       min: 1,
       max: 45,
       step: 1,
-      customFormat: '[value]°',
     },
+    customFormat: (v) => v + '°',
     tips: `the amount of rotation per wheel scroll.`,
   },
   {
@@ -80,7 +80,6 @@ export const editorMetas: FieldMeta[] = [
       max: 100,
       step: 1,
       allowFloat: false,
-      customFormat: '[value]',
     },
     tips: `the maximum number of history items to keep.`,
   },

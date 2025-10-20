@@ -216,6 +216,22 @@ const VerticalRuler: Component<{ marks: RulerMark[] }> = (props) => {
   );
 };
 
+const rotationIndicator = css`
+  position: absolute;
+  top: 0;
+  left: 16px;
+  height: 16px;
+  padding: 0 8px;
+  background-color: var(--color-warning);
+  color: var(--color-on-warning);
+  font-size: 10px;
+  line-height: 16px;
+  white-space: nowrap;
+  border-radius: 0 0 4px 0;
+  opacity: 0.8;
+  z-index: calc(var(--zindex-canvas-overlay) + 1);
+`;
+
 const Ruler: Component = () => {
   // キャンバス状態の変更を監視してマークを再計算
   const rulerData = createMemo(() => {
@@ -246,11 +262,13 @@ const Ruler: Component = () => {
     }
   });
 
+  // 回転中かどうかを判定
+  const isRotated = () => Math.abs(interactStore.rotation) > 0.1; // 0.1度以上で回転とみなす
+
   return (
     <div class={rulerRoot} data-ruler-container>
       <HorizontalRuler marks={rulerData().horizontalMarks} />
       <VerticalRuler marks={rulerData().verticalMarks} />
-      {/* <div class={intersectionContainer} /> */}
     </div>
   );
 };

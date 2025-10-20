@@ -124,12 +124,13 @@ const SideSectionControl: Component<Props> = (props) => {
         <For each={appearanceStore[props.side].tabs}>{(tab, index) => <ControlItem side={props.side} tab={tab} index={index()} />}</For>
 
         <Show when={props.side === 'rightSide'}>
-          <div style={{ height: '150px', display: 'flex', 'flex-direction': 'column', 'align-items': 'center', 'margin-top': 'auto', gap: '8px' }}>
+          <div style={{ height: '170px', display: 'flex', 'flex-direction': 'column', 'align-items': 'center', 'margin-top': 'auto', gap: '8px' }}>
             <p
               style={{
                 'writing-mode': 'vertical-lr',
                 'vertical-align': 'middle',
-                height: '56px',
+                'white-space': 'nowrap',
+                height: '72px',
               }}
             >
               x {(interactStore.zoom / interactStore.initialZoom).toFixed(2)}

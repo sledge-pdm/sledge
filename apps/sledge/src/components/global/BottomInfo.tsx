@@ -44,7 +44,7 @@ const bottomInfoContainerRight = css`
 const sliderContainer = css`
   display: flex;
   flex-direction: row;
-  width: 140px;
+  width: 160px;
   overflow: visible;
 `;
 
@@ -77,15 +77,21 @@ const BottomInfo: Component = () => {
         <p style={{ color: textColor(), overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
           <div class={sliderContainer}>
+            <p
+              style={{
+                width: '72px',
+              }}
+            >
+              {interactStore.rotation.toFixed(1)}°
+            </p>
             <Slider
-              labelMode='left'
+              labelMode='none'
               value={interactStore.rotation}
               min={-180}
               max={180}
               floatSignificantDigits={1}
               wheelSpin={true}
-              allowFloat={false}
-              customFormat={(v) => v.toFixed(1) + '°'}
+              allowFloat={true}
               onChange={(v) => rotateInAreaCenter(v)}
               onDoubleClick={() => {
                 rotateInAreaCenter(0);

@@ -13,6 +13,7 @@ import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import CanvasError from '~/components/canvas/overlays/CanvasError';
+import CoordinateDebugOverlay from '~/components/canvas/overlays/CoordinateDebugOverlay';
 import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
@@ -20,7 +21,6 @@ import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
 import BottomInfo from '~/components/global/BottomInfo';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
 import { globalConfig } from '~/stores/GlobalStores';
-import CoordinateDebugOverlay from '~/components/canvas/overlays/CoordinateDebugOverlay';
 
 const canvasArea = css`
   display: flex;

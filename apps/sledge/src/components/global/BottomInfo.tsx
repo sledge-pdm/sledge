@@ -3,7 +3,7 @@ import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
-import { rotateInAreaCenter, setRotation } from '~/features/canvas';
+import { rotateInAreaCenter } from '~/features/canvas';
 import { resetBottomBarText } from '~/features/log/service';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 

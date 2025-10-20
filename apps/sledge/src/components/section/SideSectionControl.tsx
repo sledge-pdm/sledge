@@ -3,7 +3,7 @@ import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
-import { adjustZoomToFit, centeringCanvas, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
+import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
 
@@ -145,7 +145,7 @@ const SideSectionControl: Component<Props> = (props) => {
                 wheelStep={0.1}
                 allowFloat={true}
                 onChange={(v) => {
-                  centeringCanvas();
+                  // centeringCanvas();
                   zoomTowardAreaCenter(v);
                 }}
                 onDoubleClick={() => {

@@ -6,6 +6,7 @@ import { DebugLogger } from '~/features/log/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
+import { WindowPos } from '~/types/CoordinateTypes';
 import { isMacOS } from '~/utils/OSUtils';
 import TouchRotationSnapper from './TouchRotationSnapper';
 
@@ -35,11 +36,6 @@ class CanvasAreaInteract {
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
 
-  // getBoundingClientRectのキャッシュ
-  private rectCache: DOMRect | null = null;
-  private rectCacheTime = 0;
-  private readonly RECT_CACHE_DURATION = 100; // 100ms
-
   public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
     this.canvasStack.style.cursor = cursor;
     this.wrapperRef.style.cursor = cursor;
@@ -56,26 +52,6 @@ class CanvasAreaInteract {
     (this.canvasStack.style as any).msTouchAction = 'none';
 
     // コンポジタ昇格は新しいCanvasAreaで管理
-  }
-
-  /**
-   * キャッシュされたBoundingClientRectを取得
-   * 頻繁な呼び出しを避けるため
-   */
-  private getCachedRect(): DOMRect {
-    const now = Date.now();
-    if (!this.rectCache || now - this.rectCacheTime > this.RECT_CACHE_DURATION) {
-      this.rectCache = this.canvasStack.getBoundingClientRect();
-      this.rectCacheTime = now;
-    }
-    return this.rectCache;
-  }
-
-  /**
-   * rectキャッシュを無効化
-   */
-  private invalidateRectCache(): void {
-    this.rectCache = null;
   }
 
   static isDragKey(e: PointerEvent): boolean {
@@ -227,7 +203,7 @@ class CanvasAreaInteract {
           x: interactStore.offset.x + canvasMid.x * (zoomOld - zoomApplied) + dxCanvas,
           y: interactStore.offset.y + canvasMid.y * (zoomOld - zoomApplied) + dyCanvas,
         });
-        rotateInCenter({ x: midX, y: midY }, rotProcessed);
+        rotateInCenter(WindowPos.from({ x: midX, y: midY }), rotProcessed);
 
         this.lastAppliedDist = distNew;
         this.lastAppliedAngle = angleNew;
@@ -236,7 +212,6 @@ class CanvasAreaInteract {
 
         // 大きな変更時はキャッシュクリア
         clearCoordinateCache();
-        this.invalidateRectCache();
       }
     } else {
       // タッチ以外
@@ -285,10 +260,10 @@ class CanvasAreaInteract {
   private handleWheel(e: WheelEvent) {
     if (e.shiftKey) {
       const amount = globalConfig.editor.rotateDegreePerWheelScroll;
-      const mousePos: Vec2 = {
+      const mousePos: WindowPos = WindowPos.from({
         x: this.lastPointX,
         y: this.lastPointY,
-      };
+      });
       if (e.deltaY > 0) {
         rotateInCenter(mousePos, interactStore.rotation + amount);
       } else {
@@ -322,7 +297,6 @@ class CanvasAreaInteract {
     });
 
     clearCoordinateCache();
-    this.invalidateRectCache();
 
     return true;
   }

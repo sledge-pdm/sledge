@@ -3,7 +3,7 @@ import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
-import { setRotation } from '~/features/canvas';
+import { rotateInAreaCenter, setRotation } from '~/features/canvas';
 import { resetBottomBarText } from '~/features/log/service';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
@@ -86,16 +86,16 @@ const BottomInfo: Component = () => {
               wheelSpin={true}
               allowFloat={false}
               customFormat={(v) => v.toFixed(1) + '°'}
-              onChange={(v) => setRotation(v)}
+              onChange={(v) => rotateInAreaCenter(v)}
               onDoubleClick={() => {
-                setRotation(0);
+                rotateInAreaCenter(0);
               }}
               onPointerDownOnValidArea={(e) => {
                 if (e.ctrlKey || e.metaKey) {
                   e.preventDefault();
                   e.stopPropagation();
                   e.stopImmediatePropagation();
-                  setRotation(0);
+                  rotateInAreaCenter(0);
                   return false;
                 }
                 return true;

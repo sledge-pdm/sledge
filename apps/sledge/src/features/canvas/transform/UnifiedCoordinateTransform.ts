@@ -12,6 +12,11 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   private cachedInverse: DOMMatrix | null = null;
   private lastComputedHash = '';
 
+  // getBoundingClientRectの統合キャッシュ
+  private canvasAreaRectCache: DOMRect | null = null;
+  private canvasAreaRectCacheTime = 0;
+  private readonly RECT_CACHE_DURATION = 100; // 100ms
+
   /**
    * 現在の状態から変換行列を計算
    * パン・ズーム・回転・反転を全て含む
@@ -78,12 +83,74 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
     return this.cachedInverse;
   }
 
+  // NoZoom変換用のキャッシュ
+  private cachedNoZoomMatrix: DOMMatrix | null = null;
+  private cachedNoZoomInverse: DOMMatrix | null = null;
+  private lastNoZoomHash = '';
+
   /**
-   * DOMMatrixのtransformPointヘルパー
+   * NoZoom変換行列を計算（回転・反転・パンのみ）
    */
+  private computeNoZoomMatrix(): DOMMatrix {
+    const { offset, offsetOrigin, rotation, horizontalFlipped, verticalFlipped } = interactStore;
+    const { width, height } = canvasStore.canvas;
+
+    const currentHash = `nozoom_${offset.x}_${offset.y}_${offsetOrigin.x}_${offsetOrigin.y}_${rotation}_${horizontalFlipped}_${verticalFlipped}_${width}_${height}`;
+
+    if (this.cachedNoZoomMatrix && this.lastNoZoomHash === currentHash) {
+      return this.cachedNoZoomMatrix;
+    }
+
+    const Matrix = globalThis.DOMMatrix ?? (globalThis as any).WebKitCSSMatrix;
+    if (!Matrix) {
+      return new DOMMatrix();
+    }
+
+    const cx = width / 2;
+    const cy = height / 2;
+    const sx = horizontalFlipped ? -1 : 1;
+    const sy = verticalFlipped ? -1 : 1;
+    const totalOffsetX = offsetOrigin.x + offset.x;
+    const totalOffsetY = offsetOrigin.y + offset.y;
+
+    const matrix = new Matrix().translate(totalOffsetX, totalOffsetY).translate(cx, cy).rotate(rotation).scale(sx, sy).translate(-cx, -cy);
+
+    this.cachedNoZoomMatrix = matrix;
+    this.cachedNoZoomInverse = null;
+    this.lastNoZoomHash = currentHash;
+
+    return matrix;
+  }
+
+  private computeNoZoomInverseMatrix(): DOMMatrix {
+    if (this.cachedNoZoomInverse) {
+      return this.cachedNoZoomInverse;
+    }
+
+    this.cachedNoZoomInverse = this.computeNoZoomMatrix().inverse();
+    return this.cachedNoZoomInverse;
+  }
   private applyMatrix(matrix: DOMMatrix, pos: { x: number; y: number }): { x: number; y: number } {
     const result = matrix.transformPoint(new DOMPoint(pos.x, pos.y));
     return { x: result.x, y: result.y };
+  }
+
+  /**
+   * キャッシュされたcanvas-area要素のBoundingClientRectを取得
+   * 統合キャッシュにより重複呼び出しを防止
+   */
+  private getCachedCanvasAreaRect(): DOMRect | null {
+    const now = Date.now();
+    if (!this.canvasAreaRectCache || now - this.canvasAreaRectCacheTime > this.RECT_CACHE_DURATION) {
+      const canvasAreaElement = document.getElementById('canvas-area');
+      if (canvasAreaElement) {
+        this.canvasAreaRectCache = canvasAreaElement.getBoundingClientRect();
+        this.canvasAreaRectCacheTime = now;
+      } else {
+        this.canvasAreaRectCache = null;
+      }
+    }
+    return this.canvasAreaRectCache;
   }
 
   /**
@@ -91,13 +158,12 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    * タイトルバーや左側セクションのオフセットを考慮
    */
   private pageToCanvasAreaCoords(pagePos: { x: number; y: number }): { x: number; y: number } {
-    const canvasAreaElement = document.getElementById('canvas-area');
-    if (!canvasAreaElement) {
+    const rect = this.getCachedCanvasAreaRect();
+    if (!rect) {
       console.warn('canvas-area element not found, using page coordinates directly');
       return pagePos;
     }
 
-    const rect = canvasAreaElement.getBoundingClientRect();
     return {
       x: pagePos.x - rect.left,
       y: pagePos.y - rect.top,
@@ -108,13 +174,12 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    * canvas-area相対座標をページの絶対座標に変換
    */
   private canvasAreaToPageCoords(areaPos: { x: number; y: number }): { x: number; y: number } {
-    const canvasAreaElement = document.getElementById('canvas-area');
-    if (!canvasAreaElement) {
+    const rect = this.getCachedCanvasAreaRect();
+    if (!rect) {
       console.warn('canvas-area element not found, using area coordinates directly');
       return areaPos;
     }
 
-    const rect = canvasAreaElement.getBoundingClientRect();
     return {
       x: areaPos.x + rect.left,
       y: areaPos.y + rect.top,
@@ -146,6 +211,14 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   }
 
   /**
+   * ページ座標からcanvas-area相対座標を取得（デバッグ用）
+   * getBoundingClientRectのキャッシュを活用
+   */
+  getCanvasAreaCoords(pagePos: { x: number; y: number }): { x: number; y: number } {
+    return this.pageToCanvasAreaCoords(pagePos);
+  }
+
+  /**
    * キャンバス座標 → ウィンドウ座標（オーバーレイ用・ページ絶対座標）
    * 選択範囲メニューやその他のオーバーレイで使用
    */
@@ -165,74 +238,14 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   }
 
   canvasToWindowNoZoom(pos: CanvasPos): WindowPos {
-    // ズーム除外版: 回転・反転・パンのみ適用
-    const { offset, offsetOrigin, rotation, horizontalFlipped, verticalFlipped } = interactStore;
-    const { width, height } = canvasStore.canvas;
-
-    const Matrix = globalThis.DOMMatrix ?? (globalThis as any).WebKitCSSMatrix;
-    if (!Matrix) {
-      return WindowPos.from(pos);
-    }
-
-    const cx = width / 2;
-    const cy = height / 2;
-    const sx = horizontalFlipped ? -1 : 1;
-    const sy = verticalFlipped ? -1 : 1;
-    const totalOffsetX = offsetOrigin.x + offset.x;
-    const totalOffsetY = offsetOrigin.y + offset.y;
-
-    // 回転・反転のみの行列
-    const rotationMatrix = new Matrix().translate(cx, cy).rotate(rotation).scale(sx, sy).translate(-cx, -cy);
-
-    // 回転・反転を適用
-    const rotated = this.applyMatrix(rotationMatrix, pos);
-
-    // パンのみ適用（ズーム除外）
-    const areaResult = {
-      x: totalOffsetX + rotated.x,
-      y: totalOffsetY + rotated.y,
-    };
-
-    // canvas-area相対座標からページ絶対座標に変換
-    const pageCoords = this.canvasAreaToPageCoords(areaResult);
+    const result = this.applyMatrix(this.computeNoZoomMatrix(), pos);
+    const pageCoords = this.canvasAreaToPageCoords(result);
     return WindowPos.from(pageCoords);
   }
 
   windowToCanvasNoZoom(pos: WindowPos): CanvasPos {
-    // canvasToWindowNoZoomの逆変換
-    const { offset, offsetOrigin, rotation, horizontalFlipped, verticalFlipped } = interactStore;
-    const { width, height } = canvasStore.canvas;
-
-    const Matrix = globalThis.DOMMatrix ?? (globalThis as any).WebKitCSSMatrix;
-    if (!Matrix) {
-      return CanvasPos.from(pos);
-    }
-
-    // ページ絶対座標をcanvas-area相対座標に変換
     const areaCoords = this.pageToCanvasAreaCoords(pos);
-
-    const totalOffsetX = offsetOrigin.x + offset.x;
-    const totalOffsetY = offsetOrigin.y + offset.y;
-
-    // パンを戻す
-    const afterPan = {
-      x: areaCoords.x - totalOffsetX,
-      y: areaCoords.y - totalOffsetY,
-    };
-
-    // 回転・反転の逆行列
-    const cx = width / 2;
-    const cy = height / 2;
-    const sx = horizontalFlipped ? -1 : 1;
-    const sy = verticalFlipped ? -1 : 1;
-
-    const inverseRotationMatrix = new Matrix()
-      .translate(cx, cy)
-      .scale(1 / sx, 1 / sy)
-      .rotate(-rotation)
-      .translate(-cx, -cy);
-
-    const result = this.applyMatrix(inverseRotationMatrix, afterPan);
+    const result = this.applyMatrix(this.computeNoZoomInverseMatrix(), areaCoords);
     return CanvasPos.from(result);
   }
 
@@ -251,6 +264,10 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
     this.cachedMatrix = null;
     this.cachedInverse = null;
     this.lastComputedHash = '';
+    this.canvasAreaRectCache = null; // getBoundingClientRectキャッシュもクリア
+    this.cachedNoZoomMatrix = null; // NoZoomキャッシュもクリア
+    this.cachedNoZoomInverse = null;
+    this.lastNoZoomHash = '';
   }
 
   /**

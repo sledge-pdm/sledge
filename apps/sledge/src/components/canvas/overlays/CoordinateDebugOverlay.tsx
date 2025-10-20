@@ -55,20 +55,19 @@ const CoordinateDebugOverlay: Component = () => {
   const [transformInfo, setTransformInfo] = createSignal<ReturnType<typeof getDebugTransformInfo>>();
 
   let updateInterval: number;
+  let lastMouseMoveTime = 0;
+  const MOUSE_UPDATE_THROTTLE = 16; // ~60fps
 
   const handleMouseMove = (e: MouseEvent) => {
+    const now = Date.now();
+    // マウス移動の更新を60fpsにスロットル
+    if (now - lastMouseMoveTime < MOUSE_UPDATE_THROTTLE) return;
+    lastMouseMoveTime = now;
+
     const windowPos = WindowPos.create(e.clientX, e.clientY);
 
-    // canvas-area相対座標を計算
-    const canvasAreaElement = document.getElementById('canvas-area');
-    let areaPos = { x: 0, y: 0 };
-    if (canvasAreaElement) {
-      const rect = canvasAreaElement.getBoundingClientRect();
-      areaPos = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    }
+    // 統合キャッシュシステムを使用してcanvas-area相対座標を計算
+    const areaPos = coordinateTransform.getCanvasAreaCoords({ x: e.clientX, y: e.clientY });
 
     const canvasPos = coordinateTransform.windowToCanvas(windowPos);
 
@@ -87,11 +86,11 @@ const CoordinateDebugOverlay: Component = () => {
   };
 
   onMount(() => {
-    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    // Transform情報を定期的に更新
+    // Transform情報をより控えめに更新（500ms間隔）
     updateTransformInfo();
-    updateInterval = window.setInterval(updateTransformInfo, 200);
+    updateInterval = window.setInterval(updateTransformInfo, 500);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);

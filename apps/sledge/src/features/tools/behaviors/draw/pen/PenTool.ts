@@ -50,7 +50,7 @@ export class PenTool implements ToolBehavior {
       this.isShift = true;
       const anvil = getAnvilOf(args.layerId);
       if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-      this.lineChunk.start(anvil.getImageData(), anvil.getWidth(), anvil.getHeight());
+      this.lineChunk.start(anvil.getBufferCopy(), anvil.getWidth(), anvil.getHeight());
       return this.drawLine(false, ctx, args, args.color);
     } else {
       this.isShift = false;

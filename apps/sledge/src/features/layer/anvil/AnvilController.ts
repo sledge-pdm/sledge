@@ -5,13 +5,13 @@ import { eventBus } from '~/utils/EventBus';
 export function getBufferCopy(layerId: string): Uint8ClampedArray | undefined {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;
-  return anvil.getImageData();
+  return anvil.getBufferCopy();
 }
 
 export function getBufferPointer(layerId: string): Uint8ClampedArray<ArrayBufferLike> | undefined {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;
-  return anvil.getBufferData();
+  return anvil.getBufferPointer();
 }
 
 export function setBuffer(layerId: string, buffer: Uint8ClampedArray) {

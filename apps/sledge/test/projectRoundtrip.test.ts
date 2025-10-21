@@ -121,7 +121,7 @@ describe('Project dump/load roundtrip', () => {
     // Verify buffer was restored correctly (at least the non-zero pixels)
     const restoredAnvil = anvilManager.getAnvil(layer.id);
     expect(restoredAnvil).toBeDefined();
-    const restoredBuffer = restoredAnvil!.getImageData();
+    const restoredBuffer = restoredAnvil!.getBufferCopy();
     expect(restoredBuffer[0]).toBe(255); // Red channel of first pixel
     expect(restoredBuffer[3]).toBe(255); // Alpha channel of first pixel
   });

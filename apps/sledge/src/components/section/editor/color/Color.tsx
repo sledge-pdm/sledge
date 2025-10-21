@@ -17,6 +17,7 @@ const swatchContainer = css`
   flex-direction: row;
   position: relative;
   gap: var(--spacing-xs);
+  margin-top: 8px;
   margin-bottom: 12px;
 `;
 

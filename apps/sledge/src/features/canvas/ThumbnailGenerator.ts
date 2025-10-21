@@ -61,10 +61,12 @@ export class ThumbnailGenerator {
         this.offCtx.clearRect(0, 0, width, height);
       }
 
-      const buf =
-        layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving() ? floatingMoveManager.getPreviewBuffer()! : anvil.getImageData();
-      // Keep slice() for now to avoid type issues, but optimize canvas resizing
-      const imgData = new ImageData(buf.slice(), w, h);
+      const buf: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(
+        layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving()
+          ? floatingMoveManager.getPreviewBuffer()!
+          : anvil.getBufferPointer()
+      );
+      const imgData = new ImageData(buf, w, h);
       this.tmpCtx.putImageData(imgData, 0, 0);
 
       this.offCtx.imageSmoothingEnabled = false;

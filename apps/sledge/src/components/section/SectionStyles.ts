@@ -25,6 +25,7 @@ export const sectionCaption = css`
   font-size: 8px;
   opacity: 1;
   white-space: nowrap;
+  margin-right: auto;
 `;
 
 export const sectionSubCaption = css`

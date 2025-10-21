@@ -54,7 +54,7 @@ class FloatingMoveManager {
   private movePreviewBuffer: Uint8ClampedArray | undefined = undefined; // should be same size as layer/canvas.
   private state: MoveMode | undefined = undefined;
 
-  public getPreviewBuffer() {
+  public getPreviewBuffer(): Uint8ClampedArray | undefined {
     return this.movePreviewBuffer;
   }
 
@@ -93,7 +93,7 @@ class FloatingMoveManager {
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
     const anvil = getAnvilOf(targetLayerId);
     if (!anvil) return;
-    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight());
+    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight());
     if (!webpBuffer) return;
     this.targetBufferOriginal = {
       buffer: webpBuffer,

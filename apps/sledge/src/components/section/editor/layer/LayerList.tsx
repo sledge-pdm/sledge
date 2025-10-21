@@ -31,10 +31,6 @@ const layerList = css`
 const LayerList: Component<{}> = () => {
   const [items, setItems] = createSignal(allLayers());
 
-  listenEvent('onSetup', () => {
-    setItems(allLayers());
-  });
-
   createEffect(() => {
     setItems(allLayers());
   });

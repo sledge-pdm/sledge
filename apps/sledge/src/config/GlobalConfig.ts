@@ -12,6 +12,7 @@ export type GlobalConfig = {
   };
   default: {
     open: 'new' | 'last';
+    addOnlySavedProjectToLastOpened: boolean;
     canvasSize: { width: number; height: number };
   };
   editor: {
@@ -42,6 +43,7 @@ export const defaultConfig: GlobalConfig = {
   },
   default: {
     open: 'last',
+    addOnlySavedProjectToLastOpened: false,
     canvasSize: { width: 1024, height: 1024 },
   },
   editor: {

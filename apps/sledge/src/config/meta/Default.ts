@@ -1,5 +1,6 @@
 import { Consts } from '~/Consts';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
+import { globalConfig } from '~/stores/GlobalStores';
 
 export const defaultMetas: FieldMeta[] = [
   {
@@ -14,6 +15,14 @@ export const defaultMetas: FieldMeta[] = [
       ],
     },
     tips: 'the behavior on startup.',
+  },
+  {
+    section: ConfigSections.Default,
+    path: ['default', 'addOnlySavedProjectToLastOpened'],
+    label: 'add only saved project to last opened',
+    component: 'ToggleSwitch',
+    tips: `if enabled, only projects that have been saved at least once will be added to the 'last opened' list.\n
+new project will be discarded if you close the app without saving.`,
   },
   {
     section: ConfigSections.Default,

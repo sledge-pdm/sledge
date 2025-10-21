@@ -1,6 +1,6 @@
 import { rawToWebp, webpToRaw } from '@sledge/anvil';
 import type { Layer } from '~/features/layer';
-import { removeLayer } from '~/features/layer';
+import { findLayerById, removeLayer } from '~/features/layer';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -134,4 +134,20 @@ export function packLayerSnapshot(layerSnapshot: LayerSnapshot): PackedLayerSnap
     };
   }
   return { layer: layerSnapshot.layer };
+}
+
+export function getPackedLayerSnapshot(layerId: string): PackedLayerSnapshot | undefined {
+  const layer = findLayerById(layerId);
+  const anvil = getAnvilOf(layerId);
+  if (!layer || !anvil) return;
+
+  const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight());
+  return {
+    layer,
+    image: {
+      webpBuffer,
+      width: anvil.getWidth(),
+      height: anvil.getHeight(),
+    },
+  };
 }

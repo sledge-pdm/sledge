@@ -1,6 +1,6 @@
 import { getTauriVersion } from '@tauri-apps/api/app';
 import { invoke } from '@tauri-apps/api/core';
-import { emit, EventCallback, listen } from '@tauri-apps/api/event';
+import { EventCallback, listen } from '@tauri-apps/api/event';
 
 let _isTauri: boolean | null = null;
 
@@ -30,20 +30,12 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
   }
 }
 
-export type TauriWindowEvent =
-  // window/editor
-  'onProjectLoad' | 'onSetup';
-
-export function emitEvent(event: TauriWindowEvent, msg?: Object) {
-  return emit(event, msg);
-}
-
 export type TauriGlobalEvent = 'onSettingsSaved';
 
 export async function emitGlobalEvent(event: TauriGlobalEvent, msg?: Object) {
   return await safeInvoke('emit_global_event', { event, msg });
 }
 
-export function listenEvent(event: TauriWindowEvent | TauriGlobalEvent, handler: EventCallback<any>) {
+export function listenEvent(event: TauriGlobalEvent, handler: EventCallback<any>) {
   return listen(event, handler);
 }

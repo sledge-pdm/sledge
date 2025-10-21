@@ -1,6 +1,15 @@
+import {
+  AnvilLayerHistoryAction,
+  CanvasSizeHistoryAction,
+  ColorHistoryAction,
+  ImagePoolEntryPropsHistoryAction,
+  ImagePoolHistoryAction,
+  LayerListHistoryAction,
+  LayerMergeHistoryAction,
+  LayerPropsHistoryAction,
+} from '~/features/history/actions';
 import { globalConfig } from '~/stores/GlobalStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
-import { AnvilLayerHistoryAction, CanvasSizeHistoryAction, ColorHistoryAction, ImagePoolEntryPropsHistoryAction, ImagePoolHistoryAction, LayerListHistoryAction, LayerMergeHistoryAction, LayerPropsHistoryAction } from '~/features/history/actions';
 
 export class ProjectHistoryController {
   private undoStack: BaseHistoryAction[] = [];

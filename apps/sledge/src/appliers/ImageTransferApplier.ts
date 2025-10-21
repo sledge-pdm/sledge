@@ -8,13 +8,13 @@ export interface ImageTransferParams {
   entry: {
     transform: { x: number; y: number; scaleX: number; scaleY: number };
     base: { width: number; height: number };
-    resourcePath: string; // file path (already used by ImagePool)
+    imagePath: string; // file path (already used by ImagePool)
   };
   targetLayerId: string;
 }
 
 export async function transferToLayer({ entry, targetLayerId }: ImageTransferParams): Promise<void> {
-  const bitmap = await loadLocalImage(entry.resourcePath);
+  const bitmap = await loadLocalImage(entry.imagePath);
   // 自由比スケール: base 情報は呼び出し側 entry.base と bitmap 自然サイズが一致する前提
   const scaleX = entry.transform.scaleX ?? 1;
   const scaleY = entry.transform.scaleY ?? 1;

@@ -1,22 +1,13 @@
-import { rawToWebp } from '@sledge/anvil';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
-import {
-  CanvasSizeHistoryAction,
-  ColorHistoryAction,
-  ImagePoolEntryPropsHistoryAction,
-  ImagePoolHistoryAction,
-  LayerListHistoryAction,
-  LayerPropsHistoryAction,
-  PackedLayerSnapshot,
-  ProjectHistoryController,
-} from '~/features/history';
+import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
+import { currentColor, PaletteType, selectPalette, setColor, setCurrentColor } from '~/features/color';
+import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
-import { BlendMode, Layer, LayerType } from '~/features/layer';
+import { getEntry, ImagePoolEntry, insertEntry, removeEntry, updateEntryPartial } from '~/features/image_pool';
+import { addLayerTo, BlendMode, Layer, LayerType, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
 import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { canvasStore, layerListStore, setCanvasStore, setLayerListStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
 if (typeof document === 'undefined') {
@@ -39,6 +30,10 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     // Normalize color and image pool before each test
     selectPalette(PaletteType.primary);
     setColor(PaletteType.primary, '#000000');
+
+    // Reset imagePool store
+    setImagePoolStore('entries', []);
+    setImagePoolStore('selectedEntryId', undefined);
 
     const WIDTH = 16;
     const HEIGHT = 16;
@@ -64,14 +59,15 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     });
     // Drop a few known test IDs if present
     ['rnd-a', 'rnd-b', 'rnd-c'].forEach((id) => {
-      if (getEntry(id)) removeEntry(id);
+      if (getEntry(id)) removeEntry(id, true); // noDiff=true to avoid history during cleanup
     });
   });
 
   it('randomized sequence → undo-all → redo-all is consistent and idempotent', () => {
     const rng = makeRng(42);
     const LOG_RND = process.env.VITEST_LOG_RND === '1';
-    const hc = new ProjectHistoryController();
+    const hc = projectHistoryController;
+    hc.clearHistory(); // Clear history before test
 
     const initial = snapshotState();
 
@@ -79,9 +75,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     const entries: Record<string, ImagePoolEntry> = {
       'rnd-a': {
         id: 'rnd-a',
-        originalPath: 'C:/dummyA.png',
-        resourcePath: 'C:/dummyA.png',
-        fileName: 'dummyA.png',
+        imagePath: 'C:/dummyA.png',
         base: { width: 8, height: 8 },
         transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
         opacity: 1,
@@ -89,9 +83,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
       },
       'rnd-b': {
         id: 'rnd-b',
-        originalPath: 'C:/dummyB.png',
-        resourcePath: 'C:/dummyB.png',
-        fileName: 'dummyB.png',
+        imagePath: 'C:/dummyB.png',
         base: { width: 12, height: 12 },
         transform: { x: 1, y: 1, scaleX: 1, scaleY: 1 },
         opacity: 1,
@@ -99,9 +91,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
       },
       'rnd-c': {
         id: 'rnd-c',
-        originalPath: 'C:/dummyC.png',
-        resourcePath: 'C:/dummyC.png',
-        fileName: 'dummyC.png',
+        imagePath: 'C:/dummyC.png',
         base: { width: 16, height: 16 },
         transform: { x: 2, y: 2, scaleX: 1, scaleY: 1 },
         opacity: 1,
@@ -120,16 +110,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const targets = ['#000000', '#ff0000', '#00ff00', '#0000ff'] as const;
         const next = targets[Math.floor(rng() * targets.length)];
         const prev = currentColor();
-        const a = new ColorHistoryAction({
-          palette: PaletteType.primary,
-          // ColorHistoryAction expects RGBA tuples; we store via hex on controller
-          oldColor: hexToRgbaTuple(prev),
-          newColor: hexToRgbaTuple(next),
-          context: { from: 'rnd' },
-        });
         steps.push(() => {
-          a.redo();
-          hc.addAction(a);
+          setCurrentColor(next);
         });
         stepDescs.push(`Color ${prev} -> ${next}`);
       } else if (pick === 1) {
@@ -141,14 +123,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
           width: Math.max(1, cur.width + dw),
           height: Math.max(1, cur.height + dh),
         };
-        const a = new CanvasSizeHistoryAction({
-          beforeSize: cur,
-          afterSize: next,
-          context: { from: 'rnd' },
-        });
         steps.push(() => {
-          a.redo();
-          hc.addAction(a);
+          changeCanvasSizeWithNoOffset(next);
         });
         stepDescs.push(`Canvas ${cur.width}x${cur.height} -> ${next.width}x${next.height}`);
       } else if (pick === 2) {
@@ -157,14 +133,12 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const id = keys[Math.floor(rng() * keys.length)];
         const exists = !!getEntry(id);
         const kind = exists ? 'remove' : 'add';
-        const a = new ImagePoolHistoryAction({
-          kind: kind as 'add' | 'remove',
-          targetEntry: entries[id],
-          context: { from: 'rnd' },
-        });
         steps.push(() => {
-          a.redo();
-          hc.addAction(a);
+          if (kind === 'add') {
+            insertEntry(entries[id]);
+          } else {
+            removeEntry(id);
+          }
         });
         stepDescs.push(`ImagePool ${kind} ${id}`);
       } else if (pick === 3) {
@@ -173,25 +147,15 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const id = keys[Math.floor(rng() * keys.length)];
         const cur = getEntry(id);
         if (!cur) {
-          const add = new ImagePoolHistoryAction({
-            kind: 'add',
-            targetEntry: entries[id],
-            context: { from: 'rnd:ensure-entry' },
-          });
           steps.push(() => {
-            add.redo();
-            hc.addAction(add);
+            insertEntry(entries[id]);
           });
           stepDescs.push(`ImagePool add ${id} (prep for props)`);
         } else {
           const dx = Math.floor(rng() * 5) - 2;
           const dy = Math.floor(rng() * 5) - 2;
           const dop = (Math.floor(rng() * 3) - 1) * 0.1; // -0.1, 0, +0.1
-          const { id: _omit, ...oldNoId } = cur as any;
-          const oldProps = oldNoId as Omit<ImagePoolEntry, 'id'>;
-          const { id: _omit2, ...baseNoId } = cur as any;
-          const newProps: Omit<ImagePoolEntry, 'id'> = {
-            ...baseNoId,
+          const updatedProps: Partial<ImagePoolEntry> = {
             transform: {
               ...cur.transform,
               x: cur.transform.x + dx,
@@ -200,15 +164,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             opacity: Math.max(0, Math.min(1, cur.opacity + dop)),
             visible: rng() < 0.3 ? !cur.visible : cur.visible,
           };
-          const a = new ImagePoolEntryPropsHistoryAction({
-            entryId: id,
-            oldEntryProps: oldProps,
-            newEntryProps: newProps,
-            context: { from: 'rnd' },
-          });
           steps.push(() => {
-            a.redo();
-            hc.addAction(a);
+            updateEntryPartial(id, updatedProps);
           });
           stepDescs.push(`ImagePool props ${id} move(${dx},${dy})`);
         }
@@ -216,73 +173,36 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         // Layer list: add/delete/reorder
         const actionKind = Math.floor(rng() * 3); // 0:add 1:delete 2:reorder
         if (actionKind === 0) {
-          // add at random index with small blank buffer
+          // add at random index
           const idx = Math.floor(rng() * (layerListStore.layers.length + 1));
           const id = `LR-${Math.floor(rng() * 100000)}`;
-          const layer: Layer = {
-            id,
-            name: id,
-            type: LayerType.Dot,
-            typeDescription: 'dot',
-            enabled: true,
-            opacity: 1,
-            mode: BlendMode.normal,
-            dotMagnification: 1,
-          };
-          const snapshot: PackedLayerSnapshot = {
-            layer,
-            image: {
-              webpBuffer: rawToWebp(
-                new Uint8Array(canvasStore.canvas.width * canvasStore.canvas.height * 4),
-                canvasStore.canvas.width,
-                canvasStore.canvas.height
-              ),
-              width: canvasStore.canvas.width,
-              height: canvasStore.canvas.height,
-            },
-          };
-          const a = new LayerListHistoryAction({ kind: 'add', index: idx, packedSnapshot: snapshot, context: { from: 'rnd' } });
           steps.push(() => {
-            a.redo();
-            hc.addAction(a);
+            addLayerTo(idx, {
+              name: id,
+              type: LayerType.Dot,
+              enabled: true,
+              opacity: 1,
+              mode: BlendMode.normal,
+              dotMagnification: 1,
+            });
           });
           stepDescs.push(`Layer add ${id} @${idx}`);
         } else if (actionKind === 1) {
           if (layerListStore.layers.length > 1) {
-            const idx = Math.floor(rng() * layerListStore.layers.length);
-            const layer = layerListStore.layers[idx];
-            const anvil = getAnvilOf(layer.id);
-            const image = anvil
-              ? {
-                  webpBuffer: rawToWebp(new Uint8Array(anvil?.getImageData().buffer), anvil.getWidth(), anvil.getHeight()),
-                  width: anvil.getWidth(),
-                  height: anvil.getHeight(),
-                }
-              : undefined;
-            const snapshot: PackedLayerSnapshot = {
-              layer,
-              image,
-            };
-            const a = new LayerListHistoryAction({ kind: 'delete', index: idx, packedSnapshot: snapshot, context: { from: 'rnd' } });
+            const layer = layerListStore.layers[Math.floor(rng() * layerListStore.layers.length)];
             steps.push(() => {
-              a.redo();
-              hc.addAction(a);
+              removeLayer(layer.id);
             });
-            stepDescs.push(`Layer delete ${layer.id} @${idx}`);
+            stepDescs.push(`Layer delete ${layer.id}`);
           }
         } else {
           if (layerListStore.layers.length > 1) {
-            const before = layerListStore.layers.map((x) => x.id);
             // simple swap of two indices
-            const i1 = Math.floor(rng() * before.length);
-            let i2 = Math.floor(rng() * before.length);
-            if (i2 === i1) i2 = (i2 + 1) % before.length;
-            const after = [...before];
-            [after[i1], after[i2]] = [after[i2], after[i1]];
-            const a = new LayerListHistoryAction({ kind: 'reorder', index: -1, beforeOrder: before, afterOrder: after, context: { from: 'rnd' } });
+            const i1 = Math.floor(rng() * layerListStore.layers.length);
+            let i2 = Math.floor(rng() * layerListStore.layers.length);
+            if (i2 === i1) i2 = (i2 + 1) % layerListStore.layers.length;
             steps.push(() => {
-              a.redo();
-              hc.addAction(a);
+              moveLayer(i1, i2);
             });
             stepDescs.push(`Layer reorder swap(${i1},${i2})`);
           }
@@ -291,32 +211,22 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         // Layer props tweak (opacity/mode/enabled)
         if (layerListStore.layers.length > 0) {
           const layer = layerListStore.layers[Math.floor(rng() * layerListStore.layers.length)];
-          const oldProps: Omit<Layer, 'id'> = { ...layer } as any;
-          delete (oldProps as any).id;
           const modes = [BlendMode.normal, BlendMode.multiply, BlendMode.screen] as const;
           const nextMode = modes[Math.floor(rng() * modes.length)];
           const nextOpacity = Math.max(0, Math.min(1, layer.opacity + (Math.floor(rng() * 3) - 1) * 0.2));
           const nextEnabled = rng() < 0.3 ? !layer.enabled : layer.enabled;
-          const newProps: Omit<Layer, 'id'> = {
-            name: layer.name,
-            type: layer.type,
-            typeDescription: layer.typeDescription,
-            enabled: nextEnabled,
-            opacity: nextOpacity,
-            mode: nextMode,
-            dotMagnification: layer.dotMagnification,
-          };
-          const a = new LayerPropsHistoryAction({
-            layerId: layer.id,
-            oldLayerProps: oldProps,
-            newLayerProps: newProps,
-            context: { from: 'rnd' },
-          });
+
+          const changes = [
+            { prop: 'opacity' as const, value: nextOpacity },
+            { prop: 'mode' as const, value: nextMode },
+            { prop: 'enabled' as const, value: nextEnabled },
+          ];
+          const change = changes[Math.floor(rng() * changes.length)];
+
           steps.push(() => {
-            a.redo();
-            hc.addAction(a);
+            setLayerProp(layer.id, change.prop, change.value);
           });
-          stepDescs.push(`Layer props ${layer.id} opacity->${nextOpacity.toFixed(1)} mode->${nextMode}`);
+          stepDescs.push(`Layer props ${layer.id} ${change.prop}->${change.value}`);
         }
       } else if (pick === 6) {
         // Layer buffer tiny pixel patch on a random layer
@@ -326,27 +236,26 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
           if (anvil) {
             const w = anvil.getWidth();
             const count = 1 + Math.floor(rng() * 3);
-            for (let k = 0; k < count; k++) {
-              const x = k % Math.min(4, w);
-              const y = 0;
-              const r = (k * 40) & 0xff;
-              const g = (k * 80) & 0xff;
-              const b = (k * 120) & 0xff;
-              setPixel(layer.id, x, y, [r, g, b, 255]);
-            }
-            const patch = flushPatch(layer.id);
-            if (patch) {
-              const a = new AnvilLayerHistoryAction({
-                layerId: layer.id,
-                patch,
-                context: { from: 'rnd' },
-              });
-              steps.push(() => {
-                a.redo();
+            steps.push(() => {
+              for (let k = 0; k < count; k++) {
+                const x = k % Math.min(4, w);
+                const y = 0;
+                const r = (k * 40) & 0xff;
+                const g = (k * 80) & 0xff;
+                const b = (k * 120) & 0xff;
+                setPixel(layer.id, x, y, [r, g, b, 255]);
+              }
+              const patch = flushPatch(layer.id);
+              if (patch) {
+                const a = new AnvilLayerHistoryAction({
+                  layerId: layer.id,
+                  patch,
+                  context: { from: 'rnd' },
+                });
                 hc.addAction(a);
-              });
-              stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
-            }
+              }
+            });
+            stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
           }
         }
       }
@@ -391,15 +300,6 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     expect(simplifyLayers()).toEqual(final.layers);
   });
 });
-
-// Local tiny helper to convert '#rrggbb' to [r,g,b,a]
-function hexToRgbaTuple(hex: string): [number, number, number, number] {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return [r, g, b, 255];
-}
 
 // Helpers to snapshot/compare only what we care about in random checks
 function simplifyPoolState() {

@@ -82,12 +82,12 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
     case 'image_pool':
       icon = '/icons/actions/image.png';
       const ipaction = action as ImagePoolHistoryAction;
-      description = `${ipaction.kind} -> ${ipaction.targetEntry.fileName}`;
+      description = `${ipaction.kind} image`;
       break;
     case 'image_pool_entry_props':
       icon = '/icons/actions/image.png';
       const ipepaction = action as ImagePoolEntryPropsHistoryAction;
-      description = `${ipepaction.newEntryProps.fileName} transform`;
+      description = `${ipepaction.newEntryProps.imagePath} transform`;
       break;
     case 'color':
       const claction = action as ColorHistoryAction;

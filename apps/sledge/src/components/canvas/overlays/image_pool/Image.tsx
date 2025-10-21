@@ -1,14 +1,13 @@
 import { css } from '@acab/ecsstatic';
 import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { Component, createMemo, onMount } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { Component, onMount } from 'solid-js';
 import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
-import { getEntry, hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
+import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { eventBus } from '~/utils/EventBus';
+import { pathToFileLocation } from '~/utils/FileUtils';
 
 const imageElement = css`
   margin: 0;
@@ -19,81 +18,47 @@ const imageElement = css`
   image-rendering: pixelated;
 `;
 
-const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
-  const [stateStore, setStateStore] = createStore({
-    visible: props.entry.visible,
-    // transform-based drawing state
-    tx: props.entry.transform.x,
-    ty: props.entry.transform.y,
-    sx: props.entry.transform.scaleX,
-    sy: props.entry.transform.scaleY,
-    baseW: props.entry.base.width,
-    baseH: props.entry.base.height,
-  });
-
+const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, index }) => {
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
-  let onEntryChangedHandler: ((e: { id: string }) => void) | undefined;
   let entryInteract: ImageEntryInteract | undefined;
 
   onMount(() => {
-    const onEntryChanged = (e: { id: string }) => {
-      if (e.id !== props.entry.id) return;
-      const latest = getEntry(props.entry.id);
-      if (!latest) return;
-      // update reactive state only; styles bind to these
-      setStateStore({
-        visible: latest.visible,
-        tx: latest.transform.x,
-        ty: latest.transform.y,
-        sx: latest.transform.scaleX,
-        sy: latest.transform.scaleY,
-        baseW: latest.base.width,
-        baseH: latest.base.height,
-      });
-    };
-    onEntryChangedHandler = onEntryChanged;
-    eventBus.on('imagePool:entryPropChanged', onEntryChanged);
-
     // initial transform-related styling hints
     containerRef.style.willChange = 'transform';
     containerRef.style.backfaceVisibility = 'hidden';
 
-    // attach entry-level pointer interactions (logging only for now)
-    entryInteract = new ImageEntryInteract(svgRef, () => getEntry(props.entry.id) ?? props.entry);
+    entryInteract = new ImageEntryInteract(svgRef, entry.id);
     entryInteract.setInteractListeners();
 
     const canvasArea = document.getElementById('canvas-area');
+
     const handleImageSelection = (e: MouseEvent) => {
       if (!canvasArea?.contains(e.target as HTMLElement)) return;
-
       if (containerRef && !containerRef.contains(e.target as HTMLElement)) {
-        if (selected()) {
+        if (imagePoolStore.selectedEntryId === entry.id) {
           selectEntry(undefined);
         }
       } else {
-        selectEntry(props.entry.id);
+        selectEntry(entry.id);
       }
     };
-
     document.addEventListener('click', handleImageSelection);
-
     () => {
       document.removeEventListener('click', handleImageSelection);
-      if (onEntryChangedHandler) eventBus.off('imagePool:entryPropChanged', onEntryChangedHandler);
       entryInteract?.removeInteractListeners();
     };
   });
 
-  const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
+  const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (handleProps) => {
     // オーバーレイはスケールしないので、ズームのみ相殺
-    const size = () => (props.size ?? 8) / interactStore.zoom;
+    const size = () => (handleProps.size ?? 8) / interactStore.zoom;
     return (
       <rect
-        x={props.x}
-        y={props.y}
+        x={handleProps.x}
+        y={handleProps.y}
         class={'resize-handle'}
-        data-pos={props['data-pos']}
+        data-pos={handleProps['data-pos']}
         width={size()}
         height={size()}
         stroke='black'
@@ -102,36 +67,35 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         vector-effect={'non-scaling-stroke'}
         pointer-events='all'
         style={{
-          cursor: `${props['data-pos']}-resize`,
+          cursor: `${handleProps['data-pos']}-resize`,
           transform: `translate(-${size() / 2}px, -${size() / 2}px)`,
           position: 'absolute',
-          visibility: selected() ? 'visible' : 'collapse',
+          visibility: imagePoolStore.selectedEntryId === entry.id ? 'visible' : 'collapse',
         }}
       />
     );
   };
 
-  const selected = createMemo<boolean>(() => imagePoolStore.selectedEntryId === props.entry.id);
+  // const selected = createMemo<boolean>(() => imagePoolStore.selectedEntryId === entry.id);
 
   return (
     <div
       class={'image_root'}
-      id={props.entry.id}
+      id={entry.id}
       ref={(el) => (containerRef = el)}
       style={{
-        display: stateStore.visible || selected() ? 'flex' : 'none',
+        display: entry.visible || imagePoolStore.selectedEntryId === entry.id ? 'flex' : 'none',
         position: 'absolute',
         'pointer-events': 'all',
         'box-sizing': 'border-box',
         'transform-origin': '0 0',
-        // ルートは移動のみ（スケールは内側に適用）
-        transform: `translate3d(${stateStore.tx}px, ${stateStore.ty}px, 0)`,
+        transform: `translate(${entry.transform.x}px, ${entry.transform.y}px)`,
         margin: 0,
         padding: 0,
-        cursor: selected() ? 'all-scroll' : undefined,
+        cursor: imagePoolStore.selectedEntryId === entry.id ? 'all-scroll' : undefined,
         'z-index': 'var(--zindex-image-pool-image)',
       }}
-      tabIndex={props.index}
+      tabIndex={index}
       onClick={(e) => {
         e.currentTarget.focus();
       }}
@@ -139,45 +103,44 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        selectEntry(props.entry.id);
-        const showHideItem: MenuListOption = stateStore.visible
+        selectEntry(entry.id);
+        const showHideItem: MenuListOption = entry.visible
           ? {
               ...ContextMenuItems.BaseImageHide,
               onSelect: () => {
-                hideEntry(props.entry.id);
+                hideEntry(entry.id);
                 selectEntry(undefined);
               },
             }
           : {
               ...ContextMenuItems.BaseImageShow,
               onSelect: () => {
-                showEntry(props.entry.id);
-                selectEntry(props.entry.id);
+                showEntry(entry.id);
+                selectEntry(entry.id);
               },
             };
         showContextMenu(
-          `${props.entry.fileName}${stateStore.visible ? '' : ' (hidden)'}`,
+          `${pathToFileLocation(entry.imagePath)?.name}${entry.visible ? '' : ' (hidden)'}`,
           [
             showHideItem,
             {
               ...ContextMenuItems.BaseTransfer,
-              onSelect: () => transferToCurrentLayer(props.entry.id, false),
+              onSelect: () => transferToCurrentLayer(entry.id, false),
             },
             {
               ...ContextMenuItems.BaseTransferRemove,
-              onSelect: () => transferToCurrentLayer(props.entry.id, true),
+              onSelect: () => transferToCurrentLayer(entry.id, true),
             },
             {
               ...ContextMenuItems.BaseRemove,
               label: 'Remove from pool',
-              onSelect: () => removeEntry(props.entry.id),
+              onSelect: () => removeEntry(entry.id),
             },
           ],
           e
         );
       }}
     >
-      {/* スケールは画像側のラッパーに適用 */}
       <div
         style={{
           position: 'absolute',
@@ -186,18 +149,18 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           margin: 0,
           padding: 0,
           'transform-origin': '0 0',
-          transform: `scale(${stateStore.sx}, ${stateStore.sy})`,
+          transform: `scale(${entry.transform.scaleX}, ${entry.transform.scaleY})`,
         }}
       >
         <img
-          src={convertFileSrc(props.entry.originalPath)}
+          src={convertFileSrc(entry.imagePath)}
           class={imageElement}
-          width={stateStore.baseW}
-          height={stateStore.baseH}
+          width={entry.base.width}
+          height={entry.base.height}
           style={{
-            width: `${stateStore.baseW}px`,
-            height: `${stateStore.baseH}px`,
-            opacity: stateStore.visible ? 1 : selected() ? 0.5 : 0,
+            width: `${entry.base.width}px`,
+            height: `${entry.base.height}px`,
+            opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
           }}
         />
       </div>
@@ -215,8 +178,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           'shape-rendering': 'geometricPrecision',
           overflow: 'visible',
           'z-index': 'var(--zindex-image-pool-control)',
-          width: `${stateStore.baseW * stateStore.sx}px`,
-          height: `${stateStore.baseH * stateStore.sy}px`,
+          width: `${entry.base.width * entry.transform.scaleX}px`,
+          height: `${entry.base.height * entry.transform.scaleY}px`,
         }}
       >
         {/* 内部ドラッグ用の透明サーフェス */}
@@ -240,7 +203,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = (props) => {
           stroke-width={1 / interactStore.zoom}
           vector-effect={'non-scaling-stroke'}
           style={{
-            visibility: selected() ? 'visible' : 'collapse',
+            visibility: imagePoolStore.selectedEntryId === entry.id ? 'visible' : 'collapse',
             'pointer-events': 'none',
           }}
         />

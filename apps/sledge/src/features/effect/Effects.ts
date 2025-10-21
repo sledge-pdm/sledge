@@ -18,7 +18,7 @@ export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, optio
 
     const patch = flushPatch(layerId);
     if (patch) {
-      projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch, { tool: 'fx', fxName: effect }));
+      projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch, context: { tool: 'fx', fxName: effect } }));
     }
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Apply FX for ${layerId}` });
     eventBus.emit('preview:requestUpdate', { layerId: layerId });

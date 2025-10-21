@@ -30,7 +30,14 @@ export function insertEntry(entry: ImagePoolEntry, noDiff?: boolean) {
   }
   pool.set(entry.id, entry);
   if (!noDiff && old && JSON.stringify(old) !== JSON.stringify(entry)) {
-    projectHistoryController.addAction(new ImagePoolEntryPropsHistoryAction(entry.id, old, entry, { from: 'ImagePoolController.removeEntry' }));
+    projectHistoryController.addAction(
+      new ImagePoolEntryPropsHistoryAction({
+        entryId: entry.id,
+        oldEntryProps: old,
+        newEntryProps: entry,
+        context: { from: 'ImagePoolController.removeEntry' },
+      })
+    );
   }
   eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
 }
@@ -54,7 +61,14 @@ export function removeEntry(id: string, noDiff?: boolean) {
     console.warn(`ImagePoolController.removeEntry: Entry not found for id ${id}`);
     return;
   }
-  if (!noDiff) projectHistoryController.addAction(new ImagePoolHistoryAction('remove', entry, { from: 'ImagePoolController.removeEntry' }));
+  if (!noDiff)
+    projectHistoryController.addAction(
+      new ImagePoolHistoryAction({
+        kind: 'remove',
+        targetEntry: entry,
+        context: { from: 'ImagePoolController.removeEntry' },
+      })
+    );
 
   if (pool.delete(id)) {
     selectEntry(undefined);
@@ -74,14 +88,26 @@ export async function addToImagePool(imagePaths: string | string[]) {
     if (ids.length > 0) {
       ids.forEach((id) => {
         const entry = pool.get(id)!;
-        projectHistoryController.addAction(new ImagePoolHistoryAction('add', entry, { from: 'ImagePoolController.addToImagePool' }));
+        projectHistoryController.addAction(
+          new ImagePoolHistoryAction({
+            kind: 'add',
+            targetEntry: entry,
+            context: { from: 'ImagePoolController.addToImagePool' },
+          })
+        );
       });
     }
   } else {
     const id = await createEntry(imagePaths);
     if (id) {
       const entry = pool.get(id)!;
-      projectHistoryController.addAction(new ImagePoolHistoryAction('add', entry, { from: 'ImagePoolController.addToImagePool' }));
+      projectHistoryController.addAction(
+        new ImagePoolHistoryAction({
+          kind: 'add',
+          targetEntry: entry,
+          context: { from: 'ImagePoolController.addToImagePool' },
+        })
+      );
     }
   }
 
@@ -148,18 +174,18 @@ export function showEntry(id: string) {
   if (entry && !entry.visible) {
     entry.visible = true;
     projectHistoryController.addAction(
-      new ImagePoolEntryPropsHistoryAction(
-        id,
-        {
+      new ImagePoolEntryPropsHistoryAction({
+        entryId: id,
+        oldEntryProps: {
           ...entry,
           visible: false,
         },
-        {
+        newEntryProps: {
           ...entry,
           visible: true,
         },
-        { from: 'ImagePoolController.removeEntry' }
-      )
+        context: { from: 'ImagePoolController.showEntry' },
+      })
     );
     eventBus.emit('imagePool:entryPropChanged', { id });
   }
@@ -170,18 +196,18 @@ export function hideEntry(id: string) {
   if (entry && entry.visible) {
     entry.visible = false;
     projectHistoryController.addAction(
-      new ImagePoolEntryPropsHistoryAction(
-        id,
-        {
+      new ImagePoolEntryPropsHistoryAction({
+        entryId: id,
+        oldEntryProps: {
           ...entry,
           visible: true,
         },
-        {
+        newEntryProps: {
           ...entry,
           visible: false,
         },
-        { from: 'ImagePoolController.removeEntry' }
-      )
+        context: { from: 'ImagePoolController.hideEntry' },
+      })
     );
     eventBus.emit('imagePool:entryPropChanged', { id });
   }

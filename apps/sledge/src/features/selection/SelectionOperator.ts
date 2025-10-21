@@ -137,7 +137,7 @@ export function deleteSelectedArea(layerId?: string): boolean {
   anvil.setPartialBuffer(selectionBoundBox, deletedArea);
   const diffs = anvil.flushDiffs();
   if (diffs) {
-    const acc = new AnvilLayerHistoryAction(lid, diffs, { tool: TOOL_CATEGORIES.RECT_SELECTION });
+    const acc = new AnvilLayerHistoryAction({ layerId: lid, patch: diffs, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
     projectHistoryController.addAction(acc);
   }
 

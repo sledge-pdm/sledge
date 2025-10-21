@@ -38,7 +38,7 @@ class LayerMergeRenderer {
     const oIdx = getLayerIndex(this.originLayer.id);
     if (tIdx < 0 || oIdx < 0) return;
 
-    const action = new LayerMergeHistoryAction(oIdx, tIdx, activeLayer().id);
+    const action = new LayerMergeHistoryAction({ originIndex: oIdx, targetIndex: tIdx, activeLayerId: activeLayer().id });
 
     // WebGL で2パス描画
     const out = this.createRenderer().readPixelsFlipped();

@@ -1,42 +1,35 @@
 import { rawToWebp, webpToRaw } from '@sledge/anvil';
-import { getLayerIndex, type Layer } from '~/features/layer';
+import { getLayerIndex } from '~/features/layer';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { BaseHistoryAction } from '../base';
+import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
+import { PackedLayerSnapshot } from './types';
 
-export interface LayerSnapshot {
-  layer: Layer;
-  image?: {
-    buffer: Uint8ClampedArray;
-    width: number;
-    height: number;
-  };
-}
-export interface PackedLayerSnapshot {
-  layer: Layer;
-  image?: {
-    webpBuffer: Uint8Array;
-    width: number;
-    height: number;
-  };
+export interface LayerMergeHistoryActionProps extends BaseHistoryActionProps {
+  originIndex: number;
+  targetIndex: number;
+  activeLayerId: string;
+  originPackedSnapshot?: PackedLayerSnapshot;
+  targetPackedSnapshot?: PackedLayerSnapshot;
 }
 
 export class LayerMergeHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_merge' as const;
 
+  originIndex: number;
+  targetIndex: number;
+  activeLayerId: string;
   originPackedSnapshot: PackedLayerSnapshot | undefined;
   targetPackedSnapshot: PackedLayerSnapshot | undefined;
 
-  constructor(
-    public readonly originIndex: number,
-    public readonly targetIndex: number,
-    public activeLayerId: string,
-    context?: any
-  ) {
-    super(context);
-    this.originPackedSnapshot = this.getSnapshot(this.originIndex);
-    this.targetPackedSnapshot = this.getSnapshot(this.targetIndex);
+  constructor(public readonly props: LayerMergeHistoryActionProps) {
+    super(props);
+    this.originIndex = props.originIndex;
+    this.targetIndex = props.targetIndex;
+    this.activeLayerId = props.activeLayerId;
+    this.originPackedSnapshot = props.originPackedSnapshot ?? this.getSnapshot(this.originIndex);
+    this.targetPackedSnapshot = props.targetPackedSnapshot ?? this.getSnapshot(this.targetIndex);
   }
 
   getSnapshot(index: number): PackedLayerSnapshot | undefined {
@@ -106,5 +99,20 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
 
   redo(): void {
     this.swapSnapshots();
+  }
+
+  serialize(): SerializedHistoryAction {
+    return {
+      type: this.type,
+      props: {
+        context: this.context,
+        label: this.label,
+        originIndex: this.originIndex,
+        targetIndex: this.targetIndex,
+        activeLayerId: this.activeLayerId,
+        originPackedSnapshot: this.originPackedSnapshot,
+        targetPackedSnapshot: this.targetPackedSnapshot,
+      } as LayerMergeHistoryActionProps,
+    };
   }
 }

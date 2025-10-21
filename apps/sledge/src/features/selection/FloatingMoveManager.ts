@@ -194,7 +194,13 @@ class FloatingMoveManager {
     if (orig) registerWholeChange(this.targetLayerId, new Uint8ClampedArray(orig.buffer));
     const patch = flushPatch(this.targetLayerId);
     if (patch) {
-      projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
+      projectHistoryController.addAction(
+        new AnvilLayerHistoryAction({
+          layerId: this.targetLayerId,
+          patch,
+          context: { tool: TOOL_CATEGORIES.MOVE },
+        })
+      );
     }
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();

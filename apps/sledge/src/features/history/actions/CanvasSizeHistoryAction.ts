@@ -6,24 +6,29 @@ import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { BaseHistoryAction } from '../base';
+import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 type LayerBufferSnapshot = { layerId: string; dotMag: number; webpBuffer: Uint8Array };
+
+export interface CanvasSizeHistoryActionProps extends BaseHistoryActionProps {
+  beforeSize: Size2D;
+  afterSize: Size2D;
+}
 
 // history action for canvas size changes including full buffer restoration per layer
 export class CanvasSizeHistoryAction extends BaseHistoryAction {
   readonly type = 'canvas_size' as const;
 
+  beforeSize: Size2D;
+  afterSize: Size2D;
   // length = number of layers
   private beforeSnapshots: LayerBufferSnapshot[] | undefined;
   private afterSnapshots?: LayerBufferSnapshot[] | undefined;
 
-  constructor(
-    public readonly beforeSize: Size2D,
-    public readonly afterSize: Size2D,
-    context?: any
-  ) {
-    super(context);
+  constructor(public readonly props: CanvasSizeHistoryActionProps) {
+    super(props);
+    this.beforeSize = props.beforeSize;
+    this.afterSize = props.afterSize;
   }
 
   createSnapshots() {
@@ -84,5 +89,19 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       const buffer = webpToRaw(snap.webpBuffer, size.width, size.height);
       anvil.replaceBuffer(new Uint8ClampedArray(buffer.buffer), size.width, size.height);
     }
+  }
+
+  serialize(): SerializedHistoryAction {
+    return {
+      type: this.type,
+      props: {
+        context: this.context,
+        label: this.label,
+        beforeSize: this.beforeSize,
+        afterSize: this.afterSize,
+        beforeSnapshots: this.beforeSnapshots,
+        afterSnapshots: this.afterSnapshots,
+      } as CanvasSizeHistoryActionProps,
+    };
   }
 }

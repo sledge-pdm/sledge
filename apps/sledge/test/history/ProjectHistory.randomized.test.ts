@@ -1,3 +1,4 @@
+import { rawToWebp } from '@sledge/anvil';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
 import {
@@ -7,7 +8,7 @@ import {
   ImagePoolHistoryAction,
   LayerListHistoryAction,
   LayerPropsHistoryAction,
-  LayerSnapshot,
+  PackedLayerSnapshot,
   ProjectHistoryController,
 } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
@@ -119,13 +120,13 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const targets = ['#000000', '#ff0000', '#00ff00', '#0000ff'] as const;
         const next = targets[Math.floor(rng() * targets.length)];
         const prev = currentColor();
-        const a = new ColorHistoryAction(
-          PaletteType.primary,
+        const a = new ColorHistoryAction({
+          palette: PaletteType.primary,
           // ColorHistoryAction expects RGBA tuples; we store via hex on controller
-          hexToRgbaTuple(prev),
-          hexToRgbaTuple(next),
-          { from: 'rnd' }
-        );
+          oldColor: hexToRgbaTuple(prev),
+          newColor: hexToRgbaTuple(next),
+          context: { from: 'rnd' },
+        });
         steps.push(() => {
           a.redo();
           hc.addAction(a);
@@ -140,7 +141,11 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
           width: Math.max(1, cur.width + dw),
           height: Math.max(1, cur.height + dh),
         };
-        const a = new CanvasSizeHistoryAction(cur, next, { from: 'rnd' });
+        const a = new CanvasSizeHistoryAction({
+          beforeSize: cur,
+          afterSize: next,
+          context: { from: 'rnd' },
+        });
         steps.push(() => {
           a.redo();
           hc.addAction(a);
@@ -152,7 +157,11 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const id = keys[Math.floor(rng() * keys.length)];
         const exists = !!getEntry(id);
         const kind = exists ? 'remove' : 'add';
-        const a = new ImagePoolHistoryAction(kind as 'add' | 'remove', entries[id], { from: 'rnd' });
+        const a = new ImagePoolHistoryAction({
+          kind: kind as 'add' | 'remove',
+          targetEntry: entries[id],
+          context: { from: 'rnd' },
+        });
         steps.push(() => {
           a.redo();
           hc.addAction(a);
@@ -164,7 +173,11 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const id = keys[Math.floor(rng() * keys.length)];
         const cur = getEntry(id);
         if (!cur) {
-          const add = new ImagePoolHistoryAction('add', entries[id], { from: 'rnd:ensure-entry' });
+          const add = new ImagePoolHistoryAction({
+            kind: 'add',
+            targetEntry: entries[id],
+            context: { from: 'rnd:ensure-entry' },
+          });
           steps.push(() => {
             add.redo();
             hc.addAction(add);
@@ -187,7 +200,12 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             opacity: Math.max(0, Math.min(1, cur.opacity + dop)),
             visible: rng() < 0.3 ? !cur.visible : cur.visible,
           };
-          const a = new ImagePoolEntryPropsHistoryAction(id, oldProps, newProps, { from: 'rnd' });
+          const a = new ImagePoolEntryPropsHistoryAction({
+            entryId: id,
+            oldEntryProps: oldProps,
+            newEntryProps: newProps,
+            context: { from: 'rnd' },
+          });
           steps.push(() => {
             a.redo();
             hc.addAction(a);
@@ -211,15 +229,19 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             mode: BlendMode.normal,
             dotMagnification: 1,
           };
-          const snapshot: LayerSnapshot = {
+          const snapshot: PackedLayerSnapshot = {
             layer,
             image: {
-              buffer: new Uint8ClampedArray(canvasStore.canvas.width * canvasStore.canvas.height * 4),
+              webpBuffer: rawToWebp(
+                new Uint8Array(canvasStore.canvas.width * canvasStore.canvas.height * 4),
+                canvasStore.canvas.width,
+                canvasStore.canvas.height
+              ),
               width: canvasStore.canvas.width,
               height: canvasStore.canvas.height,
             },
           };
-          const a = new LayerListHistoryAction('add', idx, snapshot, undefined, undefined, { from: 'rnd' });
+          const a = new LayerListHistoryAction({ kind: 'add', index: idx, packedSnapshot: snapshot, context: { from: 'rnd' } });
           steps.push(() => {
             a.redo();
             hc.addAction(a);
@@ -232,16 +254,16 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             const anvil = getAnvilOf(layer.id);
             const image = anvil
               ? {
-                  buffer: anvil?.getImageData(),
+                  webpBuffer: rawToWebp(new Uint8Array(anvil?.getImageData().buffer), anvil.getWidth(), anvil.getHeight()),
                   width: anvil.getWidth(),
                   height: anvil.getHeight(),
                 }
               : undefined;
-            const snapshot: LayerSnapshot = {
+            const snapshot: PackedLayerSnapshot = {
               layer,
               image,
             };
-            const a = new LayerListHistoryAction('delete', idx, snapshot, undefined, undefined, { from: 'rnd' });
+            const a = new LayerListHistoryAction({ kind: 'delete', index: idx, packedSnapshot: snapshot, context: { from: 'rnd' } });
             steps.push(() => {
               a.redo();
               hc.addAction(a);
@@ -257,7 +279,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             if (i2 === i1) i2 = (i2 + 1) % before.length;
             const after = [...before];
             [after[i1], after[i2]] = [after[i2], after[i1]];
-            const a = new LayerListHistoryAction('reorder', -1, undefined, before, after, { from: 'rnd' });
+            const a = new LayerListHistoryAction({ kind: 'reorder', index: -1, beforeOrder: before, afterOrder: after, context: { from: 'rnd' } });
             steps.push(() => {
               a.redo();
               hc.addAction(a);
@@ -284,7 +306,12 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             mode: nextMode,
             dotMagnification: layer.dotMagnification,
           };
-          const a = new LayerPropsHistoryAction(layer.id, oldProps, newProps, { from: 'rnd' });
+          const a = new LayerPropsHistoryAction({
+            layerId: layer.id,
+            oldLayerProps: oldProps,
+            newLayerProps: newProps,
+            context: { from: 'rnd' },
+          });
           steps.push(() => {
             a.redo();
             hc.addAction(a);
@@ -309,7 +336,11 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             }
             const patch = flushPatch(layer.id);
             if (patch) {
-              const a = new AnvilLayerHistoryAction(layer.id, patch, { from: 'rnd' });
+              const a = new AnvilLayerHistoryAction({
+                layerId: layer.id,
+                patch,
+                context: { from: 'rnd' },
+              });
               steps.push(() => {
                 a.redo();
                 hc.addAction(a);

@@ -38,7 +38,7 @@ describe('LayerPropsHistoryAction', () => {
       dotMagnification: 2,
     };
 
-    const action = new LayerPropsHistoryAction(layerId, oldProps, newProps, 'test');
+    const action = new LayerPropsHistoryAction({ layerId, oldLayerProps: oldProps, newLayerProps: newProps, context: 'test' });
 
     action.redo();
     // name & flags updated

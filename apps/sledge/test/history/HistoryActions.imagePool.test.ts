@@ -15,13 +15,13 @@ describe('ImagePoolHistoryAction', () => {
       visible: true,
     };
     insertEntry(entry);
-    const removeAction = new ImagePoolHistoryAction('remove', entry, { from: 'test' });
+    const removeAction = new ImagePoolHistoryAction({ kind: 'remove', targetEntry: entry, context: { from: 'test' } });
     removeAction.redo();
     expect(getEntry('fixed-id')).toBeUndefined();
     removeAction.undo();
     expect(getEntry('fixed-id')).toBeDefined();
 
-    const addAction = new ImagePoolHistoryAction('add', entry, { from: 'test' });
+    const addAction = new ImagePoolHistoryAction({ kind: 'add', targetEntry: entry, context: { from: 'test' } });
     addAction.undo();
     expect(getEntry('fixed-id')).toBeUndefined();
     addAction.redo();

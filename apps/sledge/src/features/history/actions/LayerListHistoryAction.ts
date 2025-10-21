@@ -4,51 +4,33 @@ import { removeLayer } from '~/features/layer';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { BaseHistoryAction } from '../base';
+import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
 
-export interface LayerSnapshot {
-  layer: Layer;
-  image?: {
-    buffer: Uint8ClampedArray;
-    width: number;
-    height: number;
-  };
-}
-export interface PackedLayerSnapshot {
-  layer: Layer;
-  image?: {
-    webpBuffer: Uint8Array;
-    width: number;
-    height: number;
-  };
+export interface LayerListHistoryActionProps extends BaseHistoryActionProps {
+  kind: 'add' | 'delete' | 'reorder';
+  index: number;
+  packedSnapshot?: PackedLayerSnapshot;
+  beforeOrder?: string[];
+  afterOrder?: string[];
 }
 
 export class LayerListHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_list' as const;
-  readonly packedSnapshot: PackedLayerSnapshot | undefined;
 
-  constructor(
-    public readonly kind: 'add' | 'delete' | 'reorder',
-    public readonly index: number,
-    layerSnapshot?: LayerSnapshot,
-    public readonly beforeOrder?: string[],
-    public readonly afterOrder?: string[],
-    context?: any
-  ) {
-    super(context);
+  kind: 'add' | 'delete' | 'reorder';
+  index: number;
+  packedSnapshot: PackedLayerSnapshot | undefined;
+  beforeOrder?: string[];
+  afterOrder?: string[];
 
-    if (layerSnapshot?.image) {
-      const image = layerSnapshot.image;
-      const webpBuffer = rawToWebp(new Uint8Array(image.buffer.buffer), image.width, image.height);
-      this.packedSnapshot = {
-        layer: layerSnapshot.layer,
-        image: {
-          webpBuffer,
-          width: image.width,
-          height: image.height,
-        },
-      };
-    }
+  constructor(public readonly props: LayerListHistoryActionProps) {
+    super(props);
+    this.kind = props.kind;
+    this.index = props.index;
+    this.beforeOrder = props.beforeOrder;
+    this.afterOrder = props.afterOrder;
+    this.packedSnapshot = props.packedSnapshot;
   }
 
   undo(): void {
@@ -92,6 +74,21 @@ export class LayerListHistoryAction extends BaseHistoryAction {
       }
     }
   }
+
+  serialize(): SerializedHistoryAction {
+    return {
+      type: this.type,
+      props: {
+        context: this.context,
+        label: this.label,
+        kind: this.kind,
+        index: this.index,
+        packedSnapshot: this.packedSnapshot,
+        beforeOrder: this.beforeOrder,
+        afterOrder: this.afterOrder,
+      } as LayerListHistoryActionProps,
+    };
+  }
 }
 
 function insertAt(index: number, snapshot: PackedLayerSnapshot) {
@@ -120,4 +117,21 @@ function setOrder(order: string[]) {
   }
   setLayerListStore('layers', next);
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'Layer order changed' });
+}
+
+// Helper function to convert LayerSnapshot to PackedLayerSnapshot
+export function packLayerSnapshot(layerSnapshot: LayerSnapshot): PackedLayerSnapshot {
+  if (layerSnapshot.image) {
+    const image = layerSnapshot.image;
+    const webpBuffer = rawToWebp(new Uint8Array(image.buffer.buffer), image.width, image.height);
+    return {
+      layer: layerSnapshot.layer,
+      image: {
+        webpBuffer,
+        width: image.width,
+        height: image.height,
+      },
+    };
+  }
+  return { layer: layerSnapshot.layer };
 }

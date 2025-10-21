@@ -1,3 +1,4 @@
+import { BaseHistoryAction, SerializedHistoryAction } from '~/features/history';
 import { ImagePoolEntry } from '~/features/image_pool';
 import { CanvasStore } from '~/stores/project/CanvasStore';
 import { ImagePoolStore } from '~/stores/project/ImagePoolStore';
@@ -45,6 +46,10 @@ export interface ProjectV1 extends ProjectBase {
     store: ImagePoolStore;
     entries: ImagePoolEntry[];
   };
+  history: {
+    undoStack: SerializedHistoryAction[];
+    redoStack: SerializedHistoryAction[];
+  }
   snapshots: {
     store: SnapshotStore;
   };

@@ -18,8 +18,13 @@ const ColorPicker: Component<{ width: number }> = (props) => {
   const handlePointerUp = () => {
     const oldColor = colorOnPointerDown();
     if (oldColor) {
-      const action = new ColorHistoryAction(colorStore.currentPalette, oldColor, hexToRGBA(colorPicker.color.hexString), {
-        from: 'ColorController.setCurrentColor',
+      const action = new ColorHistoryAction({
+        palette: colorStore.currentPalette,
+        oldColor,
+        newColor: hexToRGBA(colorPicker.color.hexString),
+        context: {
+          from: 'ColorController.setCurrentColor',
+        },
       });
       projectHistoryController.addAction(action);
     }

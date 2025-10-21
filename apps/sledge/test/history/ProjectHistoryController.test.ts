@@ -1,12 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BaseHistoryAction, ProjectHistoryController } from '~/features/history';
+import { BaseHistoryAction, BaseHistoryActionProps, ProjectHistoryController, SerializedHistoryAction } from '~/features/history';
+
+interface TestActionProps extends BaseHistoryActionProps {
+  label: string;
+}
 
 class TestAction extends BaseHistoryAction {
   readonly type = 'unknown' as const;
   public didUndo = false;
   public didRedo = false;
-  constructor(label?: string) {
-    super({ from: 'test' }, label);
+  constructor(props: TestActionProps) {
+    super(props);
   }
   undo(): void {
     this.didUndo = true;
@@ -14,13 +18,19 @@ class TestAction extends BaseHistoryAction {
   redo(): void {
     this.didRedo = true;
   }
+  serialize(): SerializedHistoryAction {
+    return {
+      type: this.type,
+      props: this.props,
+    };
+  }
 }
 
 describe('ProjectHistoryController', () => {
   it('push/undo/redo updates stacks and calls action methods', () => {
     const hc = new ProjectHistoryController();
-    const a1 = new TestAction('A1');
-    const a2 = new TestAction('A2');
+    const a1 = new TestAction({ label: 'A1' });
+    const a2 = new TestAction({ label: 'A2' });
 
     expect(hc.canUndo()).toBe(false);
     expect(hc.canRedo()).toBe(false);
@@ -45,7 +55,7 @@ describe('ProjectHistoryController', () => {
 
   it('onChange emits state with lastLabel', () => {
     const hc = new ProjectHistoryController();
-    const a1 = new TestAction('Label1');
+    const a1 = new TestAction({ label: 'Label1' });
     const listener = vi.fn();
     const off = hc.onChange(listener);
 

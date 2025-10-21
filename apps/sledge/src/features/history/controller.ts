@@ -1,17 +1,62 @@
 import { globalConfig } from '~/stores/GlobalStores';
-import { BaseHistoryAction } from './base';
+import { BaseHistoryAction, SerializedHistoryAction } from './base';
+import { AnvilLayerHistoryAction, CanvasSizeHistoryAction, ColorHistoryAction, ImagePoolEntryPropsHistoryAction, ImagePoolHistoryAction, LayerListHistoryAction, LayerMergeHistoryAction, LayerPropsHistoryAction } from '~/features/history/actions';
 
 export class ProjectHistoryController {
   private undoStack: BaseHistoryAction[] = [];
   private redoStack: BaseHistoryAction[] = [];
   private listeners: Set<(state: { canUndo: boolean; canRedo: boolean; lastLabel?: string }) => void> = new Set();
 
-  // Provide read-only snapshots for UI (do not mutate returned arrays!)
   getUndoStack(): BaseHistoryAction[] {
     return this.undoStack;
   }
   getRedoStack(): BaseHistoryAction[] {
     return this.redoStack;
+  }
+
+  getSerialized(): {
+    undoStack: SerializedHistoryAction[];
+    redoStack: SerializedHistoryAction[];
+  } {
+    return {
+      undoStack: this.undoStack.map((action) => action.serialize()),
+      redoStack: this.redoStack.map((action) => action.serialize()),
+    };
+  }
+
+  setSerialized(undoStack: SerializedHistoryAction[], redoStack: SerializedHistoryAction[]): void {
+    this.undoStack = undoStack.map((serialized) => {
+      const action = this.deserialize(serialized);
+      if (!action) throw new Error('Failed to deserialize history action');
+      return action;
+    });
+    this.redoStack = redoStack.map((serialized) => {
+      const action = this.deserialize(serialized);
+      if (!action) throw new Error('Failed to deserialize history action');
+      return action;
+    });
+  }
+
+  deserialize(serialized: SerializedHistoryAction): BaseHistoryAction | undefined {
+    switch (serialized.type) {
+      case 'canvas_size':
+        return new CanvasSizeHistoryAction(serialized.props as any);
+      case 'color':
+        return new ColorHistoryAction(serialized.props as any);
+      case 'image_pool':
+        return new ImagePoolHistoryAction(serialized.props as any);
+      case 'image_pool_entry_props':
+        return new ImagePoolEntryPropsHistoryAction(serialized.props as any);
+      case 'layer_buffer':
+        return new AnvilLayerHistoryAction(serialized.props as any);
+      case 'layer_list':
+        return new LayerListHistoryAction(serialized.props as any);
+      case 'layer_merge':
+        return new LayerMergeHistoryAction(serialized.props as any);
+      case 'layer_props':
+        return new LayerPropsHistoryAction(serialized.props as any);
+    }
+    return undefined;
   }
 
   addAction(action: BaseHistoryAction): void {

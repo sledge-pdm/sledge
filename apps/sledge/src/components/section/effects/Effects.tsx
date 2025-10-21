@@ -3,10 +3,12 @@ import { Dropdown, DropdownOption } from '@sledge/ui';
 import { Accessor, Component, createMemo, createSignal } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
 import BrightnessContrast from '~/components/section/effects/effects/BrightnessContrast';
+import Dithering from '~/components/section/effects/effects/Dithering';
 import DustRemoval from '~/components/section/effects/effects/DustRemoval';
 import GaussianBlur from '~/components/section/effects/effects/GaussianBlur';
 import GrayScale from '~/components/section/effects/effects/GrayScale';
 import Invert from '~/components/section/effects/effects/Invert';
+import Posterize from '~/components/section/effects/effects/Posterize';
 import { activeLayer, findLayerById } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
 
@@ -78,10 +80,12 @@ const Effects: Component = () => {
       </div>
 
       <BrightnessContrast selectedLayerId={selectedLayerId} />
+      <Dithering selectedLayerId={selectedLayerId} />
       <DustRemoval selectedLayerId={selectedLayerId} />
       <GrayScale selectedLayerId={selectedLayerId} />
       <Invert selectedLayerId={selectedLayerId} />
       <GaussianBlur selectedLayerId={selectedLayerId} />
+      <Posterize selectedLayerId={selectedLayerId} />
     </>
   );
 };

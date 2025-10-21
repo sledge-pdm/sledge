@@ -34,7 +34,7 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
   if (!layer) throw new Error('Layer not found');
   const layerW = getWidth(targetLayerId)!;
   const layerH = getHeight(targetLayerId)!;
-  
+
   const buf = getBufferPointer(targetLayerId);
   if (!buf) return;
 

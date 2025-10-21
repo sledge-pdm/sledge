@@ -1,7 +1,7 @@
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
+import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
 import { loadLocalImage } from '~/utils/DataUtils';
 
 export interface ImageTransferParams {
@@ -15,7 +15,7 @@ export interface ImageTransferParams {
 
 export async function transferToLayer({ entry, targetLayerId }: ImageTransferParams): Promise<void> {
   const bitmap = await loadLocalImage(entry.imagePath);
-  
+
   const scaleX = entry.transform.scaleX ?? 1;
   const scaleY = entry.transform.scaleY ?? 1;
   const w = Math.max(1, Math.round(bitmap.width * scaleX));
@@ -101,7 +101,6 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
     );
   }
 }
-
 
 /**
  * import { projectHistoryController } from '~/features/history';

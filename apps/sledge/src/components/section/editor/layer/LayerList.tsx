@@ -15,6 +15,7 @@ const layerListSectionContent = css`
   padding-left: 2px;
   padding-right: 4px;
   padding-top: 2px;
+  margin-top: 8px;
 `;
 
 const layerList = css`

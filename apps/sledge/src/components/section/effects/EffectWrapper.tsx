@@ -9,6 +9,7 @@ const applyButtonContainer = css`
   flex-direction: column;
   width: 100%;
   align-items: end;
+  margin-top: 8px;
 `;
 
 interface EffectWrapperProps {
@@ -21,7 +22,7 @@ interface EffectWrapperProps {
 
 export const EffectWrapper: Component<EffectWrapperProps> = (props) => {
   return (
-    <SectionItem title={props.title}>
+    <SectionItem title={props.title} expandable defaultExpanded>
       <div class={sectionContent} style={{ gap: props.gap ?? '4px' }}>
         {props.children}
 

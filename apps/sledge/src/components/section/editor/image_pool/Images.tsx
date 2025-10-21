@@ -10,6 +10,7 @@ import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 
 const imagesSectionsContent = css`
+  margin-top: 8px;
   padding-left: 8px;
 `;
 

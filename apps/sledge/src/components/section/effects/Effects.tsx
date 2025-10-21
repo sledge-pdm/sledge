@@ -14,6 +14,7 @@ const effectsContainer = css`
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow: hidden;
   height: auto;
   gap: 8px;
 `;
@@ -24,15 +25,18 @@ const previewContainer = css`
   align-self: center;
   width: fit-content;
   height: fit-content;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+`;
+
+const applyToText = css`
+  white-space: nowrap;
 `;
 
 const layerSelectContainer = css`
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  margin-left: 16px;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 12px;
   margin-bottom: 16px;
 `;
 
@@ -69,16 +73,16 @@ const Effects: Component = () => {
           />
         </div>
         <div class={layerSelectContainer}>
-          <p>apply to</p>
-          <Dropdown options={layersOption()} value={selectedLayerId()} onChange={(v) => setSelectedLayerId(v)} />
+          <p class={applyToText}>apply to</p>
+          <Dropdown options={layersOption()} value={selectedLayerId()} onChange={(v) => setSelectedLayerId(v)} fullWidth={false} />
         </div>
       </div>
 
-      <Invert selectedLayerId={selectedLayerId} />
-      <GrayScale selectedLayerId={selectedLayerId} />
-      <GaussianBlur selectedLayerId={selectedLayerId} />
       <BrightnessContrast selectedLayerId={selectedLayerId} />
       <DustRemoval selectedLayerId={selectedLayerId} />
+      <GrayScale selectedLayerId={selectedLayerId} />
+      <Invert selectedLayerId={selectedLayerId} />
+      <GaussianBlur selectedLayerId={selectedLayerId} />
     </>
   );
 };

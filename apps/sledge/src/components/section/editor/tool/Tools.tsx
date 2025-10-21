@@ -11,6 +11,7 @@ import { flexRow } from '~/styles/styles';
 import ToolItem from './ToolItem';
 
 const toolsSectionContent = css`
+  margin-top: 8px;
   padding-left: 8px;
 `;
 

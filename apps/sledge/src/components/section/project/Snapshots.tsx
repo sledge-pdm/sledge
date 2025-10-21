@@ -14,6 +14,7 @@ import { useTimeAgoText } from '~/utils/TimeUtils';
 import { sectionContent } from '../SectionStyles';
 
 const snapshotSectionContent = css`
+  margin-top: 8px;
   gap: 8px;
 `;
 const settingsContainer = css`

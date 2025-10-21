@@ -11,6 +11,7 @@ const sectionContent = css`
 
 interface Props {
   title?: string;
+  expandable?: boolean;
   defaultExpanded?: boolean;
   subHeaderIcons?: SubHeaderIcon[];
   children: JSX.Element;
@@ -20,7 +21,7 @@ const SectionItem: Component<Props> = (props) => {
   const [expanded, setExpanded] = createSignal(props.defaultExpanded ?? true);
   return (
     <div class={sectionRoot}>
-      <SectionSubHeader defaultExpanded={expanded()} onExpandChanged={setExpanded} icons={props.subHeaderIcons}>
+      <SectionSubHeader expandable={props.expandable} defaultExpanded={expanded()} onExpandChanged={setExpanded} icons={props.subHeaderIcons}>
         {props.title}
       </SectionSubHeader>
       <Show when={expanded()}>

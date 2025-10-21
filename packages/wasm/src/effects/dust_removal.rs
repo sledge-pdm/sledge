@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use std::collections::VecDeque;
+use wasm_bindgen::prelude::*;
 
 use crate::console_log;
 
@@ -25,12 +25,7 @@ impl DustRemovalOption {
 
 /// Remove small isolated pixel groups (dust removal)
 #[wasm_bindgen]
-pub fn dust_removal(
-    pixels: &mut [u8],
-    width: u32,
-    height: u32,
-    options: &DustRemovalOption,
-) {
+pub fn dust_removal(pixels: &mut [u8], width: u32, height: u32, options: &DustRemovalOption) {
     console_log!(
         "Applying dust removal: max_size={}, alpha_threshold={}",
         options.max_size,
@@ -44,31 +39,36 @@ pub fn dust_removal(
     let w = width as i32;
     let h = height as i32;
     let pixel_count = (width * height) as usize;
-    
+
     // Track processed pixels to avoid duplicate work
     let mut processed = vec![false; pixel_count];
-    
+
     // 8-directional neighbors
     let directions = [
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1),           (0, 1),
-        (1, -1),  (1, 0),  (1, 1),
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
     ];
 
     for y in 0..h {
         for x in 0..w {
             let index = (y * w + x) as usize;
-            
+
             // Skip if already processed or pixel is transparent
             if processed[index] {
                 continue;
             }
-            
+
             let pixel_index = index * 4;
             if pixel_index + 3 >= pixels.len() {
                 continue;
             }
-            
+
             let alpha = pixels[pixel_index + 3];
             if alpha <= options.alpha_threshold {
                 processed[index] = true;
@@ -119,10 +119,10 @@ pub fn dust_removal(
                     if remove_index + 3 < pixels.len() {
                         // Make pixel transparent
                         pixels[remove_index + 3] = 0; // Set alpha to 0
-                        // Optionally clear RGB channels too
-                        // pixels[remove_index] = 0;     // R
-                        // pixels[remove_index + 1] = 0; // G  
-                        // pixels[remove_index + 2] = 0; // B
+                                                      // Optionally clear RGB channels too
+                                                      // pixels[remove_index] = 0;     // R
+                                                      // pixels[remove_index + 1] = 0; // G
+                                                      // pixels[remove_index + 2] = 0; // B
                     }
                 }
             }

@@ -197,7 +197,7 @@ const ExportContent: Component = () => {
   });
 
   return (
-    <div class={sectionContent} style={{ gap: '12px', 'box-sizing': 'border-box' }}>
+    <div class={sectionContent} style={{ gap: '12px', 'box-sizing': 'border-box', 'margin-top': '8px' }}>
       <div class={flexCol}>
         <p class={sectionSubCaption}>Recent folders.</p>
         <div class={sectionSubContent}>

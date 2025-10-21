@@ -140,7 +140,7 @@ pub fn fill_lasso_selection_point_in_polygon(
     for y in start_y..end_y {
         for x in start_x..end_x {
             if point_in_polygon(x as f32 + 0.5, y as f32 + 0.5, &polygon) {
-                mask[y * width + x] = 255;
+                mask[y * width + x] = 1;
             }
         }
     }
@@ -233,7 +233,7 @@ fn fill_scanline_mask(
 
         for x in left..right {
             if x < width {
-                mask[y * width + x] = 255;
+                mask[y * width + x] = 1;
             }
         }
     }
@@ -259,7 +259,7 @@ fn fill_scanline_mask_nonzero(
 
             for fill_x in fill_start..fill_end {
                 if fill_x < width {
-                    mask[y * width + fill_x] = 255;
+                    mask[y * width + fill_x] = 1;
                 }
             }
         }
@@ -275,7 +275,7 @@ fn fill_scanline_mask_nonzero(
 
         for fill_x in fill_start..fill_end {
             if fill_x < width {
-                mask[y * width + fill_x] = 255;
+                mask[y * width + fill_x] = 1;
             }
         }
     }
@@ -302,7 +302,7 @@ fn fill_scanline_mask_with_limit<F>(
 
         for x in left..right {
             if x < width && is_allowed(x, y) {
-                mask[y * width + x] = 255;
+                mask[y * width + x] = 1;
             }
         }
     }

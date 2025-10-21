@@ -10,6 +10,9 @@ import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { pathToFileLocation } from '~/utils/FileUtils';
 
 const imageElement = css`
+  position: absolute;
+  top: 0;
+  left: 0;
   margin: 0;
   padding: 0;
   pointer-events: none;

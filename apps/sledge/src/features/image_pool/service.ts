@@ -1,6 +1,5 @@
 import { transferToLayer } from '~/appliers/ImageTransferApplier';
 import { projectHistoryController } from '~/features/history';
-import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
@@ -28,29 +27,22 @@ export function insertEntry(entry: ImagePoolEntry, noDiff?: boolean) {
   }
 }
 
-export function setEntry(id: string, entry: ImagePoolEntry) {
-  setImagePoolStore('entries', [...imagePoolStore.entries.filter((e) => e.id !== entry.id), entry]);
-}
-
 export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>, noDiff?: boolean) {
-  let index = imagePoolStore.entries.findIndex((e) => e.id === id);
-  if (index === -1) return;
+  // const oldEntries = imagePoolStore.entries.slice();
+  let oldEntryIndex = imagePoolStore.entries.findIndex((e) => e.id === id);
+  if (oldEntryIndex < 0) return;
 
-  const old = { ...imagePoolStore.entries[index] };
-  const updated = { ...old, ...patch } as ImagePoolEntry;
+  setImagePoolStore('entries', oldEntryIndex, patch);
 
-  setImagePoolStore('entries', index, updated);
-
-  if (!noDiff) {
-    projectHistoryController.addAction(
-      new ImagePoolEntryPropsHistoryAction({
-        entryId: id,
-        oldEntryProps: old,
-        newEntryProps: updated,
-        context: { from: 'ImagePoolController.updateEntryPartial' },
-      })
-    );
-  }
+  // if (!noDiff) {
+  //   projectHistoryController.addAction(
+  //     new ImagePoolHistoryAction({
+  //       oldEntries,
+  //       newEntries: imagePoolStore.entries.slice(),
+  //       kind: 'edit',
+  //     })
+  //   );
+  // }
 }
 
 export function removeEntry(id: string, noDiff?: boolean) {
@@ -99,7 +91,7 @@ export async function addToImagePool(imagePaths: string | string[]) {
 }
 
 export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
-  const active = activeLayer(); // いま選択中のレイヤー
+  const active = activeLayer();
   if (!active) return;
 
   try {
@@ -149,41 +141,17 @@ export function selectEntry(id?: string) {
 export function showEntry(id: string) {
   const entry = getEntry(id);
   if (entry && !entry.visible) {
-    entry.visible = true;
-    projectHistoryController.addAction(
-      new ImagePoolEntryPropsHistoryAction({
-        entryId: id,
-        oldEntryProps: {
-          ...entry,
-          visible: false,
-        },
-        newEntryProps: {
-          ...entry,
-          visible: true,
-        },
-        context: { from: 'ImagePoolController.showEntry' },
-      })
-    );
+    updateEntryPartial(id, {
+      visible: true,
+    });
   }
 }
 
 export function hideEntry(id: string) {
   const entry = getEntry(id);
   if (entry && entry.visible) {
-    entry.visible = false;
-    projectHistoryController.addAction(
-      new ImagePoolEntryPropsHistoryAction({
-        entryId: id,
-        oldEntryProps: {
-          ...entry,
-          visible: true,
-        },
-        newEntryProps: {
-          ...entry,
-          visible: false,
-        },
-        context: { from: 'ImagePoolController.hideEntry' },
-      })
-    );
+    updateEntryPartial(id, {
+      visible: false,
+    });
   }
 }

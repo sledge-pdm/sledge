@@ -24,25 +24,11 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
   }
 
   undo(): void {
-    switch (this.kind) {
-      case 'add':
-        setImagePoolStore('entries', this.oldEntries);
-        break;
-      case 'remove':
-        setImagePoolStore('entries', this.oldEntries);
-        break;
-    }
+    setImagePoolStore('entries', [...this.oldEntries]);
   }
 
   redo(): void {
-    switch (this.kind) {
-      case 'add':
-        setImagePoolStore('entries', this.newEntries);
-        break;
-      case 'remove':
-        setImagePoolStore('entries', this.newEntries);
-        break;
-    }
+    setImagePoolStore('entries', [...this.newEntries]);
   }
 
   serialize(): SerializedHistoryAction {

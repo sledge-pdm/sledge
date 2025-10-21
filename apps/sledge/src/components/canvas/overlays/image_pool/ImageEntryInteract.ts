@@ -67,7 +67,6 @@ class ImageEntryInteract {
     if (this.mode === 'drag') {
       const nx = this.startX + dx;
       const ny = this.startY + dy;
-      console.debug('[ImagePool] drag delta', { id: entry.id, dx, dy, nx, ny, zoom });
       const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
       if (index < 0) return;
       setImagePoolStore('entries', index, 'transform', 'x', nx);
@@ -195,20 +194,6 @@ class ImageEntryInteract {
           break;
       }
 
-      console.debug('[ImagePool] resize delta', {
-        id: entry.id,
-        dx,
-        dy,
-        scaleX: nextScaleX,
-        scaleY: nextScaleY,
-        handle: this.resizePos,
-        keepAspect,
-        pivot,
-        newX,
-        newY,
-        zoom,
-      });
-
       const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
       if (index < 0) return;
       setImagePoolStore('entries', index, 'transform', 'x', newX);
@@ -226,7 +211,6 @@ class ImageEntryInteract {
     try {
       this.svgRoot.releasePointerCapture(e.pointerId);
     } catch {}
-    console.debug('[ImagePool] pointer end');
 
     const entry = getEntry(this.entryId);
     if (entry) updateEntryPartial(this.entryId, entry);

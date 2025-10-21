@@ -9,7 +9,6 @@ export {
   insertEntry,
   removeEntry,
   selectEntry,
-  setEntry,
   showEntry,
   transferToCurrentLayer,
   updateEntryPartial,

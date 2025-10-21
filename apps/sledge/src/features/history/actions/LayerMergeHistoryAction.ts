@@ -38,7 +38,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     const anvil = getAnvilOf(layer.id);
     if (!anvil) return;
 
-    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight());
+    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight());
     return {
       layer: { ...layer },
       image: {

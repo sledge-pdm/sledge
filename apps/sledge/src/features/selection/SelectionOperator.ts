@@ -136,7 +136,7 @@ export function deleteSelectedArea(layerId?: string): boolean {
 
   const canvasWidth = anvil.getWidth();
 
-  const buffer = anvil.getBufferData();
+  const buffer = anvil.getBufferPointer();
   for (let oy = 0; oy < selectionBoundBox.height; oy++) {
     for (let ox = 0; ox < selectionBoundBox.width; ox++) {
       const x = selectionBoundBox.x + ox;

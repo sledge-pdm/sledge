@@ -23,7 +23,7 @@ describe('AnvilLayerHistoryAction', () => {
 
   it('undo/redo whole buffer change restores data', () => {
     const anvil = getAnvilOf(layerId)!;
-    const before = anvil.getImageData();
+    const before = anvil.getBufferCopy();
     // simulate effect applying: fill all with color
     const originalCopy = before.slice();
     const after = before.slice();
@@ -40,17 +40,17 @@ describe('AnvilLayerHistoryAction', () => {
 
     // apply redo (already applied logically, but test revert path)
     action.undo();
-    const reverted = anvil.getImageData();
+    const reverted = anvil.getBufferCopy();
     expect(reverted[0]).toBe(originalCopy[0]);
 
     action.redo();
-    const reApplied = anvil.getImageData();
+    const reApplied = anvil.getBufferCopy();
     expect(reApplied[0]).toBe(128);
   });
 
   it('pixel patch writes individual pixels and can be undone', () => {
     const anvil = getAnvilOf(layerId)!;
-    const before = anvil.getImageData();
+    const before = anvil.getBufferCopy();
     const beforeCopy = before.slice();
     setPixel(layerId, 1, 1, [255, 0, 0, 255]);
     setPixel(layerId, 2, 1, [0, 255, 0, 255]);

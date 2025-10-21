@@ -10,7 +10,7 @@ import { packr } from '~/utils/msgpackr';
 export function getLayerBuffers(): Map<string, Uint8ClampedArray> {
   const map = new Map<string, Uint8ClampedArray>();
   allLayers().forEach((layer) => {
-    map.set(layer.id, getAnvilOf(layer.id)!.getImageData());
+    map.set(layer.id, getAnvilOf(layer.id)!.getBufferCopy());
   });
   return map;
 }

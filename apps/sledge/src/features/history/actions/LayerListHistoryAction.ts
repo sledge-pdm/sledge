@@ -141,7 +141,7 @@ export function getPackedLayerSnapshot(layerId: string): PackedLayerSnapshot | u
   const anvil = getAnvilOf(layerId);
   if (!layer || !anvil) return;
 
-  const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight());
+  const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight());
   return {
     layer,
     image: {

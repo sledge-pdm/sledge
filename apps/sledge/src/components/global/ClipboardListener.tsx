@@ -102,7 +102,7 @@ const ClipboardListener: Component = () => {
 
       const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
       const selectionBuffer = slice_patch_rgba(
-        new Uint8Array(activeAnvil.getImageData().buffer),
+        new Uint8Array(activeAnvil.getBufferCopy().buffer),
         width,
         height,
         new Uint8Array(trimmedMask),
@@ -130,7 +130,7 @@ const ClipboardListener: Component = () => {
       return 'selection';
     } else {
       // Layer copy
-      const buffer = new Uint8Array(activeAnvil.getBufferData());
+      const buffer = new Uint8Array(activeAnvil.getBufferPointer());
       const width = activeAnvil.getWidth();
       const height = activeAnvil.getHeight();
 

@@ -17,8 +17,8 @@ const EFFECTS = {
 export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, options?: any) {
   const anvil = getAnvilOf(layerId);
   if (anvil) {
-    registerWholeChange(layerId, anvil.getImageData());
-    EFFECTS[effect](new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight(), options);
+    registerWholeChange(layerId, anvil.getBufferPointer());
+    EFFECTS[effect](new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight(), options);
 
     const patch = flushPatch(layerId);
     if (patch) {

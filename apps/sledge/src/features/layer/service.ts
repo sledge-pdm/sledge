@@ -7,7 +7,7 @@ import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getPackedLayerSnapshot, LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
+import { flushPatch, getBufferCopy, getBufferPointer, getHeight, getPixel, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -93,13 +93,19 @@ export function duplicateLayer(layerId: string) {
 }
 
 export function clearLayer(layerId: string) {
-  const before = getBufferCopy(layerId);
   const w = getWidth(layerId);
   const h = getHeight(layerId);
-  if (!before || w == null || h == null) return;
-  const after = new Uint8ClampedArray(w * h * 4);
-  setBuffer(layerId, after);
-  registerWholeChange(layerId, before);
+  if (w == null || h == null) return;
+  
+  // Get the pointer to current buffer for registerWholeChange (before modification)
+  const buffer = getBufferPointer(layerId);
+  if (!buffer) return;
+  
+  registerWholeChange(layerId, buffer); // Register the original buffer before clearing
+  
+  // Clear the buffer directly (no need for setBuffer since we're modifying the pointer)
+  buffer.fill(0);
+  
   const patch = flushPatch(layerId);
   if (patch)
     projectHistoryController.addAction(

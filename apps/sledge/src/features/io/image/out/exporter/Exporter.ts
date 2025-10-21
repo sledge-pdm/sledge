@@ -1,7 +1,7 @@
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { convertToMimetype } from '~/features/io/FileExtensions';
 import { Layer } from '~/features/layer';
-import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
+import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
 import { canvasStore } from '~/stores/ProjectStores';
 
 export abstract class Exporter {
@@ -12,7 +12,7 @@ export abstract class Exporter {
 export async function convertCanvasToBlob(format: 'png' | 'jpeg' | 'webp_lossy', quality: number = 0.92, scale: number = 1): Promise<Blob> {
   if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
 
-  const buffer = webGLRenderer.readPixelsFlipped();
+  const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(webGLRenderer.readPixelsFlipped());
   const offscreen = getScaledCanvas(buffer, scale);
   const mimeType = convertToMimetype(format);
 
@@ -39,8 +39,9 @@ export async function convertLayerToBlob(
 ): Promise<Blob> {
   if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
 
-  const buffer = getBufferCopy(layer.id);
-  if (!buffer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
+  const bufferPointer = getBufferPointer(layer.id);
+  if (!bufferPointer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
+  const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(bufferPointer);
 
   const offscreen = getScaledCanvas(buffer, scale);
   const mimeType = convertToMimetype(format);
@@ -60,14 +61,15 @@ export async function convertLayerToBlob(
   });
 }
 
-export function getScaledCanvas(buffer: Uint8ClampedArray, scale: number = 1) {
+export function getScaledCanvas(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1) {
   const { width, height } = canvasStore.canvas;
 
   const offscreen = document.createElement('canvas');
   offscreen.width = width;
   offscreen.height = height;
   const ctx2d = offscreen.getContext('2d')!;
-  const imgData = new ImageData(buffer.slice(), width, height);
+
+  const imgData = new ImageData(buffer, width, height);
   ctx2d.putImageData(imgData, 0, 0);
 
   let target = offscreen;
@@ -84,14 +86,14 @@ export function getScaledCanvas(buffer: Uint8ClampedArray, scale: number = 1) {
   return target;
 }
 
-export function getScaledBuffer(buffer: Uint8ClampedArray, scale: number = 1): ImageData {
+export function getScaledBuffer(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1): ImageData {
   const { width, height } = canvasStore.canvas;
 
   const offscreen = document.createElement('canvas');
   offscreen.width = width;
   offscreen.height = height;
   const ctx2d = offscreen.getContext('2d')!;
-  const imgData = new ImageData(buffer.slice(), width, height);
+  const imgData = new ImageData(buffer, width, height);
   ctx2d.putImageData(imgData, 0, 0);
 
   let target = offscreen;

@@ -44,7 +44,6 @@ export interface ProjectV1 extends ProjectBase {
   };
   imagePool: {
     store: ImagePoolStore;
-    entries: ImagePoolEntry[];
   };
   history: {
     undoStack: SerializedHistoryAction[];

@@ -2,7 +2,6 @@ import {
   AnvilLayerHistoryAction,
   CanvasSizeHistoryAction,
   ColorHistoryAction,
-  ImagePoolEntryPropsHistoryAction,
   ImagePoolHistoryAction,
   LayerListHistoryAction,
   LayerMergeHistoryAction,
@@ -57,8 +56,6 @@ export class ProjectHistoryController {
           return new ColorHistoryAction(serialized.props as any);
         case 'image_pool':
           return new ImagePoolHistoryAction(serialized.props as any);
-        case 'image_pool_entry_props':
-          return new ImagePoolEntryPropsHistoryAction(serialized.props as any);
         case 'layer_buffer':
           return new AnvilLayerHistoryAction(serialized.props as any);
         case 'layer_list':

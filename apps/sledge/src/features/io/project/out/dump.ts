@@ -1,6 +1,5 @@
 import { rawToWebp } from '@sledge/anvil';
 import { projectHistoryController } from '~/features/history';
-import { getEntries } from '~/features/image_pool';
 import { ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
@@ -39,7 +38,6 @@ export const dumpProjectJson = async (): Promise<ProjectV1> => {
     },
     imagePool: {
       store: { ...imagePoolStore },
-      entries: getEntries(),
     },
     history: projectHistoryController.getSerialized(),
     layers: {

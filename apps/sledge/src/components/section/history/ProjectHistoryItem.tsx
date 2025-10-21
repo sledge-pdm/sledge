@@ -6,7 +6,6 @@ import { BaseHistoryAction } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
-import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
@@ -82,12 +81,7 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
     case 'image_pool':
       icon = '/icons/actions/image.png';
       const ipaction = action as ImagePoolHistoryAction;
-      description = `${ipaction.kind} -> ${ipaction.targetEntry.fileName}`;
-      break;
-    case 'image_pool_entry_props':
-      icon = '/icons/actions/image.png';
-      const ipepaction = action as ImagePoolEntryPropsHistoryAction;
-      description = `${ipepaction.newEntryProps.fileName} transform`;
+      description = `${ipaction.kind} image`;
       break;
     case 'color':
       const claction = action as ColorHistoryAction;

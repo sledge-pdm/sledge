@@ -69,7 +69,7 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   srcOrigin = srcOrigin ?? { x: 0, y: 0 };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && srcOrigin.x === 0 && srcOrigin.y === 0) return false;
   // CanvasSizeHistoryAction uses the "current" canvas size and buffer as an old state, so must be called before resizing buffers.
-  const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'changeCanvasSize' });
+  const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
 
   if (!skipHistory) act.registerBefore();
 

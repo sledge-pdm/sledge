@@ -3,20 +3,27 @@ import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
 import { eventBus } from '~/utils/EventBus';
-import { BaseHistoryAction } from '../base';
+import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 /**
  * History action for Anvil-based layer buffer changes.
  */
+export interface AnvilLayerHistoryActionProps extends BaseHistoryActionProps {
+  layerId: string;
+  patch: PackedDiffs;
+}
+
 export class AnvilLayerHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_buffer'; // 既存と同一 type を維持し履歴表示互換
 
-  constructor(
-    public readonly layerId: string,
-    public readonly patch: PackedDiffs,
-    context?: any
-  ) {
-    super(context, `Layer ${layerId}: buffer`);
+  layerId: string;
+  patch: PackedDiffs;
+
+  constructor(public readonly props: AnvilLayerHistoryActionProps) {
+    super(props);
+
+    this.layerId = props.layerId;
+    this.patch = props.patch;
   }
 
   undo(): void {
@@ -39,5 +46,12 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${this.layerId}) redo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+  }
+
+  serialize(): SerializedHistoryAction {
+    return {
+      type: this.type,
+      props: this.props,
+    };
   }
 }

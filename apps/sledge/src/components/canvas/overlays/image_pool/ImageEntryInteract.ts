@@ -309,7 +309,12 @@ class ImageEntryInteract {
 
     if (JSON.stringify(startPayload) !== JSON.stringify(payload)) {
       projectHistoryController.addAction(
-        new ImagePoolEntryPropsHistoryAction(entry.id, startEntry, endEntry, { from: 'ImageEntryInteract.commitDiff' })
+        new ImagePoolEntryPropsHistoryAction({
+          entryId: entry.id,
+          oldEntryProps: startEntry,
+          newEntryProps: endEntry,
+          context: { from: 'ImageEntryInteract.commitDiff' },
+        })
       );
     }
   }

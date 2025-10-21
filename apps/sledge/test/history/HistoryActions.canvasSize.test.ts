@@ -18,7 +18,7 @@ describe('CanvasSizeHistoryAction', () => {
   it('undo/redo updates canvas size value', () => {
     const oldSize = { width: 100, height: 80 } as const;
     const newSize = { width: 120, height: 90 } as const;
-    const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'test' });
+    const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'test' } });
     // redoing CanvasSizeHistoryActions no longer means apply resizing.
     // act.redo();
 

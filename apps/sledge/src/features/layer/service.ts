@@ -1,11 +1,12 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
+import { rawToWebp } from '@sledge/anvil';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
 import { RGBAColor, RGBAToHex } from '~/features/color';
-import { projectHistoryController } from '~/features/history';
+import { PackedLayerSnapshot, projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { LayerListHistoryAction, LayerSnapshot } from '~/features/history/actions/LayerListHistoryAction';
+import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -57,11 +58,16 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   delete before.id;
   delete after.id;
   if (!options?.noDiff) {
-    const act = new LayerPropsHistoryAction(layerId, before, after, {
-      from: `LayerService.setLayerProp(${String(propName)}: ${String(beforeValue)} > ${String(newValue)})`,
-      propName,
-      before: String(beforeValue),
-      after: String(newValue),
+    const act = new LayerPropsHistoryAction({
+      layerId,
+      oldLayerProps: before,
+      newLayerProps: after,
+      context: {
+        from: `LayerService.setLayerProp(${String(propName)}: ${String(beforeValue)} > ${String(newValue)})`,
+        propName,
+        before: String(beforeValue),
+        after: String(newValue),
+      },
     });
     projectHistoryController.addAction(act);
   }
@@ -96,7 +102,14 @@ export function clearLayer(layerId: string) {
   setBuffer(layerId, after);
   registerWholeChange(layerId, before);
   const patch = flushPatch(layerId);
-  if (patch) projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch, { tool: 'clear' }));
+  if (patch)
+    projectHistoryController.addAction(
+      new AnvilLayerHistoryAction({
+        layerId,
+        patch,
+        context: { tool: 'clear' },
+      })
+    );
   eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Layer(${layerId}) cleared` });
   eventBus.emit('preview:requestUpdate', { layerId });
 }
@@ -188,9 +201,21 @@ export const addLayerTo = (
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${newLayer.id}) added` });
 
   if (!options?.noDiff) {
-    const snapshot: LayerSnapshot = { layer: newLayer, image: { buffer: anvil.getBufferData(), width: anvil.getWidth(), height: anvil.getHeight() } };
+    const snapshot: PackedLayerSnapshot = {
+      layer: newLayer,
+      image: {
+        webpBuffer: rawToWebp(new Uint8Array(anvil.getBufferData()), anvil.getWidth(), anvil.getHeight()),
+        width: anvil.getWidth(),
+        height: anvil.getHeight(),
+      },
+    };
 
-    const act = new LayerListHistoryAction('add', index, snapshot, undefined, undefined, { from: 'LayerService.addLayerTo' });
+    const act = new LayerListHistoryAction({
+      kind: 'add',
+      index,
+      packedSnapshot: snapshot,
+      context: { from: 'LayerService.addLayerTo' },
+    });
     projectHistoryController.addAction(act);
   }
 
@@ -258,7 +283,7 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
 
   if (!noDiff) {
     const afterOrder = updated.map((l) => l.id);
-    const act = new LayerListHistoryAction('reorder', -1, undefined, beforeOrder, afterOrder, { from: 'LayerService.moveLayer' });
+    const act = new LayerListHistoryAction({ kind: 'reorder', index: -1, beforeOrder, afterOrder, context: { from: 'LayerService.moveLayer' } });
     projectHistoryController.addAction(act);
   }
 };
@@ -297,8 +322,14 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   const toRemove = layers[index];
   const anvil = getAnvilOf(toRemove.id);
   if (!anvil) return;
-  const snapshot: LayerSnapshot = { layer: toRemove, image: { buffer: anvil.getBufferData(), width: anvil.getWidth(), height: anvil.getHeight() } };
-
+  const snapshot: PackedLayerSnapshot = {
+    layer: toRemove,
+    image: {
+      webpBuffer: rawToWebp(new Uint8Array(anvil.getBufferData()), anvil.getWidth(), anvil.getHeight()),
+      width: anvil.getWidth(),
+      height: anvil.getHeight(),
+    },
+  };
   layers.splice(index, 1);
 
   setLayerListStore('layers', layers);
@@ -306,7 +337,12 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${layerId}) removed` });
 
   if (!noDiff) {
-    const act = new LayerListHistoryAction('delete', index, snapshot, undefined, undefined, { from: 'LayerService.removeLayer' });
+    const act = new LayerListHistoryAction({
+      kind: 'delete',
+      index,
+      packedSnapshot: snapshot,
+      context: { from: 'LayerService.removeLayer' },
+    });
     projectHistoryController.addAction(act);
   }
 

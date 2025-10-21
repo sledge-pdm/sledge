@@ -5,4 +5,6 @@ export * from './ColorHistoryAction';
 export * from './ImagePoolEntryPropsHistoryAction';
 export * from './ImagePoolHistoryAction';
 export * from './LayerListHistoryAction';
+export * from './LayerMergeHistoryAction';
 export * from './LayerPropsHistoryAction';
+export * from './types';

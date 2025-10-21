@@ -30,7 +30,7 @@ describe('ImagePoolEntryPropsHistoryAction', () => {
       opacity: 0.6,
       visible: false,
     };
-    const action = new ImagePoolEntryPropsHistoryAction(id, oldProps, newProps, 'test');
+    const action = new ImagePoolEntryPropsHistoryAction({ entryId: id, oldEntryProps: oldProps, newEntryProps: newProps, context: 'test' });
 
     action.redo();
     let e = getEntry(id)!;

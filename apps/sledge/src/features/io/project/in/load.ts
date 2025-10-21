@@ -1,4 +1,5 @@
 import { webpToRaw } from '@sledge/anvil';
+import { projectHistoryController } from '~/features/history';
 import { replaceAllEntries } from '~/features/image_pool';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
@@ -84,4 +85,8 @@ export function loadV1(project: ProjectV1) {
       anvilManager.registerAnvil(layer.id, newBuffer, canvasSize.width, canvasSize.height);
     }
   });
+
+  if (project.history && project.history.undoStack && project.history.redoStack) {
+    projectHistoryController.setSerialized(project.history.undoStack, project.history.redoStack);
+  }
 }

@@ -43,7 +43,6 @@ const noSnapshotsText = css`
 const Snapshots: Component = () => {
   const [backupBeforeRestore, setBackupBeforeRestore] = createSignal(false);
 
-  // ソート処理をメモ化してパフォーマンス向上
   const sortedSnapshots = createMemo(() => snapshotStore.snapshots.toSorted((a, b) => b.createdAt - a.createdAt));
 
   return (

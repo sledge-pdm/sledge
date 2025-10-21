@@ -1,3 +1,4 @@
+import { rawToWebp } from '@sledge/anvil';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LayerListHistoryAction } from '~/features/history';
 import type { Layer } from '~/features/layer';
@@ -26,8 +27,13 @@ describe('LayerListHistoryAction', () => {
 
   it('redo add inserts snapshot at index; undo removes it', () => {
     const buf = new Uint8ClampedArray([1, 2, 3, 4]);
-    const snapshot = { layer: l('X'), image: { buffer: buf, width: 1, height: 1 } };
-    const a = new LayerListHistoryAction('add', 1, snapshot, undefined, undefined, 'test');
+    const snapshot = { layer: l('X'), image: { webpBuffer: rawToWebp(new Uint8Array(buf.buffer), 1, 1), width: 1, height: 1 } };
+    const a = new LayerListHistoryAction({
+      kind: 'add',
+      index: 1,
+      packedSnapshot: snapshot,
+      context: 'test',
+    });
     a.redo();
     expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'X', 'B', 'C']);
 
@@ -38,8 +44,13 @@ describe('LayerListHistoryAction', () => {
   it('redo delete removes by id; undo re-inserts snapshot at index', () => {
     const buf = new Uint8ClampedArray([1, 2, 3, 4]);
     // use the actual layer object from the store so the delete action can match it
-    const snapshot = { layer: layerListStore.layers[1], image: { buffer: buf, width: 1, height: 1 } };
-    const a = new LayerListHistoryAction('delete', 1, snapshot, undefined, undefined, 'test');
+    const snapshot = { layer: layerListStore.layers[1], image: { webpBuffer: rawToWebp(new Uint8Array(buf.buffer), 1, 1), width: 1, height: 1 } };
+    const a = new LayerListHistoryAction({
+      kind: 'delete',
+      index: 1,
+      packedSnapshot: snapshot,
+      context: 'test',
+    });
     a.redo();
     expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'C']);
 
@@ -50,7 +61,13 @@ describe('LayerListHistoryAction', () => {
   it('reorder applies afterOrder on redo and beforeOrder on undo', () => {
     const before = ['A', 'B', 'C'];
     const after = ['C', 'A', 'B'];
-    const a = new LayerListHistoryAction('reorder', 0, undefined, before, after, 'test');
+    const a = new LayerListHistoryAction({
+      kind: 'reorder',
+      index: 0,
+      beforeOrder: before,
+      afterOrder: after,
+      context: 'test',
+    });
 
     a.redo();
     expect(layerListStore.layers.map((x) => x.id)).toEqual(after);

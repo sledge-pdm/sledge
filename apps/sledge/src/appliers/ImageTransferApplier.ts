@@ -101,6 +101,12 @@ export async function transferToLayer({ entry, targetLayerId }: ImageTransferPar
   registerWholeChange(targetLayerId, originalBuffer);
   const patch = flushPatch(targetLayerId);
   if (patch) {
-    projectHistoryController.addAction(new AnvilLayerHistoryAction(targetLayerId, patch, { tool: 'image' }));
+    projectHistoryController.addAction(
+      new AnvilLayerHistoryAction({
+        layerId: targetLayerId,
+        patch,
+        context: { tool: 'image' },
+      })
+    );
   }
 }

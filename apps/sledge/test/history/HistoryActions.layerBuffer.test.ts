@@ -36,7 +36,7 @@ describe('AnvilLayerHistoryAction', () => {
 
     const patch = flushPatch(layerId);
     expect(patch).not.toBeNull();
-    const action = new AnvilLayerHistoryAction(layerId, patch!);
+    const action = new AnvilLayerHistoryAction({ layerId, patch: patch! });
 
     // apply redo (already applied logically, but test revert path)
     action.undo();
@@ -55,7 +55,7 @@ describe('AnvilLayerHistoryAction', () => {
     setPixel(layerId, 1, 1, [255, 0, 0, 255]);
     setPixel(layerId, 2, 1, [0, 255, 0, 255]);
     const patch = flushPatch(layerId)!;
-    const action = new AnvilLayerHistoryAction(layerId, patch);
+    const action = new AnvilLayerHistoryAction({ layerId, patch });
     expect(getAnvilOf(layerId)!.getPixel(1, 1)[0]).toBe(255);
     action.undo();
     expect(getAnvilOf(layerId)!.getPixel(1, 1)[0]).toBe(beforeCopy[(1 + 1 * 32) * 4]);
@@ -70,7 +70,7 @@ describe('AnvilLayerHistoryAction', () => {
     // tiles プロパティが存在することのみを確認
     const hasTile = !!patch.tiles;
     expect(hasTile).toBe(true);
-    const action = new AnvilLayerHistoryAction(layerId, patch);
+    const action = new AnvilLayerHistoryAction({ layerId, patch });
     action.undo();
     // after undo the tile should revert to transparent (initial state)
     const px = anvil.getPixel(0, 0);
@@ -80,7 +80,7 @@ describe('AnvilLayerHistoryAction', () => {
   it('history controller pushes and undoes Anvil patches', () => {
     setPixel(layerId, 0, 0, [9, 9, 9, 255]);
     const patch = flushPatch(layerId)!;
-    projectHistoryController.addAction(new AnvilLayerHistoryAction(layerId, patch));
+    projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch }));
     expect(projectHistoryController.canUndo()).toBe(true);
     projectHistoryController.undo();
     const anvil = getAnvilOf(layerId)!;

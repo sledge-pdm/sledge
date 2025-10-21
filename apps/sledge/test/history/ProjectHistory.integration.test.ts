@@ -44,12 +44,17 @@ describe('Project-level history integration', () => {
     };
 
     // 1) Apply effects (redo) then push to history (common UI flow)
-    const a1 = new ColorHistoryAction(PaletteType.primary, [0, 0, 0, 255], [255, 0, 0, 255], { from: 'int' });
+    const a1 = new ColorHistoryAction({
+      palette: PaletteType.primary,
+      oldColor: [0, 0, 0, 255],
+      newColor: [255, 0, 0, 255],
+      context: { from: 'int' },
+    });
     a1.redo();
     if (LOG_SEQ) logs.push('Color #000000 -> #ff0000');
     hc.addAction(a1);
 
-    const a2 = new CanvasSizeHistoryAction(initialCanvas, targetCanvas, { from: 'int' });
+    const a2 = new CanvasSizeHistoryAction({ beforeSize: initialCanvas, afterSize: targetCanvas, context: { from: 'int' } });
     // redoing CanvasSizeHistoryActions no longer means apply resizing.
     // a2.redo();
 
@@ -63,7 +68,11 @@ describe('Project-level history integration', () => {
     if (LOG_SEQ) logs.push(`Canvas ${initialCanvas.width}x${initialCanvas.height} -> ${targetCanvas.width}x${targetCanvas.height}`);
     hc.addAction(a2);
 
-    const a3 = new ImagePoolHistoryAction('add', entry, { from: 'int' });
+    const a3 = new ImagePoolHistoryAction({
+      kind: 'add',
+      targetEntry: entry,
+      context: { from: 'int' },
+    });
     a3.redo();
     if (LOG_SEQ) logs.push('ImagePool add int-fixed');
     hc.addAction(a3);
@@ -96,7 +105,12 @@ describe('Project-level history integration', () => {
 
   it('idempotency: extra undo/redo beyond bounds should not change state or throw', () => {
     const hc = new ProjectHistoryController();
-    const a1 = new ColorHistoryAction(PaletteType.primary, [0, 0, 0, 255], [255, 0, 0, 255], { from: 'int' });
+    const a1 = new ColorHistoryAction({
+      palette: PaletteType.primary,
+      oldColor: [0, 0, 0, 255],
+      newColor: [255, 0, 0, 255],
+      context: { from: 'int' },
+    });
     a1.redo();
     hc.addAction(a1);
 

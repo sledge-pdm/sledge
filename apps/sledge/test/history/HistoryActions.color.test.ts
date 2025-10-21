@@ -8,7 +8,12 @@ describe('ColorHistoryAction', () => {
     setColor(PaletteType.primary, '#000000');
   });
   it('undo/redo applies palette color', () => {
-    const act = new ColorHistoryAction(PaletteType.primary, [0, 0, 0, 255], [255, 0, 0, 255], { from: 'test' });
+    const act = new ColorHistoryAction({
+      palette: PaletteType.primary,
+      oldColor: [0, 0, 0, 255],
+      newColor: [255, 0, 0, 255],
+      context: { from: 'test' },
+    });
     act.redo();
     expect(currentColor()).toBe('#ff0000');
     act.undo();

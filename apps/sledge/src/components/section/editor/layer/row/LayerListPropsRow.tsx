@@ -68,11 +68,16 @@ const LayerListPropsRow: Component = () => {
                 const latest = layerListStore.layers.find((l) => l.id === opacityHistoryLayerId);
                 if (!latest) return;
                 const { id: _id2, ...afterProps } = latest as any;
-                const act = new LayerPropsHistoryAction(opacityHistoryLayerId, opacityHistoryBefore as any, afterProps as any, {
-                  from: 'LayerList.opacitySlider(debounced 500ms)',
-                  propName: 'opacity',
-                  before: String(opacityHistoryBefore.opacity),
-                  after: String(afterProps.opacity),
+                const act = new LayerPropsHistoryAction({
+                  layerId: opacityHistoryLayerId,
+                  oldLayerProps: opacityHistoryBefore as any,
+                  newLayerProps: afterProps as any,
+                  context: {
+                    from: 'LayerList.opacitySlider(debounced 500ms)',
+                    propName: 'opacity',
+                    before: String(opacityHistoryBefore.opacity),
+                    after: String(afterProps.opacity),
+                  },
                 });
                 projectHistoryController.addAction(act);
               } finally {

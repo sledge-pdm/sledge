@@ -10,12 +10,27 @@ export type HistoryActionTypes =
   | 'layer_props'
   | 'unknown';
 
+export interface BaseHistoryActionProps {
+  context?: any;
+  label?: string;
+}
+
+export interface SerializedHistoryAction {
+  type: HistoryActionTypes;
+  props: BaseHistoryActionProps;
+}
+
 export abstract class BaseHistoryAction {
   abstract readonly type: HistoryActionTypes;
-  constructor(
-    public readonly context?: any,
-    public readonly label?: string
-  ) {}
+  context?: any;
+  label?: string;
+
+  constructor(public readonly props: BaseHistoryActionProps) {
+    this.context = props.context;
+    this.label = props.label;
+  }
   abstract undo(): void;
   abstract redo(): void;
+
+  abstract serialize(): SerializedHistoryAction;
 }

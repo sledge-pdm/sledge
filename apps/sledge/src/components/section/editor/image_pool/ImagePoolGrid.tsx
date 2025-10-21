@@ -1,12 +1,11 @@
 import { color } from '@sledge/theme';
 import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { Component, createSignal, For, onMount } from 'solid-js';
+import { Component, For } from 'solid-js';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { eventBus } from '~/utils/EventBus';
 import { pathToFileLocation } from '~/utils/FileUtils';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {

@@ -1,4 +1,4 @@
-import { brightness_contrast, gaussian_blur, grayscale, invert } from '@sledge/wasm';
+import { brightness_contrast, dust_removal, gaussian_blur, grayscale, invert } from '@sledge/wasm';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flushPatch, registerWholeChange } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -9,6 +9,7 @@ const EFFECTS = {
   invert: invert,
   gaussian_blur: gaussian_blur,
   brightness_contrast: brightness_contrast,
+  dust_removal: dust_removal,
 };
 
 export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, options?: any) {

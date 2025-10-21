@@ -142,9 +142,8 @@ export function deleteSelectedArea(layerId?: string): boolean {
       const x = selectionBoundBox.x + ox;
       const y = selectionBoundBox.y + oy;
       const maskIdx = y * canvasWidth + x;
-      const canvasIdx = (y * canvasWidth + x) * 4;
-
       if (selection.getMask()[maskIdx] === 1) {
+        const canvasIdx = maskIdx * 4;
         buffer[canvasIdx] = 0;
         buffer[canvasIdx + 1] = 0;
         buffer[canvasIdx + 2] = 0;

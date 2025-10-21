@@ -16,7 +16,6 @@ const effectsContainer = css`
   width: 100%;
   overflow: hidden;
   height: auto;
-  gap: 8px;
 `;
 
 const previewContainer = css`
@@ -25,7 +24,7 @@ const previewContainer = css`
   align-self: center;
   width: fit-content;
   height: fit-content;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 `;
 
 const applyToText = css`

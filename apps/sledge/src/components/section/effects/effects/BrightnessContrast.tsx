@@ -7,8 +7,6 @@ import { EffectSectionProps } from '~/components/section/effects/Effects';
 import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
 import { applyEffect } from '~/features/effect/Effects';
 
-
-
 const BrightnessContrast: Component<EffectSectionProps> = (props) => {
   const [options, setOptions] = createStore<{
     brightness: number;
@@ -49,6 +47,7 @@ const BrightnessContrast: Component<EffectSectionProps> = (props) => {
           value={options.contrast}
           min={-100}
           max={100}
+          wheelSpin={true}
           floatSignificantDigits={1}
           allowFloat={true}
           onDoubleClick={() => setOptions('contrast', 0)}

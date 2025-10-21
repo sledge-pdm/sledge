@@ -1,61 +1,51 @@
-import { css } from '@acab/ecsstatic';
 import { Slider, ToggleSwitch } from '@sledge/ui';
 import { AlphaBlurMode, GaussianBlurOption } from '@sledge/wasm';
-import { Component, createSignal } from 'solid-js';
+import { Component } from 'solid-js';
+import { createStore } from 'solid-js/store';
+import { EffectControl } from '~/components/section/effects/EffectControl';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
-import SectionItem from '~/components/section/SectionItem';
+import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
 import { applyEffect } from '~/features/effect/Effects';
-import { accentedButton } from '~/styles/styles';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '../../SectionStyles';
-
-const applyButtonContainer = css`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  align-items: end;
-`;
 
 const GaussianBlur: Component<EffectSectionProps> = (props) => {
-  const [blurOptions, setBlurOptions] = createSignal<GaussianBlurOption>(new GaussianBlurOption(1000, AlphaBlurMode.Blur));
+  const [options, setOptions] = createStore<{
+    radius: number;
+    alphaMode: AlphaBlurMode;
+  }>({
+    radius: 500,
+    alphaMode: AlphaBlurMode.Blur,
+  });
+
   return (
-    <SectionItem title='gaussian blur.'>
-      <div class={sectionContent} style={{ gap: '4px', 'margin-bottom': '8px' }}>
-        <p class={sectionSubCaption}>radius.</p>
-        <div class={sectionSubContent}>
-          <Slider
-            labelMode='left'
-            value={blurOptions().radius}
-            min={0}
-            max={1000}
-            allowFloat={false}
-            onChange={(value) => {
-              setBlurOptions((prev) => new GaussianBlurOption(value, prev.alpha_mode));
-            }}
-          />
-        </div>
+    <EffectWrapper
+      title='gaussian blur.'
+      onApply={() => {
+        applyEffect(props.selectedLayerId(), 'gaussian_blur', new GaussianBlurOption(options.radius, options.alphaMode));
+      }}
+    >
+      <EffectControl label='radius.'>
+        <Slider
+          labelMode='left'
+          value={options.radius}
+          min={0}
+          max={1000}
+          onDoubleClick={() => setOptions('radius', 500)}
+          allowFloat={false}
+          onChange={(value) => {
+            setOptions('radius', value);
+          }}
+        />
+      </EffectControl>
 
-        <p class={sectionSubCaption}>clamp at transparency.</p>
-        <div class={sectionSubContent}>
-          <ToggleSwitch
-            checked={blurOptions().alpha_mode === AlphaBlurMode.Skip}
-            onChange={(value) => {
-              setBlurOptions((prev) => new GaussianBlurOption(prev.radius, value ? AlphaBlurMode.Skip : AlphaBlurMode.Blur));
-            }}
-          />
-        </div>
-
-        <div class={applyButtonContainer}>
-          <button
-            class={accentedButton}
-            onClick={() => {
-              applyEffect(props.selectedLayerId(), 'gaussian_blur', blurOptions());
-            }}
-          >
-            Apply.
-          </button>
-        </div>
-      </div>
-    </SectionItem>
+      <EffectControl label='clamp at transparency.'>
+        <ToggleSwitch
+          checked={options.alphaMode === AlphaBlurMode.Skip}
+          onChange={(value) => {
+            setOptions('alphaMode', value ? AlphaBlurMode.Skip : AlphaBlurMode.Blur);
+          }}
+        />
+      </EffectControl>
+    </EffectWrapper>
   );
 };
 

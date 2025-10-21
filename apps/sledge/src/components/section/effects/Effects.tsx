@@ -2,6 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Dropdown, DropdownOption } from '@sledge/ui';
 import { Accessor, Component, createMemo, createSignal } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
+import BrightnessContrast from '~/components/section/effects/effects/BrightnessContrast';
 import GaussianBlur from '~/components/section/effects/effects/GaussianBlur';
 import GrayScale from '~/components/section/effects/effects/GrayScale';
 import Invert from '~/components/section/effects/effects/Invert';
@@ -75,6 +76,7 @@ const Effects: Component = () => {
       <Invert selectedLayerId={selectedLayerId} />
       <GrayScale selectedLayerId={selectedLayerId} />
       <GaussianBlur selectedLayerId={selectedLayerId} />
+      <BrightnessContrast selectedLayerId={selectedLayerId} />
     </>
   );
 };

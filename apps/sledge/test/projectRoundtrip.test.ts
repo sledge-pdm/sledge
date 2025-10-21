@@ -152,8 +152,8 @@ describe('Project dump/load roundtrip', () => {
         isProjectChangedAfterSave: true,
         lastSavedAt: new Date(),
         lastSavedPath: undefined,
-        autoSaveEnabled: false,
-        autoSaveInterval: 60,
+        autoSnapshotEnabled: false,
+        autoSnapshotInterval: 60,
       },
       layerListStore: {
         layers: [layer],

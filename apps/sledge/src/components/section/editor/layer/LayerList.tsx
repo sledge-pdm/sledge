@@ -6,7 +6,6 @@ import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPr
 import SectionItem from '~/components/section/SectionItem';
 import { allLayers, moveLayer } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
 import { sectionContent } from '../../SectionStyles';
 import BaseLayerItem from './BaseLayerItem';

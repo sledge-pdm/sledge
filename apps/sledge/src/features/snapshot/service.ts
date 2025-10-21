@@ -106,3 +106,19 @@ This will NOT backup your current state (unless you did manually backup.)`,
 
   setSnapshotStore(savedSnapshotStore);
 }
+
+export function addSnapshot(snapshot: ProjectSnapshot) {
+  setSnapshotStore('snapshots', [...snapshotStore.snapshots, snapshot]);
+}
+
+export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapshot) {
+  const old = snapshotStore.snapshots.find((s) => s.name === name);
+  if (old) {
+    setSnapshotStore(
+      'snapshots',
+      snapshotStore.snapshots.map((s) => (s.name === name ? snapshot : s))
+    );
+  } else {
+    addSnapshot(snapshot);
+  }
+}

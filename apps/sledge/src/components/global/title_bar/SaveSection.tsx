@@ -3,12 +3,13 @@ import { color } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { join } from '~/utils/FileUtils';
+import { useTimeAgoText } from '~/utils/TimeUtils';
 
 const saveSectionContainer = css`
   display: flex;
@@ -77,42 +78,7 @@ const SaveSection: Component = () => {
     await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
   };
 
-  const getSaveTimeText = () => {
-    const lastSavedAt = projectStore.lastSavedAt;
-    if (lastSavedAt) {
-      var seconds = Math.floor((new Date().getTime() - lastSavedAt.getTime()) / 1000);
-
-      var interval = seconds / 31536000;
-      if (interval > 1) {
-        return Math.floor(interval) + ' years ago';
-      }
-      interval = seconds / 2592000;
-      if (interval > 1) {
-        return Math.floor(interval) + ' months ago';
-      }
-      interval = seconds / 86400;
-      if (interval > 1) {
-        return Math.floor(interval) + ' days ago';
-      }
-      interval = seconds / 3600;
-      if (interval > 1) {
-        return Math.floor(interval) + ' hours ago';
-      }
-      interval = seconds / 60;
-      if (interval > 1) {
-        return Math.floor(Math.floor(interval) / 10) * 10 + ' min ago';
-      }
-      if (seconds < 10) {
-        return 'just now';
-      }
-      return Math.floor(Math.floor(seconds) / 10) * 10 + ' sec ago';
-    }
-
-    // return 'not saved yet.';
-    return '';
-  };
-
-  const [saveTimeText, setSaveTimeText] = createSignal(getSaveTimeText());
+  const saveTimeText = useTimeAgoText(projectStore.lastSavedAt?.getTime());
 
   const setTimeredSaveLog = (text: string) => {
     setSaveLog(text);
@@ -138,17 +104,6 @@ const SaveSection: Component = () => {
     eventBus.on('project:saveCancelled', () => {
       setTimeredSaveLog('save cancelled.');
     });
-
-    const interval = setInterval(() => {
-      setSaveTimeText(getSaveTimeText());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  });
-
-  createEffect(() => {
-    projectStore.lastSavedAt;
-    setSaveTimeText(getSaveTimeText());
   });
 
   const saveMenu = createMemo<MenuListOption[]>(() => [
@@ -163,50 +118,6 @@ const SaveSection: Component = () => {
       color: color.onBackground,
     },
   ]);
-
-  // const [iconSrc, setIconSrc] = createSignal<string | undefined>(undefined);
-
-  const [autoSaveIntervalRatio, setAutoSaveIntervalRatio] = createSignal<number>(0);
-
-  onMount(() => {
-    makeTimer(
-      () => {
-        if (!projectStore.autoSaveEnabled || !projectStore.autoSaveInterval || !projectStore.lastSavedAt) {
-          setAutoSaveIntervalRatio(0);
-          return;
-        }
-        const diffSec = (new Date().getTime() - projectStore.lastSavedAt.getTime()) / 1000;
-
-        const intervalRatio = diffSec / projectStore.autoSaveInterval;
-        setAutoSaveIntervalRatio(intervalRatio);
-
-        //     if (diffSec < 3) {
-        //       setIconSrc('/icons/progress/circle_check.png');
-        //       return;
-        //     }
-
-        //     if (intervalRatio < 1 / 8) {
-        //       setIconSrc('/icons/progress/circle_0.png');
-        //     } else if (intervalRatio < 2 / 8) {
-        //       setIconSrc('/icons/progress/circle_1.png');
-        //     } else if (intervalRatio < 3 / 8) {
-        //       setIconSrc('/icons/progress/circle_2.png');
-        //     } else if (intervalRatio < 4 / 8) {
-        //       setIconSrc('/icons/progress/circle_3.png');
-        //     } else if (intervalRatio < 5 / 8) {
-        //       setIconSrc('/icons/progress/circle_4.png');
-        //     } else if (intervalRatio < 6 / 8) {
-        //       setIconSrc('/icons/progress/circle_5.png');
-        //     } else if (intervalRatio < 7 / 8) {
-        //       setIconSrc('/icons/progress/circle_6.png');
-        //     } else if (intervalRatio < 8 / 8) {
-        //       setIconSrc('/icons/progress/circle_7.png');
-        //     }
-      },
-      100,
-      setInterval
-    );
-  });
 
   return (
     <div class={saveSectionContainer} data-tauri-drag-region-exclude>
@@ -236,12 +147,12 @@ const SaveSection: Component = () => {
             <Icon src={'/icons/misc/triangle_5.png'} color={color.onBackground} base={5} scale={1} />
           </div>
         </div>
-        <div
+        {/* <div
           class={autoSaveProgressBar}
           style={{
-            width: `${autoSaveIntervalRatio() * 100}%`,
+            width: `${autoSnapshotIntervalRatio() * 100}%`,
           }}
-        />
+        /> */}
       </div>
 
       <Show when={isSaveMenuShown()}>
@@ -257,7 +168,7 @@ const SaveSection: Component = () => {
         />
       </Show>
 
-      {/* <Show when={projectStore.autoSaveEnabled && fileStore.savedLocation.name && fileStore.savedLocation.path && projectStore.lastSavedAt}>
+      {/* <Show when={projectStore.autoSnapshotEnabled && fileStore.savedLocation.name && fileStore.savedLocation.path && projectStore.lastSavedAt}>
         <div style={{ opacity: 0.3 }}>
           <Icon src={iconSrc() ?? ''} color={color.onBackground} base={12} scale={1} />
         </div>

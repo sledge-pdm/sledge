@@ -9,8 +9,8 @@ export type ProjectStore = {
   lastSavedPath: string | undefined;
   lastSavedAt: Date | undefined;
 
-  autoSaveEnabled?: boolean;
-  autoSaveInterval?: number; // in seconds
+  autoSnapshotEnabled?: boolean;
+  autoSnapshotInterval?: number; // in seconds
 };
 
 export const defaultProjectStore: ProjectStore = {
@@ -19,6 +19,7 @@ export const defaultProjectStore: ProjectStore = {
   isProjectChangedAfterSave: false,
   lastSavedPath: undefined,
   lastSavedAt: undefined as Date | undefined,
-  autoSaveEnabled: false,
-  autoSaveInterval: 60,
+
+  autoSnapshotEnabled: false,
+  autoSnapshotInterval: 60,
 };

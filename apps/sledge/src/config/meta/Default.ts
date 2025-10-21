@@ -1,6 +1,5 @@
 import { Consts } from '~/Consts';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
-import { globalConfig } from '~/stores/GlobalStores';
 
 export const defaultMetas: FieldMeta[] = [
   {

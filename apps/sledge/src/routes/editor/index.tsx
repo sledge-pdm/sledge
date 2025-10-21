@@ -16,10 +16,10 @@ import { saveLastProject } from '~/features/backup';
 import { adjustZoomToFit } from '~/features/canvas';
 import { loadToolPresets } from '~/features/config';
 import { addToImagePool } from '~/features/image_pool';
-import { AutoSaveManager } from '~/features/io/AutoSaveManager';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
+import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { tryLoadProject } from '~/routes/editor/load';
 import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -91,7 +91,7 @@ export default function Editor() {
     return () => {
       unlisten();
       webGLRenderer?.dispose();
-      AutoSaveManager.getInstance().stopAutoSave();
+      AutoSnapshotManager.getInstance().stop();
       if (import.meta.hot) {
         window.location.reload();
       }
@@ -99,10 +99,10 @@ export default function Editor() {
   });
 
   createEffect(() => {
-    if (projectStore.autoSaveEnabled && projectStore.autoSaveInterval) {
-      const manager = AutoSaveManager.getInstance();
-      if (projectStore.autoSaveInterval === manager.getCurrentInterval()) return;
-      manager.startAutoSave(projectStore.autoSaveInterval);
+    if (projectStore.autoSnapshotEnabled && projectStore.autoSnapshotInterval) {
+      const manager = AutoSnapshotManager.getInstance();
+      if (projectStore.autoSnapshotInterval === manager.getCurrentInterval()) return;
+      manager.start(projectStore.autoSnapshotInterval);
     }
   });
 

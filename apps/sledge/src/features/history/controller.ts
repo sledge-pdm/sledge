@@ -34,14 +34,18 @@ export class ProjectHistoryController {
   }
 
   setSerialized(undoStack: SerializedHistoryAction[], redoStack: SerializedHistoryAction[]): void {
-    this.undoStack = undoStack.map((serialized) => {
-      const action = this.deserialize(serialized);
-      return action;
-    }).filter((a): a is BaseHistoryAction => a !== undefined);
-    this.redoStack = redoStack.map((serialized) => {
-      const action = this.deserialize(serialized);
-      return action;
-    }).filter((a): a is BaseHistoryAction => a !== undefined);
+    this.undoStack = undoStack
+      .map((serialized) => {
+        const action = this.deserialize(serialized);
+        return action;
+      })
+      .filter((a): a is BaseHistoryAction => a !== undefined);
+    this.redoStack = redoStack
+      .map((serialized) => {
+        const action = this.deserialize(serialized);
+        return action;
+      })
+      .filter((a): a is BaseHistoryAction => a !== undefined);
   }
 
   deserialize(serialized: SerializedHistoryAction): BaseHistoryAction | undefined {

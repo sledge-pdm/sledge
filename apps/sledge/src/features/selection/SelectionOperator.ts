@@ -132,16 +132,34 @@ export function deleteSelectedArea(layerId?: string): boolean {
     width: bBox.right - bBox.left + 1,
     height: bBox.bottom - bBox.top + 1,
   };
-  anvil.addWholeDiff(anvil.getImageData());
-  const deletedArea = new Uint8ClampedArray(selectionBoundBox.width * selectionBoundBox.height * 4);
-  anvil.setPartialBuffer(selectionBoundBox, deletedArea);
+  anvil.addPartialDiff(selectionBoundBox, anvil.getPartialBuffer(selectionBoundBox));
+
+  const canvasWidth = anvil.getWidth();
+
+  const buffer = anvil.getBufferData();
+  for (let oy = 0; oy < selectionBoundBox.height; oy++) {
+    for (let ox = 0; ox < selectionBoundBox.width; ox++) {
+      const x = selectionBoundBox.x + ox;
+      const y = selectionBoundBox.y + oy;
+      const maskIdx = y * canvasWidth + x;
+      const canvasIdx = (y * canvasWidth + x) * 4;
+
+      if (selection.getMask()[maskIdx] === 1) {
+        buffer[canvasIdx] = 0;
+        buffer[canvasIdx + 1] = 0;
+        buffer[canvasIdx + 2] = 0;
+        buffer[canvasIdx + 3] = 0;
+      }
+    }
+  }
+
   const diffs = anvil.flushDiffs();
   if (diffs) {
     const acc = new AnvilLayerHistoryAction({ layerId: lid, patch: diffs, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
     projectHistoryController.addAction(acc);
   }
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'delete in selection' });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
   eventBus.emit('preview:requestUpdate', { layerId: lid });
 
   return true;

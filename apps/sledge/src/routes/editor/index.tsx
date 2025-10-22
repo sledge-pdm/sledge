@@ -17,6 +17,7 @@ import { adjustZoomToFit } from '~/features/canvas';
 import { addToImagePool } from '~/features/image_pool';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { loadEditorState } from '~/features/io/editor/load';
+import { saveEditorState } from '~/features/io/editor/save';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
@@ -42,6 +43,7 @@ export default function Editor() {
 
   let unlisten: UnlistenFn;
   const handleCloseRequest = async (event: CloseRequestedEvent) => {
+    await saveEditorState();
     const isSavedProject = fileStore.savedLocation.name && fileStore.savedLocation.path;
     if (globalConfig.default.open === 'last' && !(globalConfig.default.addOnlySavedProjectToLastOpened && !isSavedProject)) {
       const loc = await saveLastProject();

@@ -108,7 +108,6 @@ const BottomInfo: Component = () => {
               }}
             />
           </div>
-          {/* <p class={bottomInfoText}>theme</p> */}
           <ThemeToggle noBackground={true} />
         </div>
       </div>

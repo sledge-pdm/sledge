@@ -7,6 +7,7 @@ import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 const ThemeToggle: Component<{ noBackground?: boolean }> = (props) => {
   return (
     <Dropdown
+      align='right'
       value={globalConfig.general.theme}
       options={themeOptions}
       noBackground={props.noBackground}

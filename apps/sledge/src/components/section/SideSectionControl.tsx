@@ -86,7 +86,6 @@ const ControlItem: Component<ItemProps> = (props) => {
           }
         }
         setAppearanceStore(props.side, 'selectedIndex', props.index);
-        eventBus.emit('window:sideSectionSideChanged', {});
       }}
     >
       <p

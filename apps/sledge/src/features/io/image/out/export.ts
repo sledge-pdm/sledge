@@ -10,8 +10,8 @@ import { LossyWebPExporter } from '~/features/io/image/out/exporter/LossyWebPExp
 import { PNGExporter } from '~/features/io/image/out/exporter/PNGExporter';
 import { SVGExporter } from '~/features/io/image/out/exporter/SVGExporter';
 import { allLayers } from '~/features/layer';
-import { setLastSettingsStore } from '~/stores/GlobalStores';
-import { join } from '~/utils/FileUtils';
+import { setLastSettingsStore } from '~/stores/EditorStores';
+import { normalizeJoin } from '~/utils/FileUtils';
 
 export interface CanvasExportOptions {
   perLayer: boolean;
@@ -21,7 +21,7 @@ export interface CanvasExportOptions {
 }
 
 export const defaultExportDir = async () => {
-  const dir = join(await pictureDir(), 'sledge');
+  const dir = normalizeJoin(await pictureDir(), 'sledge');
   if (!(await exists(dir))) {
     await mkdir(dir, { recursive: true });
   }
@@ -51,7 +51,7 @@ export async function exportImage(dirPath: string, fileName: string, options: Ca
     const layerLocations = await Promise.all(
       allLayers().map(async (layer) => {
         const layerBlob = await exporter.layerToBlob(layer, options.quality, options.scale);
-        const loc = await saveBlobViaTauri(layerBlob, join(dirPath, fileName), `${fileName}_${layer.name}.${ext}`);
+        const loc = await saveBlobViaTauri(layerBlob, normalizeJoin(dirPath, fileName), `${fileName}_${layer.name}.${ext}`);
         return loc;
       })
     );
@@ -66,7 +66,7 @@ export async function saveBlobViaTauri(blob: Blob, dirPath: string, fileName = '
   if (!(await exists(dirPath))) {
     await mkdir(dirPath, { recursive: true });
   }
-  const filePath = join(dirPath, fileName);
+  const filePath = normalizeJoin(dirPath, fileName);
   if (await exists(filePath)) {
     const ok = await confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
       kind: 'info',
@@ -81,7 +81,7 @@ export async function saveBlobViaTauri(blob: Blob, dirPath: string, fileName = '
   }
 
   const buf = new Uint8Array(await blob.arrayBuffer());
-  await writeFile(join(dirPath, fileName), buf, {});
+  await writeFile(normalizeJoin(dirPath, fileName), buf, {});
   setLastSettingsStore('exportedDirPaths', (prev) => {
     if (prev.includes(dirPath)) {
       prev = [...prev.filter((p) => p !== dirPath), dirPath];

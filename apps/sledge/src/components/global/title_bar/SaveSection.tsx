@@ -3,12 +3,12 @@ import { color } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { join } from '~/utils/FileUtils';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { useTimeAgoText } from '~/utils/TimeUtils';
 
 const saveSectionContainer = css`
@@ -50,22 +50,12 @@ const saveButtonSide = css`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 4px 4px;
+  padding: 4px 6px;
   border-left: 1px solid var(--color-border);
   cursor: pointer;
   &:hover {
     background-color: var(--color-button-hover);
   }
-`;
-
-const autoSaveProgressBar = css`
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background-color: var(--color-accent);
-  opacity: 0.25;
-  pointer-events: none;
 `;
 
 const SaveSection: Component = () => {
@@ -78,7 +68,11 @@ const SaveSection: Component = () => {
     await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
   };
 
-  const saveTimeText = useTimeAgoText(projectStore.lastSavedAt?.getTime());
+  const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStore.lastSavedAt?.getTime());
+
+  createEffect(() => {
+    updatePastTimeStamp(projectStore.lastSavedAt?.getTime());
+  });
 
   const setTimeredSaveLog = (text: string) => {
     setSaveLog(text);
@@ -86,7 +80,7 @@ const SaveSection: Component = () => {
       () => {
         setSaveLog(undefined);
       },
-      3000,
+      2000,
       setTimeout
     );
   };
@@ -107,12 +101,18 @@ const SaveSection: Component = () => {
   });
 
   const saveMenu = createMemo<MenuListOption[]>(() => [
-    { label: 'Save As...', onSelect: async () => await saveProject(), color: color.onBackground },
     {
+      type: 'item',
+      label: 'Save As...',
+      onSelect: async () => await saveProject(),
+      color: color.onBackground,
+    },
+    {
+      type: 'item',
       label: 'Open Saved Folder',
       onSelect: () => {
         if (!fileStore.savedLocation.path || !fileStore.savedLocation.name) return;
-        revealItemInDir(join(fileStore.savedLocation.path, fileStore.savedLocation.name));
+        revealItemInDir(normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name));
       },
       disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
       color: color.onBackground,
@@ -130,9 +130,6 @@ const SaveSection: Component = () => {
             style={{
               color: color.accent,
               'white-space': 'nowrap',
-              // 'text-transform': 'uppercase',
-              // 'margin-top': '1px',
-              // 'font-family': ZFB09,
             }}
           >
             {isOWPossible() ? 'save' : 'save (new)'}

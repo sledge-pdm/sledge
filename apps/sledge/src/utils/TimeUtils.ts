@@ -1,4 +1,4 @@
-import { Accessor, createSignal, onCleanup } from 'solid-js';
+import { Accessor, createSignal, onCleanup, Setter } from 'solid-js';
 
 export const getTimeAgoText = (pastTimestamp?: number) => {
   if (!pastTimestamp) return '';
@@ -33,21 +33,25 @@ export const getTimeAgoText = (pastTimestamp?: number) => {
 };
 
 export function useTimeAgoText(
-  pastTimestamp?: number,
+  defaultPastTimestamp?: number,
   options?: {
     interval: number;
   }
-): Accessor<string> {
+): {
+  saveTimeText: Accessor<string>;
+  updatePastTimeStamp: Setter<number | undefined>;
+} {
   const { interval = 1000 } = options || {};
-  const [time, setTime] = createSignal<string>(getTimeAgoText(pastTimestamp));
+  const [pastTimestamp, updatePastTimeStamp] = createSignal<number | undefined>(defaultPastTimestamp);
+  const [saveTimeText, setTimeText] = createSignal<string>(getTimeAgoText(pastTimestamp()));
 
   const intervalId = setInterval(() => {
-    setTime(getTimeAgoText(pastTimestamp));
+    setTimeText(getTimeAgoText(pastTimestamp()));
   }, interval);
 
   onCleanup(() => {
     clearInterval(intervalId);
   });
 
-  return time;
+  return { saveTimeText, updatePastTimeStamp };
 }

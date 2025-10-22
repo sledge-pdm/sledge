@@ -4,7 +4,7 @@ import { appDataDir } from '@tauri-apps/api/path';
 import { confirm, save } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
-import { setLocation as setSavedLocation } from '~/features/config';
+import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { dumpProject } from '~/features/io/project/out/dump';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
@@ -12,7 +12,7 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { getFileNameWithoutExtension, getFileUniqueId, join, pathToFileLocation } from '~/utils/FileUtils';
+import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 
 async function folderSelection(location?: FileLocation) {
   try {
@@ -30,10 +30,10 @@ async function folderSelection(location?: FileLocation) {
   console.log('path', location?.path);
   if (location?.path) {
     // if path is provided, open the path as default
-    defaultPath = join(location?.path, `${nameWOExtension}`);
+    defaultPath = normalizeJoin(location?.path, `${nameWOExtension}`);
   } else {
     // if path is not defined
-    defaultPath = join(home, `sledge/${nameWOExtension}`);
+    defaultPath = normalizeJoin(home, `sledge/${nameWOExtension}`);
   }
 
   console.log('default save path:', defaultPath);
@@ -83,7 +83,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       if (!confirmResult) return false;
     }
     // overwrite existing project
-    selectedPath = join(existingPath, name);
+    selectedPath = normalizeJoin(existingPath, name);
   } else if (fileStore.openAs === 'image' && name) {
     // write as new project from image path and name
     selectedPath = await folderSelection({ path: existingPath, name: `${fileNameWOExtension}.sledge` });
@@ -125,15 +125,15 @@ After overwrite, you cannot open this project in old version of sledge.`,
   return false;
 }
 
-export const thumbnailDir = async () => join(await appDataDir(), 'thumbnails');
-export const thumbnailPath = async (fileId: string) => join(await appDataDir(), 'thumbnails', fileId);
+export const thumbnailDir = async () => normalizeJoin(await appDataDir(), 'thumbnails');
+export const thumbnailPath = async (fileId: string) => normalizeJoin(await appDataDir(), 'thumbnails', fileId);
 
 export async function saveThumbnailExternal(fileId: string, dataUrl: string): Promise<string> {
   const dir = await thumbnailDir();
   if (!(await exists(dir))) {
     await mkdir(dir, { recursive: true });
   }
-  const path = join(dir, `${fileId}.png`);
+  const path = normalizeJoin(dir, `${fileId}.png`);
   const bytes = dataUrlToBytes(dataUrl);
   await writeFile(path, bytes);
   return path;

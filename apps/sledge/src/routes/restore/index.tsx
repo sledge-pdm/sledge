@@ -9,7 +9,7 @@ import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { pageRoot } from '~/styles/styles';
-import { join } from '~/utils/FileUtils';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 const root = css`
@@ -89,7 +89,7 @@ const Restore = () => {
       const infos: BackupInfo[] = [];
       await Promise.all(
         emergencyBackups.map(async (backupLoc) => {
-          const backupPath = join(backupLoc.path!, backupLoc.name!);
+          const backupPath = normalizeJoin(backupLoc.path!, backupLoc.name!);
           const parsed = await readProjectFromPath(backupPath);
           // Simple runtime validation for ProjectV1 structure
           if (
@@ -158,7 +158,7 @@ const Restore = () => {
                 <div
                   class={item}
                   onClick={async () => {
-                    revealItemInDir(join(info.backupLocation.path!, info.backupLocation.name!));
+                    revealItemInDir(normalizeJoin(info.backupLocation.path!, info.backupLocation.name!));
                   }}
                 >
                   <p class={itemName}>{info.backupLocation.name}</p>

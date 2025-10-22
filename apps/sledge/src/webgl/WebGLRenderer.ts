@@ -606,9 +606,22 @@ export class WebGLRenderer {
     this.currentTextureDepth = requiredDepth;
 
     const gl = this.gl;
-    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
 
     logger.debugLog(`🔄 Updating texture array: ${this.width}x${this.height}x${requiredDepth} (was ${oldDepth})`);
+
+    if (this.texArray) {
+      gl.deleteTexture(this.texArray);
+    }
+
+    // 新しいテクスチャ配列を作成
+    this.texArray = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texArray);
+
+    // テクスチャパラメータを再設定
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     // より詳細なエラーチェックを追加（開発時のみ）
     if (CHECK_ERROR_BATCH) {
@@ -673,6 +686,16 @@ export class WebGLRenderer {
 
     logger.debugLog(`🔄 Resizing texture array from ${oldDepth} to ${requiredDepth} layers`);
     logger.debugLog(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);
+
+    // ガベージコレクションの促進を試みる（ブラウザ依存だが効果的な場合がある）
+    if (oldDepth > requiredDepth && typeof window !== 'undefined' && 'gc' in window) {
+      logger.debugLog('🧹 Attempting to trigger garbage collection for texture memory cleanup');
+      try {
+        (window as any).gc();
+      } catch (e) {
+        // window.gc()が利用できない場合は無視
+      }
+    }
   }
 
   private checkWebGLCapabilities(gl: WebGL2RenderingContext): void {

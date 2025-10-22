@@ -1,6 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge/ui';
 import { Component } from 'solid-js';
+import { escapeCurrentAutosave } from '~/features/snapshot';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { projectStore, setProjectStore } from '~/stores/ProjectStores';
 
@@ -14,7 +15,6 @@ const container = css`
   flex-direction: row;
   justify-content: space-between;
 `;
-
 const intervalControlsStyle = css`
   display: flex;
   align-items: center;
@@ -38,6 +38,7 @@ const AutoSnapshot: Component = () => {
           onChange={(checked: boolean) => {
             setProjectStore('autoSnapshotEnabled', checked);
             if (checked) {
+              escapeCurrentAutosave();
               AutoSnapshotManager.getInstance().doSave();
             }
           }}

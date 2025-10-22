@@ -176,13 +176,7 @@ const CanvasArea: Component = () => {
 
       // 座標変換キャッシュをクリア
       coordinateTransform.clearCache();
-
-      if (globalConfig.editor.centerCanvasOnResize === 'offset') {
-        centeringCanvas();
-      }
-      if (globalConfig.editor.centerCanvasOnResize === 'offset_zoom') {
-        adjustZoomToFit();
-      }
+      centeringCanvas();
     });
 
     setInteractStore('canvasAreaSize', {

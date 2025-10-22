@@ -2,8 +2,8 @@ export const Consts = {
   maxPenSize: 100,
   minCanvasWidth: 1,
   minCanvasHeight: 1,
-  maxCanvasWidth: 30000,
-  maxCanvasHeight: 30000,
+  maxCanvasWidth: 10000,
+  maxCanvasHeight: 10000,
 
   webGLTextureSizeLimitMargin: 100,
 

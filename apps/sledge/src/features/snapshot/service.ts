@@ -5,6 +5,7 @@ import { createUniqueId } from 'solid-js';
 import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { loadProjectJson } from '~/features/io/project/in/load';
 import { dumpProjectJson } from '~/features/io/project/out/dump';
+import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
 
@@ -44,6 +45,22 @@ export async function registerCurrentProjectSnapshot(name?: string): Promise<Pro
   return snapshot;
 }
 
+export function addSnapshot(snapshot: ProjectSnapshot) {
+  setSnapshotStore('snapshots', [...snapshotStore.snapshots, snapshot]);
+}
+
+export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapshot) {
+  const old = snapshotStore.snapshots.find((s) => s.name === name);
+  if (old) {
+    setSnapshotStore(
+      'snapshots',
+      snapshotStore.snapshots.map((s) => (s.name === name ? snapshot : s))
+    );
+  } else {
+    addSnapshot(snapshot);
+  }
+}
+
 export async function deleteSnapshot(snapshot: ProjectSnapshot) {
   const confirmResult = await confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
     cancelLabel: 'Cancel',
@@ -69,19 +86,6 @@ export async function loadSnapshot(
   }
 ) {
   if (option?.backup) {
-    const confirmResult = await confirm(
-      `Sure to load snapshot "${snapshot.name}"?
-Current state will be saved as backup.`,
-      {
-        cancelLabel: 'Cancel',
-        okLabel: 'Backup and Load',
-        kind: 'info',
-        title: 'Load Snapshot',
-      }
-    );
-
-    if (!confirmResult) return;
-
     // backup current state
     const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
     if (!created) return;
@@ -100,6 +104,22 @@ This will NOT backup your current state (unless you did manually backup.)`,
     if (!confirmResult) return;
   }
 
+  setSnapshotStore('snapshots', (snapshots) => {
+    const filtered = snapshots.map((snapshot) => {
+      if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
+        const now = new Date();
+        return {
+          ...snapshot,
+          name: `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`,
+        };
+      }
+      return snapshot;
+    });
+    return filtered;
+  });
+
+  escapeCurrentAutosave();
+
   const savedSnapshotStore = { ...snapshotStore };
   // load snapshot
   await loadProjectJson(snapshot.snapshot);
@@ -107,18 +127,20 @@ This will NOT backup your current state (unless you did manually backup.)`,
   setSnapshotStore(savedSnapshotStore);
 }
 
-export function addSnapshot(snapshot: ProjectSnapshot) {
-  setSnapshotStore('snapshots', [...snapshotStore.snapshots, snapshot]);
-}
-
-export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapshot) {
-  const old = snapshotStore.snapshots.find((s) => s.name === name);
-  if (old) {
-    setSnapshotStore(
-      'snapshots',
-      snapshotStore.snapshots.map((s) => (s.name === name ? snapshot : s))
-    );
-  } else {
-    addSnapshot(snapshot);
-  }
+export function escapeCurrentAutosave() {
+  setSnapshotStore('snapshots', (snapshots) => {
+    const filtered = snapshots.map((snapshot) => {
+      if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
+        const now = new Date();
+        console.log('oh yeah', `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`);
+        return {
+          ...snapshot,
+          name: `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`,
+        };
+      }
+      return snapshot;
+    });
+    console.log(filtered);
+    return filtered;
+  });
 }

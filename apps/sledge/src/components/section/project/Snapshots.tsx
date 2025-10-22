@@ -109,7 +109,6 @@ const itemHeader = css`
   flex-direction: row;
   width: 100%;
   padding: 6px 10px;
-  align-items: center;
   cursor: pointer;
   background-color: var(--color-button-bg);
   &:hover {
@@ -123,6 +122,11 @@ const itemName = css`
   font-family: ZFB21;
   text-transform: uppercase;
   margin-right: auto;
+`;
+const agoText = css`
+  opacity: 0.75;
+  white-space: nowrap;
+  margin-right: 8px;
 `;
 const itemContent = css`
   display: flex;
@@ -191,10 +195,11 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
         }}
       >
         <p class={itemName}>{snapshot.name}</p>
-        <p>{saveTimeText()}</p>
+        <p class={agoText}>{saveTimeText()}</p>
 
         <div
           style={{
+            height: 'fit-content',
             transform: expanded() ? 'none' : 'rotate(180deg)',
           }}
         >

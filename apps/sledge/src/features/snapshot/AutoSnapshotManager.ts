@@ -1,11 +1,11 @@
 import { createCurrentProjectSnapshot, overwriteSnapshotWithName } from '~/features/snapshot/service';
 
+export const AUTOSAVE_SNAPSHOT_NAME = 'auto-saved';
+
 export class AutoSnapshotManager {
   private static instance: AutoSnapshotManager;
   private currentInterval: number | undefined = undefined;
   private intervalId: NodeJS.Timeout | null = null;
-
-  private readonly SNAPSHOT_NAME = 'auto-saved';
 
   private constructor() {}
 
@@ -38,6 +38,6 @@ export class AutoSnapshotManager {
   }
 
   public async doSave() {
-    overwriteSnapshotWithName(this.SNAPSHOT_NAME, await createCurrentProjectSnapshot(this.SNAPSHOT_NAME));
+    overwriteSnapshotWithName(AUTOSAVE_SNAPSHOT_NAME, await createCurrentProjectSnapshot(AUTOSAVE_SNAPSHOT_NAME));
   }
 }

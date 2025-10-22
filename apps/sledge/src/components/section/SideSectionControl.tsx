@@ -6,6 +6,7 @@ import { SectionTab } from '~/components/section/SectionTabs';
 import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
+import { eventBus } from '~/utils/EventBus';
 
 const sideSectionControlRoot = css`
   display: flex;
@@ -85,6 +86,7 @@ const ControlItem: Component<ItemProps> = (props) => {
           }
         }
         setAppearanceStore(props.side, 'selectedIndex', props.index);
+        eventBus.emit('window:sideSectionSideChanged', {});
       }}
     >
       <p
@@ -101,14 +103,6 @@ interface Props {
   side: 'leftSide' | 'rightSide';
 }
 const SideSectionControl: Component<Props> = (props) => {
-  const showToggle = () => {
-    if (props.side === 'leftSide') {
-      return appearanceStore[props.side].shown ? '>' : '<';
-    } else {
-      return appearanceStore[props.side].shown ? '<' : '>';
-    }
-  };
-
   return (
     <div
       id={`side-section-control-${props.side}`}

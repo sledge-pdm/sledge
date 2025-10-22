@@ -12,7 +12,7 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { getFileNameWithoutExtension, getFileUniqueId,  normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 
 async function folderSelection(location?: FileLocation) {
   try {

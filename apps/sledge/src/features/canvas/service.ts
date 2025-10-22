@@ -3,8 +3,7 @@ import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
-import { projectHistoryController } from '~/features/history';
-import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
+import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
 import { allLayers } from '~/features/layer';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -68,10 +67,10 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   const oldSize = { width: canvasStore.canvas.width, height: canvasStore.canvas.height };
   srcOrigin = srcOrigin ?? { x: 0, y: 0 };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && srcOrigin.x === 0 && srcOrigin.y === 0) return false;
-  // CanvasSizeHistoryAction uses the "current" canvas size and buffer as an old state, so must be called before resizing buffers.
   const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
-
-  if (!skipHistory) act.registerBefore();
+  if (!skipHistory) {
+    act.registerBefore();
+  }
 
   setCanvasStore('canvas', newSize);
   eventBus.emit('canvas:sizeChanged', { newSize });
@@ -141,10 +140,11 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
-
-  setZoom(referencedZoom);
   // reset initialzoom
   setInteractStore('initialZoom', referencedZoom);
+
+  setZoom(referencedZoom);
+
   centeringCanvas();
 };
 

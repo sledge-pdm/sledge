@@ -29,6 +29,8 @@
 * Project Snapshots
 * Image Effects
 
+- ...and the ***ＲＡＤ*** user interface, as you see.
+
 ## Platform Supports
 
 | Platform | Availability   | Status             | Detail                 |

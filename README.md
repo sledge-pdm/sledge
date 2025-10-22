@@ -41,12 +41,12 @@ Sledge is a drawing tool.
 
 ## Platform Supports
 
-| Platform | Status             | Detail                 |
-| -------- | ------------------ | ---------------------- |
-| Windows  | :white_check_mark: | _Stable._              |
-| MacOS    | :white_check_mark: | _almost Stable._       |
-| Linux    | :warning:          | _Unstable._            |
-| Mobile   | :zzz:              | _No builds available._ |
+| Platform | Availability   | Status             | Detail                 |
+| -------- | -------------- | ------------------ | ---------------------- |
+| Windows  | **Available.** | :white_check_mark: | _Stable._              |
+| MacOS    | **Available.** | :white_check_mark: | _Almost stable._       |
+| Linux    | **Available.** | :warning:          | _Unstable._            |
+| Mobile   | Not available. | :zzz:              | _No builds available._ |
 
 > Need testers for MacOS/Linux builds! Post anything in [Discussions](https://github.com/sledge-pdm/sledge/discussions), or report bug in [Issues](https://github.com/sledge-pdm/sledge/issues).
 

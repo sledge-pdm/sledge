@@ -14,7 +14,7 @@
     "lint:css": "stylelint \"**/*.{css,scss}\" --config .stylelintrc.json",
     "cargo:format": "cd packages/wasm && cargo fmt && cd ../../apps/sledge/src-tauri && cargo fmt",
     "format": "pnpm prettier && pnpm cargo:format",
-    "prepare": "husky"
+    "prepare": ""
   },
   "devDependencies": {
     "@acab/ecsstatic": "^0.9.0",

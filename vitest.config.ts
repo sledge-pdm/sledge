@@ -9,8 +9,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
-    env: dotenv.config({ path: 'configs/test/.env.vitest' }).parsed,
-    setupFiles: [path.resolve(__dirname, 'configs/test/vitest.setup.ts')],
+    env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
+    setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
     // app-level integration tests + feature-local unit tests
     include: [
       'apps/sledge/test/**/*.test.ts',

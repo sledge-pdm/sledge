@@ -36,11 +36,11 @@
 | Platform | Availability   | Status             | Detail                 |
 | -------- | -------------- | ------------------ | ---------------------- |
 | Windows  | **Available.** | :white_check_mark: | _Stable._              |
-| MacOS    | **Available.** | :white_check_mark: | _Almost stable._       |
+| Mac      | **Available.** | :white_check_mark: | _Almost stable._       |
 | Linux    | **Available.** | :warning:          | _Unstable._            |
 | Mobile   | Not available. | :zzz:              | _No builds available._ |
 
-> We need testers for MacOS/Linux builds! Please post any feedback in [Discussions](https://github.com/sledge-pdm/sledge/discussions) or report bugs in [Issues](https://github.com/sledge-pdm/sledge/issues).
+> We need testers for Mac/Linux builds! Please post any feedback in [Discussions](https://github.com/sledge-pdm/sledge/discussions) or report bugs in [Issues](https://github.com/sledge-pdm/sledge/issues).
 
 > Mobile build is planned in the future.
 

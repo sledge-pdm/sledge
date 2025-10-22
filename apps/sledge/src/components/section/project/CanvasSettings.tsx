@@ -12,18 +12,12 @@ import { saveGlobalSettings } from '~/features/io/config/save';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
+import { sectionContent } from '../SectionStyles';
 
 const canvasContentStyle = css`
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 16px;
   padding-bottom: 20px;
-`;
-
-const sizeRowStyle = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 `;
 
 const frameModeButtonContainerStyle = css`
@@ -41,6 +35,18 @@ const presetRowStyle = css`
   margin-bottom: 2px;
 `;
 
+const presetDropdownContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const presetLabel = css`
+  font-family: ZFB03;
+  margin-right: 8px;
+  color: var(--color-muted);
+`;
+
 const canvasSizeFormStyle = css`
   display: flex;
   align-items: flex-end;
@@ -53,6 +59,7 @@ const canvasSizeTimesStyle = css`
 `;
 
 const canvasSizeLabelStyle = css`
+  font-family: ZFB03;
   font-size: var(--text-sm);
   color: var(--color-muted);
   margin-bottom: 1px;
@@ -75,14 +82,13 @@ const defaultButtonContainerStyle = css`
   width: 100%;
   margin-top: 8px;
   align-items: end;
-  gap: 6px;
+  gap: 4px;
 `;
 
 const defaultInfoStyle = css`
   font-family: ZFB08;
   font-size: 8px;
-  margin-left: 4px;
-  opacity: 0.75;
+  opacity: 0.65;
 `;
 
 const actionsContainer = css`
@@ -170,86 +176,84 @@ const CanvasSettings: Component = () => {
   return (
     <SectionItem title='canvas.'>
       <div class={`${sectionContent} ${canvasContentStyle}`}>
-        <div class={sizeRowStyle}>
-          <p class={sectionSubCaption}>size.</p>
-        </div>
-        <div class={sectionSubContent}>
-          <div class={presetRowStyle}>
+        <div class={presetRowStyle}>
+          <div class={presetDropdownContainer}>
+            <p class={presetLabel}>preset</p>
             <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
-            <div
-              class={frameModeButtonContainerStyle}
-              onClick={async () => {
-                setInteractStore('isCanvasSizeFrameMode', (v) => !v);
-                if (interactStore.isCanvasSizeFrameMode) {
-                  setInteractStore('horizontalFlipped', false);
-                  setInteractStore('verticalFlipped', false);
-                  adjustZoomToFit();
-                  selectionManager.clear();
-                }
-              }}
-            >
-              <Icon
-                src={'/icons/misc/frame_resize_12.png'}
-                base={12}
-                scale={1}
-                color={interactStore.isCanvasSizeFrameMode ? color.error : undefined}
-                hoverColor={interactStore.isCanvasSizeFrameMode ? color.error : color.enabled}
-              />
-            </div>
           </div>
-          <div class={canvasSizeFormStyle}>
-            <div>
-              <p class={canvasSizeLabelStyle}>width</p>
-              <input
-                ref={(el) => (widthInputRef = el)}
-                class={canvasSizeInputStyle}
-                type='number'
-                name='width'
-                value={canvasStore.canvas.width}
-                min={Consts.minCanvasWidth}
-                max={Consts.maxCanvasWidth}
-                onInput={() => {
-                  updateButtonState();
-                  updateCurrentPreset();
-                }}
-                required
-              />
-            </div>
-
-            <p class={canvasSizeTimesStyle}>x</p>
-
-            <div>
-              <p class={canvasSizeLabelStyle}>height</p>
-              <input
-                ref={(el) => (heightInputRef = el)}
-                class={canvasSizeInputStyle}
-                type='number'
-                name='height'
-                value={canvasStore.canvas.height}
-                min={Consts.minCanvasHeight}
-                max={Consts.maxCanvasHeight}
-                onInput={() => {
-                  updateButtonState();
-                  updateCurrentPreset();
-                }}
-                required
-              />
-            </div>
-            <button
-              class={canvasSizeButtonStyle}
-              onClick={(e) => {
-                e.preventDefault();
-                submitSizeChange();
-              }}
-              disabled={!isChangable()}
-              style={{
-                color: isChangable() ? 'var(--color-active)' : undefined,
-                'border-color': isChangable() ? 'var(--color-active)' : undefined,
-              }}
-            >
-              apply
-            </button>
+          <div
+            class={frameModeButtonContainerStyle}
+            onClick={async () => {
+              setInteractStore('isCanvasSizeFrameMode', (v) => !v);
+              if (interactStore.isCanvasSizeFrameMode) {
+                setInteractStore('horizontalFlipped', false);
+                setInteractStore('verticalFlipped', false);
+                adjustZoomToFit();
+                selectionManager.clear();
+              }
+            }}
+          >
+            <Icon
+              src={'/icons/misc/frame_resize_12.png'}
+              base={12}
+              scale={1}
+              color={interactStore.isCanvasSizeFrameMode ? color.error : undefined}
+              hoverColor={interactStore.isCanvasSizeFrameMode ? color.error : color.enabled}
+            />
           </div>
+        </div>
+        <div class={canvasSizeFormStyle}>
+          <div>
+            <p class={canvasSizeLabelStyle}>width</p>
+            <input
+              ref={(el) => (widthInputRef = el)}
+              class={canvasSizeInputStyle}
+              type='number'
+              name='width'
+              value={canvasStore.canvas.width}
+              min={Consts.minCanvasWidth}
+              max={Consts.maxCanvasWidth}
+              onInput={() => {
+                updateButtonState();
+                updateCurrentPreset();
+              }}
+              required
+            />
+          </div>
+
+          <p class={canvasSizeTimesStyle}>x</p>
+
+          <div>
+            <p class={canvasSizeLabelStyle}>height</p>
+            <input
+              ref={(el) => (heightInputRef = el)}
+              class={canvasSizeInputStyle}
+              type='number'
+              name='height'
+              value={canvasStore.canvas.height}
+              min={Consts.minCanvasHeight}
+              max={Consts.maxCanvasHeight}
+              onInput={() => {
+                updateButtonState();
+                updateCurrentPreset();
+              }}
+              required
+            />
+          </div>
+          <button
+            class={canvasSizeButtonStyle}
+            onClick={(e) => {
+              e.preventDefault();
+              submitSizeChange();
+            }}
+            disabled={!isChangable()}
+            style={{
+              color: isChangable() ? 'var(--color-active)' : undefined,
+              'border-color': isChangable() ? 'var(--color-active)' : undefined,
+            }}
+          >
+            apply
+          </button>
         </div>
         <div class={defaultButtonContainerStyle}>
           <Button

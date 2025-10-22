@@ -384,7 +384,7 @@ const ConfigForm: Component<Props> = (props) => {
 
       <div class={configFormInfoAreaBottom}>
         <a class={configFormLink} onClick={loadDefaults}>
-          load defaults.
+          reset to default.
         </a>
         <a
           class={configFormLink}

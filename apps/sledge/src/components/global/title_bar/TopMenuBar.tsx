@@ -17,7 +17,7 @@ const topMenuBarRoot = css`
   display: flex;
   flex-direction: row;
   width: 100%;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-secondary);
   background-color: var(--color-controls);
   height: 28px;
   align-items: end;

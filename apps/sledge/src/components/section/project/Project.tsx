@@ -5,6 +5,7 @@ import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '../SectionStyles';
 
 const projectContentStyle = css`
+  margin-top: 4px;
   gap: 8px;
 `;
 

@@ -16,7 +16,8 @@ import { sectionContent, sectionSubCaption, sectionSubContent } from '../Section
 
 const canvasContentStyle = css`
   gap: 8px;
-  padding-bottom: 24px;
+  margin-top: 4px;
+  padding-bottom: 20px;
 `;
 
 const sizeRowStyle = css`

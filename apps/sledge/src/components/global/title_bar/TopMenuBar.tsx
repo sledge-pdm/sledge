@@ -1,14 +1,16 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
+import { color, fonts } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Update } from '@tauri-apps/plugin-updater';
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
-import { createNew, openProject } from '~/features/io/window';
+import { createNew, openExistingProject, openProject } from '~/features/io/window';
+import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
@@ -105,24 +107,43 @@ const TopMenuBar: Component = () => {
     setAvailableUpdate(update);
   });
 
-  const leftItems: Item[] = [
+  const leftItems = createMemo<Item[]>(() => [
     {
       id: 'project',
       text: 'Files.',
       action: () => {},
       menu: [
         {
+          type: 'item',
           label: '+ new project.',
           onSelect: () => {
             createNew();
           },
         },
         {
+          type: 'item',
           label: '> open project.',
           onSelect: () => {
             openProject();
           },
         },
+        { type: 'divider', label: 'recent' },
+        { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 },
+        ...fileStore.recentFiles
+          .map<MenuListOption | undefined>((loc) => {
+            if (!loc.name || !loc.path) return undefined;
+            return {
+              type: 'item',
+              label: normalizeJoin(loc.path, loc.name),
+              title: normalizeJoin(loc.path, loc.name),
+              fontFamily: fonts.ZFB03,
+              disabled: loc.path === fileStore.savedLocation.path && loc.name === fileStore.savedLocation.name,
+              onSelect() {
+                openExistingProject(loc);
+              },
+            };
+          })
+          .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
       ],
     },
     {
@@ -131,18 +152,21 @@ const TopMenuBar: Component = () => {
       action: () => {},
       menu: [
         {
+          type: 'item',
           label: 'Copy.',
           onSelect: () => {
             eventBus.emit('clipboard:doCopy', {});
           },
         },
         {
+          type: 'item',
           label: 'Cut.',
           onSelect: () => {
             eventBus.emit('clipboard:doCut', {});
           },
         },
         {
+          type: 'item',
           label: 'Paste.',
           onSelect: () => {
             eventBus.emit('clipboard:doPaste', {});
@@ -150,7 +174,7 @@ const TopMenuBar: Component = () => {
         },
       ],
     },
-  ];
+  ]);
   const rightItems: Item[] = [
     {
       id: 'settings',
@@ -164,7 +188,7 @@ const TopMenuBar: Component = () => {
   return (
     <div class={topMenuBarRoot}>
       <div class={menuListLeft}>
-        <For each={leftItems}>
+        <For each={leftItems()}>
           {(item, i) => {
             let containerRef: HTMLDivElement;
             const [menuOpen, setMenuOpen] = createSignal(false);

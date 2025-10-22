@@ -5,14 +5,14 @@ import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { join, pathToFileLocation } from '~/utils/FileUtils';
+import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 
 export async function importImageFromPath(location: FileLocation): Promise<boolean> {
   if (!location || !location.path || !location.name) {
     console.log('Invalid file location');
     return false;
   }
-  const path = join(location.path, location.name);
+  const path = normalizeJoin(location.path, location.name);
   const bitmap = await loadLocalImage(path);
   const imageData = await loadImageData(bitmap);
 

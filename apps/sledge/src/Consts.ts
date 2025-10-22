@@ -12,7 +12,7 @@ export const Consts = {
   projectThumbnailSize: 500,
 
   globalConfigFileName: 'global.json',
-  toolPresetsConfigFileName: 'tools.json',
+  editorStateFileName: 'editor_state.json',
 
   fileItemIndent: 8,
 

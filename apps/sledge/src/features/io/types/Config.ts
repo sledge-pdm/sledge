@@ -6,5 +6,4 @@ import { LastSettingsStore } from '~/stores/global/LastSettingsStore';
 export interface Config {
   globalConfigStore: GlobalConfig;
   keyConfigStore: KeyConfigStore;
-  lastSettingsStore: LastSettingsStore;
 }

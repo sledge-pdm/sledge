@@ -4,6 +4,9 @@ export type ImportableFileExtensions = (typeof importableFileExtensions)[number]
 export const exportableFileTypes = ['png', 'jpeg', 'webp_lossy', 'webp_lossless', 'svg'] as const;
 export type ExportableFileTypes = (typeof exportableFileTypes)[number];
 
+export const openableFileExtensions = ['sledge', ...importableFileExtensions] as const;
+export type OpenableFileExtensions = (typeof openableFileExtensions)[number];
+
 export function convertToLabel(extType: string): string | undefined {
   if (extType === 'png') return 'png';
   if (extType === 'jpeg') return 'jpeg';

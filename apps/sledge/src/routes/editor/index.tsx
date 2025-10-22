@@ -14,9 +14,9 @@ import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { saveLastProject } from '~/features/backup';
 import { adjustZoomToFit } from '~/features/canvas';
-import { loadToolPresets } from '~/features/config';
 import { addToImagePool } from '~/features/image_pool';
 import { loadGlobalSettings } from '~/features/io/config/load';
+import { loadEditorState } from '~/features/io/editor/load';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
@@ -77,8 +77,8 @@ export default function Editor() {
     unlisten = await getCurrentWindow().onCloseRequested(handleCloseRequest);
     try {
       await loadGlobalSettings();
+      await loadEditorState();
       await tryLoadProject();
-      await loadToolPresets();
       setIsLoading(false);
       adjustZoomToFit();
       await showMainWindow();

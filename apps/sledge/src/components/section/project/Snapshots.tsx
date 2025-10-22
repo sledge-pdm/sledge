@@ -14,7 +14,7 @@ import { useTimeAgoText } from '~/utils/TimeUtils';
 import { sectionContent } from '../SectionStyles';
 
 const snapshotSectionContent = css`
-  margin-top: 8px;
+  margin-top: 12px;
   gap: 8px;
 `;
 const settingsContainer = css`
@@ -180,7 +180,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
   };
 
   const createdAt = new Date(snapshot.createdAt);
-  const timeAgoText = useTimeAgoText(snapshot.createdAt);
+  const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(snapshot.createdAt);
 
   return (
     <div class={itemRoot}>
@@ -191,7 +191,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
         }}
       >
         <p class={itemName}>{snapshot.name}</p>
-        <p>{timeAgoText()}</p>
+        <p>{saveTimeText()}</p>
 
         <div
           style={{

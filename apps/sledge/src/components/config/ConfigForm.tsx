@@ -19,7 +19,7 @@ import { saveGlobalSettings } from '~/features/io/config/save';
 import { KeyConfigStore } from '~/stores/global/KeyConfigStore';
 import { globalConfig, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
 import { accentedButton, flexRow } from '~/styles/styles';
-import { join } from '~/utils/FileUtils';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';
 import KeyConfigSettings from './KeyConfigSettings';
@@ -389,7 +389,7 @@ const ConfigForm: Component<Props> = (props) => {
         <a
           class={configFormLink}
           onClick={async () => {
-            revealItemInDir(join(await appConfigDir(), Consts.globalConfigFileName));
+            revealItemInDir(normalizeJoin(await appConfigDir(), Consts.globalConfigFileName));
           }}
         >
           Open Config File.

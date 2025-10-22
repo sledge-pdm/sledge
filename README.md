@@ -16,11 +16,6 @@
 
 <img src="https://github.com/sledge-pdm/sledge-assets/blob/0a516e7a70669d60c370e400b2b2e83e74eb6c07/0827sledge_dark.png?raw=true" alt="the visual of sledge." width=500 />
 
-<br>
-<br>
-Sledge is a drawing tool.
-
-**Simple.**&nbsp;&nbsp;**Fast.**&nbsp;&nbsp;**Destructive.**
 
 </div>
 
@@ -31,13 +26,8 @@ Sledge is a drawing tool.
 * Image Import/Export (png, jpg, webp, svg)
 * Project History (Undo/Redo)
 * Copy and paste
-* Project snapshots
-* Image effects
-
-## Install
-
-1. Visit [sledge-rules.app](https://www.sledge-rules.app/) and download installer.
-2. Complete install as the instructions.
+* Project Snapshots
+* Image Effects
 
 ## Platform Supports
 
@@ -48,25 +38,30 @@ Sledge is a drawing tool.
 | Linux    | **Available.** | :warning:          | _Unstable._            |
 | Mobile   | Not available. | :zzz:              | _No builds available._ |
 
-> Need testers for MacOS/Linux builds! Post anything in [Discussions](https://github.com/sledge-pdm/sledge/discussions), or report bug in [Issues](https://github.com/sledge-pdm/sledge/issues).
+> We need testers for MacOS/Linux builds! Please post any feedback in [Discussions](https://github.com/sledge-pdm/sledge/discussions) or report bugs in [Issues](https://github.com/sledge-pdm/sledge/issues).
 
 > Mobile build is planned in the future.
+
+## Install
+
+1. Visit [sledge-rules.app](https://www.sledge-rules.app/) and download installer.
+2. Follow the instructions to complete the installation.
 
 ## Tech
 
 - [Tauri](https://github.com/tauri-apps/tauri) / main framework
-- [Vite](https://github.com/vitejs/vite) / dev server
-- [SolidJS](https://github.com/solidjs/solid) / frontend ui
+- [Vite](https://github.com/vitejs/vite) / development server
+- [SolidJS](https://github.com/solidjs/solid) / frontend UI
 - [ecsstatic](https://www.ecsstatic.dev/) / stylesheet generation
 - [anvil](https://github.com/sledge-pdm/anvil) / image buffer operation
 - [WebGL2](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API) / layer blend & rendering
 - [mitt](https://github.com/developit/mitt) / eventbus
 - [msgpackr](https://github.com/kriszyp/msgpackr/issues) / project file compression
-- [wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen)+[wasm-pack](https://github.com/drager/wasm-pack) / fast operations using rust (ex. floodfill)
+- [wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen)+[wasm-pack](https://github.com/drager/wasm-pack) / fast operations using Rust (e.g., flood fill)
 
 ## Fonts
 
-- [04b_XX](http://www.04.jp.org) / _by yuji oshimoto (04.jp.org)_
-- [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) / _by num_kadoma (littlelimit.net)_
-- [PixelMPlus](https://itouhiro.hatenablog.com/entry/20130602/font) / _by itouhiro (itouhiro.hatenablog.com)_
+- [04b_XX](http://www.04.jp.org) / _by Yuji Oshimoto (04.jp.org)_
+- [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) / _by Num_kadoma (littlelimit.net)_
+- [PixelMPlus](https://itouhiro.hatenablog.com/entry/20130602/font) / _by Itouhiro (itouhiro.hatenablog.com)_
 - [Terminus](https://files.ax86.net/terminus-ttf/) / _by Dimitar Zhekov_

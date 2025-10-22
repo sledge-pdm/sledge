@@ -6,36 +6,41 @@ import { openDevTools } from '~/utils/WindowUtils';
 
 export const ContextMenuItems: { [key: string]: MenuListOption } = {
   DevRefresh: {
+    type: 'item',
     label: '[dev] Refresh',
-    icon: '/icons/misc/refresh.png',
+    icon: '/icons/context_menu/refresh.png',
     onSelect: () => {
       location.reload();
     },
   },
   DevOpenDevTools: {
+    type: 'item',
     label: '[dev] Open DevTools',
-    icon: '/icons/misc/devtools.png',
+    icon: '/icons/context_menu/devtools.png',
     onSelect: async () => {
       await openDevTools(getCurrentWebview().label);
     },
   },
   Undo: {
+    type: 'item',
     label: 'Undo',
-    icon: '/icons/misc/undo.png',
+    icon: '/icons/context_menu/undo.png',
     onSelect: () => {
       projectHistoryController.undo();
     },
   },
   Redo: {
+    type: 'item',
     label: 'Redo',
-    icon: '/icons/misc/redo.png',
+    icon: '/icons/context_menu/redo.png',
     onSelect: () => {
       projectHistoryController.redo();
     },
   },
   Save: {
+    type: 'item',
     label: 'Save Project',
-    icon: '/icons/misc/save.png',
+    icon: '/icons/context_menu/save.png',
     onSelect: async () => {
       await saveProject();
     },
@@ -43,35 +48,43 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   // BaseXxx = only label and icon. Use like: {...BaseXxx, onSelect: () => {} }
   // Registration for label+icon combinations only.
   BaseRemove: {
+    type: 'item',
     label: 'Remove',
-    icon: '/icons/misc/remove.png',
+    icon: '/icons/context_menu/remove.png',
   },
   BaseDuplicate: {
+    type: 'item',
     label: 'Duplicate',
-    icon: '/icons/misc/duplicate.png',
+    icon: '/icons/context_menu/duplicate.png',
   },
   BaseClear: {
+    type: 'item',
     label: 'Clear',
-    icon: '/icons/misc/clear.png',
+    icon: '/icons/context_menu/clear.png',
   },
   BaseMergeDown: {
+    type: 'item',
     label: 'Merge Down',
-    icon: '/icons/misc/merge_down.png',
+    icon: '/icons/context_menu/merge_down.png',
   },
   BaseImageShow: {
+    type: 'item',
     label: 'Show',
-    icon: '/icons/misc/show_image.png',
+    icon: '/icons/context_menu/show_image.png',
   },
   BaseImageHide: {
+    type: 'item',
     label: 'Hide',
-    icon: '/icons/misc/hide_image.png',
+    icon: '/icons/context_menu/hide_image.png',
   },
   BaseTransfer: {
+    type: 'item',
     label: 'Transfer to layer',
-    icon: '/icons/misc/transfer.png',
+    icon: '/icons/context_menu/transfer.png',
   },
   BaseTransferRemove: {
+    type: 'item',
     label: 'Transfer and Remove',
-    icon: '/icons/misc/transfer_and_remove.png',
+    icon: '/icons/context_menu/transfer_and_remove.png',
   },
 };

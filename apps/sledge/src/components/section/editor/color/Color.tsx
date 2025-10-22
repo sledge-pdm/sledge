@@ -12,52 +12,33 @@ import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools
 import { colorStore } from '~/stores/EditorStores';
 import { flexRow } from '~/styles/styles';
 
-const swatchHeader = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 8px;
-`;
-
 const swatchContainer = css`
   display: flex;
   flex-direction: row;
   position: relative;
   gap: var(--spacing-xs);
-  margin-left: 8px;
-  margin-bottom: var(--spacing-lg);
-`;
-
-const colorElemDescription = css`
-  font-family: ZFB03;
-  opacity: 0.25;
-  font-size: 8px;
-  transform: rotate(180deg);
-  white-space: nowrap;
-  writing-mode: vertical-rl;
+  margin-top: 8px;
+  margin-bottom: 12px;
 `;
 
 const colorContent = css`
   display: flex;
   flex-direction: column;
-  margin-left: 4px;
 `;
 
 const pickerToolContainer = css`
   display: flex;
   flex-direction: column;
   margin-top: auto;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   margin-left: 24px;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
 `;
 
 const pipetteContainer = css`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: fit-content;
   cursor: pointer;
   pointer-events: all;
 `;
@@ -83,17 +64,6 @@ const Color: Component = () => {
   return (
     <SectionItem title='color.'>
       <div class={sectionContent}>
-        <div class={swatchHeader}>
-          {/* <div class={swatchDropdownContainer}>
-            <Dropdown
-              noBackground
-              align={'left'}
-              value={colorStore.currentSwatchName}
-              options={swatchDropdownOptions()}
-              onChange={(v) => setCurrentSwatch(v)}
-            />
-          </div> */}
-        </div>
         <div class={swatchContainer}>
           <For each={currentSwatch()?.colors}>
             {(item, index) => (
@@ -108,18 +78,7 @@ const Color: Component = () => {
           </For>
         </div>
 
-        {/* <div class={flexRow} style={{ 'margin-bottom': '8px', 'align-items': 'center', 'margin-right': '8px' }}>
-          <div class={flexRow} style={{ gap: '8px' }}>
-            <a>RGB</a>
-            <a>HSV</a>
-          </div>
-        </div> */}
-
         <div class={flexRow}>
-          <div>
-            <p class={colorElemDescription}>picker.</p>
-          </div>
-
           <ColorPicker width={140} />
 
           <div class={colorContent}>
@@ -128,10 +87,11 @@ const Color: Component = () => {
             <div class={pickerToolContainer}>
               <div class={pipetteContainer} onClick={() => setActiveToolCategory('pipette')}>
                 <Icon
-                  src={'/icons/misc/pipette.png'}
+                  src={'/icons/tool_bar/tool/pipette.png'}
                   base={8}
                   scale={2}
                   color={getActiveToolCategoryId() === 'pipette' ? color.active : color.onBackground}
+                  hoverColor={color.active}
                 />
               </div>
             </div>

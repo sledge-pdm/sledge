@@ -37,6 +37,10 @@ class FloatingMoveManager {
   private logger = new DebugLogger(this.LOG_LABEL, false);
 
   private targetLayerId: string | undefined = undefined;
+
+  public getTargetLayerId(): string | undefined {
+    return this.targetLayerId;
+  }
   private targetBufferOriginal:
     | {
         buffer: Uint8Array;
@@ -50,7 +54,7 @@ class FloatingMoveManager {
   private movePreviewBuffer: Uint8ClampedArray | undefined = undefined; // should be same size as layer/canvas.
   private state: MoveMode | undefined = undefined;
 
-  public getPreviewBuffer() {
+  public getPreviewBuffer(): Uint8ClampedArray | undefined {
     return this.movePreviewBuffer;
   }
 
@@ -89,7 +93,7 @@ class FloatingMoveManager {
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
     const anvil = getAnvilOf(targetLayerId);
     if (!anvil) return;
-    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferData().buffer), anvil.getWidth(), anvil.getHeight());
+    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight());
     if (!webpBuffer) return;
     this.targetBufferOriginal = {
       buffer: webpBuffer,
@@ -112,12 +116,11 @@ class FloatingMoveManager {
       target: this.targetBuffer,
     });
 
-    eventBus.emit('floatingMove:moved', {});
-    eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
 
-    eventBus.emit('floatingMove:stateChanged', { moving: true });
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSelectionPath', {});
   }
 
   public async moveDelta(delta: Vec2) {
@@ -159,10 +162,10 @@ class FloatingMoveManager {
       target: this.targetBuffer,
     });
 
-    eventBus.emit('floatingMove:moved', {});
-    eventBus.emit('selection:offsetChanged', { newOffset: this.floatingBuffer.offset });
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
+    eventBus.emit('selection:updateSelectionMenu', {});
+    eventBus.emit('selection:updateSelectionPath', {});
 
     return this.floatingBuffer;
   }
@@ -191,18 +194,20 @@ class FloatingMoveManager {
     if (orig) registerWholeChange(this.targetLayerId, new Uint8ClampedArray(orig.buffer));
     const patch = flushPatch(this.targetLayerId);
     if (patch) {
-      projectHistoryController.addAction(new AnvilLayerHistoryAction(this.targetLayerId, patch, { tool: TOOL_CATEGORIES.MOVE }));
+      projectHistoryController.addAction(
+        new AnvilLayerHistoryAction({
+          layerId: this.targetLayerId,
+          patch,
+          context: { tool: TOOL_CATEGORIES.MOVE },
+        })
+      );
     }
-    eventBus.emit('floatingMove:committed', {});
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
     } else {
       const newOffset = this.floatingBuffer.offset;
       selectionManager.shiftOffset(newOffset);
       selectionManager.commitOffset();
-
-      eventBus.emit('selection:offsetChanged', { newOffset });
-      eventBus.emit('selection:maskChanged', { commit: true });
     }
 
     // Reset the state
@@ -210,23 +215,21 @@ class FloatingMoveManager {
     this.floatingBuffer = undefined;
     this.targetLayerId = undefined;
     this.targetBuffer = undefined;
-    eventBus.emit('floatingMove:stateChanged', { moving: false });
+
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
     eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
+
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 
   public cancel() {
-    //cancel
-    if (this.getState() === 'layer' || this.getState() === 'pasted') {
-      selectionManager.clear();
-    }
     // Reset the state
     this.state = undefined;
     this.floatingBuffer = undefined;
-    this.targetLayerId = undefined;
-    this.targetBuffer = undefined;
 
-    eventBus.emit('floatingMove:stateChanged', { moving: false });
+    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+    eventBus.emit('selection:updateSelectionPath', { immediate: true });
   }
 }
 

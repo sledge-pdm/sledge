@@ -1,4 +1,3 @@
-import { saveToolPresets } from '~/features/config';
 import { activeLayer } from '~/features/layer';
 import { PresetConfig, ToolCategory, ToolCategoryId } from '~/features/tools/Tools';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
@@ -45,12 +44,10 @@ export function setActiveToolCategory(toolCategory: ToolCategoryId) {
 
 export const updateToolPresetConfig = (toolId: ToolCategoryId, presetName: string, key: string, value: any) => {
   setToolStore('tools', toolId, 'presets', 'options', presetName, key, value);
-  saveToolPresets();
 };
 
 export const setActiveToolPreset = (toolId: ToolCategoryId, presetName: string) => {
   setToolStore('tools', toolId, 'presets', 'selected', presetName);
-  saveToolPresets();
 };
 
 export const getCurrentPresetConfig = (toolId: ToolCategoryId): Record<string, any> | undefined => {

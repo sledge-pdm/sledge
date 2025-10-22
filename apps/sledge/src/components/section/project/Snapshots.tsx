@@ -3,23 +3,24 @@ import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-j
 import { css } from '@acab/ecsstatic';
 import { webpToRaw } from '@sledge/anvil';
 import { clsx } from '@sledge/core';
-import { Icon, ToggleSwitch } from '@sledge/ui';
+import { Icon } from '@sledge/ui';
+import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
 import { deleteSnapshot, loadSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { snapshotStore } from '~/stores/ProjectStores';
-import { errorButton } from '~/styles/styles';
+import { enabledButton, errorButton } from '~/styles/styles';
+import { useTimeAgoText } from '~/utils/TimeUtils';
 import { sectionContent } from '../SectionStyles';
 
 const snapshotSectionContent = css`
-  padding-left: 4px;
+  margin-top: 12px;
   gap: 8px;
 `;
 const settingsContainer = css`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 8px;
-  margin-left: 12px;
   justify-content: start;
 `;
 const buttonsContainer = css`
@@ -27,12 +28,12 @@ const buttonsContainer = css`
   flex-direction: row;
   gap: 8px;
   justify-content: end;
+  margin-top: 8px;
 `;
 const snapshotsContainer = css`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
 `;
 const noSnapshotsText = css`
   color: var(--color-muted);
@@ -43,14 +44,14 @@ const noSnapshotsText = css`
 const Snapshots: Component = () => {
   const [backupBeforeRestore, setBackupBeforeRestore] = createSignal(false);
 
-  // ソート処理をメモ化してパフォーマンス向上
   const sortedSnapshots = createMemo(() => snapshotStore.snapshots.toSorted((a, b) => b.createdAt - a.createdAt));
 
   return (
     <SectionItem title='snapshots.'>
       <div class={clsx(sectionContent, snapshotSectionContent)}>
         <div class={settingsContainer}>
-          <ToggleSwitch
+          <AutoSnapshot />
+          {/* <ToggleSwitch
             checked={backupBeforeRestore()}
             onChange={(v) => {
               setBackupBeforeRestore(v);
@@ -58,10 +59,11 @@ const Snapshots: Component = () => {
             labelMode='right'
           >
             backup before restore.
-          </ToggleSwitch>
+          </ToggleSwitch> */}
         </div>
         <div class={buttonsContainer}>
           <button
+            class={enabledButton}
             onClick={async () => {
               await registerCurrentProjectSnapshot();
             }}
@@ -107,7 +109,6 @@ const itemHeader = css`
   flex-direction: row;
   width: 100%;
   padding: 6px 10px;
-  align-items: center;
   cursor: pointer;
   background-color: var(--color-button-bg);
   &:hover {
@@ -121,6 +122,11 @@ const itemName = css`
   font-family: ZFB21;
   text-transform: uppercase;
   margin-right: auto;
+`;
+const agoText = css`
+  opacity: 0.75;
+  white-space: nowrap;
+  margin-right: 8px;
 `;
 const itemContent = css`
   display: flex;
@@ -178,6 +184,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
   };
 
   const createdAt = new Date(snapshot.createdAt);
+  const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(snapshot.createdAt);
 
   return (
     <div class={itemRoot}>
@@ -188,8 +195,11 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
         }}
       >
         <p class={itemName}>{snapshot.name}</p>
+        <p class={agoText}>{saveTimeText()}</p>
+
         <div
           style={{
+            height: 'fit-content',
             transform: expanded() ? 'none' : 'rotate(180deg)',
           }}
         >

@@ -1,5 +1,5 @@
 import { webpToRaw } from '@sledge/anvil';
-import { replaceAllEntries } from '~/features/image_pool';
+import { projectHistoryController } from '~/features/history';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
@@ -37,7 +37,7 @@ export function loadV0(project: ProjectV0) {
   setImagePoolStore(project.imagePoolStore);
 
   if (project.imagePool && Array.isArray(project.imagePool)) {
-    replaceAllEntries(project.imagePool);
+    setImagePoolStore('entries', project.imagePool);
   }
   eventBus.emit('canvas:sizeChanged', { newSize: project.canvasStore.canvas });
 
@@ -64,10 +64,6 @@ export function loadV1(project: ProjectV1) {
   if (project.imagePool) setImagePoolStore(project.imagePool.store);
   if (project.snapshots) setSnapshotStore(project.snapshots.store);
 
-  if (project.imagePool && Array.isArray(project.imagePool)) {
-    replaceAllEntries(project.imagePool);
-  }
-
   const canvasSize = canvasStore.canvas;
   eventBus.emit('canvas:sizeChanged', { newSize: canvasSize });
 
@@ -84,4 +80,8 @@ export function loadV1(project: ProjectV1) {
       anvilManager.registerAnvil(layer.id, newBuffer, canvasSize.width, canvasSize.height);
     }
   });
+
+  if (project.history && project.history.undoStack && project.history.redoStack) {
+    projectHistoryController.setSerialized(project.history.undoStack, project.history.redoStack);
+  }
 }

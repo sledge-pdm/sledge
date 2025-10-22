@@ -2,13 +2,14 @@ import { Size2D, Vec2 } from '@sledge/core';
 import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
-import { projectHistoryController } from '~/features/history';
-import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
+import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
+import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
 import { allLayers } from '~/features/layer';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
+import { WindowPos } from '~/types/CoordinateTypes';
 import { eventBus } from '~/utils/EventBus';
 
 export function isValidCanvasSize(size: Size2D): boolean {
@@ -66,10 +67,10 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   const oldSize = { width: canvasStore.canvas.width, height: canvasStore.canvas.height };
   srcOrigin = srcOrigin ?? { x: 0, y: 0 };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && srcOrigin.x === 0 && srcOrigin.y === 0) return false;
-  // CanvasSizeHistoryAction uses the "current" canvas size and buffer as an old state, so must be called before resizing buffers.
-  const act = new CanvasSizeHistoryAction(oldSize, newSize, { from: 'changeCanvasSize' });
-
-  if (!skipHistory) act.registerBefore();
+  const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
+  if (!skipHistory) {
+    act.registerBefore();
+  }
 
   setCanvasStore('canvas', newSize);
   eventBus.emit('canvas:sizeChanged', { newSize });
@@ -96,7 +97,17 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   return true;
 }
 
-const referenceLengthRatio = 0.75;
+export function getMinZoom() {
+  return interactStore.zoomMinFromInitial * interactStore.initialZoom;
+}
+export function getMaxZoom() {
+  return interactStore.zoomMaxFromInitial * interactStore.initialZoom;
+}
+export function clipZoom(zoom: number) {
+  return Math.max(getMinZoom(), Math.min(getMaxZoom(), zoom));
+}
+
+const referenceLengthRatio = 0.85;
 const referenceLength = () => {
   const sectionBetweenArea = document.getElementById('sections-between-area');
   if (!sectionBetweenArea) return 800 * referenceLengthRatio;
@@ -129,8 +140,11 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
+  // reset initialzoom
+  setInteractStore('initialZoom', referencedZoom);
 
   setZoom(referencedZoom);
+
   centeringCanvas();
 };
 
@@ -153,38 +167,12 @@ export const centeringCanvas = () => {
     y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
   });
   setRotation(0);
-
-  eventBus.emit('canvas:onAdjusted', {});
-};
-
-export const setZoomByReference = (zoomByReference: number): boolean => {
-  const referencedZoom = getReferencedZoom() ?? 1;
-  let zoom = zoomByReference * referencedZoom;
-  zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
-  if (zoom > 0 && zoom !== interactStore.zoom) {
-    setInteractStore('zoom', zoom);
-    zoomByReference =
-      Math.round(zoomByReference * Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits)) /
-      Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits);
-    setInteractStore('zoomByReference', zoomByReference);
-    return true;
-  }
-  return false;
 };
 
 export const setZoom = (zoom: number): boolean => {
-  const rawZoom = zoom;
-  zoom = Math.round(zoom * Math.pow(10, Consts.zoomPrecisionSignificantDigits)) / Math.pow(10, Consts.zoomPrecisionSignificantDigits);
   if (zoom > 0 && zoom !== interactStore.zoom) {
+    zoom = Math.min(getMaxZoom(), Math.max(getMinZoom(), zoom));
     setInteractStore('zoom', zoom);
-
-    const referencedZoom = getReferencedZoom() ?? 1;
-    let zoomByReference = rawZoom / referencedZoom;
-
-    zoomByReference =
-      Math.round(zoomByReference * Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits)) /
-      Math.pow(10, Consts.zoomByReferencePrecisionSignificantDigits);
-    setInteractStore('zoomByReference', zoomByReference);
     return true;
   }
   return false;
@@ -196,32 +184,121 @@ export const setOffset = (offset: { x: number; y: number }) => {
   }
 };
 
-export const setRotation = (rotation: number) => {
+export const normalizeRotation = (rotation: number) => {
   // 内部表現を (-180, 180] の範囲に正規化して管理する
   // 例: 270 -> -90, -181 -> 179
   let r = rotation % 360; // JS の % は符号を保持する
-  if (r > 180) r -= 360; // 181..359 -> -179..-1
-  if (r <= -180) r += 360; // ... -360..-180 -> 0..180 ( -180 は 180 に統一 )
-  r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
+  if (r > 180) r -= 360;
+  if (r < -180) r += 360;
+  // r = Math.round(r * Math.pow(10, Consts.rotationPrecisionSignificantDigits)) / Math.pow(10, Consts.rotationPrecisionSignificantDigits);
+
+  return r;
+};
+
+export const setRotation = (rotation: number) => {
+  const r = normalizeRotation(rotation);
   if (r !== interactStore.rotation) setInteractStore('rotation', r);
 };
 
+export function zoomTowardWindowPos(centerWindowPos: WindowPos, zoomNew: number) {
+  const zoomOld = interactStore.zoom;
+
+  // ズーム前の座標系でキャンバス座標を計算
+  const centerCanvasPos = coordinateTransform.windowToCanvas(centerWindowPos);
+
+  // ズームを適用
+  const zoomChanged = setZoom(zoomNew);
+
+  // ズーム中心を維持するための標準的な計算式
+  const dx = centerCanvasPos.x * (zoomOld - zoomNew);
+  const dy = centerCanvasPos.y * (zoomOld - zoomNew);
+
+  setOffset({
+    x: interactStore.offset.x + dx,
+    y: interactStore.offset.y + dy,
+  });
+
+  return zoomChanged;
+}
+
+export function zoomTowardAreaCenter(zoomNew: number) {
+  const zoomOld = interactStore.zoom;
+
+  const betweenAreaCenter = document.getElementById('between-area-center');
+  if (!betweenAreaCenter) {
+    return;
+  }
+  const betweenAreaCenterRect = betweenAreaCenter.getBoundingClientRect();
+
+  // ズーム中心のウィンドウ座標
+  const centerWindowPos = WindowPos.create(
+    betweenAreaCenterRect.left + betweenAreaCenterRect.width / 2,
+    betweenAreaCenterRect.top + betweenAreaCenterRect.height / 2
+  );
+
+  // ズーム前の座標系でキャンバス座標を計算
+  const centerCanvasPos = coordinateTransform.windowToCanvas(centerWindowPos);
+
+  // ズームを適用
+  const zoomChanged = setZoom(zoomNew);
+
+  // ズーム中心を維持するための標準的な計算式
+  // ズーム変更によるオフセット調整
+  const dx = centerCanvasPos.x * (zoomOld - zoomNew);
+  const dy = centerCanvasPos.y * (zoomOld - zoomNew);
+
+  setOffset({
+    x: interactStore.offset.x + dx,
+    y: interactStore.offset.y + dy,
+  });
+
+  return zoomChanged;
+}
+
+export function rotateInAreaCenter(rotation: number) {
+  const betweenAreaCenter = document.getElementById('between-area-center');
+  if (!betweenAreaCenter) {
+    return;
+  }
+  const betweenAreaCenterRect = betweenAreaCenter.getBoundingClientRect();
+  rotateInCenter(WindowPos.create(betweenAreaCenterRect.left, betweenAreaCenterRect.top), rotation);
+}
+
+export function rotateInCenter(centerWindowPosition: WindowPos, rotation: number) {
+  // 回転前の座標系で回転中心のキャンバス座標を計算
+  const centerCanvasPos = coordinateTransform.windowToCanvas(centerWindowPosition);
+
+  // 回転を適用
+  setRotation(rotation);
+
+  // 回転後に同じキャンバス座標が同じウィンドウ座標になるよう逆算
+  const expectedWindowPos = coordinateTransform.canvasToWindow(centerCanvasPos);
+
+  // 期待するウィンドウ座標と実際のウィンドウ座標の差分をオフセットに反映
+  const deltaWindowX = centerWindowPosition.x - expectedWindowPos.x;
+  const deltaWindowY = centerWindowPosition.y - expectedWindowPos.y;
+
+  setOffset({
+    x: interactStore.offset.x + deltaWindowX,
+    y: interactStore.offset.y + deltaWindowY,
+  });
+}
 export const toggleVerticalFlip = () => {
   setInteractStore('verticalFlipped', (v) => !v);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 export const setVerticalFlip = (flipped: boolean) => {
   setInteractStore('verticalFlipped', flipped);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const toggleHorizontalFlip = () => {
   setInteractStore('horizontalFlipped', (v) => !v);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 export const setHorizontalFlip = (flipped: boolean) => {
   setInteractStore('horizontalFlipped', flipped);
-  eventBus.emit('selection:requestMenuUpdate', {});
+  eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const resetOrientation = () => {

@@ -17,12 +17,12 @@ export const pageRoot = css`
   flex-direction: column;
   width: 320px;
   height: 100%;
-  padding: 3.5rem 4.5rem 3rem 3.5rem;
+  padding: 4rem 4rem 4rem 4rem;
 
   @media (max-width: 599px) {
     box-sizing: border-box;
     width: 100%;
     height: auto;
-    padding: 3rem 2rem 6rem 2rem;
+    padding: 3.5rem 2rem 4rem 2rem;
   }
 `;

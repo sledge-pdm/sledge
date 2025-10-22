@@ -60,7 +60,7 @@ export const accentedButton = css`
   pointer-events: all;
 
   &:hover {
-    color: #ffffff;
+    color: var(--color-button-text-on-accent);
     background: var(--color-accent);
   }
 

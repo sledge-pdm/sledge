@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
-import { Component, createMemo, Show } from 'solid-js';
+import createRAF, { targetFPS } from '@solid-primitives/raf';
+import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
 import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
 import PipetteDetail from '~/components/canvas/overlays/cursors/PipetteDetail';
@@ -13,22 +14,32 @@ import { globalConfig } from '~/stores/GlobalStores';
 const CursorOverlay: Component = () => {
   const canShowCursor = createMemo(() => interactStore.isMouseOnCanvas && isToolAllowedInCurrentLayer(getActiveToolCategory()));
 
-  const cursorElement = (pos: Vec2) => {
-    switch (globalConfig.editor.cursor) {
-      case 'pixel':
-        return <PixelCursor mousePos={{ x: pos.x, y: pos.y }} />;
-      case 'cross':
-        return <CrossCursor mousePos={{ x: pos.x, y: pos.y }} />;
-    }
+  const [mousePos, setMousePos] = createSignal<Vec2>({ x: 0, y: 0 });
+  const [running, start, stop] = createRAF(
+    targetFPS(() => {
+      setMousePos(interactStore.lastMouseWindow);
+    }, 60)
+  );
 
-    return <CrossCursor mousePos={{ x: pos.x, y: pos.y }} />;
-  };
+  onMount(() => {
+    start();
+  });
 
   return (
     <>
-      <Show when={canShowCursor()}>{cursorElement(interactStore.lastMouseWindow)}</Show>
-
-      <Show when={toolStore.activeToolCategory === TOOL_CATEGORIES.PIPETTE && !floatingMoveManager.isMoving()}>
+      <Show
+        when={toolStore.activeToolCategory === TOOL_CATEGORIES.PIPETTE && !floatingMoveManager.isMoving()}
+        fallback={
+          <Show when={canShowCursor()}>
+            <Show when={globalConfig.editor.cursor === 'pixel'}>
+              <PixelCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
+            </Show>
+            <Show when={globalConfig.editor.cursor === 'cross'}>
+              <CrossCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
+            </Show>
+          </Show>
+        }
+      >
         <PipetteCursor mousePos={interactStore.lastMouseWindow} />
         <PipetteDetail />
       </Show>

@@ -121,7 +121,7 @@ describe('Project dump/load roundtrip', () => {
     // Verify buffer was restored correctly (at least the non-zero pixels)
     const restoredAnvil = anvilManager.getAnvil(layer.id);
     expect(restoredAnvil).toBeDefined();
-    const restoredBuffer = restoredAnvil!.getImageData();
+    const restoredBuffer = restoredAnvil!.getBufferCopy();
     expect(restoredBuffer[0]).toBe(255); // Red channel of first pixel
     expect(restoredBuffer[3]).toBe(255); // Alpha channel of first pixel
   });
@@ -152,8 +152,8 @@ describe('Project dump/load roundtrip', () => {
         isProjectChangedAfterSave: true,
         lastSavedAt: new Date(),
         lastSavedPath: undefined,
-        autoSaveEnabled: false,
-        autoSaveInterval: 60,
+        autoSnapshotEnabled: false,
+        autoSnapshotInterval: 60,
       },
       layerListStore: {
         layers: [layer],
@@ -161,10 +161,7 @@ describe('Project dump/load roundtrip', () => {
         baseLayer: { colorMode: 'transparent' },
         isImagePoolActive: false,
       },
-      imagePoolStore: {
-        selectedEntryId: undefined,
-        preserveAspectRatio: true,
-      },
+      imagePoolStore: { entries: [], selectedEntryId: undefined, preserveAspectRatio: true },
       layerBuffers: new Map([[layer.id, buf]]),
       imagePool: [],
     };

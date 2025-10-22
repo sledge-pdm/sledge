@@ -12,6 +12,7 @@ export type GlobalConfig = {
   };
   default: {
     open: 'new' | 'last';
+    addOnlySavedProjectToLastOpened: boolean;
     canvasSize: { width: number; height: number };
   };
   editor: {
@@ -23,6 +24,7 @@ export type GlobalConfig = {
     requireConfirmBeforeLayerRemove: boolean;
     maxHistoryItemsCount: number;
     touchRotationZeroSnapThreshold: number;
+    rulerMarkDirection: 'outward' | 'inward';
   };
   performance: {
     targetFPS: FPS;
@@ -41,6 +43,7 @@ export const defaultConfig: GlobalConfig = {
   },
   default: {
     open: 'last',
+    addOnlySavedProjectToLastOpened: false,
     canvasSize: { width: 1024, height: 1024 },
   },
   editor: {
@@ -52,6 +55,7 @@ export const defaultConfig: GlobalConfig = {
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
     touchRotationZeroSnapThreshold: 5,
+    rulerMarkDirection: 'inward',
   },
   performance: {
     canvasRenderingMode: 'adaptive',

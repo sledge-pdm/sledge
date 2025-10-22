@@ -14,102 +14,56 @@
 
 <br>
 
-<img src="https://github.com/sledge-pdm/sledge-assets/blob/0a516e7a70669d60c370e400b2b2e83e74eb6c07/0827sledge_dark.png?raw=true" alt="the visual of sledge." width=600 />
+<img src="https://github.com/sledge-pdm/sledge-assets/blob/0a516e7a70669d60c370e400b2b2e83e74eb6c07/0827sledge_dark.png?raw=true" alt="the visual of sledge." width=500 />
 
-<br>
-Sledge is a drawing tool.
-
-**Simple.**&nbsp;&nbsp;&nbsp;**Fast.**&nbsp;&nbsp;&nbsp;**Destructive.**
 
 </div>
 
-<br>
+## Features
 
-## Platform Support
+* Pen, Eraser, Fill
+* Selection (rect, auto, lasso)
+* Image Import/Export (png, jpg, webp, svg)
+* Project History (Undo/Redo)
+* Copy and paste
+* Project Snapshots
+* Image Effects
 
-| Platform | Status                  | Detail                                   |
-| -------- | ----------------------- | ---------------------------------------- |
-| Windows  | :white_check_mark:      | _mostly OK._                             |
-| MacOS    | :white_check_mark:      | _almost OK. there's some ui/ux problem._ |
-| Linux    | :ballot_box_with_check: | _NOTOK. barely usable._                  |
-| Mobile   | :zzz:                   | _No builds available._                   |
+- ...and the ***ＲＡＤ*** user interface, as you see.
+
+## Platform Supports
+
+| Platform | Availability   | Status             | Detail                 |
+| -------- | -------------- | ------------------ | ---------------------- |
+| Windows  | **Available.** | :white_check_mark: | _Stable._              |
+| Mac      | **Available.** | :white_check_mark: | _Almost stable._       |
+| Linux    | **Available.** | :warning:          | _Unstable._            |
+| Mobile   | Not available. | :zzz:              | _No builds available._ |
+
+> We need testers for Mac/Linux builds! Please post any feedback in [Discussions](https://github.com/sledge-pdm/sledge/discussions) or report bugs in [Issues](https://github.com/sledge-pdm/sledge/issues).
+
+> Mobile build is planned in the future.
 
 ## Install
 
-1. Visit [sledge-rules.app](https://www.sledge-rules.app/) to download installer.
-2. Run the installer and complete install.
-3. Run sledge.
-
-<details>
-
-<summary>For Mac users</summary>
-
-MacOS will report an "App is Damaged" error when running sledge by double click.
-Run command below to prevent:
-
-```bash
-xattr -rc /Applications/sledge.app
-```
-
-</details>
-
-<br>
-
-## Features
-
-<details>
-<summary>WIP status</summary>
-
-| Category         | Feature               | Status | Notes                                                       |
-| ---------------- | --------------------- | ------ | ----------------------------------------------------------- |
-| **Interactions** | Mouse                 | ✅      |                                                             |
-|                  | Pen                   | ✅      |                                                             |
-|                  | Touch                 | ✅      | can only zoom/pan because it's assumed to be used with pen. |
-|                  | Touchpads             | ⏳      |                                                             |
-| **Tools**        | Pen, Eraser           | ✅      |                                                             |
-|                  | Fill                  | ✅      |                                                             |
-|                  | Color Picker          | ✅      |                                                             |
-|                  | Image Pool            | ✅      | resize, transfer to layer                                   |
-|                  | Selection             | ✅      | rect, auto                                                  |
-|                  | Text                  | ⏳      |                                                             |
-| **Composites**   | Layer Opacity         | ✅      |                                                             |
-|                  | Layer Blend Mode      | ✅      | normal / multiply / linear light / etc                      |
-| **Effects**      | Live Effects          | ⏳      | effects that can be chained and react to the image          |
-|                  | Invert                | ✅      | invert layer's colors                                       |
-|                  | Gaussian Blur         | ✅      | blur the layer                                              |
-|                  | Grayscale             | ✅      | convert the layer to grayscale                              |
-| **I/O**          | Basic I/O             | ✅      | load, save, import, export                                  |
-|                  | SVG Export            | ✅      | vector export for small pixel art/icons (< 128x128)         |
-|                  | Backup                | ⏳      | automatic backup for safe editing                           |
-|                  | Clipboard             | ✅      | selection / layer                                           |
-|                  | Drag and Drop         | ⏳      | images (add to pool) / project (open)                       |
-|                  | Project-Level History | ✅      | you can see how it works on "history" tab!                  |
-| **Others**       | Animation             | ⏳      | creating frames and output to gif, mp4                      |
-
-</details>
-
-## Fonts
-
-- [04b_XX](http://www.04.jp.org) by yuji oshimoto (04.jp.org)
-- [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) by num_kadoma (littlelimit.net)
+1. Visit [sledge-rules.app](https://www.sledge-rules.app/) and download installer.
+2. Follow the instructions to complete the installation.
 
 ## Tech
 
-### Frontend / Website
+- [Tauri](https://github.com/tauri-apps/tauri) / main framework
+- [Vite](https://github.com/vitejs/vite) / development server
+- [SolidJS](https://github.com/solidjs/solid) / frontend UI
+- [ecsstatic](https://www.ecsstatic.dev/) / stylesheet generation
+- [anvil](https://github.com/sledge-pdm/anvil) / image buffer operation
+- [WebGL2](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API) / layer blend & rendering
+- [mitt](https://github.com/developit/mitt) / eventbus
+- [msgpackr](https://github.com/kriszyp/msgpackr/issues) / project file compression
+- [wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen)+[wasm-pack](https://github.com/drager/wasm-pack) / fast operations using Rust (e.g., flood fill)
 
-- [SolidJS](https://github.com/solidjs/solid)
-- [Vite](https://github.com/vitejs/vite)
+## Fonts
 
-### Backend
-
-- [Tauri](https://github.com/tauri-apps/tauri)
-
-### Image Processing / Layer Composite
-
-- [WASM](https://developer.mozilla.org/ja/docs/WebAssembly) ([wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen) / [wasm-pack](https://github.com/drager/wasm-pack))
-- [WebGL2](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API)
-
-### Project Format
-
-- [msgpack](https://msgpack.org/ja.html)
-
+- [04b_XX](http://www.04.jp.org) / _by Yuji Oshimoto (04.jp.org)_
+- [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) / _by Num_kadoma (littlelimit.net)_
+- [PixelMPlus](https://itouhiro.hatenablog.com/entry/20130602/font) / _by Itouhiro (itouhiro.hatenablog.com)_
+- [Terminus](https://files.ax86.net/terminus-ttf/) / _by Dimitar Zhekov_

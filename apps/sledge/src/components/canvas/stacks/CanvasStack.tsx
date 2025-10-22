@@ -1,13 +1,12 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createSignal, onMount } from 'solid-js';
 import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import { InteractCanvas } from './InteractCanvas';
 
 import { css } from '@acab/ecsstatic';
 import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
-import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
 import { color } from '@sledge/theme';
@@ -23,6 +22,11 @@ const canvasStack = css`
 
 export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);
 
+/**
+ * 簡略化されたCanvasStack
+ * - 独自のtransform処理を廃止
+ * - 純粋にキャンバスコンテンツのコンテナとして機能
+ */
 const CanvasStack: Component = () => {
   const [gridSize, setGridSize] = createSignal(10);
 
@@ -41,71 +45,48 @@ const CanvasStack: Component = () => {
     setGridSize(gridSize);
   };
 
+  const handleCanvasSizeChanged = ({ newSize }: Events['canvas:sizeChanged']) => {
+    const { width, height } = newSize;
+    updateGridSize(width, height);
+  };
+
   onMount(() => {
     const { width, height } = canvasStore.canvas;
     updateGridSize(width, height);
-    eventBus.on('canvas:sizeChanged', ({ newSize }) => {
-      const { width, height } = newSize;
-      updateGridSize(width, height);
-    });
-  });
 
-  let orientationRef!: HTMLDivElement;
-  let rootRef!: HTMLDivElement;
+    eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
 
-  createEffect(() => {
-    const w = canvasStore.canvas.width;
-    const h = canvasStore.canvas.height;
-    const cx = w / 2;
-    const cy = h / 2;
-    const sx = interactStore.horizontalFlipped ? -1 : 1;
-    const sy = interactStore.verticalFlipped ? -1 : 1;
-    const rot = interactStore.rotation; // deg
-    if (orientationRef) {
-      // translate -> rotate -> scale -> translate back
-      orientationRef.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`;
-      orientationRef.style.transformOrigin = '0 0';
-    }
+    return () => {
+      eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
+    };
   });
 
   return (
     <div
-      ref={(el) => (rootRef = el)}
       style={{
         position: 'relative',
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,
         overflow: 'visible',
         'transform-origin': '0 0',
+        'background-color': color.canvas,
       }}
     >
       <div
-        ref={(el) => (orientationRef = el)}
+        id='canvas-stack'
+        class={canvasStack}
         style={{
-          position: 'absolute',
-          top: '0',
-          left: '0',
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
-          'background-color': color.canvas,
+          'shape-rendering': 'crispEdges',
+          'background-image': `url(/patterns/CheckerboardPattern.svg)`,
+          'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
+          'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
       >
-        <div
-          id='canvas-stack'
-          class={canvasStack}
-          style={{
-            width: `${canvasStore.canvas.width}px`,
-            height: `${canvasStore.canvas.height}px`,
-            'shape-rendering': 'crispEdges',
-            'background-image': `url(/patterns/CheckerboardPattern.svg)`,
-            'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
-            'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
-          }}
-        >
-          <InteractCanvas operator={layerCanvasOperator} />
-          <ImagePool />
-          <WebGLCanvas />
-        </div>
+        <InteractCanvas operator={layerCanvasOperator} />
+        <ImagePool />
+        <WebGLCanvas />
       </div>
     </div>
   );

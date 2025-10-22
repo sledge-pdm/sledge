@@ -1,4 +1,3 @@
-import { getEntries } from '~/features/image_pool';
 import { ProjectV0 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -11,7 +10,7 @@ import { packr } from '~/utils/msgpackr';
 export function getLayerBuffers(): Map<string, Uint8ClampedArray> {
   const map = new Map<string, Uint8ClampedArray>();
   allLayers().forEach((layer) => {
-    map.set(layer.id, getAnvilOf(layer.id)!.getImageData());
+    map.set(layer.id, getAnvilOf(layer.id)!.getBufferCopy());
   });
   return map;
 }
@@ -26,7 +25,7 @@ export const dumpProject = async (): Promise<Uint8Array> => {
     layerListStore: layerListStore,
     imagePoolStore: imagePoolStore,
     layerBuffers: getLayerBuffers(),
-    imagePool: getEntries(),
+    imagePool: imagePoolStore.entries,
   };
   const packed = packr.pack(project);
   return packed instanceof Uint8Array ? packed : Uint8Array.of(packed);

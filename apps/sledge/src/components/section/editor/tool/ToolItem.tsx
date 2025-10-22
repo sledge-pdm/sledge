@@ -9,17 +9,14 @@ import { toolStore } from '~/stores/EditorStores';
 const toolConfigRow = css`
   display: flex;
   flex-direction: row;
-  width: 100%;
   height: 32px;
-  width: auto;
-  gap: var(--spacing-md);
+  gap: 8px;
   align-items: center;
 `;
 
 const toolConfigRowClickable = css`
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-md);
   align-items: center;
   pointer-events: all;
   cursor: pointer;
@@ -28,12 +25,12 @@ const toolConfigRowClickable = css`
 const toolConfigRowName = css`
   cursor: pointer;
   width: 40px;
+  margin-left: 8px;
   font-size: var(--text-sm);
-  padding: var(--spacing-md) 0;
 `;
 
 const iconWrapper = css`
-  padding: 1px;
+  padding: 0px;
 `;
 
 interface Props {
@@ -52,7 +49,7 @@ const ToolItem: Component<Props> = (props: Props) => {
       {/* <Light on={props.isInUse} /> */}
       <div class={toolConfigRowClickable} onClick={() => setActiveToolCategory(category.id)}>
         <div class={iconWrapper}>
-          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} />
+          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} hoverColor={color.active} />
         </div>
         <Show when={shouldShowLabel()}>
           <p

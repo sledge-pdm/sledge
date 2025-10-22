@@ -1,6 +1,9 @@
 import { saveProject } from '~/features/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 
+/**
+ * @deprecated use AutoSnapshotManager instead
+ */
 export class AutoSaveManager {
   private static instance: AutoSaveManager;
   private currentInterval: number | undefined = undefined;

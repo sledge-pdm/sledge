@@ -24,8 +24,8 @@ export const editorMetas: FieldMeta[] = [
       min: 1,
       max: 45,
       step: 1,
-      customFormat: '[value]°',
     },
+    customFormat: (v) => v + '°',
     tips: `the amount of rotation per wheel scroll.`,
   },
   {
@@ -80,7 +80,6 @@ export const editorMetas: FieldMeta[] = [
       max: 100,
       step: 1,
       allowFloat: false,
-      customFormat: '[value]',
     },
     tips: `the maximum number of history items to keep.`,
   },
@@ -91,11 +90,23 @@ export const editorMetas: FieldMeta[] = [
     component: 'Slider',
     props: {
       min: 1,
-      max: 90,
+      max: 15,
       step: 1,
       allowFloat: false,
-      customFormat: '[value]',
     },
     tips: `Available in two-finger touch rotation only.\ncanvas rotation degree will be snapped to 0° until this threshold.`,
+  },
+  {
+    section: ConfigSections.Editor,
+    path: ['editor', 'rulerMarkDirection'],
+    label: 'ruler mark direction',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: 'outward', value: 'outward' },
+        { label: 'inward', value: 'inward' },
+      ],
+    },
+    tips: `direction of ruler marks. outward: marks extend away from canvas, inward: marks extend into canvas area.`,
   },
 ];

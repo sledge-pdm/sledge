@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge/core';
 import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { Icon, MenuList } from '@sledge/ui';
 import { pictureDir } from '@tauri-apps/api/path';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
@@ -9,8 +9,8 @@ import { createStore } from 'solid-js/store';
 import FileItem, { FilesConfig } from '~/components/section/files/item/FileItem';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
-import { fileStore } from '~/stores/EditorStores';
-import { join, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { appearanceStore, fileStore, setAppearanceStore, setLastSettingsStore } from '~/stores/EditorStores';
+import { normalizeJoin, normalizePath } from '~/utils/FileUtils';
 
 interface Props {
   defaultPath?: string;
@@ -20,8 +20,12 @@ interface Props {
 const breadcrumbsContainer = css`
   display: flex;
   flex-direction: row;
-  gap: 4px;
+  gap: 2px;
+  width: 100%;
   flex-wrap: wrap;
+  margin-right: auto;
+  padding: 4px 8px;
+  background: var(--color-surface);
 `;
 
 const breadcrumbItem = css`
@@ -46,16 +50,14 @@ const explorerContainer = css`
 const explorerInner = css`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 16px;
 `;
 
 const navigationPanel = css`
   display: flex;
   flex-direction: column;
-  padding: 8px;
   gap: 8px;
-  background: var(--color-surface);
 `;
 
 const navigationRow = css`
@@ -69,7 +71,13 @@ const flexGrow = css`
   flex-grow: 1;
 `;
 
-const editButton = css`
+const menuButtonContainer = css`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+`;
+
+const iconButton = css`
   padding: 2px;
   cursor: pointer;
 `;
@@ -86,7 +94,6 @@ const controlsRow = css`
   flex-direction: row;
   width: 100%;
   gap: 6px;
-  overflow: hidden;
   align-items: center;
 `;
 
@@ -100,7 +107,6 @@ const controlButtonsRow = css`
   display: flex;
   flex-direction: row;
   gap: 6px;
-  overflow: hidden;
   align-items: center;
   margin-left: auto;
 `;
@@ -110,8 +116,6 @@ const entriesContainer = css`
   flex-direction: row;
   width: 100%;
   height: auto;
-  gap: 4px 0;
-  margin-left: 4px;
   overflow: hidden;
   flex-wrap: wrap;
 `;
@@ -126,7 +130,7 @@ const Explorer: Component<Props> = (props) => {
   const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
 
   onMount(async () => {
-    const openPath = fileStore.savedLocation.path ? join(fileStore.savedLocation.path) : undefined;
+    const openPath = fileStore.savedLocation.path ? normalizeJoin(fileStore.savedLocation.path) : undefined;
     const defaultPath = props.defaultPath ?? openPath ?? (await pictureDir());
     if (defaultPath) {
       setPath(defaultPath);
@@ -182,6 +186,7 @@ const Explorer: Component<Props> = (props) => {
                   class={breadcrumbLink}
                   style={{
                     'pointer-events': index() === parts().length - 1 ? 'none' : 'auto',
+                    color: index() === parts().length - 1 ? color.accent : color.onBackground,
                   }}
                 >
                   {part}
@@ -195,6 +200,8 @@ const Explorer: Component<Props> = (props) => {
     );
   };
 
+  const [isMenuOpened, setMenuOpened] = createSignal<boolean>(false);
+
   return (
     <div class={explorerContainer}>
       {/* <p class={sectionCaption} style={{ margin: 0 }}>
@@ -207,20 +214,7 @@ const Explorer: Component<Props> = (props) => {
               when={configStore.pathEditMode}
               fallback={
                 <>
-                  <div class={flexGrow}>
-                    <Breadcrumbs path={currentPath()} />
-                  </div>
-
-                  <div
-                    class={editButton}
-                    onClick={() => {
-                      setConfigStore('pathEditMode', true);
-                      inputRef?.focus();
-                      // inputRef?.select();
-                    }}
-                  >
-                    <Icon src={'/icons/misc/edit.png'} base={8} hoverColor={color.accent} />
-                  </div>
+                  <Breadcrumbs path={currentPath()} />
                 </>
               }
             >
@@ -246,20 +240,19 @@ const Explorer: Component<Props> = (props) => {
           </div>
 
           <div class={controlsRow}>
-            <Show when={fileStore.savedLocation.path}>
-              <a
-                class={backToProjectLink}
-                onClick={() => {
-                  if (fileStore.savedLocation.path) setPath(fileStore.savedLocation.path);
-                }}
-              >
-                &lt; back to project
-              </a>
-            </Show>
-
             <div class={controlButtonsRow}>
               <div
-                class={editButton}
+                class={iconButton}
+                onClick={() => {
+                  setConfigStore('pathEditMode', true);
+                  inputRef?.focus();
+                  // inputRef?.select();
+                }}
+              >
+                <Icon src={'/icons/files/edit.png'} base={8} hoverColor={color.accent} />
+              </div>
+              <div
+                class={iconButton}
                 onClick={() => {
                   const path = currentPath();
                   const parts = normalizePath(path).split('/');
@@ -271,15 +264,62 @@ const Explorer: Component<Props> = (props) => {
                   }
                 }}
               >
-                <Icon src={'/icons/misc/folder_up.png'} base={8} hoverColor={color.accent} />
+                <Icon src={'/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
               </div>
               <div
-                class={editButton}
+                class={iconButton}
                 onClick={() => {
                   setConfigStore('twoColumns', (v) => !v);
                 }}
               >
-                <Icon src={configStore.twoColumns ? '/icons/misc/two_column.png' : '/icons/misc/one_column.png'} base={8} hoverColor={color.accent} />
+                <Icon
+                  src={configStore.twoColumns ? '/icons/files/two_column.png' : '/icons/files/one_column.png'}
+                  base={8}
+                  hoverColor={color.accent}
+                />
+              </div>
+              <div class={menuButtonContainer}>
+                <div
+                  class={iconButton}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setMenuOpened(!isMenuOpened());
+                  }}
+                >
+                  <Icon src={'/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
+                </div>
+                <Show when={isMenuOpened()}>
+                  <MenuList
+                    align='right'
+                    onClose={() => setMenuOpened(false)}
+                    closeByOutsideClick
+                    style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
+                    options={[
+                      {
+                        type: 'item',
+                        label: 'back to saved directory',
+                        disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
+                        onSelect: () => {
+                          if (fileStore.savedLocation.path) setPath(fileStore.savedLocation.path);
+                        },
+                      },
+                      {
+                        type: 'item',
+                        label: 'Export to this directory',
+                        onSelect: () => {
+                          setLastSettingsStore('exportSettings', 'dirPath', currentPath());
+                          setAppearanceStore(
+                            'rightSide',
+                            'selectedIndex',
+                            appearanceStore.rightSide.tabs.findIndex((t) => t === 'export')
+                          );
+                          setAppearanceStore('rightSide', 'shown', true);
+                        },
+                      },
+                    ]}
+                  />
+                </Show>
               </div>
             </div>
           </div>

@@ -1,37 +1,46 @@
-import { ImagePoolEntry, insertEntry, removeEntry } from '~/features/image_pool';
-import { BaseHistoryAction } from '../base';
+import { ImagePoolEntry } from '~/features/image_pool';
+import { setImagePoolStore } from '~/stores/ProjectStores';
+import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
+
+export interface ImagePoolHistoryActionProps extends BaseHistoryActionProps {
+  kind: 'add' | 'remove';
+  oldEntries: ImagePoolEntry[];
+  newEntries: ImagePoolEntry[];
+}
 
 // history action for changes in image pool
 export class ImagePoolHistoryAction extends BaseHistoryAction {
   readonly type = 'image_pool' as const;
 
-  constructor(
-    public readonly kind: 'add' | 'remove',
-    public readonly targetEntry: ImagePoolEntry,
-    context?: any
-  ) {
-    super(context);
+  kind: 'add' | 'remove';
+  oldEntries: ImagePoolEntry[];
+  newEntries: ImagePoolEntry[];
+
+  constructor(public readonly props: ImagePoolHistoryActionProps) {
+    super(props);
+    this.kind = props.kind;
+    this.oldEntries = props.oldEntries;
+    this.newEntries = props.newEntries;
   }
 
   undo(): void {
-    switch (this.kind) {
-      case 'add':
-        removeEntry(this.targetEntry.id, true);
-        break;
-      case 'remove':
-        insertEntry(this.targetEntry, true);
-        break;
-    }
+    setImagePoolStore('entries', [...this.oldEntries]);
   }
 
   redo(): void {
-    switch (this.kind) {
-      case 'add':
-        insertEntry(this.targetEntry, true);
-        break;
-      case 'remove':
-        removeEntry(this.targetEntry.id, true);
-        break;
-    }
+    setImagePoolStore('entries', [...this.newEntries]);
+  }
+
+  serialize(): SerializedHistoryAction {
+    return {
+      type: this.type,
+      props: {
+        context: this.context,
+        label: this.label,
+        kind: this.kind,
+        oldEntries: this.props.oldEntries,
+        newEntries: this.props.newEntries,
+      } as ImagePoolHistoryActionProps,
+    };
   }
 }

@@ -20,7 +20,12 @@ export const setCurrentColor = (colorHexString: string, options?: SetCurrentColo
   if (!options?.noDiff) {
     const oldRGBA = hexToRGBA(oldHex);
     const newRGBA = hexToRGBA(colorHexString);
-    const action = new ColorHistoryAction(palette as PaletteType, oldRGBA, newRGBA, { from: 'color.service.setCurrentColor' });
+    const action = new ColorHistoryAction({
+      palette,
+      oldColor: oldRGBA,
+      newColor: newRGBA,
+      context: { from: 'color.service.setCurrentColor' },
+    });
     projectHistoryController.addAction(action);
   }
   return result;

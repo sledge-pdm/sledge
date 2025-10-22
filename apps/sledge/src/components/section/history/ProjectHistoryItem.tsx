@@ -6,9 +6,9 @@ import { BaseHistoryAction } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
-import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
+import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { findLayerById } from '~/features/layer';
 import { toolCategories } from '~/features/tools/Tools';
@@ -48,9 +48,9 @@ function getIconForTool(tool?: string) {
   }
   switch (tool) {
     case 'clear':
-      return '/icons/misc/clear.png';
+      return '/icons/actions/clear.png';
     case 'fx':
-      return '/icons/misc/fx.png';
+      return '/icons/actions/fx.png';
   }
 
   return '';
@@ -75,18 +75,13 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
       const bigger = csaction.afterSize.width * csaction.afterSize.height >= csaction.beforeSize.width * csaction.beforeSize.height;
-      icon = bigger ? '/icons/misc/canvas_size_bigger.png' : '/icons/misc/canvas_size_smaller.png';
+      icon = bigger ? '/icons/actions/canvas_size_bigger.png' : '/icons/actions/canvas_size_smaller.png';
       description = `${csaction.beforeSize.width}x${csaction.beforeSize.height} -> ${csaction.afterSize.width}x${csaction.afterSize.height}`;
       break;
     case 'image_pool':
-      icon = '/icons/misc/image.png';
+      icon = '/icons/actions/image.png';
       const ipaction = action as ImagePoolHistoryAction;
-      description = `${ipaction.kind} -> ${ipaction.targetEntry.fileName}`;
-      break;
-    case 'image_pool_entry_props':
-      icon = '/icons/misc/image.png';
-      const ipepaction = action as ImagePoolEntryPropsHistoryAction;
-      description = `${ipepaction.newEntryProps.fileName} transform`;
+      description = `${ipaction.kind} image`;
       break;
     case 'color':
       const claction = action as ColorHistoryAction;
@@ -99,9 +94,14 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       };
       break;
     case 'layer_list':
-      icon = '/icons/misc/layer.png';
+      icon = '/icons/actions/layer.png';
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.packedSnapshot?.layer.name}`;
+      break;
+    case 'layer_merge':
+      icon = '/icons/actions/layer.png';
+      const lmaction = action as LayerMergeHistoryAction;
+      description = `Merge / ${lmaction.originPackedSnapshot?.layer.name} > ${lmaction.targetPackedSnapshot?.layer.name}`;
       break;
     case 'layer_buffer': {
       const anvilAction = action as AnvilLayerHistoryAction;
@@ -125,7 +125,7 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       break;
     }
     case 'layer_props':
-      icon = '/icons/misc/layer.png';
+      icon = '/icons/actions/layer.png';
       const lpaction = action as LayerPropsHistoryAction;
       description = `${findLayerById(lpaction.layerId)?.name} ${context.propName}: ${context.before} > ${context.after}`;
       break;

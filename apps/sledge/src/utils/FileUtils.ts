@@ -15,7 +15,7 @@ export const pathToFileLocation = (fullPath: string): FileLocation | undefined =
   const filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'));
   const fileName = fullPath.split('\\').pop()?.split('\\').pop();
 
-  const rejoinedPath = join(...filePath.split('\\'));
+  const rejoinedPath = normalizeJoin(...filePath.split('\\'));
 
   if (!filePath || !filePath?.trim() || !fileName || !fileName?.trim()) return undefined;
   else {
@@ -31,14 +31,11 @@ export const getFileNameWithoutExtension = (fileName?: string): string => {
   return fileName.replace(/\.[^/.]+$/, '');
 };
 
+/**
+ * @deprecated use normalizedJoin.
+ */
 export const join = (...paths: string[]): string => {
   const currentPlatform = platform();
-
-  // platform returns a string describing the specific operating system in use.
-  // The value is set at compile time.
-  // Possible values are linux, macos, ios, freebsd, dragonfly, netbsd, openbsd, solaris, android, windows.
-
-  // https://v2.tauri.app/ja/plugin/os-info/
 
   if (currentPlatform === 'windows') {
     return paths.join('\\');
@@ -52,5 +49,13 @@ export const normalizePath = (path: string): string => {
 };
 
 export const normalizeJoin = (...paths: string[]): string => {
-  return normalizePath(join(...paths));
+  const currentPlatform = platform();
+
+  let joined;
+  if (currentPlatform === 'windows') {
+    joined = paths.join('\\');
+  } else {
+    joined = paths.join('/');
+  }
+  return normalizePath(joined);
 };

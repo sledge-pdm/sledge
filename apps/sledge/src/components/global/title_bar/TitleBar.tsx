@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -71,13 +72,13 @@ const titleBarControls = css`
 const titleBarControlButtonContainer = css`
   display: flex;
   flex-direction: column;
-  height: 36px;
+  height: 32px;
   border: none;
   align-items: center;
   justify-content: center;
   min-width: 24px;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: 18px;
+  padding-right: 18px;
   pointer-events: all;
   &:hover {
     background-color: var(--color-button-hover);
@@ -85,16 +86,6 @@ const titleBarControlButtonContainer = css`
 `;
 
 const titleBarControlCloseButtonContainer = css`
-  display: flex;
-  flex-direction: column;
-  height: 36px;
-  border: none;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  padding-left: 16px;
-  padding-right: 16px;
-  pointer-events: all;
   &:hover {
     background-color: #ff0000b0;
   }
@@ -103,6 +94,7 @@ const titleBarControlCloseButtonContainer = css`
 const titleBarControlButtonImg = css`
   border: none;
   image-rendering: pixelated;
+  padding: 1px;
 `;
 
 const titleInfo = css`
@@ -167,7 +159,7 @@ export default function TitleBar() {
     <header>
       <div
         style={{
-          'border-bottom': shouldShowBorder() ? `1px solid ${color.border}` : 'none',
+          'border-bottom': shouldShowBorder() ? `1px solid ${color.borderSecondary}` : 'none',
           'pointer-events': 'all',
         }}
       >
@@ -200,7 +192,7 @@ export default function TitleBar() {
                     </p>
                     <Show when={fileStore.openAs === 'image'}>
                       <div style={{ 'margin-left': '8px' }}>
-                        <Icon src='icons/misc/image.png' base={8} />
+                        <Icon src='icons/title_bar/image.png' base={8} />
                       </div>
                     </Show>
                     <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
@@ -232,9 +224,9 @@ export default function TitleBar() {
                 >
                   <Icon
                     class={titleBarControlButtonImg}
-                    src={'/icons/title_bar/minimize_2.png'}
+                    src={'/icons/title_bar/minimize_10.png'}
                     color={color.onBackground}
-                    base={12}
+                    base={10}
                     data-tauri-drag-region-exclude
                   />
                 </div>
@@ -251,9 +243,9 @@ export default function TitleBar() {
                 >
                   <Icon
                     class={titleBarControlButtonImg}
-                    src={isMaximized() ? '/icons/title_bar/quit_maximize_2.png' : '/icons/title_bar/maximize_2.png'}
+                    src={isMaximized() ? '/icons/title_bar/quit_maximize_10.png' : '/icons/title_bar/maximize_10.png'}
                     color={color.onBackground}
-                    base={12}
+                    base={10}
                     data-tauri-drag-region-exclude
                   />
                 </div>
@@ -261,7 +253,7 @@ export default function TitleBar() {
 
               <Show when={isClosable()}>
                 <div
-                  class={titleBarControlCloseButtonContainer}
+                  class={clsx(titleBarControlButtonContainer, titleBarControlCloseButtonContainer)}
                   onClick={async (e) => {
                     e.preventDefault();
                     await getCurrentWindow().close();
@@ -270,9 +262,9 @@ export default function TitleBar() {
                 >
                   <Icon
                     class={titleBarControlButtonImg}
-                    src={'/icons/title_bar/close_2.png'}
+                    src={'/icons/title_bar/close_10.png'}
                     color={color.onBackground}
-                    base={12}
+                    base={10}
                     data-tauri-drag-region-exclude
                   />
                 </div>

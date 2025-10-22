@@ -5,22 +5,27 @@ import { RGBAToHex } from '~/features/color';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionOffset } from '~/features/selection/SelectionOperator';
-import { getActiveToolCategoryId, getCurrentPresetConfig, isToolAllowedInCurrentLayer } from '~/features/tools/ToolController';
-import { TOOL_CATEGORIES } from '~/features/tools/Tools';
-import { interactStore, logStore } from '~/stores/EditorStores';
+import {
+  getActiveToolCategoryId,
+  getCurrentPresetConfig,
+  getPresetOf,
+  getToolCategory,
+  isToolAllowedInCurrentLayer,
+} from '~/features/tools/ToolController';
+import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 
-import rawPattern45border16 from '@assets/patterns/45border16.svg?raw';
 import rawPattern45border16x2 from '@assets/patterns/45border16x2.svg?raw';
-import rawPattern45border8 from '@assets/patterns/45border8.svg?raw';
 import { ShapeMask } from '@sledge/anvil';
 import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 
 import { color } from '@sledge/theme';
+import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import '~/styles/selection_animations.css';
 
 // raw SVG 文字列から最初の <path .../> だけを抽出（self-closing想定）。失敗時は全体を返す。
@@ -29,8 +34,6 @@ const extractFirstPath = (svg: string) => {
   return m ? m[0] : svg;
 };
 const pattern45border16x2Path = extractFirstPath(rawPattern45border16x2);
-const pattern45border16Path = extractFirstPath(rawPattern45border16);
-const pattern45border8Path = extractFirstPath(rawPattern45border8);
 
 function getDrawnPixelMask(size: number, shape: 'circle' | 'square'): ShapeMask {
   switch (shape) {
@@ -54,13 +57,16 @@ const CanvasOverlaySVG: Component = () => {
   const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
   const [moveState, setMoveState] = createSignal(floatingMoveManager.getState());
 
+  const [lassoDisplayMode, setLassoDisplayMode] = createSignal<LassoDisplayMode>('fill');
+  const [lassoOutlinePath, setLassoOutlinePath] = createSignal('');
+
   const [_, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS(() => {
       if (selectionChanged()) {
         updateSelectionOutline();
         setSelectionChanged(false);
       }
-    }, Number(globalConfig.performance.targetFPS))
+    }, 60)
   );
 
   const updateSelectionOutline = () => {
@@ -76,24 +82,43 @@ const CanvasOverlaySVG: Component = () => {
     setPatternOffset((prev) => (prev + 0.3) % 16);
   };
 
+  // Memoize handleUpdate to keep a stable reference
+  const handlePathUpdate = ((e: Events['selection:updateSelectionPath']) => {
+    setMoveState(floatingMoveManager.getState());
+    if (e.immediate) {
+      updateSelectionOutline();
+    } else {
+      setSelectionChanged(true);
+    }
+  }) as (e: Events['selection:updateSelectionPath']) => void;
+
+  const handleLassoUpdate = ((e: Events['selection:updateLassoOutline']) => {
+    if (toolStore.activeToolCategory === TOOL_CATEGORIES.LASSO_SELECTION) {
+      const lassoTool = getToolCategory(TOOL_CATEGORIES.LASSO_SELECTION).behavior as LassoSelection;
+      const preset = getPresetOf(
+        TOOL_CATEGORIES.LASSO_SELECTION,
+        toolStore.tools.lassoSelection.presets?.selected ?? 'default'
+      ) as LassoSelectionPresetConfig;
+      const displayMode = lassoTool.getDisplayMode(preset);
+      setLassoDisplayMode(displayMode);
+      if (displayMode === 'fill') return;
+      const path = lassoTool.getPath();
+      setLassoOutlinePath(path.toString());
+    }
+  }) as (e: Events['selection:updateLassoOutline']) => void;
+
   // Events
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:maskChanged', () => setSelectionChanged(true));
-    eventBus.on('selection:offsetChanged', () => setSelectionChanged(true));
-    eventBus.on('selection:stateChanged', () => setSelectionChanged(true));
-    eventBus.on('floatingMove:moved', () => setMoveState(floatingMoveManager.getState()));
-    eventBus.on('floatingMove:stateChanged', () => setMoveState(floatingMoveManager.getState()));
+    eventBus.on('selection:updateSelectionPath', handlePathUpdate);
+    eventBus.on('selection:updateLassoOutline', handleLassoUpdate);
     setSelectionChanged(true);
 
     const updatePatternInterval = setInterval(updatePatternOffset, 30);
 
     return () => {
-      eventBus.off('selection:maskChanged');
-      eventBus.off('selection:offsetChanged');
-      eventBus.off('selection:stateChanged');
-      eventBus.off('floatingMove:moved');
-      eventBus.off('floatingMove:stateChanged');
+      eventBus.off('selection:updateSelectionPath', handlePathUpdate);
+      eventBus.off('selection:updateLassoOutline', handleLassoUpdate);
       stopRenderLoop();
       clearInterval(updatePatternInterval);
     };
@@ -172,8 +197,6 @@ const CanvasOverlaySVG: Component = () => {
 
   return (
     <>
-      <svg viewBox={`0 0 0 0`} xmlns='http://www.w3.org/2000/svg'></svg>
-
       <div style={panWrapperStyle()}>
         <div style={rotateFlipStyle()}>
           <svg
@@ -195,7 +218,7 @@ const CanvasOverlaySVG: Component = () => {
           >
             <defs>
               <pattern
-                id='45border16x2-svg'
+                id='45border16x2-animate-svg'
                 x={patternOffset()}
                 y={patternOffset()}
                 width='32'
@@ -206,6 +229,26 @@ const CanvasOverlaySVG: Component = () => {
                 <g innerHTML={pattern45border16x2Path} />
               </pattern>
             </defs>
+            <defs>
+              <pattern id='45border16x2-svg' x={0} y={0} width='32' height='32' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+                <g innerHTML={pattern45border16x2Path} />
+              </pattern>
+            </defs>
+
+            <path
+              d={lassoOutlinePath()}
+              fill={lassoDisplayMode() === 'outline' ? '#00000050' : 'none'}
+              fill-rule='nonzero'
+              clip-rule='evenodd'
+              stroke={lassoDisplayMode() === 'outline' ? color.selectionBorder : 'red'}
+              stroke-width={1}
+              vector-effect='non-scaling-stroke'
+              pointer-events='none'
+              stroke-dasharray={lassoDisplayMode() === 'outline' ? `${borderDash} ${borderDash}` : undefined}
+              class={lassoDisplayMode() === 'outline' ? 'marching-ants-animation' : undefined}
+              transform={`scale(${interactStore.zoom})`}
+            />
+
             {/* Canvas border (debug) */}
             <rect
               width={logicalWidth() * interactStore.zoom}
@@ -250,7 +293,7 @@ const CanvasOverlaySVG: Component = () => {
               <path
                 id='selection-outline'
                 d={pathCmdList().toString(interactStore.zoom)}
-                fill='url(#45border16x2-svg)'
+                fill='url(#45border16x2-animate-svg)'
                 fill-rule='evenodd'
                 clip-rule='evenodd'
                 stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}

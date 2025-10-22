@@ -1,4 +1,5 @@
-import { screenToCanvas } from '~/features/canvas/CanvasPositionCalculator';
+import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
+import { WindowPos } from '~/types/CoordinateTypes';
 
 /**
  * キャンバスリサイズ用フレーム矩形
@@ -72,7 +73,7 @@ export class ResizeFrameInteract {
     if (!rect) return;
 
     // 開始ポインタ位置（canvas 空間）
-    const { x: cx, y: cy } = screenToCanvas({ x: e.clientX, y: e.clientY });
+    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.from(e));
     this.startPointerCanvasX = cx;
     this.startPointerCanvasY = cy;
     // スナップ前提: 開始時点で整数に正規化して基準を安定化
@@ -94,7 +95,7 @@ export class ResizeFrameInteract {
 
   private handlePointerMove = (e: PointerEvent) => {
     if (!this.pointerActive || !this.mode || !this.startRect) return;
-    const { x: cx, y: cy } = screenToCanvas({ x: e.clientX, y: e.clientY });
+    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.from(e));
     const dx = cx - this.startPointerCanvasX;
     const dy = cy - this.startPointerCanvasY;
 

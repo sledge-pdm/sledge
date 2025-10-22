@@ -1,100 +1,97 @@
 import { transferToLayer } from '~/appliers/ImageTransferApplier';
 import { projectHistoryController } from '~/features/history';
-import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
-import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadLocalImage } from '~/utils/DataUtils';
-import { eventBus } from '~/utils/EventBus';
 import { getFileUniqueId } from '~/utils/FileUtils';
 
-// Plain Map でエントリーを管理
-const pool = new Map<string, ImagePoolEntry>();
-
-export const setImagePool = (entries: Map<string, ImagePoolEntry>) => {
-  pool.clear();
-  entries.forEach((entry) => {
-    pool.set(entry.id, entry);
-  });
-};
-
-export const getEntries = (): ImagePoolEntry[] => Array.from(pool.values());
-export const getEntry = (id: string): ImagePoolEntry | undefined => pool.get(id);
+export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
 
 // Insert entry with a given id (used for undo/redo to keep id stable)
 export function insertEntry(entry: ImagePoolEntry, noDiff?: boolean) {
-  let old = undefined;
-  if (pool.has(entry.id)) {
-    old = pool.get(entry.id);
+  const oldEntries = imagePoolStore.entries.slice();
+
+  setImagePoolStore('entries', [...imagePoolStore.entries.filter((e) => e.id !== entry.id), entry]);
+
+  if (!noDiff) {
+    projectHistoryController.addAction(
+      new ImagePoolHistoryAction({
+        kind: 'add',
+        oldEntries,
+        newEntries: imagePoolStore.entries.slice(),
+        context: { from: 'ImagePoolController.removeEntry' },
+      })
+    );
   }
-  pool.set(entry.id, entry);
-  if (!noDiff && old && JSON.stringify(old) !== JSON.stringify(entry)) {
-    projectHistoryController.addAction(new ImagePoolEntryPropsHistoryAction(entry.id, old, entry, { from: 'ImagePoolController.removeEntry' }));
-  }
-  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
 }
 
-export function setEntry(id: string, entry: ImagePoolEntry) {
-  pool.set(id, entry);
-  eventBus.emit('imagePool:entryPropChanged', { id });
-}
+export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>, noDiff?: boolean) {
+  // const oldEntries = imagePoolStore.entries.slice();
+  let oldEntryIndex = imagePoolStore.entries.findIndex((e) => e.id === id);
+  if (oldEntryIndex < 0) return;
 
-export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
-  const old = pool.get(id);
-  if (!old) return;
-  const updated = { ...old, ...patch } as ImagePoolEntry;
-  pool.set(id, updated);
-  eventBus.emit('imagePool:entryPropChanged', { id });
+  setImagePoolStore('entries', oldEntryIndex, patch);
+
+  // if (!noDiff) {
+  //   projectHistoryController.addAction(
+  //     new ImagePoolHistoryAction({
+  //       oldEntries,
+  //       newEntries: imagePoolStore.entries.slice(),
+  //       kind: 'edit',
+  //     })
+  //   );
+  // }
 }
 
 export function removeEntry(id: string, noDiff?: boolean) {
+  const oldEntries = imagePoolStore.entries.slice();
   const entry = getEntry(id);
   if (!entry) {
     console.warn(`ImagePoolController.removeEntry: Entry not found for id ${id}`);
     return;
   }
-  if (!noDiff) projectHistoryController.addAction(new ImagePoolHistoryAction('remove', entry, { from: 'ImagePoolController.removeEntry' }));
 
-  if (pool.delete(id)) {
-    selectEntry(undefined);
-    eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
+  if (imagePoolStore.entries.some((e) => e.id === id)) {
+    setImagePoolStore(
+      'entries',
+      imagePoolStore.entries.filter((e) => e.id !== id)
+    );
+
+    if (imagePoolStore.selectedEntryId === id) selectEntry(undefined);
+    if (!noDiff)
+      projectHistoryController.addAction(
+        new ImagePoolHistoryAction({
+          kind: 'remove',
+          oldEntries,
+          newEntries: imagePoolStore.entries.slice(),
+          context: { from: 'ImagePoolController.removeEntry' },
+        })
+      );
   }
-}
-
-export function replaceAllEntries(entries: ImagePoolEntry[]) {
-  pool.clear();
-  for (const e of entries) pool.set(e.id, e);
-  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
 }
 
 export async function addToImagePool(imagePaths: string | string[]) {
+  const old = imagePoolStore.entries.slice();
   if (Array.isArray(imagePaths)) {
-    const ids: string[] = await Promise.all(imagePaths.map((p) => createEntry(p)));
-    if (ids.length > 0) {
-      ids.forEach((id) => {
-        const entry = pool.get(id)!;
-        projectHistoryController.addAction(new ImagePoolHistoryAction('add', entry, { from: 'ImagePoolController.addToImagePool' }));
-      });
-    }
+    const entries: ImagePoolEntry[] = await Promise.all(imagePaths.map((p) => createEntry(p)));
   } else {
-    const id = await createEntry(imagePaths);
-    if (id) {
-      const entry = pool.get(id)!;
-      projectHistoryController.addAction(new ImagePoolHistoryAction('add', entry, { from: 'ImagePoolController.addToImagePool' }));
-    }
+    const entry = await createEntry(imagePaths);
   }
 
-  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
-}
-
-export async function relinkEntry(id: string, newPath: string) {
-  const filename = newPath.split(/[\\/]/).pop() ?? newPath;
-  updateEntryPartial(id, { originalPath: newPath, resourcePath: newPath, fileName: filename });
+  projectHistoryController.addAction(
+    new ImagePoolHistoryAction({
+      kind: 'add',
+      oldEntries: old,
+      newEntries: imagePoolStore.entries.slice(),
+      context: { from: 'ImagePoolController.addToImagePool' },
+    })
+  );
 }
 
 export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
-  const active = activeLayer(); // いま選択中のレイヤー
+  const active = activeLayer();
   if (!active) return;
 
   try {
@@ -104,85 +101,57 @@ export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
       entry: {
         transform: current.transform,
         base: current.base,
-        resourcePath: current.resourcePath,
+        imagePath: current.imagePath,
       },
       targetLayerId: active.id,
     });
     if (removeAfter) removeEntry(current.id); // ImagePool から削除
   } catch (e) {
     console.error(e);
-    // TODO: ユーザ通知
   }
 }
 
-async function createEntry(originalPath: string) {
-  const id = await getFileUniqueId(originalPath);
+async function createEntry(imagePath: string) {
+  const id = await getFileUniqueId(imagePath);
 
-  // 画像サイズの取得（コピーせず読み込み）
-  const bitmap = await loadLocalImage(originalPath);
+  const bitmap = await loadLocalImage(imagePath);
   const width = bitmap.width;
   const height = bitmap.height;
+
+  bitmap.close();
 
   const initialScale = Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height);
   const entry: ImagePoolEntry = {
     id,
-    originalPath,
-    resourcePath: originalPath, // resourcePath は現状 originalPath をミラー
-    fileName: originalPath.split(/[\\/]/).pop() ?? originalPath,
+    imagePath,
     base: { width, height },
     transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale },
     opacity: 1,
     visible: true,
   };
-  pool.set(id, entry);
-  return id;
+
+  insertEntry(entry);
+  return entry;
 }
 
 export function selectEntry(id?: string) {
   setImagePoolStore('selectedEntryId', id);
-  eventBus.emit('imagePool:entriesChanged', { newEntries: getEntries() });
 }
 
 export function showEntry(id: string) {
-  const entry = pool.get(id);
+  const entry = getEntry(id);
   if (entry && !entry.visible) {
-    entry.visible = true;
-    projectHistoryController.addAction(
-      new ImagePoolEntryPropsHistoryAction(
-        id,
-        {
-          ...entry,
-          visible: false,
-        },
-        {
-          ...entry,
-          visible: true,
-        },
-        { from: 'ImagePoolController.removeEntry' }
-      )
-    );
-    eventBus.emit('imagePool:entryPropChanged', { id });
+    updateEntryPartial(id, {
+      visible: true,
+    });
   }
 }
 
 export function hideEntry(id: string) {
-  const entry = pool.get(id);
+  const entry = getEntry(id);
   if (entry && entry.visible) {
-    entry.visible = false;
-    projectHistoryController.addAction(
-      new ImagePoolEntryPropsHistoryAction(
-        id,
-        {
-          ...entry,
-          visible: true,
-        },
-        {
-          ...entry,
-          visible: false,
-        },
-        { from: 'ImagePoolController.removeEntry' }
-      )
-    );
-    eventBus.emit('imagePool:entryPropChanged', { id });
+    updateEntryPartial(id, {
+      visible: false,
+    });
   }
 }

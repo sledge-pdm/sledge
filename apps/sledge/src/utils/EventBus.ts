@@ -1,7 +1,5 @@
-import { FileLocation, Size2D, Vec2 } from '@sledge/core';
+import { FileLocation, Size2D } from '@sledge/core';
 import mitt from 'mitt';
-import { ImagePoolEntry } from '~/features/image_pool';
-import { SelectionState } from '~/features/selection/SelectionAreaManager';
 
 export type Events = {
   'project:saved': { location: FileLocation };
@@ -9,22 +7,12 @@ export type Events = {
   'project:saveCancelled': {};
 
   'canvas:sizeChanged': { newSize: Size2D };
-  'canvas:onAdjusted': {};
-  'canvas:onTransformChanged': {};
 
-  'selection:maskChanged': { commit: boolean };
-  'selection:offsetChanged': { newOffset: Vec2 };
-  'selection:stateChanged': { newState: SelectionState };
-  'selection:requestMenuUpdate': {};
+  'selection:updateSelectionPath': { immediate?: boolean };
+  'selection:updateLassoOutline': {};
+  'selection:updateSelectionMenu': { immediate?: boolean };
 
   'tools:presetLoaded': { toolId?: string };
-
-  'floatingMove:stateChanged': { moving: boolean };
-  'floatingMove:moved': {};
-  'floatingMove:committed': {};
-
-  'imagePool:entriesChanged': { newEntries: ImagePoolEntry[] };
-  'imagePool:entryPropChanged': { id: string };
 
   'webgl:requestUpdate': { onlyDirty: boolean; context: string };
   'webgl:requestResume': {};
@@ -33,6 +21,10 @@ export type Events = {
   'preview:requestUpdate': { layerId?: string };
 
   'window:sideSectionSideChanged': {};
+
+  'clipboard:doCopy': {};
+  'clipboard:doCut': {};
+  'clipboard:doPaste': {};
 };
 
 export const eventBus = mitt<Events>();

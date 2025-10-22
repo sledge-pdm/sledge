@@ -82,7 +82,7 @@ const subHeadingContainer = css`
 const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
     <div class={subHeadingContainer}>
-      <Icon src='/icons/misc/dot.png' base={8} color={'var(--color-on-background)'} />
+      <Icon src='/icons/misc/bullet_s_8.png' base={8} color={'var(--color-on-background)'} />
       <p class={subHeading} {...props}>
         {props.children}
       </p>

@@ -3,7 +3,7 @@ import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
-import { setRotation } from '~/features/canvas';
+import { rotateInAreaCenter } from '~/features/canvas';
 import { resetBottomBarText } from '~/features/log/service';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
@@ -44,7 +44,7 @@ const bottomInfoContainerRight = css`
 const sliderContainer = css`
   display: flex;
   flex-direction: row;
-  width: 140px;
+  width: 160px;
   overflow: visible;
 `;
 
@@ -77,31 +77,37 @@ const BottomInfo: Component = () => {
         <p style={{ color: textColor(), overflow: 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' }}>{logStore.bottomBarText}</p>
         <div class={bottomInfoContainerRight}>
           <div class={sliderContainer}>
+            <p
+              style={{
+                width: '72px',
+              }}
+            >
+              {interactStore.rotation.toFixed(1)}°
+            </p>
             <Slider
-              labelMode='left'
+              labelMode='none'
               value={interactStore.rotation}
               min={-180}
               max={180}
+              floatSignificantDigits={1}
               wheelSpin={true}
-              allowFloat={false}
-              customFormat='[value]°'
-              onChange={(v) => setRotation(v)}
+              allowFloat={true}
+              onChange={(v) => rotateInAreaCenter(v)}
               onDoubleClick={() => {
-                setRotation(0);
+                rotateInAreaCenter(0);
               }}
               onPointerDownOnValidArea={(e) => {
                 if (e.ctrlKey || e.metaKey) {
                   e.preventDefault();
                   e.stopPropagation();
                   e.stopImmediatePropagation();
-                  setRotation(0);
+                  rotateInAreaCenter(0);
                   return false;
                 }
                 return true;
               }}
             />
           </div>
-          {/* <p class={bottomInfoText}>theme</p> */}
           <ThemeToggle noBackground={true} />
         </div>
       </div>

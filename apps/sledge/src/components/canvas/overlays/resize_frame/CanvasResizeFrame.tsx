@@ -1,9 +1,10 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { canvasToScreen } from '~/features/canvas/CanvasPositionCalculator';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
+import { setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { CanvasPos } from '~/types/CoordinateTypes';
 import ResizeFrameInteract, { ResizeFrameRect } from './ResizeFrameInteract';
 
 export const CanvasResizeFrame: Component = () => {
@@ -13,13 +14,33 @@ export const CanvasResizeFrame: Component = () => {
   const [start, setStart] = createSignal<Vec2 | undefined>();
   const [size, setSize] = createSignal<Size2D | undefined>();
 
-  const recomputeScreenBox = () => {
+  // 座標変換の結果をキャッシュするためのメモ化
+  const screenBox = createMemo(() => {
     const r = rect();
-    if (!r) return;
-    const s = canvasToScreen({ x: r.x, y: r.y });
-    const e = canvasToScreen({ x: r.x + r.width, y: r.y + r.height });
-    setStart(s);
-    setSize({ width: Math.abs(e.x - s.x), height: Math.abs(e.y - s.y) });
+    if (!r) return undefined;
+
+    // 矩形の左上と右下をオーバーレイ座標系に変換
+    const topLeft = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x, r.y));
+    const bottomRight = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x + r.width, r.y + r.height));
+
+    return {
+      start: { x: Math.min(topLeft.x, bottomRight.x), y: Math.min(topLeft.y, bottomRight.y) },
+      size: { width: Math.abs(bottomRight.x - topLeft.x), height: Math.abs(bottomRight.y - topLeft.y) },
+    };
+  });
+
+  // screenBoxの変化を監視してstateを更新
+  createEffect(() => {
+    const box = screenBox();
+    if (box) {
+      setStart(box.start);
+      setSize(box.size);
+    }
+  });
+
+  const recomputeScreenBox = () => {
+    // メモ化された値を使用するため、直接的な再計算は不要
+    // createEffectが自動的に更新を処理
   };
 
   // interact インスタンス保持
@@ -33,7 +54,7 @@ export const CanvasResizeFrame: Component = () => {
       () => rect()!,
       (r) => {
         setRect(r);
-        recomputeScreenBox();
+        // screenBoxメモが自動的に更新されるため、明示的な呼び出し不要
       },
       () => {
         /* commit は CanvasControls 側 */
@@ -48,31 +69,21 @@ export const CanvasResizeFrame: Component = () => {
     const h = canvasStore.canvas.height;
     if (w > 0 && h > 0) {
       setRect({ x: 0, y: 0, width: w, height: h });
-      recomputeScreenBox();
+      // screenBoxメモが自動的に更新されるため、明示的な呼び出し不要
     }
     setupInteract();
   });
   onCleanup(() => {
     interact?.removeInteractListeners();
   });
-  // rotation / flip / offset は interactStore の signal 変化を watch
-  createEffect(() => {
-    // 参照して依存関係を張るだけ
-    interactStore.offset.x;
-    interactStore.offset.y;
-    interactStore.rotation;
-    interactStore.horizontalFlipped;
-    interactStore.verticalFlipped;
-    interactStore.zoom;
-    recomputeScreenBox();
-  });
+
   // キャンバスサイズが外部変更された場合、未操作時のみ矩形を追従
   createEffect(() => {
     const w = canvasStore.canvas.width;
     const h = canvasStore.canvas.height;
     if (!rect() && w > 0 && h > 0) {
       setRect({ x: 0, y: 0, width: w, height: h });
-      recomputeScreenBox();
+      // screenBoxメモが自動的に更新されるため、明示的な呼び出し不要
       setupInteract();
     }
   });
@@ -183,16 +194,10 @@ export const CanvasResizeFrame: Component = () => {
           />
           {/* 情報表示: 1行目 = 表示上のピクセルサイズ (スクリーン), 2行目 = 論理キャンバスサイズ + オフセット */}
           <g font-size={16} style={{ 'font-family': fonts.ZFB08 }} fill='white' stroke='none'>
-            {/* <text x={10} y={25}>
-              screen: {Math.round(size()!.width)} x {Math.round(size()!.height)}
-            </text> */}
             <Show when={logicalFrame()}>
               <text x={8} y={20}>
-                ({logicalFrame()!.offsetX}, {logicalFrame()!.offsetY})
+                {logicalFrame()!.offsetX}, {logicalFrame()!.offsetY}
               </text>
-              {/* <text x={size()!.width - 10} y={20} text-anchor='end'>
-                {logicalFrame()!.canvasWidth} x {logicalFrame()!.canvasHeight}
-              </text> */}
             </Show>
           </g>
           {/* 四隅 */}

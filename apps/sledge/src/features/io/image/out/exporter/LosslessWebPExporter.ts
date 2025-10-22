@@ -2,12 +2,12 @@ import { rawToWebp } from '@sledge/anvil';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/image/out/exporter/Exporter';
 import { Layer } from '~/features/layer';
-import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
+import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
 
 export class LosslessWebPExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
-    const buffer = webGLRenderer.readPixelsFlipped();
+    const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(webGLRenderer.readPixelsFlipped());
     const scaledBuffer = getScaledBuffer(buffer, scale);
     const webpBuffer = rawToWebp(new Uint8Array(scaledBuffer.data.buffer), scaledBuffer.width, scaledBuffer.height);
     const blob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });
@@ -17,8 +17,9 @@ export class LosslessWebPExporter extends Exporter {
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
-    const buffer = getBufferCopy(layer.id);
-    if (!buffer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
+    const bufferPointer = getBufferPointer(layer.id);
+    if (!bufferPointer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
+    const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(bufferPointer);
     const scaledBuffer = getScaledBuffer(buffer, scale);
     const webpBuffer = rawToWebp(new Uint8Array(scaledBuffer.data), scaledBuffer.width, scaledBuffer.height);
     const blob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });

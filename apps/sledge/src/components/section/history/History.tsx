@@ -7,6 +7,7 @@ import { sectionContent, sectionSubCaption, sectionSubContent } from '~/componen
 import { BaseHistoryAction, projectHistoryController } from '~/features/history';
 
 const historyContentStyle = css`
+  margin-top: 8px;
   gap: 8px;
 `;
 

@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
-import { CanvasSizeHistoryAction, ColorHistoryAction, ImagePoolHistoryAction, ProjectHistoryController } from '~/features/history';
-import { getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
-import { allLayers } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
+import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
+import { currentColor, PaletteType, selectPalette, setColor, setCurrentColor } from '~/features/color';
+import { projectHistoryController } from '~/features/history';
+import { getEntry, ImagePoolEntry, insertEntry } from '~/features/image_pool';
+import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
 if (typeof document === 'undefined') {
@@ -21,12 +20,14 @@ describe('Project-level history integration', () => {
     // Reset color to a known state
     selectPalette(PaletteType.primary);
     setColor(PaletteType.primary, '#000000');
-    // Ensure test image pool id is not present
-    if (getEntry('int-fixed')) removeEntry('int-fixed');
+    // Reset imagePool store
+    setImagePoolStore('entries', []);
+    setImagePoolStore('selectedEntryId', undefined);
   });
 
   it('sequential actions: apply -> push -> full undo -> full redo', () => {
-    const hc = new ProjectHistoryController();
+    const hc = projectHistoryController;
+    hc.clearHistory(); // Clear history before test
     const LOG_SEQ = process.env.VITEST_LOG_SEQ === '1';
     const logs: string[] = [];
 
@@ -34,39 +35,22 @@ describe('Project-level history integration', () => {
     const targetCanvas = { width: initialCanvas.width + 10, height: initialCanvas.height - 20 };
     const entry: ImagePoolEntry = {
       id: 'int-fixed',
-      originalPath: 'C:/dummy.png',
-      resourcePath: 'C:/dummy.png',
-      fileName: 'dummy.png',
+      imagePath: 'C:/dummy.png',
       base: { width: 10, height: 10 },
       transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
       opacity: 1,
       visible: true,
     };
 
-    // 1) Apply effects (redo) then push to history (common UI flow)
-    const a1 = new ColorHistoryAction(PaletteType.primary, [0, 0, 0, 255], [255, 0, 0, 255], { from: 'int' });
-    a1.redo();
+    // 1) Apply actual operations
+    setCurrentColor('#ff0000');
     if (LOG_SEQ) logs.push('Color #000000 -> #ff0000');
-    hc.addAction(a1);
 
-    const a2 = new CanvasSizeHistoryAction(initialCanvas, targetCanvas, { from: 'int' });
-    // redoing CanvasSizeHistoryActions no longer means apply resizing.
-    // a2.redo();
-
-    a2.registerBefore();
-
-    setCanvasStore('canvas', targetCanvas);
-    allLayers().forEach((l) => getAnvilOf(l.id)?.resize(targetCanvas.width, targetCanvas.height));
-
-    a2.registerAfter();
-
+    changeCanvasSizeWithNoOffset(targetCanvas);
     if (LOG_SEQ) logs.push(`Canvas ${initialCanvas.width}x${initialCanvas.height} -> ${targetCanvas.width}x${targetCanvas.height}`);
-    hc.addAction(a2);
 
-    const a3 = new ImagePoolHistoryAction('add', entry, { from: 'int' });
-    a3.redo();
+    insertEntry(entry);
     if (LOG_SEQ) logs.push('ImagePool add int-fixed');
-    hc.addAction(a3);
 
     // Verify present state
     expect(currentColor()).toBe('#ff0000');
@@ -95,10 +79,11 @@ describe('Project-level history integration', () => {
   });
 
   it('idempotency: extra undo/redo beyond bounds should not change state or throw', () => {
-    const hc = new ProjectHistoryController();
-    const a1 = new ColorHistoryAction(PaletteType.primary, [0, 0, 0, 255], [255, 0, 0, 255], { from: 'int' });
-    a1.redo();
-    hc.addAction(a1);
+    const hc = projectHistoryController;
+    hc.clearHistory(); // Clear history before test
+
+    // Apply color change
+    setCurrentColor('#ff0000');
 
     // At this point color is red
     hc.undo();

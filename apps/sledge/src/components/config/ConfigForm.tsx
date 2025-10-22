@@ -19,7 +19,7 @@ import { saveGlobalSettings } from '~/features/io/config/save';
 import { KeyConfigStore } from '~/stores/global/KeyConfigStore';
 import { globalConfig, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
 import { accentedButton, flexRow } from '~/styles/styles';
-import { join } from '~/utils/FileUtils';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';
 import KeyConfigSettings from './KeyConfigSettings';
@@ -184,10 +184,6 @@ function getParsedValueFromMetaPath(meta: FieldMeta) {
     case 'ToggleSwitch':
       v = v ? 'enabled' : 'disabled';
       break;
-  }
-  // format (like "[value]px" -> "1200px")
-  if (meta.customFormat !== undefined) {
-    v = meta.customFormat.replaceAll('[value]', v);
   }
 
   return v;
@@ -388,12 +384,12 @@ const ConfigForm: Component<Props> = (props) => {
 
       <div class={configFormInfoAreaBottom}>
         <a class={configFormLink} onClick={loadDefaults}>
-          load defaults.
+          reset to default.
         </a>
         <a
           class={configFormLink}
           onClick={async () => {
-            revealItemInDir(join(await appConfigDir(), Consts.globalConfigFileName));
+            revealItemInDir(normalizeJoin(await appConfigDir(), Consts.globalConfigFileName));
           }}
         >
           Open Config File.

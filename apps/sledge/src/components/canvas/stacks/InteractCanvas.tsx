@@ -3,8 +3,8 @@ import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
-import { clientPositionToCanvasPosition } from '~/features/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
+import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { activeLayer } from '~/features/layer';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -31,31 +31,6 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
   const [temporaryOut, setTemporaryOut] = createSignal(false);
-
-  function getWindowMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
-    let x = 0;
-    let y = 0;
-
-    if ('clientX' in e && 'clientY' in e) {
-      x = e.clientX;
-      y = e.clientY;
-    } else if ('touches' in e && e.touches.length > 0) {
-      x = e.touches[0].clientX;
-      y = e.touches[0].clientY;
-    }
-    return { x, y };
-  }
-
-  function getCanvasMousePosition(e: MouseEvent | PointerEvent | TouchEvent) {
-    // pointer 座標
-    const clientX = 'clientX' in e ? e.clientX : e.touches[0].clientX;
-    const clientY = 'clientY' in e ? e.clientY : e.touches[0].clientY;
-
-    return clientPositionToCanvasPosition({
-      x: clientX,
-      y: clientY,
-    });
-  }
 
   function isDrawableClick(e: PointerEvent): boolean {
     if (interactStore.isCanvasSizeFrameMode) {
@@ -211,13 +186,6 @@ export const InteractCanvas: Component<Props> = (props) => {
     }
   }
 
-  function handleWheel(e: WheelEvent) {
-    const windowPosition = getWindowMousePosition(e);
-    const position = getCanvasMousePosition(e);
-    setInteractStore('lastMouseWindow', windowPosition);
-    setInteractStore('lastMouseOnCanvas', position);
-  }
-
   function endStroke(position: Vec2) {
     setInteractStore('isInStroke', false);
     setLastPos(undefined);
@@ -234,7 +202,6 @@ export const InteractCanvas: Component<Props> = (props) => {
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointercancel', handlePointerCancel);
-    window.addEventListener('wheel', handleWheel);
 
     getCurrentWindow()
       .onFocusChanged(({ payload: focused }) => {
@@ -257,7 +224,6 @@ export const InteractCanvas: Component<Props> = (props) => {
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointercancel', handlePointerCancel);
-      window.removeEventListener('wheel', handleWheel);
     };
   });
 

@@ -5,7 +5,6 @@ import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
-import { listenEvent } from '~/utils/TauriUtils';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 
 export let webGLRenderer: WebGLRenderer | undefined;
@@ -76,7 +75,7 @@ const WebGLCanvas: Component = () => {
     }
   };
 
-  listenEvent('onSetup', () => {
+  onMount(() => {
     init();
   });
 
@@ -98,7 +97,6 @@ const WebGLCanvas: Component = () => {
   });
 
   onCleanup(() => {
-    if (import.meta.hot) return;
     webGLRenderer?.dispose();
     webGLRenderer = undefined;
     stopRenderLoop();

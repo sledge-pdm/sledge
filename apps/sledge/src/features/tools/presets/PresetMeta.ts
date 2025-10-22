@@ -6,7 +6,7 @@ export type PresetFieldMeta = {
   component: ConfigComponentName;
   props?: Record<string, any>; // min/max/step/options など
   tips?: string;
-  customFormat?: string; // format: [value] => value
+  customFormat?: (value: number) => string;
   condition?: () => boolean;
 };
 

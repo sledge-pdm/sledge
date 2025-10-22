@@ -1,9 +1,7 @@
-import { projectHistoryController } from '~/features/history';
-import { ImagePoolEntryPropsHistoryAction } from '~/features/history/actions/ImagePoolEntryPropsHistoryAction';
-import { ImagePoolEntry, updateEntryPartial } from '~/features/image_pool';
+import { getEntry, updateEntryPartial } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { imagePoolStore } from '~/stores/ProjectStores';
+import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 
 type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 
@@ -23,49 +21,12 @@ class ImageEntryInteract {
   private startScaleX = 1;
   private startScaleY = 1;
   private startRotation = 0; // for future
-  // rAF batching
-  private rafId: number | null = null;
-  private rafScheduled = false;
-  private lastTs = 0;
-  private pending: { x: number; y: number; scaleX: number; scaleY: number } | undefined;
 
-  private enqueueUpdate(next: { x: number; y: number; scaleX: number; scaleY: number }) {
-    this.pending = next; // overwrite with the latest
-    if (!this.rafScheduled) {
-      this.rafScheduled = true;
-      this.rafId = requestAnimationFrame(this.applyPending);
-    }
-  }
-
-  private applyPending = (ts: number) => {
-    const fps = Number(globalConfig.performance.targetFPS || 60);
-    const interval = 1000 / (fps > 0 ? fps : 60);
-    if (this.lastTs && ts - this.lastTs < interval) {
-      // throttle to target FPS
-      this.rafId = requestAnimationFrame(this.applyPending);
-      return;
-    }
-    this.lastTs = ts;
-    this.rafScheduled = false;
-    const payload = this.pending;
-    this.pending = undefined;
-    if (!payload) return;
-    const entry = this.getEntry();
-    if (!entry) return;
-    updateEntryPartial(entry.id, {
-      transform: {
-        x: payload.x,
-        y: payload.y,
-        scaleX: payload.scaleX,
-        scaleY: payload.scaleY,
-      },
-    });
-  };
   private resizePos: ResizePos | undefined;
 
   constructor(
     private svgRoot: SVGSVGElement,
-    private getEntry: () => ImagePoolEntry | undefined
+    private entryId: string
   ) {}
 
   private handlePointerDown = (e: PointerEvent) => {
@@ -73,7 +34,7 @@ class ImageEntryInteract {
     if (e.button !== 0) return;
     const target = e.target as HTMLElement;
     const handle = target.closest?.('.resize-handle') as HTMLElement | null;
-    const entry = this.getEntry();
+    const entry = getEntry(this.entryId);
     if (!entry) return;
 
     this.pointerActive = true;
@@ -96,24 +57,20 @@ class ImageEntryInteract {
   };
 
   private handlePointerMove = (e: PointerEvent) => {
-    console.log('move');
     if (!this.pointerActive || !this.mode) return;
     const zoom = interactStore.zoom || 1;
     const dx = (e.clientX - this.startClientX) / zoom;
     const dy = (e.clientY - this.startClientY) / zoom;
-    const entry = this.getEntry();
+    const entry = getEntry(this.entryId);
     if (!entry) return;
 
     if (this.mode === 'drag') {
       const nx = this.startX + dx;
       const ny = this.startY + dy;
-      console.debug('[ImagePool] drag delta', { id: entry.id, dx, dy, nx, ny, zoom });
-      this.enqueueUpdate({
-        x: nx,
-        y: ny,
-        scaleX: entry.transform.scaleX,
-        scaleY: entry.transform.scaleY,
-      });
+      const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
+      if (index < 0) return;
+      setImagePoolStore('entries', index, 'transform', 'x', nx);
+      setImagePoolStore('entries', index, 'transform', 'y', ny);
     } else if (this.mode === 'resize') {
       const baseW = entry.base.width;
       const baseH = entry.base.height;
@@ -237,26 +194,12 @@ class ImageEntryInteract {
           break;
       }
 
-      console.debug('[ImagePool] resize delta', {
-        id: entry.id,
-        dx,
-        dy,
-        scaleX: nextScaleX,
-        scaleY: nextScaleY,
-        handle: this.resizePos,
-        keepAspect,
-        pivot,
-        newX,
-        newY,
-        zoom,
-      });
-
-      this.enqueueUpdate({
-        x: newX,
-        y: newY,
-        scaleX: nextScaleX,
-        scaleY: nextScaleY,
-      });
+      const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
+      if (index < 0) return;
+      setImagePoolStore('entries', index, 'transform', 'x', newX);
+      setImagePoolStore('entries', index, 'transform', 'y', newY);
+      setImagePoolStore('entries', index, 'transform', 'scaleX', nextScaleX);
+      setImagePoolStore('entries', index, 'transform', 'scaleY', nextScaleY);
     }
   };
 
@@ -268,62 +211,9 @@ class ImageEntryInteract {
     try {
       this.svgRoot.releasePointerCapture(e.pointerId);
     } catch {}
-    console.debug('[ImagePool] pointer end');
-    // flush pending at pointer end for consistency
-    if (this.pending) {
-      this.applyPending(performance.now());
-    }
-    if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
-      this.rafId = null;
-      this.rafScheduled = false;
-    }
 
-    const entry = this.getEntry();
-    if (entry) this.commitDiff(e, entry);
-  };
-
-  private readonly ignoreCommitProps: (keyof ImagePoolEntry)[] = [];
-
-  private commitDiff(e: PointerEvent, entry: ImagePoolEntry) {
-    const startPayload = {
-      x: this.startX,
-      y: this.startY,
-      scaleX: this.startScaleX,
-      scaleY: this.startScaleY,
-      rotation: this.startRotation,
-    };
-    const startEntry = {
-      ...entry,
-      transform: { x: startPayload.x, y: startPayload.y, scaleX: startPayload.scaleX, scaleY: startPayload.scaleY },
-    } as ImagePoolEntry;
-
-    const payload = {
-      x: entry.transform.x,
-      y: entry.transform.y,
-      scaleX: entry.transform.scaleX,
-      scaleY: entry.transform.scaleY,
-      rotation: this.startRotation,
-    };
-    const endEntry = { ...entry } as ImagePoolEntry;
-
-    if (JSON.stringify(startPayload) !== JSON.stringify(payload)) {
-      projectHistoryController.addAction(
-        new ImagePoolEntryPropsHistoryAction(entry.id, startEntry, endEntry, { from: 'ImageEntryInteract.commitDiff' })
-      );
-    }
-  }
-
-  private onWindowPointerUp = (e: PointerEvent) => {
-    const entry = this.getEntry();
-    if (!entry) return;
-    this.commitDiff(e, entry);
-  };
-
-  private onWindowPointerCancel = (e: PointerEvent) => {
-    const entry = this.getEntry();
-    if (!entry) return;
-    this.commitDiff(e, entry);
+    const entry = getEntry(this.entryId);
+    if (entry) updateEntryPartial(this.entryId, entry);
   };
 
   public setInteractListeners() {

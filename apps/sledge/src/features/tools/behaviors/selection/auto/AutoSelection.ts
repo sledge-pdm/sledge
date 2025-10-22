@@ -23,8 +23,9 @@ export class AutoSelection extends SelectionBase {
     const preview = selectionManager.getPreviewMask();
     if (preview && mask) {
       preview.setMask(mask);
-      // プレビュー更新イベント（UI反映用）
-      eventBus.emit('selection:maskChanged', { commit: false });
+
+      eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+      eventBus.emit('selection:updateSelectionPath', { immediate: true });
     }
   }
 
@@ -49,7 +50,7 @@ export class AutoSelection extends SelectionBase {
     if (width === 0 || height === 0) return undefined;
 
     // 元バッファ（RGBA）を直接渡して WASM 側で領域抽出
-    const src = new Uint8Array(anvil.getBufferData().buffer); // RGBA buffer
+    const src = new Uint8Array(anvil.getBufferPointer().buffer); // RGBA buffer
     // connectivity は現状 4 固定（0を指定し内部で4接続扱い）
     const mask = auto_select_region_mask(src, width, height, position.x, position.y, threshold ?? 0, 4);
     return mask;

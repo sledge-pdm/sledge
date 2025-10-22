@@ -6,7 +6,7 @@ import { Component, Show } from 'solid-js';
 import { openExistingProject } from '~/features/io/window';
 import { fileStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/ProjectStores';
-import { join } from '~/utils/FileUtils';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
 const locationHeaderStyle = css`
@@ -57,7 +57,7 @@ const linksContainer = css`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-top: 9px;
+  margin-top: 4px;
 `;
 
 const ProjectLocation: Component = () => {
@@ -89,7 +89,7 @@ const ProjectLocation: Component = () => {
               onClick={(e) => {
                 const loc = fileStore.savedLocation;
                 if (!loc || !loc.path || !loc.name) return;
-                revealItemInDir(join(loc.path, loc.name));
+                revealItemInDir(normalizeJoin(loc.path, loc.name));
               }}
               class={explorerLinkStyle}
             >

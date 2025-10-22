@@ -1,16 +1,16 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
 import { Checkbox } from '@sledge/ui';
-import { Component, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createMemo, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
-import { addToImagePool, getEntries, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
+import { addToImagePool, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
 
 const imagesSectionsContent = css`
+  margin-top: 8px;
   padding-left: 8px;
 `;
 
@@ -35,18 +35,6 @@ const Images: Component<{}> = () => {
   const selectedEntry = createMemo<ImagePoolEntry | undefined>(() =>
     imagePoolStore.selectedEntryId ? getEntry(imagePoolStore.selectedEntryId) : undefined
   );
-  const [entries, setEntries] = createSignal(getEntries());
-
-  const handleEntriesChanged = (e: { newEntries: ReturnType<typeof getEntries> }) => {
-    setEntries([...e.newEntries]);
-  };
-
-  onMount(() => {
-    eventBus.on('imagePool:entriesChanged', handleEntriesChanged);
-  });
-  onCleanup(() => {
-    eventBus.off('imagePool:entriesChanged', handleEntriesChanged);
-  });
 
   return (
     <SectionItem
@@ -62,7 +50,7 @@ const Images: Component<{}> = () => {
           },
         },
         {
-          src: '/icons/misc/remove_minus.png',
+          src: '/icons/misc/minus.png',
           onClick: async () => {
             const id = selectedEntry()?.id;
             if (id) removeEntry(id);
@@ -71,10 +59,9 @@ const Images: Component<{}> = () => {
         },
       ]}
     >
-      <div class={clsx(sectionContent, imagesSectionsContent)}>
-        <Show when={entries().length > 0} fallback={<p class={noImageText}>no images</p>}>
+      <div class={clsx('ignore-image-select', sectionContent, imagesSectionsContent)}>
+        <Show when={imagePoolStore.entries.length > 0} fallback={<p class={noImageText}>no images</p>}>
           <div class={gridContainer}>
-            {/* <ImagePoolList /> */}
             <ImagePoolGrid />
           </div>
           <Show when={imagePoolStore.selectedEntryId !== undefined}>

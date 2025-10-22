@@ -25,7 +25,7 @@ const headerText = css`
   display: flex;
   flex-direction: column;
   gap: 4px 8px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
   align-items: baseline;
 `;

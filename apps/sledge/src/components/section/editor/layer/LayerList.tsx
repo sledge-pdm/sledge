@@ -6,15 +6,16 @@ import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPr
 import SectionItem from '~/components/section/SectionItem';
 import { allLayers, moveLayer } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { listenEvent } from '~/utils/TauriUtils';
 import { useLongPressReorder } from '~/utils/useLongPressReorder';
 import { sectionContent } from '../../SectionStyles';
 import BaseLayerItem from './BaseLayerItem';
 import LayerItem from './LayerItem';
 
 const layerListSectionContent = css`
-  padding-left: 0px;
+  padding-left: 2px;
+  padding-right: 4px;
   padding-top: 2px;
+  margin-top: 8px;
 `;
 
 const layerList = css`
@@ -29,12 +30,6 @@ const layerList = css`
 
 const LayerList: Component<{}> = () => {
   const [items, setItems] = createSignal(allLayers());
-  const [activeItem, setActiveItem] = createSignal<string | null>(null);
-  const ids = () => items().map((l) => l.id);
-
-  listenEvent('onSetup', () => {
-    setItems(allLayers());
-  });
 
   createEffect(() => {
     setItems(allLayers());
@@ -58,7 +53,6 @@ const LayerList: Component<{}> = () => {
     onDrop: (from, to, id) => {
       const adjusted = to > from ? to - 1 : to;
       handleMove(id, adjusted);
-      setActiveItem(null);
     },
   });
 

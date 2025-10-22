@@ -3,7 +3,7 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component } from 'solid-js';
 import LayerListIconButton from '~/components/section/editor/layer/row/LayerListIconButton';
 import { activeLayer, addLayer } from '~/features/layer';
-import { clearLayer, duplicateLayer, removeLayerFromUser, setLayerProp } from '~/features/layer/service';
+import { clearLayer, duplicateLayer, mergeToBelowLayer, removeLayerFromUser, setLayerProp } from '~/features/layer/service';
 import { layerListStore } from '~/stores/ProjectStores';
 import { errorButton, flexRow } from '~/styles/styles';
 
@@ -31,7 +31,7 @@ const LayerListButtonsRow: Component<Props> = (props) => {
     <div class={flexRow}>
       <div class={iconsContainer}>
         <LayerListIconButton
-          iconSrc={'/icons/sections/layer/clear_9.png'}
+          iconSrc={'/icons/layer/clear_9.png'}
           title={'clear layer.'}
           onClick={async () => {
             const clearConfirmed = await confirm(`Sure to clear layer "${activeLayer().name}"?`);
@@ -39,7 +39,7 @@ const LayerListButtonsRow: Component<Props> = (props) => {
           }}
         />
         <LayerListIconButton
-          iconSrc={activeLayer().enabled ? '/icons/misc/visible_9.png' : '/icons/misc/invisible_9.png'}
+          iconSrc={activeLayer().enabled ? '/icons/layer/visible_9.png' : '/icons/layer/invisible_9.png'}
           title={activeLayer().enabled ? 'hide layer.' : 'show layer.'}
           onClick={() => {
             const active = activeLayer();
@@ -49,7 +49,14 @@ const LayerListButtonsRow: Component<Props> = (props) => {
           }}
         />
         <LayerListIconButton
-          iconSrc={'/icons/sections/layer/duplicate_9.png'}
+          iconSrc={'/icons/layer/merge_down_9.png'}
+          title={'merge down to below layer.'}
+          onClick={async () => {
+            await mergeToBelowLayer(layerListStore.activeLayerId);
+          }}
+        />
+        <LayerListIconButton
+          iconSrc={'/icons/layer/duplicate_9.png'}
           title={'duplicate layer.'}
           onClick={() => {
             duplicateLayer(layerListStore.activeLayerId);

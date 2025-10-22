@@ -3,7 +3,8 @@ import { Component, createEffect, createSignal } from 'solid-js';
 import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, setRotation } from '~/features/canvas';
 import { canvasStore } from '~/stores/ProjectStores';
 
-import { Button, Dropdown } from '@sledge/ui';
+import { color } from '@sledge/theme';
+import { Button, Dropdown, Icon } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
@@ -11,24 +12,21 @@ import { saveGlobalSettings } from '~/features/io/config/save';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
-import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
+import { sectionContent } from '../SectionStyles';
 
 const canvasContentStyle = css`
-  gap: 10px;
-  padding-bottom: 24px;
-`;
-
-const sizeRowStyle = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-bottom: 20px;
 `;
 
 const frameModeButtonContainerStyle = css`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   margin-left: auto;
-  gap: 6px;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
 `;
 
 const presetRowStyle = css`
@@ -37,9 +35,16 @@ const presetRowStyle = css`
   margin-bottom: 2px;
 `;
 
-const presetLabelStyle = css`
-  color: var(--color-on-background);
-  width: 72px;
+const presetDropdownContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const presetLabel = css`
+  font-family: ZFB03;
+  margin-right: 8px;
+  color: var(--color-muted);
 `;
 
 const canvasSizeFormStyle = css`
@@ -54,6 +59,7 @@ const canvasSizeTimesStyle = css`
 `;
 
 const canvasSizeLabelStyle = css`
+  font-family: ZFB03;
   font-size: var(--text-sm);
   color: var(--color-muted);
   margin-bottom: 1px;
@@ -76,19 +82,21 @@ const defaultButtonContainerStyle = css`
   width: 100%;
   margin-top: 8px;
   align-items: end;
-  gap: 6px;
+  gap: 4px;
 `;
 
 const defaultInfoStyle = css`
-  font-family: ZFB03B;
+  font-family: ZFB08;
   font-size: 8px;
-  margin-left: 4px;
-  opacity: 0.5;
+  opacity: 0.65;
 `;
 
-const actionsSectionStyle = css`
-  margin-top: 12px;
-  margin-bottom: 4px;
+const actionsContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 8px;
+  align-items: start;
 `;
 
 const adjustZoomButtonStyle = css`
@@ -168,83 +176,84 @@ const CanvasSettings: Component = () => {
   return (
     <SectionItem title='canvas.'>
       <div class={`${sectionContent} ${canvasContentStyle}`}>
-        <div class={sizeRowStyle}>
-          <p class={sectionSubCaption}>size.</p>
-          <div class={frameModeButtonContainerStyle}>
-            <Button
-              onClick={async () => {
-                setInteractStore('isCanvasSizeFrameMode', (v) => !v);
-                if (interactStore.isCanvasSizeFrameMode) {
-                  selectionManager.clear();
-                }
-              }}
-              style={{
-                color: interactStore.isCanvasSizeFrameMode ? 'var(--color-error)' : 'var(--color-accent)',
-                'border-color': interactStore.isCanvasSizeFrameMode ? 'var(--color-error)' : 'var(--color-accent)',
-              }}
-            >
-              {interactStore.isCanvasSizeFrameMode ? 'quit resize.' : 'resize with frame.'}
-            </Button>
-          </div>
-        </div>
-        <div class={sectionSubContent}>
-          <div class={presetRowStyle}>
-            <p class={presetLabelStyle}>presets.</p>
+        <div class={presetRowStyle}>
+          <div class={presetDropdownContainer}>
+            <p class={presetLabel}>preset</p>
             <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
           </div>
-          <div class={canvasSizeFormStyle}>
-            <div>
-              <p class={canvasSizeLabelStyle}>width</p>
-              <input
-                ref={(el) => (widthInputRef = el)}
-                class={canvasSizeInputStyle}
-                type='number'
-                name='width'
-                value={canvasStore.canvas.width}
-                min={Consts.minCanvasWidth}
-                max={Consts.maxCanvasWidth}
-                onInput={() => {
-                  updateButtonState();
-                  updateCurrentPreset();
-                }}
-                required
-              />
-            </div>
-
-            <p class={canvasSizeTimesStyle}>x</p>
-
-            <div>
-              <p class={canvasSizeLabelStyle}>height</p>
-              <input
-                ref={(el) => (heightInputRef = el)}
-                class={canvasSizeInputStyle}
-                type='number'
-                name='height'
-                value={canvasStore.canvas.height}
-                min={Consts.minCanvasHeight}
-                max={Consts.maxCanvasHeight}
-                onInput={() => {
-                  updateButtonState();
-                  updateCurrentPreset();
-                }}
-                required
-              />
-            </div>
-            <button
-              class={canvasSizeButtonStyle}
-              onClick={(e) => {
-                e.preventDefault();
-                submitSizeChange();
-              }}
-              disabled={!isChangable()}
-              style={{
-                color: isChangable() ? 'var(--color-active)' : undefined,
-                'border-color': isChangable() ? 'var(--color-active)' : undefined,
-              }}
-            >
-              apply
-            </button>
+          <div
+            class={frameModeButtonContainerStyle}
+            onClick={async () => {
+              setInteractStore('isCanvasSizeFrameMode', (v) => !v);
+              if (interactStore.isCanvasSizeFrameMode) {
+                setInteractStore('horizontalFlipped', false);
+                setInteractStore('verticalFlipped', false);
+                adjustZoomToFit();
+                selectionManager.clear();
+              }
+            }}
+          >
+            <Icon
+              src={'/icons/misc/frame_resize_12.png'}
+              base={12}
+              scale={1}
+              color={interactStore.isCanvasSizeFrameMode ? color.error : undefined}
+              hoverColor={interactStore.isCanvasSizeFrameMode ? color.error : color.enabled}
+            />
           </div>
+        </div>
+        <div class={canvasSizeFormStyle}>
+          <div>
+            <p class={canvasSizeLabelStyle}>width</p>
+            <input
+              ref={(el) => (widthInputRef = el)}
+              class={canvasSizeInputStyle}
+              type='number'
+              name='width'
+              value={canvasStore.canvas.width}
+              min={Consts.minCanvasWidth}
+              max={Consts.maxCanvasWidth}
+              onInput={() => {
+                updateButtonState();
+                updateCurrentPreset();
+              }}
+              required
+            />
+          </div>
+
+          <p class={canvasSizeTimesStyle}>x</p>
+
+          <div>
+            <p class={canvasSizeLabelStyle}>height</p>
+            <input
+              ref={(el) => (heightInputRef = el)}
+              class={canvasSizeInputStyle}
+              type='number'
+              name='height'
+              value={canvasStore.canvas.height}
+              min={Consts.minCanvasHeight}
+              max={Consts.maxCanvasHeight}
+              onInput={() => {
+                updateButtonState();
+                updateCurrentPreset();
+              }}
+              required
+            />
+          </div>
+          <button
+            class={canvasSizeButtonStyle}
+            onClick={(e) => {
+              e.preventDefault();
+              submitSizeChange();
+            }}
+            disabled={!isChangable()}
+            style={{
+              color: isChangable() ? 'var(--color-active)' : undefined,
+              'border-color': isChangable() ? 'var(--color-active)' : undefined,
+            }}
+          >
+            apply
+          </button>
         </div>
         <div class={defaultButtonContainerStyle}>
           <Button
@@ -255,27 +264,9 @@ const CanvasSettings: Component = () => {
           >
             Set as Default.
           </Button>
-          <p class={defaultInfoStyle}>[ current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`} ]</p>
+          <p class={defaultInfoStyle}>current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`}</p>
         </div>
-        {/* <p class={sectionSubCaption} style={{ 'margin-top': '4px', 'margin-bottom': '4px' }}>
-          info.
-        </p>
-        <div class={flexCol} style={{ gap: '4px', overflow: 'hidden' }}>
-          <div class={flexRow}>
-            <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>size</p>
-            <p style={{ 'white-space': 'wrap' }}>{`${canvasStore.canvas.width} x ${canvasStore.canvas.height}`}</p>
-          </div>
-          <div class={flexRow}>
-            <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>layers</p>
-            <p style={{ 'white-space': 'wrap' }}>{`${allLayers().length}`}</p>
-          </div>
-          <div class={flexRow}>
-            <p style={{ 'font-family': ZFB03, width: '50px', 'font-size': '8px', opacity: 0.75 }}>active</p>
-            <p style={{ 'white-space': 'wrap' }}>{`${activeLayer().name}`}</p>
-          </div>
-        </div> */}
-        <p class={`${sectionSubCaption} ${actionsSectionStyle}`}>actions.</p>
-        <div class={sectionSubContent}>
+        <div class={actionsContainer}>
           <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 
           <Button onClick={() => adjustZoomToFit()} class={adjustZoomButtonStyle}>

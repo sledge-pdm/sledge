@@ -96,10 +96,14 @@ export function getSelectionOffset() {
 }
 
 export function cancelSelection() {
+  const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
   if (floatingMoveManager.isMoving()) {
     floatingMoveManager.cancel();
   }
   selectionManager.clear();
+
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'selection cancelled' });
+  eventBus.emit('preview:requestUpdate', { layerId });
 }
 
 export function commitMove() {
@@ -107,7 +111,11 @@ export function commitMove() {
 }
 
 export function cancelMove() {
+  const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
   floatingMoveManager.cancel();
+
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'move cancelled' });
+  eventBus.emit('preview:requestUpdate', { layerId });
 }
 
 export function deleteSelectedArea(layerId?: string): boolean {
@@ -124,16 +132,33 @@ export function deleteSelectedArea(layerId?: string): boolean {
     width: bBox.right - bBox.left + 1,
     height: bBox.bottom - bBox.top + 1,
   };
-  anvil.addWholeDiff(anvil.getImageData());
-  const deletedArea = new Uint8ClampedArray(selectionBoundBox.width * selectionBoundBox.height * 4);
-  anvil.setPartialBuffer(selectionBoundBox, deletedArea);
+  anvil.addPartialDiff(selectionBoundBox, anvil.getPartialBuffer(selectionBoundBox));
+
+  const canvasWidth = anvil.getWidth();
+
+  const buffer = anvil.getBufferPointer();
+  for (let oy = 0; oy < selectionBoundBox.height; oy++) {
+    for (let ox = 0; ox < selectionBoundBox.width; ox++) {
+      const x = selectionBoundBox.x + ox;
+      const y = selectionBoundBox.y + oy;
+      const maskIdx = y * canvasWidth + x;
+      if (selection.getMask()[maskIdx] === 1) {
+        const canvasIdx = maskIdx * 4;
+        buffer[canvasIdx] = 0;
+        buffer[canvasIdx + 1] = 0;
+        buffer[canvasIdx + 2] = 0;
+        buffer[canvasIdx + 3] = 0;
+      }
+    }
+  }
+
   const diffs = anvil.flushDiffs();
   if (diffs) {
-    const acc = new AnvilLayerHistoryAction(lid, diffs, { tool: TOOL_CATEGORIES.RECT_SELECTION });
+    const acc = new AnvilLayerHistoryAction({ layerId: lid, patch: diffs, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
     projectHistoryController.addAction(acc);
   }
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'delete in selection' });
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
   eventBus.emit('preview:requestUpdate', { layerId: lid });
 
   return true;
@@ -162,5 +187,7 @@ export function invertSelectionArea() {
 
   // 4) 状態更新とイベント発火
   selectionManager.setState(isSelectionAvailable() ? 'selected' : 'idle');
-  eventBus.emit('selection:maskChanged', { commit: true });
+
+  eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+  eventBus.emit('selection:updateSelectionPath', { immediate: true });
 }

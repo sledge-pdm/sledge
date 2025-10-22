@@ -8,18 +8,17 @@
     "site:build": "pnpm -F sledge-website build",
     "wasm:build": "cd packages/wasm && pnpm --ignore-workspace i && wasm-pack build --target bundler",
     "tsc": "pnpm -r exec tsc --noEmit --skipLibCheck",
-    "test": "vitest run -c configs/test/vitest.config.ts",
-    "test:ui": "vitest -c configs/test/vitest.config.ts",
-    "prettier": "prettier --write . --config configs/format/prettier.config.json",
-    "lint:css": "stylelint \"**/*.{css,scss}\" --config configs/lint/stylelint.config.json",
+    "test": "vitest run -c vitest.config.ts",
+    "test:ui": "vitest -c vitest.config.ts",
+    "prettier": "prettier --write . --config .prettierrc",
+    "lint:css": "stylelint \"**/*.{css,scss}\" --config .stylelintrc.json",
     "cargo:format": "cd packages/wasm && cargo fmt && cd ../../apps/sledge/src-tauri && cargo fmt",
     "format": "pnpm prettier && pnpm cargo:format",
-    "prepare": "husky"
+    "prepare": ""
   },
   "devDependencies": {
     "@acab/ecsstatic": "^0.9.0",
     "dotenv": "^17.2.3",
-    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.3.0",
     "stylelint": "^16.25.0",

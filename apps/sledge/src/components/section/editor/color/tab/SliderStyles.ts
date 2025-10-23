@@ -1,4 +1,4 @@
-import { css } from "@acab/ecsstatic";
+import { css } from '@acab/ecsstatic';
 
 export const sliderContentRoot = css`
   display: flex;

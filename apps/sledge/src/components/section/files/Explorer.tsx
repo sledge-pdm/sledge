@@ -50,14 +50,14 @@ const explorerContainer = css`
 const explorerInner = css`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin-bottom: 16px;
 `;
 
 const navigationPanel = css`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 `;
 
 const navigationRow = css`
@@ -298,7 +298,7 @@ const Explorer: Component<Props> = (props) => {
                     options={[
                       {
                         type: 'item',
-                        label: 'back to saved directory',
+                        label: 'back to saved folder',
                         disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
                         onSelect: () => {
                           if (fileStore.savedLocation.path) setPath(fileStore.savedLocation.path);
@@ -306,9 +306,9 @@ const Explorer: Component<Props> = (props) => {
                       },
                       {
                         type: 'item',
-                        label: 'Export to this directory',
+                        label: 'Export to this folder',
                         onSelect: () => {
-                          setLastSettingsStore('exportSettings', 'dirPath', currentPath());
+                          setLastSettingsStore('exportSettings', 'folderPath', currentPath());
                           setAppearanceStore(
                             'rightSide',
                             'selectedIndex',

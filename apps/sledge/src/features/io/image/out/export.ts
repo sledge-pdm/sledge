@@ -37,7 +37,7 @@ const exporters = new Map<ExportableFileTypes, Exporter>([
   ['webp_lossy', new LossyWebPExporter()],
 ]);
 
-export async function exportImage(dirPath: string, fileName: string, options: CanvasExportOptions): Promise<FileLocation | undefined> {
+export async function exportImage(folderPath: string, fileName: string, options: CanvasExportOptions): Promise<FileLocation | undefined> {
   const exporter = exporters.get(options.format);
   const ext = convertToExtension(options.format);
 
@@ -46,27 +46,27 @@ export async function exportImage(dirPath: string, fileName: string, options: Ca
   if (!options.perLayer) {
     // whole canvas export
     const canvasBlob: Blob = await exporter.canvasToBlob(options.quality, options.scale);
-    return await saveBlobViaTauri(canvasBlob, dirPath, `${fileName}.${ext}`);
+    return await saveBlobViaTauri(canvasBlob, folderPath, `${fileName}.${ext}`);
   } else {
     const layerLocations = await Promise.all(
       allLayers().map(async (layer) => {
         const layerBlob = await exporter.layerToBlob(layer, options.quality, options.scale);
-        const loc = await saveBlobViaTauri(layerBlob, normalizeJoin(dirPath, fileName), `${fileName}_${layer.name}.${ext}`);
+        const loc = await saveBlobViaTauri(layerBlob, normalizeJoin(folderPath, fileName), `${fileName}_${layer.name}.${ext}`);
         return loc;
       })
     );
     return {
-      path: dirPath,
+      path: folderPath,
       name: fileName,
     };
   }
 }
 
-export async function saveBlobViaTauri(blob: Blob, dirPath: string, fileName = 'export.png'): Promise<FileLocation | undefined> {
-  if (!(await exists(dirPath))) {
-    await mkdir(dirPath, { recursive: true });
+export async function saveBlobViaTauri(blob: Blob, folderPath: string, fileName = 'export.png'): Promise<FileLocation | undefined> {
+  if (!(await exists(folderPath))) {
+    await mkdir(folderPath, { recursive: true });
   }
-  const filePath = normalizeJoin(dirPath, fileName);
+  const filePath = normalizeJoin(folderPath, fileName);
   if (await exists(filePath)) {
     const ok = await confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
       kind: 'info',
@@ -81,18 +81,18 @@ export async function saveBlobViaTauri(blob: Blob, dirPath: string, fileName = '
   }
 
   const buf = new Uint8Array(await blob.arrayBuffer());
-  await writeFile(normalizeJoin(dirPath, fileName), buf, {});
-  setLastSettingsStore('exportedDirPaths', (prev) => {
-    if (prev.includes(dirPath)) {
-      prev = [...prev.filter((p) => p !== dirPath), dirPath];
+  await writeFile(normalizeJoin(folderPath, fileName), buf, {});
+  setLastSettingsStore('exportedFolderPaths', (prev) => {
+    if (prev.includes(folderPath)) {
+      prev = [...prev.filter((p) => p !== folderPath), folderPath];
       return prev;
     }
     if (prev.length >= 10) prev.shift();
-    return [...prev, dirPath];
+    return [...prev, folderPath];
   });
 
   return {
-    path: dirPath,
+    path: folderPath,
     name: fileName,
   };
 }

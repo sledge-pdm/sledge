@@ -2,12 +2,12 @@ import { ExportSettings } from '~/components/section/export/ExportContent';
 
 export type LastSettingsStore = {
   exportSettings: ExportSettings;
-  exportedDirPaths: string[];
+  exportedFolderPaths: string[];
 };
 
 export const defaultLastSettingsStore: LastSettingsStore = {
   exportSettings: {
-    dirPath: undefined,
+    folderPath: undefined,
     fileName: '',
     exportOptions: {
       perLayer: false,
@@ -17,5 +17,5 @@ export const defaultLastSettingsStore: LastSettingsStore = {
     },
     showDirAfterSave: false,
   },
-  exportedDirPaths: [],
+  exportedFolderPaths: [],
 };

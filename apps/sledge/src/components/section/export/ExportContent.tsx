@@ -34,7 +34,7 @@ const exportDialogCustomScaleInput = css`
   width: 24px;
 `;
 
-const dirPathContainer = css`
+const folderPathContainer = css`
   display: flex;
   flex-direction: row;
   position: relative;
@@ -42,7 +42,7 @@ const dirPathContainer = css`
   border-bottom: 1px solid var(--color-border-secondary);
 `;
 
-const directoryPath = css`
+const folderPath = css`
   font-size: 10px;
   font-family: PM10;
   line-height: 1.2;
@@ -133,7 +133,7 @@ const scaleOptions: DropdownOption<number>[] = [
 const qualityMutableExtensions: Partial<ExportableFileTypes>[] = ['webp_lossy', 'jpeg'];
 
 export interface ExportSettings {
-  dirPath?: string;
+  folderPath?: string;
   fileName?: string;
   exportOptions: CanvasExportOptions;
   showDirAfterSave: boolean;
@@ -162,28 +162,29 @@ const ExportContent: Component = () => {
   const finalScale = () => (settings.exportOptions.scale !== 0 ? settings.exportOptions.scale : customScale()) ?? 1;
 
   onMount(async () => {
-    if (settings.dirPath) {
+    if (settings.folderPath) {
       // if saved, use it
     } else if (fileStore.savedLocation.path) {
-      setSettings('dirPath', fileStore.savedLocation.path);
+      setSettings('folderPath', fileStore.savedLocation.path);
     } else {
-      setSettings('dirPath', await defaultExportDir());
+      setSettings('folderPath', await defaultExportDir());
     }
   });
 
   createEffect(() => {
-    setSettings('dirPath', lastSettingsStore.exportSettings.dirPath);
+    const newFolderPath = lastSettingsStore.exportSettings.folderPath;
+    if (newFolderPath?.trim()) setSettings('folderPath', newFolderPath);
   });
 
   const openDirSelectionDialog = async () => {
     const dir = await open({
       multiple: false,
       directory: true,
-      defaultPath: settings.dirPath,
+      defaultPath: settings.folderPath,
       canCreateDirectories: true,
     });
 
-    if (dir) setSettings('dirPath', dir);
+    if (dir) setSettings('folderPath', dir);
   };
 
   const requestExport = async () => {
@@ -196,8 +197,8 @@ const ExportContent: Component = () => {
       message('Export Error; File name is empty.');
       return;
     }
-    if (settings.dirPath) {
-      const location = await exportImage(settings.dirPath, name, settings.exportOptions);
+    if (settings.folderPath) {
+      const location = await exportImage(settings.folderPath, name, settings.exportOptions);
       if (location) {
         if (settings.showDirAfterSave && location.path && location.name) {
           await revealItemInDir(normalizeJoin(location.path, location.name));
@@ -211,8 +212,8 @@ const ExportContent: Component = () => {
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
   const exportDirHistoryOptions = createMemo<MenuListOption[]>(() => {
-    const options: MenuListOption[] = lastSettingsStore.exportedDirPaths.map((path: string) => {
-      return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('dirPath', normalizePath(path)) };
+    const options: MenuListOption[] = lastSettingsStore.exportedFolderPaths.map((path: string) => {
+      return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
     });
 
     return options.reverse();
@@ -221,10 +222,10 @@ const ExportContent: Component = () => {
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
       <div class={flexCol}>
-        <p class={sectionSubCaption}>Output Directory.</p>
+        <p class={sectionSubCaption}>Output Folder.</p>
         <div class={sectionSubContent}>
           <div
-            class={dirPathContainer}
+            class={folderPathContainer}
             style={{
               cursor: exportDirHistoryOptions()?.length > 0 ? 'pointer' : 'default',
             }}
@@ -234,7 +235,7 @@ const ExportContent: Component = () => {
               setLastExportDirsMenuShown(!lastExportDirsMenuShown());
             }}
           >
-            <p class={directoryPath}>{settings.dirPath}</p>
+            <p class={folderPath}>{settings.folderPath}</p>
             <Show when={exportDirHistoryOptions()?.length > 0}>
               <div class={menuButtonContainer}>
                 <div class={iconButton}>
@@ -345,13 +346,13 @@ const ExportContent: Component = () => {
             label='Export Per Layer.'
             labelMode='left'
             title={
-              !settings.fileName || !settings.dirPath
+              !settings.fileName || !settings.folderPath
                 ? undefined
                 : 'Layer images will be exported in:\n' +
                   allLayers()
                     .map((layer) => {
                       return normalizeJoin(
-                        settings.dirPath!,
+                        settings.folderPath!,
                         settings.fileName!,
                         `${settings.fileName}_${layer.name}.${convertToExtension(settings.exportOptions.format)}`
                       );
@@ -367,7 +368,7 @@ const ExportContent: Component = () => {
           />
         </div>
 
-        <button class={accentedButton} onClick={(e) => requestExport()} disabled={!settings.dirPath || !settings.fileName}>
+        <button class={accentedButton} onClick={(e) => requestExport()} disabled={!settings.folderPath || !settings.fileName}>
           Export
         </button>
       </div>

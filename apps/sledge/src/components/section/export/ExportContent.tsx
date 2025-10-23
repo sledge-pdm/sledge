@@ -2,7 +2,8 @@ import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Slider } from '@sledge/ui';
-import { message, open } from '@tauri-apps/plugin-dialog';
+import { confirm, message, open } from '@tauri-apps/plugin-dialog';
+import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -49,6 +50,10 @@ const folderPath = css`
   word-wrap: break-word;
   word-break: break-word;
   width: 100%;
+
+  border: none;
+  letter-spacing: 1px;
+  padding: 0;
 `;
 
 const menuButtonContainer = css`
@@ -219,6 +224,31 @@ const ExportContent: Component = () => {
     return options.reverse();
   });
 
+  const setPath = async (value: string) => {
+    if (settings.folderPath) setSettings('folderPath', normalizePath(settings.folderPath));
+
+    const path = normalizePath(value);
+    if (!(await exists(path))) {
+      const confirmed = await confirm(`The specified folder does not exist. create?`, {
+        okLabel: 'Create',
+        cancelLabel: 'Cancel',
+        kind: 'info',
+        title: 'Output Folder',
+      });
+
+      if (!confirmed) return;
+
+      await mkdir(path, { recursive: true });
+    } else {
+      const pathStat = await stat(path);
+      if (pathStat.isFile) {
+        await message('The specified path is already exists as a file.');
+        return;
+      }
+    }
+    setSettings('folderPath', path);
+  };
+
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
       <div class={flexCol}>
@@ -235,7 +265,38 @@ const ExportContent: Component = () => {
               setLastExportDirsMenuShown(!lastExportDirsMenuShown());
             }}
           >
-            <p class={folderPath}>{settings.folderPath}</p>
+            <input
+              value={settings.folderPath}
+              class={folderPath}
+              onKeyDown={(e) => {
+                e.stopImmediatePropagation();
+              }}
+              onChange={async (e) => {
+                if (settings.folderPath) {
+                  setSettings('folderPath', normalizePath(settings.folderPath));
+                }
+                const path = normalizePath(e.target.value);
+                if (!(await exists(path))) {
+                  const confirmed = await confirm(`The specified folder does not exist. create?`, {
+                    okLabel: 'Create',
+                    cancelLabel: 'Cancel',
+                    kind: 'info',
+                    title: 'Output Folder',
+                  });
+
+                  if (!confirmed) return;
+
+                  await mkdir(path, { recursive: true });
+                } else {
+                  const pathStat = await stat(path);
+                  if (pathStat.isFile) {
+                    await message('The specified path is already exists as a file.');
+                    return;
+                  }
+                }
+                setSettings('folderPath', path);
+              }}
+            />
             <Show when={exportDirHistoryOptions()?.length > 0}>
               <div class={menuButtonContainer}>
                 <div class={iconButton}>

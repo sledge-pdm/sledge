@@ -18,17 +18,3 @@ export const Consts = {
 
   webGLFullUploadThresholdPercent: 15,
 };
-
-export type KeyConfigCommands =
-  | 'save'
-  | 'undo'
-  | 'redo'
-  | 'pen'
-  | 'eraser'
-  | 'fill'
-  | 'rect_select'
-  | 'auto_select'
-  | 'move'
-  | 'pipette'
-  | 'sizeIncrease'
-  | 'sizeDecrease';

@@ -6,7 +6,7 @@ import { setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
 
-const toolConfigRow = css`
+const itemRoot = css`
   display: flex;
   flex-direction: row;
   height: 32px;
@@ -14,7 +14,7 @@ const toolConfigRow = css`
   align-items: center;
 `;
 
-const toolConfigRowClickable = css`
+const clickableContainer = css`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -22,17 +22,12 @@ const toolConfigRowClickable = css`
   cursor: pointer;
 `;
 
-const toolConfigRowName = css`
+const name = css`
   cursor: pointer;
   width: 40px;
   margin-left: 8px;
   font-size: var(--text-sm);
 `;
-
-const iconWrapper = css`
-  padding: 0px;
-`;
-
 interface Props {
   categoryId: ToolCategoryId;
   withLabel?: 'none' | 'always' | 'inUse';
@@ -45,15 +40,14 @@ const ToolItem: Component<Props> = (props: Props) => {
   const shouldShowLabel = () => props.withLabel === 'always' || (props.withLabel === 'inUse' && props.isInUse);
 
   return (
-    <div class={toolConfigRow}>
+    <div class={itemRoot}>
       {/* <Light on={props.isInUse} /> */}
-      <div class={toolConfigRowClickable} onClick={() => setActiveToolCategory(category.id)}>
-        <div class={iconWrapper}>
-          <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} hoverColor={color.active} />
-        </div>
+      <div class={clickableContainer} onClick={() => setActiveToolCategory(category.id)}>
+        <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} hoverColor={color.active} />
+
         <Show when={shouldShowLabel()}>
           <p
-            class={toolConfigRowName}
+            class={name}
             style={{
               color: props.isInUse ? color.active : color.onBackground,
             }}

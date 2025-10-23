@@ -31,7 +31,7 @@ const pickerToolContainer = css`
   flex-direction: column;
   margin-top: auto;
   margin-bottom: 4px;
-  margin-left: 24px;
+  margin-left: 28px;
 `;
 
 const pipetteContainer = css`
@@ -87,7 +87,7 @@ const Color: Component = () => {
             <div class={pickerToolContainer}>
               <div class={pipetteContainer} onClick={() => setActiveToolCategory('pipette')}>
                 <Icon
-                  src={'/icons/tool_bar/tool/pipette.png'}
+                  src={'/icons/tools/pipette.png'}
                   base={8}
                   scale={2}
                   color={getActiveToolCategoryId() === 'pipette' ? color.active : color.onBackground}

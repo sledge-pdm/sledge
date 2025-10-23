@@ -1,7 +1,6 @@
 import { reconcile } from 'solid-js/store';
 import { KeyConfigEntry } from '~/config/KeyConfig';
-import { KeyConfigCommands } from '~/Consts';
-import { makeDefaultKeyConfigStore } from '~/stores/global/KeyConfigStore';
+import { KeyConfigCommands, makeDefaultKeyConfigStore } from '~/stores/global/KeyConfigStore';
 import { setKeyConfigStore } from '~/stores/GlobalStores';
 
 export const recordKey = (e: KeyboardEvent): KeyConfigEntry => {

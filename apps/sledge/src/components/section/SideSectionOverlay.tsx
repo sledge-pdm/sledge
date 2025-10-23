@@ -4,7 +4,7 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import interact from 'interactjs';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
-import { EditorTab, EffectsTab, ExportTab, FilesTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
+import { EditorTab, EffectsTab, ExplorerTab, ExportTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -124,8 +124,8 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         return <EditorTab />;
       case 'effects':
         return <EffectsTab />;
-      case 'files':
-        return <FilesTab />;
+      case 'explorer':
+        return <ExplorerTab />;
       case 'history':
         return <HistoryTab />;
       case 'project':

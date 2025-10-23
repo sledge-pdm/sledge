@@ -100,7 +100,7 @@ const tabItemActive = css`
 const tabSwitchContent = css`
   display: flex;
   flex-direction: column;
-  width: 150px;
+  width: 160px;
   height: 134px;
 `;
 
@@ -170,7 +170,7 @@ const Color: Component = () => {
             <div class={tabSwitchContent}>
               <Switch>
                 <Match when={tab() === 'picker'}>
-                  <ColorPicker width={130} />
+                  <ColorPicker width={140} />
                 </Match>
                 <Match when={tab() === 'rgb'}>
                   <RGB />

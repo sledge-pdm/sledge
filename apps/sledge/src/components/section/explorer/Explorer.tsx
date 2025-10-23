@@ -6,7 +6,7 @@ import { pictureDir } from '@tauri-apps/api/path';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import FileItem, { FilesConfig } from '~/components/section/files/item/FileItem';
+import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
 import { appearanceStore, fileStore, setAppearanceStore, setLastSettingsStore } from '~/stores/EditorStores';
@@ -44,6 +44,7 @@ const explorerContainer = css`
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-left: 8px;
   gap: 8px;
 `;
 

@@ -38,8 +38,8 @@ const CanvasDebugOverlay: Component = (props) => {
   const logger = new DebugLogger(LOG_LABEL, false);
 
   const toMiB = (bytes?: number): string => {
-    if (bytes !== undefined) return (bytes / 1024 / 1024).toFixed(1) + ' MiB';
-    else return '- MiB';
+    if (bytes !== undefined) return (bytes / 1024 / 1024).toFixed(1);
+    else return '-';
   };
 
   const [jsMemInfo, setJsMemInfo] = createSignal<any>({});
@@ -62,7 +62,7 @@ const CanvasDebugOverlay: Component = (props) => {
       setSparkLineStore((prev) => {
         const jsMiB = (jsMemInfo()?.usedJSHeapSize ?? 0) / 1024 / 1024;
         return {
-          jsHeap: [...prev.jsHeap, jsMiB].slice(-60),
+          jsHeap: [...prev.jsHeap, jsMiB].slice(-30),
         };
       });
 
@@ -75,8 +75,8 @@ const CanvasDebugOverlay: Component = (props) => {
   onMount(() => {
     let intervalId: NodeJS.Timeout | undefined;
     const startTimerId = window.setTimeout(() => {
-      intervalId = setInterval(callback, 1000);
-    }, 1500);
+      intervalId = setInterval(callback, 500);
+    }, 100);
 
     return () => {
       if (startTimerId) clearTimeout(startTimerId);
@@ -90,10 +90,12 @@ const CanvasDebugOverlay: Component = (props) => {
         <div class={canvasDebugOverlayBottomLeft}>
           <div class={jsHeapContainer}>
             <p>
-              JS Heap: {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)}
+              JS Heap
+              <br />
+              {toMiB(jsMemInfo().usedJSHeapSize)} / {toMiB(jsMemInfo().totalJSHeapSize)} MiB
             </p>
 
-            <SparkLine length={60} height={60} lengthMult={2} color='#f44336' values={sparkLineStore.jsHeap} min={0} />
+            <SparkLine length={30} height={60} lengthMult={4} color='#f44336' values={sparkLineStore.jsHeap} min={0} />
           </div>
         </div>
       </Show>

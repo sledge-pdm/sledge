@@ -12,9 +12,9 @@ export const sliderContentRoot = css`
 export const sliderContainer = css`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 `;
 export const sliderLabel = css`
   font-family: ZFB03;
-  opacity: 0.75;
+  opacity: 0.5;
 `;

@@ -8,10 +8,8 @@ import { Button, Dropdown, Icon } from '@sledge/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
-import { saveGlobalSettings } from '~/features/io/config/save';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { sectionContent } from '../SectionStyles';
 
 const canvasContentStyle = css`
@@ -95,7 +93,7 @@ const actionsContainer = css`
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 16px;
   align-items: start;
 `;
 
@@ -255,7 +253,7 @@ const CanvasSettings: Component = () => {
             apply
           </button>
         </div>
-        <div class={defaultButtonContainerStyle}>
+        {/* <div class={defaultButtonContainerStyle}>
           <Button
             onClick={async () => {
               setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
@@ -265,7 +263,7 @@ const CanvasSettings: Component = () => {
             Set as Default.
           </Button>
           <p class={defaultInfoStyle}>current: {`${globalConfig.default.canvasSize.width} x ${globalConfig.default.canvasSize.height}`}</p>
-        </div>
+        </div> */}
         <div class={actionsContainer}>
           <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 

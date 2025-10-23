@@ -6,7 +6,6 @@ import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { DropdownOption, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/color/Palette';
-import HSV from '~/components/section/editor/color/tab/HSV';
 import RGB from '~/components/section/editor/color/tab/RGB';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
@@ -175,9 +174,6 @@ const Color: Component = () => {
                 </Match>
                 <Match when={tab() === 'rgb'}>
                   <RGB />
-                </Match>
-                <Match when={tab() === 'hsv'}>
-                  <HSV />
                 </Match>
               </Switch>
             </div>

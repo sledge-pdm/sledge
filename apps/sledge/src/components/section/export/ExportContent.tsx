@@ -69,7 +69,11 @@ const menuButtonContainer = css`
   flex-direction: column;
   cursor: pointer;
 `;
-
+const menuButtonContainerDisabled = css`
+  opacity: 0.25;
+  cursor: default;
+  pointer-events: none;
+`;
 const iconButton = css`
   padding: 2px;
 `;
@@ -189,7 +193,7 @@ const ExportContent: Component = () => {
   const openDirSelectionDialog = async () => {
     const dir = await open({
       multiple: false,
-      directory: true,
+      directory: true, 
       defaultPath: settings.folderPath,
       canCreateDirectories: true,
     });
@@ -267,34 +271,32 @@ const ExportContent: Component = () => {
                 setSettings('folderPath', path);
               }}
             />
-            <Show when={lastSettingsStore.exportedFolderPaths.length > 0}>
-              <div
-                class={menuButtonContainer}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setLastExportDirsMenuShown(!lastExportDirsMenuShown());
-                }}
-              >
-                <div class={iconButton}>
-                  <Icon src={'/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
-                </div>
-                <Show when={lastExportDirsMenuShown()}>
-                  <MenuList
-                    options={lastSettingsStore.exportedFolderPaths.map((path: string) => {
-                      return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
-                    })}
-                    onClose={() => setLastExportDirsMenuShown(false)}
-                    align='right'
-                    style={{
-                      'margin-top': '6px',
-                      'border-radius': '4px',
-                      'border-color': color.onBackground,
-                    }}
-                  />
-                </Show>
+            <div
+              class={clsx(menuButtonContainer, lastSettingsStore.exportedFolderPaths.length <= 0 && menuButtonContainerDisabled)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+              }}
+            >
+              <div class={iconButton}>
+                <Icon src={'/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
               </div>
-            </Show>
+              <Show when={lastExportDirsMenuShown()}>
+                <MenuList
+                  options={lastSettingsStore.exportedFolderPaths.map((path: string) => {
+                    return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
+                  })}
+                  onClose={() => setLastExportDirsMenuShown(false)}
+                  align='right'
+                  style={{
+                    'margin-top': '6px',
+                    'border-radius': '4px',
+                    'border-color': color.onBackground,
+                  }}
+                />
+              </Show>
+            </div>
           </div>
           <button class={browseButton} onClick={openDirSelectionDialog}>
             browse...

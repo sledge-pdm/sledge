@@ -68,7 +68,7 @@ const Effects: Component = () => {
             withBorder
             sizingMode='width-based'
             referenceSize={250}
-            maxHeight={200}
+            maxHeight={160}
             fitMode='contain'
             updateInterval={20}
           />

@@ -6,7 +6,6 @@ import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { DropdownOption, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/color/Palette';
-import HSV from '~/components/section/editor/color/tab/HSV';
 import RGB from '~/components/section/editor/color/tab/RGB';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
@@ -101,7 +100,7 @@ const tabItemActive = css`
 const tabSwitchContent = css`
   display: flex;
   flex-direction: column;
-  width: 150px;
+  width: 160px;
   height: 134px;
 `;
 
@@ -171,13 +170,10 @@ const Color: Component = () => {
             <div class={tabSwitchContent}>
               <Switch>
                 <Match when={tab() === 'picker'}>
-                  <ColorPicker width={130} />
+                  <ColorPicker width={140} />
                 </Match>
                 <Match when={tab() === 'rgb'}>
                   <RGB />
-                </Match>
-                <Match when={tab() === 'hsv'}>
-                  <HSV />
                 </Match>
               </Switch>
             </div>

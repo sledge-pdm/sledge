@@ -187,8 +187,8 @@ Make sure you have restored all backups!!`,
                 }
               );
               if (!confirmed) {
-                const dirPath = await getEmergencyBackupPath();
-                await remove(dirPath, {
+                const folderPath = await getEmergencyBackupPath();
+                await remove(folderPath, {
                   recursive: true,
                 });
                 getCurrentWindow().close();

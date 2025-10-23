@@ -71,6 +71,7 @@ interface PresetRecord {
 // (Also note that this doesn't include any config-related things.)
 export interface EditorStateStore {
   appearanceStore: AppearanceStore;
+  colorStore: ColorStore;
   lastSettingsStore: LastSettingsStore;
   recentFiles: FileLocation[];
   presets: PresetRecord[];
@@ -79,6 +80,7 @@ export interface EditorStateStore {
 export const getEditorStateStore = (): EditorStateStore => {
   return {
     appearanceStore: appearanceStore,
+    colorStore: colorStore,
     lastSettingsStore: lastSettingsStore,
     recentFiles: fileStore.recentFiles,
     presets: Object.values(toolStore.tools)
@@ -96,6 +98,7 @@ export const getEditorStateStore = (): EditorStateStore => {
 export const loadEditorStateStore = (state: EditorStateStore) => {
   if (state.appearanceStore) setAppearanceStore(state.appearanceStore);
   if (state.lastSettingsStore) setLastSettingsStore(state.lastSettingsStore);
+  if (state.colorStore) setColorStore(state.colorStore);
   setFileStore('recentFiles', state.recentFiles ?? []);
   state.presets?.forEach((record) => {
     setToolStore('tools', record.toolId, 'presets', record.presets);

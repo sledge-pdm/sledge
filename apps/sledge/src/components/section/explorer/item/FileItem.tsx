@@ -84,14 +84,14 @@ const FileItem: Component<{
       style={{
         width: config.twoColumns ? '50%' : '100%',
       }}
+      onClick={() => {
+        onClick?.(entry);
+      }}
     >
       <div class={iconContainer}>
         <Icon src={getIconForName(entry.name, entry.isDirectory)} base={8} color={isMe || isPartOfMe ? color.active : undefined} />
       </div>
       <p
-        onClick={() => {
-          onClick?.(entry);
-        }}
         class={fileName}
         style={{
           opacity: entry.isDirectory ? 0.8 : undefined,

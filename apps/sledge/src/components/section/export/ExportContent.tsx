@@ -193,7 +193,7 @@ const ExportContent: Component = () => {
   const openDirSelectionDialog = async () => {
     const dir = await open({
       multiple: false,
-      directory: true, 
+      directory: true,
       defaultPath: settings.folderPath,
       canCreateDirectories: true,
     });

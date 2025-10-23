@@ -110,12 +110,12 @@ const tabSwitchContent = css`
   height: 134px;
 `;
 
-const palettePipetteContainer = css`
+const paletteContainer = css`
   display: flex;
   flex-direction: column;
   margin-top: 4px;
 `;
-const iconButtonContainer = css`
+const pipetteContainer = css`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -188,7 +188,7 @@ const Color: Component = () => {
             </div>
           </div>
 
-          <div class={palettePipetteContainer}>
+          <div class={paletteContainer}>
             <Palette />
           </div>
         </div>
@@ -240,11 +240,11 @@ const Color: Component = () => {
             </form>
           </Show>
 
-          <div class={iconButtonContainer} onClick={() => setActiveToolCategory('pipette')}>
+          <div class={pipetteContainer} onClick={() => setActiveToolCategory('pipette')}>
             <Icon
-              src={'/icons/tools/pipette_12.png'}
-              base={12}
-              scale={1}
+              src={'/icons/tools/pipette.png'}
+              base={8}
+              scale={2}
               color={getActiveToolCategoryId() === 'pipette' ? color.active : color.onBackground}
               hoverColor={color.active}
             />

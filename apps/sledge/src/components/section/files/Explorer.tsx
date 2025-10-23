@@ -294,7 +294,7 @@ const Explorer: Component<Props> = (props) => {
                     align='right'
                     onClose={() => setMenuOpened(false)}
                     closeByOutsideClick
-                    style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
+                    style={{ 'margin-top': '4px', 'margin-left': '-8px', width: '160px' }}
                     options={[
                       {
                         type: 'item',

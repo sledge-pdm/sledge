@@ -10,7 +10,6 @@ import { LossyWebPExporter } from '~/features/io/image/out/exporter/LossyWebPExp
 import { PNGExporter } from '~/features/io/image/out/exporter/PNGExporter';
 import { SVGExporter } from '~/features/io/image/out/exporter/SVGExporter';
 import { allLayers } from '~/features/layer';
-import { setLastSettingsStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 
 export interface CanvasExportOptions {
@@ -82,15 +81,6 @@ export async function saveBlobViaTauri(blob: Blob, folderPath: string, fileName 
 
   const buf = new Uint8Array(await blob.arrayBuffer());
   await writeFile(normalizeJoin(folderPath, fileName), buf, {});
-  setLastSettingsStore('exportedFolderPaths', (prev) => {
-    if (prev.includes(folderPath)) {
-      prev = [...prev.filter((p) => p !== folderPath), folderPath];
-      return prev;
-    }
-    if (prev.length >= 10) prev.shift();
-    return [...prev, folderPath];
-  });
-
   return {
     path: folderPath,
     name: fileName,

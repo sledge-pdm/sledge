@@ -11,6 +11,7 @@ import { eventBus } from '~/utils/EventBus';
 const container = css`
   display: flex;
   height: 100%;
+  box-sizing: border-box;
   pointer-events: all;
   overflow: visible;
   z-index: var(--zindex-side-section);
@@ -20,9 +21,9 @@ const sideAreaRoot = css`
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  overflow-x: visible;
   background-color: var(--color-background);
   z-index: var(--zindex-side-section);
-  overflow-x: visible;
 `;
 
 const sideAreaContentWrapper = css`

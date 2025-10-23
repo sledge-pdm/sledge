@@ -186,7 +186,7 @@ export default function TitleBar() {
                   >
                     <p class={titleBarTitle}>
                       <span class={titleBarTitle} style={{ opacity: 0.5 }}>
-                        {fileStore.savedLocation.path ? `${fileStore.savedLocation.path}\\` : ''}
+                        {fileStore.savedLocation.path ? `${fileStore.savedLocation.path}/` : ''}
                       </span>
                       {fileStore.savedLocation.name ?? '[new project]'}
                     </p>

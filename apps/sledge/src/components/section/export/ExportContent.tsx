@@ -1,11 +1,11 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
-import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Slider } from '@sledge/ui';
+import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, Slider } from '@sledge/ui';
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
@@ -39,6 +39,7 @@ const folderPathContainer = css`
   display: flex;
   flex-direction: row;
   position: relative;
+  overflow: visible;
   padding: 2px 4px;
   border-bottom: 1px solid var(--color-border-secondary);
 `;
@@ -49,22 +50,28 @@ const folderPath = css`
   line-height: 1.2;
   word-wrap: break-word;
   word-break: break-word;
+  white-space: pre-wrap;
+  resize: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  inset: 0;
   width: 100%;
+  height: fit-content;
+  field-sizing: content;
 
   border: none;
   letter-spacing: 1px;
-  padding: 0;
 `;
 
 const menuButtonContainer = css`
-  position: relative;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 `;
 
 const iconButton = css`
   padding: 2px;
-  cursor: pointer;
 `;
 
 const browseButton = css`
@@ -167,18 +174,16 @@ const ExportContent: Component = () => {
   const finalScale = () => (settings.exportOptions.scale !== 0 ? settings.exportOptions.scale : customScale()) ?? 1;
 
   onMount(async () => {
-    if (settings.folderPath) {
-      // if saved, use it
-    } else if (fileStore.savedLocation.path) {
+    if (fileStore.savedLocation.path) {
       setSettings('folderPath', fileStore.savedLocation.path);
     } else {
       setSettings('folderPath', await defaultExportDir());
     }
-  });
 
-  createEffect(() => {
-    const newFolderPath = lastSettingsStore.exportSettings.folderPath;
-    if (newFolderPath?.trim()) setSettings('folderPath', newFolderPath);
+    createEffect(() => {
+      const newFolderPath = lastSettingsStore.exportSettings.folderPath;
+      if (newFolderPath && !newFolderPath.trim()) setSettings('folderPath', newFolderPath);
+    });
   });
 
   const openDirSelectionDialog = async () => {
@@ -199,12 +204,19 @@ const ExportContent: Component = () => {
 
     const name = settings.fileName;
     if (!name) {
-      message('Export Error; File name is empty.');
+      message('Export Error: File name is empty.');
       return;
     }
     if (settings.folderPath) {
       const location = await exportImage(settings.folderPath, name, settings.exportOptions);
-      if (location) {
+      if (location && location.path && location.name) {
+        const exportedPath = normalizeJoin(location.path, location.name);
+        setLastSettingsStore('exportedFolderPaths', (prev) => {
+          prev = [exportedPath, ...prev.filter((p) => p !== exportedPath)];
+          if (prev.length >= 30) prev.unshift();
+          return prev;
+        });
+
         if (settings.showDirAfterSave && location.path && location.name) {
           await revealItemInDir(normalizeJoin(location.path, location.name));
         }
@@ -216,56 +228,14 @@ const ExportContent: Component = () => {
   };
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
-  const exportDirHistoryOptions = createMemo<MenuListOption[]>(() => {
-    const options: MenuListOption[] = lastSettingsStore.exportedFolderPaths.map((path: string) => {
-      return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
-    });
-
-    return options.reverse();
-  });
-
-  const setPath = async (value: string) => {
-    if (settings.folderPath) setSettings('folderPath', normalizePath(settings.folderPath));
-
-    const path = normalizePath(value);
-    if (!(await exists(path))) {
-      const confirmed = await confirm(`The specified folder does not exist. create?`, {
-        okLabel: 'Create',
-        cancelLabel: 'Cancel',
-        kind: 'info',
-        title: 'Output Folder',
-      });
-
-      if (!confirmed) return;
-
-      await mkdir(path, { recursive: true });
-    } else {
-      const pathStat = await stat(path);
-      if (pathStat.isFile) {
-        await message('The specified path is already exists as a file.');
-        return;
-      }
-    }
-    setSettings('folderPath', path);
-  };
 
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
-      <div class={flexCol}>
+      <div class={flexCol} style={{ overflow: 'visible' }}>
         <p class={sectionSubCaption}>Output Folder.</p>
         <div class={sectionSubContent}>
-          <div
-            class={folderPathContainer}
-            style={{
-              cursor: exportDirHistoryOptions()?.length > 0 ? 'pointer' : 'default',
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setLastExportDirsMenuShown(!lastExportDirsMenuShown());
-            }}
-          >
-            <input
+          <div class={folderPathContainer}>
+            <textarea
               value={settings.folderPath}
               class={folderPath}
               onKeyDown={(e) => {
@@ -277,7 +247,7 @@ const ExportContent: Component = () => {
                 }
                 const path = normalizePath(e.target.value);
                 if (!(await exists(path))) {
-                  const confirmed = await confirm(`The specified folder does not exist. create?`, {
+                  const confirmed = await confirm(`The specified folder does not exist. create new?`, {
                     okLabel: 'Create',
                     cancelLabel: 'Cancel',
                     kind: 'info',
@@ -297,16 +267,30 @@ const ExportContent: Component = () => {
                 setSettings('folderPath', path);
               }}
             />
-            <Show when={exportDirHistoryOptions()?.length > 0}>
-              <div class={menuButtonContainer}>
+            <Show when={lastSettingsStore.exportedFolderPaths.length > 0}>
+              <div
+                class={menuButtonContainer}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+                }}
+              >
                 <div class={iconButton}>
                   <Icon src={'/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
                 </div>
                 <Show when={lastExportDirsMenuShown()}>
                   <MenuList
-                    options={exportDirHistoryOptions()}
+                    options={lastSettingsStore.exportedFolderPaths.map((path: string) => {
+                      return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
+                    })}
+                    onClose={() => setLastExportDirsMenuShown(false)}
                     align='right'
-                    style={{ 'margin-top': '6px', 'margin-right': '-4px', 'border-radius': '4px', 'border-color': color.onBackground }}
+                    style={{
+                      'margin-top': '6px',
+                      'border-radius': '4px',
+                      'border-color': color.onBackground,
+                    }}
                   />
                 </Show>
               </div>

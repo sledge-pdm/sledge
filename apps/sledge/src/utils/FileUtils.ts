@@ -46,7 +46,7 @@ export const join = (...paths: string[]): string => {
 
 export const normalizePath = (path: string): string => {
   let replaced = path.trim().replace(/\\/g, '/').replace(/\/+/g, '/');
-  if (replaced.endsWith('/')) replaced = replaced.slice(0, -1);
+  if (!replaced.endsWith(':/') && replaced.endsWith('/')) replaced = replaced.slice(0, -1);
   return replaced;
 };
 

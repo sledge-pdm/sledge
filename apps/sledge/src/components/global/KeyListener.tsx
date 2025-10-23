@@ -1,6 +1,6 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, onCleanup, onMount } from 'solid-js';
-import { adjustZoomToFit, clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
+import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
 import { saveProject } from '~/features/io/project/out/save';

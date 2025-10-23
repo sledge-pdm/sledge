@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component } from 'solid-js';
@@ -10,20 +11,27 @@ const iconContainer = css`
   align-items: center;
   pointer-events: auto;
   padding: 2px;
-  opacity: 0.8;
+  opacity: 1;
   cursor: pointer;
+`;
+
+const iconContainerDisabled = css`
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.5;
 `;
 
 interface Props {
   iconSrc: string;
   title?: string;
+  disabled?: boolean;
   onClick?: () => void;
 }
 
 const LayerListIconButton: Component<Props> = (props) => {
   return (
     <div
-      class={iconContainer}
+      class={clsx(iconContainer, props.disabled && iconContainerDisabled)}
       title={props.title}
       onClick={(e) => {
         props.onClick?.();

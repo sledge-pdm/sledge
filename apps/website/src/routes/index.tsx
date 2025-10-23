@@ -46,9 +46,22 @@ export function Home() {
           <div>
             <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
             <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Area Selection (rect, auto) / copy and paste</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Light-weight project backup</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Image FX</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Selection (rect, auto, lasso)</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Copy and paste</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Project Snapshots</SubHeadingWithCheck>
+            <SubHeadingWithCheck>Image Effects</SubHeadingWithCheck>
+            <SubHeadingWithCheck>
+              <span
+                class={subHeading}
+                style={{
+                  'letter-spacing': '2px',
+                  'font-style': 'italic',
+                }}
+              >
+                RAD
+              </span>{' '}
+              user interface
+            </SubHeadingWithCheck>
             <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
             <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
           </div>

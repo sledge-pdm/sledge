@@ -1,16 +1,129 @@
 import { css } from '@acab/ecsstatic';
-import { Component, createMemo, For } from 'solid-js';
-import ColorPicker from '~/components/section/editor/color/ColorPicker';
+import { Component, createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
+import ColorPicker from '~/components/section/editor/color/tab/ColorPicker';
 
+import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
-import { ColorBox, DropdownOption, Icon } from '@sledge/ui';
+import { DropdownOption, Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/color/Palette';
+import HSV from '~/components/section/editor/color/tab/HSV';
+import RGB from '~/components/section/editor/color/tab/RGB';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
-import { currentColor, setCurrentColor } from '~/features/color';
+import { currentColor, hexToRGBA, RGBAToHex, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools/ToolController';
 import { colorStore } from '~/stores/EditorStores';
-import { flexRow } from '~/styles/styles';
+import { accentedButton, flexCol } from '~/styles/styles';
+
+const colorSectionContainer = css`
+  padding-left: 12px;
+  margin-top: 16px;
+`;
+const mainContainer = css`
+  display: flex;
+  flex-direction: row;
+`;
+const currentColorContainer = css`
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  padding-top: 4px;
+  padding-right: 8px;
+`;
+const currentColorSharp = css`
+  font-family: ZFB21;
+  text-transform: uppercase;
+  font-size: 16px;
+  font-family: ZFB21;
+  opacity: 0.25;
+  margin-left: 20px;
+
+  &:hover {
+    opacity: 1;
+    color: var(--color-active);
+  }
+`;
+const currentColorLabel = css`
+  font-family: ZFB21;
+  text-transform: uppercase;
+  font-size: 16px;
+  padding-bottom: 1px;
+  font-family: ZFB21;
+  opacity: 0.25;
+  margin-right: auto;
+
+  &:hover {
+    opacity: 1;
+    color: var(--color-active);
+  }
+`;
+const currentColorForm = css`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: auto;
+`;
+const currentColorInput = css`
+  width: 86px;
+  padding: 0px;
+  border-color: var(--color-border-secondary);
+  letter-spacing: 1px;
+  font-family: ZFB21;
+  text-transform: uppercase;
+  font-size: 16px;
+  font-family: ZFB21;
+  opacity: 1;
+`;
+const currentApplyButton = css`
+  margin-left: 4px;
+`;
+
+const tabsContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-right: 8px;
+`;
+const tabItem = css`
+  font-family: ZFB09;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  writing-mode: vertical-lr;
+  color: var(--color-muted);
+  opacity: 0.6;
+  padding: 1px;
+
+  &:hover {
+    opacity: 1;
+    color: var(--color-active);
+  }
+`;
+const tabItemActive = css`
+  opacity: 0.6;
+  color: var(--color-active);
+`;
+
+const tabSwitchContent = css`
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+  height: 134px;
+`;
+
+const palettePipetteContainer = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+`;
+const iconButtonContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px;
+  width: fit-content;
+  cursor: pointer;
+  pointer-events: all;
+`;
 
 const swatchContainer = css`
   display: flex;
@@ -20,31 +133,11 @@ const swatchContainer = css`
   margin-top: 8px;
   margin-bottom: 12px;
 `;
-
-const colorContent = css`
-  display: flex;
-  flex-direction: column;
-`;
-
-const pickerToolContainer = css`
-  display: flex;
-  flex-direction: column;
-  margin-top: auto;
-  margin-bottom: 4px;
-  margin-left: 28px;
-`;
-
-const pipetteContainer = css`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: fit-content;
-  cursor: pointer;
-  pointer-events: all;
-`;
-
 const Color: Component = () => {
   let hexInputRef: HTMLInputElement;
+
+  const tabs = ['picker', 'rgb'] as const;
+  const [tab, setTab] = createSignal<string>(tabs[0]);
 
   const onColorClicked = (color: string, index: number) => {
     setCurrentColor(color);
@@ -60,11 +153,104 @@ const Color: Component = () => {
   });
 
   const currentSwatch = () => colorStore.swatches.find((s) => s.name === colorStore.currentSwatchName);
-
+  const [isColorInput, setIsColorInput] = createSignal(false);
   return (
     <SectionItem title='color.'>
-      <div class={sectionContent}>
-        <div class={swatchContainer}>
+      <div class={clsx(sectionContent, colorSectionContainer)} style={{ width: 'fit-content' }}>
+        <div class={mainContainer}>
+          <div class={tabsContainer}>
+            <For each={tabs}>
+              {(item, index) => (
+                <a
+                  class={clsx(tabItem, tab() === item && tabItemActive)}
+                  onClick={() => {
+                    setTab(item);
+                  }}
+                >
+                  {item}
+                </a>
+              )}
+            </For>
+          </div>
+          <div class={flexCol}>
+            <div class={tabSwitchContent}>
+              <Switch>
+                <Match when={tab() === 'picker'}>
+                  <ColorPicker width={130} />
+                </Match>
+                <Match when={tab() === 'rgb'}>
+                  <RGB />
+                </Match>
+                <Match when={tab() === 'hsv'}>
+                  <HSV />
+                </Match>
+              </Switch>
+            </div>
+          </div>
+
+          <div class={palettePipetteContainer}>
+            <Palette />
+          </div>
+        </div>
+
+        <div class={currentColorContainer}>
+          <p class={currentColorSharp}>#</p>
+          <Show
+            when={isColorInput()}
+            fallback={
+              <a
+                class={currentColorLabel}
+                title='click to input color code.'
+                onClick={() => {
+                  setIsColorInput(true);
+                  const colorInput = document.getElementById('color-input') as HTMLInputElement;
+                  colorInput?.focus();
+                  colorInput?.setSelectionRange(0, 7);
+                }}
+              >
+                {currentColor().slice(1, 7)}
+              </a>
+            }
+          >
+            <form
+              class={currentColorForm}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const colorInput = document.getElementById('color-input') as HTMLInputElement;
+                const value = '#' + colorInput.value;
+                const rgba = hexToRGBA(value);
+                setCurrentColor('#' + RGBAToHex(rgba));
+
+                setIsColorInput(false);
+              }}
+            >
+              <input
+                id='color-input'
+                class={currentColorInput}
+                value={currentColor().slice(1, 7)}
+                autocomplete='off'
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                }}
+              />
+              <button type='submit' class={clsx(accentedButton, currentApplyButton)}>
+                ok
+              </button>
+            </form>
+          </Show>
+
+          <div class={iconButtonContainer} onClick={() => setActiveToolCategory('pipette')}>
+            <Icon
+              src={'/icons/tools/pipette_12.png'}
+              base={12}
+              scale={1}
+              color={getActiveToolCategoryId() === 'pipette' ? color.active : color.onBackground}
+              hoverColor={color.active}
+            />
+          </div>
+        </div>
+        {/* <div class={swatchContainer}>
           <For each={currentSwatch()?.colors}>
             {(item, index) => (
               <ColorBox
@@ -76,47 +262,6 @@ const Color: Component = () => {
               />
             )}
           </For>
-        </div>
-
-        <div class={flexRow}>
-          <ColorPicker width={140} />
-
-          <div class={colorContent}>
-            <Palette />
-
-            <div class={pickerToolContainer}>
-              <div class={pipetteContainer} onClick={() => setActiveToolCategory('pipette')}>
-                <Icon
-                  src={'/icons/tools/pipette.png'}
-                  base={8}
-                  scale={2}
-                  color={getActiveToolCategoryId() === 'pipette' ? color.active : color.onBackground}
-                  hoverColor={color.active}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* <div class={flexRow} style={{ height: 'fit-content', 'min-width': '90px', 'margin-left': 'auto' }}>
-          <p style={{ 'font-size': text.md }}>#</p>
-          <input
-            ref={(el) => (hexInputRef = el)}
-            style={{ 'font-family': ZFB11, 'font-size': text.md, width: '56px', border: 'none' }}
-            maxLength={6}
-            value={currentColor().substring(1)}
-            onChange={(e) => {
-              const s = e.target.value.toUpperCase();
-              if (isValidHex(s)) {
-                setCurrentColor(`#${s}`);
-              }
-            }}
-            onInput={(e) => {
-              const currentPosition = hexInputRef.selectionStart;
-              hexInputRef.value = hexInputRef.value.toUpperCase();
-              hexInputRef.selectionStart = currentPosition;
-              hexInputRef.selectionEnd = currentPosition;
-            }}
-          />
         </div> */}
       </div>
     </SectionItem>

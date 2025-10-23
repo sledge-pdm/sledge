@@ -1,6 +1,6 @@
 import { Vec2 } from '@sledge/core';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createMemo, createSignal, Match, onMount, Show, Switch } from 'solid-js';
 import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
 import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
 import PipetteDetail from '~/components/canvas/overlays/cursors/PipetteDetail';
@@ -27,21 +27,23 @@ const CursorOverlay: Component = () => {
 
   return (
     <>
-      <Show
-        when={toolStore.activeToolCategory === TOOL_CATEGORIES.PIPETTE && !floatingMoveManager.isMoving()}
-        fallback={
-          <Show when={canShowCursor()}>
-            <Show when={globalConfig.editor.cursor === 'pixel'}>
-              <PixelCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
-            </Show>
-            <Show when={globalConfig.editor.cursor === 'cross'}>
-              <CrossCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
-            </Show>
-          </Show>
-        }
-      >
-        <PipetteCursor mousePos={interactStore.lastMouseWindow} />
-        <PipetteDetail />
+      <Show when={canShowCursor()}>
+        <Show
+          when={toolStore.activeToolCategory === TOOL_CATEGORIES.PIPETTE && !floatingMoveManager.isMoving()}
+          fallback={
+            <Switch>
+              <Match when={globalConfig.editor.cursor === 'pixel'}>
+                <PixelCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
+              </Match>
+              <Match when={globalConfig.editor.cursor === 'cross'}>
+                <CrossCursor mousePos={{ x: mousePos().x, y: mousePos().y }} />
+              </Match>
+            </Switch>
+          }
+        >
+          <PipetteCursor mousePos={interactStore.lastMouseWindow} />
+          <PipetteDetail />
+        </Show>
       </Show>
     </>
   );

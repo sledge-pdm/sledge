@@ -15,7 +15,7 @@ export const container = css`
   flex-direction: row;
 `;
 export const containerInactive = css`
-  opacity: 0.25;
+  opacity: 0.15;
 `;
 
 export const label = css`
@@ -33,7 +33,7 @@ const Palette: Component = () => {
             color={colorStore.primary}
             sizePx={30}
             onClick={(color) => selectPalette(PaletteType.primary)}
-            enableUsingSelection={colorStore.currentPalette === PaletteType.primary}
+            enableUsingSelection={false}
             currentColor={currentColor}
             showDisabledBorder={true}
           />
@@ -46,7 +46,7 @@ const Palette: Component = () => {
             color={colorStore.secondary}
             sizePx={30}
             onClick={(color) => selectPalette(PaletteType.secondary)}
-            enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
+            enableUsingSelection={false}
             currentColor={currentColor}
             showDisabledBorder={true}
           />

@@ -4,44 +4,53 @@ import { Component } from 'solid-js';
 import { currentColor, PaletteType, selectPalette } from '~/features/color';
 import { colorStore } from '~/stores/EditorStores';
 
-export const paletteRoot = css`
+export const root = css`
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-left: 12px;
 `;
-export const paletteColorBoxContainer = css`
+export const container = css`
   display: flex;
   flex-direction: row;
 `;
+export const containerInactive = css`
+  opacity: 0.25;
+`;
 
-export const paletteColorBoxCaption = css`
+export const label = css`
   width: 10px;
   color: var(--color-muted);
 `;
 
 const Palette: Component = () => {
   return (
-    <div class={paletteRoot}>
-      <div class={paletteColorBoxContainer}>
-        <p class={paletteColorBoxCaption}>1</p>
-        <ColorBox
-          color={colorStore.primary}
-          sizePx={30}
-          onClick={(color) => selectPalette(PaletteType.primary)}
-          enableUsingSelection={colorStore.currentPalette === PaletteType.primary}
-          currentColor={currentColor}
-        />
+    <div class={root}>
+      <div class={container}>
+        <p class={label}>1</p>
+        <div class={colorStore.currentPalette !== PaletteType.primary ? containerInactive : undefined}>
+          <ColorBox
+            color={colorStore.primary}
+            sizePx={30}
+            onClick={(color) => selectPalette(PaletteType.primary)}
+            enableUsingSelection={colorStore.currentPalette === PaletteType.primary}
+            currentColor={currentColor}
+            showDisabledBorder={true}
+          />
+        </div>
       </div>
-      <div class={paletteColorBoxContainer}>
-        <p class={paletteColorBoxCaption}>2</p>
-        <ColorBox
-          color={colorStore.secondary}
-          sizePx={30}
-          onClick={(color) => selectPalette(PaletteType.secondary)}
-          enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
-          currentColor={currentColor}
-        />
+      <div class={container}>
+        <p class={label}>2</p>
+        <div class={colorStore.currentPalette !== PaletteType.secondary ? containerInactive : undefined}>
+          <ColorBox
+            color={colorStore.secondary}
+            sizePx={30}
+            onClick={(color) => selectPalette(PaletteType.secondary)}
+            enableUsingSelection={colorStore.currentPalette === PaletteType.secondary}
+            currentColor={currentColor}
+            showDisabledBorder={true}
+          />
+        </div>
       </div>
     </div>
   );

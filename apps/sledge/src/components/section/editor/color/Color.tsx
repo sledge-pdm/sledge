@@ -37,11 +37,6 @@ const currentColorSharp = css`
   font-family: ZFB21;
   opacity: 0.25;
   margin-left: 20px;
-
-  &:hover {
-    opacity: 1;
-    color: var(--color-active);
-  }
 `;
 const currentColorLabel = css`
   font-family: ZFB21;

@@ -95,6 +95,7 @@ pub async fn open_window(
 
     let mut builder = WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(url.into()))
         .additional_browser_args(COMMON_BROWSER_ARGS)
+        .zoom_hotkeys_enabled(false)
         .initialization_script(initialization_script);
 
     let window_inner_width: f64;

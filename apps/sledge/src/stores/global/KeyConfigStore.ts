@@ -26,7 +26,10 @@ const KEY_CONFIG_TEMPLATE_DEFAULT: Readonly<KeyConfigStore> = {
   save: [{ ctrl: true, key: 's' }],
   undo: [{ ctrl: true, key: 'z' }],
   redo: [{ ctrl: true, key: 'y' }],
-  zoom_in: [{ key: '+' }],
+  zoom_in: [
+    { shift: false, key: '+' },
+    { shift: true, key: '+' },
+  ],
   zoom_out: [{ key: '-' }],
   pen: [{ key: 'p' }],
   eraser: [{ key: 'e' }],
@@ -44,7 +47,10 @@ const KEY_CONFIG_TEMPLATE_MAC: Readonly<KeyConfigStore> = {
   save: [{ meta: true, key: 's' }],
   undo: [{ meta: true, key: 'z' }],
   redo: [{ meta: true, key: 'y' }],
-  zoom_in: [{ key: '+' }],
+  zoom_in: [
+    { shift: false, key: '+' },
+    { shift: true, key: '+' },
+  ],
   zoom_out: [{ key: '-' }],
   pen: [{ key: 'p' }],
   eraser: [{ key: 'e' }],

@@ -1,5 +1,5 @@
 import { transparent } from '~/features/color';
-import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
 import { PenTool } from '../pen/PenTool';
 
@@ -8,15 +8,15 @@ export class EraserTool extends PenTool {
 
   protected categoryId: ToolCategoryId = TOOL_CATEGORIES.ERASER;
 
-  onStart(ctx: AnvilToolContext, args: ToolArgs) {
-    return super.draw(ctx as any, args, transparent);
+  onStart(args: ToolArgs) {
+    return super.draw(args, transparent);
   }
 
-  onMove(ctx: AnvilToolContext, args: ToolArgs) {
-    return super.draw(ctx as any, args, transparent);
+  onMove(args: ToolArgs) {
+    return super.draw(args, transparent);
   }
 
-  onEnd(ctx: AnvilToolContext, args: ToolArgs) {
-    return super.onEnd(ctx as any, args);
+  onEnd(args: ToolArgs) {
+    return super.onEnd(args);
   }
 }

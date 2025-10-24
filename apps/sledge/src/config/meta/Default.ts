@@ -17,14 +17,6 @@ export const defaultMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Default,
-    path: ['default', 'addOnlySavedProjectToLastOpened'],
-    label: 'add only saved project to last opened',
-    component: 'ToggleSwitch',
-    tips: `if enabled, only projects that have been saved at least once will be added to the 'last opened' list.\n
-new project will be discarded if you close the app without saving.`,
-  },
-  {
-    section: ConfigSections.Default,
     path: ['default', 'canvasSize', 'width'],
     label: 'default canvas width',
     component: 'Slider',

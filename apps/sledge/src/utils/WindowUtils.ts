@@ -70,6 +70,12 @@ export function getNewProjectQuery(): {
   };
 }
 
+export function isFirstStartup(): boolean {
+  const sp = new URLSearchParams(window.location.search);
+  const isFirstStartup = sp.get('startup') === 'true';
+  return isFirstStartup;
+}
+
 const alreadyShownErrors: Set<string> = new Set();
 
 export async function reportAppStartupError(e: any) {

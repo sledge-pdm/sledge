@@ -3,12 +3,12 @@ import { auto_select_region_mask } from '@sledge/wasm';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
-import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { eventBus } from '~/utils/EventBus';
 
 export class AutoSelection extends SelectionBase {
-  protected onStartSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
     // プレビュー開始（add/subtract/replaceをSelectionManagerに伝える）
     selectionManager.beginPreview(mode);
     this.startPosition = args.position;
@@ -29,16 +29,16 @@ export class AutoSelection extends SelectionBase {
     }
   }
 
-  protected onMoveSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onMoveSelection(_args: ToolArgs, mode: SelectionEditMode) {
     // 現状、ドラッグ中にしきい値を変化させる等の動的更新は行わない
     // 将来的にホイールやドラッグ距離でthreshold変更→再計算を検討
   }
 
-  protected onEndSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onEndSelection(_args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.commit();
   }
 
-  protected onCancelSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onCancelSelection(_args: ToolArgs, mode: SelectionEditMode) {
     // 既存と同様、現状はcommit扱い（必要なら cancelPreview に変更）
     selectionManager.commit();
   }

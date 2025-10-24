@@ -1,55 +1,12 @@
 import { FileLocation } from '@sledge/core';
 import { appConfigDir } from '@tauri-apps/api/path';
-import { message } from '@tauri-apps/plugin-dialog';
 import { mkdir, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { v4 } from 'uuid';
 import { dumpProject } from '~/features/io/project/out/dump';
 import { fileStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 
-const LAST_PROJECT_FOLDER = 'session';
 const EMERGENCY_BACKUP_FOLDER = 'backup';
-
-// create snapshot of current project, and save
-export async function saveLastProject(): Promise<FileLocation | undefined> {
-  try {
-    const packedProject = await dumpProject();
-
-    const dir = normalizeJoin(await appConfigDir(), LAST_PROJECT_FOLDER);
-    await mkdir(dir, { recursive: true });
-    const fileName = 'last.sledge';
-    await writeFile(normalizeJoin(dir, fileName), packedProject, {
-      create: true,
-    });
-
-    return {
-      path: dir,
-      name: fileName,
-    };
-  } catch (e) {
-    await message(`Error while saving state:\n${e}`);
-    return undefined;
-  }
-}
-
-export async function getLastOpenedProjects(): Promise<FileLocation[] | undefined> {
-  const dir = normalizeJoin(await appConfigDir(), LAST_PROJECT_FOLDER);
-  await mkdir(dir, { recursive: true });
-
-  const entries = await readDir(dir);
-
-  const projectLocations: FileLocation[] = [];
-  entries.forEach((entry) => {
-    if (entry.isFile && entry.name.endsWith('.sledge')) {
-      projectLocations.push({
-        path: dir,
-        name: entry.name,
-      });
-    }
-  });
-
-  return projectLocations?.length > 0 ? projectLocations : undefined;
-}
 
 export async function getEmergencyBackupPath(): Promise<string> {
   const dir = normalizeJoin(await appConfigDir(), EMERGENCY_BACKUP_FOLDER);

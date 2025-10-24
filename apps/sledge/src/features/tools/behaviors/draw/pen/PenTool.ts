@@ -7,7 +7,7 @@ import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
 import { ShapeStore } from '~/features/tools/behaviors/draw/pen/ShapeStore';
 import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
-import { AnvilToolContext, ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
 
@@ -33,7 +33,7 @@ export class PenTool implements ToolBehavior {
     return { x: cx, y: cy };
   }
 
-  onStart(ctx: AnvilToolContext, args: ToolArgs) {
+  onStart(args: ToolArgs) {
     // 前回の状態が残っている場合はクリーンアップ
     if (this.lineChunk.getBoundingBox()) {
       console.warn('PenTool: Cleaning up previous preview state');
@@ -51,18 +51,18 @@ export class PenTool implements ToolBehavior {
       const anvil = getAnvilOf(args.layerId);
       if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
       this.lineChunk.start(anvil.getBufferCopy(), anvil.getWidth(), anvil.getHeight());
-      return this.drawLine(false, ctx, args, args.color);
+      return this.drawLine(false, args, args.color);
     } else {
       this.isShift = false;
-      return this.draw(ctx, args, args.color);
+      return this.draw(args, args.color);
     }
   }
 
-  onMove(ctx: AnvilToolContext, args: ToolArgs) {
+  onMove(args: ToolArgs) {
     if (!this.isShift) {
-      return this.draw(ctx, args, args.color);
+      return this.draw(args, args.color);
     } else {
-      return this.drawLine(false, ctx, args, args.color);
+      return this.drawLine(false, args, args.color);
     }
   }
 
@@ -88,7 +88,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  draw(ctx: AnvilToolContext, { position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  draw({ position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
@@ -141,7 +141,7 @@ export class PenTool implements ToolBehavior {
   }
 
   // 始点からの直線を描画
-  drawLine(commit: boolean, ctx: AnvilToolContext, { layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  drawLine(commit: boolean, { layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
@@ -189,16 +189,15 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onEnd(ctx: AnvilToolContext, args: ToolArgs) {
+  onEnd(args: ToolArgs) {
     let { event, color, layerId } = args;
     if (event?.buttons === 2) {
       color = transparent;
     }
     if (this.isShift) {
       // 直線を確定
-      this.drawLine(true, ctx, args, color);
+      this.drawLine(true, args, color);
     }
-    const resultText = `${this.categoryId} stroke done.`;
 
     this.isShift = false;
     this.isCtrl = false;
@@ -214,7 +213,7 @@ export class PenTool implements ToolBehavior {
         if (w <= 0 || h <= 0) {
           console.warn('Invalid bbox dimensions:', { w, h, bbox });
           this.strokeChunk.clear();
-          return { result: resultText, shouldUpdate: true, shouldRegisterToHistory: true };
+          return { shouldUpdate: true, shouldRegisterToHistory: true };
         }
         const swapBuffer = new Uint8ClampedArray(w * h * 4);
         // Layer全体バッファ取得
@@ -254,13 +253,12 @@ export class PenTool implements ToolBehavior {
     this.strokeChunk.clear();
 
     return {
-      result: resultText,
       shouldUpdate: true,
       shouldRegisterToHistory: true,
     };
   }
 
-  onCancel(ctx: AnvilToolContext, args: ToolArgs) {
+  onCancel(args: ToolArgs) {
     if (this.isShift) {
       this.undoLastLineDiff();
     }

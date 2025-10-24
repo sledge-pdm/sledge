@@ -1,5 +1,6 @@
 import { isTransparent, RGBAColor, RGBToHex, setCurrentColor, transparent } from '~/features/color';
-import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;
@@ -7,8 +8,9 @@ export class PipetteTool implements ToolBehavior {
 
   private color: RGBAColor = transparent;
 
-  onStart(ctx: AnvilToolContext, args: ToolArgs) {
-    const c = ctx.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
+  onStart(args: ToolArgs) {
+    const anvil = getAnvilOf(args.layerId);
+    const c = anvil?.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
     if (c && !isTransparent(c)) {
       this.color = c;
     }
@@ -18,8 +20,9 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onMove(ctx: AnvilToolContext, args: ToolArgs) {
-    const c = ctx.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
+  onMove(args: ToolArgs) {
+    const anvil = getAnvilOf(args.layerId);
+    const c = anvil?.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
     if (c && !isTransparent(c)) {
       this.color = c;
     }
@@ -29,7 +32,7 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onEnd(_ctx: AnvilToolContext, args: ToolArgs) {
+  onEnd(args: ToolArgs) {
     if (!isTransparent(this.color)) {
       setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
     }
@@ -41,7 +44,7 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onCancel(_ctx: AnvilToolContext, _args: ToolArgs) {
+  onCancel(__args: ToolArgs) {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,

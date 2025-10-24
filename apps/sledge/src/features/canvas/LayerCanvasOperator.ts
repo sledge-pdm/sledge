@@ -5,7 +5,7 @@ import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHi
 import { findLayerById } from '~/features/layer';
 import { flushPatch } from '~/features/layer/anvil/AnvilController';
 import { DebugLogger, setBottomBarText } from '~/features/log/service';
-import { AnvilToolContext, ToolArgs, ToolResult, createAnvilToolContext } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';
@@ -71,14 +71,11 @@ export default class LayerCanvasOperator {
       color: hexToRGBA(currentColor()),
       event: originalEvent,
     };
-    // Anvil コンテキスト生成 (ツールは全てこちらを受け取る)
-    const ctx = createAnvilToolContext(layer.id);
-    const result = this.useTool(ctx, state, toolCategory, toolArgs);
+    const result = this.useTool(state, toolCategory, toolArgs);
 
     if (result) {
-      setProjectStore('isProjectChangedAfterSave', true);
-
       if (result.shouldUpdate) {
+        setProjectStore('isProjectChangedAfterSave', true);
         eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });
       }
@@ -101,21 +98,21 @@ export default class LayerCanvasOperator {
     }
   }
 
-  private useTool(ctx: AnvilToolContext, state: DrawState, tool: ToolCategory, toolArgs: ToolArgs) {
+  private useTool(state: DrawState, tool: ToolCategory, toolArgs: ToolArgs) {
     let toolResult: ToolResult | undefined = undefined;
     const start = new Date().getTime();
     switch (state) {
       case DrawState.start:
-        toolResult = tool.behavior.onStart(ctx, toolArgs);
+        toolResult = tool.behavior.onStart(toolArgs);
         break;
       case DrawState.move:
-        toolResult = tool.behavior.onMove(ctx, toolArgs);
+        toolResult = tool.behavior.onMove(toolArgs);
         break;
       case DrawState.end:
-        toolResult = tool.behavior.onEnd(ctx, toolArgs);
+        toolResult = tool.behavior.onEnd(toolArgs);
         break;
       case DrawState.cancel:
-        toolResult = tool.behavior.onCancel?.(ctx, toolArgs);
+        toolResult = tool.behavior.onCancel?.(toolArgs);
         break;
     }
     const end = new Date().getTime();

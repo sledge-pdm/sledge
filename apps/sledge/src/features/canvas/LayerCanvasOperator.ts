@@ -77,7 +77,7 @@ export default class LayerCanvasOperator {
 
     if (result) {
       setProjectStore('isProjectChangedAfterSave', true);
-      
+
       if (result.shouldUpdate) {
         eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });

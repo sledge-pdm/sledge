@@ -68,7 +68,9 @@ export type AutoSelectionPresetConfig = PresetConfig & {
 
 export type RectSelectionPresetConfig = PresetConfig & {};
 
-export type LassoSelectionPresetConfig = PresetConfig & {};
+export type LassoSelectionPresetConfig = PresetConfig & {
+  fillMode?: 'nonzero' | 'evenodd';
+};
 
 // ツールカテゴリの定義
 export const toolCategories = {
@@ -152,7 +154,9 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: {} as LassoSelectionPresetConfig,
+        [DEFAULT_PRESET]: {
+          fillMode: 'nonzero',
+        } as LassoSelectionPresetConfig,
       },
     },
   } as ToolCategory<LassoSelectionPresetConfig>,

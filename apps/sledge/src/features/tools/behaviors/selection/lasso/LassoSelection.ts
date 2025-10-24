@@ -69,7 +69,7 @@ export class LassoSelection extends SelectionBase {
     return { x: Math.max(0, x), y: Math.max(0, y), width: Math.max(1, width), height: Math.max(1, height) };
   }
 
-  private updatePartialMask(anvil: any): void {
+  private updatePartialMask(anvil: any, mode: 'nonzero' | 'evenodd'): void {
     if (!this.previewFragment || this.points.length < 6) return;
 
     const bbox = this.calculateBoundingBox(this.points);
@@ -110,7 +110,7 @@ export class LassoSelection extends SelectionBase {
 
     // WASM関数を使用してマスクを更新
     try {
-      fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints), 'nonzero');
+      fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints), mode);
     } catch (error) {
       console.warn('Lasso selection WASM call failed:', error);
     }
@@ -171,10 +171,11 @@ export class LassoSelection extends SelectionBase {
 
     const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
     const displayMode = this.getDisplayMode(preset);
+    const fillMode = preset.fillMode ?? 'nonzero';
     if (displayMode === 'fill') {
       // 最低3点必要（線分を作るため）
       if (this.points.length >= 6) {
-        this.updatePartialMask(anvil);
+        this.updatePartialMask(anvil, fillMode);
       }
 
       selectionManager.setPreviewFragment(this.previewFragment);
@@ -206,8 +207,10 @@ export class LassoSelection extends SelectionBase {
         this.points.push(startX, startY);
       }
 
+      const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
+      const fillMode = preset.fillMode ?? 'nonzero';
       // 最終マスクを生成
-      this.updatePartialMask(anvil);
+      this.updatePartialMask(anvil, fillMode);
     }
 
     this.points = [];

@@ -3,7 +3,7 @@ import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 
 export class RectSelection extends SelectionBase {
-  protected onStartSelection(_args: ToolArgs, mode: SelectionEditMode) {
+  protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.beginPreview(mode);
     this.startPosition = args.position;
     const newRect: RectFragment = {
@@ -15,7 +15,7 @@ export class RectSelection extends SelectionBase {
     selectionManager.setPreviewFragment(newRect);
   }
 
-  protected onMoveSelection(_args: ToolArgs, mode: SelectionEditMode) {
+  protected onMoveSelection(args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.beginPreview(mode);
 
     const px = Math.max(0, args.position.x);
@@ -39,11 +39,11 @@ export class RectSelection extends SelectionBase {
     selectionManager.setPreviewFragment(newRect);
   }
 
-  protected onEndSelection(_args: ToolArgs, mode: SelectionEditMode) {
+  protected onEndSelection(args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.commit();
   }
 
-  protected onCancelSelection(_args: ToolArgs, mode: SelectionEditMode) {
+  protected onCancelSelection(args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.commit();
   }
 }

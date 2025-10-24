@@ -1,6 +1,7 @@
-import { RectFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { RectFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
+import { SelectionEditMode } from '~/stores/editor/InteractStore';
 
 export class RectSelection extends SelectionBase {
   protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
@@ -16,7 +17,7 @@ export class RectSelection extends SelectionBase {
   }
 
   protected onMoveSelection(args: ToolArgs, mode: SelectionEditMode) {
-    selectionManager.beginPreview(mode);
+    selectionManager.updatePreview();
 
     const px = Math.max(0, args.position.x);
     const py = Math.max(0, args.position.y);

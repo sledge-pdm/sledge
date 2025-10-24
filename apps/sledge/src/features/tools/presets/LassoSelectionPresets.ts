@@ -1,9 +1,8 @@
+import { selectModeMeta } from '~/features/tools/presets/SelectionMeta';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
-import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
-
-export const lassoSelectionPresets: PresetFieldMeta[] = [];
+import { ToolPresetMeta } from './PresetMeta';
 
 export const lassoSelectionPresetMeta: ToolPresetMeta = {
   toolId: TOOL_CATEGORIES.LASSO_SELECTION,
-  fields: lassoSelectionPresets,
+  fields: [selectModeMeta],
 };

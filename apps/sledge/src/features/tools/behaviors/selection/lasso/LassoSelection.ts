@@ -1,10 +1,11 @@
 import { fill_lasso_selection } from '@sledge/wasm';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { PartialFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 

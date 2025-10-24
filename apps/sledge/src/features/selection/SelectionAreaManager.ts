@@ -9,6 +9,8 @@ import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
+import { SelectionEditMode } from '~/stores/editor/InteractStore';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -43,16 +45,11 @@ export type PartialFragment = {
 };
 
 export type SelectionFragment = PixelFragment | RectFragment | TileFragment | WholeFragment | PartialFragment;
-export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type SelectionState = 'idle' | 'selected';
 
 class SelectionAreaManager {
-  private editMode: SelectionEditMode = 'replace';
+  private prevEditMode: SelectionEditMode | undefined = undefined;
   private state: SelectionState = 'idle';
-
-  public getEditMode() {
-    return this.editMode;
-  }
 
   public getState() {
     return this.state;
@@ -133,8 +130,13 @@ class SelectionAreaManager {
   }
 
   /** 「プレビュー開始時」に呼ぶ */
-  beginPreview(mode: SelectionEditMode) {
-    this.editMode = mode;
+  beginPreview(tempEditMode: SelectionEditMode) {
+    this.prevEditMode = interactStore.selectionEditMode;
+    setInteractStore('selectionEditMode', tempEditMode);
+    this.updatePreview();
+  }
+
+  updatePreview() {
     this.areaOffset = { x: 0, y: 0 };
 
     eventBus.emit('selection:updateSelectionMenu', {});
@@ -145,7 +147,7 @@ class SelectionAreaManager {
       return;
     }
 
-    if (mode === 'replace') {
+    if (interactStore.selectionEditMode === 'replace') {
       // Replace なら確定済みをクリアしてから新しい previewMask
       this.selectionMask.clear();
       // クリア後は状態をidleに更新
@@ -246,17 +248,22 @@ class SelectionAreaManager {
 
     let resultMask: Uint8Array;
 
-    if (this.editMode === 'replace') {
+    if (interactStore.selectionEditMode === 'replace') {
       // まるごと差し替え
       resultMask = new Uint8Array(combine_masks_replace(preview));
-    } else if (this.editMode === 'add') {
+    } else if (interactStore.selectionEditMode === 'add') {
       // OR 合成: wasmで高速処理
       resultMask = new Uint8Array(combine_masks_add(activeMask, preview));
-    } else if (this.editMode === 'subtract') {
+    } else if (interactStore.selectionEditMode === 'subtract') {
       // AND NOT: wasmで高速処理
       resultMask = new Uint8Array(combine_masks_subtract(activeMask, preview));
     } else {
       resultMask = activeMask;
+    }
+
+    if (this.prevEditMode) {
+      setInteractStore('selectionEditMode', this.prevEditMode);
+      this.prevEditMode === undefined;
     }
 
     this.selectionMask.setMask(resultMask);
@@ -299,7 +306,7 @@ class SelectionAreaManager {
     const previewMask = this.previewMask.getMask();
 
     // wasmで高速合成
-    if (this.editMode === 'subtract') {
+    if (interactStore.selectionEditMode === 'subtract') {
       return new Uint8Array(combine_masks_subtract(baseMask, previewMask));
     } else {
       // add または replace の場合は OR 合成

@@ -1,7 +1,9 @@
 import { Vec2 } from '@sledge/core';
-import { SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { SelectionEditMode } from '~/stores/editor/InteractStore';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 
 // 共通のモード判定と ctrl+ドラッグ移動処理をまとめたベースクラス
 // 各選択ツールは selection-mode（矩形/自動等）のみを実装すればよい
@@ -17,13 +19,15 @@ export abstract class SelectionBase implements ToolBehavior {
     const isAltPressed = e?.altKey;
     const isCtrlPressed = e?.ctrlKey;
 
-    let mode: SelectionEditMode = 'replace';
+    let mode: SelectionEditMode = interactStore.selectionEditMode;
     if (isShiftPressed) mode = 'add';
     if (isAltPressed) mode = 'subtract';
     if (isCtrlPressed) mode = 'move';
 
     return mode;
   }
+
+  movePrevMode: SelectionEditMode | undefined = undefined;
 
   onStart(args: ToolArgs) {
     const mode = this.getMode(args.event);
@@ -33,6 +37,8 @@ export abstract class SelectionBase implements ToolBehavior {
       this.startPosition = args.position;
       this.startOffset = selectionManager.getAreaOffset();
       selectionManager.setState('selected');
+      this.movePrevMode = interactStore.selectionEditMode;
+      setInteractStore('selectionEditMode', 'move');
     } else {
       // ツール固有の選択開始処理
       this.onStartSelection(args, mode);
@@ -67,6 +73,7 @@ export abstract class SelectionBase implements ToolBehavior {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
+      if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 移動確定
       selectionManager.commitOffset();
       if (!isSelectionAvailable()) {
@@ -89,6 +96,7 @@ export abstract class SelectionBase implements ToolBehavior {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
+      if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 位置を元に戻す
       selectionManager.setOffset(this.startOffset);
       selectionManager.setState('selected');

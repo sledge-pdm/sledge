@@ -69,7 +69,6 @@ export default function App() {
 
   onMount(async () => {
     const webview = getCurrentWebview();
-    await webview.clearAllBrowsingData();
     const window = getCurrentWindow();
     applyThemeToHtml();
 

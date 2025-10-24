@@ -68,10 +68,10 @@ export default function App() {
   });
 
   onMount(async () => {
-    applyThemeToHtml();
-
     const webview = getCurrentWebview();
+    await webview.clearAllBrowsingData();
     const window = getCurrentWindow();
+    applyThemeToHtml();
 
     await webview.setZoom(zoomForIntegerize(await window.scaleFactor()));
 

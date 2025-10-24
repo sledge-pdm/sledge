@@ -8,12 +8,12 @@ export function getNormalBottomBarText() {
     return 'line: shift+drag (ctrl to snap) / rotate: shift+wheel';
   }
 
-  if (toolStore?.activeToolCategory === 'rectSelection') {
-    return 'add: shift+drag / substract: alt+drag / move: ctrl+drag';
-  }
-
-  if (toolStore?.activeToolCategory === 'autoSelection') {
-    return 'add: shift+drag / substract: alt+drag / move: ctrl+drag';
+  if (
+    toolStore?.activeToolCategory === 'rectSelection' ||
+    toolStore?.activeToolCategory === 'autoSelection' ||
+    toolStore?.activeToolCategory === 'lassoSelection'
+  ) {
+    return 'add: shift+drag / subtract: alt+drag / move: ctrl+drag';
   }
 
   if (toolStore?.activeToolCategory === 'pipette') {

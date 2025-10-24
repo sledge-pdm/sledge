@@ -53,6 +53,7 @@
     "core:window:allow-set-title",
     "core:window:allow-set-theme",
     "core:webview:allow-set-webview-zoom",
+    "core:webview:allow-clear-all-browsing-data",
     "os:default",
     "process:default",
     "updater:default",

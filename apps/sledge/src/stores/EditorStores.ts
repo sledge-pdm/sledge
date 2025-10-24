@@ -73,15 +73,23 @@ export interface EditorStateStore {
   appearanceStore: AppearanceStore;
   colorStore: ColorStore;
   lastSettingsStore: LastSettingsStore;
+  lastOpenAs: 'project' | 'new_project' | 'image';
+  lastPath: FileLocation;
   recentFiles: FileLocation[];
   presets: PresetRecord[];
 }
+
+export const getLastOpenedInfo = () => {
+  return {};
+};
 
 export const getEditorStateStore = (): EditorStateStore => {
   return {
     appearanceStore: appearanceStore,
     colorStore: colorStore,
     lastSettingsStore: lastSettingsStore,
+    lastOpenAs: fileStore.openAs,
+    lastPath: fileStore.savedLocation,
     recentFiles: fileStore.recentFiles,
     presets: Object.values(toolStore.tools)
       .map((tool) => {
@@ -95,13 +103,24 @@ export const getEditorStateStore = (): EditorStateStore => {
   };
 };
 
-export const loadEditorStateStore = (state: EditorStateStore) => {
+export const loadEditorStateStore = (
+  state: EditorStateStore
+): {
+  lastOpenAs?: 'project' | 'new_project' | 'image';
+  lastPath?: FileLocation;
+} => {
   if (state.appearanceStore) setAppearanceStore(state.appearanceStore);
   if (state.lastSettingsStore) setLastSettingsStore(state.lastSettingsStore);
   if (state.colorStore) setColorStore(state.colorStore);
+
   setFileStore('recentFiles', state.recentFiles ?? []);
   state.presets?.forEach((record) => {
     setToolStore('tools', record.toolId, 'presets', record.presets);
     eventBus.emit('tools:presetLoaded', { toolId: record.toolId });
   });
+
+  return {
+    lastOpenAs: state.lastOpenAs,
+    lastPath: state.lastPath,
+  };
 };

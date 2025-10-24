@@ -9,6 +9,7 @@ import { AnvilToolContext, ToolArgs, ToolResult, createAnvilToolContext } from '
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';
+import { setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export enum DrawState {
@@ -75,6 +76,8 @@ export default class LayerCanvasOperator {
     const result = this.useTool(ctx, state, toolCategory, toolArgs);
 
     if (result) {
+      setProjectStore('isProjectChangedAfterSave', true);
+      
       if (result.shouldUpdate) {
         eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });

@@ -1,11 +1,10 @@
 import { css } from '@acab/ecsstatic';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
-import { openExistingProject } from '~/features/io/window';
+import { adjustZoomToFit } from '~/features/canvas';
+import { loadProjectFromLocation } from '~/routes/editor/load';
 import { fileStore } from '~/stores/EditorStores';
-import { setProjectStore } from '~/stores/ProjectStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
@@ -102,10 +101,8 @@ const ProjectLocation: Component = () => {
                 const confirmed = await confirm(`Sure to reopen this project?
 Unsaved changes will be discarded!`);
                 if (confirmed) {
-                  await openExistingProject(fileStore.savedLocation);
-                  // clear dirty and close
-                  setProjectStore('isProjectChangedAfterSave', false);
-                  getCurrentWindow().close();
+                  await loadProjectFromLocation(fileStore.savedLocation);
+                  adjustZoomToFit();
                 }
               }}
             >

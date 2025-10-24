@@ -177,7 +177,7 @@ const CanvasSettings: Component = () => {
         <div class={presetRowStyle}>
           <div class={presetDropdownContainer}>
             <p class={presetLabel}>preset</p>
-            <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={false} />
+            <Dropdown options={canvasSizePresetsDropdownOptions} value={sizePreset} onChange={handlePresetChange} wheelSpin={true} />
           </div>
           <div
             class={frameModeButtonContainerStyle}

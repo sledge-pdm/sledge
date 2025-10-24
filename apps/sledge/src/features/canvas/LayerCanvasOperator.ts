@@ -9,7 +9,6 @@ import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';
-import { setProjectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 export enum DrawState {
@@ -75,7 +74,6 @@ export default class LayerCanvasOperator {
 
     if (result) {
       if (result.shouldUpdate) {
-        setProjectStore('isProjectChangedAfterSave', true);
         eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
         eventBus.emit('preview:requestUpdate', { layerId: layer.id });
       }

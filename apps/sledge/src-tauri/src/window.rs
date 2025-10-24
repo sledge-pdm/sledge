@@ -157,35 +157,34 @@ pub async fn open_window(
     }
 
     builder = builder.inner_size(window_inner_width, window_inner_height);
-    if let Some(parent) = parent {
-        if kind != SledgeWindowKind::Editor
-            && let Some(parent_window) = app.get_webview_window(&parent)
-        {
-            builder = builder.parent(&parent_window).map_err(|e| e.to_string())?;
+    if let Some(parent) = parent
+        && kind != SledgeWindowKind::Editor
+        && let Some(parent_window) = app.get_webview_window(&parent)
+    {
+        builder = builder.parent(&parent_window).map_err(|e| e.to_string())?;
 
-            let scale_factor = parent_window.scale_factor().unwrap_or(1.0);
+        let scale_factor = parent_window.scale_factor().unwrap_or(1.0);
 
-            // Physical positionとPhysical sizeを使用して正確な位置を計算
-            let parent_position = parent_window.inner_position().unwrap_or_default();
-            let parent_size = parent_window.inner_size().unwrap_or_default();
+        // Physical positionとPhysical sizeを使用して正確な位置を計算
+        let parent_position = parent_window.inner_position().unwrap_or_default();
+        let parent_size = parent_window.inner_size().unwrap_or_default();
 
-            // Physical coordinatesでの中央位置計算
-            let parent_center_x = parent_position.x as f64 + (parent_size.width as f64) / 2.0;
-            let parent_center_y = parent_position.y as f64 + (parent_size.height as f64) / 2.0;
+        // Physical coordinatesでの中央位置計算
+        let parent_center_x = parent_position.x as f64 + (parent_size.width as f64) / 2.0;
+        let parent_center_y = parent_position.y as f64 + (parent_size.height as f64) / 2.0;
 
-            // 子ウィンドウのサイズ
-            let child_physical_width = window_inner_width;
-            let child_physical_height = window_inner_height;
+        // 子ウィンドウのサイズ
+        let child_physical_width = window_inner_width;
+        let child_physical_height = window_inner_height;
 
-            // Physical座標で計算してからLogical座標に変換
-            let physical_px = parent_center_x - child_physical_width * scale_factor / 2.0;
-            let physical_py = parent_center_y - child_physical_height * scale_factor / 2.0;
+        // Physical座標で計算してからLogical座標に変換
+        let physical_px = parent_center_x - child_physical_width * scale_factor / 2.0;
+        let physical_py = parent_center_y - child_physical_height * scale_factor / 2.0;
 
-            // Logical座標に変換（position()メソッドはLogical座標を期待）
-            let px = physical_px / scale_factor;
-            let py = physical_py / scale_factor;
-            builder = builder.position(px, py);
-        }
+        // Logical座標に変換（position()メソッドはLogical座標を期待）
+        let px = physical_px / scale_factor;
+        let py = physical_py / scale_factor;
+        builder = builder.position(px, py);
     }
 
     #[cfg(target_os = "windows")]

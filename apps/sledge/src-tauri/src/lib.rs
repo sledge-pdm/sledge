@@ -73,7 +73,6 @@ pub fn run() {
                 .level_for("egui_glow", log::LevelFilter::Warn)
                 .level_for("egui_winit", log::LevelFilter::Warn)
                 .level_for("tao", log::LevelFilter::Error)
-                .level_for("tauri_plugin_updater::updater", log::LevelFilter::Info)
                 .build(),
         )
         .plugin(tauri_plugin_fs::init())

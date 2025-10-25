@@ -1,5 +1,7 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, onCleanup, onMount } from 'solid-js';
+import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
+import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
 import { saveProject } from '~/features/io/project/out/save';
 import {
@@ -9,7 +11,7 @@ import {
   setActiveToolCategory,
   updateToolPresetConfig,
 } from '~/features/tools/ToolController';
-import { fileStore, toolStore } from '~/stores/EditorStores';
+import { fileStore, interactStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { isKeyMatchesToEntry } from '../../features/config/KeyConfigController';
 
@@ -32,6 +34,7 @@ const KeyListener: Component = () => {
 
     if (toolStore.activeToolCategory === 'rectSelection' && e.altKey) return;
     if (toolStore.activeToolCategory === 'autoSelection' && e.altKey) return;
+    if (toolStore.activeToolCategory === 'lassoSelection' && e.altKey) return;
 
     // Check if input is focused early to avoid unnecessary processing
     const inputFocused = isInputFocused();
@@ -74,12 +77,20 @@ const KeyListener: Component = () => {
       }
     }
 
+    if (isKeyMatchesToEntry(e, keyConfigStore['zoom_in'])) {
+      zoom('in');
+    }
+    if (isKeyMatchesToEntry(e, keyConfigStore['zoom_out'])) {
+      zoom('out');
+    }
+
     if (!e.repeat) {
       if (isKeyMatchesToEntry(e, keyConfigStore['pen'])) setActiveToolCategory('pen');
       if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) setActiveToolCategory('eraser');
       if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) setActiveToolCategory('fill');
       if (isKeyMatchesToEntry(e, keyConfigStore['rect_select'])) setActiveToolCategory('rectSelection');
       if (isKeyMatchesToEntry(e, keyConfigStore['auto_select'])) setActiveToolCategory('autoSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore['lasso_select'])) setActiveToolCategory('lassoSelection');
       if (isKeyMatchesToEntry(e, keyConfigStore['move'])) setActiveToolCategory('move');
       if (isKeyMatchesToEntry(e, keyConfigStore['pipette'])) {
         e.preventDefault();
@@ -116,5 +127,17 @@ const KeyListener: Component = () => {
 
   return null;
 };
+
+function zoom(type: 'in' | 'out') {
+  const delta = type === 'out' ? -interactStore.wheelZoomStep : interactStore.wheelZoomStep;
+
+  let zoomNew = interactStore.zoom + interactStore.zoom * delta;
+  zoomNew = clipZoom(zoomNew);
+  const zoomed = zoomTowardAreaCenter(zoomNew);
+
+  if (zoomed) {
+    clearCoordinateCache();
+  }
+}
 
 export default KeyListener;

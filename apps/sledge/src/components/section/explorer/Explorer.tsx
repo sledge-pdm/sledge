@@ -6,7 +6,7 @@ import { pictureDir } from '@tauri-apps/api/path';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import FileItem, { FilesConfig } from '~/components/section/files/item/FileItem';
+import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
 import { appearanceStore, fileStore, setAppearanceStore, setLastSettingsStore } from '~/stores/EditorStores';
@@ -44,20 +44,21 @@ const explorerContainer = css`
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-left: 8px;
   gap: 8px;
 `;
 
 const explorerInner = css`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin-bottom: 16px;
 `;
 
 const navigationPanel = css`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 `;
 
 const navigationRow = css`
@@ -294,11 +295,11 @@ const Explorer: Component<Props> = (props) => {
                     align='right'
                     onClose={() => setMenuOpened(false)}
                     closeByOutsideClick
-                    style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
+                    style={{ 'margin-top': '4px', 'margin-left': '-8px', width: '160px' }}
                     options={[
                       {
                         type: 'item',
-                        label: 'back to saved directory',
+                        label: 'back to saved folder',
                         disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
                         onSelect: () => {
                           if (fileStore.savedLocation.path) setPath(fileStore.savedLocation.path);
@@ -306,9 +307,9 @@ const Explorer: Component<Props> = (props) => {
                       },
                       {
                         type: 'item',
-                        label: 'Export to this directory',
+                        label: 'Export to this folder',
                         onSelect: () => {
-                          setLastSettingsStore('exportSettings', 'dirPath', currentPath());
+                          setLastSettingsStore('exportSettings', 'folderPath', currentPath());
                           setAppearanceStore(
                             'rightSide',
                             'selectedIndex',

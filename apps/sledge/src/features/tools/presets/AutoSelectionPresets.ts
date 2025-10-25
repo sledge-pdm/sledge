@@ -1,7 +1,9 @@
+import { selectModeMeta } from '~/features/tools/presets/SelectionMeta';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
 export const autoSelectionPresets: PresetFieldMeta[] = [
+  selectModeMeta,
   {
     key: 'threshold',
     label: 'Threshold',
@@ -14,12 +16,6 @@ export const autoSelectionPresets: PresetFieldMeta[] = [
     },
     tips: 'Color tolerance for fill operation',
   },
-  // {
-  //   key: 'antialias',
-  //   label: 'Antialias',
-  //   component: 'ToggleSwitch',
-  //   tips: 'Enable antialiasing for smoother edges',
-  // },
 ];
 
 export const autoSelectionPresetMeta: ToolPresetMeta = {

@@ -12,7 +12,7 @@ import {
 } from '~/features/layer/anvil/AnvilController';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionLimitMode, isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 
 export interface FillProps {
@@ -28,21 +28,21 @@ export interface Fill {
 export class FillTool implements ToolBehavior {
   onlyOnCanvas = true;
 
-  onStart(ctx: AnvilToolContext, { position, color, presetName, layerId }: ToolArgs) {
+  onStart({ position, color, presetName, layerId }: ToolArgs) {
     const startTime = Date.now();
 
     const preset = presetName ? (getPresetOf('fill', presetName) as any) : undefined;
     const threshold = preset?.threshold ?? 0;
     const limitMode = getSelectionLimitMode();
 
-    const before = getBufferCopy(ctx.layerId);
+    const before = getBufferCopy(layerId);
 
     const selectionFillMode = preset.selectionFillMode ?? 'inside';
     if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
       floodFill({
-        target: getBufferPointer(ctx.layerId)!,
-        targetWidth: getLayerWidth(ctx.layerId)!,
-        targetHeight: getLayerHeight(ctx.layerId)!,
+        target: getBufferPointer(layerId)!,
+        targetWidth: getLayerWidth(layerId)!,
+        targetHeight: getLayerHeight(layerId)!,
         fillColor: color,
         startX: position.x,
         startY: position.y,
@@ -52,9 +52,9 @@ export class FillTool implements ToolBehavior {
       const selectionMask = selectionManager.getSelectionMask();
       if (selectionFillMode === 'inside') {
         floodFill({
-          target: getBufferPointer(ctx.layerId)!,
-          targetWidth: getLayerWidth(ctx.layerId)!,
-          targetHeight: getLayerHeight(ctx.layerId)!,
+          target: getBufferPointer(layerId)!,
+          targetWidth: getLayerWidth(layerId)!,
+          targetHeight: getLayerHeight(layerId)!,
           fillColor: color,
           startX: position.x,
           startY: position.y,
@@ -66,7 +66,7 @@ export class FillTool implements ToolBehavior {
         });
       } else {
         const maskBuffer = selectionMask.getMask();
-        const target = getBufferPointer(ctx.layerId)!;
+        const target = getBufferPointer(layerId)!;
         for (let i = 0; i < maskBuffer.length; i++) {
           const isInSelection = maskBuffer[i] === 1;
           if (isInSelection) {
@@ -80,7 +80,7 @@ export class FillTool implements ToolBehavior {
       }
     }
 
-    if (before) registerWholeChange(ctx.layerId, before);
+    if (before) registerWholeChange(layerId, before);
 
     const endTime = Date.now();
 
@@ -91,14 +91,14 @@ export class FillTool implements ToolBehavior {
     };
   }
 
-  onMove(ctx: AnvilToolContext, args: ToolArgs) {
+  onMove(args: ToolArgs) {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
     };
   }
 
-  onEnd(ctx: AnvilToolContext, args: ToolArgs) {
+  onEnd(args: ToolArgs) {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,

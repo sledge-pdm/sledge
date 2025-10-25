@@ -58,6 +58,7 @@ const CanvasOverlaySVG: Component = () => {
   const [moveState, setMoveState] = createSignal(floatingMoveManager.getState());
 
   const [lassoDisplayMode, setLassoDisplayMode] = createSignal<LassoDisplayMode>('fill');
+  const [lassoFillMode, setLassoFillMode] = createSignal<'nonzero' | 'evenodd'>('nonzero');
   const [lassoOutlinePath, setLassoOutlinePath] = createSignal('');
 
   const [_, startRenderLoop, stopRenderLoop] = createRAF(
@@ -100,6 +101,8 @@ const CanvasOverlaySVG: Component = () => {
         toolStore.tools.lassoSelection.presets?.selected ?? 'default'
       ) as LassoSelectionPresetConfig;
       const displayMode = lassoTool.getDisplayMode(preset);
+      const lassoFillMode = preset.fillMode;
+      setLassoFillMode(lassoFillMode ?? 'nonzero');
       setLassoDisplayMode(displayMode);
       if (displayMode === 'fill') return;
       const path = lassoTool.getPath();
@@ -238,7 +241,7 @@ const CanvasOverlaySVG: Component = () => {
             <path
               d={lassoOutlinePath()}
               fill={lassoDisplayMode() === 'outline' ? '#00000050' : 'none'}
-              fill-rule='nonzero'
+              fill-rule={lassoFillMode()}
               clip-rule='evenodd'
               stroke={lassoDisplayMode() === 'outline' ? color.selectionBorder : 'red'}
               stroke-width={1}

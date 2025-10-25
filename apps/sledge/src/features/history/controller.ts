@@ -8,6 +8,7 @@ import {
   LayerPropsHistoryAction,
 } from '~/features/history/actions';
 import { globalConfig } from '~/stores/GlobalStores';
+import { setProjectStore } from '~/stores/ProjectStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
 
 export class ProjectHistoryController {
@@ -119,6 +120,7 @@ export class ProjectHistoryController {
     const lastLabel = this.undoStack[this.undoStack.length - 1]?.label;
     const snap = { canUndo: this.canUndo(), canRedo: this.canRedo(), lastLabel };
     this.listeners.forEach((l) => l(snap));
+    setProjectStore('isProjectChangedAfterSave', true);
   }
 }
 export const projectHistoryController = new ProjectHistoryController();

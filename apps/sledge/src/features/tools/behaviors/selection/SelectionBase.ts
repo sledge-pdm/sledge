@@ -1,7 +1,9 @@
 import { Vec2 } from '@sledge/core';
-import { SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { AnvilToolContext, ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { SelectionEditMode } from '~/stores/editor/InteractStore';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 
 // 共通のモード判定と ctrl+ドラッグ移動処理をまとめたベースクラス
 // 各選択ツールは selection-mode（矩形/自動等）のみを実装すればよい
@@ -17,7 +19,7 @@ export abstract class SelectionBase implements ToolBehavior {
     const isAltPressed = e?.altKey;
     const isCtrlPressed = e?.ctrlKey;
 
-    let mode: SelectionEditMode = 'replace';
+    let mode: SelectionEditMode = interactStore.selectionEditMode;
     if (isShiftPressed) mode = 'add';
     if (isAltPressed) mode = 'subtract';
     if (isCtrlPressed) mode = 'move';
@@ -25,7 +27,9 @@ export abstract class SelectionBase implements ToolBehavior {
     return mode;
   }
 
-  onStart(_ctx: AnvilToolContext, args: ToolArgs) {
+  movePrevMode: SelectionEditMode | undefined = undefined;
+
+  onStart(args: ToolArgs) {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
@@ -33,9 +37,11 @@ export abstract class SelectionBase implements ToolBehavior {
       this.startPosition = args.position;
       this.startOffset = selectionManager.getAreaOffset();
       selectionManager.setState('selected');
+      this.movePrevMode = interactStore.selectionEditMode;
+      setInteractStore('selectionEditMode', 'move');
     } else {
       // ツール固有の選択開始処理
-      this.onStartSelection(_ctx, args, mode);
+      this.onStartSelection(args, mode);
     }
 
     return {
@@ -44,7 +50,7 @@ export abstract class SelectionBase implements ToolBehavior {
     };
   }
 
-  onMove(_ctx: AnvilToolContext, args: ToolArgs) {
+  onMove(args: ToolArgs) {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
@@ -54,7 +60,7 @@ export abstract class SelectionBase implements ToolBehavior {
       selectionManager.setOffset({ x: this.startOffset.x + dx, y: this.startOffset.y + dy });
     } else {
       // ツール固有の選択更新処理
-      this.onMoveSelection(_ctx, args, mode);
+      this.onMoveSelection(args, mode);
     }
 
     return {
@@ -63,10 +69,11 @@ export abstract class SelectionBase implements ToolBehavior {
     };
   }
 
-  onEnd(_ctx: AnvilToolContext, args: ToolArgs) {
+  onEnd(args: ToolArgs) {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
+      if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 移動確定
       selectionManager.commitOffset();
       if (!isSelectionAvailable()) {
@@ -76,7 +83,7 @@ export abstract class SelectionBase implements ToolBehavior {
       }
     } else {
       // ツール固有の確定処理
-      this.onEndSelection(_ctx, args, mode);
+      this.onEndSelection(args, mode);
     }
 
     return {
@@ -85,16 +92,17 @@ export abstract class SelectionBase implements ToolBehavior {
     };
   }
 
-  onCancel(_ctx: AnvilToolContext, args: ToolArgs) {
+  onCancel(args: ToolArgs) {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
+      if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 位置を元に戻す
       selectionManager.setOffset(this.startOffset);
       selectionManager.setState('selected');
     } else {
       // ツール固有のキャンセル処理
-      this.onCancelSelection(_ctx, args, mode);
+      this.onCancelSelection(args, mode);
     }
 
     return {
@@ -104,8 +112,8 @@ export abstract class SelectionBase implements ToolBehavior {
   }
 
   // 派生クラスで実装する選択系処理（矩形・自動等）
-  protected abstract onStartSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode): void;
-  protected abstract onMoveSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode): void;
-  protected abstract onEndSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode): void;
-  protected abstract onCancelSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode): void;
+  protected abstract onStartSelection(args: ToolArgs, mode: SelectionEditMode): void;
+  protected abstract onMoveSelection(args: ToolArgs, mode: SelectionEditMode): void;
+  protected abstract onEndSelection(args: ToolArgs, mode: SelectionEditMode): void;
+  protected abstract onCancelSelection(args: ToolArgs, mode: SelectionEditMode): void;
 }

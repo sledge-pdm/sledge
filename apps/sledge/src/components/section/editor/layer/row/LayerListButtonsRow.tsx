@@ -27,6 +27,10 @@ interface Props {
 }
 
 const LayerListButtonsRow: Component<Props> = (props) => {
+  const isBottomLayerActive = () =>
+    layerListStore.layers.findIndex((l) => l.id === layerListStore.activeLayerId) === layerListStore.layers.length - 1;
+  const isOnlyOneLayer = () => layerListStore.layers.length === 1;
+
   return (
     <div class={flexRow}>
       <div class={iconsContainer}>
@@ -49,17 +53,18 @@ const LayerListButtonsRow: Component<Props> = (props) => {
           }}
         />
         <LayerListIconButton
-          iconSrc={'/icons/layer/merge_down_9.png'}
-          title={'merge down to below layer.'}
-          onClick={async () => {
-            await mergeToBelowLayer(layerListStore.activeLayerId);
-          }}
-        />
-        <LayerListIconButton
           iconSrc={'/icons/layer/duplicate_9.png'}
           title={'duplicate layer.'}
           onClick={() => {
             duplicateLayer(layerListStore.activeLayerId);
+          }}
+        />
+        <LayerListIconButton
+          iconSrc={'/icons/layer/merge_down_9.png'}
+          title={'merge down to below layer.'}
+          disabled={isBottomLayerActive()}
+          onClick={async () => {
+            await mergeToBelowLayer(layerListStore.activeLayerId);
           }}
         />
       </div>
@@ -74,6 +79,7 @@ const LayerListButtonsRow: Component<Props> = (props) => {
         </button>
         <button
           class={errorButton}
+          disabled={isOnlyOneLayer()}
           onClick={async () => {
             const active = activeLayer();
             if (active) {

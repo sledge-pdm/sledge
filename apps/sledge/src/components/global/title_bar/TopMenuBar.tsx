@@ -19,7 +19,7 @@ const topMenuBarRoot = css`
   display: flex;
   flex-direction: row;
   width: 100%;
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-bottom: 1px solid var(--color-border);
   background-color: var(--color-controls);
   height: 28px;
   align-items: end;
@@ -127,23 +127,27 @@ const TopMenuBar: Component = () => {
             openProject();
           },
         },
-        { type: 'divider', label: 'recent' },
-        { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 },
-        ...fileStore.recentFiles
-          .map<MenuListOption | undefined>((loc) => {
-            if (!loc.name || !loc.path) return undefined;
-            return {
-              type: 'item',
-              label: normalizeJoin(loc.path, loc.name),
-              title: normalizeJoin(loc.path, loc.name),
-              fontFamily: fonts.ZFB03,
-              disabled: loc.path === fileStore.savedLocation.path && loc.name === fileStore.savedLocation.name,
-              onSelect() {
-                openExistingProject(loc);
-              },
-            };
-          })
-          .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
+        ...(fileStore.recentFiles.length > 0
+          ? [
+              { type: 'divider', label: 'recent' } as MenuListOption,
+              { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
+              ...fileStore.recentFiles
+                .map<MenuListOption | undefined>((loc) => {
+                  if (!loc.name || !loc.path) return undefined;
+                  return {
+                    type: 'item',
+                    label: normalizeJoin(loc.path, loc.name),
+                    title: normalizeJoin(loc.path, loc.name),
+                    fontFamily: fonts.ZFB03,
+                    disabled: loc.path === fileStore.savedLocation.path && loc.name === fileStore.savedLocation.name,
+                    onSelect: () => {
+                      openExistingProject(loc);
+                    },
+                  };
+                })
+                .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
+            ]
+          : []),
       ],
     },
     {

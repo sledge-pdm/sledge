@@ -1,10 +1,12 @@
 import { fill_lasso_selection } from '@sledge/wasm';
+import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { PartialFragment, SelectionEditMode, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
-import { AnvilToolContext, ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -68,8 +70,10 @@ export class LassoSelection extends SelectionBase {
     return { x: Math.max(0, x), y: Math.max(0, y), width: Math.max(1, width), height: Math.max(1, height) };
   }
 
-  private updatePartialMask(anvil: any): void {
+  private updatePartialMask(anvil: any, mode: 'nonzero' | 'evenodd'): void {
     if (!this.previewFragment || this.points.length < 6) return;
+
+    getCurrentWebview().clearAllBrowsingData();
 
     const bbox = this.calculateBoundingBox(this.points);
 
@@ -109,13 +113,13 @@ export class LassoSelection extends SelectionBase {
 
     // WASM関数を使用してマスクを更新
     try {
-      fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints), 'nonzero');
+      fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints), mode);
     } catch (error) {
       console.warn('Lasso selection WASM call failed:', error);
     }
   }
 
-  protected onStartSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.beginPreview(mode);
     this.startPosition = args.position;
 
@@ -145,7 +149,7 @@ export class LassoSelection extends SelectionBase {
     }
   }
 
-  protected onMoveSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onMoveSelection(args: ToolArgs, mode: SelectionEditMode) {
     if (!this.previewFragment) return;
 
     const anvil = getAnvilOf(args.layerId);
@@ -170,10 +174,11 @@ export class LassoSelection extends SelectionBase {
 
     const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
     const displayMode = this.getDisplayMode(preset);
+    const fillMode = preset.fillMode ?? 'nonzero';
     if (displayMode === 'fill') {
       // 最低3点必要（線分を作るため）
       if (this.points.length >= 6) {
-        this.updatePartialMask(anvil);
+        this.updatePartialMask(anvil, fillMode);
       }
 
       selectionManager.setPreviewFragment(this.previewFragment);
@@ -182,7 +187,7 @@ export class LassoSelection extends SelectionBase {
     }
   }
 
-  protected onEndSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onEndSelection(args: ToolArgs, mode: SelectionEditMode) {
     if (!this.previewFragment) return;
 
     const anvil = getAnvilOf(args.layerId);
@@ -205,8 +210,10 @@ export class LassoSelection extends SelectionBase {
         this.points.push(startX, startY);
       }
 
+      const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
+      const fillMode = preset.fillMode ?? 'nonzero';
       // 最終マスクを生成
-      this.updatePartialMask(anvil);
+      this.updatePartialMask(anvil, fillMode);
     }
 
     this.points = [];
@@ -216,7 +223,7 @@ export class LassoSelection extends SelectionBase {
     selectionManager.commit();
   }
 
-  protected onCancelSelection(_ctx: AnvilToolContext, args: ToolArgs, mode: SelectionEditMode) {
+  protected onCancelSelection(_args: ToolArgs, mode: SelectionEditMode) {
     // 座標をクリア
     this.points = [];
     selectionManager.commit();

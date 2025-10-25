@@ -159,7 +159,7 @@ export default function TitleBar() {
     <header>
       <div
         style={{
-          'border-bottom': shouldShowBorder() ? `1px solid ${color.borderSecondary}` : 'none',
+          'border-bottom': shouldShowBorder() ? `1px solid ${color.border}` : 'none',
           'pointer-events': 'all',
         }}
       >
@@ -186,7 +186,7 @@ export default function TitleBar() {
                   >
                     <p class={titleBarTitle}>
                       <span class={titleBarTitle} style={{ opacity: 0.5 }}>
-                        {fileStore.savedLocation.path ? `${fileStore.savedLocation.path}\\` : ''}
+                        {fileStore.savedLocation.path ? `${fileStore.savedLocation.path}/` : ''}
                       </span>
                       {fileStore.savedLocation.name ?? '[new project]'}
                     </p>

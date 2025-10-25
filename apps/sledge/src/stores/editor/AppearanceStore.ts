@@ -18,7 +18,7 @@ export type AppearanceStore = {
 export const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: true,
-    tabs: ['editor', 'effects', 'files', 'danger'],
+    tabs: ['editor', 'effects', 'explorer', 'danger'],
     selectedIndex: 0,
   },
   rightSide: {

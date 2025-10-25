@@ -1,5 +1,6 @@
 import { Size2D, Vec2 } from '@sledge/core';
 
+export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type InteractStore = {
   canvasAreaSize: Size2D;
   lastMouseWindow: Vec2;
@@ -22,6 +23,8 @@ export type InteractStore = {
   rotation: number;
   verticalFlipped: boolean;
   horizontalFlipped: boolean;
+
+  selectionEditMode: SelectionEditMode;
 
   isCanvasSizeFrameMode: boolean;
   canvasSizeFrameOffset: Vec2;
@@ -50,6 +53,8 @@ export const defaultInteractStore: InteractStore = {
   horizontalFlipped: false,
 
   isDragging: false,
+
+  selectionEditMode: 'replace',
 
   isCanvasSizeFrameMode: false,
   canvasSizeFrameOffset: { x: 0, y: 0 },

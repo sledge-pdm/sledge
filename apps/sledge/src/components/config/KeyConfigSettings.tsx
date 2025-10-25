@@ -3,7 +3,6 @@ import { color } from '@sledge/theme';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { KeyConfigEntry } from '~/config/KeyConfig';
-import { KeyConfigCommands } from '~/Consts';
 import {
   isRecordEndWithoutSave as isRecordAbortKey,
   isRecordEndSave as isRecordEndKey,
@@ -13,6 +12,7 @@ import {
   restoreDefaultKeyConfig,
   saveKeyConfigEntry,
 } from '~/features/config/KeyConfigController';
+import { KeyConfigCommands } from '~/stores/global/KeyConfigStore';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { accentedText, flexCol } from '~/styles/styles';
 

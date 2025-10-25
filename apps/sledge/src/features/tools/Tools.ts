@@ -66,7 +66,11 @@ export type AutoSelectionPresetConfig = PresetConfig & {
   // antialias?: boolean;
 };
 
-export type LassoSelectionPresetConfig = PresetConfig & {};
+export type RectSelectionPresetConfig = PresetConfig & {};
+
+export type LassoSelectionPresetConfig = PresetConfig & {
+  fillMode?: 'nonzero' | 'evenodd';
+};
 
 // ツールカテゴリの定義
 export const toolCategories = {
@@ -121,7 +125,12 @@ export const toolCategories = {
     name: 'Rect Select',
     iconSrc: '/icons/tools/rect_select.png',
     behavior: new RectSelection(),
-    // プリセット不要
+    presets: {
+      selected: DEFAULT_PRESET,
+      options: {
+        [DEFAULT_PRESET]: {} as RectSelectionPresetConfig,
+      },
+    },
   } as ToolCategory,
   [TOOL_CATEGORIES.AUTO_SELECTION]: {
     id: TOOL_CATEGORIES.AUTO_SELECTION,
@@ -145,7 +154,9 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: {} as LassoSelectionPresetConfig,
+        [DEFAULT_PRESET]: {
+          fillMode: 'nonzero',
+        } as LassoSelectionPresetConfig,
       },
     },
   } as ToolCategory<LassoSelectionPresetConfig>,

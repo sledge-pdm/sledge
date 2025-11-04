@@ -1,4 +1,4 @@
-import { rawToWebp, transferBufferInstant, webpToRaw } from '@sledge/anvil';
+import { AntialiasMode, rawToWebp, transferBufferInstant, webpToRaw } from '@sledge/anvil';
 import { v4 } from 'uuid';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
@@ -111,6 +111,7 @@ async function transferToLayer(layerId: string, entryId: string) {
     scaleX: entry.transform.scaleX,
     scaleY: entry.transform.scaleY,
     rotate: entry.transform.rotation,
+    antialiasMode: AntialiasMode.Nearest,
   });
 
   const patch = flushPatch(layerId);

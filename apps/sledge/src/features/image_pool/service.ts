@@ -28,21 +28,10 @@ export function insertEntry(entry: ImagePoolEntry, noDiff?: boolean) {
 }
 
 export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>, noDiff?: boolean) {
-  // const oldEntries = imagePoolStore.entries.slice();
   let oldEntryIndex = imagePoolStore.entries.findIndex((e) => e.id === id);
   if (oldEntryIndex < 0) return;
 
   setImagePoolStore('entries', oldEntryIndex, patch);
-
-  // if (!noDiff) {
-  //   projectHistoryController.addAction(
-  //     new ImagePoolHistoryAction({
-  //       oldEntries,
-  //       newEntries: imagePoolStore.entries.slice(),
-  //       kind: 'edit',
-  //     })
-  //   );
-  // }
 }
 
 export function removeEntry(id: string, noDiff?: boolean) {

@@ -71,29 +71,44 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
 
     const initial = snapshotState();
 
+    // Helper function to create minimal WebP buffer (dummy data for testing)
+    const createDummyWebpBuffer = (width: number, height: number, seed: number): Uint8Array => {
+      // Create a simple pattern based on dimensions and seed for deterministic testing
+      const size = Math.max(32, Math.floor((width * height * seed) / 100)); // minimum 32 bytes
+      const buffer = new Uint8Array(size);
+      // Fill with a predictable pattern
+      for (let i = 0; i < size; i++) {
+        buffer[i] = (seed * 17 + i * 31) & 0xff;
+      }
+      return buffer;
+    };
+
     // Predefined candidate entries for pool operations
     const entries: Record<string, ImagePoolEntry> = {
       'rnd-a': {
         id: 'rnd-a',
-        imagePath: 'C:/dummyA.png',
+        originalPath: 'C:/dummyA.png',
+        webpBuffer: createDummyWebpBuffer(8, 8, 1),
         base: { width: 8, height: 8 },
-        transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
+        transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },
         opacity: 1,
         visible: true,
       },
       'rnd-b': {
         id: 'rnd-b',
-        imagePath: 'C:/dummyB.png',
+        originalPath: 'C:/dummyB.png',
+        webpBuffer: createDummyWebpBuffer(12, 12, 2),
         base: { width: 12, height: 12 },
-        transform: { x: 1, y: 1, scaleX: 1, scaleY: 1 },
+        transform: { x: 1, y: 1, scaleX: 1, scaleY: 1, rotation: 0 },
         opacity: 1,
         visible: true,
       },
       'rnd-c': {
         id: 'rnd-c',
-        imagePath: 'C:/dummyC.png',
+        originalPath: 'C:/dummyC.png',
+        webpBuffer: createDummyWebpBuffer(16, 16, 3),
         base: { width: 16, height: 16 },
-        transform: { x: 2, y: 2, scaleX: 1, scaleY: 1 },
+        transform: { x: 2, y: 2, scaleX: 1, scaleY: 1, rotation: 0 },
         opacity: 1,
         visible: true,
       },

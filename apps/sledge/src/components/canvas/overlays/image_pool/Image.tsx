@@ -1,10 +1,10 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { MenuListOption, showContextMenu } from '@sledge/ui';
-import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, onMount } from 'solid-js';
 import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
+import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
@@ -26,6 +26,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
   let entryInteract: ImageEntryInteract | undefined;
+
+  const imageSrc = useWebpBlobUrl(entry.webpBuffer);
 
   onMount(() => {
     // initial transform-related styling hints
@@ -71,16 +73,15 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         vector-effect={'non-scaling-stroke'}
         pointer-events='all'
         style={{
-          cursor: `${handleProps['data-pos']}-resize`,
+          cursor: handleProps['data-pos'] === 'r' ? 'grab' : `${handleProps['data-pos']}-resize`,
           transform: `translate(-${size() / 2}px, -${size() / 2}px)`,
           position: 'absolute',
           visibility: imagePoolStore.selectedEntryId === entry.id ? 'visible' : 'collapse',
+          'pointer-events': imagePoolStore.selectedEntryId === entry.id ? 'auto' : 'none',
         }}
       />
     );
   };
-
-  // const selected = createMemo<boolean>(() => imagePoolStore.selectedEntryId === entry.id);
 
   return (
     <div
@@ -124,7 +125,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
               },
             };
         showContextMenu(
-          `${pathToFileLocation(entry.imagePath)?.name}${entry.visible ? '' : ' (hidden)'}`,
+          `${entry.originalPath ? pathToFileLocation(entry.originalPath)?.name : '[ unknown ]'}${entry.visible ? '' : ' (hidden)'}`,
           [
             showHideItem,
             {
@@ -145,29 +146,19 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         );
       }}
     >
-      <div
+      <img
+        src={imageSrc()}
+        class={imageElement}
+        width={entry.base.width}
+        height={entry.base.height}
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          margin: 0,
-          padding: 0,
-          'transform-origin': '0 0',
-          transform: `scale(${entry.transform.scaleX}, ${entry.transform.scaleY})`,
+          width: `${entry.base.width * entry.transform.scaleX}px`,
+          height: `${entry.base.height * entry.transform.scaleY}px`,
+          'transform-origin': '50% 50%',
+          transform: `rotate(${entry.transform.rotation}deg)`,
+          opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
         }}
-      >
-        <img
-          src={convertFileSrc(entry.imagePath)}
-          class={imageElement}
-          width={entry.base.width}
-          height={entry.base.height}
-          style={{
-            width: `${entry.base.width}px`,
-            height: `${entry.base.height}px`,
-            opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
-          }}
-        />
-      </div>
+      />
 
       <svg
         xmlns='http://www.w3.org/2000/svg'
@@ -184,6 +175,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           'z-index': 'var(--zindex-image-pool-control)',
           width: `${entry.base.width * entry.transform.scaleX}px`,
           height: `${entry.base.height * entry.transform.scaleY}px`,
+          'transform-origin': '50% 50%',
+          transform: `rotate(${entry.transform.rotation}deg)`,
         }}
       >
         {/* 内部ドラッグ用の透明サーフェス */}
@@ -208,7 +201,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           vector-effect={'non-scaling-stroke'}
           style={{
             visibility: imagePoolStore.selectedEntryId === entry.id ? 'visible' : 'collapse',
-            'pointer-events': 'none',
+            'pointer-events': imagePoolStore.selectedEntryId === entry.id ? 'auto' : 'none',
           }}
         />
         {/* 四隅 */}
@@ -221,6 +214,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         <Handle x={'100%'} y={'50%'} data-pos='e' />
         <Handle x={'50%'} y={'100%'} data-pos='s' />
         <Handle x={'0'} y={'50%'} data-pos='w' />
+
+        <Handle x={'50%'} y={`-${16 / interactStore.zoom}px`} data-pos='r' />
       </svg>
     </div>
   );

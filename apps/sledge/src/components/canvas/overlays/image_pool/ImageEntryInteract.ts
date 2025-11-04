@@ -1,9 +1,10 @@
+import { normalizeRotation } from '~/features/canvas';
 import { getEntry, updateEntryPartial } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 
-type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
+type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'r';
 
 /**
  * ImageEntryInteract
@@ -13,14 +14,14 @@ type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
  */
 class ImageEntryInteract {
   private pointerActive = false;
-  private mode: 'drag' | 'resize' | undefined;
+  private mode: 'drag' | 'resize' | 'rotate' | undefined;
   private startClientX = 0;
   private startClientY = 0;
   private startX = 0;
   private startY = 0;
   private startScaleX = 1;
   private startScaleY = 1;
-  private startRotation = 0; // for future
+  private startRotation = 0;
 
   private resizePos: ResizePos | undefined;
 
@@ -44,10 +45,16 @@ class ImageEntryInteract {
     this.startY = entry.transform.y;
     this.startScaleX = entry.transform.scaleX;
     this.startScaleY = entry.transform.scaleY;
+    this.startRotation = entry.transform.rotation;
 
     if (handle) {
-      this.mode = 'resize';
-      this.resizePos = handle.getAttribute('data-pos') as ResizePos | undefined;
+      const dataPos = handle.getAttribute('data-pos') as ResizePos | undefined;
+      this.resizePos = dataPos;
+      if (dataPos === 'r') {
+        this.mode = 'rotate';
+      } else {
+        this.mode = 'resize';
+      }
     } else {
       this.mode = 'drag';
       this.resizePos = undefined;
@@ -200,6 +207,25 @@ class ImageEntryInteract {
       setImagePoolStore('entries', index, 'transform', 'y', newY);
       setImagePoolStore('entries', index, 'transform', 'scaleX', nextScaleX);
       setImagePoolStore('entries', index, 'transform', 'scaleY', nextScaleY);
+    } else if (this.mode === 'rotate') {
+      // client rect of svg control (=image)
+      const svgRect = this.svgRoot.getBoundingClientRect();
+      if (!svgRect) return;
+      const rectCenterX = (svgRect.left + svgRect.right) / 2;
+      const rectCenterY = (svgRect.top + svgRect.bottom) / 2;
+      // 開始時の角度
+      const startAngle = Math.atan2(this.startClientY - rectCenterY, this.startClientX - rectCenterX);
+      // 現在の角度
+      const currentAngle = Math.atan2(e.clientY - rectCenterY, e.clientX - rectCenterX);
+
+      const deltaAngle = (currentAngle - startAngle) * (180 / Math.PI);
+      let newRotation = this.startRotation + deltaAngle;
+
+      newRotation = normalizeRotation(newRotation);
+
+      const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
+      if (index < 0) return;
+      setImagePoolStore('entries', index, 'transform', 'rotation', newRotation);
     }
   };
 

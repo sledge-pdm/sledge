@@ -10,7 +10,7 @@ import KeyListener from '~/components/global/KeyListener';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit } from '~/features/canvas';
-import { addToImagePool } from '~/features/image_pool';
+import { addImagesFromLocal } from '~/features/image_pool';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { loadEditorState } from '~/features/io/editor/load';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
@@ -65,7 +65,7 @@ export default function Editor() {
 
   listen('tauri://drag-drop', async (e: any) => {
     const paths = e.payload.paths as string[];
-    addToImagePool(paths.filter((p) => importableFileExtensions.some((ext) => p.endsWith(`.${ext}`))));
+    addImagesFromLocal(paths.filter((p) => importableFileExtensions.some((ext) => p.endsWith(`.${ext}`))));
 
     paths
       .filter((p) => p.endsWith('.sledge'))

@@ -5,7 +5,7 @@ import { Component, createMemo, JSX, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
-import { addToImagePool, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
+import { addImagesFromLocal, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 
@@ -50,7 +50,7 @@ const Images: Component<{}> = () => {
           onClick: async () => {
             const path = await openImageImportDialog();
             if (path !== undefined) {
-              addToImagePool(path);
+              addImagesFromLocal(path);
             }
           },
         },
@@ -87,6 +87,7 @@ const Images: Component<{}> = () => {
                 <InfoRow label='scale'>
                   {selectedEntry()?.transform.scaleX.toFixed(2)}, {selectedEntry()?.transform.scaleY.toFixed(2)}
                 </InfoRow>
+                <InfoRow label='rotation'>{selectedEntry()?.transform.rotation.toFixed(1)}</InfoRow>
               </div>
             </div>
           </Show>

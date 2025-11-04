@@ -1,14 +1,16 @@
 import { color } from '@sledge/theme';
 import { MenuListOption, showContextMenu } from '@sledge/ui';
-import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, For } from 'solid-js';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
+import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { pathToFileLocation } from '~/utils/FileUtils';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
+  const imageSrc = useWebpBlobUrl(props.entry.webpBuffer);
+
   return (
     <div
       class={flexCol}
@@ -41,7 +43,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
             };
 
         showContextMenu(
-          `${pathToFileLocation(entry.imagePath)?.name}${props.entry.visible ? '' : ' (hidden)'}`,
+          `${entry.originalPath ? pathToFileLocation(entry.originalPath)?.name : '[ unknown ]'}${props.entry.visible ? '' : ' (hidden)'}`,
           [
             showHideItem,
             {
@@ -71,11 +73,11 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
       >
         <img
           class={'ignore-image-select'}
-          src={convertFileSrc(props.entry.imagePath)}
+          src={imageSrc()}
           width={40}
           height={40}
-          alt={props.entry.imagePath}
-          title={props.entry.imagePath}
+          alt={props.entry.originalPath}
+          title={props.entry.originalPath}
           style={{ 'object-fit': 'cover' }}
           onError={(e) => {
             e.currentTarget.style.opacity = '0.5';

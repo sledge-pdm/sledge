@@ -3,7 +3,7 @@
 export type { ImagePoolEntry } from './model';
 
 export {
-  addToImagePool,
+  addImagesFromLocal,
   getEntry,
   hideEntry,
   insertEntry,

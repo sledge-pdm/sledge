@@ -9,7 +9,8 @@ import { createStore } from 'solid-js/store';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
-import { appearanceStore, fileStore, setAppearanceStore, setLastSettingsStore } from '~/stores/EditorStores';
+import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
+import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin, normalizePath } from '~/utils/FileUtils';
 
 interface Props {
@@ -44,7 +45,7 @@ const explorerContainer = css`
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-left: 8px;
+  padding-left: 8px;
   gap: 8px;
 `;
 
@@ -68,10 +69,6 @@ const navigationRow = css`
   align-items: center;
 `;
 
-const flexGrow = css`
-  flex-grow: 1;
-`;
-
 const menuButtonContainer = css`
   position: relative;
   display: flex;
@@ -79,7 +76,7 @@ const menuButtonContainer = css`
 `;
 
 const iconButton = css`
-  padding: 2px;
+  padding: 3px;
   cursor: pointer;
 `;
 
@@ -98,16 +95,10 @@ const controlsRow = css`
   align-items: center;
 `;
 
-const backToProjectLink = css`
-  font-family: ZFB03B;
-  opacity: 0.5;
-  align-self: flex-end;
-`;
-
 const controlButtonsRow = css`
   display: flex;
   flex-direction: row;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
   margin-left: auto;
 `;
@@ -295,7 +286,7 @@ const Explorer: Component<Props> = (props) => {
                     align='right'
                     onClose={() => setMenuOpened(false)}
                     closeByOutsideClick
-                    style={{ 'margin-top': '4px', 'margin-left': '-8px', width: '160px' }}
+                    style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
                     options={[
                       {
                         type: 'item',
@@ -309,13 +300,14 @@ const Explorer: Component<Props> = (props) => {
                         type: 'item',
                         label: 'Export to this folder',
                         onSelect: () => {
-                          setLastSettingsStore('exportSettings', 'folderPath', currentPath());
                           setAppearanceStore(
                             'rightSide',
                             'selectedIndex',
                             appearanceStore.rightSide.tabs.findIndex((t) => t === 'export')
                           );
                           setAppearanceStore('rightSide', 'shown', true);
+
+                          eventBus.emit('export:requestExportPath', { newPath: currentPath() });
                         },
                       },
                     ]}

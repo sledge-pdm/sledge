@@ -5,7 +5,7 @@ import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, Slider } from '@sle
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
@@ -14,6 +14,7 @@ import { allLayers } from '~/features/layer';
 import { fileStore, lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { accentedButton, flexCol } from '~/styles/styles';
+import { eventBus, Events } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
@@ -184,10 +185,15 @@ const ExportContent: Component = () => {
       setSettings('folderPath', await defaultExportDir());
     }
 
-    createEffect(() => {
-      const newFolderPath = lastSettingsStore.exportSettings.folderPath;
-      if (newFolderPath && !newFolderPath.trim()) setSettings('folderPath', newFolderPath);
-    });
+    const handleRequestExportPath = (e: Events['export:requestExportPath']) => {
+      setSettings('folderPath', e.newPath);
+    };
+
+    eventBus.on('export:requestExportPath', handleRequestExportPath);
+
+    return () => {
+      eventBus.off('export:requestExportPath', handleRequestExportPath);
+    };
   });
 
   const openDirSelectionDialog = async () => {
@@ -235,7 +241,7 @@ const ExportContent: Component = () => {
 
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
-      <div class={flexCol} style={{ overflow: 'visible' }}>
+      <div class={flexCol}>
         <p class={sectionSubCaption}>Output Folder.</p>
         <div class={sectionSubContent}>
           <div class={folderPathContainer}>
@@ -291,8 +297,6 @@ const ExportContent: Component = () => {
                   align='right'
                   style={{
                     'margin-top': '6px',
-                    'border-radius': '4px',
-                    'border-color': color.onBackground,
                   }}
                 />
               </Show>

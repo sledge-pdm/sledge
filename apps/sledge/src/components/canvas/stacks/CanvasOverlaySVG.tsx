@@ -19,7 +19,7 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 
-import rawPattern45border16x2 from '@assets/patterns/45border16x2.svg?raw';
+import rawAreaPattern from '@assets/patterns/SelectionAreaPattern.svg?raw';
 import { ShapeMask } from '@sledge/anvil';
 import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
@@ -33,7 +33,7 @@ const extractFirstPath = (svg: string) => {
   const m = svg.match(/<path[\s\S]*?>/i); // self-closing or standard 最短
   return m ? m[0] : svg;
 };
-const pattern45border16x2Path = extractFirstPath(rawPattern45border16x2);
+const areaPatternPath = extractFirstPath(rawAreaPattern);
 
 function getDrawnPixelMask(size: number, shape: 'circle' | 'square'): ShapeMask {
   switch (shape) {
@@ -221,7 +221,7 @@ const CanvasOverlaySVG: Component = () => {
           >
             <defs>
               <pattern
-                id='45border16x2-animate-svg'
+                id='area-pattern-animate'
                 x={patternOffset()}
                 y={patternOffset()}
                 width='32'
@@ -229,12 +229,15 @@ const CanvasOverlaySVG: Component = () => {
                 patternUnits='userSpaceOnUse'
                 patternContentUnits='userSpaceOnUse'
               >
-                <g innerHTML={pattern45border16x2Path} />
+                {/* Background rectangle placed before the stripe path so it appears behind */}
+                <rect x={0} y={0} width='32' height='32' fill={color.selectionFill} />
+                <g innerHTML={areaPatternPath} />
               </pattern>
             </defs>
             <defs>
-              <pattern id='45border16x2-svg' x={0} y={0} width='32' height='32' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
-                <g innerHTML={pattern45border16x2Path} />
+              <pattern id='area-pattern' x={0} y={0} width='32' height='32' patternUnits='userSpaceOnUse' patternContentUnits='userSpaceOnUse'>
+                <rect x={0} y={0} width='32' height='32' fill={color.selectionFill} />
+                <g innerHTML={areaPatternPath} />
               </pattern>
             </defs>
 
@@ -296,7 +299,7 @@ const CanvasOverlaySVG: Component = () => {
               <path
                 id='selection-outline'
                 d={pathCmdList().toString(interactStore.zoom)}
-                fill='url(#45border16x2-animate-svg)'
+                fill='url(#area-pattern-animate)'
                 fill-rule='evenodd'
                 clip-rule='evenodd'
                 stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}

@@ -159,8 +159,6 @@ const SaveSection: Component = () => {
           align={'right'}
           style={{
             'margin-top': '4px',
-            'border-color': color.onBackground,
-            'border-radius': '4px',
           }}
         />
       </Show>

@@ -36,8 +36,6 @@ const sideAreaContentWrapper = css`
   right: 0;
   padding-top: 24px;
   padding-bottom: 48px;
-  overflow-x: visible;
-  overflow-y: scroll;
 
   &::-webkit-scrollbar {
     width: 2px;

@@ -4,7 +4,9 @@ import { createEffect, createSignal, JSX, Show } from 'solid-js';
 
 const containerStyle = css`
   position: relative;
+  display: flex;
   flex-grow: 1;
+  overflow: visible;
 `;
 
 const fadeTopStyle = css`

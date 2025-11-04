@@ -158,10 +158,7 @@ const SaveSection: Component = () => {
           onClose={() => setIsSaveMenuShown(false)}
           align={'right'}
           style={{
-            width: '140px',
             'margin-top': '4px',
-            'border-color': color.onBackground,
-            'border-radius': '4px',
           }}
         />
       </Show>

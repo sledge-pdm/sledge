@@ -214,8 +214,6 @@ const TopMenuBar: Component = () => {
                     onClose={() => setMenuOpen(false)}
                     style={{
                       'margin-top': '4px',
-                      'border-color': color.onBackground,
-                      'border-radius': '4px',
                       'min-width': '120px',
                     }}
                   />

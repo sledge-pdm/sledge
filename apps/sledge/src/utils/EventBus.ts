@@ -25,6 +25,8 @@ export type Events = {
   'clipboard:doCopy': {};
   'clipboard:doCut': {};
   'clipboard:doPaste': {};
+
+  'export:requestExportPath': { newPath: string };
 };
 
 export const eventBus = mitt<Events>();

@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { MenuListOption, showContextMenu } from '@sledge/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, onMount } from 'solid-js';
@@ -202,7 +203,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           width={'100%'}
           height={'100%'}
           fill='none'
-          stroke='black'
+          stroke={color.selectionBorder}
           stroke-width={1 / interactStore.zoom}
           vector-effect={'non-scaling-stroke'}
           style={{

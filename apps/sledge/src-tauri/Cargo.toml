@@ -1,9 +1,9 @@
 [package]
 name = "sledge"
 version = "0.1.0"
-description = "Simply destructive drawing tool."
+description = "Pixel-based drawing tool."
 authors = ["innsbluck"]
-license = ""
+license = "MIT"
 repository = "https://github.com/sledge-pdm/sledge"
 edition = "2024"
 rust-version = "1.89.0"

@@ -91,7 +91,7 @@ jobs:
         run: pnpm exec stylelint -c .stylelintrc.json "apps/sledge/src/**/*.css" || true
         # NOTE: Using || true so stylelint warnings (non-error) don't fail build; adjust if needed.
 
-      - name: Run unit tests (Vitest)
+      - name: Run Vitest
         run: pnpm test
 
       - name: Upload Vitest results (if any)

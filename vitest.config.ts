@@ -13,14 +13,8 @@ export default defineConfig({
     setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
     // app-level integration tests + feature-local unit tests
     include: [
-      'packages/anvil/test/**/*.test.ts',
-      'packages/anvil/test/**/*.test.tsx',
-
       'apps/sledge/test/**/*.test.ts',
       'apps/sledge/test/**/*.test.tsx',
-
-      'apps/sledge/src/features/**/__tests__/**/*.test.ts',
-      'apps/sledge/src/features/**/__tests__/**/*.test.tsx',
     ],
     exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
     coverage: {

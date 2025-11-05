@@ -9,7 +9,6 @@
     "wasm:build": "cd packages/wasm && pnpm --ignore-workspace i && wasm-pack build --target bundler",
     "tsc": "pnpm -r exec tsc --noEmit --skipLibCheck",
     "test": "vitest run -c vitest.config.ts",
-    "test:ui": "vitest -c vitest.config.ts",
     "prettier": "prettier --write . --config .prettierrc",
     "lint:css": "stylelint \"**/*.{css,scss}\" --config .stylelintrc.json",
     "cargo:format": "cd packages/wasm && cargo fmt && cd ../../apps/sledge/src-tauri && cargo fmt",
@@ -27,6 +26,6 @@
     "typescript": "^5.9.3",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.0.7"
   }
 }

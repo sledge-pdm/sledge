@@ -1,4 +1,6 @@
 import { FileLocation } from '@sledge/core';
+import { homeDir, pictureDir } from '@tauri-apps/api/path';
+import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { platform } from '@tauri-apps/plugin-os';
 
 export async function getFileUniqueId(path: string): Promise<string> {
@@ -25,6 +27,32 @@ export const pathToFileLocation = (fullPath: string): FileLocation | undefined =
     };
   }
 };
+
+export async function getDefaultProjectDir() {
+  const pf = platform();
+  if (pf === 'linux') {
+    const home = await homeDir();
+    const linuxPicDir = normalizeJoin(home, 'sledge');
+    if (!(await exists(linuxPicDir))) await mkdir(linuxPicDir, { recursive: true });
+    return linuxPicDir;
+  } else {
+    return await pictureDir();
+  }
+}
+
+export async function getDefaultPictureDir() {
+  const home = await homeDir();
+  const projectDir = normalizeJoin(home, 'sledge');
+  if (!(await exists(projectDir)))
+    await mkdir(projectDir, {
+      recursive: true,
+    });
+  return projectDir;
+}
+
+export async function getDefaultExportDir() {
+  return await getDefaultPictureDir();
+}
 
 export const getFileNameWithoutExtension = (fileName?: string): string => {
   if (!fileName) return '';

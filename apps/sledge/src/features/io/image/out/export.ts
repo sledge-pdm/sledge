@@ -1,5 +1,4 @@
 import { FileLocation } from '@sledge/core';
-import { pictureDir } from '@tauri-apps/api/path';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { convertToExtension, ExportableFileTypes } from '~/features/io/FileExtensions';
@@ -18,15 +17,6 @@ export interface CanvasExportOptions {
   quality?: number; // jpeg 時の品質 0～1, png のときは無視
   scale: number; // 1（そのまま）～10 など
 }
-
-export const defaultExportDir = async () => {
-  const dir = normalizeJoin(await pictureDir(), 'sledge');
-  if (!(await exists(dir))) {
-    await mkdir(dir, { recursive: true });
-  }
-
-  return dir;
-};
 
 const exporters = new Map<ExportableFileTypes, Exporter>([
   ['png', new PNGExporter()],

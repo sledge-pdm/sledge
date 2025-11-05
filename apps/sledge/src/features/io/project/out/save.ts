@@ -1,8 +1,7 @@
 import { FileLocation } from '@sledge/core';
-import { path } from '@tauri-apps/api';
 import { appDataDir } from '@tauri-apps/api/path';
 import { confirm, save } from '@tauri-apps/plugin-dialog';
-import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
+import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { calcThumbnailSize, ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
@@ -12,32 +11,11 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { getDefaultProjectDir, getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 
 async function folderSelection(location?: FileLocation) {
-  try {
-    await mkdir('sledge', {
-      baseDir: BaseDirectory.Home,
-      recursive: true,
-    });
-  } catch (e) {
-    console.warn('failed or skipped making new directory:', e);
-  }
-  const home = await path.homeDir();
-
   const nameWOExtension = location?.name ? getFileNameWithoutExtension(location?.name) : 'new project';
-  let defaultPath = '';
-  console.log('path', location?.path);
-  if (location?.path) {
-    // if path is provided, open the path as default
-    defaultPath = normalizeJoin(location?.path, `${nameWOExtension}`);
-  } else {
-    // if path is not defined
-    defaultPath = normalizeJoin(home, `sledge/${nameWOExtension}`);
-  }
-
-  console.log('default save path:', defaultPath);
-
+  const defaultPath = normalizeJoin(location?.path ?? (await getDefaultProjectDir()), `${nameWOExtension}.sledge`);
   return await save({
     title: 'save sledge project',
     defaultPath,

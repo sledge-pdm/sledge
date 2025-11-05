@@ -113,16 +113,14 @@ const WebGLCanvas: Component = () => {
   };
 
   return (
-    <>
-      <canvas
-        ref={(el) => (canvasEl = el!)}
-        style={{
-          position: 'absolute',
-          'image-rendering': imageRendering(),
-          'z-index': 'var(--zindex-webgl-canvas)',
-        }}
-      />
-    </>
+    <canvas
+      ref={(el) => (canvasEl = el!)}
+      style={{
+        position: 'absolute',
+        'image-rendering': imageRendering(),
+        'z-index': 'var(--zindex-webgl-canvas)',
+      }}
+    />
   );
 };
 

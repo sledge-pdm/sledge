@@ -38,11 +38,7 @@ pub fn brightness_contrast(
 
     // Convert percentage values to actual multipliers
     let brightness_offset = (options.brightness / 100.0) * 255.0;
-    let contrast_factor = if options.contrast >= 0.0 {
-        1.0 + (options.contrast / 100.0)
-    } else {
-        1.0 + (options.contrast / 100.0)
-    };
+    let contrast_factor = 1.0 + (options.contrast / 100.0);
 
     let pixel_count = (width * height) as usize;
 

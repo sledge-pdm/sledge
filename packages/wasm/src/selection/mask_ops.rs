@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::*;
 pub fn combine_masks_add(base_mask: &[u8], preview_mask: &[u8]) -> Vec<u8> {
     let mut result = base_mask.to_vec();
     for i in 0..result.len().min(preview_mask.len()) {
-        result[i] = result[i] | preview_mask[i];
+        result[i] |= preview_mask[i];
     }
     result
 }
@@ -15,7 +15,7 @@ pub fn combine_masks_add(base_mask: &[u8], preview_mask: &[u8]) -> Vec<u8> {
 pub fn combine_masks_subtract(base_mask: &[u8], preview_mask: &[u8]) -> Vec<u8> {
     let mut result = base_mask.to_vec();
     for i in 0..result.len().min(preview_mask.len()) {
-        result[i] = result[i] & (preview_mask[i] ^ 1);
+        result[i] &= preview_mask[i] ^ 1;
     }
     result
 }

@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+#[allow(clippy::too_many_arguments)]
 pub fn patch_buffer_rgba(
     // target
     target: &[u8],
@@ -40,10 +41,10 @@ pub fn patch_buffer_rgba(
                 continue;
             }
 
-            let px_r = patch[src_start] as u8;
-            let px_g = patch[src_start + 1] as u8;
-            let px_b = patch[src_start + 2] as u8;
-            let px_a = patch[src_start + 3] as u8;
+            let px_r = patch[src_start];
+            let px_g = patch[src_start + 1];
+            let px_b = patch[src_start + 2];
+            let px_a = patch[src_start + 3];
 
             if px_a == 0 {
                 continue;

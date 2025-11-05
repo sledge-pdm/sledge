@@ -19,7 +19,7 @@ pub fn fill_lasso_selection(
     let width = width as usize;
     let height = height as usize;
 
-    if points.len() < 6 || points.len() % 2 != 0 {
+    if points.len() < 6 || !points.len().is_multiple_of(2) {
         return false; // 最低3点必要
     }
 
@@ -71,7 +71,7 @@ pub fn fill_lasso_selection_with_mask(
     let width = width as usize;
     let height = height as usize;
 
-    if points.len() < 6 || points.len() % 2 != 0 {
+    if points.len() < 6 || !points.len().is_multiple_of(2) {
         return false;
     }
 
@@ -121,7 +121,7 @@ pub fn fill_lasso_selection_point_in_polygon(
     let width = width as usize;
     let height = height as usize;
 
-    if points.len() < 6 || points.len() % 2 != 0 {
+    if points.len() < 6 || !points.len().is_multiple_of(2) {
         return false;
     }
 
@@ -176,11 +176,9 @@ fn find_intersections(polygon: &[(f32, f32)], y: f32) -> Vec<f32> {
         let (x2, y2) = polygon[j];
 
         // 水平線との交点を計算
-        if (y1 <= y && y < y2) || (y2 <= y && y < y1) {
-            if (y2 - y1).abs() > f32::EPSILON {
-                let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
-                intersections.push(x);
-            }
+        if ((y1 <= y && y < y2) || (y2 <= y && y < y1)) && (y2 - y1).abs() > f32::EPSILON {
+            let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+            intersections.push(x);
         }
     }
 
@@ -200,12 +198,10 @@ fn find_intersections_with_direction(polygon: &[(f32, f32)], y: f32) -> Vec<(f32
         let (x2, y2) = polygon[j];
 
         // 水平線との交点を計算
-        if (y1 <= y && y < y2) || (y2 <= y && y < y1) {
-            if (y2 - y1).abs() > f32::EPSILON {
-                let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
-                let direction = if y2 > y1 { 1 } else { -1 };
-                intersections.push((x, direction));
-            }
+        if ((y1 <= y && y < y2) || (y2 <= y && y < y1)) && (y2 - y1).abs() > f32::EPSILON {
+            let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+            let direction = if y2 > y1 { 1 } else { -1 };
+            intersections.push((x, direction));
         }
     }
 

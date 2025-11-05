@@ -9,8 +9,8 @@ import {
   cancelMove,
   cancelSelection,
   commitMove,
+  convertSelectionToImage,
   deleteSelectedArea,
-  invertSelectionArea,
   isSelectionAvailable,
 } from '~/features/selection/SelectionOperator';
 import { eventBus, Events } from '~/utils/EventBus';
@@ -297,11 +297,11 @@ const MenuContent = () => {
         />
         <Divider />
         <Item
-          src='/icons/selection/invert_10.png'
-          onClick={() => {
-            invertSelectionArea();
+          src='/icons/selection/to_image_10.png'
+          onClick={async () => {
+            await convertSelectionToImage(true);
           }}
-          title='invert.'
+          title='copy to image.'
         />
         <Divider />
         <Item

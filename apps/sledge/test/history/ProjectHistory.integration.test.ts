@@ -33,11 +33,62 @@ describe('Project-level history integration', () => {
 
     const initialCanvas = { ...canvasStore.canvas };
     const targetCanvas = { width: initialCanvas.width + 10, height: initialCanvas.height - 20 };
+    // Create minimal WebP buffer for testing
+    const dummyWebpBuffer = new Uint8Array([
+      0x52,
+      0x49,
+      0x46,
+      0x46, // RIFF
+      0x28,
+      0x00,
+      0x00,
+      0x00, // file size
+      0x57,
+      0x45,
+      0x42,
+      0x50, // WEBP
+      0x56,
+      0x50,
+      0x38,
+      0x4c, // VP8L
+      0x1c,
+      0x00,
+      0x00,
+      0x00, // chunk size
+      0x2f,
+      0x0a,
+      0x00,
+      0x0a,
+      0x00,
+      0x88,
+      0x88,
+      0x08,
+      0x8c,
+      0x52,
+      0x87,
+      0x01,
+      0x87,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82,
+    ]);
+
     const entry: ImagePoolEntry = {
       id: 'int-fixed',
-      imagePath: 'C:/dummy.png',
+      originalPath: 'C:/dummy.png',
+      webpBuffer: dummyWebpBuffer,
       base: { width: 10, height: 10 },
-      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
+      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },
       opacity: 1,
       visible: true,
     };

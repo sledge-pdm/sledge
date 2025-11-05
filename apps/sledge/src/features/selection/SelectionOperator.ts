@@ -1,6 +1,9 @@
 import { Vec2 } from '@sledge/core';
-import { combine_masks_subtract } from '@sledge/wasm';
+import { combine_masks_subtract, slice_patch_rgba, trim_mask_with_box } from '@sledge/wasm';
+import { PackedDiffs } from 'node_modules/@sledge/anvil/src/types/patch/Patch';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
+import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
+import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 // import { getActiveAgent } from '~/features/layer/agent/LayerAgentManager'; // legacy (will be removed)
 import { getBufferPointer, getHeight as getLayerHeight, getWidth as getLayerWidth } from '~/features/layer/anvil/AnvilController';
@@ -10,6 +13,7 @@ import { getCurrentSelection, selectionManager } from '~/features/selection/Sele
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
+import { imagePoolStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
@@ -51,6 +55,13 @@ export function isDrawingAllowed(pos: Vec2, checkState?: boolean): boolean {
 
 export function getSelectionLimitMode(): SelectionLimitMode {
   return toolStore.selectionLimitMode;
+}
+
+export function isPositionWithinSelection(pos: Vec2) {
+  pos.x = Math.floor(pos.x);
+  pos.y = Math.floor(pos.y);
+
+  return selectionManager.isMaskOverlap(pos, true);
 }
 
 // 現在の状況からFloat状態を作成
@@ -118,20 +129,21 @@ export function cancelMove() {
   eventBus.emit('preview:requestUpdate', { layerId });
 }
 
-export function deleteSelectedArea(layerId?: string): boolean {
+export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): undefined | PackedDiffs {
   const selection = getCurrentSelection();
-  const lid = layerId ?? activeLayer().id;
+  const lid = props?.layerId ?? activeLayer().id;
   const anvil = getAnvilOf(lid);
-  if (!anvil) return false;
+  if (!anvil) return;
 
   const bBox = selection.getBoundBox();
-  if (!bBox) return false;
+  if (!bBox) return;
   const selectionBoundBox = {
     x: bBox.left,
     y: bBox.top,
     width: bBox.right - bBox.left + 1,
     height: bBox.bottom - bBox.top + 1,
   };
+
   anvil.addPartialDiff(selectionBoundBox, anvil.getPartialBuffer(selectionBoundBox));
 
   const canvasWidth = anvil.getWidth();
@@ -152,16 +164,17 @@ export function deleteSelectedArea(layerId?: string): boolean {
     }
   }
 
-  const diffs = anvil.flushDiffs();
-  if (diffs) {
-    const acc = new AnvilLayerHistoryAction({ layerId: lid, patch: diffs, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
-    projectHistoryController.addAction(acc);
-  }
-
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
   eventBus.emit('preview:requestUpdate', { layerId: lid });
 
-  return true;
+  const diffs = anvil.flushDiffs();
+  if (!props?.noAction) {
+    if (diffs) {
+      const acc = new AnvilLayerHistoryAction({ layerId: lid, patch: diffs, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
+      projectHistoryController.addAction(acc);
+    }
+  }
+  return diffs ?? undefined;
 }
 
 export function invertSelectionArea() {
@@ -190,4 +203,105 @@ export function invertSelectionArea() {
 
   eventBus.emit('selection:updateSelectionMenu', { immediate: true });
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
+}
+
+// Compute tight bounding box of 1s in a canvas-sized selection mask
+export const computeMaskBBox = (
+  mask: Uint8Array,
+  width: number,
+  height: number
+): { x: number; y: number; width: number; height: number } | undefined => {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < height; y++) {
+    const row = y * width;
+    for (let x = 0; x < width; x++) {
+      if (mask[row + x] === 1) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0 || maxY < 0) return undefined;
+  return { x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
+};
+
+export function getCurrentSelectionBuffer():
+  | {
+      buffer: Uint8Array;
+      bbox: { x: number; y: number; width: number; height: number };
+    }
+  | undefined {
+  const activeAnvil = getAnvilOf(activeLayer().id);
+  if (!activeAnvil) return;
+  const width = activeAnvil.getWidth();
+  const height = activeAnvil.getHeight();
+  selectionManager.commitOffset();
+  const mask = selectionManager.getCombinedMask();
+  const bbox = computeMaskBBox(mask, width, height);
+  if (!bbox) return;
+
+  const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
+  const selectionBuffer = slice_patch_rgba(
+    new Uint8Array(activeAnvil.getBufferCopy().buffer),
+    width,
+    height,
+    new Uint8Array(trimmedMask),
+    bbox.width,
+    bbox.height,
+    bbox.x,
+    bbox.y
+  );
+
+  return {
+    buffer: selectionBuffer,
+    bbox,
+  };
+}
+
+export async function convertSelectionToImage(deleteAfter?: boolean) {
+  const selectionData = getCurrentSelectionBuffer();
+  if (!selectionData) return;
+  const { buffer, bbox } = selectionData;
+
+  const oldEntries = imagePoolStore.entries.slice();
+
+  const entry = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
+  entry.transform.x = bbox.x;
+  entry.transform.y = bbox.y;
+  entry.transform.scaleX = 1;
+  entry.transform.scaleY = 1;
+
+  insertEntry(entry, true);
+  selectEntry(entry.id);
+
+  const newEntries = imagePoolStore.entries.slice();
+
+  let diffs: PackedDiffs | undefined = undefined;
+  if (deleteAfter) {
+    diffs = deleteSelectedArea({ noAction: true }) ?? undefined;
+  }
+  cancelSelection();
+
+  const action = new ConvertSelectionHistoryAction({
+    layerId: layerListStore.activeLayerId,
+    oldEntries,
+    newEntries,
+    patch: diffs,
+  });
+  projectHistoryController.addAction(action);
+
+  selectionManager.setState(isSelectionAvailable() ? 'selected' : 'idle');
+
+  eventBus.emit('selection:updateSelectionMenu', { immediate: true });
+  eventBus.emit('selection:updateSelectionPath', { immediate: true });
+
+  if (deleteAfter) {
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
+    eventBus.emit('preview:requestUpdate', { layerId: layerListStore.activeLayerId });
+  }
 }

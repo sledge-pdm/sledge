@@ -10,18 +10,6 @@ vi.mock('~/utils/EventBus', () => ({
   },
 }));
 
-// Mock bottom bar text function but keep other exports (e.g., DebugLogger)
-vi.mock('~/features/log/service', () => ({
-  setBottomBarText: vi.fn(),
-  DebugLogger: class {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    constructor(_label: string, _enabled: boolean) {}
-    debugLog() {}
-    debugWarn() {}
-    debugError() {}
-  },
-}));
-
 vi.mock('~/utils/VersionUtils', () => ({
   getCurrentVersion: vi.fn(async () => '0.1.0'),
 }));
@@ -41,11 +29,19 @@ vi.mock('@sledge/theme', () => ({
     { label: 'dark', value: 'dark' },
   ],
 }));
-
 // Mock WebGLRenderer consumer modules that import GLSL to avoid Vite parsing GLSL files in node tests
 vi.mock('~/webgl/WebGLRenderer', () => ({
   WebGLRenderer: class {
     constructor() {}
+  },
+}));
+
+vi.mock('~/features/log/DebugLogger', () => ({
+  DebugLogger: class {
+    constructor(_label: string, _enabled: boolean) {}
+    debugLog() {}
+    debugWarn() {}
+    debugError() {}
   },
 }));
 

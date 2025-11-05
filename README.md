@@ -14,7 +14,7 @@
 
 <br>
 
-<img src="https://github.com/sledge-pdm/sledge-assets/blob/0a516e7a70669d60c370e400b2b2e83e74eb6c07/0827sledge_dark.png?raw=true" alt="the visual of sledge." width=500 />
+<img src="https://github.com/sledge-pdm/sledge-assets/blob/main/readme_top.jpg?raw=true" alt="the visual of sledge." width=500 />
 
 
 </div>
@@ -58,6 +58,7 @@
 - [anvil](https://github.com/sledge-pdm/anvil) / image buffer operation
 - [WebGL2](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API) / layer blend & rendering
 - [mitt](https://github.com/developit/mitt) / eventbus
+- [iro.js](https://iro.js.org/) / color picker
 - [msgpackr](https://github.com/kriszyp/msgpackr/issues) / project file compression
 - [wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen)+[wasm-pack](https://github.com/drager/wasm-pack) / fast operations using Rust (e.g., flood fill)
 

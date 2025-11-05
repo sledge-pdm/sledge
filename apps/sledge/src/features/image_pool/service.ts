@@ -1,11 +1,13 @@
-import { transferToLayer } from '~/appliers/ImageTransferApplier';
-import { projectHistoryController } from '~/features/history';
+import { AntialiasMode, rawToWebp, transferBufferInstant, webpToRaw } from '@sledge/anvil';
+import { v4 } from 'uuid';
+import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
+import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
-import { loadLocalImage } from '~/utils/DataUtils';
-import { getFileUniqueId } from '~/utils/FileUtils';
+import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
+import { eventBus } from '~/utils/EventBus';
 
 export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
 
@@ -21,28 +23,17 @@ export function insertEntry(entry: ImagePoolEntry, noDiff?: boolean) {
         kind: 'add',
         oldEntries,
         newEntries: imagePoolStore.entries.slice(),
-        context: { from: 'ImagePoolController.removeEntry' },
+        context: { from: 'ImagePoolController.insertEntry' },
       })
     );
   }
 }
 
 export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>, noDiff?: boolean) {
-  // const oldEntries = imagePoolStore.entries.slice();
   let oldEntryIndex = imagePoolStore.entries.findIndex((e) => e.id === id);
   if (oldEntryIndex < 0) return;
 
   setImagePoolStore('entries', oldEntryIndex, patch);
-
-  // if (!noDiff) {
-  //   projectHistoryController.addAction(
-  //     new ImagePoolHistoryAction({
-  //       oldEntries,
-  //       newEntries: imagePoolStore.entries.slice(),
-  //       kind: 'edit',
-  //     })
-  //   );
-  // }
 }
 
 export function removeEntry(id: string, noDiff?: boolean) {
@@ -72,65 +63,99 @@ export function removeEntry(id: string, noDiff?: boolean) {
   }
 }
 
-export async function addToImagePool(imagePaths: string | string[]) {
-  const old = imagePoolStore.entries.slice();
+export async function addImagesFromLocal(imagePaths: string | string[]) {
   if (Array.isArray(imagePaths)) {
-    const entries: ImagePoolEntry[] = await Promise.all(imagePaths.map((p) => createEntry(p)));
+    await Promise.all(
+      imagePaths.map(async (p) => {
+        const entry = await createEntryFromLocalImage(p);
+        insertEntry(entry, false);
+      })
+    );
   } else {
-    const entry = await createEntry(imagePaths);
+    const entry = await createEntryFromLocalImage(imagePaths);
+    insertEntry(entry, false);
   }
-
-  projectHistoryController.addAction(
-    new ImagePoolHistoryAction({
-      kind: 'add',
-      oldEntries: old,
-      newEntries: imagePoolStore.entries.slice(),
-      context: { from: 'ImagePoolController.addToImagePool' },
-    })
-  );
 }
 
-export async function transferToCurrentLayer(id: string, removeAfter: boolean) {
+export async function addImagesFromRawBuffer(rawBuffer: Uint8ClampedArray, width: number, height: number) {
+  const entry = await createEntryFromRawBuffer(rawBuffer, width, height);
+  insertEntry(entry, false);
+}
+
+export async function transferToCurrentLayer(entryId: string, removeAfter: boolean) {
   const active = activeLayer();
   if (!active) return;
 
   try {
-    const current = getEntry(id);
-    if (!current) return;
-    await transferToLayer({
-      entry: {
-        transform: current.transform,
-        base: current.base,
-        imagePath: current.imagePath,
-      },
-      targetLayerId: active.id,
-    });
-    if (removeAfter) removeEntry(current.id); // ImagePool から削除
+    transferToLayer(active.id, entryId);
+    if (removeAfter) removeEntry(entryId); // ImagePool から削除
   } catch (e) {
     console.error(e);
   }
 }
 
-async function createEntry(imagePath: string) {
-  const id = await getFileUniqueId(imagePath);
+async function transferToLayer(layerId: string, entryId: string) {
+  const layerBuf = getBufferPointer(layerId);
+  const layerW = getWidth(layerId);
+  const layerH = getHeight(layerId);
+  const entry = getEntry(entryId);
+  if (!layerW || !layerH || !layerBuf || !entry) return;
 
-  const bitmap = await loadLocalImage(imagePath);
-  const width = bitmap.width;
-  const height = bitmap.height;
+  const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
 
-  bitmap.close();
+  registerWholeChange(layerId, layerBuf);
 
+  transferBufferInstant(new Uint8ClampedArray(rawEntryBuffer.buffer), entry.base.width, entry.base.height, layerBuf, layerW, layerH, {
+    offsetX: entry.transform.x,
+    offsetY: entry.transform.y,
+    scaleX: entry.transform.scaleX,
+    scaleY: entry.transform.scaleY,
+    rotate: entry.transform.rotation,
+    antialiasMode: AntialiasMode.Nearest,
+  });
+
+  const patch = flushPatch(layerId);
+  if (patch) {
+    projectHistoryController.addAction(
+      new AnvilLayerHistoryAction({
+        layerId,
+        patch,
+        context: { tool: 'image' },
+      })
+    );
+  }
+  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Image Transfer to Layer(${layerId})` });
+  eventBus.emit('preview:requestUpdate', { layerId });
+}
+
+async function createEntry(webpBuffer: Uint8Array, width: number, height: number) {
+  const id = v4();
   const initialScale = Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height);
   const entry: ImagePoolEntry = {
     id,
-    imagePath,
+    webpBuffer,
     base: { width, height },
-    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale },
+    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale, rotation: 0 },
     opacity: 1,
     visible: true,
   };
+  return entry;
+}
 
-  insertEntry(entry);
+export async function createEntryFromLocalImage(imagePath: string) {
+  const bitmap = await loadLocalImage(imagePath);
+  const width = bitmap.width;
+  const height = bitmap.height;
+  const imageData = await loadImageData(bitmap);
+  const webpBuffer = rawToWebp(imageData.data, width, height);
+  bitmap.close();
+  const entry = createEntry(webpBuffer, width, height);
+  return entry;
+}
+
+export async function createEntryFromRawBuffer(rawBuffer: Uint8Array | Uint8ClampedArray, width: number, height: number) {
+  const webpBuffer = rawToWebp(rawBuffer, width, height);
+  const entry = createEntry(webpBuffer, width, height);
   return entry;
 }
 

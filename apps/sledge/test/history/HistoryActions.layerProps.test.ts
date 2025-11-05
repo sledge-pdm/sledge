@@ -1,77 +1,63 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, it } from 'vitest';
 import { LayerPropsHistoryAction } from '~/features/history';
-import { BlendMode, Layer, LayerType } from '~/features/layer';
+import type { Layer } from '~/features/layer';
+import { BlendMode, LayerType } from '~/features/layer';
 import { setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import './mocks';
+import { createTestLayer, expect, getLayerFromStore, setupTestEnvironment, TEST_CONSTANTS, vi } from './utils';
 
 describe('LayerPropsHistoryAction', () => {
-  const layerId = 'layer-1';
-  const base: Layer = {
-    id: layerId,
-    name: 'L1',
-    type: LayerType.Dot,
-    typeDescription: 'dot layer.',
-    enabled: true,
-    opacity: 1,
-    mode: BlendMode.normal,
-    dotMagnification: 1,
-  };
+  const layerId = 'A';
+  const baseLayer = createTestLayer(layerId, 'Layer A');
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    setupTestEnvironment();
     // Spy on eventBus.emit
     vi.spyOn(eventBus, 'emit');
     // Seed store with a single layer
-    setLayerListStore('layers', [base]);
+    setLayerListStore('layers', [baseLayer]);
     setLayerListStore('activeLayerId', layerId);
   });
 
   it('redo applies new props, undo restores old props, and emits update', () => {
-    const oldProps: Omit<Layer, 'id'> = { ...base, id: undefined as any } as any;
+    const oldProps: Omit<Layer, 'id'> = { ...baseLayer, id: undefined as any } as any;
     const newProps: Omit<Layer, 'id'> = {
-      name: 'L1-renamed',
+      name: 'Layer A - Renamed',
       type: LayerType.Dot,
-      typeDescription: 'dot layer.',
+      typeDescription: 'dot',
       enabled: false,
       opacity: 0.5,
       mode: BlendMode.multiply,
       dotMagnification: 2,
     };
 
-    const action = new LayerPropsHistoryAction({ layerId, oldLayerProps: oldProps, newLayerProps: newProps, context: 'test' });
+    const action = new LayerPropsHistoryAction({
+      layerId,
+      oldLayerProps: oldProps,
+      newLayerProps: newProps,
+      context: TEST_CONSTANTS.CONTEXT,
+    });
 
     action.redo();
-    // name & flags updated
-    expect((global as any).layerListStore?.layers?.[0]?.name ?? undefined).toBeUndefined();
-    // We cannot read store directly via global; instead check via setLayerListStore closure effect
-    // So, re-read by mutating & capturing current value via setter
-    // Helper to read current layer snapshot using the setter
-    let afterRedo: Layer | undefined;
-    setLayerListStore((s: any) => {
-      afterRedo = s.layers[0];
-      return s;
-    });
+    const afterRedo = getLayerFromStore(0);
     expect(afterRedo).toBeDefined();
-    expect(afterRedo!.name).toBe('L1-renamed');
+    expect(afterRedo!.name).toBe('Layer A - Renamed');
     expect(afterRedo!.enabled).toBe(false);
     expect(afterRedo!.opacity).toBe(0.5);
     expect(afterRedo!.mode).toBe(BlendMode.multiply);
     expect(afterRedo!.dotMagnification).toBe(2);
 
     // event emitted
-    expect(eventBus.emit).toHaveBeenCalledWith('webgl:requestUpdate', { context: 'test', onlyDirty: false });
+    expect(eventBus.emit).toHaveBeenCalledWith('webgl:requestUpdate', { context: TEST_CONSTANTS.CONTEXT, onlyDirty: false });
 
     action.undo();
-    let afterUndo: Layer | undefined;
-    setLayerListStore((s: any) => {
-      afterUndo = s.layers[0];
-      return s;
-    });
-    expect(afterUndo!.name).toBe('L1');
+    const afterUndo = getLayerFromStore(0);
+    expect(afterUndo!.name).toBe('Layer A');
     expect(afterUndo!.enabled).toBe(true);
     expect(afterUndo!.opacity).toBe(1);
     expect(afterUndo!.mode).toBe(BlendMode.normal);
     expect(afterUndo!.dotMagnification).toBe(1);
-    expect(eventBus.emit).toHaveBeenCalledWith('webgl:requestUpdate', { context: 'test', onlyDirty: false });
+    expect(eventBus.emit).toHaveBeenCalledWith('webgl:requestUpdate', { context: TEST_CONSTANTS.CONTEXT, onlyDirty: false });
   });
 });

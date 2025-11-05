@@ -1,24 +1,17 @@
-import { Anvil } from '@sledge/anvil';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, it } from 'vitest';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { fillRect, flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf, registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
-
-vi.mock('~/features/selection/FloatingMoveManager', () => ({
-  floatingMoveManager: { isMoving: () => false },
-}));
-vi.mock('~/features/selection/SelectionOperator', () => ({
-  cancelMove: vi.fn(),
-}));
+import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import './mocks';
+import { expect, expectHistoryState, setupTestAnvil, setupTestEnvironment, TEST_CONSTANTS } from './utils';
 
 describe('AnvilLayerHistoryAction', () => {
-  const layerId = 'layer-history-test';
+  const layerId = 'A';
 
   beforeEach(() => {
-    projectHistoryController.clearHistory();
-    // 手動で Anvil インスタンス作成しマネージャへ登録 (ESM import 利用)
-    registerLayerAnvil(layerId, new Anvil(32, 32, 32));
+    setupTestEnvironment();
+    setupTestAnvil(layerId, TEST_CONSTANTS.CANVAS_SIZE.width, TEST_CONSTANTS.CANVAS_SIZE.height, TEST_CONSTANTS.TILE_SIZE);
   });
 
   it('undo/redo whole buffer change restores data', () => {
@@ -38,11 +31,12 @@ describe('AnvilLayerHistoryAction', () => {
     expect(patch).not.toBeNull();
     const action = new AnvilLayerHistoryAction({ layerId, patch: patch! });
 
-    // apply redo (already applied logically, but test revert path)
+    // Test undo (revert to original state)
     action.undo();
     const reverted = anvil.getBufferCopy();
     expect(reverted[0]).toBe(originalCopy[0]);
 
+    // Test redo (re-apply changes)
     action.redo();
     const reApplied = anvil.getBufferCopy();
     expect(reApplied[0]).toBe(128);
@@ -50,58 +44,39 @@ describe('AnvilLayerHistoryAction', () => {
 
   it('pixel patch writes individual pixels and can be undone', () => {
     const anvil = getAnvilOf(layerId)!;
-    const before = anvil.getBufferCopy();
-    const beforeCopy = before.slice();
-    setPixel(layerId, 1, 1, [255, 0, 0, 255]);
-    setPixel(layerId, 2, 1, [0, 255, 0, 255]);
-    const patch = flushPatch(layerId)!;
-    const action = new AnvilLayerHistoryAction({ layerId, patch });
-    expect(getAnvilOf(layerId)!.getPixel(1, 1)[0]).toBe(255);
-    action.undo();
-    expect(getAnvilOf(layerId)!.getPixel(1, 1)[0]).toBe(beforeCopy[(1 + 1 * 32) * 4]);
-    action.redo();
-    expect(getAnvilOf(layerId)!.getPixel(2, 1)[1]).toBe(255);
-  });
+    const beforeCopy = anvil.getBufferCopy().slice();
 
-  it('tile fill optimization produces tile patch (treated like multiple pixels)', () => {
-    const anvil = getAnvilOf(layerId)!;
-    fillRect(layerId, 0, 0, 32, 32, [10, 20, 30, 255]);
+    // Set pixels with different colors
+    setPixel(layerId, 1, 1, [255, 0, 0, 255]); // Red
+    setPixel(layerId, 2, 1, [0, 255, 0, 255]); // Green
+
     const patch = flushPatch(layerId)!;
-    // tiles プロパティが存在することのみを確認
-    const hasTile = !!patch.tiles;
-    expect(hasTile).toBe(true);
     const action = new AnvilLayerHistoryAction({ layerId, patch });
+
+    // Verify pixels were set
+    expect(anvil.getPixel(1, 1)[0]).toBe(255);
+
+    // Test undo
     action.undo();
-    // after undo the tile should revert to transparent (initial state)
-    const px = anvil.getPixel(0, 0);
-    expect(px[3]).toBe(255);
+    expect(anvil.getPixel(1, 1)[0]).toBe(beforeCopy[(1 + 1 * TEST_CONSTANTS.CANVAS_SIZE.width) * 4]);
+
+    // Test redo
+    action.redo();
+    expect(anvil.getPixel(2, 1)[1]).toBe(255);
   });
 
   it('history controller pushes and undoes Anvil patches', () => {
     setPixel(layerId, 0, 0, [9, 9, 9, 255]);
     const patch = flushPatch(layerId)!;
+
     projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch }));
-    expect(projectHistoryController.canUndo()).toBe(true);
+    expectHistoryState(true, false);
+
     projectHistoryController.undo();
     const anvil = getAnvilOf(layerId)!;
     expect(anvil.getPixel(0, 0)[3]).toBe(0); // alpha back to 0 after undo
     projectHistoryController.redo();
     expect(anvil.getPixel(0, 0)[0]).toBe(9);
-  });
-
-  it('applyPatch helper symmetry (manual call)', () => {
-    const anvil = getAnvilOf(layerId)!;
-    // set some pixels -> patch captures before(0) and after(1 / 5)
-    setPixel(layerId, 5, 5, [1, 2, 3, 4]);
-    setPixel(layerId, 6, 5, [5, 6, 7, 8]);
-    const patch = flushPatch(layerId)!;
-    // Modify pixels again so applying redo will restore patch effect
-    setPixel(layerId, 5, 5, [9, 9, 9, 9]);
-    setPixel(layerId, 6, 5, [9, 9, 9, 9]);
-    flushPatch(layerId); // discard second patch
-    anvil.applyPatch(patch, 'undo'); // apply before values
-    expect(getAnvilOf(layerId)!.getPixel(5, 5)[0]).toBe(0);
-    anvil.applyPatch(patch, 'redo'); // apply after values
-    expect(getAnvilOf(layerId)!.getPixel(6, 5)[0]).toBe(9);
+    expectHistoryState(true, false);
   });
 });

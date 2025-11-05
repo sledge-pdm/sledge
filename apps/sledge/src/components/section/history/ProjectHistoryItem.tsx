@@ -93,6 +93,10 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
         new: newHex,
       };
       break;
+    case 'convert_selection':
+      icon = '/icons/actions/image.png';
+      description = `convert selection to image`;
+      break;
     case 'layer_list':
       icon = '/icons/actions/layer.png';
       const llaction = action as LayerListHistoryAction;

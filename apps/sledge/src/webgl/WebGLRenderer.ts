@@ -4,7 +4,7 @@ import { Consts } from '~/Consts';
 import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
 import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { DebugLogger } from '~/features/log/service';
+import { DebugLogger } from '~/features/log/DebugLogger';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 import fragmentSrc from './shaders/blend.frag.glsl';

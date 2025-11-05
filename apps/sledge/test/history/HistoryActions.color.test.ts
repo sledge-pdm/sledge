@@ -1,22 +1,26 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { currentColor, PaletteType, selectPalette, setColor } from '~/features/color';
+import { beforeEach, describe, it } from 'vitest';
+import { currentColor, PaletteType } from '~/features/color';
 import { ColorHistoryAction } from '~/features/history';
+import './mocks';
+import { expect, setupTestEnvironment, TEST_CONSTANTS } from './utils';
 
 describe('ColorHistoryAction', () => {
   beforeEach(() => {
-    selectPalette(PaletteType.primary);
-    setColor(PaletteType.primary, '#000000');
+    setupTestEnvironment();
   });
+
   it('undo/redo applies palette color', () => {
-    const act = new ColorHistoryAction({
+    const action = new ColorHistoryAction({
       palette: PaletteType.primary,
       oldColor: [0, 0, 0, 255],
       newColor: [255, 0, 0, 255],
-      context: { from: 'test' },
+      context: { from: TEST_CONSTANTS.CONTEXT },
     });
-    act.redo();
+
+    action.redo();
     expect(currentColor()).toBe('#ff0000');
-    act.undo();
+
+    action.undo();
     expect(currentColor()).toBe('#000000');
   });
 });

@@ -1,5 +1,5 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { Component, onCleanup, onMount } from 'solid-js';
+import { Component, onMount } from 'solid-js';
 import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
@@ -13,7 +13,7 @@ import {
 } from '~/features/tools/ToolController';
 import { fileStore, interactStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { isKeyMatchesToEntry } from '../../features/config/KeyConfigController';
+import { isKeyMatchesToEntry } from '../config/KeyConfigController';
 
 const KeyListener: Component = () => {
   // Helper function to check if the active element is an input field
@@ -123,7 +123,6 @@ const KeyListener: Component = () => {
       unlistenUnfocusPipetteObserve();
     };
   });
-  onCleanup(() => {});
 
   return null;
 };

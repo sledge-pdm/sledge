@@ -1,4 +1,5 @@
 import { Vec2 } from '@sledge/core';
+import { showContextMenu } from '@sledge/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
@@ -6,12 +7,16 @@ import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { activeLayer } from '~/features/layer';
-import { DebugLogger, setBottomBarText } from '~/features/log/service';
+import { DebugLogger } from '~/features/log/DebugLogger';
+import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPositionWithinSelection } from '~/features/selection/SelectionOperator';
 import { getActiveToolCategory } from '~/features/tools/ToolController';
 import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
+import { eventBus } from '~/utils/EventBus';
 
 interface Props {
   operator: LayerCanvasOperator;
@@ -249,7 +254,57 @@ export const InteractCanvas: Component<Props> = (props) => {
       }}
       onContextMenu={(e) => {
         e.preventDefault();
-        e.stopImmediatePropagation();
+        const position = getCanvasMousePosition(e);
+
+        // selection
+        if (isPositionWithinSelection(position)) {
+          console.log('yeah');
+          showContextMenu(
+            'selection',
+            [
+              {
+                ...ContextMenuItems.BaseCopy,
+                onSelect: async () => {
+                  eventBus.emit('clipboard:doCopy', {});
+                },
+              },
+              {
+                ...ContextMenuItems.BaseCut,
+                onSelect: async () => {
+                  eventBus.emit('clipboard:doCut', {});
+                },
+              },
+              {
+                ...ContextMenuItems.BaseRemove,
+                onSelect: async () => {
+                  deleteSelectedArea();
+                },
+              },
+              {
+                ...ContextMenuItems.BaseInvertSelection,
+                onSelect: async () => {
+                  invertSelectionArea();
+                },
+              },
+              {
+                ...ContextMenuItems.BaseSelectionConvertToImage,
+                onSelect: async () => {
+                  await convertSelectionToImage(true);
+                },
+              },
+              {
+                ...ContextMenuItems.BaseSelectionCopyAsImage,
+                onSelect: async () => {
+                  await convertSelectionToImage(false);
+                },
+              },
+            ],
+            e
+          );
+          e.stopImmediatePropagation();
+        } else {
+          e.stopImmediatePropagation();
+        }
       }}
     />
   );

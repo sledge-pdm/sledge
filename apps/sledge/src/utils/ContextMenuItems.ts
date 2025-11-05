@@ -47,6 +47,16 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   },
   // BaseXxx = only label and icon. Use like: {...BaseXxx, onSelect: () => {} }
   // Registration for label+icon combinations only.
+  BaseCopy: {
+    type: 'item',
+    label: 'Copy',
+    icon: '/icons/context_menu/copy.png',
+  },
+  BaseCut: {
+    type: 'item',
+    label: 'Cut',
+    icon: '/icons/context_menu/cut.png',
+  },
   BaseRemove: {
     type: 'item',
     label: 'Remove',
@@ -87,4 +97,19 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
     label: 'Transfer and Remove',
     icon: '/icons/context_menu/transfer_and_remove.png',
   },
-};
+  BaseSelectionConvertToImage: {
+    type: 'item',
+    label: 'Convert to image',
+    icon: '/icons/context_menu/convert_to_image.png',
+  },
+  BaseSelectionCopyAsImage: {
+    type: 'item',
+    label: 'Copy as image',
+    icon: '/icons/context_menu/copy_as_image.png',
+  },
+  BaseInvertSelection: {
+    type: 'item',
+    label: 'Invert Selection',
+    icon: '/icons/context_menu/invert.png',
+  },
+} as const;

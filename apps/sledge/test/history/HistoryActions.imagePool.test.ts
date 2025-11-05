@@ -1,26 +1,32 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, it } from 'vitest';
 import { projectHistoryController } from '~/features/history';
-import { getEntry, ImagePoolEntry, insertEntry, removeEntry } from '~/features/image_pool';
+import { getEntry, insertEntry, removeEntry } from '~/features/image_pool';
+import './mocks';
+import { createTestEntry, expect, expectHistoryState, setupTestEnvironment } from './utils';
 
 describe('ImagePoolHistoryAction', () => {
+  beforeEach(() => {
+    setupTestEnvironment();
+  });
+
   it('undo/redo add/remove keeps id with insertEntry()', async () => {
-    const entry: ImagePoolEntry = {
-      id: 'fixed-id',
-      imagePath: 'C:/dummy.png',
-      base: { width: 10, height: 10 },
-      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
-      opacity: 1,
-      visible: true,
-    };
-    insertEntry(entry);
+    const entry = createTestEntry('entry-A', {
+      originalPath: 'C:/dummy.png',
+    });
+
+    insertEntry(entry, true);
     removeEntry(entry.id, false);
-    expect(getEntry('fixed-id')).toBeUndefined();
+    expect(getEntry('entry-A')).toBeUndefined();
+
+    expectHistoryState(true, false);
     projectHistoryController.undo();
-    expect(getEntry('fixed-id')).toBeDefined();
+    expect(getEntry('entry-A')).toBeDefined();
+
+    expectHistoryState(false, true);
     projectHistoryController.redo();
-    expect(getEntry('fixed-id')).toBeUndefined();
+    expect(getEntry('entry-A')).toBeUndefined();
 
     // cleanup
-    removeEntry('fixed-id');
+    removeEntry('entry-A');
   });
 });

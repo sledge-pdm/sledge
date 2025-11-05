@@ -68,7 +68,7 @@ pub fn gaussian_blur(pixels: &mut [u8], width: u32, height: u32, options: &Gauss
 
                         // 境界チェック - 画像内の有効なピクセルのみ処理
                         if px >= 0 && px < w && py >= 0 && py < h {
-                            let pixel_index = ((py * w + px) * 4 + c as i32) as usize;
+                            let pixel_index = ((py * w + px) * 4 + c) as usize;
                             let kernel_index = ((ky + 1) * 3 + (kx + 1)) as usize;
 
                             let weight = kernel[kernel_index];
@@ -78,7 +78,7 @@ pub fn gaussian_blur(pixels: &mut [u8], width: u32, height: u32, options: &Gauss
                     }
                 }
 
-                let result_index = ((y * w + x) * 4 + c as i32) as usize;
+                let result_index = ((y * w + x) * 4 + c) as usize;
                 if result_index < pixels.len() {
                     // 実際に使用した重みで正規化
                     pixels[result_index] = if weight_sum > 0.0 {

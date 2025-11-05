@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { SparkLine } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { DebugLogger } from '~/features/log/service';
+import { DebugLogger } from '~/features/log/DebugLogger';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const canvasDebugOverlayTopLeft = css`

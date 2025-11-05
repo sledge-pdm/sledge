@@ -119,10 +119,10 @@ pub fn dust_removal(pixels: &mut [u8], width: u32, height: u32, options: &DustRe
                     if remove_index + 3 < pixels.len() {
                         // Make pixel transparent
                         pixels[remove_index + 3] = 0; // Set alpha to 0
-                                                      // Optionally clear RGB channels too
-                                                      // pixels[remove_index] = 0;     // R
-                                                      // pixels[remove_index + 1] = 0; // G
-                                                      // pixels[remove_index + 2] = 0; // B
+                        // Optionally clear RGB channels too
+                        // pixels[remove_index] = 0;     // R
+                        // pixels[remove_index + 1] = 0; // G
+                        // pixels[remove_index + 2] = 0; // B
                     }
                 }
             }

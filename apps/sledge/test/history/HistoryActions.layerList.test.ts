@@ -1,78 +1,70 @@
-import { rawToWebp } from '@sledge/anvil';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, it } from 'vitest';
 import { LayerListHistoryAction } from '~/features/history';
-import type { Layer } from '~/features/layer';
-import * as layerModule from '~/features/layer';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-
-const { BlendMode, LayerType } = layerModule;
+import './mocks';
+import { createTestLayer, createWebpFromRaw, expectLayerOrder, setupTestEnvironment, TEST_CONSTANTS } from './utils';
 
 describe('LayerListHistoryAction', () => {
-  const l = (id: string, name = id): Layer => ({
-    id,
-    name,
-    type: LayerType.Dot,
-    typeDescription: 'dot',
-    enabled: true,
-    opacity: 1,
-    mode: BlendMode.normal,
-    dotMagnification: 1,
-  });
-
   beforeEach(() => {
-    vi.clearAllMocks();
-    setLayerListStore('layers', [l('A'), l('B'), l('C')]);
-    setLayerListStore('activeLayerId', 'A');
+    setupTestEnvironment();
   });
 
   it('redo add inserts snapshot at index; undo removes it', () => {
     const buf = new Uint8ClampedArray([1, 2, 3, 4]);
-    const snapshot = { layer: l('X'), image: { webpBuffer: rawToWebp(new Uint8Array(buf.buffer), 1, 1), width: 1, height: 1 } };
-    const a = new LayerListHistoryAction({
+    const snapshot = {
+      layer: createTestLayer('X'),
+      image: { webpBuffer: createWebpFromRaw(buf, 1, 1), width: 1, height: 1 },
+    };
+    const action = new LayerListHistoryAction({
       kind: 'add',
       index: 1,
       packedSnapshot: snapshot,
-      context: 'test',
+      context: TEST_CONSTANTS.CONTEXT,
     });
-    a.redo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'X', 'B', 'C']);
 
-    a.undo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'C']);
+    action.redo();
+    expectLayerOrder(['A', 'X', 'B', 'C']);
+
+    action.undo();
+    expectLayerOrder(['A', 'B', 'C']);
   });
 
   it('redo delete removes by id; undo re-inserts snapshot at index', () => {
-    const buf = new Uint8ClampedArray([1, 2, 3, 4]);
-    // use the actual layer object from the store so the delete action can match it
-    const snapshot = { layer: layerListStore.layers[1], image: { webpBuffer: rawToWebp(new Uint8Array(buf.buffer), 1, 1), width: 1, height: 1 } };
-    const a = new LayerListHistoryAction({
-      kind: 'delete',
-      index: 1,
-      packedSnapshot: snapshot,
-      context: 'test',
-    });
-    a.redo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'C']);
+    expectLayerOrder(['A', 'B', 'C']);
 
-    a.undo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(['A', 'B', 'B', 'C']);
+    const buf = new Uint8ClampedArray([1, 2, 3, 4]);
+    const snapshot = {
+      layer: createTestLayer('D'),
+      image: { webpBuffer: createWebpFromRaw(buf, 1, 1), width: 1, height: 1 },
+    };
+    const action = new LayerListHistoryAction({
+      kind: 'delete',
+      index: 3,
+      packedSnapshot: snapshot,
+      context: TEST_CONSTANTS.CONTEXT,
+    });
+
+    action.undo();
+    expectLayerOrder(['A', 'B', 'C', 'D']);
+
+    action.redo();
+    expectLayerOrder(['A', 'B', 'C']);
   });
 
   it('reorder applies afterOrder on redo and beforeOrder on undo', () => {
     const before = ['A', 'B', 'C'];
     const after = ['C', 'A', 'B'];
-    const a = new LayerListHistoryAction({
+    const action = new LayerListHistoryAction({
       kind: 'reorder',
       index: 0,
       beforeOrder: before,
       afterOrder: after,
-      context: 'test',
+      context: TEST_CONSTANTS.CONTEXT,
     });
 
-    a.redo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(after);
+    action.redo();
+    expectLayerOrder(after);
 
-    a.undo();
-    expect(layerListStore.layers.map((x) => x.id)).toEqual(before);
+    action.undo();
+    expectLayerOrder(before);
   });
 });

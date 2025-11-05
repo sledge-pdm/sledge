@@ -43,12 +43,6 @@ export function getPixel(layerId: string, x: number, y: number) {
   }
 }
 
-export function fillRect(layerId: string, x: number, y: number, w: number, h: number, rgba: [number, number, number, number]) {
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return;
-  anvil.fillRect(x, y, w, h, rgba);
-}
-
 export function flushPatch(layerId: string): PackedDiffs | null {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return null;

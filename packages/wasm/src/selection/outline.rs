@@ -52,6 +52,7 @@ pub fn mask_to_path(mask: &[u8], width: u32, height: u32, offset_x: f32, offset_
 /// 1. 境界セグメント抽出
 fn extract_boundary_segments(mask: &[u8], w: i32, h: i32) -> Vec<Segment> {
     use std::collections::HashMap;
+    use std::collections::hash_map::Entry::{Occupied, Vacant};
 
     let mut key_set: HashMap<String, Segment> = HashMap::new();
 
@@ -65,10 +66,13 @@ fn extract_boundary_segments(mask: &[u8], w: i32, h: i32) -> Vec<Segment> {
 
         let key = format!("{},{}-{},{}", p1.x, p1.y, p2.x, p2.y);
 
-        if key_set.contains_key(&key) {
-            key_set.remove(&key); // 重複なら内部→除去
-        } else {
-            key_set.insert(key, Segment { p1, p2 });
+        match key_set.entry(key) {
+            Occupied(e) => {
+                e.remove(); // 重複なら内部→除去
+            }
+            Vacant(e) => {
+                e.insert(Segment { p1, p2 });
+            }
         }
     };
 
@@ -129,10 +133,7 @@ fn merge_segments(segs: Vec<Segment>) -> Vec<Segment> {
     let mut horiz_groups: std::collections::HashMap<i32, Vec<Segment>> =
         std::collections::HashMap::new();
     for seg in horiz {
-        horiz_groups
-            .entry(seg.p1.y)
-            .or_insert_with(Vec::new)
-            .push(seg);
+        horiz_groups.entry(seg.p1.y).or_default().push(seg);
     }
 
     for mut group in horiz_groups.into_values() {
@@ -143,10 +144,7 @@ fn merge_segments(segs: Vec<Segment>) -> Vec<Segment> {
     let mut vert_groups: std::collections::HashMap<i32, Vec<Segment>> =
         std::collections::HashMap::new();
     for seg in vert {
-        vert_groups
-            .entry(seg.p1.x)
-            .or_insert_with(Vec::new)
-            .push(seg);
+        vert_groups.entry(seg.p1.x).or_default().push(seg);
     }
 
     for mut group in vert_groups.into_values() {
@@ -172,7 +170,7 @@ fn order_vertical(s: Segment) -> Segment {
     }
 }
 
-fn merge_line(list: &mut Vec<Segment>, is_horizontal: bool) -> Vec<Segment> {
+fn merge_line(list: &mut [Segment], is_horizontal: bool) -> Vec<Segment> {
     if list.is_empty() {
         return Vec::new();
     }
@@ -187,9 +185,7 @@ fn merge_line(list: &mut Vec<Segment>, is_horizontal: bool) -> Vec<Segment> {
     let mut result = Vec::new();
     let mut current = list[0].clone();
 
-    for i in 1..list.len() {
-        let seg = &list[i];
-
+    for seg in list.iter().skip(1) {
         let can_merge = if is_horizontal {
             current.p2.x >= seg.p1.x
         } else {
@@ -224,10 +220,7 @@ fn build_loops(segs: Vec<Segment>) -> Vec<Vec<Point>> {
     for seg in &segs {
         for pt in [seg.p1, seg.p2] {
             let key = format!("{},{}", pt.x, pt.y);
-            idx_by_pt
-                .entry(key)
-                .or_insert_with(Vec::new)
-                .push(seg.clone());
+            idx_by_pt.entry(key).or_default().push(seg.clone());
         }
     }
 

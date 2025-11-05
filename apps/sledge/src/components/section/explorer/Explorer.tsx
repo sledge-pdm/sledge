@@ -2,7 +2,6 @@ import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon, MenuList } from '@sledge/ui';
-import { pictureDir } from '@tauri-apps/api/path';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -11,7 +10,7 @@ import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
 import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
-import { normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { getDefaultPictureDir, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 
 interface Props {
   defaultPath?: string;
@@ -123,7 +122,7 @@ const Explorer: Component<Props> = (props) => {
 
   onMount(async () => {
     const openPath = fileStore.savedLocation.path ? normalizeJoin(fileStore.savedLocation.path) : undefined;
-    const defaultPath = props.defaultPath ?? openPath ?? (await pictureDir());
+    const defaultPath = props.defaultPath ?? openPath ?? (await getDefaultPictureDir());
     if (defaultPath) {
       setPath(defaultPath);
     }
@@ -136,9 +135,11 @@ const Explorer: Component<Props> = (props) => {
 
   createEffect(async () => {
     const path = currentPath();
+    console.log(path);
     if (path) {
       try {
         const entries = await readDir(path);
+        console.log(entries);
 
         // sort dir => file
         entries.sort((a, b) => {

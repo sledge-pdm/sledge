@@ -9,13 +9,13 @@ import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
-import { CanvasExportOptions, defaultExportDir, exportImage } from '~/features/io/image/out/export';
+import { CanvasExportOptions, exportImage } from '~/features/io/image/out/export';
 import { allLayers } from '~/features/layer';
 import { fileStore, lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
-import { getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { getDefaultExportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
 const qualityField = css`
@@ -182,7 +182,7 @@ const ExportContent: Component = () => {
     if (fileStore.savedLocation.path) {
       setSettings('folderPath', fileStore.savedLocation.path);
     } else {
-      setSettings('folderPath', await defaultExportDir());
+      setSettings('folderPath', await getDefaultExportDir());
     }
 
     const handleRequestExportPath = (e: Events['export:requestExportPath']) => {

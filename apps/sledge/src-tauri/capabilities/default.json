@@ -17,6 +17,8 @@
     "fs:allow-open",
     "fs:allow-write",
     "fs:allow-write-file",
+    "fs:allow-applocaldata-write-recursive",
+    "fs:allow-applocaldata-read-recursive",
     "fs:allow-app-read",
     "fs:allow-app-write",
     "fs:allow-read",

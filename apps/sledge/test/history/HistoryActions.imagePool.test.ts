@@ -14,7 +14,7 @@ describe('ImagePoolHistoryAction', () => {
       originalPath: 'C:/dummy.png',
     });
 
-    insertEntry(entry, true); 
+    insertEntry(entry, true);
     removeEntry(entry.id, false);
     expect(getEntry('entry-A')).toBeUndefined();
 

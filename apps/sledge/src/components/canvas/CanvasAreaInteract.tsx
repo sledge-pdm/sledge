@@ -2,13 +2,13 @@ import { Vec2 } from '@sledge/core';
 import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
+import { DebugLogger } from '~/features/log/DebugLogger';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { WindowPos } from '~/types/CoordinateTypes';
 import { isMacOS } from '~/utils/OSUtils';
 import TouchRotationSnapper from './TouchRotationSnapper';
-import { DebugLogger } from '~/features/log/DebugLogger';
 
 const LOG_LABEL = 'CanvasAreaInteract';
 const logger = new DebugLogger(LOG_LABEL, false);

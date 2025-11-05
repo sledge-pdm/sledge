@@ -42,14 +42,46 @@ export function createTestLayers(count: number): Layer[] {
 // Dummy WebP buffer creation
 export function createDummyWebpBuffer(customData?: number[]): Uint8Array {
   const defaultData = [
-    0x52, 0x49, 0x46, 0x46, // RIFF
-    0x20, 0x00, 0x00, 0x00, // file size
-    0x57, 0x45, 0x42, 0x50, // WEBP
-    0x56, 0x50, 0x38, 0x20, // VP8
-    0x14, 0x00, 0x00, 0x00, // chunk size
-    0x30, 0x01, 0x00, 0x9d, 0x01, 0x2a, 0x0a, 0x00,
-    0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
+    0x52,
+    0x49,
+    0x46,
+    0x46, // RIFF
+    0x20,
+    0x00,
+    0x00,
+    0x00, // file size
+    0x57,
+    0x45,
+    0x42,
+    0x50, // WEBP
+    0x56,
+    0x50,
+    0x38,
+    0x20, // VP8
+    0x14,
+    0x00,
+    0x00,
+    0x00, // chunk size
+    0x30,
+    0x01,
+    0x00,
+    0x9d,
+    0x01,
+    0x2a,
+    0x0a,
+    0x00,
+    0x0a,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
   ];
   return new Uint8Array(customData ?? defaultData);
 }
@@ -60,22 +92,18 @@ export function createWebpFromRaw(rawData: Uint8ClampedArray, width: number, hei
 }
 
 // ImagePoolEntry creation utilities
-export function createTestEntry(id: string, options?: {
-  width?: number;
-  height?: number;
-  x?: number;
-  y?: number;
-  webpBuffer?: Uint8Array;
-  originalPath?: string;
-}): ImagePoolEntry {
-  const {
-    width = 10,
-    height = 10,
-    x = 0,
-    y = 0,
-    webpBuffer = createDummyWebpBuffer(),
-    originalPath,
-  } = options ?? {};
+export function createTestEntry(
+  id: string,
+  options?: {
+    width?: number;
+    height?: number;
+    x?: number;
+    y?: number;
+    webpBuffer?: Uint8Array;
+    originalPath?: string;
+  }
+): ImagePoolEntry {
+  const { width = 10, height = 10, x = 0, y = 0, webpBuffer = createDummyWebpBuffer(), originalPath } = options ?? {};
 
   return {
     id,
@@ -111,14 +139,14 @@ export function setupBasicStores(): void {
   const layers = createTestLayers(3); // A, B, C
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', 'A');
-  
+
   // Reset image pool
   setImagePoolStore('entries', []);
   setImagePoolStore('selectedEntryId', undefined);
-  
+
   // Reset canvas
   setCanvasStore('canvas', TEST_CONSTANTS.CANVAS_SIZE);
-  
+
   // Reset color
   selectPalette(PaletteType.primary);
   setColor(PaletteType.primary, '#000000');
@@ -156,7 +184,7 @@ export function getAllLayersFromStore(): Layer[] {
 }
 
 export function getLayerIdsFromStore(): string[] {
-  return getAllLayersFromStore().map(l => l.id);
+  return getAllLayersFromStore().map((l) => l.id);
 }
 
 // Mock setup utilities
@@ -173,7 +201,7 @@ export function setupCommonMocks(): void {
 // Mock configurations that can be imported
 export const COMMON_MOCKS = {
   FloatingMoveManager: {
-    floatingMoveManager: { 
+    floatingMoveManager: {
       isMoving: () => false,
       cancel: vi.fn(),
     },

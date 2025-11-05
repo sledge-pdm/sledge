@@ -7,10 +7,10 @@ import {
   LayerMergeHistoryAction,
   LayerPropsHistoryAction,
 } from '~/features/history/actions';
+import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { globalConfig } from '~/stores/GlobalStores';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
-import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 
 export class ProjectHistoryController {
   private undoStack: BaseHistoryAction[] = [];

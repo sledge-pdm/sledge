@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 /// - `mask_offset_x/y`: where to sample from the source for mask(0,0)
 /// Returns an RGBA buffer sized `source_width * source_height * 4`, where selected pixels are fully transparent.
 #[wasm_bindgen]
+#[allow(clippy::too_many_arguments)]
 pub fn crop_patch_rgba(
     // source
     source: &[u8],

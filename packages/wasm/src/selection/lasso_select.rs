@@ -176,11 +176,9 @@ fn find_intersections(polygon: &[(f32, f32)], y: f32) -> Vec<f32> {
         let (x2, y2) = polygon[j];
 
         // 水平線との交点を計算
-        if (y1 <= y && y < y2) || (y2 <= y && y < y1) {
-            if (y2 - y1).abs() > f32::EPSILON {
-                let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
-                intersections.push(x);
-            }
+        if ((y1 <= y && y < y2) || (y2 <= y && y < y1)) && (y2 - y1).abs() > f32::EPSILON {
+            let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+            intersections.push(x);
         }
     }
 
@@ -200,12 +198,10 @@ fn find_intersections_with_direction(polygon: &[(f32, f32)], y: f32) -> Vec<(f32
         let (x2, y2) = polygon[j];
 
         // 水平線との交点を計算
-        if (y1 <= y && y < y2) || (y2 <= y && y < y1) {
-            if (y2 - y1).abs() > f32::EPSILON {
-                let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
-                let direction = if y2 > y1 { 1 } else { -1 };
-                intersections.push((x, direction));
-            }
+        if ((y1 <= y && y < y2) || (y2 <= y && y < y1)) && (y2 - y1).abs() > f32::EPSILON {
+            let x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+            let direction = if y2 > y1 { 1 } else { -1 };
+            intersections.push((x, direction));
         }
     }
 

@@ -30,6 +30,6 @@ pub fn grayscale(pixels: &mut [u8], width: u32, height: u32) {
         pixels[base_index] = gray_value; // R
         pixels[base_index + 1] = gray_value; // G
         pixels[base_index + 2] = gray_value; // B
-                                             // アルファチャンネル（pixels[base_index + 3]）はそのまま
+        // アルファチャンネル（pixels[base_index + 3]）はそのまま
     }
 }

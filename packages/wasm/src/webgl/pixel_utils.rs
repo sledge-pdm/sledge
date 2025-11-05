@@ -52,9 +52,7 @@ pub fn extract_tile_buffer(
             tile_buffer.extend_from_slice(&source_buffer[source_row_start..source_row_end]);
         } else {
             // バッファ範囲外の場合は透明ピクセル（0,0,0,0）で埋める
-            for _ in 0..(tile_width * bytes_per_pixel) {
-                tile_buffer.push(0);
-            }
+            tile_buffer.extend(std::iter::repeat_n(0, tile_width * bytes_per_pixel));
         }
     }
 

@@ -19,7 +19,7 @@ pub fn fill_lasso_selection(
     let width = width as usize;
     let height = height as usize;
 
-    if points.len() < 6 || points.len() % 2 != 0 {
+    if points.len() < 6 || !points.len().is_multiple_of(2) {
         return false; // 最低3点必要
     }
 
@@ -71,7 +71,7 @@ pub fn fill_lasso_selection_with_mask(
     let width = width as usize;
     let height = height as usize;
 
-    if points.len() < 6 || points.len() % 2 != 0 {
+    if points.len() < 6 || !points.len().is_multiple_of(2) {
         return false;
     }
 
@@ -121,7 +121,7 @@ pub fn fill_lasso_selection_point_in_polygon(
     let width = width as usize;
     let height = height as usize;
 
-    if points.len() < 6 || points.len() % 2 != 0 {
+    if points.len() < 6 || !points.len().is_multiple_of(2) {
         return false;
     }
 

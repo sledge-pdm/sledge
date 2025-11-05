@@ -305,8 +305,8 @@ const CanvasOverlaySVG: Component = () => {
                 stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}
                 stroke-width='1'
                 vector-effect='non-scaling-stroke'
-                stroke-dasharray={`${borderDash} ${borderDash}`}
                 pointer-events='none'
+                stroke-dasharray={`${borderDash} ${borderDash}`}
                 class='marching-ants-animation'
               />
             </Show>

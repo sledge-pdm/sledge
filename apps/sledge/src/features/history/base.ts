@@ -2,8 +2,8 @@
 export type HistoryActionTypes =
   | 'canvas_size'
   | 'color'
+  | 'convert_selection'
   | 'image_pool'
-  | 'image_pool_entry_props'
   | 'layer_buffer'
   | 'layer_list'
   | 'layer_merge'

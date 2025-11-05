@@ -10,6 +10,7 @@ import {
 import { globalConfig } from '~/stores/GlobalStores';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
+import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 
 export class ProjectHistoryController {
   private undoStack: BaseHistoryAction[] = [];
@@ -55,6 +56,8 @@ export class ProjectHistoryController {
           return new CanvasSizeHistoryAction(serialized.props as any);
         case 'color':
           return new ColorHistoryAction(serialized.props as any);
+        case 'convert_selection':
+          return new ConvertSelectionHistoryAction(serialized.props as any);
         case 'image_pool':
           return new ImagePoolHistoryAction(serialized.props as any);
         case 'layer_buffer':

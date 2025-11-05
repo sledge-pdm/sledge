@@ -4,6 +4,9 @@ export type { ImagePoolEntry } from './model';
 
 export {
   addImagesFromLocal,
+  addImagesFromRawBuffer,
+  createEntryFromLocalImage,
+  createEntryFromRawBuffer,
   getEntry,
   hideEntry,
   insertEntry,

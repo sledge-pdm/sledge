@@ -142,7 +142,7 @@ async function createEntry(webpBuffer: Uint8Array, width: number, height: number
   return entry;
 }
 
-async function createEntryFromLocalImage(imagePath: string) {
+export async function createEntryFromLocalImage(imagePath: string) {
   const bitmap = await loadLocalImage(imagePath);
   const width = bitmap.width;
   const height = bitmap.height;
@@ -153,7 +153,7 @@ async function createEntryFromLocalImage(imagePath: string) {
   return entry;
 }
 
-async function createEntryFromRawBuffer(rawBuffer: Uint8ClampedArray, width: number, height: number) {
+export async function createEntryFromRawBuffer(rawBuffer: Uint8Array | Uint8ClampedArray, width: number, height: number) {
   const webpBuffer = rawToWebp(rawBuffer, width, height);
   const entry = createEntry(webpBuffer, width, height);
   return entry;

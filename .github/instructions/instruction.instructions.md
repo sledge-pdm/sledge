@@ -54,7 +54,10 @@ Instead, use more direct expressions like "return undefined when values are not 
 naming "safeXXX" for functions or values. It's also subjective and just increases the number of values to handle.
 Instead, consider assignning fallback-ed value for original value(e.g. "XXX").
 
-In case of testing, ALWAYS USE `pnpm test` in project root. that's it. PLEASE don't mess up with commands.
+### Commands
+
+* In case of testing, ALWAYS use `pnpm test` in project root.
+* Use semicolon(;) as the separator of commands.
 
 ## Branch Strategy
 

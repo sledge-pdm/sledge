@@ -22,11 +22,6 @@ const canvasStack = css`
 
 export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);
 
-/**
- * 簡略化されたCanvasStack
- * - 独自のtransform処理を廃止
- * - 純粋にキャンバスコンテンツのコンテナとして機能
- */
 const CanvasStack: Component = () => {
   const [gridSize, setGridSize] = createSignal(10);
 

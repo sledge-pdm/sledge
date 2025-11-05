@@ -7,11 +7,6 @@ on:
       - '**/*.md'
       - 'LICENSE'
       - 'assets/**'
-  pull_request:
-    paths-ignore:
-      - '**/*.md'
-      - 'LICENSE'
-      - 'assets/**'
   workflow_dispatch: {}
 
 concurrency:

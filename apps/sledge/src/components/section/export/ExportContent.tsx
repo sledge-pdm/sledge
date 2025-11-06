@@ -1,13 +1,13 @@
 import { css } from '@acab/ecsstatic';
 import { clsx, Vec2 } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, Slider } from '@sledge/ui';
+import { color, fonts } from '@sledge/theme';
+import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Slider } from '@sledge/ui';
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { saveGlobalSettings } from '~/features/io/config/save';
+import { saveEditorState } from '~/features/io/editor/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { CanvasExportOptions, exportImage } from '~/features/io/image/out/export';
 import { allLayers } from '~/features/layer';
@@ -220,10 +220,10 @@ const ExportContent: Component = () => {
     if (settings.folderPath) {
       const location = await exportImage(settings.folderPath, name, settings.exportOptions);
       if (location && location.path && location.name) {
-        const exportedPath = normalizeJoin(location.path, location.name);
+        const exportedFolderPath = normalizePath(location.path);
         setLastSettingsStore('exportedFolderPaths', (prev) => {
-          prev = [exportedPath, ...prev.filter((p) => p !== exportedPath)];
-          if (prev.length >= 30) prev.unshift();
+          prev = [exportedFolderPath, ...prev.filter((p) => p !== exportedFolderPath)];
+          if (prev.length >= 10) prev.unshift();
           return prev;
         });
 
@@ -234,7 +234,7 @@ const ExportContent: Component = () => {
     }
 
     setLastSettingsStore('exportSettings', settings);
-    await saveGlobalSettings(true);
+    await saveEditorState();
   };
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
@@ -244,9 +244,20 @@ const ExportContent: Component = () => {
   const [menuAnchor, setMenuAnchor] = createSignal<Vec2>({ x: 0, y: 0 });
 
   createEffect(() => {
-    const menuShown = lastExportDirsMenuShown();
+    lastExportDirsMenuShown();
     const rect = menuButtonContainerRef.getBoundingClientRect();
     setMenuAnchor({ x: rect.right, y: rect.bottom });
+  });
+
+  const exportedFoldersOptions: MenuListOption[] = lastSettingsStore.exportedFolderPaths.map((path: string) => {
+    return {
+      type: 'item',
+      label: normalizePath(path) + '/',
+      onSelect: () => {
+        setSettings('folderPath', normalizePath(path));
+        setLastExportDirsMenuShown(false);
+      },
+    };
   });
 
   return (
@@ -305,16 +316,20 @@ const ExportContent: Component = () => {
               </div>
               <Show when={lastExportDirsMenuShown()}>
                 <MenuList
-                  options={lastSettingsStore.exportedFolderPaths.map((path: string) => {
-                    return {
+                  options={[
+                    ...exportedFoldersOptions,
+                    {
                       type: 'item',
-                      label: normalizePath(path),
-                      onSelect: () => {
-                        setSettings('folderPath', normalizePath(path));
+                      label: 'clear.',
+                      color: color.muted,
+                      fontFamily: fonts.ZFB03,
+                      onSelect: async () => {
+                        setLastSettingsStore('exportedFolderPaths', []);
+                        await saveEditorState();
                         setLastExportDirsMenuShown(false);
                       },
-                    };
-                  })}
+                    },
+                  ]}
                   onClose={() => setLastExportDirsMenuShown(false)}
                   align='right'
                   style={{

@@ -2,11 +2,13 @@ import { css } from '@acab/ecsstatic';
 import { color, fonts } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { confirm } from '@tauri-apps/plugin-dialog';
 import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
-import { createNew, openExistingProject, openProject } from '~/features/io/window';
+import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
+import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
 import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
@@ -125,6 +127,22 @@ const TopMenuBar: Component = () => {
           label: '> open project.',
           onSelect: () => {
             openProject();
+          },
+        },
+        {
+          type: 'item',
+          label: '> from clipboard.',
+          onSelect: async () => {
+            // clipboard data will loaded in new window, but ensure there's data
+            const ensureData = await tryGetImageFromClipboard();
+            if (!ensureData) {
+              const confirmed = await confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
+                title: 'Open from clipboard',
+              });
+              if (!confirmed) return;
+            }
+
+            openFromClipboard();
           },
         },
         ...(fileStore.recentFiles.length > 0

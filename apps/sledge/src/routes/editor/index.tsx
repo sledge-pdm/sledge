@@ -9,7 +9,7 @@ import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit } from '~/features/canvas';
 import { addImagesFromLocal } from '~/features/image_pool';
-import ClipboardListener from '~/features/io/ClipboardListener';
+import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { loadEditorState } from '~/features/io/editor/load';
 import { importableFileExtensions } from '~/features/io/FileExtensions';

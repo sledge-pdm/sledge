@@ -63,22 +63,22 @@ export function removeEntry(id: string, noDiff?: boolean) {
   }
 }
 
-export async function addImagesFromLocal(imagePaths: string | string[]) {
+export async function addImagesFromLocal(imagePaths: string | string[], fit?: boolean) {
   if (Array.isArray(imagePaths)) {
     await Promise.all(
       imagePaths.map(async (p) => {
-        const entry = await createEntryFromLocalImage(p);
+        const entry = await createEntryFromLocalImage(p, fit);
         insertEntry(entry, false);
       })
     );
   } else {
-    const entry = await createEntryFromLocalImage(imagePaths);
+    const entry = await createEntryFromLocalImage(imagePaths, fit);
     insertEntry(entry, false);
   }
 }
 
-export async function addImagesFromRawBuffer(rawBuffer: Uint8ClampedArray, width: number, height: number) {
-  const entry = await createEntryFromRawBuffer(rawBuffer, width, height);
+export async function addImagesFromRawBuffer(rawBuffer: Uint8ClampedArray, width: number, height: number, fit?: boolean) {
+  const entry = await createEntryFromRawBuffer(rawBuffer, width, height, fit);
   insertEntry(entry, false);
 }
 
@@ -128,9 +128,9 @@ async function transferToLayer(layerId: string, entryId: string) {
   eventBus.emit('preview:requestUpdate', { layerId });
 }
 
-async function createEntry(webpBuffer: Uint8Array, width: number, height: number) {
+async function createEntry(webpBuffer: Uint8Array, width: number, height: number, fit?: boolean) {
   const id = v4();
-  const initialScale = Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height);
+  const initialScale = fit ? Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height) : 1;
   const entry: ImagePoolEntry = {
     id,
     webpBuffer,
@@ -142,20 +142,20 @@ async function createEntry(webpBuffer: Uint8Array, width: number, height: number
   return entry;
 }
 
-export async function createEntryFromLocalImage(imagePath: string) {
+export async function createEntryFromLocalImage(imagePath: string, fit?: boolean) {
   const bitmap = await loadLocalImage(imagePath);
   const width = bitmap.width;
   const height = bitmap.height;
   const imageData = await loadImageData(bitmap);
   const webpBuffer = rawToWebp(imageData.data, width, height);
   bitmap.close();
-  const entry = createEntry(webpBuffer, width, height);
+  const entry = createEntry(webpBuffer, width, height, fit);
   return entry;
 }
 
-export async function createEntryFromRawBuffer(rawBuffer: Uint8Array | Uint8ClampedArray, width: number, height: number) {
+export async function createEntryFromRawBuffer(rawBuffer: Uint8Array | Uint8ClampedArray, width: number, height: number, fit?: boolean) {
   const webpBuffer = rawToWebp(rawBuffer, width, height);
-  const entry = createEntry(webpBuffer, width, height);
+  const entry = createEntry(webpBuffer, width, height, fit);
   return entry;
 }
 

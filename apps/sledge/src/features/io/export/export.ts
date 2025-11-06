@@ -1,13 +1,13 @@
 import { FileLocation } from '@sledge/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
+import { Exporter } from '~/features/io/export/exporter/Exporter';
+import { JPEGExporter } from '~/features/io/export/exporter/JPEGExporter';
+import { LosslessWebPExporter } from '~/features/io/export/exporter/LosslessWebPExporter';
+import { LossyWebPExporter } from '~/features/io/export/exporter/LossyWebPExporter';
+import { PNGExporter } from '~/features/io/export/exporter/PNGExporter';
+import { SVGExporter } from '~/features/io/export/exporter/SVGExporter';
 import { convertToExtension, ExportableFileTypes } from '~/features/io/FileExtensions';
-import { Exporter } from '~/features/io/image/out/exporter/Exporter';
-import { JPEGExporter } from '~/features/io/image/out/exporter/JPEGExporter';
-import { LosslessWebPExporter } from '~/features/io/image/out/exporter/LosslessWebPExporter';
-import { LossyWebPExporter } from '~/features/io/image/out/exporter/LossyWebPExporter';
-import { PNGExporter } from '~/features/io/image/out/exporter/PNGExporter';
-import { SVGExporter } from '~/features/io/image/out/exporter/SVGExporter';
 import { allLayers } from '~/features/layer';
 import { normalizeJoin } from '~/utils/FileUtils';
 

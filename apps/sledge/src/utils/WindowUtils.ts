@@ -51,6 +51,12 @@ export const getNewProjectSearchParams = (): string => {
   return sp.toString();
 };
 
+export const getProjectFromClipboardSearchParams = (): string => {
+  const sp = new URLSearchParams();
+  sp.append('clipboard', 'true');
+  return sp.toString();
+};
+
 export function getOpenLocation(): FileLocation | undefined {
   // @ts-ignore
   const openPath = window.__PATH__;
@@ -68,6 +74,11 @@ export function getNewProjectQuery(): {
     width: sp.get('width') ? Number(sp.get('width')) : undefined,
     height: sp.get('height') ? Number(sp.get('height')) : undefined,
   };
+}
+
+export function getFromClipboardQuery(): boolean {
+  const sp = new URLSearchParams(window.location.search);
+  return !!sp.get('clipboard');
 }
 
 export function isFirstStartup(): boolean {

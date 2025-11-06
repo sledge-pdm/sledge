@@ -59,6 +59,9 @@
     "os:default",
     "process:default",
     "updater:default",
-    "log:default"
+    "log:default",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-read-image",
+    "clipboard-manager:allow-write-image"
   ]
 }

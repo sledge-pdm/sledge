@@ -9,7 +9,6 @@ import { Component, createEffect, createMemo, createSignal, onMount, Show } from
 import { createStore } from 'solid-js/store';
 import { saveEditorState } from '~/features/io/editor/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
-import { CanvasExportOptions, exportImage } from '~/features/io/image/out/export';
 import { allLayers } from '~/features/layer';
 import { fileStore, lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -17,6 +16,7 @@ import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
 import { getDefaultExportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
+import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 
 const qualityField = css`
   display: flex;

@@ -1,0 +1,33 @@
+import { readImage } from '@tauri-apps/plugin-clipboard-manager';
+
+// Helper function to check if the active element is an input field
+export function isInputFocused() {
+  const activeElement = document.activeElement;
+  if (!activeElement) return false;
+
+  const tagName = activeElement.tagName.toLowerCase();
+  const isContentEditable = activeElement.getAttribute('contenteditable') === 'true';
+
+  return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isContentEditable;
+}
+
+export async function tryGetImageFromClipboard(): Promise<
+  | {
+      imageBuf: Uint8Array;
+      width: number;
+      height: number;
+    }
+  | undefined
+> {
+  try {
+    const clipboardImage = await readImage();
+    const imageBuf = await clipboardImage.rgba();
+    const size = await clipboardImage.size();
+    // imageBuf is stored in JS heap so we can release original resource data
+    clipboardImage.close();
+    return { imageBuf, width: size.width, height: size.height };
+  } catch (e) {
+    console.error(`failed to get image from clipboard: ${e}`);
+    return undefined;
+  }
+}

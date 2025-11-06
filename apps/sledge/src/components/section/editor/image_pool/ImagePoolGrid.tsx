@@ -41,8 +41,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
                 showEntry(entry.id);
               },
             };
-        const filename = entry.originalPath && pathToFileLocation(entry.originalPath)?.name;
-        let label = filename ?? '[ unknown ]';
+        let label = entry.descriptionName ?? '[ unknown ]';
         if (!props.entry.visible) label += ' (hidden)';
         showContextMenu(
           [
@@ -78,8 +77,8 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
           src={imageSrc()}
           width={40}
           height={40}
-          alt={props.entry.originalPath}
-          title={props.entry.originalPath}
+          alt={props.entry.descriptionName}
+          title={props.entry.descriptionName}
           style={{ 'object-fit': 'cover' }}
           onError={(e) => {
             e.currentTarget.style.opacity = '0.5';

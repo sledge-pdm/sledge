@@ -271,6 +271,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   const oldEntries = imagePoolStore.entries.slice();
 
   const entry = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
+  entry.descriptionName = '[ from selection ]';
   entry.transform.x = bbox.x;
   entry.transform.y = bbox.y;
   entry.transform.scaleX = 1;

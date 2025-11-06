@@ -88,6 +88,7 @@ const ClipboardListener: Component = () => {
       if (data) {
         const { imageBuf, width, height } = data;
         const entry = await createEntryFromRawBuffer(imageBuf, width, height);
+        entry.descriptionName = '[ from clipboard ]';
         const placementPos = interactStore.placementPosition ?? { x: 0, y: 0 };
         entry.transform.x = placementPos.x;
         entry.transform.y = placementPos.y;

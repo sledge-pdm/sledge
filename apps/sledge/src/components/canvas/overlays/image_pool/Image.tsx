@@ -8,7 +8,6 @@ import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { pathToFileLocation } from '~/utils/FileUtils';
 
 const imageContainer = css`
   position: absolute;
@@ -125,8 +124,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
                 selectEntry(entry.id);
               },
             };
-        const filename = entry.originalPath && pathToFileLocation(entry.originalPath)?.name;
-        let label = filename ?? '[ unknown ]';
+        let label = entry.descriptionName ?? '[ unknown ]';
         if (!entry.visible) label += ' (hidden)';
         showContextMenu(
           [
@@ -153,8 +151,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
       <div
         class={imageContainer}
         style={{
-          width: `${entry.base.width * entry.transform.scaleX}px`,
-          height: `${entry.base.height * entry.transform.scaleY}px`,
           'transform-origin': '50% 50%',
           transform: `rotate(${entry.transform.rotation}deg)`,
         }}
@@ -164,14 +160,16 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           width={entry.base.width}
           height={entry.base.height}
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
+            width: `${entry.base.width * entry.transform.scaleX}px`,
+            height: `${entry.base.height * entry.transform.scaleY}px`,
             opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
           }}
         />
         <div
           style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
             margin: '8px',
             'transform-origin': '0 0',
             scale: 1 / interactStore.zoom,

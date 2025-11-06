@@ -8,6 +8,7 @@ import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange 
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
+import { pathToFileLocation } from '~/utils/FileUtils';
 
 export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
 
@@ -71,22 +72,22 @@ export function removeEntry(id: string, noDiff?: boolean) {
   }
 }
 
-export async function addImagesFromLocal(imagePaths: string | string[], fit?: boolean) {
+export async function addImagesFromLocal(imagePaths: string | string[], forceFit?: boolean) {
   if (Array.isArray(imagePaths)) {
     await Promise.all(
       imagePaths.map(async (p) => {
-        const entry = await createEntryFromLocalImage(p, fit);
+        const entry = await createEntryFromLocalImage(p, forceFit);
         insertEntry(entry, false);
       })
     );
   } else {
-    const entry = await createEntryFromLocalImage(imagePaths, fit);
+    const entry = await createEntryFromLocalImage(imagePaths, forceFit);
     insertEntry(entry, false);
   }
 }
 
-export async function addImagesFromRawBuffer(rawBuffer: Uint8ClampedArray, width: number, height: number, fit?: boolean) {
-  const entry = await createEntryFromRawBuffer(rawBuffer, width, height, fit);
+export async function addImagesFromRawBuffer(rawBuffer: Uint8ClampedArray, width: number, height: number, forceFit?: boolean) {
+  const entry = await createEntryFromRawBuffer(rawBuffer, width, height, forceFit);
   insertEntry(entry, false);
 }
 
@@ -136,9 +137,15 @@ async function transferToLayer(layerId: string, entryId: string) {
   eventBus.emit('preview:requestUpdate', { layerId });
 }
 
-async function createEntry(webpBuffer: Uint8Array, width: number, height: number, fit?: boolean) {
+function createEntry(webpBuffer: Uint8Array, width: number, height: number, forceFit?: boolean) {
   const id = v4();
-  const initialScale = fit ? Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height) : 1;
+  let initialScale = forceFit ? Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height) : 1;
+
+  // at least ensure fit to prevent image overflow
+  if (width > canvasStore.canvas.width || height > canvasStore.canvas.height) {
+    initialScale = Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height);
+  }
+
   const entry: ImagePoolEntry = {
     id,
     webpBuffer,
@@ -150,20 +157,21 @@ async function createEntry(webpBuffer: Uint8Array, width: number, height: number
   return entry;
 }
 
-export async function createEntryFromLocalImage(imagePath: string, fit?: boolean) {
+export async function createEntryFromLocalImage(imagePath: string, forceFit?: boolean) {
   const bitmap = await loadLocalImage(imagePath);
   const width = bitmap.width;
   const height = bitmap.height;
   const imageData = await loadImageData(bitmap);
   const webpBuffer = rawToWebp(imageData.data, width, height);
   bitmap.close();
-  const entry = createEntry(webpBuffer, width, height, fit);
+  const entry = createEntry(webpBuffer, width, height, forceFit);
+  entry.descriptionName = pathToFileLocation(imagePath)?.name;
   return entry;
 }
 
-export async function createEntryFromRawBuffer(rawBuffer: Uint8Array | Uint8ClampedArray, width: number, height: number, fit?: boolean) {
+export async function createEntryFromRawBuffer(rawBuffer: Uint8Array | Uint8ClampedArray, width: number, height: number, forceFit?: boolean) {
   const webpBuffer = rawToWebp(rawBuffer, width, height);
-  const entry = createEntry(webpBuffer, width, height, fit);
+  const entry = createEntry(webpBuffer, width, height, forceFit);
   return entry;
 }
 

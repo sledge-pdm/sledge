@@ -41,10 +41,12 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
                 showEntry(entry.id);
               },
             };
-
+        const filename = entry.originalPath && pathToFileLocation(entry.originalPath)?.name;
+        let label = filename ?? '[ unknown ]';
+        if (!props.entry.visible) label += ' (hidden)';
         showContextMenu(
-          `${entry.originalPath ? pathToFileLocation(entry.originalPath)?.name : '[ unknown ]'}${props.entry.visible ? '' : ' (hidden)'}`,
           [
+            { type: 'label', label },
             showHideItem,
             {
               ...ContextMenuItems.BaseTransfer,

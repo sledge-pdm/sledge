@@ -174,8 +174,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
             const layerId = props.layer.id;
             showContextMenu(
-              props.layer.name,
               [
+                { type: 'label', label: props.layer.name },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
                 { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },

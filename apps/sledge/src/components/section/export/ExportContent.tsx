@@ -1,13 +1,13 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, Slider } from '@sledge/ui';
+import { clsx, Vec2 } from '@sledge/core';
+import { color, fonts } from '@sledge/theme';
+import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Slider } from '@sledge/ui';
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { saveGlobalSettings } from '~/features/io/config/save';
+import { saveEditorState } from '~/features/io/editor/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { CanvasExportOptions, exportImage } from '~/features/io/image/out/export';
 import { allLayers } from '~/features/layer';
@@ -220,10 +220,10 @@ const ExportContent: Component = () => {
     if (settings.folderPath) {
       const location = await exportImage(settings.folderPath, name, settings.exportOptions);
       if (location && location.path && location.name) {
-        const exportedPath = normalizeJoin(location.path, location.name);
+        const exportedFolderPath = normalizePath(location.path);
         setLastSettingsStore('exportedFolderPaths', (prev) => {
-          prev = [exportedPath, ...prev.filter((p) => p !== exportedPath)];
-          if (prev.length >= 30) prev.unshift();
+          prev = [exportedFolderPath, ...prev.filter((p) => p !== exportedFolderPath)];
+          if (prev.length >= 10) prev.unshift();
           return prev;
         });
 
@@ -234,10 +234,33 @@ const ExportContent: Component = () => {
     }
 
     setLastSettingsStore('exportSettings', settings);
-    await saveGlobalSettings(true);
+    await saveEditorState();
   };
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
+
+  let menuButtonContainerRef: HTMLDivElement;
+
+  const [menuAnchor, setMenuAnchor] = createSignal<Vec2>({ x: 0, y: 0 });
+
+  createEffect(() => {
+    lastExportDirsMenuShown();
+    const rect = menuButtonContainerRef.getBoundingClientRect();
+    setMenuAnchor({ x: rect.right, y: rect.bottom });
+  });
+
+  const exportedFoldersOptions = createMemo<MenuListOption[]>(() =>
+    lastSettingsStore.exportedFolderPaths.map((path: string) => {
+      return {
+        type: 'item',
+        label: normalizePath(path) + '/',
+        onSelect: () => {
+          setSettings('folderPath', normalizePath(path));
+          setLastExportDirsMenuShown(false);
+        },
+      };
+    })
+  );
 
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
@@ -278,25 +301,45 @@ const ExportContent: Component = () => {
               }}
             />
             <div
-              class={clsx(menuButtonContainer, lastSettingsStore.exportedFolderPaths.length <= 0 && menuButtonContainerDisabled)}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+              ref={(ref) => {
+                menuButtonContainerRef = ref;
               }}
+              class={clsx(menuButtonContainer, lastSettingsStore.exportedFolderPaths.length <= 0 && menuButtonContainerDisabled)}
             >
-              <div class={iconButton}>
+              <div
+                class={iconButton}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+                }}
+              >
                 <Icon src={'/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
               </div>
               <Show when={lastExportDirsMenuShown()}>
                 <MenuList
-                  options={lastSettingsStore.exportedFolderPaths.map((path: string) => {
-                    return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
-                  })}
+                  options={[
+                    ...exportedFoldersOptions(),
+                    {
+                      type: 'item',
+                      label: 'clear.',
+                      color: color.muted,
+                      fontFamily: fonts.ZFB03,
+                      onSelect: async () => {
+                        setLastSettingsStore('exportedFolderPaths', []);
+                        await saveEditorState();
+                        setLastExportDirsMenuShown(false);
+                      },
+                    },
+                  ]}
                   onClose={() => setLastExportDirsMenuShown(false)}
                   align='right'
                   style={{
-                    'margin-top': '6px',
+                    position: 'fixed',
+                    top: `${menuAnchor().y + 8}px`,
+                    left: `${menuAnchor().x + 8}px`,
+                    transform: 'translateX(-100%)',
+                    width: 'fit-content',
                   }}
                 />
               </Show>

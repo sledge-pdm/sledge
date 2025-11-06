@@ -124,9 +124,12 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
                 selectEntry(entry.id);
               },
             };
+        const filename = entry.originalPath && pathToFileLocation(entry.originalPath)?.name;
+        let label = filename ?? '[ unknown ]';
+        if (!entry.visible) label += ' (hidden)';
         showContextMenu(
-          `${entry.originalPath ? pathToFileLocation(entry.originalPath)?.name : '[ unknown ]'}${entry.visible ? '' : ' (hidden)'}`,
           [
+            { type: 'label', label },
             showHideItem,
             {
               ...ContextMenuItems.BaseTransfer,

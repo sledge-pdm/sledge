@@ -260,8 +260,8 @@ export const InteractCanvas: Component<Props> = (props) => {
         if (isPositionWithinSelection(position)) {
           console.log('yeah');
           showContextMenu(
-            'selection',
             [
+              { type: 'label', label: 'selection' },
               {
                 ...ContextMenuItems.BaseCopy,
                 onSelect: async () => {

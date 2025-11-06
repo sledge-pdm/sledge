@@ -1,11 +1,11 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
+import { clsx, Vec2 } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, Slider } from '@sledge/ui';
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
@@ -239,6 +239,16 @@ const ExportContent: Component = () => {
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
 
+  let menuButtonContainerRef: HTMLDivElement;
+
+  const [menuAnchor, setMenuAnchor] = createSignal<Vec2>({ x: 0, y: 0 });
+
+  createEffect(() => {
+    const menuShown = lastExportDirsMenuShown();
+    const rect = menuButtonContainerRef.getBoundingClientRect();
+    setMenuAnchor({ x: rect.right, y: rect.bottom });
+  });
+
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
       <div class={flexCol}>
@@ -278,25 +288,41 @@ const ExportContent: Component = () => {
               }}
             />
             <div
-              class={clsx(menuButtonContainer, lastSettingsStore.exportedFolderPaths.length <= 0 && menuButtonContainerDisabled)}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+              ref={(ref) => {
+                menuButtonContainerRef = ref;
               }}
+              class={clsx(menuButtonContainer, lastSettingsStore.exportedFolderPaths.length <= 0 && menuButtonContainerDisabled)}
             >
-              <div class={iconButton}>
+              <div
+                class={iconButton}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+                }}
+              >
                 <Icon src={'/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
               </div>
               <Show when={lastExportDirsMenuShown()}>
                 <MenuList
                   options={lastSettingsStore.exportedFolderPaths.map((path: string) => {
-                    return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
+                    return {
+                      type: 'item',
+                      label: normalizePath(path),
+                      onSelect: () => {
+                        setSettings('folderPath', normalizePath(path));
+                        setLastExportDirsMenuShown(false);
+                      },
+                    };
                   })}
                   onClose={() => setLastExportDirsMenuShown(false)}
                   align='right'
                   style={{
-                    'margin-top': '6px',
+                    position: 'fixed',
+                    top: `${menuAnchor().y + 8}px`,
+                    left: `${menuAnchor().x + 8}px`,
+                    transform: 'translateX(-100%)',
+                    width: 'fit-content',
                   }}
                 />
               </Show>

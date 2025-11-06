@@ -5,7 +5,7 @@ import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Sli
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveEditorState } from '~/features/io/editor/save';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
@@ -249,16 +249,18 @@ const ExportContent: Component = () => {
     setMenuAnchor({ x: rect.right, y: rect.bottom });
   });
 
-  const exportedFoldersOptions: MenuListOption[] = lastSettingsStore.exportedFolderPaths.map((path: string) => {
-    return {
-      type: 'item',
-      label: normalizePath(path) + '/',
-      onSelect: () => {
-        setSettings('folderPath', normalizePath(path));
-        setLastExportDirsMenuShown(false);
-      },
-    };
-  });
+  const exportedFoldersOptions = createMemo<MenuListOption[]>(() =>
+    lastSettingsStore.exportedFolderPaths.map((path: string) => {
+      return {
+        type: 'item',
+        label: normalizePath(path) + '/',
+        onSelect: () => {
+          setSettings('folderPath', normalizePath(path));
+          setLastExportDirsMenuShown(false);
+        },
+      };
+    })
+  );
 
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
@@ -317,7 +319,7 @@ const ExportContent: Component = () => {
               <Show when={lastExportDirsMenuShown()}>
                 <MenuList
                   options={[
-                    ...exportedFoldersOptions,
+                    ...exportedFoldersOptions(),
                     {
                       type: 'item',
                       label: 'clear.',

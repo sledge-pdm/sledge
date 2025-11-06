@@ -50,7 +50,15 @@ export function removeEntry(id: string, noDiff?: boolean) {
       imagePoolStore.entries.filter((e) => e.id !== id)
     );
 
-    if (imagePoolStore.selectedEntryId === id) selectEntry(undefined);
+    if (imagePoolStore.selectedEntryId === id) {
+      const index = oldEntries.findIndex((e) => e.id === id);
+      const nextIndex = index - 1;
+      if (0 <= nextIndex && nextIndex < imagePoolStore.entries.length) {
+        selectEntry(oldEntries[nextIndex].id);
+      } else {
+        selectEntry(undefined);
+      }
+    }
     if (!noDiff)
       projectHistoryController.addAction(
         new ImagePoolHistoryAction({

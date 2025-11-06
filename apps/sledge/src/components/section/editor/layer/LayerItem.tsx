@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
@@ -39,6 +40,10 @@ const layerItemSpinner = css`
 
 const layerItemDisabled = css`
   opacity: 0.3;
+`;
+
+const layerItemCutFreezed = css`
+  opacity: 0.5;
 `;
 
 const layerItemIndex = css`
@@ -163,7 +168,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           }}
         ></div>
         <div
-          class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
+          class={clsx(layerItem, !props.layer.enabled && layerItemDisabled, props.layer.cutFreeze && layerItemCutFreezed)}
           onClick={onDetClicked}
           onContextMenu={async (e) => {
             e.preventDefault();

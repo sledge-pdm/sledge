@@ -1,10 +1,13 @@
 import { Image } from '@tauri-apps/api/image';
-import { writeImage } from '@tauri-apps/plugin-clipboard-manager';
+import { readText, writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { Component, onMount } from 'solid-js';
+import { projectHistoryController } from '~/features/history';
+import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
+import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { isInputFocused, tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
-import { activeLayer, removeLayer } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
+import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
@@ -23,13 +26,11 @@ const ClipboardListener: Component = () => {
       if (!activeAnvil) return;
 
       if (isSelectionAvailable()) {
-        // Selection copy
         const bufData = getCurrentSelectionBuffer();
         if (!bufData) return;
         const { buffer, bbox } = bufData;
         const image = await Image.new(buffer, bbox.width, bbox.height);
         await writeImage(image);
-        // if succeed, save offset as a placement position
         setInteractStore('placementPosition', {
           x: bbox.x,
           y: bbox.y,
@@ -37,19 +38,7 @@ const ClipboardListener: Component = () => {
         setBottomBarText('selection copied!', { kind: 'info' });
         return 'selection';
       } else {
-        // Layer copy
-        const buffer = activeAnvil.getBufferPointer();
-        const image = await Image.new(new Uint8Array(buffer.buffer), activeAnvil.getWidth(), activeAnvil.getHeight());
-        await writeImage(image);
-
-        // We must not destroy data that may referenced in later paste operation.
-        // image.close();
-
-        // if succeed, save (0, 0) as a placement position
-        setInteractStore('placementPosition', {
-          x: 0,
-          y: 0,
-        });
+        await writeText(layerListStore.activeLayerId);
         setBottomBarText('layer copied!', { kind: 'info' });
         return 'layer';
       }
@@ -67,7 +56,10 @@ const ClipboardListener: Component = () => {
     if (!copyMode) return;
 
     if (copyMode === 'layer') {
-      removeLayer(layerListStore.activeLayerId); // history added
+      // this literally delete original layer to copy so cannot paste after.
+      // this should be like an "archive" operation, that freezes layer but not delete from list and anvilManager. like below.
+      setLayerProp(layerListStore.activeLayerId, 'cutFreeze', true, { noDiff: true }); // history added
+      // removeLayer(layerListStore.activeLayerId, { noDiff: false }); // history added
     } else {
       deleteSelectedArea({
         layerId: layerListStore.activeLayerId,
@@ -84,20 +76,67 @@ const ClipboardListener: Component = () => {
     try {
       if (isSelectionAvailable()) cancelSelection();
 
-      const data = await tryGetImageFromClipboard();
-      if (data) {
-        const { imageBuf, width, height } = data;
-        const entry = await createEntryFromRawBuffer(imageBuf, width, height);
-        entry.descriptionName = '[ from clipboard ]';
-        const placementPos = interactStore.placementPosition ?? { x: 0, y: 0 };
-        entry.transform.x = placementPos.x;
-        entry.transform.y = placementPos.y;
-        insertEntry(entry);
-        selectEntry(entry.id);
-        setBottomBarText('pasted!');
+      // 1. check layer id paste
+      const textData = await readText();
+      if (textData) {
+        const srcLayer = findLayerById(textData);
+        const srcAnvil = anvilManager.getAnvil(textData);
+        if (srcLayer && srcAnvil) {
+          const isCut = srcLayer.cutFreeze;
+          // 切り取りと分かった時点でcutFreezeは取り下げる
+          setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });
+          const unfreezedSourceLayer = findLayerById(textData);
+          if (unfreezedSourceLayer && isCut) {
+            const activeLayerIdBefore = activeLayer().id;
+            const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
+            const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
+
+            const insertionIndex = activeIndex();
+            const inserted = addLayerTo(
+              insertionIndex,
+              { ...unfreezedSourceLayer, cutFreeze: false }, // ensure cutFreeze=false
+              { initImage: srcAnvil.getBufferCopy(), noDiff: true, uniqueName: false }
+            );
+
+            removeLayer(unfreezedSourceLayer.id, { noDiff: true });
+
+            const targetPackedSnapshot = getPackedLayerSnapshot(inserted.id);
+            const targetIndex = getLayerIndex(inserted.id);
+            setActiveLayerId(inserted.id);
+
+            const activeLayerIdAfter = activeLayer().id;
+            if (sourcePackedSnapshot && targetPackedSnapshot) {
+              const action = new LayerListCutPasteHistoryAction({
+                sourcePackedSnapshot,
+                sourceIndex, // 挿入前に取得した index
+                targetPackedSnapshot,
+                targetIndex, // 削除後の挿入レイヤー index
+                activeLayerIdBefore,
+                activeLayerIdAfter,
+              });
+              projectHistoryController.addAction(action);
+            }
+          } else {
+            addLayerTo(activeIndex(), srcLayer, { initImage: srcAnvil.getBufferCopy(), noDiff: false, uniqueName: false });
+          }
+        }
       } else {
-        console.error('Failed to read clipboard contents.');
-        setBottomBarText('paste failed.', { kind: 'error' });
+        // 2. check image paste
+        const data = await tryGetImageFromClipboard();
+        if (data) {
+          const { imageBuf, width, height } = data;
+          const entry = await createEntryFromRawBuffer(imageBuf, width, height);
+          entry.descriptionName = '[ from clipboard ]';
+          const placementPos = interactStore.placementPosition ?? { x: 0, y: 0 };
+          entry.transform.x = placementPos.x;
+          entry.transform.y = placementPos.y;
+          insertEntry(entry);
+          selectEntry(entry.id);
+          setBottomBarText('pasted!');
+        } else {
+          console.error('Failed to read clipboard contents.');
+          setBottomBarText('paste failed.', { kind: 'error' });
+        }
       }
     } catch (err) {
       console.error('Failed to read clipboard contents:', err);

@@ -14,8 +14,7 @@
 
 <br>
 
-<img src="https://github.com/sledge-pdm/sledge-assets/blob/main/readme_top.jpg?raw=true" alt="the visual of sledge." width=500 />
-
+<img src="https://github.com/sledge-pdm/sledge-assets/blob/main/readme_top.jpg?raw=true" alt="the visual of sledge." width=600 />
 
 </div>
 
@@ -49,6 +48,14 @@
 1. Visit [sledge-rules.app](https://www.sledge-rules.app/) and download installer.
 2. Follow the instructions to complete the installation.
 
+## Contact
+
+* APP: [@sledge_app](https://x.com/sledge_app)
+* DEV: [@alphendp](https://x.com/alphendp)
+
+> DM open (in both). Contact me free.\
+> *Follow @sledge_app if you want live update/feature information!*
+
 ## Tech
 
 - [Tauri](https://github.com/tauri-apps/tauri) / main framework
@@ -68,3 +75,4 @@
 - [k12x8 / k8x12](https://littlelimit.net/k12x8.htm) / _by Num_kadoma (littlelimit.net)_
 - [PixelMPlus](https://itouhiro.hatenablog.com/entry/20130602/font) / _by Itouhiro (itouhiro.hatenablog.com)_
 - [Terminus](https://files.ax86.net/terminus-ttf/) / _by Dimitar Zhekov_
+

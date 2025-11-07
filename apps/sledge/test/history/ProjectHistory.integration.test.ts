@@ -85,7 +85,7 @@ describe('Project-level history integration', () => {
 
     const entry: ImagePoolEntry = {
       id: 'int-fixed',
-      originalPath: 'C:/dummy.png',
+      descriptionName: 'dummy.png',
       webpBuffer: dummyWebpBuffer,
       base: { width: 10, height: 10 },
       transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },

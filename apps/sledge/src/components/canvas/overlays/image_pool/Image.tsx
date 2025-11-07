@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
-import { MenuListOption, showContextMenu } from '@sledge/ui';
+import { Icon, MenuListOption, showContextMenu } from '@sledge/ui';
 import { Component, onMount } from 'solid-js';
 import ImageEntryInteract from '~/components/canvas/overlays/image_pool/ImageEntryInteract';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
@@ -8,9 +8,8 @@ import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { pathToFileLocation } from '~/utils/FileUtils';
 
-const imageElement = css`
+const imageContainer = css`
   position: absolute;
   top: 0;
   left: 0;
@@ -20,6 +19,7 @@ const imageElement = css`
   touch-action: none;
   z-index: var(--zindex-image-pool-image);
   image-rendering: pixelated;
+  overflow: hidden;
 `;
 
 const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, index }) => {
@@ -124,8 +124,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
                 selectEntry(entry.id);
               },
             };
-        const filename = entry.originalPath && pathToFileLocation(entry.originalPath)?.name;
-        let label = filename ?? '[ unknown ]';
+        let label = entry.descriptionName ?? '[ unknown ]';
         if (!entry.visible) label += ' (hidden)';
         showContextMenu(
           [
@@ -149,20 +148,37 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         );
       }}
     >
-      <img
-        src={imageSrc()}
-        class={imageElement}
-        width={entry.base.width}
-        height={entry.base.height}
+      <div
+        class={imageContainer}
         style={{
-          width: `${entry.base.width * entry.transform.scaleX}px`,
-          height: `${entry.base.height * entry.transform.scaleY}px`,
           'transform-origin': '50% 50%',
           transform: `rotate(${entry.transform.rotation}deg)`,
-          opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
         }}
-      />
-
+      >
+        <img
+          src={imageSrc()}
+          width={entry.base.width}
+          height={entry.base.height}
+          style={{
+            width: `${entry.base.width * entry.transform.scaleX}px`,
+            height: `${entry.base.height * entry.transform.scaleY}px`,
+            opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            margin: '8px',
+            'transform-origin': '0 0',
+            scale: 1 / interactStore.zoom,
+            opacity: imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0.25,
+          }}
+        >
+          <Icon src={'/icons/actions/image.png'} base={8} scale={2} color={'#808080'} />
+        </div>
+      </div>
       <svg
         xmlns='http://www.w3.org/2000/svg'
         ref={(el) => (svgRef = el)}
@@ -199,11 +215,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           width={'100%'}
           height={'100%'}
           fill='none'
+          stroke-opacity={imagePoolStore.selectedEntryId === entry.id ? 1 : 0.15}
           stroke={color.selectionBorder}
           stroke-width={1 / interactStore.zoom}
           vector-effect={'non-scaling-stroke'}
           style={{
-            visibility: imagePoolStore.selectedEntryId === entry.id ? 'visible' : 'collapse',
             'pointer-events': imagePoolStore.selectedEntryId === entry.id ? 'auto' : 'none',
           }}
         />

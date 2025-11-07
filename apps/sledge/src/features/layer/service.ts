@@ -5,8 +5,10 @@ import { adjustZoomToFit } from '~/features/canvas';
 import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-import { getPackedLayerSnapshot, LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
+import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
+import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
+import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import {
   flushPatch,
   getBufferCopy,
@@ -182,10 +184,19 @@ export const addLayerTo = (
     dotMagnification?: number;
     opacity?: number;
     mode?: BlendMode;
+    cutFreeze?: boolean;
   },
   options?: AddLayerOptions
 ) => {
-  const { name = 'layer 1', type = LayerType.Dot, enabled = true, dotMagnification = 1, opacity = 1, mode = BlendMode.normal } = layer;
+  const {
+    name = 'layer 1',
+    type = LayerType.Dot,
+    enabled = true,
+    dotMagnification = 1,
+    opacity = 1,
+    mode = BlendMode.normal,
+    cutFreeze = false,
+  } = layer;
   const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
   const newLayer = createLayer(
     {
@@ -195,7 +206,7 @@ export const addLayerTo = (
       dotMagnification,
       opacity,
       mode,
-      initImage: options?.initImage,
+      cutFreeze,
     },
     uniqueName
   );
@@ -203,7 +214,7 @@ export const addLayerTo = (
   // Initialize anvil
   const width = canvasStore.canvas.width;
   const height = canvasStore.canvas.height;
-  const anvil = anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
+  anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
 
   const layers = [...allLayers()];
   layers.splice(index, 0, newLayer as any);
@@ -290,7 +301,7 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
 
   if (!noDiff) {
     const afterOrder = updated.map((l) => l.id);
-    const act = new LayerListHistoryAction({ kind: 'reorder', index: -1, beforeOrder, afterOrder, context: { from: 'LayerService.moveLayer' } });
+    const act = new LayerListReorderHistoryAction({ beforeOrder, afterOrder, context: { from: 'LayerService.moveLayer' } });
     projectHistoryController.addAction(act);
   }
 };

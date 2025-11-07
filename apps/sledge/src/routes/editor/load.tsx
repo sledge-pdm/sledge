@@ -2,9 +2,9 @@ import { FileLocation } from '@sledge/core';
 import { getEmergencyBackups } from '~/features/backup';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
-import { importImageFromPath } from '~/features/io/image/in/import';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { loadProjectJson } from '~/features/io/project/in/load';
+import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/in/loadFrom';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
@@ -14,10 +14,11 @@ import { layerListStore, setCanvasStore, setProjectStore } from '~/stores/Projec
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
-import { getNewProjectQuery, getOpenLocation, openWindow } from '~/utils/WindowUtils';
+import { getFromClipboardQuery, getNewProjectQuery, getOpenLocation, openWindow } from '~/utils/WindowUtils';
 
 export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new_project' | 'image'; lastPath?: FileLocation }): Promise<boolean> {
   const openingLocation = getOpenLocation();
+  const clipboardQuery = getFromClipboardQuery();
   const newProjectQuery = getNewProjectQuery();
 
   const emergencyBackups = await getEmergencyBackups();
@@ -29,6 +30,8 @@ export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new
 
   if (openingLocation && openingLocation.path && openingLocation.name) {
     return await loadProjectFromLocation(openingLocation);
+  } else if (clipboardQuery) {
+    return await loadProjectFromClipboardImage();
   } else if (newProjectQuery.new) {
     return await loadNewProject(newProjectQuery);
   } else if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
@@ -37,8 +40,6 @@ export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new
     // fallback
     return await loadNewProject();
   }
-
-  throw new Error('unknown error');
 }
 
 export async function loadProjectFromLocation(loc: FileLocation): Promise<boolean> {
@@ -66,7 +67,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
   } else {
     // image file
     setFileStore('openAs', 'image');
-    const isImportSuccessful = await importImageFromPath(loc);
+    const isImportSuccessful = await loadProjectFromLocalImage(loc);
     if (isImportSuccessful) {
       setProjectStore('isProjectChangedAfterSave', true);
       return false;

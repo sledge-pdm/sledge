@@ -6,6 +6,8 @@ export type HistoryActionTypes =
   | 'image_pool'
   | 'layer_buffer'
   | 'layer_list'
+  | 'layer_list_reorder'
+  | 'layer_list_cut_paste'
   | 'layer_merge'
   | 'layer_props'
   | 'unknown';

@@ -6,7 +6,6 @@ import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { pathToFileLocation } from '~/utils/FileUtils';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
   const imageSrc = useWebpBlobUrl(props.entry.webpBuffer);
@@ -41,8 +40,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
                 showEntry(entry.id);
               },
             };
-        const filename = entry.originalPath && pathToFileLocation(entry.originalPath)?.name;
-        let label = filename ?? '[ unknown ]';
+        let label = entry.descriptionName ?? '[ unknown ]';
         if (!props.entry.visible) label += ' (hidden)';
         showContextMenu(
           [
@@ -78,8 +76,8 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
           src={imageSrc()}
           width={40}
           height={40}
-          alt={props.entry.originalPath}
-          title={props.entry.originalPath}
+          alt={props.entry.descriptionName}
+          title={props.entry.descriptionName}
           style={{ 'object-fit': 'cover' }}
           onError={(e) => {
             e.currentTarget.style.opacity = '0.5';

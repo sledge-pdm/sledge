@@ -1,8 +1,8 @@
 import { beforeEach, describe, it } from 'vitest';
 import { LayerListHistoryAction } from '~/features/history';
+import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import './mocks';
 import { createTestLayer, createWebpFromRaw, expectLayerOrder, setupTestEnvironment, TEST_CONSTANTS } from './utils';
-import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 
 describe('LayerListHistoryAction', () => {
   beforeEach(() => {

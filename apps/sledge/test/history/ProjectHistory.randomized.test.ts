@@ -50,6 +50,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
       opacity: 1,
       mode: BlendMode.normal,
       dotMagnification: 1,
+      cutFreeze: false,
     });
     setLayerListStore('layers', [l('L1'), l('L2'), l('L3')]);
     setLayerListStore('activeLayerId', 'L1');

@@ -26,6 +26,7 @@ export function createTestLayer(id: string, name?: string): Layer {
     opacity: 1,
     mode: BlendMode.normal,
     dotMagnification: 1,
+    cutFreeze: false,
   };
 }
 

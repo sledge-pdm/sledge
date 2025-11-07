@@ -2,6 +2,7 @@ import { beforeEach, describe, it } from 'vitest';
 import { LayerListHistoryAction } from '~/features/history';
 import './mocks';
 import { createTestLayer, createWebpFromRaw, expectLayerOrder, setupTestEnvironment, TEST_CONSTANTS } from './utils';
+import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 
 describe('LayerListHistoryAction', () => {
   beforeEach(() => {
@@ -53,9 +54,7 @@ describe('LayerListHistoryAction', () => {
   it('reorder applies afterOrder on redo and beforeOrder on undo', () => {
     const before = ['A', 'B', 'C'];
     const after = ['C', 'A', 'B'];
-    const action = new LayerListHistoryAction({
-      kind: 'reorder',
-      index: 0,
+    const action = new LayerListReorderHistoryAction({
       beforeOrder: before,
       afterOrder: after,
       context: TEST_CONSTANTS.CONTEXT,

@@ -30,6 +30,7 @@ describe('LayerPropsHistoryAction', () => {
       opacity: 0.5,
       mode: BlendMode.multiply,
       dotMagnification: 2,
+      cutFreeze: false,
     };
 
     const action = new LayerPropsHistoryAction({

@@ -62,7 +62,7 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
 export async function loadProjectFromClipboardImage(): Promise<boolean> {
   try {
     const data = await tryGetImageFromClipboard();
-    
+
     if (!data) return false;
 
     setFileStore('openAs', 'image');

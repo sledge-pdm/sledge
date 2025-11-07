@@ -8,6 +8,7 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveEditorState } from '~/features/io/editor/save';
+import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { allLayers } from '~/features/layer';
 import { fileStore, lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
@@ -16,7 +17,6 @@ import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
 import { getDefaultExportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
-import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 
 const qualityField = css`
   display: flex;

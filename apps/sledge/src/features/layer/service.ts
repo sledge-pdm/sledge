@@ -8,6 +8,7 @@ import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHi
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
+import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import {
   flushPatch,
   getBufferCopy,
@@ -28,7 +29,6 @@ import { eventBus } from '~/utils/EventBus';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { changeBaseLayerColor, createLayer } from './model';
 import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
-import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 
 // Layer property updates
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];

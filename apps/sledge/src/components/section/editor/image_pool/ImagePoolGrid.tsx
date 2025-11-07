@@ -6,7 +6,6 @@ import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { pathToFileLocation } from '~/utils/FileUtils';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
   const imageSrc = useWebpBlobUrl(props.entry.webpBuffer);

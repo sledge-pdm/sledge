@@ -1,5 +1,4 @@
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
-import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { getDefaultPictureDir } from '~/utils/FileUtils';
 
 export const importableImageExtensions = ['png', 'jpg', 'webp', 'gif'];

@@ -1,7 +1,7 @@
-import { rawToWebp } from "@sledge/anvil";
-import { LayerSnapshot, PackedLayerSnapshot } from "~/features/history/actions/types";
-import { findLayerById } from "~/features/layer";
-import { getAnvilOf } from "~/features/layer/anvil/AnvilManager";
+import { rawToWebp } from '@sledge/anvil';
+import { LayerSnapshot, PackedLayerSnapshot } from '~/features/history/actions/types';
+import { findLayerById } from '~/features/layer';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 
 // Helper function to convert LayerSnapshot to PackedLayerSnapshot
 export function packLayerSnapshot(layerSnapshot: LayerSnapshot): PackedLayerSnapshot {

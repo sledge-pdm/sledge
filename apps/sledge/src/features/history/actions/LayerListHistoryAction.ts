@@ -1,10 +1,10 @@
-import { rawToWebp, webpToRaw } from '@sledge/anvil';
-import { findLayerById, removeLayer } from '~/features/layer';
+import { webpToRaw } from '@sledge/anvil';
+import { removeLayer } from '~/features/layer';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { PackedLayerSnapshot } from './types';
 
 export interface LayerListHistoryActionProps extends BaseHistoryActionProps {
   kind: 'add' | 'delete';

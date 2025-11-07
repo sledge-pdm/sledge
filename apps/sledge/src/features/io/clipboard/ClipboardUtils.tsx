@@ -1,4 +1,4 @@
-import { readImage } from '@tauri-apps/plugin-clipboard-manager';
+import { readImage, readText } from '@tauri-apps/plugin-clipboard-manager';
 
 // Helper function to check if the active element is an input field
 export function isInputFocused() {
@@ -28,6 +28,16 @@ export async function tryGetImageFromClipboard(): Promise<
     return { imageBuf, width: size.width, height: size.height };
   } catch (e) {
     console.error(`failed to get image from clipboard: ${e}`);
+    return undefined;
+  }
+}
+
+export async function tryGetTextFromClipboard(): Promise<string | undefined> {
+  try {
+    const clipboardText = await readText();
+    return clipboardText;
+  } catch (e) {
+    console.error(`failed to get text from clipboard: ${e}`);
     return undefined;
   }
 }

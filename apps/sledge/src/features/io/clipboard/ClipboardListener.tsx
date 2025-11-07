@@ -1,11 +1,11 @@
 import { Image } from '@tauri-apps/api/image';
-import { readText, writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
+import { writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { Component, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
-import { isInputFocused, tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
+import { isInputFocused, tryGetImageFromClipboard, tryGetTextFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
@@ -77,7 +77,8 @@ const ClipboardListener: Component = () => {
       if (isSelectionAvailable()) cancelSelection();
 
       // 1. check layer id paste
-      const textData = await readText();
+      const textData = await tryGetTextFromClipboard();
+      console.log(textData);
       if (textData) {
         const srcLayer = findLayerById(textData);
         const srcAnvil = anvilManager.getAnvil(textData);
@@ -121,8 +122,10 @@ const ClipboardListener: Component = () => {
           }
         }
       } else {
+        console.log('image');
         // 2. check image paste
         const data = await tryGetImageFromClipboard();
+        console.log(data);
         if (data) {
           const { imageBuf, width, height } = data;
           const entry = await createEntryFromRawBuffer(imageBuf, width, height);

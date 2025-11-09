@@ -8,6 +8,8 @@ import {
   LayerPropsHistoryAction,
 } from '~/features/history/actions';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
+import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
+import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { globalConfig } from '~/stores/GlobalStores';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
@@ -64,6 +66,10 @@ export class ProjectHistoryController {
           return new AnvilLayerHistoryAction(serialized.props as any);
         case 'layer_list':
           return new LayerListHistoryAction(serialized.props as any);
+        case 'layer_list_cut_paste':
+          return new LayerListCutPasteHistoryAction(serialized.props as any);
+        case 'layer_list_reorder':
+          return new LayerListReorderHistoryAction(serialized.props as any);
         case 'layer_merge':
           return new LayerMergeHistoryAction(serialized.props as any);
         case 'layer_props':

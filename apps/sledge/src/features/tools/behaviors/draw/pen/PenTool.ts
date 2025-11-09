@@ -1,5 +1,6 @@
 import { packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
+import { Consts } from '~/Consts';
 import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer } from '~/features/layer';
 import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
@@ -8,14 +9,13 @@ import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
 import { ShapeStore } from '~/features/tools/behaviors/draw/pen/ShapeStore';
 import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
-import { getPresetOf } from '~/features/tools/ToolController';
-import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
+import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
 
 export class PenTool implements ToolBehavior {
   allowRightClick = true;
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
-  startTime: number | undefined = undefined;
   isShift: boolean = false;
   isCtrl: boolean = false;
 
@@ -34,13 +34,20 @@ export class PenTool implements ToolBehavior {
   }
 
   onStart(args: ToolArgs) {
+    // register to history if it's new size
+    const preset = getPresetOf(TOOL_CATEGORIES.PEN, args.presetName ?? DEFAULT_PRESET) as PenPresetConfig;
+    const history: number[] = preset.sizeHistory ?? [];
+    if (preset.size && !history.includes(preset.size)) {
+      const newHistory = [preset.size, ...history].slice(0, Consts.maxSizeHistoryLength);
+      updateToolPresetConfig(TOOL_CATEGORIES.PEN, args.presetName ?? DEFAULT_PRESET, 'sizeHistory', newHistory);
+    }
+
     // 前回の状態が残っている場合はクリーンアップ
     if (this.lineChunk.getBoundingBox()) {
       console.warn('PenTool: Cleaning up previous preview state');
       this.undoLastLineDiff();
     }
 
-    this.startTime = Date.now();
     this.isCtrl = args.event?.ctrlKey ?? false;
     this.startPosition = args.rawPosition;
 
@@ -266,7 +273,6 @@ export class PenTool implements ToolBehavior {
     this.isShift = false;
     this.isCtrl = false;
     this.startPosition = undefined;
-    this.startTime = undefined;
 
     this.lineChunk.clear();
     this.strokeChunk.clear();

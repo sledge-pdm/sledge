@@ -1,7 +1,9 @@
 // Side-effectful operations / state interactions for color feature
+import { Consts } from '~/Consts';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
+import { saveEditorState } from '~/features/io/editor/save';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 import { PaletteType } from './palette';
 
@@ -37,13 +39,16 @@ export const getColorHistory = () => {
 interface AddColorHistoryOptions {
   replaceSameColor: boolean;
 }
+
 export const addColorHistory = (color: RGBAColor, options?: AddColorHistoryOptions) => {
   setColorStore('history', (old) => {
     if (options?.replaceSameColor) {
       old = old.filter((c) => !colorMatch(c, color));
     }
-    return [color, ...old].slice(0, 50);
+    return [color, ...old].slice(0, Consts.maxColorHistoryLength);
   });
+
+  saveEditorState();
 };
 
 interface RegisterColorChangeOptions {

@@ -1,3 +1,4 @@
+import SizeHistoryRow from '~/components/section/editor/tool/SizeHistoryRow';
 import { Consts } from '~/Consts';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
@@ -8,6 +9,7 @@ export const penPresetFields: PresetFieldMeta[] = [
     label: 'Size',
     component: 'Slider',
     props: {
+      labelWidth: 48,
       min: 1,
       max: Consts.maxPenSize,
       step: 1,
@@ -16,6 +18,16 @@ export const penPresetFields: PresetFieldMeta[] = [
     tips: 'Pen brush size',
     customFormat: (v: number) => {
       return `${v} px`;
+    },
+  },
+  {
+    key: 'sizeHistory',
+    label: undefined,
+    component: 'Custom',
+    props: {
+      content: () => {
+        return <SizeHistoryRow categoryId={TOOL_CATEGORIES.PEN} />;
+      },
     },
   },
   {

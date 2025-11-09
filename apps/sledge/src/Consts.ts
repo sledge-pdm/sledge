@@ -17,4 +17,7 @@ export const Consts = {
   fileItemIndent: 8,
 
   webGLFullUploadThresholdPercent: 15,
+
+  maxSizeHistoryLength: 10,
+  maxColorHistoryLength: 56,
 };

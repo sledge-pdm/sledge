@@ -1,3 +1,4 @@
+import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -5,6 +6,7 @@ import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import AnalogSticks from '~/components/global/analog_sticks/AnalogSticks';
+import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/Loading';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit } from '~/features/canvas';
@@ -22,6 +24,20 @@ import { projectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { isFirstStartup, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+
+const mainContainer = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+`;
+const mainContent = css`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  height: 100%;
+  width: 100%;
+`;
 
 export default function Editor() {
   const isFirst = isFirstStartup();
@@ -78,15 +94,21 @@ export default function Editor() {
   return (
     <Show when={!isLoading()} fallback={<Loading />}>
       <div class={pageRoot}>
-        <SideSectionControl side='leftSide' />
+        <div class={mainContainer}>
+          <div class={mainContent}>
+            <SideSectionControl side='leftSide' />
 
-        <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
-          <div style={{ 'flex-grow': 1, 'background-color': color.canvasArea }}>
-            <CanvasArea />
+            <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
+              <div style={{ 'flex-grow': 1, 'background-color': color.canvasArea }}>
+                <CanvasArea />
+              </div>
+            </div>
+
+            <SideSectionControl side='rightSide' />
           </div>
-        </div>
 
-        <SideSectionControl side='rightSide' />
+          <BottomBar />
+        </div>
 
         <AnalogSticks />
 

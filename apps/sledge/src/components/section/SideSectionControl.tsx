@@ -11,7 +11,7 @@ const sideSectionControlRoot = css`
   display: flex;
   flex-direction: column;
   box-sizing: content-box;
-  padding-bottom: 12px;
+  width: 28px;
   justify-content: start;
   align-items: center;
   background-color: var(--color-background);
@@ -20,6 +20,7 @@ const sideSectionControlRoot = css`
 const sideSectionControlList = css`
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: 100%;
   align-items: center;
 `;
@@ -31,8 +32,9 @@ const sideSectionControlItem = css`
   justify-content: center;
   transform: rotate(180deg);
   width: 100%;
-  padding: 14px 10px 14px 10px;
-  box-sizing: border-box;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  box-sizing: content-box;
 
   cursor: pointer;
 

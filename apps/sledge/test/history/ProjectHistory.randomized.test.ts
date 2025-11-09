@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
-import { currentColor, PaletteType, selectPalette, setColor, setCurrentColor } from '~/features/color';
+import { currentColor, hexToRGBA, PaletteType, registerColorChange, selectPalette, setColor, setCurrentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getEntry, ImagePoolEntry, insertEntry, removeEntry, updateEntryPartial } from '~/features/image_pool';
@@ -127,6 +127,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const next = targets[Math.floor(rng() * targets.length)];
         const prev = currentColor();
         steps.push(() => {
+          registerColorChange(hexToRGBA(prev), hexToRGBA(next));
           setCurrentColor(next);
         });
         stepDescs.push(`Color ${prev} -> ${next}`);

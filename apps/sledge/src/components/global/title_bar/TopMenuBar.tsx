@@ -9,6 +9,8 @@ import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
+import { activeLayer } from '~/features/layer';
+import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
@@ -94,7 +96,7 @@ interface Item {
   id: string;
   text: string;
   action: () => void;
-  menu?: MenuListOption[];
+  menu?: () => MenuListOption[];
 }
 
 const TopMenuBar: Component = () => {
@@ -109,12 +111,22 @@ const TopMenuBar: Component = () => {
     setAvailableUpdate(update);
   });
 
+  const getCurrentEditTarget = () => {
+    // if (imagePoolStore.selectedEntryId !== undefined) {
+    //   currentEditTarget= 'image';
+    // }
+    if (isSelectionAvailable()) {
+      return 'selection';
+    }
+    return `layer: ${activeLayer()?.name}`;
+  };
+
   const leftItems = createMemo<Item[]>(() => [
     {
       id: 'project',
       text: 'Files.',
       action: () => {},
-      menu: [
+      menu: () => [
         {
           type: 'item',
           label: '+ new project.',
@@ -172,7 +184,11 @@ const TopMenuBar: Component = () => {
       id: 'edit',
       text: 'Edit.',
       action: () => {},
-      menu: [
+      menu: () => [
+        {
+          type: 'label',
+          label: getCurrentEditTarget(),
+        },
         {
           type: 'item',
           label: 'Copy.',
@@ -219,16 +235,16 @@ const TopMenuBar: Component = () => {
                 <a
                   class={menuItemText}
                   onClick={(e) => {
-                    if (item.menu) setMenuOpen(true);
                     item.action();
+                    if (item.menu) setMenuOpen(true);
                   }}
                 >
                   {item.text}
                 </a>
                 <div class={menuItemBackground} />
-                <Show when={item.menu && menuOpen()}>
+                <Show when={item.menu?.() && menuOpen()}>
                   <MenuList
-                    options={item.menu!}
+                    options={item.menu?.()!}
                     onClose={() => setMenuOpen(false)}
                     style={{
                       'margin-top': '4px',

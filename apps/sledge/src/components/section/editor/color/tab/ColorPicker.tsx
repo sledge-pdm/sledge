@@ -1,10 +1,7 @@
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
-import { currentColor, hexToRGBA, RGBAColor, setCurrentColor } from '~/features/color';
-import { projectHistoryController } from '~/features/history';
-import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
-import { colorStore } from '~/stores/EditorStores';
+import { currentColor, hexToRGBA, registerColorChange, RGBAColor, setCurrentColor } from '~/features/color';
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
@@ -18,15 +15,7 @@ const ColorPicker: Component<{ width: number }> = (props) => {
   const handlePointerUp = () => {
     const oldColor = colorOnPointerDown();
     if (oldColor) {
-      const action = new ColorHistoryAction({
-        palette: colorStore.currentPalette,
-        oldColor,
-        newColor: hexToRGBA(colorPicker.color.hexString),
-        context: {
-          from: 'ColorController.setCurrentColor',
-        },
-      });
-      projectHistoryController.addAction(action);
+      registerColorChange(oldColor, hexToRGBA(colorPicker.color.hexString));
     }
     setColorOnPointerDown(undefined);
   };
@@ -69,7 +58,7 @@ const ColorPicker: Component<{ width: number }> = (props) => {
           ],
         });
         colorPicker.on('color:change', function (color: any) {
-          setCurrentColor(color.hexString, { noDiff: true });
+          setCurrentColor(color.hexString);
         });
       }}
       onPointerDown={(e) => {

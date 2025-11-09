@@ -14,7 +14,8 @@ const bottomInfoRoot = css`
   flex-wrap: wrap;
   background-color: var(--color-background);
   border-top: 1px solid var(--color-border);
-  height: 20px;
+  height: 18px;
+  padding-left: 8px;
   z-index: var(--zindex-bottom-info);
   pointer-events: all;
   overflow-y: visible;
@@ -23,17 +24,15 @@ const bottomInfoRoot = css`
 const bottomInfoContainer = css`
   display: flex;
   flex-direction: row;
-  height: 20px;
+  height: 100%;
   width: 100%;
   align-items: center;
-  padding-left: var(--spacing-md);
   gap: var(--spacing-md);
 `;
 
 const bottomInfoContainerRight = css`
   display: flex;
   flex-direction: row;
-  height: 20px;
   flex-grow: 1;
   align-items: center;
   justify-content: end;
@@ -48,7 +47,7 @@ const sliderContainer = css`
   overflow: visible;
 `;
 
-const BottomInfo: Component = () => {
+const BottomBar: Component = () => {
   onMount(() => {
     resetBottomBarText();
   });
@@ -62,7 +61,7 @@ const BottomInfo: Component = () => {
     switch (logStore?.bottomBarKind) {
       case 'info':
       default:
-        return color.onBackground;
+        return color.muted;
       case 'warn':
         return color.warn;
       case 'error':
@@ -115,4 +114,4 @@ const BottomInfo: Component = () => {
   );
 };
 
-export default BottomInfo;
+export default BottomBar;

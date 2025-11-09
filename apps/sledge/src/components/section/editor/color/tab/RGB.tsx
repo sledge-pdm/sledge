@@ -1,8 +1,7 @@
 import { Slider } from '@sledge/ui';
 import { Component, createMemo, createSignal, onMount } from 'solid-js';
 import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tab/SliderStyles';
-import { currentColor, hexToRGBA, RGBAColor, RGBAToHex } from '~/features/color';
-import { ColorHistoryAction, projectHistoryController } from '~/features/history';
+import { currentColor, hexToRGBA, registerColorChange, RGBAColor, RGBAToHex } from '~/features/color';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 
 const RGB: Component = (props) => {
@@ -11,15 +10,7 @@ const RGB: Component = (props) => {
   const handlePointerUp = () => {
     const oldColor = colorOnPointerDown();
     if (oldColor) {
-      const action = new ColorHistoryAction({
-        palette: colorStore.currentPalette,
-        oldColor,
-        newColor: hexToRGBA(currentColor()),
-        context: {
-          from: 'ColorController.setCurrentColor',
-        },
-      });
-      projectHistoryController.addAction(action);
+      registerColorChange(oldColor, hexToRGBA(currentColor()));
     }
     setColorOnPointerDown(undefined);
   };

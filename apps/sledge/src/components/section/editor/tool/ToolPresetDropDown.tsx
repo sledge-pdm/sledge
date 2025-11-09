@@ -23,7 +23,6 @@ const ToolPresetDropDown: Component<Props> = (props) => {
       options={presetOptions()}
       value={selectedPreset() ?? 'default'}
       onChange={(v) => {
-        console.log(v);
         setToolStore('tools', props.toolId, 'presets', 'selected', v);
         eventBus.emit('tools:presetLoaded', { toolId: props.toolId });
       }}

@@ -135,12 +135,9 @@ const Explorer: Component<Props> = (props) => {
 
   createEffect(async () => {
     const path = currentPath();
-    console.log(path);
     if (path) {
       try {
         const entries = await readDir(path);
-        console.log(entries);
-
         // sort dir => file
         entries.sort((a, b) => {
           if (a.isDirectory && !b.isDirectory) return -1;

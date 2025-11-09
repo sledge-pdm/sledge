@@ -78,7 +78,6 @@ const ClipboardListener: Component = () => {
 
       // 1. check layer id paste
       const textData = await tryGetTextFromClipboard();
-      console.log(textData);
       if (textData) {
         const srcLayer = findLayerById(textData);
         const srcAnvil = anvilManager.getAnvil(textData);
@@ -122,10 +121,8 @@ const ClipboardListener: Component = () => {
           }
         }
       } else {
-        console.log('image');
         // 2. check image paste
         const data = await tryGetImageFromClipboard();
-        console.log(data);
         if (data) {
           const { imageBuf, width, height } = data;
           const entry = await createEntryFromRawBuffer(imageBuf, width, height);

@@ -102,7 +102,6 @@ const KeyListener: Component = () => {
   const handleKeyUp = (e: KeyboardEvent) => {
     if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategoryId() === 'pipette') {
       e.preventDefault();
-      console.log('Pipette tool deactivated');
       setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
     }
   };
@@ -112,7 +111,6 @@ const KeyListener: Component = () => {
     window.addEventListener('keyup', handleKeyUp);
     const unlistenUnfocusPipetteObserve = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
       if (!focused && getActiveToolCategoryId() === 'pipette') {
-        console.log('Pipette tool deactivated');
         setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
       }
     });

@@ -87,7 +87,6 @@ const SaveSection: Component = () => {
 
   onMount(() => {
     eventBus.on('project:saved', () => {
-      console.log('project saved!');
       setTimeredSaveLog('saved!');
     });
 

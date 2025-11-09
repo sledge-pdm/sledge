@@ -3,7 +3,7 @@ import { Consts } from '~/Consts';
 import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
-import { saveEditorState } from '~/features/io/editor/save';
+import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 import { PaletteType } from './palette';
 
@@ -51,7 +51,7 @@ export const addColorHistory = (color: RGBAColor, options?: AddColorHistoryOptio
     return [color, ...old].slice(0, Consts.maxColorHistoryLength);
   });
 
-  saveEditorState();
+  saveEditorStateDebounced();
 };
 
 interface RegisterColorChangeOptions {

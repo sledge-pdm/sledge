@@ -1,9 +1,9 @@
 import { css } from '@acab/ecsstatic';
 import { Dropdown, Slider } from '@sledge/ui';
+import { debounce } from '@solid-primitives/scheduled';
 import { Component } from 'solid-js';
 import { LayerPropsHistoryAction, projectHistoryController } from '~/features/history';
-import { activeLayer, blendModeOptions, setLayerProp } from '~/features/layer';
-import { layerListStore } from '~/stores/ProjectStores';
+import { activeLayer, blendModeOptions, findLayerById, setLayerProp } from '~/features/layer';
 import { flexRow } from '~/styles/styles';
 
 const layerConfigRow = css`
@@ -16,10 +16,33 @@ const layerConfigRow = css`
 
 // mode, opacity
 const LayerListPropsRow: Component = () => {
-  // Debounce state for opacity change history aggregation
-  let opacityCommitTimer: number | undefined;
-  let opacityHistoryBefore: Omit<ReturnType<typeof activeLayer>, 'id'> | null = null;
-  let opacityHistoryLayerId: string | null = null;
+  let opacityBeforeHistorySet: number | null = null;
+  let opacityTargetLayerId: string | null = null;
+
+  const setHistory = () => {
+    if (opacityTargetLayerId === null || opacityBeforeHistorySet === null) return;
+    const layer = findLayerById(opacityTargetLayerId);
+    if (layer) {
+      const act = new LayerPropsHistoryAction({
+        layerId: opacityTargetLayerId,
+        oldLayerProps: { ...layer, opacity: opacityBeforeHistorySet },
+        newLayerProps: layer,
+        context: {
+          from: 'LayerList.opacitySlider(debounced)',
+          propName: 'opacity',
+          before: String(opacityBeforeHistorySet),
+          after: String(layer.opacity),
+        },
+      });
+      projectHistoryController.addAction(act);
+    }
+
+    opacityBeforeHistorySet = null;
+    opacityTargetLayerId = null;
+  };
+
+  const setHistoryDebounced = debounce(setHistory, 200);
+
   return (
     <div class={layerConfigRow}>
       <div
@@ -47,45 +70,19 @@ const LayerListPropsRow: Component = () => {
           allowFloat={true}
           floatSignificantDigits={2}
           labelMode={'none'}
-          onChange={(newValue) => {
-            // Debounced history: apply change immediately without diff, then commit once after 500ms idle
+          onPointerDownOnValidArea={(_e) => {
             const layer = activeLayer();
-            // capture BEFORE snapshot only at the beginning of a burst
-            if (!opacityCommitTimer) {
-              const { id: _id, ...beforeProps } = layer as any;
-              opacityHistoryBefore = beforeProps;
-              opacityHistoryLayerId = layer.id;
+            opacityBeforeHistorySet = layer.opacity;
+            opacityTargetLayerId = layer.id;
+            return true;
+          }}
+          onChange={(newValue) => {
+            if (opacityTargetLayerId) {
+              setLayerProp(opacityTargetLayerId, 'opacity', newValue, {
+                noDiff: true, // Don't record per-change: commit a single history entry after debounce
+              });
+              setHistoryDebounced();
             }
-
-            setLayerProp(layer.id, 'opacity', newValue, {
-              noDiff: true, // Don't record per-change: commit a single history entry after debounce
-            });
-
-            if (opacityCommitTimer) window.clearTimeout(opacityCommitTimer);
-            opacityCommitTimer = window.setTimeout(() => {
-              try {
-                if (!opacityHistoryLayerId || !opacityHistoryBefore) return;
-                const latest = layerListStore.layers.find((l) => l.id === opacityHistoryLayerId);
-                if (!latest) return;
-                const { id: _id2, ...afterProps } = latest as any;
-                const act = new LayerPropsHistoryAction({
-                  layerId: opacityHistoryLayerId,
-                  oldLayerProps: opacityHistoryBefore as any,
-                  newLayerProps: afterProps as any,
-                  context: {
-                    from: 'LayerList.opacitySlider(debounced 500ms)',
-                    propName: 'opacity',
-                    before: String(opacityHistoryBefore.opacity),
-                    after: String(afterProps.opacity),
-                  },
-                });
-                projectHistoryController.addAction(act);
-              } finally {
-                opacityCommitTimer = undefined as any;
-                opacityHistoryBefore = null;
-                opacityHistoryLayerId = null;
-              }
-            }, 200) as any;
           }}
         />
       </div>

@@ -42,7 +42,7 @@ export async function openNewFile(): Promise<string | undefined> {
   });
 
   if (!file) {
-    console.log('file not selected');
+    console.error('file not selected');
     return undefined;
   }
 

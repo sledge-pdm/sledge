@@ -122,7 +122,6 @@ class SelectionAreaManager {
   }
 
   isMaskOverlap(pos: Vec2, withMoveOffset?: boolean) {
-    console.log(pos);
     if (withMoveOffset) {
       pos.x -= this.areaOffset.x;
       pos.y -= this.areaOffset.y;

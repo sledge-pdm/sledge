@@ -16,7 +16,6 @@ export class MoveTool implements ToolBehavior {
     selectionManager.commitOffset();
     selectionManager.commit();
     if (!floatingMoveManager.isMoving()) {
-      console.log('start moving.');
       // 選択状態があれば選択範囲のバッファを、なければレイヤーを移動
       startMove();
     }

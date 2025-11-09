@@ -18,7 +18,7 @@ export async function openImageImportDialog(): Promise<string | string[] | undef
   });
 
   if (!file) {
-    console.log('file not selected');
+    console.error('file not selected');
     return undefined;
   }
   return file;

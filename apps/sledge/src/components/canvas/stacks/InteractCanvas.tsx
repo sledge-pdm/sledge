@@ -258,7 +258,6 @@ export const InteractCanvas: Component<Props> = (props) => {
 
         // selection
         if (isPositionWithinSelection(position)) {
-          console.log('yeah');
           showContextMenu(
             [
               { type: 'label', label: 'selection' },

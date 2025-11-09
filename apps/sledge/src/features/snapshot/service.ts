@@ -132,7 +132,6 @@ export function escapeCurrentAutosave() {
     const filtered = snapshots.map((snapshot) => {
       if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
         const now = new Date();
-        console.log('oh yeah', `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`);
         return {
           ...snapshot,
           name: `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`,
@@ -140,7 +139,6 @@ export function escapeCurrentAutosave() {
       }
       return snapshot;
     });
-    console.log(filtered);
     return filtered;
   });
 }

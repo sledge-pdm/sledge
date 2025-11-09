@@ -21,7 +21,6 @@ export async function loadEditorState(): Promise<
 
     try {
       stateJson = JSON.parse(stateData);
-      console.log('json data loaded from file:', stateJson);
     } catch (e) {
       console.error('Failed to parse config JSON:', e);
     }

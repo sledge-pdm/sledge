@@ -47,11 +47,13 @@ export type PresetConfig = {
 // ツール別のプリセット設定型
 export type PenPresetConfig = PresetConfig & {
   shape?: 'circle' | 'square';
+  sizeHistory?: number[];
   // opacity?: number;
 };
 
 export type EraserPresetConfig = PresetConfig & {
   shape?: 'circle' | 'square';
+  sizeHistory?: number[];
   // hardness?: number;
 };
 

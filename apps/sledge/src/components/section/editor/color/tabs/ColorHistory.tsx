@@ -8,18 +8,18 @@ const container = css`
   flex-direction: row;
   flex-wrap: wrap;
   position: relative;
-  gap: var(--spacing-xs);
+  gap: 1px;
   margin-bottom: 12px;
 `;
 
-const ColorHistory: Component = (props) => {
+const ColorHistory: Component = () => {
   return (
     <div class={container}>
       <For each={getColorHistory()}>
-        {(item, index) => (
+        {(item) => (
           <ColorBox
             color={`#${RGBAToHex(item)}`}
-            sizePx={12}
+            sizePx={15}
             onClick={(color) => {
               registerColorChange(hexToRGBA(currentColor()), hexToRGBA(color), {
                 replaceSameColor: true,

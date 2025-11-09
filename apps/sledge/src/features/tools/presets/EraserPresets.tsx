@@ -1,3 +1,4 @@
+import SizeHistoryRow from '~/components/section/editor/tool/SizeHistoryRow';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
@@ -7,6 +8,7 @@ export const eraserPresetFields: PresetFieldMeta[] = [
     label: 'Size',
     component: 'Slider',
     props: {
+      labelWidth: 48,
       min: 1,
       max: 100,
       step: 1,
@@ -15,6 +17,16 @@ export const eraserPresetFields: PresetFieldMeta[] = [
     tips: 'Eraser brush size',
     customFormat: (v: number) => {
       return `${v} px`;
+    },
+  },
+  {
+    key: 'sizeHistory',
+    label: undefined,
+    component: 'Custom',
+    props: {
+      content: () => {
+        return <SizeHistoryRow categoryId={TOOL_CATEGORIES.ERASER} />;
+      },
     },
   },
   {

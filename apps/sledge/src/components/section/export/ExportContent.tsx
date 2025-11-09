@@ -7,7 +7,7 @@ import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { saveEditorState } from '~/features/io/editor/save';
+import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { allLayers } from '~/features/layer';
@@ -234,7 +234,7 @@ const ExportContent: Component = () => {
     }
 
     setLastSettingsStore('exportSettings', settings);
-    await saveEditorState();
+    await saveEditorStateImmediate();
   };
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
@@ -327,7 +327,7 @@ const ExportContent: Component = () => {
                       fontFamily: fonts.ZFB03,
                       onSelect: async () => {
                         setLastSettingsStore('exportedFolderPaths', []);
-                        await saveEditorState();
+                        await saveEditorStateImmediate();
                         setLastExportDirsMenuShown(false);
                       },
                     },

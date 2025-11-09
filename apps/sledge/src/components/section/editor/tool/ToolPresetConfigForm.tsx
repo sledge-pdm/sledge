@@ -1,5 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { spacing } from '@sledge/theme';
 import { Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { componentProps } from '~/config/ConfigComponent';
@@ -81,7 +80,7 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
   });
 
   return (
-    <div class={flexCol} style={{ gap: '12px' }}>
+    <div class={flexCol} style={{ gap: '4px' }}>
       <Show when={presetMeta()?.fields}>
         <For each={presetMeta()!.fields}>
           {(fieldMeta) => {
@@ -96,7 +95,10 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
             };
 
             return (
-              <div class={flexRow} style={{ width: '100%', 'min-height': '16px', 'align-items': 'center' }}>
+              <div
+                class={flexRow}
+                style={{ width: '100%', 'min-height': fieldMeta.component !== 'Custom' ? '24px' : undefined, 'align-items': 'center' }}
+              >
                 <Show when={fieldMeta.label}>
                   <div class={flexRow} style={{ width: '80px' }}>
                     <label class={label} for={fieldMeta.key}>

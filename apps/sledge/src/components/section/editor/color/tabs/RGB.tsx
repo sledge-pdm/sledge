@@ -1,6 +1,6 @@
 import { Slider } from '@sledge/ui';
 import { Component, createMemo, createSignal, onMount } from 'solid-js';
-import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tab/SliderStyles';
+import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tabs/SliderStyles';
 import { currentColor, hexToRGBA, registerColorChange, RGBAColor, RGBAToHex } from '~/features/color';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 

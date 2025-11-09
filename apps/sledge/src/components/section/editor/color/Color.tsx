@@ -1,16 +1,16 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createSignal, For, Match, Show, Switch } from 'solid-js';
-import ColorPicker from '~/components/section/editor/color/tab/ColorPicker';
+import ColorPicker from '~/components/section/editor/color/tabs/ColorPicker';
 
 import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import Palette from '~/components/section/editor/color/Palette';
-import ColorHistory from '~/components/section/editor/color/tab/ColorHistory';
-import RGB from '~/components/section/editor/color/tab/RGB';
+import ColorHistory from '~/components/section/editor/color/tabs/ColorHistory';
+import RGB from '~/components/section/editor/color/tabs/RGB';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
-import { currentColor, hexToRGBA, registerColorChange, RGBAToHex, setCurrentColor } from '~/features/color';
+import { currentColor, hexToRGBA, PaletteType, registerColorChange, RGBAToHex, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools/ToolController';
 import { accentedButton, flexCol } from '~/styles/styles';
 
@@ -92,7 +92,7 @@ const tabItem = css`
   }
 `;
 const tabItemActive = css`
-  opacity: 0.6;
+  opacity: 0.75;
   color: var(--color-active);
 `;
 
@@ -100,12 +100,14 @@ const tabSwitchContent = css`
   display: flex;
   flex-direction: column;
   width: 164px;
-  height: 144px;
+  height: 136px;
 `;
 
 const paletteContainer = css`
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  margin-left: 12px;
   margin-top: 4px;
 `;
 const pipetteContainer = css`
@@ -158,7 +160,8 @@ const Color: Component = () => {
           </div>
 
           <div class={paletteContainer}>
-            <Palette />
+            <Palette index={1} paletteType={PaletteType.primary} />
+            <Palette index={2} paletteType={PaletteType.secondary} />
           </div>
         </div>
 

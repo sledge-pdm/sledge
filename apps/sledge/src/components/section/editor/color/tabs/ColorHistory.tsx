@@ -8,15 +8,15 @@ const container = css`
   flex-direction: row;
   flex-wrap: wrap;
   position: relative;
-  gap: 4px;
+  gap: 1px;
   margin-bottom: 12px;
 `;
 
-const ColorHistory: Component = (props) => {
+const ColorHistory: Component = () => {
   return (
     <div class={container}>
       <For each={getColorHistory()}>
-        {(item, index) => (
+        {(item) => (
           <ColorBox
             color={`#${RGBAToHex(item)}`}
             sizePx={15}

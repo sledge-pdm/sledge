@@ -19,5 +19,5 @@ export const Consts = {
   webGLFullUploadThresholdPercent: 15,
 
   maxSizeHistoryLength: 10,
-  maxColorHistoryLength: 56,
+  maxColorHistoryLength: 80,
 };

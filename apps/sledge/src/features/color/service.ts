@@ -18,6 +18,9 @@ export const setCurrentColor = (colorHexString: string) => {
   return result;
 };
 
+export const getColorByPalette = (type: PaletteType) => {
+  return colorStore[type];
+};
 export const setColor = (palette: PaletteType, colorHexString: string) => {
   return setColorStore(palette, colorHexString);
 };

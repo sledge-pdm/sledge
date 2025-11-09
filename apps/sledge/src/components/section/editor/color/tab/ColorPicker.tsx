@@ -58,7 +58,7 @@ const ColorPicker: Component<{ width: number }> = (props) => {
           ],
         });
         colorPicker.on('color:change', function (color: any) {
-          setCurrentColor(color.hexString, { noDiff: true });
+          setCurrentColor(color.hexString);
         });
       }}
       onPointerDown={(e) => {

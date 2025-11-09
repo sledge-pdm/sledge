@@ -1,5 +1,5 @@
 // Side-effectful operations / state interactions for color feature
-import { hexToRGBA, RGBAColor } from '~/features/color';
+import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
@@ -9,25 +9,10 @@ export const currentColor = (): string => {
   return colorStore[colorStore.currentPalette];
 };
 
-interface SetCurrentColorOptions {
-  noDiff?: boolean;
-}
-
-export const setCurrentColor = (colorHexString: string, options?: SetCurrentColorOptions) => {
+export const setCurrentColor = (colorHexString: string) => {
   const palette = colorStore.currentPalette;
-  const oldHex = colorStore[palette];
+  // const oldHex = colorStore[palette];
   const result = setColorStore(palette, colorHexString);
-  if (!options?.noDiff) {
-    const oldRGBA = hexToRGBA(oldHex);
-    const newRGBA = hexToRGBA(colorHexString);
-    const action = new ColorHistoryAction({
-      palette,
-      oldColor: oldRGBA,
-      newColor: newRGBA,
-      context: { from: 'color.service.setCurrentColor' },
-    });
-    projectHistoryController.addAction(action);
-  }
   return result;
 };
 
@@ -48,13 +33,26 @@ export const setCurrentSwatch = (swatchName: string) => {
 export const getColorHistory = () => {
   return colorStore.history;
 };
-export const addColorHistory = (color: RGBAColor) => {
+
+interface AddColorHistoryOptions {
+  replaceSameColor: boolean;
+}
+export const addColorHistory = (color: RGBAColor, options?: AddColorHistoryOptions) => {
   setColorStore('history', (old) => {
+    if (options?.replaceSameColor) {
+      old = old.filter((c) => !colorMatch(c, color));
+    }
     return [color, ...old].slice(0, 50);
   });
 };
 
-export const registerColorChange = (oldColor: RGBAColor, newColor: RGBAColor) => {
+interface RegisterColorChangeOptions {
+  replaceSameColor: boolean;
+}
+
+export const registerColorChange = (oldColor: RGBAColor, newColor: RGBAColor, options?: RegisterColorChangeOptions) => {
+  if (oldColor === newColor) return;
+
   // add project history
   const action = new ColorHistoryAction({
     palette: colorStore.currentPalette,
@@ -67,5 +65,5 @@ export const registerColorChange = (oldColor: RGBAColor, newColor: RGBAColor) =>
   projectHistoryController.addAction(action);
 
   // add color history
-  addColorHistory(newColor);
+  addColorHistory(newColor, options);
 };

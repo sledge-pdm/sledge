@@ -1,4 +1,4 @@
-import { isTransparent, RGBAColor, RGBToHex, setCurrentColor, transparent } from '~/features/color';
+import { currentColor, hexToRGBA, isTransparent, registerColorChange, RGBAColor, RGBAToHex, setCurrentColor, transparent } from '~/features/color';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 
@@ -34,7 +34,9 @@ export class PipetteTool implements ToolBehavior {
 
   onEnd(args: ToolArgs) {
     if (!isTransparent(this.color)) {
-      setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
+      const pickColor: RGBAColor = [this.color[0], this.color[1], this.color[2], this.color[3]];
+      registerColorChange(hexToRGBA(currentColor()), pickColor);
+      setCurrentColor(`#${RGBAToHex([this.color[0], this.color[1], this.color[2], this.color[3]])}`);
     }
 
     return {

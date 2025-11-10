@@ -249,7 +249,7 @@ export function getCurrentSelectionBuffer():
   const selectionBuffer = activeAnvil.sliceWithMask(new Uint8Array(trimmedMask), bbox.width, bbox.height, bbox.x, bbox.y);
 
   return {
-    buffer: selectionBuffer,
+    buffer: new Uint8Array(selectionBuffer.buffer),
     bbox,
   };
 }

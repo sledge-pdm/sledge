@@ -29,16 +29,29 @@ const WebGLCanvas: Component = () => {
     }, Number(globalConfig.performance.targetFPS))
   );
 
+  let waitingForLayoutUpdate = false;
+
   const handleCanvasSizeChangedEvent = (e: Events['canvas:sizeChanged']) => {
+    const { width, height } = e.newSize;
+    waitingForLayoutUpdate = true;
+    console.log('[WebGLCanvas] Queued layout-aware resize:', width, height);
+    setOnlyDirtyUpdate(false);
+    setUpdateRender(false);
+  };
+
+  const handleCanvasLayoutReady = (e: Events['canvas:layoutReady']) => {
+    if (!waitingForLayoutUpdate) return;
+    waitingForLayoutUpdate = false;
+
     const { width, height } = e.newSize;
     try {
       webGLRenderer?.resize(width, height);
     } catch (error) {
-      console.error('WebGLCanvas: Failed to resize WebGLRenderer', error);
+      console.error('WebGLCanvas: Failed to resize WebGLRenderer after layout update', error);
     }
-    console.log('[WebGLCanvas] Canvas size changed:', width, height);
+    console.log('[WebGLCanvas] Layout-ready resize applied:', width, height);
+    setOnlyDirtyUpdate(false);
     setUpdateRender(true);
-    setOnlyDirtyUpdate(true);
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
@@ -92,6 +105,7 @@ const WebGLCanvas: Component = () => {
 
   onMount(() => {
     eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+    eventBus.on('canvas:layoutReady', handleCanvasLayoutReady);
     eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
     eventBus.on('webgl:requestResume', handleResumeRequest);
   });
@@ -101,6 +115,7 @@ const WebGLCanvas: Component = () => {
     webGLRenderer = undefined;
     stopRenderLoop();
     eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+    eventBus.off('canvas:layoutReady', handleCanvasLayoutReady);
     eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
     eventBus.off('webgl:requestResume', handleResumeRequest);
   });

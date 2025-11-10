@@ -7,6 +7,7 @@ export type Events = {
   'project:saveCancelled': {};
 
   'canvas:sizeChanged': { newSize: Size2D };
+  'canvas:layoutReady': { newSize: Size2D };
 
   'selection:updateSelectionPath': { immediate?: boolean };
   'selection:updateLassoOutline': {};

@@ -1,4 +1,4 @@
-import { Anvil, rawToWebp } from '@sledge/anvil';
+import { Anvil, PixelBuffer } from '@sledge/anvil';
 import { expect, vi } from 'vitest';
 import { PaletteType, selectPalette, setColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
@@ -89,7 +89,8 @@ export function createDummyWebpBuffer(customData?: number[]): Uint8Array {
 
 // Create WebP buffer from raw data
 export function createWebpFromRaw(rawData: Uint8ClampedArray, width: number, height: number): Uint8Array {
-  return rawToWebp(new Uint8Array(rawData.buffer), width, height);
+  const buffer = PixelBuffer.fromRaw(width, height, rawData);
+  return buffer.exportWebp();
 }
 
 // ImagePoolEntry creation utilities

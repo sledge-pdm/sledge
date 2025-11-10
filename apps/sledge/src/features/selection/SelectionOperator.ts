@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { combine_masks_subtract, slice_patch_rgba, trim_mask_with_box } from '@sledge/wasm';
+import { combine_masks_subtract, trim_mask_with_box } from '@sledge/wasm';
 import { PackedDiffs } from 'node_modules/@sledge/anvil/src/types/patch/Patch';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
@@ -246,16 +246,7 @@ export function getCurrentSelectionBuffer():
   if (!bbox) return;
 
   const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
-  const selectionBuffer = slice_patch_rgba(
-    new Uint8Array(activeAnvil.getBufferCopy().buffer),
-    width,
-    height,
-    new Uint8Array(trimmedMask),
-    bbox.width,
-    bbox.height,
-    bbox.x,
-    bbox.y
-  );
+  const selectionBuffer = activeAnvil.sliceWithMask(new Uint8Array(trimmedMask), bbox.width, bbox.height, bbox.x, bbox.y);
 
   return {
     buffer: selectionBuffer,

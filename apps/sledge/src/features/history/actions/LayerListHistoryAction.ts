@@ -82,9 +82,12 @@ function insertAt(index: number, snapshot: PackedLayerSnapshot) {
   setLayerListStore('layers', arr);
   if (snapshot.image) {
     const anvil = getAnvilOf(snapshot.layer.id);
-    const rawBuffer = new Uint8ClampedArray(webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height).buffer);
-    if (anvil) anvil.replaceBuffer(rawBuffer);
-    else anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
+    if (anvil) {
+      anvil.importWebp(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
+    } else {
+      const rawBuffer = webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
+      anvilManager.registerAnvil(snapshot.layer.id, new Uint8ClampedArray(rawBuffer.buffer), snapshot.image.width, snapshot.image.height);
+    }
   }
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${snapshot.layer.id}) inserted` });
   eventBus.emit('preview:requestUpdate', { layerId: snapshot.layer.id });

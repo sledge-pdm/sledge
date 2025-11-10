@@ -1,4 +1,4 @@
-import { AntialiasMode, rawToWebp, transferBufferInstant, webpToRaw } from '@sledge/anvil';
+import { AntialiasMode, rawToWebp, webpToRaw } from '@sledge/anvil';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
@@ -6,6 +6,7 @@ import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHist
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
@@ -109,7 +110,8 @@ async function transferToLayer(layerId: string, entryId: string) {
   const layerW = getWidth(layerId);
   const layerH = getHeight(layerId);
   const entry = getEntry(entryId);
-  if (!layerW || !layerH || !layerBuf || !entry) return;
+  const anvil = getAnvilOf(layerId);
+  if (!layerW || !layerH || !layerBuf || !entry || !anvil) return;
 
   const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
 
@@ -126,12 +128,14 @@ async function transferToLayer(layerId: string, entryId: string) {
 
   const rotate = normalizeRotation(entry.transform.rotation);
 
-  transferBufferInstant(new Uint8ClampedArray(rawEntryBuffer.buffer), entry.base.width, entry.base.height, layerBuf, layerW, layerH, {
+  anvil.transferFromRaw(new Uint8ClampedArray(rawEntryBuffer.buffer), entry.base.width, entry.base.height, {
     offsetX,
     offsetY,
     scaleX,
     scaleY,
     rotate,
+    flipX: entry.transform.flipX,
+    flipY: entry.transform.flipY,
     antialiasMode: AntialiasMode.Nearest,
   });
 
@@ -174,7 +178,7 @@ export async function createEntryFromLocalImage(imagePath: string, forceFit?: bo
   const width = bitmap.width;
   const height = bitmap.height;
   const imageData = await loadImageData(bitmap);
-  const webpBuffer = rawToWebp(imageData.data, width, height);
+  const webpBuffer = rawToWebp(new Uint8Array(imageData.data.buffer), width, height);
   bitmap.close();
   const entry = createEntry(webpBuffer, width, height, forceFit);
   entry.descriptionName = pathToFileLocation(imagePath)?.name;

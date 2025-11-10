@@ -4,58 +4,28 @@
  * 選択範囲マスクからSVGパス文字列を生成
  */
 export function mask_to_path(mask: Uint8Array, width: number, height: number, offset_x: number, offset_y: number): string;
+export function create_opacity_mask(buffer: Uint8Array, width: number, height: number): Uint8Array;
 /**
- * Lasso選択のためのスキャンライン塗りつぶし実装
- *
- * この実装は以下の特徴を持ちます：
- * - ポリゴン内部をスキャンライン方式で効率的に判定
- * - Point-in-polygon アルゴリズムによる正確な内部判定
- * - バウンディングボックスによる計算範囲の最適化
- * - メモリ効率的な実装
- * - evenodd/nonzero塗りつぶし規則の選択
+ * Apply brightness and contrast adjustments to the image
  */
-export function fill_lasso_selection(mask: Uint8Array, width: number, height: number, points: Float32Array, fill_rule: string): boolean;
+export function brightness_contrast(pixels: Uint8Array, width: number, height: number, options: BrightnessContrastOption): void;
 /**
- * 選択範囲制限付きLasso選択
+ * Apply only brightness adjustment to the image
  */
-export function fill_lasso_selection_with_mask(mask: Uint8Array, width: number, height: number, points: Float32Array, existing_mask: Uint8Array, limit_mode: string): boolean;
+export function brightness(pixels: Uint8Array, width: number, height: number, brightness: number): void;
 /**
- * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
+ * Apply only contrast adjustment to the image
  */
-export function fill_lasso_selection_point_in_polygon(mask: Uint8Array, width: number, height: number, points: Float32Array): boolean;
-export function patch_buffer_rgba(target: Uint8Array, target_width: number, target_height: number, patch: Uint8Array, patch_width: number, patch_height: number, offset_x: number, offset_y: number): Uint8Array;
+export function contrast(pixels: Uint8Array, width: number, height: number, contrast: number): void;
 /**
- * Apply dithering effect to the image
+ * Apply posterize effect to reduce the number of color levels
  */
-export function dithering(pixels: Uint8Array, width: number, height: number, options: DitheringOption): void;
+export function posterize(pixels: Uint8Array, width: number, height: number, options: PosterizeOption): void;
 /**
- * Apply random dithering with simple parameters
+ * Apply posterize effect with simple level parameter
  */
-export function dithering_random(pixels: Uint8Array, width: number, height: number, levels: number): void;
-/**
- * Apply error diffusion dithering with simple parameters
- */
-export function dithering_error_diffusion(pixels: Uint8Array, width: number, height: number, levels: number): void;
-/**
- * Apply ordered dithering with simple parameters
- */
-export function dithering_ordered(pixels: Uint8Array, width: number, height: number, levels: number): void;
-/**
- * Remove small isolated pixel groups (dust removal)
- */
-export function dust_removal(pixels: Uint8Array, width: number, height: number, options: DustRemovalOption): void;
-/**
- * Remove small isolated pixel groups with default settings
- */
-export function dust_removal_simple(pixels: Uint8Array, width: number, height: number, max_size: number): void;
-/**
- * Extract RGBA pixels from `source` where `mask` (1 byte per pixel) is zero.
- * - `source`: RGBA buffer (width=source_width, height=source_height)
- * - `mask`: 1 byte per pixel (0 or 1), dimensions `mask_width` x `mask_height`
- * - `mask_offset_x/y`: where to sample from the source for mask(0,0)
- * Returns an RGBA buffer sized `source_width * source_height * 4`, where selected pixels are fully transparent.
- */
-export function crop_patch_rgba(source: Uint8Array, source_width: number, source_height: number, mask: Uint8Array, mask_width: number, mask_height: number, mask_offset_x: number, mask_offset_y: number): Uint8Array;
+export function posterize_simple(pixels: Uint8Array, width: number, height: number, levels: number): void;
+export function invert(pixels: Uint8Array, width: number, height: number): void;
 /**
  * 選択範囲制限モードに応じてピクセルバッファをフィルタリングする
  * original_buffer: 元のピクセルバッファ (RGBA)
@@ -83,17 +53,8 @@ export function trim_mask_with_box(mask: Uint8Array, mask_width: number, mask_he
  * 入力バッファは RGBA 連続の &[u8]。変更せず、選択マスク(幅*高さ, 0/1)を返す。
  */
 export function auto_select_region_mask(buffer: Uint8Array, width: number, height: number, start_x: number, start_y: number, threshold: number, _connectivity: number): Uint8Array;
-/**
- * Extract RGBA pixels from `source` where `mask` (1 byte per pixel) is non-zero.
- * - `source`: RGBA buffer (width=source_width, height=source_height)
- * - `mask`: 1 byte per pixel (0 or 1), dimensions `mask_width` x `mask_height`
- * - `mask_offset_x/y`: where to sample from the source for mask(0,0)
- * Returns an RGBA buffer sized `mask_width * mask_height * 4`, where non-selected pixels are fully transparent.
- */
-export function slice_patch_rgba(source: Uint8Array, source_width: number, source_height: number, mask: Uint8Array, mask_width: number, mask_height: number, mask_offset_x: number, mask_offset_y: number): Uint8Array;
 export function gaussian_blur(pixels: Uint8Array, width: number, height: number, options: GaussianBlurOption): void;
 export function grayscale(pixels: Uint8Array, width: number, height: number): void;
-export function invert(pixels: Uint8Array, width: number, height: number): void;
 /**
  * マスク合成：OR演算 (add mode)
  */
@@ -115,45 +76,53 @@ export function fill_rect_mask(mask: Uint8Array, width: number, height: number, 
  */
 export function apply_mask_offset(mask: Uint8Array, width: number, height: number, offset_x: number, offset_y: number): Uint8Array;
 /**
- * Apply brightness and contrast adjustments to the image
+ * Apply dithering effect to the image
  */
-export function brightness_contrast(pixels: Uint8Array, width: number, height: number, options: BrightnessContrastOption): void;
+export function dithering(pixels: Uint8Array, width: number, height: number, options: DitheringOption): void;
 /**
- * Apply only brightness adjustment to the image
+ * Apply random dithering with simple parameters
  */
-export function brightness(pixels: Uint8Array, width: number, height: number, brightness: number): void;
+export function dithering_random(pixels: Uint8Array, width: number, height: number, levels: number): void;
 /**
- * Apply only contrast adjustment to the image
+ * Apply error diffusion dithering with simple parameters
  */
-export function contrast(pixels: Uint8Array, width: number, height: number, contrast: number): void;
+export function dithering_error_diffusion(pixels: Uint8Array, width: number, height: number, levels: number): void;
 /**
- * Apply posterize effect to reduce the number of color levels
+ * Apply ordered dithering with simple parameters
  */
-export function posterize(pixels: Uint8Array, width: number, height: number, options: PosterizeOption): void;
+export function dithering_ordered(pixels: Uint8Array, width: number, height: number, levels: number): void;
 /**
- * Apply posterize effect with simple level parameter
+ * Remove small isolated pixel groups (dust removal)
  */
-export function posterize_simple(pixels: Uint8Array, width: number, height: number, levels: number): void;
-export function create_opacity_mask(buffer: Uint8Array, width: number, height: number): Uint8Array;
+export function dust_removal(pixels: Uint8Array, width: number, height: number, options: DustRemovalOption): void;
+/**
+ * Remove small isolated pixel groups with default settings
+ */
+export function dust_removal_simple(pixels: Uint8Array, width: number, height: number, max_size: number): void;
 /**
  * ピクセルデータを上下反転する関数
  * WebGLのreadPixelsは下から上の順序で返すため、通常の画像として使う場合は反転が必要
  */
 export function flip_pixels_vertically(pixels: Uint8Array, width: number, height: number): void;
 /**
- * タイルバッファから指定領域のピクセルデータを抽出する関数
- * WebGLRendererのrender()メソッドで使用される重い処理を最適化
+ * Lasso選択のためのスキャンライン塗りつぶし実装
+ *
+ * この実装は以下の特徴を持ちます：
+ * - ポリゴン内部をスキャンライン方式で効率的に判定
+ * - Point-in-polygon アルゴリズムによる正確な内部判定
+ * - バウンディングボックスによる計算範囲の最適化
+ * - メモリ効率的な実装
+ * - evenodd/nonzero塗りつぶし規則の選択
  */
-export function extract_tile_buffer(source_buffer: Uint8Array, source_width: number, _source_height: number, tile_x: number, tile_y: number, tile_width: number, tile_height: number): Uint8Array;
+export function fill_lasso_selection(mask: Uint8Array, width: number, height: number, points: Float32Array, fill_rule: string): boolean;
 /**
- * 複数のピクセルバッファをブレンドする関数（CPUベースの最適化）
- * レイヤーの不透明度とブレンドモードを考慮した合成処理
+ * 選択範囲制限付きLasso選択
  */
-export function blend_layers(base_buffer: Uint8Array, overlay_buffer: Uint8Array, width: number, height: number, opacity: number, blend_mode: number): void;
+export function fill_lasso_selection_with_mask(mask: Uint8Array, width: number, height: number, points: Float32Array, existing_mask: Uint8Array, limit_mode: string): boolean;
 /**
- * メモリ使用量を計算するユーティリティ関数
+ * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
  */
-export function calculate_texture_memory_usage(width: number, height: number, layer_count: number): number;
+export function fill_lasso_selection_point_in_polygon(mask: Uint8Array, width: number, height: number, points: Float32Array): boolean;
 export enum AlphaBlurMode {
   /**
    * Skip alpha channel (preserve original alpha values)

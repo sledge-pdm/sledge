@@ -1,3 +1,4 @@
+import type { RGBA } from '@sledge/anvil';
 import { PackedDiffs } from 'node_modules/@sledge/anvil/src/types/patch/Patch';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
@@ -89,4 +90,52 @@ export function getHeight(layerId: string) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;
   return anvil.getHeight();
+}
+
+export function exportLayerWebp(layerId: string): Uint8Array | null {
+  const anvil = getAnvilOf(layerId);
+  if (!anvil) return null;
+  return anvil.exportWebp();
+}
+
+export function exportLayerPng(layerId: string): Uint8Array | null {
+  const anvil = getAnvilOf(layerId);
+  if (!anvil) return null;
+  return anvil.exportPng();
+}
+
+export function importLayerWebp(layerId: string, buffer: Uint8Array, width: number, height: number): boolean {
+  const anvil = getAnvilOf(layerId);
+  if (!anvil) return false;
+  return anvil.importWebp(buffer, width, height);
+}
+
+export function importLayerRaw(layerId: string, buffer: Uint8Array | Uint8ClampedArray, width: number, height: number): boolean {
+  const anvil = getAnvilOf(layerId);
+  if (!anvil) return false;
+  return anvil.importRaw(buffer, width, height);
+}
+
+export function floodFillLayer(
+  layerId: string,
+  args: {
+    startX: number;
+    startY: number;
+    color: RGBA;
+    threshold?: number;
+    mask?: {
+      buffer: Uint8Array;
+      mode: 'inside' | 'outside' | 'none';
+    };
+  }
+): boolean {
+  const anvil = getAnvilOf(layerId);
+  if (!anvil) return false;
+  return anvil.floodFill({
+    startX: args.startX,
+    startY: args.startY,
+    color: args.color,
+    threshold: args.threshold,
+    mask: args.mask,
+  });
 }

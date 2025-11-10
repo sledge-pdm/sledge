@@ -9,7 +9,7 @@ export class LosslessWebPExporter extends Exporter {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
     const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(webGLRenderer.readPixelsFlipped());
     const scaledBuffer = getScaledBuffer(buffer, scale);
-    const webpBuffer = rawToWebp(new Uint8Array(scaledBuffer.data.buffer), scaledBuffer.width, scaledBuffer.height);
+    const webpBuffer = rawToWebp(new Uint8ClampedArray(scaledBuffer.data.buffer), scaledBuffer.width, scaledBuffer.height);
     const blob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });
     if (!blob) throw new Error('Failed to export WebP: blob is undefined');
     return blob;
@@ -21,7 +21,7 @@ export class LosslessWebPExporter extends Exporter {
     if (!bufferPointer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
     const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(bufferPointer);
     const scaledBuffer = getScaledBuffer(buffer, scale);
-    const webpBuffer = rawToWebp(new Uint8Array(scaledBuffer.data), scaledBuffer.width, scaledBuffer.height);
+    const webpBuffer = rawToWebp(new Uint8ClampedArray(scaledBuffer.data), scaledBuffer.width, scaledBuffer.height);
     const blob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });
     if (!blob) throw new Error('Failed to export WebP: blob is undefined');
     return blob;

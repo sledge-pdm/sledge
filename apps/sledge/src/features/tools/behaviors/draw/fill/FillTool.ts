@@ -1,15 +1,8 @@
-import { floodFill } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { RGBAColor } from '~/features/color';
 // LayerImageAgent 依存を除去し AnvilToolContext を利用
 //import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
-import {
-  getBufferCopy,
-  getBufferPointer,
-  getHeight as getLayerHeight,
-  getWidth as getLayerWidth,
-  registerWholeChange,
-} from '~/features/layer/anvil/AnvilController';
+import { floodFillLayer, getBufferCopy, getBufferPointer, registerWholeChange } from '~/features/layer/anvil/AnvilController';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionLimitMode, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
@@ -39,11 +32,8 @@ export class FillTool implements ToolBehavior {
 
     const selectionFillMode = preset.selectionFillMode ?? 'inside';
     if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
-      floodFill({
-        target: getBufferPointer(layerId)!,
-        targetWidth: getLayerWidth(layerId)!,
-        targetHeight: getLayerHeight(layerId)!,
-        fillColor: color,
+      floodFillLayer(layerId, {
+        color,
         startX: position.x,
         startY: position.y,
         threshold,
@@ -51,11 +41,8 @@ export class FillTool implements ToolBehavior {
     } else {
       const selectionMask = selectionManager.getSelectionMask();
       if (selectionFillMode === 'inside') {
-        floodFill({
-          target: getBufferPointer(layerId)!,
-          targetWidth: getLayerWidth(layerId)!,
-          targetHeight: getLayerHeight(layerId)!,
-          fillColor: color,
+        floodFillLayer(layerId, {
+          color,
           startX: position.x,
           startY: position.y,
           threshold,

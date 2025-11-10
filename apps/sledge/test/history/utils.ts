@@ -111,7 +111,7 @@ export function createTestEntry(
     originalPath,
     webpBuffer,
     base: { width, height },
-    transform: { x, y, scaleX: 1, scaleY: 1, rotation: 0 },
+    transform: { x, y, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
     opacity: 1,
     visible: true,
   };

@@ -99,11 +99,21 @@ export interface OnCanvasFrameInteractOptions {
   keepAspect: 'always' | 'shift' | 'none';
   // this may should be separated size/position/rotation snap options
   snapToPixel: boolean;
+
+  // An option to allow "inverted" transform changes.
+  // onChange will receive negative width and height by invertion. Handling of negatives should account for each cases (this class doesn't have latest frame).
+  // Even if allowInvert is true, minSize restrictions should always work. ( (width or height) < |minSize| case should always be ignored and stop changes to that direction)
+  allowInvert: boolean;
+
+  onStart?: (start: FrameRect) => void;
+  onChange?: (changed: FrameRect, start: FrameRect) => void;
+  onCommit?: (start: FrameRect, end: FrameRect, e: PointerEvent) => void;
 }
 
 const defaultInteractOptions: OnCanvasFrameInteractOptions = {
   keepAspect: 'shift',
   snapToPixel: false,
+  allowInvert: true,
 };
 
 type InteractTarget = HTMLElement | SVGSVGElement;
@@ -125,8 +135,6 @@ export class OnCanvasFrameInteract {
   constructor(
     private frameRoot: InteractTarget,
     private getRect: () => FrameRect,
-    private onChange: (rect: FrameRect) => void,
-    private onCommit: (start: FrameRect, end: FrameRect, e: PointerEvent) => void,
     options?: OnCanvasFrameInteractOptions
   ) {
     this.options = options ?? defaultInteractOptions;
@@ -153,6 +161,7 @@ export class OnCanvasFrameInteract {
     this.startPointerCanvasY = cy;
 
     this.startRect = this.snapRectIfEnabled(rect);
+    this.options.onStart?.(this.startRect);
 
     if (handle) {
       const dataPos = handle.getAttribute('data-pos') as ResizePos | undefined;
@@ -183,7 +192,7 @@ export class OnCanvasFrameInteract {
     this.releasePointer(e);
     if (this.startRect) {
       const endRect = this.getRect();
-      if (this.onCommit) this.onCommit(this.startRect, endRect, e);
+      this.options.onCommit?.(this.startRect, endRect, e);
     }
     this.resetState();
   };
@@ -192,7 +201,7 @@ export class OnCanvasFrameInteract {
     this.releasePointer(e);
     if (this.startRect) {
       // request revert to startRect on cancel
-      if (this.onChange) this.onChange(this.startRect);
+      this.options.onChange?.(this.startRect, this.startRect);
     }
     this.resetState();
   };
@@ -232,7 +241,7 @@ export class OnCanvasFrameInteract {
         y: this.startRect.y + dy,
       };
       const next: FrameRect = this.snapRectIfEnabled(nextRaw);
-      this.onChange(next);
+      this.options.onChange?.(next, this.startRect);
       return;
     }
 
@@ -240,38 +249,44 @@ export class OnCanvasFrameInteract {
       let { x, y, width, height } = this.startRect;
       switch (this.capturedHandlePos) {
         case 'e':
-          width = Math.max(this.minSize, this.startRect.width + dx);
+          width = this.constrainSizeValue(this.startRect.width + dx);
           break;
         case 'w':
-          width = Math.max(this.minSize, this.startRect.width - dx);
-          x = this.startRect.x + dx;
+          const rawWidth = this.startRect.width - dx;
+          width = this.constrainSizeValue(rawWidth);
+          if (this.shouldUpdateOffset(rawWidth)) x = this.startRect.x + dx;
           break;
         case 's':
-          height = Math.max(this.minSize, this.startRect.height + dy);
+          height = this.constrainSizeValue(this.startRect.height + dy);
           break;
         case 'n':
-          height = Math.max(this.minSize, this.startRect.height - dy);
-          y = this.startRect.y + dy;
+          const rawHeight = this.startRect.height - dy;
+          height = this.constrainSizeValue(rawHeight);
+          if (this.shouldUpdateOffset(rawHeight)) y = this.startRect.y + dy;
           break;
         case 'se':
-          width = Math.max(this.minSize, this.startRect.width + dx);
-          height = Math.max(this.minSize, this.startRect.height + dy);
+          width = this.constrainSizeValue(this.startRect.width + dx);
+          height = this.constrainSizeValue(this.startRect.height + dy);
           break;
         case 'ne':
-          width = Math.max(this.minSize, this.startRect.width + dx);
-          height = Math.max(this.minSize, this.startRect.height - dy);
-          y = this.startRect.y + dy;
+          width = this.constrainSizeValue(this.startRect.width + dx);
+          const rawHeightNE = this.startRect.height - dy;
+          height = this.constrainSizeValue(rawHeightNE);
+          if (this.shouldUpdateOffset(rawHeightNE)) y = this.startRect.y + dy;
           break;
         case 'sw':
-          width = Math.max(this.minSize, this.startRect.width - dx);
-          x = this.startRect.x + dx;
-          height = Math.max(this.minSize, this.startRect.height + dy);
+          const rawWidthSW = this.startRect.width - dx;
+          width = this.constrainSizeValue(rawWidthSW);
+          if (this.shouldUpdateOffset(rawWidthSW)) x = this.startRect.x + dx;
+          height = this.constrainSizeValue(this.startRect.height + dy);
           break;
         case 'nw':
-          width = Math.max(this.minSize, this.startRect.width - dx);
-          x = this.startRect.x + dx;
-          height = Math.max(this.minSize, this.startRect.height - dy);
-          y = this.startRect.y + dy;
+          const rawWidthNW = this.startRect.width - dx;
+          const rawHeightNW = this.startRect.height - dy;
+          width = this.constrainSizeValue(rawWidthNW);
+          if (this.shouldUpdateOffset(rawWidthNW)) x = this.startRect.x + dx;
+          height = this.constrainSizeValue(rawHeightNW);
+          if (this.shouldUpdateOffset(rawHeightNW)) y = this.startRect.y + dy;
           break;
       }
 
@@ -279,14 +294,14 @@ export class OnCanvasFrameInteract {
       if (shouldKeepAspect) {
         const aspect = this.startRect.width / this.startRect.height || 1;
         if (['n', 's'].includes(this.capturedHandlePos || '')) {
-          width = Math.max(this.minSize, height * aspect);
+          width = this.constrainSizeValue(height * aspect);
         } else if (['e', 'w'].includes(this.capturedHandlePos || '')) {
-          height = Math.max(this.minSize, width / aspect);
+          height = this.constrainSizeValue(width / aspect);
         } else {
-          if (width / height > aspect) {
-            height = Math.max(this.minSize, width / aspect);
+          if (Math.abs(width) / Math.abs(height) > aspect) {
+            height = this.constrainSizeValue(((width >= 0 ? width : -width) / aspect) * (height >= 0 ? 1 : -1));
           } else {
-            width = Math.max(this.minSize, height * aspect);
+            width = this.constrainSizeValue((height >= 0 ? height : -height) * aspect * (width >= 0 ? 1 : -1));
           }
         }
         if (this.capturedHandlePos?.includes('w')) {
@@ -298,7 +313,7 @@ export class OnCanvasFrameInteract {
       }
 
       const next: FrameRect = this.snapRectIfEnabled({ x, y, width, height, rotation: this.startRect.rotation });
-      this.onChange(next);
+      this.options.onChange?.(next, this.startRect);
     }
 
     if (this.mode === 'rotate') {
@@ -315,9 +330,27 @@ export class OnCanvasFrameInteract {
       newRotation = normalizeRotation(newRotation);
 
       const next: FrameRect = this.snapRectIfEnabled({ ...this.startRect, rotation: newRotation });
-      this.onChange(next);
+      this.options.onChange?.(next, this.startRect);
     }
   };
+
+  private constrainSizeValue(size: number): number {
+    if (this.options.allowInvert) {
+      if (Math.abs(size) < this.minSize) {
+        return size >= 0 ? this.minSize : -this.minSize;
+      }
+      return size;
+    } else {
+      return Math.max(this.minSize, size);
+    }
+  }
+  private shouldUpdateOffset(calculatedSize: number): boolean {
+    if (this.options.allowInvert) {
+      return Math.abs(calculatedSize) >= this.minSize;
+    } else {
+      return calculatedSize >= this.minSize;
+    }
+  }
 
   public setInteractListeners() {
     this.removeInteractListeners();
@@ -339,8 +372,8 @@ export class OnCanvasFrameInteract {
     if (this.options.snapToPixel) {
       const snappedX = Math.round(r.x);
       const snappedY = Math.round(r.y);
-      const snappedW = Math.max(1, Math.round(r.width));
-      const snappedH = Math.max(1, Math.round(r.height));
+      const snappedW = Math.round(r.width);
+      const snappedH = Math.round(r.height);
       return { x: snappedX, y: snappedY, width: snappedW, height: snappedH, rotation: r.rotation };
     } else {
       return r;

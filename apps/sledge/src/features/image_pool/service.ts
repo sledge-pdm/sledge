@@ -162,7 +162,7 @@ function createEntry(webpBuffer: Uint8Array, width: number, height: number, forc
     id,
     webpBuffer,
     base: { width, height },
-    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale, rotation: 0 },
+    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale, rotation: 0, flipX: false, flipY: false },
     opacity: 1,
     visible: true,
   };

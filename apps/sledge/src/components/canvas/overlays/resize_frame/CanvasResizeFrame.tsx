@@ -37,18 +37,24 @@ export const CanvasResizeFrame: Component = () => {
 
   const setupInteract = () => {
     if (interact || !svgEl || !rect()) return; // 既に初期化済み or 条件未整備
-    interact = new OnCanvasFrameInteract(
-      svgEl,
-      () => rect()!,
-      (r) => {
+    interact = new OnCanvasFrameInteract(svgEl, () => rect()!, {
+      keepAspect: 'shift',
+      snapToPixel: true,
+      allowInvert: true,
+
+      onChange: (r) => {
+        // should process negative case properly
+        if (r.width < 0) {
+          r.width = Math.abs(r.width);
+          r.x -= r.width; // idk if this works (may need to +1 or -1 but leave this as is)
+        }
+        if (r.height < 0) {
+          r.height = Math.abs(r.height);
+          r.y -= r.height; // idk if this works (may need to +1 or -1 but leave this as is)
+        }
         setRect(r);
       },
-      () => {},
-      {
-        keepAspect: 'shift',
-        snapToPixel: true,
-      }
-    );
+    });
     interact.setInteractListeners();
   };
 

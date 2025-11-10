@@ -20,6 +20,7 @@ const imageRoot = css`
   touch-action: none;
   z-index: var(--zindex-image-pool-image);
   transform-origin: 0 0;
+  outline: none;
   box-sizing: border-box;
 `;
 
@@ -62,8 +63,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
 
   const imageSrc = useWebpBlobUrl(entry.webpBuffer);
 
-  const viewWidth = createMemo(() => entry.base.width * entry.transform.scaleX);
-  const viewHeight = createMemo(() => entry.base.height * entry.transform.scaleY);
+  const viewWidth = createMemo(() => Math.abs(entry.base.width * entry.transform.scaleX));
+  const viewHeight = createMemo(() => Math.abs(entry.base.height * entry.transform.scaleY));
+  let startFlipX = entry.transform.flipX;
+  let startFlipY = entry.transform.flipY;
 
   onMount(() => {
     // initial transform-related styling hints
@@ -81,25 +84,44 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           rotation: entry.transform.rotation,
         };
       },
-      (r: FrameRect) => {
-        // resize entry based on change
-        const newScaleX = r.width / entry.base.width;
-        const newScaleY = r.height / entry.base.height;
-        const newTransform = {
-          ...r,
-          scaleX: newScaleX,
-          scaleY: newScaleY,
-        };
-        updateEntryPartial(entry.id, {
-          transform: newTransform,
-        });
-      },
-      (startRect, endRect, e) => {
-        // handle commit, but currently entryprop diffs are removed so just update transform in onChange().
-      },
       {
         keepAspect: 'shift',
         snapToPixel: false,
+        allowInvert: true,
+        onStart: (startRect: FrameRect) => {
+          startFlipX = entry.transform.flipX;
+          startFlipY = entry.transform.flipY;
+        },
+        onChange: (r: FrameRect) => {
+          // resize entry based on change
+          const newScaleX = Math.abs(r.width / entry.base.width);
+          const newScaleY = Math.abs(r.height / entry.base.height);
+          let flipX = startFlipX;
+          let flipY = startFlipY;
+          if (r.width < 0) {
+            r.width = Math.abs(r.width);
+            r.x -= r.width;
+            flipX = !startFlipX;
+          }
+          if (r.height < 0) {
+            r.height = Math.abs(r.height);
+            r.y -= r.height;
+            flipY = !startFlipY;
+          }
+          const newTransform = {
+            ...r,
+            scaleX: newScaleX,
+            scaleY: newScaleY,
+            flipX,
+            flipY,
+          };
+          updateEntryPartial(entry.id, {
+            transform: newTransform,
+          });
+        },
+        onCommit: (startRect, endRect, e) => {
+          // handle commit, but currently entryprop diffs are removed so just update transform in onChange().
+        },
       }
     );
     entryInteract.setInteractListeners();
@@ -202,6 +224,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           class={overlay}
           style={{
             'image-rendering': 'pixelated',
+            'transform-origin': 'center center',
+            scale: `${entry.transform.flipX ? -1 : 1} ${entry.transform.flipY ? -1 : 1}`,
             opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
           }}
         />

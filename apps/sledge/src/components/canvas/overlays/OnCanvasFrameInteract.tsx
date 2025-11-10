@@ -180,21 +180,47 @@ export class OnCanvasFrameInteract {
   private handlePointerUp = (e: PointerEvent) => {
     if (!this.pointerActive) return;
     this.emitChangeByPointerEvent(e);
-    this.pointerActive = false;
-    try {
-      this.frameRoot.releasePointerCapture(e.pointerId);
-    } catch {}
+    this.releasePointer(e);
     if (this.startRect) {
       const endRect = this.getRect();
       if (this.onCommit) this.onCommit(this.startRect, endRect, e);
     }
+    this.resetState();
+  };
+
+  private handlePointerCancel = (e: PointerEvent) => {
+    this.releasePointer(e);
+    if (this.startRect) {
+      // request revert to startRect on cancel
+      if (this.onChange) this.onChange(this.startRect);
+    }
+    this.resetState();
+  };
+
+  private releasePointer(e: PointerEvent) {
+    if (!this.pointerActive) return;
+    this.pointerActive = false;
+    try {
+      this.frameRoot.releasePointerCapture(e.pointerId);
+    } catch {}
+  }
+
+  private resetState() {
     this.mode = undefined;
     this.capturedHandlePos = undefined;
     this.startRect = undefined;
-  };
+    this.startPointerCanvasX = 0;
+    this.startPointerCanvasY = 0;
+    this.startPointerClientX = 0;
+    this.startPointerClientY = 0;
+  }
 
   private emitChangeByPointerEvent = (e: PointerEvent) => {
-    if (!this.pointerActive || !this.mode || !this.startRect) return;
+    if (!this.pointerActive || !this.mode || !this.startRect) {
+      this.releasePointer(e);
+      this.resetState();
+      return;
+    }
     const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.from(e));
     const dx = cx - this.startPointerCanvasX;
     const dy = cy - this.startPointerCanvasY;
@@ -298,12 +324,14 @@ export class OnCanvasFrameInteract {
     this.frameRoot.addEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.addEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.addEventListener('pointerup', this.handlePointerUp as EventListener);
+    this.frameRoot.addEventListener('pointercancel', this.handlePointerCancel as EventListener);
   }
 
   public removeInteractListeners() {
     this.frameRoot.removeEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.removeEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.removeEventListener('pointerup', this.handlePointerUp as EventListener);
+    this.frameRoot.removeEventListener('pointercancel', this.handlePointerCancel as EventListener);
   }
 
   private snapRectIfEnabled(r: FrameRect): FrameRect {

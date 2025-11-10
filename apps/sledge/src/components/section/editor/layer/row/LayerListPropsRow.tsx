@@ -14,7 +14,6 @@ const layerConfigRow = css`
   margin-top: 6px;
 `;
 
-// mode, opacity
 const LayerListPropsRow: Component = () => {
   let opacityBeforeHistorySet: number | null = null;
   let opacityTargetLayerId: string | null = null;

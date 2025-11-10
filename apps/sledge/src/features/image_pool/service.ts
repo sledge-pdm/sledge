@@ -1,5 +1,6 @@
 import { AntialiasMode, rawToWebp, transferBufferInstant, webpToRaw } from '@sledge/anvil';
 import { v4 } from 'uuid';
+import { normalizeRotation } from '~/features/canvas';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
@@ -114,12 +115,23 @@ async function transferToLayer(layerId: string, entryId: string) {
 
   registerWholeChange(layerId, layerBuf);
 
+  const offsetX = Math.round(entry.transform.x);
+  const offsetY = Math.round(entry.transform.y);
+
+  // calculate nearest scale to match integer width/height
+  const targetWidth = Math.round(entry.base.width * entry.transform.scaleX);
+  const targetHeight = Math.round(entry.base.height * entry.transform.scaleY);
+  const scaleX = targetWidth / entry.base.width;
+  const scaleY = targetHeight / entry.base.height;
+
+  const rotate = normalizeRotation(entry.transform.rotation);
+
   transferBufferInstant(new Uint8ClampedArray(rawEntryBuffer.buffer), entry.base.width, entry.base.height, layerBuf, layerW, layerH, {
-    offsetX: entry.transform.x,
-    offsetY: entry.transform.y,
-    scaleX: entry.transform.scaleX,
-    scaleY: entry.transform.scaleY,
-    rotate: entry.transform.rotation,
+    offsetX,
+    offsetY,
+    scaleX,
+    scaleY,
+    rotate,
     antialiasMode: AntialiasMode.Nearest,
   });
 

@@ -108,16 +108,25 @@ export function clipZoom(zoom: number) {
 }
 
 const referenceLengthRatio = 0.85;
+const defaultReferenceLength = 800;
+let lastMeasuredReferenceLength = defaultReferenceLength;
 const referenceLength = () => {
   const sectionBetweenArea = document.getElementById('sections-between-area');
-  if (!sectionBetweenArea) return 800 * referenceLengthRatio;
-  const areaBound = sectionBetweenArea.getBoundingClientRect();
-
-  if (areaBound.width < areaBound.height) {
-    return areaBound.width * referenceLengthRatio;
-  } else {
-    return areaBound.height * referenceLengthRatio;
+  if (!sectionBetweenArea) {
+    return lastMeasuredReferenceLength * referenceLengthRatio;
   }
+
+  const areaBound = sectionBetweenArea.getBoundingClientRect();
+  const minSide = Math.min(areaBound.width, areaBound.height);
+
+  if (minSide > 0) {
+    lastMeasuredReferenceLength = minSide;
+    return minSide * referenceLengthRatio;
+  }
+
+  const fallbackLength = Math.max(areaBound.width, areaBound.height, lastMeasuredReferenceLength, 1);
+  lastMeasuredReferenceLength = fallbackLength;
+  return fallbackLength * referenceLengthRatio;
 };
 
 export const getReferencedZoom = (length?: number) => {
@@ -131,20 +140,16 @@ export const getReferencedZoom = (length?: number) => {
 };
 
 export const adjustZoomToFit = (width?: number, height?: number) => {
-  if (width === undefined) width = canvasStore.canvas.width;
-  if (height === undefined) height = canvasStore.canvas.height;
+  width = width ?? canvasStore.canvas.width;
+  height = height ?? canvasStore.canvas.height;
   if (!width || !height) return;
 
-  const isWide = width > height;
-  const longerLength = isWide ? width : height;
-
+  const longerLength = width > height ? width : height;
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
-  // reset initialzoom
+
   setInteractStore('initialZoom', referencedZoom);
-
   setZoom(referencedZoom);
-
   centeringCanvas();
 };
 

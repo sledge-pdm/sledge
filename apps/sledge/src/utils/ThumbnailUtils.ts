@@ -1,5 +1,5 @@
-import { Size2D } from "@sledge/core";
-import { Consts } from "~/Consts";
+import { Size2D } from '@sledge/core';
+import { Consts } from '~/Consts';
 
 export function calcThumbnailSize(origW: number, origH: number): Size2D {
   return calcFitSize(origW, origH, Consts.projectThumbnailSize, Consts.projectThumbnailSize);

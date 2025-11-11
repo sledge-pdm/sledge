@@ -1,5 +1,5 @@
 import type { RGBA, RawPixelData } from '@sledge/anvil';
-import { PackedDiffs } from 'node_modules/@sledge/anvil/src/types/patch/Patch';
+import { PackedDiffs } from '@sledge/anvil';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
 

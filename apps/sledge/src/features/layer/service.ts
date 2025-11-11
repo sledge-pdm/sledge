@@ -29,6 +29,7 @@ import { eventBus } from '~/utils/EventBus';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { changeBaseLayerColor, createLayer } from './model';
 import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
+import { AntialiasMode } from '@sledge/anvil';
 
 // Layer property updates
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];

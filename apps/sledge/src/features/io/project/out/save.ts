@@ -2,7 +2,7 @@ import { FileLocation } from '@sledge/core';
 import { appDataDir } from '@tauri-apps/api/path';
 import { confirm, save } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
-import { calcThumbnailSize, ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
+import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { dumpProject } from '~/features/io/project/out/dump';
@@ -12,6 +12,7 @@ import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStor
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import { getDefaultProjectDir, getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 
 async function folderSelection(location?: FileLocation) {
   const nameWOExtension = location?.name ? getFileNameWithoutExtension(location?.name) : 'new project';
@@ -28,7 +29,7 @@ async function saveThumbnailData(selectedPath: string) {
   const fileId = await getFileUniqueId(selectedPath);
   const { width, height } = canvasStore.canvas;
   const thumbSize = calcThumbnailSize(width, height);
-  const thumbnailBlob = await new ThumbnailGenerator().generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
+  const thumbnailBlob = await canvasThumbnailGenerator.generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
   const thumbnailDataUrl = await blobToDataUrl(thumbnailBlob);
   return await saveThumbnailExternal(fileId, thumbnailDataUrl);
 }

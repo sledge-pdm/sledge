@@ -2,8 +2,8 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { Layer } from '~/features/layer';
+import { LayerThumbnailGenerator } from '~/features/layer/LayerThumbnailGenerator';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -39,7 +39,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
   let canvasRef: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
-  const thumbnailGen = new ThumbnailGenerator();
+  const thumbnailGen = new LayerThumbnailGenerator();
 
   // RAF and update state management
   const [needsUpdate, setNeedsUpdate] = createSignal<boolean>(false);

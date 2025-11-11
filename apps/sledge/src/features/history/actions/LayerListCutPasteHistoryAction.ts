@@ -71,7 +71,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
         anvil.importWebp(packed.image.webpBuffer, width, height);
       } else {
         const rawBuffer = webpToRaw(packed.image.webpBuffer, width, height);
-        anvilManager.registerAnvil(packed.layer.id, new Uint8ClampedArray(rawBuffer.buffer), width, height);
+        anvilManager.registerAnvil(packed.layer.id, rawBuffer, width, height);
       }
     } else {
       const width = canvasStore.canvas.width;

@@ -1,3 +1,4 @@
+import type { RawPixelData } from '@sledge/anvil';
 import { Anvil } from '@sledge/anvil';
 
 export class AnvilManager {
@@ -7,7 +8,7 @@ export class AnvilManager {
     return this.anvils.get(layerId);
   }
 
-  public registerAnvil(layerId: string, buffer: Uint8ClampedArray, width: number, height: number): Anvil {
+  public registerAnvil(layerId: string, buffer: RawPixelData, width: number, height: number): Anvil {
     const anvil = new Anvil(width, height);
     anvil.replaceBuffer(buffer);
     this.anvils.set(layerId, anvil);

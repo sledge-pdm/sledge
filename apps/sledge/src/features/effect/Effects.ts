@@ -1,3 +1,4 @@
+import { toUint8Array } from '@sledge/anvil';
 import { brightness_contrast, dithering, dust_removal, gaussian_blur, grayscale, invert, posterize } from '@sledge/wasm';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flushPatch, registerWholeChange } from '~/features/layer/anvil/AnvilController';
@@ -17,8 +18,10 @@ const EFFECTS = {
 export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, options?: any) {
   const anvil = getAnvilOf(layerId);
   if (anvil) {
-    registerWholeChange(layerId, anvil.getBufferPointer());
-    EFFECTS[effect](new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight(), options);
+    const bufferPointer = anvil.getBufferPointer();
+    if (!bufferPointer) return;
+    registerWholeChange(layerId, bufferPointer);
+    EFFECTS[effect](toUint8Array(bufferPointer), anvil.getWidth(), anvil.getHeight(), options);
 
     const patch = flushPatch(layerId);
     if (patch) {

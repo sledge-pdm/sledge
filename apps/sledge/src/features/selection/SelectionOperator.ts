@@ -6,6 +6,7 @@ import { ConvertSelectionHistoryAction } from '~/features/history/actions/Conver
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 // import { getActiveAgent } from '~/features/layer/agent/LayerAgentManager'; // legacy (will be removed)
+import type { RawPixelData } from '@sledge/anvil';
 import { getBufferPointer, getHeight as getLayerHeight, getWidth as getLayerWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -232,7 +233,7 @@ export const computeMaskBBox = (
 
 export function getCurrentSelectionBuffer():
   | {
-      buffer: Uint8Array;
+      buffer: RawPixelData;
       bbox: { x: number; y: number; width: number; height: number };
     }
   | undefined {
@@ -246,10 +247,10 @@ export function getCurrentSelectionBuffer():
   if (!bbox) return;
 
   const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
-  const selectionBuffer = activeAnvil.sliceWithMask(new Uint8Array(trimmedMask), bbox.width, bbox.height, bbox.x, bbox.y);
+  const selectionBuffer = activeAnvil.sliceWithMask(trimmedMask, bbox.width, bbox.height, bbox.x, bbox.y);
 
   return {
-    buffer: new Uint8Array(selectionBuffer.buffer),
+    buffer: selectionBuffer,
     bbox,
   };
 }

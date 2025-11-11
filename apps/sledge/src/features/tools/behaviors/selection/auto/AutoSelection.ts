@@ -1,4 +1,4 @@
-import { Anvil } from '@sledge/anvil';
+import { Anvil, toUint8Array } from '@sledge/anvil';
 import { auto_select_region_mask } from '@sledge/wasm';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -51,7 +51,9 @@ export class AutoSelection extends SelectionBase {
     if (width === 0 || height === 0) return undefined;
 
     // 元バッファ（RGBA）を直接渡して WASM 側で領域抽出
-    const src = new Uint8Array(anvil.getBufferPointer().buffer); // RGBA buffer
+    const buffer = anvil.getBufferPointer();
+    if (!buffer) return undefined;
+    const src = toUint8Array(buffer); // RGBA buffer
     // connectivity は現状 4 固定（0を指定し内部で4接続扱い）
     const mask = auto_select_region_mask(src, width, height, position.x, position.y, threshold ?? 0, 4);
     return mask;

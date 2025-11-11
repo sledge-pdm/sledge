@@ -74,7 +74,7 @@ export function loadV1(project: ProjectV1) {
     const { webpBuffer } = data;
     if (webpBuffer) {
       const buffer = webpToRaw(webpBuffer, canvasSize.width, canvasSize.height);
-      anvilManager.registerAnvil(layer.id, new Uint8ClampedArray(buffer.buffer), canvasSize.width, canvasSize.height);
+      anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
     } else {
       const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
       anvilManager.registerAnvil(layer.id, newBuffer, canvasSize.width, canvasSize.height);

@@ -1,3 +1,4 @@
+import type { RawPixelData } from '@sledge/anvil';
 import { AntialiasMode, rawToWebp, webpToRaw } from '@sledge/anvil';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
@@ -88,7 +89,7 @@ export async function addImagesFromLocal(imagePaths: string | string[], forceFit
   }
 }
 
-export async function addImagesFromRawBuffer(rawBuffer: Uint8ClampedArray, width: number, height: number, forceFit?: boolean) {
+export async function addImagesFromRawBuffer(rawBuffer: RawPixelData, width: number, height: number, forceFit?: boolean) {
   const entry = await createEntryFromRawBuffer(rawBuffer, width, height, forceFit);
   insertEntry(entry, false);
 }
@@ -128,7 +129,7 @@ async function transferToLayer(layerId: string, entryId: string) {
 
   const rotate = normalizeRotation(entry.transform.rotation);
 
-  anvil.transferFromRaw(new Uint8ClampedArray(rawEntryBuffer.buffer), entry.base.width, entry.base.height, {
+  anvil.transferFromRaw(rawEntryBuffer, entry.base.width, entry.base.height, {
     offsetX,
     offsetY,
     scaleX,
@@ -178,14 +179,14 @@ export async function createEntryFromLocalImage(imagePath: string, forceFit?: bo
   const width = bitmap.width;
   const height = bitmap.height;
   const imageData = await loadImageData(bitmap);
-  const webpBuffer = rawToWebp(new Uint8Array(imageData.data.buffer), width, height);
+  const webpBuffer = rawToWebp(imageData.data, width, height);
   bitmap.close();
   const entry = createEntry(webpBuffer, width, height, forceFit);
   entry.descriptionName = pathToFileLocation(imagePath)?.name;
   return entry;
 }
 
-export async function createEntryFromRawBuffer(rawBuffer: Uint8Array | Uint8ClampedArray, width: number, height: number, forceFit?: boolean) {
+export async function createEntryFromRawBuffer(rawBuffer: RawPixelData, width: number, height: number, forceFit?: boolean) {
   const webpBuffer = rawToWebp(rawBuffer, width, height);
   const entry = createEntry(webpBuffer, width, height, forceFit);
   return entry;

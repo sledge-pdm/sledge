@@ -1,4 +1,4 @@
-import { PixelBuffer } from '@sledge/anvil';
+import { RgbaBuffer } from '@sledge/anvil';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 
 export interface FloatingBufferApplyParams {
@@ -11,7 +11,7 @@ export interface FloatingBufferApplyParams {
 // Pure helper: returns new patched buffer (does NOT touch Anvil or history)
 export function applyFloatingBuffer({ width, height, floatingBuffer, target }: FloatingBufferApplyParams): Uint8ClampedArray {
   try {
-    const buffer = PixelBuffer.fromRaw(width, height, target);
+    const buffer = RgbaBuffer.fromRaw(width, height, target);
     buffer.transferFromRaw(floatingBuffer.buffer, floatingBuffer.width, floatingBuffer.height, {
       offsetX: floatingBuffer.offset.x,
       offsetY: floatingBuffer.offset.y,

@@ -21,6 +21,7 @@ export interface FloatingBuffer {
   width: number;
   height: number;
   offset: Vec2;
+  origin?: Vec2;
 }
 
 class FloatingMoveManager {
@@ -42,15 +43,48 @@ class FloatingMoveManager {
   private targetBuffer: Uint8ClampedArray | undefined = undefined;
   private floatingBuffer: FloatingBuffer | undefined = undefined;
 
-  private movePreviewBuffer: Uint8ClampedArray | undefined = undefined; // should be same size as layer/canvas.
+  private overlayVersion = 0;
   private state: MoveMode | undefined = undefined;
 
   public getPreviewBuffer(): Uint8ClampedArray | undefined {
-    return this.movePreviewBuffer;
+    return this.targetBuffer;
   }
 
   public getFloatingBuffer() {
     return this.floatingBuffer;
+  }
+
+  public getCompositePreview(): Uint8ClampedArray | undefined {
+    if (!this.targetBuffer || !this.floatingBuffer || !canvasStore.canvas) return undefined;
+    return applyFloatingBuffer({
+      width: canvasStore.canvas.width,
+      height: canvasStore.canvas.height,
+      floatingBuffer: this.floatingBuffer,
+      target: this.targetBuffer,
+    });
+  }
+
+  public getOverlayDescriptor():
+    | {
+        buffer: Uint8ClampedArray;
+        width: number;
+        height: number;
+        position: Vec2;
+        version: number;
+      }
+    | undefined {
+    if (!this.floatingBuffer) return undefined;
+    const origin = this.floatingBuffer.origin ?? { x: 0, y: 0 };
+    return {
+      buffer: this.floatingBuffer.buffer,
+      width: this.floatingBuffer.width,
+      height: this.floatingBuffer.height,
+      position: {
+        x: origin.x + this.floatingBuffer.offset.x,
+        y: origin.y + this.floatingBuffer.offset.y,
+      },
+      version: this.overlayVersion,
+    };
   }
 
   public isMoving() {
@@ -62,6 +96,15 @@ class FloatingMoveManager {
   }
 
   constructor() {}
+
+  private requestFrame(immediate?: boolean, layerIdOverride?: string) {
+    const layerId = layerIdOverride ?? this.targetLayerId;
+    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
+    eventBus.emit('preview:requestUpdate', { layerId });
+    const payload = immediate ? { immediate: true } : {};
+    eventBus.emit('selection:updateSelectionMenu', payload);
+    eventBus.emit('selection:updateSelectionPath', payload);
+  }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
     const width = getWidth(targetLayerId);
@@ -98,24 +141,14 @@ class FloatingMoveManager {
     this.logger.debugLog('startMove', { floatingBuffer, state });
     this.floatingBuffer = floatingBuffer;
     this.state = state;
+    this.overlayVersion++;
 
-    this.movePreviewBuffer = applyFloatingBuffer({
-      width: canvasStore.canvas.width,
-      height: canvasStore.canvas.height,
-      floatingBuffer: this.floatingBuffer,
-      target: this.targetBuffer,
-    });
-
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
-    eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
-
-    eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSelectionPath', {});
+    this.requestFrame();
   }
 
   public async moveDelta(delta: Vec2) {
     this.logger.debugLog('moveDelta', { delta });
-    if (!this.floatingBuffer || !this.movePreviewBuffer) {
+    if (!this.floatingBuffer) {
       console.error('attempt to move, but nothing is moving.');
       return;
     }
@@ -123,40 +156,20 @@ class FloatingMoveManager {
     this.floatingBuffer.offset.x += delta.x;
     this.floatingBuffer.offset.y += delta.y;
 
-    return this.updatePreview();
+    this.requestFrame();
+    return this.floatingBuffer;
   }
 
   public async moveTo(newOffset: Vec2) {
     this.logger.debugLog('moveTo', { offset: newOffset });
-    if (!this.floatingBuffer || !this.movePreviewBuffer) {
+    if (!this.floatingBuffer) {
       console.error('attempt to move, but nothing is moving.');
       return;
     }
 
     this.floatingBuffer.offset = newOffset;
 
-    return this.updatePreview();
-  }
-
-  public updatePreview() {
-    if (!this.floatingBuffer || !this.movePreviewBuffer || !this.targetBuffer) {
-      console.error('attempt to move, but nothing is moving.');
-      return;
-    }
-
-    // update preview buffer
-    this.movePreviewBuffer = applyFloatingBuffer({
-      width: canvasStore.canvas.width,
-      height: canvasStore.canvas.height,
-      floatingBuffer: this.floatingBuffer,
-      target: this.targetBuffer,
-    });
-
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
-    eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
-    eventBus.emit('selection:updateSelectionMenu', {});
-    eventBus.emit('selection:updateSelectionPath', {});
-
+    this.requestFrame();
     return this.floatingBuffer;
   }
 
@@ -166,20 +179,18 @@ class FloatingMoveManager {
       console.error('attempt to commit, but no target layer or buffer is set.');
       return;
     }
-    if (!this.floatingBuffer || !this.movePreviewBuffer) {
+    if (!this.floatingBuffer) {
       console.error('attempt to commit, but nothing is moving.');
       return;
     }
 
-    // update preview buffer
-    this.movePreviewBuffer = applyFloatingBuffer({
-      width: canvasStore.canvas.width,
-      height: canvasStore.canvas.height,
-      floatingBuffer: this.floatingBuffer,
-      target: this.targetBuffer,
-    });
+    const composed = this.getCompositePreview();
+    if (!composed) {
+      console.error('failed to build composed preview for commit');
+      return;
+    }
 
-    setBuffer(this.targetLayerId, this.movePreviewBuffer);
+    setBuffer(this.targetLayerId, composed);
     const orig = webpToRaw(this.targetBufferOriginal.buffer, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
     registerWholeChange(this.targetLayerId, orig);
     const patch = flushPatch(this.targetLayerId);
@@ -201,25 +212,28 @@ class FloatingMoveManager {
     }
 
     // Reset the state
+    const layerId = this.targetLayerId;
     this.state = undefined;
     this.floatingBuffer = undefined;
     this.targetLayerId = undefined;
     this.targetBuffer = undefined;
+    this.targetBufferOriginal = undefined;
+    this.overlayVersion++;
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
-    eventBus.emit('preview:requestUpdate', { layerId: this.targetLayerId });
-
-    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSelectionPath', { immediate: true });
+    this.requestFrame(true, layerId);
   }
 
   public cancel() {
     // Reset the state
+    const layerId = this.targetLayerId;
     this.state = undefined;
     this.floatingBuffer = undefined;
+    this.targetLayerId = undefined;
+    this.targetBuffer = undefined;
+    this.targetBufferOriginal = undefined;
+    this.overlayVersion++;
 
-    eventBus.emit('selection:updateSelectionMenu', { immediate: true });
-    eventBus.emit('selection:updateSelectionPath', { immediate: true });
+    this.requestFrame(true, layerId);
   }
 }
 

@@ -16,6 +16,12 @@ uniform int            u_blendModes[16];
 uniform bool           u_hasBaseLayer;
 uniform vec4           u_baseLayerColor;
 
+uniform bool           u_hasOverlay;
+uniform sampler2D      u_overlayTex;
+uniform vec2           u_overlayOrigin;
+uniform vec2           u_overlaySize;
+uniform vec2           u_canvasSize;
+
 
 float blendAlpha(float s, float d) {
   return s + d * (1.0 - s);
@@ -107,6 +113,24 @@ vec4 blendVividLight(vec4 src, vec4 dst) {
   return vec4(rgb, blendAlpha(Sa, dst.a));
 }
 
+vec4 sampleOverlay(vec2 uv) {
+  if (!u_hasOverlay) {
+    return vec4(0.0);
+  }
+  if (u_overlaySize.x <= 0.0 || u_overlaySize.y <= 0.0) {
+    return vec4(0.0);
+  }
+
+  vec2 pixel = vec2(uv.x * u_canvasSize.x, uv.y * u_canvasSize.y);
+  vec2 relative = pixel - u_overlayOrigin;
+  if (relative.x < 0.0 || relative.y < 0.0 || relative.x >= u_overlaySize.x || relative.y >= u_overlaySize.y) {
+    return vec4(0.0);
+  }
+
+  vec2 texUV = vec2(relative.x / u_overlaySize.x, relative.y / u_overlaySize.y);
+  return texture(u_overlayTex, texUV);
+}
+
 void main() {
   // ベースレイヤーがある場合はその色を、ない場合は最初のレイヤーから開始
   vec4 dst;
@@ -141,6 +165,13 @@ void main() {
       dst = blendVividLight(src, dst);
     } else {
       dst = blendNormal(src, dst);
+    }
+  }
+
+  if (u_hasOverlay) {
+    vec4 overlay = sampleOverlay(v_uv);
+    if (overlay.a > 0.0) {
+      dst = blendNormal(overlay, dst);
     }
   }
 

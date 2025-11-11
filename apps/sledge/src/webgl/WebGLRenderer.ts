@@ -52,14 +52,20 @@ export class WebGLRenderer {
   private program: WebGLProgram;
   private vao: WebGLVertexArrayObject;
   private texArray!: WebGLTexture;
+  private overlayTexture?: WebGLTexture;
   private fullscreenQuadBuffer?: WebGLBuffer; // バッファの参照を保持
   private currentTextureDepth: number = 0; // 現在のテクスチャ配列の深度を追跡
+  private overlayTextureVersion = -1;
 
   private uLayerCountLoc!: WebGLUniformLocation;
   private uOpacitiesLoc!: WebGLUniformLocation;
   private uBlendModesLoc!: WebGLUniformLocation;
   private uHasBaseLayerLoc!: WebGLUniformLocation;
   private uBaseLayerColorLoc!: WebGLUniformLocation;
+  private uHasOverlayLoc!: WebGLUniformLocation;
+  private uOverlayOriginLoc!: WebGLUniformLocation;
+  private uOverlaySizeLoc!: WebGLUniformLocation;
+  private uCanvasSizeLoc!: WebGLUniformLocation;
   private disposed: boolean = false;
 
   private isChromium: boolean = false;
@@ -110,6 +116,10 @@ export class WebGLRenderer {
     // sampler2DArray はユニット 0
     const loc = gl.getUniformLocation(this.program, 'u_texArray')!;
     gl.uniform1i(loc, 0);
+    const overlaySamplerLoc = gl.getUniformLocation(this.program, 'u_overlayTex');
+    if (overlaySamplerLoc) {
+      gl.uniform1i(overlaySamplerLoc, 1);
+    }
 
     // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
@@ -120,6 +130,15 @@ export class WebGLRenderer {
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    this.overlayTexture = gl.createTexture()!;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.overlayTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.activeTexture(gl.TEXTURE0);
 
     // 初期化完了後の一括エラーチェック
     batchCheckGLError(gl, 'WebGL texture setup and parameters');
@@ -134,6 +153,10 @@ export class WebGLRenderer {
     this.uBlendModesLoc = this.gl.getUniformLocation(this.program, 'u_blendModes')!;
     this.uHasBaseLayerLoc = this.gl.getUniformLocation(this.program, 'u_hasBaseLayer')!;
     this.uBaseLayerColorLoc = this.gl.getUniformLocation(this.program, 'u_baseLayerColor')!;
+    this.uHasOverlayLoc = this.gl.getUniformLocation(this.program, 'u_hasOverlay')!;
+    this.uOverlayOriginLoc = this.gl.getUniformLocation(this.program, 'u_overlayOrigin')!;
+    this.uOverlaySizeLoc = this.gl.getUniformLocation(this.program, 'u_overlaySize')!;
+    this.uCanvasSizeLoc = this.gl.getUniformLocation(this.program, 'u_canvasSize')!;
 
     logger.debugLog('Initialized WebGLRenderer');
   }
@@ -272,7 +295,8 @@ export class WebGLRenderer {
       const anvil = getAnvilOf(layer.id);
       if (!anvil) return;
       const usePreviewBuffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving();
-      const buf = usePreviewBuffer ? floatingMoveManager.getPreviewBuffer() : getBufferPointer(layer.id);
+      const baseBuffer = getBufferPointer(layer.id);
+      const buf = usePreviewBuffer ? (floatingMoveManager.getPreviewBuffer() ?? baseBuffer) : baseBuffer;
       if (!buf) return;
 
       // バッファサイズの整合性をチェック
@@ -404,6 +428,17 @@ export class WebGLRenderer {
       logger.debugLog('🎨 Base layer disabled for this render');
     }
 
+    const overlayDescriptor = floatingMoveManager.isMoving() ? floatingMoveManager.getOverlayDescriptor() : undefined;
+    if (overlayDescriptor && overlayDescriptor.width > 0 && overlayDescriptor.height > 0) {
+      this.syncOverlayTexture(overlayDescriptor);
+      gl.uniform1i(this.uHasOverlayLoc, 1);
+      gl.uniform2f(this.uOverlayOriginLoc, overlayDescriptor.position.x, overlayDescriptor.position.y);
+      gl.uniform2f(this.uOverlaySizeLoc, overlayDescriptor.width, overlayDescriptor.height);
+    } else {
+      gl.uniform1i(this.uHasOverlayLoc, 0);
+    }
+    gl.uniform2f(this.uCanvasSizeLoc, this.width, this.height);
+
     // フルスクリーンクワッドを描画
     logger.debugLog(`🖌️ Drawing fullscreen quad...`);
 
@@ -417,6 +452,19 @@ export class WebGLRenderer {
     } else {
       logger.debugLog(`✅ Render completed successfully`);
     }
+  }
+
+  private syncOverlayTexture(overlay?: { buffer: Uint8ClampedArray; width: number; height: number; version: number }) {
+    if (!overlay || !this.overlayTexture) return;
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.overlayTexture);
+    if (this.overlayTextureVersion !== overlay.version) {
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, overlay.width, overlay.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, overlay.buffer);
+      this.overlayTextureVersion = overlay.version;
+    }
+    gl.activeTexture(gl.TEXTURE0);
   }
 
   public isDisposed(): boolean {
@@ -566,6 +614,12 @@ export class WebGLRenderer {
     if (this.texArray) {
       gl.deleteTexture(this.texArray);
       logger.debugLog('WebGL texture array disposed');
+    }
+    if (this.overlayTexture) {
+      gl.deleteTexture(this.overlayTexture);
+      this.overlayTexture = undefined;
+      this.overlayTextureVersion = -1;
+      logger.debugLog('WebGL floating overlay texture disposed');
     }
 
     // プログラムを削除

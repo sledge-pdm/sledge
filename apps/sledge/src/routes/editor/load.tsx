@@ -128,12 +128,9 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
 async function notifyLastProjectFallback(error: unknown) {
   const errorMessage = error instanceof Error ? error.message : error ? String(error) : undefined;
   const fallbackMessage = errorMessage && errorMessage.trim().length > 0 ? errorMessage : '<No message available>';
-  await message(
-    `Failed to reopen the last project. A new project was created instead.\n${fallbackMessage}`,
-    {
-      kind: 'warning',
-      title: 'Project load',
-      okLabel: 'OK',
-    }
-  );
+  await message(`Failed to reopen the last project. A new project was created instead.\n${fallbackMessage}`, {
+    kind: 'warning',
+    title: 'Project load',
+    okLabel: 'OK',
+  });
 }

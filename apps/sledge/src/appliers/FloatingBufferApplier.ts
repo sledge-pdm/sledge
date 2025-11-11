@@ -12,9 +12,11 @@ export interface FloatingBufferApplyParams {
 export function applyFloatingBuffer({ width, height, floatingBuffer, target }: FloatingBufferApplyParams): Uint8ClampedArray {
   try {
     const buffer = RgbaBuffer.fromRaw(width, height, target);
+    const originX = floatingBuffer.origin?.x ?? 0;
+    const originY = floatingBuffer.origin?.y ?? 0;
     buffer.transferFromRaw(floatingBuffer.buffer, floatingBuffer.width, floatingBuffer.height, {
-      offsetX: floatingBuffer.offset.x,
-      offsetY: floatingBuffer.offset.y,
+      offsetX: Math.round(originX + floatingBuffer.offset.x),
+      offsetY: Math.round(originY + floatingBuffer.offset.y),
     });
     return new Uint8ClampedArray(buffer.data);
   } catch (e) {

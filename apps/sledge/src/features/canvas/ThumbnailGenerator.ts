@@ -61,11 +61,14 @@ export class ThumbnailGenerator {
         this.offCtx.clearRect(0, 0, width, height);
       }
 
-      const buf: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(
-        layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving()
-          ? floatingMoveManager.getPreviewBuffer()!
-          : anvil.getBufferPointer()
-      );
+      const isFloating = layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving();
+      let sourceBuffer = anvil.getBufferPointer();
+      if (isFloating) {
+        sourceBuffer = floatingMoveManager.getCompositePreview() ?? floatingMoveManager.getPreviewBuffer() ?? sourceBuffer;
+      }
+      if (!sourceBuffer) throw new Error('No buffer available for layer ' + layerId);
+
+      const buf: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(sourceBuffer);
       const imgData = new ImageData(buf, w, h);
       this.tmpCtx.putImageData(imgData, 0, 0);
 

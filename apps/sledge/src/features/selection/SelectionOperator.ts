@@ -81,6 +81,7 @@ export function startMove() {
       width,
       height,
       offset: { x: 0, y: 0 },
+      origin: { x: 0, y: 0 },
     };
     floatingMoveManager.startMove(layerFloatingBuffer, 'layer', layerId);
   }
@@ -95,7 +96,13 @@ export function startMoveFromPasted(imageData: ImageData, boundBox: { x: number;
   selectionManager.setPreviewFragment({ kind: 'rect', startPosition: pastingOffset, width: boundBox.width, height: boundBox.height });
   selectionManager.commit();
   floatingMoveManager.startMove(
-    { buffer: new Uint8ClampedArray(imageData.data), width: boundBox.width, height: boundBox.height, offset: pastingOffset },
+    {
+      buffer: new Uint8ClampedArray(imageData.data),
+      width: boundBox.width,
+      height: boundBox.height,
+      offset: pastingOffset,
+      origin: { x: boundBox.x, y: boundBox.y },
+    },
     'pasted',
     layerId
   );

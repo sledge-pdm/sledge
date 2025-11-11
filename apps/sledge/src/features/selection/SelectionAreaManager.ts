@@ -2,7 +2,14 @@
 
 import { TileIndex } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask } from '@sledge/wasm';
+import {
+  apply_mask_offset,
+  combine_masks_add,
+  combine_masks_replace,
+  combine_masks_subtract,
+  fill_rect_mask,
+  trim_mask_with_box,
+} from '@sledge/wasm';
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { activeLayer } from '~/features/layer';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
@@ -369,14 +376,20 @@ class SelectionAreaManager {
     this.commitOffset();
     this.commit();
 
-    // slice buffer by mask
-    const patch = anvil.sliceWithMask(new Uint8Array(this.getCombinedMask()), width, height, 0, 0);
+    const baseMask = new Uint8Array(this.getCombinedMask());
+    const bbox = this.selectionMask.getBoundBox();
+    if (!bbox) return;
+    const selectionWidth = bbox.right - bbox.left + 1;
+    const selectionHeight = bbox.bottom - bbox.top + 1;
+    const trimmedMask = trim_mask_with_box(baseMask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
+    const patch = anvil.sliceWithMask(trimmedMask, selectionWidth, selectionHeight, bbox.left, bbox.top);
 
     return {
       buffer: patch,
       offset: { x: 0, y: 0 },
-      width,
-      height,
+      width: selectionWidth,
+      height: selectionHeight,
+      origin: { x: bbox.left, y: bbox.top },
     };
   }
 }

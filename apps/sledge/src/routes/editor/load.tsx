@@ -71,7 +71,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
       }
       setSavedLocation(path);
       await loadProjectJson(projectFile);
-      setProjectStore('isProjectChangedAfterSave', true);
+      setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } catch (error) {
       console.error('Failed to read project:', error);
@@ -82,7 +82,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
     setFileStore('openAs', 'image');
     const isImportSuccessful = await loadProjectFromLocalImage(loc);
     if (isImportSuccessful) {
-      setProjectStore('isProjectChangedAfterSave', true);
+      setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } else {
       console.error('Failed to import image from path:', path);

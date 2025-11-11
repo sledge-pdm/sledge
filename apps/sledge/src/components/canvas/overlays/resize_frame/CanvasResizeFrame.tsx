@@ -1,25 +1,20 @@
 import { Size2D, Vec2 } from '@sledge/core';
 import { fonts } from '@sledge/theme';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { CanvasPos } from '~/types/CoordinateTypes';
-import ResizeFrameInteract, { ResizeFrameRect } from './ResizeFrameInteract';
 
 export const CanvasResizeFrame: Component = () => {
-  // 編集中の矩形（キャンバス座標系）
-  const [rect, setRect] = createSignal<ResizeFrameRect | undefined>();
-  // 画面座標での表示開始位置とサイズ
+  const [rect, setRect] = createSignal<FrameRect | undefined>();
   const [start, setStart] = createSignal<Vec2 | undefined>();
   const [size, setSize] = createSignal<Size2D | undefined>();
 
-  // 座標変換の結果をキャッシュするためのメモ化
   const screenBox = createMemo(() => {
     const r = rect();
     if (!r) return undefined;
-
-    // 矩形の左上と右下をオーバーレイ座標系に変換
     const topLeft = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x, r.y));
     const bottomRight = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x + r.width, r.y + r.height));
 
@@ -29,7 +24,6 @@ export const CanvasResizeFrame: Component = () => {
     };
   });
 
-  // screenBoxの変化を監視してstateを更新
   createEffect(() => {
     const box = screenBox();
     if (box) {
@@ -38,81 +32,54 @@ export const CanvasResizeFrame: Component = () => {
     }
   });
 
-  const recomputeScreenBox = () => {
-    // メモ化された値を使用するため、直接的な再計算は不要
-    // createEffectが自動的に更新を処理
-  };
-
-  // interact インスタンス保持
   let svgEl: SVGSVGElement | undefined;
-  let interact: ResizeFrameInteract | undefined;
+  let interact: OnCanvasFrameInteract | undefined;
 
   const setupInteract = () => {
     if (interact || !svgEl || !rect()) return; // 既に初期化済み or 条件未整備
-    interact = new ResizeFrameInteract(
-      svgEl,
-      () => rect()!,
-      (r) => {
+    interact = new OnCanvasFrameInteract(svgEl, () => rect()!, {
+      keepAspect: 'shift',
+      snapToPixel: true,
+      allowInvert: true,
+
+      onChange: (r) => {
+        // should process negative case properly
+        if (r.width < 0) {
+          r.width = Math.abs(r.width);
+          r.x -= r.width; // idk if this works (may need to +1 or -1 but leave this as is)
+        }
+        if (r.height < 0) {
+          r.height = Math.abs(r.height);
+          r.y -= r.height; // idk if this works (may need to +1 or -1 but leave this as is)
+        }
         setRect(r);
-        // screenBoxメモが自動的に更新されるため、明示的な呼び出し不要
       },
-      () => {
-        /* commit は CanvasControls 側 */
-      }
-    );
+    });
     interact.setInteractListeners();
   };
 
   onMount(() => {
-    // 初期矩形: 現在のキャンバスサイズ
     const w = canvasStore.canvas.width;
     const h = canvasStore.canvas.height;
     if (w > 0 && h > 0) {
-      setRect({ x: 0, y: 0, width: w, height: h });
-      // screenBoxメモが自動的に更新されるため、明示的な呼び出し不要
+      setRect({ x: 0, y: 0, width: w, height: h, rotation: 0 });
     }
     setupInteract();
   });
+
   onCleanup(() => {
     interact?.removeInteractListeners();
   });
 
-  // キャンバスサイズが外部変更された場合、未操作時のみ矩形を追従
   createEffect(() => {
     const w = canvasStore.canvas.width;
     const h = canvasStore.canvas.height;
     if (!rect() && w > 0 && h > 0) {
-      setRect({ x: 0, y: 0, width: w, height: h });
-      // screenBoxメモが自動的に更新されるため、明示的な呼び出し不要
+      setRect({ x: 0, y: 0, width: w, height: h, rotation: 0 });
+
       setupInteract();
     }
   });
-  // saveRectToStore 削除: logicalFrame から同期する
-
-  const Handle: Component<{ x: string; y: string; 'data-pos': string; size?: number }> = (props) => {
-    // オーバーレイはスケールしないので、ズームのみ相殺
-    const size = () => props.size ?? 8;
-    return (
-      <rect
-        x={props.x}
-        y={props.y}
-        class={'resize-handle'}
-        data-pos={props['data-pos']}
-        width={size()}
-        height={size()}
-        stroke='#808080'
-        fill='black'
-        stroke-width={1}
-        vector-effect={'non-scaling-stroke'}
-        pointer-events='all'
-        style={{
-          cursor: `${props['data-pos']}-resize`,
-          transform: `translate(-${size() / 2}px, -${size() / 2}px)`,
-          position: 'absolute',
-        }}
-      />
-    );
-  };
 
   // 確定時に使用する整数キャンバスサイズとフレーム左上座標(startX,startY)を計算
   // - startX = floor(rect.x) / startY = floor(rect.y)
@@ -158,7 +125,6 @@ export const CanvasResizeFrame: Component = () => {
             position: 'absolute',
             left: `${start()!.x}px`,
             top: `${start()!.y}px`,
-
             width: `${size()!.width}px`,
             height: `${size()!.height}px`,
             margin: 0,
@@ -169,7 +135,6 @@ export const CanvasResizeFrame: Component = () => {
             'pointer-events': 'all',
           }}
         >
-          {/* 内部ドラッグ用の透明サーフェス */}
           <rect
             class={'drag-surface'}
             x={'0'}
@@ -180,7 +145,7 @@ export const CanvasResizeFrame: Component = () => {
             pointer-events={'all'}
             style={{ cursor: 'move' }}
           />
-          {/* border rect */}
+
           <rect
             class={'border-rect'}
             width={'100%'}
@@ -192,7 +157,7 @@ export const CanvasResizeFrame: Component = () => {
               'pointer-events': 'none',
             }}
           />
-          {/* 情報表示: 1行目 = 表示上のピクセルサイズ (スクリーン), 2行目 = 論理キャンバスサイズ + オフセット */}
+
           <g font-size={16} style={{ 'font-family': fonts.ZFB08 }} fill='white' stroke='none'>
             <Show when={logicalFrame()}>
               <text x={8} y={20}>
@@ -200,16 +165,8 @@ export const CanvasResizeFrame: Component = () => {
               </text>
             </Show>
           </g>
-          {/* 四隅 */}
-          <Handle x={'0'} y={'0'} data-pos='nw' />
-          <Handle x={'100%'} y={'0'} data-pos='ne' />
-          <Handle x={'100%'} y={'100%'} data-pos='se' />
-          <Handle x={'0'} y={'100%'} data-pos='sw' />
-          {/* 四辺 */}
-          <Handle x={'50%'} y={'0'} data-pos='n' />
-          <Handle x={'100%'} y={'50%'} data-pos='e' />
-          <Handle x={'50%'} y={'100%'} data-pos='s' />
-          <Handle x={'0'} y={'50%'} data-pos='w' />
+
+          <FrameHandles corner edge visible size={8} />
         </svg>
       </Show>
     </>

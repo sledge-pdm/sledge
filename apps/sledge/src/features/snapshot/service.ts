@@ -24,7 +24,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
       snapshot: await dumpProjectJson(),
       thumbnail: thumbnailImageData
         ? {
-            webpBuffer: rawToWebp(new Uint8Array(thumbnailImageData.data.buffer), thumbnailImageData.width, thumbnailImageData.height),
+            webpBuffer: rawToWebp(thumbnailImageData.data, thumbnailImageData.width, thumbnailImageData.height),
             width: thumbnailImageData.width,
             height: thumbnailImageData.height,
           }

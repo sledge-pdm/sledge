@@ -71,20 +71,102 @@ export function mask_to_path(mask, width, height, offset_x, offset_y) {
     }
 }
 
-let cachedFloat32ArrayMemory0 = null;
-
-function getFloat32ArrayMemory0() {
-    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
-        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
-    }
-    return cachedFloat32ArrayMemory0;
+/**
+ * @param {Uint8Array} buffer
+ * @param {number} width
+ * @param {number} height
+ * @returns {Uint8Array}
+ */
+export function create_opacity_mask(buffer, width, height) {
+    const ptr0 = passArray8ToWasm0(buffer, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.create_opacity_mask(ptr0, len0, width, height);
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
 }
 
-function passArrayF32ToWasm0(arg, malloc) {
-    const ptr = malloc(arg.length * 4, 4) >>> 0;
-    getFloat32ArrayMemory0().set(arg, ptr / 4);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+/**
+ * Apply brightness and contrast adjustments to the image
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {BrightnessContrastOption} options
+ */
+export function brightness_contrast(pixels, width, height, options) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    _assertClass(options, BrightnessContrastOption);
+    wasm.brightness_contrast(ptr0, len0, pixels, width, height, options.__wbg_ptr);
+}
+
+/**
+ * Apply only brightness adjustment to the image
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {number} brightness
+ */
+export function brightness(pixels, width, height, brightness) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.brightness(ptr0, len0, pixels, width, height, brightness);
+}
+
+/**
+ * Apply only contrast adjustment to the image
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {number} contrast
+ */
+export function contrast(pixels, width, height, contrast) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.contrast(ptr0, len0, pixels, width, height, contrast);
+}
+
+/**
+ * Apply posterize effect to reduce the number of color levels
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {PosterizeOption} options
+ */
+export function posterize(pixels, width, height, options) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    _assertClass(options, PosterizeOption);
+    wasm.posterize(ptr0, len0, pixels, width, height, options.__wbg_ptr);
+}
+
+/**
+ * Apply posterize effect with simple level parameter
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {number} levels
+ */
+export function posterize_simple(pixels, width, height, levels) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.posterize_simple(ptr0, len0, pixels, width, height, levels);
+}
+
+/**
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ */
+export function invert(pixels, width, height) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.invert(ptr0, len0, pixels, width, height);
 }
 
 const cachedTextEncoder = new TextEncoder();
@@ -138,207 +220,6 @@ function passStringToWasm0(arg, malloc, realloc) {
     WASM_VECTOR_LEN = offset;
     return ptr;
 }
-/**
- * Lasso選択のためのスキャンライン塗りつぶし実装
- *
- * この実装は以下の特徴を持ちます：
- * - ポリゴン内部をスキャンライン方式で効率的に判定
- * - Point-in-polygon アルゴリズムによる正確な内部判定
- * - バウンディングボックスによる計算範囲の最適化
- * - メモリ効率的な実装
- * - evenodd/nonzero塗りつぶし規則の選択
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {Float32Array} points
- * @param {string} fill_rule
- * @returns {boolean}
- */
-export function fill_lasso_selection(mask, width, height, points, fill_rule) {
-    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passStringToWasm0(fill_rule, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len2 = WASM_VECTOR_LEN;
-    const ret = wasm.fill_lasso_selection(ptr0, len0, mask, width, height, ptr1, len1, ptr2, len2);
-    return ret !== 0;
-}
-
-/**
- * 選択範囲制限付きLasso選択
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {Float32Array} points
- * @param {Uint8Array} existing_mask
- * @param {string} limit_mode
- * @returns {boolean}
- */
-export function fill_lasso_selection_with_mask(mask, width, height, points, existing_mask, limit_mode) {
-    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passArray8ToWasm0(existing_mask, wasm.__wbindgen_malloc);
-    const len2 = WASM_VECTOR_LEN;
-    const ptr3 = passStringToWasm0(limit_mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len3 = WASM_VECTOR_LEN;
-    const ret = wasm.fill_lasso_selection_with_mask(ptr0, len0, mask, width, height, ptr1, len1, ptr2, len2, ptr3, len3);
-    return ret !== 0;
-}
-
-/**
- * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {Float32Array} points
- * @returns {boolean}
- */
-export function fill_lasso_selection_point_in_polygon(mask, width, height, points) {
-    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.fill_lasso_selection_point_in_polygon(ptr0, len0, mask, width, height, ptr1, len1);
-    return ret !== 0;
-}
-
-/**
- * @param {Uint8Array} target
- * @param {number} target_width
- * @param {number} target_height
- * @param {Uint8Array} patch
- * @param {number} patch_width
- * @param {number} patch_height
- * @param {number} offset_x
- * @param {number} offset_y
- * @returns {Uint8Array}
- */
-export function patch_buffer_rgba(target, target_width, target_height, patch, patch_width, patch_height, offset_x, offset_y) {
-    const ptr0 = passArray8ToWasm0(target, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(patch, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.patch_buffer_rgba(ptr0, len0, target_width, target_height, ptr1, len1, patch_width, patch_height, offset_x, offset_y);
-    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v3;
-}
-
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-/**
- * Apply dithering effect to the image
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {DitheringOption} options
- */
-export function dithering(pixels, width, height, options) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    _assertClass(options, DitheringOption);
-    wasm.dithering(ptr0, len0, pixels, width, height, options.__wbg_ptr);
-}
-
-/**
- * Apply random dithering with simple parameters
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {number} levels
- */
-export function dithering_random(pixels, width, height, levels) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.dithering_random(ptr0, len0, pixels, width, height, levels);
-}
-
-/**
- * Apply error diffusion dithering with simple parameters
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {number} levels
- */
-export function dithering_error_diffusion(pixels, width, height, levels) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.dithering_error_diffusion(ptr0, len0, pixels, width, height, levels);
-}
-
-/**
- * Apply ordered dithering with simple parameters
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {number} levels
- */
-export function dithering_ordered(pixels, width, height, levels) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.dithering_ordered(ptr0, len0, pixels, width, height, levels);
-}
-
-/**
- * Remove small isolated pixel groups (dust removal)
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {DustRemovalOption} options
- */
-export function dust_removal(pixels, width, height, options) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    _assertClass(options, DustRemovalOption);
-    wasm.dust_removal(ptr0, len0, pixels, width, height, options.__wbg_ptr);
-}
-
-/**
- * Remove small isolated pixel groups with default settings
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {number} max_size
- */
-export function dust_removal_simple(pixels, width, height, max_size) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.dust_removal_simple(ptr0, len0, pixels, width, height, max_size);
-}
-
-/**
- * Extract RGBA pixels from `source` where `mask` (1 byte per pixel) is zero.
- * - `source`: RGBA buffer (width=source_width, height=source_height)
- * - `mask`: 1 byte per pixel (0 or 1), dimensions `mask_width` x `mask_height`
- * - `mask_offset_x/y`: where to sample from the source for mask(0,0)
- * Returns an RGBA buffer sized `source_width * source_height * 4`, where selected pixels are fully transparent.
- * @param {Uint8Array} source
- * @param {number} source_width
- * @param {number} source_height
- * @param {Uint8Array} mask
- * @param {number} mask_width
- * @param {number} mask_height
- * @param {number} mask_offset_x
- * @param {number} mask_offset_y
- * @returns {Uint8Array}
- */
-export function crop_patch_rgba(source, source_width, source_height, mask, mask_width, mask_height, mask_offset_x, mask_offset_y) {
-    const ptr0 = passArray8ToWasm0(source, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.crop_patch_rgba(ptr0, len0, source_width, source_height, ptr1, len1, mask_width, mask_height, mask_offset_x, mask_offset_y);
-    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v3;
-}
-
 /**
  * 選択範囲制限モードに応じてピクセルバッファをフィルタリングする
  * original_buffer: 元のピクセルバッファ (RGBA)
@@ -440,33 +321,6 @@ export function auto_select_region_mask(buffer, width, height, start_x, start_y,
 }
 
 /**
- * Extract RGBA pixels from `source` where `mask` (1 byte per pixel) is non-zero.
- * - `source`: RGBA buffer (width=source_width, height=source_height)
- * - `mask`: 1 byte per pixel (0 or 1), dimensions `mask_width` x `mask_height`
- * - `mask_offset_x/y`: where to sample from the source for mask(0,0)
- * Returns an RGBA buffer sized `mask_width * mask_height * 4`, where non-selected pixels are fully transparent.
- * @param {Uint8Array} source
- * @param {number} source_width
- * @param {number} source_height
- * @param {Uint8Array} mask
- * @param {number} mask_width
- * @param {number} mask_height
- * @param {number} mask_offset_x
- * @param {number} mask_offset_y
- * @returns {Uint8Array}
- */
-export function slice_patch_rgba(source, source_width, source_height, mask, mask_width, mask_height, mask_offset_x, mask_offset_y) {
-    const ptr0 = passArray8ToWasm0(source, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.slice_patch_rgba(ptr0, len0, source_width, source_height, ptr1, len1, mask_width, mask_height, mask_offset_x, mask_offset_y);
-    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v3;
-}
-
-/**
  * @param {Uint8Array} pixels
  * @param {number} width
  * @param {number} height
@@ -488,17 +342,6 @@ export function grayscale(pixels, width, height) {
     var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
     var len0 = WASM_VECTOR_LEN;
     wasm.grayscale(ptr0, len0, pixels, width, height);
-}
-
-/**
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- */
-export function invert(pixels, width, height) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.invert(ptr0, len0, pixels, width, height);
 }
 
 /**
@@ -584,85 +427,83 @@ export function apply_mask_offset(mask, width, height, offset_x, offset_y) {
 }
 
 /**
- * Apply brightness and contrast adjustments to the image
+ * Apply dithering effect to the image
  * @param {Uint8Array} pixels
  * @param {number} width
  * @param {number} height
- * @param {BrightnessContrastOption} options
+ * @param {DitheringOption} options
  */
-export function brightness_contrast(pixels, width, height, options) {
+export function dithering(pixels, width, height, options) {
     var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
     var len0 = WASM_VECTOR_LEN;
-    _assertClass(options, BrightnessContrastOption);
-    wasm.brightness_contrast(ptr0, len0, pixels, width, height, options.__wbg_ptr);
+    _assertClass(options, DitheringOption);
+    wasm.dithering(ptr0, len0, pixels, width, height, options.__wbg_ptr);
 }
 
 /**
- * Apply only brightness adjustment to the image
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {number} brightness
- */
-export function brightness(pixels, width, height, brightness) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.brightness(ptr0, len0, pixels, width, height, brightness);
-}
-
-/**
- * Apply only contrast adjustment to the image
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {number} contrast
- */
-export function contrast(pixels, width, height, contrast) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.contrast(ptr0, len0, pixels, width, height, contrast);
-}
-
-/**
- * Apply posterize effect to reduce the number of color levels
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- * @param {PosterizeOption} options
- */
-export function posterize(pixels, width, height, options) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    _assertClass(options, PosterizeOption);
-    wasm.posterize(ptr0, len0, pixels, width, height, options.__wbg_ptr);
-}
-
-/**
- * Apply posterize effect with simple level parameter
+ * Apply random dithering with simple parameters
  * @param {Uint8Array} pixels
  * @param {number} width
  * @param {number} height
  * @param {number} levels
  */
-export function posterize_simple(pixels, width, height, levels) {
+export function dithering_random(pixels, width, height, levels) {
     var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
     var len0 = WASM_VECTOR_LEN;
-    wasm.posterize_simple(ptr0, len0, pixels, width, height, levels);
+    wasm.dithering_random(ptr0, len0, pixels, width, height, levels);
 }
 
 /**
- * @param {Uint8Array} buffer
+ * Apply error diffusion dithering with simple parameters
+ * @param {Uint8Array} pixels
  * @param {number} width
  * @param {number} height
- * @returns {Uint8Array}
+ * @param {number} levels
  */
-export function create_opacity_mask(buffer, width, height) {
-    const ptr0 = passArray8ToWasm0(buffer, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.create_opacity_mask(ptr0, len0, width, height);
-    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v2;
+export function dithering_error_diffusion(pixels, width, height, levels) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.dithering_error_diffusion(ptr0, len0, pixels, width, height, levels);
+}
+
+/**
+ * Apply ordered dithering with simple parameters
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {number} levels
+ */
+export function dithering_ordered(pixels, width, height, levels) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.dithering_ordered(ptr0, len0, pixels, width, height, levels);
+}
+
+/**
+ * Remove small isolated pixel groups (dust removal)
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {DustRemovalOption} options
+ */
+export function dust_removal(pixels, width, height, options) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    _assertClass(options, DustRemovalOption);
+    wasm.dust_removal(ptr0, len0, pixels, width, height, options.__wbg_ptr);
+}
+
+/**
+ * Remove small isolated pixel groups with default settings
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @param {number} max_size
+ */
+export function dust_removal_simple(pixels, width, height, max_size) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.dust_removal_simple(ptr0, len0, pixels, width, height, max_size);
 }
 
 /**
@@ -678,55 +519,86 @@ export function flip_pixels_vertically(pixels, width, height) {
     wasm.flip_pixels_vertically(ptr0, len0, pixels, width, height);
 }
 
-/**
- * タイルバッファから指定領域のピクセルデータを抽出する関数
- * WebGLRendererのrender()メソッドで使用される重い処理を最適化
- * @param {Uint8Array} source_buffer
- * @param {number} source_width
- * @param {number} _source_height
- * @param {number} tile_x
- * @param {number} tile_y
- * @param {number} tile_width
- * @param {number} tile_height
- * @returns {Uint8Array}
- */
-export function extract_tile_buffer(source_buffer, source_width, _source_height, tile_x, tile_y, tile_width, tile_height) {
-    const ptr0 = passArray8ToWasm0(source_buffer, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.extract_tile_buffer(ptr0, len0, source_width, _source_height, tile_x, tile_y, tile_width, tile_height);
-    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v2;
+let cachedFloat32ArrayMemory0 = null;
+
+function getFloat32ArrayMemory0() {
+    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
+        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
+    }
+    return cachedFloat32ArrayMemory0;
 }
 
+function passArrayF32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getFloat32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
 /**
- * 複数のピクセルバッファをブレンドする関数（CPUベースの最適化）
- * レイヤーの不透明度とブレンドモードを考慮した合成処理
- * @param {Uint8Array} base_buffer
- * @param {Uint8Array} overlay_buffer
+ * Lasso選択のためのスキャンライン塗りつぶし実装
+ *
+ * この実装は以下の特徴を持ちます：
+ * - ポリゴン内部をスキャンライン方式で効率的に判定
+ * - Point-in-polygon アルゴリズムによる正確な内部判定
+ * - バウンディングボックスによる計算範囲の最適化
+ * - メモリ効率的な実装
+ * - evenodd/nonzero塗りつぶし規則の選択
+ * @param {Uint8Array} mask
  * @param {number} width
  * @param {number} height
- * @param {number} opacity
- * @param {number} blend_mode
+ * @param {Float32Array} points
+ * @param {string} fill_rule
+ * @returns {boolean}
  */
-export function blend_layers(base_buffer, overlay_buffer, width, height, opacity, blend_mode) {
-    var ptr0 = passArray8ToWasm0(base_buffer, wasm.__wbindgen_malloc);
+export function fill_lasso_selection(mask, width, height, points, fill_rule) {
+    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
     var len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(overlay_buffer, wasm.__wbindgen_malloc);
+    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
     const len1 = WASM_VECTOR_LEN;
-    wasm.blend_layers(ptr0, len0, base_buffer, ptr1, len1, width, height, opacity, blend_mode);
+    const ptr2 = passStringToWasm0(fill_rule, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.fill_lasso_selection(ptr0, len0, mask, width, height, ptr1, len1, ptr2, len2);
+    return ret !== 0;
 }
 
 /**
- * メモリ使用量を計算するユーティリティ関数
+ * 選択範囲制限付きLasso選択
+ * @param {Uint8Array} mask
  * @param {number} width
  * @param {number} height
- * @param {number} layer_count
- * @returns {number}
+ * @param {Float32Array} points
+ * @param {Uint8Array} existing_mask
+ * @param {string} limit_mode
+ * @returns {boolean}
  */
-export function calculate_texture_memory_usage(width, height, layer_count) {
-    const ret = wasm.calculate_texture_memory_usage(width, height, layer_count);
-    return ret >>> 0;
+export function fill_lasso_selection_with_mask(mask, width, height, points, existing_mask, limit_mode) {
+    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArray8ToWasm0(existing_mask, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passStringToWasm0(limit_mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ret = wasm.fill_lasso_selection_with_mask(ptr0, len0, mask, width, height, ptr1, len1, ptr2, len2, ptr3, len3);
+    return ret !== 0;
+}
+
+/**
+ * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
+ * @param {Uint8Array} mask
+ * @param {number} width
+ * @param {number} height
+ * @param {Float32Array} points
+ * @returns {boolean}
+ */
+export function fill_lasso_selection_point_in_polygon(mask, width, height, points) {
+    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.fill_lasso_selection_point_in_polygon(ptr0, len0, mask, width, height, ptr1, len1);
+    return ret !== 0;
 }
 
 /**

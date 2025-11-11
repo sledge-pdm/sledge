@@ -172,10 +172,10 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
   const updateCanvas = () => {
     if (canvasRef && snapshot.thumbnail) {
       const { webpBuffer, width, height } = snapshot.thumbnail;
-      const rawBuffer = new Uint8ClampedArray(webpToRaw(webpBuffer, width, height).buffer);
+      const rawBuffer = webpToRaw(webpBuffer, width, height);
       const ctx = canvasRef.getContext('2d') as CanvasRenderingContext2D;
       if (ctx) {
-        const imgData = new ImageData(rawBuffer.slice(), width, height);
+        const imgData = new ImageData(new Uint8ClampedArray(rawBuffer.buffer).slice(), width, height);
         ctx.putImageData(imgData, 0, 0);
         const tr = height / width;
         canvasRef.style.height = `${canvasRef.clientWidth * tr}px`;

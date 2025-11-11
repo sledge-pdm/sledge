@@ -1,5 +1,5 @@
 // src/renderer/WebGLRenderer.ts
-import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
+import { flip_pixels_vertically } from '@sledge/wasm';
 import { Consts } from '~/Consts';
 import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
 import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
@@ -41,6 +41,10 @@ function batchCheckGLError(gl: WebGL2RenderingContext, operation: string): boole
     return true;
   }
   return true;
+}
+
+function calculateTextureMemoryUsage(width: number, height: number, layerCount: number) {
+  return width * height * layerCount * 4;
 }
 
 export class WebGLRenderer {
@@ -151,7 +155,7 @@ export class WebGLRenderer {
 
     // 前回のメモリ使用量をログ出力
     if (this.currentTextureDepth > 0) {
-      const oldMemory = calculate_texture_memory_usage(this.width, this.height, this.currentTextureDepth);
+      const oldMemory = calculateTextureMemoryUsage(this.width, this.height, this.currentTextureDepth);
       logger.debugLog(`Releasing texture memory: ${(oldMemory / 1024 / 1024).toFixed(2)} MB`);
     }
 
@@ -525,13 +529,11 @@ export class WebGLRenderer {
     const w = this.width;
     const h = this.height;
 
-    // (1) フルアップデート → ピクセル読み取り
     this.render(false);
     this.gl.finish?.();
     const raw = new Uint8Array(w * h * 4);
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
 
-    // (2) WASM関数を使った高速な上下反転
     const flipped = new Uint8Array(raw);
     flip_pixels_vertically(flipped, w, h);
 
@@ -681,8 +683,8 @@ export class WebGLRenderer {
     }
 
     // WASM関数を使ったメモリ使用量計算
-    const oldMemory = calculate_texture_memory_usage(this.width, this.height, oldDepth);
-    const newMemory = calculate_texture_memory_usage(this.width, this.height, requiredDepth);
+    const oldMemory = calculateTextureMemoryUsage(this.width, this.height, oldDepth);
+    const newMemory = calculateTextureMemoryUsage(this.width, this.height, requiredDepth);
 
     logger.debugLog(`🔄 Resizing texture array from ${oldDepth} to ${requiredDepth} layers`);
     logger.debugLog(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);

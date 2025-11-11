@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createMemo, onCleanup } from 'solid-js';
 import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
 import { InteractCanvas } from './InteractCanvas';
 
@@ -6,7 +6,7 @@ import { css } from '@acab/ecsstatic';
 import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
 import { activeLayer } from '~/features/layer';
 import { canvasStore } from '~/stores/ProjectStores';
-import { eventBus, Events } from '~/utils/EventBus';
+import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
 import { color } from '@sledge/theme';
@@ -23,37 +23,29 @@ const canvasStack = css`
 export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);
 
 const CanvasStack: Component = () => {
-  const [gridSize, setGridSize] = createSignal(10);
+  const gridSize = createMemo(() => {
+    const { width, height } = canvasStore.canvas;
 
-  const updateGridSize = (width: number, height: number) => {
     const shorter = width > height ? height : width;
-    let canvasStoreOrder = Math.floor(Math.log10(shorter));
-    canvasStoreOrder -= 1;
-
+    let canvasStoreOrder = Math.floor(Math.log10(shorter)) - 1;
     let gridSize = Math.pow(10, canvasStoreOrder);
     if (gridSize < 1) {
       gridSize = 1;
     } else if (gridSize > 100) {
       gridSize = 100;
     }
+    return gridSize;
+  });
 
-    setGridSize(gridSize);
-  };
-
-  const handleCanvasSizeChanged = ({ newSize }: Events['canvas:sizeChanged']) => {
-    const { width, height } = newSize;
-    updateGridSize(width, height);
-  };
-
-  onMount(() => {
+  createEffect(() => {
     const { width, height } = canvasStore.canvas;
-    updateGridSize(width, height);
+    const frame = requestAnimationFrame(() => {
+      eventBus.emit('canvas:layoutReady', { newSize: { width, height } });
+    });
 
-    eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
-
-    return () => {
-      eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
-    };
+    onCleanup(() => {
+      cancelAnimationFrame(frame);
+    });
   });
 
   return (
@@ -74,6 +66,7 @@ const CanvasStack: Component = () => {
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
           'shape-rendering': 'crispEdges',
+          'image-rendering': 'pixelated',
           'background-image': `url(/patterns/CheckerboardPattern.svg)`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,

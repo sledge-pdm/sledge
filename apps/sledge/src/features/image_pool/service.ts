@@ -1,10 +1,12 @@
-import { AntialiasMode, rawToWebp, transferBufferInstant, webpToRaw } from '@sledge/anvil';
+import { AntialiasMode, rawToWebp, webpToRaw } from '@sledge/anvil';
 import { v4 } from 'uuid';
+import { normalizeRotation } from '~/features/canvas';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
@@ -108,18 +110,32 @@ async function transferToLayer(layerId: string, entryId: string) {
   const layerW = getWidth(layerId);
   const layerH = getHeight(layerId);
   const entry = getEntry(entryId);
-  if (!layerW || !layerH || !layerBuf || !entry) return;
+  const anvil = getAnvilOf(layerId);
+  if (!layerW || !layerH || !layerBuf || !entry || !anvil) return;
 
   const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
 
   registerWholeChange(layerId, layerBuf);
 
-  transferBufferInstant(new Uint8ClampedArray(rawEntryBuffer.buffer), entry.base.width, entry.base.height, layerBuf, layerW, layerH, {
-    offsetX: entry.transform.x,
-    offsetY: entry.transform.y,
-    scaleX: entry.transform.scaleX,
-    scaleY: entry.transform.scaleY,
-    rotate: entry.transform.rotation,
+  const offsetX = Math.round(entry.transform.x);
+  const offsetY = Math.round(entry.transform.y);
+
+  // calculate nearest scale to match integer width/height
+  const targetWidth = Math.round(entry.base.width * entry.transform.scaleX);
+  const targetHeight = Math.round(entry.base.height * entry.transform.scaleY);
+  const scaleX = targetWidth / entry.base.width;
+  const scaleY = targetHeight / entry.base.height;
+
+  const rotate = normalizeRotation(entry.transform.rotation);
+
+  anvil.transferFromRaw(new Uint8ClampedArray(rawEntryBuffer.buffer), entry.base.width, entry.base.height, {
+    offsetX,
+    offsetY,
+    scaleX,
+    scaleY,
+    rotate,
+    flipX: entry.transform.flipX,
+    flipY: entry.transform.flipY,
     antialiasMode: AntialiasMode.Nearest,
   });
 
@@ -150,7 +166,7 @@ function createEntry(webpBuffer: Uint8Array, width: number, height: number, forc
     id,
     webpBuffer,
     base: { width, height },
-    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale, rotation: 0 },
+    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale, rotation: 0, flipX: false, flipY: false },
     opacity: 1,
     visible: true,
   };
@@ -162,7 +178,7 @@ export async function createEntryFromLocalImage(imagePath: string, forceFit?: bo
   const width = bitmap.width;
   const height = bitmap.height;
   const imageData = await loadImageData(bitmap);
-  const webpBuffer = rawToWebp(imageData.data, width, height);
+  const webpBuffer = rawToWebp(new Uint8Array(imageData.data.buffer), width, height);
   bitmap.close();
   const entry = createEntry(webpBuffer, width, height, forceFit);
   entry.descriptionName = pathToFileLocation(imagePath)?.name;

@@ -1,21 +1,12 @@
 // controllers/layer/SelectionManager.ts
 
-import { rawToWebp, webpToRaw } from '@sledge/anvil';
+import { webpToRaw } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { crop_patch_rgba } from '@sledge/wasm';
 import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
-import {
-  flushPatch,
-  getBufferCopy,
-  getBufferPointer,
-  getHeight,
-  getWidth,
-  registerWholeChange,
-  setBuffer,
-} from '~/features/layer/anvil/AnvilController';
+import { flushPatch, getBufferCopy, getHeight, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -79,11 +70,10 @@ class FloatingMoveManager {
     if (state === 'layer') {
       return new Uint8ClampedArray(width * height * 4);
     } else if (state === 'selection') {
-      const base = getBufferPointer(targetLayerId);
-      if (!base) return undefined;
+      const anvil = getAnvilOf(targetLayerId);
+      if (!anvil) return undefined;
       const mask = selectionManager.getCombinedMask();
-      const croppedBuffer = crop_patch_rgba(new Uint8Array(base.buffer), width, height, new Uint8Array(mask), width, height, 0, 0);
-      return new Uint8ClampedArray(croppedBuffer.buffer);
+      return anvil.cropWithMask(mask, width, height, 0, 0);
     } else if (state === 'pasted') {
       const base = getBufferCopy(targetLayerId);
       return base ? base.slice() : undefined;
@@ -93,7 +83,7 @@ class FloatingMoveManager {
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
     const anvil = getAnvilOf(targetLayerId);
     if (!anvil) return;
-    const webpBuffer = rawToWebp(new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight());
+    const webpBuffer = anvil.exportWebp();
     if (!webpBuffer) return;
     this.targetBufferOriginal = {
       buffer: webpBuffer,
@@ -191,7 +181,7 @@ class FloatingMoveManager {
 
     setBuffer(this.targetLayerId, this.movePreviewBuffer);
     const orig = webpToRaw(this.targetBufferOriginal.buffer, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
-    if (orig) registerWholeChange(this.targetLayerId, new Uint8ClampedArray(orig.buffer));
+    registerWholeChange(this.targetLayerId, new Uint8ClampedArray(orig.buffer));
     const patch = flushPatch(this.targetLayerId);
     if (patch) {
       projectHistoryController.addAction(

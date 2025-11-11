@@ -63,22 +63,25 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     arr.splice(index, 0, packed.layer);
     setLayerListStore('layers', arr);
 
-    let width, height: number;
-    let rawBuffer: Uint8ClampedArray;
-    if (packed.image) {
-      width = packed.image.width;
-      height = packed.image.height;
-      rawBuffer = new Uint8ClampedArray(webpToRaw(packed.image.webpBuffer, packed.image.width, packed.image.height).buffer);
-    } else {
-      width = canvasStore.canvas.width;
-      height = canvasStore.canvas.height;
-      rawBuffer = new Uint8ClampedArray(canvasStore.canvas.width * canvasStore.canvas.height * 4);
-    }
     const anvil = getAnvilOf(packed.layer.id);
-    if (anvil) {
-      anvil.replaceBuffer(rawBuffer);
+    if (packed.image) {
+      const width = packed.image.width;
+      const height = packed.image.height;
+      if (anvil) {
+        anvil.importWebp(packed.image.webpBuffer, width, height);
+      } else {
+        const rawBuffer = webpToRaw(packed.image.webpBuffer, width, height);
+        anvilManager.registerAnvil(packed.layer.id, new Uint8ClampedArray(rawBuffer.buffer), width, height);
+      }
     } else {
-      anvilManager.registerAnvil(packed.layer.id, rawBuffer, width, height);
+      const width = canvasStore.canvas.width;
+      const height = canvasStore.canvas.height;
+      const rawBuffer = new Uint8ClampedArray(width * height * 4);
+      if (anvil) {
+        anvil.replaceBuffer(rawBuffer);
+      } else {
+        anvilManager.registerAnvil(packed.layer.id, rawBuffer, width, height);
+      }
     }
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `CutPaste reinsert (${packed.layer.id})` });

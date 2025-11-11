@@ -1,4 +1,4 @@
-import { patch_buffer_rgba } from '@sledge/wasm';
+import { PixelBuffer } from '@sledge/anvil';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 
 export interface FloatingBufferApplyParams {
@@ -10,19 +10,13 @@ export interface FloatingBufferApplyParams {
 
 // Pure helper: returns new patched buffer (does NOT touch Anvil or history)
 export function applyFloatingBuffer({ width, height, floatingBuffer, target }: FloatingBufferApplyParams): Uint8ClampedArray {
-  const offset = floatingBuffer.offset;
   try {
-    const res = patch_buffer_rgba(
-      new Uint8Array(target.buffer, target.byteOffset, target.byteLength),
-      width,
-      height,
-      new Uint8Array(floatingBuffer.buffer.buffer, floatingBuffer.buffer.byteOffset, floatingBuffer.buffer.byteLength),
-      floatingBuffer.width,
-      floatingBuffer.height,
-      offset.x,
-      offset.y
-    );
-    return new Uint8ClampedArray(res);
+    const buffer = PixelBuffer.fromRaw(width, height, target);
+    buffer.transferFromRaw(floatingBuffer.buffer, floatingBuffer.width, floatingBuffer.height, {
+      offsetX: floatingBuffer.offset.x,
+      offsetY: floatingBuffer.offset.y,
+    });
+    return new Uint8ClampedArray(buffer.data);
   } catch (e) {
     console.error('applyFloatingBuffer wasm error', e);
     return target;

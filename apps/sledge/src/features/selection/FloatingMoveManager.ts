@@ -181,7 +181,7 @@ class FloatingMoveManager {
 
     setBuffer(this.targetLayerId, this.movePreviewBuffer);
     const orig = webpToRaw(this.targetBufferOriginal.buffer, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
-    registerWholeChange(this.targetLayerId, new Uint8ClampedArray(orig.buffer));
+    registerWholeChange(this.targetLayerId, orig);
     const patch = flushPatch(this.targetLayerId);
     if (patch) {
       projectHistoryController.addAction(

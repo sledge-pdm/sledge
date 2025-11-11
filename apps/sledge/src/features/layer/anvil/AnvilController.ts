@@ -1,5 +1,5 @@
-import type { RGBA } from '@sledge/anvil';
-import { PackedDiffs } from 'node_modules/@sledge/anvil/src/types/patch/Patch';
+import type { RGBA, RawPixelData } from '@sledge/anvil';
+import { PackedDiffs } from '@sledge/anvil';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
 
@@ -15,14 +15,14 @@ export function getBufferPointer(layerId: string): Uint8ClampedArray<ArrayBuffer
   return anvil.getBufferPointer();
 }
 
-export function setBuffer(layerId: string, buffer: Uint8ClampedArray) {
+export function setBuffer(layerId: string, buffer: RawPixelData) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return undefined;
   anvil.replaceBuffer(buffer);
 }
 
 // Whole buffer diff 登録 (clear, FX など) - swap method
-export function registerWholeChange(layerId: string, swapBuffer: Uint8ClampedArray) {
+export function registerWholeChange(layerId: string, swapBuffer: RawPixelData) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return;
   anvil.addWholeDiff(swapBuffer);
@@ -110,7 +110,7 @@ export function importLayerWebp(layerId: string, buffer: Uint8Array, width: numb
   return anvil.importWebp(buffer, width, height);
 }
 
-export function importLayerRaw(layerId: string, buffer: Uint8Array | Uint8ClampedArray, width: number, height: number): boolean {
+export function importLayerRaw(layerId: string, buffer: RawPixelData, width: number, height: number): boolean {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return false;
   return anvil.importRaw(buffer, width, height);

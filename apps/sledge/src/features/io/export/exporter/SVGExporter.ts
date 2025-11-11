@@ -1,3 +1,4 @@
+import { toUint8Array } from '@sledge/anvil';
 import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
@@ -18,7 +19,7 @@ export class SVGExporter extends Exporter {
     const buffer = webGLRenderer.readPixelsFlipped();
 
     // wasmを使って不透明部分のマスクを作成
-    const mask = create_opacity_mask(new Uint8Array(buffer.buffer), width, height);
+    const mask = create_opacity_mask(toUint8Array(buffer), width, height);
 
     // wasmを使ってSVGパスを生成
     const svgPath = mask_to_path(mask, width, height, 0, 0);
@@ -52,7 +53,7 @@ export class SVGExporter extends Exporter {
     if (!buffer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
 
     // wasmを使って不透明部分のマスクを作成
-    const mask = create_opacity_mask(new Uint8Array(buffer.buffer), width, height);
+    const mask = create_opacity_mask(toUint8Array(buffer), width, height);
 
     // wasmを使ってSVGパスを生成
     const svgPath = mask_to_path(mask, width, height, 0, 0);

@@ -1,3 +1,4 @@
+import { toUint8Array } from '@sledge/anvil';
 import { Image } from '@tauri-apps/api/image';
 import { writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { Component, onMount } from 'solid-js';
@@ -29,7 +30,7 @@ const ClipboardListener: Component = () => {
         const bufData = getCurrentSelectionBuffer();
         if (!bufData) return;
         const { buffer, bbox } = bufData;
-        const image = await Image.new(buffer, bbox.width, bbox.height);
+        const image = await Image.new(toUint8Array(buffer), bbox.width, bbox.height);
         await writeImage(image);
         setInteractStore('placementPosition', {
           x: bbox.x,

@@ -1,3 +1,4 @@
+import { RawPixelData, toUint8ClampedArray } from '@sledge/anvil';
 import { readFile } from '@tauri-apps/plugin-fs';
 
 export function blobToDataUrl(blob: Blob): Promise<string> {
@@ -36,22 +37,14 @@ export async function loadImageData(bitmap: ImageBitmap): Promise<ImageData> {
   return imageData;
 }
 
-export async function bufferToBlob({
-  buffer,
-  width,
-  height,
-}: {
-  buffer: Uint8Array | Uint8ClampedArray;
-  width: number;
-  height: number;
-}): Promise<Blob> {
+export async function bufferToBlob({ buffer, width, height }: { buffer: RawPixelData; width: number; height: number }): Promise<Blob> {
   // OffscreenCanvasを使ってバッファから画像を作成
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas context unavailable');
 
   // ImageDataを作成
-  const imageData = new ImageData(new Uint8ClampedArray(buffer), width, height);
+  const imageData = new ImageData(toUint8ClampedArray(buffer) as Uint8ClampedArray<ArrayBuffer>, width, height);
   ctx.putImageData(imageData, 0, 0);
 
   // Blobに変換
@@ -60,7 +53,7 @@ export async function bufferToBlob({
 }
 
 export async function downloadBufferAsPNG(
-  buffer: Uint8Array | Uint8ClampedArray,
+  buffer: RawPixelData,
   width: number,
   height: number,
   filename: string = 'debug-buffer.png'
@@ -87,7 +80,7 @@ export async function downloadBufferAsPNG(
 /**
  * デバッグ用：バッファを即座にPNGとしてダウンロード
  */
-export function debugDownloadBuffer(buffer: Uint8Array | Uint8ClampedArray, width: number, height: number, label: string = 'debug') {
+export function debugDownloadBuffer(buffer: RawPixelData, width: number, height: number, label: string = 'debug') {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `${label}-${timestamp}.png`;
 

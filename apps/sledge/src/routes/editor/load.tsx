@@ -1,4 +1,5 @@
 import { FileLocation } from '@sledge/core';
+import { message } from '@tauri-apps/plugin-dialog';
 import { getEmergencyBackups } from '~/features/backup';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
@@ -30,16 +31,28 @@ export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new
 
   if (openingLocation && openingLocation.path && openingLocation.name) {
     return await loadProjectFromLocation(openingLocation);
-  } else if (clipboardQuery) {
-    return await loadProjectFromClipboardImage();
-  } else if (newProjectQuery.new) {
-    return await loadNewProject(newProjectQuery);
-  } else if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
-    return await loadProjectFromLocation(lastLocation);
-  } else {
-    // fallback
-    return await loadNewProject();
   }
+
+  if (clipboardQuery) {
+    return await loadProjectFromClipboardImage();
+  }
+
+  if (newProjectQuery.new) {
+    return await loadNewProject(newProjectQuery);
+  }
+
+  if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
+    try {
+      return await loadProjectFromLocation(lastLocation);
+    } catch (e) {
+      console.error('Failed to load last project, falling back to a new project:', e);
+      const createdNewProject = await loadNewProject();
+      await notifyLastProjectFallback(e);
+      return createdNewProject;
+    }
+  }
+
+  return await loadNewProject();
 }
 
 export async function loadProjectFromLocation(loc: FileLocation): Promise<boolean> {
@@ -58,7 +71,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
       }
       setSavedLocation(path);
       await loadProjectJson(projectFile);
-      setProjectStore('isProjectChangedAfterSave', true);
+      setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } catch (error) {
       console.error('Failed to read project:', error);
@@ -69,7 +82,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
     setFileStore('openAs', 'image');
     const isImportSuccessful = await loadProjectFromLocalImage(loc);
     if (isImportSuccessful) {
-      setProjectStore('isProjectChangedAfterSave', true);
+      setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } else {
       console.error('Failed to import image from path:', path);
@@ -110,4 +123,14 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   });
   setProjectStore('isProjectChangedAfterSave', false);
   return true;
+}
+
+async function notifyLastProjectFallback(error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : error ? String(error) : undefined;
+  const fallbackMessage = errorMessage && errorMessage.trim().length > 0 ? errorMessage : '<No message available>';
+  await message(`Failed to reopen the last project. A new project was created instead.\n${fallbackMessage}`, {
+    kind: 'warning',
+    title: 'Project load',
+    okLabel: 'OK',
+  });
 }

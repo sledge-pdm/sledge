@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, batch, createSignal, onCleanup, onMount } from 'solid-js';
 import { clientPositionToCanvasPosition } from '~/controllers/canvas/CanvasPositionCalculator';
 import LayerCanvasOperator, { DrawState } from '~/controllers/canvas/LayerCanvasOperator';
 import { selectionManager } from '~/controllers/selection/SelectionManager';
@@ -71,12 +71,13 @@ export const InteractCanvas: Component<Props> = (props) => {
   function handlePointerDown(e: PointerEvent) {
     if (!isDrawableClick(e)) return;
 
-    setInteractStore('isPenOut', false);
-
     const position = getCanvasMousePosition(e);
-    props.operator.handleDraw(DrawState.start, e, getCurrentToolCategory(), position, lastPos());
-    setInteractStore('isInStroke', true);
-    setLastPos(position);
+    batch(() => {
+      setInteractStore('isPenOut', false);
+      props.operator.handleDraw(DrawState.start, e, getCurrentToolCategory(), position, lastPos());
+      setInteractStore('isInStroke', true);
+      setLastPos(position);
+    });
   }
 
   function handlePointerCancel(e: PointerEvent) {
@@ -88,12 +89,14 @@ export const InteractCanvas: Component<Props> = (props) => {
 
   function handlePointerMove(e: PointerEvent) {
     const onCanvas = !!canvasRef?.contains(e.target as Node);
-    setInteractStore('isMouseOnCanvas', onCanvas);
-
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setInteractStore('lastMouseWindow', windowPosition);
-    setInteractStore('lastMouseOnCanvas', position);
+
+    batch(() => {
+      setInteractStore('isMouseOnCanvas', onCanvas);
+      setInteractStore('lastMouseWindow', windowPosition);
+      setInteractStore('lastMouseOnCanvas', position);
+    });
 
     if (!isDrawableClick(e)) return;
 
@@ -132,8 +135,10 @@ export const InteractCanvas: Component<Props> = (props) => {
   function handleWheel(e: WheelEvent) {
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setInteractStore('lastMouseWindow', windowPosition);
-    setInteractStore('lastMouseOnCanvas', position);
+    batch(() => {
+      setInteractStore('lastMouseWindow', windowPosition);
+      setInteractStore('lastMouseOnCanvas', position);
+    });
   }
 
   function endStroke(position: Vec2) {

@@ -40,6 +40,14 @@
       ]
     },
     "opener:allow-open-path",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "/**"
+        }
+      ]
+    },
     "opener:allow-reveal-item-in-dir",
     "core:webview:allow-create-webview-window",
     "core:window:default",

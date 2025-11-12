@@ -4,6 +4,7 @@ import { color } from '@sledge/theme';
 import { Icon, MenuList } from '@sledge/ui';
 import { message } from '@tauri-apps/plugin-dialog';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
+import { openPath } from '@tauri-apps/plugin-opener';
 import { Component, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
@@ -126,6 +127,8 @@ const Explorer: Component<Props> = (props) => {
   let lastValidPath: string | undefined;
   let loadRequestToken = 0;
   let skipBlurApply = false;
+  let backPath: string | undefined;
+  let forwardPath: string | undefined;
 
   const normalizeDirectoryPath = (rawPath: string): string => {
     if (!rawPath) return '';
@@ -187,14 +190,11 @@ const Explorer: Component<Props> = (props) => {
         ((lastValidPath && lastValidPath !== normalized && lastValidPath) ||
           (defaultExplorerPath && defaultExplorerPath !== normalized && defaultExplorerPath));
 
-      await message(
-        `Cannot open directory.\n${normalized}${fallback ? `\nReverting to ${fallback}.` : ''}`,
-        {
-          kind: 'warning',
-          title: 'Explorer',
-          okLabel: 'OK',
-        }
-      );
+      await message(`Cannot open directory.\n${normalized}${fallback ? `\nReverting to ${fallback}.` : ''}`, {
+        kind: 'warning',
+        title: 'Explorer',
+        okLabel: 'OK',
+      });
 
       if (fallback) {
         return await setPath(fallback, false);
@@ -210,6 +210,86 @@ const Explorer: Component<Props> = (props) => {
       if (!configStore.pathEditMode) setPathDraft('');
       return false;
     }
+  };
+
+  type HistoryMode = 'push' | 'back' | 'forward' | 'replace';
+
+  const navigatePath = async (path: string, options?: { mode?: HistoryMode; allowRetry?: boolean }) => {
+    const mode = options?.mode ?? 'push';
+    const allowRetry = options?.allowRetry ?? true;
+    const previous = currentPath();
+    const previousBack = backPath;
+    const previousForward = forwardPath;
+    let candidateBack = backPath;
+    let candidateForward = forwardPath;
+
+    if (mode !== 'replace') {
+      if (mode === 'push') {
+        candidateBack = previous ? previous : candidateBack;
+        candidateForward = undefined;
+      } else if (mode === 'back') {
+        candidateForward = previous ? previous : candidateForward;
+      } else if (mode === 'forward') {
+        candidateBack = previous ? previous : candidateBack;
+      }
+    }
+
+    const success = await setPath(path, allowRetry);
+    const changed = success && currentPath() !== previous;
+
+    if (!changed) {
+      backPath = previousBack;
+      forwardPath = previousForward;
+      return false;
+    }
+
+    if (mode === 'replace') {
+      return true;
+    }
+
+    backPath = candidateBack;
+    forwardPath = candidateForward;
+
+    if (mode === 'back') {
+      backPath = undefined;
+    } else if (mode === 'forward') {
+      forwardPath = undefined;
+    }
+
+    return true;
+  };
+
+  const getParentDirectory = (path: string): string | undefined => {
+    const normalized = normalizePath(path);
+    if (!normalized) return undefined;
+    const parts = normalized.split('/');
+    if (parts.length <= 1) return undefined;
+    let parent = parts.slice(0, -1).join('/');
+    if (parts.length === 2) parent += '/';
+    if (!parent || parent === normalized) return undefined;
+    return parent;
+  };
+
+  const handleBackNavigation = async () => {
+    if (backPath) {
+      const target = backPath;
+      await navigatePath(target, { mode: 'back' });
+      return;
+    }
+
+    const current = currentPath();
+    const parent = current ? getParentDirectory(current) : undefined;
+    if (!parent) return;
+    if (current) {
+      forwardPath = current;
+    }
+    await navigatePath(parent, { mode: 'replace' });
+  };
+
+  const handleForwardNavigation = async () => {
+    if (!forwardPath) return;
+    const target = forwardPath;
+    await navigatePath(target, { mode: 'forward' });
   };
 
   const applyPathDraft = async () => {
@@ -233,7 +313,7 @@ const Explorer: Component<Props> = (props) => {
       return;
     }
 
-    await setPath(rawDraft);
+    await navigatePath(rawDraft);
     setPathDraft(currentPath());
     setConfigStore('pathEditMode', false);
   };
@@ -296,6 +376,24 @@ const Explorer: Component<Props> = (props) => {
     });
   };
 
+  const handleMouseDown = (e: MouseEvent) => {
+    e.preventDefault();
+    // prevent if canvas area focused
+    if ((e.target as HTMLElement).closest('#canvas-area')) {
+      return;
+    }
+
+    if (e.button === 3) {
+      e.preventDefault();
+      handleBackNavigation();
+      return;
+    } else if (e.button === 4) {
+      e.preventDefault();
+      handleForwardNavigation();
+      return;
+    }
+  };
+
   onMount(async () => {
     const openPath = fileStore.savedLocation.path ? normalizeJoin(fileStore.savedLocation.path) : undefined;
     const fallbackPath = await getDefaultPictureDir();
@@ -303,8 +401,14 @@ const Explorer: Component<Props> = (props) => {
     const defaultPath = props.defaultPath ?? openPath ?? fallbackPath;
     if (defaultPath) {
       setPathDraft(defaultPath);
-      await setPath(defaultPath);
+      await navigatePath(defaultPath, { mode: 'replace' });
     }
+
+    window.addEventListener('mousedown', handleMouseDown);
+
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+    };
   });
 
   const Breadcrumbs: Component<{ path: string }> = (props) => {
@@ -319,7 +423,7 @@ const Explorer: Component<Props> = (props) => {
                 <a
                   onClick={() => {
                     if (index() === items().length - 1) return;
-                    void setPath(item.value);
+                    void navigatePath(item.value);
                   }}
                   class={breadcrumbLink}
                   style={{
@@ -341,9 +445,6 @@ const Explorer: Component<Props> = (props) => {
 
   return (
     <div class={explorerContainer}>
-      {/* <p class={sectionCaption} style={{ margin: 0 }}>
-        explorer.
-      </p> */}
       <div class={explorerInner}>
         <div class={navigationPanel}>
           <div class={navigationRow}>
@@ -409,13 +510,9 @@ const Explorer: Component<Props> = (props) => {
               <div
                 class={iconButton}
                 onClick={() => {
-                  const path = currentPath();
-                  const parts = normalizePath(path).split('/');
-                  if (parts.length <= 1) return;
-                  let parent = parts.slice(0, -1).join('/');
-                  if (parts.length === 2) parent += '/';
+                  const parent = getParentDirectory(currentPath());
                   if (parent) {
-                    void setPath(parent);
+                    void navigatePath(parent);
                   }
                 }}
               >
@@ -453,10 +550,17 @@ const Explorer: Component<Props> = (props) => {
                     options={[
                       {
                         type: 'item',
+                        label: 'open in explorer',
+                        onSelect: async () => {
+                          await openPath(currentPath());
+                        },
+                      },
+                      {
+                        type: 'item',
                         label: 'back to saved folder',
                         disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
                         onSelect: () => {
-                          if (fileStore.savedLocation.path) void setPath(fileStore.savedLocation.path);
+                          if (fileStore.savedLocation.path) void navigatePath(fileStore.savedLocation.path);
                         },
                       },
                       {
@@ -507,7 +611,7 @@ const Explorer: Component<Props> = (props) => {
                       isPartOfMe={!!isPartOfMe}
                       onClick={(e) => {
                         if (entry.isDirectory) {
-                          void setPath(path);
+                          void navigatePath(path);
                         } else if (entry.isFile) {
                           const ext = ['sledge', ...importableFileExtensions];
                           if (ext.some((e) => entry.name.endsWith(`.${e}`))) {

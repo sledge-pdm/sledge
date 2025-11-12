@@ -13,19 +13,17 @@ export async function getFileUniqueId(path: string): Promise<string> {
 }
 
 export const pathToFileLocation = (fullPath: string): FileLocation | undefined => {
-  fullPath = fullPath.replace(/\//g, '\\'); // Normalize path format for Windows
-  const filePath = fullPath.substring(0, fullPath.lastIndexOf('\\'));
-  const fileName = fullPath.split('\\').pop()?.split('\\').pop();
-
-  const rejoinedPath = normalizeJoin(...filePath.split('\\'));
-
-  if (!filePath || !filePath?.trim() || !fileName || !fileName?.trim()) return undefined;
-  else {
-    return {
-      path: rejoinedPath,
-      name: fileName,
-    };
-  }
+  if (!fullPath || !fullPath.trim()) return undefined;
+  const normalized = normalizePath(fullPath);
+  const sepIndex = normalized.lastIndexOf('/');
+  if (sepIndex <= 0 || sepIndex === normalized.length - 1) return undefined;
+  const dir = normalized.substring(0, sepIndex);
+  const name = normalized.substring(sepIndex + 1);
+  if (!dir.trim() || !name.trim()) return undefined;
+  return {
+    path: dir,
+    name,
+  };
 };
 
 export async function getDefaultProjectDir() {
@@ -72,20 +70,72 @@ export const join = (...paths: string[]): string => {
   }
 };
 
+const isUncPath = (value: string): boolean => {
+  if (!value) return false;
+  const startsUnc = value.startsWith('\\\\') || value.startsWith('//');
+  const hasBackslash = value.includes('\\');
+  if (!startsUnc || !hasBackslash) return false;
+  const withoutPrefix = value.replace(/^[/\\]+/, '');
+  const parts = withoutPrefix.split(/[/\\]/).filter((part) => part.length > 0);
+  return parts.length >= 2 && parts[0].length > 0 && parts[1].length > 0;
+};
+
 export const normalizePath = (path: string): string => {
-  let replaced = path.trim().replace(/\\/g, '/').replace(/\/+/g, '/');
+  let trimmed = path.trim();
+  if (!trimmed) return '';
+
+  const isUnc = isUncPath(trimmed);
+  if (isUnc) trimmed = trimmed.replace(/^[/\\]+/, '');
+
+  let replaced = trimmed.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
+  if (isUnc) replaced = '//' + replaced;
   if (!replaced.endsWith(':/') && replaced.endsWith('/')) replaced = replaced.slice(0, -1);
   return replaced;
 };
 
 export const normalizeJoin = (...paths: string[]): string => {
-  const currentPlatform = platform();
+  if (!paths || paths.length === 0) return '';
+  const pieces: string[] = [];
+  paths.forEach((segment) => {
+    if (!segment || !segment.trim()) return;
+    let cleaned = segment.replace(/\\/g, '/');
+    const isFirstPiece = pieces.length === 0;
+    if (isFirstPiece) {
+      cleaned = cleaned.replace(/\/+$/, '');
+    } else {
+      cleaned = cleaned.replace(/^\/+/, '').replace(/\/+$/, '');
+    }
+    if (cleaned) pieces.push(cleaned);
+  });
 
-  let joined;
-  if (currentPlatform === 'windows') {
-    joined = paths.join('\\');
-  } else {
-    joined = paths.join('/');
-  }
+  if (pieces.length === 0) return '';
+  const currentPlatform = platform();
+  const joined = currentPlatform === 'windows' ? pieces.join('\\') : pieces.join('/');
   return normalizePath(joined);
+};
+
+export const formatNativePath = (path: string): string => {
+  const original = path.trim();
+  const normalized = normalizePath(path);
+  if (!normalized) return '';
+
+  const currentPlatform = platform();
+  if (currentPlatform !== 'windows') return normalized;
+
+  if (normalized.startsWith('//?/')) {
+    return normalized.replace(/\//g, '\\');
+  }
+
+  const looksLikeUnc = original.startsWith('\\\\') || original.startsWith('//') || normalized.startsWith('//');
+
+  if (looksLikeUnc) {
+    const withoutPrefix = normalized.replace(/^\/+/, '');
+    return `\\\\${withoutPrefix.replace(/\//g, '\\')}`;
+  }
+
+  if (/^[a-zA-Z]:\//.test(normalized)) {
+    return normalized.replace(/\//g, '\\');
+  }
+
+  return normalized.replace(/\//g, '\\');
 };

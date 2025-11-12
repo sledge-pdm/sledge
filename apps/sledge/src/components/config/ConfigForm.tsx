@@ -2,7 +2,6 @@ import { css } from '@acab/ecsstatic';
 import { Checkbox, Dropdown, Icon, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { componentProps } from '~/config/ConfigComponent';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
@@ -20,6 +19,7 @@ import { KeyConfigStore } from '~/stores/global/KeyConfigStore';
 import { globalConfig, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
 import { accentedButton, flexRow } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';
 import KeyConfigSettings from './KeyConfigSettings';
@@ -389,7 +389,7 @@ const ConfigForm: Component<Props> = (props) => {
         <a
           class={configFormLink}
           onClick={async () => {
-            revealItemInDir(normalizeJoin(await appConfigDir(), Consts.globalConfigFileName));
+            await revealInFileBrowser(normalizeJoin(await appConfigDir(), Consts.globalConfigFileName));
           }}
         >
           Open Config File.

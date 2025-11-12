@@ -3,13 +3,13 @@ import { FileLocation } from '@sledge/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { remove, stat } from '@tauri-apps/plugin-fs';
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { pageRoot } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 const root = css`
@@ -158,7 +158,7 @@ const Restore = () => {
                 <div
                   class={item}
                   onClick={async () => {
-                    revealItemInDir(normalizeJoin(info.backupLocation.path!, info.backupLocation.name!));
+                    revealInFileBrowser(normalizeJoin(info.backupLocation.path!, info.backupLocation.name!));
                   }}
                 >
                   <p class={itemName}>{info.backupLocation.name}</p>

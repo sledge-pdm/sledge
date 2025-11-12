@@ -5,43 +5,18 @@ import { Icon, MenuList } from '@sledge/ui';
 import { message } from '@tauri-apps/plugin-dialog';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { openPath } from '@tauri-apps/plugin-opener';
-import { Component, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
+import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
+import { getParentDirectory, normalizeDirectoryPath } from '~/components/section/explorer/utils/path';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { openExistingProject } from '~/features/io/window';
 import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
-import { getDefaultPictureDir, normalizeJoin, normalizePath } from '~/utils/FileUtils';
-
-interface Props {
-  defaultPath?: string;
-}
+import { getDefaultPictureDir, normalizeJoin } from '~/utils/FileUtils';
 
 // Styles
-const breadcrumbsContainer = css`
-  display: flex;
-  flex-direction: row;
-  gap: 2px;
-  width: 100%;
-  flex-wrap: wrap;
-  margin-right: auto;
-  padding: 4px 8px;
-  background: var(--color-surface);
-`;
-
-const breadcrumbItem = css`
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  align-items: center;
-`;
-
-const breadcrumbLink = css`
-  font-family: PM10;
-  font-size: 10px;
-`;
-
 const explorerContainer = css`
   display: flex;
   flex-direction: column;
@@ -113,15 +88,19 @@ const entriesContainer = css`
   flex-wrap: wrap;
 `;
 
-const Explorer: Component<Props> = (props) => {
+const Explorer: Component = () => {
   let inputRef: HTMLInputElement | undefined = undefined;
   const [configStore, setConfigStore] = createStore<FilesConfig>({
     twoColumns: false,
     pathEditMode: false,
   });
-  const [currentPath, setCurrentPath] = createSignal<string>(props.defaultPath ?? '');
+  const [currentPath, setCurrentPath] = createSignal<string>('');
+  createEffect(() => {
+    const newPath = currentPath();
+    if (newPath) setAppearanceStore('explorerPath', newPath);
+  });
   const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
-  const [pathDraft, setPathDraft] = createSignal<string>(props.defaultPath ?? '');
+  const [pathDraft, setPathDraft] = createSignal<string>('');
 
   let defaultExplorerPath: string | undefined;
   let lastValidPath: string | undefined;
@@ -129,20 +108,6 @@ const Explorer: Component<Props> = (props) => {
   let skipBlurApply = false;
   let backPath: string | undefined;
   let forwardPath: string | undefined;
-
-  const normalizeDirectoryPath = (rawPath: string): string => {
-    if (!rawPath) return '';
-    let candidate = rawPath.trim();
-    if (/^[a-zA-Z]:$/.test(candidate)) {
-      candidate = `${candidate}/`;
-    }
-    const normalized = normalizePath(candidate);
-    if (!normalized) {
-      const slashOnly = candidate.replace(/\\/g, '/');
-      if (/^\/+$/.test(slashOnly)) return '/';
-    }
-    return normalized;
-  };
 
   const sortEntries = (items: DirEntry[]): DirEntry[] => {
     return items.sort((a, b) => {
@@ -259,17 +224,6 @@ const Explorer: Component<Props> = (props) => {
     return true;
   };
 
-  const getParentDirectory = (path: string): string | undefined => {
-    const normalized = normalizePath(path);
-    if (!normalized) return undefined;
-    const parts = normalized.split('/');
-    if (parts.length <= 1) return undefined;
-    let parent = parts.slice(0, -1).join('/');
-    if (parts.length === 2) parent += '/';
-    if (!parent || parent === normalized) return undefined;
-    return parent;
-  };
-
   const handleBackNavigation = async () => {
     if (backPath) {
       const target = backPath;
@@ -318,66 +272,7 @@ const Explorer: Component<Props> = (props) => {
     setConfigStore('pathEditMode', false);
   };
 
-  type BreadcrumbEntry = { label: string; value: string };
-
-  const buildBreadcrumbItems = (rawPath: string): BreadcrumbEntry[] => {
-    const normalized = normalizeDirectoryPath(rawPath);
-    if (!normalized) return [];
-
-    if (normalized === '/') {
-      return [{ label: '/', value: '/' }];
-    }
-
-    if (normalized.startsWith('//')) {
-      const withoutPrefix = normalized.replace(/^\/\//, '');
-      const parts = withoutPrefix.split('/').filter((part) => part);
-      if (parts.length < 2) {
-        return [{ label: normalized, value: normalized }];
-      }
-      const [server, share, ...rest] = parts;
-      let acc = `//${server}/${share}`;
-      const items: BreadcrumbEntry[] = [{ label: `//${server}/${share}`, value: acc }];
-      rest.forEach((part) => {
-        acc = `${acc}/${part}`;
-        items.push({ label: part, value: acc });
-      });
-      return items;
-    }
-
-    if (normalized.startsWith('/')) {
-      const rest = normalized.split('/').filter((part) => part);
-      const items: BreadcrumbEntry[] = [{ label: '/', value: '/' }];
-      let acc = '';
-      rest.forEach((part) => {
-        acc = acc ? `${acc}/${part}` : `/${part}`;
-        items.push({ label: part, value: acc });
-      });
-      return items;
-    }
-
-    if (/^[a-zA-Z]:/.test(normalized)) {
-      const segments = normalized.split('/').filter((part, index) => part || index === 0);
-      if (segments.length === 0) return [];
-      const driveLabel = segments[0].endsWith(':') ? `${segments[0]}/` : segments[0];
-      let acc = driveLabel;
-      const items: BreadcrumbEntry[] = [{ label: driveLabel, value: driveLabel }];
-      segments.slice(1).forEach((part) => {
-        acc = acc.endsWith('/') ? `${acc}${part}` : `${acc}/${part}`;
-        items.push({ label: part, value: acc });
-      });
-      return items;
-    }
-
-    const parts = normalized.split('/').filter((part) => part);
-    let acc = '';
-    return parts.map((part) => {
-      acc = acc ? `${acc}/${part}` : part;
-      return { label: part, value: acc };
-    });
-  };
-
   const handleMouseDown = (e: MouseEvent) => {
-    e.preventDefault();
     // prevent if canvas area focused
     if ((e.target as HTMLElement).closest('#canvas-area')) {
       return;
@@ -398,7 +293,8 @@ const Explorer: Component<Props> = (props) => {
     const openPath = fileStore.savedLocation.path ? normalizeJoin(fileStore.savedLocation.path) : undefined;
     const fallbackPath = await getDefaultPictureDir();
     defaultExplorerPath = fallbackPath;
-    const defaultPath = props.defaultPath ?? openPath ?? fallbackPath;
+    const editorSavedPath = appearanceStore.explorerPath ?? undefined;
+    const defaultPath = editorSavedPath ?? openPath ?? fallbackPath;
     if (defaultPath) {
       setPathDraft(defaultPath);
       await navigatePath(defaultPath, { mode: 'replace' });
@@ -411,36 +307,6 @@ const Explorer: Component<Props> = (props) => {
     };
   });
 
-  const Breadcrumbs: Component<{ path: string }> = (props) => {
-    const items = createMemo<BreadcrumbEntry[]>(() => buildBreadcrumbItems(props.path));
-    return (
-      <div class={breadcrumbsContainer}>
-        <For each={items()}>
-          {(item, index) => {
-            return (
-              <div class={breadcrumbItem}>
-                {index() > 0 && <p>&gt;</p>}
-                <a
-                  onClick={() => {
-                    if (index() === items().length - 1) return;
-                    void navigatePath(item.value);
-                  }}
-                  class={breadcrumbLink}
-                  style={{
-                    'pointer-events': index() === items().length - 1 ? 'none' : 'auto',
-                    color: index() === items().length - 1 ? color.accent : color.onBackground,
-                  }}
-                >
-                  {item.label}
-                </a>
-              </div>
-            );
-          }}
-        </For>
-      </div>
-    );
-  };
-
   const [isMenuOpened, setMenuOpened] = createSignal<boolean>(false);
 
   return (
@@ -452,7 +318,12 @@ const Explorer: Component<Props> = (props) => {
               when={configStore.pathEditMode}
               fallback={
                 <>
-                  <Breadcrumbs path={currentPath()} />
+                  <Breadcrumbs
+                    path={currentPath()}
+                    onNavigate={(value) => {
+                      void navigatePath(value);
+                    }}
+                  />
                 </>
               }
             >

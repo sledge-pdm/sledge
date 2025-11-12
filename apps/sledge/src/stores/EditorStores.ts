@@ -119,6 +119,9 @@ export const loadEditorStateStore = (
     eventBus.emit('tools:presetLoaded', { toolId: record.toolId });
   });
 
+  // init explorer path on load
+  setAppearanceStore('explorerPath', undefined);
+
   return {
     lastOpenAs: state.lastOpenAs,
     lastPath: state.lastPath,

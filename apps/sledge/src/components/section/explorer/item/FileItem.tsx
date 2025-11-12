@@ -83,6 +83,7 @@ const FileItem: Component<{
       class={fileItemContainer}
       style={{
         width: config.twoColumns ? '50%' : '100%',
+        'pointer-events': isMe ? 'none' : 'auto',
       }}
       onClick={() => {
         onClick?.(entry);
@@ -97,7 +98,6 @@ const FileItem: Component<{
           opacity: entry.isDirectory ? 0.8 : undefined,
           'text-decoration': entry.isDirectory ? 'underline' : 'none',
           color: isMe || isPartOfMe ? color.active : undefined,
-          'pointer-events': isMe ? 'none' : 'auto',
         }}
       >
         {entry.name}

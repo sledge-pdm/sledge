@@ -44,3 +44,37 @@ fn reveal_on_windows(path: String) -> Result<(), String> {
         .map_err(|e| format!("Failed to open Explorer: {e}"))?;
     Ok(())
 }
+
+#[cfg(target_os = "windows")]
+#[tauri::command(async)]
+pub async fn get_available_drive_letters() -> Result<Vec<char>, String> {
+    use windows::Win32::Storage::FileSystem::GetLogicalDrives;
+    let mask = unsafe { GetLogicalDrives() };
+    if mask == 0 {
+        return Err("GetLogicalDrives failed".into());
+    }
+    let mut free = Vec::new();
+    for bit in 0..26 {
+        if mask & (1 << bit) == 0 {
+            free.push((b'A' + bit) as char);
+        }
+    }
+    Ok(free)
+}
+
+#[cfg(target_os = "windows")]
+#[tauri::command(async)]
+pub async fn get_defined_drive_letters() -> Result<Vec<char>, String> {
+    use windows::Win32::Storage::FileSystem::GetLogicalDrives;
+    let mask = unsafe { GetLogicalDrives() };
+    if mask == 0 {
+        return Err("GetLogicalDrives failed".into());
+    }
+    let mut free = Vec::new();
+    for bit in 0..26 {
+        if mask & (1 << bit) != 0 {
+            free.push((b'A' + bit) as char);
+        }
+    }
+    Ok(free)
+}

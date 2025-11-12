@@ -1,20 +1,18 @@
 import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge/core';
 import { color } from '@sledge/theme';
-import { Icon, MenuList } from '@sledge/ui';
+import { Dropdown, DropdownOption, Icon, MenuList } from '@sledge/ui';
 import { message } from '@tauri-apps/plugin-dialog';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { openPath } from '@tauri-apps/plugin-opener';
-import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
 import { getParentDirectory, normalizeDirectoryPath } from '~/components/section/explorer/utils/path';
-import { importableFileExtensions } from '~/features/io/FileExtensions';
-import { openExistingProject } from '~/features/io/window';
 import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
-import { getDefaultPictureDir, normalizeJoin } from '~/utils/FileUtils';
+import { getDefaultPictureDir, getDefinedDriveLetters, isOpenableFile, normalizeJoin } from '~/utils/FileUtils';
 
 // Styles
 const explorerContainer = css`
@@ -23,6 +21,14 @@ const explorerContainer = css`
   width: 100%;
   padding-left: 8px;
   gap: 8px;
+`;
+
+const driveDropdownContainer = css`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  justify-content: end;
 `;
 
 const explorerInner = css`
@@ -91,6 +97,7 @@ const entriesContainer = css`
 const Explorer: Component = () => {
   let inputRef: HTMLInputElement | undefined = undefined;
   const [configStore, setConfigStore] = createStore<FilesConfig>({
+    showOnlySledgeOpenable: true,
     twoColumns: false,
     pathEditMode: false,
   });
@@ -100,7 +107,18 @@ const Explorer: Component = () => {
     if (newPath) setAppearanceStore('explorerPath', newPath);
   });
   const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
+  const visibleEntries = createMemo<DirEntry[] | undefined>(() => {
+    const currentEntries = entries();
+    if (!currentEntries) return currentEntries;
+    if (!configStore.showOnlySledgeOpenable) return currentEntries;
+    return currentEntries.filter((entry) => {
+      if (!entry.isFile) return true;
+      return isOpenableFile(entry.name);
+    });
+  });
   const [pathDraft, setPathDraft] = createSignal<string>('');
+
+  const [driveLetters, setDriveLetters] = createSignal<string[] | undefined>(undefined);
 
   let defaultExplorerPath: string | undefined;
   let lastValidPath: string | undefined;
@@ -108,6 +126,23 @@ const Explorer: Component = () => {
   let skipBlurApply = false;
   let backPath: string | undefined;
   let forwardPath: string | undefined;
+
+  const driveRootFromLetter = (letter: string | undefined): string | undefined => {
+    if (!letter) return undefined;
+    const upper = letter.trim().toUpperCase();
+    if (!upper || upper.length === 0 || !/^[A-Z]$/.test(upper)) return undefined;
+    const normalized = normalizeDirectoryPath(`${upper}:`);
+    return normalized || undefined;
+  };
+
+  const driveRootFromPath = (path: string | undefined): string | undefined => {
+    if (!path) return undefined;
+    const normalized = normalizeDirectoryPath(path);
+    if (!normalized) return undefined;
+    const match = normalized.match(/^([a-zA-Z]):/);
+    if (!match) return undefined;
+    return driveRootFromLetter(match[1]);
+  };
 
   const sortEntries = (items: DirEntry[]): DirEntry[] => {
     return items.sort((a, b) => {
@@ -300,6 +335,8 @@ const Explorer: Component = () => {
       await navigatePath(defaultPath, { mode: 'replace' });
     }
 
+    setDriveLetters(await getDefinedDriveLetters());
+
     window.addEventListener('mousedown', handleMouseDown);
 
     return () => {
@@ -311,6 +348,26 @@ const Explorer: Component = () => {
 
   return (
     <div class={explorerContainer}>
+      <Show when={driveLetters()}>
+        <div class={driveDropdownContainer}>
+          <Dropdown
+            align='right'
+            wheelSpin={false}
+            options={driveLetters()!
+              .map((letter) => driveRootFromLetter(letter))
+              .filter((root): root is string => !!root)
+              .map<DropdownOption<string>>((root) => ({
+                label: root,
+                value: root,
+              }))}
+            value={driveRootFromPath(currentPath()) ?? ''}
+            onChange={async (v) => {
+              setPathDraft(v);
+              await navigatePath(v, { mode: 'replace' });
+            }}
+          />
+        </div>
+      </Show>
       <div class={explorerInner}>
         <div class={navigationPanel}>
           <div class={navigationRow}>
@@ -401,6 +458,20 @@ const Explorer: Component = () => {
                   hoverColor={color.accent}
                 />
               </div>
+              <div
+                class={iconButton}
+                title='show only files that sledge can open.'
+                onClick={() => {
+                  setConfigStore('showOnlySledgeOpenable', (v) => !v);
+                }}
+              >
+                <Icon
+                  src={'/icons/files/file_sledge.png'}
+                  base={8}
+                  color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted}
+                  hoverColor={color.enabled}
+                />
+              </div>
               <div class={menuButtonContainer}>
                 <div
                   class={iconButton}
@@ -459,7 +530,7 @@ const Explorer: Component = () => {
         <div class={entriesContainer}>
           <Switch
             fallback={
-              <For each={entries()}>
+              <For each={visibleEntries()}>
                 {(entry) => {
                   const path = normalizeJoin(currentPath(), entry.name);
                   const location: FileLocation = {
@@ -477,20 +548,16 @@ const Explorer: Component = () => {
                   return (
                     <FileItem
                       config={configStore}
+                      location={location}
                       entry={entry}
                       isMe={!!isMe}
                       isPartOfMe={!!isPartOfMe}
                       onClick={(e) => {
                         if (entry.isDirectory) {
                           void navigatePath(path);
-                        } else if (entry.isFile) {
-                          const ext = ['sledge', ...importableFileExtensions];
-                          if (ext.some((e) => entry.name.endsWith(`.${e}`))) {
-                            openExistingProject(location);
-                          } else {
-                            // TODO: show error toast
-                          }
+                          return true;
                         }
+                        return false;
                       }}
                     />
                   );
@@ -501,8 +568,12 @@ const Explorer: Component = () => {
             <Match when={entries() === undefined}>
               <p>failed to open directory.</p>
             </Match>
-            <Match when={entries() !== undefined && entries()!.length === 0}>
-              <p>this directory is empty.</p>
+            <Match when={entries() !== undefined && (visibleEntries()?.length ?? 0) === 0}>
+              <p>
+                {configStore.showOnlySledgeOpenable && (entries()?.length ?? 0) > 0
+                  ? 'no sledge-compatible files in this folder.'
+                  : 'this directory is empty.'}
+              </p>
             </Match>
           </Switch>
         </div>

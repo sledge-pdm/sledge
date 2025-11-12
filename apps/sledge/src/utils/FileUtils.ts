@@ -2,6 +2,8 @@ import { FileLocation } from '@sledge/core';
 import { homeDir, pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { platform } from '@tauri-apps/plugin-os';
+import { importableFileExtensions, openableFileExtensions } from '~/features/io/FileExtensions';
+import { safeInvoke } from '~/utils/TauriUtils';
 
 export async function getFileUniqueId(path: string): Promise<string> {
   const buf = new TextEncoder().encode(path);
@@ -151,4 +153,34 @@ export const formatNativePath = (path: string): string => {
   }
 
   return normalized.replace(/\//g, '\\');
+};
+
+export const getAvailableDriveLetters = async (): Promise<string[] | undefined> => {
+  const platformType = platform();
+  if (platformType !== 'windows') {
+    // console.warn('getAvailableDriveLetters is only available on Windows platform.');
+    return undefined;
+  }
+
+  return await safeInvoke('get_available_drive_letters');
+};
+
+export const getDefinedDriveLetters = async (): Promise<string[] | undefined> => {
+  const platformType = platform();
+  if (platformType !== 'windows') {
+    // console.warn('getAvailableDriveLetters is only available on Windows platform.');
+    return undefined;
+  }
+
+  return await safeInvoke('get_defined_drive_letters');
+};
+
+export const isOpenableFile = (name: string) => {
+  if (!name.includes('.')) return false;
+  return openableFileExtensions.some((ext) => name.endsWith(`.${ext}`));
+};
+
+export const isImportableFile = (name: string) => {
+  if (!name.includes('.')) return false;
+  return importableFileExtensions.some((ext) => name.endsWith(`.${ext}`));
 };

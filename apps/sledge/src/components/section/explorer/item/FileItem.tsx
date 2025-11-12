@@ -1,9 +1,13 @@
 import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge/core';
 import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { Icon, MenuListOption, showContextMenu } from '@sledge/ui';
 import { DirEntry } from '@tauri-apps/plugin-fs';
-import { Component, Show } from 'solid-js';
-import { openableFileExtensions } from '~/features/io/FileExtensions';
+import { Component, createMemo, Show } from 'solid-js';
+import { createEntryFromLocalImage, insertEntry, selectEntry } from '~/features/image_pool';
+import { openExistingProject } from '~/features/io/window';
+import { isImportableFile, isOpenableFile, normalizeJoin } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 
 const fileItemContainer = css`
   display: flex;
@@ -50,6 +54,7 @@ const openIndicator = css`
 `;
 
 export interface FilesConfig {
+  showOnlySledgeOpenable: boolean;
   twoColumns: boolean;
   pathEditMode: boolean;
 }
@@ -61,21 +66,62 @@ const getIconForName = (name: string, isDirectory: boolean) => {
   return '/icons/files/file.png';
 };
 
-const isOpenableFile = (name: string) => {
-  return openableFileExtensions.some((ext) => name.endsWith(`.${ext}`));
-};
-
 const FileItem: Component<{
   entry: DirEntry;
+  location: FileLocation;
   title?: string;
   isMe: boolean;
   isPartOfMe: boolean;
   config: FilesConfig;
-  onClick?: (entry: DirEntry) => void;
+  // do show context menu after called if false returned
+  onClick?: (entry: DirEntry) => boolean;
 }> = (props) => {
-  const { entry, title, isMe, isPartOfMe, config, onClick } = props;
+  const { entry, location, title, isMe, isPartOfMe, config, onClick } = props;
 
-  if (entry.isFile && !isOpenableFile(entry.name)) return;
+  const contextMenuOptions = createMemo<MenuListOption[]>(() => {
+    const opts: MenuListOption[] = [
+      { type: 'label', label: entry.name },
+      {
+        type: 'item',
+        icon: '/icons/files/folder.png',
+        label: 'show in explorer',
+        onSelect: async () => {
+          if (!location.path || !location.name) return;
+          await revealInFileBrowser(normalizeJoin(location.path, location.name));
+        },
+      },
+    ];
+
+    if (entry.isDirectory) {
+      // no option
+    }
+    if (entry.isFile) {
+      if (isImportableFile(entry.name))
+        opts.push({
+          type: 'item',
+          label: 'import to project',
+          icon: '/icons/files/image.png',
+          onSelect: async () => {
+            if (!location.path || !location.name) return;
+            const entry = await createEntryFromLocalImage(normalizeJoin(location.path, location.name));
+            insertEntry(entry);
+            selectEntry(entry.id);
+          },
+        });
+
+      if (isOpenableFile(entry.name))
+        opts.push({
+          type: 'item',
+          icon: '/icons/files/file_sledge.png',
+          label: 'open in new window',
+          onSelect: async () => {
+            await openExistingProject(location);
+          },
+        });
+    }
+
+    return opts;
+  });
 
   return (
     <div
@@ -85,8 +131,17 @@ const FileItem: Component<{
         width: config.twoColumns ? '50%' : '100%',
         'pointer-events': isMe ? 'none' : 'auto',
       }}
-      onClick={() => {
-        onClick?.(entry);
+      onClick={(e) => {
+        const consumed = onClick?.(entry);
+        if (!consumed) {
+          showContextMenu(contextMenuOptions(), e);
+        }
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        showContextMenu(contextMenuOptions(), e);
       }}
     >
       <div class={iconContainer}>

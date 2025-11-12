@@ -37,6 +37,8 @@ tauri-plugin-process = "2.3.1"
 tauri-plugin-clipboard-manager = "2"
 uuid = { version = "1.18.1", features = ["v4"] }
 url = "2.5.7"
+
+[target."cfg(target_os = \"windows\")".dependencies]
 windows = { version = "0.62.2", features = ["Win32_Storage_FileSystem"] }
 
 

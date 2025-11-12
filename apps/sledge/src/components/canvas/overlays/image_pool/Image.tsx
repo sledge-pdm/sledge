@@ -30,8 +30,6 @@ const imageContainer = css`
   height: 100%;
   margin: 0;
   padding: 0;
-  pointer-events: none;
-  touch-action: none;
   z-index: var(--zindex-image-pool-image);
   image-rendering: pixelated;
   overflow: hidden;
@@ -151,6 +149,50 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
     entryInteract?.setOptions({ keepAspect: preserveAspectRatio ? 'always' : 'shift' });
   });
 
+  const handleContextMenu = (e: PointerEvent | MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    selectEntry(entry.id);
+    const showHideItem: MenuListOption = entry.visible
+      ? {
+          ...ContextMenuItems.BaseImageHide,
+          onSelect: () => {
+            hideEntry(entry.id);
+            selectEntry(undefined);
+          },
+        }
+      : {
+          ...ContextMenuItems.BaseImageShow,
+          onSelect: () => {
+            showEntry(entry.id);
+            selectEntry(entry.id);
+          },
+        };
+    let label = entry.descriptionName ?? '[ unknown ]';
+    if (!entry.visible) label += ' (hidden)';
+    showContextMenu(
+      [
+        { type: 'label', label },
+        showHideItem,
+        {
+          ...ContextMenuItems.BaseTransfer,
+          onSelect: () => transferToCurrentLayer(entry.id, false),
+        },
+        {
+          ...ContextMenuItems.BaseTransferRemove,
+          onSelect: () => transferToCurrentLayer(entry.id, true),
+        },
+        {
+          ...ContextMenuItems.BaseRemove,
+          label: 'Remove from pool',
+          onSelect: () => removeEntry(entry.id),
+        },
+      ],
+      e
+    );
+  };
+
   return (
     <div
       class={imageRoot}
@@ -167,49 +209,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
       onClick={(e) => {
         e.currentTarget.focus();
       }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        selectEntry(entry.id);
-        const showHideItem: MenuListOption = entry.visible
-          ? {
-              ...ContextMenuItems.BaseImageHide,
-              onSelect: () => {
-                hideEntry(entry.id);
-                selectEntry(undefined);
-              },
-            }
-          : {
-              ...ContextMenuItems.BaseImageShow,
-              onSelect: () => {
-                showEntry(entry.id);
-                selectEntry(entry.id);
-              },
-            };
-        let label = entry.descriptionName ?? '[ unknown ]';
-        if (!entry.visible) label += ' (hidden)';
-        showContextMenu(
-          [
-            { type: 'label', label },
-            showHideItem,
-            {
-              ...ContextMenuItems.BaseTransfer,
-              onSelect: () => transferToCurrentLayer(entry.id, false),
-            },
-            {
-              ...ContextMenuItems.BaseTransferRemove,
-              onSelect: () => transferToCurrentLayer(entry.id, true),
-            },
-            {
-              ...ContextMenuItems.BaseRemove,
-              label: 'Remove from pool',
-              onSelect: () => removeEntry(entry.id),
-            },
-          ],
-          e
-        );
-      }}
+      onContextMenu={handleContextMenu}
     >
       <div
         class={imageContainer}
@@ -223,24 +223,14 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           height={entry.base.height}
           class={overlay}
           style={{
+            'pointer-events': 'none',
+            'touch-action': 'none',
             'image-rendering': 'pixelated',
             'transform-origin': 'center center',
             scale: `${entry.transform.flipX ? -1 : 1} ${entry.transform.flipY ? -1 : 1}`,
             opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
           }}
         />
-        <div
-          style={{
-            position: 'absolute',
-            top: '8px',
-            left: '8px',
-            'transform-origin': '0 0',
-            scale: 1 / interactStore.zoom,
-            opacity: imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0.25,
-          }}
-        >
-          <Icon src={'/icons/actions/image.png'} base={8} scale={2} color={'#808080'} />
-        </div>
       </div>
       <svg
         xmlns='http://www.w3.org/2000/svg'
@@ -278,6 +268,30 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           }}
         />
       </svg>
+
+      <div
+        class={overlay}
+        style={{
+          transform: `rotate(${entry.transform.rotation}deg)`,
+          'z-index': 'var(--zindex-image-pool-control)',
+        }}
+      >
+        <div
+          onClick={handleContextMenu}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            'transform-origin': '0 0',
+            transform: `scale(${1 / interactStore.zoom}) translate(8px, 8px) `,
+            opacity: imagePoolStore.selectedEntryId === entry.id ? 1 : 0.5,
+            'pointer-events': 'all',
+            cursor: 'pointer',
+          }}
+        >
+          <Icon src={'/icons/actions/image.png'} base={8} scale={2} color={'#808080'} hoverColor={color.accent} />
+        </div>
+      </div>
     </div>
   );
 };

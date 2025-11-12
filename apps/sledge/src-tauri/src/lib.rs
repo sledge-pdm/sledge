@@ -68,7 +68,9 @@ pub fn run() {
             window::open_devtools_window,
             global_event::emit_global_event,
             files::reveal_native_path,
+            #[cfg(target_os = "windows")]
             files::get_available_drive_letters,
+            #[cfg(target_os = "windows")]
             files::get_defined_drive_letters
         ])
         .plugin(

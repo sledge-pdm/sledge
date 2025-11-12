@@ -1,4 +1,5 @@
 #[tauri::command]
+#[allow(unused_variables)]
 pub async fn reveal_native_path(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {

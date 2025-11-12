@@ -96,9 +96,17 @@ export const normalizePath = (path: string): string => {
 export const normalizeJoin = (...paths: string[]): string => {
   if (!paths || paths.length === 0) return '';
   const pieces: string[] = [];
+  let hasUnixRoot = false;
   paths.forEach((segment) => {
     if (!segment || !segment.trim()) return;
-    let cleaned = segment.replace(/\\/g, '/');
+    let cleaned = segment.replace(/\\/g, '/').trim();
+    if (!cleaned) return;
+
+    if (!hasUnixRoot && /^\/+$/.test(cleaned)) {
+      hasUnixRoot = true;
+      return;
+    }
+
     const isFirstPiece = pieces.length === 0;
     if (isFirstPiece) {
       cleaned = cleaned.replace(/\/+$/, '');
@@ -108,10 +116,15 @@ export const normalizeJoin = (...paths: string[]): string => {
     if (cleaned) pieces.push(cleaned);
   });
 
-  if (pieces.length === 0) return '';
+  if (pieces.length === 0) return hasUnixRoot ? '/' : '';
   const currentPlatform = platform();
-  const joined = currentPlatform === 'windows' ? pieces.join('\\') : pieces.join('/');
-  return normalizePath(joined);
+  let joined = currentPlatform === 'windows' ? pieces.join('\\') : pieces.join('/');
+  if (hasUnixRoot && joined) {
+    joined = '/' + joined.replace(/^\/+/, '');
+  }
+  const normalized = normalizePath(joined);
+  if (hasUnixRoot && !normalized) return '/';
+  return normalized;
 };
 
 export const formatNativePath = (path: string): string => {

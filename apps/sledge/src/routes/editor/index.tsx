@@ -21,6 +21,7 @@ import { openExistingProject } from '~/features/io/window';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { tryLoadProject } from '~/routes/editor/load';
+import { appearanceStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { pathToFileLocation } from '~/utils/FileUtils';
@@ -119,7 +120,9 @@ export default function Editor() {
           <BottomBar />
         </div>
 
-        <AnalogSticks />
+        <Show when={appearanceStore.onscreenControl}>
+          <AnalogSticks />
+        </Show>
 
         <KeyListener />
         <ClipboardListener />

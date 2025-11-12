@@ -13,6 +13,7 @@ export type AppearanceStore = {
   };
 
   ruler: boolean;
+  onscreenControl: boolean;
   explorerPath?: string;
 };
 
@@ -30,4 +31,5 @@ export const defaultAppearanceStore: AppearanceStore = {
   },
 
   ruler: false,
+  onscreenControl: false,
 };

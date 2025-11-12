@@ -1,7 +1,8 @@
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { Icon } from '@sledge/ui';
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { setAppearanceStore } from '~/stores/EditorStores';
 import { AnalogSticksController } from './AnalogSticksController';
 
 const root = css`
@@ -106,7 +107,6 @@ const zoomHandle = css`
 const AnalogSticks: Component = () => {
   const [position, setPosition] = createSignal<Vec2>({ x: 0, y: 0 });
   const [positionLocked, setPositionLocked] = createSignal(false);
-  const [isVisible, setIsVisible] = createSignal(false);
 
   // Pan stick state (0.5, 0.5 is center)
   const [panStickPosition, setPanStickPosition] = createSignal<Vec2>({ x: 0.5, y: 0.5 });
@@ -115,11 +115,6 @@ const AnalogSticks: Component = () => {
 
   // Controller instance
   let panZoomController: AnalogSticksController;
-
-  // Drag states
-  const [isDraggingPan, setIsDraggingPan] = createSignal(false);
-  const [isDraggingZoom, setIsDraggingZoom] = createSignal(false);
-  const [isDraggingWindow, setIsDraggingWindow] = createSignal(false);
 
   onMount(() => {
     const sectionsBetweenArea = document.getElementById('sections-between-area');
@@ -131,20 +126,6 @@ const AnalogSticks: Component = () => {
 
     // Initialize controller
     panZoomController = new AnalogSticksController();
-
-    // Keyboard shortcut to toggle visibility (F6)
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F6') {
-        e.preventDefault();
-        setIsVisible(!isVisible());
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    onCleanup(() => {
-      document.removeEventListener('keydown', handleKeyDown);
-    });
   });
 
   onCleanup(() => {
@@ -185,7 +166,6 @@ client XY: ${e.clientX}, ${e.clientY}`);
 
   const finalizeWindowDrag = (e: PointerEvent) => {
     if (windowDragState.pointerId !== e.pointerId) return;
-    setIsDraggingWindow(false);
     window.removeEventListener('pointermove', handleWindowPointerMove);
     window.removeEventListener('pointerup', finalizeWindowDrag);
     window.removeEventListener('pointercancel', finalizeWindowDrag);
@@ -199,7 +179,6 @@ client XY: ${e.clientX}, ${e.clientY}`);
     if (windowDragState.pointerId !== null) return;
 
     logPointerEvent(e);
-    setIsDraggingWindow(true);
     windowDragState.pointerId = e.pointerId;
     windowDragState.lastX = e.clientX;
     windowDragState.lastY = e.clientY;
@@ -214,7 +193,6 @@ client XY: ${e.clientX}, ${e.clientY}`);
   const handlePanPointerDown = (e: PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDraggingPan(true);
 
     const panEl = e.currentTarget as HTMLElement;
     panEl.setPointerCapture(e.pointerId);
@@ -240,7 +218,6 @@ client XY: ${e.clientX}, ${e.clientY}`);
     };
 
     const handlePanUp = () => {
-      setIsDraggingPan(false);
       panEl.releasePointerCapture(e.pointerId);
 
       // Return to center
@@ -259,7 +236,6 @@ client XY: ${e.clientX}, ${e.clientY}`);
   const handleZoomPointerDown = (e: PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDraggingZoom(true);
 
     const zoomEl = e.currentTarget as HTMLElement;
     zoomEl.setPointerCapture(e.pointerId);
@@ -274,7 +250,6 @@ client XY: ${e.clientX}, ${e.clientY}`);
     };
 
     const handleZoomUp = () => {
-      setIsDraggingZoom(false);
       zoomEl.releasePointerCapture(e.pointerId);
 
       // Return to center
@@ -290,71 +265,69 @@ client XY: ${e.clientX}, ${e.clientY}`);
   };
 
   return (
-    <Show when={isVisible()}>
-      <div
-        class={root}
-        style={{
-          left: `${position().x}px`,
-          top: `${position().y}px`,
-        }}
-      >
-        <div class={rootBackground} />
-        <div class={titlebar}>
-          <div
-            class={iconContainer}
-            onClick={() => {
-              setPositionLocked(!positionLocked());
-            }}
-            title={positionLocked() ? 'Unlock position' : 'Lock position'}
-          >
-            <Icon
-              src={positionLocked() ? '/icons/misc/lock_closed.png' : '/icons/misc/lock_opened.png'}
-              base={8}
-              color={'var(--color-on-background)'}
-            />
-          </div>
-          <div
-            class={iconContainer}
-            onClick={() => {
-              setIsVisible(false);
-            }}
-            title='Hide controller (Press F6 to show again)'
-          >
-            <Icon src={'/icons/misc/remove.png'} base={8} color={'var(--color-on-background)'} />
-          </div>
-
-          <div
-            title={positionLocked() ? 'Locked (click to unlock)' : 'Draggable (click to lock)'}
-            class={titlebarBackground}
-            onPointerDown={handleWindowPointerDown}
+    <div
+      class={root}
+      style={{
+        left: `${position().x}px`,
+        top: `${position().y}px`,
+      }}
+    >
+      <div class={rootBackground} />
+      <div class={titlebar}>
+        <div
+          class={iconContainer}
+          onClick={() => {
+            setPositionLocked(!positionLocked());
+          }}
+          title={positionLocked() ? 'Unlock position' : 'Lock position'}
+        >
+          <Icon
+            src={positionLocked() ? '/icons/misc/lock_closed.png' : '/icons/misc/lock_opened.png'}
+            base={8}
+            color={'var(--color-on-background)'}
           />
         </div>
-        <div class={controlContainer}>
-          {/* パンを操作するスティック */}
-          <div class={panContainer} title='Pan Control - Drag to pan canvas'>
-            <div
-              class={panStick}
-              style={{
-                left: `${panStickPosition().x * 100}%`,
-                top: `${panStickPosition().y * 100}%`,
-              }}
-              onPointerDown={handlePanPointerDown}
-            ></div>
-          </div>
-          {/* ズームを操作するフェーダー */}
-          <div class={zoomContainer} title='Zoom Control - Up: Zoom in, Down: Zoom out'>
-            <div class={zoomBackground}></div>
-            <div
-              class={zoomHandle}
-              style={{
-                top: `${zoomFaderPosition() * 100}%`,
-              }}
-              onPointerDown={handleZoomPointerDown}
-            ></div>
-          </div>
+        <div
+          class={iconContainer}
+          onClick={() => {
+            setAppearanceStore('onscreenControl', false);
+          }}
+          title='Hide controller'
+        >
+          <Icon src={'/icons/misc/remove.png'} base={8} color={'var(--color-on-background)'} />
+        </div>
+
+        <div
+          title={positionLocked() ? 'Locked (click to unlock)' : 'Draggable (click to lock)'}
+          class={titlebarBackground}
+          onPointerDown={handleWindowPointerDown}
+        />
+      </div>
+      <div class={controlContainer}>
+        {/* パンを操作するスティック */}
+        <div class={panContainer} title='Pan Control - Drag to pan canvas'>
+          <div
+            class={panStick}
+            style={{
+              left: `${panStickPosition().x * 100}%`,
+              top: `${panStickPosition().y * 100}%`,
+            }}
+            onPointerDown={handlePanPointerDown}
+          ></div>
+        </div>
+        {/* ズームを操作するフェーダー */}
+        <div class={zoomContainer} title='Zoom Control - Up: Zoom in, Down: Zoom out'>
+          <div class={zoomBackground}></div>
+          <div
+            class={zoomHandle}
+            style={{
+              top: `${zoomFaderPosition() * 100}%`,
+            }}
+            onPointerDown={handleZoomPointerDown}
+          ></div>
         </div>
       </div>
-    </Show>
+    </div>
   );
 };
 

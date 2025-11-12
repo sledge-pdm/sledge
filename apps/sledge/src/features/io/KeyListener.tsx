@@ -11,7 +11,7 @@ import {
   setActiveToolCategory,
   updateToolPresetConfig,
 } from '~/features/tools/ToolController';
-import { fileStore, interactStore, toolStore } from '~/stores/EditorStores';
+import { fileStore, interactStore, setAppearanceStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { isKeyMatchesToEntry } from '../config/KeyConfigController';
 
@@ -30,6 +30,11 @@ const KeyListener: Component = () => {
   const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
       e.preventDefault();
+    }
+
+    if (e.key === 'F6') {
+      e.preventDefault();
+      setAppearanceStore('onscreenControl', (v) => !v);
     }
 
     if (toolStore.activeToolCategory === 'rectSelection' && e.altKey) return;

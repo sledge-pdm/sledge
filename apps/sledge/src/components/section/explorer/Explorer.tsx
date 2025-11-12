@@ -2,8 +2,9 @@ import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon, MenuList } from '@sledge/ui';
+import { message } from '@tauri-apps/plugin-dialog';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
-import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
@@ -119,68 +120,210 @@ const Explorer: Component<Props> = (props) => {
   });
   const [currentPath, setCurrentPath] = createSignal<string>(props.defaultPath ?? '');
   const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
+  const [pathDraft, setPathDraft] = createSignal<string>(props.defaultPath ?? '');
+
+  let defaultExplorerPath: string | undefined;
+  let lastValidPath: string | undefined;
+  let loadRequestToken = 0;
+  let skipBlurApply = false;
+
+  const normalizeDirectoryPath = (rawPath: string): string => {
+    if (!rawPath) return '';
+    let candidate = rawPath.trim();
+    if (/^[a-zA-Z]:$/.test(candidate)) {
+      candidate = `${candidate}/`;
+    }
+    const normalized = normalizePath(candidate);
+    if (!normalized) {
+      const slashOnly = candidate.replace(/\\/g, '/');
+      if (/^\/+$/.test(slashOnly)) return '/';
+    }
+    return normalized;
+  };
+
+  const sortEntries = (items: DirEntry[]): DirEntry[] => {
+    return items.sort((a, b) => {
+      if (a.isDirectory && !b.isDirectory) return -1;
+      if (!a.isDirectory && b.isDirectory) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  };
+
+  const revertToPath = (path: string) => {
+    setCurrentPath(path);
+    if (!configStore.pathEditMode) setPathDraft(path);
+  };
+
+  const setPath = async (path: string, allowRetry = true): Promise<boolean> => {
+    const normalized = normalizeDirectoryPath(path);
+    if (!normalized) return false;
+
+    const previousValidPath = lastValidPath ?? currentPath();
+    if (normalized === previousValidPath) {
+      if (!configStore.pathEditMode) setPathDraft(normalized);
+      return true;
+    }
+
+    const requestToken = ++loadRequestToken;
+    revertToPath(normalized);
+
+    try {
+      const dirEntries = await readDir(normalized);
+      if (requestToken !== loadRequestToken) return true;
+      sortEntries(dirEntries);
+      setEntries(dirEntries);
+      lastValidPath = normalized;
+      if (!defaultExplorerPath) defaultExplorerPath = normalized;
+      return true;
+    } catch (error) {
+      if (requestToken !== loadRequestToken) return false;
+
+      const fallback =
+        allowRetry &&
+        ((lastValidPath && lastValidPath !== normalized && lastValidPath) ||
+          (defaultExplorerPath && defaultExplorerPath !== normalized && defaultExplorerPath));
+
+      await message(
+        `Cannot open directory.\n${normalized}${fallback ? `\nReverting to ${fallback}.` : ''}`,
+        {
+          kind: 'warning',
+          title: 'Explorer',
+          okLabel: 'OK',
+        }
+      );
+
+      if (fallback) {
+        return await setPath(fallback, false);
+      }
+
+      if (previousValidPath) {
+        revertToPath(previousValidPath);
+        return false;
+      }
+
+      setEntries(undefined);
+      setCurrentPath('');
+      if (!configStore.pathEditMode) setPathDraft('');
+      return false;
+    }
+  };
+
+  const applyPathDraft = async () => {
+    const rawDraft = pathDraft();
+    if (!rawDraft.trim()) {
+      setPathDraft(currentPath());
+      setConfigStore('pathEditMode', false);
+      return;
+    }
+
+    const normalizedDraft = normalizeDirectoryPath(rawDraft);
+    if (!normalizedDraft) {
+      setPathDraft(currentPath());
+      setConfigStore('pathEditMode', false);
+      return;
+    }
+
+    if (normalizedDraft === currentPath()) {
+      setPathDraft(currentPath());
+      setConfigStore('pathEditMode', false);
+      return;
+    }
+
+    await setPath(rawDraft);
+    setPathDraft(currentPath());
+    setConfigStore('pathEditMode', false);
+  };
+
+  type BreadcrumbEntry = { label: string; value: string };
+
+  const buildBreadcrumbItems = (rawPath: string): BreadcrumbEntry[] => {
+    const normalized = normalizeDirectoryPath(rawPath);
+    if (!normalized) return [];
+
+    if (normalized === '/') {
+      return [{ label: '/', value: '/' }];
+    }
+
+    if (normalized.startsWith('//')) {
+      const withoutPrefix = normalized.replace(/^\/\//, '');
+      const parts = withoutPrefix.split('/').filter((part) => part);
+      if (parts.length < 2) {
+        return [{ label: normalized, value: normalized }];
+      }
+      const [server, share, ...rest] = parts;
+      let acc = `//${server}/${share}`;
+      const items: BreadcrumbEntry[] = [{ label: `//${server}/${share}`, value: acc }];
+      rest.forEach((part) => {
+        acc = `${acc}/${part}`;
+        items.push({ label: part, value: acc });
+      });
+      return items;
+    }
+
+    if (normalized.startsWith('/')) {
+      const rest = normalized.split('/').filter((part) => part);
+      const items: BreadcrumbEntry[] = [{ label: '/', value: '/' }];
+      let acc = '';
+      rest.forEach((part) => {
+        acc = acc ? `${acc}/${part}` : `/${part}`;
+        items.push({ label: part, value: acc });
+      });
+      return items;
+    }
+
+    if (/^[a-zA-Z]:/.test(normalized)) {
+      const segments = normalized.split('/').filter((part, index) => part || index === 0);
+      if (segments.length === 0) return [];
+      const driveLabel = segments[0].endsWith(':') ? `${segments[0]}/` : segments[0];
+      let acc = driveLabel;
+      const items: BreadcrumbEntry[] = [{ label: driveLabel, value: driveLabel }];
+      segments.slice(1).forEach((part) => {
+        acc = acc.endsWith('/') ? `${acc}${part}` : `${acc}/${part}`;
+        items.push({ label: part, value: acc });
+      });
+      return items;
+    }
+
+    const parts = normalized.split('/').filter((part) => part);
+    let acc = '';
+    return parts.map((part) => {
+      acc = acc ? `${acc}/${part}` : part;
+      return { label: part, value: acc };
+    });
+  };
 
   onMount(async () => {
     const openPath = fileStore.savedLocation.path ? normalizeJoin(fileStore.savedLocation.path) : undefined;
-    const defaultPath = props.defaultPath ?? openPath ?? (await getDefaultPictureDir());
+    const fallbackPath = await getDefaultPictureDir();
+    defaultExplorerPath = fallbackPath;
+    const defaultPath = props.defaultPath ?? openPath ?? fallbackPath;
     if (defaultPath) {
-      setPath(defaultPath);
-    }
-  });
-
-  const setPath = (path: string) => {
-    if (!path.includes('/')) path += '/';
-    setCurrentPath(normalizePath(path));
-  };
-
-  createEffect(async () => {
-    const path = currentPath();
-    if (path) {
-      try {
-        const entries = await readDir(path);
-        // sort dir => file
-        entries.sort((a, b) => {
-          if (a.isDirectory && !b.isDirectory) return -1;
-          if (!a.isDirectory && b.isDirectory) return 1;
-          return a.name.localeCompare(b.name);
-        });
-
-        setEntries(entries);
-      } catch (e) {
-        setEntries(undefined);
-      }
+      setPathDraft(defaultPath);
+      await setPath(defaultPath);
     }
   });
 
   const Breadcrumbs: Component<{ path: string }> = (props) => {
-    const parts = createMemo<string[]>(() => {
-      return props.path
-        .replaceAll('\\', '/')
-        .split('/')
-        .filter((p) => p);
-    });
+    const items = createMemo<BreadcrumbEntry[]>(() => buildBreadcrumbItems(props.path));
     return (
       <div class={breadcrumbsContainer}>
-        <For each={parts()}>
-          {(part, index) => {
+        <For each={items()}>
+          {(item, index) => {
             return (
               <div class={breadcrumbItem}>
                 {index() > 0 && <p>&gt;</p>}
                 <a
                   onClick={() => {
-                    const newPath = parts()
-                      .slice(0, index() + 1)
-                      .join('/');
-                    setPath(newPath);
+                    if (index() === items().length - 1) return;
+                    void setPath(item.value);
                   }}
                   class={breadcrumbLink}
                   style={{
-                    'pointer-events': index() === parts().length - 1 ? 'none' : 'auto',
-                    color: index() === parts().length - 1 ? color.accent : color.onBackground,
+                    'pointer-events': index() === items().length - 1 ? 'none' : 'auto',
+                    color: index() === items().length - 1 ? color.accent : color.onBackground,
                   }}
                 >
-                  {part}
-                  {parts().length === 1 && '/'}
+                  {item.label}
                 </a>
               </div>
             );
@@ -210,17 +353,31 @@ const Explorer: Component<Props> = (props) => {
             >
               <input
                 ref={(ref) => (inputRef = ref)}
-                value={currentPath()}
+                value={pathDraft()}
                 onInput={(e) => {
-                  setPath(e.currentTarget.value);
+                  setPathDraft(e.currentTarget.value);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === 'Escape') {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    skipBlurApply = false;
+                    inputRef?.blur();
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    skipBlurApply = true;
+                    setPathDraft(currentPath());
                     setConfigStore('pathEditMode', false);
                     inputRef?.blur();
                   }
                 }}
-                onBlur={() => setConfigStore('pathEditMode', false)}
+                onBlur={async () => {
+                  if (skipBlurApply) {
+                    skipBlurApply = false;
+                    return;
+                  }
+                  if (!configStore.pathEditMode) return;
+                  await applyPathDraft();
+                }}
                 class={pathInput}
                 style={{
                   opacity: configStore.pathEditMode ? 1 : 0.4,
@@ -234,9 +391,13 @@ const Explorer: Component<Props> = (props) => {
               <div
                 class={iconButton}
                 onClick={() => {
+                  setPathDraft(currentPath());
                   setConfigStore('pathEditMode', true);
-                  inputRef?.focus();
-                  // inputRef?.select();
+                  skipBlurApply = false;
+                  setTimeout(() => {
+                    inputRef?.focus();
+                    inputRef?.select();
+                  }, 0);
                 }}
               >
                 <Icon src={'/icons/files/edit.png'} base={8} hoverColor={color.accent} />
@@ -250,7 +411,7 @@ const Explorer: Component<Props> = (props) => {
                   let parent = parts.slice(0, -1).join('/');
                   if (parts.length === 2) parent += '/';
                   if (parent) {
-                    setPath(parent);
+                    void setPath(parent);
                   }
                 }}
               >
@@ -291,7 +452,7 @@ const Explorer: Component<Props> = (props) => {
                         label: 'back to saved folder',
                         disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
                         onSelect: () => {
-                          if (fileStore.savedLocation.path) setPath(fileStore.savedLocation.path);
+                          if (fileStore.savedLocation.path) void setPath(fileStore.savedLocation.path);
                         },
                       },
                       {
@@ -342,7 +503,7 @@ const Explorer: Component<Props> = (props) => {
                       isPartOfMe={!!isPartOfMe}
                       onClick={(e) => {
                         if (entry.isDirectory) {
-                          setPath(path);
+                          void setPath(path);
                         } else if (entry.isFile) {
                           const ext = ['sledge', ...importableFileExtensions];
                           if (ext.some((e) => entry.name.endsWith(`.${e}`))) {

@@ -2,13 +2,13 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/out/save';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { useTimeAgoText } from '~/utils/TimeUtils';
 
 const saveSectionContainer = css`
@@ -111,7 +111,7 @@ const SaveSection: Component = () => {
       label: 'Open Saved Folder',
       onSelect: () => {
         if (!fileStore.savedLocation.path || !fileStore.savedLocation.name) return;
-        revealItemInDir(normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name));
+        revealInFileBrowser(normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name));
       },
       disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
       color: color.onBackground,

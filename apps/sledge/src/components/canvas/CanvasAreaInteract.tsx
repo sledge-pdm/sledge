@@ -75,6 +75,20 @@ class CanvasAreaInteract {
     return false;
   }
 
+  private handleMouseDown(e: MouseEvent) {
+    if (e.button === 3) {
+      e.preventDefault();
+      if (projectHistoryController.canUndo()) {
+        projectHistoryController.undo();
+      }
+    } else if (e.button === 4) {
+      e.preventDefault();
+      if (projectHistoryController.canRedo()) {
+        projectHistoryController.redo();
+      }
+    }
+  }
+
   private handlePointerDown(e: PointerEvent) {
     const start = new Date().getTime();
     logger.debugLog(`handlePointerDown start`);
@@ -108,14 +122,17 @@ class CanvasAreaInteract {
     } else {
       // タッチ以外
       if (e.pointerType === 'mouse') {
+        console.log(e.button);
         if (e.button === 3) {
           e.preventDefault();
+          e.stopImmediatePropagation();
           if (projectHistoryController.canUndo()) {
             projectHistoryController.undo();
           }
           return;
         } else if (e.button === 4) {
           e.preventDefault();
+          e.stopImmediatePropagation();
           if (projectHistoryController.canRedo()) {
             projectHistoryController.redo();
           }
@@ -312,6 +329,7 @@ class CanvasAreaInteract {
     // キーアップ処理は現状不要
   }
 
+  private onMouseDown = this.handleMouseDown.bind(this);
   private onPointerDown = this.handlePointerDown.bind(this);
   private onPointerMove = this.handlePointerMove.bind(this);
   private onPointerUp = this.handlePointerUp.bind(this);
@@ -322,6 +340,7 @@ class CanvasAreaInteract {
 
   public setInteractListeners() {
     this.removeInteractListeners();
+    this.wrapperRef.addEventListener('mousedown', this.onMouseDown);
     this.wrapperRef.addEventListener('pointerdown', this.onPointerDown);
     window.addEventListener('pointermove', this.onPointerMove);
     window.addEventListener('pointerup', this.onPointerUp);
@@ -334,6 +353,7 @@ class CanvasAreaInteract {
   }
 
   public removeInteractListeners() {
+    this.wrapperRef.removeEventListener('mousedown', this.onMouseDown);
     this.wrapperRef.removeEventListener('pointerdown', this.onPointerDown);
     window.removeEventListener('pointermove', this.onPointerMove);
     window.removeEventListener('pointerup', this.onPointerUp);

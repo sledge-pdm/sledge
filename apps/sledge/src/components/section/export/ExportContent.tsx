@@ -4,7 +4,6 @@ import { color, fonts } from '@sledge/theme';
 import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Slider } from '@sledge/ui';
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
@@ -16,6 +15,7 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
 import { getDefaultExportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
 const qualityField = css`
@@ -228,7 +228,7 @@ const ExportContent: Component = () => {
         });
 
         if (settings.showDirAfterSave && location.path && location.name) {
-          await revealItemInDir(normalizeJoin(location.path, location.name));
+          await revealInFileBrowser(normalizeJoin(location.path, location.name));
         }
       }
     }

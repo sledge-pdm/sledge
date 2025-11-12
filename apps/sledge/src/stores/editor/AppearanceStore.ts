@@ -13,6 +13,7 @@ export type AppearanceStore = {
   };
 
   ruler: boolean;
+  explorerPath?: string;
 };
 
 export const defaultAppearanceStore: AppearanceStore = {

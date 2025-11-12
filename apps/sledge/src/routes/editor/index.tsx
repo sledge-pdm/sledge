@@ -14,6 +14,7 @@ import { addImagesFromLocal } from '~/features/image_pool';
 import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { loadEditorState } from '~/features/io/editor/load';
+import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import KeyListener from '~/features/io/KeyListener';
 import { openExistingProject } from '~/features/io/window';
@@ -52,9 +53,17 @@ export default function Editor() {
       await loadGlobalSettings();
       const lastState = await loadEditorState();
       await tryLoadProject(lastState);
+      // Save editor state if load succeeded.
+      // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
+      await saveEditorStateImmediate();
       setIsLoading(false);
+      // Adjusting zoom before showing window seems to be not working on some OS except windows
       adjustZoomToFit();
+
       await showMainWindow();
+
+      // So make sure it's properly zoomed on init
+      adjustZoomToFit();
     } catch (e) {
       unlisten();
       if (isFirst) await reportAppStartupError(e);

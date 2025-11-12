@@ -79,10 +79,6 @@ export interface EditorStateStore {
   presets: PresetRecord[];
 }
 
-export const getLastOpenedInfo = () => {
-  return {};
-};
-
 export const getEditorStateStore = (): EditorStateStore => {
   return {
     appearanceStore: appearanceStore,

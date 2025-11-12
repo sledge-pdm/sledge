@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { Component, For, createMemo } from 'solid-js';
-import { buildBreadcrumbItems, BreadcrumbEntry } from '~/components/section/explorer/utils/path';
+import { BreadcrumbEntry, buildBreadcrumbItems } from '~/components/section/explorer/utils/path';
 
 const breadcrumbsContainer = css`
   display: flex;

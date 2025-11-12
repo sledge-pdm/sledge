@@ -160,7 +160,11 @@ const Explorer: Component<Props> = (props) => {
 
     const previousValidPath = lastValidPath ?? currentPath();
     if (normalized === previousValidPath) {
-      if (!configStore.pathEditMode) setPathDraft(normalized);
+      if (currentPath() !== previousValidPath) {
+        revertToPath(previousValidPath);
+      } else if (!configStore.pathEditMode) {
+        setPathDraft(previousValidPath);
+      }
       return true;
     }
 

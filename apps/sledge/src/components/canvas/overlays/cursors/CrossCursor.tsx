@@ -4,6 +4,8 @@ import { Component } from 'solid-js';
 
 const root = css`
   position: fixed;
+  top: 0;
+  left: 0;
   margin-top: -5.5px;
   margin-left: -5.5px;
   width: 11px;
@@ -41,8 +43,7 @@ const CrossCursor: Component<Props> = (props: Props) => {
     <div
       class={root}
       style={{
-        top: `${props.mousePos.y}px`,
-        left: `${props.mousePos.x}px`,
+        translate: `${props.mousePos.x}px ${props.mousePos.y}px`,
       }}
     >
       <div class={horizontalBar} />

@@ -4,6 +4,8 @@ import { Component } from 'solid-js';
 
 const root = css`
   position: fixed;
+  top: 0;
+  left: 0;
   width: 3px;
   height: 3px;
   margin-top: -1.5px;
@@ -22,8 +24,7 @@ const PixelCursor: Component<Props> = (props: Props) => {
     <div
       class={root}
       style={{
-        top: `${props.mousePos.y}px`,
-        left: `${props.mousePos.x}px`,
+        translate: `${props.mousePos.x}px ${props.mousePos.y}px`,
       }}
     />
   );

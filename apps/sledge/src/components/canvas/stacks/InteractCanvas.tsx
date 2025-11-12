@@ -2,7 +2,7 @@ import { Vec2 } from '@sledge/core';
 import { showContextMenu } from '@sledge/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { batch, Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/transform/CanvasPositionCalculator';
@@ -136,11 +136,13 @@ export const InteractCanvas: Component<Props> = (props) => {
 
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
-    setInteractStore('lastMouseWindow', windowPosition);
-    setInteractStore('lastMouseOnCanvas', position);
-
     const onCanvas = !!canvasRef?.contains(e.target as Node);
-    setInteractStore('isMouseOnCanvas', onCanvas);
+
+    batch(() => {
+      setInteractStore('lastMouseWindow', windowPosition);
+      setInteractStore('lastMouseOnCanvas', position);
+      setInteractStore('isMouseOnCanvas', onCanvas);
+    });
 
     if (!isDrawableClick(e)) {
       logger.debugWarn(`handlePointerMove cancelled because not drawable click`);

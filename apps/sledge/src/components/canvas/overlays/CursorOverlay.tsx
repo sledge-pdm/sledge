@@ -1,6 +1,4 @@
-import { Vec2 } from '@sledge/core';
-import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createMemo, createSignal, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createMemo, Match, Show, Switch } from 'solid-js';
 import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
 import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
 import PipetteDetail from '~/components/canvas/overlays/cursors/PipetteDetail';
@@ -13,17 +11,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 
 const CursorOverlay: Component = () => {
   const canShowCursor = createMemo(() => interactStore.isMouseOnCanvas && isToolAllowedInCurrentLayer(getActiveToolCategory()));
-
-  const [mousePos, setMousePos] = createSignal<Vec2>({ x: 0, y: 0 });
-  const [running, start, stop] = createRAF(
-    targetFPS(() => {
-      setMousePos(interactStore.lastMouseWindow);
-    }, 60)
-  );
-
-  onMount(() => {
-    start();
-  });
+  const mousePos = createMemo(() => interactStore.lastMouseWindow);
 
   return (
     <>
@@ -42,7 +30,7 @@ const CursorOverlay: Component = () => {
           }
         >
           <PipetteCursor mousePos={interactStore.lastMouseWindow} />
-          <PipetteDetail />
+          <PipetteDetail mousePos={interactStore.lastMouseWindow} />
         </Show>
       </Show>
     </>

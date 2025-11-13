@@ -1,8 +1,7 @@
 // controllers/layer/SelectionManager.ts
 
-import { webpToRaw } from '@sledge/anvil';
+import { RgbaBuffer, webpToRaw } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { applyFloatingBuffer } from '~/appliers/FloatingBufferApplier';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
@@ -56,12 +55,15 @@ class FloatingMoveManager {
 
   public getCompositePreview(): Uint8ClampedArray | undefined {
     if (!this.targetBuffer || !this.floatingBuffer || !canvasStore.canvas) return undefined;
-    return applyFloatingBuffer({
-      width: canvasStore.canvas.width,
-      height: canvasStore.canvas.height,
-      floatingBuffer: this.floatingBuffer,
-      target: this.targetBuffer,
+    const buffer = RgbaBuffer.fromRaw(canvasStore.canvas.width, canvasStore.canvas.height, this.targetBuffer);
+    const originX = this.floatingBuffer.origin?.x ?? 0;
+    const originY = this.floatingBuffer.origin?.y ?? 0;
+    buffer.transferFromRaw(this.floatingBuffer.buffer, this.floatingBuffer.width, this.floatingBuffer.height, {
+      offsetX: Math.round(originX + this.floatingBuffer.offset.x),
+      offsetY: Math.round(originY + this.floatingBuffer.offset.y),
     });
+
+    return buffer.data;
   }
 
   public getOverlayDescriptor():

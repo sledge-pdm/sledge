@@ -12,10 +12,6 @@ import CheckerboardPattern from '/patterns/CheckerboardPattern.svg';
 
 const canvasStack = css`
   position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
 `;
 const CanvasStack: Component = () => {
   const gridSize = createMemo(() => {
@@ -50,7 +46,6 @@ const CanvasStack: Component = () => {
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,
         overflow: 'visible',
-        'transform-origin': '0 0',
         'background-color': color.canvas,
       }}
     >
@@ -68,8 +63,8 @@ const CanvasStack: Component = () => {
         }}
       >
         <InteractArea />
-        <ImagePool />
         <WebGLCanvas />
+        <ImagePool />
       </div>
     </div>
   );

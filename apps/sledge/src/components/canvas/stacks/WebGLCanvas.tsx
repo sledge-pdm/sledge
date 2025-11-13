@@ -1,3 +1,4 @@
+import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { allLayers } from '~/features/layer';
@@ -7,10 +8,16 @@ import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 
+const webglCanvasStyle = css`
+  position: absolute;
+  z-index: var(--zindex-webgl-canvas);
+`;
+
 export let webGLRenderer: WebGLRenderer | undefined;
 
 const WebGLCanvas: Component = () => {
   let canvasEl!: HTMLCanvasElement;
+  let requireFullRender = false;
 
   const [updateRender, setUpdateRender] = createSignal(false);
   const [onlyDirtyUpdate, setOnlyDirtyUpdate] = createSignal(false);
@@ -21,6 +28,7 @@ const WebGLCanvas: Component = () => {
         setUpdateRender(false);
         try {
           webGLRenderer?.render(onlyDirtyUpdate());
+          requireFullRender = false;
         } catch (error) {
           console.error('WebGLCanvas: Failed to resize WebGLRenderer', error);
         }
@@ -35,6 +43,7 @@ const WebGLCanvas: Component = () => {
     const { width, height } = e.newSize;
     waitingForLayoutUpdate = true;
     console.log('[WebGLCanvas] Queued layout-aware resize:', width, height);
+    requireFullRender = true;
     setOnlyDirtyUpdate(false);
     setUpdateRender(false);
   };
@@ -50,14 +59,18 @@ const WebGLCanvas: Component = () => {
       console.error('WebGLCanvas: Failed to resize WebGLRenderer after layout update', error);
     }
     console.log('[WebGLCanvas] Layout-ready resize applied:', width, height);
+    requireFullRender = true;
     setOnlyDirtyUpdate(false);
     setUpdateRender(true);
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
     /* console.log('[WebGLCanvas] Requesting update:', e.context); */
+    if (!e.onlyDirty) {
+      requireFullRender = true;
+    }
     setUpdateRender(true);
-    setOnlyDirtyUpdate(e.onlyDirty);
+    setOnlyDirtyUpdate(!requireFullRender && e.onlyDirty);
   };
 
   const handleResumeRequest = (e: Events['webgl:requestResume']) => {
@@ -77,6 +90,7 @@ const WebGLCanvas: Component = () => {
       webGLRenderer = new WebGLRenderer(canvasEl);
       webGLRenderer?.setLayers(allLayers());
       webGLRenderer.resize(width, height);
+      requireFullRender = true;
       setOnlyDirtyUpdate(false);
       setUpdateRender(true); // rise flag for init render
 
@@ -130,10 +144,9 @@ const WebGLCanvas: Component = () => {
   return (
     <canvas
       ref={(el) => (canvasEl = el!)}
+      class={webglCanvasStyle}
       style={{
-        position: 'absolute',
         'image-rendering': imageRendering(),
-        'z-index': 'var(--zindex-webgl-canvas)',
       }}
     />
   );

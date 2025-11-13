@@ -1,3 +1,4 @@
+import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { showContextMenu } from '@sledge/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
@@ -17,6 +18,13 @@ import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStore
 import { canvasStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
+
+const interactArea = css`
+  position: absolute;
+  touch-action: none;
+  pointer-events: all;
+  z-index: var(--zindex-interact-area);
+`;
 
 // レイヤーごとのキャンバスの上でタッチイベントを受ける領域
 export const InteractArea: Component = () => {
@@ -236,16 +244,14 @@ export const InteractArea: Component = () => {
   return (
     <div
       id='interact-area'
+      class={interactArea}
       ref={(el) => {
         areaRef = el;
       }}
       style={{
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,
-        'touch-action': 'none',
-        'pointer-events': 'all',
         cursor: cursor(),
-        'z-index': 'var(--zindex-interact-area)',
       }}
       onContextMenu={(e) => {
         e.preventDefault();

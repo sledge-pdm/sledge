@@ -1,9 +1,9 @@
 import { css } from '@acab/ecsstatic';
-import { Component, createMemo, For } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { calculateRulerMarks, RulerMark } from './RulerCalculator';
+import { calculateRulerMarks, RectSnapshot, RulerCalculationContext, RulerCalculationResult, RulerMark } from './RulerCalculator';
 
 const rulerRoot = css`
   position: absolute;
@@ -146,6 +146,73 @@ const verticalLabelInward = css`
   line-height: 1;
 `;
 
+const toSnapshot = (rect: DOMRectReadOnly): RectSnapshot => ({
+  left: rect.left,
+  top: rect.top,
+  width: rect.width,
+  height: rect.height,
+});
+
+const createRectSignal = (elementId: string) => {
+  const [rect, setRect] = createSignal<RectSnapshot | null>(null);
+
+  const attach = () => {
+    const element = document.getElementById(elementId) as HTMLElement | null;
+    if (!element) return false;
+
+    const updateRect = () => setRect(toSnapshot(element.getBoundingClientRect()));
+    const resizeHandler = () => updateRect();
+    const scrollHandler = () => updateRect();
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateRect) : null;
+    observer?.observe(element);
+
+    window.addEventListener('resize', resizeHandler);
+    window.addEventListener('scroll', scrollHandler, true);
+    updateRect();
+
+    onCleanup(() => {
+      observer?.disconnect();
+      window.removeEventListener('resize', resizeHandler);
+      window.removeEventListener('scroll', scrollHandler, true);
+    });
+
+    return true;
+  };
+
+  onMount(() => {
+    if (attach()) return;
+
+    let rafId: number | null = null;
+    const retry = () => {
+      if (attach()) {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        return;
+      }
+      rafId = requestAnimationFrame(retry);
+    };
+    rafId = requestAnimationFrame(retry);
+    onCleanup(() => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+    });
+  });
+
+  return rect;
+};
+
+const emptyResult = (): RulerCalculationResult => ({
+  horizontalMarks: [],
+  verticalMarks: [],
+  startCanvasX: 0,
+  startCanvasY: 0,
+  endCanvasX: 0,
+  endCanvasY: 0,
+});
+
 const HorizontalRuler: Component<{ marks: RulerMark[] }> = (props) => {
   const isInward = () => globalConfig.editor.rulerMarkDirection === 'inward';
 
@@ -233,37 +300,52 @@ const rotationIndicator = css`
 `;
 
 const Ruler: Component = () => {
-  // キャンバス状態の変更を監視してマークを再計算
-  const rulerData = createMemo(() => {
-    // interactStoreとcanvasStoreの変更を明示的に監視
-    const zoom = interactStore.zoom;
-    const offset = interactStore.offset;
-    const offsetOrigin = interactStore.offsetOrigin;
-    const rotation = interactStore.rotation;
-    const horizontalFlipped = interactStore.horizontalFlipped;
-    const verticalFlipped = interactStore.verticalFlipped;
-    const canvasWidth = canvasStore.canvas.width;
-    const canvasHeight = canvasStore.canvas.height;
-    // globalConfigの変更も監視（rulerMarkDirectionの変更で再描画）
-    const rulerMarkDirection = globalConfig.editor.rulerMarkDirection;
+  const canvasAreaRect = createRectSignal('canvas-area');
+  const sectionsBetweenRect = createRectSignal('sections-between-area');
 
-    try {
-      return calculateRulerMarks();
-    } catch (error) {
-      console.warn('Failed to calculate ruler marks:', error);
-      return {
-        horizontalMarks: [],
-        verticalMarks: [],
-        startCanvasX: 0,
-        startCanvasY: 0,
-        endCanvasX: 0,
-        endCanvasY: 0,
-      };
+  const [rulerData, setRulerData] = createSignal<RulerCalculationResult>(emptyResult());
+
+  let pendingContext: RulerCalculationContext | null = null;
+  let rafId: number | null = null;
+
+  const scheduleCalculation = () => {
+    if (rafId !== null) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      if (!pendingContext) return;
+      try {
+        setRulerData(calculateRulerMarks(pendingContext));
+      } catch (error) {
+        console.warn('Failed to calculate ruler marks:', error);
+        setRulerData(emptyResult());
+      }
+    });
+  };
+
+  createEffect(() => {
+    pendingContext = {
+      zoom: interactStore.zoom,
+      offsetX: interactStore.offset.x,
+      offsetY: interactStore.offset.y,
+      offsetOriginX: interactStore.offsetOrigin.x,
+      offsetOriginY: interactStore.offsetOrigin.y,
+      horizontalFlipped: interactStore.horizontalFlipped,
+      verticalFlipped: interactStore.verticalFlipped,
+      canvasWidth: canvasStore.canvas.width,
+      canvasHeight: canvasStore.canvas.height,
+      sectionsRect: sectionsBetweenRect(),
+      canvasAreaRect: canvasAreaRect(),
+    };
+    scheduleCalculation();
+  });
+
+  onCleanup(() => {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
     }
   });
 
-  // 回転中かどうかを判定
-  const isRotated = () => Math.abs(interactStore.rotation) > 0.1; // 0.1度以上で回転とみなす
+  const isRotated = () => Math.abs(interactStore.rotation) > 0.1;
 
   return (
     <div class={rulerRoot} data-ruler-container>

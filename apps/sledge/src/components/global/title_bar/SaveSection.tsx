@@ -22,13 +22,12 @@ const saveSectionContainer = css`
 `;
 
 const saveButtonRoot = css`
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  position: relative;
   border-radius: 4px;
   border: 1px solid var(--color-accent);
   overflow: hidden;
-  margin: 0;
   margin-left: 4px;
 `;
 
@@ -40,19 +39,22 @@ const saveButtonMainButton = css`
   justify-content: center;
   cursor: pointer;
   pointer-events: all;
+  appearance: none;
+  border: none;
   &:hover {
     background-color: var(--color-button-hover);
   }
 `;
 
 const saveButtonSide = css`
+  box-sizing: border-box;
+  cursor: pointer;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 4px 6px;
   border-left: 1px solid var(--color-border);
-  cursor: pointer;
+  padding: 4px 6px;
   &:hover {
     background-color: var(--color-button-hover);
   }
@@ -124,7 +126,7 @@ const SaveSection: Component = () => {
         <p style={{ 'white-space': 'nowrap', opacity: 0.8 }}>{saveLog()}</p>
       </Show>
       <div class={saveButtonRoot} data-tauri-drag-region-exclude>
-        <div class={saveButtonMainButton} onClick={async () => await save()}>
+        <button class={saveButtonMainButton} onClick={async () => await save()}>
           <p
             style={{
               color: color.accent,
@@ -133,22 +135,16 @@ const SaveSection: Component = () => {
           >
             {isOWPossible() ? 'save' : 'save (new)'}
           </p>
-        </div>
-        <div class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>
-          <div
-            style={{
-              transform: isSaveMenuShown() ? 'rotate(180deg)' : 'rotate(0deg)',
-            }}
-          >
-            <Icon src={'/icons/misc/triangle_5.png'} color={color.onBackground} base={5} scale={1} />
-          </div>
-        </div>
-        {/* <div
-          class={autoSaveProgressBar}
-          style={{
-            width: `${autoSnapshotIntervalRatio() * 100}%`,
-          }}
-        /> */}
+        </button>
+        <a class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>
+          <Icon
+            src={'/icons/misc/triangle_5.png'}
+            color={color.onBackground}
+            base={5}
+            scale={1}
+            transform={isSaveMenuShown() ? 'rotate(180deg)' : 'rotate(0deg)'}
+          />
+        </a>
       </div>
 
       <Show when={isSaveMenuShown()}>

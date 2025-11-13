@@ -1,7 +1,5 @@
 import { AntialiasMode, RgbaBuffer } from '@sledge/anvil';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { layerListStore } from '~/stores/ProjectStores';
 
 export class LayerThumbnailGenerator {
   private thumbnailBuffer: RgbaBuffer;
@@ -27,14 +25,15 @@ export class LayerThumbnailGenerator {
       const bufferHandle = anvil.getBufferHandle();
       const target = this.ensureThumbnailBuffer(width, height);
       this.clearThumbnailBuffer(target);
-      const isFloating = layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving();
-      if (isFloating) {
-        const floatingSource = floatingMoveManager.getCompositePreview() ?? floatingMoveManager.getPreviewBuffer();
-        if (floatingSource) {
-          target.transferFromRaw(floatingSource, sourceWidth, sourceHeight, { scaleX, scaleY, antialiasMode });
-          return new ImageData(new Uint8ClampedArray(target.data), width, height);
-        }
-      }
+      // Currently ignore floating buffer due to performance cost
+      // const isFloating = layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving();
+      // if (isFloating) {
+      //   const floatingSource = floatingMoveManager.getCompositePreview() ?? floatingMoveManager.getPreviewBuffer();
+      //   if (floatingSource) {
+      //     target.transferFromRaw(floatingSource, sourceWidth, sourceHeight, { scaleX, scaleY, antialiasMode });
+      //     return new ImageData(new Uint8ClampedArray(target.data), width, height);
+      //   }
+      // }
       target.transferFromBuffer(bufferHandle, { scaleX, scaleY, antialiasMode });
       return new ImageData(new Uint8ClampedArray(target.data), width, height);
     } catch (err) {

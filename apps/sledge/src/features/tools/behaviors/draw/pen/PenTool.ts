@@ -1,4 +1,4 @@
-import { packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
+import { Anvil, PixelPatchData, ShapeMask, packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { Consts } from '~/Consts';
 import { RGBAColor, transparent } from '~/features/color';
@@ -11,6 +11,15 @@ import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+
+type StrokeContext = {
+  layerId: string;
+  anvil: Anvil;
+  dotMagnification: number;
+  size: number;
+  shape: 'square' | 'circle';
+  shapeMask: ShapeMask;
+};
 
 export class PenTool implements ToolBehavior {
   allowRightClick = true;
@@ -26,6 +35,38 @@ export class PenTool implements ToolBehavior {
 
   lineChunk = new LineChunk();
   strokeChunk = new StrokeChunk();
+  private strokeContext: StrokeContext | undefined = undefined;
+  private pixelAccumulator: Map<string, PixelPatchData> | undefined = undefined;
+
+  private resolveStrokeContext(layerId: string, presetName: string, preset?: PenPresetConfig): StrokeContext | undefined {
+    const anvil = getAnvilOf(layerId);
+    if (!anvil) return undefined;
+
+    const layer = findLayerById(layerId) ?? activeLayer();
+    const dotMagnification = layer?.dotMagnification ?? 1;
+    const resolvedPreset = preset ?? (getPresetOf(this.categoryId, presetName) as PenPresetConfig | undefined);
+    const size = resolvedPreset?.size ?? 1;
+    const shape = (resolvedPreset?.shape ?? 'square') as 'square' | 'circle';
+    const shapeMask = this.shapeStore.get(shape, size);
+    if (!shapeMask) return undefined;
+
+    this.strokeContext = { layerId, anvil, dotMagnification, size, shape, shapeMask };
+    return this.strokeContext;
+  }
+
+  private getStrokeContext(layerId: string, presetName: string, preset?: PenPresetConfig): StrokeContext | undefined {
+    if (this.strokeContext && this.strokeContext.layerId === layerId) {
+      return this.strokeContext;
+    }
+    return this.resolveStrokeContext(layerId, presetName, preset);
+  }
+
+  private ensurePixelAccumulator(): Map<string, PixelPatchData> {
+    if (!this.pixelAccumulator) {
+      this.pixelAccumulator = new Map();
+    }
+    return this.pixelAccumulator;
+  }
 
   centerPosition(scaledPos: Vec2 | undefined, rawPos: Vec2 | undefined, size: number, dotMagnification: number): Vec2 {
     const scale = dotMagnification || 1;
@@ -48,16 +89,17 @@ export class PenTool implements ToolBehavior {
   }
 
   onStart(args: ToolArgs) {
+    const presetName = args.presetName ?? DEFAULT_PRESET;
     // register to history if it's new size
-    const preset = getPresetOf(TOOL_CATEGORIES.PEN, args.presetName ?? DEFAULT_PRESET) as PenPresetConfig;
+    const preset = getPresetOf(TOOL_CATEGORIES.PEN, presetName) as PenPresetConfig;
     const history: number[] = preset.sizeHistory ?? [];
     if (preset.size && !history.includes(preset.size)) {
       const newHistory = [preset.size, ...history].slice(0, Consts.maxSizeHistoryLength);
-      updateToolPresetConfig(TOOL_CATEGORIES.PEN, args.presetName ?? DEFAULT_PRESET, 'sizeHistory', newHistory);
+      updateToolPresetConfig(TOOL_CATEGORIES.PEN, presetName, 'sizeHistory', newHistory);
     }
 
     // 前回の状態が残っている場合はクリーンアップ
-    if (this.lineChunk.getBoundingBox()) {
+    if (this.lineChunk.hasPreview()) {
       console.warn('PenTool: Cleaning up previous preview state');
       this.undoLastLineDiff();
     }
@@ -67,12 +109,15 @@ export class PenTool implements ToolBehavior {
     this.startScaledPosition = args.position;
 
     this.strokeChunk.clear();
+    this.lineChunk.clear();
+    this.pixelAccumulator = new Map();
+
+    if (!this.resolveStrokeContext(args.layerId, presetName, preset)) {
+      return { shouldUpdate: false, shouldRegisterToHistory: false };
+    }
 
     if (args.event?.shiftKey) {
       this.isShift = true;
-      const anvil = getAnvilOf(args.layerId);
-      if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-      this.lineChunk.start(anvil.getBufferCopy(), anvil.getWidth(), anvil.getHeight());
       return this.drawLine(false, args, args.color);
     } else {
       this.isShift = false;
@@ -111,38 +156,42 @@ export class PenTool implements ToolBehavior {
   }
 
   draw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
-    if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
-
+    const resolvedPresetName = presetName ?? DEFAULT_PRESET;
     if (event?.buttons === 2) {
       color = transparent;
     }
 
-    const preset = getPresetOf(this.categoryId, presetName) as any;
-    const size = preset?.size ?? 1;
-    const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
+    const context = this.getStrokeContext(layerId, resolvedPresetName);
+    if (!context) return { shouldUpdate: false, shouldRegisterToHistory: false };
+    const pixelAcc = this.ensurePixelAccumulator();
 
-    const layer = findLayerById(layerId) ?? activeLayer();
-    const dotMagnification = layer?.dotMagnification ?? 1;
-    const anvil = getAnvilOf(layerId);
-    if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-    const cp = this.centerPosition(position, rawPosition, size, dotMagnification);
+    const cp = this.centerPosition(position, rawPosition, context.size, context.dotMagnification);
 
-    const diffs = putShape({ anvil, posX: cp.x, posY: cp.y, shape: this.shapeStore.get(shape, size)!, color, manualDiff: true });
-    if (diffs) this.strokeChunk.add(anvil.getWidth(), diffs);
+    const diffs = putShape({
+      anvil: context.anvil,
+      posX: cp.x,
+      posY: cp.y,
+      shape: context.shapeMask,
+      color,
+      manualDiff: true,
+      pixelAcc,
+    });
+    if (diffs) this.strokeChunk.add(context.anvil.getWidth(), diffs);
 
     if (rawLastPosition !== undefined) {
-      const fromCp = this.centerPosition(lastPosition, rawLastPosition, size, dotMagnification);
-      const diffs = putShapeLine({
-        anvil,
+      const fromCp = this.centerPosition(lastPosition, rawLastPosition, context.size, context.dotMagnification);
+      const lineDiffs = putShapeLine({
+        anvil: context.anvil,
         posX: cp.x,
         posY: cp.y,
         fromPosX: fromCp.x,
         fromPosY: fromCp.y,
-        shape: this.shapeStore.get(shape, size)!,
+        shape: context.shapeMask,
         color,
         manualDiff: true,
+        pixelAcc,
       });
-      if (diffs) this.strokeChunk.add(anvil.getWidth(), diffs);
+      if (lineDiffs) this.strokeChunk.add(context.anvil.getWidth(), lineDiffs);
     }
 
     return {
@@ -152,20 +201,20 @@ export class PenTool implements ToolBehavior {
   }
 
   private undoLastLineDiff() {
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
+    const fallbackLayer = activeLayer();
+    const targetLayerId = this.strokeContext?.layerId ?? fallbackLayer?.id;
+    if (!targetLayerId) return;
+
+    const anvil = getAnvilOf(targetLayerId);
     if (!anvil) return;
 
-    const patch = this.lineChunk.getPatch();
-    if (patch) anvil.setPartialBuffer(patch.bbox, patch.patch);
-    anvil.setAllDirty();
-
-    this.lineChunk.resetBoundary();
+    this.lineChunk.restore(anvil);
   }
 
   // 始点からの直線を描画
   drawLine(commit: boolean, { layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
-    if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
+    const resolvedPresetName = presetName ?? DEFAULT_PRESET;
+    if (!this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
       color = transparent;
@@ -173,18 +222,14 @@ export class PenTool implements ToolBehavior {
 
     this.undoLastLineDiff();
 
-    // ctrl+shiftの場合は角度固定
-    const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(rawPosition, this.startPosition) : rawPosition;
+    // ctrl+shiftの場合は角度で調整
+    const targetPosition = this.isCtrl ? this.snapToAngle(rawPosition, this.startPosition) : rawPosition;
 
-    const preset = getPresetOf(this.categoryId, presetName) as any;
-    const size = preset?.size ?? 1;
-    const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
+    const context = this.getStrokeContext(layerId, resolvedPresetName);
+    if (!context) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
-    const layer = findLayerById(layerId) ?? activeLayer();
-    const dotMagnification = layer?.dotMagnification ?? 1;
-    const anvil = getAnvilOf(layerId);
-    if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-
+    const dotMagnification = context.dotMagnification;
+    const size = context.size;
     const scaledStart = this.startScaledPosition ?? {
       x: Math.floor(this.startPosition.x / dotMagnification),
       y: Math.floor(this.startPosition.y / dotMagnification),
@@ -199,22 +244,21 @@ export class PenTool implements ToolBehavior {
         : position;
     const cp = this.centerPosition(scaledTarget, targetPosition, size, dotMagnification);
     const diffs = putShapeLine({
-      anvil,
+      anvil: context.anvil,
       posX: cp.x,
       posY: cp.y,
       fromPosX: fromCp.x,
       fromPosY: fromCp.y,
-      shape: this.shapeStore.get(shape, size)!,
+      shape: context.shapeMask,
       color,
       manualDiff: true,
+      pixelAcc: commit ? this.ensurePixelAccumulator() : undefined,
     });
     if (diffs) {
       if (commit) {
-        this.strokeChunk.add(anvil.getWidth(), diffs);
+        this.strokeChunk.add(context.anvil.getWidth(), diffs);
       } else {
-        diffs.forEach((d) => {
-          this.lineChunk.add(d.x, d.y);
-        });
+        this.lineChunk.capture(diffs);
       }
     }
 
@@ -239,6 +283,8 @@ export class PenTool implements ToolBehavior {
     this.startPosition = undefined;
     this.startScaledPosition = undefined;
     this.lineChunk.clear();
+    this.strokeContext = undefined;
+    this.pixelAccumulator = undefined;
 
     const anvil = getAnvilOf(layerId);
     if (anvil) {
@@ -306,6 +352,8 @@ export class PenTool implements ToolBehavior {
 
     this.lineChunk.clear();
     this.strokeChunk.clear();
+    this.strokeContext = undefined;
+    this.pixelAccumulator = undefined;
 
     return {
       shouldUpdate: false,

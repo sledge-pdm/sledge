@@ -49,3 +49,5 @@ post_build.bat
 .tauri
 
 coverage
+
+wiki

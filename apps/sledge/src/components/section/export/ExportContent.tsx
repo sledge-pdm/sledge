@@ -139,6 +139,11 @@ const estimatedSize = css`
   opacity: 0.75;
 `;
 
+const exportResultText = css`
+  font-family: ZFB03;
+  color: var(--color-muted);
+`;
+
 const scaleOptions: DropdownOption<number>[] = [
   { label: 'x1', value: 1 },
   { label: 'x2', value: 2 },
@@ -175,8 +180,15 @@ const ExportContent: Component = () => {
     },
   });
   const [customScale, setCustomScale] = createSignal(1);
-
   const finalScale = () => (settings.exportOptions.scale !== 0 ? settings.exportOptions.scale : customScale()) ?? 1;
+
+  const [exportResult, setExportResult] = createSignal<
+    | {
+        kind: 'success' | 'error';
+        text: string;
+      }
+    | undefined
+  >(undefined);
 
   onMount(async () => {
     if (fileStore.savedLocation.path) {
@@ -208,19 +220,32 @@ const ExportContent: Component = () => {
   };
 
   const requestExport = async () => {
-    if (finalScale() === 0) return;
+    if (finalScale() <= 0) {
+      setExportResult({
+        kind: 'error',
+        text: `Export Error: invalid scale value.`,
+      });
+      return;
+    }
 
     setSettings('exportOptions', 'scale', finalScale());
 
     const name = settings.fileName;
     if (!name) {
-      message('Export Error: File name is empty.');
+      setExportResult({
+        kind: 'error',
+        text: `Export Error: File name is empty.`,
+      });
       return;
     }
     if (settings.folderPath) {
       const location = await exportImage(settings.folderPath, name, settings.exportOptions);
       if (location && location.path && location.name) {
         const exportedFolderPath = normalizePath(location.path);
+        setExportResult({
+          kind: 'success',
+          text: `export succeed!\n${exportedFolderPath}`,
+        });
         setLastSettingsStore('exportedFolderPaths', (prev) => {
           prev = [exportedFolderPath, ...prev.filter((p) => p !== exportedFolderPath)];
           if (prev.length >= 10) prev.unshift();
@@ -230,6 +255,11 @@ const ExportContent: Component = () => {
         if (settings.showDirAfterSave && location.path && location.name) {
           await revealInFileBrowser(normalizeJoin(location.path, location.name));
         }
+      } else {
+        setExportResult({
+          kind: 'error',
+          text: `Export error: file not exported`,
+        });
       }
     }
 
@@ -465,6 +495,15 @@ const ExportContent: Component = () => {
         <button class={accentedButton} onClick={(e) => requestExport()} disabled={!settings.folderPath || !settings.fileName}>
           Export
         </button>
+
+        <p
+          class={exportResultText}
+          style={{
+            color: exportResult()?.kind === 'error' ? color.error : color.muted,
+          }}
+        >
+          {exportResult()?.text}
+        </p>
       </div>
     </div>
   );

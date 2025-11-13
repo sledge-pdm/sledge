@@ -140,6 +140,28 @@ const CanvasControlMenu: Component = () => {
           // hoverColor={color.active}
         />
       </div>
+      <div
+        class={iconContainer}
+        title='toggle onscreenControl.'
+        style={{
+          cursor: 'pointer',
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+
+          setAppearanceStore('onscreenControl', (v) => !v);
+        }}
+      >
+        <Icon
+          src='/icons/canvas/onscreen_control_9.png'
+          base={9}
+          scale={1}
+          color={appearanceStore.onscreenControl ? color.enabled : color.onBackground}
+          // hoverColor={color.active}
+        />
+      </div>
     </>
   );
 };

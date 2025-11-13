@@ -1,27 +1,18 @@
 import { Component, createEffect, createMemo, onCleanup } from 'solid-js';
-import LayerCanvasOperator from '~/features/canvas/LayerCanvasOperator';
-import { InteractCanvas } from './InteractCanvas';
+import { InteractArea } from './InteractCanvas';
 
 import { css } from '@acab/ecsstatic';
 import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
-import { activeLayer } from '~/features/layer';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
 import { color } from '@sledge/theme';
-import '/patterns/CheckerboardPattern.svg';
+import CheckerboardPattern from '/patterns/CheckerboardPattern.svg';
 
 const canvasStack = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
   position: relative;
 `;
-
-export const layerCanvasOperator = new LayerCanvasOperator(() => activeLayer().id);
-
 const CanvasStack: Component = () => {
   const gridSize = createMemo(() => {
     const { width, height } = canvasStore.canvas;
@@ -55,7 +46,6 @@ const CanvasStack: Component = () => {
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,
         overflow: 'visible',
-        'transform-origin': '0 0',
         'background-color': color.canvas,
       }}
     >
@@ -67,14 +57,14 @@ const CanvasStack: Component = () => {
           height: `${canvasStore.canvas.height}px`,
           'shape-rendering': 'crispEdges',
           'image-rendering': 'pixelated',
-          'background-image': `url(/patterns/CheckerboardPattern.svg)`,
+          'background-image': `url("${CheckerboardPattern}")`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
       >
-        <InteractCanvas operator={layerCanvasOperator} />
-        <ImagePool />
+        <InteractArea />
         <WebGLCanvas />
+        <ImagePool />
       </div>
     </div>
   );

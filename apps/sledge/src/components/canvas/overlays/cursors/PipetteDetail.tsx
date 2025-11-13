@@ -1,13 +1,15 @@
 import { css } from '@acab/ecsstatic';
+import { Vec2 } from '@sledge/core';
 import { color, fonts } from '@sledge/theme';
 import { ColorBox } from '@sledge/ui';
 import { Component, Show } from 'solid-js';
 import { currentColor, isTransparent, transparent } from '~/features/color';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';
-import { interactStore } from '~/stores/EditorStores';
 
 const pipetteDetailContainer = css`
   position: fixed;
+  top: 0;
+  left: 0;
   display: flex;
   flex-direction: row;
   pointer-events: none;
@@ -20,13 +22,16 @@ const pipetteDetailContainer = css`
   background-color: var(--color-background);
 `;
 
-const PipetteDetail: Component = () => {
+interface Props {
+  mousePos: Vec2;
+}
+
+const PipetteDetail: Component<Props> = (props) => {
   return (
     <div
       class={pipetteDetailContainer}
       style={{
-        top: `${interactStore.lastMouseWindow.y}px`,
-        left: `${interactStore.lastMouseWindow.x}px`,
+        translate: `${props.mousePos.x}px ${props.mousePos.y}px`,
       }}
     >
       <Show

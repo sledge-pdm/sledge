@@ -3,7 +3,7 @@ import { createRAF, targetFPS } from '@solid-primitives/raf';
 import { clipZoom, setOffset, zoomTowardAreaCenter } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';
 
-export interface AnalogSticksControllerOptions {
+export interface OnscreenControlInteractOptions {
   // Pan sensitivity (pixels per tick when at maximum deviation)
   panSensitivity: number;
   // Zoom sensitivity (zoom change per tick when at maximum deviation)
@@ -16,9 +16,9 @@ export interface AnalogSticksControllerOptions {
   deadzone: number;
 }
 
-const defaultOptions: AnalogSticksControllerOptions = {
-  panSensitivity: -6.0,
-  zoomSensitivity: 0.05,
+const defaultOptions: OnscreenControlInteractOptions = {
+  panSensitivity: -7.0,
+  zoomSensitivity: 0.04,
   returnSpeed: 0.12,
   maxDeviation: 20,
   deadzone: 1,
@@ -37,8 +37,8 @@ const defaultOptions: AnalogSticksControllerOptions = {
  * - 中心(0.5)が基準ズーム、上下で拡大/縮小
  * - 離すと自動的に中心に戻る
  */
-export class AnalogSticksController {
-  private options: AnalogSticksControllerOptions;
+export class OnscreenControlInteract {
+  private options: OnscreenControlInteractOptions;
 
   // Current positions: pan is 2D (-1 to 1), zoom is 1D (-1 to 1, where 0 is center)
   private panPosition: Vec2 = { x: 0, y: 0 };
@@ -53,7 +53,7 @@ export class AnalogSticksController {
   private startRAF: () => void;
   private stopRAF: () => void;
 
-  constructor(options: Partial<AnalogSticksControllerOptions> = {}) {
+  constructor(options: Partial<OnscreenControlInteractOptions> = {}) {
     this.options = { ...defaultOptions, ...options };
 
     // Setup RAF loop
@@ -194,7 +194,7 @@ export class AnalogSticksController {
 
     // Apply zoom if beyond deadzone
     if (Math.abs(this.zoomPosition) > this.options.deadzone / this.options.maxDeviation) {
-      const zoomDelta = this.zoomPosition * this.options.zoomSensitivity;
+      const zoomDelta = this.zoomPosition * this.options.zoomSensitivity * interactStore.zoom;
       if (zoomDelta === 0) return;
       const newZoom = clipZoom(interactStore.zoom + zoomDelta);
       zoomTowardAreaCenter(newZoom);

@@ -5,9 +5,9 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import AnalogSticks from '~/components/global/analog_sticks/AnalogSticks';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/Loading';
+import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit } from '~/features/canvas';
 import { addImagesFromLocal } from '~/features/image_pool';
@@ -21,6 +21,7 @@ import { openExistingProject } from '~/features/io/window';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { tryLoadProject } from '~/routes/editor/load';
+import { appearanceStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { pathToFileLocation } from '~/utils/FileUtils';
@@ -119,7 +120,9 @@ export default function Editor() {
           <BottomBar />
         </div>
 
-        <AnalogSticks />
+        <Show when={appearanceStore.onscreenControl}>
+          <OnscreenControl />
+        </Show>
 
         <KeyListener />
         <ClipboardListener />

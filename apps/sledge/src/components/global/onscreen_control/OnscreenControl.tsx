@@ -3,7 +3,7 @@ import { Vec2 } from '@sledge/core';
 import { Icon } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { setAppearanceStore } from '~/stores/EditorStores';
-import { AnalogSticksController } from './AnalogSticksController';
+import { OnscreenControlInteract } from './OnscreenControlInteract';
 
 const root = css`
   position: fixed;
@@ -104,7 +104,7 @@ const zoomHandle = css`
 `;
 
 // floating(movable) canvas pan/zoom controller that imitates analog sticks by 2d pixels
-const AnalogSticks: Component = () => {
+const OnscreenControl: Component = () => {
   const [position, setPosition] = createSignal<Vec2>({ x: 0, y: 0 });
   const [positionLocked, setPositionLocked] = createSignal(false);
 
@@ -114,7 +114,7 @@ const AnalogSticks: Component = () => {
   const [zoomFaderPosition, setZoomFaderPosition] = createSignal(0.5);
 
   // Controller instance
-  let panZoomController: AnalogSticksController;
+  let panZoomController: OnscreenControlInteract;
 
   onMount(() => {
     const sectionsBetweenArea = document.getElementById('sections-between-area');
@@ -125,7 +125,7 @@ const AnalogSticks: Component = () => {
     }
 
     // Initialize controller
-    panZoomController = new AnalogSticksController();
+    panZoomController = new OnscreenControlInteract();
   });
 
   onCleanup(() => {
@@ -331,4 +331,4 @@ client XY: ${e.clientX}, ${e.clientY}`);
   );
 };
 
-export default AnalogSticks;
+export default OnscreenControl;

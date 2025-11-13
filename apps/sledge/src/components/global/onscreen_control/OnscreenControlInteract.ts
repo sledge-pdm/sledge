@@ -17,8 +17,8 @@ export interface OnscreenControlInteractOptions {
 }
 
 const defaultOptions: OnscreenControlInteractOptions = {
-  panSensitivity: -6.0,
-  zoomSensitivity: 0.05,
+  panSensitivity: -7.0,
+  zoomSensitivity: 0.04,
   returnSpeed: 0.12,
   maxDeviation: 20,
   deadzone: 1,
@@ -194,7 +194,7 @@ export class OnscreenControlInteract {
 
     // Apply zoom if beyond deadzone
     if (Math.abs(this.zoomPosition) > this.options.deadzone / this.options.maxDeviation) {
-      const zoomDelta = this.zoomPosition * this.options.zoomSensitivity;
+      const zoomDelta = this.zoomPosition * this.options.zoomSensitivity * interactStore.zoom;
       if (zoomDelta === 0) return;
       const newZoom = clipZoom(interactStore.zoom + zoomDelta);
       zoomTowardAreaCenter(newZoom);

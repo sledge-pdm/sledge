@@ -2,7 +2,7 @@ import { packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { Consts } from '~/Consts';
 import { RGBAColor, transparent } from '~/features/color';
-import { activeLayer } from '~/features/layer';
+import { activeLayer, findLayerById } from '~/features/layer';
 import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
@@ -20,17 +20,31 @@ export class PenTool implements ToolBehavior {
   isCtrl: boolean = false;
 
   startPosition: Vec2 | undefined = undefined;
+  startScaledPosition: Vec2 | undefined = undefined;
 
   shapeStore = new ShapeStore();
 
   lineChunk = new LineChunk();
   strokeChunk = new StrokeChunk();
 
-  centerPosition(rawPos: Vec2, size: number): Vec2 {
-    const even = size % 2 === 0;
-    const cx = even ? Math.round(rawPos.x) : Math.floor(rawPos.x);
-    const cy = even ? Math.round(rawPos.y) : Math.floor(rawPos.y);
-    return { x: cx, y: cy };
+  centerPosition(scaledPos: Vec2 | undefined, rawPos: Vec2 | undefined, size: number, dotMagnification: number): Vec2 {
+    const scale = dotMagnification || 1;
+    if (size % 2 === 0 && rawPos) {
+      return {
+        x: Math.round(rawPos.x / scale),
+        y: Math.round(rawPos.y / scale),
+      };
+    }
+    if (scaledPos) {
+      return scaledPos;
+    }
+    if (rawPos) {
+      return {
+        x: Math.floor(rawPos.x / scale),
+        y: Math.floor(rawPos.y / scale),
+      };
+    }
+    return { x: 0, y: 0 };
   }
 
   onStart(args: ToolArgs) {
@@ -50,6 +64,7 @@ export class PenTool implements ToolBehavior {
 
     this.isCtrl = args.event?.ctrlKey ?? false;
     this.startPosition = args.rawPosition;
+    this.startScaledPosition = args.position;
 
     this.strokeChunk.clear();
 
@@ -95,7 +110,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  draw({ position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  draw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
     if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
@@ -106,16 +121,17 @@ export class PenTool implements ToolBehavior {
     const size = preset?.size ?? 1;
     const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
 
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
+    const layer = findLayerById(layerId) ?? activeLayer();
+    const dotMagnification = layer?.dotMagnification ?? 1;
+    const anvil = getAnvilOf(layerId);
     if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-    const cp = this.centerPosition(rawPosition, size);
+    const cp = this.centerPosition(position, rawPosition, size, dotMagnification);
 
     const diffs = putShape({ anvil, posX: cp.x, posY: cp.y, shape: this.shapeStore.get(shape, size)!, color, manualDiff: true });
     if (diffs) this.strokeChunk.add(anvil.getWidth(), diffs);
 
     if (rawLastPosition !== undefined) {
-      const fromCp = this.centerPosition(rawLastPosition, size);
+      const fromCp = this.centerPosition(lastPosition, rawLastPosition, size, dotMagnification);
       const diffs = putShapeLine({
         anvil,
         posX: cp.x,
@@ -164,12 +180,24 @@ export class PenTool implements ToolBehavior {
     const size = preset?.size ?? 1;
     const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
 
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
+    const layer = findLayerById(layerId) ?? activeLayer();
+    const dotMagnification = layer?.dotMagnification ?? 1;
+    const anvil = getAnvilOf(layerId);
     if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
-    const fromCp = this.centerPosition(this.startPosition, size);
-    const cp = this.centerPosition(targetPosition, size);
+    const scaledStart = this.startScaledPosition ?? {
+      x: Math.floor(this.startPosition.x / dotMagnification),
+      y: Math.floor(this.startPosition.y / dotMagnification),
+    };
+    const fromCp = this.centerPosition(scaledStart, this.startPosition, size, dotMagnification);
+    const scaledTarget =
+      targetPosition !== undefined
+        ? {
+            x: Math.floor(targetPosition.x / dotMagnification),
+            y: Math.floor(targetPosition.y / dotMagnification),
+          }
+        : position;
+    const cp = this.centerPosition(scaledTarget, targetPosition, size, dotMagnification);
     const diffs = putShapeLine({
       anvil,
       posX: cp.x,
@@ -209,6 +237,7 @@ export class PenTool implements ToolBehavior {
     this.isShift = false;
     this.isCtrl = false;
     this.startPosition = undefined;
+    this.startScaledPosition = undefined;
     this.lineChunk.clear();
 
     const anvil = getAnvilOf(layerId);
@@ -273,6 +302,7 @@ export class PenTool implements ToolBehavior {
     this.isShift = false;
     this.isCtrl = false;
     this.startPosition = undefined;
+    this.startScaledPosition = undefined;
 
     this.lineChunk.clear();
     this.strokeChunk.clear();

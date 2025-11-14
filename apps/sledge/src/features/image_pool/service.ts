@@ -6,7 +6,6 @@ import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/hi
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
-import { flushPatch, getHeight, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
@@ -107,10 +106,10 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
 }
 
 async function transferToLayer(layerId: string, entryId: string) {
-  const layerW = getWidth(layerId);
-  const layerH = getHeight(layerId);
   const entry = getEntry(entryId);
   const anvil = getAnvil(layerId);
+  const layerW = anvil.getWidth();
+  const layerH = anvil.getHeight();
   if (!layerW || !layerH || !entry) return;
 
   const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
@@ -139,7 +138,7 @@ async function transferToLayer(layerId: string, entryId: string) {
     antialiasMode: AntialiasMode.Nearest,
   });
 
-  const patch = flushPatch(layerId);
+  const patch = anvil.flushDiffs();
   if (patch) {
     projectHistoryController.addAction(
       new AnvilLayerHistoryAction({

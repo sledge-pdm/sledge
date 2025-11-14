@@ -3,7 +3,6 @@ import { Vec2 } from '@sledge/core';
 import { Consts } from '~/Consts';
 import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer, findLayerById } from '~/features/layer';
-import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
 import { ShapeStore } from '~/features/tools/behaviors/draw/pen/ShapeStore';
@@ -295,8 +294,8 @@ export class PenTool implements ToolBehavior {
       }
       const swapBuffer = new Uint8ClampedArray(w * h * 4);
       // Layer全体バッファ取得
-      const layerBuffer = getBufferPointer(layerId);
-      const layerWidth = getWidth(layerId);
+      const layerBuffer = anvil.getBufferPointer();
+      const layerWidth = anvil.getWidth();
       if (layerBuffer && layerWidth) {
         // 現バッファから変更前の状態を取得・保存
         for (let yy = 0; yy < h; yy++) {

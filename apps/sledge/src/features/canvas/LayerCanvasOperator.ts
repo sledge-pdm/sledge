@@ -3,7 +3,7 @@ import { currentColor, hexToRGBA } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { flushPatch } from '~/features/layer/anvil/AnvilController';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { setBottomBarText } from '~/features/log/service';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
@@ -85,7 +85,8 @@ export default class LayerCanvasOperator {
         updateLayerPreview(layer.id);
       }
       if (result.shouldRegisterToHistory) {
-        const patch = flushPatch(layer.id);
+        const anvil = getAnvil(layer.id);
+        const patch = anvil.flushDiffs();
         if (patch)
           projectHistoryController.addAction(
             new AnvilLayerHistoryAction({

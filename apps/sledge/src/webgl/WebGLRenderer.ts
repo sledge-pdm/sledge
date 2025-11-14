@@ -2,7 +2,6 @@
 import { flip_pixels_vertically } from '@sledge/wasm';
 import { Consts } from '~/Consts';
 import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
-import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -220,12 +219,12 @@ export class WebGLRenderer {
 
           this.layers.forEach((layer) => {
             const anvil = getAnvil(layer.id);
-              try {
-                anvil.resize(actualWidth, actualHeight); // offset なし resize
-                logger.debugLog(`✅ Resized anvil layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
-              } catch (error) {
-                logger.debugError(`❌ Failed to resize anvil layer buffer ${layer.id}:`, error);
-              }
+            try {
+              anvil.resize(actualWidth, actualHeight); // offset なし resize
+              logger.debugLog(`✅ Resized anvil layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
+            } catch (error) {
+              logger.debugError(`❌ Failed to resize anvil layer buffer ${layer.id}:`, error);
+            }
           });
 
           // キャンバスストアも更新（他のコンポーネントとの整合性を保つため）
@@ -292,7 +291,7 @@ export class WebGLRenderer {
 
       const anvil = getAnvil(layer.id);
       const usePreviewBuffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving();
-      const baseBuffer = getBufferPointer(layer.id);
+      const baseBuffer = anvil.getBufferPointer();
       const buf = usePreviewBuffer ? (floatingMoveManager.getPreviewBuffer() ?? baseBuffer) : baseBuffer;
       if (!buf) return;
 
@@ -318,7 +317,7 @@ export class WebGLRenderer {
       }
 
       // Dirty tiles optimization: calculate coverage ratio
-      const dirtyTiles = getDirtyTiles(layer.id);
+      const dirtyTiles = anvil.getDirtyTileIndices();
       const tileSize = anvil.getTileSize();
 
       // Calculate dirty pixels coverage as percentage
@@ -385,7 +384,7 @@ export class WebGLRenderer {
         }
 
         // フルアップロード後は dirty フラグをクリア (patch 経由でない更新ケース)
-        clearDirtyTiles(layer.id);
+        anvil.clearDirtyTiles();
       }
     });
 

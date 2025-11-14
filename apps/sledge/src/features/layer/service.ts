@@ -9,7 +9,6 @@ import { LayerListHistoryAction } from '~/features/history/actions/LayerListHist
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
-import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth } from '~/features/layer/anvil/AnvilController';
 import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -78,7 +77,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
 export function duplicateLayer(layerId: string) {
   const layer = findLayerById(layerId);
   if (!layer) return;
-  const buffer = getBufferCopy(layerId);
+  const buffer = getAnvil(layerId).getBufferCopy();
   addLayer(
     {
       name: layer.name,
@@ -94,16 +93,16 @@ export function duplicateLayer(layerId: string) {
 }
 
 export function clearLayer(layerId: string) {
-  const w = getWidth(layerId);
-  const h = getHeight(layerId);
+  const anvil = getAnvil(layerId);
+  const w = anvil.getWidth();
+  const h = anvil.getHeight();
   if (w == null || h == null) return;
 
-  const anvil = getAnvil(layerId);
   anvil.addCurrentWholeDiff();
 
   anvil.getBufferHandle().fill([0, 0, 0, 0]);
 
-  const patch = flushPatch(layerId);
+  const patch = anvil.flushDiffs();
   if (patch)
     projectHistoryController.addAction(
       new AnvilLayerHistoryAction({
@@ -129,11 +128,11 @@ export async function mergeToBelowLayer(layerId: string) {
 }
 
 export function getCurrentPointingColor(): RGBAColor | undefined {
-  if (!interactStore.lastMouseOnCanvas) return undefined;
+  const activeAnvil = getAnvil(layerListStore.activeLayerId);
   const x = Math.floor(interactStore.lastMouseOnCanvas.x);
   const y = Math.floor(interactStore.lastMouseOnCanvas.y);
-  const color = getPixel(layerListStore.activeLayerId, x, y);
-  return color as RGBAColor | undefined;
+  if (!interactStore.lastMouseOnCanvas || !activeAnvil.getBufferHandle().isInBounds(x, y)) return undefined;
+  return activeAnvil.getPixel(x, y);
 }
 
 export function getCurrentPointingColorHex(): string | undefined {

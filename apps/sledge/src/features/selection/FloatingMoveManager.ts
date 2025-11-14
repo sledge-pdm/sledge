@@ -4,7 +4,6 @@ import { Vec2 } from '@sledge/core';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
-import { flushPatch, getBufferCopy, getHeight, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -109,8 +108,9 @@ class FloatingMoveManager {
   }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
-    const width = getWidth(targetLayerId);
-    const height = getHeight(targetLayerId);
+    const anvil = getAnvil(targetLayerId);
+    const width = anvil.getWidth();
+    const height = anvil.getHeight();
     if (width == null || height == null) return undefined;
     if (state === 'layer') {
       return new Uint8ClampedArray(width * height * 4);
@@ -119,7 +119,7 @@ class FloatingMoveManager {
       const mask = selectionManager.getCombinedMask();
       return anvil.cropWithMask(mask, width, height, 0, 0);
     } else if (state === 'pasted') {
-      const base = getBufferCopy(targetLayerId);
+      const base = anvil.getBufferCopy();
       return base ? base.slice() : undefined;
     }
   }
@@ -195,7 +195,7 @@ class FloatingMoveManager {
 
     anvil.addCurrentWholeDiff();
 
-    const patch = flushPatch(this.targetLayerId);
+    const patch = anvil.flushDiffs();
     if (patch) {
       projectHistoryController.addAction(
         new AnvilLayerHistoryAction({
@@ -205,6 +205,7 @@ class FloatingMoveManager {
         })
       );
     }
+
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
     } else {

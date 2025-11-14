@@ -5,8 +5,7 @@ import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getEntry, ImagePoolEntry, insertEntry, removeEntry, updateEntryPartial } from '~/features/image_pool';
 import { addLayerTo, BlendMode, Layer, LayerType, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
-import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
@@ -249,7 +248,8 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         // Layer buffer tiny pixel patch on a random layer
         if (layerListStore.layers.length > 0) {
           const layer = layerListStore.layers[Math.floor(rng() * layerListStore.layers.length)];
-          const anvil = getAnvil(layer.id);
+          const anvil = anvilManager.getAnvil(layer.id);
+          if (!anvil) return;
           const w = anvil.getWidth();
           const count = 1 + Math.floor(rng() * 3);
           steps.push(() => {
@@ -259,9 +259,9 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
               const r = (k * 40) & 0xff;
               const g = (k * 80) & 0xff;
               const b = (k * 120) & 0xff;
-              setPixel(layer.id, x, y, [r, g, b, 255]);
+              anvil.setPixel(x, y, [r, g, b, 255]);
             }
-            const patch = flushPatch(layer.id);
+            const patch = anvil.flushDiffs();
             if (patch) {
               const a = new AnvilLayerHistoryAction({
                 layerId: layer.id,

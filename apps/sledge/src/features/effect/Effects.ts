@@ -1,6 +1,5 @@
 import type { RgbaBuffer } from '@sledge/anvil';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
-import { flushPatch } from '~/features/layer/anvil/AnvilController';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
@@ -12,7 +11,7 @@ export function applyEffect(layerId: string | undefined, fxName: string, mutator
 
   anvil.applyWholeBufferEffect(mutator);
 
-  const patch = flushPatch(layerId);
+  const patch = anvil.flushDiffs();
   if (patch) {
     projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch, context: { tool: 'fx', fxName } }));
   }

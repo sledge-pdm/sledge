@@ -2,7 +2,7 @@ import { rawToWebp } from '@sledge/anvil';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
-import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 
 export class LosslessWebPExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
@@ -17,7 +17,7 @@ export class LosslessWebPExporter extends Exporter {
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
-    const bufferPointer = getBufferPointer(layer.id);
+    const bufferPointer = getAnvil(layer.id).getBufferPointer();
     if (!bufferPointer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
     const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(bufferPointer);
     const scaledBuffer = getScaledBuffer(buffer, scale);

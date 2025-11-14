@@ -5,7 +5,6 @@ import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/hi
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
-import { getBufferPointer, getHeight as getLayerHeight, getWidth as getLayerWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -66,17 +65,17 @@ export function isPositionWithinSelection(pos: Vec2) {
 
 // 現在の状況からFloat状態を作成
 export function startMove() {
-  const layer = activeLayer();
-  const layerId = layer.id;
-  const width = getLayerWidth(layerId);
-  const height = getLayerHeight(layerId);
+  const layerId = layerListStore.activeLayerId;
+  const anvil = getAnvil(layerId);
+  const width = anvil.getWidth();
+  const height = anvil.getHeight();
   if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
     floatingMoveManager.startMove(selectionManager.getFloatingBuffer(layerId)!, 'selection', layerId);
   } else {
     selectionManager.selectAll();
-    const buf = getBufferPointer(layerId);
+    const buf = anvil.getBufferPointer();
     const layerFloatingBuffer: FloatingBuffer = {
       buffer: buf ? buf.slice() : new Uint8ClampedArray(width * height * 4),
       width,

@@ -9,15 +9,7 @@ import { LayerListHistoryAction } from '~/features/history/actions/LayerListHist
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
-import {
-  flushPatch,
-  getBufferCopy,
-  getBufferPointer,
-  getHeight,
-  getPixel,
-  getWidth,
-  registerWholeChange,
-} from '~/features/layer/anvil/AnvilController';
+import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth } from '~/features/layer/anvil/AnvilController';
 import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -107,14 +99,11 @@ export function clearLayer(layerId: string) {
   const h = getHeight(layerId);
   if (w == null || h == null) return;
 
-  // Get the pointer to current buffer for registerWholeChange (before modification)
-  const buffer = getBufferPointer(layerId);
-  if (!buffer) return;
+  const anvil = getAnvilOf(layerId);
+  if (!anvil) return;
+  anvil.addCurrentWholeDiff();
 
-  registerWholeChange(layerId, buffer); // Register the original buffer before clearing
-
-  // Clear the buffer directly (no need for setBuffer since we're modifying the pointer)
-  buffer.fill(0);
+  anvil.getBufferHandle().fill([0, 0, 0, 0]);
 
   const patch = flushPatch(layerId);
   if (patch)

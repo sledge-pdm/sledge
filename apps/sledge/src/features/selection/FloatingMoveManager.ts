@@ -1,11 +1,10 @@
 // controllers/layer/SelectionManager.ts
-
-import { RgbaBuffer, webpToRaw } from '@sledge/anvil';
+import { RgbaBuffer } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
-import { flushPatch, getBufferCopy, getHeight, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
+import { flushPatch, getBufferCopy, getHeight, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -192,9 +191,16 @@ class FloatingMoveManager {
       return;
     }
 
-    setBuffer(this.targetLayerId, composed);
-    const orig = webpToRaw(this.targetBufferOriginal.buffer, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
-    registerWholeChange(this.targetLayerId, orig);
+    const anvil = getAnvilOf(this.targetLayerId);
+    if (!anvil) {
+      console.error('failed to get anvil of target layer for commit');
+      return;
+    }
+
+    anvil.replaceBuffer(composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
+
+    anvil.addCurrentWholeDiff();
+
     const patch = flushPatch(this.targetLayerId);
     if (patch) {
       projectHistoryController.addAction(

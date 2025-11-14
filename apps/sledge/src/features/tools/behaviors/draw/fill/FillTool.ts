@@ -2,9 +2,9 @@ import { Vec2 } from '@sledge/core';
 import { RGBAColor } from '~/features/color';
 // LayerImageAgent 依存を除去し AnvilToolContext を利用
 //import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
-import { floodFillLayer, getBufferCopy, getBufferPointer, registerWholeChange } from '~/features/layer/anvil/AnvilController';
+import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
-import { getSelectionLimitMode, isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 
@@ -26,25 +26,32 @@ export class FillTool implements ToolBehavior {
 
     const preset = presetName ? (getPresetOf('fill', presetName) as any) : undefined;
     const threshold = preset?.threshold ?? 0;
-    const limitMode = getSelectionLimitMode();
+    // const limitMode = getSelectionLimitMode();
 
-    const before = getBufferCopy(layerId);
+    const anvil = getAnvilOf(layerId);
+    if (!anvil)
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
+
+    anvil.addCurrentWholeDiff();
 
     const selectionFillMode = preset.selectionFillMode ?? 'inside';
     if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
-      floodFillLayer(layerId, {
-        color,
+      anvil.floodFill({
         startX: position.x,
         startY: position.y,
+        color,
         threshold,
       });
     } else {
       const selectionMask = selectionManager.getSelectionMask();
       if (selectionFillMode === 'inside') {
-        floodFillLayer(layerId, {
-          color,
+        anvil.floodFill({
           startX: position.x,
           startY: position.y,
+          color,
           threshold,
           mask: {
             buffer: selectionMask.getMask(),
@@ -53,21 +60,13 @@ export class FillTool implements ToolBehavior {
         });
       } else {
         const maskBuffer = selectionMask.getMask();
-        const target = getBufferPointer(layerId)!;
+        const buffer = anvil.getBufferHandle();
         for (let i = 0; i < maskBuffer.length; i++) {
           const isInSelection = maskBuffer[i] === 1;
-          if (isInSelection) {
-            const bufferIndex = i * 4;
-            target[bufferIndex] = color[0]; // R
-            target[bufferIndex + 1] = color[1]; // G
-            target[bufferIndex + 2] = color[2]; // B
-            target[bufferIndex + 3] = color[3]; // A
-          }
+          if (isInSelection) buffer.indexSet(i * 4, color);
         }
       }
     }
-
-    if (before) registerWholeChange(layerId, before);
 
     const endTime = Date.now();
 

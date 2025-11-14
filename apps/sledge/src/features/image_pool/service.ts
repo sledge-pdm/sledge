@@ -6,7 +6,7 @@ import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/hi
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
-import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
+import { flushPatch, getHeight, getWidth } from '~/features/layer/anvil/AnvilController';
 import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
@@ -107,16 +107,15 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
 }
 
 async function transferToLayer(layerId: string, entryId: string) {
-  const layerBuf = getBufferPointer(layerId);
   const layerW = getWidth(layerId);
   const layerH = getHeight(layerId);
   const entry = getEntry(entryId);
   const anvil = getAnvilOf(layerId);
-  if (!layerW || !layerH || !layerBuf || !entry || !anvil) return;
+  if (!layerW || !layerH || !entry || !anvil) return;
 
   const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
 
-  registerWholeChange(layerId, layerBuf);
+  anvil.addCurrentWholeDiff();
 
   const offsetX = Math.round(entry.transform.x);
   const offsetY = Math.round(entry.transform.y);

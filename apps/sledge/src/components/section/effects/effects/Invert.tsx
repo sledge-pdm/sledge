@@ -8,7 +8,7 @@ const Invert: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='invert.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'invert');
+        applyEffect(props.selectedLayerId(), 'invert', (buffer) => buffer.invert());
       }}
     ></EffectWrapper>
   );

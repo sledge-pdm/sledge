@@ -21,13 +21,6 @@ export function setBuffer(layerId: string, buffer: RawPixelData) {
   anvil.replaceBuffer(buffer);
 }
 
-// Whole buffer diff 登録 (clear, FX など) - swap method
-export function registerWholeChange(layerId: string, swapBuffer: RawPixelData) {
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return;
-  anvil.addWholeDiff(swapBuffer);
-}
-
 export function setPixel(layerId: string, x: number, y: number, rgba: [number, number, number, number]) {
   const anvil = getAnvilOf(layerId);
   if (!anvil) return;
@@ -114,28 +107,4 @@ export function importLayerRaw(layerId: string, buffer: RawPixelData, width: num
   const anvil = getAnvilOf(layerId);
   if (!anvil) return false;
   return anvil.importRaw(buffer, width, height);
-}
-
-export function floodFillLayer(
-  layerId: string,
-  args: {
-    startX: number;
-    startY: number;
-    color: RGBA;
-    threshold?: number;
-    mask?: {
-      buffer: Uint8Array;
-      mode: 'inside' | 'outside' | 'none';
-    };
-  }
-): boolean {
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return false;
-  return anvil.floodFill({
-    startX: args.startX,
-    startY: args.startY,
-    color: args.color,
-    threshold: args.threshold,
-    mask: args.mask,
-  });
 }

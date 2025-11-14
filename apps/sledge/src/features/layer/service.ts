@@ -10,7 +10,7 @@ import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerL
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { flushPatch, getBufferCopy, getHeight, getPixel, getWidth } from '~/features/layer/anvil/AnvilController';
-import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
@@ -99,8 +99,7 @@ export function clearLayer(layerId: string) {
   const h = getHeight(layerId);
   if (w == null || h == null) return;
 
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return;
+  const anvil = getAnvil(layerId);
   anvil.addCurrentWholeDiff();
 
   anvil.getBufferHandle().fill([0, 0, 0, 0]);
@@ -267,7 +266,7 @@ export function isImagePoolActive() {
 
 export const resetAllLayers = () => {
   layerListStore.layers.forEach((l) => {
-    getAnvilOf(l.id)?.resetBuffer();
+    getAnvil(l.id).resetBuffer();
   });
   eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Reset all layers` });
 
@@ -327,8 +326,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   // snapshot before removal
   const toRemove = layers[index];
-  const anvil = getAnvilOf(toRemove.id);
-  if (!anvil) return;
+  const anvil = getAnvil(toRemove.id);
   const snapshot = getPackedLayerSnapshot(toRemove.id);
   layers.splice(index, 1);
 

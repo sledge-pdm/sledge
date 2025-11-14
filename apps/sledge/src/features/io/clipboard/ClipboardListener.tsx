@@ -8,7 +8,7 @@ import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { isInputFocused, tryGetImageFromClipboard, tryGetTextFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
-import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { setBottomBarText } from '~/features/log/service';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
@@ -22,10 +22,6 @@ const ClipboardListener: Component = () => {
     e?.preventDefault();
 
     try {
-      const layer = activeLayer();
-      const activeAnvil = getAnvilOf(layer.id);
-      if (!activeAnvil) return;
-
       if (isSelectionAvailable()) {
         const bufData = getCurrentSelectionBuffer();
         if (!bufData) return;
@@ -81,8 +77,8 @@ const ClipboardListener: Component = () => {
       const textData = await tryGetTextFromClipboard();
       if (textData) {
         const srcLayer = findLayerById(textData);
-        const srcAnvil = anvilManager.getAnvil(textData);
-        if (srcLayer && srcAnvil) {
+        if (srcLayer) {
+          const srcAnvil = getAnvil(textData);
           const isCut = srcLayer.cutFreeze;
           // 切り取りと分かった時点でcutFreezeは取り下げる
           setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });

@@ -2,7 +2,7 @@ import { Vec2 } from '@sledge/core';
 import { RGBAColor } from '~/features/color';
 // LayerImageAgent 依存を除去し AnvilToolContext を利用
 //import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
@@ -28,12 +28,7 @@ export class FillTool implements ToolBehavior {
     const threshold = preset?.threshold ?? 0;
     // const limitMode = getSelectionLimitMode();
 
-    const anvil = getAnvilOf(layerId);
-    if (!anvil)
-      return {
-        shouldUpdate: false,
-        shouldRegisterToHistory: false,
-      };
+    const anvil = getAnvil(layerId);
 
     anvil.addCurrentWholeDiff();
 

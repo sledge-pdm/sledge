@@ -7,7 +7,7 @@ import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHist
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { flushPatch, getHeight, getWidth } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
@@ -110,8 +110,8 @@ async function transferToLayer(layerId: string, entryId: string) {
   const layerW = getWidth(layerId);
   const layerH = getHeight(layerId);
   const entry = getEntry(entryId);
-  const anvil = getAnvilOf(layerId);
-  if (!layerW || !layerH || !entry || !anvil) return;
+  const anvil = getAnvil(layerId);
+  if (!layerW || !layerH || !entry) return;
 
   const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
 

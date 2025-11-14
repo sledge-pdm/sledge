@@ -1,7 +1,7 @@
 import { Size2D } from '@sledge/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
@@ -31,8 +31,8 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   createSnapshots() {
     return allLayers().map((l) => {
-      const anvil = getAnvilOf(l.id);
-      const webp = anvil!.exportWebp();
+      const anvil = getAnvil(l.id);
+      const webp = anvil.exportWebp();
       return {
         layerId: l.id,
         dotMag: l.dotMagnification,
@@ -80,8 +80,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   private restoreSnapshots(size: Size2D, snapshots: LayerBufferSnapshot[]) {
     for (const snap of snapshots) {
-      const anvil = getAnvilOf(snap.layerId);
-      if (!anvil) continue;
+      const anvil = getAnvil(snap.layerId);
       anvil.importWebp(snap.webpBuffer, size.width, size.height);
     }
   }

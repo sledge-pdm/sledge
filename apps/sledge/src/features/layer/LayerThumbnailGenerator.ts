@@ -1,5 +1,5 @@
 import { AntialiasMode, RgbaBuffer } from '@sledge/anvil';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 
 export class LayerThumbnailGenerator {
   private thumbnailBuffer: RgbaBuffer;
@@ -12,8 +12,7 @@ export class LayerThumbnailGenerator {
 
   generateLayerThumbnail(layerId: string, width: number, height: number): ImageData {
     try {
-      const anvil = getAnvilOf(layerId);
-      if (!anvil) throw new Error('No Anvil for layer ' + layerId);
+      const anvil = getAnvil(layerId);
       const sourceWidth = anvil.getWidth();
       const sourceHeight = anvil.getHeight();
       if (sourceWidth === 0 || sourceHeight === 0 || width === 0 || height === 0) {

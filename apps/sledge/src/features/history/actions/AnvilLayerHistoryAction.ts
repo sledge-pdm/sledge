@@ -1,5 +1,5 @@
 import { PackedDiffs } from '@sledge/anvil';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
 import { eventBus } from '~/utils/EventBus';
@@ -31,7 +31,7 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
       cancelMove();
       return;
     }
-    getAnvilOf(this.layerId)?.applyPatch(this.patch, 'undo');
+    getAnvil(this.layerId)?.applyPatch(this.patch, 'undo');
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${this.layerId}) undo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
@@ -42,7 +42,7 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
       cancelMove();
       return;
     }
-    getAnvilOf(this.layerId)?.applyPatch(this.patch, 'redo');
+    getAnvil(this.layerId)?.applyPatch(this.patch, 'redo');
 
     eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${this.layerId}) redo` });
     eventBus.emit('preview:requestUpdate', { layerId: this.layerId });

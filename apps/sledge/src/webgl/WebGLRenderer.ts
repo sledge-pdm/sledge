@@ -3,7 +3,7 @@ import { flip_pixels_vertically } from '@sledge/wasm';
 import { Consts } from '~/Consts';
 import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
 import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
@@ -219,15 +219,13 @@ export class WebGLRenderer {
           logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
 
           this.layers.forEach((layer) => {
-            const anvil = getAnvilOf(layer.id);
-            if (anvil) {
+            const anvil = getAnvil(layer.id);
               try {
                 anvil.resize(actualWidth, actualHeight); // offset なし resize
                 logger.debugLog(`✅ Resized anvil layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
               } catch (error) {
                 logger.debugError(`❌ Failed to resize anvil layer buffer ${layer.id}:`, error);
               }
-            }
           });
 
           // キャンバスストアも更新（他のコンポーネントとの整合性を保つため）
@@ -292,8 +290,7 @@ export class WebGLRenderer {
     activeLayers.forEach((layer, i) => {
       logger.debugLog(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
 
-      const anvil = getAnvilOf(layer.id);
-      if (!anvil) return;
+      const anvil = getAnvil(layer.id);
       const usePreviewBuffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving();
       const baseBuffer = getBufferPointer(layer.id);
       const buf = usePreviewBuffer ? (floatingMoveManager.getPreviewBuffer() ?? baseBuffer) : baseBuffer;

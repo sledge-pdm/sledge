@@ -1,7 +1,7 @@
 import { projectHistoryController } from '~/features/history';
 import { ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore, snapshotStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 import { getCurrentVersion } from '~/utils/VersionUtils';
@@ -21,8 +21,8 @@ export const dumpProjectJson = async (): Promise<ProjectV1> => {
   >();
   const size = canvasStore.canvas;
   allLayers().forEach((l) => {
-    const anvil = getAnvilOf(l.id);
-    const webp = anvil!.exportWebp();
+    const anvil = getAnvil(l.id);
+    const webp = anvil.exportWebp();
     buffers.set(l.id, {
       webpBuffer: webp,
     });

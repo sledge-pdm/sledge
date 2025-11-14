@@ -1,6 +1,6 @@
 import { webpToRaw } from '@sledge/anvil';
 import { getLayerIndex } from '~/features/layer';
-import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
@@ -35,8 +35,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
   getSnapshot(index: number): PackedLayerSnapshot | undefined {
     const layer = layerListStore.layers[index];
     if (!layer) return;
-    const anvil = getAnvilOf(layer.id);
-    if (!anvil) return;
+    const anvil = getAnvil(layer.id);
 
     const webpBuffer = anvil.exportWebp();
     return {
@@ -55,10 +54,10 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
       setLayerListStore('layers', idx, snapshot.layer);
 
       if (snapshot.image) {
-        const anvil = getAnvilOf(snapshot.layer.id);
-        if (anvil) {
+        try {
+          const anvil = getAnvil(snapshot.layer.id);
           anvil.importWebp(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-        } else {
+        } catch {
           const rawBuffer = webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
           anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
         }

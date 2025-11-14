@@ -1,15 +1,14 @@
 import type { RgbaBuffer } from '@sledge/anvil';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flushPatch } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { eventBus } from '~/utils/EventBus';
 
 export type LayerEffectMutator = (buffer: RgbaBuffer) => void;
 
 export function applyEffect(layerId: string | undefined, fxName: string, mutator: LayerEffectMutator) {
   if (!layerId) return;
-  const anvil = getAnvilOf(layerId);
-  if (!anvil) return;
+  const anvil = getAnvil(layerId);
 
   anvil.applyWholeBufferEffect(mutator);
 

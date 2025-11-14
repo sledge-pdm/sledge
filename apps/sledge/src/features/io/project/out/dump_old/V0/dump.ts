@@ -1,6 +1,6 @@
 import { ProjectV0 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 
@@ -10,7 +10,7 @@ import { packr } from '~/utils/msgpackr';
 export function getLayerBuffers(): Map<string, Uint8ClampedArray> {
   const map = new Map<string, Uint8ClampedArray>();
   allLayers().forEach((layer) => {
-    map.set(layer.id, getAnvilOf(layer.id)!.getBufferCopy());
+    map.set(layer.id, getAnvil(layer.id).getBufferCopy());
   });
   return map;
 }

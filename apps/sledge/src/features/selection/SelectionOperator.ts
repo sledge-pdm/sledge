@@ -6,7 +6,7 @@ import { ConvertSelectionHistoryAction } from '~/features/history/actions/Conver
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 import { getBufferPointer, getHeight as getLayerHeight, getWidth as getLayerWidth } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
@@ -138,8 +138,7 @@ export function cancelMove() {
 export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): PackedDiffs | undefined {
   const selection = getCurrentSelection();
   const lid = props?.layerId ?? activeLayer().id;
-  const anvil = getAnvilOf(lid);
-  if (!anvil) return;
+  const anvil = getAnvil(lid);
 
   const bBox = selection.getBoundBox();
   if (!bBox) return;
@@ -242,8 +241,7 @@ export function getCurrentSelectionBuffer():
       bbox: { x: number; y: number; width: number; height: number };
     }
   | undefined {
-  const activeAnvil = getAnvilOf(activeLayer().id);
-  if (!activeAnvil) return;
+  const activeAnvil = getAnvil(activeLayer().id);
   const width = activeAnvil.getWidth();
   const height = activeAnvil.getHeight();
   selectionManager.commitOffset();

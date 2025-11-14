@@ -1,6 +1,6 @@
 import { Anvil, toUint8Array } from '@sledge/anvil';
 import { auto_select_region_mask } from '@sledge/wasm';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
@@ -16,8 +16,7 @@ export class AutoSelection extends SelectionBase {
 
     const threshold = (args.presetName ? (getPresetOf('autoSelection', args.presetName) as any)?.threshold : undefined) ?? 0;
 
-    const anvil = getAnvilOf(args.layerId);
-    if (!anvil) return;
+    const anvil = getAnvil(args.layerId);
 
     // 領域選択マスクを生成してプレビューに反映
     const mask = this.computeRegionMask(anvil, args.position, threshold);

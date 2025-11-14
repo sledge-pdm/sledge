@@ -1,7 +1,7 @@
 import { webpToRaw } from '@sledge/anvil';
 import { PackedLayerSnapshot } from '~/features/history/actions/types';
 import { findLayerById, removeLayer, setActiveLayerId } from '~/features/layer';
-import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
@@ -63,7 +63,12 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     arr.splice(index, 0, packed.layer);
     setLayerListStore('layers', arr);
 
-    const anvil = getAnvilOf(packed.layer.id);
+    let anvil: ReturnType<typeof getAnvil> | undefined;
+    try {
+      anvil = getAnvil(packed.layer.id);
+    } catch {
+      anvil = undefined;
+    }
     if (packed.image) {
       const width = packed.image.width;
       const height = packed.image.height;

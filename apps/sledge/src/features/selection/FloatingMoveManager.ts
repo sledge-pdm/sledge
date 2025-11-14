@@ -5,7 +5,7 @@ import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { flushPatch, getBufferCopy, getHeight, getWidth } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
@@ -114,8 +114,7 @@ class FloatingMoveManager {
     if (state === 'layer') {
       return new Uint8ClampedArray(width * height * 4);
     } else if (state === 'selection') {
-      const anvil = getAnvilOf(targetLayerId);
-      if (!anvil) return undefined;
+      const anvil = getAnvil(targetLayerId);
       const mask = selectionManager.getCombinedMask();
       return anvil.cropWithMask(mask, width, height, 0, 0);
     } else if (state === 'pasted') {
@@ -125,8 +124,7 @@ class FloatingMoveManager {
   }
 
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
-    const anvil = getAnvilOf(targetLayerId);
-    if (!anvil) return;
+    const anvil = getAnvil(targetLayerId);
     const webpBuffer = anvil.exportWebp();
     if (!webpBuffer) return;
     this.targetBufferOriginal = {
@@ -191,12 +189,7 @@ class FloatingMoveManager {
       return;
     }
 
-    const anvil = getAnvilOf(this.targetLayerId);
-    if (!anvil) {
-      console.error('failed to get anvil of target layer for commit');
-      return;
-    }
-
+    const anvil = getAnvil(this.targetLayerId);
     anvil.replaceBuffer(composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
 
     anvil.addCurrentWholeDiff();

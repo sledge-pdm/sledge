@@ -2,7 +2,7 @@ import { beforeEach, describe, it } from 'vitest';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import './mocks';
 import { expect, expectHistoryState, setupTestAnvil, setupTestEnvironment, TEST_CONSTANTS } from './utils';
 
@@ -15,7 +15,7 @@ describe('AnvilLayerHistoryAction', () => {
   });
 
   it('undo/redo whole buffer change restores data', () => {
-    const anvil = getAnvilOf(layerId)!;
+    const anvil = getAnvil(layerId);
     const before = anvil.getBufferCopy();
     // simulate effect applying: fill all with color
     const originalCopy = before.slice();
@@ -43,7 +43,7 @@ describe('AnvilLayerHistoryAction', () => {
   });
 
   it('pixel patch writes individual pixels and can be undone', () => {
-    const anvil = getAnvilOf(layerId)!;
+    const anvil = getAnvil(layerId);
     const beforeCopy = anvil.getBufferCopy().slice();
 
     // Set pixels with different colors
@@ -73,7 +73,7 @@ describe('AnvilLayerHistoryAction', () => {
     expectHistoryState(true, false);
 
     projectHistoryController.undo();
-    const anvil = getAnvilOf(layerId)!;
+    const anvil = getAnvil(layerId);
     expect(anvil.getPixel(0, 0)[3]).toBe(0); // alpha back to 0 after undo
     projectHistoryController.redo();
     expect(anvil.getPixel(0, 0)[0]).toBe(9);

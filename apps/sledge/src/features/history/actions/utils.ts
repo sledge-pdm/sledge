@@ -1,11 +1,11 @@
 import { PackedLayerSnapshot } from '~/features/history/actions/types';
 import { findLayerById } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 
 export function getPackedLayerSnapshot(layerId: string): PackedLayerSnapshot | undefined {
   const layer = findLayerById(layerId);
-  const anvil = getAnvilOf(layerId);
-  if (!layer || !anvil) return;
+  if (!layer) return;
+  const anvil = getAnvil(layerId);
 
   const webpBuffer = anvil.exportWebp();
   return {

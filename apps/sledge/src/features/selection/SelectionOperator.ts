@@ -5,8 +5,7 @@ import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/hi
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
-import { getBufferPointer, getHeight as getLayerHeight, getWidth as getLayerWidth } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
@@ -14,6 +13,7 @@ import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { imagePoolStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -65,17 +65,17 @@ export function isPositionWithinSelection(pos: Vec2) {
 
 // 現在の状況からFloat状態を作成
 export function startMove() {
-  const layer = activeLayer();
-  const layerId = layer.id;
-  const width = getLayerWidth(layerId);
-  const height = getLayerHeight(layerId);
+  const layerId = layerListStore.activeLayerId;
+  const anvil = getAnvil(layerId);
+  const width = anvil.getWidth();
+  const height = anvil.getHeight();
   if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
     floatingMoveManager.startMove(selectionManager.getFloatingBuffer(layerId)!, 'selection', layerId);
   } else {
     selectionManager.selectAll();
-    const buf = getBufferPointer(layerId);
+    const buf = anvil.getBufferPointer();
     const layerFloatingBuffer: FloatingBuffer = {
       buffer: buf ? buf.slice() : new Uint8ClampedArray(width * height * 4),
       width,
@@ -119,8 +119,8 @@ export function cancelSelection() {
   }
   selectionManager.clear();
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'selection cancelled' });
-  eventBus.emit('preview:requestUpdate', { layerId });
+  updateWebGLCanvas(false, 'selection cancelled');
+  updateLayerPreview(layerId);
 }
 
 export function commitMove() {
@@ -131,15 +131,14 @@ export function cancelMove() {
   const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
   floatingMoveManager.cancel();
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'move cancelled' });
-  eventBus.emit('preview:requestUpdate', { layerId });
+  updateWebGLCanvas(false, 'move cancelled');
+  updateLayerPreview(layerId);
 }
 
 export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): PackedDiffs | undefined {
   const selection = getCurrentSelection();
   const lid = props?.layerId ?? activeLayer().id;
-  const anvil = getAnvilOf(lid);
-  if (!anvil) return;
+  const anvil = getAnvil(lid);
 
   const bBox = selection.getBoundBox();
   if (!bBox) return;
@@ -170,8 +169,8 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
     }
   }
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
-  eventBus.emit('preview:requestUpdate', { layerId: lid });
+  updateWebGLCanvas(false, 'delete selected area');
+  updateLayerPreview(lid);
 
   const diffs = anvil.flushDiffs();
   if (!props?.noAction) {
@@ -242,8 +241,7 @@ export function getCurrentSelectionBuffer():
       bbox: { x: number; y: number; width: number; height: number };
     }
   | undefined {
-  const activeAnvil = getAnvilOf(activeLayer().id);
-  if (!activeAnvil) return;
+  const activeAnvil = getAnvil(activeLayer().id);
   const width = activeAnvil.getWidth();
   const height = activeAnvil.getHeight();
   selectionManager.commitOffset();
@@ -299,7 +297,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
 
   if (deleteAfter) {
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
-    eventBus.emit('preview:requestUpdate', { layerId: layerListStore.activeLayerId });
+    updateWebGLCanvas(false, 'delete selected area');
+    updateLayerPreview(layerListStore.activeLayerId);
   }
 }

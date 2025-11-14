@@ -5,8 +5,7 @@ import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getEntry, ImagePoolEntry, insertEntry, removeEntry, updateEntryPartial } from '~/features/image_pool';
 import { addLayerTo, BlendMode, Layer, LayerType, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
-import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
-import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
@@ -249,31 +248,30 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         // Layer buffer tiny pixel patch on a random layer
         if (layerListStore.layers.length > 0) {
           const layer = layerListStore.layers[Math.floor(rng() * layerListStore.layers.length)];
-          const anvil = getAnvilOf(layer.id);
-          if (anvil) {
-            const w = anvil.getWidth();
-            const count = 1 + Math.floor(rng() * 3);
-            steps.push(() => {
-              for (let k = 0; k < count; k++) {
-                const x = k % Math.min(4, w);
-                const y = 0;
-                const r = (k * 40) & 0xff;
-                const g = (k * 80) & 0xff;
-                const b = (k * 120) & 0xff;
-                setPixel(layer.id, x, y, [r, g, b, 255]);
-              }
-              const patch = flushPatch(layer.id);
-              if (patch) {
-                const a = new AnvilLayerHistoryAction({
-                  layerId: layer.id,
-                  patch,
-                  context: { from: 'rnd' },
-                });
-                hc.addAction(a);
-              }
-            });
-            stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
-          }
+          const anvil = anvilManager.getAnvil(layer.id);
+          if (!anvil) return;
+          const w = anvil.getWidth();
+          const count = 1 + Math.floor(rng() * 3);
+          steps.push(() => {
+            for (let k = 0; k < count; k++) {
+              const x = k % Math.min(4, w);
+              const y = 0;
+              const r = (k * 40) & 0xff;
+              const g = (k * 80) & 0xff;
+              const b = (k * 120) & 0xff;
+              anvil.setPixel(x, y, [r, g, b, 255]);
+            }
+            const patch = anvil.flushDiffs();
+            if (patch) {
+              const a = new AnvilLayerHistoryAction({
+                layerId: layer.id,
+                patch,
+                context: { from: 'rnd' },
+              });
+              hc.addAction(a);
+            }
+          });
+          stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
         }
       }
     }

@@ -3,7 +3,7 @@ import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
-import { getBufferCopy } from '~/features/layer/anvil/AnvilController';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore } from '~/stores/ProjectStores';
 
 export class SVGExporter extends Exporter {
@@ -49,7 +49,7 @@ export class SVGExporter extends Exporter {
     }
 
     if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
-    const buffer = getBufferCopy(layer.id);
+    const buffer = getAnvil(layer.id).getBufferCopy();
     if (!buffer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
 
     // wasmを使って不透明部分のマスクを作成

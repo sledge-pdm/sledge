@@ -1,7 +1,7 @@
 import { projectHistoryController } from '~/features/history';
 import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { activeLayer, BlendMode, getLayerIndex, Layer } from '~/features/layer';
-import { flushPatch, setBuffer } from '~/features/layer/anvil/AnvilController';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { WebGLRenderer } from '~/webgl/WebGLRenderer';
 
@@ -42,8 +42,9 @@ class LayerMergeRenderer {
 
     // WebGL で2パス描画
     const out = this.createRenderer().readPixelsFlipped();
-    setBuffer(this.targetLayer.id, out);
-    flushPatch(this.targetLayer.id);
+    const targetAnvil = getAnvil(this.targetLayer.id);
+    targetAnvil.replaceBuffer(out);
+    targetAnvil.flushDiffs();
     // target を normal / 100% に正規化
     setLayerListStore('layers', tIdx, 'mode', BlendMode.normal);
     setLayerListStore('layers', tIdx, 'opacity', 1.0);

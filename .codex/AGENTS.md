@@ -1,7 +1,7 @@
 
 # Instructions
 
-- Respond in the language used in the incoming message. If a translation of this document is needed, prefer the English original.
+- Respond in the language used in the incoming message.
 
 ## Abstract
 

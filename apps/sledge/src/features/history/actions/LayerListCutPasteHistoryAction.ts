@@ -1,9 +1,9 @@
 import { webpToRaw } from '@sledge/anvil';
 import { PackedLayerSnapshot } from '~/features/history/actions/types';
 import { findLayerById, removeLayer, setActiveLayerId } from '~/features/layer';
-import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface LayerListCutPasteHistoryActionProps extends BaseHistoryActionProps {
@@ -44,7 +44,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     // restore original (with cutFreeze true)
     this.reinsert(this.sourceIndex, this.sourcePackedSnapshot);
     setActiveLayerId(this.activeLayerIdBefore);
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'CutPaste undo' });
+    updateWebGLCanvas(false, 'CutPaste undo');
   }
 
   redo(): void {
@@ -54,7 +54,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     // insert pasted (cutFreeze false)
     this.reinsert(this.targetIndex, this.targetPackedSnapshot);
     setActiveLayerId(this.activeLayerIdAfter);
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'CutPaste redo' });
+    updateWebGLCanvas(false, 'CutPaste redo');
   }
 
   private reinsert(index: number, packed: PackedLayerSnapshot) {
@@ -63,7 +63,12 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     arr.splice(index, 0, packed.layer);
     setLayerListStore('layers', arr);
 
-    const anvil = getAnvilOf(packed.layer.id);
+    let anvil: ReturnType<typeof getAnvil> | undefined;
+    try {
+      anvil = getAnvil(packed.layer.id);
+    } catch {
+      anvil = undefined;
+    }
     if (packed.image) {
       const width = packed.image.width;
       const height = packed.image.height;
@@ -84,8 +89,8 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
       }
     }
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `CutPaste reinsert (${packed.layer.id})` });
-    eventBus.emit('preview:requestUpdate', { layerId: packed.layer.id });
+    updateWebGLCanvas(false, `CutPaste reinsert (${packed.layer.id})`);
+    updateLayerPreview(packed.layer.id);
   }
 
   serialize(): SerializedHistoryAction {

@@ -1,17 +1,16 @@
 // controllers/layer/SelectionManager.ts
-
-import { RgbaBuffer, webpToRaw } from '@sledge/anvil';
+import { RgbaBuffer } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
-import { flushPatch, getBufferCopy, getHeight, getWidth, registerWholeChange, setBuffer } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export type MoveMode = 'selection' | 'layer' | 'pasted';
 
@@ -101,33 +100,32 @@ class FloatingMoveManager {
 
   private requestFrame(immediate?: boolean, layerIdOverride?: string) {
     const layerId = layerIdOverride ?? this.targetLayerId;
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'floating-move' });
-    eventBus.emit('preview:requestUpdate', { layerId });
+    updateWebGLCanvas(false, 'floating-move');
+    updateLayerPreview(layerId);
     const payload = immediate ? { immediate: true } : {};
     eventBus.emit('selection:updateSelectionMenu', payload);
     eventBus.emit('selection:updateSelectionPath', payload);
   }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
-    const width = getWidth(targetLayerId);
-    const height = getHeight(targetLayerId);
+    const anvil = getAnvil(targetLayerId);
+    const width = anvil.getWidth();
+    const height = anvil.getHeight();
     if (width == null || height == null) return undefined;
     if (state === 'layer') {
       return new Uint8ClampedArray(width * height * 4);
     } else if (state === 'selection') {
-      const anvil = getAnvilOf(targetLayerId);
-      if (!anvil) return undefined;
+      const anvil = getAnvil(targetLayerId);
       const mask = selectionManager.getCombinedMask();
       return anvil.cropWithMask(mask, width, height, 0, 0);
     } else if (state === 'pasted') {
-      const base = getBufferCopy(targetLayerId);
+      const base = anvil.getBufferCopy();
       return base ? base.slice() : undefined;
     }
   }
 
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
-    const anvil = getAnvilOf(targetLayerId);
-    if (!anvil) return;
+    const anvil = getAnvil(targetLayerId);
     const webpBuffer = anvil.exportWebp();
     if (!webpBuffer) return;
     this.targetBufferOriginal = {
@@ -192,10 +190,12 @@ class FloatingMoveManager {
       return;
     }
 
-    setBuffer(this.targetLayerId, composed);
-    const orig = webpToRaw(this.targetBufferOriginal.buffer, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
-    registerWholeChange(this.targetLayerId, orig);
-    const patch = flushPatch(this.targetLayerId);
+    const anvil = getAnvil(this.targetLayerId);
+    anvil.replaceBuffer(composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
+
+    anvil.addCurrentWholeDiff();
+
+    const patch = anvil.flushDiffs();
     if (patch) {
       projectHistoryController.addAction(
         new AnvilLayerHistoryAction({
@@ -205,6 +205,7 @@ class FloatingMoveManager {
         })
       );
     }
+
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
     } else {

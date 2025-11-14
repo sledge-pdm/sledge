@@ -6,12 +6,11 @@ import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/hi
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
-import { flushPatch, getBufferPointer, getHeight, getWidth, registerWholeChange } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
-import { eventBus } from '~/utils/EventBus';
 import { pathToFileLocation } from '~/utils/FileUtils';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
 
@@ -107,16 +106,15 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
 }
 
 async function transferToLayer(layerId: string, entryId: string) {
-  const layerBuf = getBufferPointer(layerId);
-  const layerW = getWidth(layerId);
-  const layerH = getHeight(layerId);
   const entry = getEntry(entryId);
-  const anvil = getAnvilOf(layerId);
-  if (!layerW || !layerH || !layerBuf || !entry || !anvil) return;
+  const anvil = getAnvil(layerId);
+  const layerW = anvil.getWidth();
+  const layerH = anvil.getHeight();
+  if (!layerW || !layerH || !entry) return;
 
   const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
 
-  registerWholeChange(layerId, layerBuf);
+  anvil.addCurrentWholeDiff();
 
   const offsetX = Math.round(entry.transform.x);
   const offsetY = Math.round(entry.transform.y);
@@ -140,7 +138,7 @@ async function transferToLayer(layerId: string, entryId: string) {
     antialiasMode: AntialiasMode.Nearest,
   });
 
-  const patch = flushPatch(layerId);
+  const patch = anvil.flushDiffs();
   if (patch) {
     projectHistoryController.addAction(
       new AnvilLayerHistoryAction({
@@ -150,8 +148,8 @@ async function transferToLayer(layerId: string, entryId: string) {
       })
     );
   }
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Image Transfer to Layer(${layerId})` });
-  eventBus.emit('preview:requestUpdate', { layerId });
+  updateWebGLCanvas(false, `Image Transfer to Layer(${layerId})`);
+  updateLayerPreview(layerId);
 }
 
 function createEntry(webpBuffer: Uint8Array, width: number, height: number, forceFit?: boolean) {

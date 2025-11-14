@@ -3,8 +3,7 @@ import { Vec2 } from '@sledge/core';
 import { Consts } from '~/Consts';
 import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer, findLayerById } from '~/features/layer';
-import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
 import { ShapeStore } from '~/features/tools/behaviors/draw/pen/ShapeStore';
 import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
@@ -39,8 +38,7 @@ export class PenTool implements ToolBehavior {
   private pixelAccumulator: Map<string, PixelPatchData> | undefined = undefined;
 
   private resolveStrokeContext(layerId: string, presetName: string, preset?: PenPresetConfig): StrokeContext | undefined {
-    const anvil = getAnvilOf(layerId);
-    if (!anvil) return undefined;
+    const anvil = getAnvil(layerId);
 
     const layer = findLayerById(layerId) ?? activeLayer();
     const dotMagnification = layer?.dotMagnification ?? 1;
@@ -205,9 +203,7 @@ export class PenTool implements ToolBehavior {
     const targetLayerId = this.strokeContext?.layerId ?? fallbackLayer?.id;
     if (!targetLayerId) return;
 
-    const anvil = getAnvilOf(targetLayerId);
-    if (!anvil) return;
-
+    const anvil = getAnvil(targetLayerId);
     this.lineChunk.restore(anvil);
   }
 
@@ -286,50 +282,48 @@ export class PenTool implements ToolBehavior {
     this.strokeContext = undefined;
     this.pixelAccumulator = undefined;
 
-    const anvil = getAnvilOf(layerId);
-    if (anvil) {
-      const bbox = this.strokeChunk.boundBox;
-      if (bbox) {
-        const w = bbox.maxX - bbox.minX + 1;
-        const h = bbox.maxY - bbox.minY + 1;
-        if (w <= 0 || h <= 0) {
-          console.warn('Invalid bbox dimensions:', { w, h, bbox });
-          this.strokeChunk.clear();
-          return { shouldUpdate: true, shouldRegisterToHistory: true };
+    const anvil = getAnvil(layerId);
+    const bbox = this.strokeChunk.boundBox;
+    if (bbox) {
+      const w = bbox.maxX - bbox.minX + 1;
+      const h = bbox.maxY - bbox.minY + 1;
+      if (w <= 0 || h <= 0) {
+        console.warn('Invalid bbox dimensions:', { w, h, bbox });
+        this.strokeChunk.clear();
+        return { shouldUpdate: true, shouldRegisterToHistory: true };
+      }
+      const swapBuffer = new Uint8ClampedArray(w * h * 4);
+      // Layer全体バッファ取得
+      const layerBuffer = anvil.getBufferPointer();
+      const layerWidth = anvil.getWidth();
+      if (layerBuffer && layerWidth) {
+        // 現バッファから変更前の状態を取得・保存
+        for (let yy = 0; yy < h; yy++) {
+          const srcRowStart = (bbox.minX + (bbox.minY + yy) * layerWidth) * 4;
+          const dstRowStart = yy * w * 4;
+          swapBuffer.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
         }
-        const swapBuffer = new Uint8ClampedArray(w * h * 4);
-        // Layer全体バッファ取得
-        const layerBuffer = getBufferPointer(layerId);
-        const layerWidth = getWidth(layerId);
-        if (layerBuffer && layerWidth) {
-          // 現バッファから変更前の状態を取得・保存
-          for (let yy = 0; yy < h; yy++) {
-            const srcRowStart = (bbox.minX + (bbox.minY + yy) * layerWidth) * 4;
-            const dstRowStart = yy * w * 4;
-            swapBuffer.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
-          }
-          // ストロークによる変更を適用して「変更前の状態」を作成
-          for (const [layerIdx, diff] of this.strokeChunk.diffs) {
-            // layerIdx からピクセル座標を逆算
-            const pixelIdx = layerIdx / 4;
-            const x = pixelIdx % layerWidth;
-            const y = Math.floor(pixelIdx / layerWidth);
+        // ストロークによる変更を適用して「変更前の状態」を作成
+        for (const [layerIdx, diff] of this.strokeChunk.diffs) {
+          // layerIdx からピクセル座標を逆算
+          const pixelIdx = layerIdx / 4;
+          const x = pixelIdx % layerWidth;
+          const y = Math.floor(pixelIdx / layerWidth);
 
-            // bbox内でのローカル座標に変換
-            const localX = x - bbox.minX;
-            const localY = y - bbox.minY;
-            const localIdx = (localX + localY * w) * 4;
+          // bbox内でのローカル座標に変換
+          const localX = x - bbox.minX;
+          const localY = y - bbox.minY;
+          const localIdx = (localX + localY * w) * 4;
 
-            // packed RGBA32 を RGBA 成分に展開して swapBuffer に書き込み
-            const [r, g, b, a] = packedU32ToRgba(diff.color);
+          // packed RGBA32 を RGBA 成分に展開して swapBuffer に書き込み
+          const [r, g, b, a] = packedU32ToRgba(diff.color);
 
-            swapBuffer[localIdx] = r;
-            swapBuffer[localIdx + 1] = g;
-            swapBuffer[localIdx + 2] = b;
-            swapBuffer[localIdx + 3] = a;
-          }
-          anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
+          swapBuffer[localIdx] = r;
+          swapBuffer[localIdx + 1] = g;
+          swapBuffer[localIdx + 2] = b;
+          swapBuffer[localIdx + 3] = a;
         }
+        anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
       }
     }
     this.strokeChunk.clear();

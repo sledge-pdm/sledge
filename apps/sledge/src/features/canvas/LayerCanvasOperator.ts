@@ -3,14 +3,14 @@ import { currentColor, hexToRGBA } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { flushPatch } from '~/features/layer/anvil/AnvilController';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { setBottomBarText } from '~/features/log/service';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export enum DrawState {
   start,
@@ -81,11 +81,12 @@ export default class LayerCanvasOperator {
       }
 
       if (result.shouldUpdate) {
-        eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: 'LayerCanvasOperator (action: ' + DrawState[state] + ')' });
-        eventBus.emit('preview:requestUpdate', { layerId: layer.id });
+        updateWebGLCanvas(true, 'LayerCanvasOperator (action: ' + DrawState[state] + ')');
+        updateLayerPreview(layer.id);
       }
       if (result.shouldRegisterToHistory) {
-        const patch = flushPatch(layer.id);
+        const anvil = getAnvil(layer.id);
+        const patch = anvil.flushDiffs();
         if (patch)
           projectHistoryController.addAction(
             new AnvilLayerHistoryAction({

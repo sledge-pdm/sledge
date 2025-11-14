@@ -12,7 +12,7 @@ import {
 } from '@sledge/wasm';
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { activeLayer } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
@@ -178,7 +178,7 @@ class SelectionAreaManager {
 
     let changed = false;
 
-    const anvil = getAnvilOf(activeLayer().id);
+    const anvil = getAnvil(activeLayer().id);
     switch (frag.kind) {
       case 'pixel': {
         this.previewMask.setFlag(frag.position, 1);
@@ -191,7 +191,6 @@ class SelectionAreaManager {
         break;
       }
       case 'tile': {
-        if (!anvil) break;
         const tileSize = anvil.getTileSize();
         // TileIndex (legacy) から行列を推測 (row/col か x/y を許容)
         const col: number = (frag.index as any).col ?? (frag.index as any).x;
@@ -367,8 +366,7 @@ class SelectionAreaManager {
   }
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
-    const anvil = getAnvilOf(srcLayerId);
-    if (!anvil) return;
+    const anvil = getAnvil(srcLayerId);
     // canvasStore �����������ȃP�[�X (�ɑ����e�X�g) �ł͉����Ԃ��Ȃ�
     if (!canvasStore?.canvas) return;
     const { width, height } = canvasStore.canvas;

@@ -1,5 +1,4 @@
 import { Slider } from '@sledge/ui';
-import { DustRemovalOption } from '@sledge/wasm';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { EffectControl } from '~/components/section/effects/EffectControl';
@@ -19,7 +18,7 @@ const DustRemoval: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='dust removal.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'dust_removal', new DustRemovalOption(options.maxSize, options.alphaThreshold));
+        applyEffect(props.selectedLayerId(), 'dust removal', (buffer) => buffer.dustRemoval(options.maxSize, options.alphaThreshold));
       }}
     >
       <EffectControl label='max size.'>

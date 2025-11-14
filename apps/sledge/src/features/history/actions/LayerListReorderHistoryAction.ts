@@ -1,6 +1,6 @@
 import type { Layer } from '~/features/layer';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface LayerListReorderHistoryActionProps extends BaseHistoryActionProps {
@@ -54,5 +54,5 @@ function setOrder(order: string[]) {
     if (!order.includes(l.id)) next.push(l);
   }
   setLayerListStore('layers', next);
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'Layer order changed' });
+  updateWebGLCanvas(false, 'Layer order changed');
 }

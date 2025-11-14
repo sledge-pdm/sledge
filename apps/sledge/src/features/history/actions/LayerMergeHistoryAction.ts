@@ -2,7 +2,7 @@ import { webpToRaw } from '@sledge/anvil';
 import { getLayerIndex } from '~/features/layer';
 import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { PackedLayerSnapshot } from './types';
 
@@ -62,11 +62,8 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
           anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
         }
       }
-
-      eventBus.emit('preview:requestUpdate', { layerId: snapshot.layer.id });
     }
-
-    eventBus.emit('preview:requestUpdate', { layerId: snapshot.layer.id });
+    updateLayerPreview(snapshot.layer.id);
   }
 
   swapSnapshots() {
@@ -87,7 +84,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     this.applySnapshot(this.originPackedSnapshot);
     this.applySnapshot(this.targetPackedSnapshot);
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'Layer merge undo/redo' });
+    updateWebGLCanvas(false, 'Layer merge undo/redo');
 
     // swap
     this.originPackedSnapshot = swapOriginPackedSnapshot;

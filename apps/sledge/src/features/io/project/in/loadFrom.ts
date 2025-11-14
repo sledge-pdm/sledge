@@ -5,8 +5,8 @@ import { addLayer, BlendMode, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
-import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export async function loadProjectFromImagePath(location: FileLocation): Promise<boolean> {
   if (!location || !location.path || !location.name) {
@@ -53,8 +53,8 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
 
   anvilManager.registerAnvil(initLayer.id, new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Import ${location.name}` });
-  eventBus.emit('preview:requestUpdate', { layerId: initLayer.id });
+  updateWebGLCanvas(false, `Import ${location.name}`);
+  updateLayerPreview(initLayer.id);
 
   return true;
 }
@@ -95,8 +95,8 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
 
     anvilManager.registerAnvil(initLayer.id, new Uint8ClampedArray(data.imageBuf), data.width, data.height);
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Import from clipboard` });
-    eventBus.emit('preview:requestUpdate', { layerId: initLayer.id });
+    updateWebGLCanvas(false, `Import from clipboard`);
+    updateLayerPreview(initLayer.id);
 
     return true;
   } catch (e) {

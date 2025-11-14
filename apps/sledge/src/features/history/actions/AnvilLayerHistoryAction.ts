@@ -2,7 +2,7 @@ import { PackedDiffs } from '@sledge/anvil';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 /**
@@ -33,8 +33,8 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
     }
     getAnvil(this.layerId)?.applyPatch(this.patch, 'undo');
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${this.layerId}) undo` });
-    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+    updateWebGLCanvas(true, `Anvil(${this.layerId}) undo`);
+    updateLayerPreview(this.layerId);
   }
 
   redo(): void {
@@ -44,8 +44,8 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
     }
     getAnvil(this.layerId)?.applyPatch(this.patch, 'redo');
 
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${this.layerId}) redo` });
-    eventBus.emit('preview:requestUpdate', { layerId: this.layerId });
+    updateWebGLCanvas(true, `Anvil(${this.layerId}) redo`);
+    updateLayerPreview(this.layerId);
   }
 
   serialize(): SerializedHistoryAction {

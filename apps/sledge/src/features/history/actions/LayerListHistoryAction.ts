@@ -2,7 +2,7 @@ import { webpToRaw } from '@sledge/anvil';
 import { removeLayer } from '~/features/layer';
 import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { PackedLayerSnapshot } from './types';
 
@@ -89,6 +89,6 @@ function insertAt(index: number, snapshot: PackedLayerSnapshot) {
       anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
     }
   }
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Layer(${snapshot.layer.id}) inserted` });
-  eventBus.emit('preview:requestUpdate', { layerId: snapshot.layer.id });
+  updateWebGLCanvas(false, `Layer(${snapshot.layer.id}) inserted`);
+  updateLayerPreview(snapshot.layer.id);
 }

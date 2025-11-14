@@ -10,7 +10,7 @@ import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { WindowPos } from '~/types/CoordinateTypes';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export function isValidCanvasSize(size: Size2D): boolean {
   if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;
@@ -81,9 +81,9 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
       srcOrigin,
       destOrigin,
     });
-    eventBus.emit('preview:requestUpdate', { layerId: l.id });
+    updateLayerPreview(l.id);
   }
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'changeCanvasSize' });
+  updateWebGLCanvas(false, 'changeCanvasSize');
   if (!skipHistory) {
     act.registerAfter();
     projectHistoryController.addAction(act);

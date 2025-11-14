@@ -1,7 +1,7 @@
-import type { RGBA, RawPixelData } from '@sledge/anvil';
+import type { RawPixelData } from '@sledge/anvil';
 import { PackedDiffs } from '@sledge/anvil';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export function getBufferCopy(layerId: string): Uint8ClampedArray {
   return getAnvil(layerId).getBufferCopy();
@@ -30,8 +30,8 @@ export function getPixel(layerId: string, x: number, y: number) {
 export function flushPatch(layerId: string): PackedDiffs | null {
   const raw = getAnvil(layerId).flushDiffs();
   if (raw) {
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: true, context: `Anvil(${layerId}) flush` });
-    eventBus.emit('preview:requestUpdate', { layerId });
+    updateWebGLCanvas(true, `Anvil(${layerId}) flush`);
+    updateLayerPreview(layerId);
   }
   return raw ?? null;
 }

@@ -14,6 +14,7 @@ import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { imagePoolStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -119,8 +120,8 @@ export function cancelSelection() {
   }
   selectionManager.clear();
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'selection cancelled' });
-  eventBus.emit('preview:requestUpdate', { layerId });
+  updateWebGLCanvas(false, 'selection cancelled');
+  updateLayerPreview(layerId);
 }
 
 export function commitMove() {
@@ -131,8 +132,8 @@ export function cancelMove() {
   const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
   floatingMoveManager.cancel();
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'move cancelled' });
-  eventBus.emit('preview:requestUpdate', { layerId });
+  updateWebGLCanvas(false, 'move cancelled');
+  updateLayerPreview(layerId);
 }
 
 export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): PackedDiffs | undefined {
@@ -169,8 +170,8 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
     }
   }
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
-  eventBus.emit('preview:requestUpdate', { layerId: lid });
+  updateWebGLCanvas(false, 'delete selected area');
+  updateLayerPreview(lid);
 
   const diffs = anvil.flushDiffs();
   if (!props?.noAction) {
@@ -297,7 +298,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
 
   if (deleteAfter) {
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'delete selected area' });
-    eventBus.emit('preview:requestUpdate', { layerId: layerListStore.activeLayerId });
+    updateWebGLCanvas(false, 'delete selected area');
+    updateLayerPreview(layerListStore.activeLayerId);
   }
 }

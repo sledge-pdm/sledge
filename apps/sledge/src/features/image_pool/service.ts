@@ -10,8 +10,8 @@ import { flushPatch, getHeight, getWidth } from '~/features/layer/anvil/AnvilCon
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
-import { eventBus } from '~/utils/EventBus';
 import { pathToFileLocation } from '~/utils/FileUtils';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
 
@@ -149,8 +149,8 @@ async function transferToLayer(layerId: string, entryId: string) {
       })
     );
   }
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Image Transfer to Layer(${layerId})` });
-  eventBus.emit('preview:requestUpdate', { layerId });
+  updateWebGLCanvas(false, `Image Transfer to Layer(${layerId})`);
+  updateLayerPreview(layerId);
 }
 
 function createEntry(webpBuffer: Uint8Array, width: number, height: number, forceFit?: boolean) {

@@ -2,7 +2,7 @@ import type { RgbaBuffer } from '@sledge/anvil';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flushPatch } from '~/features/layer/anvil/AnvilController';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export type LayerEffectMutator = (buffer: RgbaBuffer) => void;
 
@@ -17,6 +17,6 @@ export function applyEffect(layerId: string | undefined, fxName: string, mutator
     projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch, context: { tool: 'fx', fxName } }));
   }
 
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Apply FX for ${layerId}` });
-  eventBus.emit('preview:requestUpdate', { layerId });
+  updateWebGLCanvas(false, `Apply FX for ${layerId}`);
+  updateLayerPreview(layerId);
 }

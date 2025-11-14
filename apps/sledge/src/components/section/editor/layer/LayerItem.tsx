@@ -9,7 +9,7 @@ import { removeLayerFromUser } from '~/features/layer/service';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { eventBus } from '~/utils/EventBus';
+import { updateWebGLCanvas } from '~/webgl/service';
 
 const layerItem = css`
   display: flex;
@@ -102,7 +102,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     if (props.index !== -1) {
       setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'layer deactivated from layeritem' });
+    updateWebGLCanvas(false, 'layer deactivated from layeritem');
   };
 
   const handlePointerDown = (e: PointerEvent) => {

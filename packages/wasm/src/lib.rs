@@ -1,7 +1,5 @@
 use wasm_bindgen::prelude::*;
 
-// エフェクト
-pub mod effects;
 // WebGL関連
 pub mod webgl;
 // 選択範囲関連

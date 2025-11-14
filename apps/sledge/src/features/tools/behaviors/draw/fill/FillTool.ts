@@ -5,8 +5,9 @@ import { RGBAColor } from '~/features/color';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
+import { FillPresetConfig } from '~/features/tools/Tools';
 
 export interface FillProps {
   layerId: string;
@@ -21,11 +22,16 @@ export interface Fill {
 export class FillTool implements ToolBehavior {
   onlyOnCanvas = true;
 
-  onStart({ position, color, presetName, layerId }: ToolArgs) {
+  onStart({ position, color, presetName, layerId }: ToolArgs): ToolResult {
     const startTime = Date.now();
 
-    const preset = presetName ? (getPresetOf('fill', presetName) as any) : undefined;
-    const threshold = preset?.threshold ?? 0;
+    const preset = presetName ? (getPresetOf('fill', presetName) as FillPresetConfig) : undefined;
+    if (!preset)
+      return {
+        shouldRegisterToHistory: false,
+        shouldUpdate: false,
+      };
+    const threshold = preset.threshold ?? 0;
     // const limitMode = getSelectionLimitMode();
 
     const anvil = getAnvil(layerId);
@@ -43,6 +49,7 @@ export class FillTool implements ToolBehavior {
     } else {
       const selectionMask = selectionManager.getSelectionMask();
       if (selectionFillMode === 'inside') {
+        //inside
         anvil.floodFill({
           startX: position.x,
           startY: position.y,
@@ -54,12 +61,11 @@ export class FillTool implements ToolBehavior {
           },
         });
       } else {
-        const maskBuffer = selectionMask.getMask();
-        const buffer = anvil.getBufferHandle();
-        for (let i = 0; i < maskBuffer.length; i++) {
-          const isInSelection = maskBuffer[i] === 1;
-          if (isInSelection) buffer.indexSet(i * 4, color);
-        }
+        //area
+        anvil.fillWithMaskArea({
+          mask: selectionMask.getMask(),
+          color,
+        });
       }
     }
 
@@ -72,14 +78,14 @@ export class FillTool implements ToolBehavior {
     };
   }
 
-  onMove(args: ToolArgs) {
+  onMove(args: ToolArgs): ToolResult {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
     };
   }
 
-  onEnd(args: ToolArgs) {
+  onEnd(args: ToolArgs): ToolResult {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,

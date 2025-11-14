@@ -86,7 +86,7 @@ export class PenTool implements ToolBehavior {
     return { x: 0, y: 0 };
   }
 
-  onStart(args: ToolArgs) {
+  onStart(args: ToolArgs): ToolResult {
     const presetName = args.presetName ?? DEFAULT_PRESET;
     // register to history if it's new size
     const preset = getPresetOf(TOOL_CATEGORIES.PEN, presetName) as PenPresetConfig;
@@ -123,7 +123,7 @@ export class PenTool implements ToolBehavior {
     }
   }
 
-  onMove(args: ToolArgs) {
+  onMove(args: ToolArgs): ToolResult {
     if (!this.isShift) {
       return this.draw(args, args.color);
     } else {
@@ -264,7 +264,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onEnd(args: ToolArgs) {
+  onEnd(args: ToolArgs): ToolResult {
     let { event, color, layerId } = args;
     if (event?.buttons === 2) {
       color = transparent;
@@ -334,7 +334,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onCancel(args: ToolArgs) {
+  onCancel(args: ToolArgs): ToolResult {
     if (this.isShift) {
       this.undoLastLineDiff();
     }

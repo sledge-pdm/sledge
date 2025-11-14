@@ -75,9 +75,8 @@ export function startMove() {
     floatingMoveManager.startMove(selectionManager.getFloatingBuffer(layerId)!, 'selection', layerId);
   } else {
     selectionManager.selectAll();
-    const buf = anvil.getBufferPointer();
     const layerFloatingBuffer: FloatingBuffer = {
-      buffer: buf ? buf.slice() : new Uint8ClampedArray(width * height * 4),
+      buffer: anvil.getBufferCopy() ?? new Uint8ClampedArray(width * height * 4),
       width,
       height,
       offset: { x: 0, y: 0 },
@@ -150,24 +149,7 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   };
 
   anvil.addPartialDiff(selectionBoundBox, anvil.getPartialBuffer(selectionBoundBox));
-
-  const canvasWidth = anvil.getWidth();
-
-  const buffer = anvil.getBufferPointer();
-  for (let oy = 0; oy < selectionBoundBox.height; oy++) {
-    for (let ox = 0; ox < selectionBoundBox.width; ox++) {
-      const x = selectionBoundBox.x + ox;
-      const y = selectionBoundBox.y + oy;
-      const maskIdx = y * canvasWidth + x;
-      if (selection.getMask()[maskIdx] === 1) {
-        const canvasIdx = maskIdx * 4;
-        buffer[canvasIdx] = 0;
-        buffer[canvasIdx + 1] = 0;
-        buffer[canvasIdx + 2] = 0;
-        buffer[canvasIdx + 3] = 0;
-      }
-    }
-  }
+  anvil.getBufferHandle().fillMaskArea(selection.getMask(), [0, 0, 0, 0]);
 
   updateWebGLCanvas(false, 'delete selected area');
   updateLayerPreview(lid);

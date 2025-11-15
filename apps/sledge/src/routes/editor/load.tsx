@@ -12,6 +12,7 @@ import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { layerListStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
+import { applyProjectLocation } from '~/features/io/project/ProjectLocationManager';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
@@ -98,10 +99,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
     project: CURRENT_PROJECT_VERSION,
     sledge: await getCurrentVersion(),
   });
-  setFileStore('savedLocation', {
-    name: undefined,
-    path: undefined,
-  });
+  applyProjectLocation(undefined, 'new_project');
   const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
   const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
   setCanvasStore('canvas', 'width', width);

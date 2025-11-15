@@ -2,6 +2,7 @@ import { CloseRequestedEvent } from '@tauri-apps/api/window';
 import { message } from '@tauri-apps/plugin-dialog';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { saveProject } from '~/features/io/project/out/save';
+import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 
 const BUTTON_YES = 'Save and Quit';
@@ -19,11 +20,11 @@ export const handleCloseRequest = async (event: CloseRequestedEvent) => {
 
     switch (button) {
       case BUTTON_YES:
-        const saveSuccessful = await saveProject();
+        const saveSuccessful = await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
         if (saveSuccessful) return;
 
         event.preventDefault();
-        message('Save failed. try save project manually.');
+        message('Save failed. Try save project manually.');
         break;
 
       case BUTTON_NO:

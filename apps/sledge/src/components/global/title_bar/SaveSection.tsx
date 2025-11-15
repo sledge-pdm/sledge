@@ -102,12 +102,12 @@ const SaveSection: Component = () => {
   });
 
   const saveMenu = createMemo<MenuListOption[]>(() => [
-      {
-        type: 'item',
-        label: 'Save As...',
-        onSelect: async () => await saveProject(fileStore.savedLocation.name),
-        color: color.onBackground,
-      },
+    {
+      type: 'item',
+      label: 'Save As...',
+      onSelect: async () => await saveProject(fileStore.savedLocation.name),
+      color: color.onBackground,
+    },
     {
       type: 'item',
       label: 'Open Saved Folder',

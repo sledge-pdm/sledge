@@ -1,9 +1,9 @@
 import { FileLocation } from '@sledge/core';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
+import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';

@@ -1,6 +1,6 @@
 import { FileLocation } from '@sledge/core';
-import { setFileStore, fileStore } from '~/stores/EditorStores';
-import { projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { setProjectStore } from '~/stores/ProjectStores';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 
 export type ProjectOpenMode = 'project' | 'new_project' | 'image';
@@ -16,7 +16,6 @@ export const getActiveProjectLocation = (): FileLocation => ({
 });
 
 export const hasActiveProjectLocation = () => Boolean(fileStore.savedLocation.path && fileStore.savedLocation.name);
-
 
 export function applyProjectLocation(location: FileLocation | undefined, openAs: ProjectOpenMode = 'project'): void {
   const resolved = location

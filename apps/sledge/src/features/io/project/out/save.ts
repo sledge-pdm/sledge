@@ -1,4 +1,3 @@
-import { FileLocation } from '@sledge/core';
 import { appDataDir } from '@tauri-apps/api/path';
 import { confirm, save } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
@@ -11,12 +10,11 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { getDefaultProjectDir, getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 
-async function folderSelection(location?: FileLocation) {
-  const nameWOExtension = location?.name ? getFileNameWithoutExtension(location?.name) : 'new project';
-  const defaultPath = normalizeJoin(location?.path ?? (await getDefaultProjectDir()), `${nameWOExtension}.sledge`);
+async function folderSelection(nameWOExtension: string) {
+  const defaultPath = normalizeJoin(await projectSaveDir(), `${nameWOExtension}.sledge`);
   return await save({
     title: 'save sledge project',
     defaultPath,
@@ -63,12 +61,12 @@ After overwrite, you cannot open this project in old version of sledge.`,
     }
     // overwrite existing project
     selectedPath = normalizeJoin(existingPath, name);
-  } else if (fileStore.openAs === 'image' && name) {
-    // write as new project from image path and name
-    selectedPath = await folderSelection({ path: existingPath, name: `${fileNameWOExtension}.sledge` });
+  } else if (name) {
+    // write as new project in existing name
+    selectedPath = await folderSelection(fileNameWOExtension);
   } else {
     // write as new project ($HOME&/sledge/new project.sledge)
-    selectedPath = await folderSelection();
+    selectedPath = await folderSelection('new project');
   }
 
   if (typeof selectedPath === 'string') {
@@ -84,8 +82,6 @@ After overwrite, you cannot open this project in old version of sledge.`,
       setSavedLocation(selectedPath);
       // @ts-ignore
       window.__PATH__ = selectedPath;
-
-      setProjectStore('lastSavedPath', selectedPath);
       setProjectStore('lastSavedAt', new Date());
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });

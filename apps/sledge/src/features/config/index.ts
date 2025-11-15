@@ -1,11 +1,8 @@
 import { BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
-import { setFileStore } from '~/stores/EditorStores';
-import { pathToFileLocation } from '~/utils/FileUtils';
+import { applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 
 export function setSavedLocation(path: string) {
-  const fileLocation = pathToFileLocation(path);
-  if (!fileLocation) return;
-  setFileStore('savedLocation', fileLocation);
+  applyProjectLocationFromPath(path, 'project');
 }
 
 // make app config path (%APPDATA%/Roaming/com.innsbluck.sledge/) if not exists

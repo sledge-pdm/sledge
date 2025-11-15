@@ -14,7 +14,7 @@ import { fileStore, lastSettingsStore, setLastSettingsStore } from '~/stores/Edi
 import { canvasStore } from '~/stores/ProjectStores';
 import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
-import { getDefaultExportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { exportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
@@ -191,11 +191,7 @@ const ExportContent: Component = () => {
   >(undefined);
 
   onMount(async () => {
-    if (fileStore.savedLocation.path) {
-      setSettings('folderPath', fileStore.savedLocation.path);
-    } else {
-      setSettings('folderPath', await getDefaultExportDir());
-    }
+    setSettings('folderPath', await exportDir());
 
     const handleRequestExportPath = (e: Events['export:requestExportPath']) => {
       setSettings('folderPath', e.newPath);

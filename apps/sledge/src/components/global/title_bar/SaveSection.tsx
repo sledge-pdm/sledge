@@ -105,7 +105,7 @@ const SaveSection: Component = () => {
     {
       type: 'item',
       label: 'Save As...',
-      onSelect: async () => await saveProject(),
+      onSelect: async () => await saveProject(fileStore.savedLocation.name),
       color: color.onBackground,
     },
     {

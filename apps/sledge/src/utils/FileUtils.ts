@@ -3,6 +3,7 @@ import { homeDir, pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { platform } from '@tauri-apps/plugin-os';
 import { importableFileExtensions, openableFileExtensions } from '~/features/io/FileExtensions';
+import { fileStore } from '~/stores/EditorStores';
 import { safeInvoke } from '~/utils/TauriUtils';
 
 export async function getFileUniqueId(path: string): Promise<string> {
@@ -28,7 +29,7 @@ export const pathToFileLocation = (fullPath: string): FileLocation | undefined =
   };
 };
 
-export async function getDefaultProjectDir() {
+export async function defaultProjectDir() {
   const pf = platform();
   if (pf === 'linux') {
     const home = await homeDir();
@@ -40,7 +41,7 @@ export async function getDefaultProjectDir() {
   }
 }
 
-export async function getDefaultPictureDir() {
+export async function defaultPictureDir() {
   const home = await homeDir();
   const projectDir = normalizeJoin(home, 'sledge');
   if (!(await exists(projectDir)))
@@ -50,8 +51,18 @@ export async function getDefaultPictureDir() {
   return projectDir;
 }
 
-export async function getDefaultExportDir() {
-  return await getDefaultPictureDir();
+export async function projectSaveDir(): Promise<string> {
+  if (fileStore.savedLocation.path) {
+    return normalizePath(fileStore.savedLocation.path);
+  }
+  return await defaultProjectDir();
+}
+
+export async function exportDir(): Promise<string> {
+  if (fileStore.savedLocation.path) {
+    return normalizePath(fileStore.savedLocation.path);
+  }
+  return await defaultPictureDir();
 }
 
 export const getFileNameWithoutExtension = (fileName?: string): string => {

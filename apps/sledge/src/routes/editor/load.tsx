@@ -6,6 +6,7 @@ import { setSavedLocation } from '~/features/config';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { loadProjectJson } from '~/features/io/project/in/load';
 import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/in/loadFrom';
+import { applyProjectLocation } from '~/features/io/project/ProjectLocationManager';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
@@ -98,10 +99,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
     project: CURRENT_PROJECT_VERSION,
     sledge: await getCurrentVersion(),
   });
-  setFileStore('savedLocation', {
-    name: undefined,
-    path: undefined,
-  });
+  applyProjectLocation(undefined, 'new_project');
   const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
   const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
   setCanvasStore('canvas', 'width', width);

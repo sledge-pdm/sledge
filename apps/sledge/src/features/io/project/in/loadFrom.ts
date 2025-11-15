@@ -1,11 +1,11 @@
 import { FileLocation } from '@sledge/core';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
+import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { setFileStore } from '~/stores/EditorStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
-import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export async function loadProjectFromImagePath(location: FileLocation): Promise<boolean> {
@@ -17,16 +17,9 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
   const bitmap = await loadLocalImage(path);
   const imageData = await loadImageData(bitmap);
 
-  setFileStore('openAs', 'image');
-  // it's not meant to overwrite image on save.
-  // this should be treated well in save function using openAs state.
-  setFileStore(
-    'savedLocation',
-    pathToFileLocation(path) ?? {
-      name: undefined,
-      path: undefined,
-    }
-  );
+  if (!applyProjectLocationFromPath(path, 'image')) {
+    applyProjectLocation(undefined, 'image');
+  }
 
   changeCanvasSizeWithNoOffset(
     {
@@ -65,11 +58,7 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
 
     if (!data) return false;
 
-    setFileStore('openAs', 'image');
-    setFileStore('savedLocation', {
-      name: undefined,
-      path: undefined,
-    });
+    applyProjectLocation(undefined, 'image');
 
     changeCanvasSizeWithNoOffset(
       {

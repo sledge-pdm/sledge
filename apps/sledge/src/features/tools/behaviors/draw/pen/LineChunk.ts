@@ -18,18 +18,7 @@ export class LineChunk {
 
   restore(anvil: Anvil) {
     if (!this.diffs.length) return;
-    const buffer = anvil.getBufferPointer();
-    const width = anvil.getWidth();
-
-    for (const diff of this.diffs) {
-      const idx = (diff.x + diff.y * width) * 4;
-      const [r, g, b, a] = diff.color;
-      buffer[idx] = r;
-      buffer[idx + 1] = g;
-      buffer[idx + 2] = b;
-      buffer[idx + 3] = a;
-      anvil.setDirty(diff.x, diff.y);
-    }
+    anvil.restorePixelDiffs(this.diffs);
 
     this.clear();
   }

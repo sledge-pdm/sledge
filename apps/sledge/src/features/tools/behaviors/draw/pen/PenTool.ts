@@ -86,7 +86,7 @@ export class PenTool implements ToolBehavior {
     return { x: 0, y: 0 };
   }
 
-  onStart(args: ToolArgs) {
+  onStart(args: ToolArgs): ToolResult {
     const presetName = args.presetName ?? DEFAULT_PRESET;
     // register to history if it's new size
     const preset = getPresetOf(TOOL_CATEGORIES.PEN, presetName) as PenPresetConfig;
@@ -123,7 +123,7 @@ export class PenTool implements ToolBehavior {
     }
   }
 
-  onMove(args: ToolArgs) {
+  onMove(args: ToolArgs): ToolResult {
     if (!this.isShift) {
       return this.draw(args, args.color);
     } else {
@@ -264,7 +264,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onEnd(args: ToolArgs) {
+  onEnd(args: ToolArgs): ToolResult {
     let { event, color, layerId } = args;
     if (event?.buttons === 2) {
       color = transparent;
@@ -292,30 +292,18 @@ export class PenTool implements ToolBehavior {
         this.strokeChunk.clear();
         return { shouldUpdate: true, shouldRegisterToHistory: true };
       }
-      const swapBuffer = new Uint8ClampedArray(w * h * 4);
-      // Layer全体バッファ取得
-      const layerBuffer = anvil.getBufferPointer();
+      const swapBuffer = anvil.getPartialBuffer({ x: bbox.minX, y: bbox.minY, width: w, height: h });
       const layerWidth = anvil.getWidth();
-      if (layerBuffer && layerWidth) {
-        // 現バッファから変更前の状態を取得・保存
-        for (let yy = 0; yy < h; yy++) {
-          const srcRowStart = (bbox.minX + (bbox.minY + yy) * layerWidth) * 4;
-          const dstRowStart = yy * w * 4;
-          swapBuffer.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
-        }
-        // ストロークによる変更を適用して「変更前の状態」を作成
+      if (swapBuffer.length && layerWidth) {
         for (const [layerIdx, diff] of this.strokeChunk.diffs) {
-          // layerIdx からピクセル座標を逆算
           const pixelIdx = layerIdx / 4;
           const x = pixelIdx % layerWidth;
           const y = Math.floor(pixelIdx / layerWidth);
 
-          // bbox内でのローカル座標に変換
           const localX = x - bbox.minX;
           const localY = y - bbox.minY;
           const localIdx = (localX + localY * w) * 4;
 
-          // packed RGBA32 を RGBA 成分に展開して swapBuffer に書き込み
           const [r, g, b, a] = packedU32ToRgba(diff.color);
 
           swapBuffer[localIdx] = r;
@@ -334,7 +322,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onCancel(args: ToolArgs) {
+  onCancel(args: ToolArgs): ToolResult {
     if (this.isShift) {
       this.undoLastLineDiff();
     }

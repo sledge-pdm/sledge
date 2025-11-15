@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge/core';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 
@@ -29,7 +29,7 @@ export abstract class SelectionBase implements ToolBehavior {
 
   movePrevMode: SelectionEditMode | undefined = undefined;
 
-  onStart(args: ToolArgs) {
+  onStart(args: ToolArgs): ToolResult {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
@@ -50,7 +50,7 @@ export abstract class SelectionBase implements ToolBehavior {
     };
   }
 
-  onMove(args: ToolArgs) {
+  onMove(args: ToolArgs): ToolResult {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
@@ -69,7 +69,7 @@ export abstract class SelectionBase implements ToolBehavior {
     };
   }
 
-  onEnd(args: ToolArgs) {
+  onEnd(args: ToolArgs): ToolResult {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {
@@ -92,7 +92,7 @@ export abstract class SelectionBase implements ToolBehavior {
     };
   }
 
-  onCancel(args: ToolArgs) {
+  onCancel(args: ToolArgs): ToolResult {
     const mode = this.getMode(args.event);
 
     if (mode === 'move') {

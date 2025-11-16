@@ -249,7 +249,8 @@ const ExportContent: Component = () => {
         });
 
         if (settings.showDirAfterSave && location.path && location.name) {
-          await revealInFileBrowser(normalizeJoin(location.path, location.name));
+          const path = normalizeJoin(location.path, location.name);
+          await revealInFileBrowser(path);
         }
       } else {
         setExportResult({

@@ -2,6 +2,7 @@
 use std::path::{Path, PathBuf};
 
 #[tauri::command]
+#[allow(unused_variables)]
 pub async fn reveal_native_path(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
@@ -54,10 +55,10 @@ fn prepare_windows_path(input: &str) -> Result<std::path::PathBuf, String> {
 #[cfg(target_os = "windows")]
 fn strip_extended_prefix(path: &std::path::Path) -> std::path::PathBuf {
     let display = path.display().to_string();
-    if display.starts_with(r"\\?\UNC\") {
-        std::path::PathBuf::from(format!(r"\\{}", &display[8..]))
-    } else if display.starts_with(r"\\?\") {
-        std::path::PathBuf::from(&display[4..])
+    if let Some(rest) = display.strip_prefix(r"\\?\UNC\") {
+        std::path::PathBuf::from(format!(r"\\{}", rest))
+    } else if let Some(rest) = display.strip_prefix(r"\\?\") {
+        std::path::PathBuf::from(rest)
     } else {
         path.to_path_buf()
     }

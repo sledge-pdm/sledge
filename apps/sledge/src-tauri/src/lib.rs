@@ -1,4 +1,5 @@
 mod analysis;
+mod files;
 mod global_event;
 mod window;
 
@@ -55,6 +56,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
@@ -65,6 +67,11 @@ pub fn run() {
             window::show_main_window,
             window::open_devtools_window,
             global_event::emit_global_event,
+            files::reveal_native_path,
+            #[cfg(target_os = "windows")]
+            files::get_available_drive_letters,
+            #[cfg(target_os = "windows")]
+            files::get_defined_drive_letters
         ])
         .plugin(
             tauri_plugin_log::Builder::new()

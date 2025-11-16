@@ -1,27 +1,45 @@
+import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import AnalogSticks from '~/components/global/analog_sticks/AnalogSticks';
+import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/Loading';
+import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
 import SideSectionControl from '~/components/section/SideSectionControl';
 import { adjustZoomToFit } from '~/features/canvas';
 import { addImagesFromLocal } from '~/features/image_pool';
-import ClipboardListener from '~/features/io/ClipboardListener';
+import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { loadEditorState } from '~/features/io/editor/load';
+import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import KeyListener from '~/features/io/KeyListener';
 import { openExistingProject } from '~/features/io/window';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { tryLoadProject } from '~/routes/editor/load';
+import { appearanceStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { isFirstStartup, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+
+const mainContainer = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+`;
+const mainContent = css`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  height: 100%;
+  width: 100%;
+`;
 
 export default function Editor() {
   const isFirst = isFirstStartup();
@@ -36,9 +54,17 @@ export default function Editor() {
       await loadGlobalSettings();
       const lastState = await loadEditorState();
       await tryLoadProject(lastState);
+      // Save editor state if load succeeded.
+      // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
+      await saveEditorStateImmediate();
       setIsLoading(false);
+      // Adjusting zoom before showing window seems to be not working on some OS except windows
       adjustZoomToFit();
+
       await showMainWindow();
+
+      // So make sure it's properly zoomed on init
+      adjustZoomToFit();
     } catch (e) {
       unlisten();
       if (isFirst) await reportAppStartupError(e);
@@ -78,17 +104,25 @@ export default function Editor() {
   return (
     <Show when={!isLoading()} fallback={<Loading />}>
       <div class={pageRoot}>
-        <SideSectionControl side='leftSide' />
+        <div class={mainContainer}>
+          <div class={mainContent}>
+            <SideSectionControl side='leftSide' />
 
-        <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
-          <div style={{ 'flex-grow': 1, 'background-color': color.canvasArea }}>
-            <CanvasArea />
+            <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
+              <div style={{ 'flex-grow': 1, 'background-color': color.canvasArea }}>
+                <CanvasArea />
+              </div>
+            </div>
+
+            <SideSectionControl side='rightSide' />
           </div>
+
+          <BottomBar />
         </div>
 
-        <SideSectionControl side='rightSide' />
-
-        <AnalogSticks />
+        <Show when={appearanceStore.onscreenControl}>
+          <OnscreenControl />
+        </Show>
 
         <KeyListener />
         <ClipboardListener />

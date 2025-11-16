@@ -1,9 +1,7 @@
-import { FileLocation } from '@sledge/core';
-import { path } from '@tauri-apps/api';
 import { appDataDir } from '@tauri-apps/api/path';
 import { confirm, save } from '@tauri-apps/plugin-dialog';
-import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
-import { calcThumbnailSize, ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
+import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
+import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { dumpProject } from '~/features/io/project/out/dump';
@@ -12,32 +10,11 @@ import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
-import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
+import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 
-async function folderSelection(location?: FileLocation) {
-  try {
-    await mkdir('sledge', {
-      baseDir: BaseDirectory.Home,
-      recursive: true,
-    });
-  } catch (e) {
-    console.warn('failed or skipped making new directory:', e);
-  }
-  const home = await path.homeDir();
-
-  const nameWOExtension = location?.name ? getFileNameWithoutExtension(location?.name) : 'new project';
-  let defaultPath = '';
-  console.log('path', location?.path);
-  if (location?.path) {
-    // if path is provided, open the path as default
-    defaultPath = normalizeJoin(location?.path, `${nameWOExtension}`);
-  } else {
-    // if path is not defined
-    defaultPath = normalizeJoin(home, `sledge/${nameWOExtension}`);
-  }
-
-  console.log('default save path:', defaultPath);
-
+async function folderSelection(nameWOExtension: string) {
+  const defaultPath = normalizeJoin(await projectSaveDir(), `${nameWOExtension}.sledge`);
   return await save({
     title: 'save sledge project',
     defaultPath,
@@ -50,7 +27,7 @@ async function saveThumbnailData(selectedPath: string) {
   const fileId = await getFileUniqueId(selectedPath);
   const { width, height } = canvasStore.canvas;
   const thumbSize = calcThumbnailSize(width, height);
-  const thumbnailBlob = await new ThumbnailGenerator().generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
+  const thumbnailBlob = await canvasThumbnailGenerator.generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
   const thumbnailDataUrl = await blobToDataUrl(thumbnailBlob);
   return await saveThumbnailExternal(fileId, thumbnailDataUrl);
 }
@@ -84,12 +61,12 @@ After overwrite, you cannot open this project in old version of sledge.`,
     }
     // overwrite existing project
     selectedPath = normalizeJoin(existingPath, name);
-  } else if (fileStore.openAs === 'image' && name) {
-    // write as new project from image path and name
-    selectedPath = await folderSelection({ path: existingPath, name: `${fileNameWOExtension}.sledge` });
+  } else if (name) {
+    // write as new project in existing name
+    selectedPath = await folderSelection(fileNameWOExtension);
   } else {
     // write as new project ($HOME&/sledge/new project.sledge)
-    selectedPath = await folderSelection();
+    selectedPath = await folderSelection('new project');
   }
 
   if (typeof selectedPath === 'string') {
@@ -105,8 +82,6 @@ After overwrite, you cannot open this project in old version of sledge.`,
       setSavedLocation(selectedPath);
       // @ts-ignore
       window.__PATH__ = selectedPath;
-
-      setProjectStore('lastSavedPath', selectedPath);
       setProjectStore('lastSavedAt', new Date());
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });

@@ -76,9 +76,7 @@ export function changeBaseLayerCustomColor(baseLayer: BaseLayer, customColor: st
 }
 
 // Layer factory functions
-type CreateLayerProps = Omit<Layer, 'id' | 'typeDescription'> & {
-  initImage: Uint8ClampedArray | undefined;
-};
+type CreateLayerProps = Omit<Layer, 'id' | 'typeDescription'>;
 
 export const fallbackLayerProps: CreateLayerProps = {
   name: 'fb layer',
@@ -87,7 +85,7 @@ export const fallbackLayerProps: CreateLayerProps = {
   mode: BlendMode.normal,
   enabled: true,
   dotMagnification: 1,
-  initImage: undefined,
+  cutFreeze: false,
 };
 
 function getTypeString(type: LayerType): string {
@@ -118,6 +116,7 @@ export const createLayer = (props: CreateLayerProps, checkUnique?: boolean): Lay
     mode: props.mode,
     enabled: props.enabled,
     dotMagnification: props.dotMagnification,
+    cutFreeze: props.cutFreeze,
   };
 };
 

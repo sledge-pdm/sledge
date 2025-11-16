@@ -1,6 +1,6 @@
-import { Anvil } from '@sledge/anvil';
+import { Anvil, toUint8Array } from '@sledge/anvil';
 import { auto_select_region_mask } from '@sledge/wasm';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
@@ -16,8 +16,7 @@ export class AutoSelection extends SelectionBase {
 
     const threshold = (args.presetName ? (getPresetOf('autoSelection', args.presetName) as any)?.threshold : undefined) ?? 0;
 
-    const anvil = getAnvilOf(args.layerId);
-    if (!anvil) return;
+    const anvil = getAnvil(args.layerId);
 
     // 領域選択マスクを生成してプレビューに反映
     const mask = this.computeRegionMask(anvil, args.position, threshold);
@@ -51,7 +50,9 @@ export class AutoSelection extends SelectionBase {
     if (width === 0 || height === 0) return undefined;
 
     // 元バッファ（RGBA）を直接渡して WASM 側で領域抽出
-    const src = new Uint8Array(anvil.getBufferPointer().buffer); // RGBA buffer
+    const buffer = anvil.getBufferPointer();
+    if (!buffer) return undefined;
+    const src = toUint8Array(buffer); // RGBA buffer
     // connectivity は現状 4 固定（0を指定し内部で4接続扱い）
     const mask = auto_select_region_mask(src, width, height, position.x, position.y, threshold ?? 0, 4);
     return mask;

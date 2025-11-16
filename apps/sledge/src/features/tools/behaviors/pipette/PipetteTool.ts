@@ -1,6 +1,6 @@
-import { isTransparent, RGBAColor, RGBToHex, setCurrentColor, transparent } from '~/features/color';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { currentColor, hexToRGBA, isTransparent, registerColorChange, RGBAColor, RGBAToHex, setCurrentColor, transparent } from '~/features/color';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;
@@ -8,10 +8,10 @@ export class PipetteTool implements ToolBehavior {
 
   private color: RGBAColor = transparent;
 
-  onStart(args: ToolArgs) {
-    const anvil = getAnvilOf(args.layerId);
-    const c = anvil?.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
-    if (c && !isTransparent(c)) {
+  onStart(args: ToolArgs): ToolResult {
+    const anvil = getAnvil(args.layerId);
+    const c = anvil.getPixel(args.position.x, args.position.y) as RGBAColor;
+    if (!isTransparent(c)) {
       this.color = c;
     }
     return {
@@ -20,10 +20,10 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onMove(args: ToolArgs) {
-    const anvil = getAnvilOf(args.layerId);
-    const c = anvil?.getPixel(args.position.x, args.position.y) as RGBAColor | undefined;
-    if (c && !isTransparent(c)) {
+  onMove(args: ToolArgs): ToolResult {
+    const anvil = getAnvil(args.layerId);
+    const c = anvil.getPixel(args.position.x, args.position.y) as RGBAColor;
+    if (!isTransparent(c)) {
       this.color = c;
     }
     return {
@@ -32,9 +32,11 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onEnd(args: ToolArgs) {
+  onEnd(args: ToolArgs): ToolResult {
     if (!isTransparent(this.color)) {
-      setCurrentColor(`#${RGBToHex([this.color[0], this.color[1], this.color[2]])}`);
+      const pickColor: RGBAColor = [this.color[0], this.color[1], this.color[2], this.color[3]];
+      registerColorChange(hexToRGBA(currentColor()), pickColor);
+      setCurrentColor(`#${RGBAToHex([this.color[0], this.color[1], this.color[2], this.color[3]])}`);
     }
 
     return {
@@ -44,7 +46,7 @@ export class PipetteTool implements ToolBehavior {
     };
   }
 
-  onCancel(__args: ToolArgs) {
+  onCancel(__args: ToolArgs): ToolResult {
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,

@@ -3,7 +3,7 @@ import { Vec2 } from '@sledge/core';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMove } from '~/features/selection/SelectionOperator';
-import { ToolArgs, ToolBehavior } from '~/features/tools/behaviors/ToolBehavior';
+import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 
 export class MoveTool implements ToolBehavior {
   acceptStartOnOutCanvas = true;
@@ -12,11 +12,10 @@ export class MoveTool implements ToolBehavior {
   private startOffset: Vec2 = { x: 0, y: 0 };
   private startPosition: Vec2 = { x: 0, y: 0 };
 
-  onStart(args: ToolArgs) {
+  onStart(args: ToolArgs): ToolResult {
     selectionManager.commitOffset();
     selectionManager.commit();
     if (!floatingMoveManager.isMoving()) {
-      console.log('start moving.');
       // 選択状態があれば選択範囲のバッファを、なければレイヤーを移動
       startMove();
     }
@@ -30,7 +29,7 @@ export class MoveTool implements ToolBehavior {
     };
   }
 
-  onMove(args: ToolArgs) {
+  onMove(args: ToolArgs): ToolResult {
     if (!isSelectionAvailable()) {
       return {
         shouldUpdate: false,
@@ -57,7 +56,7 @@ export class MoveTool implements ToolBehavior {
     };
   }
 
-  onEnd(args: ToolArgs) {
+  onEnd(args: ToolArgs): ToolResult {
     // commitは手動で行うのでここでは呼ばない
     // floatingMoveManager.commit();
 

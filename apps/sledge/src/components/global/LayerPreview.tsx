@@ -2,10 +2,11 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
 import { Layer } from '~/features/layer';
+import { LayerThumbnailGenerator } from '~/features/layer/LayerThumbnailGenerator';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
+import { calcPreviewSize } from '~/utils/ThumbnailUtils';
 
 const canvas = css`
   width: 100%;
@@ -39,7 +40,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
   let canvasRef: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
-  const thumbnailGen = new ThumbnailGenerator();
+  const thumbnailGen = new LayerThumbnailGenerator();
 
   // RAF and update state management
   const [needsUpdate, setNeedsUpdate] = createSignal<boolean>(false);
@@ -51,10 +52,6 @@ const LayerPreview: Component<Props> = (props: Props) => {
       }
     }, props.updateInterval ?? 10)
   );
-
-  // Cache last computed dimensions to avoid unnecessary canvas resizing
-  let lastPreviewWidth = 0;
-  let lastPreviewHeight = 0;
 
   const requestUpdate = () => {
     if (!isRunning()) {
@@ -93,80 +90,24 @@ const LayerPreview: Component<Props> = (props: Props) => {
   const performUpdate = async () => {
     if (!canvasRef || !ctx) return;
 
-    const canvasAspectRatio = canvasStore.canvas.width / canvasStore.canvas.height;
-    const fitMode = props.fitMode ?? 'contain';
+    const previewSize = calcPreviewSize({
+      canvasSize: canvasStore.canvas,
+      sizingMode: props.sizingMode,
+      referenceSize: props.referenceSize,
+      fitMode: props.fitMode,
+      maxWidth: props.maxWidth,
+      maxHeight: props.maxHeight,
+    });
 
-    let targetWidth: number;
-    let targetHeight: number;
+    const previewWidth = Math.round(previewSize.width);
+    const previewHeight = Math.round(previewSize.height);
+    if (previewWidth === 0 || previewHeight === 0) return;
 
-    // sizingModeに基づいて基準サイズを決定
-    if (props.sizingMode === 'width-based') {
-      targetWidth = props.referenceSize;
-      targetHeight = Math.round(targetWidth / canvasAspectRatio);
-    } else {
-      // height-based
-      targetHeight = props.referenceSize;
-      targetWidth = Math.round(targetHeight * canvasAspectRatio);
-    }
-
-    if (targetWidth === 0 || targetHeight === 0) return;
-
-    // 最大値制限の適用とfitModeの処理
-    const maxWidth = props.maxWidth;
-    const maxHeight = props.maxHeight;
-
-    let finalWidth = targetWidth;
-    let finalHeight = targetHeight;
-
-    // maxWidth/maxHeightに引っかかった場合の処理
-    if ((maxWidth && targetWidth > maxWidth) || (maxHeight && targetHeight > maxHeight)) {
-      if (fitMode === 'contain') {
-        // contain: アスペクト比を保ったまま制限内に収める（従来の動作）
-        let zoom = 1;
-        if (maxWidth && targetWidth > maxWidth) zoom = maxWidth / targetWidth;
-        if (maxHeight && targetHeight > maxHeight && zoom > maxHeight / targetHeight) zoom = maxHeight / targetHeight;
-
-        finalWidth = Math.round(targetWidth * zoom);
-        finalHeight = Math.round(targetHeight * zoom);
-      } else {
-        // cover: referenceSize を満たすように他方を調整
-        if (props.sizingMode === 'width-based') {
-          finalWidth = Math.min(targetWidth, maxWidth || targetWidth);
-          if (maxHeight && targetHeight > maxHeight) {
-            // 高さ制限に引っかかった場合、referenceSize（幅）を維持して高さを制限
-            finalHeight = maxHeight;
-            finalWidth = props.referenceSize; // 幅は必ずreferenceSize
-          } else {
-            finalHeight = targetHeight;
-          }
-        } else {
-          // height-based
-          finalHeight = Math.min(targetHeight, maxHeight || targetHeight);
-          if (maxWidth && targetWidth > maxWidth) {
-            // 幅制限に引っかかった場合、referenceSize（高さ）を維持して幅を制限
-            finalWidth = maxWidth;
-            finalHeight = props.referenceSize; // 高さは必ずreferenceSize
-          } else {
-            finalWidth = targetWidth;
-          }
-        }
-      }
-    }
-
-    const previewWidth = Math.round(finalWidth);
-    const previewHeight = Math.round(finalHeight);
-
-    // Only resize canvas if dimensions actually changed
     if (canvasRef.width !== previewWidth || canvasRef.height !== previewHeight) {
       canvasRef.width = previewWidth;
       canvasRef.height = previewHeight;
-
-      // スタイル設定も新しい設計に合わせて調整
       canvasRef.style.width = `${previewWidth}px`;
       canvasRef.style.height = `${previewHeight}px`;
-
-      lastPreviewWidth = previewWidth;
-      lastPreviewHeight = previewHeight;
     }
 
     const preview = thumbnailGen.generateLayerThumbnail(props.layer.id, previewWidth, previewHeight);

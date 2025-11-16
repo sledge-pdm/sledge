@@ -14,11 +14,10 @@ import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import Ruler from '~/components/canvas/measures/ruler/Ruler';
 import CanvasError from '~/components/canvas/overlays/CanvasError';
+import CanvasOverlaySVG from '~/components/canvas/overlays/CanvasOverlaySVG';
 import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
-import CanvasOverlaySVG from '~/components/canvas/stacks/CanvasOverlaySVG';
-import BottomInfo from '~/components/global/BottomInfo';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
 import { globalConfig } from '~/stores/GlobalStores';
 
@@ -245,7 +244,6 @@ const CanvasArea: Component = () => {
             <CanvasDebugOverlay />
             <CanvasError />
           </div>
-          <BottomInfo />
         </div>
         <SideSectionsOverlay side='rightSide' />
       </div>

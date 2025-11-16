@@ -116,7 +116,7 @@ describe('ConvertSelectionHistoryAction', () => {
       originalPath: undefined,
       webpBuffer: dummyWebpBuffer,
       base: { width: 10, height: 10 },
-      transform: { x: 5, y: 5, scaleX: 1, scaleY: 1, rotation: 0 },
+      transform: { x: 5, y: 5, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
       visible: true,
     };
@@ -198,7 +198,7 @@ describe('ConvertSelectionHistoryAction', () => {
       originalPath: undefined,
       webpBuffer: dummyWebpBuffer,
       base: { width: 2, height: 2 },
-      transform: { x: 5, y: 5, scaleX: 1, scaleY: 1, rotation: 0 },
+      transform: { x: 5, y: 5, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
       visible: true,
     };
@@ -242,7 +242,7 @@ describe('ConvertSelectionHistoryAction', () => {
       originalPath: undefined,
       webpBuffer: dummyWebpBuffer,
       base: { width: 8, height: 8 },
-      transform: { x: 10, y: 15, scaleX: 1.5, scaleY: 2.0, rotation: 45 },
+      transform: { x: 10, y: 15, scaleX: 1.5, scaleY: 2.0, rotation: 45, flipX: false, flipY: false },
       opacity: 0.8,
       visible: false,
     };
@@ -273,7 +273,7 @@ describe('ConvertSelectionHistoryAction', () => {
       originalPath: 'test.png',
       webpBuffer: new Uint8Array([0x00, 0x01, 0x02]),
       base: { width: 16, height: 16 },
-      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },
+      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
       visible: true,
     };
@@ -283,7 +283,7 @@ describe('ConvertSelectionHistoryAction', () => {
       originalPath: undefined,
       webpBuffer: new Uint8Array([0x52, 0x49, 0x46, 0x46]),
       base: { width: 4, height: 4 },
-      transform: { x: 8, y: 8, scaleX: 1, scaleY: 1, rotation: 0 },
+      transform: { x: 8, y: 8, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
       visible: true,
     };
@@ -325,7 +325,7 @@ describe('ConvertSelectionHistoryAction', () => {
       originalPath: undefined,
       webpBuffer: dummyWebpBuffer,
       base: { width: 12, height: 12 },
-      transform: { x: 20, y: 25, scaleX: 1, scaleY: 1, rotation: 0 },
+      transform: { x: 20, y: 25, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
       visible: true,
     };

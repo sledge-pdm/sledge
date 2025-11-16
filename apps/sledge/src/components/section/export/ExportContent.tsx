@@ -1,21 +1,21 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, Slider } from '@sledge/ui';
+import { clsx, Vec2 } from '@sledge/core';
+import { color, fonts } from '@sledge/theme';
+import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Slider } from '@sledge/ui';
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { saveGlobalSettings } from '~/features/io/config/save';
+import { saveEditorStateImmediate } from '~/features/io/editor/save';
+import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
-import { CanvasExportOptions, defaultExportDir, exportImage } from '~/features/io/image/out/export';
 import { allLayers } from '~/features/layer';
 import { fileStore, lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
-import { getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { exportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
 const qualityField = css`
@@ -139,6 +139,11 @@ const estimatedSize = css`
   opacity: 0.75;
 `;
 
+const exportResultText = css`
+  font-family: ZFB03;
+  color: var(--color-muted);
+`;
+
 const scaleOptions: DropdownOption<number>[] = [
   { label: 'x1', value: 1 },
   { label: 'x2', value: 2 },
@@ -175,15 +180,18 @@ const ExportContent: Component = () => {
     },
   });
   const [customScale, setCustomScale] = createSignal(1);
-
   const finalScale = () => (settings.exportOptions.scale !== 0 ? settings.exportOptions.scale : customScale()) ?? 1;
 
+  const [exportResult, setExportResult] = createSignal<
+    | {
+        kind: 'success' | 'error';
+        text: string;
+      }
+    | undefined
+  >(undefined);
+
   onMount(async () => {
-    if (fileStore.savedLocation.path) {
-      setSettings('folderPath', fileStore.savedLocation.path);
-    } else {
-      setSettings('folderPath', await defaultExportDir());
-    }
+    setSettings('folderPath', await exportDir());
 
     const handleRequestExportPath = (e: Events['export:requestExportPath']) => {
       setSettings('folderPath', e.newPath);
@@ -208,36 +216,78 @@ const ExportContent: Component = () => {
   };
 
   const requestExport = async () => {
-    if (finalScale() === 0) return;
+    if (finalScale() <= 0) {
+      setExportResult({
+        kind: 'error',
+        text: `Export Error: invalid scale value.`,
+      });
+      return;
+    }
 
     setSettings('exportOptions', 'scale', finalScale());
 
     const name = settings.fileName;
     if (!name) {
-      message('Export Error: File name is empty.');
+      setExportResult({
+        kind: 'error',
+        text: `Export Error: File name is empty.`,
+      });
       return;
     }
     if (settings.folderPath) {
       const location = await exportImage(settings.folderPath, name, settings.exportOptions);
       if (location && location.path && location.name) {
-        const exportedPath = normalizeJoin(location.path, location.name);
+        const exportedFolderPath = normalizePath(location.path);
+        setExportResult({
+          kind: 'success',
+          text: `export succeed!\n${exportedFolderPath}`,
+        });
         setLastSettingsStore('exportedFolderPaths', (prev) => {
-          prev = [exportedPath, ...prev.filter((p) => p !== exportedPath)];
-          if (prev.length >= 30) prev.unshift();
+          prev = [exportedFolderPath, ...prev.filter((p) => p !== exportedFolderPath)];
+          if (prev.length >= 10) prev.unshift();
           return prev;
         });
 
         if (settings.showDirAfterSave && location.path && location.name) {
-          await revealItemInDir(normalizeJoin(location.path, location.name));
+          const path = normalizeJoin(location.path, location.name);
+          await revealInFileBrowser(path);
         }
+      } else {
+        setExportResult({
+          kind: 'error',
+          text: `Export error: file not exported`,
+        });
       }
     }
 
     setLastSettingsStore('exportSettings', settings);
-    await saveGlobalSettings(true);
+    await saveEditorStateImmediate();
   };
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
+
+  let menuButtonContainerRef: HTMLDivElement;
+
+  const [menuAnchor, setMenuAnchor] = createSignal<Vec2>({ x: 0, y: 0 });
+
+  createEffect(() => {
+    lastExportDirsMenuShown();
+    const rect = menuButtonContainerRef.getBoundingClientRect();
+    setMenuAnchor({ x: rect.right, y: rect.bottom });
+  });
+
+  const exportedFoldersOptions = createMemo<MenuListOption[]>(() =>
+    lastSettingsStore.exportedFolderPaths.map((path: string) => {
+      return {
+        type: 'item',
+        label: normalizePath(path) + '/',
+        onSelect: () => {
+          setSettings('folderPath', normalizePath(path));
+          setLastExportDirsMenuShown(false);
+        },
+      };
+    })
+  );
 
   return (
     <div class={sectionContent} style={{ gap: '8px', 'box-sizing': 'border-box', 'margin-top': '4px' }}>
@@ -278,25 +328,45 @@ const ExportContent: Component = () => {
               }}
             />
             <div
-              class={clsx(menuButtonContainer, lastSettingsStore.exportedFolderPaths.length <= 0 && menuButtonContainerDisabled)}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+              ref={(ref) => {
+                menuButtonContainerRef = ref;
               }}
+              class={clsx(menuButtonContainer, lastSettingsStore.exportedFolderPaths.length <= 0 && menuButtonContainerDisabled)}
             >
-              <div class={iconButton}>
+              <div
+                class={iconButton}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setLastExportDirsMenuShown(!lastExportDirsMenuShown());
+                }}
+              >
                 <Icon src={'/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
               </div>
               <Show when={lastExportDirsMenuShown()}>
                 <MenuList
-                  options={lastSettingsStore.exportedFolderPaths.map((path: string) => {
-                    return { type: 'item', label: normalizePath(path), onSelect: () => setSettings('folderPath', normalizePath(path)) };
-                  })}
+                  options={[
+                    ...exportedFoldersOptions(),
+                    {
+                      type: 'item',
+                      label: 'clear.',
+                      color: color.muted,
+                      fontFamily: fonts.ZFB03,
+                      onSelect: async () => {
+                        setLastSettingsStore('exportedFolderPaths', []);
+                        await saveEditorStateImmediate();
+                        setLastExportDirsMenuShown(false);
+                      },
+                    },
+                  ]}
                   onClose={() => setLastExportDirsMenuShown(false)}
                   align='right'
                   style={{
-                    'margin-top': '6px',
+                    position: 'fixed',
+                    top: `${menuAnchor().y + 8}px`,
+                    left: `${menuAnchor().x + 8}px`,
+                    transform: 'translateX(-100%)',
+                    width: 'fit-content',
                   }}
                 />
               </Show>
@@ -422,6 +492,15 @@ const ExportContent: Component = () => {
         <button class={accentedButton} onClick={(e) => requestExport()} disabled={!settings.folderPath || !settings.fileName}>
           Export
         </button>
+
+        <p
+          class={exportResultText}
+          style={{
+            color: exportResult()?.kind === 'error' ? color.error : color.muted,
+          }}
+        >
+          {exportResult()?.text}
+        </p>
       </div>
     </div>
   );

@@ -1,13 +1,9 @@
 use wasm_bindgen::prelude::*;
 
-// エフェクト
-pub mod effects;
 // WebGL関連
 pub mod webgl;
 // 選択範囲関連
 pub mod selection;
-// バッファ操作
-pub mod buffer;
 // ユーティリティ
 pub mod utils;
 

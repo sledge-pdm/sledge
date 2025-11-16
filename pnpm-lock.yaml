@@ -59,6 +59,9 @@ importers:
       '@solid-primitives/raf':
         specifier: ^2.3.2
         version: 2.3.2(solid-js@1.9.9)
+      '@solid-primitives/scheduled':
+        specifier: ^1.5.2
+        version: 1.5.2(solid-js@1.9.9)
       '@solid-primitives/scroll':
         specifier: ^2.1.3
         version: 2.1.3(solid-js@1.9.9)
@@ -74,6 +77,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.9.0
         version: 2.9.0
+      '@tauri-apps/plugin-clipboard-manager':
+        specifier: ~2.3.2
+        version: 2.3.2
       '@tauri-apps/plugin-dialog':
         specifier: ^2.4.0
         version: 2.4.0
@@ -196,6 +202,12 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vite-plugin-top-level-await:
+        specifier: ^1.6.0
+        version: 1.6.0(rollup@4.52.4)(vite@7.1.11(@types/node@24.9.1)(yaml@2.8.1))
+      vite-plugin-wasm:
+        specifier: ^3.5.0
+        version: 3.5.0(vite@7.1.11(@types/node@24.9.1)(yaml@2.8.1))
       vitest:
         specifier: ^4.0.7
         version: 4.0.7(@types/node@24.9.1)(jsdom@27.0.0(postcss@8.5.6))(yaml@2.8.1)
@@ -1118,6 +1130,9 @@ packages:
     resolution: {integrity: sha512-kKi2/WWsNXKoMdatBl4xrT7e1Ce27JvsetBVfWuIb6D3ep/Y0WO5SIr70yarXOSWam8NyDur4ipzjZkg6m7VDg==}
     engines: {node: '>= 10'}
     hasBin: true
+
+  '@tauri-apps/plugin-clipboard-manager@2.3.2':
+    resolution: {integrity: sha512-CUlb5Hqi2oZbcZf4VUyUH53XWPPdtpw43EUpCza5HWZJwxEoDowFzNUDt1tRUXA8Uq+XPn17Ysfptip33sG4eQ==}
 
   '@tauri-apps/plugin-dialog@2.4.0':
     resolution: {integrity: sha512-OvXkrEBfWwtd8tzVCEXIvRfNEX87qs2jv6SqmVPiHcJjBhSF/GUvjqUNIDmKByb5N8nvDqVUM7+g1sXwdC/S9w==}
@@ -3422,6 +3437,10 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 2.9.1
       '@tauri-apps/cli-win32-ia32-msvc': 2.9.1
       '@tauri-apps/cli-win32-x64-msvc': 2.9.1
+
+  '@tauri-apps/plugin-clipboard-manager@2.3.2':
+    dependencies:
+      '@tauri-apps/api': 2.9.0
 
   '@tauri-apps/plugin-dialog@2.4.0':
     dependencies:

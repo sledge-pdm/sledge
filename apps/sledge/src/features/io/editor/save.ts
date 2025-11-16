@@ -1,9 +1,12 @@
+import { debounce } from '@solid-primitives/scheduled';
 import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { ensureAppConfigPath } from '~/features/config';
 import { getEditorStateStore } from '~/stores/EditorStores';
 
-export async function saveEditorState() {
+export const saveEditorStateDebounced = debounce(saveEditorStateImmediate, 500);
+
+export async function saveEditorStateImmediate() {
   try {
     await ensureAppConfigPath();
 

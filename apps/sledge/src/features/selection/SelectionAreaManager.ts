@@ -2,11 +2,17 @@
 
 import { TileIndex } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { apply_mask_offset, combine_masks_add, combine_masks_replace, combine_masks_subtract, fill_rect_mask, slice_patch_rgba } from '@sledge/wasm';
+import {
+  apply_mask_offset,
+  combine_masks_add,
+  combine_masks_replace,
+  combine_masks_subtract,
+  fill_rect_mask,
+  trim_mask_with_box,
+} from '@sledge/wasm';
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { activeLayer } from '~/features/layer';
-import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
@@ -122,7 +128,6 @@ class SelectionAreaManager {
   }
 
   isMaskOverlap(pos: Vec2, withMoveOffset?: boolean) {
-    console.log(pos);
     if (withMoveOffset) {
       pos.x -= this.areaOffset.x;
       pos.y -= this.areaOffset.y;
@@ -173,7 +178,7 @@ class SelectionAreaManager {
 
     let changed = false;
 
-    const anvil = getAnvilOf(activeLayer().id);
+    const anvil = getAnvil(activeLayer().id);
     switch (frag.kind) {
       case 'pixel': {
         this.previewMask.setFlag(frag.position, 1);
@@ -186,7 +191,6 @@ class SelectionAreaManager {
         break;
       }
       case 'tile': {
-        if (!anvil) break;
         const tileSize = anvil.getTileSize();
         // TileIndex (legacy) から行列を推測 (row/col か x/y を許容)
         const col: number = (frag.index as any).col ?? (frag.index as any).x;
@@ -362,23 +366,28 @@ class SelectionAreaManager {
   }
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
-    const buffer = getBufferPointer(srcLayerId);
-    if (!buffer) return;
-    // canvasStore が未初期化なケース (極早期テスト) では何も返さない
+    const anvil = getAnvil(srcLayerId);
+    // canvasStore �����������ȃP�[�X (�ɑ����e�X�g) �ł͉����Ԃ��Ȃ�
     if (!canvasStore?.canvas) return;
     const { width, height } = canvasStore.canvas;
 
     this.commitOffset();
     this.commit();
 
-    // slice buffer by mask
-    const patch = slice_patch_rgba(new Uint8Array(buffer.buffer), width, height, new Uint8Array(this.getCombinedMask()), width, height, 0, 0);
+    const baseMask = new Uint8Array(this.getCombinedMask());
+    const bbox = this.selectionMask.getBoundBox();
+    if (!bbox) return;
+    const selectionWidth = bbox.right - bbox.left + 1;
+    const selectionHeight = bbox.bottom - bbox.top + 1;
+    const trimmedMask = trim_mask_with_box(baseMask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
+    const patch = anvil.sliceWithMask(trimmedMask, selectionWidth, selectionHeight, bbox.left, bbox.top);
 
     return {
-      buffer: new Uint8ClampedArray(patch.buffer),
+      buffer: patch,
       offset: { x: 0, y: 0 },
-      width,
-      height,
+      width: selectionWidth,
+      height: selectionHeight,
+      origin: { x: bbox.left, y: bbox.top },
     };
   }
 }

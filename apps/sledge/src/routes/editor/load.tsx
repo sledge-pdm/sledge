@@ -1,10 +1,12 @@
 import { FileLocation } from '@sledge/core';
+import { message } from '@tauri-apps/plugin-dialog';
 import { getEmergencyBackups } from '~/features/backup';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
-import { importImageFromPath } from '~/features/io/image/in/import';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { loadProjectJson } from '~/features/io/project/in/load';
+import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/in/loadFrom';
+import { applyProjectLocation } from '~/features/io/project/ProjectLocationManager';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
@@ -14,10 +16,11 @@ import { layerListStore, setCanvasStore, setProjectStore } from '~/stores/Projec
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
-import { getNewProjectQuery, getOpenLocation, openWindow } from '~/utils/WindowUtils';
+import { getFromClipboardQuery, getNewProjectQuery, getOpenLocation, openWindow } from '~/utils/WindowUtils';
 
 export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new_project' | 'image'; lastPath?: FileLocation }): Promise<boolean> {
   const openingLocation = getOpenLocation();
+  const clipboardQuery = getFromClipboardQuery();
   const newProjectQuery = getNewProjectQuery();
 
   const emergencyBackups = await getEmergencyBackups();
@@ -29,16 +32,28 @@ export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new
 
   if (openingLocation && openingLocation.path && openingLocation.name) {
     return await loadProjectFromLocation(openingLocation);
-  } else if (newProjectQuery.new) {
-    return await loadNewProject(newProjectQuery);
-  } else if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
-    return await loadProjectFromLocation(lastLocation);
-  } else {
-    // fallback
-    return await loadNewProject();
   }
 
-  throw new Error('unknown error');
+  if (clipboardQuery) {
+    return await loadProjectFromClipboardImage();
+  }
+
+  if (newProjectQuery.new) {
+    return await loadNewProject(newProjectQuery);
+  }
+
+  if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
+    try {
+      return await loadProjectFromLocation(lastLocation);
+    } catch (e) {
+      console.error('Failed to load last project, falling back to a new project:', e);
+      const createdNewProject = await loadNewProject();
+      await notifyLastProjectFallback(e);
+      return createdNewProject;
+    }
+  }
+
+  return await loadNewProject();
 }
 
 export async function loadProjectFromLocation(loc: FileLocation): Promise<boolean> {
@@ -57,7 +72,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
       }
       setSavedLocation(path);
       await loadProjectJson(projectFile);
-      setProjectStore('isProjectChangedAfterSave', true);
+      setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } catch (error) {
       console.error('Failed to read project:', error);
@@ -66,9 +81,9 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
   } else {
     // image file
     setFileStore('openAs', 'image');
-    const isImportSuccessful = await importImageFromPath(loc);
+    const isImportSuccessful = await loadProjectFromLocalImage(loc);
     if (isImportSuccessful) {
-      setProjectStore('isProjectChangedAfterSave', true);
+      setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } else {
       console.error('Failed to import image from path:', path);
@@ -84,10 +99,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
     project: CURRENT_PROJECT_VERSION,
     sledge: await getCurrentVersion(),
   });
-  setFileStore('savedLocation', {
-    name: undefined,
-    path: undefined,
-  });
+  applyProjectLocation(undefined, 'new_project');
   const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
   const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
   setCanvasStore('canvas', 'width', width);
@@ -109,4 +121,14 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   });
   setProjectStore('isProjectChangedAfterSave', false);
   return true;
+}
+
+async function notifyLastProjectFallback(error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : error ? String(error) : undefined;
+  const fallbackMessage = errorMessage && errorMessage.trim().length > 0 ? errorMessage : '<No message available>';
+  await message(`Failed to reopen the last project. A new project was created instead.\n${fallbackMessage}`, {
+    kind: 'warning',
+    title: 'Project load',
+    okLabel: 'OK',
+  });
 }

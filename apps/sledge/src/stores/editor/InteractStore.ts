@@ -8,6 +8,10 @@ export type InteractStore = {
   isMouseOnCanvas: boolean;
   isInStroke: boolean;
 
+  // The "placement" position used in paste. should handled in less care.
+  // (it's not a big deal if this position dropped. just images are pasted in (0, 0). that's all.)
+  placementPosition: Vec2;
+
   initialZoom: number;
 
   zoom: number;
@@ -37,6 +41,7 @@ export const defaultInteractStore: InteractStore = {
   lastMouseOnCanvas: { x: 0, y: 0 },
   isMouseOnCanvas: false,
   isInStroke: false,
+  placementPosition: { x: 0, y: 0 },
   initialZoom: 1,
   zoom: 1,
   zoomMinFromInitial: 0.5,

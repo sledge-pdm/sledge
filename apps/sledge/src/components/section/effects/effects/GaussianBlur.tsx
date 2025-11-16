@@ -1,5 +1,5 @@
+import { AlphaBlurMode } from '@sledge/anvil';
 import { Slider, ToggleSwitch } from '@sledge/ui';
-import { AlphaBlurMode, GaussianBlurOption } from '@sledge/wasm';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { EffectControl } from '~/components/section/effects/EffectControl';
@@ -20,7 +20,7 @@ const GaussianBlur: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='gaussian blur.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'gaussian_blur', new GaussianBlurOption(options.radius, options.alphaMode));
+        applyEffect(props.selectedLayerId(), 'gaussian blur', (buffer) => buffer.gaussianBlur(options.radius, options.alphaMode));
       }}
     >
       <EffectControl label='radius.'>

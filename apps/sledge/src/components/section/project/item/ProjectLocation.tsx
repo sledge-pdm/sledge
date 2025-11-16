@@ -1,11 +1,11 @@
 import { css } from '@acab/ecsstatic';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { Component, Show } from 'solid-js';
 import { adjustZoomToFit } from '~/features/canvas';
 import { loadProjectFromLocation } from '~/routes/editor/load';
 import { fileStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
 const locationHeaderStyle = css`
@@ -88,7 +88,7 @@ const ProjectLocation: Component = () => {
               onClick={(e) => {
                 const loc = fileStore.savedLocation;
                 if (!loc || !loc.path || !loc.name) return;
-                revealItemInDir(normalizeJoin(loc.path, loc.name));
+                revealInFileBrowser(normalizeJoin(loc.path, loc.name));
               }}
               class={explorerLinkStyle}
             >

@@ -1,5 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { spacing } from '@sledge/theme';
 import { Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { componentProps } from '~/config/ConfigComponent';
@@ -50,7 +49,7 @@ function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v:
     case 'ToggleSwitch':
       return <ToggleSwitch id={meta.key} checked={value()} onChange={onChange} />;
     case 'Custom':
-      return <div>{meta.props?.content?.() ?? null}</div>;
+      return meta.props?.content?.() ?? null;
     default:
       return <div>Unsupported component: {meta.component}</div>;
   }
@@ -81,7 +80,7 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
   });
 
   return (
-    <div class={flexCol} style={{ gap: spacing.sm }}>
+    <div class={flexCol} style={{ gap: '4px' }}>
       <Show when={presetMeta()?.fields}>
         <For each={presetMeta()!.fields}>
           {(fieldMeta) => {
@@ -96,12 +95,17 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
             };
 
             return (
-              <div class={flexRow} style={{ width: '100%', 'min-height': '20px', 'align-items': 'center' }}>
-                <div class={flexRow} style={{ width: '80px' }}>
-                  <label class={label} for={fieldMeta.key}>
-                    {fieldMeta.label}
-                  </label>
-                </div>
+              <div
+                class={flexRow}
+                style={{ width: '100%', 'min-height': fieldMeta.component !== 'Custom' ? '24px' : undefined, 'align-items': 'center' }}
+              >
+                <Show when={fieldMeta.label}>
+                  <div class={flexRow} style={{ width: '80px' }}>
+                    <label class={label} for={fieldMeta.key}>
+                      {fieldMeta.label}
+                    </label>
+                  </div>
+                </Show>
                 <div class={flexRow} style={{ 'flex-grow': 1, 'justify-content': 'end' }}>
                   <FieldRenderer meta={fieldMeta} value={value} onChange={onChange} />
                 </div>

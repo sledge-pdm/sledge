@@ -2,11 +2,15 @@ import { css } from '@acab/ecsstatic';
 import { color, fonts } from '@sledge/theme';
 import { MenuList, MenuListOption } from '@sledge/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { confirm } from '@tauri-apps/plugin-dialog';
 import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
-import { createNew, openExistingProject, openProject } from '~/features/io/window';
+import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
+import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
+import { activeLayer } from '~/features/layer';
+import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { fileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
@@ -92,7 +96,7 @@ interface Item {
   id: string;
   text: string;
   action: () => void;
-  menu?: MenuListOption[];
+  menu?: () => MenuListOption[];
 }
 
 const TopMenuBar: Component = () => {
@@ -107,12 +111,22 @@ const TopMenuBar: Component = () => {
     setAvailableUpdate(update);
   });
 
+  const getCurrentEditTarget = () => {
+    // if (imagePoolStore.selectedEntryId !== undefined) {
+    //   currentEditTarget= 'image';
+    // }
+    if (isSelectionAvailable()) {
+      return 'selection';
+    }
+    return `layer: ${activeLayer()?.name}`;
+  };
+
   const leftItems = createMemo<Item[]>(() => [
     {
       id: 'project',
       text: 'Files.',
       action: () => {},
-      menu: [
+      menu: () => [
         {
           type: 'item',
           label: '+ new project.',
@@ -125,6 +139,22 @@ const TopMenuBar: Component = () => {
           label: '> open project.',
           onSelect: () => {
             openProject();
+          },
+        },
+        {
+          type: 'item',
+          label: '> from clipboard.',
+          onSelect: async () => {
+            // clipboard data will loaded in new window, but ensure there's data
+            const ensureData = await tryGetImageFromClipboard();
+            if (!ensureData) {
+              const confirmed = await confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
+                title: 'Open from clipboard',
+              });
+              if (!confirmed) return;
+            }
+
+            openFromClipboard();
           },
         },
         ...(fileStore.recentFiles.length > 0
@@ -154,7 +184,11 @@ const TopMenuBar: Component = () => {
       id: 'edit',
       text: 'Edit.',
       action: () => {},
-      menu: [
+      menu: () => [
+        {
+          type: 'label',
+          label: getCurrentEditTarget(),
+        },
         {
           type: 'item',
           label: 'Copy.',
@@ -201,16 +235,16 @@ const TopMenuBar: Component = () => {
                 <a
                   class={menuItemText}
                   onClick={(e) => {
-                    if (item.menu) setMenuOpen(true);
                     item.action();
+                    if (item.menu) setMenuOpen(true);
                   }}
                 >
                   {item.text}
                 </a>
                 <div class={menuItemBackground} />
-                <Show when={item.menu && menuOpen()}>
+                <Show when={item.menu?.() && menuOpen()}>
                   <MenuList
-                    options={item.menu!}
+                    options={item.menu?.()!}
                     onClose={() => setMenuOpen(false)}
                     style={{
                       'margin-top': '4px',

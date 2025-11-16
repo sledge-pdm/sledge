@@ -1,5 +1,5 @@
 import { FileLocation } from '@sledge/core';
-import { saveEditorState } from '~/features/io/editor/save';
+import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { setFileStore } from '~/stores/EditorStores';
 
 export const addRecentFile = (fileLocation?: FileLocation) => {
@@ -9,5 +9,5 @@ export const addRecentFile = (fileLocation?: FileLocation) => {
     files.unshift(fileLocation);
     return [...files];
   });
-  saveEditorState();
+  saveEditorStateDebounced();
 };

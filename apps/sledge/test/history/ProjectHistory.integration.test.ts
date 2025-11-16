@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
-import { currentColor, PaletteType, selectPalette, setColor, setCurrentColor } from '~/features/color';
+import { currentColor, hexToRGBA, PaletteType, registerColorChange, selectPalette, setColor, setCurrentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { getEntry, ImagePoolEntry, insertEntry } from '~/features/image_pool';
 import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
@@ -85,15 +85,16 @@ describe('Project-level history integration', () => {
 
     const entry: ImagePoolEntry = {
       id: 'int-fixed',
-      originalPath: 'C:/dummy.png',
+      descriptionName: 'dummy.png',
       webpBuffer: dummyWebpBuffer,
       base: { width: 10, height: 10 },
-      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },
+      transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
       visible: true,
     };
 
     // 1) Apply actual operations
+    registerColorChange(hexToRGBA('#000000'), hexToRGBA('#ff0000'));
     setCurrentColor('#ff0000');
     if (LOG_SEQ) logs.push('Color #000000 -> #ff0000');
 
@@ -134,6 +135,7 @@ describe('Project-level history integration', () => {
     hc.clearHistory(); // Clear history before test
 
     // Apply color change
+    registerColorChange(hexToRGBA('#000000'), hexToRGBA('#ff0000'));
     setCurrentColor('#ff0000');
 
     // At this point color is red

@@ -1,14 +1,17 @@
 import { beforeEach, describe, it } from 'vitest';
 import { CanvasSizeHistoryAction } from '~/features/history';
 import { allLayers } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import './mocks';
-import { expect, setupTestEnvironment, TEST_CONSTANTS } from './utils';
+import { expect, setupTestAnvil, setupTestEnvironment, TEST_CONSTANTS } from './utils';
 
 describe('CanvasSizeHistoryAction', () => {
   beforeEach(() => {
     setupTestEnvironment();
+    allLayers().forEach((l) => {
+      setupTestAnvil(l.id, TEST_CONSTANTS.CANVAS_SIZE.width, TEST_CONSTANTS.CANVAS_SIZE.height, TEST_CONSTANTS.TILE_SIZE);
+    });
   });
 
   it('undo/redo updates canvas size value', () => {
@@ -25,7 +28,7 @@ describe('CanvasSizeHistoryAction', () => {
     action.registerBefore();
 
     setCanvasStore('canvas', newSize);
-    allLayers().forEach((l) => getAnvilOf(l.id)?.resize(newSize.width, newSize.height));
+    allLayers().forEach((l) => getAnvil(l.id).resize(newSize.width, newSize.height));
 
     action.registerAfter();
 

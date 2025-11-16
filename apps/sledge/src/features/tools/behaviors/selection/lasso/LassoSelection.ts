@@ -1,6 +1,6 @@
 import { fill_lasso_selection } from '@sledge/wasm';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
@@ -123,8 +123,7 @@ export class LassoSelection extends SelectionBase {
     selectionManager.beginPreview(mode);
     this.startPosition = args.position;
 
-    const anvil = getAnvilOf(args.layerId);
-    if (!anvil) return;
+    const anvil = getAnvil(args.layerId);
 
     // 座標追跡を初期化
     this.points = [args.position.x, args.position.y];
@@ -152,8 +151,7 @@ export class LassoSelection extends SelectionBase {
   protected onMoveSelection(args: ToolArgs, mode: SelectionEditMode) {
     if (!this.previewFragment) return;
 
-    const anvil = getAnvilOf(args.layerId);
-    if (!anvil) return;
+    const anvil = getAnvil(args.layerId);
 
     // フレームレート制限による最適化
     const currentTime = performance.now();
@@ -190,11 +188,7 @@ export class LassoSelection extends SelectionBase {
   protected onEndSelection(args: ToolArgs, mode: SelectionEditMode) {
     if (!this.previewFragment) return;
 
-    const anvil = getAnvilOf(args.layerId);
-    if (!anvil) {
-      selectionManager.commit();
-      return;
-    }
+    const anvil = getAnvil(args.layerId);
 
     // 最終的なマスクを生成（ポリゴンを閉じるため）
     if (this.points.length >= 6) {

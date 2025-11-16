@@ -1,8 +1,7 @@
-import { rawToWebp } from '@sledge/anvil';
 import { projectHistoryController } from '~/features/history';
 import { ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
-import { getBufferPointer } from '~/features/layer/anvil/AnvilController';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore, snapshotStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 import { getCurrentVersion } from '~/utils/VersionUtils';
@@ -22,9 +21,10 @@ export const dumpProjectJson = async (): Promise<ProjectV1> => {
   >();
   const size = canvasStore.canvas;
   allLayers().forEach((l) => {
-    const buf = getBufferPointer(l.id) ?? new Uint8Array(size.width * size.height * 4);
+    const anvil = getAnvil(l.id);
+    const webp = anvil.exportWebp();
     buffers.set(l.id, {
-      webpBuffer: rawToWebp(new Uint8Array(buf.buffer), canvasStore.canvas.width, canvasStore.canvas.height),
+      webpBuffer: webp,
     });
   });
   const project: ProjectV1 = {

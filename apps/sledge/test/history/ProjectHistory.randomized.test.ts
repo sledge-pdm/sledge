@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
-import { currentColor, PaletteType, selectPalette, setColor, setCurrentColor } from '~/features/color';
+import { currentColor, hexToRGBA, PaletteType, registerColorChange, selectPalette, setColor, setCurrentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getEntry, ImagePoolEntry, insertEntry, removeEntry, updateEntryPartial } from '~/features/image_pool';
 import { addLayerTo, BlendMode, Layer, LayerType, moveLayer, removeLayer, setLayerProp } from '~/features/layer';
-import { flushPatch, setPixel } from '~/features/layer/anvil/AnvilController';
-import { anvilManager, getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { canvasStore, layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore } from '~/stores/ProjectStores';
 
 // Mock 'document' if used in CanvasSizeHistoryAction or related code
@@ -50,6 +49,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
       opacity: 1,
       mode: BlendMode.normal,
       dotMagnification: 1,
+      cutFreeze: false,
     });
     setLayerListStore('layers', [l('L1'), l('L2'), l('L3')]);
     setLayerListStore('activeLayerId', 'L1');
@@ -90,7 +90,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         originalPath: 'C:/dummyA.png',
         webpBuffer: createDummyWebpBuffer(8, 8, 1),
         base: { width: 8, height: 8 },
-        transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },
+        transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
         opacity: 1,
         visible: true,
       },
@@ -99,7 +99,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         originalPath: 'C:/dummyB.png',
         webpBuffer: createDummyWebpBuffer(12, 12, 2),
         base: { width: 12, height: 12 },
-        transform: { x: 1, y: 1, scaleX: 1, scaleY: 1, rotation: 0 },
+        transform: { x: 1, y: 1, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
         opacity: 1,
         visible: true,
       },
@@ -108,7 +108,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         originalPath: 'C:/dummyC.png',
         webpBuffer: createDummyWebpBuffer(16, 16, 3),
         base: { width: 16, height: 16 },
-        transform: { x: 2, y: 2, scaleX: 1, scaleY: 1, rotation: 0 },
+        transform: { x: 2, y: 2, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
         opacity: 1,
         visible: true,
       },
@@ -126,6 +126,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         const next = targets[Math.floor(rng() * targets.length)];
         const prev = currentColor();
         steps.push(() => {
+          registerColorChange(hexToRGBA(prev), hexToRGBA(next));
           setCurrentColor(next);
         });
         stepDescs.push(`Color ${prev} -> ${next}`);
@@ -247,31 +248,30 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
         // Layer buffer tiny pixel patch on a random layer
         if (layerListStore.layers.length > 0) {
           const layer = layerListStore.layers[Math.floor(rng() * layerListStore.layers.length)];
-          const anvil = getAnvilOf(layer.id);
-          if (anvil) {
-            const w = anvil.getWidth();
-            const count = 1 + Math.floor(rng() * 3);
-            steps.push(() => {
-              for (let k = 0; k < count; k++) {
-                const x = k % Math.min(4, w);
-                const y = 0;
-                const r = (k * 40) & 0xff;
-                const g = (k * 80) & 0xff;
-                const b = (k * 120) & 0xff;
-                setPixel(layer.id, x, y, [r, g, b, 255]);
-              }
-              const patch = flushPatch(layer.id);
-              if (patch) {
-                const a = new AnvilLayerHistoryAction({
-                  layerId: layer.id,
-                  patch,
-                  context: { from: 'rnd' },
-                });
-                hc.addAction(a);
-              }
-            });
-            stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
-          }
+          const anvil = anvilManager.getAnvil(layer.id);
+          if (!anvil) return;
+          const w = anvil.getWidth();
+          const count = 1 + Math.floor(rng() * 3);
+          steps.push(() => {
+            for (let k = 0; k < count; k++) {
+              const x = k % Math.min(4, w);
+              const y = 0;
+              const r = (k * 40) & 0xff;
+              const g = (k * 80) & 0xff;
+              const b = (k * 120) & 0xff;
+              anvil.setPixel(x, y, [r, g, b, 255]);
+            }
+            const patch = anvil.flushDiffs();
+            if (patch) {
+              const a = new AnvilLayerHistoryAction({
+                layerId: layer.id,
+                patch,
+                context: { from: 'rnd' },
+              });
+              hc.addAction(a);
+            }
+          });
+          stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
         }
       }
     }

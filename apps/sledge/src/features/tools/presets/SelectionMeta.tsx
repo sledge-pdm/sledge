@@ -7,8 +7,12 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 
 const container = css`
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: end;
   width: 100%;
   gap: 8px;
+  min-height: 24px;
 `;
 const item = css`
   display: flex;

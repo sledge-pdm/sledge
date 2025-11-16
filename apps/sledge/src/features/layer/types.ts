@@ -27,6 +27,7 @@ export interface Layer {
   mode: BlendMode;
   enabled: boolean;
   dotMagnification: number;
+  cutFreeze: boolean;
 }
 
 // BaseLayer types

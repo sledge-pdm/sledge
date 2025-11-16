@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
@@ -8,7 +9,7 @@ import { removeLayerFromUser } from '~/features/layer/service';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { eventBus } from '~/utils/EventBus';
+import { updateWebGLCanvas } from '~/webgl/service';
 
 const layerItem = css`
   display: flex;
@@ -39,6 +40,10 @@ const layerItemSpinner = css`
 
 const layerItemDisabled = css`
   opacity: 0.3;
+`;
+
+const layerItemCutFreezed = css`
+  opacity: 0.5;
 `;
 
 const layerItemIndex = css`
@@ -97,7 +102,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     if (props.index !== -1) {
       setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'layer deactivated from layeritem' });
+    updateWebGLCanvas(false, 'layer deactivated from layeritem');
   };
 
   const handlePointerDown = (e: PointerEvent) => {
@@ -163,7 +168,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           }}
         ></div>
         <div
-          class={[layerItem, !props.layer.enabled && layerItemDisabled].filter(Boolean).join(' ')}
+          class={clsx(layerItem, !props.layer.enabled && layerItemDisabled, props.layer.cutFreeze && layerItemCutFreezed)}
           onClick={onDetClicked}
           onContextMenu={async (e) => {
             e.preventDefault();
@@ -174,8 +179,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
             const layerId = props.layer.id;
             showContextMenu(
-              props.layer.name,
               [
+                { type: 'label', label: props.layer.name },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
                 { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },

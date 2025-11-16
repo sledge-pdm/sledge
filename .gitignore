@@ -49,3 +49,7 @@ post_build.bat
 .tauri
 
 coverage
+
+wiki
+
+packages/plugins-workspace-2

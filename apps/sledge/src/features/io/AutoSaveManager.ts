@@ -31,7 +31,7 @@ export class AutoSaveManager {
       if (fileStore.savedLocation.name && fileStore.savedLocation.path) {
         await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
       } else {
-        console.log('Auto-save skipped: No valid file location.');
+        console.warn('Auto-save skipped: No valid file location.');
       }
     }, interval * 1000);
   }

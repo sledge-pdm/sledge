@@ -17,6 +17,8 @@
     "fs:allow-open",
     "fs:allow-write",
     "fs:allow-write-file",
+    "fs:allow-applocaldata-write-recursive",
+    "fs:allow-applocaldata-read-recursive",
     "fs:allow-app-read",
     "fs:allow-app-write",
     "fs:allow-read",
@@ -38,6 +40,14 @@
       ]
     },
     "opener:allow-open-path",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "/**"
+        }
+      ]
+    },
     "opener:allow-reveal-item-in-dir",
     "core:webview:allow-create-webview-window",
     "core:window:default",
@@ -57,6 +67,11 @@
     "os:default",
     "process:default",
     "updater:default",
-    "log:default"
+    "log:default",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-read-image",
+    "clipboard-manager:allow-write-image",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text"
   ]
 }

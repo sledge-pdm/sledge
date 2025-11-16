@@ -8,7 +8,7 @@ const GrayScale: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='grayscale.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'grayscale');
+        applyEffect(props.selectedLayerId(), 'grayscale', (buffer) => buffer.grayscale());
       }}
     ></EffectWrapper>
   );

@@ -27,6 +27,7 @@ describe('Project dump/load roundtrip', () => {
       opacity: 1,
       mode: BlendMode.normal,
       dotMagnification: 1,
+      cutFreeze: false,
     };
     setLayerListStore('layers', [layer]);
     setLayerListStore('activeLayerId', layer.id);
@@ -78,6 +79,7 @@ describe('Project dump/load roundtrip', () => {
       opacity: 1,
       mode: BlendMode.normal,
       dotMagnification: 1,
+      cutFreeze: false,
     };
     setLayerListStore('layers', [layer]);
     setLayerListStore('activeLayerId', layer.id);
@@ -137,6 +139,7 @@ describe('Project dump/load roundtrip', () => {
       opacity: 0.8,
       mode: BlendMode.normal,
       dotMagnification: 1,
+      cutFreeze: false,
     };
 
     const buf = new Uint8ClampedArray(2 * 2 * 4); // 2x2 RGBA

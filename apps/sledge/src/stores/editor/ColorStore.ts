@@ -1,4 +1,4 @@
-import { PaletteType } from '~/features/color';
+import { PaletteType, RGBAColor } from '~/features/color';
 import { DEFAULT, SMPTE, Swatch } from '~/features/color/swatch/swatches';
 
 export type ColorStore = {
@@ -6,6 +6,7 @@ export type ColorStore = {
   primary: string;
   secondary: string;
   swatches: Swatch[];
+  history: RGBAColor[];
   currentSwatchName: string;
 };
 
@@ -14,5 +15,6 @@ export const defaultColorStore: ColorStore = {
   primary: '#000000', // 通常の描画色
   secondary: '#ffffff', // 背景・消しゴムなど
   swatches: [DEFAULT, SMPTE],
+  history: [],
   currentSwatchName: DEFAULT.name,
 };

@@ -79,10 +79,6 @@ export interface EditorStateStore {
   presets: PresetRecord[];
 }
 
-export const getLastOpenedInfo = () => {
-  return {};
-};
-
 export const getEditorStateStore = (): EditorStateStore => {
   return {
     appearanceStore: appearanceStore,
@@ -118,6 +114,9 @@ export const loadEditorStateStore = (
     setToolStore('tools', record.toolId, 'presets', record.presets);
     eventBus.emit('tools:presetLoaded', { toolId: record.toolId });
   });
+
+  // init explorer path on load
+  setAppearanceStore('explorerPath', undefined);
 
   return {
     lastOpenAs: state.lastOpenAs,

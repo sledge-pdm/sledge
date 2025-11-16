@@ -96,8 +96,6 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
       setUpdatePosition(false);
     }, 60)
   );
-
-  // Move handleUpdate outside the component to keep its reference stable
   const handleUpdate = (e: Events['selection:updateSelectionMenu']) => {
     setSelectionState(selectionManager.getState());
     setFloatingMoveState(floatingMoveManager.isMoving());
@@ -126,16 +124,12 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
     };
   });
 
-  // 座標変換に影響する要素を監視
+  // Reposition only while a selection is active and transform changes
   createEffect(() => {
+    if (selectionState() === 'idle') return;
     interactStore.rotation;
     interactStore.horizontalFlipped;
     interactStore.verticalFlipped;
-    setUpdatePosition(true);
-  });
-
-  // 平行移動のみを監視（頻度が高いため分離）
-  createEffect(() => {
     interactStore.offset.x;
     interactStore.offset.y;
     setUpdatePosition(true);
@@ -206,7 +200,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
         visibility: visibility(),
         'pointer-events': 'all',
         'transform-origin': '100% 0',
-        transform: `rotate(${interactStore.rotation}deg) translateY(8px)`,
+        transform: `rotate(${interactStore.rotation}deg) translateY(4px)`,
         'z-index': 'var(--zindex-canvas-overlay)',
       }}
       onPointerDown={(e) => {

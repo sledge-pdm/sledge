@@ -13,12 +13,15 @@ export type AppearanceStore = {
   };
 
   ruler: boolean;
+  onscreenControl: boolean;
+  explorerPath?: string;
 };
 
 export const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: true,
-    tabs: ['editor', 'effects', 'explorer', 'danger'],
+    tabs: ['editor', 'effects', 'explorer'],
+    // tabs: ['editor', 'effects', 'explorer', 'danger'],
     selectedIndex: 0,
   },
   rightSide: {
@@ -28,4 +31,5 @@ export const defaultAppearanceStore: AppearanceStore = {
   },
 
   ruler: false,
+  onscreenControl: false,
 };

@@ -1,6 +1,6 @@
 import { getLayerIndex, Layer } from '~/features/layer';
 import { setLayerListStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
+import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface LayerPropsHistoryActionProps extends BaseHistoryActionProps {
@@ -26,13 +26,13 @@ export class LayerPropsHistoryAction extends BaseHistoryAction {
   undo(): void {
     const idx = getLayerIndex(this.layerId);
     setLayerListStore('layers', idx, { id: this.layerId, ...this.oldLayerProps });
-    eventBus.emit('webgl:requestUpdate', { context: this.context, onlyDirty: false });
+    updateWebGLCanvas(false, this.context);
   }
 
   redo(): void {
     const idx = getLayerIndex(this.layerId);
     setLayerListStore('layers', idx, { id: this.layerId, ...this.newLayerProps });
-    eventBus.emit('webgl:requestUpdate', { context: this.context, onlyDirty: false });
+    updateWebGLCanvas(false, this.context);
   }
 
   serialize(): SerializedHistoryAction {

@@ -1,5 +1,5 @@
+import { DitheringMode } from '@sledge/anvil';
 import { Dropdown, DropdownOption, Slider } from '@sledge/ui';
-import { DitheringMode, DitheringOption } from '@sledge/wasm';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { EffectControl } from '~/components/section/effects/EffectControl';
@@ -28,7 +28,7 @@ const Dithering: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='dithering.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'dithering', new DitheringOption(options.mode, options.levels, options.strength));
+        applyEffect(props.selectedLayerId(), 'dithering', (buffer) => buffer.dithering(options.mode, options.levels, options.strength));
       }}
     >
       <EffectControl label='mode.'>

@@ -1,9 +1,8 @@
 // src/renderer/WebGLRenderer.ts
-import { calculate_texture_memory_usage, flip_pixels_vertically } from '@sledge/wasm';
+import { flip_pixels_vertically } from '@sledge/wasm';
 import { Consts } from '~/Consts';
 import { getBaseLayerColor, getBlendModeId, Layer } from '~/features/layer';
-import { clearDirtyTiles, getBufferPointer, getDirtyTiles } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { DebugLogger } from '~/features/log/DebugLogger';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
@@ -43,19 +42,29 @@ function batchCheckGLError(gl: WebGL2RenderingContext, operation: string): boole
   return true;
 }
 
+function calculateTextureMemoryUsage(width: number, height: number, layerCount: number) {
+  return width * height * layerCount * 4;
+}
+
 export class WebGLRenderer {
   private gl: WebGL2RenderingContext;
   private program: WebGLProgram;
   private vao: WebGLVertexArrayObject;
   private texArray!: WebGLTexture;
+  private overlayTexture?: WebGLTexture;
   private fullscreenQuadBuffer?: WebGLBuffer; // バッファの参照を保持
   private currentTextureDepth: number = 0; // 現在のテクスチャ配列の深度を追跡
+  private overlayTextureVersion = -1;
 
   private uLayerCountLoc!: WebGLUniformLocation;
   private uOpacitiesLoc!: WebGLUniformLocation;
   private uBlendModesLoc!: WebGLUniformLocation;
   private uHasBaseLayerLoc!: WebGLUniformLocation;
   private uBaseLayerColorLoc!: WebGLUniformLocation;
+  private uHasOverlayLoc!: WebGLUniformLocation;
+  private uOverlayOriginLoc!: WebGLUniformLocation;
+  private uOverlaySizeLoc!: WebGLUniformLocation;
+  private uCanvasSizeLoc!: WebGLUniformLocation;
   private disposed: boolean = false;
 
   private isChromium: boolean = false;
@@ -106,6 +115,10 @@ export class WebGLRenderer {
     // sampler2DArray はユニット 0
     const loc = gl.getUniformLocation(this.program, 'u_texArray')!;
     gl.uniform1i(loc, 0);
+    const overlaySamplerLoc = gl.getUniformLocation(this.program, 'u_overlayTex');
+    if (overlaySamplerLoc) {
+      gl.uniform1i(overlaySamplerLoc, 1);
+    }
 
     // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
@@ -116,6 +129,15 @@ export class WebGLRenderer {
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    this.overlayTexture = gl.createTexture()!;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.overlayTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.activeTexture(gl.TEXTURE0);
 
     // 初期化完了後の一括エラーチェック
     batchCheckGLError(gl, 'WebGL texture setup and parameters');
@@ -130,6 +152,10 @@ export class WebGLRenderer {
     this.uBlendModesLoc = this.gl.getUniformLocation(this.program, 'u_blendModes')!;
     this.uHasBaseLayerLoc = this.gl.getUniformLocation(this.program, 'u_hasBaseLayer')!;
     this.uBaseLayerColorLoc = this.gl.getUniformLocation(this.program, 'u_baseLayerColor')!;
+    this.uHasOverlayLoc = this.gl.getUniformLocation(this.program, 'u_hasOverlay')!;
+    this.uOverlayOriginLoc = this.gl.getUniformLocation(this.program, 'u_overlayOrigin')!;
+    this.uOverlaySizeLoc = this.gl.getUniformLocation(this.program, 'u_overlaySize')!;
+    this.uCanvasSizeLoc = this.gl.getUniformLocation(this.program, 'u_canvasSize')!;
 
     logger.debugLog('Initialized WebGLRenderer');
   }
@@ -151,7 +177,7 @@ export class WebGLRenderer {
 
     // 前回のメモリ使用量をログ出力
     if (this.currentTextureDepth > 0) {
-      const oldMemory = calculate_texture_memory_usage(this.width, this.height, this.currentTextureDepth);
+      const oldMemory = calculateTextureMemoryUsage(this.width, this.height, this.currentTextureDepth);
       logger.debugLog(`Releasing texture memory: ${(oldMemory / 1024 / 1024).toFixed(2)} MB`);
     }
 
@@ -192,14 +218,12 @@ export class WebGLRenderer {
           logger.debugLog(`🔧 Resizing all layer buffers to match WebGL constraints: ${actualWidth}x${actualHeight}`);
 
           this.layers.forEach((layer) => {
-            const anvil = getAnvilOf(layer.id);
-            if (anvil) {
-              try {
-                anvil.resize(actualWidth, actualHeight); // offset なし resize
-                logger.debugLog(`✅ Resized anvil layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
-              } catch (error) {
-                logger.debugError(`❌ Failed to resize anvil layer buffer ${layer.id}:`, error);
-              }
+            const anvil = getAnvil(layer.id);
+            try {
+              anvil.resize(actualWidth, actualHeight); // offset なし resize
+              logger.debugLog(`✅ Resized anvil layer buffer ${layer.id} to ${actualWidth}x${actualHeight}`);
+            } catch (error) {
+              logger.debugError(`❌ Failed to resize anvil layer buffer ${layer.id}:`, error);
             }
           });
 
@@ -265,10 +289,10 @@ export class WebGLRenderer {
     activeLayers.forEach((layer, i) => {
       logger.debugLog(`📄 Processing layer ${i}: ${layer.id}, enabled: ${layer.enabled}`);
 
-      const anvil = getAnvilOf(layer.id);
-      if (!anvil) return;
+      const anvil = getAnvil(layer.id);
       const usePreviewBuffer = layer.id === layerListStore.activeLayerId && floatingMoveManager.isMoving();
-      const buf = usePreviewBuffer ? floatingMoveManager.getPreviewBuffer() : getBufferPointer(layer.id);
+      const baseBuffer = anvil.getBufferPointer();
+      const buf = usePreviewBuffer ? (floatingMoveManager.getPreviewBuffer() ?? baseBuffer) : baseBuffer;
       if (!buf) return;
 
       // バッファサイズの整合性をチェック
@@ -293,7 +317,7 @@ export class WebGLRenderer {
       }
 
       // Dirty tiles optimization: calculate coverage ratio
-      const dirtyTiles = getDirtyTiles(layer.id);
+      const dirtyTiles = anvil.getDirtyTileIndices();
       const tileSize = anvil.getTileSize();
 
       // Calculate dirty pixels coverage as percentage
@@ -360,7 +384,7 @@ export class WebGLRenderer {
         }
 
         // フルアップロード後は dirty フラグをクリア (patch 経由でない更新ケース)
-        clearDirtyTiles(layer.id);
+        anvil.clearDirtyTiles();
       }
     });
 
@@ -400,6 +424,17 @@ export class WebGLRenderer {
       logger.debugLog('🎨 Base layer disabled for this render');
     }
 
+    const overlayDescriptor = floatingMoveManager.isMoving() ? floatingMoveManager.getOverlayDescriptor() : undefined;
+    if (overlayDescriptor && overlayDescriptor.width > 0 && overlayDescriptor.height > 0) {
+      this.syncOverlayTexture(overlayDescriptor);
+      gl.uniform1i(this.uHasOverlayLoc, 1);
+      gl.uniform2f(this.uOverlayOriginLoc, overlayDescriptor.position.x, overlayDescriptor.position.y);
+      gl.uniform2f(this.uOverlaySizeLoc, overlayDescriptor.width, overlayDescriptor.height);
+    } else {
+      gl.uniform1i(this.uHasOverlayLoc, 0);
+    }
+    gl.uniform2f(this.uCanvasSizeLoc, this.width, this.height);
+
     // フルスクリーンクワッドを描画
     logger.debugLog(`🖌️ Drawing fullscreen quad...`);
 
@@ -413,6 +448,19 @@ export class WebGLRenderer {
     } else {
       logger.debugLog(`✅ Render completed successfully`);
     }
+  }
+
+  private syncOverlayTexture(overlay?: { buffer: Uint8ClampedArray; width: number; height: number; version: number }) {
+    if (!overlay || !this.overlayTexture) return;
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.overlayTexture);
+    if (this.overlayTextureVersion !== overlay.version) {
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, overlay.width, overlay.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, overlay.buffer);
+      this.overlayTextureVersion = overlay.version;
+    }
+    gl.activeTexture(gl.TEXTURE0);
   }
 
   public isDisposed(): boolean {
@@ -525,13 +573,11 @@ export class WebGLRenderer {
     const w = this.width;
     const h = this.height;
 
-    // (1) フルアップデート → ピクセル読み取り
     this.render(false);
     this.gl.finish?.();
     const raw = new Uint8Array(w * h * 4);
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
 
-    // (2) WASM関数を使った高速な上下反転
     const flipped = new Uint8Array(raw);
     flip_pixels_vertically(flipped, w, h);
 
@@ -564,6 +610,12 @@ export class WebGLRenderer {
     if (this.texArray) {
       gl.deleteTexture(this.texArray);
       logger.debugLog('WebGL texture array disposed');
+    }
+    if (this.overlayTexture) {
+      gl.deleteTexture(this.overlayTexture);
+      this.overlayTexture = undefined;
+      this.overlayTextureVersion = -1;
+      logger.debugLog('WebGL floating overlay texture disposed');
     }
 
     // プログラムを削除
@@ -681,8 +733,8 @@ export class WebGLRenderer {
     }
 
     // WASM関数を使ったメモリ使用量計算
-    const oldMemory = calculate_texture_memory_usage(this.width, this.height, oldDepth);
-    const newMemory = calculate_texture_memory_usage(this.width, this.height, requiredDepth);
+    const oldMemory = calculateTextureMemoryUsage(this.width, this.height, oldDepth);
+    const newMemory = calculateTextureMemoryUsage(this.width, this.height, requiredDepth);
 
     logger.debugLog(`🔄 Resizing texture array from ${oldDepth} to ${requiredDepth} layers`);
     logger.debugLog(`📊 Memory change: ${(oldMemory / 1024 / 1024).toFixed(2)} MB → ${(newMemory / 1024 / 1024).toFixed(2)} MB`);

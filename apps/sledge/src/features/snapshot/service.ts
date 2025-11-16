@@ -2,7 +2,7 @@ import { rawToWebp } from '@sledge/anvil';
 import { Size2D } from '@sledge/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createUniqueId } from 'solid-js';
-import { ThumbnailGenerator } from '~/features/canvas/ThumbnailGenerator';
+import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { loadProjectJson } from '~/features/io/project/in/load';
 import { dumpProjectJson } from '~/features/io/project/out/dump';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
@@ -13,7 +13,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
   try {
     const canvasSize: Size2D = { ...canvasStore.canvas };
     // create thumbnail (actual size)
-    const thumbnailImageData = new ThumbnailGenerator().generateCanvasThumbnail(canvasSize.width, canvasSize.height);
+    const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(canvasSize.width, canvasSize.height);
 
     const now = new Date();
     const snapshot: ProjectSnapshot = {
@@ -24,7 +24,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
       snapshot: await dumpProjectJson(),
       thumbnail: thumbnailImageData
         ? {
-            webpBuffer: rawToWebp(new Uint8Array(thumbnailImageData.data.buffer), thumbnailImageData.width, thumbnailImageData.height),
+            webpBuffer: rawToWebp(thumbnailImageData.data, thumbnailImageData.width, thumbnailImageData.height),
             width: thumbnailImageData.width,
             height: thumbnailImageData.height,
           }
@@ -132,7 +132,6 @@ export function escapeCurrentAutosave() {
     const filtered = snapshots.map((snapshot) => {
       if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
         const now = new Date();
-        console.log('oh yeah', `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`);
         return {
           ...snapshot,
           name: `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`,
@@ -140,7 +139,6 @@ export function escapeCurrentAutosave() {
       }
       return snapshot;
     });
-    console.log(filtered);
     return filtered;
   });
 }

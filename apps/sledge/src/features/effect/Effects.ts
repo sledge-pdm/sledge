@@ -1,30 +1,21 @@
-import { brightness_contrast, dithering, dust_removal, gaussian_blur, grayscale, invert, posterize } from '@sledge/wasm';
+import type { RgbaBuffer } from '@sledge/anvil';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
-import { flushPatch, registerWholeChange } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
-import { eventBus } from '~/utils/EventBus';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
-const EFFECTS = {
-  grayscale: grayscale,
-  invert: invert,
-  gaussian_blur: gaussian_blur,
-  brightness_contrast: brightness_contrast,
-  dust_removal: dust_removal,
-  posterize: posterize,
-  dithering: dithering,
-};
+export type LayerEffectMutator = (buffer: RgbaBuffer) => void;
 
-export function applyEffect(layerId: string, effect: keyof typeof EFFECTS, options?: any) {
-  const anvil = getAnvilOf(layerId);
-  if (anvil) {
-    registerWholeChange(layerId, anvil.getBufferPointer());
-    EFFECTS[effect](new Uint8Array(anvil.getBufferPointer().buffer), anvil.getWidth(), anvil.getHeight(), options);
+export function applyEffect(layerId: string | undefined, fxName: string, mutator: LayerEffectMutator) {
+  if (!layerId) return;
+  const anvil = getAnvil(layerId);
 
-    const patch = flushPatch(layerId);
-    if (patch) {
-      projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch, context: { tool: 'fx', fxName: effect } }));
-    }
-    eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: `Apply FX for ${layerId}` });
-    eventBus.emit('preview:requestUpdate', { layerId: layerId });
+  anvil.applyWholeBufferEffect(mutator);
+
+  const patch = anvil.flushDiffs();
+  if (patch) {
+    projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch, context: { tool: 'fx', fxName } }));
   }
+
+  updateWebGLCanvas(false, `Apply FX for ${layerId}`);
+  updateLayerPreview(layerId);
 }

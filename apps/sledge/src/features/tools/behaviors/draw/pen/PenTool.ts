@@ -1,56 +1,121 @@
-import { packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
+import { Anvil, PixelPatchData, ShapeMask, packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
+import { Consts } from '~/Consts';
 import { RGBAColor, transparent } from '~/features/color';
-import { activeLayer } from '~/features/layer';
-import { getBufferPointer, getWidth } from '~/features/layer/anvil/AnvilController';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { activeLayer, findLayerById } from '~/features/layer';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
 import { ShapeStore } from '~/features/tools/behaviors/draw/pen/ShapeStore';
 import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
-import { getPresetOf } from '~/features/tools/ToolController';
-import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
+import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+
+type StrokeContext = {
+  layerId: string;
+  anvil: Anvil;
+  dotMagnification: number;
+  size: number;
+  shape: 'square' | 'circle';
+  shapeMask: ShapeMask;
+};
 
 export class PenTool implements ToolBehavior {
   allowRightClick = true;
   onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
-  startTime: number | undefined = undefined;
   isShift: boolean = false;
   isCtrl: boolean = false;
 
   startPosition: Vec2 | undefined = undefined;
+  startScaledPosition: Vec2 | undefined = undefined;
 
   shapeStore = new ShapeStore();
 
   lineChunk = new LineChunk();
   strokeChunk = new StrokeChunk();
+  private strokeContext: StrokeContext | undefined = undefined;
+  private pixelAccumulator: Map<string, PixelPatchData> | undefined = undefined;
 
-  centerPosition(rawPos: Vec2, size: number): Vec2 {
-    const even = size % 2 === 0;
-    const cx = even ? Math.round(rawPos.x) : Math.floor(rawPos.x);
-    const cy = even ? Math.round(rawPos.y) : Math.floor(rawPos.y);
-    return { x: cx, y: cy };
+  private resolveStrokeContext(layerId: string, presetName: string, preset?: PenPresetConfig): StrokeContext | undefined {
+    const anvil = getAnvil(layerId);
+
+    const layer = findLayerById(layerId) ?? activeLayer();
+    const dotMagnification = layer?.dotMagnification ?? 1;
+    const resolvedPreset = preset ?? (getPresetOf(this.categoryId, presetName) as PenPresetConfig | undefined);
+    const size = resolvedPreset?.size ?? 1;
+    const shape = (resolvedPreset?.shape ?? 'square') as 'square' | 'circle';
+    const shapeMask = this.shapeStore.get(shape, size);
+    if (!shapeMask) return undefined;
+
+    this.strokeContext = { layerId, anvil, dotMagnification, size, shape, shapeMask };
+    return this.strokeContext;
   }
 
-  onStart(args: ToolArgs) {
+  private getStrokeContext(layerId: string, presetName: string, preset?: PenPresetConfig): StrokeContext | undefined {
+    if (this.strokeContext && this.strokeContext.layerId === layerId) {
+      return this.strokeContext;
+    }
+    return this.resolveStrokeContext(layerId, presetName, preset);
+  }
+
+  private ensurePixelAccumulator(): Map<string, PixelPatchData> {
+    if (!this.pixelAccumulator) {
+      this.pixelAccumulator = new Map();
+    }
+    return this.pixelAccumulator;
+  }
+
+  centerPosition(scaledPos: Vec2 | undefined, rawPos: Vec2 | undefined, size: number, dotMagnification: number): Vec2 {
+    const scale = dotMagnification || 1;
+    if (size % 2 === 0 && rawPos) {
+      return {
+        x: Math.round(rawPos.x / scale),
+        y: Math.round(rawPos.y / scale),
+      };
+    }
+    if (scaledPos) {
+      return scaledPos;
+    }
+    if (rawPos) {
+      return {
+        x: Math.floor(rawPos.x / scale),
+        y: Math.floor(rawPos.y / scale),
+      };
+    }
+    return { x: 0, y: 0 };
+  }
+
+  onStart(args: ToolArgs): ToolResult {
+    const presetName = args.presetName ?? DEFAULT_PRESET;
+    // register to history if it's new size
+    const preset = getPresetOf(TOOL_CATEGORIES.PEN, presetName) as PenPresetConfig;
+    const history: number[] = preset.sizeHistory ?? [];
+    if (preset.size && !history.includes(preset.size)) {
+      const newHistory = [preset.size, ...history].slice(0, Consts.maxSizeHistoryLength);
+      updateToolPresetConfig(TOOL_CATEGORIES.PEN, presetName, 'sizeHistory', newHistory);
+    }
+
     // 前回の状態が残っている場合はクリーンアップ
-    if (this.lineChunk.getBoundingBox()) {
+    if (this.lineChunk.hasPreview()) {
       console.warn('PenTool: Cleaning up previous preview state');
       this.undoLastLineDiff();
     }
 
-    this.startTime = Date.now();
     this.isCtrl = args.event?.ctrlKey ?? false;
     this.startPosition = args.rawPosition;
+    this.startScaledPosition = args.position;
 
     this.strokeChunk.clear();
+    this.lineChunk.clear();
+    this.pixelAccumulator = new Map();
+
+    if (!this.resolveStrokeContext(args.layerId, presetName, preset)) {
+      return { shouldUpdate: false, shouldRegisterToHistory: false };
+    }
 
     if (args.event?.shiftKey) {
       this.isShift = true;
-      const anvil = getAnvilOf(args.layerId);
-      if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-      this.lineChunk.start(anvil.getBufferCopy(), anvil.getWidth(), anvil.getHeight());
       return this.drawLine(false, args, args.color);
     } else {
       this.isShift = false;
@@ -58,7 +123,7 @@ export class PenTool implements ToolBehavior {
     }
   }
 
-  onMove(args: ToolArgs) {
+  onMove(args: ToolArgs): ToolResult {
     if (!this.isShift) {
       return this.draw(args, args.color);
     } else {
@@ -88,38 +153,43 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  draw({ position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
-    if (!presetName) return { shouldUpdate: false, shouldRegisterToHistory: false };
-
+  draw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
+    const resolvedPresetName = presetName ?? DEFAULT_PRESET;
     if (event?.buttons === 2) {
       color = transparent;
     }
 
-    const preset = getPresetOf(this.categoryId, presetName) as any;
-    const size = preset?.size ?? 1;
-    const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
+    const context = this.getStrokeContext(layerId, resolvedPresetName);
+    if (!context) return { shouldUpdate: false, shouldRegisterToHistory: false };
+    const pixelAcc = this.ensurePixelAccumulator();
 
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
-    if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-    const cp = this.centerPosition(rawPosition, size);
+    const cp = this.centerPosition(position, rawPosition, context.size, context.dotMagnification);
 
-    const diffs = putShape({ anvil, posX: cp.x, posY: cp.y, shape: this.shapeStore.get(shape, size)!, color, manualDiff: true });
-    if (diffs) this.strokeChunk.add(anvil.getWidth(), diffs);
+    const diffs = putShape({
+      anvil: context.anvil,
+      posX: cp.x,
+      posY: cp.y,
+      shape: context.shapeMask,
+      color,
+      manualDiff: true,
+      pixelAcc,
+    });
+    if (diffs) this.strokeChunk.add(context.anvil.getWidth(), diffs);
 
     if (rawLastPosition !== undefined) {
-      const fromCp = this.centerPosition(rawLastPosition, size);
-      const diffs = putShapeLine({
-        anvil,
+      const fromCp = this.centerPosition(lastPosition, rawLastPosition, context.size, context.dotMagnification);
+      const lineDiffs = putShapeLine({
+        anvil: context.anvil,
         posX: cp.x,
         posY: cp.y,
         fromPosX: fromCp.x,
         fromPosY: fromCp.y,
-        shape: this.shapeStore.get(shape, size)!,
+        shape: context.shapeMask,
         color,
         manualDiff: true,
+        pixelAcc,
       });
-      if (diffs) this.strokeChunk.add(anvil.getWidth(), diffs);
+      if (lineDiffs) this.strokeChunk.add(context.anvil.getWidth(), lineDiffs);
     }
 
     return {
@@ -129,20 +199,18 @@ export class PenTool implements ToolBehavior {
   }
 
   private undoLastLineDiff() {
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
-    if (!anvil) return;
+    const fallbackLayer = activeLayer();
+    const targetLayerId = this.strokeContext?.layerId ?? fallbackLayer?.id;
+    if (!targetLayerId) return;
 
-    const patch = this.lineChunk.getPatch();
-    if (patch) anvil.setPartialBuffer(patch.bbox, patch.patch);
-    anvil.setAllDirty();
-
-    this.lineChunk.resetBoundary();
+    const anvil = getAnvil(targetLayerId);
+    this.lineChunk.restore(anvil);
   }
 
   // 始点からの直線を描画
   drawLine(commit: boolean, { layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
-    if (!presetName || !this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
+    const resolvedPresetName = presetName ?? DEFAULT_PRESET;
+    if (!this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
     if (event?.buttons === 2) {
       color = transparent;
@@ -150,36 +218,43 @@ export class PenTool implements ToolBehavior {
 
     this.undoLastLineDiff();
 
-    // ctrl+shiftの場合は角度固定
-    const targetPosition = this.isCtrl && this.startPosition ? this.snapToAngle(rawPosition, this.startPosition) : rawPosition;
+    // ctrl+shiftの場合は角度で調整
+    const targetPosition = this.isCtrl ? this.snapToAngle(rawPosition, this.startPosition) : rawPosition;
 
-    const preset = getPresetOf(this.categoryId, presetName) as any;
-    const size = preset?.size ?? 1;
-    const shape = (preset?.shape ?? 'square') as 'square' | 'circle'; // デフォルトは正方形
+    const context = this.getStrokeContext(layerId, resolvedPresetName);
+    if (!context) return { shouldUpdate: false, shouldRegisterToHistory: false };
 
-    const layer = activeLayer();
-    const anvil = layer ? getAnvilOf(layer.id) : undefined;
-    if (!anvil) return { shouldUpdate: false, shouldRegisterToHistory: false };
-
-    const fromCp = this.centerPosition(this.startPosition, size);
-    const cp = this.centerPosition(targetPosition, size);
+    const dotMagnification = context.dotMagnification;
+    const size = context.size;
+    const scaledStart = this.startScaledPosition ?? {
+      x: Math.floor(this.startPosition.x / dotMagnification),
+      y: Math.floor(this.startPosition.y / dotMagnification),
+    };
+    const fromCp = this.centerPosition(scaledStart, this.startPosition, size, dotMagnification);
+    const scaledTarget =
+      targetPosition !== undefined
+        ? {
+            x: Math.floor(targetPosition.x / dotMagnification),
+            y: Math.floor(targetPosition.y / dotMagnification),
+          }
+        : position;
+    const cp = this.centerPosition(scaledTarget, targetPosition, size, dotMagnification);
     const diffs = putShapeLine({
-      anvil,
+      anvil: context.anvil,
       posX: cp.x,
       posY: cp.y,
       fromPosX: fromCp.x,
       fromPosY: fromCp.y,
-      shape: this.shapeStore.get(shape, size)!,
+      shape: context.shapeMask,
       color,
       manualDiff: true,
+      pixelAcc: commit ? this.ensurePixelAccumulator() : undefined,
     });
     if (diffs) {
       if (commit) {
-        this.strokeChunk.add(anvil.getWidth(), diffs);
+        this.strokeChunk.add(context.anvil.getWidth(), diffs);
       } else {
-        diffs.forEach((d) => {
-          this.lineChunk.add(d.x, d.y);
-        });
+        this.lineChunk.capture(diffs);
       }
     }
 
@@ -189,7 +264,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onEnd(args: ToolArgs) {
+  onEnd(args: ToolArgs): ToolResult {
     let { event, color, layerId } = args;
     if (event?.buttons === 2) {
       color = transparent;
@@ -202,52 +277,41 @@ export class PenTool implements ToolBehavior {
     this.isShift = false;
     this.isCtrl = false;
     this.startPosition = undefined;
+    this.startScaledPosition = undefined;
     this.lineChunk.clear();
+    this.strokeContext = undefined;
+    this.pixelAccumulator = undefined;
 
-    const anvil = getAnvilOf(layerId);
-    if (anvil) {
-      const bbox = this.strokeChunk.boundBox;
-      if (bbox) {
-        const w = bbox.maxX - bbox.minX + 1;
-        const h = bbox.maxY - bbox.minY + 1;
-        if (w <= 0 || h <= 0) {
-          console.warn('Invalid bbox dimensions:', { w, h, bbox });
-          this.strokeChunk.clear();
-          return { shouldUpdate: true, shouldRegisterToHistory: true };
+    const anvil = getAnvil(layerId);
+    const bbox = this.strokeChunk.boundBox;
+    if (bbox) {
+      const w = bbox.maxX - bbox.minX + 1;
+      const h = bbox.maxY - bbox.minY + 1;
+      if (w <= 0 || h <= 0) {
+        console.warn('Invalid bbox dimensions:', { w, h, bbox });
+        this.strokeChunk.clear();
+        return { shouldUpdate: true, shouldRegisterToHistory: true };
+      }
+      const swapBuffer = anvil.getPartialBuffer({ x: bbox.minX, y: bbox.minY, width: w, height: h });
+      const layerWidth = anvil.getWidth();
+      if (swapBuffer.length && layerWidth) {
+        for (const [layerIdx, diff] of this.strokeChunk.diffs) {
+          const pixelIdx = layerIdx / 4;
+          const x = pixelIdx % layerWidth;
+          const y = Math.floor(pixelIdx / layerWidth);
+
+          const localX = x - bbox.minX;
+          const localY = y - bbox.minY;
+          const localIdx = (localX + localY * w) * 4;
+
+          const [r, g, b, a] = packedU32ToRgba(diff.color);
+
+          swapBuffer[localIdx] = r;
+          swapBuffer[localIdx + 1] = g;
+          swapBuffer[localIdx + 2] = b;
+          swapBuffer[localIdx + 3] = a;
         }
-        const swapBuffer = new Uint8ClampedArray(w * h * 4);
-        // Layer全体バッファ取得
-        const layerBuffer = getBufferPointer(layerId);
-        const layerWidth = getWidth(layerId);
-        if (layerBuffer && layerWidth) {
-          // 現バッファから変更前の状態を取得・保存
-          for (let yy = 0; yy < h; yy++) {
-            const srcRowStart = (bbox.minX + (bbox.minY + yy) * layerWidth) * 4;
-            const dstRowStart = yy * w * 4;
-            swapBuffer.set(layerBuffer.subarray(srcRowStart, srcRowStart + w * 4), dstRowStart);
-          }
-          // ストロークによる変更を適用して「変更前の状態」を作成
-          for (const [layerIdx, diff] of this.strokeChunk.diffs) {
-            // layerIdx からピクセル座標を逆算
-            const pixelIdx = layerIdx / 4;
-            const x = pixelIdx % layerWidth;
-            const y = Math.floor(pixelIdx / layerWidth);
-
-            // bbox内でのローカル座標に変換
-            const localX = x - bbox.minX;
-            const localY = y - bbox.minY;
-            const localIdx = (localX + localY * w) * 4;
-
-            // packed RGBA32 を RGBA 成分に展開して swapBuffer に書き込み
-            const [r, g, b, a] = packedU32ToRgba(diff.color);
-
-            swapBuffer[localIdx] = r;
-            swapBuffer[localIdx + 1] = g;
-            swapBuffer[localIdx + 2] = b;
-            swapBuffer[localIdx + 3] = a;
-          }
-          anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
-        }
+        anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
       }
     }
     this.strokeChunk.clear();
@@ -258,7 +322,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  onCancel(args: ToolArgs) {
+  onCancel(args: ToolArgs): ToolResult {
     if (this.isShift) {
       this.undoLastLineDiff();
     }
@@ -266,10 +330,12 @@ export class PenTool implements ToolBehavior {
     this.isShift = false;
     this.isCtrl = false;
     this.startPosition = undefined;
-    this.startTime = undefined;
+    this.startScaledPosition = undefined;
 
     this.lineChunk.clear();
     this.strokeChunk.clear();
+    this.strokeContext = undefined;
+    this.pixelAccumulator = undefined;
 
     return {
       shouldUpdate: false,

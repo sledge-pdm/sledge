@@ -97,7 +97,7 @@ export default function App() {
             class={appRoot}
             onContextMenu={(e) => {
               e.preventDefault();
-              showContextMenu(undefined, import.meta.env.DEV ? [ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools] : [], e);
+              showContextMenu(import.meta.env.DEV ? [ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools] : [], e);
             }}
           >
             <TitleBar />

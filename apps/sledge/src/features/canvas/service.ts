@@ -5,12 +5,13 @@ import { Consts } from '~/Consts';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
 import { allLayers } from '~/features/layer';
-import { getAnvilOf } from '~/features/layer/anvil/AnvilManager';
+import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { WindowPos } from '~/types/CoordinateTypes';
 import { eventBus } from '~/utils/EventBus';
+import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export function isValidCanvasSize(size: Size2D): boolean {
   if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;
@@ -76,14 +77,14 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   eventBus.emit('canvas:sizeChanged', { newSize });
 
   for (const l of allLayers()) {
-    const anvil = getAnvilOf(l.id)!;
+    const anvil = getAnvil(l.id);
     anvil.resizeWithOffset(newSize, {
       srcOrigin,
       destOrigin,
     });
-    eventBus.emit('preview:requestUpdate', { layerId: l.id });
+    updateLayerPreview(l.id);
   }
-  eventBus.emit('webgl:requestUpdate', { onlyDirty: false, context: 'changeCanvasSize' });
+  updateWebGLCanvas(false, 'changeCanvasSize');
   if (!skipHistory) {
     act.registerAfter();
     projectHistoryController.addAction(act);
@@ -108,16 +109,25 @@ export function clipZoom(zoom: number) {
 }
 
 const referenceLengthRatio = 0.85;
+const defaultReferenceLength = 800;
+let lastMeasuredReferenceLength = defaultReferenceLength;
 const referenceLength = () => {
   const sectionBetweenArea = document.getElementById('sections-between-area');
-  if (!sectionBetweenArea) return 800 * referenceLengthRatio;
-  const areaBound = sectionBetweenArea.getBoundingClientRect();
-
-  if (areaBound.width < areaBound.height) {
-    return areaBound.width * referenceLengthRatio;
-  } else {
-    return areaBound.height * referenceLengthRatio;
+  if (!sectionBetweenArea) {
+    return lastMeasuredReferenceLength * referenceLengthRatio;
   }
+
+  const areaBound = sectionBetweenArea.getBoundingClientRect();
+  const minSide = Math.min(areaBound.width, areaBound.height);
+
+  if (minSide > 0) {
+    lastMeasuredReferenceLength = minSide;
+    return minSide * referenceLengthRatio;
+  }
+
+  const fallbackLength = Math.max(areaBound.width, areaBound.height, lastMeasuredReferenceLength, 1);
+  lastMeasuredReferenceLength = fallbackLength;
+  return fallbackLength * referenceLengthRatio;
 };
 
 export const getReferencedZoom = (length?: number) => {
@@ -131,20 +141,16 @@ export const getReferencedZoom = (length?: number) => {
 };
 
 export const adjustZoomToFit = (width?: number, height?: number) => {
-  if (width === undefined) width = canvasStore.canvas.width;
-  if (height === undefined) height = canvasStore.canvas.height;
+  width = width ?? canvasStore.canvas.width;
+  height = height ?? canvasStore.canvas.height;
   if (!width || !height) return;
 
-  const isWide = width > height;
-  const longerLength = isWide ? width : height;
-
+  const longerLength = width > height ? width : height;
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
-  // reset initialzoom
+
   setInteractStore('initialZoom', referencedZoom);
-
   setZoom(referencedZoom);
-
   centeringCanvas();
 };
 

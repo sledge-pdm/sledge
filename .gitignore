@@ -51,3 +51,5 @@ post_build.bat
 coverage
 
 wiki
+
+packages/plugins-workspace-2

@@ -39,7 +39,16 @@ uuid = { version = "1.18.1", features = ["v4"] }
 url = "2.5.7"
 
 [target."cfg(target_os = \"windows\")".dependencies]
-windows = { version = "0.62.2", features = ["Win32_Storage_FileSystem"] }
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_System_Com",
+    "Win32_UI_Shell",
+    "Win32_UI_Shell_Common",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Storage_FileSystem",
+    "Win32_NetworkManagement_WNet",
+    "Win32_System_Registry",
+] }
 
 
 [target."cfg(target_os = \"macos\")".dependencies]

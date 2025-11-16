@@ -56,6 +56,7 @@ export async function saveBlobViaTauri(blob: Blob, folderPath: string, fileName 
     await mkdir(folderPath, { recursive: true });
   }
   const filePath = normalizeJoin(folderPath, fileName);
+  console.log(filePath);
   if (await exists(filePath)) {
     const ok = await confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
       kind: 'info',

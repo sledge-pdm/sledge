@@ -1,8 +1,9 @@
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
 import { hexWithSharpToRGBA, RGBA, RGBAToHex } from '@sledge/anvil';
-import { Component, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
+import { colorStore } from '~/stores/EditorStores';
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
@@ -19,10 +20,16 @@ const ColorPicker: Component<{ width: number }> = (props) => {
 
   onMount(() => {
     window.addEventListener('pointerup', handlePointerUp);
+    return () => window.removeEventListener('pointerup', handlePointerUp);
+  });
 
-    return () => {
-      window.removeEventListener('pointerup', handlePointerUp);
-    };
+  createEffect(() => {
+    const palette = colorStore.currentPalette;
+    const paletteHex = RGBAToHex(colorStore.palettes[palette], {
+      excludeAlpha: false,
+      withSharp: true,
+    });
+    colorPicker.setColors([paletteHex]);
   });
 
   return (

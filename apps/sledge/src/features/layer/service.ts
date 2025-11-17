@@ -1,8 +1,8 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
+import { RGBA, RGBAToHex } from '@sledge/anvil';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
-import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
@@ -127,7 +127,7 @@ export async function mergeToBelowLayer(layerId: string) {
   await mergeRenderer.mergeLayer();
 }
 
-export function getCurrentPointingColor(): RGBAColor | undefined {
+export function getCurrentPointingColor(): RGBA | undefined {
   const activeAnvil = getAnvil(layerListStore.activeLayerId);
   const x = Math.floor(interactStore.lastMouseOnCanvas.x);
   const y = Math.floor(interactStore.lastMouseOnCanvas.y);
@@ -137,7 +137,12 @@ export function getCurrentPointingColor(): RGBAColor | undefined {
 
 export function getCurrentPointingColorHex(): string | undefined {
   const c = getCurrentPointingColor();
-  return c ? `#${RGBAToHex(c, false)}` : undefined;
+  return c
+    ? RGBAToHex(c, {
+        excludeAlpha: false,
+        withSharp: true,
+      })
+    : undefined;
 }
 
 // Layer list management

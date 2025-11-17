@@ -1,16 +1,16 @@
+import { RGBA } from '@sledge/anvil';
 import { Slider } from '@sledge/ui';
-import { Component, createMemo, createSignal, onMount } from 'solid-js';
+import { Component, createSignal, onMount } from 'solid-js';
 import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tabs/SliderStyles';
-import { currentColor, hexToRGBA, registerColorChange, RGBAColor, RGBAToHex } from '~/features/color';
-import { colorStore, setColorStore } from '~/stores/EditorStores';
+import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 
 const RGB: Component = (props) => {
-  const [colorOnPointerDown, setColorOnPointerDown] = createSignal<RGBAColor | undefined>(undefined);
+  const [colorOnPointerDown, setColorOnPointerDown] = createSignal<RGBA | undefined>(undefined);
 
   const handlePointerUp = () => {
     const oldColor = colorOnPointerDown();
     if (oldColor) {
-      registerColorChange(oldColor, hexToRGBA(currentColor()));
+      registerColorChange(oldColor, currentColor());
     }
     setColorOnPointerDown(undefined);
   };
@@ -23,8 +23,6 @@ const RGB: Component = (props) => {
     };
   });
 
-  const rgba = createMemo(() => hexToRGBA(colorStore[colorStore.currentPalette]));
-
   return (
     <div class={sliderContentRoot}>
       <div class={sliderContainer}>
@@ -35,14 +33,14 @@ const RGB: Component = (props) => {
           min={0}
           max={255}
           allowFloat={false}
-          value={rgba()[0]}
+          value={currentColor()[0]}
           onPointerDownOnValidArea={(e) => {
-            setColorOnPointerDown(hexToRGBA(currentColor()));
+            setColorOnPointerDown(currentColor());
             return true;
           }}
           onChange={(v) => {
-            const color: RGBAColor = [v, rgba()[1], rgba()[2], rgba()[3]];
-            setColorStore(colorStore.currentPalette, '#' + RGBAToHex(color, true));
+            const color: RGBA = [v, currentColor()[1], currentColor()[2], currentColor()[3]];
+            setCurrentColor(color);
           }}
         />
       </div>
@@ -55,14 +53,14 @@ const RGB: Component = (props) => {
           min={0}
           max={255}
           allowFloat={false}
-          value={rgba()[1]}
+          value={currentColor()[1]}
           onPointerDownOnValidArea={(e) => {
-            setColorOnPointerDown(hexToRGBA(currentColor()));
+            setColorOnPointerDown(currentColor());
             return true;
           }}
           onChange={(v) => {
-            const color: RGBAColor = [rgba()[0], v, rgba()[2], rgba()[3]];
-            setColorStore(colorStore.currentPalette, '#' + RGBAToHex(color, true));
+            const color: RGBA = [currentColor()[0], v, currentColor()[2], currentColor()[3]];
+            setCurrentColor(color);
           }}
         />
       </div>
@@ -75,14 +73,14 @@ const RGB: Component = (props) => {
           min={0}
           max={255}
           allowFloat={false}
-          value={rgba()[2]}
+          value={currentColor()[2]}
           onPointerDownOnValidArea={(e) => {
-            setColorOnPointerDown(hexToRGBA(currentColor()));
+            setColorOnPointerDown(currentColor());
             return true;
           }}
           onChange={(v) => {
-            const color: RGBAColor = [rgba()[0], rgba()[1], v, rgba()[3]];
-            setColorStore(colorStore.currentPalette, '#' + RGBAToHex(color, true));
+            const color: RGBA = [currentColor()[0], currentColor()[1], v, currentColor()[3]];
+            setCurrentColor(color);
           }}
         />
       </div>

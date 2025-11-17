@@ -122,7 +122,6 @@ class CanvasAreaInteract {
     } else {
       // タッチ以外
       if (e.pointerType === 'mouse') {
-        console.log(e.button);
         if (e.button === 3) {
           e.preventDefault();
           e.stopImmediatePropagation();

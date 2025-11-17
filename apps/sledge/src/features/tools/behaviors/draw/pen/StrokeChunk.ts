@@ -1,4 +1,4 @@
-import { PixelPatchData, rgbaToPackedU32 } from '@sledge/anvil';
+import { type PixelPatchData, rgbaToPackedU32 } from '@sledge/anvil';
 
 export interface CompactPixelDiff {
   color: number; // packed RGBA32

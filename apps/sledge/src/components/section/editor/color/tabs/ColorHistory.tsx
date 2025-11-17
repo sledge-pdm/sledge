@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { ColorBox } from '@sledge/ui';
 import { Component, For } from 'solid-js';
-import { currentColor, getColorHistory, hexToRGBA, registerColorChange, RGBAToHex, setCurrentColor } from '~/features/color';
+import { currentColor, getColorHistory, registerColorChange, setCurrentColor } from '~/features/color';
 
 const container = css`
   display: flex;
@@ -18,10 +18,10 @@ const ColorHistory: Component = () => {
       <For each={getColorHistory()}>
         {(item) => (
           <ColorBox
-            color={`#${RGBAToHex(item)}`}
+            color={item}
             sizePx={15}
             onClick={(color) => {
-              registerColorChange(hexToRGBA(currentColor()), hexToRGBA(color), {
+              registerColorChange(currentColor(), color, {
                 replaceSameColor: true,
               });
               setCurrentColor(color);

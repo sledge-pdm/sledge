@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
-import { currentColor, hexToRGBA, PaletteType, registerColorChange, selectPalette, setColor, setCurrentColor } from '~/features/color';
+import { currentColor, PaletteType, registerColorChange, selectPalette, setCurrentColor, setPaletteColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { getEntry, ImagePoolEntry, insertEntry } from '~/features/image_pool';
 import { canvasStore, setImagePoolStore } from '~/stores/ProjectStores';
@@ -19,7 +19,7 @@ describe('Project-level history integration', () => {
   beforeEach(() => {
     // Reset color to a known state
     selectPalette(PaletteType.primary);
-    setColor(PaletteType.primary, '#000000');
+    setPaletteColor(PaletteType.primary, [0, 0, 0, 255]);
     // Reset imagePool store
     setImagePoolStore('entries', []);
     setImagePoolStore('selectedEntryId', undefined);
@@ -94,8 +94,8 @@ describe('Project-level history integration', () => {
     };
 
     // 1) Apply actual operations
-    registerColorChange(hexToRGBA('#000000'), hexToRGBA('#ff0000'));
-    setCurrentColor('#ff0000');
+    registerColorChange([0, 0, 0, 255], [255, 0, 0, 255]);
+    setCurrentColor([255, 0, 0, 255]);
     if (LOG_SEQ) logs.push('Color #000000 -> #ff0000');
 
     changeCanvasSizeWithNoOffset(targetCanvas);
@@ -105,21 +105,21 @@ describe('Project-level history integration', () => {
     if (LOG_SEQ) logs.push('ImagePool add int-fixed');
 
     // Verify present state
-    expect(currentColor()).toBe('#ff0000');
+    expect(currentColor()).toStrictEqual([255, 0, 0, 255]);
     expect(canvasStore.canvas.width).toBe(targetCanvas.width);
     expect(canvasStore.canvas.height).toBe(targetCanvas.height);
     expect(getEntry('int-fixed')).toBeDefined();
 
     // Full undo
     while (hc.canUndo()) hc.undo();
-    expect(currentColor()).toBe('#000000');
+    expect(currentColor()).toStrictEqual([0, 0, 0, 255]);
     expect(canvasStore.canvas.width).toBe(initialCanvas.width);
     expect(canvasStore.canvas.height).toBe(initialCanvas.height);
     expect(getEntry('int-fixed')).toBeUndefined();
 
     // Full redo
     while (hc.canRedo()) hc.redo();
-    expect(currentColor()).toBe('#ff0000');
+    expect(currentColor()).toStrictEqual([255, 0, 0, 255]);
     expect(canvasStore.canvas.width).toBe(targetCanvas.width);
     expect(canvasStore.canvas.height).toBe(targetCanvas.height);
     expect(getEntry('int-fixed')).toBeDefined();
@@ -135,18 +135,18 @@ describe('Project-level history integration', () => {
     hc.clearHistory(); // Clear history before test
 
     // Apply color change
-    registerColorChange(hexToRGBA('#000000'), hexToRGBA('#ff0000'));
-    setCurrentColor('#ff0000');
+    registerColorChange([0, 0, 0, 255], [255, 0, 0, 255]);
+    setCurrentColor([255, 0, 0, 255]);
 
     // At this point color is red
     hc.undo();
     // extra undo (no-op)
     hc.undo();
-    expect(currentColor()).toBe('#000000');
+    expect(currentColor()).toStrictEqual([0, 0, 0, 255]);
 
     hc.redo();
     // extra redo (no-op)
     hc.redo();
-    expect(currentColor()).toBe('#ff0000');
+    expect(currentColor()).toStrictEqual([255, 0, 0, 255]);
   });
 });

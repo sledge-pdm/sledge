@@ -39,42 +39,6 @@ export default defineConfig({
       ignored: ['**/src-tauri/**', '**/.vite-inspect/**'],
     },
   },
-  worker: {
-    // Not needed with vite-plugin-top-level-await >= 1.3.0
-    format: 'es',
-    plugins: () => [wasmPlugin(), topLevelAwait()],
-  },
-  optimizeDeps: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
-    include: [
-      // Tauri APIs - 個別にpre-bundlingして高速化
-      '@tauri-apps/api/app',
-      '@tauri-apps/api/core',
-      '@tauri-apps/api/event',
-      '@tauri-apps/api/path',
-      // '@tauri-apps/api/fs',
-      // '@tauri-apps/api/dialog',
-      // Tauri プラグイン
-      '@tauri-apps/plugin-os',
-      // 外部ライブラリ
-      'mitt',
-      'uuid',
-      'interactjs',
-      'msgpackr',
-      // SolidJS関連（よく使用されるもの）
-      '@solid-primitives/map',
-      '@solid-primitives/mouse',
-      '@solid-primitives/timer',
-    ],
-    exclude: [
-      '@solid-primitives/raf',
-      // WASMモジュールはpre-bundlingから除外
-      '@sledge/wasm',
-      // VanillaExtractのランタイムをpre-bundlingから除外（処理速度向上）
-      '@vanilla-extract/css',
-      '@vanilla-extract/dynamic',
-    ],
-  },
   publicDir: '../../assets',
   resolve: {
     alias: {

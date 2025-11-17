@@ -1,6 +1,7 @@
+import { RGBA } from '@sledge/anvil';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
-import { currentColor, hexToRGBA, PaletteType, registerColorChange, selectPalette, setColor, setCurrentColor } from '~/features/color';
+import { currentColor, PaletteType, registerColorChange, selectPalette, setCurrentColor, setPaletteColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { getEntry, ImagePoolEntry, insertEntry, removeEntry, updateEntryPartial } from '~/features/image_pool';
@@ -28,7 +29,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
   beforeEach(() => {
     // Normalize color and image pool before each test
     selectPalette(PaletteType.primary);
-    setColor(PaletteType.primary, '#000000');
+    setPaletteColor(PaletteType.primary, [0, 0, 0, 255]);
 
     // Reset imagePool store
     setImagePoolStore('entries', []);
@@ -122,11 +123,16 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
       const pick = Math.floor(rng() * 7); // 7 kinds
       if (pick === 0) {
         // Color toggle among a tiny palette
-        const targets = ['#000000', '#ff0000', '#00ff00', '#0000ff'] as const;
+        const targets: RGBA[] = [
+          [0, 0, 0, 255],
+          [255, 0, 0, 255],
+          [0, 255, 0, 255],
+          [0, 0, 255, 255],
+        ] as const;
         const next = targets[Math.floor(rng() * targets.length)];
         const prev = currentColor();
         steps.push(() => {
-          registerColorChange(hexToRGBA(prev), hexToRGBA(next));
+          registerColorChange(prev, next);
           setCurrentColor(next);
         });
         stepDescs.push(`Color ${prev} -> ${next}`);

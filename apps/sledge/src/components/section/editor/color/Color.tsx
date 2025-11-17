@@ -1,7 +1,8 @@
 import { css } from '@acab/ecsstatic';
-import { Component, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { Component, createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
 import ColorPicker from '~/components/section/editor/color/tabs/ColorPicker';
 
+import { hexToRGBA, RGBAToHex } from '@sledge/anvil';
 import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
@@ -10,7 +11,7 @@ import ColorHistory from '~/components/section/editor/color/tabs/ColorHistory';
 import RGB from '~/components/section/editor/color/tabs/RGB';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
-import { currentColor, hexToRGBA, PaletteType, registerColorChange, RGBAToHex, setCurrentColor } from '~/features/color';
+import { currentColor, PaletteType, registerColorChange, setCurrentColor } from '~/features/color';
 import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools/ToolController';
 import { accentedButton, flexCol } from '~/styles/styles';
 
@@ -125,6 +126,14 @@ const Color: Component = () => {
   const [tab, setTab] = createSignal<string>(tabs[0]);
 
   const [isColorInput, setIsColorInput] = createSignal(false);
+
+  const displayColorHex = createMemo(() => {
+    return RGBAToHex(currentColor(), {
+      excludeAlpha: true,
+      withSharp: false,
+    });
+  });
+
   return (
     <SectionItem title='color.'>
       <div class={clsx(sectionContent, colorSectionContainer)} style={{ width: 'fit-content' }}>
@@ -177,10 +186,10 @@ const Color: Component = () => {
                   setIsColorInput(true);
                   const colorInput = document.getElementById('color-input') as HTMLInputElement;
                   colorInput?.focus();
-                  colorInput?.setSelectionRange(0, 7);
+                  colorInput?.setSelectionRange(0, 6);
                 }}
               >
-                {currentColor().slice(1, 7)}
+                {displayColorHex()}
               </a>
             }
           >
@@ -189,10 +198,9 @@ const Color: Component = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 const colorInput = document.getElementById('color-input') as HTMLInputElement;
-                const value = '#' + colorInput.value;
-                const rgba = hexToRGBA(value);
-                registerColorChange(hexToRGBA(currentColor()), rgba);
-                setCurrentColor('#' + RGBAToHex(rgba));
+                const rgba = hexToRGBA(colorInput.value);
+                registerColorChange(currentColor(), rgba);
+                setCurrentColor(rgba);
 
                 setIsColorInput(false);
               }}
@@ -200,7 +208,7 @@ const Color: Component = () => {
               <input
                 id='color-input'
                 class={currentColorInput}
-                value={currentColor().slice(1, 7)}
+                value={displayColorHex()}
                 autocomplete='off'
                 onKeyDown={(e) => {
                   e.stopPropagation();

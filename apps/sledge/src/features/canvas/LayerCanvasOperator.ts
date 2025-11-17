@@ -1,5 +1,5 @@
 import { Vec2 } from '@sledge/core';
-import { currentColor, hexToRGBA } from '~/features/color';
+import { currentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
@@ -68,7 +68,7 @@ export default class LayerCanvasOperator {
       position,
       lastPosition,
       presetName: toolCategory.presets?.selected,
-      color: hexToRGBA(currentColor()),
+      color: currentColor(),
       event: originalEvent,
     };
     const result = this.useTool(state, toolCategory, toolArgs);

@@ -1,5 +1,5 @@
+import { RGBA } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { RGBAColor } from '~/features/color';
 // LayerImageAgent 依存を除去し AnvilToolContext を利用
 //import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
@@ -11,7 +11,7 @@ import { FillPresetConfig } from '~/features/tools/Tools';
 
 export interface FillProps {
   layerId: string;
-  color: RGBAColor;
+  color: RGBA;
   position: Vec2;
   threshold?: number;
 }

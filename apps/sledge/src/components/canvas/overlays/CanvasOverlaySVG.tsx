@@ -1,7 +1,7 @@
+import { RGBAToHex } from '@sledge/anvil';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
-import { RGBAToHex } from '~/features/color';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionOffset } from '~/features/selection/SelectionOperator';

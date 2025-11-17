@@ -1,8 +1,8 @@
+import type { RGBA } from '@sledge/anvil';
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { RGBAColor } from '~/features/color';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 
-function makeBuffer(w: number, h: number, color: RGBAColor = [0, 0, 0, 0]) {
+function makeBuffer(w: number, h: number, color: RGBA = [0, 0, 0, 0]) {
   const buf = new Uint8ClampedArray(w * h * 4);
   for (let i = 0; i < buf.length; i += 4) {
     buf[i] = color[0];
@@ -23,7 +23,7 @@ describe('Anvil integration with LayerImageAgent', () => {
   });
 
   it('should create anvil instance alongside LayerImageAgent', () => {
-    const initial: RGBAColor = [100, 150, 200, 255];
+    const initial: RGBA = [100, 150, 200, 255];
     const buf = makeBuffer(W, H, initial);
 
     const anvil = anvilManager.registerAnvil('L1', buf, W, H);
@@ -34,7 +34,7 @@ describe('Anvil integration with LayerImageAgent', () => {
   });
 
   it('should sync buffer data between agent and anvil', () => {
-    const initial: RGBAColor = [100, 150, 200, 255];
+    const initial: RGBA = [100, 150, 200, 255];
     const buf = makeBuffer(W, H, initial);
 
     const anvil = anvilManager.registerAnvil('L1', buf, W, H);
@@ -45,8 +45,8 @@ describe('Anvil integration with LayerImageAgent', () => {
   });
 
   it('should sync buffer when setBuffer is called', () => {
-    const initial: RGBAColor = [100, 150, 200, 255];
-    const newColor: RGBAColor = [255, 0, 0, 255];
+    const initial: RGBA = [100, 150, 200, 255];
+    const newColor: RGBA = [255, 0, 0, 255];
     const initialBuf = makeBuffer(W, H, initial);
     const newBuf = makeBuffer(W, H, newColor);
 
@@ -62,7 +62,7 @@ describe('Anvil integration with LayerImageAgent', () => {
   });
 
   it('should handle resize operations', () => {
-    const initial: RGBAColor = [100, 150, 200, 255];
+    const initial: RGBA = [100, 150, 200, 255];
     const buf = makeBuffer(W, H, initial);
 
     const anvil = anvilManager.registerAnvil('L1', buf, W, H);
@@ -79,8 +79,8 @@ describe('Anvil integration with LayerImageAgent', () => {
   });
 
   it('should maintain separate anvil instances per layer', () => {
-    const color1: RGBAColor = [255, 0, 0, 255];
-    const color2: RGBAColor = [0, 255, 0, 255];
+    const color1: RGBA = [255, 0, 0, 255];
+    const color2: RGBA = [0, 255, 0, 255];
     const buf1 = makeBuffer(W, H, color1);
     const buf2 = makeBuffer(W, H, color2);
 
@@ -93,8 +93,8 @@ describe('Anvil integration with LayerImageAgent', () => {
   });
 
   it('should handle basic pixel operations through anvil', () => {
-    const initial: RGBAColor = [0, 0, 0, 0];
-    const testColor: RGBAColor = [255, 128, 64, 255];
+    const initial: RGBA = [0, 0, 0, 0];
+    const testColor: RGBA = [255, 128, 64, 255];
     const buf = makeBuffer(W, H, initial);
 
     const anvil = anvilManager.registerAnvil('L1', buf, W, H);

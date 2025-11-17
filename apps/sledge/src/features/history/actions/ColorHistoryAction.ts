@@ -1,10 +1,11 @@
-import { PaletteType, RGBAColor, RGBAToHex, setColor } from '~/features/color';
+import { RGBA } from '@sledge/anvil';
+import { PaletteType, setPaletteColor } from '~/features/color';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface ColorHistoryActionProps extends BaseHistoryActionProps {
   palette: PaletteType;
-  oldColor: RGBAColor;
-  newColor: RGBAColor;
+  oldColor: RGBA;
+  newColor: RGBA;
 }
 
 // history action for color change in palette
@@ -12,8 +13,8 @@ export class ColorHistoryAction extends BaseHistoryAction {
   readonly type = 'color' as const;
 
   palette: PaletteType;
-  oldColor: RGBAColor;
-  newColor: RGBAColor;
+  oldColor: RGBA;
+  newColor: RGBA;
 
   constructor(public readonly props: ColorHistoryActionProps) {
     super(props);
@@ -23,11 +24,11 @@ export class ColorHistoryAction extends BaseHistoryAction {
   }
 
   undo(): void {
-    setColor(this.palette, `#${RGBAToHex(this.oldColor, true)}`);
+    setPaletteColor(this.palette, this.oldColor);
   }
 
   redo(): void {
-    setColor(this.palette, `#${RGBAToHex(this.newColor, true)}`);
+    setPaletteColor(this.palette, this.newColor);
   }
 
   serialize(): SerializedHistoryAction {

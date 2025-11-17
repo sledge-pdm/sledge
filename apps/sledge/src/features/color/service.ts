@@ -1,29 +1,28 @@
 // Side-effectful operations / state interactions for color feature
+import { colorMatch, RGBA } from '@sledge/anvil';
 import { Consts } from '~/Consts';
-import { colorMatch, RGBAColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 import { PaletteType } from './palette';
 
-export const currentColor = (): string => {
-  return colorStore[colorStore.currentPalette];
+export const currentColor = (): RGBA => {
+  return colorStore.palettes[colorStore.currentPalette];
 };
 
-export const setCurrentColor = (colorHexString: string) => {
-  const palette = colorStore.currentPalette;
-  // const oldHex = colorStore[palette];
-  const result = setColorStore(palette, colorHexString);
+export const getPaletteColor = (type: PaletteType) => {
+  return colorStore.palettes[type];
+};
+
+export const setCurrentColor = (color: RGBA) => {
+  const result = setColorStore('palettes', colorStore.currentPalette, color);
   return result;
 };
+export const setPaletteColor = (palette: PaletteType, color: RGBA) => {
+  return setColorStore('palettes', palette, color);
+};
 
-export const getColorByPalette = (type: PaletteType) => {
-  return colorStore[type];
-};
-export const setColor = (palette: PaletteType, colorHexString: string) => {
-  return setColorStore(palette, colorHexString);
-};
 export const selectPalette = (palette: PaletteType) => {
   return setColorStore('currentPalette', palette);
 };
@@ -43,7 +42,7 @@ interface AddColorHistoryOptions {
   replaceSameColor: boolean;
 }
 
-export const addColorHistory = (color: RGBAColor, options?: AddColorHistoryOptions) => {
+export const addColorHistory = (color: RGBA, options?: AddColorHistoryOptions) => {
   setColorStore('history', (old) => {
     if (options?.replaceSameColor) {
       old = old.filter((c) => !colorMatch(c, color));
@@ -58,7 +57,7 @@ interface RegisterColorChangeOptions {
   replaceSameColor: boolean;
 }
 
-export const registerColorChange = (oldColor: RGBAColor, newColor: RGBAColor, options?: RegisterColorChangeOptions) => {
+export const registerColorChange = (oldColor: RGBA, newColor: RGBA, options?: RegisterColorChangeOptions) => {
   if (oldColor === newColor) return;
 
   // add project history

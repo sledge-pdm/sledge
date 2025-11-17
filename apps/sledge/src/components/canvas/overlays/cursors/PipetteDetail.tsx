@@ -1,9 +1,10 @@
 import { css } from '@acab/ecsstatic';
+import { isTransparent, transparent } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { color, fonts } from '@sledge/theme';
 import { ColorBox } from '@sledge/ui';
 import { Component, Show } from 'solid-js';
-import { currentColor, isTransparent, transparent } from '~/features/color';
+import { currentColor } from '~/features/color';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';
 
 const pipetteDetailContainer = css`

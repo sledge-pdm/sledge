@@ -1,21 +1,18 @@
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
-import { currentColor, hexToRGBA, registerColorChange, RGBAColor, setCurrentColor } from '~/features/color';
+import { hexWithSharpToRGBA, RGBA, RGBAToHex } from '@sledge/anvil';
+import { Component, createSignal, onMount } from 'solid-js';
+import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 
 const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
 
-  const [colorOnPointerDown, setColorOnPointerDown] = createSignal<RGBAColor | undefined>(undefined);
-
-  createEffect(() => {
-    colorPicker.setColors([currentColor()]);
-  });
+  const [colorOnPointerDown, setColorOnPointerDown] = createSignal<RGBA | undefined>(undefined);
 
   const handlePointerUp = () => {
     const oldColor = colorOnPointerDown();
     if (oldColor) {
-      registerColorChange(oldColor, hexToRGBA(colorPicker.color.hexString));
+      registerColorChange(oldColor, hexWithSharpToRGBA(colorPicker.color.hexString));
     }
     setColorOnPointerDown(undefined);
   };
@@ -34,7 +31,10 @@ const ColorPicker: Component<{ width: number }> = (props) => {
         colorPicker = iro.ColorPicker(el, {
           width: props.width,
           padding: 0,
-          color: currentColor(),
+          color: RGBAToHex(currentColor(), {
+            excludeAlpha: false,
+            withSharp: true,
+          }),
           handleRadius: 4,
           layoutDirection: 'horizontal',
           layout: [
@@ -57,12 +57,13 @@ const ColorPicker: Component<{ width: number }> = (props) => {
             },
           ],
         });
-        colorPicker.on('color:change', function (color: any) {
-          setCurrentColor(color.hexString);
+        colorPicker.on('color:change', (color: any) => {
+          const rgba = hexWithSharpToRGBA(color.hexString);
+          setCurrentColor(rgba);
         });
       }}
       onPointerDown={(e) => {
-        setColorOnPointerDown(hexToRGBA(currentColor()));
+        setColorOnPointerDown(currentColor());
       }}
     />
   );

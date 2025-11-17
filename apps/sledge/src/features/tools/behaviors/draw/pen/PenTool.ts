@@ -1,7 +1,6 @@
-import { Anvil, PixelPatchData, ShapeMask, packedU32ToRgba, putShape, putShapeLine } from '@sledge/anvil';
+import { Anvil, type PixelPatchData, RGBA, ShapeMask, packedU32ToRgba, putShape, putShapeLine, transparent } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { Consts } from '~/Consts';
-import { RGBAColor, transparent } from '~/features/color';
 import { activeLayer, findLayerById } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
@@ -153,7 +152,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  draw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  draw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBA): ToolResult {
     const resolvedPresetName = presetName ?? DEFAULT_PRESET;
     if (event?.buttons === 2) {
       color = transparent;
@@ -208,7 +207,7 @@ export class PenTool implements ToolBehavior {
   }
 
   // 始点からの直線を描画
-  drawLine(commit: boolean, { layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBAColor): ToolResult {
+  drawLine(commit: boolean, { layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBA): ToolResult {
     const resolvedPresetName = presetName ?? DEFAULT_PRESET;
     if (!this.startPosition) return { shouldUpdate: false, shouldRegisterToHistory: false };
 

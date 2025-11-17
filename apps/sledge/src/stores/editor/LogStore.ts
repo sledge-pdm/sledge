@@ -1,8 +1,8 @@
+import { RGBA } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { RGBAColor } from '~/features/color';
 
 type DebugPoint = Vec2 & {
-  color: RGBAColor;
+  color: RGBA;
 };
 
 export type BottomBarKind = 'info' | 'warn' | 'error';

@@ -1,4 +1,4 @@
-import { Anvil, PixelPatchData } from '@sledge/anvil';
+import { Anvil, type PixelPatchData } from '@sledge/anvil';
 
 /**
  * Tracks the temporary diffs created while showing Shift-line previews so they

@@ -218,6 +218,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@sledge/anvil':
+        specifier: workspace:*
+        version: link:../anvil
       solid-js:
         specifier: ^1.9.10
         version: 1.9.10

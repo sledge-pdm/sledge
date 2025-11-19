@@ -3,13 +3,13 @@ import { Vec2 } from '@sledge/core';
 import { Consts } from '~/Consts';
 import { activeLayer, findLayerById } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logSystemWarn, logUserInfo } from '~/features/log/service';
 import { LineChunk } from '~/features/tools/behaviors/draw/pen/LineChunk';
 import { ShapeStore } from '~/features/tools/behaviors/draw/pen/ShapeStore';
 import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
-import { logSystemWarn, logUserInfo } from '~/features/log/service';
 
 type StrokeContext = {
   layerId: string;

@@ -2,10 +2,10 @@ import { Size2D } from '@sledge/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logSystemWarn } from '~/features/log/service';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { logSystemWarn } from '~/features/log/service';
 
 type LayerBufferSnapshot = { layerId: string; dotMag: number; webpBuffer: Uint8Array };
 

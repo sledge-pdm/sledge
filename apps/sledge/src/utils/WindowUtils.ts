@@ -4,8 +4,8 @@ import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
 import { message } from '@tauri-apps/plugin-dialog';
 import { exit } from '@tauri-apps/plugin-process';
-import { globalConfig } from '~/stores/GlobalStores';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
+import { globalConfig } from '~/stores/GlobalStores';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
 

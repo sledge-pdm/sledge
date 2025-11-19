@@ -13,13 +13,13 @@ import {
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { activeLayer } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { logSystemInfo, logSystemWarn } from '~/features/log/service';
 
 export type PixelFragment = {
   kind: 'pixel';

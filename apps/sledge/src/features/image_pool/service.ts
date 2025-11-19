@@ -7,7 +7,7 @@ import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHist
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { logSystemError, logSystemWarn, logUserInfo, logUserWarn } from '~/features/log/service';
+import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';

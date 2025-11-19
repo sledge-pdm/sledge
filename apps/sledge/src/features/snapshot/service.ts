@@ -5,10 +5,10 @@ import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { loadProjectJson } from '~/features/io/project/in/load';
 import { dumpProjectJson } from '~/features/io/project/out/dump';
+import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
-import { logSystemError } from '~/features/log/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {

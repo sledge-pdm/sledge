@@ -1,8 +1,8 @@
 import { isTransparent, RGBA, RGBAToHex, transparent } from '@sledge/anvil';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { logUserInfo } from '~/features/log/service';
+import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;
@@ -40,7 +40,7 @@ export class PipetteTool implements ToolBehavior {
       registerColorChange(currentColor(), pickColor);
       setCurrentColor(pickColor);
       const includeAlpha = pickColor[3] !== 255;
-      const hex = RGBAToHex(pickColor, { includeAlpha });
+      const hex = RGBAToHex(pickColor, { excludeAlpha: !includeAlpha });
       logUserInfo(`Color picked #${hex}`);
     }
 

@@ -1,4 +1,3 @@
-import { formatDetail } from '~/features/log/service';
 import { LogKind } from '~/stores/editor/LogStore';
 import { setLogStore, toolStore } from '~/stores/EditorStores';
 

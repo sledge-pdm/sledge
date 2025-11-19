@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
-import { logSystemWarn } from '~/features/log/service';
 import { coordinateTransform, getDebugTransformInfo } from '~/features/canvas/transform/CanvasPositionCalculator';
+import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { CanvasPos, WindowPos } from '~/types/CoordinateTypes';

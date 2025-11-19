@@ -1,9 +1,9 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
+import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
-import { logSystemWarn } from '~/features/log/service';
 import { calculateRulerMarks, RectSnapshot, RulerCalculationContext, RulerCalculationResult, RulerMark } from './RulerCalculator';
 
 const rulerRoot = css`

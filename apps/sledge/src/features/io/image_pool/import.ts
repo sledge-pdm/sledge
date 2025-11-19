@@ -1,6 +1,6 @@
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
-import { exportDir } from '~/utils/FileUtils';
 import { logUserWarn } from '~/features/log/service';
+import { exportDir } from '~/utils/FileUtils';
 
 export const importableImageExtensions = ['png', 'jpg', 'webp', 'gif'];
 

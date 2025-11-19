@@ -1,4 +1,5 @@
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
+import { logUserWarn } from '~/features/log/service';
 import { exportDir } from '~/utils/FileUtils';
 
 export const importableImageExtensions = ['png', 'jpg', 'webp', 'gif'];
@@ -18,7 +19,7 @@ export async function openImageImportDialog(): Promise<string | string[] | undef
   });
 
   if (!file) {
-    console.error('file not selected');
+    logUserWarn('file not selected.', { label: 'ImagePoolImport' });
     return undefined;
   }
   return file;

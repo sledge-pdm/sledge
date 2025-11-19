@@ -7,6 +7,7 @@ import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHist
 import { ImagePoolEntry } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
@@ -43,7 +44,7 @@ export function removeEntry(id: string, noDiff?: boolean) {
   const oldEntries = imagePoolStore.entries.slice();
   const entry = getEntry(id);
   if (!entry) {
-    console.warn(`ImagePoolController.removeEntry: Entry not found for id ${id}`);
+    logUserWarn(`ImagePool entry ${id} not found.`, { label: 'ImagePool' });
     return;
   }
 
@@ -82,15 +83,20 @@ export async function addImagesFromLocal(imagePaths: string | string[], forceFit
         insertEntry(entry, false);
       })
     );
+    if (imagePaths.length > 0) {
+      logUserInfo(`Added ${imagePaths.length} image(s) to image pool.`);
+    }
   } else {
     const entry = await createEntryFromLocalImage(imagePaths, forceFit);
     insertEntry(entry, false);
+    logUserInfo('Image added to image pool.');
   }
 }
 
 export async function addImagesFromRawBuffer(rawBuffer: RawPixelData, width: number, height: number, forceFit?: boolean) {
   const entry = await createEntryFromRawBuffer(rawBuffer, width, height, forceFit);
   insertEntry(entry, false);
+  logUserInfo('Image added to image pool.');
 }
 
 export async function transferToCurrentLayer(entryId: string, removeAfter: boolean) {
@@ -100,8 +106,9 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
   try {
     transferToLayer(active.id, entryId);
     if (removeAfter) removeEntry(entryId); // ImagePool から削除
+    logUserInfo('Image transferred to active layer.');
   } catch (e) {
-    console.error(e);
+    logSystemError('Image transfer failed.', { label: 'ImagePool', details: [e] });
   }
 }
 

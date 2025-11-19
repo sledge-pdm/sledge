@@ -13,6 +13,7 @@ import {
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { activeLayer } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
@@ -118,7 +119,11 @@ class SelectionAreaManager {
 
     // キャンバスサイズ変更が来たら、両方のマスクをリサイズ
     eventBus.on('canvas:sizeChanged', (e: any) => {
-      console.log('SelectionManager: Received canvas:sizeChanged event', e.newSize);
+      logSystemInfo('SelectionManager: Received canvas:sizeChanged event', {
+        label: 'SelectionAreaManager',
+        details: [e.newSize],
+        debugOnly: true,
+      });
       this.selectionMask.changeSize(e.newSize);
       if (this.previewMask) {
         this.previewMask.changeSize(e.newSize);
@@ -149,7 +154,9 @@ class SelectionAreaManager {
     eventBus.emit('selection:updateSelectionPath', {});
 
     if (this.selectionMask.getWidth() === 0 || this.selectionMask.getHeight() === 0) {
-      console.warn('SelectionManager: SelectionMask size is 0x0. Canvas size may not be initialized properly.');
+      logSystemWarn('SelectionManager: SelectionMask size is 0x0. Canvas size may not be initialized properly.', {
+        label: 'SelectionAreaManager',
+      });
       return;
     }
 
@@ -172,7 +179,9 @@ class SelectionAreaManager {
 
     // マスクサイズが0x0の場合はエラーログを出力して早期リターン
     if (this.previewMask.getWidth() === 0 || this.previewMask.getHeight() === 0) {
-      console.warn('SelectionManager: PreviewMask size is 0x0. Canvas size may not be initialized properly.');
+      logSystemWarn('SelectionManager: PreviewMask size is 0x0. Canvas size may not be initialized properly.', {
+        label: 'SelectionAreaManager',
+      });
       return;
     }
 

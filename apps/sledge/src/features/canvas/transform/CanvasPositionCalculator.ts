@@ -1,4 +1,5 @@
 import { Vec2 } from '@sledge/core';
+import { logSystemWarn } from '~/features/log/service';
 import { CanvasPos, WindowPos } from '~/types/CoordinateTypes';
 import { coordinateTransform } from './UnifiedCoordinateTransform';
 
@@ -33,7 +34,10 @@ export function screenToCanvasForOverlay(pos: Vec2): Vec2 {
 export function clientPositionToCanvasPositionWithoutRotation(clientPos: Vec2): Vec2 {
   // 新しいシステムでは回転を個別に除外する機能は提供しない
   // 必要に応じて別途実装
-  console.warn('clientPositionToCanvasPositionWithoutRotation is deprecated and may not work correctly with new coordinate system');
+  logSystemWarn('clientPositionToCanvasPositionWithoutRotation is deprecated and may not work correctly with new coordinate system', {
+    label: 'CanvasPositionCalculator',
+    debugOnly: true,
+  });
   return coordinateTransform.windowToCanvasVec2(clientPos);
 }
 

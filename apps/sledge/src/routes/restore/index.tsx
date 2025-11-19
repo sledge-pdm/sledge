@@ -7,6 +7,7 @@ import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { readProjectFromPath } from '~/features/io/project/in/import';
+import { logSystemWarn } from '~/features/log/service';
 import { pageRoot } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
@@ -112,7 +113,9 @@ const Restore = () => {
             infos.push(info);
           } else {
             // Handle invalid backup file structure
-            console.warn(`Backup at ${backupPath} does not match expected ProjectV1 structure.`);
+            logSystemWarn(`Backup at ${backupPath} does not match expected ProjectV1 structure.`, {
+              label: 'RestoreWindow',
+            });
           }
         })
       );

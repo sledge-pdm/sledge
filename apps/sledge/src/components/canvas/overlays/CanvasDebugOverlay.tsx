@@ -2,7 +2,8 @@ import { css } from '@acab/ecsstatic';
 import { SparkLine } from '@sledge/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { DebugLogger } from '~/features/log/DebugLogger';
+import { VERBOSE_LOG_ENABLED } from '~/Consts';
+import { logSystemInfo } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const canvasDebugOverlayTopLeft = css`
@@ -35,7 +36,9 @@ const jsHeapContainer = css`
 
 const CanvasDebugOverlay: Component = (props) => {
   const LOG_LABEL = 'CanvasDebugOverlay';
-  const logger = new DebugLogger(LOG_LABEL, false);
+  const logDebug = (message: string, ...details: unknown[]) => {
+    if (VERBOSE_LOG_ENABLED) logSystemInfo(message, { label: LOG_LABEL, details: details.length ? details : undefined, debugOnly: true });
+  };
 
   const toMiB = (bytes?: number): string => {
     if (bytes !== undefined) return (bytes / 1024 / 1024).toFixed(1);
@@ -54,7 +57,7 @@ const CanvasDebugOverlay: Component = (props) => {
     if (!globalConfig.debug.showPerformanceMonitor || memFetchInFlight || !document.hasFocus()) return;
     memFetchInFlight = true;
     try {
-      logger.debugLog(`update memory info start.`);
+      logDebug(`update memory info start.`);
       // JS heap は即時取得
       try {
         setJsMemInfo((performance as any).memory);
@@ -66,7 +69,7 @@ const CanvasDebugOverlay: Component = (props) => {
         };
       });
 
-      logger.debugLog(`update memory info done.`);
+      logDebug(`update memory info done.`);
     } finally {
       memFetchInFlight = false;
     }

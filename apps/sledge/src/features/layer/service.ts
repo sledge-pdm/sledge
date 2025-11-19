@@ -10,7 +10,7 @@ import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerL
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { setBottomBarText } from '~/features/log/service';
+import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { interactStore } from '~/stores/EditorStores';
@@ -21,12 +21,14 @@ import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { changeBaseLayerColor, createLayer } from './model';
 import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 
+const LOG_LABEL = 'LayerService';
+
 // Layer property updates
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
 
 export function setLayerName(layerId: string, newName: string): boolean {
   if (!newName || newName.trim() === '') {
-    console.warn('Layer name cannot be empty');
+    logUserWarn('Layer name cannot be empty', { label: LOG_LABEL });
     return false;
   }
 
@@ -90,6 +92,7 @@ export function duplicateLayer(layerId: string) {
     { initImage: buffer }
   );
   updateWebGLCanvas(true, `Layer(${layerId}) duplicated`);
+  logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }
 
 export function clearLayer(layerId: string) {
@@ -113,6 +116,7 @@ export function clearLayer(layerId: string) {
     );
   updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
   updateLayerPreview(layerId);
+  logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
 }
 
 export async function mergeToBelowLayer(layerId: string) {
@@ -125,6 +129,7 @@ export async function mergeToBelowLayer(layerId: string) {
 
   const mergeRenderer = new LayerMergeRenderer(originLayer, targetLayer);
   await mergeRenderer.mergeLayer();
+  logUserInfo(`Layer "${originLayer.name}" merged into "${targetLayer.name}".`, { label: LOG_LABEL });
 }
 
 export function getCurrentPointingColor(): RGBA | undefined {
@@ -214,6 +219,7 @@ export const addLayerTo = (
   setActiveLayerId(newLayer.id);
 
   updateWebGLCanvas(false, `Layer(${newLayer.id}) added`);
+  logUserInfo(`Layer "${newLayer.name}" added.`, { label: LOG_LABEL });
 
   if (!options?.noDiff) {
     const snapshot = getPackedLayerSnapshot(newLayer.id);
@@ -235,8 +241,7 @@ export function setActiveLayerId(id: string): void {
   const layer = findLayerById(id);
   if (layer) {
     if (!layer.enabled) {
-      console.warn('Cannot set inactive layer to active');
-      setBottomBarText('Cannot set inactive layer to active');
+      logUserError('Cannot set inactive layer to active', { label: LOG_LABEL });
       return;
     }
     if (layerListStore.activeLayerId === id) return;
@@ -302,7 +307,7 @@ interface RemoveLayerOptions {
 }
 export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
   if (!findLayerById(layerId)) {
-    setBottomBarText(`layer ${layerId} not found.`, { kind: 'error' });
+    logUserError(`layer ${layerId} not found.`, { label: LOG_LABEL });
     return;
   }
 
@@ -336,6 +341,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
   updateWebGLCanvas(false, `Layer(${layerId}) removed`);
+  logUserInfo(`Layer "${toRemove.name}" removed.`, { label: LOG_LABEL });
 
   if (!noDiff && snapshot) {
     const act = new LayerListHistoryAction({

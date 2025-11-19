@@ -1,5 +1,6 @@
 import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { activeLayer } from '~/features/layer';
+import { logSystemInfo } from '~/features/log/service';
 import { PresetConfig, ToolCategory, ToolCategoryId } from '~/features/tools/Tools';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 
@@ -43,7 +44,10 @@ export function getPrevActiveToolCategoryId(): ToolCategoryId | undefined {
 
 export function setActiveToolCategory(toolCategory: ToolCategoryId) {
   if (toolStore.activeToolCategory === toolCategory) return;
-  console.log(`tool changed ${toolStore.activeToolCategory} -> ${toolCategory}`);
+  logSystemInfo(`tool changed ${toolStore.activeToolCategory} -> ${toolCategory}`, {
+    label: 'ToolController',
+    debugOnly: true,
+  });
   setToolStore('prevActiveCategory', toolStore.activeToolCategory);
   setToolStore('activeToolCategory', toolCategory);
 }

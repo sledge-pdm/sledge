@@ -1,5 +1,6 @@
 import { AntialiasMode, RgbaBuffer } from '@sledge/anvil';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logSystemWarn } from '~/features/log/service';
 
 export class LayerThumbnailGenerator {
   private thumbnailBuffer: RgbaBuffer;
@@ -38,8 +39,10 @@ export class LayerThumbnailGenerator {
     } catch (err) {
       // Suppress thumbnail generation errors; return a transparent fallback ImageData
       // (avoid escalating as a critical error for thumbnail generation)
-      // eslint-disable-next-line no-console
-      console.warn('LayerThumbnailGenerator.generateLayerThumbnail suppressed error:', err);
+      logSystemWarn('LayerThumbnailGenerator.generateLayerThumbnail suppressed error.', {
+        label: 'LayerThumbnailGenerator',
+        details: [err],
+      });
       return new ImageData(width || 1, height || 1);
     }
   }

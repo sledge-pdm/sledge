@@ -1,6 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal } from 'solid-js';
 import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, setRotation } from '~/features/canvas';
+import { logSystemInfo } from '~/features/log/service';
 import { canvasStore } from '~/stores/ProjectStores';
 
 import { color } from '@sledge/theme';
@@ -120,7 +121,7 @@ const CanvasSettings: Component = () => {
   createEffect(() => {
     canvasStore.canvas;
 
-    console.log('CanvasSettings: canvas changed', canvasStore.canvas);
+    logSystemInfo('CanvasSettings: canvas changed', { label: 'CanvasSettings', details: [canvasStore.canvas], debugOnly: true });
     updateButtonState();
     updateCurrentPreset();
   });

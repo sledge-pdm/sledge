@@ -5,6 +5,7 @@ import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { loadProjectJson } from '~/features/io/project/in/load';
 import { dumpProjectJson } from '~/features/io/project/out/dump';
+import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
@@ -32,7 +33,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
     };
     return snapshot;
   } catch (error) {
-    console.error('Failed to create snapshot:', error);
+    logSystemError('Failed to create snapshot.', { label: 'Snapshot', details: [error] });
     throw new Error('スナップショットの作成に失敗しました');
   }
 }

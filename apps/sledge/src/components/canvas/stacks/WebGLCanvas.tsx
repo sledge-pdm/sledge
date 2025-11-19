@@ -2,6 +2,7 @@ import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { allLayers } from '~/features/layer';
+import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore } from '~/stores/ProjectStores';
@@ -16,6 +17,7 @@ const webglCanvasStyle = css`
 export let webGLRenderer: WebGLRenderer | undefined;
 
 const WebGLCanvas: Component = () => {
+  const LOG_LABEL = 'WebGLCanvas';
   let canvasEl!: HTMLCanvasElement;
   let requireFullRender = false;
 
@@ -30,7 +32,7 @@ const WebGLCanvas: Component = () => {
           webGLRenderer?.render(onlyDirtyUpdate());
           requireFullRender = false;
         } catch (error) {
-          console.error('WebGLCanvas: Failed to resize WebGLRenderer', error);
+          logSystemError('Failed to render WebGL frame.', { label: LOG_LABEL, details: [error] });
         }
         setOnlyDirtyUpdate(false);
       }
@@ -42,7 +44,11 @@ const WebGLCanvas: Component = () => {
   const handleCanvasSizeChangedEvent = (e: Events['canvas:sizeChanged']) => {
     const { width, height } = e.newSize;
     waitingForLayoutUpdate = true;
-    console.log('[WebGLCanvas] Queued layout-aware resize:', width, height);
+    logSystemInfo('Queued layout-aware resize', {
+      label: LOG_LABEL,
+      details: [width, height],
+      debugOnly: true,
+    });
     requireFullRender = true;
     setOnlyDirtyUpdate(false);
     setUpdateRender(false);
@@ -56,9 +62,14 @@ const WebGLCanvas: Component = () => {
     try {
       webGLRenderer?.resize(width, height);
     } catch (error) {
-      console.error('WebGLCanvas: Failed to resize WebGLRenderer after layout update', error);
+      logSystemError('Failed to resize WebGLRenderer after layout update', { label: LOG_LABEL, details: [error] });
     }
-    console.log('[WebGLCanvas] Layout-ready resize applied:', width, height);
+
+    logSystemInfo('Layout-ready resize applied', {
+      label: LOG_LABEL,
+      details: [width, height],
+      debugOnly: true,
+    });
     requireFullRender = true;
     setOnlyDirtyUpdate(false);
     setUpdateRender(true);
@@ -95,9 +106,10 @@ const WebGLCanvas: Component = () => {
       setUpdateRender(true); // rise flag for init render
 
       startRenderLoop();
-      console.log('WebGLCanvas: Starting render loop');
+
+      logSystemInfo('Starting render loop', { label: LOG_LABEL, debugOnly: true });
     } catch (error) {
-      console.error('WebGLCanvas: Failed to initialize WebGLRenderer', error);
+      logSystemError('Failed to initialize WebGLRenderer', { label: LOG_LABEL, details: [error] });
       webGLRenderer = undefined;
     }
   };

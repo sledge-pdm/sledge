@@ -1,5 +1,6 @@
 import { Vec2 } from '@sledge/core';
 // import LayerImageAgent from '~/features/layer/agent/LayerImageAgent'; // legacy
+import { logUserInfo } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMove } from '~/features/selection/SelectionOperator';
@@ -59,6 +60,11 @@ export class MoveTool implements ToolBehavior {
   onEnd(args: ToolArgs): ToolResult {
     // commitは手動で行うのでここでは呼ばない
     // floatingMoveManager.commit();
+    if (isSelectionAvailable()) {
+      logUserInfo('Move tool drag finished. Commit or cancel to apply the change.');
+    } else {
+      logUserInfo('Move tool finished with no active selection.');
+    }
 
     return {
       shouldUpdate: false,

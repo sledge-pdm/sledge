@@ -6,6 +6,7 @@ import { ConvertSelectionHistoryAction } from '~/features/history/actions/Conver
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logUserInfo, logUserWarn } from '~/features/log/service';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
@@ -113,25 +114,40 @@ export function getSelectionOffset() {
 
 export function cancelSelection() {
   const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
-  if (floatingMoveManager.isMoving()) {
+  const wasMoving = floatingMoveManager.isMoving();
+  const hadSelection = selectionManager.isSelected();
+  if (wasMoving) {
     floatingMoveManager.cancel();
   }
   selectionManager.clear();
 
   updateWebGLCanvas(false, 'selection cancelled');
   updateLayerPreview(layerId);
+
+  if (wasMoving || hadSelection) {
+    logUserInfo('Selection cancelled.');
+  }
 }
 
 export function commitMove() {
+  const wasMoving = floatingMoveManager.isMoving();
   floatingMoveManager.commit();
+  if (wasMoving) {
+    logUserInfo('Selection move committed.');
+  }
 }
 
 export function cancelMove() {
   const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
+  const wasMoving = floatingMoveManager.isMoving();
   floatingMoveManager.cancel();
 
   updateWebGLCanvas(false, 'move cancelled');
   updateLayerPreview(layerId);
+
+  if (wasMoving) {
+    logUserInfo('Selection move cancelled.');
+  }
 }
 
 export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): PackedDiffs | undefined {
@@ -140,7 +156,10 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   const anvil = getAnvil(lid);
 
   const bBox = selection.getBoundBox();
-  if (!bBox) return;
+  if (!bBox) {
+    logUserWarn('No selection to delete.');
+    return;
+  }
   const selectionBoundBox = {
     x: bBox.left,
     y: bBox.top,
@@ -153,6 +172,7 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
 
   updateWebGLCanvas(false, 'delete selected area');
   updateLayerPreview(lid);
+  logUserInfo('Selected area cleared.');
 
   const diffs = anvil.flushDiffs();
   if (!props?.noAction) {
@@ -175,7 +195,10 @@ export function invertSelectionArea() {
 
   const selection = getCurrentSelection();
   const mask = selection.getMask();
-  if (!mask || mask.length === 0) return;
+  if (!mask || mask.length === 0) {
+    logUserWarn('No selection to invert.');
+    return;
+  }
 
   // 3) すべて 1 のマスクから現在のマスクを減算して反転を得る
   //    out = 1 & ~mask == ~mask
@@ -190,6 +213,7 @@ export function invertSelectionArea() {
 
   eventBus.emit('selection:updateSelectionMenu', { immediate: true });
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
+  logUserInfo('Selection inverted.');
 }
 
 // Compute tight bounding box of 1s in a canvas-sized selection mask

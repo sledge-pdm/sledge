@@ -21,3 +21,5 @@ export const Consts = {
   maxSizeHistoryLength: 8,
   maxColorHistoryLength: 80,
 };
+
+export const VERBOSE_LOG_ENABLED = false;

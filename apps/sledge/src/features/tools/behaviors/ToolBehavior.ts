@@ -2,7 +2,6 @@ import { RGBA } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 
 export interface ToolResult {
-  result?: string;
   shouldUpdate: boolean;
   shouldRegisterToHistory: boolean;
   shouldReturnToPrevTool?: boolean;

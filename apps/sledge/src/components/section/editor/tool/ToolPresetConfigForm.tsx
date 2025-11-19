@@ -2,6 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { componentProps } from '~/config/ConfigComponent';
+import { logSystemInfo } from '~/features/log/service';
 import { getPresetMetaByToolId, PresetFieldMeta } from '~/features/tools/presets';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
@@ -67,7 +68,7 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
   onMount(() => {
     eventBus.on('tools:presetLoaded', (e) => {
       if (props.toolId === e.toolId) {
-        console.log('loaded preset for tool:', props.toolId);
+        logSystemInfo('loaded preset for tool', { label: 'ToolPresetConfig', details: [props.toolId], debugOnly: true });
         setPresetMeta(getPresetMetaByToolId(props.toolId));
         setOptions(presets()?.selected ? presets()!.options[presets()!.selected] : undefined);
       }

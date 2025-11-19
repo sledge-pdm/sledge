@@ -4,6 +4,7 @@ import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
 import { message } from '@tauri-apps/plugin-dialog';
 import { exit } from '@tauri-apps/plugin-process';
+import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
@@ -93,16 +94,16 @@ export async function reportAppStartupError(e: any) {
   const errorMessage = e instanceof Error ? e.message : String(e);
   const errorStack = e instanceof Error ? e.stack : undefined;
   if (alreadyShownErrors.has(errorMessage)) {
-    console.warn('Critical error already reported:', errorMessage);
+    logSystemWarn('Critical error already reported.', { label: 'WindowUtils', details: [errorMessage] });
     return; // Avoid reporting the same error multiple times
   }
 
   // startup error won't affect project file
   // await saveEmergencyBackup();
 
-  console.error('Reporting startup error:', {
-    message: errorMessage,
-    stack: errorStack,
+  logSystemError('Reporting startup error.', {
+    label: 'WindowUtils',
+    details: [{ message: errorMessage, stack: errorStack }],
   });
 
   alreadyShownErrors.add(errorMessage);
@@ -126,13 +127,13 @@ export async function reportWindowStartError(e: any) {
   const errorMessage = e instanceof Error ? e.message : String(e);
   const errorStack = e instanceof Error ? e.stack : undefined;
   if (alreadyShownErrors.has(errorMessage)) {
-    console.warn('Critical error already reported:', errorMessage);
+    logSystemWarn('Critical error already reported.', { label: 'WindowUtils', details: [errorMessage] });
     return; // Avoid reporting the same error multiple times
   }
 
-  console.error('Reporting window startup error:', {
-    message: errorMessage,
-    stack: errorStack,
+  logSystemError('Reporting window startup error.', {
+    label: 'WindowUtils',
+    details: [{ message: errorMessage, stack: errorStack }],
   });
   alreadyShownErrors.add(errorMessage);
 
@@ -157,13 +158,13 @@ export async function reportCriticalError(e: any) {
   const errorMessage = e instanceof Error ? e.message : String(e);
   const errorStack = e instanceof Error ? e.stack : undefined;
   if (alreadyShownErrors.has(errorMessage)) {
-    console.warn('Critical error already reported:', errorMessage);
+    logSystemWarn('Critical error already reported.', { label: 'WindowUtils', details: [errorMessage] });
     return; // Avoid reporting the same error multiple times
   }
 
-  console.error('Reporting critical error:', {
-    message: errorMessage,
-    stack: errorStack,
+  logSystemError('Reporting critical error.', {
+    label: 'WindowUtils',
+    details: [{ message: errorMessage, stack: errorStack }],
   });
 
   alreadyShownErrors.add(errorMessage);
@@ -186,9 +187,9 @@ export async function showMainWindow() {
   try {
     const windowLabel = getCurrentWindow().label;
     await safeInvoke('show_main_window', { windowLabel });
-    console.log('🌐 [PERF] Window transition completed');
+    logSystemInfo('🌐 [PERF] Window transition completed', { label: 'WindowUtils', debugOnly: true });
   } catch (error) {
-    console.error('Failed to transition from native splash:', error);
+    logSystemError('Failed to transition from native splash.', { label: 'WindowUtils', details: [error] });
     // フォールバック
     getCurrentWindow().show();
   }

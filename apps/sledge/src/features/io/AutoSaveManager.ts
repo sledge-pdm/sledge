@@ -1,4 +1,5 @@
 import { saveProject } from '~/features/io/project/out/save';
+import { logSystemWarn } from '~/features/log/service';
 import { fileStore } from '~/stores/EditorStores';
 
 /**
@@ -31,7 +32,7 @@ export class AutoSaveManager {
       if (fileStore.savedLocation.name && fileStore.savedLocation.path) {
         await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
       } else {
-        console.warn('Auto-save skipped: No valid file location.');
+        logSystemWarn('Auto-save skipped: No valid file location.', { label: 'AutoSave' });
       }
     }, interval * 1000);
   }

@@ -4,13 +4,17 @@ import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils
 import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { logSystemError, logUserError } from '~/features/log/service';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
+const LOG_LABEL = 'ProjectImageImport';
+
 export async function loadProjectFromImagePath(location: FileLocation): Promise<boolean> {
   if (!location || !location.path || !location.name) {
-    console.log('Invalid file location');
+    logSystemError('Invalid file location for image import.', { label: LOG_LABEL, details: [location] });
+    logUserError('invalid image location.', { label: LOG_LABEL });
     return false;
   }
   const path = normalizeJoin(location.path, location.name);
@@ -89,7 +93,8 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
 
     return true;
   } catch (e) {
-    console.log('failed to load from clipboard');
+    logSystemError('failed to load project from clipboard.', { label: LOG_LABEL, details: [e] });
+    logUserError('failed to load from clipboard.', { label: LOG_LABEL, details: [e] });
     throw new Error('failed to load project from clipboard');
     return false;
   }

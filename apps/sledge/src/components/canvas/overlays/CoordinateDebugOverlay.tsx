@@ -1,5 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { logSystemWarn } from '~/features/log/service';
 import { coordinateTransform, getDebugTransformInfo } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -85,7 +86,7 @@ const CoordinateDebugOverlay: Component = () => {
       const info = getDebugTransformInfo();
       setTransformInfo(info);
     } catch (error) {
-      console.warn('Failed to get transform info:', error);
+      logSystemWarn('Failed to get transform info.', { label: 'CoordinateDebugOverlay', details: [error] });
     }
   };
 

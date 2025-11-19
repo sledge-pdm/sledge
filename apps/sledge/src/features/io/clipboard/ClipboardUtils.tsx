@@ -1,4 +1,7 @@
 import { readImage, readText } from '@tauri-apps/plugin-clipboard-manager';
+import { logSystemError } from '~/features/log/service';
+
+const LOG_LABEL = 'ClipboardUtils';
 
 // Helper function to check if the active element is an input field
 export function isInputFocused() {
@@ -27,7 +30,7 @@ export async function tryGetImageFromClipboard(): Promise<
     clipboardImage.close();
     return { imageBuf, width: size.width, height: size.height };
   } catch (e) {
-    console.error(`failed to get image from clipboard: ${e}`);
+    logSystemError('failed to get image from clipboard.', { label: LOG_LABEL, details: [e] });
     return undefined;
   }
 }
@@ -37,7 +40,7 @@ export async function tryGetTextFromClipboard(): Promise<string | undefined> {
     const clipboardText = await readText();
     return clipboardText;
   } catch (e) {
-    console.error(`failed to get text from clipboard: ${e}`);
+    logSystemError('failed to get text from clipboard.', { label: LOG_LABEL, details: [e] });
     return undefined;
   }
 }

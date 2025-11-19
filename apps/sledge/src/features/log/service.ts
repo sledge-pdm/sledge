@@ -1,92 +1,188 @@
-import { BottomBarKind } from '~/stores/editor/LogStore';
-import { setLogStore, toolStore } from '~/stores/EditorStores';
+import { error as tauriError, info as tauriInfo, warn as tauriWarn } from '@tauri-apps/plugin-log';
+import { setBottomBarText, setBottomBarTextPermanent } from '~/features/log/bottomBar';
+import { LogKind } from '~/stores/editor/LogStore';
 
-let currentTimerId: ReturnType<typeof setTimeout> | null = null;
+type LogChannel = 'tauri' | 'bottomBar';
 
-export function getNormalBottomBarText() {
-  if (toolStore?.activeToolCategory === 'pen') {
-    return 'line: shift+drag (ctrl to snap) / rotate: shift+wheel';
-  }
+type CommonLogOptions = {
+  label?: string;
+  details?: unknown[];
+  debugOnly?: boolean;
+  channels?: LogChannel[];
+};
 
-  if (
-    toolStore?.activeToolCategory === 'rectSelection' ||
-    toolStore?.activeToolCategory === 'autoSelection' ||
-    toolStore?.activeToolCategory === 'lassoSelection'
-  ) {
-    return 'add: shift+drag / subtract: alt+drag / move: ctrl+drag';
-  }
-
-  if (toolStore?.activeToolCategory === 'pipette') {
-    return 'continuous pick: shift+click';
-  }
-
-  return 'rotate: shift+wheel / drag: ctrl+drag';
-}
-
-export function resetBottomBarText() {
-  setLogStore('bottomBarText', getNormalBottomBarText());
-  setLogStore('bottomBarKind', 'info');
-}
-
-interface BottomBarTextOptions {
+export type UserLogOptions = CommonLogOptions & {
+  kind?: LogKind;
   duration?: number;
-  kind?: BottomBarKind;
+  persistent?: boolean;
+};
+
+export type SystemLogOptions = CommonLogOptions & {
+  kind?: LogKind;
+};
+
+type InternalLogOptions = Required<Pick<UserLogOptions, 'kind'>> &
+  CommonLogOptions & {
+    channels: LogChannel[];
+    duration?: number;
+    persistent?: boolean;
+  };
+
+const DEFAULT_USER_CHANNELS: LogChannel[] = ['tauri', 'bottomBar'];
+const DEFAULT_SYSTEM_CHANNELS: LogChannel[] = ['tauri'];
+
+const tauriLoggers = {
+  info: tauriInfo,
+  warn: tauriWarn,
+  error: tauriError,
+};
+
+function mapKindToTauriLevel(kind: LogKind): keyof typeof tauriLoggers {
+  if (kind === 'error') return 'error';
+  if (kind === 'warn') return 'warn';
+  return 'info';
 }
 
-export function setBottomBarText(text: string, options?: BottomBarTextOptions) {
-  const { duration = 3000, kind = 'info' } = options || {};
-  // 既存のタイマーがあればクリア
-  if (currentTimerId !== null) {
-    clearTimeout(currentTimerId);
-    currentTimerId = null;
+export function formatDetail(detail: unknown) {
+  if (detail instanceof Error) {
+    return detail.stack || detail.message;
   }
+  if (typeof detail === 'string') {
+    return detail;
+  }
+  try {
+    return JSON.stringify(detail);
+  } catch {
+    return String(detail);
+  }
+}
 
-  // 新しいテキストを設定
-  setLogStore('bottomBarText', text);
-  setLogStore('bottomBarKind', kind);
+function formatLogLine(message: string, options: { label?: string; details?: unknown[] }) {
+  const timestamp = new Date().toISOString();
+  const labelPart = options.label ? `[${options.label}] ` : '';
+  const detailsPart = options.details?.length ? ` | ${options.details.map(formatDetail).join(' | ')}` : '';
+  return `[${timestamp}] ${labelPart}${message}${detailsPart}`;
+}
 
-  // 通常テキストの場合は自動復帰しない
-  if (text === getNormalBottomBarText()) {
+function logToConsole(kind: LogKind, line: string) {
+  if (import.meta.env.DEV) {
+    if (kind === 'error') {
+      console.error(line);
+      return;
+    }
+    if (kind === 'warn') {
+      console.warn(line);
+      return;
+    }
+    console.log(line);
+  }
+}
+
+function logToTauri(kind: LogKind, line: string) {
+  const level = mapKindToTauriLevel(kind);
+  try {
+    const maybePromise = tauriLoggers[level](line);
+    Promise.resolve(maybePromise).catch(() => {
+      /* no-op */
+    });
+  } catch {
+    // ignored - fall back to console logging which already occurred in dev builds
+  }
+}
+
+function showBottomBarMessage(text: string, kind: LogKind, options?: { duration?: number; persistent?: boolean }) {
+  if (options?.persistent) {
+    setBottomBarTextPermanent(text, { kind });
+    return;
+  }
+  setBottomBarText(text, { kind, duration: options?.duration });
+}
+
+function logEvent(message: string, options: InternalLogOptions) {
+  const { channels, duration, persistent, kind, label, details, debugOnly } = options;
+  if (debugOnly && !import.meta.env.DEV) {
     return;
   }
 
-  // 一時的なテキストの場合、指定時間後に通常テキストに戻す
-  currentTimerId = setTimeout(() => {
-    resetBottomBarText();
-    currentTimerId = null;
-  }, duration);
-}
+  const normalizedMessage = typeof message === 'string' ? message : String(message);
+  const line = formatLogLine(normalizedMessage, { label, details });
 
-export function clearBottomBarTextTimer() {
-  if (currentTimerId !== null) {
-    clearTimeout(currentTimerId);
-    currentTimerId = null;
+  logToConsole(kind, line);
+  if (channels.includes('tauri')) {
+    logToTauri(kind, line);
+  }
+  if (channels.includes('bottomBar')) {
+    showBottomBarMessage(normalizedMessage, kind, { duration, persistent });
   }
 }
 
-export function setBottomBarTextPermanent(text: string, options?: Omit<BottomBarTextOptions, 'duration'>) {
-  clearBottomBarTextTimer();
-  setLogStore('bottomBarText', text);
-  setLogStore('bottomBarKind', options?.kind || 'info');
+export function logSystemMessage(message: string, options?: SystemLogOptions) {
+  logEvent(message, {
+    kind: options?.kind ?? 'info',
+    label: options?.label,
+    details: options?.details ?? [],
+    debugOnly: options?.debugOnly,
+    channels: options?.channels ?? DEFAULT_SYSTEM_CHANNELS,
+  });
 }
 
-export function debugLog(label?: string, ...msg: any) {
-  if (import.meta.env.DEV) {
-    const timestamp = `[${new Date().getSeconds()}.${(Date.now() % 100000).toString().padStart(5, '0')}] `;
-    console.log(`${timestamp}[${label}]:`, ...msg);
-  }
+export function logUserMessage(message: string, options?: UserLogOptions) {
+  logEvent(message, {
+    kind: options?.kind ?? 'info',
+    label: options?.label,
+    details: options?.details ?? [],
+    debugOnly: options?.debugOnly,
+    channels: options?.channels ?? DEFAULT_USER_CHANNELS,
+    duration: options?.duration,
+    persistent: options?.persistent,
+  });
 }
 
-export function debugWarn(label?: string, ...msg: any) {
-  if (import.meta.env.DEV) {
-    const timestamp = `[${new Date().getSeconds()}.${(Date.now() % 100000).toString().padStart(5, '0')}] `;
-    console.warn(`${timestamp}[${label}]:`, ...msg);
+export const logSystemInfo = (message: string, options?: SystemLogOptions) => logSystemMessage(message, { ...options, kind: 'info' });
+export const logSystemWarn = (message: string, options?: SystemLogOptions) => logSystemMessage(message, { ...options, kind: 'warn' });
+export const logSystemError = (message: string, options?: SystemLogOptions) => logSystemMessage(message, { ...options, kind: 'error' });
+
+export const logUserInfo = (message: string, options?: UserLogOptions) => logUserMessage(message, { ...options, kind: 'info' });
+export const logUserSuccess = (message: string, options?: UserLogOptions) => logUserMessage(message, { ...options, kind: 'success' });
+export const logUserWarn = (message: string, options?: UserLogOptions) => logUserMessage(message, { ...options, kind: 'warn' });
+export const logUserError = (message: string, options?: UserLogOptions) => logUserMessage(message, { ...options, kind: 'error' });
+
+function prepareDebugPayload(msg: unknown[]): { message: string; details: unknown[] } {
+  if (!msg.length) {
+    return { message: '', details: [] };
   }
+  const [first, ...rest] = msg;
+  return {
+    message: typeof first === 'string' ? first : formatDetail(first),
+    details: rest,
+  };
 }
 
-export function debugError(label?: string, ...msg: any) {
-  if (import.meta.env.DEV) {
-    const timestamp = `[${new Date().getSeconds()}.${(Date.now() % 100000).toString().padStart(5, '0')}] `;
-    console.error(`${timestamp}[${label}]:`, ...msg);
-  }
+export function debugLog(label?: string, ...msg: unknown[]) {
+  const payload = prepareDebugPayload(msg);
+  logSystemMessage(payload.message, {
+    label,
+    details: payload.details,
+    debugOnly: true,
+  });
+}
+
+export function debugWarn(label?: string, ...msg: unknown[]) {
+  const payload = prepareDebugPayload(msg);
+  logSystemMessage(payload.message, {
+    label,
+    details: payload.details,
+    kind: 'warn',
+    debugOnly: true,
+  });
+}
+
+export function debugError(label?: string, ...msg: unknown[]) {
+  const payload = prepareDebugPayload(msg);
+  logSystemMessage(payload.message, {
+    label,
+    details: payload.details,
+    kind: 'error',
+    debugOnly: true,
+  });
 }

@@ -9,6 +9,7 @@ import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+import { logSystemWarn, logUserInfo } from '~/features/log/service';
 
 type StrokeContext = {
   layerId: string;
@@ -97,7 +98,7 @@ export class PenTool implements ToolBehavior {
 
     // 前回の状態が残っている場合はクリーンアップ
     if (this.lineChunk.hasPreview()) {
-      console.warn('PenTool: Cleaning up previous preview state');
+      logSystemWarn('PenTool: Cleaning up previous preview state', { label: 'PenTool', debugOnly: true });
       this.undoLastLineDiff();
     }
 
@@ -282,12 +283,13 @@ export class PenTool implements ToolBehavior {
     this.pixelAccumulator = undefined;
 
     const anvil = getAnvil(layerId);
+    let strokeCommitted = false;
     const bbox = this.strokeChunk.boundBox;
     if (bbox) {
       const w = bbox.maxX - bbox.minX + 1;
       const h = bbox.maxY - bbox.minY + 1;
       if (w <= 0 || h <= 0) {
-        console.warn('Invalid bbox dimensions:', { w, h, bbox });
+        logSystemWarn('Invalid bbox dimensions.', { label: 'PenTool', details: [{ w, h, bbox }] });
         this.strokeChunk.clear();
         return { shouldUpdate: true, shouldRegisterToHistory: true };
       }
@@ -311,9 +313,13 @@ export class PenTool implements ToolBehavior {
           swapBuffer[localIdx + 3] = a;
         }
         anvil.addPartialDiff({ x: bbox.minX, y: bbox.minY, width: w, height: h }, swapBuffer);
+        strokeCommitted = true;
       }
     }
     this.strokeChunk.clear();
+
+    const toolLabel = this.categoryId === TOOL_CATEGORIES.ERASER ? 'Eraser' : 'Pen';
+    logUserInfo(strokeCommitted ? `${toolLabel} stroke applied.` : `${toolLabel} stroke finished.`);
 
     return {
       shouldUpdate: true,

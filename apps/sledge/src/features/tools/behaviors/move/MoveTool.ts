@@ -4,6 +4,7 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMove } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
+import { logUserInfo } from '~/features/log/service';
 
 export class MoveTool implements ToolBehavior {
   acceptStartOnOutCanvas = true;
@@ -59,6 +60,11 @@ export class MoveTool implements ToolBehavior {
   onEnd(args: ToolArgs): ToolResult {
     // commitは手動で行うのでここでは呼ばない
     // floatingMoveManager.commit();
+    if (isSelectionAvailable()) {
+      logUserInfo('Move tool drag finished. Commit or cancel to apply the change.');
+    } else {
+      logUserInfo('Move tool finished with no active selection.');
+    }
 
     return {
       shouldUpdate: false,

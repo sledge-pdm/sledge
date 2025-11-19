@@ -7,6 +7,7 @@ import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
+import { logSystemWarn } from '~/features/log/service';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -115,7 +116,7 @@ export class LassoSelection extends SelectionBase {
     try {
       fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints), mode);
     } catch (error) {
-      console.warn('Lasso selection WASM call failed:', error);
+      logSystemWarn('Lasso selection WASM call failed.', { label: 'LassoSelection', details: [error] });
     }
   }
 

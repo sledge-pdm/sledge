@@ -1,11 +1,12 @@
 // controllers/layer/SelectionManager.ts
 import { RgbaBuffer } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
+import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { DebugLogger } from '~/features/log/DebugLogger';
+import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -24,7 +25,6 @@ export interface FloatingBuffer {
 
 class FloatingMoveManager {
   private readonly LOG_LABEL = 'FloatingMoveManager';
-  private logger = new DebugLogger(this.LOG_LABEL, false);
 
   private targetLayerId: string | undefined = undefined;
 
@@ -138,7 +138,7 @@ class FloatingMoveManager {
 
     this.targetLayerId = targetLayerId;
 
-    this.logger.debugLog('startMove', { floatingBuffer, state });
+    this.debugLog('startMove', { floatingBuffer, state });
     this.floatingBuffer = floatingBuffer;
     this.state = state;
     this.overlayVersion++;
@@ -147,9 +147,9 @@ class FloatingMoveManager {
   }
 
   public async moveDelta(delta: Vec2) {
-    this.logger.debugLog('moveDelta', { delta });
+    this.debugLog('moveDelta', { delta });
     if (!this.floatingBuffer) {
-      console.error('attempt to move, but nothing is moving.');
+      logSystemError('attempt to move, but nothing is moving.', { label: this.LOG_LABEL });
       return;
     }
 
@@ -161,9 +161,9 @@ class FloatingMoveManager {
   }
 
   public async moveTo(newOffset: Vec2) {
-    this.logger.debugLog('moveTo', { offset: newOffset });
+    this.debugLog('moveTo', { offset: newOffset });
     if (!this.floatingBuffer) {
-      console.error('attempt to move, but nothing is moving.');
+      logSystemError('attempt to move, but nothing is moving.', { label: this.LOG_LABEL });
       return;
     }
 
@@ -174,19 +174,19 @@ class FloatingMoveManager {
   }
 
   public commit() {
-    this.logger.debugLog('commit', {});
+    this.debugLog('commit', {});
     if (!this.targetLayerId || !this.targetBuffer || !this.targetBufferOriginal) {
-      console.error('attempt to commit, but no target layer or buffer is set.');
+      logSystemError('attempt to commit, but no target layer or buffer is set.', { label: this.LOG_LABEL });
       return;
     }
     if (!this.floatingBuffer) {
-      console.error('attempt to commit, but nothing is moving.');
+      logSystemError('attempt to commit, but nothing is moving.', { label: this.LOG_LABEL });
       return;
     }
 
     const composed = this.getCompositePreview();
     if (!composed) {
-      console.error('failed to build composed preview for commit');
+      logSystemError('failed to build composed preview for commit', { label: this.LOG_LABEL });
       return;
     }
 
@@ -237,6 +237,15 @@ class FloatingMoveManager {
     this.overlayVersion++;
 
     this.requestFrame(true, layerId);
+  }
+
+  private debugLog(message: string, ...details: unknown[]) {
+    if (VERBOSE_LOG_ENABLED)
+      logSystemInfo(message, {
+        label: this.LOG_LABEL,
+        details: details.length ? details : undefined,
+        debugOnly: true,
+      });
   }
 }
 

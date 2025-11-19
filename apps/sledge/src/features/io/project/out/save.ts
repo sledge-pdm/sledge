@@ -6,6 +6,7 @@ import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { dumpProject } from '~/features/io/project/out/dump';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
+import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
@@ -33,6 +34,7 @@ async function saveThumbnailData(selectedPath: string) {
 }
 
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
+  const LOG_LABEL = 'ProjectSave';
   let selectedPath: string | null;
 
   let fileNameWOExtension = name ? getFileNameWithoutExtension(name) : 'new project';
@@ -75,7 +77,6 @@ After overwrite, you cannot open this project in old version of sledge.`,
 
       const data = await dumpProject();
       await writeFile(selectedPath, data);
-      console.log('project saved to:', selectedPath);
       addRecentFile(pathToFileLocation(selectedPath));
 
       setFileStore('openAs', 'project');
@@ -87,16 +88,18 @@ After overwrite, you cannot open this project in old version of sledge.`,
       if (loc) eventBus.emit('project:saved', { location: loc });
 
       setProjectStore('isProjectChangedAfterSave', false);
-
+      logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return true;
     } catch (error) {
-      console.error('Error saving project:', error);
+      logSystemError('Error saving project.', { label: LOG_LABEL, details: [error, selectedPath] });
+      logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
       eventBus.emit('project:saveFailed', { error: error });
       return false;
     }
   }
 
   eventBus.emit('project:saveCancelled', {});
+  logUserWarn('project save cancelled.', { label: LOG_LABEL });
   return false;
 }
 

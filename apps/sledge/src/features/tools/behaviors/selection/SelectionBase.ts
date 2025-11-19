@@ -4,6 +4,7 @@ import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { logUserInfo } from '~/features/log/service';
 
 // 共通のモード判定と ctrl+ドラッグ移動処理をまとめたベースクラス
 // 各選択ツールは selection-mode（矩形/自動等）のみを実装すればよい
@@ -71,6 +72,7 @@ export abstract class SelectionBase implements ToolBehavior {
 
   onEnd(args: ToolArgs): ToolResult {
     const mode = this.getMode(args.event);
+    let message: string | undefined;
 
     if (mode === 'move') {
       if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
@@ -78,12 +80,29 @@ export abstract class SelectionBase implements ToolBehavior {
       selectionManager.commitOffset();
       if (!isSelectionAvailable()) {
         selectionManager.clear();
+        message = 'Selection cleared.';
       } else {
         selectionManager.setState('selected');
+        message = 'Selection moved.';
       }
     } else {
       // ツール固有の確定処理
       this.onEndSelection(args, mode);
+      switch (mode) {
+        case 'add':
+          message = 'Selection added.';
+          break;
+        case 'subtract':
+          message = 'Selection subtracted.';
+          break;
+        default:
+          message = 'Selection updated.';
+          break;
+      }
+    }
+
+    if (message) {
+      logUserInfo(message);
     }
 
     return {

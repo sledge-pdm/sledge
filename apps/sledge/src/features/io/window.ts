@@ -3,6 +3,7 @@ import { path } from '@tauri-apps/api';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
+import { logUserWarn } from '~/features/log/service';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 import { getNewProjectSearchParams, getProjectFromClipboardSearchParams, openWindow } from '~/utils/WindowUtils';
 
@@ -42,7 +43,7 @@ export async function openNewFile(): Promise<string | undefined> {
   });
 
   if (!file) {
-    console.error('file not selected');
+    logUserWarn('file not selected.', { label: LOG_LABEL });
     return undefined;
   }
 
@@ -51,7 +52,6 @@ export async function openNewFile(): Promise<string | undefined> {
 
 export const openProject = () => {
   openNewFile().then((file: string | undefined) => {
-    console.log(file);
     if (file !== undefined) {
       const loc = pathToFileLocation(file);
       if (!loc) return;
@@ -60,3 +60,4 @@ export const openProject = () => {
     }
   });
 };
+const LOG_LABEL = 'FileOpen';

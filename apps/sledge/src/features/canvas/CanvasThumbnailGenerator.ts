@@ -1,5 +1,6 @@
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { canvasStore } from '~/stores/ProjectStores';
+import { logSystemWarn } from '~/features/log/service';
 
 export class CanvasThumbnailGenerator {
   private off: OffscreenCanvas;
@@ -32,8 +33,10 @@ export class CanvasThumbnailGenerator {
       return ctx.getImageData(0, 0, width, height);
     } catch (err) {
       // Suppress errors during canvas thumbnail generation and return undefined
-      // eslint-disable-next-line no-console
-      console.warn('CanvasThumbnailGenerator.generateCanvasThumbnail suppressed error:', err);
+      logSystemWarn('CanvasThumbnailGenerator.generateCanvasThumbnail suppressed error.', {
+        label: 'CanvasThumbnailGenerator',
+        details: [err],
+      });
       return undefined;
     }
   }
@@ -60,8 +63,10 @@ export class CanvasThumbnailGenerator {
       return this.off.convertToBlob();
     } catch (err) {
       // Suppress blob generation errors and return an empty blob as fallback
-      // eslint-disable-next-line no-console
-      console.warn('CanvasThumbnailGenerator.generateCanvasThumbnailBlob suppressed error:', err);
+      logSystemWarn('CanvasThumbnailGenerator.generateCanvasThumbnailBlob suppressed error.', {
+        label: 'CanvasThumbnailGenerator',
+        details: [err],
+      });
       return Promise.resolve(new Blob());
     }
   }

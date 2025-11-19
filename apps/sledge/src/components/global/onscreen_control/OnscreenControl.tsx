@@ -2,6 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { Icon } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { logSystemInfo } from '~/features/log/service';
 import { setAppearanceStore } from '~/stores/EditorStores';
 import { OnscreenControlInteract } from './OnscreenControlInteract';
 
@@ -105,6 +106,7 @@ const zoomHandle = css`
 
 // floating(movable) canvas pan/zoom controller that imitates analog sticks by 2d pixels
 const OnscreenControl: Component = () => {
+  const LOG_LABEL = 'OnscreenControl';
   const [position, setPosition] = createSignal<Vec2>({ x: 0, y: 0 });
   const [positionLocked, setPositionLocked] = createSignal(false);
 
@@ -140,11 +142,20 @@ const OnscreenControl: Component = () => {
   });
 
   const logPointerEvent = (e: PointerEvent) => {
-    console.log(`pointerEvent: ${e.type}
-pointer type: ${e.pointerType}
-button: ${e.button}
-buttons: ${e.buttons}
-client XY: ${e.clientX}, ${e.clientY}`);
+    logSystemInfo('pointer event', {
+      label: LOG_LABEL,
+      debugOnly: true,
+      details: [
+        {
+          type: e.type,
+          pointerType: e.pointerType,
+          button: e.button,
+          buttons: e.buttons,
+          clientX: e.clientX,
+          clientY: e.clientY,
+        },
+      ],
+    });
   };
 
   // --- Window (controller) dragging state & handlers (re-implemented to support pen properly) ---

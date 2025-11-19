@@ -5,6 +5,7 @@ import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
+import { logSystemWarn } from '~/features/log/service';
 
 type LayerBufferSnapshot = { layerId: string; dotMag: number; webpBuffer: Uint8Array };
 
@@ -53,7 +54,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   undo(): void {
     if (!this.beforeSnapshots) {
-      console.warn('CanvasSizeHistoryAction.undo: beforeSnapshots is not set');
+      logSystemWarn('CanvasSizeHistoryAction.undo: beforeSnapshots is not set', { label: 'CanvasSizeHistoryAction' });
       return;
     }
     this.applyState(this.beforeSize, this.beforeSnapshots);
@@ -61,7 +62,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   redo(): void {
     if (!this.afterSnapshots) {
-      console.warn('CanvasSizeHistoryAction.redo: afterSnapshots is not set');
+      logSystemWarn('CanvasSizeHistoryAction.redo: afterSnapshots is not set', { label: 'CanvasSizeHistoryAction' });
       return;
     }
     this.applyState(this.afterSize, this.afterSnapshots);

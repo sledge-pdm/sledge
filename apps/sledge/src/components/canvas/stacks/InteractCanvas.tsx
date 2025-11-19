@@ -5,11 +5,11 @@ import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { batch, Component, createSignal, onCleanup, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
+import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
 import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { activeLayer } from '~/features/layer';
-import { DebugLogger } from '~/features/log/DebugLogger';
-import { setBottomBarText } from '~/features/log/service';
+import { logSystemInfo, logSystemWarn, logUserError } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPositionWithinSelection } from '~/features/selection/SelectionOperator';
 import { getActiveToolCategory } from '~/features/tools/ToolController';
@@ -29,7 +29,22 @@ const interactArea = css`
 // レイヤーごとのキャンバスの上でタッチイベントを受ける領域
 export const InteractArea: Component = () => {
   const LOG_LABEL = 'InteractArea';
-  const logger = new DebugLogger(LOG_LABEL, false);
+  const logDebug = (message: string, ...details: unknown[]) => {
+    if (VERBOSE_LOG_ENABLED)
+      logSystemInfo(message, {
+        label: LOG_LABEL,
+        details: details.length ? details : undefined,
+        debugOnly: true,
+      });
+  };
+  const logDebugWarn = (message: string, ...details: unknown[]) => {
+    if (VERBOSE_LOG_ENABLED)
+      logSystemWarn(message, {
+        label: LOG_LABEL,
+        details: details.length ? details : undefined,
+        debugOnly: true,
+      });
+  };
 
   let areaRef: HTMLDivElement | undefined;
 
@@ -66,24 +81,20 @@ export const InteractArea: Component = () => {
 
   function handleOutCanvasAreaPointerDown(e: PointerEvent) {
     const start = new Date().getTime();
-    logger.debugLog(`handleOutCanvasAreaPointerDown start`);
+    logDebug(`handleOutCanvasAreaPointerDown start`);
     const activeToolCategory = getActiveToolCategory();
     if (!activeToolCategory.behavior.acceptStartOnOutCanvas) {
-      logger.debugWarn(`handleOutCanvasAreaPointerDown cancelled because tool doesn't accept it`);
+      logDebugWarn(`handleOutCanvasAreaPointerDown cancelled because tool doesn't accept it`);
       return;
     }
     if (!isDrawableClick(e)) {
       if (interactStore.isCanvasSizeFrameMode) {
-        setBottomBarText('quit frame resize mode first!', {
-          kind: 'error',
-        });
+        logUserError('quit frame resize mode first!', { label: LOG_LABEL });
       }
       if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
-        setBottomBarText('commit or cancel move first!', {
-          kind: 'error',
-        });
+        logUserError('commit or cancel move first!', { label: LOG_LABEL });
       }
-      logger.debugWarn(`handleOutCanvasAreaPointerDown cancelled because not drawable click`);
+      logDebugWarn(`handleOutCanvasAreaPointerDown cancelled because not drawable click`);
       return;
     }
 
@@ -97,24 +108,20 @@ export const InteractArea: Component = () => {
     setInteractStore('isInStroke', true);
     setLastPos(position);
     const end = new Date().getTime();
-    logger.debugLog(`handleOutCanvasAreaPointerDown executed in ${end - start} ms`);
+    logDebug(`handleOutCanvasAreaPointerDown executed in ${end - start} ms`);
   }
 
   function handlePointerDown(e: PointerEvent) {
     const start = new Date().getTime();
-    logger.debugLog(`handlePointerDown start`);
+    logDebug(`handlePointerDown start`);
     if (!isDrawableClick(e)) {
       if (interactStore.isCanvasSizeFrameMode) {
-        setBottomBarText('quit frame resize mode first!', {
-          kind: 'error',
-        });
+        logUserError('quit frame resize mode first!', { label: LOG_LABEL });
       }
       if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
-        setBottomBarText('commit or cancel move first!', {
-          kind: 'error',
-        });
+        logUserError('commit or cancel move first!', { label: LOG_LABEL });
       }
-      logger.debugWarn(`handlePointerDown cancelled because not drawable click`);
+      logDebugWarn(`handlePointerDown cancelled because not drawable click`);
       return;
     }
 
@@ -123,7 +130,7 @@ export const InteractArea: Component = () => {
     setInteractStore('isInStroke', true);
     setLastPos(position);
     const end = new Date().getTime();
-    logger.debugLog(`handlePointerDown executed in ${end - start} ms`);
+    logDebug(`handlePointerDown executed in ${end - start} ms`);
   }
 
   function handlePointerCancel(e: PointerEvent) {
@@ -135,7 +142,7 @@ export const InteractArea: Component = () => {
 
   function handlePointerMove(e: PointerEvent) {
     const start = new Date().getTime();
-    logger.debugLog(`handlePointerMove start`);
+    logDebug(`handlePointerMove start`);
 
     const windowPosition = getWindowMousePosition(e);
     const position = getCanvasMousePosition(e);
@@ -148,7 +155,7 @@ export const InteractArea: Component = () => {
     });
 
     if (!isDrawableClick(e)) {
-      logger.debugWarn(`handlePointerMove cancelled because not drawable click`);
+      logDebugWarn(`handlePointerMove cancelled because not drawable click`);
       return;
     }
 
@@ -166,14 +173,14 @@ export const InteractArea: Component = () => {
     }
 
     if (!interactStore.isInStroke || !lastPos()) {
-      logger.debugWarn(`handlePointerMove cancelled because not in stroke or no last position`);
+      logDebugWarn(`handlePointerMove cancelled because not in stroke or no last position`);
       return;
     }
 
     operator.handleDraw(DrawState.move, e, getActiveToolCategory(), position, lastPos());
     setLastPos(position);
     const end = new Date().getTime();
-    logger.debugLog(`handlePointerMove executed in ${end - start} ms`);
+    logDebug(`handlePointerMove executed in ${end - start} ms`);
   }
 
   function handlePointerUp(e: PointerEvent) {

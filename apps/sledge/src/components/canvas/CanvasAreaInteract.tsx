@@ -1,8 +1,9 @@
 import { Vec2 } from '@sledge/core';
+import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
-import { DebugLogger } from '~/features/log/DebugLogger';
+import { logSystemInfo, logSystemWarn } from '~/features/log';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -11,7 +12,22 @@ import { isMacOS } from '~/utils/OSUtils';
 import TouchRotationSnapper from './TouchRotationSnapper';
 
 const LOG_LABEL = 'CanvasAreaInteract';
-const logger = new DebugLogger(LOG_LABEL, false);
+const logDebug = (message: string, ...details: unknown[]) => {
+  if (VERBOSE_LOG_ENABLED)
+    logSystemInfo(message, {
+      label: LOG_LABEL,
+      details: details.length ? details : undefined,
+      debugOnly: true,
+    });
+};
+const logDebugWarn = (message: string, ...details: unknown[]) => {
+  if (VERBOSE_LOG_ENABLED)
+    logSystemWarn(message, {
+      label: LOG_LABEL,
+      details: details.length ? details : undefined,
+      debugOnly: true,
+    });
+};
 
 /**
  * 最適化されたCanvasAreaInteract
@@ -91,7 +107,7 @@ class CanvasAreaInteract {
 
   private handlePointerDown(e: PointerEvent) {
     const start = new Date().getTime();
-    logger.debugLog(`handlePointerDown start`);
+    logDebug(`handlePointerDown start`);
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -145,18 +161,18 @@ class CanvasAreaInteract {
       }
     }
     const end = new Date().getTime();
-    logger.debugLog(`handlePointerDown executed in ${end - start} ms`);
+    logDebug(`handlePointerDown executed in ${end - start} ms`);
   }
 
   private handlePointerMove(e: PointerEvent) {
     const start = new Date().getTime();
-    logger.debugLog(`handlePointerMove start`);
+    logDebug(`handlePointerMove start`);
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
 
     this.updateCursor('auto');
     if (!this.pointers.has(e.pointerId)) {
-      logger.debugWarn(`handlePointerMove cancelled because don't have current pointer`);
+      logDebugWarn(`handlePointerMove cancelled because don't have current pointer`);
       return;
     }
     const prev = this.pointers.get(e.pointerId)!;
@@ -250,7 +266,7 @@ class CanvasAreaInteract {
       }
     }
     const end = new Date().getTime();
-    logger.debugLog(`handlePointerMove executed in ${end - start} ms`);
+    logDebug(`handlePointerMove executed in ${end - start} ms`);
   }
 
   private handlePointerUp(e: PointerEvent) {
@@ -348,7 +364,7 @@ class CanvasAreaInteract {
     // keyboard
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
-    logger.debugLog('setInteractListeners done');
+    logDebug('setInteractListeners done');
   }
 
   public removeInteractListeners() {

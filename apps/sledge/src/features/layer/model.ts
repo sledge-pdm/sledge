@@ -1,6 +1,6 @@
 // Layer domain models - Pure layer utilities and factories
 
-import { hexToRGBA } from '@sledge/anvil';
+import { hexWithSharpToRGBA } from '@sledge/anvil';
 import { DropdownOption } from '@sledge/ui';
 import { v4 } from 'uuid';
 import { layerListStore } from '~/stores/ProjectStores';
@@ -49,7 +49,7 @@ export const getBaseLayerColor = (baseLayer: BaseLayer): [number, number, number
       return [0, 0, 0, 1];
     case 'custom':
       if (baseLayer.customColor) {
-        const rgba = hexToRGBA(baseLayer.customColor);
+        const rgba = hexWithSharpToRGBA(baseLayer.customColor);
         return [rgba[0] / 255, rgba[1] / 255, rgba[2] / 255, rgba[3] / 255];
       }
       // カスタム色が設定されていない場合は透明にフォールバック

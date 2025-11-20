@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
-import { Component, createEffect, createSignal, For } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import LayerListButtonsRow from '~/components/section/editor/layer/row/LayerListButtonsRow';
 import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';
 import SectionItem from '~/components/section/SectionItem';
@@ -26,6 +26,14 @@ const layerList = css`
   gap: 4px;
   margin-top: 8px;
   width: 100%;
+`;
+
+const selectionInfo = css`
+  font-family: ZFB03B;
+  /* color: var(--color-muted); */
+  width: 100%;
+  text-align: end;
+  margin-top: 8px;
 `;
 
 const LayerList: Component<{}> = () => {
@@ -61,6 +69,10 @@ const LayerList: Component<{}> = () => {
       <div class={clsx(sectionContent, layerListSectionContent)}>
         <LayerListButtonsRow onUpdate={(type) => setItems(allLayers())} />
         <LayerListPropsRow />
+
+        <Show when={layerListStore.selected.size > 0}>
+          <p class={selectionInfo}>{layerListStore.selected.size} layers selected.</p>
+        </Show>
 
         <div class={layerList} ref={(el) => (listRef = el)}>
           <For each={items()}>

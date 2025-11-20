@@ -1,11 +1,20 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
-import { Icon, Light, showContextMenu } from '@sledge/ui';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { Checkbox, Icon, Light, showContextMenu } from '@sledge/ui';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { allLayers, duplicateLayer, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
-import { clearLayerFromUser, removeLayerFromUser } from '~/features/layer/service';
+import { allLayers, findLayerById, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
+import {
+  clearLayersFromUser,
+  deselectLayer,
+  duplicateLayers,
+  getSelectedLayers,
+  removeLayersFromUser,
+  selectLayer,
+  summarizeLayerNames,
+  toggleLayerVisibility,
+} from '~/features/layer/service';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
@@ -72,10 +81,21 @@ const layerItemName = css`
 `;
 
 const activeLight = css`
+  position: absolute;
   align-self: center;
+  right: 0px;
   margin: var(--spacing-sm) 0;
   margin-left: var(--spacing-sm);
   margin-right: var(--spacing-md);
+`;
+
+const selectCheckboxContainer = css`
+  display: flex;
+  position: absolute;
+  top: 8px;
+  right: 0px;
+  opacity: 0.75;
+  pointer-events: all;
 `;
 
 interface LayerItemProps {
@@ -137,6 +157,15 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   });
 
   const isActive = () => layerListStore.activeLayerId === props.layer.id;
+  const isSelectionMode = () => layerListStore.selectionEnabled && layerListStore.selected.size > 0;
+  const contextTargets = () => (isSelectionMode() ? undefined : [props.layer.id]);
+  const resolvedContextTargets = () => contextTargets() ?? getSelectedLayers();
+  const contextMenuLabel = () => {
+    const targets = resolvedContextTargets();
+    if (targets.length === 0) return props.layer.name;
+    if (targets.length === 1) return findLayerById(targets[0])?.name ?? targets[0];
+    return `${targets.length} layers: ${summarizeLayerNames(targets)}`;
+  };
 
   return (
     <>
@@ -178,13 +207,18 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             // menu.show(new LogicalPosition(e.clientX, e.clientY));
 
             const layerId = props.layer.id;
+            const targetLayers = contextTargets();
             showContextMenu(
               [
-                { type: 'label', label: props.layer.name },
-                { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
+                { type: 'label', label: contextMenuLabel() },
+                { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayers(targetLayers) },
                 { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
-                { ...ContextMenuItems.BaseClear, onSelect: async () => await clearLayerFromUser(layerId) },
-                { ...ContextMenuItems.BaseRemove, onSelect: async () => await removeLayerFromUser(layerId) },
+                { ...ContextMenuItems.BaseClear, onSelect: async () => await clearLayersFromUser(targetLayers) },
+                { ...ContextMenuItems.BaseRemove, onSelect: async () => await removeLayersFromUser(targetLayers) },
+                {
+                  ...(findLayerById(props.layer.id)?.enabled ? ContextMenuItems.BaseImageHide : ContextMenuItems.BaseImageShow),
+                  onSelect: () => toggleLayerVisibility(targetLayers),
+                },
               ],
               e
             );
@@ -206,6 +240,22 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               <Icon src='/icons/misc/triangle_7.png' base={7} color={color.surface} />
             </div>
           </div>
+          <Show when={layerListStore.selectionEnabled}>
+            <div
+              class={selectCheckboxContainer}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Checkbox
+                checked={layerListStore.selected.has(props.layer.id)}
+                onChange={(e) => {
+                  if (e) selectLayer(props.layer.id);
+                  else deselectLayer(props.layer.id);
+                }}
+              />
+            </div>
+          </Show>
           <LayerPreview layer={props.layer} onClick={onPreviewClicked} sizingMode='height-based' referenceSize={40} maxWidth={80} fitMode='cover' />
           <div
             class={flexCol}
@@ -268,7 +318,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               </p>
             )}
           </div>
-          <Light class={activeLight} on={isActive()} />
+          <Show when={!layerListStore.selectionEnabled}>
+            <Light class={activeLight} on={isActive()} />
+          </Show>
         </div>
       </div>
     </>

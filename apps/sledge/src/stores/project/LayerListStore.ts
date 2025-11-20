@@ -4,6 +4,8 @@ export type LayerListStore = {
   layers: Layer[];
   baseLayer: BaseLayer;
   activeLayerId: string;
+  selectionEnabled: boolean;
+  selected: Set<string>;
   isImagePoolActive: boolean;
 };
 
@@ -13,5 +15,7 @@ export const defaultLayerListStore: LayerListStore = {
     colorMode: 'transparent',
   },
   activeLayerId: '',
+  selectionEnabled: false,
+  selected: new Set<string>(),
   isImagePoolActive: true,
 };

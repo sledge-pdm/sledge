@@ -1,9 +1,17 @@
 import { css } from '@acab/ecsstatic';
+import { color } from '@sledge/theme';
 import { Component } from 'solid-js';
 import LayerListIconButton from '~/components/section/editor/layer/row/LayerListIconButton';
-import { activeLayer, addLayer } from '~/features/layer';
-import { clearLayerFromUser, duplicateLayer, mergeToBelowLayer, removeLayerFromUser, setLayerProp } from '~/features/layer/service';
-import { layerListStore } from '~/stores/ProjectStores';
+import { addLayer, findLayerById } from '~/features/layer';
+import {
+  clearLayersFromUser,
+  duplicateLayers,
+  getSelectedLayers,
+  mergeToBelowLayer,
+  removeLayersFromUser,
+  toggleLayerVisibility,
+} from '~/features/layer/service';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { errorButton, flexRow } from '~/styles/styles';
 
 const iconsContainer = css`
@@ -26,41 +34,56 @@ interface Props {
 }
 
 const LayerListButtonsRow: Component<Props> = (props) => {
-  const isBottomLayerActive = () =>
-    layerListStore.layers.findIndex((l) => l.id === layerListStore.activeLayerId) === layerListStore.layers.length - 1;
-  const isOnlyOneLayer = () => layerListStore.layers.length === 1;
+  const targets = () => getSelectedLayers();
+  const targetCount = () => targets().length;
+  const targetLayerId = () => targets()[0];
+  const areTargetsEnabled = () => targets().every((id) => findLayerById(id)?.enabled);
+  const visibilityIcon = () => (areTargetsEnabled() ? '/icons/layer/visible_9.png' : '/icons/layer/invisible_9.png');
+  const visibilityTitle = () => (areTargetsEnabled() ? 'hide selected layer(s).' : 'show selected layer(s).');
+  const isBottomLayerTarget = () => layerListStore.layers.findIndex((l) => l.id === targetLayerId()) === layerListStore.layers.length - 1;
+  const isRemoveDisabled = () => layerListStore.layers.length <= 1 || layerListStore.layers.length === targetCount();
 
   return (
     <div class={flexRow}>
       <div class={iconsContainer}>
         <LayerListIconButton
           iconSrc={'/icons/layer/clear_9.png'}
-          title={'clear layer.'}
-          onClick={async () => await clearLayerFromUser(layerListStore.activeLayerId)}
+          title={'clear selected layer(s).'}
+          onClick={async () => await clearLayersFromUser()}
         />
         <LayerListIconButton
-          iconSrc={activeLayer().enabled ? '/icons/layer/visible_9.png' : '/icons/layer/invisible_9.png'}
-          title={activeLayer().enabled ? 'hide layer.' : 'show layer.'}
+          iconSrc={visibilityIcon()}
+          title={visibilityTitle()}
           onClick={() => {
-            const active = activeLayer();
-            if (active) {
-              setLayerProp(active.id, 'enabled', !active.enabled);
-            }
+            toggleLayerVisibility();
           }}
         />
         <LayerListIconButton
           iconSrc={'/icons/layer/duplicate_9.png'}
-          title={'duplicate layer.'}
+          title={'duplicate selected layer(s).'}
           onClick={() => {
-            duplicateLayer(layerListStore.activeLayerId);
+            duplicateLayers();
           }}
         />
         <LayerListIconButton
           iconSrc={'/icons/layer/merge_down_9.png'}
           title={'merge down to below layer.'}
-          disabled={isBottomLayerActive()}
+          disabled={targetCount() !== 1 || isBottomLayerTarget()}
           onClick={async () => {
-            await mergeToBelowLayer(layerListStore.activeLayerId);
+            const target = targetLayerId();
+            if (target) {
+              await mergeToBelowLayer(target);
+            }
+          }}
+        />
+        <LayerListIconButton
+          iconSrc={'/icons/layer/selection_mode_9.png'}
+          title={'toggle layer selection mode.'}
+          // disabled={appearanceStore.selectionEnabled}
+          iconColor={layerListStore.selectionEnabled ? color.enabled : color.onBackground}
+          onClick={async () => {
+            setLayerListStore('selectionEnabled', (v) => !v);
+            setLayerListStore('selected', new Set());
           }}
         />
       </div>
@@ -75,13 +98,10 @@ const LayerListButtonsRow: Component<Props> = (props) => {
         </button>
         <button
           class={errorButton}
-          disabled={isOnlyOneLayer()}
+          disabled={isRemoveDisabled()}
           onClick={async () => {
-            const active = activeLayer();
-            if (active) {
-              await removeLayerFromUser(active.id);
-              props.onUpdate?.('remove');
-            }
+            await removeLayersFromUser();
+            props.onUpdate?.('remove');
           }}
         >
           - REMOVE.

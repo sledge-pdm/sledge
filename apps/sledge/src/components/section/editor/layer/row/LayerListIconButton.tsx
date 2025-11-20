@@ -23,6 +23,8 @@ const iconContainerDisabled = css`
 
 interface Props {
   iconSrc: string;
+  iconColor?: string;
+  hoverColor?: string;
   title?: string;
   disabled?: boolean;
   onClick?: () => void;
@@ -37,7 +39,7 @@ const LayerListIconButton: Component<Props> = (props) => {
         props.onClick?.();
       }}
     >
-      <Icon src={props.iconSrc} base={9} scale={1} hoverColor={color.active} />
+      <Icon src={props.iconSrc} base={9} scale={1} color={props.iconColor ?? color.onBackground} hoverColor={props.hoverColor ?? color.active} />
     </div>
   );
 };

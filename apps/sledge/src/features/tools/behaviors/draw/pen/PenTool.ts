@@ -319,7 +319,7 @@ export class PenTool implements ToolBehavior {
     this.strokeChunk.clear();
 
     const toolLabel = this.categoryId === TOOL_CATEGORIES.ERASER ? 'Eraser' : 'Pen';
-    logUserInfo(strokeCommitted ? `${toolLabel} stroke applied.` : `${toolLabel} stroke finished.`);
+    if (strokeCommitted) logUserInfo(`${toolLabel} stroke finished.`);
 
     return {
       shouldUpdate: true,

@@ -1,4 +1,5 @@
 import { Theme } from '@sledge/theme';
+import { KeyConfigStore, makeDefaultKeyConfigStore } from '~/config/KeyConfig';
 import { Cursor } from '~/config/types/Cursor';
 import { FPS } from '~/config/types/FPS';
 import { CanvasRenderingMode } from '~/features/canvas';
@@ -32,9 +33,10 @@ export type GlobalConfig = {
   debug: {
     showPerformanceMonitor: boolean;
   };
+  keyConfig: KeyConfigStore;
 };
 
-export const defaultConfig: GlobalConfig = {
+export const makeDefaultGlobalConfig = (): GlobalConfig => ({
   general: {
     theme: 'os',
     skippedVersions: [],
@@ -62,4 +64,8 @@ export const defaultConfig: GlobalConfig = {
   debug: {
     showPerformanceMonitor: false,
   },
-};
+  keyConfig: makeDefaultKeyConfigStore(),
+});
+
+// Keep a default instance for places that expect a value, but prefer calling makeDefaultGlobalConfig for freshness.
+export const defaultConfig: GlobalConfig = makeDefaultGlobalConfig();

@@ -3,7 +3,7 @@ import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 export const performanceMetas: FieldMeta[] = [
   {
     section: ConfigSections.Performance,
-    path: ['performance', 'targetFPS'],
+    path: 'performance/targetFPS',
     label: 'canvas target fps',
     component: 'Dropdown',
     props: {
@@ -17,7 +17,7 @@ export const performanceMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Performance,
-    path: ['performance', 'canvasRenderingMode'],
+    path: 'performance/canvasRenderingMode',
     label: 'rendering mode',
     component: 'Dropdown',
     props: {

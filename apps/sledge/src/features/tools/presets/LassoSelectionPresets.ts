@@ -1,6 +1,6 @@
 import { selectModeMeta } from '~/features/tools/presets/SelectionMeta';
-import { TOOL_CATEGORIES } from '~/features/tools/Tools';
-import { ToolPresetMeta } from './PresetMeta';
+import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
 export const lassoSelectionPresetMeta: ToolPresetMeta = {
   toolId: TOOL_CATEGORIES.LASSO_SELECTION,
@@ -18,5 +18,5 @@ export const lassoSelectionPresetMeta: ToolPresetMeta = {
       },
       tips: 'lasso fill mode.',
     },
-  ],
+  ] satisfies PresetFieldMeta<LassoSelectionPresetConfig>[],
 };

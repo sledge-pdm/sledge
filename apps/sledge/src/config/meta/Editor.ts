@@ -3,7 +3,7 @@ import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 export const editorMetas: FieldMeta[] = [
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'cursor'],
+    path: 'editor/cursor',
     label: 'cursor',
     component: 'Dropdown',
     props: {
@@ -17,7 +17,7 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'rotateDegreePerWheelScroll'],
+    path: 'editor/rotateDegreePerWheelScroll',
     label: 'rotate degree per wheel',
     component: 'Slider',
     props: {
@@ -30,14 +30,14 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'showPointedPixel'],
+    path: 'editor/showPointedPixel',
     label: 'show pointed pixel',
     component: 'ToggleSwitch',
     tips: `whether if shows pointed pixel as rect.`,
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'centerCanvasOnResize'],
+    path: 'editor/centerCanvasOnResize',
     label: 'center canvas on resize',
     component: 'Dropdown',
     props: {
@@ -51,7 +51,7 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'centerCanvasOnMaximize'],
+    path: 'editor/centerCanvasOnMaximize',
     label: 'center canvas on window maximize',
     component: 'Dropdown',
     props: {
@@ -65,14 +65,14 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'requireConfirmBeforeLayerRemove'],
+    path: 'editor/requireConfirmBeforeLayerRemove',
     label: 'require confirm before removing layer',
     component: 'ToggleSwitch',
     tips: `require confirm before removing layer. if disabled, skip confirm.`,
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'maxHistoryItemsCount'],
+    path: 'editor/maxHistoryItemsCount',
     label: 'max history items count',
     component: 'Slider',
     props: {
@@ -85,7 +85,7 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'touchRotationZeroSnapThreshold'],
+    path: 'editor/touchRotationZeroSnapThreshold',
     label: '0 degree snap threshold (2 finger touch)',
     component: 'Slider',
     props: {
@@ -98,7 +98,7 @@ export const editorMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.Editor,
-    path: ['editor', 'rulerMarkDirection'],
+    path: 'editor/rulerMarkDirection',
     label: 'ruler mark direction',
     component: 'Dropdown',
     props: {

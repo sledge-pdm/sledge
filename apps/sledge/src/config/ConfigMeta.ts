@@ -1,4 +1,5 @@
-import { ConfigComponentName } from '~/config/ConfigComponent';
+import type { ConfigFieldOf } from '@sledge/ui';
+import type { GlobalConfig } from '~/config/GlobalConfig';
 
 export enum ConfigSections {
   General = 'GENERAL',
@@ -9,12 +10,4 @@ export enum ConfigSections {
   Debug = 'DEBUG',
 }
 
-export type FieldMeta = {
-  section: ConfigSections;
-  path: readonly string[];
-  label: string;
-  component: ConfigComponentName;
-  props?: Record<string, any>; // min/max/step/options など
-  tips?: string;
-  customFormat?: (v: number) => string; // format: [value] => value
-};
+export type FieldMeta = ConfigFieldOf<GlobalConfig> & { section: ConfigSections };

@@ -1,5 +1,13 @@
 import { css } from '@acab/ecsstatic';
-import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray } from '@sledge/ui';
+import {
+  componentProps,
+  ConfigFieldRenderer,
+  getValueAtPath,
+  Icon,
+  Light,
+  pathToArray,
+  type ConfigField,
+} from '@sledge/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
@@ -289,7 +297,8 @@ const ConfigForm: Component<Props> = (props) => {
             <Show when={currentSection() !== ConfigSections.KeyConfig}>
               <For each={grouped().get(currentSection())}>
                 {(meta) => {
-                  const componentProp = componentProps.get(meta.component);
+                  const componentName = typeof meta.component === 'string' ? meta.component : undefined;
+                  const componentProp = componentName ? componentProps.get(componentName) : undefined;
                   const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
                   const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'right';
                   const value = () => getValueFromMetaPath(meta);
@@ -316,7 +325,7 @@ const ConfigForm: Component<Props> = (props) => {
                             {getParsedValueFromMetaPath(meta)}.
                           </label>
                         </Show>
-                        <ConfigFieldRenderer field={meta} value={value} onChange={onChange} />
+                        <ConfigFieldRenderer field={meta as ConfigField} value={value} onChange={onChange} />
                         <Show when={shouldShowRightLabel}>
                           <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': 'var(--spacing-sm)' }}>
                             {getParsedValueFromMetaPath(meta)}.

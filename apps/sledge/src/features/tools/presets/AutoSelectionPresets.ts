@@ -1,8 +1,8 @@
 import { selectModeMeta } from '~/features/tools/presets/SelectionMeta';
-import { TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { AutoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
-export const autoSelectionPresets: PresetFieldMeta[] = [
+export const autoSelectionPresets: PresetFieldMeta<AutoSelectionPresetConfig>[] = [
   selectModeMeta,
   {
     key: 'threshold',

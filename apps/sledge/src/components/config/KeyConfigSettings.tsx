@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
-import { KeyConfigEntry } from '~/config/KeyConfig';
+import { KeyConfigCommands, KeyConfigEntry } from '~/config/KeyConfig';
 import {
   isRecordEndWithoutSave as isRecordAbortKey,
   isRecordEndSave as isRecordEndKey,
@@ -12,7 +12,6 @@ import {
   restoreDefaultKeyConfig,
   saveKeyConfigEntry,
 } from '~/features/config/KeyConfigController';
-import { KeyConfigCommands } from '~/stores/global/KeyConfigStore';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { accentedText, flexCol } from '~/styles/styles';
 
@@ -90,7 +89,7 @@ const KeyConfigSettings: Component<Props> = (props) => {
         <span style={{ color: color.accent }}>esc</span> to abort.
       </p>
       <div class={flexCol} style={{ gap: '4px', width: '100%' }}>
-        <For each={Object.entries(keyConfigStore)}>
+        <For each={Object.entries(keyConfigStore())}>
           {([name, entry]) => {
             const isRecording = () => name === recordingName();
             return (

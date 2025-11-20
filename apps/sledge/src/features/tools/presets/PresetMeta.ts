@@ -1,10 +1,13 @@
-import { ConfigComponentName } from '~/config/ConfigComponent';
+import type { ComponentPropsMap, ConfigComponentFactory, ConfigComponentName } from '@sledge/ui';
 
-export type PresetFieldMeta = {
-  key: string;
+export type PresetFieldMeta<
+  TConfig = Record<string, any>,
+  C extends ConfigComponentName | ConfigComponentFactory<any> = ConfigComponentName | ConfigComponentFactory<any>,
+> = {
+  key: keyof TConfig | (string & {});
   label?: string;
-  component: ConfigComponentName;
-  props?: Record<string, any>; // min/max/step/options など
+  component: C;
+  props?: C extends ConfigComponentName ? ComponentPropsMap[C] : never;
   tips?: string;
   customFormat?: (value: number) => string;
   condition?: () => boolean;

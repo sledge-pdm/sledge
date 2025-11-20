@@ -1,9 +1,8 @@
 import { css } from '@acab/ecsstatic';
-import { Checkbox, Dropdown, Slider, ToggleSwitch } from '@sledge/ui';
+import { ConfigFieldRenderer } from '@sledge/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
-import { componentProps } from '~/config/ConfigComponent';
 import { logSystemInfo } from '~/features/log/service';
-import { getPresetMetaByToolId, PresetFieldMeta } from '~/features/tools/presets';
+import { getPresetMetaByToolId } from '~/features/tools/presets';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
 import { flexCol, flexRow } from '~/styles/styles';
@@ -20,40 +19,6 @@ const label = css`
 interface Props {
   toolId: ToolCategoryId;
   onConfigChange: (key: string, value: any) => void;
-}
-
-function FieldRenderer(props: { meta: PresetFieldMeta; value: any; onChange: (v: any) => void }) {
-  const { meta, value, onChange } = props;
-
-  switch (meta.component) {
-    case 'Dropdown':
-      return <Dropdown value={value()} options={meta.props?.options} onChange={onChange} />;
-    case 'Slider':
-      return (
-        <Slider
-          defaultValue={value()}
-          value={value()}
-          min={meta.props?.min ?? 0}
-          max={meta.props?.max ?? 0}
-          labelMode={componentProps.get('Slider')?.labelMode ?? 'left'}
-          customFormat={meta.customFormat}
-          wheelSpin={meta.props?.wheelSpin ?? true}
-          allowDirectInput={true}
-          allowFloat={meta.props?.allowFloat ?? false}
-          floatSignificantDigits={meta.props?.floatSignificantDigits}
-          onChange={onChange}
-          {...meta.props}
-        />
-      );
-    case 'CheckBox':
-      return <Checkbox id={meta.key} checked={value()} onChange={onChange} />;
-    case 'ToggleSwitch':
-      return <ToggleSwitch id={meta.key} checked={value()} onChange={onChange} />;
-    case 'Custom':
-      return meta.props?.content?.() ?? null;
-    default:
-      return <div>Unsupported component: {meta.component}</div>;
-  }
 }
 
 const ToolPresetConfigForm: Component<Props> = (props) => {
@@ -82,39 +47,38 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
 
   return (
     <div class={flexCol} style={{ gap: '4px' }}>
-      <Show when={presetMeta()?.fields}>
-        <For each={presetMeta()!.fields}>
-          {(fieldMeta) => {
-            if (fieldMeta.condition) {
-              const condition = fieldMeta.condition();
-              if (!condition) return null;
-            }
+      <For each={presetMeta()?.fields}>
+        {(fieldMeta) => {
+          if (fieldMeta.condition) {
+            const condition = fieldMeta.condition();
+            if (!condition) return null;
+          }
 
-            const value = () => options()[fieldMeta.key] ?? '';
-            const onChange = (newValue: any) => {
-              props.onConfigChange(fieldMeta.key, newValue);
-            };
+          const optionsValue = options();
+          const value = () => optionsValue[fieldMeta.key as keyof typeof optionsValue] ?? '';
+          const onChange = (newValue: any) => {
+            props.onConfigChange(fieldMeta.key as string, newValue);
+          };
 
-            return (
-              <div
-                class={flexRow}
-                style={{ width: '100%', 'min-height': fieldMeta.component !== 'Custom' ? '24px' : undefined, 'align-items': 'center' }}
-              >
-                <Show when={fieldMeta.label}>
-                  <div class={flexRow} style={{ width: '80px' }}>
-                    <label class={label} for={fieldMeta.key}>
-                      {fieldMeta.label}
-                    </label>
-                  </div>
-                </Show>
-                <div class={flexRow} style={{ 'flex-grow': 1, 'justify-content': 'end' }}>
-                  <FieldRenderer meta={fieldMeta} value={value} onChange={onChange} />
+          return (
+            <div
+              class={flexRow}
+              style={{ width: '100%', 'min-height': fieldMeta.component !== 'Custom' ? '24px' : undefined, 'align-items': 'center' }}
+            >
+              <Show when={fieldMeta.label}>
+                <div class={flexRow} style={{ width: '80px' }}>
+                  <label class={label} for={fieldMeta.key}>
+                    {fieldMeta.label}
+                  </label>
                 </div>
+              </Show>
+              <div class={flexRow} style={{ 'flex-grow': 1, 'justify-content': 'end' }}>
+                <ConfigFieldRenderer field={fieldMeta as any} value={value} onChange={onChange} />
               </div>
-            );
-          }}
-        </For>
-      </Show>
+            </div>
+          );
+        }}
+      </For>
     </div>
   );
 };

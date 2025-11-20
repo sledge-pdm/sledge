@@ -1,8 +1,8 @@
 import SizeHistoryRow from '~/components/section/editor/tool/SizeHistoryRow';
-import { TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { EraserPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
-export const eraserPresetFields: PresetFieldMeta[] = [
+export const eraserPresetFields: PresetFieldMeta<EraserPresetConfig>[] = [
   {
     key: 'size',
     label: 'Size',
@@ -22,11 +22,8 @@ export const eraserPresetFields: PresetFieldMeta[] = [
   {
     key: 'sizeHistory',
     label: undefined,
-    component: 'Custom',
-    props: {
-      content: () => {
-        return <SizeHistoryRow categoryId={TOOL_CATEGORIES.ERASER} />;
-      },
+    component: () => {
+      return <SizeHistoryRow categoryId={TOOL_CATEGORIES.ERASER} />;
     },
   },
   {

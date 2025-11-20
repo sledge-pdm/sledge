@@ -28,66 +28,59 @@ const label = css`
 export const selectModeMeta: PresetFieldMeta = {
   key: 'selection_mode',
   label: 'Mode',
-  component: 'Custom',
-  props: {
-    content: () => {
-      return (
-        <div class={container}>
-          <div
-            class={item}
-            onClick={() => {
-              setInteractStore('selectionEditMode', 'replace');
-            }}
-          >
-            <Show when={interactStore.selectionEditMode === 'replace'}>
-              <p class={label}>replace.</p>
-            </Show>
-            <Icon
-              src='/icons/selection/mode_replace.png'
-              base={8}
-              color={interactStore.selectionEditMode === 'replace' ? color.active : color.muted}
-            />
-          </div>
-          <div
-            class={item}
-            onClick={() => {
-              setInteractStore('selectionEditMode', 'add');
-            }}
-          >
-            <Show when={interactStore.selectionEditMode === 'add'}>
-              <p class={label}>add.</p>
-            </Show>
-            <Icon src='/icons/selection/mode_add.png' base={8} color={interactStore.selectionEditMode === 'add' ? color.active : color.muted} />
-          </div>
-          <div
-            class={item}
-            onClick={() => {
-              setInteractStore('selectionEditMode', 'subtract');
-            }}
-          >
-            <Show when={interactStore.selectionEditMode === 'subtract'}>
-              <p class={label}>subtract.</p>
-            </Show>
-            <Icon
-              src='/icons/selection/mode_subtract.png'
-              base={8}
-              color={interactStore.selectionEditMode === 'subtract' ? color.active : color.muted}
-            />
-          </div>
-          <div
-            class={item}
-            onClick={() => {
-              setInteractStore('selectionEditMode', 'move');
-            }}
-          >
-            <Show when={interactStore.selectionEditMode === 'move'}>
-              <p class={label}>move.</p>
-            </Show>
-            <Icon src='/icons/selection/mode_move.png' base={8} color={interactStore.selectionEditMode === 'move' ? color.active : color.muted} />
-          </div>
+  component: () => {
+    return (
+      <div class={container}>
+        <div
+          class={item}
+          onClick={() => {
+            setInteractStore('selectionEditMode', 'replace');
+          }}
+        >
+          <Show when={interactStore.selectionEditMode === 'replace'}>
+            <p class={label}>replace.</p>
+          </Show>
+          <Icon src='/icons/selection/mode_replace.png' base={8} color={interactStore.selectionEditMode === 'replace' ? color.active : color.muted} />
         </div>
-      );
-    },
+        <div
+          class={item}
+          onClick={() => {
+            setInteractStore('selectionEditMode', 'add');
+          }}
+        >
+          <Show when={interactStore.selectionEditMode === 'add'}>
+            <p class={label}>add.</p>
+          </Show>
+          <Icon src='/icons/selection/mode_add.png' base={8} color={interactStore.selectionEditMode === 'add' ? color.active : color.muted} />
+        </div>
+        <div
+          class={item}
+          onClick={() => {
+            setInteractStore('selectionEditMode', 'subtract');
+          }}
+        >
+          <Show when={interactStore.selectionEditMode === 'subtract'}>
+            <p class={label}>subtract.</p>
+          </Show>
+          <Icon
+            src='/icons/selection/mode_subtract.png'
+            base={8}
+            color={interactStore.selectionEditMode === 'subtract' ? color.active : color.muted}
+          />
+        </div>
+        <div
+          class={item}
+          onClick={() => {
+            setInteractStore('selectionEditMode', 'move');
+          }}
+        >
+          <Show when={interactStore.selectionEditMode === 'move'}>
+            <p class={label}>move.</p>
+          </Show>
+          <Icon src='/icons/selection/mode_move.png' base={8} color={interactStore.selectionEditMode === 'move' ? color.active : color.muted} />
+        </div>
+      </div>
+    );
   },
   tips: 'Color tolerance for fill operation',
 };

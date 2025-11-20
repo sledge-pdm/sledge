@@ -93,6 +93,9 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     if (container) {
       container.classList.remove('sledge-dnd-grabbing');
       container.style.touchAction = previousTouchAction ?? '';
+      if (pointerId !== null && container.releasePointerCapture && container.hasPointerCapture?.(pointerId)) {
+        container.releasePointerCapture(pointerId);
+      }
     }
     previousTouchAction = null;
     if (cursorStyleEl && cursorStyleEl.parentElement) cursorStyleEl.parentElement.removeChild(cursorStyleEl);
@@ -139,6 +142,9 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     if (!container || !sourceId) return;
     previousTouchAction = container.style.touchAction;
     container.style.touchAction = 'none';
+    if (pointerId !== null && container.setPointerCapture) {
+      container.setPointerCapture(pointerId);
+    }
     const el = itemMap.get(sourceId);
     if (!el) return;
     sourceEl = el;
@@ -276,6 +282,10 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   };
 
   const handlePointerMove = (e: PointerEvent) => {
+    if (dragging && e.cancelable) {
+      // ペン操作時にブラウザのスクロールでpointercancelされないよう抑止
+      e.preventDefault();
+    }
     if (pointerId !== null && e.pointerId !== pointerId) return;
     lastClientX = e.clientX;
     lastClientY = e.clientY;

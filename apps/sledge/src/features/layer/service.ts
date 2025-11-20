@@ -83,6 +83,7 @@ export function toggleLayerVisibility(layerIds?: string[]) {
   const shouldEnable = !targets.every((id) => findLayerById(id)?.enabled);
   targets.forEach((id) => setLayerProp(id, 'enabled', shouldEnable));
   logUserInfo(`Layer visibility ${shouldEnable ? 'enabled' : 'disabled'} for ${targets.length} layer(s).`, { label: LOG_LABEL });
+  if (targets.length > 0) resetSelectionState();
 }
 
 export function duplicateLayer(layerId: string) {
@@ -107,6 +108,7 @@ export function duplicateLayer(layerId: string) {
 export function duplicateLayers(layerIds?: string[]) {
   const targets = getOperationTargetLayerIds(layerIds);
   targets.forEach((id) => duplicateLayer(id));
+  if (targets.length > 0) resetSelectionState();
 }
 
 export async function mergeToBelowLayer(layerId: string) {
@@ -303,6 +305,11 @@ function dropFromSelection(layerIds: string[]) {
   });
 }
 
+export function resetSelectionState() {
+  setLayerListStore('selectionEnabled', false);
+  setLayerListStore('selected', () => new Set<string>());
+}
+
 export function setImagePoolActive(active: boolean) {
   setLayerListStore('isImagePoolActive', active);
 }
@@ -370,6 +377,7 @@ export const removeLayersFromUser = async (layerIds?: string[], options?: Remove
 
   targets.forEach((id) => removeLayer(id, options));
   dropFromSelection(targets);
+  resetSelectionState();
 };
 
 export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
@@ -431,6 +439,7 @@ export const clearLayersFromUser = async (layerIds?: string[]) => {
   }
 
   targets.forEach((id) => clearLayer(id));
+  resetSelectionState();
 };
 
 export const clearLayerFromUser = async (layerId: string) => {

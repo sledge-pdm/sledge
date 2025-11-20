@@ -112,6 +112,19 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   const onDetClicked = (e: MouseEvent) => {
     e.stopPropagation();
+    if (e.shiftKey) {
+      if (!layerListStore.selectionEnabled) {
+        setLayerListStore('selectionEnabled', true);
+        setLayerListStore('selected', () => new Set<string>([props.layer.id]));
+      } else {
+        setLayerListStore('selected', (set: Set<string>) => {
+          const updated = new Set(set);
+          if (updated.has(props.layer.id)) updated.delete(props.layer.id);
+          else updated.add(props.layer.id);
+          return updated;
+        });
+      }
+    }
     setActiveLayerId(props.layer.id);
     // not needed because setActiveLayerId calls it
     // eventBus.emit('webgl:requestUpdate', { onlyDirty: false });

@@ -66,12 +66,7 @@ const LayerList: Component<{}> = () => {
           <For each={items()}>
             {(layer, index) => {
               return (
-                <div
-                  ref={(el) => dnd.registerItem(el, layer.id)}
-                  onPointerDown={(e) => dnd.onPointerDown(e, layer.id)}
-                  // isolate pointer to allow intentional long-press without scrolling
-                  style={{ 'touch-action': 'none' }}
-                >
+                <div ref={(el) => dnd.registerItem(el, layer.id)} onPointerDown={(e) => dnd.onPointerDown(e, layer.id)}>
                   <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />
                 </div>
               );

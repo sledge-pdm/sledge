@@ -63,6 +63,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   let dropLineEl: HTMLDivElement | null = null;
   let pointerInsideContainer = true;
   let cursorStyleEl: HTMLStyleElement | null = null;
+  let previousTouchAction: string | null = null;
 
   const itemMap = new Map<Id, HTMLElement>();
 
@@ -89,7 +90,11 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     (document.body as any).style.cursor = '';
     // remove grabbing cursor class/style from container
     const container = options.containerRef?.();
-    if (container) container.classList.remove('sledge-dnd-grabbing');
+    if (container) {
+      container.classList.remove('sledge-dnd-grabbing');
+      container.style.touchAction = previousTouchAction ?? '';
+    }
+    previousTouchAction = null;
     if (cursorStyleEl && cursorStyleEl.parentElement) cursorStyleEl.parentElement.removeChild(cursorStyleEl);
     cursorStyleEl = null;
     pointerId = null;
@@ -132,6 +137,8 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   const startDrag = (e: PointerEvent) => {
     const container = options.containerRef();
     if (!container || !sourceId) return;
+    previousTouchAction = container.style.touchAction;
+    container.style.touchAction = 'none';
     const el = itemMap.get(sourceId);
     if (!el) return;
     sourceEl = el;

@@ -387,7 +387,7 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
   updateWebGLCanvas(false, `BaseLayer color mode changed to ${colorMode}`);
-  setProjectStore("isProjectChangedAfterSave", true);
+  setProjectStore('isProjectChangedAfterSave', true);
 }
 
 /**
@@ -397,5 +397,5 @@ export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
   updateWebGLCanvas(false, `BaseLayer custom color changed to ${customColor}`);
-  setProjectStore("isProjectChangedAfterSave", true);
+  setProjectStore('isProjectChangedAfterSave', true);
 }

@@ -15,6 +15,11 @@ import {
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { accentedText, flexCol } from '~/styles/styles';
 
+const root = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+`;
 const row = css`
   display: flex;
   flex-direction: row;
@@ -83,7 +88,7 @@ const KeyConfigSettings: Component<Props> = (props) => {
   onCleanup(() => window.removeEventListener('keydown', handleOnKeyDown));
 
   return (
-    <div class={flexCol}>
+    <div class={root}>
       <p style={{ 'margin-bottom': '16px' }}>
         <span class={accentedText}>enter</span> to confirm.&nbsp;
         <span style={{ color: color.accent }}>esc</span> to abort.

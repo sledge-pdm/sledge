@@ -2,7 +2,7 @@ import { BaseDirectory } from '@tauri-apps/api/path';
 import { exists, readTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { saveGlobalSettings } from '~/features/io/config/save';
-import { getDefaultSettings } from '~/features/io/config/set';
+import { getDefaultSettings, getFallbackedSettings } from '~/features/io/config/set';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { loadConfigToGlobalStore } from '~/stores/GlobalStores';
 
@@ -36,10 +36,7 @@ export async function loadGlobalSettings() {
       await saveGlobalSettings(false);
       return defaultSettings;
     } else {
-      const fallbackedConfigJson = {
-        ...defaultSettings,
-        ...configJson,
-      };
+      const fallbackedConfigJson = getFallbackedSettings(configJson);
       loadConfigToGlobalStore(fallbackedConfigJson);
       await saveGlobalSettings(false);
       return fallbackedConfigJson;

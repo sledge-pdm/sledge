@@ -25,6 +25,11 @@ const resetSkippedVersionsLink = css`
 export const generalMetas: FieldMeta[] = [
   {
     section: ConfigSections.General,
+    kind: 'header',
+    header: 'theme',
+  },
+  {
+    section: ConfigSections.General,
     path: 'general/theme',
     label: 'global theme',
     component: 'Dropdown',
@@ -32,6 +37,11 @@ export const generalMetas: FieldMeta[] = [
       options: themeOptions,
     },
     tips: 'global theme of sledge.',
+  },
+  {
+    section: ConfigSections.General,
+    kind: 'header',
+    header: 'versions',
   },
   {
     section: ConfigSections.General,

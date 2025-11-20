@@ -1,15 +1,17 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
-import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
+import { ConfigSections, FieldMeta, FieldValueMeta, isHeaderMeta } from '~/config/ConfigMeta';
 import { GlobalConfig } from '~/config/GlobalConfig';
+import { generalMetas } from '~/config/meta/Appearance';
+import { canvasMetas } from '~/config/meta/Canvas';
 import { debugMetas } from '~/config/meta/Debug';
-import { defaultMetas } from '~/config/meta/Default';
-import { editorMetas } from '~/config/meta/Editor';
-import { generalMetas } from '~/config/meta/General';
 import { performanceMetas } from '~/config/meta/Performance';
+import { protectionMetas } from '~/config/meta/Protection';
+import { startupMetas } from '~/config/meta/Startup';
 import { Consts } from '~/Consts';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { resetToDefaultConfig } from '~/features/io/config/reset';
@@ -37,7 +39,7 @@ const configFormSections = css`
   flex-direction: column;
   border-right: 1px solid var(--color-border-secondary);
   width: 170px;
-  padding-top: 20px;
+  padding-top: 18px;
 `;
 
 const configFormSectionItem = css`
@@ -54,6 +56,10 @@ const configFormSectionItem = css`
   &:hover {
     background-color: var(--color-surface);
   }
+`;
+
+const configFormSectionItemSelected = css`
+  background-color: var(--color-surface);
 `;
 
 const configFormSectionLabel = css`
@@ -96,15 +102,18 @@ const configFormScrollContent = css`
   display: flex;
   flex-direction: column;
   overflow-y: visible;
-  gap: var(--spacing-xl);
-  margin: 28px 20px;
+  margin: 8px 20px 28px 20px;
   padding-bottom: var(--spacing-md);
 `;
 
 const configFormFieldHeader = css`
-  font-size: 12px;
-  font-family: ZFB31;
+  font-size: 8px;
+  font-family: ZFB09;
   letter-spacing: 1px;
+  color: var(--color-accent);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  text-transform: lowercase;
 `;
 
 const configFormFieldItem = css`
@@ -112,6 +121,7 @@ const configFormFieldItem = css`
   flex-direction: column;
   justify-content: center;
   gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 `;
 
 const configFormFieldLabelTooltip = css`
@@ -172,9 +182,9 @@ const configFormAbout = css`
   margin-top: 8px;
 `;
 
-const getValueFromMetaPath = (meta: FieldMeta) => getValueAtPath(globalConfig, meta.path);
+const getValueFromMetaPath = (meta: FieldValueMeta) => getValueAtPath(globalConfig, meta.path);
 
-function getParsedValueFromMetaPath(meta: FieldMeta) {
+function getParsedValueFromMetaPath(meta: FieldValueMeta) {
   let v = getValueFromMetaPath(meta);
 
   switch (meta.component) {
@@ -244,14 +254,16 @@ const ConfigForm: Component<Props> = (props) => {
 
     const settingsMeta = [
       ...generalMetas,
-      ...editorMetas,
+      ...canvasMetas,
+      ...startupMetas,
       ...performanceMetas,
-      ...defaultMetas,
+      ...protectionMetas,
       ...debugMetas,
     ] as const satisfies readonly FieldMeta[];
 
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
     const grouped = settingsMeta.reduce((map, field) => {
+      if (!('section' in field)) return map;
       const arr = map.get(field.section) ?? [];
       arr.push(field);
       map.set(field.section, arr);
@@ -271,7 +283,10 @@ const ConfigForm: Component<Props> = (props) => {
       <div class={configFormSections}>
         <For each={Object.values(ConfigSections)}>
           {(section) => (
-            <div class={configFormSectionItem} onClick={() => setSection(section)}>
+            <div
+              class={clsx(configFormSectionItem, section === currentSection() && configFormSectionItemSelected)}
+              onClick={() => setSection(section)}
+            >
               <Light on={section === currentSection()} color='var(--color-accent)' />
               <a class={configFormSectionLabel} style={section === currentSection() ? { color: 'var(--color-accent)' } : {}}>
                 {section.toUpperCase()}.
@@ -283,12 +298,16 @@ const ConfigForm: Component<Props> = (props) => {
       <div class={configFormFields}>
         <div class={configFormScrollContent}>
           <Show when={currentSection() !== undefined}>
-            <Show when={currentSection() === ConfigSections.KeyConfig}>
+            <Show when={currentSection() === ConfigSections.Shortcuts}>
               <KeyConfigSettings onKeyConfigChange={onKeyConfigChange} />
             </Show>
-            <Show when={currentSection() !== ConfigSections.KeyConfig}>
+            <Show when={currentSection() !== ConfigSections.Shortcuts}>
               <For each={grouped().get(currentSection())}>
                 {(meta) => {
+                  if (isHeaderMeta(meta)) {
+                    return <p class={configFormFieldHeader}>{meta.header.toUpperCase()}.</p>;
+                  }
+
                   const componentName = typeof meta.component === 'string' ? meta.component : undefined;
                   const componentProp = componentName ? componentProps.get(componentName) : undefined;
                   const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';

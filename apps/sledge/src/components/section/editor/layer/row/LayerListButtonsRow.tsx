@@ -1,9 +1,8 @@
 import { css } from '@acab/ecsstatic';
-import { confirm } from '@tauri-apps/plugin-dialog';
 import { Component } from 'solid-js';
 import LayerListIconButton from '~/components/section/editor/layer/row/LayerListIconButton';
 import { activeLayer, addLayer } from '~/features/layer';
-import { clearLayer, duplicateLayer, mergeToBelowLayer, removeLayerFromUser, setLayerProp } from '~/features/layer/service';
+import { clearLayerFromUser, duplicateLayer, mergeToBelowLayer, removeLayerFromUser, setLayerProp } from '~/features/layer/service';
 import { layerListStore } from '~/stores/ProjectStores';
 import { errorButton, flexRow } from '~/styles/styles';
 
@@ -37,10 +36,7 @@ const LayerListButtonsRow: Component<Props> = (props) => {
         <LayerListIconButton
           iconSrc={'/icons/layer/clear_9.png'}
           title={'clear layer.'}
-          onClick={async () => {
-            const clearConfirmed = await confirm(`Sure to clear layer "${activeLayer().name}"?`);
-            if (clearConfirmed) clearLayer(layerListStore.activeLayerId);
-          }}
+          onClick={async () => await clearLayerFromUser(layerListStore.activeLayerId)}
         />
         <LayerListIconButton
           iconSrc={activeLayer().enabled ? '/icons/layer/visible_9.png' : '/icons/layer/invisible_9.png'}

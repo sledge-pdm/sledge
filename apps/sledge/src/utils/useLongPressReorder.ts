@@ -67,6 +67,17 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
 
   const itemMap = new Map<Id, HTMLElement>();
 
+  const ensurePointerCaptured = () => {
+    const container = options.containerRef?.();
+    if (!container || pointerId === null) return;
+    if (container.hasPointerCapture?.(pointerId)) return;
+    try {
+      container.setPointerCapture(pointerId);
+    } catch (_e) {
+      // ignore capture errors
+    }
+  };
+
   const clearTimer = () => {
     if (pressTimer !== null) {
       window.clearTimeout(pressTimer);
@@ -140,11 +151,10 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   const startDrag = (e: PointerEvent) => {
     const container = options.containerRef();
     if (!container || !sourceId) return;
+    if (e.cancelable) e.preventDefault();
     previousTouchAction = container.style.touchAction;
     container.style.touchAction = 'none';
-    if (pointerId !== null && container.setPointerCapture) {
-      container.setPointerCapture(pointerId);
-    }
+    ensurePointerCaptured();
     const el = itemMap.get(sourceId);
     if (!el) return;
     sourceEl = el;
@@ -285,6 +295,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     if (dragging && e.cancelable) {
       // ペン操作時にブラウザのスクロールでpointercancelされないよう抑止
       e.preventDefault();
+      ensurePointerCaptured();
     }
     if (pointerId !== null && e.pointerId !== pointerId) return;
     lastClientX = e.clientX;

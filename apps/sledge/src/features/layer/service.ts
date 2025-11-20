@@ -15,7 +15,7 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { changeBaseLayerColor, createLayer } from './model';
@@ -387,6 +387,7 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
   updateWebGLCanvas(false, `BaseLayer color mode changed to ${colorMode}`);
+  setProjectStore("isProjectChangedAfterSave", true);
 }
 
 /**
@@ -396,4 +397,5 @@ export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
   updateWebGLCanvas(false, `BaseLayer custom color changed to ${customColor}`);
+  setProjectStore("isProjectChangedAfterSave", true);
 }

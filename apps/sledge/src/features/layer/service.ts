@@ -260,9 +260,7 @@ type LayerOrder = 'asc' | 'desc';
 
 function normalizeLayerIds(layerIds: string[], order: LayerOrder = 'asc') {
   const uniqueIds = Array.from(new Set(layerIds));
-  const withIndex = uniqueIds
-    .map((id) => ({ id, index: getLayerIndex(id) }))
-    .filter((item) => item.index !== -1);
+  const withIndex = uniqueIds.map((id) => ({ id, index: getLayerIndex(id) })).filter((item) => item.index !== -1);
 
   withIndex.sort((a, b) => (order === 'asc' ? a.index - b.index : b.index - a.index));
 

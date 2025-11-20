@@ -13,6 +13,7 @@ import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
+import { getCurrentVersion } from '~/utils/VersionUtils';
 
 async function folderSelection(nameWOExtension: string) {
   const defaultPath = normalizeJoin(await projectSaveDir(), `${nameWOExtension}.sledge`);
@@ -73,6 +74,12 @@ After overwrite, you cannot open this project in old version of sledge.`,
 
   if (typeof selectedPath === 'string') {
     try {
+      // overwrite project versions
+      setProjectStore('loadProjectVersion', {
+        sledge: await getCurrentVersion(),
+        project: CURRENT_PROJECT_VERSION,
+      });
+
       const thumbpath = await saveThumbnailData(selectedPath);
 
       const data = await dumpProject();

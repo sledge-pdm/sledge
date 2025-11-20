@@ -14,6 +14,10 @@ export type KeyConfigCommands =
   | 'redo'
   | 'zoom_in'
   | 'zoom_out'
+  | 'layer_clear'
+  | 'layer_delete'
+  | 'layer_duplicate'
+  | 'layer_toggle_visibility'
   | 'pen'
   | 'eraser'
   | 'fill'
@@ -38,6 +42,10 @@ const KEY_CONFIG_TEMPLATE_DEFAULT: Readonly<KeyConfigStore> = {
     { shift: true, key: '+' },
   ],
   zoom_out: [{ key: '-' }],
+  layer_clear: [{ ctrl: true, shift: true, key: 'k' }],
+  layer_delete: [{ key: 'Delete' }],
+  layer_duplicate: [{ ctrl: true, shift: true, key: 'd' }],
+  layer_toggle_visibility: [{ ctrl: true, shift: true, key: 'h' }],
   pen: [{ key: 'p' }],
   eraser: [{ key: 'e' }],
   fill: [{ key: 'f' }],
@@ -59,6 +67,10 @@ const KEY_CONFIG_TEMPLATE_MAC: Readonly<KeyConfigStore> = {
     { shift: true, key: '+' },
   ],
   zoom_out: [{ key: '-' }],
+  layer_clear: [{ meta: true, shift: true, key: 'k' }],
+  layer_delete: [{ key: 'Delete' }],
+  layer_duplicate: [{ meta: true, shift: true, key: 'd' }],
+  layer_toggle_visibility: [{ meta: true, shift: true, key: 'h' }],
   pen: [{ key: 'p' }],
   eraser: [{ key: 'e' }],
   fill: [{ key: 'f' }],

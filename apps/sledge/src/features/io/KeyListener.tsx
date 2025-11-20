@@ -4,6 +4,7 @@ import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
 import { saveProject } from '~/features/io/project/out/save';
+import { clearLayersFromUser, duplicateLayers, removeLayersFromUser, toggleLayerVisibility } from '~/features/layer/service';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -87,6 +88,26 @@ const KeyListener: Component = () => {
     }
     if (isKeyMatchesToEntry(e, keyConfigStore()['zoom_out'])) {
       zoom('out');
+    }
+
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_delete'])) {
+      e.preventDefault();
+      await removeLayersFromUser();
+    }
+
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_clear'])) {
+      e.preventDefault();
+      await clearLayersFromUser();
+    }
+
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_duplicate'])) {
+      e.preventDefault();
+      duplicateLayers();
+    }
+
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_toggle_visibility'])) {
+      e.preventDefault();
+      toggleLayerVisibility();
     }
 
     if (!e.repeat) {

@@ -163,6 +163,8 @@ describe('Project dump/load roundtrip', () => {
         activeLayerId: layer.id,
         baseLayer: { colorMode: 'transparent' },
         isImagePoolActive: false,
+        selectionEnabled: false,
+        selected: new Set<string>(),
       },
       imagePoolStore: { entries: [], selectedEntryId: undefined, preserveAspectRatio: true },
       layerBuffers: new Map([[layer.id, buf]]),

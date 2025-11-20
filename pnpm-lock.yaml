@@ -220,7 +220,11 @@ importers:
 
   packages/core: {}
 
-  packages/theme: {}
+  packages/theme:
+    dependencies:
+      '@sledge/anvil':
+        specifier: workspace:*
+        version: link:../anvil
 
   packages/ui:
     dependencies:

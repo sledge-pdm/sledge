@@ -63,20 +63,8 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   let dropLineEl: HTMLDivElement | null = null;
   let pointerInsideContainer = true;
   let cursorStyleEl: HTMLStyleElement | null = null;
-  let previousTouchAction: string | null = null;
 
   const itemMap = new Map<Id, HTMLElement>();
-
-  const ensurePointerCaptured = () => {
-    const container = options.containerRef?.();
-    if (!container || pointerId === null) return;
-    if (container.hasPointerCapture?.(pointerId)) return;
-    try {
-      container.setPointerCapture(pointerId);
-    } catch (_e) {
-      // ignore capture errors
-    }
-  };
 
   const clearTimer = () => {
     if (pressTimer !== null) {
@@ -101,14 +89,7 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
     (document.body as any).style.cursor = '';
     // remove grabbing cursor class/style from container
     const container = options.containerRef?.();
-    if (container) {
-      container.classList.remove('sledge-dnd-grabbing');
-      container.style.touchAction = previousTouchAction ?? '';
-      if (pointerId !== null && container.releasePointerCapture && container.hasPointerCapture?.(pointerId)) {
-        container.releasePointerCapture(pointerId);
-      }
-    }
-    previousTouchAction = null;
+    if (container) container.classList.remove('sledge-dnd-grabbing');
     if (cursorStyleEl && cursorStyleEl.parentElement) cursorStyleEl.parentElement.removeChild(cursorStyleEl);
     cursorStyleEl = null;
     pointerId = null;
@@ -151,10 +132,6 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   const startDrag = (e: PointerEvent) => {
     const container = options.containerRef();
     if (!container || !sourceId) return;
-    if (e.cancelable) e.preventDefault();
-    previousTouchAction = container.style.touchAction;
-    container.style.touchAction = 'none';
-    ensurePointerCaptured();
     const el = itemMap.get(sourceId);
     if (!el) return;
     sourceEl = el;
@@ -292,11 +269,6 @@ export function useLongPressReorder<T>(options: UseLongPressReorderOptions<T>): 
   };
 
   const handlePointerMove = (e: PointerEvent) => {
-    if (dragging && e.cancelable) {
-      // ペン操作時にブラウザのスクロールでpointercancelされないよう抑止
-      e.preventDefault();
-      ensurePointerCaptured();
-    }
     if (pointerId !== null && e.pointerId !== pointerId) return;
     lastClientX = e.clientX;
     lastClientY = e.clientY;

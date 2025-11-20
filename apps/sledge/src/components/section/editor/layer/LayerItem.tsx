@@ -4,8 +4,8 @@ import { color } from '@sledge/theme';
 import { Icon, Light, showContextMenu } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { allLayers, clearLayer, duplicateLayer, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
-import { removeLayerFromUser } from '~/features/layer/service';
+import { allLayers, duplicateLayer, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
+import { clearLayerFromUser, removeLayerFromUser } from '~/features/layer/service';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
@@ -183,7 +183,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                 { type: 'label', label: props.layer.name },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayer(layerId) },
                 { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
-                { ...ContextMenuItems.BaseClear, onSelect: () => clearLayer(layerId) },
+                { ...ContextMenuItems.BaseClear, onSelect: async () => await clearLayerFromUser(layerId) },
                 { ...ContextMenuItems.BaseRemove, onSelect: async () => await removeLayerFromUser(layerId) },
               ],
               e

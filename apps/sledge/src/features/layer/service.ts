@@ -95,30 +95,6 @@ export function duplicateLayer(layerId: string) {
   logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }
 
-export function clearLayer(layerId: string) {
-  const anvil = getAnvil(layerId);
-  const w = anvil.getWidth();
-  const h = anvil.getHeight();
-  if (w == null || h == null) return;
-
-  anvil.addCurrentWholeDiff();
-
-  anvil.getBufferHandle().fill([0, 0, 0, 0]);
-
-  const patch = anvil.flushDiffs();
-  if (patch)
-    projectHistoryController.addAction(
-      new AnvilLayerHistoryAction({
-        layerId,
-        patch,
-        context: { tool: 'clear' },
-      })
-    );
-  updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
-  updateLayerPreview(layerId);
-  logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
-}
-
 export async function mergeToBelowLayer(layerId: string) {
   const originLayerIndex = getLayerIndex(layerId);
   const targetLayerIndex = originLayerIndex + 1;
@@ -305,6 +281,7 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
 interface RemoveLayerOptions {
   noDiff?: boolean;
 }
+
 export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
   if (!findLayerById(layerId)) {
     logUserError(`layer ${layerId} not found.`, { label: LOG_LABEL });
@@ -356,6 +333,46 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   // Anvil インスタンスも破棄
   anvilManager.removeAnvil(layerId);
 };
+
+export const clearLayerFromUser = async (layerId: string) => {
+  if (!findLayerById(layerId)) {
+    logUserError(`layer ${layerId} not found.`, { label: LOG_LABEL });
+    return;
+  }
+
+  if (globalConfig.editor.requireConfirmBeforeLayerClear) {
+    const removeConfirmed = await confirm(`Sure to clear layer "${findLayerById(layerId)?.name}"?`, {
+      title: 'Clear Layer',
+    });
+    if (removeConfirmed) clearLayer(layerId);
+  } else {
+    clearLayer(layerId);
+  }
+};
+
+export function clearLayer(layerId: string) {
+  const anvil = getAnvil(layerId);
+  const w = anvil.getWidth();
+  const h = anvil.getHeight();
+  if (w == null || h == null) return;
+
+  anvil.addCurrentWholeDiff();
+
+  anvil.getBufferHandle().fill([0, 0, 0, 0]);
+
+  const patch = anvil.flushDiffs();
+  if (patch)
+    projectHistoryController.addAction(
+      new AnvilLayerHistoryAction({
+        layerId,
+        patch,
+        context: { tool: 'clear' },
+      })
+    );
+  updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
+  updateLayerPreview(layerId);
+  logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
+}
 
 export const allLayers = () => layerListStore.layers;
 export const findLayerById = (id: string) => allLayers().find((layer) => layer.id === id);

@@ -3,6 +3,11 @@ import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 export const performanceMetas: FieldMeta[] = [
   {
     section: ConfigSections.Performance,
+    kind: 'header',
+    header: 'canvas',
+  },
+  {
+    section: ConfigSections.Performance,
     path: 'performance/targetFPS',
     label: 'canvas target fps',
     component: 'Dropdown',
@@ -31,5 +36,23 @@ export const performanceMetas: FieldMeta[] = [
 "pixelated" shows sharp edges but misses some lines/shapes when zoomed out.
 "crispEdges" is stable, but does not show edges of pixels when zoomed in.
 "adaptive" will automatically changes those 2 modes (recommended).`,
+  },
+  {
+    section: ConfigSections.Performance,
+    kind: 'header',
+    header: 'history',
+  },
+  {
+    section: ConfigSections.Performance,
+    path: 'editor/maxHistoryItemsCount',
+    label: 'max history items count',
+    component: 'Slider',
+    props: {
+      min: 10,
+      max: 100,
+      step: 1,
+      allowFloat: false,
+    },
+    tips: `the maximum number of history items to keep.`,
   },
 ];

@@ -1,7 +1,6 @@
 import { normalizeRotation } from '~/features/canvas';
 import { getEntry, updateEntryPartial } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 
 type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'r';
@@ -144,8 +143,8 @@ class ImageEntryInteract {
         }
       }
 
-      // 追加: 画面上の最小表示ピクセルに基づく動的クランプ
-      const minDisplayPx = Number((globalConfig as any).imagePool?.minDisplayPx ?? 8);
+      // Guard against shrinking below the minimum visible pixel size
+      const minDisplayPx = 1;
       const minScaleX = Math.max(1e-4, minDisplayPx / (baseW * zoom));
       const minScaleY = Math.max(1e-4, minDisplayPx / (baseH * zoom));
       if (keepAspect) {

@@ -9,7 +9,6 @@ export type GlobalConfig = {
   general: {
     theme: Theme;
     skippedVersions: string[];
-    resetSkippedVersions: string;
   };
   default: {
     open: 'new' | 'last';
@@ -22,6 +21,7 @@ export type GlobalConfig = {
     centerCanvasOnResize: CanvasCenteringMode;
     centerCanvasOnMaximize: CanvasCenteringMode;
     requireConfirmBeforeLayerRemove: boolean;
+    requireConfirmBeforeLayerClear: boolean;
     maxHistoryItemsCount: number;
     touchRotationZeroSnapThreshold: number;
     rulerMarkDirection: 'outward' | 'inward';
@@ -40,7 +40,6 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
   general: {
     theme: 'os',
     skippedVersions: [],
-    resetSkippedVersions: '',
   },
   default: {
     open: 'last',
@@ -52,6 +51,7 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
     centerCanvasOnResize: 'disabled',
     centerCanvasOnMaximize: 'offset',
     requireConfirmBeforeLayerRemove: true,
+    requireConfirmBeforeLayerClear: true,
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
     touchRotationZeroSnapThreshold: 5,

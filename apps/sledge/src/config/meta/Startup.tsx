@@ -2,9 +2,10 @@ import CanvasSizeInput from '~/components/section/project/item/CanvasSizeInput';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 import { Consts } from '~/Consts';
 
-export const defaultMetas: FieldMeta[] = [
+export const startupMetas: FieldMeta[] = [
+  { section: ConfigSections.Startup, kind: 'header', header: 'open' },
   {
-    section: ConfigSections.Default,
+    section: ConfigSections.Startup,
     path: 'default/open',
     label: 'open on start',
     component: 'Dropdown',
@@ -16,8 +17,9 @@ export const defaultMetas: FieldMeta[] = [
     },
     tips: 'the behavior on startup.',
   },
+  { section: ConfigSections.Startup, kind: 'header', header: 'project' },
   {
-    section: ConfigSections.Default,
+    section: ConfigSections.Startup,
     path: 'default/canvasSize',
     label: 'default canvas size',
     component: ({ value, onChange }) => (

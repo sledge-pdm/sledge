@@ -8,30 +8,18 @@ import { createEffect, onMount, Suspense, type Component } from 'solid-js';
 import ThemeToggle from '~/components/ThemeToggle';
 import { Home } from '~/routes';
 import NotFound from '~/routes/not-found';
+import PlaygroundIndex from '~/routes/playgrounds';
+import PlaygroundWrapper from '~/routes/playgrounds/layout';
+import PlaygroundPointerTest from '~/routes/playgrounds/pointer-test';
 import { globalStore } from '~/store/GlobalStore';
-
-// Styles
-const flexRow = css`
-  display: flex;
-  flex-direction: row;
-`;
 
 const rootContainer = css`
   display: flex;
-  flex-direction: column;
-  width: auto;
+  flex-direction: row;
+  width: 100%;
   height: 100vh;
-  overflow-x: hidden;
-  overflow-y: visible;
   z-index: 2;
   background-color: var(--color-surface);
-
-  &::-webkit-scrollbar {
-    width: 2px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #dddddd75;
-  }
 
   @media (max-width: 599px) {
     width: 100%;
@@ -40,16 +28,29 @@ const rootContainer = css`
   }
 `;
 
-const pageContainer = css`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: auto;
+const restContainer = css`
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex-grow: 1;
   height: 100vh;
+  z-index: 2;
+`;
+
+const pageContainer = css`
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--color-border-secondary);
+  overflow-x: hidden;
+  overflow-y: visible;
   background-color: var(--color-surface);
+
+  &::-webkit-scrollbar {
+    width: 2px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #dddddd75;
+  }
 
   @media (max-width: 599px) {
     position: initial;
@@ -87,11 +88,43 @@ const themeArea = css`
   margin: 1rem;
   z-index: 10;
   @media (max-width: 599px) {
+    position: fixed;
     top: unset;
-    bottom: var(--spacing-xl);
-    left: var(--spacing-xl);
+    bottom: 28px;
+    right: 16px;
     align-items: start;
     margin: 0;
+  }
+`;
+
+const subRoutesArea = css`
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 60px;
+  left: 28px;
+  gap: 8px;
+  z-index: 10;
+  @media (max-width: 599px) {
+    position: fixed;
+    width: 100%;
+    bottom: 10px;
+    top: unset;
+    left: 8px;
+    align-items: start;
+    margin: 0;
+    z-index: 10 0;
+  }
+`;
+const subRoutesLink = css`
+  font-size: 24px;
+  font-family: ZFB31;
+  text-transform: uppercase;
+  opacity: 0.2;
+  text-rendering: geometricPrecision;
+  text-decoration: none;
+  @media (max-width: 599px) {
+    font-size: 12px;
   }
 `;
 
@@ -107,6 +140,8 @@ const rightBottomArea = css`
   z-index: 10;
   @media (max-width: 599px) {
     margin-right: 0;
+    right: 16px;
+    bottom: 8px;
   }
 `;
 
@@ -135,30 +170,44 @@ const App: Component = () => {
                 'overflow-y': 'auto',
               }}
             >
-              <div class={borderBg} />
-
-              <div class={themeArea}>
-                <ThemeToggle noBackground={false} />
-              </div>
-
-              <div class={rightBottomArea}>
-                <p
-                  style={{
-                    'font-family': 'ZFB03B',
-                    opacity: 0.15,
-                  }}
-                >
-                  2025 innsbluck.
-                </p>
-              </div>
-
               <div class={pageContainer}>{props.children}</div>
+
+              <div id='portal-root' class={restContainer}>
+                <div class={borderBg} />
+                <div class={themeArea}>
+                  <ThemeToggle noBackground={false} />
+                </div>
+
+                <div class={subRoutesArea}>
+                  <a class={subRoutesLink} href={'/'}>
+                    home
+                  </a>
+                  <a class={subRoutesLink} href={'/playground'}>
+                    playground
+                  </a>
+                </div>
+
+                <div class={rightBottomArea}>
+                  <p
+                    style={{
+                      'font-family': 'ZFB03B',
+                      opacity: 0.15,
+                    }}
+                  >
+                    2025 innsbluck.
+                  </p>
+                </div>
+              </div>
             </div>
           </Suspense>
         </MetaProvider>
       )}
     >
       <Route path='/' component={Home} />
+      <Route path='/playground/*' component={PlaygroundWrapper}>
+        <Route path='/' component={PlaygroundIndex} />
+        <Route path='/pointer-test' component={PlaygroundPointerTest} />
+      </Route>
       <Route path='*' component={NotFound} />
     </Router>
   );

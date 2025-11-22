@@ -1,4 +1,4 @@
-import { Anvil, type PixelPatchData, RGBA, ShapeMask, packedU32ToRgba, putShape, putShapeLine, transparent } from '@sledge/anvil';
+import { Anvil, PixelAccumulator, RGBA, ShapeMask, packedU32ToRgba, putShape, putShapeLine, transparent } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import { Consts } from '~/Consts';
 import { activeLayer, findLayerById } from '~/features/layer';
@@ -35,7 +35,7 @@ export class PenTool implements ToolBehavior {
   lineChunk = new LineChunk();
   strokeChunk = new StrokeChunk();
   private strokeContext: StrokeContext | undefined = undefined;
-  private pixelAccumulator: Map<string, PixelPatchData> | undefined = undefined;
+  private pixelAccumulator: PixelAccumulator | undefined = undefined;
 
   private resolveStrokeContext(layerId: string, presetName: string, preset?: PenPresetConfig): StrokeContext | undefined {
     const anvil = getAnvil(layerId);
@@ -59,9 +59,11 @@ export class PenTool implements ToolBehavior {
     return this.resolveStrokeContext(layerId, presetName, preset);
   }
 
-  private ensurePixelAccumulator(): Map<string, PixelPatchData> {
+  private ensurePixelAccumulator(): PixelAccumulator | undefined {
+    if (!this.strokeContext) return undefined;
     if (!this.pixelAccumulator) {
-      this.pixelAccumulator = new Map();
+      const width = this.strokeContext.anvil.getWidth();
+      this.pixelAccumulator = new PixelAccumulator(width);
     }
     return this.pixelAccumulator;
   }
@@ -108,11 +110,13 @@ export class PenTool implements ToolBehavior {
 
     this.strokeChunk.clear();
     this.lineChunk.clear();
-    this.pixelAccumulator = new Map();
+    this.pixelAccumulator = undefined;
 
-    if (!this.resolveStrokeContext(args.layerId, presetName, preset)) {
+    const context = this.resolveStrokeContext(args.layerId, presetName, preset);
+    if (!context) {
       return { shouldUpdate: false, shouldRegisterToHistory: false };
     }
+    this.pixelAccumulator = new PixelAccumulator(context.anvil.getWidth());
 
     if (args.event?.shiftKey) {
       this.isShift = true;

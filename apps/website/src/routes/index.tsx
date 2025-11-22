@@ -1,8 +1,8 @@
 import { css } from '@acab/ecsstatic';
-import { Icon } from '@sledge/ui';
-import { Component, JSX, Show } from 'solid-js';
+import { Show } from 'solid-js';
+import { subHeading, SubHeadingWithCheck, SubHeadingWithX } from '~/components/SubHeadings';
 import DownloadSection from '~/components/top/DownloadSection';
-import Header from '~/components/top/Header';
+import Header, { SubTitleWithReleaseData } from '~/components/top/Header';
 import PageImage from '~/components/top/PageImage';
 import { pageRoot } from '~/styles';
 import { useReleaseData } from '~/utils/useReleaseData';
@@ -33,7 +33,7 @@ export function Home() {
   return (
     <main class={pageRoot}>
       <Show when={!releaseData.isLoading()} fallback={<p>Loading...</p>}>
-        <Header releaseData={releaseData} />
+        <Header subTitle={SubTitleWithReleaseData(releaseData)} />
 
         <div class={pageImageContainer}>
           <PageImage />
@@ -70,57 +70,3 @@ export function Home() {
     </main>
   );
 }
-
-const subHeading = css`
-  font-family: k12x8;
-  letter-spacing: 1px;
-  width: 100%;
-  line-height: 1.5;
-  color: var(--color-on-background);
-  vertical-align: middle;
-  user-select: text;
-  @media (max-width: 599px) {
-    font-size: 8px;
-  }
-`;
-
-const subHeadingContainer = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-`;
-
-const SubHeadingWithDot: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
-  return (
-    <div class={subHeadingContainer}>
-      <Icon src='/icons/misc/bullet_s_8.png' base={8} color={'var(--color-on-background)'} />
-      <p class={subHeading} {...props}>
-        {props.children}
-      </p>
-    </div>
-  );
-};
-
-const SubHeadingWithCheck: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
-  return (
-    <div class={subHeadingContainer}>
-      <Icon src='/icons/misc/check_8.png' base={8} color={'var(--color-enabled)'} />
-      <p class={subHeading} {...props}>
-        {props.children}
-      </p>
-    </div>
-  );
-};
-
-const SubHeadingWithX: Component<JSX.HTMLAttributes<HTMLParagraphElement>> = (props) => {
-  return (
-    <div class={subHeadingContainer}>
-      <Icon src='/icons/misc/remove.png' base={8} color={'var(--color-error)'} />
-      <p class={subHeading} {...props}>
-        {props.children}
-      </p>
-    </div>
-  );
-};

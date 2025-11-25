@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    // General
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "target": "ESNext",
+
+    // Modules
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // Type Checking & Safety
+    "strict": true,
+    "paths": {
+      "~/*": ["./src/*"],
+      "@sledge/ui": ["../../packages/ui"],
+      "@sledge/theme": ["../../packages/theme"],
+      "@sledge/core": ["../../packages/core"],
+      "@sledge/anvil": ["../../packages/anvil"],
+      "@sledge/wasm": ["../../packages/wasm/pkg/sledge_wasm.js"]
+    },
+    "types": ["vite/client", "@testing-library/jest-dom"],
+    "rootDirs": ["src"]
+  }
+}

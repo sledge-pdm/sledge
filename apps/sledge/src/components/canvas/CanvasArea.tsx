@@ -129,6 +129,7 @@ const CanvasArea: Component = () => {
 
   // 最後に適用されたtransform値（差分検出用）
   let lastTransformMatrix = '';
+  let lastTransformArray: number[] | undefined;
 
   const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
     targetFPS(() => {
@@ -143,17 +144,25 @@ const CanvasArea: Component = () => {
   const updateTransform = () => {
     try {
       const matrix = coordinateTransform.getTransformMatrix();
+      const matrixArray = typeof matrix.toFloat64Array === 'function' ? Array.from(matrix.toFloat64Array()) : undefined;
+      const isSameMatrix =
+        matrixArray &&
+        lastTransformArray &&
+        matrixArray.length === lastTransformArray.length &&
+        matrixArray.every((v, idx) => v === lastTransformArray![idx]);
+      if (isSameMatrix) return;
+
       const matrixString = toMatrix3dString(matrix);
 
-      // 差分検出による最適化
+      // 差分検知による最適化
       if (lastTransformMatrix !== matrixString) {
-        // matrix3dを使用してより効率的な変換を実現
         canvasStack.style.transform = matrixString;
         lastTransformMatrix = matrixString;
+        lastTransformArray = matrixArray;
       }
     } catch (error) {
       logSystemWarn('Transform update failed.', { label: 'CanvasArea', details: [error] });
-      // フォールバックとして従来の方式を使用
+      // ??????????????????
       const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
       const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
       const currentZoom = interactStore.zoom;

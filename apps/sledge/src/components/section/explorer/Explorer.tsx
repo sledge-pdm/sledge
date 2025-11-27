@@ -4,7 +4,6 @@ import { color } from '@sledge/theme';
 import { Dropdown, DropdownOption, Icon, MenuList } from '@sledge/ui';
 import { message } from '@tauri-apps/plugin-dialog';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
-import { openPath } from '@tauri-apps/plugin-opener';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
@@ -13,6 +12,7 @@ import { getParentDirectory, normalizeDirectoryPath } from '~/components/section
 import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import { exportDir, getDefinedDriveLetters, isOpenableFile, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { revealInFileBrowser } from '~/utils/NativeOpener';
 
 // Styles
 const explorerContainer = css`
@@ -494,7 +494,7 @@ const Explorer: Component = () => {
                         type: 'item',
                         label: 'open in explorer',
                         onSelect: async () => {
-                          await openPath(currentPath());
+                          await revealInFileBrowser(currentPath());
                         },
                       },
                       {

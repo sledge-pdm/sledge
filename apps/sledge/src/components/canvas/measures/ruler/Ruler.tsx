@@ -1,5 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
+import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -316,7 +317,7 @@ const Ruler: Component = () => {
       try {
         setRulerData(calculateRulerMarks(pendingContext));
       } catch (error) {
-        console.warn('Failed to calculate ruler marks:', error);
+        logSystemWarn('Failed to calculate ruler marks.', { label: 'Ruler', details: [error] });
         setRulerData(emptyResult());
       }
     });

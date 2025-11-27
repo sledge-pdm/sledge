@@ -1,5 +1,5 @@
+import { transparent } from '@sledge/anvil';
 import { Consts } from '~/Consts';
-import { transparent } from '~/features/color';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, EraserPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';

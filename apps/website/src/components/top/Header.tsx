@@ -1,12 +1,8 @@
 import { css } from '@acab/ecsstatic';
 import { Asset, os, ReleaseData } from '@sledge/core';
 import { makeTimer } from '@solid-primitives/timer';
-import { Accessor, Component, createSignal, onMount } from 'solid-js';
-
-const flexRow = css`
-  display: flex;
-  flex-direction: row;
-`;
+import { Accessor, Component, createSignal, onMount, Show } from 'solid-js';
+import { JSX } from 'solid-js/h/jsx-runtime';
 
 const versionInfoSledge = css`
   font-family: ZFB31;
@@ -31,19 +27,8 @@ const headerText = css`
 `;
 
 const Header: Component<{
-  releaseData: {
-    isLoading: Accessor<boolean>;
-    userOS: Accessor<os>;
-    releaseData: Accessor<ReleaseData | null>;
-    availableAssets: () => {
-      asset: Asset;
-      extension: string;
-    }[];
-    information: () => string | undefined;
-  };
-}> = ({ releaseData }) => {
-  const { isLoading, userOS, releaseData: data, availableAssets, information } = releaseData;
-
+  subTitle?: JSX.Element;
+}> = ({ subTitle }) => {
   const descriptionFlavors: string[] = [
     'Paint, rearmed.',
     `A tiny hooligan in your pocket.`,
@@ -73,16 +58,33 @@ const Header: Component<{
 
   return (
     <p class={headerText}>
-      <span class={versionInfoSledge}>sledge</span>
-      <span
-        class={versionInfoText}
-        style={{
-          color: data()?.name ? 'var(--color-accent)' : 'var(--color-error)',
-        }}
-      >
-        {data()?.name ?? '[ fetch failed ]'}
-      </span>
+      <a href='/' style={{ 'text-decoration': 'none', color: 'inherit' }}>
+        <span class={versionInfoSledge}>sledge</span>
+      </a>
+      <Show when={subTitle}>{subTitle as HTMLElement}</Show>
     </p>
+  );
+};
+
+export const SubTitleWithReleaseData: Component<{
+  isLoading: Accessor<boolean>;
+  userOS: Accessor<os>;
+  releaseData: Accessor<ReleaseData | null>;
+  availableAssets: () => {
+    asset: Asset;
+    extension: string;
+  }[];
+  information: () => string | undefined;
+}> = (releaseBundle) => {
+  return (
+    <span
+      class={versionInfoText}
+      style={{
+        color: releaseBundle?.releaseData()?.name ? 'var(--color-accent)' : 'var(--color-error)',
+      }}
+    >
+      {releaseBundle?.releaseData()?.name ?? '[ fetch failed ]'}
+    </span>
   );
 };
 

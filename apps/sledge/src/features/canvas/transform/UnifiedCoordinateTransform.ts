@@ -1,4 +1,5 @@
 import { Vec2 } from '@sledge/core';
+import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { CanvasPos, CoordinateTransform, WindowPos } from '~/types/CoordinateTypes';
@@ -35,7 +36,7 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
     // DOMMatrix fallback check
     const Matrix = globalThis.DOMMatrix ?? (globalThis as any).WebKitCSSMatrix;
     if (!Matrix) {
-      console.warn('DOMMatrix not available, using identity matrix');
+      logSystemWarn('DOMMatrix not available, using identity matrix', { label: 'UnifiedCoordinateTransform' });
       return new DOMMatrix();
     }
 
@@ -160,7 +161,10 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   private pageToCanvasAreaCoords(pagePos: { x: number; y: number }): { x: number; y: number } {
     const rect = this.getCachedCanvasAreaRect();
     if (!rect) {
-      console.warn('canvas-area element not found, using page coordinates directly');
+      logSystemWarn('canvas-area element not found, using page coordinates directly', {
+        label: 'UnifiedCoordinateTransform',
+        debugOnly: true,
+      });
       return pagePos;
     }
 
@@ -176,7 +180,10 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   private canvasAreaToPageCoords(areaPos: { x: number; y: number }): { x: number; y: number } {
     const rect = this.getCachedCanvasAreaRect();
     if (!rect) {
-      console.warn('canvas-area element not found, using area coordinates directly');
+      logSystemWarn('canvas-area element not found, using area coordinates directly', {
+        label: 'UnifiedCoordinateTransform',
+        debugOnly: true,
+      });
       return areaPos;
     }
 

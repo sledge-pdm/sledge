@@ -3,10 +3,19 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import solidPlugin from 'vite-plugin-solid';
+import topLevelAwait from 'vite-plugin-top-level-await';
+import wasmPlugin from 'vite-plugin-wasm';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [ecsstatic(), solidPlugin(), tsconfigPaths(), nodePolyfills({ include: ['process'], globals: { global: true, process: true } })],
+  plugins: [
+    ecsstatic(),
+    solidPlugin(),
+    tsconfigPaths(),
+    nodePolyfills({ include: ['process'], globals: { global: true, process: true } }),
+    wasmPlugin(),
+    topLevelAwait(),
+  ],
   server: {
     port: 3000,
   },

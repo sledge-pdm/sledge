@@ -3,7 +3,6 @@ import { themeOptions } from '@sledge/theme';
 import { Show } from 'solid-js';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 import { saveGlobalSettings } from '~/features/io/config/save';
-import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 const skippedVersionsContainer = css`
   display: flex;
@@ -26,7 +25,12 @@ const resetSkippedVersionsLink = css`
 export const generalMetas: FieldMeta[] = [
   {
     section: ConfigSections.General,
-    path: ['general', 'theme'],
+    kind: 'header',
+    header: 'theme',
+  },
+  {
+    section: ConfigSections.General,
+    path: 'general/theme',
     label: 'global theme',
     component: 'Dropdown',
     props: {
@@ -36,30 +40,32 @@ export const generalMetas: FieldMeta[] = [
   },
   {
     section: ConfigSections.General,
-    path: ['general', 'skippedVersions'],
+    kind: 'header',
+    header: 'versions',
+  },
+  {
+    section: ConfigSections.General,
+    path: 'general/skippedVersions',
     label: 'skipped versions',
-    component: 'Custom',
-    props: {
-      content: () => {
-        const handleClick = async () => {
-          setGlobalConfig('general', 'skippedVersions', []);
-          await saveGlobalSettings(true);
-          alert('Reset all skipped versions.');
-        };
+    component: ({ value, onChange }) => {
+      const handleClick = async () => {
+        onChange([]);
+        await saveGlobalSettings(true);
+        alert('Reset all skipped versions.');
+      };
 
-        const versions = globalConfig.general.skippedVersions;
+      const versions = value() as string[];
 
-        return (
-          <div class={skippedVersionsContainer}>
-            <Show when={versions.length > 0} fallback={<p class={noSkippedVesionsText}>[ No skipped versions. ]</p>}>
-              <p class={skippedVesionsText}>{globalConfig.general.skippedVersions.join(', ')}</p>
-              <a class={resetSkippedVersionsLink} onClick={handleClick}>
-                reset.
-              </a>
-            </Show>
-          </div>
-        );
-      },
+      return (
+        <div class={skippedVersionsContainer}>
+          <Show when={versions.length > 0} fallback={<p class={noSkippedVesionsText}>[ No skipped versions. ]</p>}>
+            <p class={skippedVesionsText}>{versions.join(', ')}</p>
+            <a class={resetSkippedVersionsLink} onClick={handleClick}>
+              reset.
+            </a>
+          </Show>
+        </div>
+      );
     },
     tips: 'reset skipped update / versions state.',
   },

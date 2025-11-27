@@ -1,6 +1,6 @@
 import { Anvil, RgbaBuffer } from '@sledge/anvil';
 import { expect, vi } from 'vitest';
-import { PaletteType, selectPalette, setColor } from '~/features/color';
+import { PaletteType, selectPalette, setPaletteColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import type { ImagePoolEntry } from '~/features/image_pool';
 import type { Layer } from '~/features/layer';
@@ -89,7 +89,7 @@ export function createDummyWebpBuffer(customData?: number[]): Uint8Array {
 
 // Create WebP buffer from raw data
 export function createWebpFromRaw(rawData: Uint8ClampedArray, width: number, height: number): Uint8Array {
-  const buffer = RgbaBuffer.fromRaw(width, height, rawData);
+  const buffer = RgbaBuffer.fromRaw(width, height, new Uint8Array(rawData.buffer));
   return buffer.exportWebp();
 }
 
@@ -151,7 +151,7 @@ export function setupBasicStores(): void {
 
   // Reset color
   selectPalette(PaletteType.primary);
-  setColor(PaletteType.primary, '#000000');
+  setPaletteColor(PaletteType.primary, [0, 0, 0, 255]);
 }
 
 // History controller setup

@@ -1,11 +1,11 @@
 import { Vec2 } from '@sledge/core';
-import { currentColor, hexToRGBA } from '~/features/color';
+import { VERBOSE_LOG_ENABLED } from '~/Consts';
+import { currentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { findLayerById } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { DebugLogger } from '~/features/log/DebugLogger';
-import { setBottomBarText } from '~/features/log/service';
+import { logSystemInfo, logUserError } from '~/features/log/service';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategory } from '~/features/tools/Tools';
@@ -20,7 +20,8 @@ export enum DrawState {
 }
 
 const LOG_LABEL = 'LayerCanvasOperator';
-const logger = new DebugLogger(LOG_LABEL, false);
+const logDebug = (message: string, ...details: unknown[]) =>
+  logSystemInfo(message, { label: LOG_LABEL, details: details.length ? details : undefined, debugOnly: true });
 
 export default class LayerCanvasOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
@@ -48,9 +49,8 @@ export default class LayerCanvasOperator {
     // This won't suppress all draw actions on inactive layers.
     // It's due to prevent showing warn in every click out of canvas.
     if (!isToolAllowedInCurrentLayer(toolCategory) && interactStore.isMouseOnCanvas) {
-      console.warn('Layer is inactive.');
-      setBottomBarText('Layer is inactive.', {
-        kind: 'error',
+      logUserError('Layer is inactive.', {
+        label: LOG_LABEL,
         duration: 1000,
       });
       return;
@@ -68,7 +68,7 @@ export default class LayerCanvasOperator {
       position,
       lastPosition,
       presetName: toolCategory.presets?.selected,
-      color: hexToRGBA(currentColor()),
+      color: currentColor(),
       event: originalEvent,
     };
     const result = this.useTool(state, toolCategory, toolArgs);
@@ -122,12 +122,7 @@ export default class LayerCanvasOperator {
         break;
     }
     const end = new Date().getTime();
-    logger.debugLog(`${tool.name} ${DrawState[state]} executed in ${end - start} ms: ${toolResult}`);
-    if (toolResult?.result) {
-      setBottomBarText(toolResult.result, {
-        duration: 1500,
-      });
-    }
+    if (VERBOSE_LOG_ENABLED) logDebug(`${tool.name} ${DrawState[state]} executed in ${end - start} ms: ${toolResult}`);
     return toolResult;
   }
 }

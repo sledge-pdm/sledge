@@ -1,11 +1,12 @@
 // controllers/layer/SelectionManager.ts
-import { RgbaBuffer } from '@sledge/anvil';
+import { AntialiasMode, RgbaBuffer, toUint8Array, toUint8ClampedArray } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
+import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 // import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { DebugLogger } from '~/features/log/DebugLogger';
+import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -24,7 +25,6 @@ export interface FloatingBuffer {
 
 class FloatingMoveManager {
   private readonly LOG_LABEL = 'FloatingMoveManager';
-  private logger = new DebugLogger(this.LOG_LABEL, false);
 
   private targetLayerId: string | undefined = undefined;
 
@@ -33,13 +33,20 @@ class FloatingMoveManager {
   }
   private targetBufferOriginal:
     | {
-        buffer: Uint8Array;
+        webpBuffer: Uint8Array;
         width: number;
         height: number;
       }
     | undefined = undefined;
   private targetBuffer: Uint8ClampedArray | undefined = undefined;
   private floatingBuffer: FloatingBuffer | undefined = undefined;
+  private compositeBuffer:
+    | {
+        buffer: RgbaBuffer;
+        width: number;
+        height: number;
+      }
+    | undefined;
 
   private overlayVersion = 0;
   private state: MoveMode | undefined = undefined;
@@ -53,16 +60,38 @@ class FloatingMoveManager {
   }
 
   public getCompositePreview(): Uint8ClampedArray | undefined {
-    if (!this.targetBuffer || !this.floatingBuffer || !canvasStore.canvas) return undefined;
-    const buffer = RgbaBuffer.fromRaw(canvasStore.canvas.width, canvasStore.canvas.height, this.targetBuffer);
+    if (!this.targetBuffer || !this.floatingBuffer) return undefined;
+    const width = this.targetBufferOriginal?.width ?? canvasStore.canvas?.width;
+    const height = this.targetBufferOriginal?.height ?? canvasStore.canvas?.height;
+    if (!width || !height) return undefined;
+
+    if (!this.compositeBuffer || this.compositeBuffer.width !== width || this.compositeBuffer.height !== height) {
+      this.compositeBuffer = {
+        buffer: new RgbaBuffer(width, height),
+        width,
+        height,
+      };
+    }
+
+    const buffer = this.compositeBuffer.buffer;
+    buffer.overwriteWith(toUint8Array(this.targetBuffer), width, height);
     const originX = this.floatingBuffer.origin?.x ?? 0;
     const originY = this.floatingBuffer.origin?.y ?? 0;
-    buffer.transferFromRaw(this.floatingBuffer.buffer, this.floatingBuffer.width, this.floatingBuffer.height, {
-      offsetX: Math.round(originX + this.floatingBuffer.offset.x),
-      offsetY: Math.round(originY + this.floatingBuffer.offset.y),
-    });
+    buffer.blitFromRaw(
+      toUint8Array(this.floatingBuffer.buffer),
+      this.floatingBuffer.width,
+      this.floatingBuffer.height,
+      Math.round(originX + this.floatingBuffer.offset.x),
+      Math.round(originY + this.floatingBuffer.offset.y),
+      1,
+      1,
+      0,
+      AntialiasMode.Nearest,
+      false,
+      false
+    );
 
-    return buffer.data;
+    return buffer.data();
   }
 
   public getOverlayDescriptor():
@@ -117,7 +146,7 @@ class FloatingMoveManager {
     } else if (state === 'selection') {
       const anvil = getAnvil(targetLayerId);
       const mask = selectionManager.getCombinedMask();
-      return anvil.cropWithMask(mask, width, height, 0, 0);
+      return toUint8ClampedArray(anvil.getBufferHandle().cropWithMask(mask, width, height, 0, 0));
     } else if (state === 'pasted') {
       const base = anvil.getBufferCopy();
       return base ? base.slice() : undefined;
@@ -125,11 +154,12 @@ class FloatingMoveManager {
   }
 
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
+    this.compositeBuffer = undefined;
     const anvil = getAnvil(targetLayerId);
     const webpBuffer = anvil.exportWebp();
     if (!webpBuffer) return;
     this.targetBufferOriginal = {
-      buffer: webpBuffer,
+      webpBuffer: webpBuffer,
       width: anvil.getWidth(),
       height: anvil.getHeight(),
     };
@@ -138,7 +168,7 @@ class FloatingMoveManager {
 
     this.targetLayerId = targetLayerId;
 
-    this.logger.debugLog('startMove', { floatingBuffer, state });
+    this.debugLog('startMove', { floatingBuffer, state });
     this.floatingBuffer = floatingBuffer;
     this.state = state;
     this.overlayVersion++;
@@ -147,9 +177,9 @@ class FloatingMoveManager {
   }
 
   public async moveDelta(delta: Vec2) {
-    this.logger.debugLog('moveDelta', { delta });
+    this.debugLog('moveDelta', { delta });
     if (!this.floatingBuffer) {
-      console.error('attempt to move, but nothing is moving.');
+      logSystemError('attempt to move, but nothing is moving.', { label: this.LOG_LABEL });
       return;
     }
 
@@ -161,9 +191,9 @@ class FloatingMoveManager {
   }
 
   public async moveTo(newOffset: Vec2) {
-    this.logger.debugLog('moveTo', { offset: newOffset });
+    this.debugLog('moveTo', { offset: newOffset });
     if (!this.floatingBuffer) {
-      console.error('attempt to move, but nothing is moving.');
+      logSystemError('attempt to move, but nothing is moving.', { label: this.LOG_LABEL });
       return;
     }
 
@@ -174,26 +204,26 @@ class FloatingMoveManager {
   }
 
   public commit() {
-    this.logger.debugLog('commit', {});
+    this.debugLog('commit', {});
     if (!this.targetLayerId || !this.targetBuffer || !this.targetBufferOriginal) {
-      console.error('attempt to commit, but no target layer or buffer is set.');
+      logSystemError('attempt to commit, but no target layer or buffer is set.', { label: this.LOG_LABEL });
       return;
     }
     if (!this.floatingBuffer) {
-      console.error('attempt to commit, but nothing is moving.');
+      logSystemError('attempt to commit, but nothing is moving.', { label: this.LOG_LABEL });
       return;
     }
 
     const composed = this.getCompositePreview();
     if (!composed) {
-      console.error('failed to build composed preview for commit');
+      logSystemError('failed to build composed preview for commit', { label: this.LOG_LABEL });
       return;
     }
 
     const anvil = getAnvil(this.targetLayerId);
-    anvil.replaceBuffer(composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height);
-
-    anvil.addCurrentWholeDiff();
+    anvil.addWholeDiffWebp(this.targetBufferOriginal.webpBuffer);
+    anvil.getBufferHandle().overwriteWith(toUint8Array(composed), this.targetBufferOriginal.width, this.targetBufferOriginal.height);
+    anvil.setAllDirty();
 
     const patch = anvil.flushDiffs();
     if (patch) {
@@ -221,6 +251,7 @@ class FloatingMoveManager {
     this.targetLayerId = undefined;
     this.targetBuffer = undefined;
     this.targetBufferOriginal = undefined;
+    this.compositeBuffer = undefined;
     this.overlayVersion++;
 
     this.requestFrame(true, layerId);
@@ -234,9 +265,19 @@ class FloatingMoveManager {
     this.targetLayerId = undefined;
     this.targetBuffer = undefined;
     this.targetBufferOriginal = undefined;
+    this.compositeBuffer = undefined;
     this.overlayVersion++;
 
     this.requestFrame(true, layerId);
+  }
+
+  private debugLog(message: string, ...details: unknown[]) {
+    if (VERBOSE_LOG_ENABLED)
+      logSystemInfo(message, {
+        label: this.LOG_LABEL,
+        details: details.length ? details : undefined,
+        debugOnly: true,
+      });
   }
 }
 

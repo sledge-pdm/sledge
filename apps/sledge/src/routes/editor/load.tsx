@@ -10,6 +10,7 @@ import { applyProjectLocation } from '~/features/io/project/ProjectLocationManag
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { logSystemError, logUserError } from '~/features/log/service';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { layerListStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
@@ -17,6 +18,8 @@ import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { getFromClipboardQuery, getNewProjectQuery, getOpenLocation, openWindow } from '~/utils/WindowUtils';
+
+const LOG_LABEL = 'ProjectLoader';
 
 export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new_project' | 'image'; lastPath?: FileLocation }): Promise<boolean> {
   const openingLocation = getOpenLocation();
@@ -46,7 +49,8 @@ export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new
     try {
       return await loadProjectFromLocation(lastLocation);
     } catch (e) {
-      console.error('Failed to load last project, falling back to a new project:', e);
+      logSystemError('Failed to load last project, falling back to a new project.', { label: LOG_LABEL, details: [e] });
+      logUserError('failed to load last project. created a new project.', { label: LOG_LABEL, persistent: true });
       const createdNewProject = await loadNewProject();
       await notifyLastProjectFallback(e);
       return createdNewProject;
@@ -67,7 +71,6 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
     try {
       const projectFile = await readProjectFromPath(path);
       if (!projectFile) {
-        console.error('Failed to read project from path:', path);
         throw new Error('Failed to read project from path: reading ' + path);
       }
       setSavedLocation(path);
@@ -75,7 +78,8 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
       setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } catch (error) {
-      console.error('Failed to read project:', error);
+      logSystemError('Failed to read project.', { label: LOG_LABEL, details: [path, error] });
+      logUserError('failed to open project file.', { label: LOG_LABEL, details: [error], persistent: true });
       throw new Error('Failed to read project.\n' + error);
     }
   } else {
@@ -86,7 +90,8 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
       setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } else {
-      console.error('Failed to import image from path:', path);
+      logSystemError('Failed to import image from path.', { label: LOG_LABEL, details: [path] });
+      logUserError('failed to import image.', { label: LOG_LABEL, persistent: true });
       throw new Error('Failed to import image from path:' + path);
     }
   }

@@ -1,9 +1,9 @@
 import SizeHistoryRow from '~/components/section/editor/tool/SizeHistoryRow';
 import { Consts } from '~/Consts';
-import { TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { PenPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
-export const penPresetFields: PresetFieldMeta[] = [
+export const penPresetFields: PresetFieldMeta<PenPresetConfig>[] = [
   {
     key: 'size',
     label: 'Size',
@@ -23,11 +23,8 @@ export const penPresetFields: PresetFieldMeta[] = [
   {
     key: 'sizeHistory',
     label: undefined,
-    component: 'Custom',
-    props: {
-      content: () => {
-        return <SizeHistoryRow categoryId={TOOL_CATEGORIES.PEN} />;
-      },
+    component: () => {
+      return <SizeHistoryRow categoryId={TOOL_CATEGORIES.PEN} />;
     },
   },
   {

@@ -1,6 +1,7 @@
 import { getTauriVersion } from '@tauri-apps/api/app';
 import { invoke } from '@tauri-apps/api/core';
 import { EventCallback, listen } from '@tauri-apps/api/event';
+import { logSystemError, logSystemWarn } from '~/features/log/service';
 
 let _isTauri: boolean | null = null;
 
@@ -17,7 +18,7 @@ export async function isTauri(): Promise<boolean> {
 
 export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T | undefined> {
   if (!(await isTauri())) {
-    console.warn(`[safeInvoke] '${cmd}' skipped (not in Tauri environment)`);
+    logSystemWarn(`[safeInvoke] '${cmd}' skipped (not in Tauri environment)`, { label: 'TauriUtils', debugOnly: true });
     return undefined;
   }
 
@@ -25,7 +26,7 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
     const result = await invoke<T>(cmd, args);
     return result;
   } catch (e) {
-    console.error(`[safeInvoke] '${cmd}' failed:`, e);
+    logSystemError(`[safeInvoke] '${cmd}' failed`, { label: 'TauriUtils', details: [e] });
     return undefined;
   }
 }

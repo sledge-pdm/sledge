@@ -2,8 +2,11 @@ import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { ensureAppConfigPath } from '~/features/config';
 import { getFallbackedSettings } from '~/features/io/config/set';
+import { logSystemError } from '~/features/log/service';
 import { getGlobalRootStore } from '~/stores/GlobalStores';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
+
+const LOG_LABEL = 'ConfigSave';
 
 export async function saveGlobalSettings(triggerGlobalEvent: boolean) {
   try {
@@ -16,9 +19,8 @@ export async function saveGlobalSettings(triggerGlobalEvent: boolean) {
       create: true,
     });
     if (triggerGlobalEvent) await emitGlobalEvent('onSettingsSaved', { config: fbConfig });
-    console.log('global settings saved:', fbConfig);
   } catch (e) {
-    console.error('global settings save failed.', e);
+    logSystemError('global settings save failed.', { label: LOG_LABEL, details: [e] });
     throw e;
   }
 }

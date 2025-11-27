@@ -11,7 +11,7 @@ vi.mock('~/utils/EventBus', () => ({
 }));
 
 vi.mock('~/utils/VersionUtils', () => ({
-  getCurrentVersion: vi.fn(async () => '0.1.3'),
+  getCurrentVersion: vi.fn(async () => '0.1.4'),
 }));
 
 // Solid stores: we can import the real stores as they use solid-js/store (no DOM),
@@ -21,6 +21,11 @@ vi.mock('~/utils/VersionUtils', () => ({
 vi.mock('@tauri-apps/api/path', () => ({ pictureDir: vi.fn(async () => 'C:/Pictures') }));
 vi.mock('@tauri-apps/plugin-fs', () => ({ exists: vi.fn(), mkdir: vi.fn(), writeFile: vi.fn(), readFile: vi.fn() }));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ confirm: vi.fn(async () => true), message: vi.fn() }));
+vi.mock('@tauri-apps/plugin-log', () => ({
+  info: vi.fn(async () => {}),
+  warn: vi.fn(async () => {}),
+  error: vi.fn(async () => {}),
+}));
 vi.mock('@sledge/ui', () => ({}));
 vi.mock('@sledge/theme', () => ({
   themeOptions: [
@@ -33,15 +38,6 @@ vi.mock('@sledge/theme', () => ({
 vi.mock('~/webgl/WebGLRenderer', () => ({
   WebGLRenderer: class {
     constructor() {}
-  },
-}));
-
-vi.mock('~/features/log/DebugLogger', () => ({
-  DebugLogger: class {
-    constructor(_label: string, _enabled: boolean) {}
-    debugLog() {}
-    debugWarn() {}
-    debugError() {}
   },
 }));
 

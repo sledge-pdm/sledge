@@ -4,7 +4,7 @@ import { Slider } from '@sledge/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { rotateInAreaCenter } from '~/features/canvas';
-import { resetBottomBarText } from '~/features/log/service';
+import { resetBottomBarText } from '~/features/log/bottomBar';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 
 const bottomInfoRoot = css`
@@ -59,9 +59,13 @@ const BottomBar: Component = () => {
 
   const textColor = createMemo<string>(() => {
     switch (logStore?.bottomBarKind) {
-      case 'info':
+      case 'persistent':
       default:
         return color.muted;
+      case 'info':
+        return color.onBackground;
+      case 'success':
+        return color.enabled;
       case 'warn':
         return color.warn;
       case 'error':

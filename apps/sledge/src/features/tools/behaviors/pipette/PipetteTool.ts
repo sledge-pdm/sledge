@@ -1,16 +1,18 @@
-import { currentColor, hexToRGBA, isTransparent, registerColorChange, RGBAColor, RGBAToHex, setCurrentColor, transparent } from '~/features/color';
+import { isTransparent, RGBA, RGBAToHex, transparent } from '@sledge/anvil';
+import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logUserInfo } from '~/features/log/service';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 
 export class PipetteTool implements ToolBehavior {
   onlyOnCanvas = true;
   isInstantTool = true;
 
-  private color: RGBAColor = transparent;
+  private color: RGBA = transparent;
 
   onStart(args: ToolArgs): ToolResult {
     const anvil = getAnvil(args.layerId);
-    const c = anvil.getPixel(args.position.x, args.position.y) as RGBAColor;
+    const c = anvil.getPixel(args.position.x, args.position.y) as RGBA;
     if (!isTransparent(c)) {
       this.color = c;
     }
@@ -22,7 +24,7 @@ export class PipetteTool implements ToolBehavior {
 
   onMove(args: ToolArgs): ToolResult {
     const anvil = getAnvil(args.layerId);
-    const c = anvil.getPixel(args.position.x, args.position.y) as RGBAColor;
+    const c = anvil.getPixel(args.position.x, args.position.y) as RGBA;
     if (!isTransparent(c)) {
       this.color = c;
     }
@@ -34,9 +36,12 @@ export class PipetteTool implements ToolBehavior {
 
   onEnd(args: ToolArgs): ToolResult {
     if (!isTransparent(this.color)) {
-      const pickColor: RGBAColor = [this.color[0], this.color[1], this.color[2], this.color[3]];
-      registerColorChange(hexToRGBA(currentColor()), pickColor);
-      setCurrentColor(`#${RGBAToHex([this.color[0], this.color[1], this.color[2], this.color[3]])}`);
+      const pickColor: RGBA = [this.color[0], this.color[1], this.color[2], this.color[3]];
+      registerColorChange(currentColor(), pickColor);
+      setCurrentColor(pickColor);
+      const includeAlpha = pickColor[3] !== 255;
+      const hex = RGBAToHex(pickColor, { excludeAlpha: !includeAlpha });
+      logUserInfo(`Color picked #${hex}`);
     }
 
     return {

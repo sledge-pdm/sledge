@@ -1,6 +1,7 @@
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { check, Update } from '@tauri-apps/plugin-updater';
+import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { projectStore } from '~/stores/ProjectStores';
 
 function isValidUpdate(update: Update): boolean {
@@ -16,7 +17,7 @@ function isValidUpdate(update: Update): boolean {
 }
 
 export async function getUpdate(): Promise<Update | undefined> {
-  console.log('checking for updates...');
+  logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
   try {
     const update = await check({
       timeout: 5000,
@@ -25,14 +26,14 @@ export async function getUpdate(): Promise<Update | undefined> {
       return update;
     }
   } catch (e) {
-    console.error('failed to update:', e);
+    logSystemError('failed to update.', { label: 'UpdateUtils', details: [e] });
   }
 
   return undefined;
 }
 
 export async function askAndInstallUpdate() {
-  console.log('checking for updates...');
+  logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
 
   if (projectStore.isProjectChangedAfterSave) {
     const confirmed = await confirm('There are unsaved changes.\nSure to update without save?', {
@@ -51,7 +52,11 @@ export async function askAndInstallUpdate() {
       timeout: 5000,
     });
     if (update && isValidUpdate(update)) {
-      console.log(`found update ${update.version} from ${update.date} with notes ${update.body}`);
+      logSystemInfo(`found update ${update.version} from ${update.date}`, {
+        label: 'UpdateUtils',
+        debugOnly: true,
+        details: [update.body],
+      });
 
       const confirmed = await confirm(
         `New version available.
@@ -72,23 +77,23 @@ ${update.currentVersion} -> ${update.version}`,
           switch (event.event) {
             case 'Started':
               contentLength = event.data.contentLength || 0;
-              console.log(`started downloading ${event.data.contentLength} bytes`);
+              logSystemInfo(`started downloading ${event.data.contentLength} bytes`, { label: 'UpdateUtils', debugOnly: true });
               break;
             case 'Progress':
               downloaded += event.data.chunkLength || 0;
-              console.log(`downloaded ${downloaded} from ${contentLength}`);
+              logSystemInfo(`downloaded ${downloaded} from ${contentLength}`, { label: 'UpdateUtils', debugOnly: true });
               break;
             case 'Finished':
-              console.log('download finished');
+              logSystemInfo('download finished', { label: 'UpdateUtils', debugOnly: true });
               break;
           }
         });
 
-        console.log('update installed');
+        logSystemInfo('update installed', { label: 'UpdateUtils', debugOnly: true });
         await relaunch();
       }
     }
   } catch (e) {
-    console.error('failed to update:', e);
+    logSystemError('failed to update.', { label: 'UpdateUtils', details: [e] });
   }
 }

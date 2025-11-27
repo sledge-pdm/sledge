@@ -6,6 +6,7 @@ mod window;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, async_runtime::block_on};
 use tauri_plugin_fs::FsExt;
+use tauri_plugin_log::{Target, TargetKind};
 use window::{SledgeWindowKind, WindowOpenOptions};
 
 fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
@@ -75,6 +76,10 @@ pub fn run() {
         ])
         .plugin(
             tauri_plugin_log::Builder::new()
+                .targets([
+                    Target::new(TargetKind::Webview),
+                    Target::new(TargetKind::Stdout),
+                ])
                 .level_for("eframe", log::LevelFilter::Warn)
                 .level_for("egui", log::LevelFilter::Warn)
                 .level_for("egui_glow", log::LevelFilter::Warn)

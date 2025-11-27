@@ -4,6 +4,7 @@ import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
 import { saveProject } from '~/features/io/project/out/save';
+import { clearLayersFromUser, duplicateLayers, removeLayersFromUser, toggleLayerVisibility } from '~/features/layer/service';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -44,21 +45,21 @@ const KeyListener: Component = () => {
     // Check if input is focused early to avoid unnecessary processing
     const inputFocused = isInputFocused();
 
-    if (isKeyMatchesToEntry(e, keyConfigStore['save']) && !e.repeat) {
+    if (isKeyMatchesToEntry(e, keyConfigStore()['save']) && !e.repeat) {
       e.preventDefault(); // Prevent default save action
       saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
     }
 
-    if (isKeyMatchesToEntry(e, keyConfigStore['undo'])) {
+    if (isKeyMatchesToEntry(e, keyConfigStore()['undo'])) {
       e.preventDefault(); // prevent conflict with input undo/redo
       projectHistoryController.undo();
     }
-    if (isKeyMatchesToEntry(e, keyConfigStore['redo'])) {
+    if (isKeyMatchesToEntry(e, keyConfigStore()['redo'])) {
       e.preventDefault(); // prevent conflict with input undo/redo
       projectHistoryController.redo();
     }
 
-    if (isKeyMatchesToEntry(e, keyConfigStore['sizeIncrease'])) {
+    if (isKeyMatchesToEntry(e, keyConfigStore()['sizeIncrease'])) {
       const currentToolId = getActiveToolCategoryId();
       const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
       if (selectedPreset !== undefined) {
@@ -70,7 +71,7 @@ const KeyListener: Component = () => {
       }
     }
 
-    if (isKeyMatchesToEntry(e, keyConfigStore['sizeDecrease'])) {
+    if (isKeyMatchesToEntry(e, keyConfigStore()['sizeDecrease'])) {
       const currentToolId = getActiveToolCategoryId();
       const selectedPreset = toolStore.tools[currentToolId]?.presets?.selected;
       if (selectedPreset !== undefined) {
@@ -82,22 +83,42 @@ const KeyListener: Component = () => {
       }
     }
 
-    if (isKeyMatchesToEntry(e, keyConfigStore['zoom_in'])) {
+    if (isKeyMatchesToEntry(e, keyConfigStore()['zoom_in'])) {
       zoom('in');
     }
-    if (isKeyMatchesToEntry(e, keyConfigStore['zoom_out'])) {
+    if (isKeyMatchesToEntry(e, keyConfigStore()['zoom_out'])) {
       zoom('out');
     }
 
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_delete'])) {
+      e.preventDefault();
+      await removeLayersFromUser();
+    }
+
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_clear'])) {
+      e.preventDefault();
+      await clearLayersFromUser();
+    }
+
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_duplicate'])) {
+      e.preventDefault();
+      duplicateLayers();
+    }
+
+    if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_toggle_visibility'])) {
+      e.preventDefault();
+      toggleLayerVisibility();
+    }
+
     if (!e.repeat) {
-      if (isKeyMatchesToEntry(e, keyConfigStore['pen'])) setActiveToolCategory('pen');
-      if (isKeyMatchesToEntry(e, keyConfigStore['eraser'])) setActiveToolCategory('eraser');
-      if (isKeyMatchesToEntry(e, keyConfigStore['fill'])) setActiveToolCategory('fill');
-      if (isKeyMatchesToEntry(e, keyConfigStore['rect_select'])) setActiveToolCategory('rectSelection');
-      if (isKeyMatchesToEntry(e, keyConfigStore['auto_select'])) setActiveToolCategory('autoSelection');
-      if (isKeyMatchesToEntry(e, keyConfigStore['lasso_select'])) setActiveToolCategory('lassoSelection');
-      if (isKeyMatchesToEntry(e, keyConfigStore['move'])) setActiveToolCategory('move');
-      if (isKeyMatchesToEntry(e, keyConfigStore['pipette'])) {
+      if (isKeyMatchesToEntry(e, keyConfigStore()['pen'])) setActiveToolCategory('pen');
+      if (isKeyMatchesToEntry(e, keyConfigStore()['eraser'])) setActiveToolCategory('eraser');
+      if (isKeyMatchesToEntry(e, keyConfigStore()['fill'])) setActiveToolCategory('fill');
+      if (isKeyMatchesToEntry(e, keyConfigStore()['rect_select'])) setActiveToolCategory('rectSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore()['auto_select'])) setActiveToolCategory('autoSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore()['lasso_select'])) setActiveToolCategory('lassoSelection');
+      if (isKeyMatchesToEntry(e, keyConfigStore()['move'])) setActiveToolCategory('move');
+      if (isKeyMatchesToEntry(e, keyConfigStore()['pipette'])) {
         e.preventDefault();
         setActiveToolCategory('pipette');
       }
@@ -105,7 +126,7 @@ const KeyListener: Component = () => {
   };
 
   const handleKeyUp = (e: KeyboardEvent) => {
-    if (!isKeyMatchesToEntry(e, keyConfigStore['pipette']) && getActiveToolCategoryId() === 'pipette') {
+    if (!isKeyMatchesToEntry(e, keyConfigStore()['pipette']) && getActiveToolCategoryId() === 'pipette') {
       e.preventDefault();
       setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
     }

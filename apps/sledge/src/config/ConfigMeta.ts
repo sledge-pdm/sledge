@@ -1,20 +1,24 @@
-import { ConfigComponentName } from '~/config/ConfigComponent';
+import type { ConfigFieldOf } from '@sledge/ui';
+import type { GlobalConfig } from '~/config/GlobalConfig';
 
 export enum ConfigSections {
   General = 'GENERAL',
-  Editor = 'EDITOR',
   Performance = 'PERFORMANCE',
-  Default = 'DEFAULTS',
-  KeyConfig = 'KEY CONFIG',
+  Canvas = 'CANVAS',
+  Startup = 'STARTUP',
+  Protection = 'PROTECTION',
+  Shortcuts = 'SHORTCUTS',
   Debug = 'DEBUG',
 }
 
-export type FieldMeta = {
+export type FieldHeaderMeta = {
   section: ConfigSections;
-  path: readonly string[];
-  label: string;
-  component: ConfigComponentName;
-  props?: Record<string, any>; // min/max/step/options など
-  tips?: string;
-  customFormat?: (v: number) => string; // format: [value] => value
+  kind: 'header';
+  header: string;
 };
+
+export type FieldValueMeta = ConfigFieldOf<GlobalConfig> & { section: ConfigSections; kind?: 'field' };
+
+export type FieldMeta = FieldValueMeta | FieldHeaderMeta;
+
+export const isHeaderMeta = (meta: FieldMeta): meta is FieldHeaderMeta => meta.kind === 'header';

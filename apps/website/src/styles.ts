@@ -15,9 +15,11 @@ export const flexCol = css`
 export const pageRoot = css`
   display: flex;
   flex-direction: column;
-  width: 320px;
-  height: 100%;
-  padding: 4rem 4rem 4rem 4rem;
+  width: 420px;
+  flex-grow: 1;
+  height: auto;
+  box-sizing: border-box;
+  padding: 4rem;
 
   @media (max-width: 599px) {
     box-sizing: border-box;

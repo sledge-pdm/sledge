@@ -1,22 +1,22 @@
 import { css } from '@acab/ecsstatic';
-import { Checkbox, Dropdown, Icon, Light, RadioButton, Slider, ToggleSwitch } from '@sledge/ui';
+import { clsx } from '@sledge/core';
+import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
-import { componentProps } from '~/config/ConfigComponent';
-import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
+import { ConfigSections, FieldMeta, FieldValueMeta, isHeaderMeta } from '~/config/ConfigMeta';
 import { GlobalConfig } from '~/config/GlobalConfig';
+import { generalMetas } from '~/config/meta/Appearance';
+import { canvasMetas } from '~/config/meta/Canvas';
 import { debugMetas } from '~/config/meta/Debug';
-import { defaultMetas } from '~/config/meta/Default';
-import { editorMetas } from '~/config/meta/Editor';
-import { generalMetas } from '~/config/meta/General';
 import { performanceMetas } from '~/config/meta/Performance';
+import { protectionMetas } from '~/config/meta/Protection';
+import { startupMetas } from '~/config/meta/Startup';
 import { Consts } from '~/Consts';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { resetToDefaultConfig } from '~/features/io/config/reset';
 import { saveGlobalSettings } from '~/features/io/config/save';
-import { KeyConfigStore } from '~/stores/global/KeyConfigStore';
-import { globalConfig, keyConfigStore, setGlobalConfig } from '~/stores/GlobalStores';
+import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { accentedButton, flexRow } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
@@ -39,7 +39,7 @@ const configFormSections = css`
   flex-direction: column;
   border-right: 1px solid var(--color-border-secondary);
   width: 170px;
-  padding-top: 20px;
+  padding-top: 18px;
 `;
 
 const configFormSectionItem = css`
@@ -56,6 +56,10 @@ const configFormSectionItem = css`
   &:hover {
     background-color: var(--color-surface);
   }
+`;
+
+const configFormSectionItemSelected = css`
+  background-color: var(--color-surface);
 `;
 
 const configFormSectionLabel = css`
@@ -98,15 +102,18 @@ const configFormScrollContent = css`
   display: flex;
   flex-direction: column;
   overflow-y: visible;
-  gap: var(--spacing-xl);
-  margin: 28px 20px;
+  margin: 8px 20px 28px 20px;
   padding-bottom: var(--spacing-md);
 `;
 
 const configFormFieldHeader = css`
-  font-size: 12px;
-  font-family: ZFB31;
+  font-size: 8px;
+  font-family: ZFB09;
   letter-spacing: 1px;
+  color: var(--color-accent);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  text-transform: lowercase;
 `;
 
 const configFormFieldItem = css`
@@ -114,6 +121,7 @@ const configFormFieldItem = css`
   flex-direction: column;
   justify-content: center;
   gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 `;
 
 const configFormFieldLabelTooltip = css`
@@ -174,9 +182,9 @@ const configFormAbout = css`
   margin-top: 8px;
 `;
 
-const getValueFromMetaPath = (meta: FieldMeta) => meta.path.reduce((obj, key) => (obj as any)[key], globalConfig) as any;
+const getValueFromMetaPath = (meta: FieldValueMeta) => getValueAtPath(globalConfig, meta.path);
 
-function getParsedValueFromMetaPath(meta: FieldMeta) {
+function getParsedValueFromMetaPath(meta: FieldValueMeta) {
   let v = getValueFromMetaPath(meta);
 
   switch (meta.component) {
@@ -186,46 +194,7 @@ function getParsedValueFromMetaPath(meta: FieldMeta) {
       break;
   }
 
-  return v;
-}
-
-function FieldRenderer(props: { meta: FieldMeta; onChange?: (v: any) => void }) {
-  const { meta } = props;
-
-  const value = () => getValueFromMetaPath(meta);
-
-  // ─┬─ setGlobalConfig の呼び出し
-  //  └─ path タプルを any[] にキャストしてから spread
-  const onChange = (v: any) => {
-    (setGlobalConfig as unknown as (...args: any[]) => void)(...(meta.path as any[]), v);
-    if (props.onChange) props.onChange(v);
-  };
-
-  switch (meta.component) {
-    case 'Dropdown':
-      return <Dropdown value={value} options={meta.props?.options} onChange={onChange} />;
-    case 'Slider':
-      return (
-        <Slider
-          defaultValue={value()}
-          min={meta.props?.min ?? 0}
-          max={meta.props?.max ?? 0}
-          labelMode={componentProps.get('Slider')?.labelMode ?? 'left'}
-          customFormat={meta.customFormat}
-          allowDirectInput={true}
-          onChange={onChange}
-          {...meta.props}
-        />
-      );
-    case 'CheckBox':
-      return <Checkbox id={meta.path.toString()} checked={value()} onChange={onChange} />;
-    case 'RadioButton':
-      return <RadioButton id={meta.path.toString()} value={value()} onChange={onChange} {...meta.props} />;
-    case 'ToggleSwitch':
-      return <ToggleSwitch id={meta.path.toString()} checked={value()} onChange={onChange} />;
-    case 'Custom':
-      return <div>{meta.props?.content?.() ?? null}</div>;
-  }
+  return String(v);
 }
 
 interface Props {
@@ -253,7 +222,6 @@ const ConfigForm: Component<Props> = (props) => {
 
     if (confirmed) {
       resetToDefaultConfig();
-      // location.reload();
       message('reset succeeded.');
     }
   };
@@ -267,11 +235,10 @@ const ConfigForm: Component<Props> = (props) => {
         ...originalConfig,
         misc: undefined,
       }) !==
-        JSON.stringify({
-          ...globalConfig,
-          misc: undefined,
-        }) ||
-      JSON.stringify(originalKeyConfig) !== JSON.stringify(keyConfigStore)
+      JSON.stringify({
+        ...globalConfig,
+        misc: undefined,
+      })
     ) {
       setIsDirty(true);
     } else {
@@ -282,21 +249,21 @@ const ConfigForm: Component<Props> = (props) => {
   const [grouped, setGrouped] = createSignal<Map<ConfigSections, FieldMeta[]>>(new Map());
 
   let originalConfig: GlobalConfig | undefined;
-  let originalKeyConfig: KeyConfigStore | undefined;
   onMount(async () => {
     await loadGlobalSettings();
 
     const settingsMeta = [
       ...generalMetas,
-      ...editorMetas,
+      ...canvasMetas,
+      ...startupMetas,
       ...performanceMetas,
-      ...defaultMetas,
+      ...protectionMetas,
       ...debugMetas,
     ] as const satisfies readonly FieldMeta[];
 
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
-    originalKeyConfig = JSON.parse(JSON.stringify(keyConfigStore));
     const grouped = settingsMeta.reduce((map, field) => {
+      if (!('section' in field)) return map;
       const arr = map.get(field.section) ?? [];
       arr.push(field);
       map.set(field.section, arr);
@@ -308,7 +275,6 @@ const ConfigForm: Component<Props> = (props) => {
   listenEvent('onSettingsSaved', async () => {
     await loadGlobalSettings();
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
-    originalKeyConfig = JSON.parse(JSON.stringify(keyConfigStore));
     checkDirty();
   });
 
@@ -317,7 +283,10 @@ const ConfigForm: Component<Props> = (props) => {
       <div class={configFormSections}>
         <For each={Object.values(ConfigSections)}>
           {(section) => (
-            <div class={configFormSectionItem} onClick={() => setSection(section)}>
+            <div
+              class={clsx(configFormSectionItem, section === currentSection() && configFormSectionItemSelected)}
+              onClick={() => setSection(section)}
+            >
               <Light on={section === currentSection()} color='var(--color-accent)' />
               <a class={configFormSectionLabel} style={section === currentSection() ? { color: 'var(--color-accent)' } : {}}>
                 {section.toUpperCase()}.
@@ -329,21 +298,32 @@ const ConfigForm: Component<Props> = (props) => {
       <div class={configFormFields}>
         <div class={configFormScrollContent}>
           <Show when={currentSection() !== undefined}>
-            {/* <p class={configFormFieldHeader}>{currentSection().toUpperCase()}.</p> */}
-            <Show when={currentSection() === ConfigSections.KeyConfig}>
+            <Show when={currentSection() === ConfigSections.Shortcuts}>
               <KeyConfigSettings onKeyConfigChange={onKeyConfigChange} />
             </Show>
-            <Show when={currentSection() !== ConfigSections.KeyConfig}>
+            <Show when={currentSection() !== ConfigSections.Shortcuts}>
               <For each={grouped().get(currentSection())}>
                 {(meta) => {
-                  const componentProp = componentProps.get(meta.component);
+                  if (isHeaderMeta(meta)) {
+                    return <p class={configFormFieldHeader}>{meta.header.toUpperCase()}.</p>;
+                  }
+
+                  const componentName = typeof meta.component === 'string' ? meta.component : undefined;
+                  const componentProp = componentName ? componentProps.get(componentName) : undefined;
                   const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
                   const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'right';
+                  const value = () => getValueFromMetaPath(meta);
+                  const onChange = (v: any) => {
+                    const arrPath = pathToArray(meta.path);
+                    (setGlobalConfig as unknown as (...args: any[]) => void)(...arrPath, v);
+                    onFieldChange(meta, v);
+                  };
+
                   return (
                     <div class={configFormFieldItem}>
                       <div class={flexRow}>
                         <Icon src={'/icons/misc/bullet_s_8.png'} base={8} />
-                        <p class={configFormFieldLabel}>{meta.label.toUpperCase()}</p>
+                        <p class={configFormFieldLabel}>{meta.label?.toUpperCase()}</p>
                         <Show when={meta.tips !== undefined}>
                           <p class={configFormFieldLabelTooltip} title={meta.tips ?? undefined}>
                             ?
@@ -356,7 +336,7 @@ const ConfigForm: Component<Props> = (props) => {
                             {getParsedValueFromMetaPath(meta)}.
                           </label>
                         </Show>
-                        <FieldRenderer meta={meta} onChange={(v) => onFieldChange(meta, v)}></FieldRenderer>
+                        <ConfigFieldRenderer field={meta as ConfigField} value={value} onChange={onChange} />
                         <Show when={shouldShowRightLabel}>
                           <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': 'var(--spacing-sm)' }}>
                             {getParsedValueFromMetaPath(meta)}.
@@ -379,7 +359,6 @@ const ConfigForm: Component<Props> = (props) => {
         <button class={accentedButton} disabled={!isDirty()} onClick={manualSave}>
           {isDirty() ? 'save' : 'no changes'}.
         </button>
-        {/* <button onClick={() => props.onClose?.()}>cancel.</button> */}
       </div>
 
       <div class={configFormInfoAreaBottom}>

@@ -1,8 +1,9 @@
+import { RGBA } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { RGBAColor } from '~/features/color';
 // LayerImageAgent 依存を除去し AnvilToolContext を利用
 //import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logUserInfo } from '~/features/log';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
@@ -11,7 +12,7 @@ import { FillPresetConfig } from '~/features/tools/Tools';
 
 export interface FillProps {
   layerId: string;
-  color: RGBAColor;
+  color: RGBA;
   position: Vec2;
   threshold?: number;
 }
@@ -71,8 +72,9 @@ export class FillTool implements ToolBehavior {
 
     const endTime = Date.now();
 
+    logUserInfo(`Flood Fill done. (in ${endTime - startTime} ms)`);
+
     return {
-      result: `Flood Fill done. (in ${endTime - startTime} ms)`,
       shouldUpdate: true,
       shouldRegisterToHistory: true,
     };

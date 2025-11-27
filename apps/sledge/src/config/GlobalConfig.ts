@@ -1,4 +1,5 @@
 import { Theme } from '@sledge/theme';
+import { KeyConfigStore, makeDefaultKeyConfigStore } from '~/config/KeyConfig';
 import { Cursor } from '~/config/types/Cursor';
 import { FPS } from '~/config/types/FPS';
 import { CanvasRenderingMode } from '~/features/canvas';
@@ -8,7 +9,6 @@ export type GlobalConfig = {
   general: {
     theme: Theme;
     skippedVersions: string[];
-    resetSkippedVersions: string;
   };
   default: {
     open: 'new' | 'last';
@@ -21,6 +21,7 @@ export type GlobalConfig = {
     centerCanvasOnResize: CanvasCenteringMode;
     centerCanvasOnMaximize: CanvasCenteringMode;
     requireConfirmBeforeLayerRemove: boolean;
+    requireConfirmBeforeLayerClear: boolean;
     maxHistoryItemsCount: number;
     touchRotationZeroSnapThreshold: number;
     rulerMarkDirection: 'outward' | 'inward';
@@ -31,14 +32,15 @@ export type GlobalConfig = {
   };
   debug: {
     showPerformanceMonitor: boolean;
+    showDirtyTiles: boolean;
   };
+  keyConfig: KeyConfigStore;
 };
 
-export const defaultConfig: GlobalConfig = {
+export const makeDefaultGlobalConfig = (): GlobalConfig => ({
   general: {
     theme: 'os',
     skippedVersions: [],
-    resetSkippedVersions: '',
   },
   default: {
     open: 'last',
@@ -50,6 +52,7 @@ export const defaultConfig: GlobalConfig = {
     centerCanvasOnResize: 'disabled',
     centerCanvasOnMaximize: 'offset',
     requireConfirmBeforeLayerRemove: true,
+    requireConfirmBeforeLayerClear: true,
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
     touchRotationZeroSnapThreshold: 5,
@@ -61,5 +64,10 @@ export const defaultConfig: GlobalConfig = {
   },
   debug: {
     showPerformanceMonitor: false,
+    showDirtyTiles: false,
   },
-};
+  keyConfig: makeDefaultKeyConfigStore(),
+});
+
+// Keep a default instance for places that expect a value, but prefer calling makeDefaultGlobalConfig for freshness.
+export const defaultConfig: GlobalConfig = makeDefaultGlobalConfig();

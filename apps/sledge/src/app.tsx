@@ -13,6 +13,7 @@ import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, onMount } from 'solid-js';
 import { loadGlobalSettings } from '~/features/io/config/load';
+import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
@@ -30,14 +31,15 @@ const appRoot = css`
 `;
 
 export default function App() {
+  const LOG_LABEL = 'App';
   // グローバルエラーハンドラーを設定
   const handleGlobalError = (event: ErrorEvent) => {
-    console.error('Global error caught:', event.error);
+    logSystemError('Global error caught.', { label: LOG_LABEL, details: [event.error] });
     reportCriticalError(event.error || new Error(event.message));
   };
 
   const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-    console.error('Unhandled promise rejection caught:', event.reason);
+    logSystemError('Unhandled promise rejection caught.', { label: LOG_LABEL, details: [event.reason] });
     reportCriticalError(event.reason instanceof Error ? event.reason : new Error(String(event.reason)));
   };
 
@@ -76,7 +78,11 @@ export default function App() {
 
     window.onScaleChanged(async ({ payload }) => {
       const { scaleFactor, size } = payload;
-      console.log('scale changed to:', scaleFactor, 'dprzoom: ', zoomForIntegerize(scaleFactor));
+      logSystemInfo('scale changed', {
+        label: LOG_LABEL,
+        details: [scaleFactor, 'dprzoom', zoomForIntegerize(scaleFactor)],
+        debugOnly: true,
+      });
       await webview.setZoom(zoomForIntegerize(scaleFactor));
     });
 

@@ -1,6 +1,7 @@
 import { fill_lasso_selection } from '@sledge/wasm';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { logSystemWarn } from '~/features/log/service';
 import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
@@ -115,7 +116,7 @@ export class LassoSelection extends SelectionBase {
     try {
       fill_lasso_selection(this.previewFragment.partialMask, clampedWidth, clampedHeight, new Float32Array(localPoints), mode);
     } catch (error) {
-      console.warn('Lasso selection WASM call failed:', error);
+      logSystemWarn('Lasso selection WASM call failed.', { label: 'LassoSelection', details: [error] });
     }
   }
 

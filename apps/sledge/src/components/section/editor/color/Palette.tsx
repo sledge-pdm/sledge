@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge/core';
 import { ColorBox } from '@sledge/ui';
 import { Component } from 'solid-js';
-import { currentColor, getColorByPalette, PaletteType, selectPalette } from '~/features/color';
+import { currentColor, getPaletteColor, PaletteType, selectPalette } from '~/features/color';
 import { colorStore } from '~/stores/EditorStores';
 
 export const container = css`
@@ -35,7 +35,7 @@ const Palette: Component<PaletteProps> = (props) => {
       <p class={clsx(label, !isSelected() && labelInactive)}>{props.index}</p>
       <div class={!isSelected() ? containerInactive : undefined}>
         <ColorBox
-          color={getColorByPalette(props.paletteType)}
+          color={getPaletteColor(props.paletteType)}
           sizePx={30}
           onClick={() => selectPalette(props.paletteType)}
           enableUsingSelection={false}

@@ -1,8 +1,8 @@
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
-export const fillPresetFields: PresetFieldMeta[] = [
+export const fillPresetFields: PresetFieldMeta<FillPresetConfig>[] = [
   {
     key: 'threshold',
     label: 'Threshold',

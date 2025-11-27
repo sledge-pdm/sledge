@@ -18,9 +18,9 @@ describe('ColorHistoryAction', () => {
     });
 
     action.redo();
-    expect(currentColor()).toBe('#ff0000');
+    expect(currentColor()).toStrictEqual([255, 0, 0, 255]);
 
     action.undo();
-    expect(currentColor()).toBe('#000000');
+    expect(currentColor()).toStrictEqual([0, 0, 0, 255]);
   });
 });

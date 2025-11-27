@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
+import { RGBAToHex } from '@sledge/anvil';
 import { Icon } from '@sledge/ui';
 import { Accessor, Component, Show } from 'solid-js';
-import { RGBAToHex } from '~/features/color';
 import { BaseHistoryAction } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';

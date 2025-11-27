@@ -1,5 +1,6 @@
 import { RawPixelData, toUint8ClampedArray } from '@sledge/anvil';
 import { readFile } from '@tauri-apps/plugin-fs';
+import { logSystemError, logSystemInfo } from '~/features/log/service';
 
 export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -84,6 +85,8 @@ export function debugDownloadBuffer(buffer: RawPixelData, width: number, height:
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `${label}-${timestamp}.png`;
 
-  downloadBufferAsPNG(buffer, width, height, filename).catch(console.error);
-  console.log(`Debug: Downloaded buffer as ${filename} (${width}x${height})`);
+  downloadBufferAsPNG(buffer, width, height, filename).catch((error) => {
+    logSystemError('debug buffer download failed.', { label: 'DataUtils', details: [error] });
+  });
+  logSystemInfo(`Debug: Downloaded buffer as ${filename} (${width}x${height})`, { label: 'DataUtils', debugOnly: true });
 }

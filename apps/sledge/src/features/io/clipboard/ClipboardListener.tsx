@@ -9,11 +9,13 @@ import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/i
 import { isInputFocused, tryGetImageFromClipboard, tryGetTextFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { setBottomBarText } from '~/features/log/service';
+import { logSystemError, logUserError, logUserSuccess } from '~/features/log/service';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
+
+const LOG_LABEL = 'ClipboardListener';
 
 const ClipboardListener: Component = () => {
   const handleCopy = async (e?: ClipboardEvent): Promise<'layer' | 'selection' | undefined> => {
@@ -32,15 +34,15 @@ const ClipboardListener: Component = () => {
           x: bbox.x,
           y: bbox.y,
         });
-        setBottomBarText('selection copied!', { kind: 'info' });
+        logUserSuccess('selection copied!', { label: LOG_LABEL });
         return 'selection';
       } else {
         await writeText(layerListStore.activeLayerId);
-        setBottomBarText('layer copied!', { kind: 'info' });
+        logUserSuccess('layer copied!', { label: LOG_LABEL });
         return 'layer';
       }
     } catch (e) {
-      setBottomBarText('copy failed.', { kind: 'error' });
+      logUserError('copy failed.', { label: LOG_LABEL, details: [e] });
     }
   };
 
@@ -129,15 +131,15 @@ const ClipboardListener: Component = () => {
           entry.transform.y = placementPos.y;
           insertEntry(entry);
           selectEntry(entry.id);
-          setBottomBarText('pasted!');
+          logUserSuccess('pasted!', { label: LOG_LABEL });
         } else {
-          console.error('Failed to read clipboard contents.');
-          setBottomBarText('paste failed.', { kind: 'error' });
+          logSystemError('Failed to read clipboard contents.', { label: LOG_LABEL });
+          logUserError('paste failed.', { label: LOG_LABEL });
         }
       }
     } catch (err) {
-      console.error('Failed to read clipboard contents:', err);
-      setBottomBarText('paste failed.', { kind: 'error' });
+      logSystemError('Failed to read clipboard contents.', { label: LOG_LABEL, details: [err] });
+      logUserError('paste failed.', { label: LOG_LABEL, details: [err] });
     }
   };
 

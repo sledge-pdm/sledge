@@ -7,6 +7,7 @@ import { css } from '@acab/ecsstatic';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
+import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore, setInteractStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
@@ -138,7 +139,7 @@ const CanvasArea: Component = () => {
         lastTransformMatrix = matrixString;
       }
     } catch (error) {
-      console.warn('Transform update failed:', error);
+      logSystemWarn('Transform update failed.', { label: 'CanvasArea', details: [error] });
       // フォールバックとして従来の方式を使用
       const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
       const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;

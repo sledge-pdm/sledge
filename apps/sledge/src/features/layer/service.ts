@@ -1,8 +1,8 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
+import { RGBA, RGBAToHex } from '@sledge/anvil';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
-import { RGBAColor, RGBAToHex } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
@@ -10,23 +10,25 @@ import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerL
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { setBottomBarText } from '~/features/log/service';
+import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { changeBaseLayerColor, createLayer } from './model';
 import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
+
+const LOG_LABEL = 'LayerService';
 
 // Layer property updates
 const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
 
 export function setLayerName(layerId: string, newName: string): boolean {
   if (!newName || newName.trim() === '') {
-    console.warn('Layer name cannot be empty');
+    logUserWarn('Layer name cannot be empty', { label: LOG_LABEL });
     return false;
   }
 
@@ -74,6 +76,16 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   if (propNamesToUpdate.indexOf(propName) !== -1) updateWebGLCanvas(false, `Layer(${layerId}) prop updated(${propName})`);
 }
 
+export function toggleLayerVisibility(layerIds?: string[]) {
+  const targets = getOperationTargetLayerIds(layerIds);
+  if (targets.length === 0) return;
+
+  const shouldEnable = !targets.every((id) => findLayerById(id)?.enabled);
+  targets.forEach((id) => setLayerProp(id, 'enabled', shouldEnable));
+  logUserInfo(`Layer visibility ${shouldEnable ? 'enabled' : 'disabled'} for ${targets.length} layer(s).`, { label: LOG_LABEL });
+  if (targets.length > 0) resetSelectionState();
+}
+
 export function duplicateLayer(layerId: string) {
   const layer = findLayerById(layerId);
   if (!layer) return;
@@ -90,29 +102,13 @@ export function duplicateLayer(layerId: string) {
     { initImage: buffer }
   );
   updateWebGLCanvas(true, `Layer(${layerId}) duplicated`);
+  logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }
 
-export function clearLayer(layerId: string) {
-  const anvil = getAnvil(layerId);
-  const w = anvil.getWidth();
-  const h = anvil.getHeight();
-  if (w == null || h == null) return;
-
-  anvil.addCurrentWholeDiff();
-
-  anvil.getBufferHandle().fill([0, 0, 0, 0]);
-
-  const patch = anvil.flushDiffs();
-  if (patch)
-    projectHistoryController.addAction(
-      new AnvilLayerHistoryAction({
-        layerId,
-        patch,
-        context: { tool: 'clear' },
-      })
-    );
-  updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
-  updateLayerPreview(layerId);
+export function duplicateLayers(layerIds?: string[]) {
+  const targets = getOperationTargetLayerIds(layerIds);
+  targets.forEach((id) => duplicateLayer(id));
+  if (targets.length > 0) resetSelectionState();
 }
 
 export async function mergeToBelowLayer(layerId: string) {
@@ -125,9 +121,10 @@ export async function mergeToBelowLayer(layerId: string) {
 
   const mergeRenderer = new LayerMergeRenderer(originLayer, targetLayer);
   await mergeRenderer.mergeLayer();
+  logUserInfo(`Layer "${originLayer.name}" merged into "${targetLayer.name}".`, { label: LOG_LABEL });
 }
 
-export function getCurrentPointingColor(): RGBAColor | undefined {
+export function getCurrentPointingColor(): RGBA | undefined {
   const activeAnvil = getAnvil(layerListStore.activeLayerId);
   const x = Math.floor(interactStore.lastMouseOnCanvas.x);
   const y = Math.floor(interactStore.lastMouseOnCanvas.y);
@@ -137,7 +134,12 @@ export function getCurrentPointingColor(): RGBAColor | undefined {
 
 export function getCurrentPointingColorHex(): string | undefined {
   const c = getCurrentPointingColor();
-  return c ? `#${RGBAToHex(c, false)}` : undefined;
+  return c
+    ? RGBAToHex(c, {
+        excludeAlpha: false,
+        withSharp: true,
+      })
+    : undefined;
 }
 
 // Layer list management
@@ -209,6 +211,7 @@ export const addLayerTo = (
   setActiveLayerId(newLayer.id);
 
   updateWebGLCanvas(false, `Layer(${newLayer.id}) added`);
+  logUserInfo(`Layer "${newLayer.name}" added.`, { label: LOG_LABEL });
 
   if (!options?.noDiff) {
     const snapshot = getPackedLayerSnapshot(newLayer.id);
@@ -230,8 +233,7 @@ export function setActiveLayerId(id: string): void {
   const layer = findLayerById(id);
   if (layer) {
     if (!layer.enabled) {
-      console.warn('Cannot set inactive layer to active');
-      setBottomBarText('Cannot set inactive layer to active');
+      logUserError('Cannot set inactive layer to active', { label: LOG_LABEL });
       return;
     }
     if (layerListStore.activeLayerId === id) return;
@@ -252,6 +254,58 @@ export function getActiveLayerIndex(): number {
 
 export function getLayerIndex(layerId: string) {
   return layerListStore.layers.findIndex((l) => l.id === layerId);
+}
+
+type LayerOrder = 'asc' | 'desc';
+
+function normalizeLayerIds(layerIds: string[], order: LayerOrder = 'asc') {
+  const uniqueIds = Array.from(new Set(layerIds));
+  const withIndex = uniqueIds.map((id) => ({ id, index: getLayerIndex(id) })).filter((item) => item.index !== -1);
+
+  withIndex.sort((a, b) => (order === 'asc' ? a.index - b.index : b.index - a.index));
+
+  return withIndex.map((item) => item.id);
+}
+
+function getOperationTargetLayerIds(layerIds?: string[], options?: { fallbackToActive?: boolean; order?: LayerOrder }) {
+  const fallbackToActive = options?.fallbackToActive ?? true;
+  const order = options?.order ?? 'asc';
+
+  let targets: string[] = [];
+  if (!layerIds || layerIds.length === 0) {
+    if (layerListStore.selectionEnabled && layerListStore.selected.size > 0) {
+      targets = Array.from(layerListStore.selected);
+    }
+
+    if (targets.length === 0 && fallbackToActive && layerListStore.activeLayerId) {
+      targets = [layerListStore.activeLayerId];
+    }
+  } else {
+    targets = layerIds;
+  }
+
+  return normalizeLayerIds(targets, order);
+}
+
+export function summarizeLayerNames(layerIds: string[]) {
+  const names = layerIds.map((id) => layerListStore.layers.find((l) => l.id === id)?.name ?? id);
+  if (names.length === 0) return '';
+  if (names.length <= 3) return names.join(', ');
+  return `${names.slice(0, 3).join(', ')}... (+${names.length - 3})`;
+}
+
+function dropFromSelection(layerIds: string[]) {
+  if (!layerIds.length) return;
+  setLayerListStore('selected', (set: Set<string>) => {
+    const updated = new Set(set);
+    layerIds.forEach((id) => updated.delete(id));
+    return updated;
+  });
+}
+
+export function resetSelectionState() {
+  setLayerListStore('selectionEnabled', false);
+  setLayerListStore('selected', () => new Set<string>());
 }
 
 export function setImagePoolActive(active: boolean) {
@@ -295,21 +349,37 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
 interface RemoveLayerOptions {
   noDiff?: boolean;
 }
-export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
-  if (!findLayerById(layerId)) {
-    setBottomBarText(`layer ${layerId} not found.`, { kind: 'error' });
+
+export const removeLayersFromUser = async (layerIds?: string[], options?: RemoveLayerOptions) => {
+  const targets = getOperationTargetLayerIds(layerIds, { order: 'desc' });
+  if (targets.length === 0) {
+    logUserWarn('No layer selected for removal.', { label: LOG_LABEL });
+    return;
+  }
+
+  if (layerListStore.layers.length - targets.length < 1) {
+    logUserWarn('Cannot remove all layers. At least one layer must remain.', { label: LOG_LABEL });
     return;
   }
 
   if (globalConfig.editor.requireConfirmBeforeLayerRemove) {
-    const removeConfirmed = await confirm(`Sure to remove layer "${findLayerById(layerId)?.name}"?`, {
+    const message =
+      targets.length === 1
+        ? `Sure to remove layer "${summarizeLayerNames(targets)}"?`
+        : `Sure to remove ${targets.length} layers? (${summarizeLayerNames(targets)})`;
+    const removeConfirmed = await confirm(message, {
       title: 'Remove Layer',
     });
-    // LayerListController.removeLayer already adds history; just call it
-    if (removeConfirmed) removeLayer(layerId, options);
-  } else {
-    removeLayer(layerId, options);
+    if (!removeConfirmed) return;
   }
+
+  targets.forEach((id) => removeLayer(id, options));
+  dropFromSelection(targets);
+  resetSelectionState();
+};
+
+export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
+  await removeLayersFromUser([layerId], options);
 };
 
 export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
@@ -331,6 +401,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
   updateWebGLCanvas(false, `Layer(${layerId}) removed`);
+  logUserInfo(`Layer "${toRemove.name}" removed.`, { label: LOG_LABEL });
 
   if (!noDiff && snapshot) {
     const act = new LayerListHistoryAction({
@@ -346,6 +417,57 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   anvilManager.removeAnvil(layerId);
 };
 
+export const clearLayersFromUser = async (layerIds?: string[]) => {
+  const targets = getOperationTargetLayerIds(layerIds);
+  if (targets.length === 0) {
+    logUserWarn('No layer selected for clear.', { label: LOG_LABEL });
+    return;
+  }
+
+  if (globalConfig.editor.requireConfirmBeforeLayerClear) {
+    const confirmed = await confirm(
+      targets.length === 1
+        ? `Sure to clear layer "${summarizeLayerNames(targets)}"?`
+        : `Sure to clear ${targets.length} layers? (${summarizeLayerNames(targets)})`,
+      {
+        title: 'Clear Layer',
+      }
+    );
+    if (!confirmed) return;
+  }
+
+  targets.forEach((id) => clearLayer(id));
+  resetSelectionState();
+};
+
+export const clearLayerFromUser = async (layerId: string) => {
+  await clearLayersFromUser([layerId]);
+};
+
+export function clearLayer(layerId: string) {
+  const anvil = getAnvil(layerId);
+  const w = anvil.getWidth();
+  const h = anvil.getHeight();
+  if (w == null || h == null) return;
+
+  anvil.addCurrentWholeDiff();
+
+  anvil.getBufferHandle().fillAllCodes(0);
+
+  const patch = anvil.flushDiffs();
+  if (patch)
+    projectHistoryController.addAction(
+      new AnvilLayerHistoryAction({
+        layerId,
+        patch,
+        context: { tool: 'clear' },
+      })
+    );
+  updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
+  updateLayerPreview(layerId);
+  logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
+}
+
 export const allLayers = () => layerListStore.layers;
 export const findLayerById = (id: string) => allLayers().find((layer) => layer.id === id);
 export const activeLayer = () => findLayerById(layerListStore.activeLayerId) || allLayers()[0];
@@ -359,6 +481,7 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
   updateWebGLCanvas(false, `BaseLayer color mode changed to ${colorMode}`);
+  setProjectStore('isProjectChangedAfterSave', true);
 }
 
 /**
@@ -368,4 +491,31 @@ export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
   updateWebGLCanvas(false, `BaseLayer custom color changed to ${customColor}`);
+  setProjectStore('isProjectChangedAfterSave', true);
+}
+
+export function setSelectionEnabled(enabled: boolean) {
+  setLayerListStore('selectionEnabled', enabled);
+}
+export function isSelectionEnabled() {
+  return layerListStore.selectionEnabled;
+}
+
+export function selectLayer(layerId: string) {
+  if (!findLayerById(layerId)) return;
+  setLayerListStore('selected', (set: Set<string>) => {
+    const updated = new Set(set);
+    updated.add(layerId);
+    return updated;
+  });
+}
+export function deselectLayer(layerId: string) {
+  setLayerListStore('selected', (set: Set<string>) => {
+    const updated = new Set(set);
+    updated.delete(layerId);
+    return updated;
+  });
+}
+export function getSelectedLayers(noFallbackToActive: boolean = false): string[] {
+  return getOperationTargetLayerIds(undefined, { fallbackToActive: !noFallbackToActive });
 }

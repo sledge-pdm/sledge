@@ -2,6 +2,7 @@ import { FileLocation } from '@sledge/core';
 import { BaseDirectory } from '@tauri-apps/api/path';
 import { exists, readTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
+import { logSystemError } from '~/features/log/service';
 import { EditorStateStore, loadEditorStateStore } from '~/stores/EditorStores';
 
 export async function loadEditorState(): Promise<
@@ -22,7 +23,7 @@ export async function loadEditorState(): Promise<
     try {
       stateJson = JSON.parse(stateData);
     } catch (e) {
-      console.error('Failed to parse config JSON:', e);
+      logSystemError('Failed to parse config JSON.', { label: 'EditorState', details: [e] });
     }
 
     if (stateJson) {

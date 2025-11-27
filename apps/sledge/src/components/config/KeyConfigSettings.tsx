@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
-import { KeyConfigEntry } from '~/config/KeyConfig';
+import { KeyConfigCommands, KeyConfigEntry } from '~/config/KeyConfig';
 import {
   isRecordEndWithoutSave as isRecordAbortKey,
   isRecordEndSave as isRecordEndKey,
@@ -12,10 +12,14 @@ import {
   restoreDefaultKeyConfig,
   saveKeyConfigEntry,
 } from '~/features/config/KeyConfigController';
-import { KeyConfigCommands } from '~/stores/global/KeyConfigStore';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { accentedText, flexCol } from '~/styles/styles';
 
+const root = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+`;
 const row = css`
   display: flex;
   flex-direction: row;
@@ -84,13 +88,13 @@ const KeyConfigSettings: Component<Props> = (props) => {
   onCleanup(() => window.removeEventListener('keydown', handleOnKeyDown));
 
   return (
-    <div class={flexCol}>
+    <div class={root}>
       <p style={{ 'margin-bottom': '16px' }}>
         <span class={accentedText}>enter</span> to confirm.&nbsp;
         <span style={{ color: color.accent }}>esc</span> to abort.
       </p>
       <div class={flexCol} style={{ gap: '4px', width: '100%' }}>
-        <For each={Object.entries(keyConfigStore)}>
+        <For each={Object.entries(keyConfigStore())}>
           {([name, entry]) => {
             const isRecording = () => name === recordingName();
             return (

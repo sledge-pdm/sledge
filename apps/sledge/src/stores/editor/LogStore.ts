@@ -1,20 +1,20 @@
+import { RGBA } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { RGBAColor } from '~/features/color';
 
 type DebugPoint = Vec2 & {
-  color: RGBAColor;
+  color: RGBA;
 };
 
-export type BottomBarKind = 'info' | 'warn' | 'error';
+export type LogKind = 'persistent' | 'info' | 'success' | 'warn' | 'error';
 
 export type LogStore = {
   bottomBarText: string;
-  bottomBarKind: BottomBarKind;
+  bottomBarKind: LogKind;
   canvasDebugPoints: DebugPoint[]; // デバッグ用の点の配列
 };
 
 export const defaultLogStore: LogStore = {
   bottomBarText: 'rotate: shift+wheel / drag: ctrl+drag',
-  bottomBarKind: 'info',
+  bottomBarKind: 'persistent',
   canvasDebugPoints: [],
 };

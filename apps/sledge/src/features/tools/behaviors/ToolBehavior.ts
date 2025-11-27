@@ -1,8 +1,7 @@
+import { RGBA } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
-import { RGBAColor } from '~/features/color';
 
 export interface ToolResult {
-  result?: string;
   shouldUpdate: boolean;
   shouldRegisterToHistory: boolean;
   shouldReturnToPrevTool?: boolean;
@@ -31,7 +30,7 @@ export interface ToolArgs {
   // pixel position (rounded)
   position: Vec2;
   lastPosition?: Vec2;
-  color: RGBAColor; // RGBA
+  color: RGBA; // RGBA
   presetName?: string;
   event?: PointerEvent;
   // TODO: pressure, tilt, ...

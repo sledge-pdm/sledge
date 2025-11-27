@@ -10,6 +10,7 @@ import {
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
+import { logSystemError } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
@@ -77,7 +78,7 @@ export class ProjectHistoryController {
       }
       return undefined;
     } catch (e) {
-      console.error('Error deserializing history action:', e);
+      logSystemError('Error deserializing history action.', { label: 'HistoryController', details: [e] });
       return undefined;
     }
   }

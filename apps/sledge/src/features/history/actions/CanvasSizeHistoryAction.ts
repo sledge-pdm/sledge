@@ -5,6 +5,7 @@ import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { logSystemWarn } from '~/features/log/service';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 type LayerBufferSnapshot = { layerId: string; dotMag: number; webpBuffer: Uint8Array };
@@ -84,6 +85,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       const anvil = getAnvil(snap.layerId);
       anvil.importWebp(snap.webpBuffer, size.width, size.height);
     }
+    updateWebGLCanvas(true, `canvas resize restore`);
   }
 
   serialize(): SerializedHistoryAction {

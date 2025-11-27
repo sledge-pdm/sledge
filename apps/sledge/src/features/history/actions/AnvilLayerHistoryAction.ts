@@ -31,7 +31,11 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
       cancelMove();
       return;
     }
-    getAnvil(this.layerId).applyPatch(this.patch, 'undo');
+    try {
+      getAnvil(this.layerId).applyPatch(this.patch, 'undo');
+    } catch {
+      return;
+    }
 
     updateWebGLCanvas(true, `Anvil(${this.layerId}) undo`);
     updateLayerPreview(this.layerId);
@@ -42,7 +46,11 @@ export class AnvilLayerHistoryAction extends BaseHistoryAction {
       cancelMove();
       return;
     }
-    getAnvil(this.layerId).applyPatch(this.patch, 'redo');
+    try {
+      getAnvil(this.layerId).applyPatch(this.patch, 'redo');
+    } catch {
+      return;
+    }
 
     updateWebGLCanvas(true, `Anvil(${this.layerId}) redo`);
     updateLayerPreview(this.layerId);

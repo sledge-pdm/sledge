@@ -295,7 +295,6 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
 
     const final = snapshotState();
 
-    // Undo all → initial snapshot
     while (hc.canUndo()) hc.undo();
     expect(currentColor()).toBe(initial.color);
     expect(canvasStore.canvas.width).toBe(initial.canvas.width);

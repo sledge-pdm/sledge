@@ -202,22 +202,21 @@ const CanvasOverlaySVG: Component = () => {
 
   const [dirtyTiles, setDirtyTiles] = createSignal<TileIndex[]>();
   const [tileSize, setTileSize] = createSignal(32);
-  onMount(() => {
-    createTimer(
-      () => {
-        try {
-          const activeAnvil = getAnvil(layerListStore.activeLayerId);
-          const tileSize = activeAnvil.getTileSize();
-          setTileSize(tileSize);
-          // JS TilesController
-          setDirtyTiles(activeAnvil.getDirtyTiles());
-        } catch (e) {
-          // ignore when anvil not ready
-        }
-      },
-      50,
-      setInterval
-    );
+  createEffect(() => {
+    if (!globalConfig.debug.showDirtyTiles) return;
+    const timer = setInterval(() => {
+      try {
+        const activeAnvil = getAnvil(layerListStore.activeLayerId);
+        const tileSize = activeAnvil.getTileSize();
+        setTileSize(tileSize);
+        // JS TilesController
+        setDirtyTiles(activeAnvil.getDirtyTiles());
+      } catch (e) {
+        // ignore when anvil not ready
+      }
+    }, 50);
+    // Cleanup when showDirtyTiles becomes false or component unmounts
+    return () => clearInterval(timer);
   });
 
   return (

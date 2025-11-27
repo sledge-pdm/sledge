@@ -172,10 +172,11 @@ const CanvasOverlaySVG: Component = () => {
     position: 'absolute',
     top: '0px',
     left: '0px',
-    transform: `translate(${interactStore.offsetOrigin.x + interactStore.offset.x}px, ${interactStore.offsetOrigin.y + interactStore.offset.y}px)`,
+    transform: `translate3d(${interactStore.offsetOrigin.x + interactStore.offset.x}px, ${interactStore.offsetOrigin.y + interactStore.offset.y}px, 0px)`,
     'transform-origin': '0 0',
     'pointer-events': 'none',
     'z-index': 'var(--zindex-canvas-overlay)',
+    'will-change': 'transform',
   });
 
   // rotate + flip (中心基準)  ※ zoom は含まない
@@ -193,9 +194,10 @@ const CanvasOverlaySVG: Component = () => {
       left: '0px',
       width: `${w}px`,
       height: `${h}px`,
-      transform: `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${sx}, ${sy}) translate(${-cx}px, ${-cy}px)`,
+      transform: `translate3d(${cx}px, ${cy}px, 0px) rotate(${rot}deg) scale3d(${sx}, ${sy}, 1) translate3d(${-cx}px, ${-cy}px, 0px)`,
       'transform-origin': '0 0',
       'pointer-events': 'none',
+      'will-change': 'transform',
     };
   };
 

@@ -89,7 +89,7 @@ export function createDummyWebpBuffer(customData?: number[]): Uint8Array {
 
 // Create WebP buffer from raw data
 export function createWebpFromRaw(rawData: Uint8ClampedArray, width: number, height: number): Uint8Array {
-  const buffer = RgbaBuffer.fromRaw(width, height, rawData);
+  const buffer = RgbaBuffer.fromRaw(width, height, new Uint8Array(rawData.buffer));
   return buffer.exportWebp();
 }
 

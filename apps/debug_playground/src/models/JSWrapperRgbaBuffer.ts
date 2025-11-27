@@ -1,5 +1,5 @@
 import { Point, RawPixelData, RGBA, Size, toUint8Array, toUint8ClampedArray } from '@sledge/anvil';
-import { AlphaBlurMode, AntialiasMode, DitheringMode, RgbaBuffer } from '../../../../packages/anvil/src/ops_wasm/pkg/anvil_ops_wasm.js';
+import { AlphaBlurMode, AntialiasMode, DitheringMode, RgbaBuffer } from '../../../../packages/anvil/src/wasm/pkg/anvil_wasm.js';
 
 /**
  * Core pixel buffer operations - raw RGBA8 array management
@@ -150,7 +150,7 @@ export class JSWrapperRgbaBuffer {
     const srcOrigin = options?.srcOrigin ?? { x: 0, y: 0 };
     const destOrigin = options?.destOrigin ?? { x: 0, y: 0 };
 
-    this.wasmBuffer.resize_with_origins(newSize.width, newSize.height, srcOrigin.x, srcOrigin.y, destOrigin.x, destOrigin.y);
+    this.wasmBuffer.resizeWithOrigins(newSize.width, newSize.height, srcOrigin.x, srcOrigin.y, destOrigin.x, destOrigin.y);
     this.refreshDataView();
     this.width = newSize.width;
     this.height = newSize.height;

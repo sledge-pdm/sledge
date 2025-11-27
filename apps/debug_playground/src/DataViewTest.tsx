@@ -1,7 +1,6 @@
-
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { JSWrapperRgbaBuffer } from '~/models/JSWrapperRgbaBuffer';
-import { RgbaBuffer } from '../../../packages/anvil/src/ops_wasm/pkg/anvil_ops_wasm';
+import { RgbaBuffer } from '../../../packages/anvil/src/wasm/pkg/anvil_wasm';
 
 type RGBA = [number, number, number, number];
 
@@ -96,7 +95,7 @@ export const DataViewTest = () => {
         <div>
           <label>Color RGBA </label>
           <input
-            type="color"
+            type='color'
             value={`#${jsColor()
               .slice(0, 3)
               .map((c) => c.toString(16).padStart(2, '0'))
@@ -122,7 +121,7 @@ export const DataViewTest = () => {
         <div>
           <label>Color RGBA </label>
           <input
-            type="color"
+            type='color'
             value={`#${wasmColor()
               .slice(0, 3)
               .map((c) => c.toString(16).padStart(2, '0'))
@@ -142,7 +141,8 @@ export const DataViewTest = () => {
         <h3>Both</h3>
         <button onClick={randomDot}>Random dot (both)</button>
         <p style={{ 'max-width': '220px', 'font-size': '12px', color: '#555' }}>
-          JS wrapperは refreshDataView を通じてビューを維持。WASM 直接は data() の生ビューを書き換え。fill 操作や resize を追加して挙動を確認してください。
+          JS wrapperは refreshDataView を通じてビューを維持。WASM 直接は data() の生ビューを書き換え。fill 操作や resize
+          を追加して挙動を確認してください。
         </p>
       </div>
     </div>

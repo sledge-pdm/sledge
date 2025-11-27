@@ -1,6 +1,6 @@
 // controllers/layer/SelectionManager.ts
 
-import { TileIndex } from '@sledge/anvil';
+import { TileIndex, toUint8ClampedArray } from '@sledge/anvil';
 import { Vec2 } from '@sledge/core';
 import {
   apply_mask_offset,
@@ -376,7 +376,6 @@ class SelectionAreaManager {
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
     const anvil = getAnvil(srcLayerId);
-    // canvasStore �����������ȃP�[�X (�ɑ����e�X�g) �ł͉����Ԃ��Ȃ�
     if (!canvasStore?.canvas) return;
     const { width, height } = canvasStore.canvas;
 
@@ -389,7 +388,7 @@ class SelectionAreaManager {
     const selectionWidth = bbox.right - bbox.left + 1;
     const selectionHeight = bbox.bottom - bbox.top + 1;
     const trimmedMask = trim_mask_with_box(baseMask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
-    const patch = anvil.sliceWithMask(trimmedMask, selectionWidth, selectionHeight, bbox.left, bbox.top);
+    const patch = toUint8ClampedArray(anvil.getBufferHandle().sliceWithMask(trimmedMask, selectionWidth, selectionHeight, bbox.left, bbox.top));
 
     return {
       buffer: patch,

@@ -168,7 +168,7 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   };
 
   anvil.addPartialDiff(selectionBoundBox, anvil.getPartialBuffer(selectionBoundBox));
-  anvil.getBufferHandle().fillMaskArea(selection.getMask(), [0, 0, 0, 0]);
+  anvil.getBufferHandle().fillMaskArea(selection.getMask(), 0, 0, 0, 0);
 
   updateWebGLCanvas(false, 'delete selected area');
   updateLayerPreview(lid);
@@ -256,7 +256,7 @@ export function getCurrentSelectionBuffer():
   if (!bbox) return;
 
   const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
-  const selectionBuffer = activeAnvil.sliceWithMask(trimmedMask, bbox.width, bbox.height, bbox.x, bbox.y);
+  const selectionBuffer = activeAnvil.getBufferHandle().sliceWithMask(trimmedMask, bbox.width, bbox.height, bbox.x, bbox.y);
 
   return {
     buffer: selectionBuffer,

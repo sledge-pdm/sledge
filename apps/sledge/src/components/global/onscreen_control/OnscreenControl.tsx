@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
 import { Icon } from '@sledge/ui';
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { logSystemInfo } from '~/features/log/service';
 import { setAppearanceStore } from '~/stores/EditorStores';
 import { OnscreenControlInteract } from './OnscreenControlInteract';
@@ -31,9 +31,9 @@ const titlebar = css`
   position: relative;
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 8px;
-  padding: 6px;
-  justify-content: end;
+  padding: 4px;
   border-bottom: 1px solid var(--color-border);
   touch-action: none;
   user-select: none;
@@ -47,14 +47,22 @@ const titlebarBackground = css`
   touch-action: none;
   user-select: none;
 `;
+const titlebarSpacer = css`
+  flex-grow: 1;
+`;
+const controlZoomText = css`
+  color: var(--color-muted);
+  pointer-events: all;
+  cursor: pointer;
+  z-index: var(--zindex-floating-controller);
+  margin-left: 2px;
+`;
 
 const controlContainer = css`
   display: flex;
   flex-direction: row;
   gap: 12px;
-  padding: 12px;
-
-  zoom: 1.5;
+  padding: 8px;
 `;
 const iconContainer = css`
   cursor: pointer;
@@ -65,18 +73,21 @@ const panContainer = css`
   position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-on-background);
-  border-radius: 50%;
   width: 48px;
   height: 48px;
 `;
+const panFrame = css`
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+`;
 const panStick = css`
   position: absolute;
-  background-color: var(--color-on-background);
   width: 16px;
   height: 16px;
+  image-rendering: pixelated;
   cursor: pointer;
-  border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: opacity 0.2s ease;
 `;
@@ -89,16 +100,14 @@ const zoomContainer = css`
   align-items: center;
 `;
 const zoomBackground = css`
-  background-color: var(--color-on-background);
-  width: 1px;
-  height: 100%;
+  height: 48px;
+  image-rendering: pixelated;
   touch-action: none;
 `;
 const zoomHandle = css`
   position: absolute;
-  background-color: var(--color-on-background);
-  width: 20px;
-  height: 6px;
+  width: 16px;
+  image-rendering: pixelated;
   transform: translateY(-50%);
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -114,6 +123,9 @@ const OnscreenControl: Component = () => {
   const [panStickPosition, setPanStickPosition] = createSignal<Vec2>({ x: 0.5, y: 0.5 });
   // Zoom fader state (0.5 is center)
   const [zoomFaderPosition, setZoomFaderPosition] = createSignal(0.5);
+
+  const zoomToggles: number[] = [1, 1.5, 2];
+  const [controlZoom, setControlZoom] = createSignal<number>(zoomToggles[0]);
 
   // Controller instance
   let panZoomController: OnscreenControlInteract;
@@ -285,6 +297,24 @@ const OnscreenControl: Component = () => {
     >
       <div class={rootBackground} />
       <div class={titlebar}>
+        <Show when={!positionLocked()}>
+          <a
+            class={controlZoomText}
+            onClick={() => {
+              const idx = zoomToggles.indexOf(controlZoom());
+              if (idx >= 0) {
+                const next = idx >= zoomToggles.length - 1 ? 0 : idx + 1;
+                setControlZoom(zoomToggles[next]);
+              } else {
+                setControlZoom(zoomToggles[0]);
+              }
+            }}
+          >
+            x{controlZoom()}
+          </a>
+        </Show>
+        <div class={titlebarSpacer} />
+
         <div
           class={iconContainer}
           onClick={() => {
@@ -314,28 +344,40 @@ const OnscreenControl: Component = () => {
           onPointerDown={handleWindowPointerDown}
         />
       </div>
-      <div class={controlContainer}>
+      <div
+        class={controlContainer}
+        style={{
+          zoom: controlZoom(),
+        }}
+      >
         {/* パンを操作するスティック */}
         <div class={panContainer} title='Pan Control - Drag to pan canvas'>
-          <div
+          <img src={'/icons/onscreen_control/stick_frame_24.png'} width={24} height={24} class={panFrame} onPointerDown={handlePanPointerDown} />
+          <img
+            src={'/icons/onscreen_control/stick_handle_8.png'}
+            width={8}
+            height={8}
             class={panStick}
             style={{
               left: `${panStickPosition().x * 100}%`,
               top: `${panStickPosition().y * 100}%`,
             }}
             onPointerDown={handlePanPointerDown}
-          ></div>
+          ></img>
         </div>
         {/* ズームを操作するフェーダー */}
         <div class={zoomContainer} title='Zoom Control - Up: Zoom in, Down: Zoom out'>
-          <div class={zoomBackground}></div>
-          <div
+          <img src={'/icons/onscreen_control/bar_frame_24.png'} class={zoomBackground} width={24} height={24}></img>
+          <img
+            src={'/icons/onscreen_control/bar_handle_8.png'}
+            width={8}
+            height={8}
             class={zoomHandle}
             style={{
               top: `${zoomFaderPosition() * 100}%`,
             }}
             onPointerDown={handleZoomPointerDown}
-          ></div>
+          ></img>
         </div>
       </div>
     </div>

@@ -452,7 +452,7 @@ export function clearLayer(layerId: string) {
 
   anvil.addCurrentWholeDiff();
 
-  anvil.getBufferHandle().fill([0, 0, 0, 0]);
+  anvil.getBufferHandle().fillAllCodes(0);
 
   const patch = anvil.flushDiffs();
   if (patch)

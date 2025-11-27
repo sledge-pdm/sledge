@@ -25,17 +25,8 @@ export class LayerThumbnailGenerator {
       const bufferHandle = anvil.getBufferHandle();
       const target = this.ensureThumbnailBuffer(width, height);
       this.clearThumbnailBuffer(target);
-      // Currently ignore floating buffer due to performance cost
-      // const isFloating = layerId === layerListStore.activeLayerId && floatingMoveManager.isMoving();
-      // if (isFloating) {
-      //   const floatingSource = floatingMoveManager.getCompositePreview() ?? floatingMoveManager.getPreviewBuffer();
-      //   if (floatingSource) {
-      //     target.transferFromRaw(floatingSource, sourceWidth, sourceHeight, { scaleX, scaleY, antialiasMode });
-      //     return new ImageData(new Uint8ClampedArray(target.data), width, height);
-      //   }
-      // }
-      target.transferFromBuffer(bufferHandle, { scaleX, scaleY, antialiasMode });
-      return new ImageData(new Uint8ClampedArray(target.data), width, height);
+      target.blitFromBuffer(bufferHandle, 0, 0, scaleX, scaleY, 0, antialiasMode, false, false);
+      return new ImageData(new Uint8ClampedArray(target.data()), width, height);
     } catch (err) {
       // Suppress thumbnail generation errors; return a transparent fallback ImageData
       // (avoid escalating as a critical error for thumbnail generation)
@@ -57,6 +48,6 @@ export class LayerThumbnailGenerator {
   }
 
   private clearThumbnailBuffer(buffer: RgbaBuffer): void {
-    buffer.data.fill(0);
+    buffer.fillAllCodes(0);
   }
 }

@@ -8,7 +8,7 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "testing.followRunningTest": true,
 
-  "rust-analyzer.linkedProjects": ["./packages/anvil/src/ops_wasm/Cargo.toml", "./packages/wasm/Cargo.toml", "./apps/sledge/src-tauri/Cargo.toml"],
+  "rust-analyzer.linkedProjects": ["./packages/anvil/src/wasm/Cargo.toml", "./packages/wasm/Cargo.toml", "./apps/sledge/src-tauri/Cargo.toml"],
   "rust-analyzer.check.command": "clippy",
   "chatgpt.openOnStartup": true
 }

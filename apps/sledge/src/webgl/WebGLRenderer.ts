@@ -337,7 +337,7 @@ export class WebGLRenderer {
       }
 
       // Dirty tiles optimization: calculate coverage ratio
-      const dirtyTiles = anvil.getDirtyTileIndices();
+      const dirtyTiles = anvil.getDirtyTiles();
       const tileSize = anvil.getTileSize();
 
       // Calculate dirty pixels coverage as percentage
@@ -380,6 +380,8 @@ export class WebGLRenderer {
         if (!batchCheckGLError(gl, `batch tile upload layer ${i} (${dirtyTiles.length} tiles)`)) {
           logDebugError(LOG_LABEL, `Batch tile upload failed: layer=${i}, tiles=${dirtyTiles.length}`);
         }
+
+        anvil.clearDirtyTiles();
       } else {
         logDebug(`📤 Full upload for layer ${i}`);
 
@@ -403,7 +405,6 @@ export class WebGLRenderer {
           logDebugError(`Full upload failed: layer=${i}, size=(${this.width},${this.height}), buffer.length=${buf.length}`);
         }
 
-        // フルアップロード後は dirty フラグをクリア (patch 経由でない更新ケース)
         anvil.clearDirtyTiles();
       }
     });

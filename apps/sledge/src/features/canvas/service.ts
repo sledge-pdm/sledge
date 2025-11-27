@@ -179,6 +179,7 @@ export const setZoom = (zoom: number): boolean => {
   if (zoom > 0 && zoom !== interactStore.zoom) {
     zoom = Math.min(getMaxZoom(), Math.max(getMinZoom(), zoom));
     setInteractStore('zoom', zoom);
+    coordinateTransform.clearCache();
     return true;
   }
   return false;
@@ -187,6 +188,7 @@ export const setZoom = (zoom: number): boolean => {
 export const setOffset = (offset: { x: number; y: number }) => {
   if (offset.x !== interactStore.offset.x || offset.y !== interactStore.offset.y) {
     setInteractStore('offset', offset);
+    coordinateTransform.clearCache();
   }
 };
 
@@ -203,7 +205,10 @@ export const normalizeRotation = (rotation: number) => {
 
 export const setRotation = (rotation: number) => {
   const r = normalizeRotation(rotation);
-  if (r !== interactStore.rotation) setInteractStore('rotation', r);
+  if (r !== interactStore.rotation) {
+    setInteractStore('rotation', r);
+    coordinateTransform.clearCache();
+  }
 };
 
 export function zoomTowardWindowPos(centerWindowPos: WindowPos, zoomNew: number) {
@@ -291,19 +296,23 @@ export function rotateInCenter(centerWindowPosition: WindowPos, rotation: number
 }
 export const toggleVerticalFlip = () => {
   setInteractStore('verticalFlipped', (v) => !v);
+  coordinateTransform.clearCache();
   eventBus.emit('selection:updateSelectionMenu', {});
 };
 export const setVerticalFlip = (flipped: boolean) => {
   setInteractStore('verticalFlipped', flipped);
+  coordinateTransform.clearCache();
   eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const toggleHorizontalFlip = () => {
   setInteractStore('horizontalFlipped', (v) => !v);
+  coordinateTransform.clearCache();
   eventBus.emit('selection:updateSelectionMenu', {});
 };
 export const setHorizontalFlip = (flipped: boolean) => {
   setInteractStore('horizontalFlipped', flipped);
+  coordinateTransform.clearCache();
   eventBus.emit('selection:updateSelectionMenu', {});
 };
 

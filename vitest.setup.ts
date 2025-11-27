@@ -11,7 +11,7 @@ vi.mock('~/utils/EventBus', () => ({
 }));
 
 vi.mock('~/utils/VersionUtils', () => ({
-  getCurrentVersion: vi.fn(async () => '0.1.4'),
+  getCurrentVersion: vi.fn(async () => '0.1.5'),
 }));
 
 // Solid stores: we can import the real stores as they use solid-js/store (no DOM),

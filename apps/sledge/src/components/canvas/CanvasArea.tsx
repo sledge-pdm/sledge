@@ -102,6 +102,19 @@ const centerMarker = css`
   background-color: red;
 `;
 
+const toMatrix3dString = (matrix: DOMMatrix): string => {
+  if (matrix.is2D) {
+    const { a, b, c, d, e, f } = matrix;
+    return `matrix3d(${a},${b},0,0,${c},${d},0,0,0,0,1,0,${e},${f},0,1)`;
+  }
+  const toArray = typeof matrix.toFloat64Array === 'function' ? Array.from(matrix.toFloat64Array()) : [];
+  if (toArray.length === 16) {
+    return `matrix3d(${toArray.join(',')})`;
+  }
+  // 最低限 matrix() を返すフォールバック
+  return matrix.toString();
+};
+
 /**
  * 新しいCanvasArea実装
  * - 単一のTransformMatrix使用
@@ -116,6 +129,7 @@ const CanvasArea: Component = () => {
 
   // 最後に適用されたtransform値（差分検出用）
   let lastTransformMatrix = '';
+  let lastTransformArray: number[] | undefined;
 
   const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
     targetFPS(() => {
@@ -130,21 +144,29 @@ const CanvasArea: Component = () => {
   const updateTransform = () => {
     try {
       const matrix = coordinateTransform.getTransformMatrix();
-      const matrixString = matrix.toString();
+      const matrixArray = typeof matrix.toFloat64Array === 'function' ? Array.from(matrix.toFloat64Array()) : undefined;
+      const isSameMatrix =
+        matrixArray &&
+        lastTransformArray &&
+        matrixArray.length === lastTransformArray.length &&
+        matrixArray.every((v, idx) => v === lastTransformArray![idx]);
+      if (isSameMatrix) return;
 
-      // 差分検出による最適化
+      const matrixString = toMatrix3dString(matrix);
+
+      // 差分検知による最適化
       if (lastTransformMatrix !== matrixString) {
-        // matrix3dを使用してより効率的な変換を実現
         canvasStack.style.transform = matrixString;
         lastTransformMatrix = matrixString;
+        lastTransformArray = matrixArray;
       }
     } catch (error) {
       logSystemWarn('Transform update failed.', { label: 'CanvasArea', details: [error] });
-      // フォールバックとして従来の方式を使用
+      // ??????????????????
       const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
       const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
       const currentZoom = interactStore.zoom;
-      canvasStack.style.transform = `translate(${currentOffsetX}px, ${currentOffsetY}px) scale(${currentZoom})`;
+      canvasStack.style.transform = `translate3d(${currentOffsetX}px, ${currentOffsetY}px, 0px) scale3d(${currentZoom}, ${currentZoom}, 1)`;
     }
   };
 

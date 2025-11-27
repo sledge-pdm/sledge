@@ -25,7 +25,6 @@ import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 
 import { color } from '@sledge/theme';
-import { createTimer } from '@solid-primitives/timer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import '~/styles/selection_animations.css';

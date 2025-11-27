@@ -25,7 +25,6 @@ import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 
 import { color } from '@sledge/theme';
-import { createTimer } from '@solid-primitives/timer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import '~/styles/selection_animations.css';
@@ -202,22 +201,21 @@ const CanvasOverlaySVG: Component = () => {
 
   const [dirtyTiles, setDirtyTiles] = createSignal<TileIndex[]>();
   const [tileSize, setTileSize] = createSignal(32);
-  onMount(() => {
-    createTimer(
-      () => {
-        try {
-          const activeAnvil = getAnvil(layerListStore.activeLayerId);
-          const tileSize = activeAnvil.getTileSize();
-          setTileSize(tileSize);
-          // JS TilesController
-          setDirtyTiles(activeAnvil.getDirtyTiles());
-        } catch (e) {
-          // ignore when anvil not ready
-        }
-      },
-      50,
-      setInterval
-    );
+  createEffect(() => {
+    if (!globalConfig.debug.showDirtyTiles) return;
+    const timer = setInterval(() => {
+      try {
+        const activeAnvil = getAnvil(layerListStore.activeLayerId);
+        const tileSize = activeAnvil.getTileSize();
+        setTileSize(tileSize);
+        // JS TilesController
+        setDirtyTiles(activeAnvil.getDirtyTiles());
+      } catch (e) {
+        // ignore when anvil not ready
+      }
+    }, 50);
+    // Cleanup when showDirtyTiles becomes false or component unmounts
+    return () => clearInterval(timer);
   });
 
   return (

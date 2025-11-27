@@ -32,6 +32,7 @@ export type GlobalConfig = {
   };
   debug: {
     showPerformanceMonitor: boolean;
+    showDirtyTiles: boolean;
   };
   keyConfig: KeyConfigStore;
 };
@@ -63,6 +64,7 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
   },
   debug: {
     showPerformanceMonitor: false,
+    showDirtyTiles: false,
   },
   keyConfig: makeDefaultKeyConfigStore(),
 });

@@ -9,4 +9,11 @@ export const debugMetas: FieldMeta[] = [
     component: 'ToggleSwitch',
     tips: `show performance monitor.`,
   },
+  {
+    section: ConfigSections.Debug,
+    path: 'debug/showDirtyTiles',
+    label: 'show dirty tiles',
+    component: 'ToggleSwitch',
+    tips: `show dirty (changed, but not rendered) tiles.\nthese will briefly flash at higher canvas refresh rates`,
+  },
 ];

@@ -17,27 +17,21 @@ const layerConfigRow = css`
 const LayerListPropsRow: Component = () => {
   let opacityBeforeHistorySet: number | null = null;
   let opacityTargetLayerId: string | null = null;
+  let pendingAction: LayerPropsHistoryAction | null = null;
 
   const setHistory = () => {
-    if (opacityTargetLayerId === null || opacityBeforeHistorySet === null) return;
+    if (opacityTargetLayerId === null || opacityBeforeHistorySet === null || !pendingAction) return;
     const layer = findLayerById(opacityTargetLayerId);
     if (layer) {
-      const act = new LayerPropsHistoryAction({
-        layerId: opacityTargetLayerId,
-        oldLayerProps: { ...layer, opacity: opacityBeforeHistorySet },
-        newLayerProps: layer,
-        context: {
-          from: 'LayerList.opacitySlider(debounced)',
-          propName: 'opacity',
-          before: String(opacityBeforeHistorySet),
-          after: String(layer.opacity),
-        },
-      });
-      projectHistoryController.addAction(act);
+      pendingAction.registerAfter(layer);
+      if (pendingAction.hasDiff()) {
+        projectHistoryController.addAction(pendingAction);
+      }
     }
 
     opacityBeforeHistorySet = null;
     opacityTargetLayerId = null;
+    pendingAction = null;
   };
 
   const setHistoryDebounced = debounce(setHistory, 200);
@@ -73,6 +67,15 @@ const LayerListPropsRow: Component = () => {
             const layer = activeLayer();
             opacityBeforeHistorySet = layer.opacity;
             opacityTargetLayerId = layer.id;
+            pendingAction = new LayerPropsHistoryAction({
+              layerId: layer.id,
+              context: {
+                from: 'LayerList.opacitySlider(debounced)',
+                propName: 'opacity',
+                before: String(layer.opacity),
+              },
+            });
+            pendingAction.registerBefore(layer);
             return true;
           }}
           onChange={(newValue) => {
@@ -80,6 +83,8 @@ const LayerListPropsRow: Component = () => {
               setLayerProp(opacityTargetLayerId, 'opacity', newValue, {
                 noDiff: true, // Don't record per-change: commit a single history entry after debounce
               });
+              // 更新後の値を記録
+              pendingAction?.registerAfter();
               setHistoryDebounced();
             }
           }}

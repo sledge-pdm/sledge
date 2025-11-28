@@ -1,10 +1,12 @@
 import { Anvil } from '@sledge/anvil';
+import { readFileSync } from 'fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool';
 import { registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { HistoryActionTester } from '../../../support/HistoryActionTester';
 
 vi.mock('~/features/selection/FloatingMoveManager', () => ({
   floatingMoveManager: {
@@ -66,49 +68,7 @@ describe('ConvertSelectionHistoryAction', () => {
   });
 
   it('converts selection to image without delete (copy)', () => {
-    // Create dummy WebP buffer for testing
-    const dummyWebpBuffer = new Uint8Array([
-      0x52,
-      0x49,
-      0x46,
-      0x46, // RIFF
-      0x20,
-      0x00,
-      0x00,
-      0x00, // file size
-      0x57,
-      0x45,
-      0x42,
-      0x50, // WEBP
-      0x56,
-      0x50,
-      0x38,
-      0x20, // VP8
-      0x14,
-      0x00,
-      0x00,
-      0x00, // chunk size
-      0x30,
-      0x01,
-      0x00,
-      0x9d,
-      0x01,
-      0x2a,
-      0x0a,
-      0x00,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-    ]);
+    const dummyWebpBuffer = readFileSync(new URL('./images/convertSelection_copy.webp', import.meta.url));
 
     const oldEntries: ImagePoolEntry[] = [];
     const newImageEntry: ImagePoolEntry = {
@@ -125,72 +85,39 @@ describe('ConvertSelectionHistoryAction', () => {
     // Set up the new state (after conversion)
     setImagePoolStore('entries', newEntries);
 
-    const action = new ConvertSelectionHistoryAction({
-      layerId,
-      oldEntries,
-      newEntries,
-      // No patch for copy operation (no deletion)
+    const tester = new HistoryActionTester(
+      () =>
+        new ConvertSelectionHistoryAction({
+          layerId,
+          oldEntries,
+          newEntries,
+          // No patch for copy operation (no deletion)
+        })
+    );
+
+    tester.run({
+      apply: () => {
+        // conversion後の状態を直接セット
+        setImagePoolStore('entries', newEntries);
+      },
+      assertAfterApply: () => {
+        expect(imagePoolStore.entries).toHaveLength(1);
+        expect(imagePoolStore.entries[0].id).toBe('converted-image-1');
+      },
+      assertAfterUndo: () => {
+        expect(imagePoolStore.entries).toHaveLength(0);
+      },
+      assertAfterRedo: () => {
+        expect(imagePoolStore.entries).toHaveLength(1);
+        expect(imagePoolStore.entries[0].id).toBe('converted-image-1');
+        expect(imagePoolStore.entries[0].transform.x).toBe(5);
+        expect(imagePoolStore.entries[0].transform.y).toBe(5);
+      },
     });
-
-    expect(imagePoolStore.entries).toHaveLength(1);
-    expect(imagePoolStore.entries[0].id).toBe('converted-image-1');
-
-    // Test undo - should remove the converted image
-    action.undo();
-    expect(imagePoolStore.entries).toHaveLength(0);
-
-    // Test redo - should restore the converted image
-    action.redo();
-    expect(imagePoolStore.entries).toHaveLength(1);
-    expect(imagePoolStore.entries[0].id).toBe('converted-image-1');
-    expect(imagePoolStore.entries[0].transform.x).toBe(5);
-    expect(imagePoolStore.entries[0].transform.y).toBe(5);
   });
 
   it('converts selection to image with delete (cut) - tests image pool behavior', () => {
-    // Create dummy WebP buffer for testing
-    const dummyWebpBuffer = new Uint8Array([
-      0x52,
-      0x49,
-      0x46,
-      0x46, // RIFF
-      0x20,
-      0x00,
-      0x00,
-      0x00, // file size
-      0x57,
-      0x45,
-      0x42,
-      0x50, // WEBP
-      0x56,
-      0x50,
-      0x38,
-      0x20, // VP8
-      0x14,
-      0x00,
-      0x00,
-      0x00, // chunk size
-      0x30,
-      0x01,
-      0x00,
-      0x9d,
-      0x01,
-      0x2a,
-      0x0a,
-      0x00,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-    ]);
+    const dummyWebpBuffer = readFileSync(new URL('./images/convertSelection_cut.webp', import.meta.url));
 
     const oldEntries: ImagePoolEntry[] = [];
     const newImageEntry: ImagePoolEntry = {
@@ -214,27 +141,31 @@ describe('ConvertSelectionHistoryAction', () => {
     // Set up the image pool state (after conversion)
     setImagePoolStore('entries', newEntries);
 
-    const action = new ConvertSelectionHistoryAction({
-      layerId,
-      oldEntries,
-      newEntries,
-      patch: mockPatch, // Include patch for cut operation (deletion)
+    const tester = new HistoryActionTester(
+      () =>
+        new ConvertSelectionHistoryAction({
+          layerId,
+          oldEntries,
+          newEntries,
+          patch: mockPatch, // Include patch for cut operation (deletion)
+        })
+    );
+
+    tester.run({
+      apply: () => {
+        setImagePoolStore('entries', newEntries);
+      },
+      assertAfterApply: () => expect(imagePoolStore.entries).toHaveLength(1),
+      assertAfterUndo: () => expect(imagePoolStore.entries).toHaveLength(0),
+      assertAfterRedo: () => {
+        expect(imagePoolStore.entries).toHaveLength(1);
+        expect(imagePoolStore.entries[0].id).toBe('converted-image-cut');
+      },
     });
-
-    expect(imagePoolStore.entries).toHaveLength(1);
-
-    // Test undo - should remove image (patch restoration is handled by AnvilHistoryAction separately)
-    action.undo();
-    expect(imagePoolStore.entries).toHaveLength(0);
-
-    // Test redo - should add image back
-    action.redo();
-    expect(imagePoolStore.entries).toHaveLength(1);
-    expect(imagePoolStore.entries[0].id).toBe('converted-image-cut');
   });
 
   it('serializes and deserializes correctly', () => {
-    const dummyWebpBuffer = new Uint8Array([0x52, 0x49, 0x46, 0x46]);
+    const dummyWebpBuffer = readFileSync(new URL('./images/convertSelection_serialization.webp', import.meta.url));
 
     const oldEntries: ImagePoolEntry[] = [];
     const newImageEntry: ImagePoolEntry = {
@@ -248,15 +179,24 @@ describe('ConvertSelectionHistoryAction', () => {
     };
     const newEntries: ImagePoolEntry[] = [newImageEntry];
 
-    const action = new ConvertSelectionHistoryAction({
-      layerId,
-      oldEntries,
-      newEntries,
-      context: { tool: 'rect_selection' },
-      label: 'Convert Selection to Image',
-    });
+    const tester = new HistoryActionTester(
+      () =>
+        new ConvertSelectionHistoryAction({
+          layerId,
+          oldEntries,
+          newEntries,
+          context: { tool: 'rect_selection' },
+          label: 'Convert Selection to Image',
+        })
+    );
 
-    const serialized = action.serialize();
+    const serialized = tester
+      .run({
+        apply: () => {
+          setImagePoolStore('entries', newEntries);
+        },
+      })
+      .serialize();
 
     expect(serialized.type).toBe('convert_selection');
     expect((serialized.props as any).layerId).toBe(layerId);
@@ -271,7 +211,7 @@ describe('ConvertSelectionHistoryAction', () => {
     const existingEntry: ImagePoolEntry = {
       id: 'existing-image',
       originalPath: 'test.png',
-      webpBuffer: new Uint8Array([0x00, 0x01, 0x02]),
+      webpBuffer: readFileSync(new URL('./images/convertSelection_existing.webp', import.meta.url)),
       base: { width: 16, height: 16 },
       transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
@@ -281,7 +221,7 @@ describe('ConvertSelectionHistoryAction', () => {
     const newConvertedEntry: ImagePoolEntry = {
       id: 'converted-from-selection',
       originalPath: undefined,
-      webpBuffer: new Uint8Array([0x52, 0x49, 0x46, 0x46]),
+      webpBuffer: readFileSync(new URL('./images/convertSelection_copy.webp', import.meta.url)),
       base: { width: 4, height: 4 },
       transform: { x: 8, y: 8, scaleX: 1, scaleY: 1, rotation: 0, flipX: false, flipY: false },
       opacity: 1,
@@ -294,30 +234,36 @@ describe('ConvertSelectionHistoryAction', () => {
     // Set initial state
     setImagePoolStore('entries', oldEntries);
 
-    const action = new ConvertSelectionHistoryAction({
-      layerId,
-      oldEntries,
-      newEntries,
+    const tester = new HistoryActionTester(
+      () =>
+        new ConvertSelectionHistoryAction({
+          layerId,
+          oldEntries,
+          newEntries,
+        })
+    );
+
+    tester.run({
+      apply: () => {
+        setImagePoolStore('entries', newEntries);
+      },
+      assertAfterApply: () => {
+        expect(imagePoolStore.entries).toHaveLength(2);
+        expect(imagePoolStore.entries.find((e) => e.id === 'existing-image')).toBeDefined();
+        expect(imagePoolStore.entries.find((e) => e.id === 'converted-from-selection')).toBeDefined();
+      },
+      assertAfterUndo: () => {
+        expect(imagePoolStore.entries).toHaveLength(1);
+        expect(imagePoolStore.entries[0].id).toBe('existing-image');
+      },
+      assertAfterRedo: () => {
+        expect(imagePoolStore.entries).toHaveLength(2);
+      },
     });
-
-    // Apply conversion (add new entry)
-    action.redo();
-    expect(imagePoolStore.entries).toHaveLength(2);
-    expect(imagePoolStore.entries.find((e) => e.id === 'existing-image')).toBeDefined();
-    expect(imagePoolStore.entries.find((e) => e.id === 'converted-from-selection')).toBeDefined();
-
-    // Undo conversion (remove new entry)
-    action.undo();
-    expect(imagePoolStore.entries).toHaveLength(1);
-    expect(imagePoolStore.entries[0].id).toBe('existing-image');
-
-    // Redo conversion (add new entry back)
-    action.redo();
-    expect(imagePoolStore.entries).toHaveLength(2);
   });
 
   it('works with project history controller', () => {
-    const dummyWebpBuffer = new Uint8Array([0x52, 0x49, 0x46, 0x46]);
+    const dummyWebpBuffer = readFileSync(new URL('./images/convertSelection_historyController.webp', import.meta.url));
 
     const oldEntries: ImagePoolEntry[] = [];
     const newImageEntry: ImagePoolEntry = {
@@ -331,27 +277,32 @@ describe('ConvertSelectionHistoryAction', () => {
     };
     const newEntries: ImagePoolEntry[] = [newImageEntry];
 
-    const action = new ConvertSelectionHistoryAction({
-      layerId,
-      oldEntries,
-      newEntries,
+    const tester = new HistoryActionTester(
+      () =>
+        new ConvertSelectionHistoryAction({
+          layerId,
+          oldEntries,
+          newEntries,
+        })
+    );
+
+    tester.run({
+      apply: (action) => {
+        setImagePoolStore('entries', newEntries);
+        projectHistoryController.addAction(action);
+        expect(projectHistoryController.canUndo()).toBe(true);
+      },
+      undo: () => projectHistoryController.undo(),
+      redo: () => projectHistoryController.redo(),
+      assertAfterApply: () => expect(imagePoolStore.entries).toHaveLength(1),
+      assertAfterUndo: () => {
+        expect(imagePoolStore.entries).toHaveLength(0);
+        expect(projectHistoryController.canRedo()).toBe(true);
+      },
+      assertAfterRedo: () => {
+        expect(imagePoolStore.entries).toHaveLength(1);
+        expect(imagePoolStore.entries[0].id).toBe('history-controller-test');
+      },
     });
-
-    // Set the state after conversion
-    setImagePoolStore('entries', newEntries);
-
-    projectHistoryController.addAction(action);
-    expect(projectHistoryController.canUndo()).toBe(true);
-    expect(imagePoolStore.entries).toHaveLength(1);
-
-    // Test undo through controller
-    projectHistoryController.undo();
-    expect(imagePoolStore.entries).toHaveLength(0);
-    expect(projectHistoryController.canRedo()).toBe(true);
-
-    // Test redo through controller
-    projectHistoryController.redo();
-    expect(imagePoolStore.entries).toHaveLength(1);
-    expect(imagePoolStore.entries[0].id).toBe('history-controller-test');
   });
 });

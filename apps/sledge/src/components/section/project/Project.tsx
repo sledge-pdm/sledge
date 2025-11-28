@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component } from 'solid-js';
-import ProjectLocation from '~/components/section/project/item/ProjectLocation';
+import ProjectInfo from '~/components/section/project/item/ProjectInfo';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '../SectionStyles';
 
@@ -13,7 +13,7 @@ const Project: Component = () => {
   return (
     <SectionItem title='project.'>
       <div class={`${sectionContent} ${projectContentStyle}`}>
-        <ProjectLocation />
+        <ProjectInfo />
       </div>
     </SectionItem>
   );

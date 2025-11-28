@@ -104,7 +104,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     });
   });
 
-  it('randomized sequence → undo-all → redo-all is consistent and idempotent', () => {
+  it('randomized sequence → undo-all → redo-all is consistent and idempotent', { repeats: 5 }, () => {
     const rng = makeRng();
     const LOG_RND = process.env.VITEST_LOG_RND === '1';
     const hc = projectHistoryController;
@@ -143,22 +143,23 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
     };
 
     // Build a short random sequence of actions
-    const steps: Array<() => void> = [];
     const stepDescs: string[] = [];
     const N = 40; // still short/light, but a bit richer coverage
     for (let i = 0; i < N; i++) {
       const pick = ACTION_TYPES[rng.int(ACTION_TYPES.length)];
+      let action: (() => void) | undefined;
+      let desc: string | undefined;
       switch (pick) {
         case 'color':
           // Color toggle among a tiny palette
           const targets: RGBA[] = [BLACK, RED, GREEN, BLUE] as const;
           const nextColor = targets[rng.int(targets.length)];
           const prevColor = currentColor();
-          steps.push(() => {
+          action = () => {
             registerColorChange(prevColor, nextColor);
             setCurrentColor(nextColor);
-          });
-          stepDescs.push(`Color ${prevColor} -> ${nextColor}`);
+          };
+          desc = `Color ${prevColor} -> ${nextColor}`;
           break;
         case 'canvas':
           // Small canvas tweak within reasonable bounds
@@ -169,10 +170,10 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             width: Math.max(1, cur.width + dw),
             height: Math.max(1, cur.height + dh),
           };
-          steps.push(() => {
+          action = () => {
             changeCanvasSizeWithNoOffset(nextSize);
-          });
-          stepDescs.push(`Canvas ${cur.width}x${cur.height} -> ${nextSize.width}x${nextSize.height}`);
+          };
+          desc = `Canvas ${cur.width}x${cur.height} -> ${nextSize.width}x${nextSize.height}`;
           break;
         case 'imagePoolToggle':
           // ImagePool add/remove on one of the fixed ids
@@ -180,14 +181,14 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
           const id = keys[rng.int(keys.length)];
           const exists = !!getEntry(id);
           const kind = exists ? 'remove' : 'add';
-          steps.push(() => {
+          action = () => {
             if (kind === 'add') {
               insertEntry(entries[id]);
             } else {
               removeEntry(id);
             }
-          });
-          stepDescs.push(`ImagePool ${kind} ${id}`);
+          };
+          desc = `ImagePool ${kind} ${id}`;
           break;
         case 'layerList':
           // Layer list: add/delete/reorder
@@ -196,7 +197,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             // add at random index
             const idx = rng.int(layerListStore.layers.length + 1);
             const id = `LR-${rng.int(100000)}`;
-            steps.push(() => {
+            action = () => {
               addLayerTo(idx, {
                 name: id,
                 type: LayerType.Dot,
@@ -205,15 +206,15 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
                 mode: BlendMode.normal,
                 dotMagnification: 1,
               });
-            });
-            stepDescs.push(`Layer add ${id} @${idx}`);
+            };
+            desc = `Layer add ${id} @${idx}`;
           } else if (actionKind === 1) {
             if (layerListStore.layers.length > 1) {
               const layer = layerListStore.layers[rng.int(layerListStore.layers.length)];
-              steps.push(() => {
+              action = () => {
                 removeLayer(layer.id);
-              });
-              stepDescs.push(`Layer delete ${layer.id}`);
+              };
+              desc = `Layer delete ${layer.id}`;
             }
           } else {
             if (layerListStore.layers.length > 1) {
@@ -221,10 +222,10 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
               const i1 = rng.int(layerListStore.layers.length);
               let i2 = rng.int(layerListStore.layers.length);
               if (i2 === i1) i2 = (i2 + 1) % layerListStore.layers.length;
-              steps.push(() => {
+              action = () => {
                 moveLayer(i1, i2);
-              });
-              stepDescs.push(`Layer reorder swap(${i1},${i2})`);
+              };
+              desc = `Layer reorder swap(${i1},${i2})`;
             }
           }
           break;
@@ -244,10 +245,10 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             ];
             const change = changes[rng.int(changes.length)];
 
-            steps.push(() => {
+            action = () => {
               setLayerProp(layer.id, change.prop, change.value);
-            });
-            stepDescs.push(`Layer props ${layer.id} ${change.prop}->${change.value}`);
+            };
+            desc = `Layer props ${layer.id} ${change.prop}->${change.value}`;
           }
           break;
         case 'layerBuffer':
@@ -258,7 +259,7 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
             if (!anvil) return;
             const w = anvil.getWidth();
             const count = rng.range(1, 4); // 1..3
-            steps.push(() => {
+            action = () => {
               for (let k = 0; k < count; k++) {
                 const x = k % Math.min(4, w);
                 const y = 0;
@@ -281,21 +282,22 @@ describe('Project-level history randomized (lightweight scaffold)', () => {
                   apply: (action) => hc.addAction(action),
                 });
               }
-            });
-            stepDescs.push(`Layer buffer pixels ${layer.id} n=${count}`);
+            };
+            desc = `Layer buffer pixels ${layer.id} n=${count}`;
           }
           break;
         default:
           console.warn(`Unknown action type picked: ${pick}`);
           break;
       }
+      if (action && desc) {
+        action();
+        stepDescs.push(desc);
+      }
     }
 
     const signature = JSON.stringify({ steps: stepDescs });
     ensureRandomStateDifferent(signature);
-
-    // Execute sequence
-    steps.forEach((fn) => fn());
 
     if (LOG_RND) {
       // Print executed step list for debugging/repro

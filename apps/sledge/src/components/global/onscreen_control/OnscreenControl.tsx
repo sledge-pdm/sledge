@@ -1,5 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge/core';
+import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { logSystemInfo } from '~/features/log/service';
@@ -352,32 +353,34 @@ const OnscreenControl: Component = () => {
       >
         {/* パンを操作するスティック */}
         <div class={panContainer} title='Pan Control - Drag to pan canvas'>
-          <img src={'/icons/onscreen_control/stick_frame_24.png'} width={24} height={24} class={panFrame} onPointerDown={handlePanPointerDown} />
-          <img
-            src={'/icons/onscreen_control/stick_handle_8.png'}
-            width={8}
-            height={8}
+          <div class={panFrame} onPointerDown={handlePanPointerDown}>
+            <Icon src={'/icons/onscreen_control/stick_frame_24.png'} base={24} scale={2} color={color.onBackground} />
+          </div>
+          <div
             class={panStick}
             style={{
               left: `${panStickPosition().x * 100}%`,
               top: `${panStickPosition().y * 100}%`,
             }}
             onPointerDown={handlePanPointerDown}
-          ></img>
+          >
+            <Icon src={'/icons/onscreen_control/stick_handle_8.png'} base={8} scale={2} color={color.onBackground} />
+          </div>
         </div>
         {/* ズームを操作するフェーダー */}
         <div class={zoomContainer} title='Zoom Control - Up: Zoom in, Down: Zoom out'>
-          <img src={'/icons/onscreen_control/bar_frame_24.png'} class={zoomBackground} width={24} height={24}></img>
-          <img
-            src={'/icons/onscreen_control/bar_handle_8.png'}
-            width={8}
-            height={8}
+          <div class={zoomBackground} onPointerDown={handlePanPointerDown}>
+            <Icon src={'/icons/onscreen_control/bar_frame_48.png'} base={48} scale={1} color={color.onBackground} />
+          </div>
+          <div
             class={zoomHandle}
             style={{
               top: `${zoomFaderPosition() * 100}%`,
             }}
-            onPointerDown={handleZoomPointerDown}
-          ></img>
+            onPointerDown={handlePanPointerDown}
+          >
+            <Icon src={'/icons/onscreen_control/bar_handle_8.png'} base={8} scale={2} color={color.onBackground} />
+          </div>
         </div>
       </div>
     </div>

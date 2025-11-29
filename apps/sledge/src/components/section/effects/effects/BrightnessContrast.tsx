@@ -33,7 +33,7 @@ const BrightnessContrast: Component<EffectSectionProps> = (props) => {
           wheelSpin={true}
           floatSignificantDigits={1}
           allowFloat={true}
-          onDoubleClick={() => setOptions('brightness', 0)}
+          dblClickResetValue={0}
           onChange={(value) => {
             setOptions('brightness', value);
           }}
@@ -50,7 +50,7 @@ const BrightnessContrast: Component<EffectSectionProps> = (props) => {
           wheelSpin={true}
           floatSignificantDigits={1}
           allowFloat={true}
-          onDoubleClick={() => setOptions('contrast', 0)}
+          dblClickResetValue={0}
           onChange={(value) => {
             setOptions('contrast', value);
           }}

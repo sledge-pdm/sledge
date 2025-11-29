@@ -50,7 +50,7 @@ const Dithering: Component<EffectSectionProps> = (props) => {
           max={32}
           wheelSpin={true}
           allowFloat={false}
-          onDoubleClick={() => setOptions('levels', 4)}
+          dblClickResetValue={4}
           onChange={(value) => {
             setOptions('levels', value);
           }}
@@ -67,7 +67,7 @@ const Dithering: Component<EffectSectionProps> = (props) => {
           wheelSpin={true}
           floatSignificantDigits={2}
           allowFloat={true}
-          onDoubleClick={() => setOptions('strength', 1.0)}
+          dblClickResetValue={1.0}
           onChange={(value) => {
             setOptions('strength', value);
           }}

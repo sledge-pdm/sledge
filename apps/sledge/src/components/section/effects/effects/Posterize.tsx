@@ -29,7 +29,7 @@ const Posterize: Component<EffectSectionProps> = (props) => {
           max={32}
           wheelSpin={true}
           allowFloat={false}
-          onDoubleClick={() => setOptions('levels', 8)}
+          dblClickResetValue={8}
           onChange={(value) => {
             setOptions('levels', value);
           }}

@@ -153,6 +153,7 @@ const SideSectionControl: Component<Props> = (props) => {
                 wheelSpin={true}
                 wheelStep={0.1}
                 allowFloat={true}
+                dblClickResetValue={interactStore.initialZoom}
                 onChange={(v) => {
                   // centeringCanvas();
                   zoomTowardAreaCenter(v);

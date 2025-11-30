@@ -1,5 +1,7 @@
 import { css } from '@acab/ecsstatic';
+import { Title } from '@solidjs/meta';
 import { Show } from 'solid-js';
+import NormalPortal from '~/components/NormalPortal';
 import { subHeading, SubHeadingWithCheck, SubHeadingWithX } from '~/components/SubHeadings';
 import DownloadSection from '~/components/top/DownloadSection';
 import Header, { SubTitleWithReleaseData } from '~/components/top/Header';
@@ -31,42 +33,47 @@ export function Home() {
   const releaseData = useReleaseData();
 
   return (
-    <main class={pageRoot}>
-      <Show when={!releaseData.isLoading()} fallback={<p>Loading...</p>}>
-        <Header subTitle={SubTitleWithReleaseData(releaseData)} />
+    <>
+      <Title>sledge.</Title>
+      <main class={pageRoot}>
+        <Show when={!releaseData.isLoading()} fallback={<p>Loading...</p>}>
+          <Header subTitle={SubTitleWithReleaseData(releaseData)} />
 
-        <div class={pageImageContainer}>
-          <PageImage />
-        </div>
-
-        <DownloadSection releaseData={releaseData} />
-
-        <div class={sectionContainer}>
-          <p class={mainText}>...is a Drawing Tool.</p>
-          <div>
-            <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Selection (rect, auto, lasso)</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Copy and paste</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Project Snapshots</SubHeadingWithCheck>
-            <SubHeadingWithCheck>Image Effects</SubHeadingWithCheck>
-            <SubHeadingWithCheck>
-              <span
-                class={subHeading}
-                style={{
-                  'letter-spacing': '2px',
-                  'font-style': 'italic',
-                }}
-              >
-                RAD
-              </span>{' '}
-              user interface
-            </SubHeadingWithCheck>
-            <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
-            <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
+          <div class={pageImageContainer}>
+            <PageImage />
           </div>
-        </div>
-      </Show>
-    </main>
+
+          <DownloadSection releaseData={releaseData} />
+
+          <div class={sectionContainer}>
+            <p class={mainText}>...is a Drawing Tool.</p>
+            <div>
+              <SubHeadingWithCheck>Pen, Eraser, Fill</SubHeadingWithCheck>
+              <SubHeadingWithCheck>Image Import/Export (png, jpg, svg)</SubHeadingWithCheck>
+              <SubHeadingWithCheck>Selection (rect, auto, lasso)</SubHeadingWithCheck>
+              <SubHeadingWithCheck>Copy and paste</SubHeadingWithCheck>
+              <SubHeadingWithCheck>Project Snapshots</SubHeadingWithCheck>
+              <SubHeadingWithCheck>Image Effects</SubHeadingWithCheck>
+              <SubHeadingWithCheck>
+                <span
+                  class={subHeading}
+                  style={{
+                    'letter-spacing': '2px',
+                    'font-style': 'italic',
+                  }}
+                >
+                  RAD
+                </span>{' '}
+                user interface
+              </SubHeadingWithCheck>
+              <SubHeadingWithX>Super Realistic brush engine</SubHeadingWithX>
+              <SubHeadingWithX>Freakly Complicated UI</SubHeadingWithX>
+            </div>
+          </div>
+        </Show>
+
+        <NormalPortal />
+      </main>
+    </>
   );
 }

@@ -36,9 +36,6 @@ const informationText = css`
 const loadingText = css`
   font-size: 8px;
   color: var(--color-muted);
-  @media (max-width: 599px) {
-    font-size: 8px;
-  }
 `;
 
 const downloadsContainer = css`

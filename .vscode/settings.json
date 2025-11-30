@@ -10,5 +10,9 @@
 
   "rust-analyzer.linkedProjects": ["./packages/anvil/src/wasm/Cargo.toml", "./packages/wasm/Cargo.toml", "./apps/sledge/src-tauri/Cargo.toml"],
   "rust-analyzer.check.command": "clippy",
-  "chatgpt.openOnStartup": true
+  "chatgpt.openOnStartup": true,
+
+  "path-autocomplete.pathMappings": {
+    "/": "${folder}/assets"
+  }
 }

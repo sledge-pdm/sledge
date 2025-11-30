@@ -96,9 +96,7 @@ const BottomBar: Component = () => {
               wheelSpin={true}
               allowFloat={true}
               onChange={(v) => rotateInAreaCenter(v)}
-              onDoubleClick={() => {
-                rotateInAreaCenter(0);
-              }}
+              dblClickResetValue={0}
               onPointerDownOnValidArea={(e) => {
                 if (e.ctrlKey || e.metaKey) {
                   e.preventDefault();

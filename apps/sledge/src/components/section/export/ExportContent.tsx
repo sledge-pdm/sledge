@@ -484,7 +484,7 @@ const ExportContent: Component = () => {
           <Checkbox
             checked={settings.showDirAfterSave}
             onChange={(checked) => setSettings('showDirAfterSave', checked)}
-            label='open dir after save'
+            label='open in explorer'
             labelMode='left'
           />
         </div>

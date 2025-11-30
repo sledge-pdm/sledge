@@ -1,7 +1,7 @@
 import type { RGBA } from '@sledge/anvil';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { GREEN, RED, TRANSPARENT } from './support/colors';
+import { GREEN, RED, TRANSPARENT } from '../../support/colors';
 
 function makeBuffer(w: number, h: number, color: RGBA = TRANSPARENT) {
   const buf = new Uint8ClampedArray(w * h * 4);

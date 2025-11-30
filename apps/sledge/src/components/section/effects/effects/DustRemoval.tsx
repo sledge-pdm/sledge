@@ -28,7 +28,7 @@ const DustRemoval: Component<EffectSectionProps> = (props) => {
           min={0}
           max={1000}
           wheelSpin={true}
-          onDoubleClick={() => setOptions('maxSize', 5)}
+          dblClickResetValue={5}
           allowFloat={false}
           onChange={(value) => {
             setOptions('maxSize', value);
@@ -42,7 +42,7 @@ const DustRemoval: Component<EffectSectionProps> = (props) => {
           min={0}
           max={255}
           wheelSpin={true}
-          onDoubleClick={() => setOptions('alphaThreshold', 0)}
+          dblClickResetValue={0}
           allowFloat={false}
           onChange={(value) => {
             setOptions('alphaThreshold', value);

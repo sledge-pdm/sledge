@@ -31,13 +31,7 @@ export function setLayerName(layerId: string, newName: string): boolean {
     logUserWarn('Layer name cannot be empty', { label: LOG_LABEL });
     return false;
   }
-
-  const layer = findLayerById(layerId);
-  if (!layer) return false;
-
-  const idx = getLayerIndex(layerId);
-  setLayerListStore('layers', idx, 'name', newName);
-  updateWebGLCanvas(false, `Layer(${layerId}) name updated`);
+  setLayerProp(layerId, 'name', newName);
   return true;
 }
 
@@ -52,6 +46,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   const layer = findLayerById(layerId);
   if (!layer) return;
   const beforeValue = layer[propName];
+  if (beforeValue === newValue) return;
   const before = { ...layer } as any;
   const idx = getLayerIndex(layerId);
   setLayerListStore('layers', idx, propName, newValue as any);
@@ -394,7 +389,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   // snapshot before removal
   const toRemove = layers[index];
-  const anvil = getAnvil(toRemove.id);
+  if (!toRemove) return;
   const snapshot = getPackedLayerSnapshot(toRemove.id);
   layers.splice(index, 1);
 

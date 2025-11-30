@@ -9,6 +9,7 @@ import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
+import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {
@@ -126,6 +127,8 @@ This will NOT backup your current state (unless you did manually backup.)`,
   await loadProjectJson(snapshot.snapshot);
 
   setSnapshotStore(savedSnapshotStore);
+  updateWebGLCanvas(false, 'snapshot loaded');
+  updateLayerPreviewAll();
 }
 
 export function escapeCurrentAutosave() {

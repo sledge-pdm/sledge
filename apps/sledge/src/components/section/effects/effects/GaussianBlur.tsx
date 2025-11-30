@@ -30,7 +30,7 @@ const GaussianBlur: Component<EffectSectionProps> = (props) => {
           min={0}
           max={1000}
           wheelSpin={true}
-          onDoubleClick={() => setOptions('radius', 500)}
+          dblClickResetValue={500}
           allowFloat={false}
           onChange={(value) => {
             setOptions('radius', value);

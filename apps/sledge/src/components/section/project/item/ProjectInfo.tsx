@@ -1,6 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { confirm } from '@tauri-apps/plugin-dialog';
-import { Component, Show } from 'solid-js';
+import { FileInfo, stat } from '@tauri-apps/plugin-fs';
+import { Component, createSignal, onMount, Show } from 'solid-js';
 import { adjustZoomToFit } from '~/features/canvas';
 import { loadProjectFromLocation } from '~/routes/editor/load';
 import { fileStore } from '~/stores/EditorStores';
@@ -43,7 +44,7 @@ const placeholderStyle = css`
 
 const reopenProjectLink = css`
   font-family: ZFB03B;
-  opacity: 0.75;
+  opacity: 0.5;
 `;
 
 const explorerLinkStyle = css`
@@ -59,7 +60,31 @@ const linksContainer = css`
   margin-top: 4px;
 `;
 
-const ProjectLocation: Component = () => {
+const ProjectInfo: Component = () => {
+  const [savedStat, setSavedStat] = createSignal<FileInfo>();
+
+  onMount(async () => {
+    const location = fileStore.savedLocation;
+    if (location.path && location.name) {
+      const path = normalizeJoin(location.path, location.name);
+      const fileStat = await stat(path);
+      setSavedStat(fileStat);
+    }
+  });
+
+  const toReadableByteStr = (bytes: number): string => {
+    const order = 1024;
+    if (bytes > order ** 3) {
+      return `${(bytes / order ** 3).toFixed(1)} GB`; // GB
+    } else if (bytes > order ** 2) {
+      return `${(bytes / order ** 2).toFixed(1)} MB`; // MB
+    } else if (bytes > order ** 1) {
+      return `${(bytes / order ** 1).toFixed(1)} KB`; // KB
+    } else {
+      return `${bytes.toFixed(1)} B`; // < 1KB
+    }
+  };
+
   return (
     <>
       <div class={locationHeaderStyle}>
@@ -77,6 +102,12 @@ const ProjectLocation: Component = () => {
             <p class={locationLabelStyle}>file</p>
             <Show when={fileStore.savedLocation.name} fallback={<p class={placeholderStyle}>[ unsaved project ]</p>}>
               <p class={locationValueStyle}>{fileStore.savedLocation.name || '<unknown>'}</p>
+            </Show>
+          </div>
+          <div class={locationRowStyle}>
+            <p class={locationLabelStyle}>size</p>
+            <Show when={savedStat()} fallback={<p class={placeholderStyle}></p>}>
+              <p class={locationValueStyle}>{toReadableByteStr(savedStat()!.size)}</p>
             </Show>
           </div>
         </div>
@@ -115,4 +146,4 @@ Unsaved changes will be discarded!`);
   );
 };
 
-export default ProjectLocation;
+export default ProjectInfo;

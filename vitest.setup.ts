@@ -14,6 +14,9 @@ vi.mock('~/utils/VersionUtils', () => ({
   getCurrentVersion: vi.fn(async () => '0.1.5'),
 }));
 
+// Domain-specific matchers (layer order, canvas size, history state)
+import './apps/sledge/test/setupMatchers';
+
 // Solid stores: we can import the real stores as they use solid-js/store (no DOM),
 // but to avoid side effects on global state between tests, we reset important flags per test if needed.
 

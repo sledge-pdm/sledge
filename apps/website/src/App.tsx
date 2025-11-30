@@ -5,13 +5,32 @@ import { MetaProvider } from '@solidjs/meta';
 import { Route, Router } from '@solidjs/router';
 import { inject } from '@vercel/analytics';
 import { createEffect, onMount, Suspense, type Component } from 'solid-js';
-import ThemeToggle from '~/components/ThemeToggle';
+import TopBar from '~/components/TopBar';
 import { Home } from '~/routes';
 import NotFound from '~/routes/not-found';
-import PlaygroundIndex from '~/routes/playgrounds';
-import PlaygroundWrapper from '~/routes/playgrounds/layout';
-import PlaygroundPointerTest from '~/routes/playgrounds/pointer-test';
+import PlaygroundIndex from '~/routes/playground';
+import PlaygroundWrapper from '~/routes/playground/layout';
+import PlaygroundPointerTest from '~/routes/playground/pointer-test';
+import GetStarted from '~/routes/wiki/introduction/get_started';
+import HowToInstall from '~/routes/wiki/introduction/how_to_install';
+import Clipboard from '~/routes/wiki/io/clipboard';
+import Export from '~/routes/wiki/io/export';
+import Import from '~/routes/wiki/io/import';
+import SupportedFiles from '~/routes/wiki/io/supported_files';
+import WikiWrapper from '~/routes/wiki/layout';
+import WikiNotFound from '~/routes/wiki/not-found';
+import OnscreenControl from '~/routes/wiki/others/onscreen_control';
+import Canvas from '~/routes/wiki/project/canvas';
+import Effects from '~/routes/wiki/project/effects';
+import ImagePool from '~/routes/wiki/project/image';
+import Layer from '~/routes/wiki/project/layer';
+import Eraser from '~/routes/wiki/tools/eraser';
+import Fill from '~/routes/wiki/tools/fill';
+import Move from '~/routes/wiki/tools/move';
+import Pen from '~/routes/wiki/tools/pen';
+import Selections from '~/routes/wiki/tools/selections';
 import { globalStore } from '~/store/GlobalStore';
+import { flexCol } from '~/styles';
 
 const rootContainer = css`
   display: flex;
@@ -20,26 +39,22 @@ const rootContainer = css`
   height: 100vh;
   z-index: 2;
   background-color: var(--color-surface);
-
-  @media (max-width: 599px) {
-    width: 100%;
-    border-right: none;
-    height: auto;
-  }
 `;
 
 const restContainer = css`
   display: flex;
   flex-direction: column;
   position: relative;
-  flex-grow: 1;
+  width: 100%;
   height: 100vh;
+  overflow: hidden;
   z-index: 2;
 `;
 
 const pageContainer = css`
   display: flex;
   flex-direction: column;
+  width: 600px;
   border-right: 1px solid var(--color-border-secondary);
   overflow-x: hidden;
   overflow-y: visible;
@@ -50,81 +65,6 @@ const pageContainer = css`
   }
   &::-webkit-scrollbar-thumb {
     background-color: #dddddd75;
-  }
-
-  @media (max-width: 599px) {
-    position: initial;
-    /* background-color: var(--color-background); */
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    width: 100%;
-    height: fit-content;
-  }
-`;
-
-const borderBg = css`
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  top: 0;
-  left: 0;
-  height: 100dvh;
-  width: 100dvw;
-  z-index: -1;
-  opacity: 0.2;
-  background: url(/icons/misc/tex_45border_16.png) left top;
-  background-repeat: repeat;
-  background-size: 16px 16px;
-`;
-
-const themeArea = css`
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: var(--spacing-xl);
-  right: var(--spacing-xl);
-  gap: var(--spacing-md);
-  align-items: end;
-  margin: 1rem;
-  z-index: 10;
-  @media (max-width: 599px) {
-    position: fixed;
-    top: unset;
-    bottom: 28px;
-    right: 16px;
-    align-items: start;
-    margin: 0;
-  }
-`;
-
-const subRoutesArea = css`
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: 60px;
-  left: 28px;
-  gap: 8px;
-  z-index: 10;
-  @media (max-width: 599px) {
-    position: fixed;
-    width: 100%;
-    bottom: 10px;
-    top: unset;
-    left: 8px;
-    align-items: start;
-    margin: 0;
-    z-index: 10 0;
-  }
-`;
-const subRoutesLink = css`
-  font-size: 24px;
-  font-family: ZFB31;
-  text-transform: uppercase;
-  opacity: 0.2;
-  text-rendering: geometricPrecision;
-  text-decoration: none;
-  @media (max-width: 599px) {
-    font-size: 12px;
   }
 `;
 
@@ -138,11 +78,6 @@ const rightBottomArea = css`
   margin-right: 1rem;
   align-items: end;
   z-index: 10;
-  @media (max-width: 599px) {
-    margin-right: 0;
-    right: 16px;
-    bottom: 8px;
-  }
 `;
 
 const App: Component = () => {
@@ -160,42 +95,29 @@ const App: Component = () => {
     <Router
       root={(props) => (
         <MetaProvider>
-          <title>Sledge</title>
-
           <Suspense>
-            <div
-              class={rootContainer}
-              style={{
-                'overflow-x': 'hidden',
-                'overflow-y': 'auto',
-              }}
-            >
-              <div class={pageContainer}>{props.children}</div>
+            <div class={flexCol}>
+              <TopBar />
+              <div
+                class={rootContainer}
+                style={{
+                  'overflow-x': 'hidden',
+                  'overflow-y': 'auto',
+                }}
+              >
+                <div class={pageContainer}>{props.children}</div>
 
-              <div id='portal-root' class={restContainer}>
-                <div class={borderBg} />
-                <div class={themeArea}>
-                  <ThemeToggle noBackground={false} />
-                </div>
-
-                <div class={subRoutesArea}>
-                  <a class={subRoutesLink} href={'/'}>
-                    home
-                  </a>
-                  <a class={subRoutesLink} href={'/playground'}>
-                    playground
-                  </a>
-                </div>
-
-                <div class={rightBottomArea}>
-                  <p
-                    style={{
-                      'font-family': 'ZFB03B',
-                      opacity: 0.15,
-                    }}
-                  >
-                    2025 innsbluck.
-                  </p>
+                <div id='portal-root' class={restContainer}>
+                  <div class={rightBottomArea}>
+                    <p
+                      style={{
+                        'font-family': 'ZFB03B',
+                        opacity: 0.15,
+                      }}
+                    >
+                      2025 innsbluck.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -207,6 +129,26 @@ const App: Component = () => {
       <Route path='/playground/*' component={PlaygroundWrapper}>
         <Route path='/' component={PlaygroundIndex} />
         <Route path='/pointer-test' component={PlaygroundPointerTest} />
+      </Route>
+      <Route path='/wiki/*' component={WikiWrapper}>
+        <Route path='/' component={GetStarted} />
+        <Route path='/introduction/get_started' component={GetStarted} />
+        <Route path='/introduction/how_to_install' component={HowToInstall} />
+        <Route path='/tools/pen' component={Pen} />
+        <Route path='/tools/eraser' component={Eraser} />
+        <Route path='/tools/fill' component={Fill} />
+        <Route path='/tools/selections' component={Selections} />
+        <Route path='/tools/move' component={Move} />
+        <Route path='/project/canvas' component={Canvas} />
+        <Route path='/project/layer' component={Layer} />
+        <Route path='/project/image' component={ImagePool} />
+        <Route path='/project/effects' component={Effects} />
+        <Route path='/io/supported_files' component={SupportedFiles} />
+        <Route path='/io/import' component={Import} />
+        <Route path='/io/export' component={Export} />
+        <Route path='/io/clipboard' component={Clipboard} />
+        <Route path='/others/onscreen_control' component={OnscreenControl} />
+        <Route path='*' component={WikiNotFound} />
       </Route>
       <Route path='*' component={NotFound} />
     </Router>

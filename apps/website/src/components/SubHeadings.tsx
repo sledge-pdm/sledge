@@ -10,9 +10,6 @@ export const subHeading = css`
   color: var(--color-on-background);
   vertical-align: middle;
   user-select: text;
-  @media (max-width: 599px) {
-    font-size: 8px;
-  }
 `;
 
 export const subHeadingContainer = css`

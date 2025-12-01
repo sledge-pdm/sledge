@@ -8,7 +8,7 @@ const SupportedFiles: Component = () => {
     <>
       <Title>sledge. - supported files</Title>
       <div class={wikiContentRoot}>
-        <WikiContentHeader iconSrc='/icons/wiki/wiki_supported_files.png'>Supported files / methods</WikiContentHeader>
+        <WikiContentHeader iconSrc='/icons/wiki/wiki_supported_files.png'>Supported files</WikiContentHeader>
         <div class={wikiMarkdown}>
           <p>This article is under preparation.</p>
           <p>Supported file formats and import/export methods will be added soon.</p>

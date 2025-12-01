@@ -8,7 +8,7 @@ const Selections: Component = () => {
     <>
       <Title>sledge. - selections</Title>
       <div class={wikiContentRoot}>
-        <WikiContentHeader iconSrc='/icons/wiki/wiki_selections.png'>Selection (Rect / Lasso / Auto)</WikiContentHeader>
+        <WikiContentHeader iconSrc='/icons/wiki/wiki_selections.png'>Selections</WikiContentHeader>
         <div class={wikiMarkdown}>
           <p>This article is under preparation.</p>
           <p>Details for Selection tools will be added soon.</p>

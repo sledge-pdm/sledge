@@ -14,10 +14,9 @@ export const flexCol = css`
 // Common page styles
 export const pageRoot = css`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   box-sizing: border-box;
   width: 100%;
   flex-grow: 1;
   height: auto;
-  padding: 4rem;
 `;

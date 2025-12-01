@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Icon } from '@sledge/ui';
 import { useLocation, useNavigate } from '@solidjs/router';
@@ -8,18 +9,23 @@ const container = css`
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-left: 4px;
   pointer-events: all;
-  padding: 8px;
+  padding: 6px 12px;
   min-height: 28px;
   gap: 12px;
+  cursor: pointer;
 
   &:hover {
-    background-color: #88888815;
+    background-color: #88888840;
   }
   &:hover > * {
     color: var(--color-active);
   }
+`;
+
+const containerSelected = css`
+  background-color: #88888840;
+  cursor: default;
 `;
 
 const itemLink = css`
@@ -49,13 +55,9 @@ const WikiSectionItem: Component<Props> = (props) => {
   });
   return (
     <div
-      class={container}
+      class={clsx(container, isCurrent() && containerSelected)}
       onClick={() => {
         navigate(props.href);
-      }}
-      style={{
-        'background-color': isCurrent() ? '#88888815' : undefined,
-        cursor: !isCurrent() ? 'pointer' : 'default',
       }}
     >
       <Show when={props.iconSrc}>

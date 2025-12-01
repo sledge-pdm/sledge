@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { type Component } from 'solid-js';
-import { Portal } from 'solid-js/web';
 import { wikiContentRoot } from '~/routes/wiki/styles';
 
 export const scrollContent = css`
@@ -26,12 +25,10 @@ export const heroHeading = css`
 
 export const WikiNotFound: Component = () => {
   return (
-    <Portal mount={document.querySelector('#portal-root') as Node}>
-      <div class={wikiContentRoot}>
-        <p class={heroHeading}>OOPS!</p>
-        <p>The page you are looking for does not exist.</p>
-      </div>
-    </Portal>
+    <div class={wikiContentRoot}>
+      <p class={heroHeading}>OOPS!</p>
+      <p>The page you are looking for does not exist.</p>
+    </div>
   );
 };
 

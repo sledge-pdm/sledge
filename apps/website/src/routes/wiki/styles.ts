@@ -3,18 +3,11 @@ import { css } from '@acab/ecsstatic';
 export const wikiContentRoot = css`
   display: flex;
   flex-direction: column;
-  padding: 4rem;
   gap: 24px;
   height: 100svh;
+  padding: 48px;
   background-color: var(--color-background);
   overflow-y: auto;
-`;
-
-export const wikiContentHeader = css`
-  font-size: 36px;
-  font-family: ZFB31;
-  text-transform: uppercase;
-  user-select: text;
 `;
 
 export const wikiMarkdown = css`

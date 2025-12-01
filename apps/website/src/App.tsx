@@ -9,7 +9,6 @@ import TopBar from '~/components/TopBar';
 import { Home } from '~/routes';
 import NotFound from '~/routes/not-found';
 import PlaygroundIndex from '~/routes/playground';
-import PlaygroundWrapper from '~/routes/playground/layout';
 import PlaygroundPointerTest from '~/routes/playground/pointer-test';
 import GetStarted from '~/routes/wiki/introduction/get_started';
 import HowToInstall from '~/routes/wiki/introduction/how_to_install';
@@ -37,7 +36,6 @@ const rootContainer = css`
   flex-direction: row;
   width: 100%;
   height: 100vh;
-  z-index: 2;
   background-color: var(--color-surface);
 `;
 
@@ -48,13 +46,12 @@ const restContainer = css`
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  z-index: 2;
 `;
 
 const pageContainer = css`
   display: flex;
   flex-direction: column;
-  width: 600px;
+  width: 100%;
   border-right: 1px solid var(--color-border-secondary);
   overflow-x: hidden;
   overflow-y: visible;
@@ -72,10 +69,9 @@ const rightBottomArea = css`
   display: flex;
   flex-direction: column;
   position: fixed;
-  bottom: var(--spacing-xl);
-  right: var(--spacing-xl);
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
   gap: var(--spacing-md);
-  margin-right: 1rem;
   align-items: end;
   z-index: 10;
 `;
@@ -107,17 +103,15 @@ const App: Component = () => {
               >
                 <div class={pageContainer}>{props.children}</div>
 
-                <div id='portal-root' class={restContainer}>
-                  <div class={rightBottomArea}>
-                    <p
-                      style={{
-                        'font-family': 'ZFB03B',
-                        opacity: 0.15,
-                      }}
-                    >
-                      2025 innsbluck.
-                    </p>
-                  </div>
+                <div class={rightBottomArea}>
+                  <p
+                    style={{
+                      'font-family': 'ZFB03B',
+                      opacity: 0.25,
+                    }}
+                  >
+                    2025 innsbluck.
+                  </p>
                 </div>
               </div>
             </div>
@@ -126,7 +120,7 @@ const App: Component = () => {
       )}
     >
       <Route path='/' component={Home} />
-      <Route path='/playground/*' component={PlaygroundWrapper}>
+      <Route path='/playground/*'>
         <Route path='/' component={PlaygroundIndex} />
         <Route path='/pointer-test' component={PlaygroundPointerTest} />
       </Route>

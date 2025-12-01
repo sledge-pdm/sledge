@@ -3,7 +3,6 @@ import { Title } from '@solidjs/meta';
 import { RouteSectionProps } from '@solidjs/router';
 import { Component, For, createSignal, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
 
 const header = css`
   font-size: 16px;
@@ -170,9 +169,7 @@ const PlaygroundPointerTest: Component<RouteSectionProps> = (props) => {
           }}
         </For>
 
-        <Portal mount={document.querySelector('#portal-root') as Node}>
-          <div ref={(ref) => (areaRef = ref)} id='area' class={pointerArea} />
-        </Portal>
+        <div ref={(ref) => (areaRef = ref)} id='area' class={pointerArea} />
       </div>
     </>
   );

@@ -12,7 +12,7 @@ const barRoot = css`
   width: 100%;
   height: 24px;
   border-bottom: 1px solid var(--color-border);
-  padding: 0 8px 0 4rem;
+  padding: 0 8px 0 48px;
 `;
 
 const routesMenuContainer = css`
@@ -39,6 +39,7 @@ const iconContainer = css`
   flex-direction: row;
   align-items: center;
   gap: 8px;
+  margin-left: 8px;
 `;
 
 interface RouteItemProps {
@@ -67,7 +68,7 @@ const TopBar: Component = () => {
         <RouteItem href={'/playground'}>playground</RouteItem>
       </div>
       <div class={spacer} />
-      <ThemeToggle noBackground />
+      <ThemeToggle />
       <div class={iconContainer}>
         <a href='https://x.com/sledge_app' target='_blank' title='@sledge_app'>
           <Icon src='/icons/x_16.png' base={16} />

@@ -11,14 +11,13 @@ const container = css`
 `;
 
 export const iconContainer = css`
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 `;
 
 export const header = css`
   font-size: 32px;
   font-family: ZFB09;
   user-select: text;
-  vertical-align: bottom;
 `;
 
 interface Props {

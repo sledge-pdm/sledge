@@ -10,7 +10,6 @@ const sectionLabel = css`
   font-family: ZFB20;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin-top: 16px;
   margin-bottom: 16px;
 `;
 

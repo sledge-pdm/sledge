@@ -18,5 +18,15 @@ export const pageRoot = css`
   box-sizing: border-box;
   width: 100%;
   flex-grow: 1;
-  height: auto;
+  height: 100%;
+`;
+
+// scrollbar style
+export const simpleScrollbar = css`
+  &::-webkit-scrollbar {
+    width: 2px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #88888875;
+  }
 `;

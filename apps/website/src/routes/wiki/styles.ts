@@ -4,10 +4,8 @@ export const wikiContentRoot = css`
   display: flex;
   flex-direction: column;
   gap: 24px;
-  height: 100svh;
   padding: 48px;
   background-color: var(--color-background);
-  overflow-y: auto;
 `;
 
 export const wikiMarkdown = css`

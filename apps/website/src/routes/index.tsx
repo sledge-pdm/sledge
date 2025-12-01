@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { Title } from '@solidjs/meta';
 import { Show } from 'solid-js';
 import BorderBackground from '~/components/BorderBackground';
@@ -6,7 +7,7 @@ import { subHeading, SubHeadingWithCheck, SubHeadingWithX } from '~/components/S
 import DownloadSection from '~/components/top/DownloadSection';
 import Header, { SubTitleWithReleaseData } from '~/components/top/Header';
 import PageImage from '~/components/top/PageImage';
-import { pageRoot } from '~/styles';
+import { pageRoot, simpleScrollbar } from '~/styles';
 import { useReleaseData } from '~/utils/useReleaseData';
 
 const mainText = css`
@@ -31,10 +32,11 @@ const sectionContainer = css`
 const content = css`
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 450px;
+  width: 500px;
+  box-sizing: content-box;
   border-right: 1px solid var(--color-border);
-  padding: 48px 56px;
+  padding: 48px 48px 80px 56px;
+  overflow-y: auto;
 `;
 const rest = css`
   display: flex;
@@ -42,6 +44,7 @@ const rest = css`
   height: 100%;
   width: 100%;
   flex-grow: 1;
+  overflow-y: auto;
 `;
 
 export function Home() {
@@ -51,7 +54,7 @@ export function Home() {
     <>
       <Title>sledge.</Title>
       <main class={pageRoot}>
-        <div class={content}>
+        <div class={clsx(content, simpleScrollbar)}>
           <Show when={!releaseData.isLoading()} fallback={<p>Loading...</p>}>
             <Header subTitle={SubTitleWithReleaseData(releaseData)} />
 

@@ -10,7 +10,7 @@ const sectionLabel = css`
   font-family: ZFB20;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 `;
 
 interface Props {

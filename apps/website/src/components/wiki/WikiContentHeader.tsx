@@ -11,7 +11,7 @@ const container = css`
 `;
 
 export const iconContainer = css`
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 `;
 
 export const header = css`

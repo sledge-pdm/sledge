@@ -10,13 +10,13 @@ const container = css`
   flex-direction: row;
   align-items: center;
   pointer-events: all;
-  padding: 6px 12px;
+  padding: 8px 12px;
   min-height: 28px;
   gap: 12px;
   cursor: pointer;
 
   &:hover {
-    background-color: #88888840;
+    background-color: #88888830;
   }
   &:hover > * {
     color: var(--color-active);
@@ -24,7 +24,7 @@ const container = css`
 `;
 
 const containerSelected = css`
-  background-color: #88888840;
+  background-color: #88888830;
   cursor: default;
 `;
 

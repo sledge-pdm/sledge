@@ -1,24 +1,11 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge/core';
 import { RouteSectionProps } from '@solidjs/router';
 import { Component } from 'solid-js';
 import WikiSection from '~/components/wiki/WikiSection';
 import WikiSectionItem from '~/components/wiki/WikiSectionItem';
-import { pageRoot } from '~/styles';
+import { pageRoot, simpleScrollbar } from '~/styles';
 
-const titleContainer = css`
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
-`;
-const title = css`
-  font-family: ZFB31;
-  letter-spacing: 0px;
-  font-size: 36px;
-  overflow: hidden;
-  overflow-wrap: break-word;
-  text-decoration: none;
-  width: fit-content;
-`;
 const menuBar = css`
   display: flex;
   flex-direction: column;
@@ -27,6 +14,7 @@ const menuBar = css`
   border-right: 1px solid var(--color-border);
   padding: 48px;
   gap: 16px;
+  overflow-y: auto;
 `;
 const content = css`
   display: flex;
@@ -34,12 +22,13 @@ const content = css`
   height: 100%;
   width: 100%;
   flex-grow: 1;
+  overflow-y: auto;
 `;
 
 const WikiWrapper: Component<RouteSectionProps> = (props) => {
   return (
     <main class={pageRoot}>
-      <div class={menuBar}>
+      <div class={clsx(menuBar, simpleScrollbar)}>
         <WikiSection title='introduction'>
           <WikiSectionItem title='Get Started' href='/wiki/introduction/get_started' hrefAlt={['/wiki']} />
           <WikiSectionItem title='How To Install' href='/wiki/introduction/how_to_install' />
@@ -71,7 +60,7 @@ const WikiWrapper: Component<RouteSectionProps> = (props) => {
           <WikiSectionItem title='Onscreen Control' href='/wiki/others/onscreen_control' iconSrc='/icons/wiki/wiki_onscreen_control.png' />
         </WikiSection>
       </div>
-      <div class={content}>{props.children}</div>
+      <div class={clsx(content, simpleScrollbar)}>{props.children}</div>
     </main>
   );
 };

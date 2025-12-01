@@ -39,15 +39,6 @@ const rootContainer = css`
   background-color: var(--color-surface);
 `;
 
-const restContainer = css`
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-`;
-
 const pageContainer = css`
   display: flex;
   flex-direction: column;

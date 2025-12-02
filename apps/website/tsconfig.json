@@ -16,8 +16,7 @@
       "~/*": ["./src/*"],
       "@sledge/ui": ["../../packages/ui"],
       "@sledge/theme": ["../../packages/theme"],
-      "@sledge/core": ["../../packages/core"],
-      "@sledge/anvil": ["../../packages/anvil"]
+      "@sledge/core": ["../../packages/core"]
     },
     "types": ["vite/client"]
   }

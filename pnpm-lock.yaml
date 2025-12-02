@@ -44,13 +44,13 @@ importers:
 
   apps/debug_playground:
     dependencies:
-      '@sledge/anvil':
-        specifier: workspace:*
-        version: link:../../packages/anvil
       solid-js:
         specifier: ^1.9.5
         version: 1.9.10
     devDependencies:
+      '@sledge/anvil':
+        specifier: npm:@sledge-pdm/anvil@^1.0.2
+        version: '@sledge-pdm/anvil@1.0.3'
       '@solidjs/testing-library':
         specifier: ^0.8.10
         version: 0.8.10(@solidjs/router@0.15.4(solid-js@1.9.10))(solid-js@1.9.10)
@@ -88,8 +88,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.2
       '@sledge/anvil':
-        specifier: workspace:*
-        version: link:../../packages/anvil
+        specifier: npm:@sledge-pdm/anvil@^1.0.2
+        version: '@sledge-pdm/anvil@1.0.3'
       '@solid-primitives/deep':
         specifier: ^0.3.3
         version: 0.3.3(solid-js@1.9.10)
@@ -193,6 +193,9 @@ importers:
 
   apps/website:
     dependencies:
+      '@sledge/anvil':
+        specifier: npm:@sledge-pdm/anvil@^1.0.2
+        version: '@sledge-pdm/anvil@1.0.3'
       '@solid-primitives/timer':
         specifier: ^1.4.3
         version: 1.4.3(solid-js@1.9.10)
@@ -237,40 +240,19 @@ importers:
         specifier: ^3.5.0
         version: 3.5.0(vite@7.2.2(@types/node@24.10.1)(yaml@2.8.1))
 
-  packages/anvil:
-    devDependencies:
-      prettier:
-        specifier: ^3.6.2
-        version: 3.6.2
-      prettier-plugin-organize-imports:
-        specifier: ^4.3.0
-        version: 4.3.0(prettier@3.6.2)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite-plugin-top-level-await:
-        specifier: ^1.6.0
-        version: 1.6.0(rollup@4.52.4)(vite@7.2.2(@types/node@24.10.1)(yaml@2.8.1))
-      vite-plugin-wasm:
-        specifier: ^3.5.0
-        version: 3.5.0(vite@7.2.2(@types/node@24.10.1)(yaml@2.8.1))
-      vitest:
-        specifier: ^4.0.9
-        version: 4.0.9(@types/node@24.10.1)(jsdom@27.0.0(postcss@8.5.6))(yaml@2.8.1)
-
   packages/core: {}
 
   packages/theme:
     dependencies:
       '@sledge/anvil':
-        specifier: workspace:*
-        version: link:../anvil
+        specifier: npm:@sledge-pdm/anvil@^1.0.2
+        version: '@sledge-pdm/anvil@1.0.3'
 
   packages/ui:
     dependencies:
       '@sledge/anvil':
-        specifier: workspace:*
-        version: link:../anvil
+        specifier: npm:@sledge-pdm/anvil@^1.0.2
+        version: '@sledge-pdm/anvil@1.0.3'
       solid-js:
         specifier: ^1.9.10
         version: 1.9.10
@@ -977,6 +959,9 @@ packages:
     resolution: {integrity: sha512-bf9PtUa0u8IXDVxzRToFQKsNCRz9qLYfR/MpECxl4mRoWYjAeFjgxj1XdZr2M/GNVpT05p+LgQOHopYDlUu6/w==}
     cpu: [x64]
     os: [win32]
+
+  '@sledge-pdm/anvil@1.0.3':
+    resolution: {integrity: sha512-O8YsqSuqwCQyZ32R4KFKn45Goo0S3h+YxaS0uAdK8nhk1a8JwLQWOCOwNP/3sLYU1wC84Xa2di/Gg7Nfxk3h+Q==}
 
   '@solid-devtools/debugger@0.28.1':
     resolution: {integrity: sha512-6qIUI6VYkXoRnL8oF5bvh2KgH71qlJ18hNw/mwSyY6v48eb80ZR48/5PDXufUa3q+MBSuYa1uqTMwLewpay9eg==}
@@ -3562,6 +3547,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.52.4':
     optional: true
+
+  '@sledge-pdm/anvil@1.0.3': {}
 
   '@solid-devtools/debugger@0.28.1(solid-js@1.9.10)':
     dependencies:

@@ -1,8 +1,8 @@
 import { css } from '@acab/ecsstatic';
+import { Title } from '@solidjs/meta';
 import { RouteSectionProps } from '@solidjs/router';
 import { Component, For, createSignal, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
 
 const header = css`
   font-size: 16px;
@@ -136,41 +136,42 @@ const PlaygroundPointerTest: Component<RouteSectionProps> = (props) => {
   });
 
   return (
-    <div>
-      <a href='/playground'>back to playground home</a>
-      <p class={header}>Pointer Test</p>
-      <p class={subHeader}>test your pointers.</p>
-      <p class={infoContent}>
-        window (ms): <input type='number' min='0' step='100' value={windowMs()} onInput={(e) => setWindowMs(Number(e.currentTarget.value) || 0)} />
-      </p>
+    <>
+      <Title>sledge. - pointer test</Title>
+      <div>
+        <a href='/playground'>back to playground home</a>
+        <p class={header}>Pointer Test</p>
+        <p class={subHeader}>test your pointers.</p>
+        <p class={infoContent}>
+          window (ms): <input type='number' min='0' step='100' value={windowMs()} onInput={(e) => setWindowMs(Number(e.currentTarget.value) || 0)} />
+        </p>
 
-      <For each={pointerEventNames}>
-        {(eventType) => {
-          const info = latestEventsStore[eventType];
+        <For each={pointerEventNames}>
+          {(eventType) => {
+            const info = latestEventsStore[eventType];
 
-          return (
-            <>
-              <p class={infoHeader}>{eventType}</p>
-              <p class={infoContent}>type: {info.event?.pointerType ?? '---'}</p>
-              <p class={infoContent}>
-                position: <span class={highlight}>{info.event?.clientX.toFixed(1)}</span>,{' '}
-                <span class={highlight}>{info.event?.clientY.toFixed(1)}</span>
-              </p>
-              <p class={infoContent}>
-                interval: <span class={highlight}>{info.intervalMs?.toFixed(2)}</span> ms
-              </p>
-              <p class={infoContent}>
-                last {(windowMs() / 1000).toFixed(1)}s count: <span class={highlight}>{info.recentCount}</span>
-              </p>
-            </>
-          );
-        }}
-      </For>
+            return (
+              <>
+                <p class={infoHeader}>{eventType}</p>
+                <p class={infoContent}>type: {info.event?.pointerType ?? '---'}</p>
+                <p class={infoContent}>
+                  position: <span class={highlight}>{info.event?.clientX.toFixed(1)}</span>,{' '}
+                  <span class={highlight}>{info.event?.clientY.toFixed(1)}</span>
+                </p>
+                <p class={infoContent}>
+                  interval: <span class={highlight}>{info.intervalMs?.toFixed(2)}</span> ms
+                </p>
+                <p class={infoContent}>
+                  last {(windowMs() / 1000).toFixed(1)}s count: <span class={highlight}>{info.recentCount}</span>
+                </p>
+              </>
+            );
+          }}
+        </For>
 
-      <Portal mount={document.querySelector('#portal-root') as Node}>
         <div ref={(ref) => (areaRef = ref)} id='area' class={pointerArea} />
-      </Portal>
-    </div>
+      </div>
+    </>
   );
 };
 

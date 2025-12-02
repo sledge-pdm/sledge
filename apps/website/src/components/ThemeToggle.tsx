@@ -33,7 +33,7 @@ const ThemeToggle: Component<{ noBackground?: boolean }> = (props) => {
         value={globalStore.theme}
         options={omittedThemeOptions}
         noBackground={props.noBackground}
-        wheelSpin={false}
+        wheelSpin={true}
         onChange={(v) => {
           setGlobalStore('theme', v as Theme);
           animateThemeChange();

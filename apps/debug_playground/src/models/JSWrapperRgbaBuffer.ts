@@ -1,5 +1,15 @@
-import { Point, RawPixelData, RGBA, Size, toUint8Array, toUint8ClampedArray } from '@sledge/anvil';
-import { AlphaBlurMode, AntialiasMode, DitheringMode, RgbaBuffer } from '../../../../packages/anvil/src/wasm/pkg/anvil_wasm.js';
+import {
+  AlphaBlurMode,
+  AntialiasMode,
+  DitheringMode,
+  Point,
+  RawPixelData,
+  RGBA,
+  RgbaBuffer,
+  Size,
+  toUint8Array,
+  toUint8ClampedArray,
+} from '@sledge/anvil';
 
 /**
  * Core pixel buffer operations - raw RGBA8 array management

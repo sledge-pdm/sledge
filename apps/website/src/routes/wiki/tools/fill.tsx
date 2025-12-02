@@ -44,7 +44,7 @@ const Fill: Component = () => {
 
           <h4>Demo</h4>
           <div>
-            <img alt='Fill threshold demo' src='/wiki/tools/fill/threshold_demo.gif' />
+            <img width={500} alt='Fill threshold demo' src='/wiki/tools/fill/threshold_demo.gif' />
           </div>
         </div>
       </div>

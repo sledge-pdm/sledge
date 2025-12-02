@@ -16,7 +16,6 @@ export const wikiMarkdown = css`
   font-size: 16px;
   line-height: 1.6;
   color: var(--color-on-background);
-  text-rendering: optimizeLegibility;
   pointer-events: all;
 
   * {
@@ -30,7 +29,7 @@ export const wikiMarkdown = css`
   h2,
   h3,
   h4 {
-    letter-spacing: 0.6px;
+    letter-spacing: 1px;
     margin: 0;
   }
 
@@ -71,8 +70,15 @@ export const wikiMarkdown = css`
     flex-direction: column;
     gap: 6px;
     margin: 0;
-    padding-left: 24px;
+    padding-left: 20px;
+  }
+
+  ul {
     list-style-type: square;
+  }
+
+  ol {
+    list-style-type: decimal;
   }
 
   li {

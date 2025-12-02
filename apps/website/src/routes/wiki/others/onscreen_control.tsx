@@ -10,8 +10,21 @@ const OnscreenControl: Component = () => {
       <div class={wikiContentRoot}>
         <WikiContentHeader iconSrc='/icons/wiki/wiki_onscreen_control.png'>Onscreen Control</WikiContentHeader>
         <div class={wikiMarkdown}>
-          <p>This article is under preparation.</p>
-          <p>Onscreen control usage will be added soon.</p>
+          <h2>About</h2>
+          <p>A floating controller for pan/zoom. It mimics an analog stick and can be dragged anywhere over the UI.</p>
+
+          <h2>Controls</h2>
+          <ul>
+            <li><strong>Pan stick:</strong> drag inside the square to pan. It springs back to center on release.</li>
+            <li><strong>Zoom fader:</strong> drag up/down to zoom in/out. It also recenters on release.</li>
+            <li><strong>Zoom presets:</strong> tap the <code>x1 / x1.5 / x2</code> indicator in the title bar to change the controller scale.</li>
+          </ul>
+
+          <h2>Window handling</h2>
+          <ul>
+            <li>Drag the title bar to move the controller. The lock icon freezes/unfreezes its position.</li>
+            <li>The close icon hides the controller (toggle again via F6 or the canvas control menu).</li>
+          </ul>
         </div>
       </div>
     </>

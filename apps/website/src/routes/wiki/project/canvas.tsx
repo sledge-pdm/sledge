@@ -10,8 +10,32 @@ const Canvas: Component = () => {
       <div class={wikiContentRoot}>
         <WikiContentHeader iconSrc='/icons/wiki/wiki_canvas.png'>Canvas</WikiContentHeader>
         <div class={wikiMarkdown}>
-          <p>This article is under preparation.</p>
-          <p>Canvas workflow details will be added soon.</p>
+          <h2>About</h2>
+          <p>Canvas size and view settings (zoom/offset/rotation/flip) are managed together so drawing and overlays stay aligned.</p>
+
+          <h2>Size</h2>
+          <ul>
+            <li>Acceptable range: 1–8000 px for both width and height.</li>
+            <li>If the GPU’s WebGL drawing buffer would exceed its safe memory, a warning is shown and the resize is rejected.</li>
+            <li>Resizing reflows every layer buffer and clears the current selection. History is recorded unless explicitly skipped.</li>
+          </ul>
+
+          <h2>View</h2>
+          <ul>
+            <li>
+              <strong>Zoom:</strong> Clamped between a min/max derived from the initial zoom. “Fit Eadjusts zoom so the longest side fits the work
+              area.
+            </li>
+            <li>
+              <strong>Offset:</strong> Panning moves the canvas origin; centering recenters using the current zoom.
+            </li>
+            <li>
+              <strong>Rotation:</strong> Any angle is normalized to the −180°–180° range.
+            </li>
+            <li>
+              <strong>Flip:</strong> Horizontal/vertical flips are toggled independently and can be reset along with rotation.
+            </li>
+          </ul>
         </div>
       </div>
     </>

@@ -10,8 +10,8 @@ const Move: Component = () => {
       <div class={wikiContentRoot}>
         <WikiContentHeader iconSrc='/icons/wiki/wiki_move.png'>Move</WikiContentHeader>
         <div class={wikiMarkdown}>
-          <p>This article is under preparation.</p>
-          <p>Details for Move tool will be added soon.</p>
+          <h2>About</h2>
+          <p>Move drags the current selection. If no selection exists, it temporarily selects the whole active layer and drags that buffer.</p>
         </div>
       </div>
     </>

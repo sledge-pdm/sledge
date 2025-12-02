@@ -1,6 +1,6 @@
+import { RgbaBuffer } from '@sledge/anvil';
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { JSWrapperRgbaBuffer } from '~/models/JSWrapperRgbaBuffer';
-import { RgbaBuffer } from '../../../packages/anvil/src/wasm/pkg/anvil_wasm';
 
 type RGBA = [number, number, number, number];
 

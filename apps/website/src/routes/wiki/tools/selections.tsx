@@ -15,6 +15,9 @@ const Selections: Component = () => {
             Selections define a mask for editing or moving pixels. Drawing can be limited to inside/outside the mask, and the mask can be moved as a
             floating buffer.
           </p>
+          <div>
+            <img alt='Selections tool UI' src='/wiki/tools/selections/about.png' />
+          </div>
           <p>Tools:</p>
           <ul>
             <li>

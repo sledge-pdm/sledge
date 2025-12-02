@@ -12,6 +12,9 @@ const Move: Component = () => {
         <div class={wikiMarkdown}>
           <h2>About</h2>
           <p>Move drags the current selection. If no selection exists, it temporarily selects the whole active layer and drags that buffer.</p>
+          <div>
+            <img alt='Move tool UI' src='/wiki/tools/move/about.png' />
+          </div>
         </div>
       </div>
     </>

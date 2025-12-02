@@ -12,6 +12,9 @@ const OnscreenControl: Component = () => {
         <div class={wikiMarkdown}>
           <h2>About</h2>
           <p>A floating controller for pan/zoom. It mimics an analog stick and can be dragged anywhere over the UI.</p>
+          <div>
+            <img alt='Onscreen Control UI' src='/wiki/others/onscreen_control/about.png' />
+          </div>
 
           <h2>Controls</h2>
           <ul>

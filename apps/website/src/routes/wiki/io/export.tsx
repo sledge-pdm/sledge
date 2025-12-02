@@ -32,8 +32,10 @@ const Export: Component = () => {
           <p>Enabled for JPEG and WEBP (lossy). PNG and WEBP (lossless) ignore the slider.</p>
 
           <h3>Per layer</h3>
-          <p>When enabled, every layer is exported individually into a subfolder named after the file. Filenames become
-            <code>{`{fileName}/{fileName}_{layerName}.{ext}`}</code>.</p>
+          <p>
+            When enabled, every layer is exported individually into a subfolder named after the file. Filenames become
+            <code>{`{fileName}/{fileName}_{layerName}.{ext}`}</code>.
+          </p>
 
           <h3>Show in explorer</h3>
           <p>Opens the exported location after a successful write.</p>

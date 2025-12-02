@@ -15,9 +15,15 @@ const OnscreenControl: Component = () => {
 
           <h2>Controls</h2>
           <ul>
-            <li><strong>Pan stick:</strong> drag inside the square to pan. It springs back to center on release.</li>
-            <li><strong>Zoom fader:</strong> drag up/down to zoom in/out. It also recenters on release.</li>
-            <li><strong>Zoom presets:</strong> tap the <code>x1 / x1.5 / x2</code> indicator in the title bar to change the controller scale.</li>
+            <li>
+              <strong>Pan stick:</strong> drag inside the square to pan. It springs back to center on release.
+            </li>
+            <li>
+              <strong>Zoom fader:</strong> drag up/down to zoom in/out. It also recenters on release.
+            </li>
+            <li>
+              <strong>Zoom presets:</strong> tap the <code>x1 / x1.5 / x2</code> indicator in the title bar to change the controller scale.
+            </li>
           </ul>
 
           <h2>Window handling</h2>

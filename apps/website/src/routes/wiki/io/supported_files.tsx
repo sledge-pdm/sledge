@@ -15,24 +15,42 @@ const SupportedFiles: Component = () => {
 
           <h2>Open / Import</h2>
           <ul>
-            <li><strong>Projects:</strong> <code>.sledge</code></li>
-            <li><strong>Images (new project):</strong> <code>.png</code>, <code>.jpg</code>/<code>.jpeg</code>, <code>.webp</code></li>
-            <li><strong>Clipboard import:</strong> bitmap image (RGBA)</li>
+            <li>
+              <strong>Projects:</strong> <code>.sledge</code>
+            </li>
+            <li>
+              <strong>Images (new project):</strong> <code>.png</code>, <code>.jpg</code>/<code>.jpeg</code>, <code>.webp</code>
+            </li>
+            <li>
+              <strong>Clipboard import:</strong> bitmap image (RGBA)
+            </li>
           </ul>
-          <p>Opening a non-<code>.sledge</code> file imports it as a new project sized to the image.</p>
+          <p>
+            Opening a non-<code>.sledge</code> file imports it as a new project sized to the image.
+          </p>
 
           <h2>Export</h2>
           <ul>
-            <li><code>.png</code></li>
-            <li><code>.jpg</code> (JPEG)</li>
-            <li><code>.webp</code> (lossy / lossless)</li>
-            <li><code>.svg</code> (opacity outline, canvas ≤ 128×128)</li>
+            <li>
+              <code>.png</code>
+            </li>
+            <li>
+              <code>.jpg</code> (JPEG)
+            </li>
+            <li>
+              <code>.webp</code> (lossy / lossless)
+            </li>
+            <li>
+              <code>.svg</code> (opacity outline, canvas ≤ 128×128)
+            </li>
           </ul>
           <p>Per-layer export writes one file per layer inside a subfolder named after the export file.</p>
 
           <h2>Image Pool import</h2>
           <ul>
-            <li><code>.png</code>, <code>.jpg</code>/<code>.jpeg</code>, <code>.webp</code>, <code>.gif</code></li>
+            <li>
+              <code>.png</code>, <code>.jpg</code>/<code>.jpeg</code>, <code>.webp</code>, <code>.gif</code>
+            </li>
           </ul>
           <p>Imported images are converted to WEBP internally and can be transformed before transferring to a layer.</p>
 

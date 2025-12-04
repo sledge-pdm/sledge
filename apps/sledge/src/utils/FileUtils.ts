@@ -3,7 +3,7 @@ import { homeDir, pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { platform } from '@tauri-apps/plugin-os';
 import { importableFileExtensions, openableFileExtensions } from '~/features/io/FileExtensions';
-import { fileStore } from '~/stores/EditorStores';
+import { fileStore, lastSettingsStore } from '~/stores/EditorStores';
 import { safeInvoke } from '~/utils/TauriUtils';
 
 export async function getFileUniqueId(path: string): Promise<string> {
@@ -62,7 +62,20 @@ export async function exportDir(): Promise<string> {
   if (fileStore.savedLocation.path) {
     return normalizePath(fileStore.savedLocation.path);
   }
+  if (lastSettingsStore.exportSettings.folderPath) {
+    return normalizePath(lastSettingsStore.exportSettings.folderPath);
+  }
   return await defaultPictureDir();
+}
+
+export function exportFileName(): string {
+  if (fileStore.savedLocation.name) {
+    return getFileNameWithoutExtension(fileStore.savedLocation.name);
+  }
+  if (lastSettingsStore.exportSettings.fileName) {
+    return getFileNameWithoutExtension(lastSettingsStore.exportSettings.fileName);
+  }
+  return 'new project';
 }
 
 export const getFileNameWithoutExtension = (fileName?: string): string => {

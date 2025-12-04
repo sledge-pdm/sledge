@@ -10,11 +10,11 @@ import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { allLayers } from '~/features/layer';
-import { fileStore, lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
+import { lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
-import { exportDir, getFileNameWithoutExtension, normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { exportDir, exportFileName, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
@@ -169,11 +169,9 @@ const ExportContent: Component = () => {
     };
   });
 
-  const nameWithoutExtension = () => getFileNameWithoutExtension(fileStore.savedLocation.name);
-
   const [settings, setSettings] = createStore<ExportSettings>({
     ...lastSettingsStore.exportSettings,
-    fileName: fileStore.savedLocation.name ? nameWithoutExtension() : 'new project',
+    fileName: exportFileName(),
     exportOptions: {
       ...lastSettingsStore.exportSettings.exportOptions,
       perLayer: false,

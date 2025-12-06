@@ -3,22 +3,31 @@ export function __wbg_set_wasm(val) {
     wasm = val;
 }
 
+function getArrayU8FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
+}
+
+let cachedFloat32ArrayMemory0 = null;
+function getFloat32ArrayMemory0() {
+    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
+        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
+    }
+    return cachedFloat32ArrayMemory0;
+}
+
+function getStringFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return decodeText(ptr, len);
+}
 
 let cachedUint8ArrayMemory0 = null;
-
 function getUint8ArrayMemory0() {
     if (cachedUint8ArrayMemory0 === null || cachedUint8ArrayMemory0.byteLength === 0) {
         cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
     }
     return cachedUint8ArrayMemory0;
 }
-
-function getArrayU8FromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
-}
-
-let WASM_VECTOR_LEN = 0;
 
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
@@ -27,65 +36,14 @@ function passArray8ToWasm0(arg, malloc) {
     return ptr;
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-
-cachedTextDecoder.decode();
-
-const MAX_SAFARI_DECODE_BYTES = 2146435072;
-let numBytesDecoded = 0;
-function decodeText(ptr, len) {
-    numBytesDecoded += len;
-    if (numBytesDecoded >= MAX_SAFARI_DECODE_BYTES) {
-        cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-        cachedTextDecoder.decode();
-        numBytesDecoded = len;
-    }
-    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
-}
-
-function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return decodeText(ptr, len);
-}
-/**
- * 選択範囲マスクからSVGパス文字列を生成
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {number} offset_x
- * @param {number} offset_y
- * @returns {string}
- */
-export function mask_to_path(mask, width, height, offset_x, offset_y) {
-    let deferred2_0;
-    let deferred2_1;
-    try {
-        const ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mask_to_path(ptr0, len0, width, height, offset_x, offset_y);
-        deferred2_0 = ret[0];
-        deferred2_1 = ret[1];
-        return getStringFromWasm0(ret[0], ret[1]);
-    } finally {
-        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
-    }
-}
-
-const cachedTextEncoder = new TextEncoder();
-
-if (!('encodeInto' in cachedTextEncoder)) {
-    cachedTextEncoder.encodeInto = function (arg, view) {
-        const buf = cachedTextEncoder.encode(arg);
-        view.set(buf);
-        return {
-            read: arg.length,
-            written: buf.length
-        };
-    }
+function passArrayF32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getFloat32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
 }
 
 function passStringToWasm0(arg, malloc, realloc) {
-
     if (realloc === undefined) {
         const buf = cachedTextEncoder.encode(arg);
         const ptr = malloc(buf.length, 1) >>> 0;
@@ -106,7 +64,6 @@ function passStringToWasm0(arg, malloc, realloc) {
         if (code > 0x7F) break;
         mem[ptr + offset] = code;
     }
-
     if (offset !== len) {
         if (offset !== 0) {
             arg = arg.slice(offset);
@@ -122,34 +79,121 @@ function passStringToWasm0(arg, malloc, realloc) {
     WASM_VECTOR_LEN = offset;
     return ptr;
 }
+
+let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+cachedTextDecoder.decode();
+const MAX_SAFARI_DECODE_BYTES = 2146435072;
+let numBytesDecoded = 0;
+function decodeText(ptr, len) {
+    numBytesDecoded += len;
+    if (numBytesDecoded >= MAX_SAFARI_DECODE_BYTES) {
+        cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+        cachedTextDecoder.decode();
+        numBytesDecoded = len;
+    }
+    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+}
+
+const cachedTextEncoder = new TextEncoder();
+
+if (!('encodeInto' in cachedTextEncoder)) {
+    cachedTextEncoder.encodeInto = function (arg, view) {
+        const buf = cachedTextEncoder.encode(arg);
+        view.set(buf);
+        return {
+            read: arg.length,
+            written: buf.length
+        };
+    }
+}
+
+let WASM_VECTOR_LEN = 0;
+
 /**
- * 選択範囲制限モードに応じてピクセルバッファをフィルタリングする
- * original_buffer: 元のピクセルバッファ (RGBA)
- * selection_mask: 選択範囲のマスク (0 or 1)
- * mode: 制限モード ("inside", "outside", "none")
- * width, height: 画像のサイズ
- *
- * "inside": 選択範囲外を透明化
- * "outside": 選択範囲内を透明化
- * "none": 元のバッファをそのまま返す
- * @param {Uint8Array} original_buffer
- * @param {Uint8Array} selection_mask
- * @param {string} mode
+ * マスクオフセット適用（commitOffset用）
+ * @param {Uint8Array} mask
  * @param {number} width
  * @param {number} height
+ * @param {number} offset_x
+ * @param {number} offset_y
  * @returns {Uint8Array}
  */
-export function filter_by_selection_mask(original_buffer, selection_mask, mode, width, height) {
-    const ptr0 = passArray8ToWasm0(original_buffer, wasm.__wbindgen_malloc);
+export function apply_mask_offset(mask, width, height, offset_x, offset_y) {
+    const ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(selection_mask, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passStringToWasm0(mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len2 = WASM_VECTOR_LEN;
-    const ret = wasm.filter_by_selection_mask(ptr0, len0, ptr1, len1, ptr2, len2, width, height);
-    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    const ret = wasm.apply_mask_offset(ptr0, len0, width, height, offset_x, offset_y);
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v4;
+    return v2;
+}
+
+/**
+ * しきい値付きの自動選択（領域抽出）
+ * 入力バッファは RGBA 連続の &[u8]。変更せず、選択マスク(幅*高さ, 0/1)を返す。
+ * @param {Uint8Array} buffer
+ * @param {number} width
+ * @param {number} height
+ * @param {number} start_x
+ * @param {number} start_y
+ * @param {number} threshold
+ * @param {number} _connectivity
+ * @returns {Uint8Array}
+ */
+export function auto_select_region_mask(buffer, width, height, start_x, start_y, threshold, _connectivity) {
+    const ptr0 = passArray8ToWasm0(buffer, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.auto_select_region_mask(ptr0, len0, width, height, start_x, start_y, threshold, _connectivity);
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
+}
+
+/**
+ * マスク合成：OR演算 (add mode)
+ * @param {Uint8Array} base_mask
+ * @param {Uint8Array} preview_mask
+ * @returns {Uint8Array}
+ */
+export function combine_masks_add(base_mask, preview_mask) {
+    const ptr0 = passArray8ToWasm0(base_mask, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray8ToWasm0(preview_mask, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.combine_masks_add(ptr0, len0, ptr1, len1);
+    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v3;
+}
+
+/**
+ * マスク合成：置換 (replace mode)
+ * @param {Uint8Array} preview_mask
+ * @returns {Uint8Array}
+ */
+export function combine_masks_replace(preview_mask) {
+    const ptr0 = passArray8ToWasm0(preview_mask, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.combine_masks_replace(ptr0, len0);
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
+}
+
+/**
+ * マスク合成：AND NOT演算 (subtract mode)
+ * @param {Uint8Array} base_mask
+ * @param {Uint8Array} preview_mask
+ * @returns {Uint8Array}
+ */
+export function combine_masks_subtract(base_mask, preview_mask) {
+    const ptr0 = passArray8ToWasm0(base_mask, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray8ToWasm0(preview_mask, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.combine_masks_subtract(ptr0, len0, ptr1, len1);
+    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v3;
 }
 
 /**
@@ -183,120 +227,6 @@ export function composite_fill_result(base_buffer, overlay_buffer, selection_mas
 }
 
 /**
- * @param {Uint8Array} mask
- * @param {number} mask_width
- * @param {number} mask_height
- * @param {number} box_x
- * @param {number} box_y
- * @param {number} box_width
- * @param {number} box_height
- * @returns {Uint8Array}
- */
-export function trim_mask_with_box(mask, mask_width, mask_height, box_x, box_y, box_width, box_height) {
-    const ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.trim_mask_with_box(ptr0, len0, mask_width, mask_height, box_x, box_y, box_width, box_height);
-    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v2;
-}
-
-/**
- * ピクセルデータを上下反転する関数
- * WebGLのreadPixelsは下から上の順序で返すため、通常の画像として使う場合は反転が必要
- * @param {Uint8Array} pixels
- * @param {number} width
- * @param {number} height
- */
-export function flip_pixels_vertically(pixels, width, height) {
-    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.flip_pixels_vertically(ptr0, len0, pixels, width, height);
-}
-
-/**
- * マスク合成：OR演算 (add mode)
- * @param {Uint8Array} base_mask
- * @param {Uint8Array} preview_mask
- * @returns {Uint8Array}
- */
-export function combine_masks_add(base_mask, preview_mask) {
-    const ptr0 = passArray8ToWasm0(base_mask, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(preview_mask, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.combine_masks_add(ptr0, len0, ptr1, len1);
-    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v3;
-}
-
-/**
- * マスク合成：AND NOT演算 (subtract mode)
- * @param {Uint8Array} base_mask
- * @param {Uint8Array} preview_mask
- * @returns {Uint8Array}
- */
-export function combine_masks_subtract(base_mask, preview_mask) {
-    const ptr0 = passArray8ToWasm0(base_mask, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(preview_mask, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.combine_masks_subtract(ptr0, len0, ptr1, len1);
-    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v3;
-}
-
-/**
- * マスク合成：置換 (replace mode)
- * @param {Uint8Array} preview_mask
- * @returns {Uint8Array}
- */
-export function combine_masks_replace(preview_mask) {
-    const ptr0 = passArray8ToWasm0(preview_mask, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.combine_masks_replace(ptr0, len0);
-    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v2;
-}
-
-/**
- * 矩形をマスクに描画
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {number} start_x
- * @param {number} start_y
- * @param {number} rect_width
- * @param {number} rect_height
- */
-export function fill_rect_mask(mask, width, height, start_x, start_y, rect_width, rect_height) {
-    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.fill_rect_mask(ptr0, len0, mask, width, height, start_x, start_y, rect_width, rect_height);
-}
-
-/**
- * マスクオフセット適用（commitOffset用）
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {number} offset_x
- * @param {number} offset_y
- * @returns {Uint8Array}
- */
-export function apply_mask_offset(mask, width, height, offset_x, offset_y) {
-    const ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.apply_mask_offset(ptr0, len0, width, height, offset_x, offset_y);
-    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v2;
-}
-
-/**
  * @param {Uint8Array} buffer
  * @param {number} width
  * @param {number} height
@@ -311,42 +241,6 @@ export function create_opacity_mask(buffer, width, height) {
     return v2;
 }
 
-/**
- * しきい値付きの自動選択（領域抽出）
- * 入力バッファは RGBA 連続の &[u8]。変更せず、選択マスク(幅*高さ, 0/1)を返す。
- * @param {Uint8Array} buffer
- * @param {number} width
- * @param {number} height
- * @param {number} start_x
- * @param {number} start_y
- * @param {number} threshold
- * @param {number} _connectivity
- * @returns {Uint8Array}
- */
-export function auto_select_region_mask(buffer, width, height, start_x, start_y, threshold, _connectivity) {
-    const ptr0 = passArray8ToWasm0(buffer, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.auto_select_region_mask(ptr0, len0, width, height, start_x, start_y, threshold, _connectivity);
-    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v2;
-}
-
-let cachedFloat32ArrayMemory0 = null;
-
-function getFloat32ArrayMemory0() {
-    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
-        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
-    }
-    return cachedFloat32ArrayMemory0;
-}
-
-function passArrayF32ToWasm0(arg, malloc) {
-    const ptr = malloc(arg.length * 4, 4) >>> 0;
-    getFloat32ArrayMemory0().set(arg, ptr / 4);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
-}
 /**
  * Lasso選択のためのスキャンライン塗りつぶし実装
  *
@@ -375,6 +269,23 @@ export function fill_lasso_selection(mask, width, height, points, fill_rule) {
 }
 
 /**
+ * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
+ * @param {Uint8Array} mask
+ * @param {number} width
+ * @param {number} height
+ * @param {Float32Array} points
+ * @returns {boolean}
+ */
+export function fill_lasso_selection_point_in_polygon(mask, width, height, points) {
+    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.fill_lasso_selection_point_in_polygon(ptr0, len0, mask, width, height, ptr1, len1);
+    return ret !== 0;
+}
+
+/**
  * 選択範囲制限付きLasso選択
  * @param {Uint8Array} mask
  * @param {number} width
@@ -398,34 +309,117 @@ export function fill_lasso_selection_with_mask(mask, width, height, points, exis
 }
 
 /**
- * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
+ * 矩形をマスクに描画
  * @param {Uint8Array} mask
  * @param {number} width
  * @param {number} height
- * @param {Float32Array} points
- * @returns {boolean}
+ * @param {number} start_x
+ * @param {number} start_y
+ * @param {number} rect_width
+ * @param {number} rect_height
  */
-export function fill_lasso_selection_point_in_polygon(mask, width, height, points) {
+export function fill_rect_mask(mask, width, height, start_x, start_y, rect_width, rect_height) {
     var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
     var len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.fill_lasso_selection_point_in_polygon(ptr0, len0, mask, width, height, ptr1, len1);
-    return ret !== 0;
+    wasm.fill_rect_mask(ptr0, len0, mask, width, height, start_x, start_y, rect_width, rect_height);
 }
 
-export function __wbg_wbindgencopytotypedarray_d105febdb9374ca3(arg0, arg1, arg2) {
+/**
+ * 選択範囲制限モードに応じてピクセルバッファをフィルタリングする
+ * original_buffer: 元のピクセルバッファ (RGBA)
+ * selection_mask: 選択範囲のマスク (0 or 1)
+ * mode: 制限モード ("inside", "outside", "none")
+ * width, height: 画像のサイズ
+ *
+ * "inside": 選択範囲外を透明化
+ * "outside": 選択範囲内を透明化
+ * "none": 元のバッファをそのまま返す
+ * @param {Uint8Array} original_buffer
+ * @param {Uint8Array} selection_mask
+ * @param {string} mode
+ * @param {number} width
+ * @param {number} height
+ * @returns {Uint8Array}
+ */
+export function filter_by_selection_mask(original_buffer, selection_mask, mode, width, height) {
+    const ptr0 = passArray8ToWasm0(original_buffer, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray8ToWasm0(selection_mask, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.filter_by_selection_mask(ptr0, len0, ptr1, len1, ptr2, len2, width, height);
+    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v4;
+}
+
+/**
+ * ピクセルデータを上下反転する関数
+ * WebGLのreadPixelsは下から上の順序で返すため、通常の画像として使う場合は反転が必要
+ * @param {Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ */
+export function flip_pixels_vertically(pixels, width, height) {
+    var ptr0 = passArray8ToWasm0(pixels, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    wasm.flip_pixels_vertically(ptr0, len0, pixels, width, height);
+}
+
+/**
+ * 選択範囲マスクからSVGパス文字列を生成
+ * @param {Uint8Array} mask
+ * @param {number} width
+ * @param {number} height
+ * @param {number} offset_x
+ * @param {number} offset_y
+ * @returns {string}
+ */
+export function mask_to_path(mask, width, height, offset_x, offset_y) {
+    let deferred2_0;
+    let deferred2_1;
+    try {
+        const ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.mask_to_path(ptr0, len0, width, height, offset_x, offset_y);
+        deferred2_0 = ret[0];
+        deferred2_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
+}
+
+/**
+ * @param {Uint8Array} mask
+ * @param {number} mask_width
+ * @param {number} mask_height
+ * @param {number} box_x
+ * @param {number} box_y
+ * @param {number} box_width
+ * @param {number} box_height
+ * @returns {Uint8Array}
+ */
+export function trim_mask_with_box(mask, mask_width, mask_height, box_x, box_y, box_width, box_height) {
+    const ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.trim_mask_with_box(ptr0, len0, mask_width, mask_height, box_x, box_y, box_width, box_height);
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
+}
+
+export function __wbg___wbindgen_copy_to_typed_array_db832bc4df7216c1(arg0, arg1, arg2) {
     new Uint8Array(arg2.buffer, arg2.byteOffset, arg2.byteLength).set(getArrayU8FromWasm0(arg0, arg1));
 };
 
 export function __wbindgen_init_externref_table() {
-    const table = wasm.__wbindgen_export_0;
+    const table = wasm.__wbindgen_externrefs;
     const offset = table.grow(4);
     table.set(0, undefined);
     table.set(offset + 0, undefined);
     table.set(offset + 1, null);
     table.set(offset + 2, true);
     table.set(offset + 3, false);
-    ;
 };
-

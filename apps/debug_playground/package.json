@@ -22,7 +22,7 @@
     "vitest": "^4.0.0",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
-    "@sledge/anvil": "npm:@sledge-pdm/anvil@^1.0.4"
+    "@sledge/anvil": "npm:@sledge-pdm/anvil@^1.0.5"
   },
   "dependencies": {
     "solid-js": "^1.9.5"

@@ -49,8 +49,8 @@ importers:
         version: 1.9.10
     devDependencies:
       '@sledge/anvil':
-        specifier: npm:@sledge-pdm/anvil@^1.0.4
-        version: '@sledge-pdm/anvil@1.0.4'
+        specifier: npm:@sledge-pdm/anvil@^1.0.5
+        version: '@sledge-pdm/anvil@1.0.5'
       '@solidjs/testing-library':
         specifier: ^0.8.10
         version: 0.8.10(@solidjs/router@0.15.4(solid-js@1.9.10))(solid-js@1.9.10)
@@ -88,8 +88,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.2
       '@sledge/anvil':
-        specifier: npm:@sledge-pdm/anvil@^1.0.4
-        version: '@sledge-pdm/anvil@1.0.4'
+        specifier: npm:@sledge-pdm/anvil@^1.0.5
+        version: '@sledge-pdm/anvil@1.0.5'
       '@solid-primitives/deep':
         specifier: ^0.3.3
         version: 0.3.3(solid-js@1.9.10)
@@ -194,8 +194,8 @@ importers:
   apps/website:
     dependencies:
       '@sledge/anvil':
-        specifier: npm:@sledge-pdm/anvil@^1.0.4
-        version: '@sledge-pdm/anvil@1.0.4'
+        specifier: npm:@sledge-pdm/anvil@^1.0.5
+        version: '@sledge-pdm/anvil@1.0.5'
       '@solid-primitives/timer':
         specifier: ^1.4.3
         version: 1.4.3(solid-js@1.9.10)
@@ -242,14 +242,14 @@ importers:
   packages/theme:
     dependencies:
       '@sledge/anvil':
-        specifier: npm:@sledge-pdm/anvil@^1.0.4
-        version: '@sledge-pdm/anvil@1.0.4'
+        specifier: npm:@sledge-pdm/anvil@^1.0.5
+        version: '@sledge-pdm/anvil@1.0.5'
 
   packages/ui:
     dependencies:
       '@sledge/anvil':
-        specifier: npm:@sledge-pdm/anvil@^1.0.4
-        version: '@sledge-pdm/anvil@1.0.4'
+        specifier: npm:@sledge-pdm/anvil@^1.0.5
+        version: '@sledge-pdm/anvil@1.0.5'
       solid-js:
         specifier: ^1.9.10
         version: 1.9.10
@@ -957,8 +957,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@sledge-pdm/anvil@1.0.4':
-    resolution: {integrity: sha512-avjMpKF9Y8oGXaeAkpS7lw+t9e9SBZIJDsjMV2wRj2URjWO4PXmPNSpcBe/F6c2LfBZcp/WOMT3F5kEJHwfEIg==}
+  '@sledge-pdm/anvil@1.0.5':
+    resolution: {integrity: sha512-qbOOBMOpeQ7zyoSIW2sSexlgxJUfBlRsN25VYqSYxjT81rHZg3wittUBAbBJJ5HwBnpHUrTabcSX38wZBT4d+g==}
 
   '@solid-devtools/debugger@0.28.1':
     resolution: {integrity: sha512-6qIUI6VYkXoRnL8oF5bvh2KgH71qlJ18hNw/mwSyY6v48eb80ZR48/5PDXufUa3q+MBSuYa1uqTMwLewpay9eg==}
@@ -3577,7 +3577,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.52.4':
     optional: true
 
-  '@sledge-pdm/anvil@1.0.4': {}
+  '@sledge-pdm/anvil@1.0.5': {}
 
   '@solid-devtools/debugger@0.28.1(solid-js@1.9.10)':
     dependencies:

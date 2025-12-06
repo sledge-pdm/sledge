@@ -6,7 +6,7 @@ authors = ["innsbluck"]
 license = "MIT"
 repository = "https://github.com/sledge-pdm/sledge"
 edition = "2024"
-rust-version = "1.89.0"
+rust-version = "1.91.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

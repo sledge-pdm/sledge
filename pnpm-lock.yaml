@@ -237,30 +237,6 @@ importers:
         specifier: ^3.5.0
         version: 3.5.0(vite@7.2.6(@types/node@24.10.1)(yaml@2.8.1))
 
-  packages/anvil:
-    devDependencies:
-      '@types/node':
-        specifier: ^24.10.1
-        version: 24.10.1
-      prettier:
-        specifier: ^3.6.2
-        version: 3.7.4
-      prettier-plugin-organize-imports:
-        specifier: ^4.3.0
-        version: 4.3.0(prettier@3.7.4)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite-plugin-top-level-await:
-        specifier: ^1.6.0
-        version: 1.6.0(rollup@4.52.4)(vite@7.2.6(@types/node@24.10.1)(yaml@2.8.1))
-      vite-plugin-wasm:
-        specifier: ^3.5.0
-        version: 3.5.0(vite@7.2.6(@types/node@24.10.1)(yaml@2.8.1))
-      vitest:
-        specifier: ^4.0.15
-        version: 4.0.15(@types/node@24.10.1)(jsdom@27.2.0)(yaml@2.8.1)
-
   packages/core: {}
 
   packages/theme:
@@ -3974,6 +3950,7 @@ snapshots:
   '@types/node@24.10.1':
     dependencies:
       undici-types: 7.16.0
+    optional: true
 
   '@vercel/analytics@1.6.1': {}
 
@@ -5556,7 +5533,8 @@ snapshots:
 
   typescript@5.9.3: {}
 
-  undici-types@7.16.0: {}
+  undici-types@7.16.0:
+    optional: true
 
   unplugin-utils@0.3.1:
     dependencies:

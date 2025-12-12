@@ -1,15 +1,13 @@
-import { DEFAULT_TABS_BY_SIDE, SECTION_TAB_DEFINITIONS, type SectionTab, type SideSection } from '~/config/SectionTabConfig';
+import { DEFAULT_TAB_CONTROLS_BY_SIDE, SECTION_TAB_CONTROLS, SectionTab, SectionTabControl, type SectionSide } from '~/config/SectionTabConfig';
 
 export type AppearanceStore = {
   leftSide: {
-    shown: boolean;
-    tabs: SectionTab[];
-    selectedTab?: SectionTab;
+    controls: SectionTabControl[];
+    content?: SectionTab;
   };
   rightSide: {
-    shown: boolean;
-    tabs: SectionTab[];
-    selectedTab?: SectionTab;
+    controls: SectionTabControl[];
+    content?: SectionTab;
   };
 
   ruler: boolean;
@@ -17,65 +15,60 @@ export type AppearanceStore = {
   explorerPath?: string;
 };
 
-const defaultShown: Record<SideSection, boolean> = {
-  leftSide: true,
-  rightSide: false,
-};
-
 export const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
-    shown: defaultShown.leftSide,
-    tabs: DEFAULT_TABS_BY_SIDE.leftSide,
-    selectedTab: DEFAULT_TABS_BY_SIDE.leftSide[0],
+    controls: DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide, // controlの可視性、ここでつけるべきか？ { id: "editor", shown: true }
+    content: DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide[0],
   },
   rightSide: {
-    shown: defaultShown.rightSide,
-    tabs: DEFAULT_TABS_BY_SIDE.rightSide,
-    selectedTab: DEFAULT_TABS_BY_SIDE.rightSide[0],
+    controls: DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide,
+    content: DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide[0],
   },
 
   ruler: false,
   onscreenControl: false,
 };
 
-const tabSideMap = new Map<SectionTab, SideSection>(SECTION_TAB_DEFINITIONS.map((tab) => [tab.id, tab.defaultSide]));
+const tabSideMap = new Map<SectionTabControl, SectionSide>(
+  SECTION_TAB_CONTROLS.map((tab) => [tab.id as unknown as SectionTabControl, tab.defaultSide])
+);
 
-const sanitizeSideState = (side: SideSection, source?: Partial<AppearanceStore['leftSide']>): AppearanceStore['leftSide'] => {
-  const defaultTabs = DEFAULT_TABS_BY_SIDE[side];
-  const tabsFromSource = Array.isArray(source?.tabs) ? source?.tabs : [];
+const sanitizeSideState = (side: SectionSide, source?: Partial<AppearanceStore['leftSide']>): AppearanceStore['leftSide'] => {
+  const defaultControls = DEFAULT_TAB_CONTROLS_BY_SIDE[side];
+  const controlsFromSource = Array.isArray(source?.controls) ? source?.controls : [];
 
-  const tabs = tabsFromSource
-    .filter((tab): tab is SectionTab => tabSideMap.has(tab)) // drop unknown IDs
-    .filter((tab) => tabSideMap.get(tab) === side); // keep only tabs belonging to this side
+  const controls = controlsFromSource
+    .filter((control): control is SectionTabControl => tabSideMap.has(control)) // drop unknown IDs
+    .filter((control) => tabSideMap.get(control) === side); // keep only tabs belonging to this side
 
-  const deduped: SectionTab[] = [];
-  tabs.forEach((tab) => {
-    if (!deduped.includes(tab)) deduped.push(tab);
+  const deduped: SectionTabControl[] = [];
+  controls.forEach((control) => {
+    if (!deduped.includes(control)) deduped.push(control);
   });
 
   // Add any missing default tabs for this side in their declared order.
-  defaultTabs.forEach((tab) => {
-    if (!deduped.includes(tab)) deduped.push(tab);
+  defaultControls.forEach((control) => {
+    if (!deduped.includes(control)) deduped.push(control);
   });
 
-  const sanitizedTabs = deduped.length > 0 ? deduped : defaultTabs;
+  const sanitizedControls = deduped.length > 0 ? deduped : defaultControls;
   const legacySelectedIndex = (() => {
     const idx = (source as any)?.selectedIndex;
-    if (typeof idx !== 'number' || Number.isNaN(idx) || sanitizedTabs.length === 0) return undefined;
-    return Math.min(Math.max(idx, 0), sanitizedTabs.length - 1);
+    if (typeof idx !== 'number' || Number.isNaN(idx) || sanitizedControls.length === 0) return undefined;
+    return Math.min(Math.max(idx, 0), sanitizedControls.length - 1);
   })();
 
-  const sanitizedSelectedTab: SectionTab = (() => {
-    if (source?.selectedTab && sanitizedTabs.includes(source.selectedTab)) return source.selectedTab;
-    if (legacySelectedIndex !== undefined) return sanitizedTabs[legacySelectedIndex];
-    return sanitizedTabs[0];
+  const sanitizedContent: SectionTab | undefined = (() => {
+    // @ts-expect-error
+    if (source?.shown === false) return undefined; // legacy hidden side
+    if (source?.content && sanitizedControls.includes(source.content as SectionTabControl)) return source.content;
+    if (legacySelectedIndex !== undefined) return sanitizedControls[legacySelectedIndex];
+    return sanitizedControls[0];
   })();
-  const sanitizedShown = source?.shown ?? defaultShown[side];
 
   return {
-    shown: sanitizedShown,
-    tabs: sanitizedTabs,
-    selectedTab: sanitizedSelectedTab,
+    controls: sanitizedControls,
+    content: sanitizedContent,
   };
 };
 

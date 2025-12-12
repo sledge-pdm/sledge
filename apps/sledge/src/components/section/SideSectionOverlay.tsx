@@ -1,10 +1,10 @@
-import { Component, onMount } from 'solid-js';
+import { Component, onMount, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import interact from 'interactjs';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
-import { EditorTab, EffectsTab, ExplorerTab, ExportTab, HistoryTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
+import { getTabContent } from '~/features/config/TabContentController';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -117,29 +117,6 @@ const SideSectionsOverlay: Component<Props> = (props) => {
     });
   });
 
-  const tabContent = (tab?: SectionTab) => {
-    switch (tab) {
-      case 'editor':
-        return <EditorTab />;
-      case 'effects':
-        return <EffectsTab />;
-      case 'explorer':
-        return <ExplorerTab />;
-      case 'history':
-        return <HistoryTab />;
-      case 'project':
-        return <ProjectTab />;
-      case 'export':
-        return <ExportTab />;
-      case 'danger':
-        // moved to individual component
-        // return <PerilousTab />;
-        return null;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div
       class={container}
@@ -149,20 +126,22 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         left: props.side === 'leftSide' ? '0' : 'unset',
         right: props.side === 'rightSide' ? '0' : 'unset',
 
-        'border-right': props.side === 'leftSide' && appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
+        'border-right': props.side === 'leftSide' && appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
+        'border-left': props.side === 'rightSide' && appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
       }}
     >
       <div
         id={`side-sections-${props.side}`}
         class={sideAreaRoot}
         style={{
-          display: appearanceStore[props.side].shown ? 'flex' : 'none',
-          width: appearanceStore[props.side].shown ? '300px' : '0px',
+          display: appearanceStore[props.side].content ? 'flex' : 'none',
+          width: appearanceStore[props.side].content ? '300px' : '0px',
         }}
       >
         <ScrollFadeContainer class={sideAreaContentWrapper}>
-          <div class={sideAreaContent}>{tabContent(appearanceStore[props.side].selectedTab)}</div>
+          <div class={sideAreaContent}>
+            <Show when={appearanceStore[props.side].content}>{getTabContent(appearanceStore[props.side].content!)()}</Show>
+          </div>
         </ScrollFadeContainer>
       </div>
     </div>

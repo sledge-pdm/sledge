@@ -2,10 +2,10 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
-import { SectionTab } from '~/components/section/SectionTabs';
-import { getTabDefinition } from '~/config/SectionTabConfig';
+import { SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
 import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
-import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
+import { toggleTabContent } from '~/features/config/TabContentController';
+import { appearanceStore, interactStore } from '~/stores/EditorStores';
 
 const sideSectionControlRoot = css`
   display: flex;
@@ -97,33 +97,24 @@ const zoomSliderContainer = css`
 
 interface ItemProps {
   side: 'leftSide' | 'rightSide';
-  tab: SectionTab;
+  control: SectionTabControl | SectionTab; // accept non-control content for individual controls (e.g, "danger")
 }
 
 const ControlItem: Component<ItemProps> = (props) => {
-  const selected = () => appearanceStore[props.side].selectedTab === props.tab && appearanceStore[props.side].shown;
+  const selected = () => appearanceStore[props.side].content === props.control;
   return (
     <div
       class={sideSectionControlItem}
-      style={{ 'margin-top': props.tab === 'danger' ? 'auto' : undefined, 'margin-bottom': props.tab === 'danger' ? '0px' : undefined }}
+      style={{ 'margin-top': props.control === 'danger' ? 'auto' : undefined, 'margin-bottom': props.control === 'danger' ? '0px' : undefined }}
       onClick={() => {
-        if (!appearanceStore[props.side].shown) {
-          setAppearanceStore(props.side, 'shown', true);
-        } else {
-          if (selected()) {
-            setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
-          } else {
-            setAppearanceStore(props.side, 'shown', true);
-          }
-        }
-        setAppearanceStore(props.side, 'selectedTab', props.tab);
+        toggleTabContent(props.side, props.control);
       }}
     >
       <p
         class={selected() ? sideSectionControlTextActive : sideSectionControlText}
-        style={{ color: props.tab === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
+        style={{ color: props.control === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
       >
-        {props.tab}.
+        {props.control}.
       </p>
     </div>
   );
@@ -138,20 +129,18 @@ const SideSectionControl: Component<Props> = (props) => {
       id={`side-section-control-${props.side}`}
       class={sideSectionControlRoot}
       style={{
-        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
+        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
+        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
 
         'z-index': 'var(--zindex-side-section)',
       }}
     >
       <div class={sideSectionControlList}>
-        <For each={appearanceStore[props.side].tabs.filter((t) => getTabDefinition(t)?.operable)}>
-          {(tab) => <ControlItem side={props.side} tab={tab} />}
-        </For>
+        <For each={appearanceStore[props.side].controls}>{(control) => <ControlItem side={props.side} control={control} />}</For>
 
         <Show when={props.side === 'leftSide'}>
           <div class={dangerTabContainer}>
-            <ControlItem tab='danger' side='leftSide' />
+            <ControlItem control='danger' side='leftSide' />
           </div>
         </Show>
         <Show when={props.side === 'rightSide'}>

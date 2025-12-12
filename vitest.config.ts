@@ -14,9 +14,6 @@ export default defineConfig({
     // app-level integration tests + feature-local unit tests
     include: ['apps/sledge/test/**/*.test.ts', 'apps/sledge/test/**/*.test.tsx'],
     exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
-    coverage: {
-      reporter: ['text', 'html'],
-    },
   },
   resolve: {
     alias: {

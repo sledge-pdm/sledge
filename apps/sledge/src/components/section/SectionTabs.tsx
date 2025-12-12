@@ -12,7 +12,7 @@ import CanvasSettings from '~/components/section/project/CanvasSettings';
 import Project from '~/components/section/project/Project';
 import Snapshots from '~/components/section/project/Snapshots';
 
-export type SectionTab = 'editor' | 'effects' | 'explorer' | 'history' | 'project' | 'export' | 'danger';
+export type { SectionTab } from '~/config/SectionTabConfig';
 
 export const EditorTab: Component = () => {
   return (

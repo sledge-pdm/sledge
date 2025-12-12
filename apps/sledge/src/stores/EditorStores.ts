@@ -2,7 +2,7 @@
 import { FileLocation } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { ToolCategoryId, ToolPresets } from '~/features/tools/Tools';
-import { AppearanceStore, defaultAppearanceStore } from '~/stores/editor/AppearanceStore';
+import { AppearanceStore, defaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { ColorStore, defaultColorStore } from '~/stores/editor/ColorStore';
 import { FileStore, defaultFileStore } from '~/stores/editor/FileStore';
 import { InteractStore, defaultInteractStore } from '~/stores/editor/InteractStore';
@@ -105,7 +105,7 @@ export const loadEditorStateStore = (
   lastOpenAs?: 'project' | 'new_project' | 'image';
   lastPath?: FileLocation;
 } => {
-  if (state.appearanceStore) setAppearanceStore(state.appearanceStore);
+  if (state.appearanceStore) setAppearanceStore(sanitizeAppearanceStore(state.appearanceStore));
   if (state.lastSettingsStore) setLastSettingsStore(state.lastSettingsStore);
   if (state.colorStore) setColorStore(state.colorStore);
 

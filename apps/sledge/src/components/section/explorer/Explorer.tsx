@@ -509,11 +509,7 @@ const Explorer: Component = () => {
                         type: 'item',
                         label: 'Export to this folder',
                         onSelect: () => {
-                          setAppearanceStore(
-                            'rightSide',
-                            'selectedIndex',
-                            appearanceStore.rightSide.tabs.findIndex((t) => t === 'export')
-                          );
+                          setAppearanceStore('rightSide', 'selectedTab', 'export');
                           setAppearanceStore('rightSide', 'shown', true);
 
                           eventBus.emit('export:requestExportPath', { newPath: currentPath() });

@@ -4,12 +4,12 @@ export type AppearanceStore = {
   leftSide: {
     shown: boolean;
     tabs: SectionTab[];
-    selectedIndex: number;
+    selectedTab?: SectionTab;
   };
   rightSide: {
     shown: boolean;
     tabs: SectionTab[];
-    selectedIndex: number;
+    selectedTab?: SectionTab;
   };
 
   ruler: boolean;
@@ -26,12 +26,12 @@ export const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
     shown: defaultShown.leftSide,
     tabs: DEFAULT_TABS_BY_SIDE.leftSide,
-    selectedIndex: 0,
+    selectedTab: DEFAULT_TABS_BY_SIDE.leftSide[0],
   },
   rightSide: {
     shown: defaultShown.rightSide,
     tabs: DEFAULT_TABS_BY_SIDE.rightSide,
-    selectedIndex: 0,
+    selectedTab: DEFAULT_TABS_BY_SIDE.rightSide[0],
   },
 
   ruler: false,
@@ -59,13 +59,23 @@ const sanitizeSideState = (side: SideSection, source?: Partial<AppearanceStore['
   });
 
   const sanitizedTabs = deduped.length > 0 ? deduped : defaultTabs;
-  const sanitizedSelectedIndex = Math.min(Math.max(source?.selectedIndex ?? 0, 0), Math.max(sanitizedTabs.length - 1, 0));
+  const legacySelectedIndex = (() => {
+    const idx = (source as any)?.selectedIndex;
+    if (typeof idx !== 'number' || Number.isNaN(idx) || sanitizedTabs.length === 0) return undefined;
+    return Math.min(Math.max(idx, 0), sanitizedTabs.length - 1);
+  })();
+
+  const sanitizedSelectedTab: SectionTab = (() => {
+    if (source?.selectedTab && sanitizedTabs.includes(source.selectedTab)) return source.selectedTab;
+    if (legacySelectedIndex !== undefined) return sanitizedTabs[legacySelectedIndex];
+    return sanitizedTabs[0];
+  })();
   const sanitizedShown = source?.shown ?? defaultShown[side];
 
   return {
     shown: sanitizedShown,
     tabs: sanitizedTabs,
-    selectedIndex: sanitizedSelectedIndex,
+    selectedTab: sanitizedSelectedTab,
   };
 };
 

@@ -4,7 +4,7 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import interact from 'interactjs';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
-import { EditorTab, EffectsTab, ExplorerTab, ExportTab, HistoryTab, PerilousTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
+import { EditorTab, EffectsTab, ExplorerTab, ExportTab, HistoryTab, ProjectTab, SectionTab } from '~/components/section/SectionTabs';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -117,7 +117,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
     });
   });
 
-  const tabContent = (tab: SectionTab) => {
+  const tabContent = (tab?: SectionTab) => {
     switch (tab) {
       case 'editor':
         return <EditorTab />;
@@ -132,13 +132,13 @@ const SideSectionsOverlay: Component<Props> = (props) => {
       case 'export':
         return <ExportTab />;
       case 'danger':
-        return <PerilousTab />;
+        // moved to individual component
+        // return <PerilousTab />;
+        return null;
       default:
         return null;
     }
   };
-
-  const selectedTab = () => appearanceStore[props.side].tabs[appearanceStore[props.side].selectedIndex];
 
   return (
     <div
@@ -162,7 +162,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         }}
       >
         <ScrollFadeContainer class={sideAreaContentWrapper}>
-          <div class={sideAreaContent}>{tabContent(selectedTab())}</div>
+          <div class={sideAreaContent}>{tabContent(appearanceStore[props.side].selectedTab)}</div>
         </ScrollFadeContainer>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab } from '~/components/section/SectionTabs';
+import { getTabDefinition } from '~/config/SectionTabConfig';
 import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
 
@@ -72,6 +73,13 @@ const zoomContainer = css`
   gap: 8px;
 `;
 
+const dangerTabContainer = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  width: 100%;
+`;
+
 const zoomLabelContainer = css`
   writing-mode: vertical-lr;
   vertical-align: middle;
@@ -90,11 +98,10 @@ const zoomSliderContainer = css`
 interface ItemProps {
   side: 'leftSide' | 'rightSide';
   tab: SectionTab;
-  index: number;
 }
 
 const ControlItem: Component<ItemProps> = (props) => {
-  const selected = () => appearanceStore[props.side].selectedIndex === props.index && appearanceStore[props.side].shown;
+  const selected = () => appearanceStore[props.side].selectedTab === props.tab && appearanceStore[props.side].shown;
   return (
     <div
       class={sideSectionControlItem}
@@ -109,7 +116,7 @@ const ControlItem: Component<ItemProps> = (props) => {
             setAppearanceStore(props.side, 'shown', true);
           }
         }
-        setAppearanceStore(props.side, 'selectedIndex', props.index);
+        setAppearanceStore(props.side, 'selectedTab', props.tab);
       }}
     >
       <p
@@ -138,8 +145,15 @@ const SideSectionControl: Component<Props> = (props) => {
       }}
     >
       <div class={sideSectionControlList}>
-        <For each={appearanceStore[props.side].tabs}>{(tab, index) => <ControlItem side={props.side} tab={tab} index={index()} />}</For>
+        <For each={appearanceStore[props.side].tabs.filter((t) => getTabDefinition(t)?.operable)}>
+          {(tab) => <ControlItem side={props.side} tab={tab} />}
+        </For>
 
+        <Show when={props.side === 'leftSide'}>
+          <div class={dangerTabContainer}>
+            <ControlItem tab='danger' side='leftSide' />
+          </div>
+        </Show>
         <Show when={props.side === 'rightSide'}>
           <div class={zoomContainer}>
             <p class={zoomLabelContainer}>x {(interactStore.zoom / interactStore.initialZoom).toFixed(2)}</p>

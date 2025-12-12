@@ -8,7 +8,7 @@ import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-j
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
-import { getTabControlSide } from '~/features/config/TabControlController';
+import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
@@ -183,6 +183,27 @@ const TopMenuBar: Component = () => {
       ],
     },
     {
+      id: 'tab',
+      text: 'Tab.',
+      action: () => {},
+      menu: () => [
+        ...SECTION_TAB_CONTROLS.map((control) => {
+          const shown = isTabControlVisible(control.id);
+          return {
+            label: control.id,
+            type: 'item',
+            icon: shown ? '/icons/misc/check_8.png' : undefined,
+            title: control.id,
+            onSelect: () => {
+              // toggle Controls' visibility, not show/hide content
+              toggleTabControlVisibility(control.id);
+            },
+            retainAfterSelect: true,
+          } as MenuListOption;
+        }),
+      ],
+    },
+    {
       id: 'edit',
       text: 'Edit.',
       action: () => {},
@@ -212,27 +233,6 @@ const TopMenuBar: Component = () => {
             eventBus.emit('clipboard:doPaste', {});
           },
         },
-      ],
-    },
-    {
-      id: 'tab',
-      text: 'Tabs.',
-      action: () => {},
-      menu: () => [
-        ...SECTION_TAB_CONTROLS.map((control) => {
-          const shown = !!getTabControlSide(control.id);
-          return {
-            label: control.id,
-            type: 'item',
-            icon: shown ? '/icons/misc/check_8.png' : undefined,
-            title: control.id,
-            onSelect: () => {
-              // toggleTab(def.id); !!!not this
-              // toggle Controls' visibility, not show/hide content
-            },
-            retainAfterSelect: true,
-          } as MenuListOption;
-        }),
       ],
     },
   ]);

@@ -3,10 +3,12 @@ import { DEFAULT_TAB_CONTROLS_BY_SIDE, SECTION_TAB_CONTROLS, SectionTab, Section
 export type AppearanceStore = {
   leftSide: {
     controls: SectionTabControl[];
+    controlsVisibility: Partial<Record<SectionTabControl, boolean>>;
     content?: SectionTab;
   };
   rightSide: {
     controls: SectionTabControl[];
+    controlsVisibility: Partial<Record<SectionTabControl, boolean>>;
     content?: SectionTab;
   };
 
@@ -17,11 +19,13 @@ export type AppearanceStore = {
 
 export const defaultAppearanceStore: AppearanceStore = {
   leftSide: {
-    controls: DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide, // controlの可視性、ここでつけるべきか？ { id: "editor", shown: true }
+    controls: DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide,
+    controlsVisibility: {},
     content: DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide[0],
   },
   rightSide: {
     controls: DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide,
+    controlsVisibility: {},
     content: DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide[0],
   },
 
@@ -29,13 +33,16 @@ export const defaultAppearanceStore: AppearanceStore = {
   onscreenControl: false,
 };
 
-const tabSideMap = new Map<SectionTabControl, SectionSide>(
-  SECTION_TAB_CONTROLS.map((tab) => [tab.id as unknown as SectionTabControl, tab.defaultSide])
-);
+const tabSideMap = new Map<SectionTabControl, SectionSide>(SECTION_TAB_CONTROLS.map((tab) => [tab.id as SectionTabControl, tab.defaultSide]));
 
 const sanitizeSideState = (side: SectionSide, source?: Partial<AppearanceStore['leftSide']>): AppearanceStore['leftSide'] => {
   const defaultControls = DEFAULT_TAB_CONTROLS_BY_SIDE[side];
-  const controlsFromSource = Array.isArray(source?.controls) ? source?.controls : [];
+  const rawControls = source?.controls;
+  const controlsFromSource = Array.isArray(rawControls)
+    ? rawControls
+    : rawControls && typeof rawControls === 'object'
+      ? (Object.keys(rawControls) as SectionTabControl[])
+      : [];
 
   const controls = controlsFromSource
     .filter((control): control is SectionTabControl => tabSideMap.has(control)) // drop unknown IDs
@@ -51,12 +58,22 @@ const sanitizeSideState = (side: SectionSide, source?: Partial<AppearanceStore['
     if (!deduped.includes(control)) deduped.push(control);
   });
 
-  const sanitizedControls = deduped.length > 0 ? deduped : defaultControls;
+  const orderedControls = defaultControls.filter((control) => deduped.includes(control));
+  const sanitizedControls = orderedControls.length > 0 ? orderedControls : defaultControls;
   const legacySelectedIndex = (() => {
     const idx = (source as any)?.selectedIndex;
     if (typeof idx !== 'number' || Number.isNaN(idx) || sanitizedControls.length === 0) return undefined;
     return Math.min(Math.max(idx, 0), sanitizedControls.length - 1);
   })();
+
+  const visibilitySource =
+    (source?.controlsVisibility as Partial<Record<SectionTabControl, boolean>>) ||
+    (typeof rawControls === 'object' && !Array.isArray(rawControls) ? (rawControls as Partial<Record<SectionTabControl, boolean>>) : {});
+  const sanitizedVisibility: Partial<Record<SectionTabControl, boolean>> = {};
+  sanitizedControls.forEach((control) => {
+    const vis = visibilitySource?.[control];
+    sanitizedVisibility[control] = typeof vis === 'boolean' ? vis : true;
+  });
 
   const sanitizedContent: SectionTab | undefined = (() => {
     // @ts-expect-error
@@ -68,6 +85,7 @@ const sanitizeSideState = (side: SectionSide, source?: Partial<AppearanceStore['
 
   return {
     controls: sanitizedControls,
+    controlsVisibility: sanitizedVisibility,
     content: sanitizedContent,
   };
 };

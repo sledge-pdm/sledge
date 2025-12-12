@@ -1,10 +1,11 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
-import { Slider } from '@sledge/ui';
+import { MenuListOption, showContextMenu, Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
 import { SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
 import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { toggleTabContent } from '~/features/config/TabContentController';
+import { toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
 
 const sideSectionControlRoot = css`
@@ -101,13 +102,30 @@ interface ItemProps {
 }
 
 const ControlItem: Component<ItemProps> = (props) => {
+  const { side, control } = props;
+
   const selected = () => appearanceStore[props.side].content === props.control;
+
+  const contextMenu: MenuListOption[] = [
+    {
+      label: 'hide',
+      type: 'item',
+      onSelect: () => {
+        toggleTabControlVisibility(props.control as SectionTabControl);
+      },
+    },
+  ];
+
   return (
     <div
       class={sideSectionControlItem}
       style={{ 'margin-top': props.control === 'danger' ? 'auto' : undefined, 'margin-bottom': props.control === 'danger' ? '0px' : undefined }}
       onClick={() => {
         toggleTabContent(props.side, props.control);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        showContextMenu(contextMenu, e);
       }}
     >
       <p
@@ -124,6 +142,9 @@ interface Props {
   side: 'leftSide' | 'rightSide';
 }
 const SideSectionControl: Component<Props> = (props) => {
+  const visibleControls = () =>
+    appearanceStore[props.side].controls.filter((control) => appearanceStore[props.side].controlsVisibility?.[control] !== false);
+
   return (
     <div
       id={`side-section-control-${props.side}`}
@@ -136,7 +157,7 @@ const SideSectionControl: Component<Props> = (props) => {
       }}
     >
       <div class={sideSectionControlList}>
-        <For each={appearanceStore[props.side].controls}>{(control) => <ControlItem side={props.side} control={control} />}</For>
+        <For each={visibleControls()}>{(control) => <ControlItem side={props.side} control={control} />}</For>
 
         <Show when={props.side === 'leftSide'}>
           <div class={dangerTabContainer}>

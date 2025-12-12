@@ -2,7 +2,7 @@
 import { FileLocation } from '@sledge/core';
 import { createStore } from 'solid-js/store';
 import { ToolCategoryId, ToolPresets } from '~/features/tools/Tools';
-import { AppearanceStore, defaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
+import { AppearanceStore, createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { ColorStore, defaultColorStore } from '~/stores/editor/ColorStore';
 import { FileStore, defaultFileStore } from '~/stores/editor/FileStore';
 import { InteractStore, defaultInteractStore } from '~/stores/editor/InteractStore';
@@ -12,7 +12,7 @@ import { LastSettingsStore, defaultLastSettingsStore } from '~/stores/global/Las
 import { eventBus } from '~/utils/EventBus';
 
 export const initEditorStore = () => {
-  const [appearanceStore, setAppearanceStore] = createStore<AppearanceStore>(defaultAppearanceStore);
+  const [appearanceStore, setAppearanceStore] = createStore<AppearanceStore>(createDefaultAppearanceStore());
   const [colorStore, setColorStore] = createStore<ColorStore>(defaultColorStore);
   const [fileStore, setFileStore] = createStore<FileStore>(defaultFileStore);
   const [interactStore, setInteractStore] = createStore<InteractStore>(defaultInteractStore);
@@ -105,6 +105,7 @@ export const loadEditorStateStore = (
   lastOpenAs?: 'project' | 'new_project' | 'image';
   lastPath?: FileLocation;
 } => {
+  console.log(state.appearanceStore);
   if (state.appearanceStore) setAppearanceStore(sanitizeAppearanceStore(state.appearanceStore));
   if (state.lastSettingsStore) setLastSettingsStore(state.lastSettingsStore);
   if (state.colorStore) setColorStore(state.colorStore);

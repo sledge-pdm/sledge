@@ -1,4 +1,5 @@
 import { SECTION_TAB_CONTROLS, SectionTabControlDefinition, type SectionSide, type SectionTabControl } from '~/config/SectionTabConfig';
+import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
 
 export const getTabControl = (control: SectionTabControl): SectionTabControlDefinition | undefined =>
@@ -16,17 +17,23 @@ export const moveTabControl = (control: SectionTabControl, targetSide: SectionSi
   const sourceSide = getTabControlSide(control);
   if (!sourceSide) return;
 
-  const currentLeft = appearanceStore.leftSide.controls.filter((c) => c !== control);
-  const currentRight = appearanceStore.rightSide.controls.filter((c) => c !== control);
+  const currentLeft = appearanceStore.leftSide.controls;
+  const currentRight = appearanceStore.rightSide.controls;
+  const filteredLeft = currentLeft.filter((c) => c !== control);
+  const filteredRight = currentRight.filter((c) => c !== control);
 
-  const sourceTabs = sourceSide === 'leftSide' ? currentLeft : currentRight;
-  const targetTabs = targetSide === 'leftSide' ? currentLeft : currentRight;
+  const sourceTabs = sourceSide === 'leftSide' ? filteredLeft : filteredRight;
+  const targetTabs = targetSide === 'leftSide' ? filteredLeft : filteredRight;
 
   const insertIndex = clampIndex(targetIndex ?? targetTabs.length, targetTabs.length + 1);
   const nextTargetTabs = [...targetTabs.slice(0, insertIndex), control, ...targetTabs.slice(insertIndex)];
 
-  setAppearanceStore('leftSide', 'controls', targetSide === 'leftSide' ? nextTargetTabs : sourceTabs);
-  setAppearanceStore('rightSide', 'controls', targetSide === 'rightSide' ? nextTargetTabs : sourceTabs);
+  // Safety: ensure control is only present in the target side even if callers misbehave.
+  const dedupedLeft = targetSide === 'leftSide' ? nextTargetTabs : filteredLeft.filter((c) => c !== control);
+  const dedupedRight = targetSide === 'rightSide' ? nextTargetTabs : filteredRight.filter((c) => c !== control);
+
+  setAppearanceStore('leftSide', 'controls', dedupedLeft);
+  setAppearanceStore('rightSide', 'controls', dedupedRight);
   setAppearanceStore(sourceSide, 'controlsVisibility', (vis) => {
     const next = { ...(vis ?? {}) };
     delete next[control];
@@ -46,6 +53,8 @@ export const moveTabControl = (control: SectionTabControl, targetSide: SectionSi
       : nextTargetTabs[0];
     setAppearanceStore(sourceSide, 'content', nextSelection);
   }
+
+  saveEditorStateImmediate();
 };
 
 export const isTabControlVisible = (control: SectionTabControl): boolean => {
@@ -72,4 +81,6 @@ export const toggleTabControlVisibility = (control: SectionTabControl) => {
     ...(vis ?? {}),
     [control]: !currentlyVisible,
   }));
+
+  saveEditorStateImmediate();
 };

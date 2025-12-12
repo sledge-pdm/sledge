@@ -1,12 +1,5 @@
-import { JSX, lazy } from 'solid-js';
-
-const EditorTab = lazy(() => import('~/components/section/SectionTabs').then((m) => ({ default: m.EditorTab })));
-const EffectsTab = lazy(() => import('~/components/section/SectionTabs').then((m) => ({ default: m.EffectsTab })));
-const ExplorerTab = lazy(() => import('~/components/section/SectionTabs').then((m) => ({ default: m.ExplorerTab })));
-const ProjectTab = lazy(() => import('~/components/section/SectionTabs').then((m) => ({ default: m.ProjectTab })));
-const ExportTab = lazy(() => import('~/components/section/SectionTabs').then((m) => ({ default: m.ExportTab })));
-const HistoryTab = lazy(() => import('~/components/section/SectionTabs').then((m) => ({ default: m.HistoryTab })));
-const PerilousTab = lazy(() => import('~/components/section/SectionTabs').then((m) => ({ default: m.PerilousTab })));
+import { JSX } from 'solid-js';
+import { EditorTab, EffectsTab, ExplorerTab, ExportTab, HistoryTab, PerilousTab, ProjectTab } from '~/config/SectionTabs';
 
 export type SectionSide = 'leftSide' | 'rightSide';
 

@@ -303,6 +303,7 @@ export function createReorder<C = ContainerId, I = ItemId>(options: ReorderOptio
       }
       return;
     }
+    if (e.cancelable) e.preventDefault();
     if (ghostEl) {
       ghostEl.style.top = `${e.clientY - offsetY}px`;
       ghostEl.style.left = `${e.clientX - offsetX}px`;

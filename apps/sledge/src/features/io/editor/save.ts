@@ -10,6 +10,8 @@ export const saveEditorStateDebounced = debounce(saveEditorStateImmediate, 500);
 const LOG_LABEL = 'EditorState';
 
 export async function saveEditorStateImmediate() {
+  if (process.env.VITEST === 'true') return;
+
   try {
     await ensureAppConfigPath();
 

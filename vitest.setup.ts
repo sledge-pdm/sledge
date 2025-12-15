@@ -29,6 +29,11 @@ vi.mock('@tauri-apps/plugin-log', () => ({
   warn: vi.fn(async () => {}),
   error: vi.fn(async () => {}),
 }));
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+  transformCallback: vi.fn((cb: (...args: any[]) => any) => cb),
+  convertFileSrc: vi.fn((path: string) => path),
+}));
 vi.mock('@sledge/ui', () => ({}));
 vi.mock('@sledge/theme', () => ({
   themeOptions: [
@@ -47,3 +52,38 @@ vi.mock('~/webgl/WebGLRenderer', () => ({
 vi.mock('@acab/ecsstatic', () => ({
   css: vi.fn(),
 }));
+
+// Tauri ランタイム依存の window オブジェクトを最低限スタブ
+if (!(globalThis as any).window) {
+  (globalThis as any).window = {} as any;
+}
+(globalThis as any).window.__TAURI_IPC__ = {
+  invoke: vi.fn(),
+  convertFileSrc: vi.fn((path: string) => path),
+  transformCallback: vi.fn((cb: (...args: any[]) => any) => cb),
+};
+
+// Node 環境には OffscreenCanvas がないため、参照されても落ちないよう最低限のスタブを用意
+if (!(globalThis as any).OffscreenCanvas) {
+  class OffscreenCanvasStub {
+    width: number;
+    height: number;
+    constructor(width: number, height: number) {
+      this.width = width;
+      this.height = height;
+    }
+    getContext() {
+      return {
+        drawImage: vi.fn(),
+        putImageData: vi.fn(),
+        getImageData: vi.fn(() => ({
+          data: new Uint8ClampedArray(),
+          width: this.width,
+          height: this.height,
+        })),
+      } as any;
+    }
+    convertToBlob = vi.fn(async () => new Blob());
+  }
+  (globalThis as any).OffscreenCanvas = OffscreenCanvasStub as any;
+}

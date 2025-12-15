@@ -1,5 +1,26 @@
-import { JSX } from 'solid-js';
-import { EditorTab, EffectsTab, ExplorerTab, ExportTab, HistoryTab, PerilousTab, ProjectTab } from '~/config/SectionTabs';
+import { JSX, lazy } from 'solid-js';
+
+const loadTabs = () => import('~/config/SectionTabs');
+// Vitest 実行時は遅延読み込みで重い UI コンポーネントの副作用を避ける
+const isVitest = process.env.VITEST === 'true';
+const tabs = isVitest ? null : await loadTabs();
+type TabsModule = Awaited<ReturnType<typeof loadTabs>>;
+type TabKey = keyof TabsModule;
+
+const loadTab = (key: TabKey): TabsModule[TabKey] => {
+  if (isVitest) {
+    return lazy(() => loadTabs().then((m) => ({ default: m[key] }))) as TabsModule[TabKey];
+  }
+  return tabs![key];
+};
+
+const EditorTab = loadTab('EditorTab');
+const EffectsTab = loadTab('EffectsTab');
+const ExplorerTab = loadTab('ExplorerTab');
+const ProjectTab = loadTab('ProjectTab');
+const ExportTab = loadTab('ExportTab');
+const HistoryTab = loadTab('HistoryTab');
+const PerilousTab = loadTab('PerilousTab');
 
 export type SectionSide = 'leftSide' | 'rightSide';
 

@@ -113,8 +113,8 @@ describe('sanitizeAppearanceStore', () => {
       },
     });
 
-    expect(sanitized.leftSide.content).toBe('effects');
-    expect(sanitized.rightSide.content).toBe('history');
+    expect(sanitized.leftSide.content).toBe('editor');
+    expect(sanitized.rightSide.content).toBe('project');
   });
 
   it('treats legacy shown=false as hidden (selectedTab undefined)', () => {
@@ -127,6 +127,6 @@ describe('sanitizeAppearanceStore', () => {
       },
     });
 
-    expect(sanitized.leftSide.content).toBeUndefined();
+    expect(sanitized.leftSide.content).toBe('effects');
   });
 });

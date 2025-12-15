@@ -7,7 +7,7 @@ import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~
 import { toggleTabContent } from '~/features/config/TabContentController';
 import { moveTabControl } from '~/features/config/TabControlController';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
-import sideControlReorder from '~/utils/useSideControlReorder';
+import { useReorder } from '~/utils/useReorder';
 
 const sideSectionControlRoot = css`
   display: flex;
@@ -143,18 +143,18 @@ const isControlVisible = (side: 'leftSide' | 'rightSide', control: SectionTabCon
 const visibleControlsBySide = (side: 'leftSide' | 'rightSide') => appearanceStore[side].controls.filter((control) => isControlVisible(side, control));
 
 const SideSectionControl: Component<Props> = (props) => {
-  const dnd = sideControlReorder({
-    getItemsBySide: (side) => visibleControlsBySide(side),
-    onDrop: ({ id, fromSide, toSide, fromIndex, toIndex }) => {
-      const adjustedVisibleTo = fromSide === toSide && toIndex > fromIndex ? toIndex - 1 : toIndex;
+  const dnd = useReorder<'leftSide' | 'rightSide', SectionTabControl>({
+    getItems: (side) => visibleControlsBySide(side),
+    onDrop: ({ id, fromContainer, toContainer, fromIndex, toIndex }) => {
+      const adjustedVisibleTo = fromContainer === toContainer && toIndex > fromIndex ? toIndex - 1 : toIndex;
 
       const nextTargetTabs =
-        toSide === fromSide ? appearanceStore[toSide].controls.filter((c) => c !== (id as SectionTabControl)) : appearanceStore[toSide].controls;
-      const visibleTarget = nextTargetTabs.filter((control) => isControlVisible(toSide, control));
+        toContainer === fromContainer ? appearanceStore[toContainer].controls.filter((c) => c !== id) : appearanceStore[toContainer].controls;
+      const visibleTarget = nextTargetTabs.filter((control) => isControlVisible(toContainer, control));
       const targetIndex =
         adjustedVisibleTo >= visibleTarget.length ? nextTargetTabs.length : Math.max(0, nextTargetTabs.indexOf(visibleTarget[adjustedVisibleTo]));
 
-      moveTabControl(id as SectionTabControl, toSide, targetIndex);
+      moveTabControl(id, toContainer, targetIndex);
     },
   });
 

@@ -7,8 +7,6 @@ export function setSavedLocation(path: string) {
 
 // make app config path (%APPDATA%/Roaming/com.innsbluck.sledge/) if not exists
 export async function ensureAppConfigPath() {
-  if (process.env.VITEST === 'true') return;
-
   if (!(await exists('', { baseDir: BaseDirectory.AppConfig }))) {
     await mkdir('', { baseDir: BaseDirectory.AppConfig, recursive: true });
   }

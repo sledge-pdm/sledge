@@ -14,6 +14,20 @@ vi.mock('~/utils/VersionUtils', () => ({
   getCurrentVersion: vi.fn(async () => '0.1.5'),
 }));
 
+// UI-heavy section tabs are stubbed so config imports stay lightweight in Node tests.
+vi.mock('~/config/SectionTabs', () => {
+  const createTab = () => () => null;
+  return {
+    EditorTab: createTab(),
+    EffectsTab: createTab(),
+    ExplorerTab: createTab(),
+    ProjectTab: createTab(),
+    ExportTab: createTab(),
+    HistoryTab: createTab(),
+    PerilousTab: createTab(),
+  };
+});
+
 // Domain-specific matchers (layer order, canvas size, history state)
 import './apps/sledge/test/setupMatchers';
 

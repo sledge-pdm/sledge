@@ -6,7 +6,7 @@ import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPr
 import SectionItem from '~/components/section/SectionItem';
 import { allLayers, moveLayer } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';
-import { useLongPressReorder } from '~/utils/useLongPressReorder';
+import { createReorder } from '~/utils/useReorder';
 import { sectionContent } from '../../SectionStyles';
 import BaseLayerItem from './BaseLayerItem';
 import LayerItem from './LayerItem';
@@ -52,14 +52,12 @@ const LayerList: Component<{}> = () => {
   }
 
   // DnD hook wiring
-  let listRef: HTMLDivElement | undefined;
-  const dnd = useLongPressReorder({
-    getItems: items,
-    getId: (l) => l.id,
-    containerRef: () => listRef,
+  const listContainerId = 'layer-list';
+  const dnd = createReorder<string, string>({
+    getItems: (container) => (container === listContainerId ? items().map((l) => l.id) : []),
     longPressMs: 350,
-    onDrop: (from, to, id) => {
-      const adjusted = to > from ? to - 1 : to;
+    onDrop: ({ fromIndex, toIndex, id }) => {
+      const adjusted = toIndex > fromIndex ? toIndex - 1 : toIndex;
       handleMove(id, adjusted);
     },
   });
@@ -74,11 +72,19 @@ const LayerList: Component<{}> = () => {
           <p class={selectionInfo}>{layerListStore.selected.size} layers selected.</p>
         </Show>
 
-        <div class={layerList} ref={(el) => (listRef = el)}>
+        <div
+          class={layerList}
+          ref={(el) => {
+            dnd.registerContainer(listContainerId, el ?? null);
+          }}
+        >
           <For each={items()}>
             {(layer, index) => {
               return (
-                <div ref={(el) => dnd.registerItem(el, layer.id)} onPointerDown={(e) => dnd.onPointerDown(e, layer.id)}>
+                <div
+                  ref={(el) => dnd.registerItem(listContainerId, el, layer.id)}
+                  onPointerDown={(e) => dnd.onPointerDown(e, listContainerId, layer.id)}
+                >
                   <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />
                 </div>
               );

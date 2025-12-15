@@ -1,6 +1,15 @@
 // Minimal mocks for UI/Tauri dependent modules so unit tests can run in Node.
 import { vi } from 'vitest';
 
+// Some Tauri packages reach directly for the global bridge; stub it early so real modules don't explode if they slip past mocks.
+const tauriIpcMock = {
+  invoke: vi.fn(),
+  convertFileSrc: vi.fn((path: string) => path),
+  transformCallback: vi.fn((cb: (...args: any[]) => any) => cb),
+};
+(globalThis as any).__TAURI_IPC__ = tauriIpcMock;
+(globalThis as any).__TAURI_INTERNALS__ = { transformCallback: tauriIpcMock.transformCallback };
+
 // Mock mitt-based event bus to no-op emit/on during unit tests (avoid importing the real module entirely)
 vi.mock('~/utils/EventBus', () => ({
   eventBus: {
@@ -36,7 +45,15 @@ import './apps/sledge/test/setupMatchers';
 
 // Tauri APIs are not needed for these unit tests; stub them generally to prevent import errors if accidentally referenced.
 vi.mock('@tauri-apps/api/path', () => ({ pictureDir: vi.fn(async () => 'C:/Pictures') }));
-vi.mock('@tauri-apps/plugin-fs', () => ({ exists: vi.fn(), mkdir: vi.fn(), writeFile: vi.fn(), readFile: vi.fn() }));
+vi.mock('@tauri-apps/plugin-fs', () => ({
+  BaseDirectory: { AppConfig: 'app-config' },
+  exists: vi.fn(async () => false),
+  mkdir: vi.fn(async () => {}),
+  writeFile: vi.fn(async () => {}),
+  readFile: vi.fn(async () => new Uint8Array()),
+  writeTextFile: vi.fn(async () => {}),
+  readTextFile: vi.fn(async () => ''),
+}));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ confirm: vi.fn(async () => true), message: vi.fn() }));
 vi.mock('@tauri-apps/plugin-log', () => ({
   info: vi.fn(async () => {}),
@@ -44,9 +61,9 @@ vi.mock('@tauri-apps/plugin-log', () => ({
   error: vi.fn(async () => {}),
 }));
 vi.mock('@tauri-apps/api/core', () => ({
-  invoke: vi.fn(),
-  transformCallback: vi.fn((cb: (...args: any[]) => any) => cb),
-  convertFileSrc: vi.fn((path: string) => path),
+  invoke: tauriIpcMock.invoke,
+  transformCallback: tauriIpcMock.transformCallback,
+  convertFileSrc: tauriIpcMock.convertFileSrc,
 }));
 vi.mock('@sledge/ui', () => ({}));
 vi.mock('@sledge/theme', () => ({

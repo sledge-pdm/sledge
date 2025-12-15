@@ -7,11 +7,15 @@ import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
+import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
+import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
+import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
-import { fileStore } from '~/stores/EditorStores';
+import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
+import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -181,6 +185,63 @@ const TopMenuBar: Component = () => {
       ],
     },
     {
+      id: 'view',
+      text: 'view.',
+      action: () => {},
+      menu: () => [
+        {
+          type: 'label',
+          label: 'canvas',
+        },
+        {
+          label: 'ruler',
+          type: 'item',
+          icon: appearanceStore.ruler ? '/icons/misc/check_8.png' : undefined,
+          onSelect: () => {
+            setAppearanceStore('ruler', (v) => !v);
+          },
+          retainAfterSelect: true,
+        },
+        {
+          label: 'onscreen control',
+          type: 'item',
+          icon: appearanceStore.onscreenControl ? '/icons/misc/check_8.png' : undefined,
+          onSelect: () => {
+            setAppearanceStore('onscreenControl', (v) => !v);
+          },
+          retainAfterSelect: true,
+        },
+        {
+          type: 'label',
+          label: 'tab',
+        },
+        ...SECTION_TAB_CONTROLS.map((control) => {
+          const shown = isTabControlVisible(control.id);
+          return {
+            label: control.id,
+            type: 'item',
+            icon: shown ? '/icons/misc/check_8.png' : undefined,
+            title: control.id,
+            onSelect: () => {
+              // toggle Controls' visibility, not show/hide content
+              toggleTabControlVisibility(control.id);
+            },
+            retainAfterSelect: true,
+          } as MenuListOption;
+        }),
+        {
+          type: 'item',
+          label: 'reset to default.',
+          onSelect: async () => {
+            const sanitizedDefault = sanitizeAppearanceStore(createDefaultAppearanceStore());
+            setAppearanceStore(sanitizedDefault);
+            await saveEditorStateImmediate();
+          },
+          color: color.muted,
+        },
+      ],
+    },
+    {
       id: 'edit',
       text: 'Edit.',
       action: () => {},
@@ -213,6 +274,7 @@ const TopMenuBar: Component = () => {
       ],
     },
   ]);
+
   const rightItems: Item[] = [
     {
       id: 'settings',

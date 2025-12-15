@@ -262,6 +262,7 @@ export const InteractArea: Component = () => {
       }}
       onContextMenu={(e) => {
         e.preventDefault();
+        e.stopImmediatePropagation();
         const position = getCanvasMousePosition(e);
 
         // selection

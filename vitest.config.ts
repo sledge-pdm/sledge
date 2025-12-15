@@ -14,9 +14,6 @@ export default defineConfig({
     // app-level integration tests + feature-local unit tests
     include: ['apps/sledge/test/**/*.test.ts', 'apps/sledge/test/**/*.test.tsx'],
     exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
-    coverage: {
-      reporter: ['text', 'html'],
-    },
   },
   resolve: {
     alias: {
@@ -25,6 +22,8 @@ export default defineConfig({
       '@sledge/theme': path.resolve(__dirname, 'packages/theme'),
       '@sledge/ui': path.resolve(__dirname, 'packages/ui'),
       '@sledge/wasm': path.resolve(__dirname, 'packages/wasm/pkg/sledge_wasm.js'),
+      '@tauri-apps/plugin-fs': path.resolve(__dirname, 'apps/sledge/test/mocks/tauri-plugin-fs.ts'),
+      '@tauri-apps/api/core': path.resolve(__dirname, 'apps/sledge/test/mocks/tauri-api-core.ts'),
     },
   },
 });

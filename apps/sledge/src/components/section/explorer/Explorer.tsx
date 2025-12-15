@@ -9,6 +9,7 @@ import { createStore } from 'solid-js/store';
 import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
 import { getParentDirectory, normalizeDirectoryPath } from '~/components/section/explorer/utils/path';
+import { showTabContent } from '~/features/config/TabContentController';
 import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import { exportDir, getDefinedDriveLetters, isOpenableFile, normalizeJoin, normalizePath } from '~/utils/FileUtils';
@@ -509,12 +510,7 @@ const Explorer: Component = () => {
                         type: 'item',
                         label: 'Export to this folder',
                         onSelect: () => {
-                          setAppearanceStore(
-                            'rightSide',
-                            'selectedIndex',
-                            appearanceStore.rightSide.tabs.findIndex((t) => t === 'export')
-                          );
-                          setAppearanceStore('rightSide', 'shown', true);
+                          showTabContent('export', 'rightSide');
 
                           eventBus.emit('export:requestExportPath', { newPath: currentPath() });
                         },

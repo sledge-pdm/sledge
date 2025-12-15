@@ -2,9 +2,12 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
 import { Component, For, Show } from 'solid-js';
-import { SectionTab } from '~/components/section/SectionTabs';
+import { SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
 import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
-import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
+import { toggleTabContent } from '~/features/config/TabContentController';
+import { moveTabControl } from '~/features/config/TabControlController';
+import { appearanceStore, interactStore } from '~/stores/EditorStores';
+import { useReorder } from '~/utils/useReorder';
 
 const sideSectionControlRoot = css`
   display: flex;
@@ -22,6 +25,15 @@ const sideSectionControlList = css`
   width: 100%;
   height: 100%;
   align-items: center;
+`;
+
+const sideSectionControlReorderArea = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+  position: relative;
+  touch-action: none; /* keep pen/scroll from cancelling reorder */
 `;
 
 const sideSectionControlItem = css`
@@ -68,8 +80,13 @@ const zoomContainer = css`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: auto;
   gap: 8px;
+`;
+
+const dangerTabContainer = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 `;
 
 const zoomLabelContainer = css`
@@ -89,34 +106,29 @@ const zoomSliderContainer = css`
 
 interface ItemProps {
   side: 'leftSide' | 'rightSide';
-  tab: SectionTab;
-  index: number;
+  control: SectionTabControl | SectionTab; // accept non-control content for individual controls (e.g, "danger")
+  shouldSuppressClick?: () => boolean;
 }
 
 const ControlItem: Component<ItemProps> = (props) => {
-  const selected = () => appearanceStore[props.side].selectedIndex === props.index && appearanceStore[props.side].shown;
+  const { side, control, shouldSuppressClick } = props;
+
+  const selected = () => appearanceStore[side].content === control;
+
   return (
     <div
       class={sideSectionControlItem}
-      style={{ 'margin-top': props.tab === 'danger' ? 'auto' : undefined, 'margin-bottom': props.tab === 'danger' ? '0px' : undefined }}
+      style={{ 'margin-top': control === 'danger' ? 'auto' : undefined, 'margin-bottom': control === 'danger' ? '0px' : undefined }}
       onClick={() => {
-        if (!appearanceStore[props.side].shown) {
-          setAppearanceStore(props.side, 'shown', true);
-        } else {
-          if (selected()) {
-            setAppearanceStore(props.side, 'shown', !appearanceStore[props.side].shown);
-          } else {
-            setAppearanceStore(props.side, 'shown', true);
-          }
-        }
-        setAppearanceStore(props.side, 'selectedIndex', props.index);
+        if (shouldSuppressClick?.()) return;
+        toggleTabContent(side, control);
       }}
     >
       <p
         class={selected() ? sideSectionControlTextActive : sideSectionControlText}
-        style={{ color: props.tab === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
+        style={{ color: control === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
       >
-        {props.tab}.
+        {control}.
       </p>
     </div>
   );
@@ -125,21 +137,55 @@ const ControlItem: Component<ItemProps> = (props) => {
 interface Props {
   side: 'leftSide' | 'rightSide';
 }
+
+const isControlVisible = (side: 'leftSide' | 'rightSide', control: SectionTabControl) =>
+  appearanceStore[side].controlsVisibility?.[control] !== false;
+
+const visibleControlsBySide = (side: 'leftSide' | 'rightSide') => appearanceStore[side].controls.filter((control) => isControlVisible(side, control));
+
 const SideSectionControl: Component<Props> = (props) => {
+  const dnd = useReorder<'leftSide' | 'rightSide', SectionTabControl>({
+    getItems: (side) => visibleControlsBySide(side),
+    onDrop: ({ id, fromContainer, toContainer, fromIndex, toIndex }) => {
+      const adjustedVisibleTo = fromContainer === toContainer && toIndex > fromIndex ? toIndex - 1 : toIndex;
+
+      const nextTargetTabs =
+        toContainer === fromContainer ? appearanceStore[toContainer].controls.filter((c) => c !== id) : appearanceStore[toContainer].controls;
+      const visibleTarget = nextTargetTabs.filter((control) => isControlVisible(toContainer, control));
+      const targetIndex =
+        adjustedVisibleTo >= visibleTarget.length ? nextTargetTabs.length : Math.max(0, nextTargetTabs.indexOf(visibleTarget[adjustedVisibleTo]));
+
+      moveTabControl(id, toContainer, targetIndex);
+    },
+  });
+
   return (
     <div
       id={`side-section-control-${props.side}`}
       class={sideSectionControlRoot}
       style={{
-        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].shown ? `1px solid ${color.border}` : 'none',
+        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
+        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
 
         'z-index': 'var(--zindex-side-section)',
       }}
     >
       <div class={sideSectionControlList}>
-        <For each={appearanceStore[props.side].tabs}>{(tab, index) => <ControlItem side={props.side} tab={tab} index={index()} />}</For>
+        <div class={sideSectionControlReorderArea} ref={(el) => dnd.registerContainer(props.side, el)}>
+          <For each={visibleControlsBySide(props.side)}>
+            {(control) => (
+              <div ref={(el) => dnd.registerItem(props.side, el, control)} onPointerDown={(e) => dnd.onPointerDown(e, props.side, control)}>
+                <ControlItem side={props.side} control={control} shouldSuppressClick={dnd.shouldSuppressClick} />
+              </div>
+            )}
+          </For>
+        </div>
 
+        <Show when={props.side === 'leftSide'}>
+          <div class={dangerTabContainer}>
+            <ControlItem control='danger' side='leftSide' />
+          </div>
+        </Show>
         <Show when={props.side === 'rightSide'}>
           <div class={zoomContainer}>
             <p class={zoomLabelContainer}>x {(interactStore.zoom / interactStore.initialZoom).toFixed(2)}</p>

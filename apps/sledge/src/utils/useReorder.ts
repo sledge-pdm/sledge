@@ -231,6 +231,7 @@ export function createReorder<C = ContainerId, I = ItemId>(options: ReorderOptio
   };
 
   const startDrag = (e: PointerEvent) => {
+    if (e.cancelable) e.preventDefault();
     if (!sourceId || !sourceContainer) return;
     const entry = itemMap.get(sourceId);
     if (!entry) return;
@@ -350,7 +351,6 @@ export function createReorder<C = ContainerId, I = ItemId>(options: ReorderOptio
 
   const onPointerDown = (e: PointerEvent, container: C, id: I) => {
     if (e.button !== 0) return;
-    e.preventDefault();
     sourceId = id;
     sourceContainer = container;
     pointerId = e.pointerId;

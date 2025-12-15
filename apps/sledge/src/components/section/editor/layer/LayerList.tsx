@@ -26,7 +26,6 @@ const layerList = css`
   gap: 4px;
   margin-top: 8px;
   width: 100%;
-  touch-action: none; /* prevent pen/scroll gestures from cancelling reorder */
 `;
 
 const selectionInfo = css`

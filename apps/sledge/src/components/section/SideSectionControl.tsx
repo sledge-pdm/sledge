@@ -33,6 +33,7 @@ const sideSectionControlReorderArea = css`
   width: 100%;
   flex: 1;
   position: relative;
+  touch-action: none; /* keep pen/scroll from cancelling reorder */
 `;
 
 const sideSectionControlItem = css`

@@ -102,6 +102,9 @@ interface LayerItemProps {
   index: number;
   isLast?: boolean;
   layer: Layer;
+  // dnd props
+  ref?: (el: HTMLDivElement) => void;
+  onPointerDown?: (e: PointerEvent) => void;
 }
 
 const LayerItem: Component<LayerItemProps> = (props) => {
@@ -191,6 +194,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         `}
       </style>
       <div
+        ref={(el) => props.ref?.(el)}
         style={{
           width: '100%',
           position: 'relative',
@@ -211,6 +215,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         ></div>
         <div
           class={clsx(layerItem, !props.layer.enabled && layerItemDisabled, props.layer.cutFreeze && layerItemCutFreezed)}
+          onPointerDown={props.onPointerDown}
           onClick={onDetClicked}
           onContextMenu={async (e) => {
             e.preventDefault();

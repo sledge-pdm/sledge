@@ -82,12 +82,13 @@ const LayerList: Component<{}> = () => {
           <For each={items()}>
             {(layer, index) => {
               return (
-                <div
+                <LayerItem
                   ref={(el) => dnd.registerItem(listContainerId, el, layer.id)}
                   onPointerDown={(e) => dnd.onPointerDown(e, listContainerId, layer.id)}
-                >
-                  <LayerItem layer={layer} index={index()} isLast={index() === items().length - 1} />
-                </div>
+                  layer={layer}
+                  index={index()}
+                  isLast={index() === items().length - 1}
+                />
               );
             }}
           </For>

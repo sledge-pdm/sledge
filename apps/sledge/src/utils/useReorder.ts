@@ -1,5 +1,4 @@
 import { color } from '@sledge/theme';
-import { makeTimer } from '@solid-primitives/timer';
 
 type ContainerId = string;
 type ItemId = string;
@@ -51,7 +50,7 @@ export function createReorder<C = ContainerId, I = ItemId>(options: ReorderOptio
   const dropLineMap = new Map<C, HTMLDivElement>();
 
   let pointerId: number | null = null;
-  let pressClear: VoidFunction | null = null;
+  let pressClearTimeout: NodeJS.Timeout | null = null;
   let startX = 0;
   let startY = 0;
   let lastClientX = 0;
@@ -71,9 +70,9 @@ export function createReorder<C = ContainerId, I = ItemId>(options: ReorderOptio
   let capturedEl: HTMLElement | null = null;
 
   const clearPressTimer = () => {
-    if (pressClear) {
-      pressClear();
-      pressClear = null;
+    if (pressClearTimeout) {
+      clearTimeout(pressClearTimeout);
+      pressClearTimeout = null;
     }
   };
 
@@ -326,13 +325,9 @@ export function createReorder<C = ContainerId, I = ItemId>(options: ReorderOptio
       toIndex,
     });
     justDropped = true;
-    makeTimer(
-      () => {
-        justDropped = false;
-      },
-      80,
-      setTimeout
-    );
+    setTimeout(() => {
+      justDropped = false;
+    }, 80);
   };
 
   const handlePointerUp = (e: PointerEvent) => {
@@ -359,12 +354,16 @@ export function createReorder<C = ContainerId, I = ItemId>(options: ReorderOptio
     lastClientX = e.clientX;
     lastClientY = e.clientY;
     clearPressTimer();
-    pressClear = makeTimer(() => startDrag(e), LONG_PRESS_MS, setTimeout);
+    pressClearTimeout = setTimeout(() => startDrag(e), LONG_PRESS_MS);
 
     const target = e.currentTarget as HTMLElement | null;
     if (target && target.setPointerCapture) {
       target.setPointerCapture(e.pointerId);
       capturedEl = target;
+
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
+      window.addEventListener('pointercancel', handlePointerCancel);
     }
 
     window.addEventListener('pointermove', handlePointerMove);

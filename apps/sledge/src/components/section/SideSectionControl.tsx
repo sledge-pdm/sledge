@@ -108,21 +108,26 @@ interface ItemProps {
   side: 'leftSide' | 'rightSide';
   control: SectionTabControl | SectionTab; // accept non-control content for individual controls (e.g, "danger")
   shouldSuppressClick?: () => boolean;
+  // dnd props
+  ref?: (el: HTMLDivElement) => void;
+  onPointerDown?: (e: PointerEvent) => void;
 }
 
 const ControlItem: Component<ItemProps> = (props) => {
-  const { side, control, shouldSuppressClick } = props;
+  const { ref, side, control, shouldSuppressClick, onPointerDown } = props;
 
   const selected = () => appearanceStore[side].content === control;
 
   return (
     <div
       class={sideSectionControlItem}
+      ref={(el) => ref?.(el)}
       style={{ 'margin-top': control === 'danger' ? 'auto' : undefined, 'margin-bottom': control === 'danger' ? '0px' : undefined }}
       onClick={() => {
         if (shouldSuppressClick?.()) return;
         toggleTabContent(side, control);
       }}
+      onPointerDown={onPointerDown}
     >
       <p
         class={selected() ? sideSectionControlTextActive : sideSectionControlText}
@@ -174,9 +179,13 @@ const SideSectionControl: Component<Props> = (props) => {
         <div class={sideSectionControlReorderArea} ref={(el) => dnd.registerContainer(props.side, el)}>
           <For each={visibleControlsBySide(props.side)}>
             {(control) => (
-              <div ref={(el) => dnd.registerItem(props.side, el, control)} onPointerDown={(e) => dnd.onPointerDown(e, props.side, control)}>
-                <ControlItem side={props.side} control={control} shouldSuppressClick={dnd.shouldSuppressClick} />
-              </div>
+              <ControlItem
+                ref={(el) => dnd.registerItem(props.side, el, control)}
+                onPointerDown={(e) => dnd.onPointerDown(e, props.side, control)}
+                side={props.side}
+                control={control}
+                shouldSuppressClick={dnd.shouldSuppressClick}
+              />
             )}
           </For>
         </div>

@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Checkbox, Icon, Light, showContextMenu } from '@sledge/ui';
@@ -102,9 +103,6 @@ interface LayerItemProps {
   index: number;
   isLast?: boolean;
   layer: Layer;
-  // dnd props
-  ref?: (el: HTMLDivElement) => void;
-  onPointerDown?: (e: PointerEvent) => void;
 }
 
 const LayerItem: Component<LayerItemProps> = (props) => {
@@ -183,6 +181,23 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     return `${targets.length} layers: ${summarizeLayerNames(targets)}`;
   };
 
+  let itemEl: HTMLDivElement;
+  const [isDragging, setIsDragging] = createSignal(false);
+
+  onMount(() => {
+    const cleanDraggable = draggable({
+      element: itemEl,
+      getInitialData: () => ({ type: 'layer', id: props.layer.id }),
+      onDragStart() {
+        setIsDragging(true);
+      },
+      onDrag: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+
+    return () => cleanDraggable();
+  });
+
   return (
     <>
       <style>
@@ -194,12 +209,12 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         `}
       </style>
       <div
-        ref={(el) => props.ref?.(el)}
+        ref={(el) => (itemEl = el)}
+        data-layer-id={props.layer.id}
         style={{
           width: '100%',
           position: 'relative',
         }}
-        draggable
       >
         <div
           style={{
@@ -216,7 +231,6 @@ const LayerItem: Component<LayerItemProps> = (props) => {
         ></div>
         <div
           class={clsx(layerItem, !props.layer.enabled && layerItemDisabled, props.layer.cutFreeze && layerItemCutFreezed)}
-          onPointerDown={props.onPointerDown}
           onClick={onDetClicked}
           onContextMenu={async (e) => {
             e.preventDefault();

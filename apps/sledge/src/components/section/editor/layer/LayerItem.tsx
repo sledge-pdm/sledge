@@ -199,6 +199,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           width: '100%',
           position: 'relative',
         }}
+        draggable
       >
         <div
           style={{

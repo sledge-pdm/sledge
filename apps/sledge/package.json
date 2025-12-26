@@ -13,6 +13,7 @@
     "stylelint": "stylelint -c ../../.stylelintrc.json \"src/**/*.css\" --fix"
   },
   "dependencies": {
+    "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@jaames/iro": "^5.5.2",
     "@sledge/anvil": "npm:@sledge-pdm/anvil@^1.0.6",
     "@solid-primitives/deep": "^0.3.3",

@@ -128,7 +128,6 @@ export default function Editor() {
     if (filesWithoutPath.length > 0) {
       await addImagesFromFiles(filesWithoutPath);
     }
-
   };
 
   return (

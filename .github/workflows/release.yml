@@ -54,7 +54,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            apps/sledge/src-tauri
+            app/src-tauri
             packages/wasm
 
       - name: install dependencies (ubuntu only)
@@ -82,7 +82,7 @@ jobs:
           releaseId: ${{ github.ref_name }}
           tagName: ${{ github.ref_name }}
           releaseName: ${{ github.ref_name }}
-          projectPath: './apps/sledge'
+          projectPath: './app'
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true

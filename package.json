@@ -11,7 +11,7 @@
     "test": "vitest run -c vitest.config.ts",
     "prettier": "prettier --write . --config .prettierrc",
     "lint:css": "stylelint \"**/*.{css,scss}\" --config .stylelintrc.json",
-    "cargo:format": "cd packages/wasm && cargo fmt && cd ../../apps/sledge/src-tauri && cargo fmt",
+    "cargo:format": "cd packages/wasm && cargo fmt && cd ../../app/src-tauri && cargo fmt",
     "format": "pnpm prettier && pnpm cargo:format",
     "prepare": ""
   },

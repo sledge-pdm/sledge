@@ -39,15 +39,15 @@ export default defineConfig({
       ignored: ['**/src-tauri/**', '**/.vite-inspect/**'],
     },
   },
-  publicDir: '../../assets',
+  publicDir: '../assets',
   resolve: {
     alias: {
       '~': path.join(__dirname, 'src'),
-      '@sledge/core': path.join(__dirname, '../../packages/core'),
-      '@sledge/theme': path.join(__dirname, '../../packages/theme'),
-      '@sledge/ui': path.join(__dirname, '../../packages/ui'),
-      '@sledge/wasm': path.join(__dirname, '../../packages/wasm/pkg/sledge_wasm.js'),
-      '@assets': path.join(__dirname, '../../assets'),
+      '@sledge/core': path.join(__dirname, '../packages/core'),
+      '@sledge/theme': path.join(__dirname, '../packages/theme'),
+      '@sledge/ui': path.join(__dirname, '../packages/ui'),
+      '@sledge/wasm': path.join(__dirname, '../packages/wasm/pkg/sledge_wasm.js'),
+      '@assets': path.join(__dirname, '../assets'),
     },
   },
 });

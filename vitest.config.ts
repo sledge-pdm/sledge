@@ -12,18 +12,18 @@ export default defineConfig({
     env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
     setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
     // app-level integration tests + feature-local unit tests
-    include: ['apps/sledge/test/**/*.test.ts', 'apps/sledge/test/**/*.test.tsx'],
+    include: ['app/test/**/*.test.ts', 'app/test/**/*.test.tsx'],
     exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
   },
   resolve: {
     alias: {
-      '~': path.resolve(__dirname, 'apps/sledge/src'),
+      '~': path.resolve(__dirname, 'app/src'),
       '@sledge/core': path.resolve(__dirname, 'packages/core'),
       '@sledge/theme': path.resolve(__dirname, 'packages/theme'),
       '@sledge/ui': path.resolve(__dirname, 'packages/ui'),
       '@sledge/wasm': path.resolve(__dirname, 'packages/wasm/pkg/sledge_wasm.js'),
-      '@tauri-apps/plugin-fs': path.resolve(__dirname, 'apps/sledge/test/mocks/tauri-plugin-fs.ts'),
-      '@tauri-apps/api/core': path.resolve(__dirname, 'apps/sledge/test/mocks/tauri-api-core.ts'),
+      '@tauri-apps/plugin-fs': path.resolve(__dirname, 'app/test/mocks/tauri-plugin-fs.ts'),
+      '@tauri-apps/api/core': path.resolve(__dirname, 'app/test/mocks/tauri-api-core.ts'),
     },
   },
 });

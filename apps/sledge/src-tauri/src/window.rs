@@ -121,7 +121,8 @@ pub async fn open_window(
                 .accept_first_mouse(true)
                 .closable(true)
                 .maximizable(true)
-                .minimizable(true);
+                .minimizable(true)
+                .disable_drag_drop_handler();
         }
         SledgeWindowKind::Restore => {
             window_inner_width = 500.0;

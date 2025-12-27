@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { clsx } from '@sledge/core';
 import { color } from '@sledge/theme';
 import { Checkbox, Icon, Light, showContextMenu } from '@sledge/ui';
@@ -16,18 +17,33 @@ import {
   toggleLayerVisibility,
 } from '~/features/layer/service';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { flexCol, flexRow } from '~/styles/styles';
+import { flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { updateWebGLCanvas } from '~/webgl/service';
 
-const layerItem = css`
+const root = css`
+  width: 100%;
+  position: relative;
+`;
+
+const activeBackground = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: -1;
+`;
+
+const content = css`
   display: flex;
   flex-direction: row;
   height: 40px;
   cursor: pointer;
 `;
 
-const layerItemHandle = css`
+const handle = css`
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -35,7 +51,7 @@ const layerItemHandle = css`
   background-color: var(--color-border);
 `;
 
-const layerItemSpinner = css`
+const spinner = css`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -47,15 +63,27 @@ const layerItemSpinner = css`
   }
 `;
 
-const layerItemDisabled = css`
+const contentDisabled = css`
   opacity: 0.3;
 `;
 
-const layerItemCutFreezed = css`
+const contentCutFreezed = css`
   opacity: 0.5;
 `;
 
-const layerItemIndex = css`
+const textContent = css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex-grow: 1;
+  padding-left: 6px;
+  justify-content: center;
+  gap: 1px;
+  overflow: hidden;
+  border-left: 1px solid var(--color-border);
+`;
+
+const index = css`
   white-space: nowrap;
   font-size: var(--text-sm);
   opacity: 0.3;
@@ -63,13 +91,13 @@ const layerItemIndex = css`
   width: 16px;
 `;
 
-const layerItemType = css`
+const type = css`
   white-space: nowrap;
   font-size: var(--text-sm);
   opacity: 0.75;
 `;
 
-const layerItemName = css`
+const name = css`
   font-family: ZFB03B, k8x12;
   font-size: 16px;
   margin-left: 18px;
@@ -78,6 +106,13 @@ const layerItemName = css`
   -webkit-line-clamp: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const nameInput = css`
+  outline: none;
+  border: none;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--color-on-background);
 `;
 
 const activeLight = css`
@@ -180,6 +215,23 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     return `${targets.length} layers: ${summarizeLayerNames(targets)}`;
   };
 
+  let itemEl: HTMLDivElement;
+  const [isDragging, setIsDragging] = createSignal(false);
+
+  onMount(() => {
+    const cleanDraggable = draggable({
+      element: itemEl,
+      getInitialData: () => ({ type: 'layer', id: props.layer.id }),
+      onDragStart() {
+        setIsDragging(true);
+      },
+      onDrag: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+
+    return () => cleanDraggable();
+  });
+
   return (
     <>
       <style>
@@ -190,27 +242,16 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           }
         `}
       </style>
-      <div
-        style={{
-          width: '100%',
-          position: 'relative',
-        }}
-      >
+      <div class={root} ref={(el) => (itemEl = el)} data-layer-id={props.layer.id}>
         <div
+          class={activeBackground}
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
             'background-color': isActive() ? color.active : color.surface,
             opacity: isActive() ? 0.15 : 1.0,
-            'pointer-events': 'none',
-            'z-index': -1,
           }}
         ></div>
         <div
-          class={clsx(layerItem, !props.layer.enabled && layerItemDisabled, props.layer.cutFreeze && layerItemCutFreezed)}
+          class={clsx(content, !props.layer.enabled && contentDisabled, props.layer.cutFreeze && contentCutFreezed)}
           onClick={onDetClicked}
           onContextMenu={async (e) => {
             e.preventDefault();
@@ -241,15 +282,15 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           }}
         >
           <div
-            class={layerItemHandle}
+            class={handle}
             style={{
               'pointer-events': props.layer.enabled ? 'auto' : 'none',
             }}
           >
-            <div class={layerItemSpinner} onClick={handleMoveUp}>
+            <div class={spinner} onClick={handleMoveUp}>
               <Icon src='/icons/misc/triangle_7.png' base={7} color={color.surface} transform='rotate(180deg)' />
             </div>
-            <div class={layerItemSpinner} onClick={handleMoveDown}>
+            <div class={spinner} onClick={handleMoveDown}>
               <Icon src='/icons/misc/triangle_7.png' base={7} color={color.surface} />
             </div>
           </div>
@@ -271,34 +312,21 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           </Show>
           <LayerPreview layer={props.layer} onClick={onPreviewClicked} sizingMode='height-based' referenceSize={40} maxWidth={80} fitMode='cover' />
           <div
-            class={flexCol}
+            class={textContent}
             style={{
-              width: '100%',
-              'flex-grow': 1,
-              'padding-left': '6px',
-              'justify-content': 'center',
-              gap: '1px',
-              overflow: 'hidden',
-              'border-left': `1px solid ${color.border}`,
               'pointer-events': props.layer.enabled ? 'auto' : 'none',
             }}
           >
             <div class={flexRow}>
-              <p class={layerItemIndex}>{allLayers().length - props.index}.</p>
-              <p class={layerItemType}>
+              <p class={index}>{allLayers().length - props.index}.</p>
+              <p class={type}>
                 {props.layer.mode}. {Math.ceil(props.layer.opacity * 100)}%{props.layer.enabled ? '' : ` (inactive)`}
               </p>
             </div>
             {isNameChanging() ? (
               <input
                 ref={(ref) => (inputRef = ref)}
-                class={layerItemName}
-                style={{
-                  outline: 'none',
-                  border: 'none',
-                  'letter-spacing': '1px',
-                  'border-bottom': `1px solid ${color.onBackground}`,
-                }}
+                class={clsx(name, nameInput)}
                 value={props.layer.name}
                 onInput={(e) => {
                   setLayerName(props.layer.id, e.target.value);
@@ -320,7 +348,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               />
             ) : (
               <p
-                class={layerItemName}
+                class={name}
                 ondblclick={() => {
                   setNameChanging(true);
                   setOriginalName(props.layer.name);

@@ -93,6 +93,18 @@ export async function addImagesFromLocal(imagePaths: string | string[], forceFit
   }
 }
 
+export async function addImagesFromFiles(files: File[], forceFit?: boolean) {
+  await Promise.all(
+    files.map(async (file) => {
+      const entry = await createEntryFromFile(file, forceFit);
+      insertEntry(entry, false);
+    })
+  );
+  if (files.length > 0) {
+    logUserInfo(`Added ${files.length} image(s) to image pool.`);
+  }
+}
+
 export async function addImagesFromRawBuffer(rawBuffer: RawPixelData, width: number, height: number, forceFit?: boolean) {
   const entry = await createEntryFromRawBuffer(rawBuffer, width, height, forceFit);
   insertEntry(entry, false);
@@ -188,6 +200,18 @@ export async function createEntryFromLocalImage(imagePath: string, forceFit?: bo
   bitmap.close();
   const entry = createEntry(webpBuffer, width, height, forceFit);
   entry.descriptionName = pathToFileLocation(imagePath)?.name;
+  return entry;
+}
+
+export async function createEntryFromFile(file: File, forceFit?: boolean) {
+  const bitmap = await createImageBitmap(file);
+  const width = bitmap.width;
+  const height = bitmap.height;
+  const imageData = await loadImageData(bitmap);
+  const webpBuffer = rawToWebp(imageData.data, width, height);
+  bitmap.close();
+  const entry = createEntry(webpBuffer, width, height, forceFit);
+  entry.descriptionName = file.name;
   return entry;
 }
 

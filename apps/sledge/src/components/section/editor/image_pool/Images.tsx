@@ -36,7 +36,7 @@ const noImageText = css`
   color: var(--color-muted);
 `;
 
-const Images: Component<{}> = () => {
+const Images: Component = () => {
   const selectedEntry = createMemo<ImagePoolEntry | undefined>(() =>
     imagePoolStore.selectedEntryId ? getEntry(imagePoolStore.selectedEntryId) : undefined
   );

@@ -16,3 +16,12 @@ export async function readProjectFromPath(path: string): Promise<any | null> {
     return null;
   }
 }
+
+export function readProjectFromBytes(data: Uint8Array): any | null {
+  try {
+    return packr.unpack(data) as any;
+  } catch (error) {
+    logSystemError('Failed to read project from bytes.', { label: LOG_LABEL, details: [error] });
+    return null;
+  }
+}

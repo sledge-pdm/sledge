@@ -8,7 +8,7 @@ const loadingText = css`
   font-size: 12px;
 `;
 
-const Loading: Component = (props) => {
+const Loading: Component = () => {
   return (
     <div class={pageRoot} style={{ 'align-items': 'center', 'justify-content': 'center' }}>
       <p class={loadingText}>loading.</p>

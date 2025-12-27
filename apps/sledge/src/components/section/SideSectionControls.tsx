@@ -1,15 +1,16 @@
 import { css } from '@acab/ecsstatic';
+import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { color } from '@sledge/theme';
 import { Slider } from '@sledge/ui';
-import { Component, For, Show } from 'solid-js';
+import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
 import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { toggleTabContent } from '~/features/config/TabContentController';
 import { moveTabControl } from '~/features/config/TabControlController';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
-import { useReorder } from '~/utils/useReorder';
+import { ensureDropLine, getDropCandidates, getDropIndex, hideDropLine, setDraggingCursor, updateDropLine } from '~/utils/dndUtils';
 
-const sideSectionControlRoot = css`
+const controlsRoot = css`
   display: flex;
   flex-direction: column;
   box-sizing: content-box;
@@ -19,7 +20,7 @@ const sideSectionControlRoot = css`
   background-color: var(--color-background);
 `;
 
-const sideSectionControlList = css`
+const controlsList = css`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -27,7 +28,7 @@ const sideSectionControlList = css`
   align-items: center;
 `;
 
-const sideSectionControlReorderArea = css`
+const reorderArea = css`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -36,7 +37,7 @@ const sideSectionControlReorderArea = css`
   touch-action: none; /* keep pen/scroll from cancelling reorder */
 `;
 
-const sideSectionControlItem = css`
+const itemRoot = css`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -57,7 +58,7 @@ const sideSectionControlItem = css`
   }
 `;
 
-const sideSectionControlText = css`
+const label = css`
   font-family: ZFB09;
   font-size: 8px;
   white-space: nowrap;
@@ -66,7 +67,7 @@ const sideSectionControlText = css`
   opacity: 0.5;
 `;
 
-const sideSectionControlTextActive = css`
+const labelActive = css`
   font-family: ZFB09;
   font-size: 8px;
   white-space: nowrap;
@@ -107,27 +108,45 @@ const zoomSliderContainer = css`
 interface ItemProps {
   side: 'leftSide' | 'rightSide';
   control: SectionTabControl | SectionTab; // accept non-control content for individual controls (e.g, "danger")
-  shouldSuppressClick?: () => boolean;
+  draggable?: boolean;
 }
 
 const ControlItem: Component<ItemProps> = (props) => {
-  const { side, control, shouldSuppressClick } = props;
+  const { side, control } = props;
+  let itemEl: HTMLDivElement | undefined;
+  const [isDragging, setIsDragging] = createSignal(false);
 
   const selected = () => appearanceStore[side].content === control;
 
+  onMount(() => {
+    if (!props.draggable || !itemEl) return;
+    const cleanup = draggable({
+      element: itemEl,
+      getInitialData: () => ({ type: 'section-control', id: control, fromSide: side }),
+      onDragStart: () => {
+        setIsDragging(true);
+        setDraggingCursor(true);
+      },
+      onDrop: () => {
+        setIsDragging(false);
+        setDraggingCursor(false);
+      },
+    });
+    onCleanup(() => cleanup());
+  });
+
   return (
     <div
-      class={sideSectionControlItem}
+      class={itemRoot}
+      ref={(el) => (itemEl = el)}
+      data-control-id={props.draggable ? String(control) : undefined}
       style={{ 'margin-top': control === 'danger' ? 'auto' : undefined, 'margin-bottom': control === 'danger' ? '0px' : undefined }}
       onClick={() => {
-        if (shouldSuppressClick?.()) return;
+        if (props.draggable && isDragging()) return;
         toggleTabContent(side, control);
       }}
     >
-      <p
-        class={selected() ? sideSectionControlTextActive : sideSectionControlText}
-        style={{ color: control === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
-      >
+      <p class={selected() ? labelActive : label} style={{ color: control === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}>
         {control}.
       </p>
     </div>
@@ -143,26 +162,69 @@ const isControlVisible = (side: 'leftSide' | 'rightSide', control: SectionTabCon
 
 const visibleControlsBySide = (side: 'leftSide' | 'rightSide') => appearanceStore[side].controls.filter((control) => isControlVisible(side, control));
 
-const SideSectionControl: Component<Props> = (props) => {
-  const dnd = useReorder<'leftSide' | 'rightSide', SectionTabControl>({
-    getItems: (side) => visibleControlsBySide(side),
-    onDrop: ({ id, fromContainer, toContainer, fromIndex, toIndex }) => {
-      const adjustedVisibleTo = fromContainer === toContainer && toIndex > fromIndex ? toIndex - 1 : toIndex;
+const SideSectionControls: Component<Props> = (props) => {
+  let listEl: HTMLDivElement | undefined;
+  let dropLineEl: HTMLDivElement | null = null;
 
-      const nextTargetTabs =
-        toContainer === fromContainer ? appearanceStore[toContainer].controls.filter((c) => c !== id) : appearanceStore[toContainer].controls;
-      const visibleTarget = nextTargetTabs.filter((control) => isControlVisible(toContainer, control));
-      const targetIndex =
-        adjustedVisibleTo >= visibleTarget.length ? nextTargetTabs.length : Math.max(0, nextTargetTabs.indexOf(visibleTarget[adjustedVisibleTo]));
+  const getCandidates = (containerEl: HTMLElement, sourceId: SectionTabControl) =>
+    getDropCandidates(containerEl, '[data-control-id]', String(sourceId), (el) => el.dataset.controlId);
 
-      moveTabControl(id, toContainer, targetIndex);
-    },
+  onMount(() => {
+    if (!listEl) return;
+    const cleanup = dropTargetForElements({
+      element: listEl,
+      canDrop: ({ source }) => {
+        const data = source.data as { type?: string };
+        return data?.type === 'section-control';
+      },
+      onDrop: ({ source, location }) => {
+        const data = source.data as { type?: string; id?: SectionTabControl; fromSide?: 'leftSide' | 'rightSide' };
+        if (data?.type !== 'section-control' || !data.id || !data.fromSide || !listEl) return;
+
+        const fromSide = data.fromSide;
+        const toSide = props.side;
+        const visibleFrom = visibleControlsBySide(fromSide);
+        const fromIndex = visibleFrom.indexOf(data.id);
+        if (fromIndex < 0) return;
+
+        const candidates = getCandidates(listEl, data.id);
+        const toIndex = getDropIndex(candidates, location.current.input.clientY);
+        if (fromSide === toSide && toIndex === fromIndex) return;
+
+        const nextTargetTabs = toSide === fromSide ? appearanceStore[toSide].controls.filter((c) => c !== data.id) : appearanceStore[toSide].controls;
+        const visibleTarget = nextTargetTabs.filter((control) => isControlVisible(toSide, control));
+        const targetIndex = toIndex >= visibleTarget.length ? nextTargetTabs.length : Math.max(0, nextTargetTabs.indexOf(visibleTarget[toIndex]));
+
+        moveTabControl(data.id, toSide, targetIndex);
+        hideDropLine(dropLineEl);
+      },
+      onDrag: ({ source, location }) => {
+        const data = source.data as { type?: string; id?: SectionTabControl; fromSide?: 'leftSide' | 'rightSide' };
+        if (data?.type !== 'section-control' || !data.id || !data.fromSide || !listEl) return;
+        const candidates = getCandidates(listEl, data.id);
+        const toIndex = getDropIndex(candidates, location.current.input.clientY);
+        const visibleFrom = visibleControlsBySide(data.fromSide);
+        const fromIndex = visibleFrom.indexOf(data.id);
+        if (data.fromSide === props.side && toIndex === fromIndex) {
+          hideDropLine(dropLineEl);
+          return;
+        }
+
+        dropLineEl = ensureDropLine(listEl, dropLineEl);
+        updateDropLine(dropLineEl, listEl, candidates, toIndex, 1);
+      },
+      onDragLeave: () => {
+        hideDropLine(dropLineEl);
+      },
+    });
+
+    onCleanup(() => cleanup());
   });
 
   return (
     <div
       id={`side-section-control-${props.side}`}
-      class={sideSectionControlRoot}
+      class={controlsRoot}
       style={{
         'border-right': props.side === 'leftSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
         'border-left': props.side === 'rightSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
@@ -170,15 +232,9 @@ const SideSectionControl: Component<Props> = (props) => {
         'z-index': 'var(--zindex-side-section)',
       }}
     >
-      <div class={sideSectionControlList}>
-        <div class={sideSectionControlReorderArea} ref={(el) => dnd.registerContainer(props.side, el)}>
-          <For each={visibleControlsBySide(props.side)}>
-            {(control) => (
-              <div ref={(el) => dnd.registerItem(props.side, el, control)} onPointerDown={(e) => dnd.onPointerDown(e, props.side, control)}>
-                <ControlItem side={props.side} control={control} shouldSuppressClick={dnd.shouldSuppressClick} />
-              </div>
-            )}
-          </For>
+      <div class={controlsList}>
+        <div class={reorderArea} ref={(el) => (listEl = el)}>
+          <For each={visibleControlsBySide(props.side)}>{(control) => <ControlItem side={props.side} control={control} draggable={true} />}</For>
         </div>
 
         <Show when={props.side === 'leftSide'}>
@@ -216,4 +272,4 @@ const SideSectionControl: Component<Props> = (props) => {
   );
 };
 
-export default SideSectionControl;
+export default SideSectionControls;

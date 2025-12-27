@@ -24,6 +24,10 @@ export class EraserTool extends PenTool {
     return super.draw(args, transparent);
   }
 
+  onRawMove(args: ToolArgs): ToolResult {
+    return super.drawRaw(args, transparent);
+  }
+
   onEnd(args: ToolArgs): ToolResult {
     return super.onEnd(args);
   }

@@ -15,6 +15,7 @@ import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 export enum DrawState {
   start,
   move,
+  rawmove,
   end,
   cancel,
 }
@@ -113,6 +114,9 @@ export default class CanvasToolOperator {
         break;
       case DrawState.move:
         toolResult = tool.behavior.onMove(toolArgs);
+        break;
+      case DrawState.rawmove:
+        toolResult = tool.behavior.onRawMove ? tool.behavior.onRawMove(toolArgs) : tool.behavior.onMove(toolArgs);
         break;
       case DrawState.end:
         toolResult = tool.behavior.onEnd(toolArgs);

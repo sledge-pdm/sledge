@@ -13,8 +13,9 @@ import { logSystemInfo, logSystemWarn, logUserError } from '~/features/log/servi
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPositionWithinSelection } from '~/features/selection/SelectionOperator';
 import { getActiveToolCategory } from '~/features/tools/ToolController';
-import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
+import { TOOL_CATEGORIES, TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
@@ -51,6 +52,12 @@ export const StrokeCanvas: Component = () => {
   const [isInStroke, setIsInStroke] = createSignal<boolean>(false);
   const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
   const handledPointerDown = new WeakSet<PointerEvent>();
+
+  function shouldUseRawMove() {
+    if (!globalConfig.debug.useRawMove) return false;
+    const activeToolId = getActiveToolCategory().id;
+    return activeToolId === TOOL_CATEGORIES.PEN || activeToolId === TOOL_CATEGORIES.ERASER;
+  }
 
   function isDrawableClick(e: PointerEvent): boolean {
     if (interactStore.isCanvasSizeFrameMode) {
@@ -122,14 +129,30 @@ export const StrokeCanvas: Component = () => {
   }
 
   function handlePointerMove(e: PointerEvent) {
+    handleMove('move', e);
+  }
+
+  function handlePointerRawUpdate(e: PointerEvent) {
+    handleMove('rawmove', e);
+  }
+
+  function handleMove(type: 'move' | 'rawmove', e: PointerEvent) {
+    const fnName = type === 'move' ? 'handlePointerMove' : 'handlePointerRawUpdate';
+
     const start = new Date().getTime();
-    logDebug(`handlePointerMove start`);
+    logDebug(`${fnName} start`);
+
+    if (type === 'rawmove' && !shouldUseRawMove()) {
+      const end = new Date().getTime();
+      logDebug(`${fnName} executed in ${end - start} ms`);
+      return;
+    }
 
     const { canvasPosition, onCanvas } = updatePointerState(e);
 
     if (!isDrawableClick(e)) {
       setIsInStroke(false);
-      logDebugWarn(`handlePointerMove cancelled because not drawable click`);
+      logDebugWarn(`handlePointerRawUpdate cancelled because not drawable click`);
       return;
     }
 
@@ -140,14 +163,14 @@ export const StrokeCanvas: Component = () => {
     }
 
     if (!isInStroke() || !lastPos()) {
-      logDebugWarn(`handlePointerMove cancelled because not in stroke or no last position`);
+      logDebugWarn(`${fnName} cancelled because not in stroke or no last position`);
       return;
     }
 
-    operator.handleDraw(DrawState.move, e, getActiveToolCategory(), canvasPosition, lastPos());
+    operator.handleDraw(DrawState.rawmove, e, getActiveToolCategory(), canvasPosition, lastPos());
     setLastPos(canvasPosition);
     const end = new Date().getTime();
-    logDebug(`handlePointerMove executed in ${end - start} ms`);
+    logDebug(`${fnName} executed in ${end - start} ms`);
   }
 
   function handlePointerUp(e: PointerEvent) {
@@ -190,6 +213,8 @@ export const StrokeCanvas: Component = () => {
 
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointermove', handlePointerMove);
+    // @ts-ignore
+    window.addEventListener('pointerrawupdate', handlePointerRawUpdate);
     window.addEventListener('pointercancel', handlePointerCancel);
 
     getCurrentWindow()
@@ -212,6 +237,8 @@ export const StrokeCanvas: Component = () => {
 
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointermove', handlePointerMove);
+      // @ts-ignore
+      window.removeEventListener('pointerrawupdate', handlePointerRawUpdate);
       window.removeEventListener('pointercancel', handlePointerCancel);
       unlistenFocusChanged?.();
     };

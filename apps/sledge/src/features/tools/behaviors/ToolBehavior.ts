@@ -12,11 +12,9 @@ export interface ToolBehavior {
   isInstantTool?: boolean;
 
   onStart: (args: ToolArgs) => ToolResult;
-
   onMove: (args: ToolArgs) => ToolResult;
-
+  onRawMove?: (args: ToolArgs) => ToolResult;
   onEnd: (args: ToolArgs) => ToolResult;
-
   onCancel?: (args: ToolArgs) => ToolResult;
 }
 

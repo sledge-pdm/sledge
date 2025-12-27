@@ -10,6 +10,7 @@ import { StrokeChunk } from '~/features/tools/behaviors/draw/pen/StrokeChunk';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+import { globalConfig } from '~/stores/GlobalStores';
 
 type StrokeContext = {
   layerId: string;
@@ -130,6 +131,10 @@ export class PenTool implements ToolBehavior {
     }
   }
 
+  onRawMove(args: ToolArgs): ToolResult {
+    return this.drawRaw(args, args.color);
+  }
+
   protected categoryId: ToolCategoryId = TOOL_CATEGORIES.PEN;
 
   private SNAP_ANGLE = Math.PI / 12;
@@ -175,7 +180,52 @@ export class PenTool implements ToolBehavior {
     });
     if (diffs) this.strokeChunk.add(context.anvil.getWidth(), diffs);
 
-    if (rawLastPosition !== undefined) {
+    if (!globalConfig.debug.disableCompletionLine && rawLastPosition !== undefined) {
+      const fromCp = this.centerPosition(lastPosition, rawLastPosition, context.size, context.dotMagnification);
+      const lineDiffs = putShapeLine({
+        anvil: context.anvil,
+        posX: cp.x,
+        posY: cp.y,
+        fromPosX: fromCp.x,
+        fromPosY: fromCp.y,
+        shape: context.shapeMask,
+        color,
+        manualDiff: true,
+        pixelAcc,
+      });
+      if (lineDiffs) this.strokeChunk.add(context.anvil.getWidth(), lineDiffs);
+    }
+
+    return {
+      shouldUpdate: true,
+      shouldRegisterToHistory: false,
+    };
+  }
+
+  protected drawRaw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBA): ToolResult {
+    const resolvedPresetName = presetName ?? DEFAULT_PRESET;
+    if (event?.buttons === 2) {
+      color = transparent;
+    }
+
+    const context = this.getStrokeContext(layerId, resolvedPresetName);
+    if (!context) return { shouldUpdate: false, shouldRegisterToHistory: false };
+    const pixelAcc = this.ensurePixelAccumulator();
+
+    const cp = this.centerPosition(position, rawPosition, context.size, context.dotMagnification);
+
+    const diffs = putShape({
+      anvil: context.anvil,
+      posX: cp.x,
+      posY: cp.y,
+      shape: context.shapeMask,
+      color,
+      manualDiff: true,
+      pixelAcc,
+    });
+    if (diffs) this.strokeChunk.add(context.anvil.getWidth(), diffs);
+
+    if (!globalConfig.debug.disableCompletionLine && rawLastPosition !== undefined) {
       const fromCp = this.centerPosition(lastPosition, rawLastPosition, context.size, context.dotMagnification);
       const lineDiffs = putShapeLine({
         anvil: context.anvil,

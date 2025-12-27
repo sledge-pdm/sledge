@@ -43,6 +43,7 @@ const item = css`
   padding: 6px;
   gap: 6px;
   background-color: var(--color-surface);
+  z-index: var(--zindex-canvas-overlay);
   &:hover {
     filter: brightness(0.85);
   }
@@ -67,7 +68,15 @@ interface ItemProps {
 
 const Item: Component<ItemProps> = (props) => {
   return (
-    <div class={item} onClick={props.onClick} title={props.title}>
+    <div
+      class={item}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        props.onClick?.();
+      }}
+      title={props.title}
+    >
       <Icon src={props.src} color={color.onBackground} base={10} />
       <Show when={props.label}>
         <p>{props.label}</p>
@@ -204,14 +213,6 @@ export const OnCanvasSelectionMenu: Component = () => {
         'z-index': 'var(--zindex-canvas-overlay)',
         'will-change': 'transform',
       }}
-      onPointerDown={(e) => {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }}
-      onPointerMove={(e) => {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }}
     >
       <div ref={(ref) => (containerRef = ref)} class={container}>
         {MenuContent()}
@@ -242,14 +243,6 @@ export const OuterSelectionMenu: Component = () => {
         'pointer-events': 'all',
         'z-index': 'var(--zindex-canvas-overlay)',
         visibility: visibility(),
-      }}
-      onPointerDown={(e) => {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }}
-      onPointerMove={(e) => {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
       }}
     >
       <div class={container}>{MenuContent()}</div>

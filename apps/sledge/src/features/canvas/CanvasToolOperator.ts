@@ -19,11 +19,11 @@ export enum DrawState {
   cancel,
 }
 
-const LOG_LABEL = 'LayerCanvasOperator';
+const LOG_LABEL = 'CanvasToolOperator';
 const logDebug = (message: string, ...details: unknown[]) =>
   logSystemInfo(message, { label: LOG_LABEL, details: details.length ? details : undefined, debugOnly: true });
 
-export default class LayerCanvasOperator {
+export default class CanvasToolOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
 
   private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
@@ -80,7 +80,7 @@ export default class LayerCanvasOperator {
       }
 
       if (result.shouldUpdate) {
-        updateWebGLCanvas(true, 'LayerCanvasOperator (action: ' + DrawState[state] + ')');
+        updateWebGLCanvas(true, 'CanvasToolOperator (action: ' + DrawState[state] + ')');
         updateLayerPreview(layer.id);
       }
       if (result.shouldRegisterToHistory) {

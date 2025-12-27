@@ -2,14 +2,12 @@ import { Size2D, Vec2 } from '@sledge/core';
 
 export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type InteractStore = {
-  canvasAreaSize: Size2D;
   lastMouseWindow: Vec2;
   lastMouseOnCanvas: Vec2;
   isMouseOnCanvas: boolean;
-  isInStroke: boolean;
 
   // The "placement" position used in paste. should handled in less care.
-  // (it's not a big deal if this position dropped. just images are pasted in (0, 0). that's all.)
+  // (it's not a big deal if this position had reset/dropped. this will just fallback to (0, 0).)
   placementPosition: Vec2;
 
   initialZoom: number;
@@ -36,11 +34,9 @@ export type InteractStore = {
 };
 
 export const defaultInteractStore: InteractStore = {
-  canvasAreaSize: { width: 0, height: 0 },
   lastMouseWindow: { x: 0, y: 0 },
   lastMouseOnCanvas: { x: 0, y: 0 },
   isMouseOnCanvas: false,
-  isInStroke: false,
   placementPosition: { x: 0, y: 0 },
   initialZoom: 1,
   zoom: 1,

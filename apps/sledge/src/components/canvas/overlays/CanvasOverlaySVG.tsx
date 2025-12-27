@@ -324,7 +324,7 @@ const CanvasOverlaySVG: Component = () => {
             {/* ペン形状と選択範囲はリサイズ中は表示しない */}
             <Show when={interactStore.isCanvasSizeFrameMode === false}>
               {/* Pen hover preview */}
-              <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas}>
+              <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel}>
                 <path
                   d={penOutlinePath()}
                   fill='none'

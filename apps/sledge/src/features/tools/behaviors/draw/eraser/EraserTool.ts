@@ -6,8 +6,6 @@ import { DEFAULT_PRESET, EraserPresetConfig, TOOL_CATEGORIES, ToolCategoryId } f
 import { PenTool } from '../pen/PenTool';
 
 export class EraserTool extends PenTool {
-  onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
-
   protected categoryId: ToolCategoryId = TOOL_CATEGORIES.ERASER;
 
   onStart(args: ToolArgs): ToolResult {

@@ -1,7 +1,7 @@
 import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { activeLayer } from '~/features/layer';
 import { logSystemInfo } from '~/features/log/service';
-import { PresetConfig, ToolCategory, ToolCategoryId } from '~/features/tools/Tools';
+import { EraserPresetConfig, PenPresetConfig, PresetConfig, TOOL_CATEGORIES, ToolCategory, ToolCategoryId } from '~/features/tools/Tools';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 
 export const getToolCategory = (id: ToolCategoryId): ToolCategory => toolStore.tools[id];
@@ -68,6 +68,20 @@ export const getCurrentPresetConfig = (toolId: ToolCategoryId): Record<string, a
 
   const selectedPreset = tool.presets.selected;
   return tool.presets.options[selectedPreset];
+};
+
+export const getCurrentCanvasMargin = (): number => {
+  const category = getActiveToolCategory();
+  switch (category.id) {
+    case TOOL_CATEGORIES.PEN:
+      const penConfig = getCurrentPresetConfig(category.id) as PenPresetConfig;
+      return penConfig.size ?? 0;
+    case TOOL_CATEGORIES.ERASER:
+      const eraserConfig = getCurrentPresetConfig(category.id) as EraserPresetConfig;
+      return eraserConfig.size ?? 0;
+  }
+
+  return 0;
 };
 
 export function isToolAllowedInCurrentLayer(category?: ToolCategory): boolean {

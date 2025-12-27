@@ -8,9 +8,7 @@ export interface ToolResult {
 }
 
 export interface ToolBehavior {
-  acceptStartOnOutCanvas?: boolean;
   allowRightClick?: boolean;
-  onlyOnCanvas?: boolean;
   isInstantTool?: boolean;
 
   onStart: (args: ToolArgs) => ToolResult;

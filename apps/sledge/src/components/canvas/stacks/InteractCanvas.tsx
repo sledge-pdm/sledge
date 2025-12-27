@@ -3,7 +3,7 @@ import { Vec2 } from '@sledge/core';
 import { showContextMenu } from '@sledge/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { batch, Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { batch, Component, createSignal, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import LayerCanvasOperator, { DrawState } from '~/features/canvas/LayerCanvasOperator';
@@ -46,14 +46,12 @@ export const InteractArea: Component = () => {
       });
   };
 
-  let areaRef: HTMLDivElement | undefined;
-
   const operator = new LayerCanvasOperator(() => activeLayer().id);
 
   const [cursor, setCursor] = createSignal<string>('none');
 
+  const [isInStroke, setIsInStroke] = createSignal<boolean>(false);
   const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
-  const [temporaryOut, setTemporaryOut] = createSignal(false);
 
   function isDrawableClick(e: PointerEvent): boolean {
     if (interactStore.isCanvasSizeFrameMode) {
@@ -79,55 +77,28 @@ export const InteractArea: Component = () => {
     return true;
   }
 
-  function handleOutCanvasAreaPointerDown(e: PointerEvent) {
-    const start = new Date().getTime();
-    logDebug(`handleOutCanvasAreaPointerDown start`);
-    const activeToolCategory = getActiveToolCategory();
-    if (!activeToolCategory.behavior.acceptStartOnOutCanvas) {
-      logDebugWarn(`handleOutCanvasAreaPointerDown cancelled because tool doesn't accept it`);
-      return;
-    }
-    if (!isDrawableClick(e)) {
-      if (interactStore.isCanvasSizeFrameMode) {
-        logUserError('quit frame resize mode first!', { label: LOG_LABEL });
-      }
-      if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
-        logUserError('commit or cancel move first!', { label: LOG_LABEL });
-      }
-      logDebugWarn(`handleOutCanvasAreaPointerDown cancelled because not drawable click`);
-      return;
-    }
-
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    const position = getCanvasMousePosition(e);
-    // ! note that PointerEvent is the event on CanvasArea (not on InteractCanvas)
-    //   This may cause unexpected behavior if the tool use element-specific values.
-    operator.handleDraw(DrawState.start, e, activeToolCategory, position, lastPos());
-    setInteractStore('isInStroke', true);
-    setLastPos(position);
-    const end = new Date().getTime();
-    logDebug(`handleOutCanvasAreaPointerDown executed in ${end - start} ms`);
-  }
-
-  function handlePointerDown(e: PointerEvent) {
+  function handleWindowPointerDown(e: PointerEvent) {
     const start = new Date().getTime();
     logDebug(`handlePointerDown start`);
     if (!isDrawableClick(e)) {
       if (interactStore.isCanvasSizeFrameMode) {
-        logUserError('quit frame resize mode first!', { label: LOG_LABEL });
+        logUserError('quit frame resize mode before draw!', { label: LOG_LABEL });
       }
       if (!TOOLS_ALLOWED_IN_MOVE_MODE.includes(toolStore.activeToolCategory) && floatingMoveManager.isMoving()) {
-        logUserError('commit or cancel move first!', { label: LOG_LABEL });
+        logUserError('commit or cancel move mode before draw!', { label: LOG_LABEL });
       }
       logDebugWarn(`handlePointerDown cancelled because not drawable click`);
       return;
     }
 
+    const activeToolCategory = getActiveToolCategory();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    setIsInStroke(true);
+
     const position = getCanvasMousePosition(e);
     operator.handleDraw(DrawState.start, e, getActiveToolCategory(), position, lastPos());
-    setInteractStore('isInStroke', true);
     setLastPos(position);
     const end = new Date().getTime();
     logDebug(`handlePointerDown executed in ${end - start} ms`);
@@ -137,7 +108,6 @@ export const InteractArea: Component = () => {
     const position = getCanvasMousePosition(e);
     setInteractStore('isMouseOnCanvas', false);
     operator.handleDraw(DrawState.cancel, e, getActiveToolCategory(), position, lastPos());
-    endStroke(getCanvasMousePosition(e));
   }
 
   function handlePointerMove(e: PointerEvent) {
@@ -145,16 +115,17 @@ export const InteractArea: Component = () => {
     logDebug(`handlePointerMove start`);
 
     const windowPosition = getWindowMousePosition(e);
-    const position = getCanvasMousePosition(e);
-    const onCanvas = !!areaRef?.contains(e.target as Node);
+    const canvasPosition = getCanvasMousePosition(e);
+    const onCanvas = isOnCanvas(canvasPosition);
 
     batch(() => {
       setInteractStore('lastMouseWindow', windowPosition);
-      setInteractStore('lastMouseOnCanvas', position);
+      setInteractStore('lastMouseOnCanvas', canvasPosition);
       setInteractStore('isMouseOnCanvas', onCanvas);
     });
 
     if (!isDrawableClick(e)) {
+      setIsInStroke(false);
       logDebugWarn(`handlePointerMove cancelled because not drawable click`);
       return;
     }
@@ -165,20 +136,15 @@ export const InteractArea: Component = () => {
       setCursor('none');
     }
 
-    // 押したまま外に出てから戻ってきたときはそこから再開
-    if (temporaryOut()) {
-      setTemporaryOut(false);
-      setInteractStore('isInStroke', true);
-      setLastPos(position);
-    }
+    setLastPos(canvasPosition);
 
-    if (!interactStore.isInStroke || !lastPos()) {
+    if (!isInStroke() || !lastPos()) {
       logDebugWarn(`handlePointerMove cancelled because not in stroke or no last position`);
       return;
     }
 
-    operator.handleDraw(DrawState.move, e, getActiveToolCategory(), position, lastPos());
-    setLastPos(position);
+    operator.handleDraw(DrawState.move, e, getActiveToolCategory(), canvasPosition, lastPos());
+    setLastPos(canvasPosition);
     const end = new Date().getTime();
     logDebug(`handlePointerMove executed in ${end - start} ms`);
   }
@@ -186,36 +152,19 @@ export const InteractArea: Component = () => {
   function handlePointerUp(e: PointerEvent) {
     const position = getCanvasMousePosition(e);
     operator.handleDraw(DrawState.end, e, getActiveToolCategory(), position, lastPos());
-    endStroke(position);
+    setIsInStroke(false);
   }
 
-  function handlePointerOut(e: PointerEvent) {
-    // 出た時点でストロークを切る場合
-    // const position = getCanvasMousePosition(e);
-    // if (interactStore.isInStroke) endStroke(position);
-    setInteractStore('isMouseOnCanvas', false);
-
-    // 出た時点でも押したままキャンバス内に戻ってきたらストロークを再開する場合
-    if (interactStore.isDragging && isDrawableClick(e)) {
-      const position = getCanvasMousePosition(e);
-      operator.handleDraw(DrawState.move, e, getActiveToolCategory(), position, lastPos());
-      setTemporaryOut(true);
-    }
-  }
-
-  function endStroke(position: Vec2) {
-    setInteractStore('isInStroke', false);
-    setLastPos(undefined);
-    setTemporaryOut(false);
+  function isOnCanvas(canvasPosition: Vec2): boolean {
+    return (
+      canvasPosition.x >= 0 && canvasPosition.y >= 0 && canvasPosition.x <= canvasStore.canvas.width && canvasPosition.y <= canvasStore.canvas.height
+    );
   }
 
   let unlistenFocusChanged: UnlistenFn | undefined = undefined;
 
   onMount(() => {
-    const outCanvasArea = document.getElementById('out-canvas-area');
-    outCanvasArea!.addEventListener('pointerdown', handleOutCanvasAreaPointerDown);
-    areaRef!.addEventListener('pointerdown', handlePointerDown);
-    areaRef!.addEventListener('pointerout', handlePointerOut);
+    window.addEventListener('pointerdown', handleWindowPointerDown);
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointercancel', handlePointerCancel);
@@ -235,26 +184,18 @@ export const InteractArea: Component = () => {
       });
 
     return () => {
-      outCanvasArea!.removeEventListener('pointerdown', handleOutCanvasAreaPointerDown);
-      areaRef!.removeEventListener('pointerdown', handlePointerDown);
-      areaRef!.removeEventListener('pointerout', handlePointerOut);
+      window.removeEventListener('pointerdown', handleWindowPointerDown);
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointercancel', handlePointerCancel);
+      unlistenFocusChanged?.();
     };
-  });
-
-  onCleanup(() => {
-    unlistenFocusChanged?.();
   });
 
   return (
     <div
       id='interact-area'
       class={interactArea}
-      ref={(el) => {
-        areaRef = el;
-      }}
       style={{
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,

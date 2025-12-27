@@ -1,5 +1,5 @@
 import { Component, createEffect, createMemo, onCleanup } from 'solid-js';
-import { InteractArea } from './InteractCanvas';
+import { StrokeCanvas } from './StrokeCanvas';
 
 import { css } from '@acab/ecsstatic';
 import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
@@ -62,8 +62,8 @@ const CanvasStack: Component = () => {
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
       >
-        <InteractArea />
         <WebGLCanvas />
+        <StrokeCanvas />
         <ImagePool />
       </div>
     </div>

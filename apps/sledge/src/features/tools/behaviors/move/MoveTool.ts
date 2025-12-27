@@ -7,9 +7,6 @@ import { isSelectionAvailable, startMove } from '~/features/selection/SelectionO
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 
 export class MoveTool implements ToolBehavior {
-  acceptStartOnOutCanvas = true;
-  onlyOnCanvas = false;
-
   private startOffset: Vec2 = { x: 0, y: 0 };
   private startPosition: Vec2 = { x: 0, y: 0 };
 

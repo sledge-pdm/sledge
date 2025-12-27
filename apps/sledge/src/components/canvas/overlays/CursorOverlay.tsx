@@ -10,7 +10,7 @@ import { interactStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CursorOverlay: Component = () => {
-  const canShowCursor = createMemo(() => interactStore.isMouseOnCanvas && isToolAllowedInCurrentLayer(getActiveToolCategory()));
+  const canShowCursor = createMemo(() => isToolAllowedInCurrentLayer(getActiveToolCategory()));
   const mousePos = createMemo(() => interactStore.lastMouseWindow);
 
   return (

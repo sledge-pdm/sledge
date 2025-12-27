@@ -156,7 +156,6 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 
 export const centeringCanvas = () => {
   const canvasSize = canvasStore.canvas;
-  // const canvasArea = interactStore.canvasAreaSize;
   const sectionBetweenArea = document.getElementById('sections-between-area');
   if (!sectionBetweenArea) return;
   const areaBound = sectionBetweenArea.getBoundingClientRect();

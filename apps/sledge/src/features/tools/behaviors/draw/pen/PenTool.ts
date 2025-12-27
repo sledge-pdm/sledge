@@ -22,7 +22,6 @@ type StrokeContext = {
 
 export class PenTool implements ToolBehavior {
   allowRightClick = true;
-  onlyOnCanvas = false; // 端の補完を確保するため画面外を許可
 
   isShift: boolean = false;
   isCtrl: boolean = false;

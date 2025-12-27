@@ -1,4 +1,3 @@
-import { Vec2 } from '@sledge/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
@@ -35,8 +34,14 @@ const logDebugWarn = (message: string, ...details: unknown[]) => {
  * - 統一座標変換システムを使用
  * - 不要な計算を削減
  */
+type TrackedPointer = {
+  x: number;
+  y: number;
+  type: PointerEvent['pointerType'];
+};
+
 class CanvasAreaInteract {
-  private pointers = new Map<number, Vec2>();
+  private pointers = new Map<number, TrackedPointer>();
 
   private lastPointX: number = 0;
   private lastPointY: number = 0;
@@ -51,6 +56,10 @@ class CanvasAreaInteract {
 
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
+
+  private getTouchPointers(): TrackedPointer[] {
+    return Array.from(this.pointers.values()).filter((pointer) => pointer.type === 'touch');
+  }
 
   public updateCursor = (cursor: 'auto' | 'default' | 'move') => {
     this.canvasStack.style.cursor = cursor;
@@ -110,20 +119,23 @@ class CanvasAreaInteract {
     logDebug(`handlePointerDown start`);
     this.lastPointX = e.clientX;
     this.lastPointY = e.clientY;
-    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (e.pointerType === 'touch') {
+      this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType });
       // タッチ
-      if (this.pointers.size === 1) {
+      const touchPointers = this.getTouchPointers();
+      if (touchPointers.length === 1) {
         this.wrapperRef.setPointerCapture(e.pointerId);
         setInteractStore('isDragging', true);
-      } else if (this.pointers.size === 2) {
-        for (const id of this.pointers.keys()) {
-          this.wrapperRef.setPointerCapture(id);
+      } else if (touchPointers.length === 2) {
+        for (const [id, pointer] of this.pointers) {
+          if (pointer.type === 'touch') {
+            this.wrapperRef.setPointerCapture(id);
+          }
         }
         this.wrapperRef.setPointerCapture(e.pointerId);
         // ピンチズームの開始時に距離を記録
-        const [p0, p1] = Array.from(this.pointers.values());
+        const [p0, p1] = touchPointers;
         this.lastDist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
         this.lastAngle = Math.atan2(p1.y - p0.y, p1.x - p0.x);
         // 回転スナップ状態初期化
@@ -156,6 +168,7 @@ class CanvasAreaInteract {
       }
 
       if (CanvasAreaInteract.isDraggable(e)) {
+        this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType });
         this.wrapperRef.setPointerCapture(e.pointerId);
         setInteractStore('isDragging', true);
       }
@@ -177,12 +190,13 @@ class CanvasAreaInteract {
     }
     const prev = this.pointers.get(e.pointerId)!;
     const now = { x: e.clientX, y: e.clientY };
+    this.pointers.set(e.pointerId, { x: now.x, y: now.y, type: prev.type });
 
     if (e.pointerType === 'touch') {
       // タッチ
-      if (this.pointers.size === 1 && interactStore.isDragging) {
+      const touchPointers = this.getTouchPointers();
+      if (touchPointers.length === 1 && interactStore.isDragging) {
         // 一本指のパン
-        this.pointers.set(e.pointerId, now);
         const dx = now.x - prev.x,
           dy = now.y - prev.y;
         setOffset({
@@ -191,15 +205,9 @@ class CanvasAreaInteract {
         });
         // キャッシュをクリア（状態変更のため）
         clearCoordinateCache();
-      } else if (this.pointers.size === 2) {
+      } else if (touchPointers.length === 2) {
         // 2本指: 統一座標系を使用した最適化
-        this.pointers.set(e.pointerId, now);
-
-        if (this.pointers.size !== 2) return;
-
-        const pts = Array.from(this.pointers.values());
-        if (pts.length !== 2) return;
-        const [p0, p1] = pts;
+        const [p0, p1] = touchPointers;
 
         // 現在値計算
         const distNew = Math.hypot(p1.x - p0.x, p1.y - p0.y);
@@ -248,7 +256,7 @@ class CanvasAreaInteract {
     } else {
       // タッチ以外
       if (CanvasAreaInteract.isDraggable(e)) {
-        this.pointers.set(e.pointerId, now);
+        this.pointers.set(e.pointerId, { x: now.x, y: now.y, type: prev.type });
         if (interactStore.isDragging) {
           const dx = e.clientX - prev.x;
           const dy = e.clientY - prev.y;
@@ -274,8 +282,11 @@ class CanvasAreaInteract {
     this.lastPointY = e.clientY;
 
     this.pointers.delete(e.pointerId);
-    this.wrapperRef.releasePointerCapture(e.pointerId);
-    if (this.pointers.size < 2) {
+    if (this.wrapperRef.hasPointerCapture(e.pointerId)) {
+      this.wrapperRef.releasePointerCapture(e.pointerId);
+    }
+    const touchPointers = this.getTouchPointers();
+    if (touchPointers.length < 2) {
       // 2本指ピンチ終了時にスナップ状態リセット
       this.rotationSnapper.onGestureEnd();
     }
@@ -359,6 +370,7 @@ class CanvasAreaInteract {
     this.wrapperRef.addEventListener('pointerdown', this.onPointerDown);
     window.addEventListener('pointermove', this.onPointerMove);
     window.addEventListener('pointerup', this.onPointerUp);
+    window.addEventListener('pointercancel', this.onPointerCancel);
     this.wrapperRef.addEventListener('pointercancel', this.onPointerCancel);
     this.wrapperRef.addEventListener('wheel', this.onWheel);
     // keyboard
@@ -372,6 +384,7 @@ class CanvasAreaInteract {
     this.wrapperRef.removeEventListener('pointerdown', this.onPointerDown);
     window.removeEventListener('pointermove', this.onPointerMove);
     window.removeEventListener('pointerup', this.onPointerUp);
+    window.removeEventListener('pointercancel', this.onPointerCancel);
     this.wrapperRef.removeEventListener('pointercancel', this.onPointerCancel);
     this.wrapperRef.removeEventListener('wheel', this.onWheel);
     window.removeEventListener('keydown', this.onKeyDown);

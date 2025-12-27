@@ -13,9 +13,8 @@ import { logSystemInfo, logSystemWarn, logUserError } from '~/features/log/servi
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPositionWithinSelection } from '~/features/selection/SelectionOperator';
 import { getActiveToolCategory } from '~/features/tools/ToolController';
-import { TOOL_CATEGORIES, TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
+import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
@@ -50,14 +49,7 @@ export const StrokeCanvas: Component = () => {
   const operator = new CanvasToolOperator(() => activeLayer().id);
 
   const [isInStroke, setIsInStroke] = createSignal<boolean>(false);
-  const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
   const handledPointerDown = new WeakSet<PointerEvent>();
-
-  function shouldUseRawMove() {
-    if (!globalConfig.debug.useRawMove) return false;
-    const activeToolId = getActiveToolCategory().id;
-    return activeToolId === TOOL_CATEGORIES.PEN || activeToolId === TOOL_CATEGORIES.ERASER;
-  }
 
   function isDrawableClick(e: PointerEvent): boolean {
     if (interactStore.isCanvasSizeFrameMode) {
@@ -116,14 +108,8 @@ export const StrokeCanvas: Component = () => {
     }
 
     const { canvasPosition } = updatePointerState(e);
-    const started = operator.handleDraw(DrawState.start, e, getActiveToolCategory(), canvasPosition, lastPos());
-    if (started) {
-      setIsInStroke(true);
-      setLastPos(canvasPosition);
-    } else {
-      setIsInStroke(false);
-      setLastPos(undefined);
-    }
+    const started = operator.handleDraw(DrawState.start, e, getActiveToolCategory(), canvasPosition);
+    setIsInStroke(!!started);
     const end = new Date().getTime();
     logDebug(`handlePointerDown executed in ${end - start} ms`);
   }
@@ -142,17 +128,11 @@ export const StrokeCanvas: Component = () => {
     const start = new Date().getTime();
     logDebug(`${fnName} start`);
 
-    if (type === 'rawmove' && !shouldUseRawMove()) {
-      const end = new Date().getTime();
-      logDebug(`${fnName} executed in ${end - start} ms`);
-      return;
-    }
-
     const { canvasPosition, onCanvas } = updatePointerState(e);
 
     if (!isDrawableClick(e)) {
       setIsInStroke(false);
-      logDebugWarn(`handlePointerRawUpdate cancelled because not drawable click`);
+      logDebugWarn(`${fnName} cancelled because not drawable click`);
       return;
     }
 
@@ -162,13 +142,13 @@ export const StrokeCanvas: Component = () => {
       setInteractStore('strokeAreaCursor', 'none');
     }
 
-    if (!isInStroke() || !lastPos()) {
-      logDebugWarn(`${fnName} cancelled because not in stroke or no last position`);
+    if (!isInStroke()) {
+      logDebugWarn(`${fnName} cancelled because not in stroke`);
       return;
     }
 
-    operator.handleDraw(DrawState.rawmove, e, getActiveToolCategory(), canvasPosition, lastPos());
-    setLastPos(canvasPosition);
+    operator.handleDraw(type === 'move' ? DrawState.move : DrawState.rawmove, e, getActiveToolCategory(), canvasPosition);
+
     const end = new Date().getTime();
     logDebug(`${fnName} executed in ${end - start} ms`);
   }
@@ -176,17 +156,15 @@ export const StrokeCanvas: Component = () => {
   function handlePointerUp(e: PointerEvent) {
     if (!isInStroke()) return;
     const { canvasPosition } = updatePointerState(e);
-    operator.handleDraw(DrawState.end, e, getActiveToolCategory(), canvasPosition, lastPos());
+    operator.handleDraw(DrawState.end, e, getActiveToolCategory(), canvasPosition);
     setIsInStroke(false);
-    setLastPos(undefined);
   }
 
   function handlePointerCancel(e: PointerEvent) {
     if (!isInStroke()) return;
     const { canvasPosition } = updatePointerState(e);
-    operator.handleDraw(DrawState.cancel, e, getActiveToolCategory(), canvasPosition, lastPos());
+    operator.handleDraw(DrawState.cancel, e, getActiveToolCategory(), canvasPosition);
     setIsInStroke(false);
-    setLastPos(undefined);
   }
 
   function isOnCanvas(canvasPosition: Vec2): boolean {
@@ -220,11 +198,11 @@ export const StrokeCanvas: Component = () => {
     getCurrentWindow()
       .onFocusChanged(({ payload: focused }) => {
         if (!focused) {
-          operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 }, lastPos());
+          operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
         } else {
           // pipetteのみ復帰時も戻す
           if (toolStore.activeToolCategory === 'pipette')
-            operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 }, lastPos());
+            operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
         }
       })
       .then((fn) => {

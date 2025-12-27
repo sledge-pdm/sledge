@@ -34,15 +34,12 @@ export default class CanvasToolOperator {
     };
   }
 
-  public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2, lastPosition?: Vec2): boolean {
+  public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2): boolean {
     const layer = findLayerById(this.getLayerIdToDraw());
     if (!layer) return false;
 
     const rawPosition = position;
-    const rawLastPosition = lastPosition;
-
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
-    if (lastPosition) lastPosition = this.getMagnificatedPosition(lastPosition, layer.dotMagnification);
 
     if (!toolCategory.behavior.allowRightClick && originalEvent.buttons === 2) return false;
 
@@ -64,9 +61,7 @@ export default class CanvasToolOperator {
     const toolArgs: ToolArgs = {
       layerId: layer.id,
       rawPosition,
-      rawLastPosition,
       position,
-      lastPosition,
       presetName: toolCategory.presets?.selected,
       color: currentColor(),
       event: originalEvent,
@@ -116,7 +111,7 @@ export default class CanvasToolOperator {
         toolResult = tool.behavior.onMove(toolArgs);
         break;
       case DrawState.rawmove:
-        toolResult = tool.behavior.onRawMove ? tool.behavior.onRawMove(toolArgs) : tool.behavior.onMove(toolArgs);
+        toolResult = tool.behavior.onRawMove?.(toolArgs);
         break;
       case DrawState.end:
         toolResult = tool.behavior.onEnd(toolArgs);

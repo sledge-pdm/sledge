@@ -27,8 +27,13 @@ export class PenTool implements ToolBehavior {
   isShift: boolean = false;
   isCtrl: boolean = false;
 
+  forceColor: RGBA | undefined = undefined;
+
   startPosition: Vec2 | undefined = undefined;
   startScaledPosition: Vec2 | undefined = undefined;
+
+  lastPosition: Vec2 | undefined = undefined;
+  rawLastPosition: Vec2 | undefined = undefined;
 
   shapeStore = new ShapeStore();
 
@@ -89,11 +94,11 @@ export class PenTool implements ToolBehavior {
   onStart(args: ToolArgs): ToolResult {
     const presetName = args.presetName ?? DEFAULT_PRESET;
     // register to history if it's new size
-    const preset = getPresetOf(TOOL_CATEGORIES.PEN, presetName) as PenPresetConfig;
+    const preset = getPresetOf(this.categoryId, presetName) as PenPresetConfig;
     const history: number[] = preset.sizeHistory ?? [];
     if (preset.size && !history.includes(preset.size)) {
       const newHistory = [preset.size, ...history].slice(0, Consts.maxSizeHistoryLength);
-      updateToolPresetConfig(TOOL_CATEGORIES.PEN, presetName, 'sizeHistory', newHistory);
+      updateToolPresetConfig(this.categoryId, presetName, 'sizeHistory', newHistory);
     }
 
     // 前回の状態が残っている場合はクリーンアップ
@@ -106,6 +111,9 @@ export class PenTool implements ToolBehavior {
     this.startPosition = args.rawPosition;
     this.startScaledPosition = args.position;
 
+    this.lastPosition = undefined;
+    this.rawLastPosition = undefined;
+
     this.strokeChunk.clear();
     this.lineChunk.clear();
     this.pixelAccumulator = new Map();
@@ -114,25 +122,37 @@ export class PenTool implements ToolBehavior {
       return { shouldUpdate: false, shouldRegisterToHistory: false };
     }
 
-    if (args.event?.shiftKey) {
-      this.isShift = true;
-      return this.drawLine(false, args, args.color);
-    } else {
-      this.isShift = false;
-      return this.draw(args, args.color);
-    }
+    this.isShift = args.event?.shiftKey ? true : false;
+    return this.handleDraw(args);
   }
 
   onMove(args: ToolArgs): ToolResult {
-    if (!this.isShift) {
-      return this.draw(args, args.color);
+    if (!globalConfig.debug.useRawMove) {
+      return this.handleDraw(args);
     } else {
-      return this.drawLine(false, args, args.color);
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
     }
   }
 
   onRawMove(args: ToolArgs): ToolResult {
-    return this.drawRaw(args, args.color);
+    if (globalConfig.debug.useRawMove) {
+      return this.handleDraw(args);
+    } else {
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
+    }
+  }
+
+  handleDraw(args: ToolArgs): ToolResult {
+    const result = !this.isShift ? this.draw(args, args.color) : this.drawLine(false, args, args.color);
+    this.lastPosition = args.position;
+    this.rawLastPosition = args.rawPosition;
+    return result;
   }
 
   protected categoryId: ToolCategoryId = TOOL_CATEGORIES.PEN;
@@ -157,7 +177,7 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  draw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBA): ToolResult {
+  draw({ layerId, position, presetName, event, rawPosition }: ToolArgs, color: RGBA): ToolResult {
     const resolvedPresetName = presetName ?? DEFAULT_PRESET;
     if (event?.buttons === 2) {
       color = transparent;
@@ -168,20 +188,21 @@ export class PenTool implements ToolBehavior {
     const pixelAcc = this.ensurePixelAccumulator();
 
     const cp = this.centerPosition(position, rawPosition, context.size, context.dotMagnification);
+    const finalColor: RGBA = this.forceColor ?? color;
 
     const diffs = putShape({
       anvil: context.anvil,
       posX: cp.x,
       posY: cp.y,
       shape: context.shapeMask,
-      color,
+      color: finalColor,
       manualDiff: true,
       pixelAcc,
     });
     if (diffs) this.strokeChunk.add(context.anvil.getWidth(), diffs);
 
-    if (!globalConfig.debug.disableCompletionLine && rawLastPosition !== undefined) {
-      const fromCp = this.centerPosition(lastPosition, rawLastPosition, context.size, context.dotMagnification);
+    if (!globalConfig.debug.disableCompletionLine && this.rawLastPosition !== undefined) {
+      const fromCp = this.centerPosition(this.lastPosition, this.rawLastPosition, context.size, context.dotMagnification);
       const lineDiffs = putShapeLine({
         anvil: context.anvil,
         posX: cp.x,
@@ -189,52 +210,7 @@ export class PenTool implements ToolBehavior {
         fromPosX: fromCp.x,
         fromPosY: fromCp.y,
         shape: context.shapeMask,
-        color,
-        manualDiff: true,
-        pixelAcc,
-      });
-      if (lineDiffs) this.strokeChunk.add(context.anvil.getWidth(), lineDiffs);
-    }
-
-    return {
-      shouldUpdate: true,
-      shouldRegisterToHistory: false,
-    };
-  }
-
-  protected drawRaw({ layerId, position, lastPosition, presetName, event, rawPosition, rawLastPosition }: ToolArgs, color: RGBA): ToolResult {
-    const resolvedPresetName = presetName ?? DEFAULT_PRESET;
-    if (event?.buttons === 2) {
-      color = transparent;
-    }
-
-    const context = this.getStrokeContext(layerId, resolvedPresetName);
-    if (!context) return { shouldUpdate: false, shouldRegisterToHistory: false };
-    const pixelAcc = this.ensurePixelAccumulator();
-
-    const cp = this.centerPosition(position, rawPosition, context.size, context.dotMagnification);
-
-    const diffs = putShape({
-      anvil: context.anvil,
-      posX: cp.x,
-      posY: cp.y,
-      shape: context.shapeMask,
-      color,
-      manualDiff: true,
-      pixelAcc,
-    });
-    if (diffs) this.strokeChunk.add(context.anvil.getWidth(), diffs);
-
-    if (!globalConfig.debug.disableCompletionLine && rawLastPosition !== undefined) {
-      const fromCp = this.centerPosition(lastPosition, rawLastPosition, context.size, context.dotMagnification);
-      const lineDiffs = putShapeLine({
-        anvil: context.anvil,
-        posX: cp.x,
-        posY: cp.y,
-        fromPosX: fromCp.x,
-        fromPosY: fromCp.y,
-        shape: context.shapeMask,
-        color,
+        color: finalColor,
         manualDiff: true,
         pixelAcc,
       });
@@ -288,6 +264,7 @@ export class PenTool implements ToolBehavior {
           }
         : position;
     const cp = this.centerPosition(scaledTarget, targetPosition, size, dotMagnification);
+    const finalColor: RGBA = this.forceColor ?? color;
     const diffs = putShapeLine({
       anvil: context.anvil,
       posX: cp.x,
@@ -295,7 +272,7 @@ export class PenTool implements ToolBehavior {
       fromPosX: fromCp.x,
       fromPosY: fromCp.y,
       shape: context.shapeMask,
-      color,
+      color: finalColor,
       manualDiff: true,
       pixelAcc: commit ? this.ensurePixelAccumulator() : undefined,
     });
@@ -327,6 +304,8 @@ export class PenTool implements ToolBehavior {
     this.isCtrl = false;
     this.startPosition = undefined;
     this.startScaledPosition = undefined;
+    this.lastPosition = undefined;
+    this.rawLastPosition = undefined;
     this.lineChunk.clear();
     this.strokeContext = undefined;
     this.pixelAccumulator = undefined;
@@ -385,6 +364,8 @@ export class PenTool implements ToolBehavior {
     this.isCtrl = false;
     this.startPosition = undefined;
     this.startScaledPosition = undefined;
+    this.lastPosition = undefined;
+    this.rawLastPosition = undefined;
 
     this.lineChunk.clear();
     this.strokeChunk.clear();

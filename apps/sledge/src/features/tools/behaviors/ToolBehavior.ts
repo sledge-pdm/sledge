@@ -22,10 +22,8 @@ export interface ToolArgs {
   layerId: string;
   // pixel position (not rounded)
   rawPosition: Vec2;
-  rawLastPosition?: Vec2;
   // pixel position (rounded)
   position: Vec2;
-  lastPosition?: Vec2;
   color: RGBA; // RGBA
   presetName?: string;
   event?: PointerEvent;

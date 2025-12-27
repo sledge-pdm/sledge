@@ -33,6 +33,8 @@ export type GlobalConfig = {
   debug: {
     showPerformanceMonitor: boolean;
     showDirtyTiles: boolean;
+    useRawMove: boolean;
+    disableCompletionLine: boolean;
   };
   keyConfig: KeyConfigStore;
 };
@@ -65,6 +67,8 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
   debug: {
     showPerformanceMonitor: false,
     showDirtyTiles: false,
+    useRawMove: false,
+    disableCompletionLine: false,
   },
   keyConfig: makeDefaultKeyConfigStore(),
 });

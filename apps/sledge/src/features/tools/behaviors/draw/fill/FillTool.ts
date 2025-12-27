@@ -9,6 +9,7 @@ import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { FillPresetConfig } from '~/features/tools/Tools';
+import { interactStore } from '~/stores/EditorStores';
 
 export interface FillProps {
   layerId: string;
@@ -21,9 +22,13 @@ export interface Fill {
 }
 
 export class FillTool implements ToolBehavior {
-  onlyOnCanvas = true;
-
   onStart({ position, color, presetName, layerId }: ToolArgs): ToolResult {
+    if (!interactStore.isPointerOnCanvas) {
+      return {
+        shouldRegisterToHistory: false,
+        shouldUpdate: false,
+      };
+    }
     const startTime = Date.now();
 
     const preset = presetName ? (getPresetOf('fill', presetName) as FillPresetConfig) : undefined;

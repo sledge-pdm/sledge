@@ -9,9 +9,6 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 // 共通のモード判定と ctrl+ドラッグ移動処理をまとめたベースクラス
 // 各選択ツールは selection-mode（矩形/自動等）のみを実装すればよい
 export abstract class SelectionBase implements ToolBehavior {
-  acceptStartOnOutCanvas = true;
-  onlyOnCanvas = false;
-
   protected startPosition: Vec2 = { x: 0, y: 0 };
   protected startOffset: Vec2 = { x: 0, y: 0 }; // 移動開始時のオフセット
 

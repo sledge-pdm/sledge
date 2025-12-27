@@ -15,15 +15,16 @@ import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 export enum DrawState {
   start,
   move,
+  rawmove,
   end,
   cancel,
 }
 
-const LOG_LABEL = 'LayerCanvasOperator';
+const LOG_LABEL = 'CanvasToolOperator';
 const logDebug = (message: string, ...details: unknown[]) =>
   logSystemInfo(message, { label: LOG_LABEL, details: details.length ? details : undefined, debugOnly: true });
 
-export default class LayerCanvasOperator {
+export default class CanvasToolOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
 
   private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
@@ -33,40 +34,34 @@ export default class LayerCanvasOperator {
     };
   }
 
-  public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2, lastPosition?: Vec2) {
+  public handleDraw(state: DrawState, originalEvent: PointerEvent, toolCategory: ToolCategory, position: Vec2): boolean {
     const layer = findLayerById(this.getLayerIdToDraw());
-    if (!layer) return;
+    if (!layer) return false;
 
     const rawPosition = position;
-    const rawLastPosition = lastPosition;
-
     position = this.getMagnificatedPosition(position, layer.dotMagnification);
-    if (lastPosition) lastPosition = this.getMagnificatedPosition(lastPosition, layer.dotMagnification);
 
-    if (toolCategory.behavior.onlyOnCanvas && !interactStore.isMouseOnCanvas) return;
-    if (!toolCategory.behavior.allowRightClick && originalEvent.buttons === 2) return;
+    if (!toolCategory.behavior.allowRightClick && originalEvent.buttons === 2) return false;
 
     // This won't suppress all draw actions on inactive layers.
     // It's due to prevent showing warn in every click out of canvas.
-    if (!isToolAllowedInCurrentLayer(toolCategory) && interactStore.isMouseOnCanvas) {
+    if (!isToolAllowedInCurrentLayer(toolCategory) && interactStore.isPointerOnCanvas) {
       logUserError('Layer is inactive.', {
         label: LOG_LABEL,
         duration: 1000,
       });
-      return;
+      return false;
     }
 
     // This will suppress all draw actions on inactive layers.
     if (!isToolAllowedInCurrentLayer(toolCategory)) {
-      return;
+      return false;
     }
 
     const toolArgs: ToolArgs = {
       layerId: layer.id,
       rawPosition,
-      rawLastPosition,
       position,
-      lastPosition,
       presetName: toolCategory.presets?.selected,
       color: currentColor(),
       event: originalEvent,
@@ -81,7 +76,7 @@ export default class LayerCanvasOperator {
       }
 
       if (result.shouldUpdate) {
-        updateWebGLCanvas(true, 'LayerCanvasOperator (action: ' + DrawState[state] + ')');
+        updateWebGLCanvas(true, 'CanvasToolOperator (action: ' + DrawState[state] + ')');
         updateLayerPreview(layer.id);
       }
       if (result.shouldRegisterToHistory) {
@@ -102,6 +97,7 @@ export default class LayerCanvasOperator {
         if (prevTool) setActiveToolCategory(prevTool);
       }
     }
+    return !!result;
   }
 
   private useTool(state: DrawState, tool: ToolCategory, toolArgs: ToolArgs) {
@@ -113,6 +109,9 @@ export default class LayerCanvasOperator {
         break;
       case DrawState.move:
         toolResult = tool.behavior.onMove(toolArgs);
+        break;
+      case DrawState.rawmove:
+        toolResult = tool.behavior.onRawMove?.(toolArgs);
         break;
       case DrawState.end:
         toolResult = tool.behavior.onEnd(toolArgs);

@@ -150,7 +150,7 @@ const CanvasOverlaySVG: Component = () => {
   // Pen outline (logical coordinates)
   createEffect(() => {
     const tool = getActiveToolCategoryId();
-    const mouse = interactStore.lastMouseOnCanvas;
+    const mouse = interactStore.lastPointerOnCanvas;
     if ((tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
       const preset = getCurrentPresetConfig(tool) as any;
       const size: number = preset?.size ?? 1;
@@ -324,7 +324,7 @@ const CanvasOverlaySVG: Component = () => {
             {/* ペン形状と選択範囲はリサイズ中は表示しない */}
             <Show when={interactStore.isCanvasSizeFrameMode === false}>
               {/* Pen hover preview */}
-              <Show when={penOutlinePath() && globalConfig.editor.showPointedPixel && interactStore.isMouseOnCanvas}>
+              <Show when={interactStore.isPointerOnStrokeDetectArea && globalConfig.editor.showPointedPixel && penOutlinePath()}>
                 <path
                   d={penOutlinePath()}
                   fill='none'

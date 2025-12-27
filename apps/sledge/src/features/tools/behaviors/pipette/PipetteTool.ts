@@ -3,14 +3,20 @@ import { currentColor, registerColorChange, setCurrentColor } from '~/features/c
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { logUserInfo } from '~/features/log/service';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
+import { interactStore } from '~/stores/EditorStores';
 
 export class PipetteTool implements ToolBehavior {
-  onlyOnCanvas = true;
   isInstantTool = true;
 
   private color: RGBA = transparent;
 
   onStart(args: ToolArgs): ToolResult {
+    if (!interactStore.isPointerOnCanvas) {
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
+    }
     const anvil = getAnvil(args.layerId);
     const c = anvil.getPixel(args.position.x, args.position.y) as RGBA;
     if (!isTransparent(c)) {
@@ -23,6 +29,12 @@ export class PipetteTool implements ToolBehavior {
   }
 
   onMove(args: ToolArgs): ToolResult {
+    if (!interactStore.isPointerOnCanvas) {
+      return {
+        shouldUpdate: false,
+        shouldRegisterToHistory: false,
+      };
+    }
     const anvil = getAnvil(args.layerId);
     const c = anvil.getPixel(args.position.x, args.position.y) as RGBA;
     if (!isTransparent(c)) {

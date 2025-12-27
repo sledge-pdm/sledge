@@ -8,7 +8,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { logSystemWarn } from '~/features/log/service';
-import { appearanceStore, interactStore, setInteractStore } from '~/stores/EditorStores';
+import { appearanceStore, interactStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
@@ -67,12 +67,13 @@ const canvasAreaWrapper = css`
   z-index: var(--zindex-zoom-pan-wrapper);
 `;
 
-const outCanvasArea = css`
+const outerStrokeDetectArea = css`
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
+  touch-action: none;
 `;
 
 const canvasStackWrapper = css`
@@ -162,7 +163,6 @@ const CanvasArea: Component = () => {
       }
     } catch (error) {
       logSystemWarn('Transform update failed.', { label: 'CanvasArea', details: [error] });
-      // ??????????????????
       const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
       const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
       const currentZoom = interactStore.zoom;
@@ -172,11 +172,6 @@ const CanvasArea: Component = () => {
 
   onMount(() => {
     const unlistenOnResized = getCurrentWindow().onResized(async (e) => {
-      setInteractStore('canvasAreaSize', {
-        width: wrapper.clientWidth,
-        height: wrapper.clientHeight,
-      });
-
       // 座標変換キャッシュをクリア
       coordinateTransform.clearCache();
 
@@ -191,20 +186,11 @@ const CanvasArea: Component = () => {
     });
 
     eventBus.on('window:sideSectionSideChanged', (e) => {
-      setInteractStore('canvasAreaSize', {
-        width: wrapper.clientWidth,
-        height: wrapper.clientHeight,
-      });
-
       // 座標変換キャッシュをクリア
       coordinateTransform.clearCache();
       centeringCanvas();
     });
 
-    setInteractStore('canvasAreaSize', {
-      width: wrapper.clientWidth,
-      height: wrapper.clientHeight,
-    });
     adjustZoomToFit();
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
@@ -233,24 +219,27 @@ const CanvasArea: Component = () => {
           e.stopImmediatePropagation();
         }}
       >
-        <div id='out-canvas-area' class={outCanvasArea} />
+        {/* The area to detect stroke (outerStrokeDetectArea + StrokeCanvas = Entire Area) */}
+        <div
+          id='outer-stroke-detect-area'
+          class={outerStrokeDetectArea}
+          style={{
+            cursor: interactStore.strokeAreaCursor,
+          }}
+        />
 
         <div ref={(el) => (canvasStack = el)} class={canvasStackWrapper}>
           <CanvasStack />
         </div>
 
-        {/* オーバーレイ (ズーム外) のための固定ルート */}
         <div id='canvas-overlay-root' class={canvasOverlayRoot}>
           <Show when={interactStore.isCanvasSizeFrameMode}>
             <CanvasResizeFrame />
           </Show>
-          {/* SelectionMenu / SVG Overlay をズーム外で描画 */}
           <CanvasOverlaySVG />
           <OnCanvasSelectionMenu />
         </div>
         <CursorOverlay />
-
-        {/* <CoordinateDebugOverlay /> */}
       </div>
       <div class={sectionsContainer}>
         <SideSectionsOverlay side='leftSide' />

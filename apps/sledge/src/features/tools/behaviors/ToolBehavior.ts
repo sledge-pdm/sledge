@@ -8,17 +8,13 @@ export interface ToolResult {
 }
 
 export interface ToolBehavior {
-  acceptStartOnOutCanvas?: boolean;
   allowRightClick?: boolean;
-  onlyOnCanvas?: boolean;
   isInstantTool?: boolean;
 
   onStart: (args: ToolArgs) => ToolResult;
-
   onMove: (args: ToolArgs) => ToolResult;
-
+  onRawMove?: (args: ToolArgs) => ToolResult;
   onEnd: (args: ToolArgs) => ToolResult;
-
   onCancel?: (args: ToolArgs) => ToolResult;
 }
 
@@ -26,10 +22,8 @@ export interface ToolArgs {
   layerId: string;
   // pixel position (not rounded)
   rawPosition: Vec2;
-  rawLastPosition?: Vec2;
   // pixel position (rounded)
   position: Vec2;
-  lastPosition?: Vec2;
   color: RGBA; // RGBA
   presetName?: string;
   event?: PointerEvent;

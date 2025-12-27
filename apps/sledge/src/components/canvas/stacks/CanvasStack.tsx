@@ -2,7 +2,7 @@ import { Component, createEffect, createMemo, onCleanup } from 'solid-js';
 import { StrokeCanvas } from './StrokeCanvas';
 
 import { css } from '@acab/ecsstatic';
-import { ImagePool } from '~/components/canvas/overlays/image_pool/ImagePool';
+import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';

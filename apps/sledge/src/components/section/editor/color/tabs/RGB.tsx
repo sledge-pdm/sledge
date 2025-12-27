@@ -4,7 +4,7 @@ import { Component, createSignal, onMount } from 'solid-js';
 import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tabs/SliderStyles';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 
-const RGB: Component = (props) => {
+const RGB: Component = () => {
   const [colorOnPointerDown, setColorOnPointerDown] = createSignal<RGBA | undefined>(undefined);
 
   const handlePointerUp = () => {

@@ -34,7 +34,7 @@ const jsHeapContainer = css`
   gap: 1px;
 `;
 
-const CanvasDebugOverlay: Component = (props) => {
+const CanvasDebugOverlay: Component = () => {
   const LOG_LABEL = 'CanvasDebugOverlay';
   const logDebug = (message: string, ...details: unknown[]) => {
     if (VERBOSE_LOG_ENABLED) logSystemInfo(message, { label: LOG_LABEL, details: details.length ? details : undefined, debugOnly: true });

@@ -37,7 +37,7 @@ const selectionInfo = css`
   margin-top: 8px;
 `;
 
-const LayerList: Component<{}> = () => {
+const LayerList: Component = () => {
   const [items, setItems] = createSignal(allLayers());
   let listEl: HTMLDivElement | undefined;
   let dropLineEl: HTMLDivElement | null = null;

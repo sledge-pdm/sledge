@@ -85,7 +85,7 @@ const [floatingMoveState, setFloatingMoveState] = createSignal<boolean>(false);
 
 const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefined);
 
-export const OnCanvasSelectionMenu: Component<{}> = (props) => {
+export const OnCanvasSelectionMenu: Component = () => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
   const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
@@ -220,7 +220,7 @@ export const OnCanvasSelectionMenu: Component<{}> = (props) => {
   );
 };
 
-export const OuterSelectionMenu: Component<{}> = (props) => {
+export const OuterSelectionMenu: Component = () => {
   const visibility = createMemo(() => {
     // idle状態の場合は表示しない
     if (selectionState() === 'idle') return 'collapse';

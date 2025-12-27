@@ -8,7 +8,7 @@ import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/Loading';
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
-import SideSectionControl from '~/components/section/SideSectionControl';
+import SideSectionControls from '~/components/section/SideSectionControls';
 import { adjustZoomToFit } from '~/features/canvas';
 import { addImagesFromFiles, addImagesFromLocal } from '~/features/image_pool';
 import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
@@ -141,7 +141,7 @@ export default function Editor() {
       >
         <div class={mainContainer}>
           <div class={mainContent}>
-            <SideSectionControl side='leftSide' />
+            <SideSectionControls side='leftSide' />
 
             <div class={flexCol} style={{ 'flex-grow': 1, position: 'relative' }}>
               <div style={{ 'flex-grow': 1, 'background-color': color.canvasArea }}>
@@ -149,7 +149,7 @@ export default function Editor() {
               </div>
             </div>
 
-            <SideSectionControl side='rightSide' />
+            <SideSectionControls side='rightSide' />
           </div>
 
           <BottomBar />

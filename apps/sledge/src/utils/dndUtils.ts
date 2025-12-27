@@ -38,7 +38,7 @@ export const ensureDropLine = (containerEl: HTMLElement, existing?: HTMLDivEleme
   return line;
 };
 
-export const updateDropLine = (lineEl: HTMLDivElement, containerEl: HTMLElement, candidates: HTMLElement[], toIndex: number) => {
+export const updateDropLine = (lineEl: HTMLDivElement, containerEl: HTMLElement, candidates: HTMLElement[], toIndex: number, yOffset: number = 0) => {
   const containerRect = containerEl.getBoundingClientRect();
   let y = containerRect.top;
   if (toIndex <= 0) {
@@ -49,7 +49,7 @@ export const updateDropLine = (lineEl: HTMLDivElement, containerEl: HTMLElement,
     y = candidates[toIndex - 1].getBoundingClientRect().bottom;
   }
 
-  lineEl.style.top = `${y - containerRect.top - 2}px`;
+  lineEl.style.top = `${y - containerRect.top - 2 + yOffset}px`;
   lineEl.style.display = 'block';
 };
 

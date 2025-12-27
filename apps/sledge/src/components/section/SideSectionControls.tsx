@@ -10,7 +10,7 @@ import { moveTabControl } from '~/features/config/TabControlController';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
 import { ensureDropLine, getDropCandidates, getDropIndex, hideDropLine, setDraggingCursor, updateDropLine } from '~/utils/dndUtils';
 
-const sideSectionControlRoot = css`
+const controlsRoot = css`
   display: flex;
   flex-direction: column;
   box-sizing: content-box;
@@ -20,7 +20,7 @@ const sideSectionControlRoot = css`
   background-color: var(--color-background);
 `;
 
-const sideSectionControlList = css`
+const controlsList = css`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -28,7 +28,7 @@ const sideSectionControlList = css`
   align-items: center;
 `;
 
-const sideSectionControlReorderArea = css`
+const reorderArea = css`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -37,7 +37,7 @@ const sideSectionControlReorderArea = css`
   touch-action: none; /* keep pen/scroll from cancelling reorder */
 `;
 
-const sideSectionControlItem = css`
+const itemRoot = css`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -58,7 +58,7 @@ const sideSectionControlItem = css`
   }
 `;
 
-const sideSectionControlText = css`
+const label = css`
   font-family: ZFB09;
   font-size: 8px;
   white-space: nowrap;
@@ -67,7 +67,7 @@ const sideSectionControlText = css`
   opacity: 0.5;
 `;
 
-const sideSectionControlTextActive = css`
+const labelActive = css`
   font-family: ZFB09;
   font-size: 8px;
   white-space: nowrap;
@@ -137,7 +137,7 @@ const ControlItem: Component<ItemProps> = (props) => {
 
   return (
     <div
-      class={sideSectionControlItem}
+      class={itemRoot}
       ref={(el) => (itemEl = el)}
       data-control-id={props.draggable ? String(control) : undefined}
       style={{ 'margin-top': control === 'danger' ? 'auto' : undefined, 'margin-bottom': control === 'danger' ? '0px' : undefined }}
@@ -146,10 +146,7 @@ const ControlItem: Component<ItemProps> = (props) => {
         toggleTabContent(side, control);
       }}
     >
-      <p
-        class={selected() ? sideSectionControlTextActive : sideSectionControlText}
-        style={{ color: control === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}
-      >
+      <p class={selected() ? labelActive : label} style={{ color: control === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}>
         {control}.
       </p>
     </div>
@@ -165,7 +162,7 @@ const isControlVisible = (side: 'leftSide' | 'rightSide', control: SectionTabCon
 
 const visibleControlsBySide = (side: 'leftSide' | 'rightSide') => appearanceStore[side].controls.filter((control) => isControlVisible(side, control));
 
-const SideSectionControl: Component<Props> = (props) => {
+const SideSectionControls: Component<Props> = (props) => {
   let listEl: HTMLDivElement | undefined;
   let dropLineEl: HTMLDivElement | null = null;
 
@@ -214,7 +211,7 @@ const SideSectionControl: Component<Props> = (props) => {
         }
 
         dropLineEl = ensureDropLine(listEl, dropLineEl);
-        updateDropLine(dropLineEl, listEl, candidates, toIndex);
+        updateDropLine(dropLineEl, listEl, candidates, toIndex, 1);
       },
       onDragLeave: () => {
         hideDropLine(dropLineEl);
@@ -227,7 +224,7 @@ const SideSectionControl: Component<Props> = (props) => {
   return (
     <div
       id={`side-section-control-${props.side}`}
-      class={sideSectionControlRoot}
+      class={controlsRoot}
       style={{
         'border-right': props.side === 'leftSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
         'border-left': props.side === 'rightSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
@@ -235,8 +232,8 @@ const SideSectionControl: Component<Props> = (props) => {
         'z-index': 'var(--zindex-side-section)',
       }}
     >
-      <div class={sideSectionControlList}>
-        <div class={sideSectionControlReorderArea} ref={(el) => (listEl = el)}>
+      <div class={controlsList}>
+        <div class={reorderArea} ref={(el) => (listEl = el)}>
           <For each={visibleControlsBySide(props.side)}>{(control) => <ControlItem side={props.side} control={control} draggable={true} />}</For>
         </div>
 
@@ -275,4 +272,4 @@ const SideSectionControl: Component<Props> = (props) => {
   );
 };
 
-export default SideSectionControl;
+export default SideSectionControls;

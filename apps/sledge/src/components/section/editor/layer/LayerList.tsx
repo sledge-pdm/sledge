@@ -84,7 +84,7 @@ const LayerList: Component<{}> = () => {
           return;
         }
         dropLineEl = ensureDropLine(listEl, dropLineEl);
-        updateDropLine(dropLineEl, listEl, candidates, toIndex);
+        updateDropLine(dropLineEl, listEl, candidates, toIndex, 3);
       },
       onDragLeave: () => {
         hideDropLine(dropLineEl);

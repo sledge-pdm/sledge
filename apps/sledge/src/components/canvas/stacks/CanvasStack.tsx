@@ -7,12 +7,19 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
-import { color } from '@sledge/theme';
 import CheckerboardPattern from '/patterns/CheckerboardPattern.svg';
 
+const canvasStackContainer = css`
+  position: relative;
+  overflow: visible;
+  background-color: var(--color-canvas);
+`;
 const canvasStack = css`
   position: relative;
+  shape-rendering: crispEdges;
+  image-rendering: pixelated;
 `;
+
 const CanvasStack: Component = () => {
   const gridSize = createMemo(() => {
     const { width, height } = canvasStore.canvas;
@@ -41,12 +48,10 @@ const CanvasStack: Component = () => {
 
   return (
     <div
+      class={canvasStackContainer}
       style={{
-        position: 'relative',
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,
-        overflow: 'visible',
-        'background-color': color.canvas,
       }}
     >
       <div
@@ -55,8 +60,6 @@ const CanvasStack: Component = () => {
         style={{
           width: `${canvasStore.canvas.width}px`,
           height: `${canvasStore.canvas.height}px`,
-          'shape-rendering': 'crispEdges',
-          'image-rendering': 'pixelated',
           'background-image': `url("${CheckerboardPattern}")`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,

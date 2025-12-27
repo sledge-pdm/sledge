@@ -219,7 +219,13 @@ const CanvasArea: Component = () => {
         }}
       >
         {/* The area to detect stroke (outerStrokeDetectArea + StrokeCanvas = Entire Area) */}
-        <div id='outer-stroke-detect-area' class={outerStrokeDetectArea} />
+        <div
+          id='outer-stroke-detect-area'
+          class={outerStrokeDetectArea}
+          style={{
+            cursor: interactStore.strokeAreaCursor,
+          }}
+        />
 
         <div ref={(el) => (canvasStack = el)} class={canvasStackWrapper}>
           <CanvasStack />

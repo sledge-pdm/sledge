@@ -2,9 +2,12 @@ import { Size2D, Vec2 } from '@sledge/core';
 
 export type SelectionEditMode = 'add' | 'subtract' | 'replace' | 'move';
 export type InteractStore = {
-  lastMouseWindow: Vec2;
-  lastMouseOnCanvas: Vec2;
-  isMouseOnCanvas: boolean;
+  lastPointerWindow: Vec2;
+  lastPointerOnCanvas: Vec2;
+  isPointerOnCanvas: boolean;
+  isPointerOnStrokeDetectArea: boolean;
+
+  strokeAreaCursor: string;
 
   // The "placement" position used in paste. should handled in less care.
   // (it's not a big deal if this position had reset/dropped. this will just fallback to (0, 0).)
@@ -34,9 +37,11 @@ export type InteractStore = {
 };
 
 export const defaultInteractStore: InteractStore = {
-  lastMouseWindow: { x: 0, y: 0 },
-  lastMouseOnCanvas: { x: 0, y: 0 },
-  isMouseOnCanvas: false,
+  lastPointerWindow: { x: 0, y: 0 },
+  lastPointerOnCanvas: { x: 0, y: 0 },
+  isPointerOnCanvas: false,
+  isPointerOnStrokeDetectArea: false,
+  strokeAreaCursor: 'none',
   placementPosition: { x: 0, y: 0 },
   initialZoom: 1,
   zoom: 1,

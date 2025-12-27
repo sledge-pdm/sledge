@@ -10,8 +10,8 @@ import { interactStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 
 const CursorOverlay: Component = () => {
-  const canShowCursor = createMemo(() => isToolAllowedInCurrentLayer(getActiveToolCategory()));
-  const mousePos = createMemo(() => interactStore.lastMouseWindow);
+  const canShowCursor = createMemo(() => interactStore.isPointerOnStrokeDetectArea && isToolAllowedInCurrentLayer(getActiveToolCategory()));
+  const mousePos = createMemo(() => interactStore.lastPointerWindow);
 
   return (
     <>
@@ -29,8 +29,8 @@ const CursorOverlay: Component = () => {
             </Switch>
           }
         >
-          <PipetteCursor mousePos={interactStore.lastMouseWindow} />
-          <PipetteDetail mousePos={interactStore.lastMouseWindow} />
+          <PipetteCursor mousePos={interactStore.lastPointerWindow} />
+          <PipetteDetail mousePos={interactStore.lastPointerWindow} />
         </Show>
       </Show>
     </>

@@ -48,7 +48,6 @@ export const StrokeCanvas: Component = () => {
 
   const operator = new CanvasToolOperator(() => activeLayer().id);
 
-  const [cursor, setCursor] = createSignal<string>('none');
   const [isInStroke, setIsInStroke] = createSignal<boolean>(false);
   const [lastPos, setLastPos] = createSignal<Vec2 | undefined>(undefined);
   const handledPointerDown = new WeakSet<PointerEvent>();
@@ -81,11 +80,13 @@ export const StrokeCanvas: Component = () => {
     const windowPosition = getWindowMousePosition(e);
     const canvasPosition = getCanvasMousePosition(e);
     const onCanvas = isOnCanvas(canvasPosition);
+    const onStrokeDetectArea = isPointerOnStrokeDetectArea(e.target);
 
     batch(() => {
-      setInteractStore('lastMouseWindow', windowPosition);
-      setInteractStore('lastMouseOnCanvas', canvasPosition);
-      setInteractStore('isMouseOnCanvas', onCanvas);
+      setInteractStore('lastPointerWindow', windowPosition);
+      setInteractStore('lastPointerOnCanvas', canvasPosition);
+      setInteractStore('isPointerOnCanvas', onCanvas);
+      setInteractStore('isPointerOnStrokeDetectArea', onStrokeDetectArea);
     });
 
     return { canvasPosition, onCanvas };
@@ -133,9 +134,9 @@ export const StrokeCanvas: Component = () => {
     }
 
     if (onCanvas && !activeLayer().enabled) {
-      setCursor('not-allowed');
+      setInteractStore('strokeAreaCursor', 'not-allowed');
     } else {
-      setCursor('none');
+      setInteractStore('strokeAreaCursor', 'none');
     }
 
     if (!isInStroke() || !lastPos()) {
@@ -172,10 +173,17 @@ export const StrokeCanvas: Component = () => {
   }
 
   let innerArea: HTMLDivElement;
+  let outerArea: HTMLDivElement | null = null;
   let unlistenFocusChanged: UnlistenFn | undefined = undefined;
 
+  function isPointerOnStrokeDetectArea(target: EventTarget | null): boolean {
+    if (!target || !(target instanceof Node)) return false;
+    if (innerArea && innerArea.contains(target)) return true;
+    return !!outerArea && outerArea.contains(target);
+  }
+
   onMount(() => {
-    const outerArea = document.getElementById('outer-stroke-detect-area');
+    outerArea = document.getElementById('outer-stroke-detect-area') as HTMLDivElement | null;
 
     innerArea!.addEventListener('pointerdown', handlePointerDown);
     outerArea!.addEventListener('pointerdown', handlePointerDown);
@@ -217,7 +225,7 @@ export const StrokeCanvas: Component = () => {
       style={{
         width: `${canvasStore.canvas.width}px`,
         height: `${canvasStore.canvas.height}px`,
-        cursor: cursor(),
+        cursor: interactStore.strokeAreaCursor,
       }}
       onContextMenu={(e) => {
         e.preventDefault();

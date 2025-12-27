@@ -11,7 +11,7 @@ export class PipetteTool implements ToolBehavior {
   private color: RGBA = transparent;
 
   onStart(args: ToolArgs): ToolResult {
-    if (!interactStore.isMouseOnCanvas) {
+    if (!interactStore.isPointerOnCanvas) {
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,
@@ -29,7 +29,7 @@ export class PipetteTool implements ToolBehavior {
   }
 
   onMove(args: ToolArgs): ToolResult {
-    if (!interactStore.isMouseOnCanvas) {
+    if (!interactStore.isPointerOnCanvas) {
       return {
         shouldUpdate: false,
         shouldRegisterToHistory: false,

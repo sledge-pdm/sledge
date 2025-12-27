@@ -23,7 +23,7 @@ export interface Fill {
 
 export class FillTool implements ToolBehavior {
   onStart({ position, color, presetName, layerId }: ToolArgs): ToolResult {
-    if (!interactStore.isMouseOnCanvas) {
+    if (!interactStore.isPointerOnCanvas) {
       return {
         shouldRegisterToHistory: false,
         shouldUpdate: false,

@@ -47,7 +47,7 @@ export default class CanvasToolOperator {
 
     // This won't suppress all draw actions on inactive layers.
     // It's due to prevent showing warn in every click out of canvas.
-    if (!isToolAllowedInCurrentLayer(toolCategory) && interactStore.isMouseOnCanvas) {
+    if (!isToolAllowedInCurrentLayer(toolCategory) && interactStore.isPointerOnCanvas) {
       logUserError('Layer is inactive.', {
         label: LOG_LABEL,
         duration: 1000,

@@ -121,9 +121,9 @@ export async function mergeToBelowLayer(layerId: string) {
 
 export function getCurrentPointingColor(): RGBA | undefined {
   const activeAnvil = getAnvil(layerListStore.activeLayerId);
-  const x = Math.floor(interactStore.lastMouseOnCanvas.x);
-  const y = Math.floor(interactStore.lastMouseOnCanvas.y);
-  if (!interactStore.lastMouseOnCanvas || !activeAnvil.getBufferHandle().isInBounds(x, y)) return undefined;
+  const x = Math.floor(interactStore.lastPointerOnCanvas.x);
+  const y = Math.floor(interactStore.lastPointerOnCanvas.y);
+  if (!interactStore.lastPointerOnCanvas || !activeAnvil.getBufferHandle().isInBounds(x, y)) return undefined;
   return activeAnvil.getPixel(x, y);
 }
 

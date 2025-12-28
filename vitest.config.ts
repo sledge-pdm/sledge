@@ -13,7 +13,15 @@ export default defineConfig({
     setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
     // app-level integration tests + feature-local unit tests
     include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
-    exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
+    exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'], server: {
+      deps: {
+        // Ensure Vite transforms the wasm-using anvil package instead of Node trying to load .wasm directly.
+        inline: ['@sledge/anvil', /@sledge-pdm\/anvil/],
+      },
+    }
+  },
+  optimizeDeps: {
+    exclude: ['@sledge/core', '@sledge/theme', '@sledge/ui'],
   },
   resolve: {
     alias: {

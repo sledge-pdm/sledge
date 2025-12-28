@@ -76,7 +76,7 @@ jobs:
           releaseBody: 'This is a development build. Use at your own risk.'
           releaseDraft: false # Don't care because it's a dev build
           prerelease: true
-          projectPath: './app'
+          projectPath: '.'
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
           updaterJsonKeepUniversal: true

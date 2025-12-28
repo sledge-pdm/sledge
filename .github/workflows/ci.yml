@@ -151,13 +151,13 @@ jobs:
         run: cargo check --all-targets
 
       - name: WASM Rust format check
-        working-directory: packages/wasm
+        working-directory: wasm
         run: cargo fmt --all -- --check
 
       - name: WASM Rust clippy
-        working-directory: packages/wasm
+        working-directory: wasm
         run: cargo clippy --all-targets -- -D warnings
 
       - name: WASM Rust check
-        working-directory: packages/wasm
+        working-directory: wasm
         run: cargo check --all-targets

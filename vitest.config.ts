@@ -12,18 +12,25 @@ export default defineConfig({
     env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
     setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
     // app-level integration tests + feature-local unit tests
-    include: ['apps/sledge/test/**/*.test.ts', 'apps/sledge/test/**/*.test.tsx'],
+    include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
     exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
+    server: {
+      deps: {
+        // Ensure Vite transforms the wasm-using anvil package instead of Node trying to load .wasm directly.
+        inline: ['@sledge/anvil', /@sledge-pdm\/anvil/],
+      },
+    },
+  },
+  optimizeDeps: {
+    exclude: ['@sledge/core', '@sledge/theme', '@sledge/ui'],
   },
   resolve: {
     alias: {
-      '~': path.resolve(__dirname, 'apps/sledge/src'),
-      '@sledge/core': path.resolve(__dirname, 'packages/core'),
-      '@sledge/theme': path.resolve(__dirname, 'packages/theme'),
-      '@sledge/ui': path.resolve(__dirname, 'packages/ui'),
-      '@sledge/wasm': path.resolve(__dirname, 'packages/wasm/pkg/sledge_wasm.js'),
-      '@tauri-apps/plugin-fs': path.resolve(__dirname, 'apps/sledge/test/mocks/tauri-plugin-fs.ts'),
-      '@tauri-apps/api/core': path.resolve(__dirname, 'apps/sledge/test/mocks/tauri-api-core.ts'),
+      '~': path.resolve(__dirname, 'src'),
+      '@assets': path.resolve(__dirname, 'public/assets'),
+      '@sledge/wasm': path.resolve(__dirname, 'wasm/pkg/sledge_wasm.js'),
+      '@tauri-apps/plugin-fs': path.resolve(__dirname, 'test/mocks/tauri-plugin-fs.ts'),
+      '@tauri-apps/api/core': path.resolve(__dirname, 'test/mocks/tauri-api-core.ts'),
     },
   },
 });

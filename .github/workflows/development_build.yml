@@ -52,7 +52,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            apps/sledge/src-tauri
+            src-tauri
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
@@ -71,7 +71,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          projectPath: './apps/sledge'
+          projectPath: '.'
           args: ${{ matrix.args }}
 
       - name: Upload dev artifacts
@@ -80,8 +80,8 @@ jobs:
         with:
           name: binaries-linux
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.deb
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.rpm
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.deb
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.rpm
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -90,8 +90,8 @@ jobs:
         with:
           name: binaries-macos
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
+            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
+            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -100,5 +100,5 @@ jobs:
         with:
           name: binaries-windows
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.exe
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.exe
           retention-days: 3

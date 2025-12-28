@@ -21,11 +21,11 @@ importers:
         specifier: npm:@sledge-pdm/misc@^1.0.0
         version: '@sledge-pdm/misc@1.0.0'
       '@sledge/theme':
-        specifier: npm:@sledge-pdm/theme@^1.0.0
-        version: '@sledge-pdm/theme@1.0.0'
+        specifier: npm:@sledge-pdm/theme@^1.0.1
+        version: '@sledge-pdm/theme@1.0.1'
       '@sledge/ui':
-        specifier: npm:@sledge-pdm/ui@^1.0.1
-        version: '@sledge-pdm/ui@1.0.1'
+        specifier: npm:@sledge-pdm/ui@^1.0.10
+        version: '@sledge-pdm/ui@1.0.10'
       '@solid-primitives/deep':
         specifier: ^0.3.3
         version: 0.3.3(solid-js@1.9.10)
@@ -51,7 +51,7 @@ importers:
         specifier: ^0.15.4
         version: 0.15.4(solid-js@1.9.10)
       '@tauri-apps/api':
-        specifier: ^2.9.0
+        specifier: ^2.9.1
         version: 2.9.1
       '@tauri-apps/plugin-clipboard-manager':
         specifier: ~2.3.2
@@ -87,7 +87,7 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       msgpackr:
-        specifier: ^1.11.5
+        specifier: ^1.11.8
         version: 1.11.8
       solid-js:
         specifier: ^1.9.10
@@ -103,7 +103,7 @@ importers:
         specifier: ^1.10.27
         version: 1.10.27
       '@tauri-apps/cli':
-        specifier: ^2.9.5
+        specifier: ^2.9.6
         version: 2.9.6
       dotenv:
         specifier: ^17.2.3
@@ -127,7 +127,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vite:
-        specifier: ^7.2.6
+        specifier: ^7.3.0
         version: 7.3.0
       vite-plugin-glsl:
         specifier: ^1.5.5
@@ -145,7 +145,7 @@ importers:
         specifier: ^3.5.0
         version: 3.5.0(vite@7.3.0)
       vitest:
-        specifier: ^4.0.15
+        specifier: ^4.0.16
         version: 4.0.16
 
 packages:
@@ -793,11 +793,11 @@ packages:
   '@sledge-pdm/misc@1.0.0':
     resolution: {integrity: sha512-ZAscD0uZxlzFp6vMQgXktFoSrLyoTzTxG5+YLJfialt63+6+hTQaj1VclBlD9C845rN4X+HUeb8YAp/pTgulAQ==}
 
-  '@sledge-pdm/theme@1.0.0':
-    resolution: {integrity: sha512-jnILvS8NRlqW4+rK+8TUQ3/iQIWSEETina1+MLbjsvuw1t8l/3oYfBdfCKy5cDUGmUmc1sc3HsBprwidQhyXMA==}
+  '@sledge-pdm/theme@1.0.1':
+    resolution: {integrity: sha512-neDGP1DDbHfdXVJY+P88R0DsOEo34bHepFXnnoU8qdWnz7d5Yvvk6qkPAcFP6Swf9iuQ/jXfU2MmRnlWWGdKbA==}
 
-  '@sledge-pdm/ui@1.0.1':
-    resolution: {integrity: sha512-n0KtzVgkaHmNir3rEe810qBoLHPiI2/NwSpQri8p8R213iCZX1Z1VxmJvHmYL4Bf5YZbKNVwicaHn6hDNfP4ag==}
+  '@sledge-pdm/ui@1.0.10':
+    resolution: {integrity: sha512-yCmdhATLLrJEKrWfL+EAJzyjiToqFVscBJ59cfOVHgCQrnKo7g8TKMhHl24Qax953e9lnakmoMJN1btyIylUmw==}
 
   '@solid-primitives/deep@0.3.3':
     resolution: {integrity: sha512-YnCV2OFbBlNYlww0lSD7oDpk9zN20KQWr699s6euwd6+oRE1nbI+vqrfYuqC7E0WPDfk0DIG+ylY1xvY31ZlTg==}
@@ -2478,16 +2478,16 @@ snapshots:
 
   '@sledge-pdm/misc@1.0.0': {}
 
-  '@sledge-pdm/theme@1.0.0':
+  '@sledge-pdm/theme@1.0.1':
     dependencies:
       '@sledge/anvil': '@sledge-pdm/anvil@1.0.6'
       '@sledge/core': '@sledge-pdm/misc@1.0.0'
 
-  '@sledge-pdm/ui@1.0.1':
+  '@sledge-pdm/ui@1.0.10':
     dependencies:
       '@sledge/anvil': '@sledge-pdm/anvil@1.0.6'
       '@sledge/core': '@sledge-pdm/misc@1.0.0'
-      '@sledge/theme': '@sledge-pdm/theme@1.0.0'
+      '@sledge/theme': '@sledge-pdm/theme@1.0.1'
       solid-js: 1.9.10
 
   '@solid-primitives/deep@0.3.3(solid-js@1.9.10)':

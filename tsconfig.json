@@ -13,7 +13,8 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["src/*"],
-      "@sledge/wasm": ["wasm/pkg/sledge_wasm.js"]
+      "@sledge/wasm": ["wasm/pkg/sledge_wasm.js"],
+      "@assets/*": ["assets/*"]
     },
     "types": ["vite/client"],
     "rootDirs": ["src"]

@@ -21,8 +21,9 @@ import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
 import { css } from '@acab/ecsstatic';
-import '@sledge/theme';
 import Restore from '~/routes/restore';
+
+import '@sledge/theme/global.css';
 
 const appRoot = css`
   display: flex;

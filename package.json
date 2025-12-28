@@ -1,4 +1,4 @@
-{ 
+{
   "name": "sledge",
   "type": "module",
   "packageManager": "pnpm@10.25.0",
@@ -22,8 +22,8 @@
     "@jaames/iro": "^5.5.2",
     "@sledge/anvil": "npm:@sledge-pdm/anvil@^1.0.6",
     "@sledge/core": "npm:@sledge-pdm/misc@^1.0.0",
-    "@sledge/ui": "npm:@sledge-pdm/ui@^1.0.1",
-    "@sledge/theme": "npm:@sledge-pdm/theme@^1.0.0",
+    "@sledge/theme": "npm:@sledge-pdm/theme@^1.0.1",
+    "@sledge/ui": "npm:@sledge-pdm/ui@^1.0.10",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
     "@solid-primitives/raf": "^2.3.2",
@@ -32,7 +32,7 @@
     "@solid-primitives/timer": "^1.4.3",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.4",
-    "@tauri-apps/api": "^2.9.0",
+    "@tauri-apps/api": "^2.9.1",
     "@tauri-apps/plugin-clipboard-manager": "~2.3.2",
     "@tauri-apps/plugin-dialog": "^2.4.2",
     "@tauri-apps/plugin-fs": "^2.4.4",
@@ -44,14 +44,14 @@
     "@tauri-apps/plugin-updater": "^2.9.0",
     "interactjs": "^1.10.27",
     "mitt": "^3.0.1",
-    "msgpackr": "^1.11.5",
+    "msgpackr": "^1.11.8",
     "solid-js": "^1.9.10",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@acab/ecsstatic": "^0.9.0",
     "@interactjs/types": "^1.10.27",
-    "@tauri-apps/cli": "^2.9.5",
+    "@tauri-apps/cli": "^2.9.6",
     "dotenv": "^17.2.3",
     "prettier": "^3.7.4",
     "prettier-plugin-organize-imports": "^4.3.0",
@@ -59,12 +59,12 @@
     "stylelint-config-standard": "^39.0.1",
     "stylelint-order": "^7.0.0",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6",
+    "vite": "^7.3.0",
     "vite-plugin-glsl": "^1.5.5",
     "vite-plugin-inspect": "^11.3.3",
     "vite-plugin-solid": "^2.11.10",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.16"
   }
 }

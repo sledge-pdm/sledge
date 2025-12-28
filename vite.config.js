@@ -39,7 +39,14 @@ export default defineConfig({
       ignored: ['**/src-tauri/**', '**/.vite-inspect/**'],
     },
   },
-  publicDir: './assets',
+  publicDir: 'assets',
+  optimizeDeps: {
+    exclude: [
+      '@sledge/core',
+      '@sledge/theme',
+      '@sledge/ui',
+    ]
+  },
   resolve: {
     alias: {
       '~': path.join(__dirname, 'src'),

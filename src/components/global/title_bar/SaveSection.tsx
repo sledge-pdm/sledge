@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import rawAreaPattern from '@assets/patterns/SelectionAreaPattern.svg?raw';
+import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { color } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';

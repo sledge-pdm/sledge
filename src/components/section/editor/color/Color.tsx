@@ -223,7 +223,7 @@ const Color: Component = () => {
 
           <div class={pipetteContainer} onClick={() => setActiveToolCategory('pipette')}>
             <Icon
-              src={'/icons/tools/pipette.png'}
+              src={'/assets/icons/tools/pipette.png'}
               base={8}
               scale={2}
               color={getActiveToolCategoryId() === 'pipette' ? color.active : color.onBackground}

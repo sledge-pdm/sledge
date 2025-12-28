@@ -39,7 +39,7 @@ export default defineConfig({
       ignored: ['**/src-tauri/**', '**/.vite-inspect/**'],
     },
   },
-  publicDir: 'assets',
+  publicDir: './public',
   optimizeDeps: {
     exclude: ['@sledge/core', '@sledge/theme', '@sledge/ui'],
   },
@@ -47,7 +47,7 @@ export default defineConfig({
     alias: {
       '~': path.join(__dirname, 'src'),
       '@sledge/wasm': path.join(__dirname, 'wasm/pkg/sledge_wasm.js'),
-      '@assets': path.join(__dirname, 'assets'),
+      '@assets': path.join(__dirname, 'public/assets'),
     },
   },
 });

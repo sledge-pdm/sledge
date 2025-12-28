@@ -27,7 +27,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '~': path.resolve(__dirname, 'src'),
-      '@assets': path.resolve(__dirname, 'assets'),
+      '@assets': path.resolve(__dirname, 'public/assets'),
       '@sledge/wasm': path.resolve(__dirname, 'wasm/pkg/sledge_wasm.js'),
       '@tauri-apps/plugin-fs': path.resolve(__dirname, 'test/mocks/tauri-plugin-fs.ts'),
       '@tauri-apps/api/core': path.resolve(__dirname, 'test/mocks/tauri-api-core.ts'),

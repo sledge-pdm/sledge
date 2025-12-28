@@ -324,7 +324,7 @@ const OnscreenControl: Component = () => {
           title={positionLocked() ? 'Unlock position' : 'Lock position'}
         >
           <Icon
-            src={positionLocked() ? '/icons/misc/lock_closed.png' : '/icons/misc/lock_opened.png'}
+            src={positionLocked() ? '/assets/icons/misc/lock_closed.png' : '/assets/icons/misc/lock_opened.png'}
             base={8}
             color={'var(--color-on-background)'}
           />
@@ -336,7 +336,7 @@ const OnscreenControl: Component = () => {
           }}
           title='Hide controller'
         >
-          <Icon src={'/icons/misc/remove.png'} base={8} color={'var(--color-on-background)'} />
+          <Icon src={'/assets/icons/misc/remove.png'} base={8} color={'var(--color-on-background)'} />
         </div>
 
         <div
@@ -354,7 +354,7 @@ const OnscreenControl: Component = () => {
         {/* パンを操作するスティック */}
         <div class={panContainer} title='Pan Control - Drag to pan canvas'>
           <div class={panFrame} onPointerDown={handlePanPointerDown}>
-            <Icon src={'/icons/onscreen_control/stick_frame_24.png'} base={24} scale={2} color={color.onBackground} />
+            <Icon src={'/assets/icons/onscreen_control/stick_frame_24.png'} base={24} scale={2} color={color.onBackground} />
           </div>
           <div
             class={panStick}
@@ -364,13 +364,13 @@ const OnscreenControl: Component = () => {
             }}
             onPointerDown={handlePanPointerDown}
           >
-            <Icon src={'/icons/onscreen_control/stick_handle_8.png'} base={8} scale={2} color={color.onBackground} />
+            <Icon src={'/assets/icons/onscreen_control/stick_handle_8.png'} base={8} scale={2} color={color.onBackground} />
           </div>
         </div>
         {/* ズームを操作するフェーダー */}
         <div class={zoomContainer} title='Zoom Control - Up: Zoom in, Down: Zoom out'>
           <div class={zoomBackground} onPointerDown={handlePanPointerDown}>
-            <Icon src={'/icons/onscreen_control/bar_frame_48.png'} base={48} scale={1} color={color.onBackground} />
+            <Icon src={'/assets/icons/onscreen_control/bar_frame_48.png'} base={48} scale={1} color={color.onBackground} />
           </div>
           <div
             class={zoomHandle}
@@ -379,7 +379,7 @@ const OnscreenControl: Component = () => {
             }}
             onPointerDown={handlePanPointerDown}
           >
-            <Icon src={'/icons/onscreen_control/bar_handle_8.png'} base={8} scale={2} color={color.onBackground} />
+            <Icon src={'/assets/icons/onscreen_control/bar_handle_8.png'} base={8} scale={2} color={color.onBackground} />
           </div>
         </div>
       </div>

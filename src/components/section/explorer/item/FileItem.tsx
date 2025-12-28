@@ -60,10 +60,10 @@ export interface FilesConfig {
 }
 
 const getIconForName = (name: string, isDirectory: boolean) => {
-  if (isDirectory) return '/icons/files/folder.png';
-  if (name.endsWith('.sledge')) return '/icons/files/file_sledge.png';
-  if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) return '/icons/files/image.png';
-  return '/icons/files/file.png';
+  if (isDirectory) return '/assets/icons/files/folder.png';
+  if (name.endsWith('.sledge')) return '/assets/icons/files/file_sledge.png';
+  if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) return '/assets/icons/files/image.png';
+  return '/assets/icons/files/file.png';
 };
 
 const FileItem: Component<{
@@ -83,7 +83,7 @@ const FileItem: Component<{
       { type: 'label', label: entry.name },
       {
         type: 'item',
-        icon: '/icons/files/folder.png',
+        icon: '/assets/icons/files/folder.png',
         label: 'show in explorer',
         onSelect: async () => {
           if (!location.path || !location.name) return;
@@ -100,7 +100,7 @@ const FileItem: Component<{
         opts.push({
           type: 'item',
           label: 'import to project',
-          icon: '/icons/files/image.png',
+          icon: '/assets/icons/files/image.png',
           onSelect: async () => {
             if (!location.path || !location.name) return;
             const entry = await createEntryFromLocalImage(normalizeJoin(location.path, location.name));
@@ -112,7 +112,7 @@ const FileItem: Component<{
       if (isOpenableFile(entry.name))
         opts.push({
           type: 'item',
-          icon: '/icons/files/file_sledge.png',
+          icon: '/assets/icons/files/file_sledge.png',
           label: 'open in new window',
           onSelect: async () => {
             await openExistingProject(location);

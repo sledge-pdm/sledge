@@ -38,7 +38,7 @@ const LayerListButtonsRow: Component<Props> = (props) => {
   const targetCount = () => targets().length;
   const targetLayerId = () => targets()[0];
   const areTargetsEnabled = () => targets().every((id) => findLayerById(id)?.enabled);
-  const visibilityIcon = () => (areTargetsEnabled() ? '/icons/layer/visible_9.png' : '/icons/layer/invisible_9.png');
+  const visibilityIcon = () => (areTargetsEnabled() ? '/assets/icons/layer/visible_9.png' : '/assets/icons/layer/invisible_9.png');
   const visibilityTitle = () => (areTargetsEnabled() ? 'hide selected layer(s).' : 'show selected layer(s).');
   const isBottomLayerTarget = () => layerListStore.layers.findIndex((l) => l.id === targetLayerId()) === layerListStore.layers.length - 1;
   const isRemoveDisabled = () => layerListStore.layers.length <= 1 || layerListStore.layers.length === targetCount();
@@ -47,7 +47,7 @@ const LayerListButtonsRow: Component<Props> = (props) => {
     <div class={flexRow}>
       <div class={iconsContainer}>
         <LayerListIconButton
-          iconSrc={'/icons/layer/clear_9.png'}
+          iconSrc={'/assets/icons/layer/clear_9.png'}
           title={'clear selected layer(s).'}
           onClick={async () => await clearLayersFromUser()}
         />
@@ -59,14 +59,14 @@ const LayerListButtonsRow: Component<Props> = (props) => {
           }}
         />
         <LayerListIconButton
-          iconSrc={'/icons/layer/duplicate_9.png'}
+          iconSrc={'/assets/icons/layer/duplicate_9.png'}
           title={'duplicate selected layer(s).'}
           onClick={() => {
             duplicateLayers();
           }}
         />
         <LayerListIconButton
-          iconSrc={'/icons/layer/merge_down_9.png'}
+          iconSrc={'/assets/icons/layer/merge_down_9.png'}
           title={'merge down to below layer.'}
           disabled={targetCount() !== 1 || isBottomLayerTarget()}
           onClick={async () => {
@@ -77,7 +77,7 @@ const LayerListButtonsRow: Component<Props> = (props) => {
           }}
         />
         <LayerListIconButton
-          iconSrc={'/icons/layer/selection_mode_9.png'}
+          iconSrc={'/assets/icons/layer/selection_mode_9.png'}
           title={'toggle layer selection mode.'}
           // disabled={appearanceStore.selectionEnabled}
           iconColor={layerListStore.selectionEnabled ? color.enabled : color.onBackground}

@@ -289,7 +289,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
             cursor: 'pointer',
           }}
         >
-          <Icon src={'/icons/actions/image.png'} base={8} scale={2} color={'#808080'} hoverColor={color.accent} />
+          <Icon src={'/assets/icons/actions/image.png'} base={8} scale={2} color={'#808080'} hoverColor={color.accent} />
         </div>
       </div>
     </div>

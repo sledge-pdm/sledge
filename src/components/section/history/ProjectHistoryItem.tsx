@@ -48,9 +48,9 @@ function getIconForTool(tool?: string) {
   }
   switch (tool) {
     case 'clear':
-      return '/icons/actions/clear.png';
+      return '/assets/icons/actions/clear.png';
     case 'fx':
-      return '/icons/actions/fx.png';
+      return '/assets/icons/actions/fx.png';
   }
 
   return '';
@@ -75,11 +75,11 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
       const bigger = csaction.afterSize.width * csaction.afterSize.height >= csaction.beforeSize.width * csaction.beforeSize.height;
-      icon = bigger ? '/icons/actions/canvas_size_bigger.png' : '/icons/actions/canvas_size_smaller.png';
+      icon = bigger ? '/assets/icons/actions/canvas_size_bigger.png' : '/assets/icons/actions/canvas_size_smaller.png';
       description = `${csaction.beforeSize.width}x${csaction.beforeSize.height} -> ${csaction.afterSize.width}x${csaction.afterSize.height}`;
       break;
     case 'image_pool':
-      icon = '/icons/actions/image.png';
+      icon = '/assets/icons/actions/image.png';
       const ipaction = action as ImagePoolHistoryAction;
       description = `${ipaction.kind} image`;
       break;
@@ -94,16 +94,16 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       };
       break;
     case 'convert_selection':
-      icon = '/icons/actions/image.png';
+      icon = '/assets/icons/actions/image.png';
       description = `convert selection to image`;
       break;
     case 'layer_list':
-      icon = '/icons/actions/layer.png';
+      icon = '/assets/icons/actions/layer.png';
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.packedSnapshot?.layer.name}`;
       break;
     case 'layer_merge':
-      icon = '/icons/actions/layer.png';
+      icon = '/assets/icons/actions/layer.png';
       const lmaction = action as LayerMergeHistoryAction;
       description = `Merge / ${lmaction.originPackedSnapshot?.layer.name} > ${lmaction.targetPackedSnapshot?.layer.name}`;
       break;
@@ -129,7 +129,7 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       break;
     }
     case 'layer_props':
-      icon = '/icons/actions/layer.png';
+      icon = '/assets/icons/actions/layer.png';
       const lpaction = action as LayerPropsHistoryAction;
       description = `${findLayerById(lpaction.layerId)?.name} ${context.propName}: ${context.before} > ${context.after}`;
       break;
@@ -141,7 +141,7 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
     <div class={historyRowStyle} title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}>
       <p class={indexStyle}>{typeof index === 'function' ? index() : index}</p>
       {/* <div>
-        <Icon src={undo ? '/icons/misc/undo.png' : '/icons/misc/redo.png'} color={var(--color-on-background)} base={8} scale={1} />
+        <Icon src={undo ? '/assets/icons/misc/undo.png' : '/assets/icons/misc/redo.png'} color={var(--color-on-background)} base={8} scale={1} />
       </div> */}
       <Show
         when={colorIcon}

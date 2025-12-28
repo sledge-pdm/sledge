@@ -142,7 +142,7 @@ const thumbCanvas = css`
   border: 1px solid var(--color-canvas-border);
   transform-origin: 0 0;
   background-color: var(--color-canvas);
-  background-image: url(/patterns/CheckerboardPattern.svg);
+  background-image: url(/assets/patterns/CheckerboardPattern.svg);
   background-size: 16px 16px;
   background-position:
     0 0,
@@ -203,7 +203,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
             transform: expanded() ? 'none' : 'rotate(180deg)',
           }}
         >
-          <Icon src={'/icons/misc/triangle_7.png'} base={7} />
+          <Icon src={'/assets/icons/misc/triangle_7.png'} base={7} />
         </div>
       </div>
 

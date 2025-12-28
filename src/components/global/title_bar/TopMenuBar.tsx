@@ -196,7 +196,7 @@ const TopMenuBar: Component = () => {
         {
           label: 'ruler',
           type: 'item',
-          icon: appearanceStore.ruler ? '/icons/misc/check_8.png' : undefined,
+          icon: appearanceStore.ruler ? '/assets/icons/misc/check_8.png' : undefined,
           onSelect: () => {
             setAppearanceStore('ruler', (v) => !v);
           },
@@ -205,7 +205,7 @@ const TopMenuBar: Component = () => {
         {
           label: 'onscreen control',
           type: 'item',
-          icon: appearanceStore.onscreenControl ? '/icons/misc/check_8.png' : undefined,
+          icon: appearanceStore.onscreenControl ? '/assets/icons/misc/check_8.png' : undefined,
           onSelect: () => {
             setAppearanceStore('onscreenControl', (v) => !v);
           },
@@ -220,7 +220,7 @@ const TopMenuBar: Component = () => {
           return {
             label: control.id,
             type: 'item',
-            icon: shown ? '/icons/misc/check_8.png' : undefined,
+            icon: shown ? '/assets/icons/misc/check_8.png' : undefined,
             title: control.id,
             onSelect: () => {
               // toggle Controls' visibility, not show/hide content

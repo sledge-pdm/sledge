@@ -434,7 +434,7 @@ const Explorer: Component = () => {
                   }, 0);
                 }}
               >
-                <Icon src={'/icons/files/edit.png'} base={8} hoverColor={color.accent} />
+                <Icon src={'/assets/icons/files/edit.png'} base={8} hoverColor={color.accent} />
               </div>
               <div
                 class={iconButton}
@@ -445,7 +445,7 @@ const Explorer: Component = () => {
                   }
                 }}
               >
-                <Icon src={'/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
+                <Icon src={'/assets/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
               </div>
               <div
                 class={iconButton}
@@ -454,7 +454,7 @@ const Explorer: Component = () => {
                 }}
               >
                 <Icon
-                  src={configStore.twoColumns ? '/icons/files/two_column.png' : '/icons/files/one_column.png'}
+                  src={configStore.twoColumns ? '/assets/icons/files/two_column.png' : '/assets/icons/files/one_column.png'}
                   base={8}
                   hoverColor={color.accent}
                 />
@@ -467,7 +467,7 @@ const Explorer: Component = () => {
                 }}
               >
                 <Icon
-                  src={'/icons/files/file_sledge.png'}
+                  src={'/assets/icons/files/file_sledge.png'}
                   base={8}
                   color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted}
                   hoverColor={color.enabled}
@@ -482,7 +482,7 @@ const Explorer: Component = () => {
                     setMenuOpened(!isMenuOpened());
                   }}
                 >
-                  <Icon src={'/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
+                  <Icon src={'/assets/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
                 </div>
                 <Show when={isMenuOpened()}>
                   <MenuList

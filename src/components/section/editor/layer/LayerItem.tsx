@@ -288,10 +288,10 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             }}
           >
             <div class={spinner} onClick={handleMoveUp}>
-              <Icon src='/icons/misc/triangle_7.png' base={7} color={color.surface} transform='rotate(180deg)' />
+              <Icon src='/assets/icons/misc/triangle_7.png' base={7} color={color.surface} transform='rotate(180deg)' />
             </div>
             <div class={spinner} onClick={handleMoveDown}>
-              <Icon src='/icons/misc/triangle_7.png' base={7} color={color.surface} />
+              <Icon src='/assets/icons/misc/triangle_7.png' base={7} color={color.surface} />
             </div>
           </div>
           <Show when={layerListStore.selectionEnabled}>

@@ -40,7 +40,11 @@ export const selectModeMeta: PresetFieldMeta = {
           <Show when={interactStore.selectionEditMode === 'replace'}>
             <p class={label}>replace.</p>
           </Show>
-          <Icon src='/icons/selection/mode_replace.png' base={8} color={interactStore.selectionEditMode === 'replace' ? color.active : color.muted} />
+          <Icon
+            src='/assets/icons/selection/mode_replace.png'
+            base={8}
+            color={interactStore.selectionEditMode === 'replace' ? color.active : color.muted}
+          />
         </div>
         <div
           class={item}
@@ -51,7 +55,7 @@ export const selectModeMeta: PresetFieldMeta = {
           <Show when={interactStore.selectionEditMode === 'add'}>
             <p class={label}>add.</p>
           </Show>
-          <Icon src='/icons/selection/mode_add.png' base={8} color={interactStore.selectionEditMode === 'add' ? color.active : color.muted} />
+          <Icon src='/assets/icons/selection/mode_add.png' base={8} color={interactStore.selectionEditMode === 'add' ? color.active : color.muted} />
         </div>
         <div
           class={item}
@@ -63,7 +67,7 @@ export const selectModeMeta: PresetFieldMeta = {
             <p class={label}>subtract.</p>
           </Show>
           <Icon
-            src='/icons/selection/mode_subtract.png'
+            src='/assets/icons/selection/mode_subtract.png'
             base={8}
             color={interactStore.selectionEditMode === 'subtract' ? color.active : color.muted}
           />
@@ -77,7 +81,11 @@ export const selectModeMeta: PresetFieldMeta = {
           <Show when={interactStore.selectionEditMode === 'move'}>
             <p class={label}>move.</p>
           </Show>
-          <Icon src='/icons/selection/mode_move.png' base={8} color={interactStore.selectionEditMode === 'move' ? color.active : color.muted} />
+          <Icon
+            src='/assets/icons/selection/mode_move.png'
+            base={8}
+            color={interactStore.selectionEditMode === 'move' ? color.active : color.muted}
+          />
         </div>
       </div>
     );

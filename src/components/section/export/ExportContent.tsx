@@ -339,7 +339,7 @@ const ExportContent: Component = () => {
                   setLastExportDirsMenuShown(!lastExportDirsMenuShown());
                 }}
               >
-                <Icon src={'/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
+                <Icon src={'/assets/icons/misc/triangle_7.png'} base={7} hoverColor={color.accent} />
               </div>
               <Show when={lastExportDirsMenuShown()}>
                 <MenuList

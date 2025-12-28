@@ -33,7 +33,7 @@ const FrameResizeMenu: Component = () => {
       </div>
       <div class={frameActions}>
         <Item
-          src='/icons/selection/commit_10.png'
+          src='/assets/icons/selection/commit_10.png'
           onClick={() => {
             const targetW = interactStore.canvasSizeFrameSize.width;
             const targetH = interactStore.canvasSizeFrameSize.height;
@@ -52,7 +52,7 @@ const FrameResizeMenu: Component = () => {
         />
         <Divider />
         <Item
-          src='/icons/selection/cancel_10.png'
+          src='/assets/icons/selection/cancel_10.png'
           onClick={() => {
             setInteractStore('isCanvasSizeFrameMode', false);
           }}

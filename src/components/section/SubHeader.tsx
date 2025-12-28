@@ -113,7 +113,7 @@ export const SectionSubHeader: Component<Props> = (props) => {
         </Show>
         <Show when={props.expandable}>
           <div style={{ 'padding-bottom': '1px' }}>
-            <Icon src={'/icons/misc/triangle_5.png'} base={5} transform={expanded() ? undefined : 'scaleY(-1)'} />
+            <Icon src={'/assets/icons/misc/triangle_5.png'} base={5} transform={expanded() ? undefined : 'scaleY(-1)'} />
           </div>
         </Show>
       </div>

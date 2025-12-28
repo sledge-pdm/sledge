@@ -8,7 +8,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   DevRefresh: {
     type: 'item',
     label: '[dev] Refresh',
-    icon: '/icons/context_menu/refresh.png',
+    icon: '/assets/icons/context_menu/refresh.png',
     onSelect: () => {
       location.reload();
     },
@@ -16,7 +16,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   DevOpenDevTools: {
     type: 'item',
     label: '[dev] Open DevTools',
-    icon: '/icons/context_menu/devtools.png',
+    icon: '/assets/icons/context_menu/devtools.png',
     onSelect: async () => {
       await openDevTools(getCurrentWebview().label);
     },
@@ -24,7 +24,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   Undo: {
     type: 'item',
     label: 'Undo',
-    icon: '/icons/context_menu/undo.png',
+    icon: '/assets/icons/context_menu/undo.png',
     onSelect: () => {
       projectHistoryController.undo();
     },
@@ -32,7 +32,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   Redo: {
     type: 'item',
     label: 'Redo',
-    icon: '/icons/context_menu/redo.png',
+    icon: '/assets/icons/context_menu/redo.png',
     onSelect: () => {
       projectHistoryController.redo();
     },
@@ -40,7 +40,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   Save: {
     type: 'item',
     label: 'Save Project',
-    icon: '/icons/context_menu/save.png',
+    icon: '/assets/icons/context_menu/save.png',
     onSelect: async () => {
       await saveProject();
     },
@@ -50,66 +50,66 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   BaseCopy: {
     type: 'item',
     label: 'Copy',
-    icon: '/icons/context_menu/copy.png',
+    icon: '/assets/icons/context_menu/copy.png',
   },
   BaseCut: {
     type: 'item',
     label: 'Cut',
-    icon: '/icons/context_menu/cut.png',
+    icon: '/assets/icons/context_menu/cut.png',
   },
   BaseRemove: {
     type: 'item',
     label: 'Remove',
-    icon: '/icons/context_menu/remove.png',
+    icon: '/assets/icons/context_menu/remove.png',
   },
   BaseDuplicate: {
     type: 'item',
     label: 'Duplicate',
-    icon: '/icons/context_menu/duplicate.png',
+    icon: '/assets/icons/context_menu/duplicate.png',
   },
   BaseClear: {
     type: 'item',
     label: 'Clear',
-    icon: '/icons/context_menu/clear.png',
+    icon: '/assets/icons/context_menu/clear.png',
   },
   BaseMergeDown: {
     type: 'item',
     label: 'Merge Down',
-    icon: '/icons/context_menu/merge_down.png',
+    icon: '/assets/icons/context_menu/merge_down.png',
   },
   BaseImageShow: {
     type: 'item',
     label: 'Show',
-    icon: '/icons/context_menu/show_image.png',
+    icon: '/assets/icons/context_menu/show_image.png',
   },
   BaseImageHide: {
     type: 'item',
     label: 'Hide',
-    icon: '/icons/context_menu/hide_image.png',
+    icon: '/assets/icons/context_menu/hide_image.png',
   },
   BaseTransfer: {
     type: 'item',
     label: 'Transfer to layer',
-    icon: '/icons/context_menu/transfer.png',
+    icon: '/assets/icons/context_menu/transfer.png',
   },
   BaseTransferRemove: {
     type: 'item',
     label: 'Transfer and Remove',
-    icon: '/icons/context_menu/transfer_and_remove.png',
+    icon: '/assets/icons/context_menu/transfer_and_remove.png',
   },
   BaseSelectionConvertToImage: {
     type: 'item',
     label: 'Convert to image',
-    icon: '/icons/context_menu/convert_to_image.png',
+    icon: '/assets/icons/context_menu/convert_to_image.png',
   },
   BaseSelectionCopyAsImage: {
     type: 'item',
     label: 'Copy as image',
-    icon: '/icons/context_menu/copy_as_image.png',
+    icon: '/assets/icons/context_menu/copy_as_image.png',
   },
   BaseInvertSelection: {
     type: 'item',
     label: 'Invert Selection',
-    icon: '/icons/context_menu/invert.png',
+    icon: '/assets/icons/context_menu/invert.png',
   },
 } as const;

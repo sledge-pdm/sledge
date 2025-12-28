@@ -50,7 +50,7 @@ const PerilousLayers: Component = () => {
   return (
     <div class={sectionRoot}>
       <div class={dangerHeaderStyle}>
-        <Icon src={'/icons/misc/danger_11.png'} color={'var(--color-error)'} base={11} scale={2} />
+        <Icon src={'/assets/icons/misc/danger_11.png'} color={'var(--color-error)'} base={11} scale={2} />
         <p class={dangerTitleStyle}>DANGER!!</p>
       </div>
       <p class={dangerDescriptionStyle}>these operations may destroy your project. use them carefully!</p>

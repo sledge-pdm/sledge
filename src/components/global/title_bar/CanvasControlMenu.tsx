@@ -36,7 +36,7 @@ const CanvasControlMenu: Component = () => {
         }}
       >
         <Icon
-          src='/icons/canvas/flip_vertical_9.png'
+          src='/assets/icons/canvas/flip_vertical_9.png'
           base={9}
           scale={1}
           color={interactStore.verticalFlipped ? color.enabled : color.onBackground}
@@ -59,7 +59,7 @@ const CanvasControlMenu: Component = () => {
         }}
       >
         <Icon
-          src='/icons/canvas/flip_horizontal_9.png'
+          src='/assets/icons/canvas/flip_horizontal_9.png'
           base={9}
           scale={1}
           color={interactStore.horizontalFlipped ? color.enabled : color.onBackground}
@@ -81,7 +81,7 @@ const CanvasControlMenu: Component = () => {
           setRotation((currentNearestRightAngle + 1) * 90);
         }}
       >
-        <Icon src='/icons/canvas/rotate_clockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
+        <Icon src='/assets/icons/canvas/rotate_clockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
       <div
         class={iconContainer}
@@ -98,7 +98,7 @@ const CanvasControlMenu: Component = () => {
           setRotation((currentNearestRightAngle - 1) * 90);
         }}
       >
-        <Icon src='/icons/canvas/rotate_counterclockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
+        <Icon src='/assets/icons/canvas/rotate_counterclockwise_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
       <div
         class={iconContainer}
@@ -116,7 +116,7 @@ const CanvasControlMenu: Component = () => {
           resetOrientation();
         }}
       >
-        <Icon src='/icons/canvas/reset_orientation_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
+        <Icon src='/assets/icons/canvas/reset_orientation_9.png' base={9} scale={1} color={color.onBackground} hoverColor={color.active} />
       </div>
       <div
         class={iconContainer}
@@ -133,7 +133,7 @@ const CanvasControlMenu: Component = () => {
         }}
       >
         <Icon
-          src='/icons/canvas/ruler_9.png'
+          src='/assets/icons/canvas/ruler_9.png'
           base={9}
           scale={1}
           color={appearanceStore.ruler ? color.enabled : color.onBackground}
@@ -155,7 +155,7 @@ const CanvasControlMenu: Component = () => {
         }}
       >
         <Icon
-          src='/icons/canvas/onscreen_control_9.png'
+          src='/assets/icons/canvas/onscreen_control_9.png'
           base={9}
           scale={1}
           color={appearanceStore.onscreenControl ? color.enabled : color.onBackground}

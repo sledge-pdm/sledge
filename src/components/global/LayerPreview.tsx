@@ -139,7 +139,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
         }}
         style={{
           'image-rendering': 'pixelated',
-          'background-image': `url(/patterns/CheckerboardPattern.svg)`,
+          'background-image': `url(/assets/patterns/CheckerboardPattern.svg)`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
           border: props.withBorder ? `1px solid ${color.canvasBorder}` : undefined,

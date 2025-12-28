@@ -226,7 +226,7 @@ const SaveSection: Component = () => {
           </button>
           <a class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>
             <Icon
-              src={'/icons/misc/triangle_5.png'}
+              src={'/assets/icons/misc/triangle_5.png'}
               color={color.onBackground}
               base={5}
               scale={1}

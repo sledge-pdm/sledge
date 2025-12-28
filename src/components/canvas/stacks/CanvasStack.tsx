@@ -7,7 +7,7 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
-import CheckerboardPattern from '/patterns/CheckerboardPattern.svg';
+import CheckerboardPattern from '/assets/patterns/CheckerboardPattern.svg';
 
 const canvasStackContainer = css`
   position: relative;

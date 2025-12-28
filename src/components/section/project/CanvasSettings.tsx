@@ -193,7 +193,7 @@ const CanvasSettings: Component = () => {
             }}
           >
             <Icon
-              src={'/icons/misc/frame_resize_12.png'}
+              src={'/assets/icons/misc/frame_resize_12.png'}
               base={12}
               scale={1}
               color={interactStore.isCanvasSizeFrameMode ? color.error : undefined}

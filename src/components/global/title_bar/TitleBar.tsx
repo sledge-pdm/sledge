@@ -224,7 +224,7 @@ export default function TitleBar() {
                 >
                   <Icon
                     class={titleBarControlButtonImg}
-                    src={'/icons/title_bar/minimize_10.png'}
+                    src={'/assets/icons/title_bar/minimize_10.png'}
                     color={color.onBackground}
                     base={10}
                     data-tauri-drag-region-exclude
@@ -243,7 +243,7 @@ export default function TitleBar() {
                 >
                   <Icon
                     class={titleBarControlButtonImg}
-                    src={isMaximized() ? '/icons/title_bar/quit_maximize_10.png' : '/icons/title_bar/maximize_10.png'}
+                    src={isMaximized() ? '/assets/icons/title_bar/quit_maximize_10.png' : '/assets/icons/title_bar/maximize_10.png'}
                     color={color.onBackground}
                     base={10}
                     data-tauri-drag-region-exclude
@@ -262,7 +262,7 @@ export default function TitleBar() {
                 >
                   <Icon
                     class={titleBarControlButtonImg}
-                    src={'/icons/title_bar/close_10.png'}
+                    src={'/assets/icons/title_bar/close_10.png'}
                     color={color.onBackground}
                     base={10}
                     data-tauri-drag-region-exclude

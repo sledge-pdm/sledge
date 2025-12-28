@@ -255,7 +255,7 @@ const MenuContent = () => {
     <>
       <Show when={floatingMoveState()}>
         <Item
-          src='/icons/selection/commit_10.png'
+          src='/assets/icons/selection/commit_10.png'
           onClick={() => {
             commitMove();
             cancelSelection();
@@ -265,7 +265,7 @@ const MenuContent = () => {
         />
         <Divider />
         <Item
-          src='/icons/selection/cancel_10.png'
+          src='/assets/icons/selection/cancel_10.png'
           onClick={() => {
             cancelMove();
             cancelSelection();
@@ -276,7 +276,7 @@ const MenuContent = () => {
       </Show>
       <Show when={!floatingMoveState()}>
         <Item
-          src='/icons/selection/cancel_10.png'
+          src='/assets/icons/selection/cancel_10.png'
           onClick={() => {
             cancelSelection();
           }}
@@ -285,7 +285,7 @@ const MenuContent = () => {
         />
         <Divider />
         <Item
-          src='/icons/selection/to_image_10.png'
+          src='/assets/icons/selection/to_image_10.png'
           onClick={async () => {
             await convertSelectionToImage(true);
           }}
@@ -293,7 +293,7 @@ const MenuContent = () => {
         />
         <Divider />
         <Item
-          src='/icons/selection/delete_10.png'
+          src='/assets/icons/selection/delete_10.png'
           onClick={() => {
             deleteSelectedArea();
           }}

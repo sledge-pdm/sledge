@@ -322,7 +322,7 @@ const ConfigForm: Component<Props> = (props) => {
                   return (
                     <div class={configFormFieldItem}>
                       <div class={flexRow}>
-                        <Icon src={'/icons/misc/bullet_s_8.png'} base={8} />
+                        <Icon src={'/assets/icons/misc/bullet_s_8.png'} base={8} />
                         <p class={configFormFieldLabel}>{meta.label?.toUpperCase()}</p>
                         <Show when={meta.tips !== undefined}>
                           <p class={configFormFieldLabelTooltip} title={meta.tips ?? undefined}>

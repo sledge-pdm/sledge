@@ -1,10 +1,10 @@
 import { css } from '@acab/ecsstatic';
-import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { color } from '@sledge/theme';
 import { Icon, MenuList, MenuListOption } from '@sledge/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/out/save';
+import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { fileStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';

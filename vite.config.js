@@ -41,11 +41,7 @@ export default defineConfig({
   },
   publicDir: 'assets',
   optimizeDeps: {
-    exclude: [
-      '@sledge/core',
-      '@sledge/theme',
-      '@sledge/ui',
-    ]
+    exclude: ['@sledge/core', '@sledge/theme', '@sledge/ui'],
   },
   resolve: {
     alias: {

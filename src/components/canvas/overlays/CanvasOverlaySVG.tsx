@@ -19,10 +19,10 @@ import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 
-import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { ShapeMask } from '@sledge/anvil';
 import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
+import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 
 import { color } from '@sledge/theme';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';

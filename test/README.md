@@ -1,7 +1,7 @@
 Test layout and conventions
 ===========================
 
-- tests live under `app/test/<feature>/...`. Keep feature-specific cases next to their domain (e.g. history, layer, utils). Cross-cutting integration (project roundtrip) can stay at the root.
+- tests live under `test/<feature>/...`. Keep feature-specific cases next to their domain (e.g. history, layer, utils). Cross-cutting integration (project roundtrip) can stay at the root.
 - prefer headless fakes over DOM: use small Anvil buffers (`8x8`, `16x16`) and stub `document`/`eventBus` only with the methods a test actually needs.
 - reuse shared helpers: history tests already use `features/history/utils.ts`. Add new helpers per feature instead of inlining large setups in each spec.
 - follow naming hints in `features/history/history_test_instruction.md` (IDs `A/B/C`, entries `entry-A/B/C`) for readability; extend the same pattern to new suites.

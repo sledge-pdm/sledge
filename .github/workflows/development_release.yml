@@ -52,7 +52,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            app/src-tauri
+            src-tauri
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.

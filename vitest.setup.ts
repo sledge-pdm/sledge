@@ -38,7 +38,7 @@ vi.mock('~/config/SectionTabs', () => {
 });
 
 // Domain-specific matchers (layer order, canvas size, history state)
-import './app/test/setupMatchers';
+import './test/setupMatchers';
 
 // Solid stores: we can import the real stores as they use solid-js/store (no DOM),
 // but to avoid side effects on global state between tests, we reset important flags per test if needed.

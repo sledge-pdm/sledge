@@ -54,7 +54,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            app/src-tauri
+            src-tauri
             packages/wasm
 
       - name: install dependencies (ubuntu only)

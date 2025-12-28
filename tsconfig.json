@@ -12,17 +12,13 @@
     "jsxImportSource": "solid-js",
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"],
-      "@sledge/ui": ["../packages/ui"],
-      "@sledge/theme": ["../packages/theme"],
-      "@sledge/core": ["../packages/core"],
-      "@sledge/wasm": ["../packages/wasm/pkg/sledge_wasm.js"]
+      "~/*": ["src/*"],
+      "@sledge/wasm": ["wasm/pkg/sledge_wasm.js"]
     },
     "types": ["vite/client"],
     "rootDirs": ["src"]
   },
   "exclude": [
-    // Tauri が生成するバイナリ的 JS 資産群（型チェック不要 / 文字化けし ts エラーになる）
     "src-tauri/target",
     "**/out/tauri-codegen-assets/**"
   ]

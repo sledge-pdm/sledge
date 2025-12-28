@@ -21,7 +21,7 @@ import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
 import { css } from '@acab/ecsstatic';
-import '@sledge/theme/src/global.css';
+import '@sledge/theme';
 import Restore from '~/routes/restore';
 
 const appRoot = css`

@@ -1,8 +1,4 @@
-packages:
-  - app
-  - packages/*
-
-ignoredBuiltDependencies:
+onlyBuiltDependencies:
   - '@swc/core'
-  - 'esbuild'
-  - 'msgpackr-extract'
+  - esbuild
+  - msgpackr-extract

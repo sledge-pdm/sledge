@@ -82,7 +82,7 @@ jobs:
           releaseId: ${{ github.ref_name }}
           tagName: ${{ github.ref_name }}
           releaseName: ${{ github.ref_name }}
-          projectPath: './app'
+          projectPath: '.'
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true

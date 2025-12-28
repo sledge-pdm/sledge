@@ -80,8 +80,8 @@ jobs:
         with:
           name: binaries-linux
           path: |
-            ${{ github.workspace }}/app/src-tauri/target/release/bundle/**/*.deb
-            ${{ github.workspace }}/app/src-tauri/target/release/bundle/**/*.rpm
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.deb
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.rpm
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -90,8 +90,8 @@ jobs:
         with:
           name: binaries-macos
           path: |
-            ${{ github.workspace }}/app/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
-            ${{ github.workspace }}/app/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
+            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
+            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -100,5 +100,5 @@ jobs:
         with:
           name: binaries-windows
           path: |
-            ${{ github.workspace }}/app/src-tauri/target/release/bundle/**/*.exe
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.exe
           retention-days: 3

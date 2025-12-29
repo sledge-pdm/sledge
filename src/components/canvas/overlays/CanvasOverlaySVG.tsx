@@ -1,4 +1,4 @@
-import { RGBAToHex, TileIndex } from '@sledge-pdm/anvil';
+import { TileIndex } from '@sledge-pdm/anvil';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
@@ -24,6 +24,7 @@ import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
 import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 
+import { RGBAToHex } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';

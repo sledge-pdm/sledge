@@ -1,5 +1,4 @@
-import { RGBA } from '@sledge-pdm/anvil';
-import { Vec2 } from '@sledge-pdm/core';
+import { RGBA, Vec2 } from '@sledge-pdm/core';
 
 export interface ToolResult {
   shouldUpdate: boolean;

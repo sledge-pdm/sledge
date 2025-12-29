@@ -1,4 +1,4 @@
-import { RGBA } from '@sledge-pdm/anvil';
+import { RGBA } from '@sledge-pdm/core';
 import { Slider } from '@sledge-pdm/ui';
 import { Component, createSignal, onMount } from 'solid-js';
 import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tabs/SliderStyles';

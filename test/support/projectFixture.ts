@@ -1,5 +1,5 @@
-import type { RGBA } from '@sledge-pdm/anvil';
 import { Anvil } from '@sledge-pdm/anvil';
+import type { RGBA } from '@sledge-pdm/core';
 import { vi } from 'vitest';
 import { PaletteType, selectPalette, setPaletteColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';

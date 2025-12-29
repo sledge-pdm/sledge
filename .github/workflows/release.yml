@@ -69,6 +69,9 @@ jobs:
       - name: build wasm
         run: pnpm wasm:build
 
+      - name: Configure pnpm Auth for private registry
+        run: pnpm config set //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
+
       - name: install frontend dependencies
         run: pnpm install
 

@@ -1,4 +1,4 @@
-import { PackedDiffs } from '@sledge/anvil';
+import { PackedDiffs } from '@sledge-pdm/anvil';
 import { ImagePoolEntry } from '~/features/image_pool';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';

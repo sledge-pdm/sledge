@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { Vec2 } from '@sledge/core';
-import { showContextMenu } from '@sledge/ui';
+import { Vec2 } from '@sledge-pdm/core';
+import { showContextMenu } from '@sledge-pdm/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { batch, Component, createSignal, onMount } from 'solid-js';

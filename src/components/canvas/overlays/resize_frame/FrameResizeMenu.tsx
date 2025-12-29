@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { color, Icon } from '@sledge-pdm/ui';
 import { Component, createSignal, Show } from 'solid-js';
 import { changeCanvasSize } from '~/features/canvas';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';

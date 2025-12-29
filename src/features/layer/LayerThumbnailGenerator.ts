@@ -1,4 +1,4 @@
-import { AntialiasMode, RgbaBuffer } from '@sledge/anvil';
+import { AntialiasMode, RgbaBuffer } from '@sledge-pdm/anvil';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { logSystemWarn } from '~/features/log/service';
 

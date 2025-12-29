@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
+import { color } from '@sledge-pdm/ui';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';

@@ -1,5 +1,5 @@
-import { AlphaBlurMode } from '@sledge/anvil';
-import { Slider, ToggleSwitch } from '@sledge/ui';
+import { AlphaBlurMode } from '@sledge-pdm/anvil';
+import { Slider, ToggleSwitch } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { EffectControl } from '~/components/section/effects/EffectControl';

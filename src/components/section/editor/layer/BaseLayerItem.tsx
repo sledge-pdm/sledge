@@ -1,5 +1,4 @@
-import { color, spacing, text } from '@sledge/theme';
-import { ColorBox, Dropdown } from '@sledge/ui';
+import { color, ColorBox, Dropdown, spacing, text } from '@sledge-pdm/ui';
 import { Component, createSignal } from 'solid-js';
 import { BaseLayerColorMode, setBaseLayerColorMode, setBaseLayerCustomColor } from '~/features/layer';
 import { layerListStore } from '~/stores/ProjectStores';

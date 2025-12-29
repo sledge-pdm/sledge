@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { spacing } from '@sledge/theme';
+import { clsx } from '@sledge-pdm/core';
+import { spacing } from '@sledge-pdm/ui';
 import { Component, For, Show } from 'solid-js';
 import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManager';
 import SectionItem from '~/components/section/SectionItem';

@@ -1,7 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { color } from '@sledge/theme';
-import { Slider } from '@sledge/ui';
+import { color, Slider } from '@sledge-pdm/ui';
 import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
 import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';

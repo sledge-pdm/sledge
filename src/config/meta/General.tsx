@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { themeOptions } from '@sledge/theme';
+import { themeOptions } from '@sledge-pdm/ui';
 import { Show } from 'solid-js';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 import { saveGlobalSettings } from '~/features/io/config/save';

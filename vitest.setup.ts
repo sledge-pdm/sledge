@@ -65,8 +65,8 @@ vi.mock('@tauri-apps/api/core', () => ({
   transformCallback: tauriIpcMock.transformCallback,
   convertFileSrc: tauriIpcMock.convertFileSrc,
 }));
-vi.mock('@sledge/ui', () => ({}));
-vi.mock('@sledge/theme', () => ({
+vi.mock('@sledge-pdm/ui', () => ({}));
+vi.mock('@sledge-pdm/ui', () => ({
   themeOptions: [
     { label: 'os theme', value: 'os' },
     { label: 'light', value: 'light' },

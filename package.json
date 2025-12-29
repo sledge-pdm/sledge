@@ -20,10 +20,9 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@jaames/iro": "^5.5.2",
-    "@sledge/anvil": "npm:@sledge-pdm/anvil@^1.0.7",
-    "@sledge/core": "npm:@sledge-pdm/misc@^1.0.0",
-    "@sledge/theme": "npm:@sledge-pdm/theme@^1.0.3",
-    "@sledge/ui": "npm:@sledge-pdm/ui@^1.0.14",
+    "@sledge-pdm/anvil": "^1.1.1",
+    "@sledge-pdm/core": "^1.0.3",
+    "@sledge-pdm/ui": "1.1.2",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
     "@solid-primitives/raf": "^2.3.2",

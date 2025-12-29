@@ -1,4 +1,4 @@
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 
 export type FileStore = {
   openAs: 'project' | 'new_project' | 'image';

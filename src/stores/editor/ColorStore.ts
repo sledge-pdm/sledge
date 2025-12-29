@@ -1,4 +1,4 @@
-import { RGBA } from '@sledge/anvil';
+import { RGBA } from '@sledge-pdm/anvil';
 import { PaletteType } from '~/features/color';
 import { DEFAULT, SMPTE, Swatch } from '~/features/color/swatch/swatches';
 

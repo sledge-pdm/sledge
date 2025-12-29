@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
-import { Slider } from '@sledge/ui';
+import { color, Slider } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { rotateInAreaCenter } from '~/features/canvas';

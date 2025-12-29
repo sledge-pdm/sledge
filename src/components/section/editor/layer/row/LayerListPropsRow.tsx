@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { Dropdown, Slider } from '@sledge/ui';
+import { Dropdown, Slider } from '@sledge-pdm/ui';
 import { debounce } from '@solid-primitives/scheduled';
 import { Component } from 'solid-js';
 import { LayerPropsHistoryAction, projectHistoryController } from '~/features/history';

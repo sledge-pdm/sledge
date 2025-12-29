@@ -1,4 +1,4 @@
-import { RGBA } from '@sledge/anvil';
+import { RGBA } from '@sledge-pdm/anvil';
 import { PaletteType, setPaletteColor } from '~/features/color';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 

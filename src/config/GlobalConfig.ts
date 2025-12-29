@@ -1,4 +1,4 @@
-import { Theme } from '@sledge/theme';
+import { Theme } from '@sledge-pdm/ui';
 import { KeyConfigStore, makeDefaultKeyConfigStore } from '~/config/KeyConfig';
 import { Cursor } from '~/config/types/Cursor';
 import { FPS } from '~/config/types/FPS';

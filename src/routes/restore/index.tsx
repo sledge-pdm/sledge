@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { remove, stat } from '@tauri-apps/plugin-fs';

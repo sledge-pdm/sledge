@@ -1,6 +1,6 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
-import { RGBA, RGBAToHex } from '@sledge/anvil';
+import { RGBA, RGBAToHex } from '@sledge-pdm/anvil';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';

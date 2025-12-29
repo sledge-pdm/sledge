@@ -1,7 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { Vec2 } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { Vec2 } from '@sledge-pdm/core';
+import { color, Icon } from '@sledge-pdm/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { logSystemInfo } from '~/features/log/service';
 import { setAppearanceStore } from '~/stores/EditorStores';

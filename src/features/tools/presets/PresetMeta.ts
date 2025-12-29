@@ -1,4 +1,4 @@
-import type { ComponentPropsMap, ConfigComponentFactory, ConfigComponentName } from '@sledge/ui';
+import type { ComponentPropsMap, ConfigComponentFactory, ConfigComponentName } from '@sledge-pdm/ui';
 
 export type PresetFieldMeta<
   TConfig = Record<string, any>,

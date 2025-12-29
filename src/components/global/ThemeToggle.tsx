@@ -1,5 +1,4 @@
-import { Theme, themeOptions } from '@sledge/theme';
-import { Dropdown } from '@sledge/ui';
+import { Dropdown, Theme, themeOptions } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';

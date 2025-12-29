@@ -1,7 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { clsx } from '@sledge-pdm/core';
+import { color, Icon } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 
 const iconContainer = css`

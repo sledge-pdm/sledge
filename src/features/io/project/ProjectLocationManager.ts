@@ -1,4 +1,4 @@
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { fileStore, setFileStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';

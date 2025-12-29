@@ -1,5 +1,5 @@
 // Side-effectful operations / state interactions for color feature
-import { colorMatch, RGBA } from '@sledge/anvil';
+import { colorMatch, RGBA } from '@sledge-pdm/anvil';
 import { Consts } from '~/Consts';
 import { projectHistoryController } from '~/features/history';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';

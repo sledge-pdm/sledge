@@ -1,4 +1,4 @@
-import { Vec2 } from '@sledge/core';
+import { Vec2 } from '@sledge-pdm/core';
 import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';

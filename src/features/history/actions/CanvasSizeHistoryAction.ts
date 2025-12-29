@@ -1,4 +1,4 @@
-import { Size2D } from '@sledge/core';
+import { Size2D } from '@sledge-pdm/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';

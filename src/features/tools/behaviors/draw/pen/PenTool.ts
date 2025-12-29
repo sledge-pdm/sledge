@@ -1,5 +1,5 @@
-import { Anvil, type PixelPatchData, RGBA, ShapeMask, packedU32ToRgba, putShape, putShapeLine, transparent } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
+import { Anvil, type PixelPatchData, RGBA, ShapeMask, packedU32ToRgba, putShape, putShapeLine, transparent } from '@sledge-pdm/anvil';
+import { Vec2 } from '@sledge-pdm/core';
 import { Consts } from '~/Consts';
 import { activeLayer, findLayerById } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';

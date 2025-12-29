@@ -1,5 +1,5 @@
-import { RGBA } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
+import { RGBA } from '@sledge-pdm/anvil';
+import { Vec2 } from '@sledge-pdm/core';
 
 type DebugPoint = Vec2 & {
   color: RGBA;

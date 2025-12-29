@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
+import { color } from '@sledge-pdm/ui';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { KeyConfigCommands, KeyConfigEntry } from '~/config/KeyConfig';

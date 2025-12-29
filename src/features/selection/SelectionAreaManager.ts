@@ -1,7 +1,7 @@
 // controllers/layer/SelectionManager.ts
 
-import { TileIndex, toUint8ClampedArray } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
+import { TileIndex, toUint8ClampedArray } from '@sledge-pdm/anvil';
+import { Vec2 } from '@sledge-pdm/core';
 import {
   apply_mask_offset,
   combine_masks_add,

@@ -1,4 +1,4 @@
-import { FileLocation, Size2D } from '@sledge/core';
+import { FileLocation, Size2D } from '@sledge-pdm/core';
 import mitt from 'mitt';
 
 export type Events = {

@@ -1,4 +1,4 @@
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { mkdir, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { v4 } from 'uuid';

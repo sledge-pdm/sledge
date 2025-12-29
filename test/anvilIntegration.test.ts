@@ -1,4 +1,4 @@
-import type { RGBA } from '@sledge/anvil';
+import type { RGBA } from '@sledge-pdm/anvil';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { GREEN, RED, TRANSPARENT } from './support/colors';

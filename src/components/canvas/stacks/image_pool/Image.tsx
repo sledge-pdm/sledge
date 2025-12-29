@@ -1,7 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Icon, MenuListOption, showContextMenu } from '@sledge/ui';
+import { clsx } from '@sledge-pdm/core';
+import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer, updateEntryPartial } from '~/features/image_pool';

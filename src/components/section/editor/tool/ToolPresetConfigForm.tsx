@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { ConfigFieldRenderer } from '@sledge/ui';
+import { ConfigFieldRenderer } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { logSystemInfo } from '~/features/log/service';
 import { getPresetMetaByToolId } from '~/features/tools/presets';

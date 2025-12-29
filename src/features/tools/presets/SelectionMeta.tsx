@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { color, Icon } from '@sledge-pdm/ui';
 import { Show } from 'solid-js';
 import { PresetFieldMeta } from '~/features/tools/presets/PresetMeta';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';

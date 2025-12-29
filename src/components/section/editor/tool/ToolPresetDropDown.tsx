@@ -1,4 +1,4 @@
-import { Dropdown } from '@sledge/ui';
+import { Dropdown } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { setToolStore, toolStore } from '~/stores/EditorStores';

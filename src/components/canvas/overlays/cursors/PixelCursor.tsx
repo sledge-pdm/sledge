@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { Vec2 } from '@sledge/core';
+import { Vec2 } from '@sledge-pdm/core';
 import { Component } from 'solid-js';
 
 const root = css`

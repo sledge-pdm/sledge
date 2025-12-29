@@ -1,4 +1,4 @@
-import { RGBA } from '@sledge/anvil';
+import { RGBA } from '@sledge-pdm/anvil';
 
 export const BLACK: RGBA = [0, 0, 0, 255];
 export const WHITE: RGBA = [255, 255, 255, 255];

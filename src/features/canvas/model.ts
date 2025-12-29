@@ -1,4 +1,4 @@
-import { DropdownOption } from '@sledge/ui';
+import { DropdownOption } from '@sledge-pdm/ui';
 
 export type Canvas = {
   width: number;

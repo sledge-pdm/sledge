@@ -1,4 +1,4 @@
-import type { ConfigFieldOf } from '@sledge/ui';
+import type { ConfigFieldOf } from '@sledge-pdm/ui';
 import type { GlobalConfig } from '~/config/GlobalConfig';
 
 export enum ConfigSections {

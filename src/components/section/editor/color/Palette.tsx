@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { ColorBox } from '@sledge/ui';
+import { clsx } from '@sledge-pdm/core';
+import { ColorBox } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { currentColor, getPaletteColor, PaletteType, selectPalette } from '~/features/color';
 import { colorStore } from '~/stores/EditorStores';

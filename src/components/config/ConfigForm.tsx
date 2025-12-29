@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge/ui';
+import { clsx } from '@sledge-pdm/core';
+import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge-pdm/ui';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';

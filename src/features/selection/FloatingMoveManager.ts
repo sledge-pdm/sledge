@@ -1,6 +1,6 @@
 // controllers/layer/SelectionManager.ts
-import { AntialiasMode, RgbaBuffer, toUint8Array, toUint8ClampedArray } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
+import { AntialiasMode, RgbaBuffer, toUint8Array, toUint8ClampedArray } from '@sledge-pdm/anvil';
+import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';

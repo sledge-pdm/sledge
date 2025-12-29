@@ -1,4 +1,4 @@
-import { Vec2 } from '@sledge/core';
+import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { currentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';

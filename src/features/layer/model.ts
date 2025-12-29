@@ -1,7 +1,7 @@
 // Layer domain models - Pure layer utilities and factories
 
-import { hexWithSharpToRGBA } from '@sledge/anvil';
-import { DropdownOption } from '@sledge/ui';
+import { hexWithSharpToRGBA } from '@sledge-pdm/anvil';
+import { DropdownOption } from '@sledge-pdm/ui';
 import { v4 } from 'uuid';
 import { layerListStore } from '~/stores/ProjectStores';
 import { BaseLayer, BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';

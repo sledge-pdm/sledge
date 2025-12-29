@@ -2,10 +2,9 @@ import { css } from '@acab/ecsstatic';
 import { Component, createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
 import ColorPicker from '~/components/section/editor/color/tabs/ColorPicker';
 
-import { hexToRGBA, RGBAToHex } from '@sledge/anvil';
-import { clsx } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { hexToRGBA, RGBAToHex } from '@sledge-pdm/anvil';
+import { clsx } from '@sledge-pdm/core';
+import { color, Icon } from '@sledge-pdm/ui';
 import Palette from '~/components/section/editor/color/Palette';
 import ColorHistory from '~/components/section/editor/color/tabs/ColorHistory';
 import RGB from '~/components/section/editor/color/tabs/RGB';

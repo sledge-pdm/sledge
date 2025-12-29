@@ -1,5 +1,4 @@
-import { color } from '@sledge/theme';
-import { MenuListOption, showContextMenu } from '@sledge/ui';
+import { color, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, For } from 'solid-js';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';

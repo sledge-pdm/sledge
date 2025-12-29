@@ -1,6 +1,6 @@
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
-import { hexWithSharpToRGBA, RGBA, RGBAToHex } from '@sledge/anvil';
+import { hexWithSharpToRGBA, RGBA, RGBAToHex } from '@sledge-pdm/anvil';
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 import { colorStore } from '~/stores/EditorStores';

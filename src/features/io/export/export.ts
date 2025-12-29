@@ -1,4 +1,4 @@
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { Exporter } from '~/features/io/export/exporter/Exporter';

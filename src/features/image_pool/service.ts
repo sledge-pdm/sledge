@@ -1,5 +1,5 @@
-import type { RawPixelData } from '@sledge/anvil';
-import { AntialiasMode, rawToWebp, webpToRaw } from '@sledge/anvil';
+import type { RawPixelData } from '@sledge-pdm/anvil';
+import { AntialiasMode, rawToWebp, webpToRaw } from '@sledge-pdm/anvil';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';

@@ -6,8 +6,7 @@ import About from './routes/about/index';
 import Editor from './routes/editor/index';
 import Home from './routes/start/index';
 
-import { applyTheme } from '@sledge/theme';
-import { showContextMenu } from '@sledge/ui';
+import { applyTheme, showContextMenu } from '@sledge-pdm/ui';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -23,7 +22,7 @@ import { listenEvent } from './utils/TauriUtils';
 import { css } from '@acab/ecsstatic';
 import Restore from '~/routes/restore';
 
-import '@sledge/theme/global.css';
+import '@sledge-pdm/ui/global.css';
 
 const appRoot = css`
   display: flex;

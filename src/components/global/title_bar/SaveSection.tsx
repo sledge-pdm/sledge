@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
-import { Icon, MenuList, MenuListOption } from '@sledge/ui';
+import { color, Icon, MenuList, MenuListOption } from '@sledge-pdm/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/out/save';

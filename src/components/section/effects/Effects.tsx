@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { Dropdown, DropdownOption } from '@sledge/ui';
+import { Dropdown, DropdownOption } from '@sledge-pdm/ui';
 import { Accessor, Component, createMemo, createSignal } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
 import BrightnessContrast from '~/components/section/effects/effects/BrightnessContrast';

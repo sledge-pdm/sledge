@@ -1,4 +1,4 @@
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { setFileStore } from '~/stores/EditorStores';
 

@@ -1,8 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { isTransparent, transparent } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
-import { color, fonts } from '@sledge/theme';
-import { ColorBox } from '@sledge/ui';
+import { isTransparent, transparent, Vec2 } from '@sledge-pdm/core';
+import { color, ColorBox, fonts } from '@sledge-pdm/ui';
 import { Component, Show } from 'solid-js';
 import { currentColor } from '~/features/color';
 import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';

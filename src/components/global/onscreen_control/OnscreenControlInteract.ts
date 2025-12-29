@@ -1,4 +1,4 @@
-import { Vec2 } from '@sledge/core';
+import { Vec2 } from '@sledge-pdm/core';
 import { createRAF, targetFPS } from '@solid-primitives/raf';
 import { clipZoom, setOffset, zoomTowardAreaCenter } from '~/features/canvas';
 import { interactStore } from '~/stores/EditorStores';

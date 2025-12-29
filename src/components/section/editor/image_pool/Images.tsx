@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge/core';
-import { Checkbox } from '@sledge/ui';
+import { clsx } from '@sledge-pdm/core';
+import { Checkbox } from '@sledge-pdm/ui';
 import { Component, createMemo, JSX, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';

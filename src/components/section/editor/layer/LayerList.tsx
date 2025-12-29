@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { clsx } from '@sledge/core';
+import { clsx } from '@sledge-pdm/core';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import LayerListButtonsRow from '~/components/section/editor/layer/row/LayerListButtonsRow';
 import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';

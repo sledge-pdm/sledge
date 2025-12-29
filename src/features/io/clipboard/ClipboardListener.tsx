@@ -1,4 +1,4 @@
-import { toUint8Array } from '@sledge/anvil';
+import { toUint8Array } from '@sledge-pdm/anvil';
 import { Image } from '@tauri-apps/api/image';
 import { writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { Component, onMount } from 'solid-js';

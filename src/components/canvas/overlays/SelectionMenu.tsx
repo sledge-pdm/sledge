@@ -2,7 +2,7 @@
  * Appearance is 100% OK.
  */
 
-import { Icon } from '@sledge/ui';
+import { Icon } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
 import {
@@ -16,8 +16,8 @@ import {
 import { eventBus, Events } from '~/utils/EventBus';
 
 import { css } from '@acab/ecsstatic';
-import { Vec2 } from '@sledge/core';
-import { color } from '@sledge/theme';
+import { Vec2 } from '@sledge-pdm/core';
+import { color } from '@sledge-pdm/ui';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';

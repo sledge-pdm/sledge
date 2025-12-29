@@ -1,4 +1,4 @@
-import { PackedDiffs } from '@sledge/anvil';
+import { PackedDiffs } from '@sledge-pdm/anvil';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';

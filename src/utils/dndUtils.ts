@@ -1,4 +1,4 @@
-import { color } from '@sledge/theme';
+import { color } from '@sledge-pdm/ui';
 
 type GetItemId = (el: HTMLElement) => string | undefined;
 

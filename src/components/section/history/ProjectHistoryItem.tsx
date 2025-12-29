@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { RGBAToHex } from '@sledge/anvil';
-import { Icon } from '@sledge/ui';
+import { RGBAToHex } from '@sledge-pdm/core';
+import { Icon } from '@sledge-pdm/ui';
 import { Accessor, Component, Show } from 'solid-js';
 import { BaseHistoryAction } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';

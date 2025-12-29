@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { ColorBox } from '@sledge/ui';
+import { ColorBox } from '@sledge-pdm/ui';
 import { Component, For } from 'solid-js';
 import { currentColor, getColorHistory, registerColorChange, setCurrentColor } from '~/features/color';
 

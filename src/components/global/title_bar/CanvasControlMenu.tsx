@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { color, Icon } from '@sledge-pdm/ui';
 import { Component, createMemo } from 'solid-js';
 import { resetOrientation, setRotation, toggleHorizontalFlip, toggleVerticalFlip } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';

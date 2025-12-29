@@ -1,4 +1,4 @@
-import { Size2D } from '@sledge/core';
+import { Size2D } from '@sledge-pdm/core';
 
 export type CanvasStore = {
   canvas: Size2D;

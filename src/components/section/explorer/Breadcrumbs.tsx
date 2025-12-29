@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
+import { color } from '@sledge-pdm/ui';
 import { Component, For, createMemo } from 'solid-js';
 import { BreadcrumbEntry, buildBreadcrumbItems } from '~/components/section/explorer/utils/path';
 

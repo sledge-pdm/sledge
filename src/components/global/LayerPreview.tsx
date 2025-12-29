@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
+import { color } from '@sledge-pdm/ui';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { Layer } from '~/features/layer';

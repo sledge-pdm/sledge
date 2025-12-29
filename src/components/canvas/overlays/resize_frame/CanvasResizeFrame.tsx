@@ -1,5 +1,5 @@
-import { Size2D, Vec2 } from '@sledge/core';
-import { fonts } from '@sledge/theme';
+import { Size2D, Vec2 } from '@sledge-pdm/core';
+import { fonts } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';

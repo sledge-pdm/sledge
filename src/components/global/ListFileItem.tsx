@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { Component, createSignal, Show } from 'solid-js';
 
 const thumb = css`

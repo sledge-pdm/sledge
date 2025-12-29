@@ -1,7 +1,4 @@
-import { RGBA } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
-// LayerImageAgent 依存を除去し AnvilToolContext を利用
-//import LayerImageAgent from '~/features/layer/agent/LayerImageAgent';
+import { RGBA, Vec2 } from '@sledge-pdm/core';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { logUserInfo } from '~/features/log';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';

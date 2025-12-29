@@ -1,5 +1,5 @@
-import { RGBA } from '@sledge/anvil';
-import { Slider } from '@sledge/ui';
+import { RGBA } from '@sledge-pdm/core';
+import { Slider } from '@sledge-pdm/ui';
 import { Component, createSignal, onMount } from 'solid-js';
 import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tabs/SliderStyles';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';

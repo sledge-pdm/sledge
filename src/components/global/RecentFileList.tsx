@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, For } from 'solid-js';
 import { createStore } from 'solid-js/store';

@@ -1,5 +1,5 @@
-import type { RawPixelData } from '@sledge/anvil';
-import { Anvil } from '@sledge/anvil';
+import type { RawPixelData } from '@sledge-pdm/anvil';
+import { Anvil } from '@sledge-pdm/anvil';
 
 export class AnvilManager {
   private anvils: Map<string, Anvil> = new Map();

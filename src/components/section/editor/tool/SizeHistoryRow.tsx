@@ -1,8 +1,7 @@
 import { css } from '@acab/ecsstatic';
-import { ShapeMask } from '@sledge/anvil';
-import { clsx } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { showContextMenu } from '@sledge/ui';
+import { ShapeMask } from '@sledge-pdm/anvil';
+import { clsx } from '@sledge-pdm/core';
+import { color, showContextMenu } from '@sledge-pdm/ui';
 import { mask_to_path } from '@sledge/wasm';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { EraserTool } from '~/features/tools/behaviors/draw/eraser/EraserTool';

@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { SparkLine } from '@sledge/ui';
+import { SparkLine } from '@sledge-pdm/ui';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';

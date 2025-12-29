@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color } from '@sledge/theme';
-import { Icon } from '@sledge/ui';
+import { color, Icon } from '@sledge-pdm/ui';
 import { Component, Show } from 'solid-js';
 import { setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategoryId } from '~/features/tools/Tools';

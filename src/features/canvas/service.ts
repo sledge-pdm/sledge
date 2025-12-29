@@ -1,4 +1,4 @@
-import { Size2D, Vec2 } from '@sledge/core';
+import { Size2D, Vec2 } from '@sledge-pdm/core';
 import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';

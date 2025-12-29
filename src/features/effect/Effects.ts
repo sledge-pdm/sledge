@@ -1,4 +1,4 @@
-import type { RgbaBuffer } from '@sledge/anvil';
+import type { RgbaBuffer } from '@sledge-pdm/anvil';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';

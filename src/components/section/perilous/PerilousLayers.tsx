@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { Button, Icon } from '@sledge/ui';
+import { Button, Icon } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
 import SectionItem from '~/components/section/SectionItem';

@@ -1,5 +1,5 @@
-import { ShapeMask } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
+import { ShapeMask } from '@sledge-pdm/anvil';
+import { Vec2 } from '@sledge-pdm/core';
 import { BaseShape } from '~/features/tools/behaviors/draw/pen/shape/BaseShape';
 
 export class Square extends BaseShape {

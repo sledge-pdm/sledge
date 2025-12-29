@@ -1,4 +1,4 @@
-import { rawToWebp } from '@sledge/anvil';
+import { rawToWebp } from '@sledge-pdm/anvil';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';

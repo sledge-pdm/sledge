@@ -1,7 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge/core';
-import { color } from '@sledge/theme';
-import { Dropdown, DropdownOption, Icon, MenuList } from '@sledge/ui';
+import { FileLocation } from '@sledge-pdm/core';
+import { color, Dropdown, DropdownOption, Icon, MenuList } from '@sledge-pdm/ui';
 import { message } from '@tauri-apps/plugin-dialog';
 import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';

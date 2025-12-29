@@ -1,4 +1,4 @@
-import { Vec2 } from '@sledge/core';
+import { Vec2 } from '@sledge-pdm/core';
 import { logUserInfo } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';

@@ -1,4 +1,4 @@
-import { Anvil, RgbaBuffer } from '@sledge/anvil';
+import { Anvil, RgbaBuffer } from '@sledge-pdm/anvil';
 import { readFileSync } from 'fs';
 import { expect, vi } from 'vitest';
 import { PaletteType, selectPalette, setPaletteColor } from '~/features/color';

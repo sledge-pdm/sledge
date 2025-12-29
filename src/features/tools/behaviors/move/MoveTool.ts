@@ -1,5 +1,4 @@
-import { Vec2 } from '@sledge/core';
-// import LayerImageAgent from '~/features/layer/agent/LayerImageAgent'; // legacy
+import { Vec2 } from '@sledge-pdm/core';
 import { logUserInfo } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';

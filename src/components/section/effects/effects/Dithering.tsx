@@ -1,5 +1,5 @@
-import { DitheringMode } from '@sledge/anvil';
-import { Dropdown, DropdownOption, Slider } from '@sledge/ui';
+import { DitheringMode } from '@sledge-pdm/anvil';
+import { Dropdown, DropdownOption, Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { EffectControl } from '~/components/section/effects/EffectControl';

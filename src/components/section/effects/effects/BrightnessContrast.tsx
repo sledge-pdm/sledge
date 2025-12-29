@@ -1,4 +1,4 @@
-import { Slider } from '@sledge/ui';
+import { Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { EffectControl } from '~/components/section/effects/EffectControl';

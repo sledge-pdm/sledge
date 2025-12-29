@@ -1,4 +1,4 @@
-import { ShapeMask } from '@sledge/anvil';
+import { ShapeMask } from '@sledge-pdm/anvil';
 
 export abstract class BaseShape {
   abstract readonly SHAPE_ID: string;

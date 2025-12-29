@@ -1,5 +1,5 @@
 // editorStore.tsx
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { createStore } from 'solid-js/store';
 import { ToolCategoryId, ToolPresets } from '~/features/tools/Tools';
 import { AppearanceStore, createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';

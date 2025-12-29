@@ -1,4 +1,4 @@
-import { FileLocation } from '@sledge/core';
+import { FileLocation } from '@sledge-pdm/core';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';

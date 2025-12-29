@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { color, fonts } from '@sledge/theme';
-import { MenuList, MenuListOption } from '@sledge/ui';
+import { color, fonts, MenuList, MenuListOption } from '@sledge-pdm/ui';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { Update } from '@tauri-apps/plugin-updater';

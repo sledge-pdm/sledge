@@ -1,4 +1,4 @@
-import { Vec2 } from '@sledge/core';
+import { Vec2 } from '@sledge-pdm/core';
 import { logSystemWarn } from '~/features/log/service';
 import { CanvasPos, WindowPos } from '~/types/CoordinateTypes';
 import { coordinateTransform } from './UnifiedCoordinateTransform';

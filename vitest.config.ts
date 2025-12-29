@@ -17,12 +17,12 @@ export default defineConfig({
     server: {
       deps: {
         // Ensure Vite transforms the wasm-using anvil package instead of Node trying to load .wasm directly.
-        inline: ['@sledge/anvil', /@sledge-pdm\/anvil/],
+        inline: ['@sledge-pdm/anvil', /@sledge-pdm\/anvil/],
       },
     },
   },
   optimizeDeps: {
-    exclude: ['@sledge/core', '@sledge/theme', '@sledge/ui'],
+    exclude: ['@sledge-pdm/core', '@sledge-pdm/ui', '@sledge-pdm/ui'],
   },
   resolve: {
     alias: {

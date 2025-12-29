@@ -1,7 +1,6 @@
 import { css } from '@acab/ecsstatic';
-import { clsx, Vec2 } from '@sledge/core';
-import { color, fonts } from '@sledge/theme';
-import { Checkbox, Dropdown, DropdownOption, Icon, MenuList, MenuListOption, Slider } from '@sledge/ui';
+import { clsx, Vec2 } from '@sledge-pdm/core';
+import { Checkbox, color, Dropdown, DropdownOption, fonts, Icon, MenuList, MenuListOption, Slider } from '@sledge-pdm/ui';
 import { confirm, message, open } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';

@@ -1,4 +1,4 @@
-import { Slider } from '@sledge/ui';
+import { Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, ToolCategoryId } from '~/features/tools/Tools';

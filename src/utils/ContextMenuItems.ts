@@ -1,4 +1,4 @@
-import { MenuListOption } from '@sledge/ui';
+import { MenuListOption } from '@sledge-pdm/ui';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { projectHistoryController } from '~/features/history';
 import { saveProject } from '~/features/io/project/out/save';

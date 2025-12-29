@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge/ui';
+import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { escapeCurrentAutosave } from '~/features/snapshot';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';

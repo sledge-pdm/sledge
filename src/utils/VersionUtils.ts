@@ -1,4 +1,4 @@
-import { getLatestVersion } from '@sledge/core';
+import { getLatestVersion } from '@sledge-pdm/core';
 import { getVersion } from '@tauri-apps/api/app';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';

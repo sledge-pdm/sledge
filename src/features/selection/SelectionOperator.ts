@@ -1,5 +1,5 @@
-import type { PackedDiffs, RawPixelData } from '@sledge/anvil';
-import { Vec2 } from '@sledge/core';
+import type { PackedDiffs, RawPixelData } from '@sledge-pdm/anvil';
+import { Vec2 } from '@sledge-pdm/core';
 import { combine_masks_subtract, trim_mask_with_box } from '@sledge/wasm';
 import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';

@@ -4,8 +4,7 @@ import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, setRota
 import { logSystemInfo } from '~/features/log/service';
 import { canvasStore } from '~/stores/ProjectStores';
 
-import { color } from '@sledge/theme';
-import { Button, Dropdown, Icon } from '@sledge/ui';
+import { Button, color, Dropdown, Icon } from '@sledge-pdm/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';

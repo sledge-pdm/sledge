@@ -1,4 +1,4 @@
-import { Size2D, Vec2 } from '@sledge/core';
+import { Size2D, Vec2 } from '@sledge-pdm/core';
 
 export interface BoundBox {
   top: number;

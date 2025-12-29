@@ -1,4 +1,4 @@
-import { Anvil, toUint8Array } from '@sledge/anvil';
+import { Anvil, toUint8Array } from '@sledge-pdm/anvil';
 import { auto_select_region_mask } from '@sledge/wasm';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';

@@ -1,9 +1,9 @@
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
-import { toUint8ClampedArray, webpToRaw } from '@sledge/anvil';
-import { clsx } from '@sledge/core';
-import { Icon } from '@sledge/ui';
+import { toUint8ClampedArray, webpToRaw } from '@sledge-pdm/anvil';
+import { clsx } from '@sledge-pdm/core';
+import { Icon } from '@sledge-pdm/ui';
 import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
 import { deleteSnapshot, loadSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';

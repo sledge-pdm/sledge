@@ -68,7 +68,8 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   const oldSize = { width: canvasStore.canvas.width, height: canvasStore.canvas.height };
   const src = srcOrigin ?? { x: 0, y: 0 };
   const dest = destOrigin ?? { x: 0, y: 0 };
-  if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0) return false;
+  if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
+    return false;
   const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
   if (!skipHistory) {
     act.registerBefore();
@@ -107,13 +108,7 @@ export function clipZoom(zoom: number) {
   return Math.max(getMinZoom(), Math.min(getMaxZoom(), zoom));
 }
 
-function resizeBufferWithOrigins(
-  buffer: Uint8ClampedArray,
-  oldSize: Size2D,
-  newSize: Size2D,
-  srcOrigin: Vec2,
-  destOrigin: Vec2
-): Uint8ClampedArray {
+function resizeBufferWithOrigins(buffer: Uint8ClampedArray, oldSize: Size2D, newSize: Size2D, srcOrigin: Vec2, destOrigin: Vec2): Uint8ClampedArray {
   const oldW = Math.floor(oldSize.width);
   const oldH = Math.floor(oldSize.height);
   const newW = Math.floor(newSize.width);

@@ -242,14 +242,7 @@ export class FrascoRenderer {
     const y0 = 1 - ((overlay.position.y + overlay.height) / this.height) * 2;
     const y1 = 1 - (overlay.position.y / this.height) * 2;
 
-    const vertices = new Float32Array([
-      x0, y1, 0, 1,
-      x0, y0, 0, 0,
-      x1, y1, 1, 1,
-      x1, y1, 1, 1,
-      x0, y0, 0, 0,
-      x1, y0, 1, 0,
-    ]);
+    const vertices = new Float32Array([x0, y1, 0, 1, x0, y0, 0, 0, x1, y1, 1, 1, x1, y1, 1, 1, x0, y0, 0, 0, x1, y0, 1, 0]);
 
     gl.bindVertexArray(this.overlayVao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.overlayVbo);

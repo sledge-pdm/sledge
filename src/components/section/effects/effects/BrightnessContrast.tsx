@@ -1,3 +1,4 @@
+import { BrightnessContrastEffect } from '@sledge-pdm/frasco';
 import { Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -5,7 +6,6 @@ import { EffectControl } from '~/components/section/effects/EffectControl';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
 import { applyEffect } from '~/features/effect/Effects';
-import { BrightnessContrastEffect } from '@sledge-pdm/frasco';
 
 const BrightnessContrast: Component<EffectSectionProps> = (props) => {
   const [options, setOptions] = createStore<{

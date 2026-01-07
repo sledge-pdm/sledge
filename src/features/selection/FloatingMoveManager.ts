@@ -211,7 +211,9 @@ class FloatingMoveManager {
       return;
     }
     layer.commitHistory();
-    layerManager.replaceLayerBuffer(this.targetLayerId, composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height, { inputSpace: 'canvas' });
+    layerManager.replaceLayerBuffer(this.targetLayerId, composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height, {
+      inputSpace: 'canvas',
+    });
     projectHistoryController.addAction(
       new LayerHistoryAction({
         layerId: this.targetLayerId,

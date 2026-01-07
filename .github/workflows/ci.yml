@@ -98,8 +98,19 @@ jobs:
         run: pnpm exec stylelint -c .stylelintrc.json "src/**/*.css" || true
         # NOTE: Using || true so stylelint warnings (non-error) don't fail build; adjust if needed.
 
-      - name: install chromium
-        run: pnpm exec playwright install
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium
+          restore-keys: |
+            ${{ runner.os }}-playwright-chromium
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm playwright install chromium
 
       - name: Run Vitest
         run: pnpm test

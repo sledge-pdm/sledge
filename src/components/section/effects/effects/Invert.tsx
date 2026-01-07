@@ -1,8 +1,8 @@
+import { InvertEffect } from '@sledge-pdm/frasco';
 import { Component } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
 import { applyEffect } from '~/features/effect/Effects';
-import { InvertEffect } from '@sledge-pdm/frasco';
 
 const Invert: Component<EffectSectionProps> = (props) => {
   return (

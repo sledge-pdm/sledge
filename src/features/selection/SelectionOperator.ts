@@ -1,8 +1,8 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '@sledge/wasm';
 import { projectHistoryController } from '~/features/history';
-import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
+import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { getLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
@@ -182,11 +182,7 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   if (!props?.noAction) {
     layer.commitHistory(glBounds);
   }
-  layer.applyEffectWithTextures(
-    { fragmentSrc: CLEAR_WITH_MASK_300ES },
-    { u_mask: maskTexture },
-    glBounds
-  );
+  layer.applyEffectWithTextures({ fragmentSrc: CLEAR_WITH_MASK_300ES }, { u_mask: maskTexture }, glBounds);
   layer.deleteTexture(maskTexture);
 
   updateWebGLCanvas(false, 'delete selected area');

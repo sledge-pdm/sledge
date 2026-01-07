@@ -1,4 +1,4 @@
-import { RGBA } from '@sledge-pdm/core';
+import { RGBA, transparent } from '@sledge-pdm/core';
 import type { CompositeLayer } from '@sledge-pdm/frasco';
 import { Frasco, BlendMode as FrascoBlendMode } from '@sledge-pdm/frasco';
 import { flip_pixels_vertically } from '@sledge/wasm';
@@ -54,6 +54,10 @@ export class FrascoRenderer {
     this.includeBaseLayer = include;
   }
 
+  public getIncludeBaseLayer(): boolean {
+    return this.includeBaseLayer;
+  }
+
   public resize(width: number, height: number): void {
     this.checkDisposed();
     if (width <= 0 || height <= 0) return;
@@ -83,9 +87,22 @@ export class FrascoRenderer {
     this.frasco.compose(composite, { size: { width: this.width, height: this.height }, baseColor });
   }
 
-  public readPixelsFlipped(): Uint8ClampedArray {
+  public renderLayersImmediate(layers: Layer[], baseColor?: RGBA): Uint8ClampedArray {
     this.checkDisposed();
-    this.render(false);
+    if (this.width === 0 || this.height === 0) {
+      return new Uint8ClampedArray(0);
+    }
+
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, MAX_LAYERS));
+    this.frasco.compose(composite, { size: { width: this.width, height: this.height }, baseColor: baseColor ?? transparent });
+    return this.readPixelsRaw();
+  }
+
+  public readPixelsFlipped(options?: { skipRender?: boolean }): Uint8ClampedArray {
+    this.checkDisposed();
+    if (!options?.skipRender) {
+      this.render(false);
+    }
     const raw = this.readPixelsRaw();
     const flipped = new Uint8Array(raw.buffer.slice(0));
     flip_pixels_vertically(flipped, this.width, this.height);

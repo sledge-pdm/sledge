@@ -44,7 +44,7 @@ import './test/setupMatchers';
 // but to avoid side effects on global state between tests, we reset important flags per test if needed.
 
 // Tauri APIs are not needed for these unit tests; stub them generally to prevent import errors if accidentally referenced.
-vi.mock('@tauri-apps/api/path', () => ({ pictureDir: vi.fn(async () => 'C:/Pictures') }));
+vi.mock('@tauri-apps/api/path', () => ({ pictureDir: vi.fn(async () => 'C:/Pictures'), homeDir: vi.fn(async () => 'C:/') }));
 vi.mock('@tauri-apps/plugin-fs', () => ({
   BaseDirectory: { AppConfig: 'app-config' },
   exists: vi.fn(async () => false),

@@ -1,3 +1,4 @@
+import { playwright } from '@vitest/browser-playwright';
 import dotenv from 'dotenv';
 import path from 'path';
 import topLevelAwait from 'vite-plugin-top-level-await';
@@ -19,6 +20,13 @@ export default defineConfig({
         // Ensure Vite transforms the wasm-using anvil package instead of Node trying to load .wasm directly.
         inline: ['@sledge-pdm/anvil', /@sledge-pdm\/anvil/],
       },
+    },
+    browser: {
+      provider: playwright(),
+      enabled: true,
+      headless: true,
+      instances: [{ browser: 'chromium' }],
+      screenshotFailures: false,
     },
   },
   optimizeDeps: {

@@ -1,17 +1,16 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
 import { getLayerIndex } from '~/features/layer';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { PackedLayerSnapshot } from './types';
+import { LayerSnapshot } from './types';
 
 export interface LayerMergeHistoryActionProps extends BaseHistoryActionProps {
   originIndex: number;
   targetIndex: number;
   activeLayerId: string;
-  originPackedSnapshot?: PackedLayerSnapshot;
-  targetPackedSnapshot?: PackedLayerSnapshot;
+  originPackedSnapshot?: LayerSnapshot;
+  targetPackedSnapshot?: LayerSnapshot;
 }
 
 export class LayerMergeHistoryAction extends BaseHistoryAction {
@@ -20,8 +19,8 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
   originIndex: number;
   targetIndex: number;
   activeLayerId: string;
-  originPackedSnapshot: PackedLayerSnapshot | undefined;
-  targetPackedSnapshot: PackedLayerSnapshot | undefined;
+  originPackedSnapshot: LayerSnapshot | undefined;
+  targetPackedSnapshot: LayerSnapshot | undefined;
 
   constructor(public readonly props: LayerMergeHistoryActionProps) {
     super(props);
@@ -32,34 +31,31 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     this.targetPackedSnapshot = props.targetPackedSnapshot ?? this.getSnapshot(this.targetIndex);
   }
 
-  getSnapshot(index: number): PackedLayerSnapshot | undefined {
+  getSnapshot(index: number): LayerSnapshot | undefined {
     const layer = layerListStore.layers[index];
     if (!layer) return;
-    const anvil = getAnvil(layer.id);
-
-    const webpBuffer = anvil.exportWebp();
+    const frascoLayer = layerManager.getLayerOptional(layer.id);
+    if (!frascoLayer) return;
+    const buffer = frascoLayer.exportRaw();
     return {
       layer: { ...layer },
       image: {
-        webpBuffer,
-        width: anvil.getWidth(),
-        height: anvil.getHeight(),
+        buffer: new Uint8ClampedArray(buffer),
+        width: frascoLayer.getWidth(),
+        height: frascoLayer.getHeight(),
       },
     };
   }
 
-  applySnapshot(snapshot: PackedLayerSnapshot) {
+  applySnapshot(snapshot: LayerSnapshot) {
     const idx = getLayerIndex(snapshot.layer.id);
     if (idx >= 0) {
       setLayerListStore('layers', idx, snapshot.layer);
 
       if (snapshot.image) {
-        try {
-          const anvil = getAnvil(snapshot.layer.id);
-          anvil.importWebp(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-        } catch {
-          const rawBuffer = webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-          anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
+        const frascoLayer = layerManager.getLayerOptional(snapshot.layer.id);
+        if (frascoLayer) {
+          frascoLayer.replaceBuffer(snapshot.image.buffer, snapshot.image.width, snapshot.image.height);
         }
       }
     }

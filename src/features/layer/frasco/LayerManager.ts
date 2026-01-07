@@ -122,10 +122,10 @@ export class LayerManager {
     this.registerLayer(layerId, buffer, width, height, { inputSpace });
   }
 
-  readPixelCanvas(layerId: string, x: number, y: number): RGBA {
-    const layer = this.getLayer(layerId);
-    if (!this.isInBounds(layerId, x, y)) {
-      throw new Error('LayerManager.readPixelCanvas: out of bounds');
+  readPixelCanvas(layerId: string, x: number, y: number): RGBA | undefined {
+    const layer = this.getLayerOptional(layerId);
+    if (!layer || !this.isInBounds(layerId, x, y)) {
+      return undefined;
     }
     const glY = layer.getHeight() - 1 - y;
     const pixels = layer.readPixels({ x, y: glY, width: 1, height: 1 });

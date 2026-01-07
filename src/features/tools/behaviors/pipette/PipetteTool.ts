@@ -1,6 +1,6 @@
 import { isTransparent, RGBA, RGBAToHex, transparent } from '@sledge-pdm/core';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log/service';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { interactStore } from '~/stores/EditorStores';
@@ -17,11 +17,10 @@ export class PipetteTool implements ToolBehavior {
         shouldRegisterToHistory: false,
       };
     }
-    const anvil = getAnvil(args.layerId);
-    const c = anvil.getPixel(args.position.x, args.position.y) as RGBA;
-    if (!isTransparent(c)) {
-      this.color = c;
-    }
+
+    const color = layerManager.readPixelCanvas(args.layerId, args.position.x, args.position.y);
+    if (color !== undefined) this.color = color;
+
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,
@@ -35,11 +34,10 @@ export class PipetteTool implements ToolBehavior {
         shouldRegisterToHistory: false,
       };
     }
-    const anvil = getAnvil(args.layerId);
-    const c = anvil.getPixel(args.position.x, args.position.y) as RGBA;
-    if (!isTransparent(c)) {
-      this.color = c;
-    }
+
+    const color = layerManager.readPixelCanvas(args.layerId, args.position.x, args.position.y);
+    if (color !== undefined) this.color = color;
+
     return {
       shouldUpdate: false,
       shouldRegisterToHistory: false,

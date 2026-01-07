@@ -3,6 +3,7 @@ import { projectHistoryController } from '~/features/history';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 
@@ -45,9 +46,11 @@ export function loadV0(project: ProjectV0) {
   project.layerListStore.layers.forEach((layer) => {
     const buffer = project.layerBuffers?.get(layer.id);
     if (buffer) {
+      layerManager.registerLayer(layer.id, buffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height, { inputSpace: 'canvas' });
       anvilManager.registerAnvil(layer.id, buffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height);
     } else {
       const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
+      layerManager.registerLayer(layer.id, newBuffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height, { inputSpace: 'canvas' });
       anvilManager.registerAnvil(layer.id, newBuffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height);
     }
   });
@@ -74,9 +77,11 @@ export function loadV1(project: ProjectV1) {
     const { webpBuffer } = data;
     if (webpBuffer) {
       const buffer = webpToRaw(webpBuffer, canvasSize.width, canvasSize.height);
+      layerManager.registerLayer(layer.id, buffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
       anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
     } else {
       const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
+      layerManager.registerLayer(layer.id, newBuffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
       anvilManager.registerAnvil(layer.id, newBuffer, canvasSize.width, canvasSize.height);
     }
   });

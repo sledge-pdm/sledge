@@ -4,6 +4,7 @@ import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils
 import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -48,6 +49,7 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
     }
   );
 
+  layerManager.registerLayer(initLayer.id, new Uint8ClampedArray(imageData.data), imageData.width, imageData.height, { inputSpace: 'canvas' });
   anvilManager.registerAnvil(initLayer.id, new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
 
   updateWebGLCanvas(false, `Import ${location.name}`);
@@ -86,6 +88,7 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
       }
     );
 
+    layerManager.registerLayer(initLayer.id, new Uint8ClampedArray(data.imageBuf), data.width, data.height, { inputSpace: 'canvas' });
     anvilManager.registerAnvil(initLayer.id, new Uint8ClampedArray(data.imageBuf), data.width, data.height);
 
     updateWebGLCanvas(false, `Import from clipboard`);

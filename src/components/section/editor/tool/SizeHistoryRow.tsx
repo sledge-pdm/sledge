@@ -139,7 +139,9 @@ const PreviewSVG: Component<PreviewProps> = (props) => {
     const shape = props.shape;
     const size = props.size;
     const behavior = toolStore.tools[props.categoryId].behavior as PenTool | EraserTool;
-    const shapeMask = behavior.shapeStore.get(shape, size ?? 0);
+    // TODO: consider shape preview way
+    // const shapeMask = behavior.shapeStore.get(shape, size ?? 0);
+    const shapeMask = undefined;
     if (shapeMask) {
       setShapeMask(shapeMask);
       const { mask, width, height, offsetX, offsetY } = shapeMask;

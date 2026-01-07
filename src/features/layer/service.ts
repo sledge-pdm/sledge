@@ -4,12 +4,13 @@ import { RGBA, RGBAToHex } from '@sledge-pdm/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
-import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
+import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
@@ -84,7 +85,7 @@ export function toggleLayerVisibility(layerIds?: string[]) {
 export function duplicateLayer(layerId: string) {
   const layer = findLayerById(layerId);
   if (!layer) return;
-  const buffer = getAnvil(layerId).getBufferCopy();
+  const buffer = layerManager.exportRawCanvas(layerId);
   addLayer(
     {
       name: layer.name,
@@ -120,11 +121,23 @@ export async function mergeToBelowLayer(layerId: string) {
 }
 
 export function getCurrentPointingColor(): RGBA | undefined {
-  const activeAnvil = getAnvil(layerListStore.activeLayerId);
+  if (!interactStore.lastPointerOnCanvas) return undefined;
   const x = Math.floor(interactStore.lastPointerOnCanvas.x);
   const y = Math.floor(interactStore.lastPointerOnCanvas.y);
-  if (!interactStore.lastPointerOnCanvas || !activeAnvil.getBufferHandle().isInBounds(x, y)) return undefined;
-  return activeAnvil.getPixel(x, y);
+  const layerId = layerListStore.activeLayerId;
+
+  const frascoLayer = layerManager.getLayerOptional(layerId);
+  if (frascoLayer && layerManager.isInBounds(layerId, x, y)) {
+    return layerManager.readPixelCanvas(layerId, x, y);
+  }
+
+  try {
+    const activeAnvil = getAnvil(layerId);
+    if (!activeAnvil.getBufferHandle().isInBounds(x, y)) return undefined;
+    return activeAnvil.getPixel(x, y);
+  } catch {
+    return undefined;
+  }
 }
 
 export function getCurrentPointingColorHex(): string | undefined {
@@ -197,6 +210,9 @@ export const addLayerTo = (
   // Initialize anvil
   const width = canvasStore.canvas.width;
   const height = canvasStore.canvas.height;
+  layerManager.registerLayer(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height, {
+    inputSpace: 'canvas',
+  });
   anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
 
   const layers = [...allLayers()];
@@ -313,7 +329,15 @@ export function isImagePoolActive() {
 
 export const resetAllLayers = () => {
   layerListStore.layers.forEach((l) => {
-    getAnvil(l.id).resetBuffer();
+    const layer = layerManager.getLayerOptional(l.id);
+    if (layer) {
+      layer.clear([0, 0, 0, 0]);
+    }
+    try {
+      getAnvil(l.id).resetBuffer();
+    } catch {
+      // ignore if anvil layer does not exist
+    }
   });
   updateWebGLCanvas(false, `Reset all layers`);
 
@@ -410,6 +434,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   // Anvil インスタンスも破棄
   anvilManager.removeAnvil(layerId);
+  layerManager.removeLayer(layerId);
 };
 
 export const clearLayersFromUser = async (layerIds?: string[]) => {
@@ -440,24 +465,20 @@ export const clearLayerFromUser = async (layerId: string) => {
 };
 
 export function clearLayer(layerId: string) {
-  const anvil = getAnvil(layerId);
-  const w = anvil.getWidth();
-  const h = anvil.getHeight();
-  if (w == null || h == null) return;
-
-  anvil.addCurrentWholeDiff();
-
-  anvil.getBufferHandle().fillAllCodes(0);
-
-  const patch = anvil.flushDiffs();
-  if (patch)
-    projectHistoryController.addAction(
-      new AnvilLayerHistoryAction({
-        layerId,
-        patch,
-        context: { tool: 'clear' },
-      })
-    );
+  const layer = getLayer(layerId);
+  layer.commitHistory();
+  layer.clear([0, 0, 0, 0]);
+  projectHistoryController.addAction(
+    new LayerHistoryAction({
+      layerId,
+      context: { tool: 'clear' },
+    })
+  );
+  try {
+    getAnvil(layerId).resetBuffer();
+  } catch {
+    // ignore if anvil layer does not exist
+  }
   updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
   updateLayerPreview(layerId);
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });

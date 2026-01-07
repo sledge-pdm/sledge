@@ -10,6 +10,7 @@ import { applyProjectLocation } from '~/features/io/project/ProjectLocationManag
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
 import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -122,6 +123,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   const canvasSize = globalConfig.default.canvasSize;
   layerListStore.layers.forEach((layer) => {
     const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
+    layerManager.registerLayer(layer.id, buffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
     anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
   });
   setProjectStore('isProjectChangedAfterSave', false);

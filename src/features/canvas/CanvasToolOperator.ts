@@ -3,12 +3,13 @@ import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { currentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
+import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { findLayerById } from '~/features/layer';
 import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { logSystemInfo, logUserError } from '~/features/log/service';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
-import { ToolCategory } from '~/features/tools/Tools';
+import { TOOL_CATEGORIES, ToolCategory } from '~/features/tools/Tools';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
@@ -80,16 +81,25 @@ export default class CanvasToolOperator {
         updateLayerPreview(layer.id);
       }
       if (result.shouldRegisterToHistory) {
-        const anvil = getAnvil(layer.id);
-        const patch = anvil.flushDiffs();
-        if (patch)
+        if (toolCategory.id === TOOL_CATEGORIES.PEN || toolCategory.id === TOOL_CATEGORIES.ERASER) {
           projectHistoryController.addAction(
-            new AnvilLayerHistoryAction({
+            new LayerHistoryAction({
               layerId: layer.id,
-              patch,
               context: { tool: toolCategory.id },
             })
           );
+        } else {
+          const anvil = getAnvil(layer.id);
+          const patch = anvil.flushDiffs();
+          if (patch)
+            projectHistoryController.addAction(
+              new AnvilLayerHistoryAction({
+                layerId: layer.id,
+                patch,
+                context: { tool: toolCategory.id },
+              })
+            );
+        }
       }
 
       if (result.shouldReturnToPrevTool) {

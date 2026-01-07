@@ -7,14 +7,14 @@ import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
-import { WebGLRenderer } from '~/webgl/WebGLRenderer';
+import { FrascoRenderer } from '~/webgl/FrascoRenderer';
 
 const webglCanvasStyle = css`
   position: absolute;
   z-index: var(--zindex-webgl-canvas);
 `;
 
-export let webGLRenderer: WebGLRenderer | undefined;
+export let webGLRenderer: FrascoRenderer | undefined;
 
 const WebGLCanvas: Component = () => {
   const LOG_LABEL = 'WebGLCanvas';
@@ -98,7 +98,7 @@ const WebGLCanvas: Component = () => {
 
     const { width, height } = canvasStore.canvas;
     try {
-      webGLRenderer = new WebGLRenderer(canvasEl);
+      webGLRenderer = new FrascoRenderer(canvasEl);
       webGLRenderer?.setLayers(allLayers());
       webGLRenderer.resize(width, height);
       requireFullRender = true;

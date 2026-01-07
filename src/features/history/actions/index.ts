@@ -3,6 +3,7 @@ export * from './AnvilLayerHistoryAction';
 export * from './CanvasSizeHistoryAction';
 export * from './ColorHistoryAction';
 export * from './ImagePoolHistoryAction';
+export * from './LayerHistoryAction';
 export * from './LayerListHistoryAction';
 export * from './LayerMergeHistoryAction';
 export * from './LayerPropsHistoryAction';

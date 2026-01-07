@@ -19,6 +19,6 @@
     "types": ["vite/client"],
     "rootDirs": ["src"]
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": ["src-tauri/target", "**/out/tauri-codegen-assets/**"]
 }

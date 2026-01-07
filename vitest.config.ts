@@ -5,7 +5,7 @@ import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
 import { defineConfig } from 'vitest/config';
 
-const sharedConfig = {
+const sharedConf = {
   plugins: [wasmPlugin(), topLevelAwait()],
   resolve: {
     alias: {
@@ -20,7 +20,7 @@ export default defineConfig({
   test: {
     projects: [
       {
-        ...sharedConfig,
+        ...sharedConf,
         test: {
           name: 'unit',
           environment: 'node',
@@ -32,7 +32,7 @@ export default defineConfig({
         },
       },
       {
-        ...sharedConfig,
+        ...sharedConf,
         test: {
           name: 'e2e',
           environment: 'node',

@@ -4,8 +4,8 @@ export type E2EImage = {
   height: number;
 };
 
-export async function loadImageData(path: string | URL): Promise<E2EImage> {
-  const url = typeof path === 'string' ? new URL(path, import.meta.url) : path;
+export async function loadImageData(path: URL): Promise<E2EImage> {
+  const url = path;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`E2E: failed to load image ${url.href}`);

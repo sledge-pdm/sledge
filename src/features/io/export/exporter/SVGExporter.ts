@@ -1,9 +1,9 @@
-import { toUint8Array } from '@sledge-pdm/core';
+import { toUint8Array, toUint8ClampedArray } from '@sledge-pdm/core';
 import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { canvasStore } from '~/stores/ProjectStores';
 
 export class SVGExporter extends Exporter {
@@ -49,7 +49,7 @@ export class SVGExporter extends Exporter {
     }
 
     if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
-    const buffer = getAnvil(layer.id).getBufferCopy();
+    const buffer = toUint8ClampedArray(getLayer(layer.id).exportRaw()) as Uint8ClampedArray<ArrayBuffer>;
     if (!buffer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
 
     // wasmを使って不透明部分のマスクを作成

@@ -1,9 +1,11 @@
 import { css } from '@acab/ecsstatic';
-import { isTransparent, transparent, Vec2 } from '@sledge-pdm/core';
+import { isTransparent, RGBA, RGBAToHex, transparent, Vec2 } from '@sledge-pdm/core';
 import { color, ColorBox, fonts } from '@sledge-pdm/ui';
 import { Component, Show } from 'solid-js';
 import { currentColor } from '~/features/color';
-import { getCurrentPointingColor, getCurrentPointingColorHex } from '~/features/layer';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { interactStore } from '~/stores/EditorStores';
+import { layerListStore } from '~/stores/ProjectStores';
 
 const pipetteDetailContainer = css`
   position: fixed;
@@ -26,6 +28,21 @@ interface Props {
 }
 
 const PipetteDetail: Component<Props> = (props) => {
+  const getCurrentPointingColor = (): RGBA | undefined => {
+    const x = Math.floor(interactStore.lastPointerOnCanvas.x);
+    const y = Math.floor(interactStore.lastPointerOnCanvas.y);
+    return layerManager.readPixelCanvas(layerListStore.activeLayerId, x, y);
+  };
+  const getCurrentPointingColorHex = (): string | undefined => {
+    const color = getCurrentPointingColor();
+    return color
+      ? RGBAToHex(color, {
+          excludeAlpha: false,
+          withSharp: true,
+        })
+      : undefined;
+  };
+
   return (
     <div
       class={pipetteDetailContainer}

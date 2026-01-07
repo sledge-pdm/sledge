@@ -1,8 +1,8 @@
-import { rawToWebp } from '@sledge-pdm/core';
+import { rawToWebp, toUint8ClampedArray } from '@sledge-pdm/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { getLayer } from '~/features/layer/frasco/LayerManager';
 
 export class LosslessWebPExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
@@ -17,9 +17,7 @@ export class LosslessWebPExporter extends Exporter {
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
-    const bufferPointer = getAnvil(layer.id).getBufferPointer();
-    if (!bufferPointer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
-    const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(bufferPointer);
+    const buffer = toUint8ClampedArray(getLayer(layer.id).exportRaw()) as Uint8ClampedArray<ArrayBuffer>;
     const scaledBuffer = getScaledBuffer(buffer, scale);
     const webpBuffer = rawToWebp(scaledBuffer.data, scaledBuffer.width, scaledBuffer.height);
     const blob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });

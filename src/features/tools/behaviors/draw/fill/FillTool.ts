@@ -1,8 +1,4 @@
 import { RGBA, Vec2 } from '@sledge-pdm/core';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { logUserInfo } from '~/features/log';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { FillPresetConfig } from '~/features/tools/Tools';
@@ -37,48 +33,54 @@ export class FillTool implements ToolBehavior {
     const threshold = preset.threshold ?? 0;
     // const limitMode = getSelectionLimitMode();
 
-    const anvil = getAnvil(layerId);
+    // TODO: replace with layer
+    // const anvil = getAnvil(layerId);
 
-    anvil.addCurrentWholeDiff();
+    // anvil.addCurrentWholeDiff();
 
-    const selectionFillMode = preset.selectionFillMode ?? 'inside';
-    if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
-      anvil.floodFill({
-        startX: position.x,
-        startY: position.y,
-        color,
-        threshold,
-      });
-    } else {
-      const selectionMask = selectionManager.getSelectionMask();
-      if (selectionFillMode === 'inside') {
-        //inside
-        anvil.floodFill({
-          startX: position.x,
-          startY: position.y,
-          color,
-          threshold,
-          mask: {
-            buffer: selectionMask.getMask(),
-            mode: 'inside',
-          },
-        });
-      } else {
-        //area
-        anvil.fillWithMaskArea({
-          mask: selectionMask.getMask(),
-          color,
-        });
-      }
-    }
+    // const selectionFillMode = preset.selectionFillMode ?? 'inside';
+    // if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
+    //   anvil.floodFill({
+    //     startX: position.x,
+    //     startY: position.y,
+    //     color,
+    //     threshold,
+    //   });
+    // } else {
+    //   const selectionMask = selectionManager.getSelectionMask();
+    //   if (selectionFillMode === 'inside') {
+    //     //inside
+    //     anvil.floodFill({
+    //       startX: position.x,
+    //       startY: position.y,
+    //       color,
+    //       threshold,
+    //       mask: {
+    //         buffer: selectionMask.getMask(),
+    //         mode: 'inside',
+    //       },
+    //     });
+    //   } else {
+    //     //area
+    //     anvil.fillWithMaskArea({
+    //       mask: selectionMask.getMask(),
+    //       color,
+    //     });
+    //   }
+    // }
 
-    const endTime = Date.now();
+    // const endTime = Date.now();
 
-    logUserInfo(`Flood Fill done. (in ${endTime - startTime} ms)`);
+    // logUserInfo(`Flood Fill done. (in ${endTime - startTime} ms)`);
+
+    // return {
+    //   shouldUpdate: true,
+    //   shouldRegisterToHistory: true,
+    // };
 
     return {
-      shouldUpdate: true,
-      shouldRegisterToHistory: true,
+      shouldUpdate: false,
+      shouldRegisterToHistory: false,
     };
   }
 

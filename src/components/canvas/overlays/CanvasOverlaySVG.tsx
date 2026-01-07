@@ -1,4 +1,3 @@
-import { TileIndex } from '@sledge-pdm/anvil';
 import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
@@ -15,7 +14,7 @@ import {
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerListStore } from '~/stores/ProjectStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 
@@ -26,7 +25,6 @@ import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 
 import { RGBAToHex } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import '~/styles/selection_animations.css';
 
@@ -202,25 +200,6 @@ const CanvasOverlaySVG: Component = () => {
     };
   };
 
-  const [dirtyTiles, setDirtyTiles] = createSignal<TileIndex[]>();
-  const [tileSize, setTileSize] = createSignal(32);
-  createEffect(() => {
-    if (!globalConfig.debug.showDirtyTiles) return;
-    const timer = setInterval(() => {
-      try {
-        const activeAnvil = getAnvil(layerListStore.activeLayerId);
-        const tileSize = activeAnvil.getTileSize();
-        setTileSize(tileSize);
-        // JS TilesController
-        setDirtyTiles(activeAnvil.getDirtyTiles());
-      } catch (e) {
-        // ignore when anvil not ready
-      }
-    }, 50);
-    // Cleanup when showDirtyTiles becomes false or component unmounts
-    return () => clearInterval(timer);
-  });
-
   return (
     <>
       <div style={panWrapperStyle()}>
@@ -242,24 +221,6 @@ const CanvasOverlaySVG: Component = () => {
               } as JSX.CSSProperties
             }
           >
-            <For each={dirtyTiles()}>
-              {(tile) => {
-                return (
-                  <rect
-                    fill={'#ff000080'}
-                    x={tile.col * tileSize()}
-                    y={tile.row * tileSize()}
-                    width={tileSize()}
-                    height={tileSize()}
-                    style={{
-                      position: 'absolute',
-                      'z-index': 1011000,
-                    }}
-                    transform={`scale(${interactStore.zoom})`}
-                  />
-                );
-              }}
-            </For>
             <defs>
               <pattern
                 id='area-pattern-animate'

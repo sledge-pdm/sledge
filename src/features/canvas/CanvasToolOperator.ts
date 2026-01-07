@@ -2,10 +2,8 @@ import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { currentColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
-import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
 import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { findLayerById } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { logSystemInfo, logUserError } from '~/features/log/service';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
@@ -89,16 +87,16 @@ export default class CanvasToolOperator {
             })
           );
         } else {
-          const anvil = getAnvil(layer.id);
-          const patch = anvil.flushDiffs();
-          if (patch)
-            projectHistoryController.addAction(
-              new AnvilLayerHistoryAction({
-                layerId: layer.id,
-                patch,
-                context: { tool: toolCategory.id },
-              })
-            );
+          // const anvil = getAnvil(layer.id);
+          // const patch = anvil.flushDiffs();
+          // if (patch)
+          //   projectHistoryController.addAction(
+          //     new AnvilLayerHistoryAction({
+          //       layerId: layer.id,
+          //       patch,
+          //       context: { tool: toolCategory.id },
+          //     })
+          //   );
         }
       }
 

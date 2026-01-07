@@ -1,6 +1,5 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
-import { RGBA, RGBAToHex } from '@sledge-pdm/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
@@ -9,12 +8,10 @@ import { LayerListHistoryAction } from '~/features/history/actions/LayerListHist
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getLayerSnapshot } from '~/features/history/actions/utils';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
-import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
@@ -120,36 +117,6 @@ export async function mergeToBelowLayer(layerId: string) {
   logUserInfo(`Layer "${originLayer.name}" merged into "${targetLayer.name}".`, { label: LOG_LABEL });
 }
 
-export function getCurrentPointingColor(): RGBA | undefined {
-  if (!interactStore.lastPointerOnCanvas) return undefined;
-  const x = Math.floor(interactStore.lastPointerOnCanvas.x);
-  const y = Math.floor(interactStore.lastPointerOnCanvas.y);
-  const layerId = layerListStore.activeLayerId;
-
-  const frascoLayer = layerManager.getLayerOptional(layerId);
-  if (frascoLayer && layerManager.isInBounds(layerId, x, y)) {
-    return layerManager.readPixelCanvas(layerId, x, y);
-  }
-
-  try {
-    const activeAnvil = getAnvil(layerId);
-    if (!activeAnvil.getBufferHandle().isInBounds(x, y)) return undefined;
-    return activeAnvil.getPixel(x, y);
-  } catch {
-    return undefined;
-  }
-}
-
-export function getCurrentPointingColorHex(): string | undefined {
-  const c = getCurrentPointingColor();
-  return c
-    ? RGBAToHex(c, {
-        excludeAlpha: false,
-        withSharp: true,
-      })
-    : undefined;
-}
-
 // Layer list management
 interface AddLayerOptions {
   initImage?: Uint8ClampedArray;
@@ -213,7 +180,6 @@ export const addLayerTo = (
   layerManager.registerLayer(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height, {
     inputSpace: 'canvas',
   });
-  anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
 
   const layers = [...allLayers()];
   layers.splice(index, 0, newLayer as any);
@@ -333,11 +299,6 @@ export const resetAllLayers = () => {
     if (layer) {
       layer.clear([0, 0, 0, 0]);
     }
-    try {
-      getAnvil(l.id).resetBuffer();
-    } catch {
-      // ignore if anvil layer does not exist
-    }
   });
   updateWebGLCanvas(false, `Reset all layers`);
 
@@ -432,8 +393,6 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
     projectHistoryController.addAction(act);
   }
 
-  // Anvil インスタンスも破棄
-  anvilManager.removeAnvil(layerId);
   layerManager.removeLayer(layerId);
 };
 
@@ -474,11 +433,6 @@ export function clearLayer(layerId: string) {
       context: { tool: 'clear' },
     })
   );
-  try {
-    getAnvil(layerId).resetBuffer();
-  } catch {
-    // ignore if anvil layer does not exist
-  }
   updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
   updateLayerPreview(layerId);
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });

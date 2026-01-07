@@ -1,11 +1,10 @@
-import { Anvil } from '@sledge-pdm/anvil';
 import type { RGBA } from '@sledge-pdm/core';
 import { vi } from 'vitest';
 import { PaletteType, selectPalette, setPaletteColor } from '~/features/color';
 import { projectHistoryController } from '~/features/history';
 import type { ImagePoolEntry } from '~/features/image_pool';
 import { BlendMode, Layer, LayerType } from '~/features/layer';
-import { anvilManager, registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { setCanvasStore, setImagePoolStore, setLayerListStore } from '~/stores/ProjectStores';
 import { defaultCanvasStore } from '~/stores/project/CanvasStore';
 import { defaultImagePoolStore } from '~/stores/project/ImagePoolStore';
@@ -46,8 +45,7 @@ function normalizeLayer(input: LayerInput): Layer {
 export class ProjectTestFixture {
   private canvas = { ...DEFAULT_CANVAS };
   private layers: Layer[] = [];
-  private registerAnvils = false;
-  private tileSize = 32;
+  private registerLayerBuffers = false;
   private activeLayerId: string | undefined = undefined;
   private poolEntries: ImagePoolEntry[] = [];
   private selectedEntryId: string | undefined = undefined;
@@ -84,9 +82,8 @@ export class ProjectTestFixture {
     return this;
   }
 
-  public useLayerAnvils(tileSize = 32) {
-    this.registerAnvils = true;
-    this.tileSize = tileSize;
+  public useLayerBuffers() {
+    this.registerLayerBuffers = true;
     return this;
   }
 
@@ -113,13 +110,14 @@ export class ProjectTestFixture {
       selected: new Set<string>(),
     }));
 
-    // reset anvil map
-    (anvilManager as any).anvils.clear();
+    // reset layer manager
+    (layerManager as any).layers.clear();
+    (layerManager as any).pending.clear();
 
     // apply canvas
     setCanvasStore('canvas', { ...this.canvas });
 
-    // apply layers + optional anvil registration
+    // apply layers + optional buffer registration
     if (this.layers.length > 0) {
       setLayerListStore('layers', this.layers);
       if (this.activeLayerId) {
@@ -128,10 +126,10 @@ export class ProjectTestFixture {
         setLayerListStore('activeLayerId', this.layers[0].id);
       }
 
-      if (this.registerAnvils) {
+      if (this.registerLayerBuffers) {
         this.layers.forEach((layer) => {
-          const anvil = new Anvil(this.canvas.width, this.canvas.height, this.tileSize);
-          registerLayerAnvil(layer.id, anvil);
+          const buffer = new Uint8ClampedArray(this.canvas.width * this.canvas.height * 4);
+          layerManager.registerLayer(layer.id, buffer, this.canvas.width, this.canvas.height, { inputSpace: 'canvas' });
         });
       }
     }

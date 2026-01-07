@@ -1,4 +1,4 @@
-import { Anvil, RgbaBuffer } from '@sledge-pdm/anvil';
+import { rawToWebp } from '@sledge-pdm/core';
 import { readFileSync } from 'fs';
 import { expect, vi } from 'vitest';
 import { PaletteType, selectPalette, setPaletteColor } from '~/features/color';
@@ -6,7 +6,6 @@ import { projectHistoryController } from '~/features/history';
 import type { ImagePoolEntry } from '~/features/image_pool';
 import type { Layer } from '~/features/layer';
 import { BlendMode, LayerType } from '~/features/layer';
-import { registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
 import { layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore } from '~/stores/ProjectStores';
 import { BLACK } from '../../support/colors';
 
@@ -45,8 +44,7 @@ export function createTestLayers(count: number): Layer[] {
 // Dummy WebP buffer creation
 // Create WebP buffer from raw data
 export function createWebpFromRaw(rawData: Uint8ClampedArray, width: number, height: number): Uint8Array {
-  const buffer = RgbaBuffer.fromRaw(width, height, new Uint8Array(rawData.buffer));
-  return buffer.exportWebp();
+  return rawToWebp(rawData, width, height);
 }
 
 // ImagePoolEntry creation utilities
@@ -89,13 +87,6 @@ export function createTestEntries(count: number): ImagePoolEntry[] {
     entries.push(createTestEntry(`entry-${letter}`));
   }
   return entries;
-}
-
-// Anvil setup utilities
-export function setupTestAnvil(layerId: string, width = 32, height = 32, tileSize = 32): Anvil {
-  const anvil = new Anvil(width, height, tileSize);
-  registerLayerAnvil(layerId, anvil);
-  return anvil;
 }
 
 // Store setup utilities

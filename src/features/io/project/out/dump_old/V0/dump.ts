@@ -1,6 +1,6 @@
 import { ProjectV0 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 
@@ -10,7 +10,12 @@ import { packr } from '~/utils/msgpackr';
 export function getLayerBuffers(): Map<string, Uint8ClampedArray> {
   const map = new Map<string, Uint8ClampedArray>();
   allLayers().forEach((layer) => {
-    map.set(layer.id, getAnvil(layer.id).getBufferCopy());
+    try {
+      map.set(layer.id, layerManager.exportRawCanvas(layer.id));
+    } catch {
+      const size = canvasStore.canvas;
+      map.set(layer.id, new Uint8ClampedArray(size.width * size.height * 4));
+    }
   });
   return map;
 }

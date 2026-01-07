@@ -5,7 +5,7 @@ import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { HistoryActionTester } from '../../../support/HistoryActionTester';
 import { projectFixture } from '../../../support/projectFixture';
 import '../mocks';
-import { createTestLayer, createTestLayers, createWebpFromRaw, expectLayerOrder, setupTestAnvil, TEST_CONSTANTS } from '../utils';
+import { createTestLayer, createTestLayers, expectLayerOrder, TEST_CONSTANTS } from '../utils';
 
 describe('LayerListHistoryAction', () => {
   beforeEach(() => {
@@ -21,7 +21,7 @@ describe('LayerListHistoryAction', () => {
     const buf = new Uint8ClampedArray([1, 2, 3, 4]);
     const snapshot = {
       layer: createTestLayer('X'),
-      image: { webpBuffer: createWebpFromRaw(buf, 1, 1), width: 1, height: 1 },
+      image: { buffer: buf, width: 1, height: 1 },
     };
     const tester = new HistoryActionTester(
       () =>
@@ -38,7 +38,6 @@ describe('LayerListHistoryAction', () => {
         const layers = layerListStore.layers;
         layers.splice(1, 0, snapshot.layer);
         setLayerListStore('layers', layers);
-        setupTestAnvil(snapshot.layer.id, TEST_CONSTANTS.CANVAS_SIZE.width, TEST_CONSTANTS.CANVAS_SIZE.height, TEST_CONSTANTS.TILE_SIZE);
       },
       assertAfterApply: () => expectLayerOrder(['A', 'X', 'B', 'C']),
       assertAfterUndo: () => expectLayerOrder(['A', 'B', 'C']),
@@ -51,7 +50,7 @@ describe('LayerListHistoryAction', () => {
     const buf = new Uint8ClampedArray([1, 2, 3, 4]);
     const snapshot = {
       layer: createTestLayer('D'),
-      image: { webpBuffer: createWebpFromRaw(buf, 1, 1), width: 1, height: 1 },
+      image: { buffer: buf, width: 1, height: 1 },
     };
     const tester = new HistoryActionTester(
       () =>

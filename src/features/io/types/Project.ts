@@ -35,7 +35,7 @@ export interface ProjectV1 extends ProjectBase {
     buffers: Map<
       string, // layer id
       {
-        webpBuffer: Uint8Array; // webp packed buffer
+        buffer: Uint8ClampedArray;
       }
     >;
   };

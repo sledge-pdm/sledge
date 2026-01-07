@@ -1,15 +1,14 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
-import { PackedLayerSnapshot } from '~/features/history/actions/types';
 import { findLayerById, removeLayer, setActiveLayerId } from '~/features/layer';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
+import { LayerSnapshot } from './types';
 
 export interface LayerListCutPasteHistoryActionProps extends BaseHistoryActionProps {
-  sourcePackedSnapshot: PackedLayerSnapshot;
+  sourcePackedSnapshot: LayerSnapshot;
   sourceIndex: number;
-  targetPackedSnapshot: PackedLayerSnapshot;
+  targetPackedSnapshot: LayerSnapshot;
   targetIndex: number;
   activeLayerIdBefore: string;
   activeLayerIdAfter: string;
@@ -19,10 +18,10 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_list_cut_paste' as const;
 
   // cutで消される側 (cutFreeze = true想定)
-  sourcePackedSnapshot: PackedLayerSnapshot;
+  sourcePackedSnapshot: LayerSnapshot;
   sourceIndex: number;
   // pasteで追加される側 (cutFreeze = false想定)
-  targetPackedSnapshot: PackedLayerSnapshot;
+  targetPackedSnapshot: LayerSnapshot;
   targetIndex: number;
 
   activeLayerIdBefore: string;
@@ -57,37 +56,16 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     updateWebGLCanvas(false, 'CutPaste redo');
   }
 
-  private reinsert(index: number, packed: PackedLayerSnapshot) {
+  private reinsert(index: number, packed: LayerSnapshot) {
     // 元スナップショットの layer.id を保持するため addLayerTo は使わず直接配列操作する。
     const arr = [...layerListStore.layers];
     arr.splice(index, 0, packed.layer);
     setLayerListStore('layers', arr);
 
-    let anvil: ReturnType<typeof getAnvil> | undefined;
-    try {
-      anvil = getAnvil(packed.layer.id);
-    } catch {
-      anvil = undefined;
-    }
-    if (packed.image) {
-      const width = packed.image.width;
-      const height = packed.image.height;
-      if (anvil) {
-        anvil.importWebp(packed.image.webpBuffer, width, height);
-      } else {
-        const rawBuffer = webpToRaw(packed.image.webpBuffer, width, height);
-        anvilManager.registerAnvil(packed.layer.id, rawBuffer, width, height);
-      }
-    } else {
-      const width = canvasStore.canvas.width;
-      const height = canvasStore.canvas.height;
-      const rawBuffer = new Uint8ClampedArray(width * height * 4);
-      if (anvil) {
-        anvil.replaceBuffer(rawBuffer);
-      } else {
-        anvilManager.registerAnvil(packed.layer.id, rawBuffer, width, height);
-      }
-    }
+    const width = packed.image?.width ?? canvasStore.canvas.width;
+    const height = packed.image?.height ?? canvasStore.canvas.height;
+    const buffer = packed.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
+    layerManager.registerLayer(packed.layer.id, buffer, width, height, { inputSpace: 'layer' });
 
     updateWebGLCanvas(false, `CutPaste reinsert (${packed.layer.id})`);
     updateLayerPreview(packed.layer.id);

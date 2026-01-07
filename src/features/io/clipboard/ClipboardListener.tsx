@@ -4,11 +4,11 @@ import { writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { Component, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
-import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
+import { getLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { isInputFocused, tryGetImageFromClipboard, tryGetTextFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log/service';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
@@ -80,26 +80,31 @@ const ClipboardListener: Component = () => {
       if (textData) {
         const srcLayer = findLayerById(textData);
         if (srcLayer) {
-          const srcAnvil = getAnvil(textData);
+          const srcFrascoLayer = layerManager.getLayerOptional(textData);
+          if (!srcFrascoLayer) {
+            logUserError('layer buffer not found.', { label: LOG_LABEL });
+            return;
+          }
+          const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.exportRaw());
           const isCut = srcLayer.cutFreeze;
           // 切り取りと分かった時点でcutFreezeは取り下げる
           setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });
           const unfreezedSourceLayer = findLayerById(textData);
           if (unfreezedSourceLayer && isCut) {
             const activeLayerIdBefore = activeLayer().id;
-            const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
+            const sourcePackedSnapshot = getLayerSnapshot(unfreezedSourceLayer.id);
             const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
 
             const insertionIndex = activeIndex();
             const inserted = addLayerTo(
               insertionIndex,
-              { ...unfreezedSourceLayer, cutFreeze: false }, // ensure cutFreeze=false
-              { initImage: srcAnvil.getBufferCopy(), noDiff: true, uniqueName: false }
+              { ...unfreezedSourceLayer, cutFreeze: false },
+              { initImage: srcBuffer, noDiff: true, uniqueName: false }
             );
 
             removeLayer(unfreezedSourceLayer.id, { noDiff: true });
 
-            const targetPackedSnapshot = getPackedLayerSnapshot(inserted.id);
+            const targetPackedSnapshot = getLayerSnapshot(inserted.id);
             const targetIndex = getLayerIndex(inserted.id);
             setActiveLayerId(inserted.id);
 
@@ -116,7 +121,7 @@ const ClipboardListener: Component = () => {
               projectHistoryController.addAction(action);
             }
           } else {
-            addLayerTo(activeIndex(), srcLayer, { initImage: srcAnvil.getBufferCopy(), noDiff: false, uniqueName: false });
+            addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, noDiff: false, uniqueName: false });
           }
         }
       } else {

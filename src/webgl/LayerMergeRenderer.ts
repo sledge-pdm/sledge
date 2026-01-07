@@ -1,8 +1,8 @@
+import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { projectHistoryController } from '~/features/history';
 import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { activeLayer, BlendMode, getLayerIndex, Layer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { FrascoRenderer } from '~/webgl/FrascoRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';

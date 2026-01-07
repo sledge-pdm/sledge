@@ -2,7 +2,6 @@ import { webpToRaw } from '@sledge-pdm/anvil';
 import { projectHistoryController } from '~/features/history';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
-import { anvilManager } from '~/features/layer/anvil/AnvilManager';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
@@ -47,11 +46,9 @@ export function loadV0(project: ProjectV0) {
     const buffer = project.layerBuffers?.get(layer.id);
     if (buffer) {
       layerManager.registerLayer(layer.id, buffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height, { inputSpace: 'canvas' });
-      anvilManager.registerAnvil(layer.id, buffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height);
     } else {
       const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
       layerManager.registerLayer(layer.id, newBuffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height, { inputSpace: 'canvas' });
-      anvilManager.registerAnvil(layer.id, newBuffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height);
     }
   });
 }
@@ -71,19 +68,17 @@ export function loadV1(project: ProjectV1) {
   eventBus.emit('canvas:sizeChanged', { newSize: canvasSize });
 
   allLayers().forEach((layer) => {
-    const data = project.layers.buffers.get(layer.id);
+    const data = project.layers.buffers.get(layer.id) as any;
     if (!data) return;
 
-    const { webpBuffer } = data;
-    if (webpBuffer) {
-      const buffer = webpToRaw(webpBuffer, canvasSize.width, canvasSize.height);
-      layerManager.registerLayer(layer.id, buffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
-      anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
-    } else {
-      const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
-      layerManager.registerLayer(layer.id, newBuffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
-      anvilManager.registerAnvil(layer.id, newBuffer, canvasSize.width, canvasSize.height);
+    let buffer: Uint8ClampedArray | undefined = data.buffer;
+    if (!buffer && data.webpBuffer) {
+      buffer = webpToRaw(data.webpBuffer, canvasSize.width, canvasSize.height);
     }
+    if (!buffer) {
+      buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
+    }
+    layerManager.registerLayer(layer.id, buffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
   });
 
   if (project.history && project.history.undoStack && project.history.redoStack) {

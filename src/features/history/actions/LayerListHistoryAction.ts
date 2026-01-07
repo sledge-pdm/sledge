@@ -1,15 +1,14 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
 import { removeLayer } from '~/features/layer';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { PackedLayerSnapshot } from './types';
+import { LayerSnapshot } from './types';
 
 export interface LayerListHistoryActionProps extends BaseHistoryActionProps {
   kind: 'add' | 'delete';
   index: number;
-  packedSnapshot?: PackedLayerSnapshot;
+  packedSnapshot?: LayerSnapshot;
   beforeOrder?: string[];
   afterOrder?: string[];
 }
@@ -19,7 +18,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
 
   kind: 'add' | 'delete';
   index: number;
-  packedSnapshot: PackedLayerSnapshot | undefined;
+  packedSnapshot: LayerSnapshot | undefined;
   beforeOrder?: string[];
   afterOrder?: string[];
 
@@ -76,19 +75,14 @@ export class LayerListHistoryAction extends BaseHistoryAction {
   }
 }
 
-function insertAt(index: number, snapshot: PackedLayerSnapshot) {
+function insertAt(index: number, snapshot: LayerSnapshot) {
   const arr = [...layerListStore.layers];
   arr.splice(index, 0, snapshot.layer);
   setLayerListStore('layers', arr);
-  if (snapshot.image) {
-    try {
-      const anvil = getAnvil(snapshot.layer.id);
-      anvil.importWebp(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-    } catch {
-      const rawBuffer = webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-      anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
-    }
-  }
+  const width = snapshot.image?.width ?? canvasStore.canvas.width;
+  const height = snapshot.image?.height ?? canvasStore.canvas.height;
+  const buffer = snapshot.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
+  layerManager.registerLayer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
   updateWebGLCanvas(false, `Layer(${snapshot.layer.id}) inserted`);
   updateLayerPreview(snapshot.layer.id);
 }

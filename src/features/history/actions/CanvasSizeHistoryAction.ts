@@ -1,14 +1,14 @@
 import { Size2D } from '@sledge-pdm/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { allLayers } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
-type LayerBufferSnapshot = { layerId: string; dotMag: number; webpBuffer: Uint8Array };
+type LayerBufferSnapshot = { layerId: string; dotMag: number; buffer: Uint8ClampedArray };
 
 export interface CanvasSizeHistoryActionProps extends BaseHistoryActionProps {
   beforeSize: Size2D;
@@ -33,12 +33,19 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   createSnapshots() {
     return allLayers().map((l) => {
-      const anvil = getAnvil(l.id);
-      const webp = anvil.exportWebp();
+      const frascoLayer = layerManager.getLayerOptional(l.id);
+      if (!frascoLayer) {
+        return {
+          layerId: l.id,
+          dotMag: l.dotMagnification,
+          buffer: new Uint8ClampedArray(0),
+        };
+      }
+      const raw = frascoLayer.exportRaw();
       return {
         layerId: l.id,
         dotMag: l.dotMagnification,
-        webpBuffer: webp,
+        buffer: new Uint8ClampedArray(raw),
       };
     });
   }
@@ -82,8 +89,16 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
 
   private restoreSnapshots(size: Size2D, snapshots: LayerBufferSnapshot[]) {
     for (const snap of snapshots) {
-      const anvil = getAnvil(snap.layerId);
-      anvil.importWebp(snap.webpBuffer, size.width, size.height);
+      const width = size.width;
+      const height = size.height;
+      const expected = width * height * 4;
+      const buffer = snap.buffer.length === expected ? snap.buffer : new Uint8ClampedArray(expected);
+      const frascoLayer = layerManager.getLayerOptional(snap.layerId);
+      if (frascoLayer) {
+        frascoLayer.replaceBuffer(buffer, width, height);
+      } else {
+        layerManager.registerLayer(snap.layerId, buffer, width, height, { inputSpace: 'layer' });
+      }
     }
     updateWebGLCanvas(true, `canvas resize restore`);
   }

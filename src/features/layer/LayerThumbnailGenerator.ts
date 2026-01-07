@@ -42,18 +42,7 @@ export class LayerThumbnailGenerator {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.drawFbo);
       gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.targetTex, 0);
 
-      gl.blitFramebuffer(
-        0,
-        0,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        width,
-        height,
-        gl.COLOR_BUFFER_BIT,
-        gl.NEAREST
-      );
+      gl.blitFramebuffer(0, 0, sourceWidth, sourceHeight, 0, 0, width, height, gl.COLOR_BUFFER_BIT, gl.NEAREST);
 
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.drawFbo);
       gl.pixelStorei(gl.PACK_ALIGNMENT, 1);

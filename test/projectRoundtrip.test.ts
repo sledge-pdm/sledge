@@ -3,14 +3,14 @@ import { loadProjectJson } from '~/features/io/project/in/load';
 import { dumpProject } from '~/features/io/project/out/dump';
 import { CURRENT_PROJECT_VERSION, ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { BlendMode, LayerType } from '~/features/layer';
-import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { layerListStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 
 describe('Project dump/load roundtrip', () => {
   beforeEach(() => {
     // Reset stores before each test
-    (anvilManager as any).anvils.clear();
+    layerManager.disposeAll();
   });
 
   it('V0 format: basic roundtrip preserves core fields and layer buffers map keys', async () => {
@@ -38,7 +38,7 @@ describe('Project dump/load roundtrip', () => {
     buf[1] = 0;
     buf[2] = 0;
     buf[3] = 255; // one red pixel for sanity
-    anvilManager.registerAnvil(layer.id, buf, 4, 4);
+    layerManager.registerLayer(layer.id, buf, 4, 4, { inputSpace: 'canvas' });
 
     // Dump
     const packed = await dumpProject();
@@ -65,7 +65,7 @@ describe('Project dump/load roundtrip', () => {
     expect(layerListStore.layers[0].id).toBe('L-1');
   });
 
-  it('V1 format: roundtrip with WebP compression preserves data', async () => {
+  it('V1 format: roundtrip with raw buffer preserves data', async () => {
     // Prepare minimal project state: one layer with small buffer
     setCanvasStore('canvas', { width: 4, height: 4 });
     setProjectStore('isProjectChangedAfterSave', false);
@@ -94,7 +94,7 @@ describe('Project dump/load roundtrip', () => {
     buf[17] = 255;
     buf[18] = 0;
     buf[19] = 255;
-    anvilManager.registerAnvil(layer.id, buf, 4, 4);
+    layerManager.registerLayer(layer.id, buf, 4, 4, { inputSpace: 'canvas' });
 
     // Dump as V1 format (current implementation)
     const packed = await dumpProject();
@@ -106,11 +106,11 @@ describe('Project dump/load roundtrip', () => {
     expect(unpacked.version).toBeDefined();
     expect(unpacked.layers.buffers.has(layer.id)).toBe(true);
 
-    // Verify WebP buffer exists
+    // Verify raw buffer exists
     const layerData = unpacked.layers.buffers.get(layer.id);
     expect(layerData).toBeDefined();
-    expect(layerData!.webpBuffer).toBeInstanceOf(Uint8Array);
-    expect(layerData!.webpBuffer.length).toBeGreaterThan(0);
+    expect(layerData!.buffer).toBeInstanceOf(Uint8ClampedArray);
+    expect(layerData!.buffer.length).toBeGreaterThan(0);
 
     // Load back and verify
     await loadProjectJson(unpacked);
@@ -121,9 +121,7 @@ describe('Project dump/load roundtrip', () => {
     expect(layerListStore.layers[0].name).toBe('layer v1');
 
     // Verify buffer was restored correctly (at least the non-zero pixels)
-    const restoredAnvil = anvilManager.getAnvil(layer.id);
-    expect(restoredAnvil).toBeDefined();
-    const restoredBuffer = restoredAnvil!.getBufferCopy();
+    const restoredBuffer = layerManager.exportRawCanvas(layer.id);
     expect(restoredBuffer[0]).toBe(255); // Red channel of first pixel
     expect(restoredBuffer[3]).toBe(255); // Alpha channel of first pixel
   });
@@ -188,8 +186,8 @@ describe('Project dump/load roundtrip', () => {
     expect(unpackedV1.version).toBeDefined();
     expect(unpackedV1.layers.buffers.has(layer.id)).toBe(true);
 
-    // Verify WebP compression was applied
+    // Verify raw buffer is stored
     const layerData = unpackedV1.layers.buffers.get(layer.id);
-    expect(layerData!.webpBuffer).toBeInstanceOf(Uint8Array);
+    expect(layerData!.buffer).toBeInstanceOf(Uint8ClampedArray);
   });
 });

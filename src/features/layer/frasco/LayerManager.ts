@@ -91,8 +91,20 @@ export class LayerManager {
   }
 
   exportRawCanvas(layerId: string): Uint8ClampedArray {
-    const layer = this.getLayer(layerId);
-    const raw = layer.exportRaw({ flipY: true });
+    const layer = this.layers.get(layerId);
+    if (layer) {
+      const raw = layer.exportRaw({ flipY: true });
+      return new Uint8ClampedArray(raw.buffer);
+    }
+    const pending = this.pending.get(layerId);
+    if (!pending) {
+      throw new Error(`LayerManager: layer not found for layerId: ${layerId}`);
+    }
+    const raw = new Uint8Array(pending.buffer.length);
+    raw.set(pending.buffer);
+    if (pending.inputSpace === 'layer') {
+      flip_pixels_vertically(raw, pending.width, pending.height);
+    }
     return new Uint8ClampedArray(raw.buffer);
   }
 

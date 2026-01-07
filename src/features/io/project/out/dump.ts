@@ -1,7 +1,7 @@
 import { projectHistoryController } from '~/features/history';
 import { ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore, snapshotStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 import { getCurrentVersion } from '~/utils/VersionUtils';
@@ -16,15 +16,19 @@ export const dumpProjectJson = async (): Promise<ProjectV1> => {
   const buffers = new Map<
     string,
     {
-      webpBuffer: Uint8Array;
+      buffer: Uint8ClampedArray;
     }
   >();
   const size = canvasStore.canvas;
   allLayers().forEach((l) => {
-    const anvil = getAnvil(l.id);
-    const webp = anvil.exportWebp();
+    let buffer: Uint8ClampedArray;
+    try {
+      buffer = layerManager.exportRawCanvas(l.id);
+    } catch {
+      buffer = new Uint8ClampedArray(size.width * size.height * 4);
+    }
     buffers.set(l.id, {
-      webpBuffer: webp,
+      buffer,
     });
   });
   const project: ProjectV1 = {

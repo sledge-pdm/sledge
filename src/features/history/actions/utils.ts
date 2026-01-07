@@ -1,19 +1,19 @@
-import { PackedLayerSnapshot } from '~/features/history/actions/types';
+import { LayerSnapshot } from '~/features/history/actions/types';
 import { findLayerById } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 
-export function getPackedLayerSnapshot(layerId: string): PackedLayerSnapshot | undefined {
+export function getLayerSnapshot(layerId: string): LayerSnapshot | undefined {
   const layer = findLayerById(layerId);
   if (!layer) return;
-  const anvil = getAnvil(layerId);
-
-  const webpBuffer = anvil.exportWebp();
+  const frascoLayer = layerManager.getLayerOptional(layerId);
+  if (!frascoLayer) return;
+  const buffer = frascoLayer.exportRaw();
   return {
-    layer,
+    layer: { ...layer },
     image: {
-      webpBuffer,
-      width: anvil.getWidth(),
-      height: anvil.getHeight(),
+      buffer: new Uint8ClampedArray(buffer),
+      width: frascoLayer.getWidth(),
+      height: frascoLayer.getHeight(),
     },
   };
 }

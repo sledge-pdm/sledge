@@ -5,6 +5,7 @@ import { EffectControl } from '~/components/section/effects/EffectControl';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
 import { applyEffect } from '~/features/effect/Effects';
+import { PosterizeEffect } from '@sledge-pdm/frasco';
 
 const Posterize: Component<EffectSectionProps> = (props) => {
   const [options, setOptions] = createStore<{
@@ -17,7 +18,7 @@ const Posterize: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='posterize.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'posterize', (buffer) => buffer.posterize(options.levels));
+        applyEffect(props.selectedLayerId(), 'posterize', (layer) => PosterizeEffect.apply(layer, { levels: options.levels }));
       }}
     >
       <EffectControl label='levels.'>

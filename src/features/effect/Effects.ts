@@ -1,20 +1,18 @@
-import type { RgbaBuffer } from '@sledge-pdm/anvil';
-import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import type { Layer } from '@sledge-pdm/frasco';
+import { projectHistoryController } from '~/features/history';
+import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
-export type LayerEffectMutator = (buffer: RgbaBuffer) => void;
+export type LayerEffectMutator = (layer: Layer) => void;
 
 export function applyEffect(layerId: string | undefined, fxName: string, mutator: LayerEffectMutator) {
   if (!layerId) return;
-  const anvil = getAnvil(layerId);
+  const layer = layerManager.getLayerOptional(layerId);
+  if (!layer) return;
 
-  anvil.applyWholeBufferEffect(mutator);
-
-  const patch = anvil.flushDiffs();
-  if (patch) {
-    projectHistoryController.addAction(new AnvilLayerHistoryAction({ layerId, patch, context: { tool: 'fx', fxName } }));
-  }
+  mutator(layer);
+  projectHistoryController.addAction(new LayerHistoryAction({ layerId, context: { tool: 'fx', fxName } }));
 
   updateWebGLCanvas(false, `Apply FX for ${layerId}`);
   updateLayerPreview(layerId);

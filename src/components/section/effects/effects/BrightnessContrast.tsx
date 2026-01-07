@@ -5,6 +5,7 @@ import { EffectControl } from '~/components/section/effects/EffectControl';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
 import { applyEffect } from '~/features/effect/Effects';
+import { BrightnessContrastEffect } from '@sledge-pdm/frasco';
 
 const BrightnessContrast: Component<EffectSectionProps> = (props) => {
   const [options, setOptions] = createStore<{
@@ -20,7 +21,9 @@ const BrightnessContrast: Component<EffectSectionProps> = (props) => {
       title='brightness and contrast.'
       onApply={() => {
         const layerId = props.selectedLayerId();
-        applyEffect(layerId, 'brightness and contrast', (buffer) => buffer.brightnessAndContrast(options.brightness, options.contrast));
+        applyEffect(layerId, 'brightness and contrast', (layer) =>
+          BrightnessContrastEffect.apply(layer, { brightness: options.brightness, contrast: options.contrast })
+        );
       }}
     >
       <EffectControl label='brightness.'>

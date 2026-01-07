@@ -1,6 +1,5 @@
 // controllers/layer/SelectionManager.ts
 
-import { TileIndex, toUint8ClampedArray } from '@sledge-pdm/anvil';
 import { Vec2 } from '@sledge-pdm/core';
 import {
   apply_mask_offset,
@@ -11,8 +10,7 @@ import {
   trim_mask_with_box,
 } from '@sledge/wasm';
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
-import { activeLayer } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
@@ -33,6 +31,7 @@ export type RectFragment = {
   height: number;
 };
 
+type TileIndex = { col: number; row: number } | { x: number; y: number };
 export type TileFragment = {
   kind: 'tile';
   index: TileIndex;
@@ -187,7 +186,6 @@ class SelectionAreaManager {
 
     let changed = false;
 
-    const anvil = getAnvil(activeLayer().id);
     switch (frag.kind) {
       case 'pixel': {
         this.previewMask.setFlag(frag.position, 1);
@@ -200,7 +198,7 @@ class SelectionAreaManager {
         break;
       }
       case 'tile': {
-        const tileSize = anvil.getTileSize();
+        const tileSize = DEFAULT_TILE_SIZE;
         // TileIndex (legacy) から行列を推測 (row/col か x/y を許容)
         const col: number = (frag.index as any).col ?? (frag.index as any).x;
         const row: number = (frag.index as any).row ?? (frag.index as any).y;
@@ -375,9 +373,9 @@ class SelectionAreaManager {
   }
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
-    const anvil = getAnvil(srcLayerId);
     if (!canvasStore?.canvas) return;
     const { width, height } = canvasStore.canvas;
+    const layerBuffer = layerManager.exportRawCanvas(srcLayerId);
 
     this.commitOffset();
     this.commit();
@@ -388,7 +386,7 @@ class SelectionAreaManager {
     const selectionWidth = bbox.right - bbox.left + 1;
     const selectionHeight = bbox.bottom - bbox.top + 1;
     const trimmedMask = trim_mask_with_box(baseMask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
-    const patch = toUint8ClampedArray(anvil.getBufferHandle().sliceWithMask(trimmedMask, selectionWidth, selectionHeight, bbox.left, bbox.top));
+    const patch = extractMaskedPatch(layerBuffer, trimmedMask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
 
     return {
       buffer: patch,
@@ -402,3 +400,35 @@ class SelectionAreaManager {
 
 export const selectionManager = new SelectionAreaManager();
 export const getCurrentSelection = () => selectionManager.getSelectionMask();
+
+const DEFAULT_TILE_SIZE = 32;
+
+function extractMaskedPatch(
+  source: Uint8ClampedArray,
+  mask: Uint8Array,
+  sourceWidth: number,
+  sourceHeight: number,
+  left: number,
+  top: number,
+  width: number,
+  height: number
+): Uint8ClampedArray {
+  const out = new Uint8ClampedArray(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    const srcY = top + y;
+    if (srcY < 0 || srcY >= sourceHeight) continue;
+    for (let x = 0; x < width; x++) {
+      const srcX = left + x;
+      if (srcX < 0 || srcX >= sourceWidth) continue;
+      const maskIdx = y * width + x;
+      if (mask[maskIdx] === 0) continue;
+      const srcIdx = (srcY * sourceWidth + srcX) * 4;
+      const dstIdx = (y * width + x) * 4;
+      out[dstIdx] = source[srcIdx];
+      out[dstIdx + 1] = source[srcIdx + 1];
+      out[dstIdx + 2] = source[srcIdx + 2];
+      out[dstIdx + 3] = source[srcIdx + 3];
+    }
+  }
+  return out;
+}

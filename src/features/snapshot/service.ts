@@ -1,5 +1,4 @@
-import { rawToWebp } from '@sledge-pdm/anvil';
-import { Size2D } from '@sledge-pdm/core';
+import { rawToWebp, Size2D } from '@sledge-pdm/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';

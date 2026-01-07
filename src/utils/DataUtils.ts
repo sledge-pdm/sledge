@@ -1,4 +1,4 @@
-import { RawPixelData, toUint8ClampedArray } from '@sledge-pdm/anvil';
+import { RawPixelData, toUint8ClampedArray } from '@sledge-pdm/core';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 

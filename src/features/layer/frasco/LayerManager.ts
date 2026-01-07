@@ -1,5 +1,4 @@
-import type { RGBA } from '@sledge-pdm/core';
-import type { RawPixelData } from '@sledge-pdm/frasco';
+import type { RawPixelData, RGBA } from '@sledge-pdm/core';
 import { Layer, TextureHistoryBackend } from '@sledge-pdm/frasco';
 import { flip_pixels_vertically } from '@sledge/wasm';
 
@@ -106,6 +105,21 @@ export class LayerManager {
       flip_pixels_vertically(raw, pending.width, pending.height);
     }
     return new Uint8ClampedArray(raw.buffer);
+  }
+
+  replaceLayerBuffer(layerId: string, buffer: RawPixelData, width: number, height: number, options?: { inputSpace?: InputSpace }): void {
+    const inputSpace = options?.inputSpace ?? 'canvas';
+    const normalized = new Uint8Array(buffer.length);
+    normalized.set(buffer);
+    if (inputSpace === 'canvas') {
+      flip_pixels_vertically(normalized, width, height);
+    }
+    const existing = this.getLayerOptional(layerId);
+    if (existing) {
+      existing.replaceBuffer(normalized, width, height);
+      return;
+    }
+    this.registerLayer(layerId, buffer, width, height, { inputSpace });
   }
 
   readPixelCanvas(layerId: string, x: number, y: number): RGBA {

@@ -1,11 +1,11 @@
-import { PackedDiffs } from '@sledge-pdm/anvil';
 import { ImagePoolEntry } from '~/features/image_pool';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
 import { setImagePoolStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
+import { LayerSnapshot } from './types';
 
 /**
  * History action for Converting selection into image.
@@ -14,8 +14,8 @@ import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } fr
  */
 export interface ConvertSelectionHistoryActionProps extends BaseHistoryActionProps {
   layerId: string;
-  // pass undefined if nothing has deleted (copy)
-  patch?: PackedDiffs;
+  beforeSnapshot?: LayerSnapshot;
+  afterSnapshot?: LayerSnapshot;
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
 }
@@ -27,7 +27,8 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
 
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
-  patch?: PackedDiffs;
+  beforeSnapshot?: LayerSnapshot;
+  afterSnapshot?: LayerSnapshot;
 
   constructor(public readonly props: ConvertSelectionHistoryActionProps) {
     super(props);
@@ -35,18 +36,19 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
     this.layerId = props.layerId;
     this.oldEntries = props.oldEntries;
     this.newEntries = props.newEntries;
-    this.patch = props.patch;
+    this.beforeSnapshot = props.beforeSnapshot;
+    this.afterSnapshot = props.afterSnapshot;
   }
 
   undo(): void {
     setImagePoolStore('entries', [...this.oldEntries]);
 
-    if (this.patch) {
+    if (this.beforeSnapshot) {
       if (floatingMoveManager.isMoving()) {
         cancelMove();
         return;
       }
-      getAnvil(this.layerId).applyPatch(this.patch, 'undo');
+      this.applySnapshot(this.beforeSnapshot);
     }
 
     updateWebGLCanvas(true, `Anvil(${this.layerId}) undo`);
@@ -56,12 +58,12 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
   redo(): void {
     setImagePoolStore('entries', [...this.newEntries]);
 
-    if (this.patch) {
+    if (this.afterSnapshot) {
       if (floatingMoveManager.isMoving()) {
         cancelMove();
         return;
       }
-      getAnvil(this.layerId).applyPatch(this.patch, 'redo');
+      this.applySnapshot(this.afterSnapshot);
     }
 
     updateWebGLCanvas(true, `Anvil(${this.layerId}) redo`);
@@ -75,10 +77,19 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
         context: this.context,
         label: this.label,
         layerId: this.layerId,
-        patch: this.patch,
+        beforeSnapshot: this.beforeSnapshot,
+        afterSnapshot: this.afterSnapshot,
         oldEntries: this.props.oldEntries,
         newEntries: this.props.newEntries,
       } as ConvertSelectionHistoryActionProps,
     };
+  }
+
+  private applySnapshot(snapshot: LayerSnapshot) {
+    const width = snapshot.image?.width ?? 0;
+    const height = snapshot.image?.height ?? 0;
+    const buffer = snapshot.image?.buffer;
+    if (!buffer || width <= 0 || height <= 0) return;
+    layerManager.replaceLayerBuffer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
   }
 }

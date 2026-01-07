@@ -1,4 +1,4 @@
-import { toUint8Array } from '@sledge-pdm/anvil';
+import { toUint8Array } from '@sledge-pdm/core';
 import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';

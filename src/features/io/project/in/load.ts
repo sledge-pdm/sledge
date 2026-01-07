@@ -1,4 +1,4 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
+import { toUint8ClampedArray, webpToRaw } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
@@ -73,7 +73,7 @@ export function loadV1(project: ProjectV1) {
 
     let buffer: Uint8ClampedArray | undefined = data.buffer;
     if (!buffer && data.webpBuffer) {
-      buffer = webpToRaw(data.webpBuffer, canvasSize.width, canvasSize.height);
+      buffer = toUint8ClampedArray(webpToRaw(data.webpBuffer, canvasSize.width, canvasSize.height));
     }
     if (!buffer) {
       buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);

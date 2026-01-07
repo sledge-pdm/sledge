@@ -98,6 +98,9 @@ jobs:
         run: pnpm exec stylelint -c .stylelintrc.json "src/**/*.css" || true
         # NOTE: Using || true so stylelint warnings (non-error) don't fail build; adjust if needed.
 
+      - name: install chromium
+        run: pnpm exec playwright install
+
       - name: Run Vitest
         run: pnpm test
 

@@ -1,10 +1,8 @@
-import { Anvil } from '@sledge-pdm/anvil';
 import { readFileSync } from 'fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { ImagePoolEntry } from '~/features/image_pool';
-import { registerLayerAnvil } from '~/features/layer/anvil/AnvilManager';
 import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { HistoryActionTester } from '../../../support/HistoryActionTester';
 
@@ -63,8 +61,6 @@ describe('ConvertSelectionHistoryAction', () => {
     projectHistoryController.clearHistory();
     // Clear image pool
     setImagePoolStore('entries', []);
-    // Register test layer
-    registerLayerAnvil(layerId, new Anvil(32, 32, 32));
   });
 
   it('converts selection to image without delete (copy)', () => {
@@ -131,13 +127,6 @@ describe('ConvertSelectionHistoryAction', () => {
     };
     const newEntries: ImagePoolEntry[] = [newImageEntry];
 
-    // Create a mock patch for cut operation
-    const mockPatch = {
-      pixels: [],
-      tiles: [],
-      whole: undefined,
-    };
-
     // Set up the image pool state (after conversion)
     setImagePoolStore('entries', newEntries);
 
@@ -147,7 +136,6 @@ describe('ConvertSelectionHistoryAction', () => {
           layerId,
           oldEntries,
           newEntries,
-          patch: mockPatch, // Include patch for cut operation (deletion)
         })
     );
 

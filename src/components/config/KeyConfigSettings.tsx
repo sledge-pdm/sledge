@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
-import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import { KeyConfigCommands, KeyConfigEntry } from '~/config/KeyConfig';
 import {
@@ -14,6 +13,7 @@ import {
 } from '~/features/config/KeyConfigController';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { accentedText, flexCol } from '~/styles/styles';
+import { dialog } from '~/utils/platform';
 
 const root = css`
   display: flex;
@@ -124,7 +124,7 @@ const KeyConfigSettings: Component<Props> = (props) => {
         style={{ 'margin-top': '24px' }}
         onClick={async (e) => {
           e.preventDefault();
-          const confirmed = await confirm('sure to restore default key config?', {
+          const confirmed = await dialog.confirm('sure to restore default key config?', {
             kind: 'warning',
             okLabel: 'restore defaults.',
             cancelLabel: 'cancel.',
@@ -134,7 +134,7 @@ const KeyConfigSettings: Component<Props> = (props) => {
           if (confirmed) {
             restoreDefaultKeyConfig();
             props.onKeyConfigChange?.();
-            message('restore succeeded.');
+            dialog.message('restore succeeded.');
           }
         }}
       >

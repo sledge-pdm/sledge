@@ -1,8 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';
 import { showContextMenu } from '@sledge-pdm/ui';
-import { UnlistenFn } from '@tauri-apps/api/event';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { batch, Component, createSignal, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
@@ -18,6 +16,7 @@ import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStore
 import { canvasStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
+import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 
 const strokeArea = css`
   position: absolute;
@@ -26,7 +25,7 @@ const strokeArea = css`
   z-index: var(--zindex-interact-area);
 `;
 
-// レイヤーごとのキャンバスの上でタッチイベントを受ける領域
+// レイヤーごとのキャンバスの上でタチE��イベントを受ける領域
 export const StrokeCanvas: Component = () => {
   const LOG_LABEL = 'StrokeCanvas';
   const logDebug = (message: string, ...details: unknown[]) => {
@@ -60,14 +59,14 @@ export const StrokeCanvas: Component = () => {
     }
     if (e.pointerType === 'touch') return false;
 
-    // 基本的にはCanvasAreaInteractのisDraggableと逆の関係
+    // 基本皁E��はCanvasAreaInteractのisDraggableと送E�E関俁E
     if (CanvasAreaInteract.isDraggable(e)) {
-      // キャンバスドラッグが有効な場合は描画不可
+      // キャンバスドラチE��が有効な場合�E描画不可
       return false;
     }
 
-    // マウスおよびペンにおいては右、左クリック相当のクリックだけを描画可能なクリックとする（中クリックは弾く）
-    // 右クリックはツールのallowRightClickによってほぼ弾かれる
+    // マウスおよびペンにおいては右、左クリチE��相当�EクリチE��だけを描画可能なクリチE��とする�E�中クリチE��は弾く！E
+    // 右クリチE��はチE�EルのallowRightClickによってほぼ弾かれめE
     if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1 && e.buttons !== 2) {
       return false;
     }
@@ -195,12 +194,13 @@ export const StrokeCanvas: Component = () => {
     window.addEventListener('pointerrawupdate', handlePointerRawUpdate);
     window.addEventListener('pointercancel', handlePointerCancel);
 
-    getCurrentWindow()
+    platformWindow
+      .getCurrentWindow()
       .onFocusChanged(({ payload: focused }) => {
         if (!focused) {
           operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
         } else {
-          // pipetteのみ復帰時も戻す
+          // pipetteのみ復帰時も戻ぁE
           if (toolStore.activeToolCategory === 'pipette')
             operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
         }

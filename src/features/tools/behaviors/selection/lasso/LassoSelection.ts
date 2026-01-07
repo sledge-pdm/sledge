@@ -1,5 +1,4 @@
 import { fill_lasso_selection } from '@sledge/wasm';
-import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { logSystemWarn } from '~/features/log/service';
 import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
@@ -9,6 +8,7 @@ import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/To
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { webview } from '~/utils/platform';
 
 export type LassoDisplayMode = 'fill' | 'outline';
 export class LassoSelection extends SelectionBase {
@@ -73,7 +73,7 @@ export class LassoSelection extends SelectionBase {
   private updatePartialMask(canvasW: number, canvasH: number, mode: 'nonzero' | 'evenodd'): void {
     if (!this.previewFragment || this.points.length < 6) return;
 
-    getCurrentWebview().clearAllBrowsingData();
+    webview.getCurrentWebview().clearAllBrowsingData();
 
     const bbox = this.calculateBoundingBox(this.points);
 

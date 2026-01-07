@@ -1,5 +1,4 @@
 import { rawToWebp, Size2D } from '@sledge-pdm/core';
-import { confirm } from '@tauri-apps/plugin-dialog';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { loadProjectJson } from '~/features/io/project/in/load';
@@ -8,6 +7,7 @@ import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
+import { dialog } from '~/utils/platform';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
@@ -63,7 +63,7 @@ export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapsho
 }
 
 export async function deleteSnapshot(snapshot: ProjectSnapshot) {
-  const confirmResult = await confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
+  const confirmResult = await dialog.confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
     cancelLabel: 'Cancel',
     okLabel: 'Delete',
     kind: 'info',
@@ -91,7 +91,7 @@ export async function loadSnapshot(
     const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
     if (!created) return;
   } else {
-    const confirmResult = await confirm(
+    const confirmResult = await dialog.confirm(
       `Sure to load snapshot "${snapshot.name}"?
 This will NOT backup your current state (unless you did manually backup.)`,
       {

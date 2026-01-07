@@ -4,13 +4,7 @@ import { Component, createEffect, createSignal, For, JSX, onMount, Show } from '
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionOffset } from '~/features/selection/SelectionOperator';
-import {
-  getActiveToolCategoryId,
-  getCurrentPresetConfig,
-  getPresetOf,
-  getToolCategory,
-  isToolAllowedInCurrentLayer,
-} from '~/features/tools/ToolController';
+import { getPresetOf, getToolCategory } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -18,9 +12,6 @@ import { canvasStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
 
-import { ShapeMask } from '@sledge-pdm/anvil';
-import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
-import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 
 import { RGBAToHex } from '@sledge-pdm/core';
@@ -34,15 +25,6 @@ const extractFirstPath = (svg: string) => {
   return m ? m[0] : svg;
 };
 const areaPatternPath = extractFirstPath(rawAreaPattern);
-
-function getDrawnPixelMask(size: number, shape: 'circle' | 'square'): ShapeMask {
-  switch (shape) {
-    case 'circle':
-      return new Circle(size).createMask();
-    case 'square':
-      return new Square(size).createMask();
-  }
-}
 
 const CanvasOverlaySVG: Component = () => {
   // 論理キャンバスサイズ (ズーム非適用)
@@ -129,41 +111,41 @@ const CanvasOverlaySVG: Component = () => {
 
   // Cache local pen shape path
   createEffect(() => {
-    const tool = getActiveToolCategoryId();
-    if (tool !== TOOL_CATEGORIES.PEN && tool !== TOOL_CATEGORIES.ERASER) {
-      cachedLocalPath = undefined;
-      cachedKey = undefined;
-      return;
-    }
-    const preset = getCurrentPresetConfig(tool) as any;
-    const size: number = preset?.size ?? 1;
-    const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-    const key = `${tool}-${size}-${shape}`;
-    if (key === cachedKey && cachedLocalPath) return;
-    const { mask, width, height } = getDrawnPixelMask(size, shape);
-    const localPath = mask_to_path(mask, width, height, 0, 0);
-    cachedLocalPath = PathCmdList.parse(localPath);
-    cachedKey = key;
+    // const tool = getActiveToolCategoryId();
+    // if (tool !== TOOL_CATEGORIES.PEN && tool !== TOOL_CATEGORIES.ERASER) {
+    //   cachedLocalPath = undefined;
+    //   cachedKey = undefined;
+    //   return;
+    // }
+    // const preset = getCurrentPresetConfig(tool) as any;
+    // const size: number = preset?.size ?? 1;
+    // const shape: 'circle' | 'square' = preset?.shape ?? 'square';
+    // const key = `${tool}-${size}-${shape}`;
+    // if (key === cachedKey && cachedLocalPath) return;
+    // const { mask, width, height } = getDrawnPixelMask(size, shape);
+    // const localPath = mask_to_path(mask, width, height, 0, 0);
+    // cachedLocalPath = PathCmdList.parse(localPath);
+    // cachedKey = key;
   });
 
   // Pen outline (logical coordinates)
   createEffect(() => {
-    const tool = getActiveToolCategoryId();
-    const mouse = interactStore.lastPointerOnCanvas;
-    if ((tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
-      const preset = getCurrentPresetConfig(tool) as any;
-      const size: number = preset?.size ?? 1;
-      const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-      const { offsetX, offsetY } = getDrawnPixelMask(size, shape);
-      const even = size % 2 === 0;
-      const cx = even ? Math.round(mouse.x) : Math.floor(mouse.x);
-      const cy = even ? Math.round(mouse.y) : Math.floor(mouse.y);
-      const ox = cx + offsetX;
-      const oy = cy + offsetY;
-      setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, ox, oy));
-    } else {
-      setPenOutlinePath('');
-    }
+    // const tool = getActiveToolCategoryId();
+    // const mouse = interactStore.lastPointerOnCanvas;
+    // if ((tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
+    //   const preset = getCurrentPresetConfig(tool) as any;
+    //   const size: number = preset?.size ?? 1;
+    //   const shape: 'circle' | 'square' = preset?.shape ?? 'square';
+    //   const { offsetX, offsetY } = getDrawnPixelMask(size, shape);
+    //   const even = size % 2 === 0;
+    //   const cx = even ? Math.round(mouse.x) : Math.floor(mouse.x);
+    //   const cy = even ? Math.round(mouse.y) : Math.floor(mouse.y);
+    //   const ox = cx + offsetX;
+    //   const oy = cy + offsetY;
+    //   setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, ox, oy));
+    // } else {
+    //   setPenOutlinePath('');
+    // }
   });
 
   // Wrapper: pan だけ (zoom は座標へ直接反映し stroke を不変に保つ)

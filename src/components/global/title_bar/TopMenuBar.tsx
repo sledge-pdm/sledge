@@ -1,8 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { color, fonts, MenuList, MenuListOption } from '@sledge-pdm/ui';
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { confirm } from '@tauri-apps/plugin-dialog';
-import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
@@ -18,6 +15,7 @@ import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorS
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { dialog, window as platformWindow, Update } from '~/utils/platform';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
@@ -109,7 +107,7 @@ const TopMenuBar: Component = () => {
   const [availableUpdate, setAvailableUpdate] = createSignal<Update | undefined>();
 
   onMount(async () => {
-    setIsDecorated(await getCurrentWindow().isDecorated());
+    setIsDecorated(await platformWindow.getCurrentWindow().isDecorated());
     const update = await getUpdate();
     setAvailableUpdate(update);
   });
@@ -151,7 +149,7 @@ const TopMenuBar: Component = () => {
             // clipboard data will loaded in new window, but ensure there's data
             const ensureData = await tryGetImageFromClipboard();
             if (!ensureData) {
-              const confirmed = await confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
+              const confirmed = await dialog.confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
                 title: 'Open from clipboard',
               });
               if (!confirmed) return;

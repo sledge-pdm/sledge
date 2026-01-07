@@ -1,4 +1,3 @@
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Component, onMount } from 'solid-js';
 import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
@@ -14,6 +13,7 @@ import {
 } from '~/features/tools/ToolController';
 import { fileStore, interactStore, setAppearanceStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
+import { window as platformWindow } from '~/utils/platform';
 import { isKeyMatchesToEntry } from '../config/KeyConfigController';
 
 const KeyListener: Component = () => {
@@ -135,7 +135,7 @@ const KeyListener: Component = () => {
   onMount(async () => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    const unlistenUnfocusPipetteObserve = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+    const unlistenUnfocusPipetteObserve = await platformWindow.getCurrentWindow().onFocusChanged(({ payload: focused }) => {
       if (!focused && getActiveToolCategoryId() === 'pipette') {
         setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
       }

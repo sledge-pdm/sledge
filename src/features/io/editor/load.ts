@@ -1,9 +1,8 @@
-import { BaseDirectory } from '@tauri-apps/api/path';
-import { exists, readTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { logSystemError } from '~/features/log/service';
 import { EditorStateStore, loadEditorStateStore } from '~/stores/EditorStores';
 import { FileLocation } from '~/types/FileLocation';
+import { fs } from '~/utils/platform';
 
 export async function loadEditorState(): Promise<
   | {
@@ -12,11 +11,10 @@ export async function loadEditorState(): Promise<
     }
   | undefined
 > {
-  const isFileExists = await exists(Consts.editorStateFileName, { baseDir: BaseDirectory.AppConfig });
+  const baseDir = fs.BaseDirectory?.AppConfig;
+  const isFileExists = baseDir ? await fs.exists(Consts.editorStateFileName, { baseDir }) : await fs.exists(Consts.editorStateFileName);
   if (isFileExists) {
-    const stateData = await readTextFile(Consts.editorStateFileName, {
-      baseDir: BaseDirectory.AppConfig,
-    });
+    const stateData = await fs.readTextFile(Consts.editorStateFileName, baseDir ? { baseDir } : undefined);
 
     let stateJson;
 

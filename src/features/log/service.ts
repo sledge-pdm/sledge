@@ -1,6 +1,6 @@
-import { error as tauriError, info as tauriInfo, warn as tauriWarn } from '@tauri-apps/plugin-log';
 import { setBottomBarText, setBottomBarTextPermanent } from '~/features/log/bottomBar';
 import { LogKind } from '~/stores/editor/LogStore';
+import { log as platformLog } from '~/utils/platform';
 
 type LogChannel = 'tauri' | 'bottomBar';
 
@@ -32,9 +32,9 @@ const DEFAULT_USER_CHANNELS: LogChannel[] = ['tauri', 'bottomBar'];
 const DEFAULT_SYSTEM_CHANNELS: LogChannel[] = ['tauri'];
 
 const tauriLoggers = {
-  info: tauriInfo,
-  warn: tauriWarn,
-  error: tauriError,
+  info: platformLog.info,
+  warn: platformLog.warn,
+  error: platformLog.error,
 };
 
 function mapKindToTauriLevel(kind: LogKind): keyof typeof tauriLoggers {

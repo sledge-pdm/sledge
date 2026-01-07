@@ -1,6 +1,3 @@
-import { appDataDir } from '@tauri-apps/api/path';
-import { confirm, save } from '@tauri-apps/plugin-dialog';
-import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
@@ -14,10 +11,11 @@ import { eventBus } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
+import { dialog, fs, path } from '~/utils/platform';
 
 async function folderSelection(nameWOExtension: string) {
   const defaultPath = normalizeJoin(await projectSaveDir(), `${nameWOExtension}.sledge`);
-  return await save({
+  return await dialog.save({
     title: 'save sledge project',
     defaultPath,
     canCreateDirectories: true,
@@ -45,7 +43,7 @@ export async function saveProject(name?: string, existingPath?: string): Promise
     const loadedProjectVersion = projectStore.loadProjectVersion?.project ?? 0;
     const isOW = fileStore.savedLocation.path === existingPath && fileStore.savedLocation.name === name;
     if (isOW && loadedProjectVersion !== CURRENT_PROJECT_VERSION) {
-      const confirmResult = await confirm(
+      const confirmResult = await dialog.confirm(
         `Trying to overwrite project that has outdated version.
 
 old: V${loadedProjectVersion}
@@ -83,7 +81,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       const thumbpath = await saveThumbnailData(selectedPath);
 
       const data = await dumpProject();
-      await writeFile(selectedPath, data);
+      await fs.writeFile(selectedPath, data);
       addRecentFile(pathToFileLocation(selectedPath));
 
       setFileStore('openAs', 'project');
@@ -110,16 +108,16 @@ After overwrite, you cannot open this project in old version of sledge.`,
   return false;
 }
 
-export const thumbnailDir = async () => normalizeJoin(await appDataDir(), 'thumbnails');
-export const thumbnailPath = async (fileId: string) => normalizeJoin(await appDataDir(), 'thumbnails', fileId);
+export const thumbnailDir = async () => normalizeJoin(await path.appDataDir(), 'thumbnails');
+export const thumbnailPath = async (fileId: string) => normalizeJoin(await path.appDataDir(), 'thumbnails', fileId);
 
 export async function saveThumbnailExternal(fileId: string, dataUrl: string): Promise<string> {
   const dir = await thumbnailDir();
-  if (!(await exists(dir))) {
-    await mkdir(dir, { recursive: true });
+  if (!(await fs.exists(dir))) {
+    await fs.mkdir(dir, { recursive: true });
   }
   const path = normalizeJoin(dir, `${fileId}.png`);
   const bytes = dataUrlToBytes(dataUrl);
-  await writeFile(path, bytes);
+  await fs.writeFile(path, bytes);
   return path;
 }

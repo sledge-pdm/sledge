@@ -1,10 +1,10 @@
 import { css } from '@acab/ecsstatic';
-import { convertFileSrc } from '@tauri-apps/api/core';
 import { Component, createEffect, For } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { thumbnailDir } from '~/features/io/project/out/save';
 import { FileLocation } from '~/types/FileLocation';
 import { getFileUniqueId, normalizeJoin } from '~/utils/FileUtils';
+import { core } from '~/utils/platform';
 import ListFileItem from './ListFileItem';
 
 export const container = css`
@@ -24,7 +24,7 @@ const RecentFileList: Component<{ files: FileLocation[]; onClick: (file: FileLoc
       const fileId = await getFileUniqueId(path);
       const fileName = fileId + '.png';
       const thumbPath = normalizeJoin(await thumbnailDir(), fileName);
-      const assetUrl = convertFileSrc(thumbPath);
+      const assetUrl = core.convertFileSrc(thumbPath);
 
       setThumbnails(path, assetUrl);
     });

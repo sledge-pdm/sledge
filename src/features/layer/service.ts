@@ -1,6 +1,5 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
-import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
@@ -14,6 +13,7 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
+import { dialog } from '~/utils/platform';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { changeBaseLayerColor, createLayer } from './model';
@@ -347,7 +347,7 @@ export const removeLayersFromUser = async (layerIds?: string[], options?: Remove
       targets.length === 1
         ? `Sure to remove layer "${summarizeLayerNames(targets)}"?`
         : `Sure to remove ${targets.length} layers? (${summarizeLayerNames(targets)})`;
-    const removeConfirmed = await confirm(message, {
+    const removeConfirmed = await dialog.confirm(message, {
       title: 'Remove Layer',
     });
     if (!removeConfirmed) return;
@@ -404,7 +404,7 @@ export const clearLayersFromUser = async (layerIds?: string[]) => {
   }
 
   if (globalConfig.editor.requireConfirmBeforeLayerClear) {
-    const confirmed = await confirm(
+    const confirmed = await dialog.confirm(
       targets.length === 1
         ? `Sure to clear layer "${summarizeLayerNames(targets)}"?`
         : `Sure to clear ${targets.length} layers? (${summarizeLayerNames(targets)})`,
@@ -445,7 +445,7 @@ export const activeIndex = () => allLayers().findIndex((layer) => layer.id === l
 
 // BaseLayer operations
 /**
- * ベースレイヤーのカラーモードを変更する
+ * ベ�Eスレイヤーのカラーモードを変更する
  */
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
@@ -455,7 +455,7 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
 }
 
 /**
- * ベースレイヤーのカスタムカラーを変更する
+ * ベ�Eスレイヤーのカスタムカラーを変更する
  */
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);

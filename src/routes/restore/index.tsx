@@ -1,7 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { confirm } from '@tauri-apps/plugin-dialog';
-import { remove, stat } from '@tauri-apps/plugin-fs';
 import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
@@ -11,6 +8,7 @@ import { pageRoot } from '~/styles/styles';
 import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
+import { dialog, fs, window as platformWindow } from '~/utils/platform';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 const root = css`
@@ -102,7 +100,7 @@ const Restore = () => {
           ) {
             const projectPath = parsed.project.store.lastSavedPath;
             const lastSavedAt = parsed.project.store.lastSavedAt;
-            const backupStat = await stat(backupPath);
+            const backupStat = await fs.stat(backupPath);
             const backupSavedAt = backupStat.mtime;
             const info: BackupInfo = {
               backupLocation: backupLoc,
@@ -180,7 +178,7 @@ const Restore = () => {
           </button> */}
           <button
             onClick={async () => {
-              const confirmed = await confirm(
+              const confirmed = await dialog.confirm(
                 `Sure to delete ALL backups and close this window?
 Make sure you have restored all backups!!`,
                 {
@@ -191,10 +189,10 @@ Make sure you have restored all backups!!`,
               );
               if (!confirmed) {
                 const folderPath = await getEmergencyBackupPath();
-                await remove(folderPath, {
+                await fs.remove(folderPath, {
                   recursive: true,
                 });
-                getCurrentWindow().close();
+                platformWindow.getCurrentWindow().close();
               }
             }}
           >

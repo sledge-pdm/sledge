@@ -1,5 +1,4 @@
 import { Size2D, Vec2 } from '@sledge-pdm/core';
-import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
@@ -11,6 +10,7 @@ import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { WindowPos } from '~/types/CoordinateTypes';
 import { eventBus } from '~/utils/EventBus';
+import { dialog } from '~/utils/platform';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export function isValidCanvasSize(size: Size2D): boolean {
@@ -36,7 +36,7 @@ export function isValidCanvasSize(size: Size2D): boolean {
 
     if (requestedBufferSize > bufferSizeLimit) {
       const maxSidePixels = Math.floor(safeSideLength);
-      message(
+      dialog.message(
         `Canvas size exceeds WebGL limitations.
 
 Requested: ${size.width}×${size.height} (${(requestedBufferSize / 1024 / 1024).toFixed(2)} MB)

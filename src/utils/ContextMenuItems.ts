@@ -1,7 +1,7 @@
 import { MenuListOption } from '@sledge-pdm/ui';
-import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { projectHistoryController } from '~/features/history';
 import { saveProject } from '~/features/io/project/out/save';
+import { webview } from '~/utils/platform';
 import { openDevTools } from '~/utils/WindowUtils';
 
 export const ContextMenuItems: { [key: string]: MenuListOption } = {
@@ -18,7 +18,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
     label: '[dev] Open DevTools',
     icon: '/assets/icons/context_menu/devtools.png',
     onSelect: async () => {
-      await openDevTools(getCurrentWebview().label);
+      await openDevTools(webview.getCurrentWebview().label);
     },
   },
   Undo: {

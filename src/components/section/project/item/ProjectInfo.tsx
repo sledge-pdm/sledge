@@ -1,12 +1,11 @@
 import { css } from '@acab/ecsstatic';
-import { confirm } from '@tauri-apps/plugin-dialog';
-import { FileInfo, stat } from '@tauri-apps/plugin-fs';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { adjustZoomToFit } from '~/features/canvas';
 import { loadProjectFromLocation } from '~/routes/editor/load';
 import { fileStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
+import { dialog, FileInfo, fs } from '~/utils/platform';
 import { sectionSubCaption, sectionSubContent } from '../../SectionStyles';
 
 const locationHeaderStyle = css`
@@ -67,7 +66,7 @@ const ProjectInfo: Component = () => {
     const location = fileStore.savedLocation;
     if (location.path && location.name) {
       const path = normalizeJoin(location.path, location.name);
-      const fileStat = await stat(path);
+      const fileStat = await fs.stat(path);
       setSavedStat(fileStat);
     }
   });
@@ -129,7 +128,7 @@ const ProjectInfo: Component = () => {
               class={reopenProjectLink}
               title={'reopen project'}
               onClick={async () => {
-                const confirmed = await confirm(`Sure to reopen this project?
+                const confirmed = await dialog.confirm(`Sure to reopen this project?
 Unsaved changes will be discarded!`);
                 if (confirmed) {
                   await loadProjectFromLocation(fileStore.savedLocation);

@@ -1,7 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { color, Dropdown, DropdownOption, Icon, MenuList } from '@sledge-pdm/ui';
-import { message } from '@tauri-apps/plugin-dialog';
-import { DirEntry, readDir } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
@@ -13,6 +11,7 @@ import { FileLocation } from '~/types/FileLocation';
 import { eventBus } from '~/utils/EventBus';
 import { exportDir, getDefinedDriveLetters, isOpenableFile, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
+import { dialog, DirEntry, fs } from '~/utils/platform';
 
 // Styles
 const explorerContainer = css`
@@ -175,7 +174,7 @@ const Explorer: Component = () => {
     revertToPath(normalized);
 
     try {
-      const dirEntries = await readDir(normalized);
+      const dirEntries = await fs.readDir(normalized);
       if (requestToken !== loadRequestToken) return true;
       sortEntries(dirEntries);
       setEntries(dirEntries);
@@ -190,7 +189,7 @@ const Explorer: Component = () => {
         ((lastValidPath && lastValidPath !== normalized && lastValidPath) ||
           (defaultExplorerPath && defaultExplorerPath !== normalized && defaultExplorerPath));
 
-      await message(`Cannot open directory.\n${normalized}${fallback ? `\nReverting to ${fallback}.` : ''}`, {
+      await dialog.message(`Cannot open directory.\n${normalized}${fallback ? `\nReverting to ${fallback}.` : ''}`, {
         kind: 'warning',
         title: 'Explorer',
         okLabel: 'OK',

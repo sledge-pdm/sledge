@@ -1,9 +1,9 @@
 import { debounce } from '@solid-primitives/scheduled';
-import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { ensureAppConfigPath } from '~/features/config';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { getEditorStateStore } from '~/stores/EditorStores';
+import { fs } from '~/utils/platform';
 
 export const saveEditorStateDebounced = debounce(saveEditorStateImmediate, 500);
 
@@ -14,8 +14,9 @@ export async function saveEditorStateImmediate() {
     await ensureAppConfigPath();
 
     const editorState = getEditorStateStore();
-    await writeTextFile(Consts.editorStateFileName, JSON.stringify(editorState, null, 2), {
-      baseDir: BaseDirectory.AppConfig,
+    const baseDir = fs.BaseDirectory?.AppConfig;
+    await fs.writeTextFile(Consts.editorStateFileName, JSON.stringify(editorState, null, 2), {
+      baseDir,
       create: true,
     });
     if (import.meta.env.DEV) logSystemInfo('editor state saved.', { label: LOG_LABEL });

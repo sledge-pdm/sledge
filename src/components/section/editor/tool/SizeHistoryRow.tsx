@@ -1,9 +1,7 @@
 import { css } from '@acab/ecsstatic';
-import { ShapeMask } from '@sledge-pdm/anvil';
 import { clsx } from '@sledge-pdm/core';
-import { color, showContextMenu } from '@sledge-pdm/ui';
-import { mask_to_path } from '@sledge/wasm';
-import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { showContextMenu } from '@sledge-pdm/ui';
+import { Component, createEffect, createMemo, createSignal, For, onMount } from 'solid-js';
 import { EraserTool } from '~/features/tools/behaviors/draw/eraser/EraserTool';
 import { PenTool } from '~/features/tools/behaviors/draw/pen/PenTool';
 import { getCurrentPresetConfig, updateToolPresetConfig } from '~/features/tools/ToolController';
@@ -132,7 +130,7 @@ interface PreviewProps {
 }
 const PreviewSVG: Component<PreviewProps> = (props) => {
   const containerSize = props.containerSize;
-  const [shapeMask, setShapeMask] = createSignal<ShapeMask | undefined>();
+  // const [shapeMask, setShapeMask] = createSignal<ShapeMask | undefined>();
   const [penOutlinePath, setPenOutlinePath] = createSignal('');
 
   const updatePreview = () => {
@@ -142,12 +140,12 @@ const PreviewSVG: Component<PreviewProps> = (props) => {
     // TODO: consider shape preview way
     // const shapeMask = behavior.shapeStore.get(shape, size ?? 0);
     const shapeMask = undefined;
-    if (shapeMask) {
-      setShapeMask(shapeMask);
-      const { mask, width, height, offsetX, offsetY } = shapeMask;
-      const localPath = mask_to_path(mask, width, height, offsetX + containerSize / 2, offsetY + containerSize / 2);
-      setPenOutlinePath(localPath);
-    }
+    // if (shapeMask) {
+    //   setShapeMask(shapeMask);
+    //   const { mask, width, height, offsetX, offsetY } = shapeMask;
+    //   const localPath = mask_to_path(mask, width, height, offsetX + containerSize / 2, offsetY + containerSize / 2);
+    //   setPenOutlinePath(localPath);
+    // }
   };
 
   onMount(() => {
@@ -159,13 +157,12 @@ const PreviewSVG: Component<PreviewProps> = (props) => {
     updatePreview();
   });
 
-  return (
-    <Show when={shapeMask() ?? penOutlinePath()}>
-      <svg viewBox={`0 0 ${containerSize} ${containerSize}`} xmlns='http://www.w3.org/2000/svg'>
-        <path d={penOutlinePath()} fill={color.onBackground} stroke={'none'} vector-effect='non-scaling-stroke' pointer-events='none' />
-      </svg>
-    </Show>
-  );
+  return null;
+  // <Show when={shapeMask() ?? penOutlinePath()}>
+  //   <svg viewBox={`0 0 ${containerSize} ${containerSize}`} xmlns='http://www.w3.org/2000/svg'>
+  //     <path d={penOutlinePath()} fill={color.onBackground} stroke={'none'} vector-effect='non-scaling-stroke' pointer-events='none' />
+  //   </svg>
+  // </Show>
 };
 
 export default SizeHistoryRow;

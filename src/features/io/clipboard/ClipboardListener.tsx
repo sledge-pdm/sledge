@@ -1,6 +1,4 @@
 import { toUint8Array } from '@sledge-pdm/core';
-import { Image } from '@tauri-apps/api/image';
-import { writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { Component, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
@@ -14,6 +12,7 @@ import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelec
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
+import { clipboard, image } from '~/utils/platform';
 
 const LOG_LABEL = 'ClipboardListener';
 
@@ -28,8 +27,8 @@ const ClipboardListener: Component = () => {
         const bufData = getCurrentSelectionBuffer();
         if (!bufData) return;
         const { buffer, bbox } = bufData;
-        const image = await Image.new(toUint8Array(buffer), bbox.width, bbox.height);
-        await writeImage(image);
+        const clipboardImage = await image.create(toUint8Array(buffer), bbox.width, bbox.height);
+        await clipboard.writeImage(clipboardImage);
         setInteractStore('placementPosition', {
           x: bbox.x,
           y: bbox.y,
@@ -37,7 +36,7 @@ const ClipboardListener: Component = () => {
         logUserSuccess('selection copied!', { label: LOG_LABEL });
         return 'selection';
       } else {
-        await writeText(layerListStore.activeLayerId);
+        await clipboard.writeText(layerListStore.activeLayerId);
         logUserSuccess('layer copied!', { label: LOG_LABEL });
         return 'layer';
       }

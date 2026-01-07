@@ -1,5 +1,3 @@
-import { confirm } from '@tauri-apps/plugin-dialog';
-import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { JPEGExporter } from '~/features/io/export/exporter/JPEGExporter';
 import { LosslessWebPExporter } from '~/features/io/export/exporter/LosslessWebPExporter';
@@ -11,6 +9,7 @@ import { allLayers } from '~/features/layer';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { dialog, fs } from '~/utils/platform';
 
 export interface CanvasExportOptions {
   perLayer: boolean;
@@ -71,12 +70,12 @@ export async function exportImage(folderPath: string, fileName: string, options:
 }
 
 export async function saveBlobViaTauri(blob: Blob, folderPath: string, fileName = 'export.png'): Promise<FileLocation | undefined> {
-  if (!(await exists(folderPath))) {
-    await mkdir(folderPath, { recursive: true });
+  if (!(await fs.exists(folderPath))) {
+    await fs.mkdir(folderPath, { recursive: true });
   }
   const filePath = normalizeJoin(folderPath, fileName);
-  if (await exists(filePath)) {
-    const ok = await confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
+  if (await fs.exists(filePath)) {
+    const ok = await dialog.confirm(`File already exists:\n${filePath}\n\nOverwrite?`, {
       kind: 'info',
       okLabel: 'Overwrite',
       cancelLabel: 'Cancel',
@@ -89,7 +88,7 @@ export async function saveBlobViaTauri(blob: Blob, folderPath: string, fileName 
   }
 
   const buf = new Uint8Array(await blob.arrayBuffer());
-  await writeFile(normalizeJoin(folderPath, fileName), buf, {});
+  await fs.writeFile(normalizeJoin(folderPath, fileName), buf, {});
   return {
     path: folderPath,
     name: fileName,

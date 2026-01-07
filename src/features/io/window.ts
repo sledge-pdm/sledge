@@ -1,10 +1,9 @@
-import { path } from '@tauri-apps/api';
-import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { logUserWarn } from '~/features/log/service';
 import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { dialog, path } from '~/utils/platform';
 import { getNewProjectSearchParams, getProjectFromClipboardSearchParams, openWindow } from '~/utils/WindowUtils';
 
 export const createNew = () => {
@@ -22,7 +21,7 @@ export const openFromClipboard = () => {
 
 export async function openNewFile(): Promise<string | undefined> {
   const home = await path.homeDir();
-  const file = await dialogOpen({
+  const file = await dialog.open({
     multiple: false,
     directory: false,
     defaultPath: normalizeJoin(home, 'sledge'),

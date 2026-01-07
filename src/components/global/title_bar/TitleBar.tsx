@@ -1,12 +1,12 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
 import { color, Icon } from '@sledge-pdm/ui';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
 import { fileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
+import { window as platformWindow } from '~/utils/platform';
 import './title_bar_region.css';
 
 const titleBarRoot = css`
@@ -110,7 +110,7 @@ export default function TitleBar() {
   const [windowTitle, setWindowTitle] = createSignal('');
 
   onMount(async () => {
-    const window = getCurrentWindow();
+    const window = platformWindow.getCurrentWindow();
     setIsMaximizable(await window.isMaximizable());
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
@@ -119,8 +119,8 @@ export default function TitleBar() {
     setWindowTitle(await window.title());
   });
 
-  getCurrentWindow().onResized(async () => {
-    setMaximized(await getCurrentWindow().isMaximized());
+  platformWindow.getCurrentWindow().onResized(async () => {
+    setMaximized(await platformWindow.getCurrentWindow().isMaximized());
   });
 
   createEffect(() => {
@@ -145,14 +145,14 @@ export default function TitleBar() {
         }
       }
 
-      getCurrentWindow().setTitle(title);
+      platformWindow.getCurrentWindow().setTitle(title);
     }
   });
 
   const borderWindowLabels: string[] = ['settings', 'restore'];
-  const shouldShowBorder = () => borderWindowLabels.find((l) => l === getCurrentWindow().label);
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === platformWindow.getCurrentWindow().label);
   const titleLessWindowLabels: string[] = ['about'];
-  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === getCurrentWindow().label);
+  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === platformWindow.getCurrentWindow().label);
 
   return (
     <header>
@@ -217,7 +217,7 @@ export default function TitleBar() {
                   class={titleBarControlButtonContainer}
                   onClick={async (e) => {
                     e.preventDefault();
-                    await getCurrentWindow().minimize();
+                    await platformWindow.getCurrentWindow().minimize();
                   }}
                   data-tauri-drag-region-exclude
                 >
@@ -236,7 +236,7 @@ export default function TitleBar() {
                   class={titleBarControlButtonContainer}
                   onClick={async (e) => {
                     e.preventDefault();
-                    await getCurrentWindow().toggleMaximize();
+                    await platformWindow.getCurrentWindow().toggleMaximize();
                   }}
                   data-tauri-drag-region-exclude
                 >
@@ -255,7 +255,7 @@ export default function TitleBar() {
                   class={clsx(titleBarControlButtonContainer, titleBarControlCloseButtonContainer)}
                   onClick={async (e) => {
                     e.preventDefault();
-                    await getCurrentWindow().close();
+                    await platformWindow.getCurrentWindow().close();
                   }}
                   data-tauri-drag-region-exclude
                 >

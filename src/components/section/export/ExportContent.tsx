@@ -1,8 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { clsx, Vec2 } from '@sledge-pdm/core';
 import { Checkbox, color, Dropdown, DropdownOption, fonts, Icon, MenuList, MenuListOption, Slider } from '@sledge-pdm/ui';
-import { confirm, message, open } from '@tauri-apps/plugin-dialog';
-import { exists, mkdir, stat } from '@tauri-apps/plugin-fs';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
@@ -15,6 +13,7 @@ import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
 import { exportDir, exportFileName, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
+import { dialog, fs } from '~/utils/platform';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '../SectionStyles';
 
 const qualityField = css`
@@ -202,7 +201,7 @@ const ExportContent: Component = () => {
   });
 
   const openDirSelectionDialog = async () => {
-    const dir = await open({
+    const dir = await dialog.open({
       multiple: false,
       directory: true,
       defaultPath: settings.folderPath,
@@ -303,8 +302,8 @@ const ExportContent: Component = () => {
                   setSettings('folderPath', normalizePath(settings.folderPath));
                 }
                 const path = normalizePath(e.target.value);
-                if (!(await exists(path))) {
-                  const confirmed = await confirm(`The specified folder does not exist. create new?`, {
+                if (!(await fs.exists(path))) {
+                  const confirmed = await dialog.confirm(`The specified folder does not exist. create new?`, {
                     okLabel: 'Create',
                     cancelLabel: 'Cancel',
                     kind: 'info',
@@ -313,11 +312,11 @@ const ExportContent: Component = () => {
 
                   if (!confirmed) return;
 
-                  await mkdir(path, { recursive: true });
+                  await fs.mkdir(path, { recursive: true });
                 } else {
-                  const pathStat = await stat(path);
+                  const pathStat = await fs.stat(path);
                   if (pathStat.isFile) {
-                    await message('The specified path is already exists as a file.');
+                    await dialog.message('The specified path is already exists as a file.');
                     return;
                   }
                 }

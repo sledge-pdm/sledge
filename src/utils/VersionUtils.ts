@@ -1,7 +1,7 @@
 import { getLatestVersion } from '@sledge-pdm/core';
-import { getVersion } from '@tauri-apps/api/app';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
+import { app } from '~/utils/platform';
 
 export const getReleaseApiUrl = () => {
   const releaseApiUrl =
@@ -65,7 +65,7 @@ const compareSemanticVersions = (v1: SemanticVersion | string, v2: SemanticVersi
 };
 
 export const getCurrentVersion = async (): Promise<string> => {
-  return await getVersion();
+  return await app.getVersion();
 };
 
 export const isNewVersionAvailable = async (considerSkip: boolean, pat?: string): Promise<boolean | undefined> => {

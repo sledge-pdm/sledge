@@ -1,9 +1,9 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { homeDir, pictureDir } from '@tauri-apps/api/path';
 import { exists, mkdir } from '@tauri-apps/plugin-fs';
 import { platform } from '@tauri-apps/plugin-os';
 import { importableFileExtensions, openableFileExtensions } from '~/features/io/FileExtensions';
 import { fileStore, lastSettingsStore } from '~/stores/EditorStores';
+import { FileLocation } from '~/types/FileLocation';
 import { safeInvoke } from '~/utils/TauriUtils';
 
 export async function getFileUniqueId(path: string): Promise<string> {

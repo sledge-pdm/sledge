@@ -1,9 +1,9 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { BaseDirectory } from '@tauri-apps/api/path';
 import { exists, readTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { logSystemError } from '~/features/log/service';
 import { EditorStateStore, loadEditorStateStore } from '~/stores/EditorStores';
+import { FileLocation } from '~/types/FileLocation';
 
 export async function loadEditorState(): Promise<
   | {

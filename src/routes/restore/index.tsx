@@ -1,5 +1,4 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge-pdm/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { remove, stat } from '@tauri-apps/plugin-fs';
@@ -9,6 +8,7 @@ import { loadGlobalSettings } from '~/features/io/config/load';
 import { readProjectFromPath } from '~/features/io/project/in/import';
 import { logSystemWarn } from '~/features/log/service';
 import { pageRoot } from '~/styles/styles';
+import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';

@@ -1,5 +1,4 @@
 // editorStore.tsx
-import { FileLocation } from '@sledge-pdm/core';
 import { createStore } from 'solid-js/store';
 import { ToolCategoryId, ToolPresets } from '~/features/tools/Tools';
 import { AppearanceStore, createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
@@ -9,6 +8,7 @@ import { InteractStore, defaultInteractStore } from '~/stores/editor/InteractSto
 import { LogStore, defaultLogStore } from '~/stores/editor/LogStore';
 import { ToolStore, defaultToolStore } from '~/stores/editor/ToolStore';
 import { LastSettingsStore, defaultLastSettingsStore } from '~/stores/global/LastSettingsStore';
+import { FileLocation } from '~/types/FileLocation';
 import { eventBus } from '~/utils/EventBus';
 
 export const initEditorStore = () => {

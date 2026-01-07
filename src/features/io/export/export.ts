@@ -1,4 +1,3 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
@@ -10,6 +9,7 @@ import { SVGExporter } from '~/features/io/export/exporter/SVGExporter';
 import { convertToExtension, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { allLayers } from '~/features/layer';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
+import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 
 export interface CanvasExportOptions {

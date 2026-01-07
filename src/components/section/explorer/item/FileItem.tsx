@@ -1,10 +1,10 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge-pdm/core';
 import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { DirEntry } from '@tauri-apps/plugin-fs';
 import { Component, createMemo, Show } from 'solid-js';
 import { createEntryFromLocalImage, insertEntry, selectEntry } from '~/features/image_pool';
 import { openExistingProject } from '~/features/io/window';
+import { FileLocation } from '~/types/FileLocation';
 import { isImportableFile, isOpenableFile, normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 

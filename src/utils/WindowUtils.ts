@@ -1,4 +1,3 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { WebviewOptions } from '@tauri-apps/api/webview';
 import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
@@ -6,6 +5,7 @@ import { message } from '@tauri-apps/plugin-dialog';
 import { exit } from '@tauri-apps/plugin-process';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
+import { FileLocation } from '~/types/FileLocation';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
 

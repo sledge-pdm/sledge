@@ -1,9 +1,9 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { appConfigDir } from '@tauri-apps/api/path';
 import { mkdir, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { v4 } from 'uuid';
 import { dumpProject } from '~/features/io/project/out/dump';
 import { fileStore } from '~/stores/EditorStores';
+import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 
 const EMERGENCY_BACKUP_FOLDER = 'backup';

@@ -1,9 +1,9 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { path } from '@tauri-apps/api';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { logUserWarn } from '~/features/log/service';
+import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 import { getNewProjectSearchParams, getProjectFromClipboardSearchParams, openWindow } from '~/utils/WindowUtils';
 

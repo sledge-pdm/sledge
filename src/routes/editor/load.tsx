@@ -1,4 +1,3 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { message } from '@tauri-apps/plugin-dialog';
 import { getEmergencyBackups } from '~/features/backup';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
@@ -15,6 +14,7 @@ import { logSystemError, logUserError } from '~/features/log/service';
 import { setFileStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { layerListStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
+import { FileLocation } from '~/types/FileLocation';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';

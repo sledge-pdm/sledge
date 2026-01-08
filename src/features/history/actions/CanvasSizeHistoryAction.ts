@@ -8,7 +8,7 @@ import { eventBus } from '~/utils/EventBus';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
-type LayerBufferSnapshot = { layerId: string; dotMag: number; buffer: Uint8ClampedArray };
+type LayerBufferSnapshot = { layerId: string; buffer: Uint8ClampedArray };
 
 export interface CanvasSizeHistoryActionProps extends BaseHistoryActionProps {
   beforeSize: Size2D;
@@ -37,14 +37,12 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       if (!frascoLayer) {
         return {
           layerId: l.id,
-          dotMag: l.dotMagnification,
           buffer: new Uint8ClampedArray(0),
         };
       }
       const raw = frascoLayer.exportRaw();
       return {
         layerId: l.id,
-        dotMag: l.dotMagnification,
         buffer: new Uint8ClampedArray(raw),
       };
     });

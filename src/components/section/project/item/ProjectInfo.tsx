@@ -106,7 +106,7 @@ const ProjectInfo: Component = () => {
           <div class={locationRowStyle}>
             <p class={locationLabelStyle}>size</p>
             <Show when={savedStat()} fallback={<p class={placeholderStyle}></p>}>
-              <p class={locationValueStyle}>{toReadableByteStr(savedStat()!.size)}</p>
+              <p class={locationValueStyle}>{toReadableByteStr(savedStat()!.size ?? 0)}</p>
             </Show>
           </div>
         </div>

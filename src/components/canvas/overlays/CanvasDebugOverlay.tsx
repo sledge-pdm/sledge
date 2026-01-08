@@ -76,7 +76,7 @@ const CanvasDebugOverlay: Component = () => {
   };
 
   onMount(() => {
-    let intervalId: NodeJS.Timeout | undefined;
+    let intervalId: number | undefined;
     const startTimerId = window.setTimeout(() => {
       intervalId = setInterval(callback, 500);
     }, 100);

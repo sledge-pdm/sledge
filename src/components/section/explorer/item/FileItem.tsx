@@ -58,7 +58,7 @@ export interface FilesConfig {
   pathEditMode: boolean;
 }
 
-const getIconForName = (name: string, isDirectory: boolean) => {
+const getIconForName = (name: string, isDirectory?: boolean) => {
   if (isDirectory) return '/assets/icons/files/folder.png';
   if (name.endsWith('.sledge')) return '/assets/icons/files/file_sledge.png';
   if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) return '/assets/icons/files/image.png';

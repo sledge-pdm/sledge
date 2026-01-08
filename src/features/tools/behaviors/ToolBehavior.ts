@@ -2,7 +2,6 @@ import { RGBA, Vec2 } from '@sledge-pdm/core';
 
 export interface ToolResult {
   shouldUpdate: boolean;
-  shouldRegisterToHistory: boolean;
   shouldReturnToPrevTool?: boolean;
 }
 

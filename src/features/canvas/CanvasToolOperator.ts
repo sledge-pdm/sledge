@@ -1,13 +1,11 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { currentColor } from '~/features/color';
-import { projectHistoryController } from '~/features/history';
-import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { findLayerById } from '~/features/layer';
 import { logSystemInfo, logUserError } from '~/features/log/service';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
-import { TOOL_CATEGORIES, ToolCategory } from '~/features/tools/Tools';
+import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
@@ -26,10 +24,10 @@ const logDebug = (message: string, ...details: unknown[]) =>
 export default class CanvasToolOperator {
   constructor(private readonly getLayerIdToDraw: () => string) {}
 
-  private getMagnificatedPosition(position: Vec2, dotMagnification: number) {
+  getRoundedPosition(position: Vec2): Vec2 {
     return {
-      x: Math.floor(position.x / dotMagnification),
-      y: Math.floor(position.y / dotMagnification),
+      x: Math.floor(position.x),
+      y: Math.floor(position.y),
     };
   }
 
@@ -38,7 +36,7 @@ export default class CanvasToolOperator {
     if (!layer) return false;
 
     const rawPosition = position;
-    position = this.getMagnificatedPosition(position, layer.dotMagnification);
+    position = this.getRoundedPosition(position);
 
     if (!toolCategory.behavior.allowRightClick && originalEvent.buttons === 2) return false;
 
@@ -77,27 +75,6 @@ export default class CanvasToolOperator {
       if (result.shouldUpdate) {
         updateWebGLCanvas(true, 'CanvasToolOperator (action: ' + DrawState[state] + ')');
         updateLayerPreview(layer.id);
-      }
-      if (result.shouldRegisterToHistory) {
-        if (toolCategory.id === TOOL_CATEGORIES.PEN || toolCategory.id === TOOL_CATEGORIES.ERASER) {
-          projectHistoryController.addAction(
-            new LayerHistoryAction({
-              layerId: layer.id,
-              context: { tool: toolCategory.id },
-            })
-          );
-        } else {
-          // const anvil = getAnvil(layer.id);
-          // const patch = anvil.flushDiffs();
-          // if (patch)
-          //   projectHistoryController.addAction(
-          //     new AnvilLayerHistoryAction({
-          //       layerId: layer.id,
-          //       patch,
-          //       context: { tool: toolCategory.id },
-          //     })
-          //   );
-        }
       }
 
       if (result.shouldReturnToPrevTool) {

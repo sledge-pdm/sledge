@@ -5,7 +5,7 @@ export const AUTOSAVE_SNAPSHOT_NAME = 'auto-saved';
 export class AutoSnapshotManager {
   private static instance: AutoSnapshotManager;
   private currentInterval: number | undefined = undefined;
-  private intervalId: NodeJS.Timeout | null = null;
+  private intervalId: number | null = null;
 
   private constructor() {}
 

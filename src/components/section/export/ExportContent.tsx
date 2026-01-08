@@ -208,7 +208,7 @@ const ExportContent: Component = () => {
       canCreateDirectories: true,
     });
 
-    if (dir) setSettings('folderPath', dir);
+    if (dir) setSettings('folderPath', dir.toString());
   };
 
   const requestExport = async () => {

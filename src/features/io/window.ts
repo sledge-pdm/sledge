@@ -46,7 +46,7 @@ export async function openNewFile(): Promise<string | undefined> {
     return undefined;
   }
 
-  return file;
+  return file.toString();
 }
 
 export const openProject = () => {

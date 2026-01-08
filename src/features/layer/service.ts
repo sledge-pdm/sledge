@@ -22,7 +22,7 @@ import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 const LOG_LABEL = 'LayerService';
 
 // Layer property updates
-const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
+const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type'];
 
 export function setLayerName(layerId: string, newName: string): boolean {
   if (!newName || newName.trim() === '') {
@@ -88,7 +88,6 @@ export function duplicateLayer(layerId: string) {
       name: layer.name,
       type: layer.type,
       enabled: layer.enabled,
-      dotMagnification: layer.dotMagnification,
       opacity: layer.opacity,
       mode: layer.mode,
     },
@@ -129,7 +128,6 @@ export const addLayer = (
     name?: string;
     type?: LayerType;
     enabled?: boolean;
-    dotMagnification?: number;
     opacity?: number;
     mode?: BlendMode;
   },
@@ -144,29 +142,19 @@ export const addLayerTo = (
     name?: string;
     type?: LayerType;
     enabled?: boolean;
-    dotMagnification?: number;
     opacity?: number;
     mode?: BlendMode;
     cutFreeze?: boolean;
   },
   options?: AddLayerOptions
 ) => {
-  const {
-    name = 'layer 1',
-    type = LayerType.Dot,
-    enabled = true,
-    dotMagnification = 1,
-    opacity = 1,
-    mode = BlendMode.normal,
-    cutFreeze = false,
-  } = layer;
+  const { name = 'layer 1', type = LayerType.Dot, enabled = true, opacity = 1, mode = BlendMode.normal, cutFreeze = false } = layer;
   const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
   const newLayer = createLayer(
     {
       name,
       type,
       enabled,
-      dotMagnification,
       opacity,
       mode,
       cutFreeze,
@@ -445,7 +433,7 @@ export const activeIndex = () => allLayers().findIndex((layer) => layer.id === l
 
 // BaseLayer operations
 /**
- * ベ�Eスレイヤーのカラーモードを変更する
+ * ベ�Eスレイヤーのカラーモードを変更する
  */
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
@@ -455,7 +443,7 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
 }
 
 /**
- * ベ�Eスレイヤーのカスタムカラーを変更する
+ * ベ�Eスレイヤーのカスタムカラーを変更する
  */
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);

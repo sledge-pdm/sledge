@@ -92,6 +92,7 @@ export class ProjectHistoryController {
     this.redoStack = [];
     this.emitChange();
   }
+
   undo(): void {
     const action = this.undoStack.pop();
     if (action) {

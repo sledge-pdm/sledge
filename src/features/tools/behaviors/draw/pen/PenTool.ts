@@ -1,6 +1,7 @@
 import { RGBA, transparent, Vec2 } from '@sledge-pdm/core';
 import { CircleShape, Grip, GripPoint, SquareShape } from '@sledge-pdm/frasco';
 import { Consts } from '~/Consts';
+import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
@@ -21,6 +22,7 @@ export class PenTool implements ToolBehavior {
   private activeLayerId: string | undefined;
   private hasStroke = false;
   private startPosition: Vec2 | undefined = undefined;
+  private startPositionRaw: Vec2 | undefined = undefined;
 
   onStart(args: ToolArgs): ToolResult {
     const presetName = args.presetName ?? DEFAULT_PRESET;
@@ -35,6 +37,7 @@ export class PenTool implements ToolBehavior {
     this.isCtrl = args.event?.ctrlKey ?? false;
     this.isShift = args.event?.shiftKey ?? false;
     this.startPosition = args.position;
+    this.startPositionRaw = args.rawPosition;
     this.activeLayerId = args.layerId;
     this.hasStroke = false;
 
@@ -43,14 +46,14 @@ export class PenTool implements ToolBehavior {
       layer = getLayer(args.layerId);
     } catch {
       this.resetStrokeState();
-      return { shouldUpdate: false, shouldRegisterToHistory: false };
+      return { shouldUpdate: false };
     }
     const shape = this.resolveShape(preset);
-    const point = this.buildPoint(args, args.position, args.color);
+    const point = this.buildPoint(args, args.rawPosition, args.color);
     this.grip.start(layer, shape, point);
     this.hasStroke = true;
 
-    return { shouldUpdate: true, shouldRegisterToHistory: false };
+    return { shouldUpdate: true };
   }
 
   onMove(args: ToolArgs): ToolResult {
@@ -62,18 +65,18 @@ export class PenTool implements ToolBehavior {
   }
 
   handleDraw(args: ToolArgs): ToolResult {
-    if (!this.activeLayerId) return { shouldUpdate: false, shouldRegisterToHistory: false };
+    if (!this.activeLayerId) return { shouldUpdate: false };
     if (this.isShift) {
-      return { shouldUpdate: false, shouldRegisterToHistory: false };
+      return { shouldUpdate: false };
     }
 
-    const point = this.buildPoint(args, args.position, args.color);
+    const point = this.buildPoint(args, args.rawPosition, args.color);
     try {
       this.grip.addPoint(point);
       this.hasStroke = true;
-      return { shouldUpdate: true, shouldRegisterToHistory: false };
+      return { shouldUpdate: true };
     } catch {
-      return { shouldUpdate: false, shouldRegisterToHistory: false };
+      return { shouldUpdate: false };
     }
   }
 
@@ -99,24 +102,30 @@ export class PenTool implements ToolBehavior {
   onEnd(args: ToolArgs): ToolResult {
     if (!this.activeLayerId) {
       this.resetStrokeState();
-      return { shouldUpdate: false, shouldRegisterToHistory: false };
+      return { shouldUpdate: false };
     }
 
-    const endPosition = this.isShift && this.isCtrl && this.startPosition ? this.snapToAngle(args.position, this.startPosition) : args.position;
+    const endPosition =
+      this.isShift && this.isCtrl && this.startPositionRaw ? this.snapToAngle(args.rawPosition, this.startPositionRaw) : args.rawPosition;
     const point = this.buildPoint(args, endPosition, args.color);
     try {
       this.grip.end(point);
     } catch {
       this.resetStrokeState();
-      return { shouldUpdate: false, shouldRegisterToHistory: false };
+      return { shouldUpdate: false };
     }
 
-    const committed = this.hasStroke;
     this.resetStrokeState();
+
+    projectHistoryController.addAction(
+      new LayerHistoryAction({
+        layerId: args.layerId,
+        context: { tool: this.categoryId },
+      })
+    );
 
     return {
       shouldUpdate: true,
-      shouldRegisterToHistory: committed,
     };
   }
 
@@ -126,7 +135,6 @@ export class PenTool implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 

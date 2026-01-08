@@ -14,7 +14,6 @@ export class PipetteTool implements ToolBehavior {
     if (!interactStore.isPointerOnCanvas) {
       return {
         shouldUpdate: false,
-        shouldRegisterToHistory: false,
       };
     }
 
@@ -23,7 +22,6 @@ export class PipetteTool implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 
@@ -31,7 +29,6 @@ export class PipetteTool implements ToolBehavior {
     if (!interactStore.isPointerOnCanvas) {
       return {
         shouldUpdate: false,
-        shouldRegisterToHistory: false,
       };
     }
 
@@ -40,7 +37,6 @@ export class PipetteTool implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 
@@ -56,7 +52,6 @@ export class PipetteTool implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
       shouldReturnToPrevTool: !args.event?.shiftKey,
     };
   }
@@ -64,7 +59,6 @@ export class PipetteTool implements ToolBehavior {
   onCancel(__args: ToolArgs): ToolResult {
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
       shouldReturnToPrevTool: true,
     };
   }

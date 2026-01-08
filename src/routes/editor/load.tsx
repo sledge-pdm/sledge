@@ -111,7 +111,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   setCanvasStore('canvas', 'height', height);
   eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
   addLayer(
-    { name: 'layer 1', type: LayerType.Dot, enabled: true, dotMagnification: 1 },
+    { name: 'layer 1', type: LayerType.Dot, enabled: true },
     {
       noDiff: true,
       uniqueName: false,

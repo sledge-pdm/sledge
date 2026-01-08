@@ -309,6 +309,24 @@ export function fill_lasso_selection_with_mask(mask, width, height, points, exis
 }
 
 /**
+ * @param {Uint8Array} buffer
+ * @param {Uint8Array} mask
+ * @param {number} fill_color_r
+ * @param {number} fill_color_g
+ * @param {number} fill_color_b
+ * @param {number} fill_color_a
+ * @returns {boolean}
+ */
+export function fill_mask_area(buffer, mask, fill_color_r, fill_color_g, fill_color_b, fill_color_a) {
+    var ptr0 = passArray8ToWasm0(buffer, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.fill_mask_area(ptr0, len0, buffer, ptr1, len1, fill_color_r, fill_color_g, fill_color_b, fill_color_a);
+    return ret !== 0;
+}
+
+/**
  * 矩形をマスクに描画
  * @param {Uint8Array} mask
  * @param {number} width
@@ -389,6 +407,60 @@ export function mask_to_path(mask, width, height, offset_x, offset_y) {
     } finally {
         wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
     }
+}
+
+/**
+ * スキャンライン方式のFloodFill実装
+ *
+ * この実装は以下の特徴を持ちます：
+ * - メモリ効率的なスキャンライン方式
+ * - スタックオーバーフロー回避
+ * - 高速な隣接色判定
+ * - 選択範囲制限サポート
+ * @param {Uint8Array} buffer
+ * @param {number} width
+ * @param {number} height
+ * @param {number} start_x
+ * @param {number} start_y
+ * @param {number} fill_color_r
+ * @param {number} fill_color_g
+ * @param {number} fill_color_b
+ * @param {number} fill_color_a
+ * @param {number} threshold
+ * @returns {boolean}
+ */
+export function scanline_flood_fill(buffer, width, height, start_x, start_y, fill_color_r, fill_color_g, fill_color_b, fill_color_a, threshold) {
+    var ptr0 = passArray8ToWasm0(buffer, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    const ret = wasm.scanline_flood_fill(ptr0, len0, buffer, width, height, start_x, start_y, fill_color_r, fill_color_g, fill_color_b, fill_color_a, threshold);
+    return ret !== 0;
+}
+
+/**
+ * 選択範囲制限付きスキャンライン FloodFill
+ * @param {Uint8Array} buffer
+ * @param {number} width
+ * @param {number} height
+ * @param {number} start_x
+ * @param {number} start_y
+ * @param {number} fill_color_r
+ * @param {number} fill_color_g
+ * @param {number} fill_color_b
+ * @param {number} fill_color_a
+ * @param {number} threshold
+ * @param {Uint8Array} selection_mask
+ * @param {string} limit_mode
+ * @returns {boolean}
+ */
+export function scanline_flood_fill_with_mask(buffer, width, height, start_x, start_y, fill_color_r, fill_color_g, fill_color_b, fill_color_a, threshold, selection_mask, limit_mode) {
+    var ptr0 = passArray8ToWasm0(buffer, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray8ToWasm0(selection_mask, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(limit_mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.scanline_flood_fill_with_mask(ptr0, len0, buffer, width, height, start_x, start_y, fill_color_r, fill_color_g, fill_color_b, fill_color_a, threshold, ptr1, len1, ptr2, len2);
+    return ret !== 0;
 }
 
 /**

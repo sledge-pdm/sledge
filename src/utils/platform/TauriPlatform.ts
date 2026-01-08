@@ -15,6 +15,8 @@ import { platform as osPlatform } from '@tauri-apps/plugin-os';
 import { exit, relaunch } from '@tauri-apps/plugin-process';
 import { open as openShell } from '@tauri-apps/plugin-shell';
 import { check } from '@tauri-apps/plugin-updater';
+import { DirEntry, FileInfo } from './plugins/fs';
+import { Update } from './plugins/updater';
 import type { Platform } from './types';
 
 export const createTauriPlatform = (): Platform => ({
@@ -29,9 +31,9 @@ export const createTauriPlatform = (): Platform => ({
     writeFile,
     readTextFile,
     writeTextFile,
-    readDir,
+    readDir: (p) => readDir(p) as unknown as Promise<DirEntry[]>,
     remove,
-    stat,
+    stat: (p) => stat(p) as unknown as Promise<FileInfo>,
   },
   dialog: {
     confirm,
@@ -80,7 +82,7 @@ export const createTauriPlatform = (): Platform => ({
     getAllWebviewWindows,
   },
   updater: {
-    check,
+    check: (options) => check(options) as unknown as Promise<Update | null>,
   },
   shell: {
     open: openShell,
@@ -88,7 +90,7 @@ export const createTauriPlatform = (): Platform => ({
   clipboard: {
     readImage,
     readText,
-    writeImage,
+    writeImage: (image) => writeImage(image as unknown as Image),
     writeText,
   },
   image: {

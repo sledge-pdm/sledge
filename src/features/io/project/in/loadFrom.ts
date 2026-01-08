@@ -39,7 +39,6 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
       name: location.name,
       mode: BlendMode.normal,
       type: LayerType.Dot,
-      dotMagnification: 1,
       opacity: 1,
     },
     {
@@ -77,7 +76,6 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
         enabled: true,
         mode: BlendMode.normal,
         type: LayerType.Dot,
-        dotMagnification: 1,
         opacity: 1,
       },
       {

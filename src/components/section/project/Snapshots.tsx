@@ -1,7 +1,7 @@
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
-import { clsx, toUint8ClampedArray, webpToRaw } from '@sledge-pdm/core';
+import { clsx, toUint8ClampedArray } from '@sledge-pdm/core';
 import { Icon } from '@sledge-pdm/ui';
 import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
@@ -10,6 +10,7 @@ import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { snapshotStore } from '~/stores/ProjectStores';
 import { enabledButton, errorButton } from '~/styles/styles';
 import { useTimeAgoText } from '~/utils/TimeUtils';
+import { webpToRaw } from '~/utils/WasmJSImplementation';
 import { sectionContent } from '../SectionStyles';
 
 const snapshotSectionContent = css`

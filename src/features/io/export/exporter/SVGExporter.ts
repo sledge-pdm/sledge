@@ -1,10 +1,11 @@
 import { toUint8Array, toUint8ClampedArray } from '@sledge-pdm/core';
-import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
+import { mask_to_path } from '@sledge/wasm';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { canvasStore } from '~/stores/ProjectStores';
+import { create_opacity_mask } from '~/utils/WasmJSImplementation';
 
 export class SVGExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {

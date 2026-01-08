@@ -1,10 +1,11 @@
-import { toUint8ClampedArray, webpToRaw } from '@sledge-pdm/core';
+import { toUint8ClampedArray } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
 import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { webpToRaw } from '~/utils/WasmJSImplementation';
 
 export const loadProjectJson = async (project: any) => {
   if (!project.version || !project.projectVersion) {

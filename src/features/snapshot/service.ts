@@ -1,4 +1,4 @@
-import { rawToWebp, Size2D } from '@sledge-pdm/core';
+import { Size2D } from '@sledge-pdm/core';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { loadProjectJson } from '~/features/io/project/in/load';
@@ -8,6 +8,7 @@ import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager'
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
 import { dialog } from '~/utils/platform';
+import { rawToWebp } from '~/utils/WasmJSImplementation';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {

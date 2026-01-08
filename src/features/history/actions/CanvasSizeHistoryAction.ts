@@ -5,10 +5,11 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { rawToWebp, webpToRaw } from '~/utils/WasmJSImplementation';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
-type LayerBufferSnapshot = { layerId: string; buffer: Uint8ClampedArray };
+type LayerBufferSnapshot = { layerId: string; webpBuffer: Uint8Array };
 
 export interface CanvasSizeHistoryActionProps extends BaseHistoryActionProps {
   beforeSize: Size2D;
@@ -31,19 +32,19 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
     this.afterSize = props.afterSize;
   }
 
-  createSnapshots() {
+  createSnapshots(): LayerBufferSnapshot[] {
     return allLayers().map((l) => {
       const frascoLayer = layerManager.getLayerOptional(l.id);
       if (!frascoLayer) {
         return {
           layerId: l.id,
-          buffer: new Uint8ClampedArray(0),
+          webpBuffer: new Uint8Array(0),
         };
       }
-      const raw = frascoLayer.exportRaw();
+      const webp = rawToWebp(frascoLayer.exportRaw(), frascoLayer.getWidth(), frascoLayer.getHeight());
       return {
         layerId: l.id,
-        buffer: new Uint8ClampedArray(raw),
+        webpBuffer: webp as Uint8Array<ArrayBuffer>,
       };
     });
   }
@@ -90,7 +91,8 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       const width = size.width;
       const height = size.height;
       const expected = width * height * 4;
-      const buffer = snap.buffer.length === expected ? snap.buffer : new Uint8ClampedArray(expected);
+      const raw = webpToRaw(snap.webpBuffer, width, height);
+      const buffer = raw.length === expected ? raw : new Uint8ClampedArray(expected);
       const frascoLayer = layerManager.getLayerOptional(snap.layerId);
       if (frascoLayer) {
         frascoLayer.replaceBuffer(buffer, width, height);

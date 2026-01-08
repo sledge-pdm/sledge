@@ -1,6 +1,6 @@
 import type { RawPixelData, RGBA } from '@sledge-pdm/core';
 import { Layer, TextureHistoryBackend } from '@sledge-pdm/frasco';
-import { flip_pixels_vertically } from '@sledge/wasm';
+import { flip_pixels_vertically } from '~/utils/WasmJSImplementation';
 
 type InputSpace = 'canvas' | 'layer';
 

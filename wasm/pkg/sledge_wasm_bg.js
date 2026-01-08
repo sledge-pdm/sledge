@@ -197,36 +197,6 @@ export function combine_masks_subtract(base_mask, preview_mask) {
 }
 
 /**
- * 2つのバッファを合成する（FloodFill結果を元のバッファに適用）
- * base_buffer: ベースとなるピクセルバッファ (RGBA)
- * overlay_buffer: 重ねるピクセルバッファ (RGBA) - FloodFillの結果
- * selection_mask: 選択範囲のマスク (0 or 1)
- * mode: 制限モード ("inside", "outside", "none")
- * width, height: 画像のサイズ
- * @param {Uint8Array} base_buffer
- * @param {Uint8Array} overlay_buffer
- * @param {Uint8Array} selection_mask
- * @param {string} mode
- * @param {number} width
- * @param {number} height
- * @returns {Uint8Array}
- */
-export function composite_fill_result(base_buffer, overlay_buffer, selection_mask, mode, width, height) {
-    const ptr0 = passArray8ToWasm0(base_buffer, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(overlay_buffer, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passArray8ToWasm0(selection_mask, wasm.__wbindgen_malloc);
-    const len2 = WASM_VECTOR_LEN;
-    const ptr3 = passStringToWasm0(mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len3 = WASM_VECTOR_LEN;
-    const ret = wasm.composite_fill_result(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, width, height);
-    var v5 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v5;
-}
-
-/**
  * @param {Uint8Array} buffer
  * @param {number} width
  * @param {number} height
@@ -269,46 +239,6 @@ export function fill_lasso_selection(mask, width, height, points, fill_rule) {
 }
 
 /**
- * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {Float32Array} points
- * @returns {boolean}
- */
-export function fill_lasso_selection_point_in_polygon(mask, width, height, points) {
-    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.fill_lasso_selection_point_in_polygon(ptr0, len0, mask, width, height, ptr1, len1);
-    return ret !== 0;
-}
-
-/**
- * 選択範囲制限付きLasso選択
- * @param {Uint8Array} mask
- * @param {number} width
- * @param {number} height
- * @param {Float32Array} points
- * @param {Uint8Array} existing_mask
- * @param {string} limit_mode
- * @returns {boolean}
- */
-export function fill_lasso_selection_with_mask(mask, width, height, points, existing_mask, limit_mode) {
-    var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
-    var len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArrayF32ToWasm0(points, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passArray8ToWasm0(existing_mask, wasm.__wbindgen_malloc);
-    const len2 = WASM_VECTOR_LEN;
-    const ptr3 = passStringToWasm0(limit_mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len3 = WASM_VECTOR_LEN;
-    const ret = wasm.fill_lasso_selection_with_mask(ptr0, len0, mask, width, height, ptr1, len1, ptr2, len2, ptr3, len3);
-    return ret !== 0;
-}
-
-/**
  * @param {Uint8Array} buffer
  * @param {Uint8Array} mask
  * @param {number} fill_color_r
@@ -340,36 +270,6 @@ export function fill_rect_mask(mask, width, height, start_x, start_y, rect_width
     var ptr0 = passArray8ToWasm0(mask, wasm.__wbindgen_malloc);
     var len0 = WASM_VECTOR_LEN;
     wasm.fill_rect_mask(ptr0, len0, mask, width, height, start_x, start_y, rect_width, rect_height);
-}
-
-/**
- * 選択範囲制限モードに応じてピクセルバッファをフィルタリングする
- * original_buffer: 元のピクセルバッファ (RGBA)
- * selection_mask: 選択範囲のマスク (0 or 1)
- * mode: 制限モード ("inside", "outside", "none")
- * width, height: 画像のサイズ
- *
- * "inside": 選択範囲外を透明化
- * "outside": 選択範囲内を透明化
- * "none": 元のバッファをそのまま返す
- * @param {Uint8Array} original_buffer
- * @param {Uint8Array} selection_mask
- * @param {string} mode
- * @param {number} width
- * @param {number} height
- * @returns {Uint8Array}
- */
-export function filter_by_selection_mask(original_buffer, selection_mask, mode, width, height) {
-    const ptr0 = passArray8ToWasm0(original_buffer, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passArray8ToWasm0(selection_mask, wasm.__wbindgen_malloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passStringToWasm0(mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len2 = WASM_VECTOR_LEN;
-    const ret = wasm.filter_by_selection_mask(ptr0, len0, ptr1, len1, ptr2, len2, width, height);
-    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v4;
 }
 
 /**

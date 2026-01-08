@@ -1,12 +1,12 @@
 import { RGBA, transparent } from '@sledge-pdm/core';
 import type { CompositeLayer } from '@sledge-pdm/frasco';
 import { Frasco, BlendMode as FrascoBlendMode } from '@sledge-pdm/frasco';
-import { flip_pixels_vertically } from '@sledge/wasm';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { getBaseLayerColor } from '~/features/layer/model';
 import type { Layer } from '~/features/layer/types';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { layerListStore } from '~/stores/ProjectStores';
+import { flip_pixels_vertically } from '~/utils/WasmJSImplementation';
 
 const MAX_LAYERS = 16;
 

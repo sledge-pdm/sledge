@@ -1,6 +1,5 @@
 import { RGBA, Vec2 } from '@sledge-pdm/core';
 import { Layer } from '@sledge-pdm/frasco';
-import { fill_mask_area, scanline_flood_fill, scanline_flood_fill_with_mask } from '@sledge/wasm';
 import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log';
@@ -10,6 +9,7 @@ import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/T
 import { getPresetOf } from '~/features/tools/ToolController';
 import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';
+import { fill_mask_area, scanline_flood_fill, scanline_flood_fill_with_mask } from '~/utils/WasmJSImplementation';
 
 export interface FillProps {
   layerId: string;

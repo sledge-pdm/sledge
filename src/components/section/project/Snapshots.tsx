@@ -10,7 +10,7 @@ import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { snapshotStore } from '~/stores/ProjectStores';
 import { enabledButton, errorButton } from '~/styles/styles';
 import { useTimeAgoText } from '~/utils/TimeUtils';
-import { webpToRaw } from '~/utils/WasmJSImplementation';
+import { webpToRaw } from '~/utils/wasm';
 import { sectionContent } from '../SectionStyles';
 
 const snapshotSectionContent = css`

@@ -5,7 +5,7 @@ import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { webpToRaw } from '~/utils/WasmJSImplementation';
+import { webpToRaw } from '~/utils/wasm';
 
 export const loadProjectJson = async (project: any) => {
   if (!project.version || !project.projectVersion) {

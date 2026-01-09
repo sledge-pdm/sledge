@@ -3,7 +3,7 @@ import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
-import { rawToWebp } from '~/utils/WasmJSImplementation';
+import { rawToWebp } from '~/utils/wasm';
 
 export class LosslessWebPExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {

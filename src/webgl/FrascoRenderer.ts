@@ -6,7 +6,7 @@ import { getBaseLayerColor } from '~/features/layer/model';
 import type { Layer } from '~/features/layer/types';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { layerListStore } from '~/stores/ProjectStores';
-import { flip_pixels_vertically } from '~/utils/WasmJSImplementation';
+import { flip_pixels_vertically } from '~/utils/wasm';
 
 const MAX_LAYERS = 16;
 

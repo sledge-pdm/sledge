@@ -1,4 +1,3 @@
-import { fill_lasso_selection } from '@sledge/wasm';
 import { logSystemWarn } from '~/features/log/service';
 import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
@@ -9,6 +8,7 @@ import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { webview } from '~/utils/platform';
+import { fill_lasso_selection } from '~/utils/wasm';
 
 export type LassoDisplayMode = 'fill' | 'outline';
 export class LassoSelection extends SelectionBase {

@@ -8,7 +8,7 @@ import {
   combine_masks_subtract,
   fill_rect_mask,
   trim_mask_with_box,
-} from '@sledge/wasm';
+} from '~/utils/wasm';
 // import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemInfo, logSystemWarn } from '~/features/log/service';

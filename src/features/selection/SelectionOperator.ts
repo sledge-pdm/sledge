@@ -1,5 +1,4 @@
 import { Vec2 } from '@sledge-pdm/core';
-import { combine_masks_subtract, trim_mask_with_box } from '@sledge/wasm';
 import { projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
@@ -15,7 +14,7 @@ import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore, imagePoolStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { flip_pixels_vertically } from '~/utils/WasmJSImplementation';
+import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.

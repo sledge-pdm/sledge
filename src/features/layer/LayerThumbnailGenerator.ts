@@ -1,6 +1,6 @@
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
-import { flip_pixels_vertically } from '~/utils/WasmJSImplementation';
+import { flip_pixels_vertically } from '~/utils/wasm';
 
 export class LayerThumbnailGenerator {
   private gl: WebGL2RenderingContext | undefined;

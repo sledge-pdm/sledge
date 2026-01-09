@@ -8,7 +8,7 @@ import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager'
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
 import { dialog } from '~/utils/platform';
-import { rawToWebp } from '~/utils/WasmJSImplementation';
+import { rawToWebp } from '~/utils/wasm';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {

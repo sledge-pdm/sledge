@@ -18,6 +18,9 @@ const sharedConf = {
 
 export default defineConfig({
   test: {
+    benchmark: {
+      include: ['test/**/*.bench.(js|ts)'],
+    },
     projects: [
       {
         ...sharedConf,

@@ -1,4 +1,3 @@
-import { mask_to_path } from '@sledge/wasm';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -11,6 +10,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
+import { mask_to_path } from '~/utils/wasm';
 
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 

@@ -11,7 +11,7 @@ import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
-import { flip_pixels_vertically, rawToWebp, webpToRaw } from '~/utils/WasmJSImplementation';
+import { flip_pixels_vertically, rawToWebp, webpToRaw } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);

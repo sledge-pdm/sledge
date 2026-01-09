@@ -5,7 +5,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
 import { setCanvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
-import { rawToWebp, webpToRaw } from '~/utils/WasmJSImplementation';
+import { rawToWebp, webpToRaw } from '~/utils/wasm';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 

@@ -9,7 +9,7 @@ import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/T
 import { getPresetOf } from '~/features/tools/ToolController';
 import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';
-import { fill_mask_area, scanline_flood_fill, scanline_flood_fill_with_mask } from '~/utils/WasmJSImplementation';
+import { fill_mask_area, scanline_flood_fill, scanline_flood_fill_with_mask } from '~/utils/wasm';
 
 export interface FillProps {
   layerId: string;

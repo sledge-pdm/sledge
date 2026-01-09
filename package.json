@@ -10,6 +10,7 @@
     "build": "tauri build",
     "wasm:build": "cd wasm && pnpm --ignore-workspace i && wasm-pack build --target bundler && rm pkg/.gitignore && rm pkg/package.json",
     "tsc": "pnpm exec tsc --noEmit --skipLibCheck",
+    "bench": "vitest bench -c vitest-bench.config.ts",
     "test": "vitest run -c vitest.config.ts",
     "prettier": "prettier --write . --config .prettierrc",
     "lint:css": "stylelint \"**/*.{css,scss}\" --config .stylelintrc.json",

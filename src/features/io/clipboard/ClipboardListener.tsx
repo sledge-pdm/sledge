@@ -2,7 +2,7 @@ import { toUint8Array } from '@sledge-pdm/core';
 import { Component, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
-import { getLayerSnapshot } from '~/features/history/actions/utils';
+import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { isInputFocused, tryGetImageFromClipboard, tryGetTextFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
@@ -91,7 +91,7 @@ const ClipboardListener: Component = () => {
           const unfreezedSourceLayer = findLayerById(textData);
           if (unfreezedSourceLayer && isCut) {
             const activeLayerIdBefore = activeLayer().id;
-            const sourcePackedSnapshot = getLayerSnapshot(unfreezedSourceLayer.id);
+            const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
             const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
 
             const insertionIndex = activeIndex();
@@ -103,7 +103,7 @@ const ClipboardListener: Component = () => {
 
             removeLayer(unfreezedSourceLayer.id, { noDiff: true });
 
-            const targetPackedSnapshot = getLayerSnapshot(inserted.id);
+            const targetPackedSnapshot = getPackedLayerSnapshot(inserted.id);
             const targetIndex = getLayerIndex(inserted.id);
             setActiveLayerId(inserted.id);
 

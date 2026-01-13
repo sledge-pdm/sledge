@@ -3,12 +3,13 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { LayerSnapshot } from './types';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { inflateLayerSnapshot } from './utils';
 
 export interface LayerListCutPasteHistoryActionProps extends BaseHistoryActionProps {
-  sourcePackedSnapshot: LayerSnapshot;
+  sourcePackedSnapshot: PackedLayerSnapshot;
   sourceIndex: number;
-  targetPackedSnapshot: LayerSnapshot;
+  targetPackedSnapshot: PackedLayerSnapshot;
   targetIndex: number;
   activeLayerIdBefore: string;
   activeLayerIdAfter: string;
@@ -18,10 +19,10 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
   readonly type = 'layer_list_cut_paste' as const;
 
   // cutで消される側 (cutFreeze = true想定)
-  sourcePackedSnapshot: LayerSnapshot;
+  sourcePackedSnapshot: PackedLayerSnapshot;
   sourceIndex: number;
   // pasteで追加される側 (cutFreeze = false想定)
-  targetPackedSnapshot: LayerSnapshot;
+  targetPackedSnapshot: PackedLayerSnapshot;
   targetIndex: number;
 
   activeLayerIdBefore: string;
@@ -41,7 +42,8 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     // remove inserted
     removeLayer(this.targetPackedSnapshot.layer.id, { noDiff: true });
     // restore original (with cutFreeze true)
-    this.reinsert(this.sourceIndex, this.sourcePackedSnapshot);
+    const inflated = inflateLayerSnapshot(this.sourcePackedSnapshot);
+    if (inflated) this.reinsert(this.sourceIndex, inflated);
     setActiveLayerId(this.activeLayerIdBefore);
     updateWebGLCanvas(false, 'CutPaste undo');
   }
@@ -51,7 +53,8 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const orig = findLayerById(this.sourcePackedSnapshot.layer.id);
     if (orig) removeLayer(orig.id, { noDiff: true });
     // insert pasted (cutFreeze false)
-    this.reinsert(this.targetIndex, this.targetPackedSnapshot);
+    const inflated = inflateLayerSnapshot(this.targetPackedSnapshot);
+    if (inflated) this.reinsert(this.targetIndex, inflated);
     setActiveLayerId(this.activeLayerIdAfter);
     updateWebGLCanvas(false, 'CutPaste redo');
   }

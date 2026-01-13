@@ -5,7 +5,8 @@ import { cancelMove } from '~/features/selection/SelectionOperator';
 import { setImagePoolStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { LayerSnapshot } from './types';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { inflateLayerSnapshot } from './utils';
 
 /**
  * History action for Converting selection into image.
@@ -14,8 +15,8 @@ import { LayerSnapshot } from './types';
  */
 export interface ConvertSelectionHistoryActionProps extends BaseHistoryActionProps {
   layerId: string;
-  beforeSnapshot?: LayerSnapshot;
-  afterSnapshot?: LayerSnapshot;
+  beforeSnapshot?: PackedLayerSnapshot;
+  afterSnapshot?: PackedLayerSnapshot;
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
 }
@@ -27,8 +28,8 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
 
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
-  beforeSnapshot?: LayerSnapshot;
-  afterSnapshot?: LayerSnapshot;
+  beforeSnapshot?: PackedLayerSnapshot;
+  afterSnapshot?: PackedLayerSnapshot;
 
   constructor(public readonly props: ConvertSelectionHistoryActionProps) {
     super(props);
@@ -48,7 +49,8 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
         cancelMove();
         return;
       }
-      this.applySnapshot(this.beforeSnapshot);
+      const inflated = inflateLayerSnapshot(this.beforeSnapshot);
+      if (inflated) this.applySnapshot(inflated);
     }
 
     updateWebGLCanvas(true, `Anvil(${this.layerId}) undo`);
@@ -63,7 +65,8 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
         cancelMove();
         return;
       }
-      this.applySnapshot(this.afterSnapshot);
+      const inflated = inflateLayerSnapshot(this.afterSnapshot);
+      if (inflated) this.applySnapshot(inflated);
     }
 
     updateWebGLCanvas(true, `Anvil(${this.layerId}) redo`);

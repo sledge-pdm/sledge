@@ -1,27 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { create_opacity_mask, flip_pixels_vertically, rawToWebp, webpToRaw } from '~/utils/wasm';
-
-describe('compression', () => {
-  it('roundtrips raw buffer via rawToWebp/webpToRaw', () => {
-    const width = 2;
-    const height = 2;
-    const raw = new Uint8Array([255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 0]);
-
-    const compressed = rawToWebp(raw, width, height);
-    const decoded = webpToRaw(compressed, width, height);
-
-    expect(Array.from(decoded)).toEqual(Array.from(raw));
-  });
-
-  it('returns expected length on invalid compressed data', () => {
-    const width = 2;
-    const height = 2;
-    const decoded = webpToRaw(new Uint8Array([0, 1, 2]), width, height);
-
-    expect(decoded.length).toBe(width * height * 4);
-  });
-});
+import { create_opacity_mask, flip_pixels_vertically } from '~/utils/wasm';
 
 describe('buffer ops', () => {
   it('flips pixels vertically', () => {

@@ -2,7 +2,7 @@ import { Vec2 } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
 import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
-import { getLayerSnapshot } from '~/features/history/actions/utils';
+import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
@@ -298,9 +298,9 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   let beforeSnapshot = undefined;
   let afterSnapshot = undefined;
   if (deleteAfter) {
-    beforeSnapshot = getLayerSnapshot(layerListStore.activeLayerId);
+    beforeSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
     deleteSelectedArea({ noAction: true });
-    afterSnapshot = getLayerSnapshot(layerListStore.activeLayerId);
+    afterSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
   }
   cancelSelection();
 

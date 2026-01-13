@@ -1,9 +1,9 @@
 import { getEmergencyBackups } from '~/features/backup';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
-import { readProjectFromPath } from '~/features/io/project/in/import';
-import { loadProjectJson } from '~/features/io/project/in/load';
+import { loadProject } from '~/features/io/project/in/load';
 import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/in/loadFrom';
+import { unpackProject } from '~/features/io/project/in/unpack';
 import { applyProjectLocation } from '~/features/io/project/ProjectLocationManager';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
@@ -69,12 +69,12 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
     // project file
     setFileStore('openAs', 'project');
     try {
-      const projectFile = await readProjectFromPath(path);
-      if (!projectFile) {
+      const projectObj = await unpackProject(path);
+      if (!projectObj) {
         throw new Error('Failed to read project from path: reading ' + path);
       }
       setSavedLocation(path);
-      await loadProjectJson(projectFile);
+      await loadProject(projectObj);
       setProjectStore('isProjectChangedAfterSave', false);
       return false;
     } catch (error) {

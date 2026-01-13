@@ -31,7 +31,7 @@ export default defineConfig({
           env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
           setupFiles: [path.resolve(__dirname, 'vitest-unit.setup.ts')],
           include: ['test/unit/**/*.test.ts', 'test/unit/**/*.test.tsx', 'test/**/*.unit.test.tsx'],
-          exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
+          exclude: ['**/dist/**', '**/node_modules/**', '**/target/**', 'test/e2e/**'],
         },
       },
       {
@@ -43,7 +43,7 @@ export default defineConfig({
           env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
           setupFiles: [path.resolve(__dirname, 'vitest-e2e.setup.ts')],
           include: ['test/e2e/**/*.test.ts', 'test/e2e/**/*.test.tsx', 'test/**/*.browser.test.tsx'],
-          exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
+          exclude: ['**/dist/**', '**/node_modules/**', '**/target/**', 'test/unit/**'],
           browser: {
             provider: playwright(),
             enabled: true,

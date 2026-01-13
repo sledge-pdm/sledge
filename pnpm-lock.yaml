@@ -15,11 +15,11 @@ importers:
         specifier: ^5.5.2
         version: 5.5.2
       '@sledge-pdm/core':
-        specifier: ^1.0.7
-        version: 1.0.7
+        specifier: ^1.0.17
+        version: 1.0.17
       '@sledge-pdm/frasco':
-        specifier: ^0.0.7
-        version: 0.0.7
+        specifier: ^0.0.13
+        version: 0.0.13
       '@sledge-pdm/ui':
         specifier: ^1.1.3
         version: 1.1.3
@@ -77,9 +77,6 @@ importers:
       '@tauri-apps/plugin-updater':
         specifier: ^2.9.0
         version: 2.9.0
-      '@types/pako':
-        specifier: ^2.0.4
-        version: 2.0.4
       interactjs:
         specifier: ^1.10.27
         version: 1.10.27
@@ -89,9 +86,6 @@ importers:
       msgpackr:
         specifier: ^1.11.8
         version: 1.11.8
-      pako:
-        specifier: ^2.1.0
-        version: 2.1.0
       solid-js:
         specifier: ^1.9.10
         version: 1.9.10
@@ -862,11 +856,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@sledge-pdm/core@1.0.7':
-    resolution: {integrity: sha512-kCk4wBzaRySEpnRU9YcwzL47KdmRb/82jsoUzJdCaKzbUzfdgK0w3uF9USWw82Os6KhKXBtgfKfuNuvYNIovcQ==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.0.7/d7ecf23f29a32dda596875af9cc4cd8d25509c1f}
+  '@sledge-pdm/core@1.0.17':
+    resolution: {integrity: sha512-tEOmv37pfAUfmXbz6VGQj6ktDSG3LrI5yrU6tYiz8WWg4mx4RLZxyvedechGmOeM5tzlXBoZgB5td2jFy4r6Lg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.0.17/abfb50e818f7bd2f1dfacca4345b3705888af0ec}
 
-  '@sledge-pdm/frasco@0.0.7':
-    resolution: {integrity: sha512-vm2L2PyvXUi9xu9cZCyvYIxt5xzOwNAyBf5yftLtjLhN9lYIhgeKoJ1f3SBW5vQ9oOHkCmJQBP36dM5h1hUtqg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.0.7/3aa9408c7a1b73b37bfd4015380d1bf830cefacf}
+  '@sledge-pdm/frasco@0.0.13':
+    resolution: {integrity: sha512-PKuLRu9kEoCK6MBTZUXCjPz6mun6RbomOQ5a6LE8bE4Nagp6MBt17dpc26fMHEEKrySEUohH/ObHzfI92SsgcA==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.0.13/0930e9509bd8b1fd0f3ce4bf71200d4256b77b36}
 
   '@sledge-pdm/ui@1.1.3':
     resolution: {integrity: sha512-7ULOo7yqeYlvcmfF/p3IWKOru+hyKLuofi/W1JYu0LN7YMkkL/bT5PEyC+01jOaWk9QvLAPBhyg1sXMR/BRW9g==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.1.3/f952861cb6ef0c148d7d3e14c1d6456dd17f817c}
@@ -2941,15 +2935,18 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.54.0':
     optional: true
 
-  '@sledge-pdm/core@1.0.7': {}
-
-  '@sledge-pdm/frasco@0.0.7':
+  '@sledge-pdm/core@1.0.17':
     dependencies:
-      '@sledge-pdm/core': 1.0.7
+      '@types/pako': 2.0.4
+      pako: 2.1.0
+
+  '@sledge-pdm/frasco@0.0.13':
+    dependencies:
+      '@sledge-pdm/core': 1.0.17
 
   '@sledge-pdm/ui@1.1.3':
     dependencies:
-      '@sledge-pdm/core': 1.0.7
+      '@sledge-pdm/core': 1.0.17
       solid-js: 1.9.10
 
   '@solid-primitives/deep@0.3.3(solid-js@1.9.10)':

@@ -1,13 +1,9 @@
-import type { RawPixelData } from '@sledge-pdm/core';
-import { rawToWebp as wasmRawToWebp, webpToRaw as wasmWebpToRaw } from '@sledge-pdm/core';
 import * as wasm from '@sledge/wasm';
 import * as js from '~/utils/wasm_js';
 
 export type WasmImplementationKind = 'wasm' | 'js';
 
 export interface WasmImplementation {
-  rawToWebp: (buffer: RawPixelData, width: number, height: number) => Uint8Array;
-  webpToRaw: (buffer: Uint8Array, width: number, height: number) => Uint8Array;
   flip_pixels_vertically: (pixels: Uint8Array, width: number, height: number) => void;
   create_opacity_mask: (buffer: Uint8Array, width: number, height: number) => Uint8Array;
   auto_select_region_mask: (
@@ -81,8 +77,6 @@ export interface WasmImplementation {
 
 const wasmImpl: WasmImplementation = {
   ...wasm,
-  rawToWebp: wasmRawToWebp,
-  webpToRaw: wasmWebpToRaw,
 };
 
 const jsImpl: WasmImplementation = js;
@@ -110,8 +104,6 @@ export const resetWasmImplementation = () => {
 
 const getImpl = () => impl;
 
-export const rawToWebp = (...args: Parameters<WasmImplementation['rawToWebp']>) => getImpl().rawToWebp(...args);
-export const webpToRaw = (...args: Parameters<WasmImplementation['webpToRaw']>) => getImpl().webpToRaw(...args);
 export const flip_pixels_vertically = (...args: Parameters<WasmImplementation['flip_pixels_vertically']>) =>
   getImpl().flip_pixels_vertically(...args);
 export const create_opacity_mask = (...args: Parameters<WasmImplementation['create_opacity_mask']>) => getImpl().create_opacity_mask(...args);

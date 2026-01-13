@@ -1,5 +1,5 @@
+import { gzipDeflate, ProjectV2 } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
-import { ProjectV1 } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore, snapshotStore } from '~/stores/ProjectStores';
@@ -12,11 +12,11 @@ export const dumpProject = async (): Promise<Uint8Array> => {
   return packed instanceof Uint8Array ? packed : Uint8Array.of(packed);
 };
 
-export const dumpProjectJson = async (): Promise<ProjectV1> => {
+export const dumpProjectJson = async (): Promise<ProjectV2> => {
   const buffers = new Map<
-    string,
+    string, // layer id
     {
-      buffer: Uint8ClampedArray;
+      deflatedBuffer: Uint8Array; // deflate compressed buffer
     }
   >();
   const size = canvasStore.canvas;
@@ -27,18 +27,19 @@ export const dumpProjectJson = async (): Promise<ProjectV1> => {
     } catch {
       buffer = new Uint8ClampedArray(size.width * size.height * 4);
     }
+    const deflated = gzipDeflate(buffer);
     buffers.set(l.id, {
-      buffer,
+      deflatedBuffer: deflated,
     });
   });
-  const project: ProjectV1 = {
+  const project: ProjectV2 = {
     version: await getCurrentVersion(),
-    projectVersion: 1,
+    projectVersion: 2,
     canvas: {
-      store: { ...canvasStore },
+      store: { canvas: { ...canvasStore.canvas } },
     },
     project: {
-      store: { ...projectStore },
+      store: { ...projectStore, loadProjectVersion: projectStore.loadProjectVersion ? { ...projectStore.loadProjectVersion } : undefined },
     },
     imagePool: {
       store: { ...imagePoolStore },
@@ -48,9 +49,7 @@ export const dumpProjectJson = async (): Promise<ProjectV1> => {
       store: { ...layerListStore },
       buffers: buffers,
     },
-    snapshots: {
-      store: { ...snapshotStore },
-    },
+    snapshots: snapshotStore.snapshots,
   };
 
   return project;

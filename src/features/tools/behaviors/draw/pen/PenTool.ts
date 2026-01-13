@@ -1,5 +1,5 @@
 import { RGBA, transparent, Vec2 } from '@sledge-pdm/core';
-import { CircleShape, Grip, GripPoint, SquareShape } from '@sledge-pdm/frasco';
+import { CircleKernel, Grip, GripInstrument, GripKernel, GripPoint, MaskStrokeInstrument, SquareKernel } from '@sledge-pdm/frasco';
 import { Consts } from '~/Consts';
 import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
@@ -16,8 +16,8 @@ export class PenTool implements ToolBehavior {
   forceColor: RGBA | undefined = undefined;
 
   private grip = new Grip({ inputSpace: 'canvas' });
-  private circleShape = new CircleShape();
-  private squareShape = new SquareShape();
+  private circleKernel = new CircleKernel();
+  private squareKernel = new SquareKernel();
 
   private activeLayerId: string | undefined;
   private hasStroke = false;
@@ -48,9 +48,9 @@ export class PenTool implements ToolBehavior {
       this.resetStrokeState();
       return { shouldUpdate: false };
     }
-    const shape = this.resolveShape(preset);
+    const { kernel, instrument } = this.resolveShape(preset);
     const point = this.buildPoint(args, args.rawPosition, args.color);
-    this.grip.start(layer, shape, point);
+    this.grip.start(layer, kernel, point, instrument);
     this.hasStroke = true;
 
     return { shouldUpdate: true };
@@ -138,9 +138,18 @@ export class PenTool implements ToolBehavior {
     };
   }
 
-  private resolveShape(preset?: PenPresetConfig) {
+  private resolveShape(preset?: PenPresetConfig): {
+    kernel: GripKernel;
+    instrument: GripInstrument;
+  } {
     const shape = (preset?.shape ?? 'circle') as 'circle' | 'square';
-    return shape === 'square' ? this.squareShape : this.circleShape;
+    const kernel = shape === 'square' ? this.squareKernel : this.circleKernel;
+    const instrument = new MaskStrokeInstrument();
+
+    return {
+      kernel,
+      instrument,
+    };
   }
 
   private buildPoint(args: ToolArgs, position: Vec2, color: RGBA): GripPoint {

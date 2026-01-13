@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
-import { readProjectFromPath } from '~/features/io/project/in/import';
+import { unpackProject } from '~/features/io/project/in/unpack';
 import { logSystemWarn } from '~/features/log/service';
 import { pageRoot } from '~/styles/styles';
 import { FileLocation } from '~/types/FileLocation';
@@ -89,7 +89,7 @@ const Restore = () => {
       await Promise.all(
         emergencyBackups.map(async (backupLoc) => {
           const backupPath = normalizeJoin(backupLoc.path!, backupLoc.name!);
-          const parsed = await readProjectFromPath(backupPath);
+          const parsed = await unpackProject(backupPath);
           // Simple runtime validation for ProjectV1 structure
           if (
             parsed &&

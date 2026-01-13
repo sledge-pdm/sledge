@@ -1,28 +1,6 @@
 // replace things in @sledge/wasm in this file
 // Doesn't require much optimization because we just testing how this memory-leaking-situation changes after purging @sledge/wasm
 
-import type { RawPixelData } from '@sledge-pdm/core';
-import { toUint8Array } from '@sledge-pdm/core';
-import { deflate, inflate } from 'pako';
-
-export function rawToWebp(buffer: RawPixelData, _width: number, _height: number): Uint8Array {
-  return deflate(toUint8Array(buffer));
-}
-
-export function webpToRaw(buffer: Uint8Array, width: number, height: number): Uint8Array {
-  const expected = Math.max(0, width) * Math.max(0, height) * 4;
-  try {
-    const raw = inflate(buffer);
-    if (raw.length === expected) return raw;
-    if (expected === 0) return new Uint8Array(0);
-    const out = new Uint8Array(expected);
-    out.set(raw.subarray(0, expected));
-    return out;
-  } catch {
-    return new Uint8Array(expected);
-  }
-}
-
 export function flip_pixels_vertically(pixels: Uint8Array, width: number, height: number): void {
   const rowBytes = width * 4;
   if (rowBytes <= 0 || height <= 1) return;

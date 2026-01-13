@@ -1,4 +1,4 @@
-import type { RawPixelData } from '@sledge-pdm/core';
+import { decodeWebp, encodeWebp, type RawPixelData } from '@sledge-pdm/core';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
@@ -11,7 +11,7 @@ import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
-import { flip_pixels_vertically, rawToWebp, webpToRaw } from '~/utils/wasm';
+import { flip_pixels_vertically } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
@@ -132,7 +132,8 @@ async function transferToLayer(layerId: string, entryId: string) {
   const layerH = layer.getHeight();
   if (!layerW || !layerH || !entry) return;
 
-  const rawEntryBuffer = webpToRaw(entry.webpBuffer, entry.base.width, entry.base.height);
+  // TODO: replace with non-webp method
+  const rawEntryBuffer = decodeWebp(entry.webpBuffer, entry.base.width, entry.base.height);
 
   const offsetX = Math.round(entry.transform.x);
   const offsetY = Math.round(entry.transform.y);
@@ -200,7 +201,7 @@ export async function createEntryFromLocalImage(imagePath: string, forceFit?: bo
   const width = bitmap.width;
   const height = bitmap.height;
   const imageData = await loadImageData(bitmap);
-  const webpBuffer = rawToWebp(imageData.data, width, height);
+  const webpBuffer = encodeWebp(imageData.data, width, height);
   bitmap.close();
   const entry = createEntry(webpBuffer, width, height, forceFit);
   entry.descriptionName = pathToFileLocation(imagePath)?.name;
@@ -212,7 +213,7 @@ export async function createEntryFromFile(file: File, forceFit?: boolean) {
   const width = bitmap.width;
   const height = bitmap.height;
   const imageData = await loadImageData(bitmap);
-  const webpBuffer = rawToWebp(imageData.data, width, height);
+  const webpBuffer = encodeWebp(imageData.data, width, height);
   bitmap.close();
   const entry = createEntry(webpBuffer, width, height, forceFit);
   entry.descriptionName = file.name;
@@ -220,7 +221,7 @@ export async function createEntryFromFile(file: File, forceFit?: boolean) {
 }
 
 export async function createEntryFromRawBuffer(rawBuffer: RawPixelData, width: number, height: number, forceFit?: boolean) {
-  const webpBuffer = rawToWebp(rawBuffer, width, height);
+  const webpBuffer = encodeWebp(rawBuffer, width, height);
   const entry = createEntry(webpBuffer, width, height, forceFit);
   return entry;
 }

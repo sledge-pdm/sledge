@@ -3,12 +3,13 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { LayerSnapshot } from './types';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { inflateLayerSnapshot } from './utils';
 
 export interface LayerListHistoryActionProps extends BaseHistoryActionProps {
   kind: 'add' | 'delete';
   index: number;
-  packedSnapshot?: LayerSnapshot;
+  packedSnapshot?: PackedLayerSnapshot;
   beforeOrder?: string[];
   afterOrder?: string[];
 }
@@ -18,7 +19,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
 
   kind: 'add' | 'delete';
   index: number;
-  packedSnapshot: LayerSnapshot | undefined;
+  packedSnapshot: PackedLayerSnapshot | undefined;
   beforeOrder?: string[];
   afterOrder?: string[];
 
@@ -39,7 +40,9 @@ export class LayerListHistoryAction extends BaseHistoryAction {
       }
       case 'delete': {
         if (!this.packedSnapshot) return;
-        insertAt(this.index, this.packedSnapshot);
+        const inflated = inflateLayerSnapshot(this.packedSnapshot);
+        if (!inflated) return;
+        insertAt(this.index, inflated);
         break;
       }
     }
@@ -49,7 +52,9 @@ export class LayerListHistoryAction extends BaseHistoryAction {
     switch (this.kind) {
       case 'add': {
         if (!this.packedSnapshot) return;
-        insertAt(this.index, this.packedSnapshot);
+        const inflated = inflateLayerSnapshot(this.packedSnapshot);
+        if (!inflated) return;
+        insertAt(this.index, inflated);
         break;
       }
       case 'delete': {

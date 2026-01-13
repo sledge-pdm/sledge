@@ -6,7 +6,7 @@ import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryActio
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { getLayerSnapshot } from '~/features/history/actions/utils';
+import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -179,7 +179,7 @@ export const addLayerTo = (
   logUserInfo(`Layer "${newLayer.name}" added.`, { label: LOG_LABEL });
 
   if (!options?.noDiff) {
-    const snapshot = getLayerSnapshot(newLayer.id);
+    const snapshot = getPackedLayerSnapshot(newLayer.id);
     if (snapshot) {
       const act = new LayerListHistoryAction({
         kind: 'add',
@@ -363,7 +363,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   // snapshot before removal
   const toRemove = layers[index];
   if (!toRemove) return;
-  const snapshot = getLayerSnapshot(toRemove.id);
+  const snapshot = getPackedLayerSnapshot(toRemove.id);
   layers.splice(index, 1);
 
   setLayerListStore('layers', layers);

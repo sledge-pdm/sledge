@@ -1,16 +1,18 @@
+import { gzipDeflate } from '@sledge-pdm/core';
 import { getLayerIndex } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { LayerSnapshot } from './types';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { inflateLayerSnapshot } from './utils';
 
 export interface LayerMergeHistoryActionProps extends BaseHistoryActionProps {
   originIndex: number;
   targetIndex: number;
   activeLayerId: string;
-  originPackedSnapshot?: LayerSnapshot;
-  targetPackedSnapshot?: LayerSnapshot;
+  originPackedSnapshot?: PackedLayerSnapshot;
+  targetPackedSnapshot?: PackedLayerSnapshot;
 }
 
 export class LayerMergeHistoryAction extends BaseHistoryAction {
@@ -19,8 +21,8 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
   originIndex: number;
   targetIndex: number;
   activeLayerId: string;
-  originPackedSnapshot: LayerSnapshot | undefined;
-  targetPackedSnapshot: LayerSnapshot | undefined;
+  originPackedSnapshot: PackedLayerSnapshot | undefined;
+  targetPackedSnapshot: PackedLayerSnapshot | undefined;
 
   constructor(public readonly props: LayerMergeHistoryActionProps) {
     super(props);
@@ -31,7 +33,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     this.targetPackedSnapshot = props.targetPackedSnapshot ?? this.getSnapshot(this.targetIndex);
   }
 
-  getSnapshot(index: number): LayerSnapshot | undefined {
+  getSnapshot(index: number): PackedLayerSnapshot | undefined {
     const layer = layerListStore.layers[index];
     if (!layer) return;
     const frascoLayer = layerManager.getLayerOptional(layer.id);
@@ -39,15 +41,13 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     const buffer = frascoLayer.exportRaw();
     return {
       layer: { ...layer },
-      image: {
-        buffer: new Uint8ClampedArray(buffer),
-        width: frascoLayer.getWidth(),
-        height: frascoLayer.getHeight(),
-      },
+      image: { codec: 'deflate', packedBuffer: gzipDeflate(buffer), width: frascoLayer.getWidth(), height: frascoLayer.getHeight() },
     };
   }
 
-  applySnapshot(snapshot: LayerSnapshot) {
+  applySnapshot(snapshot?: LayerSnapshot) {
+    if (!snapshot) return;
+
     const idx = getLayerIndex(snapshot.layer.id);
     if (idx >= 0) {
       setLayerListStore('layers', idx, snapshot.layer);
@@ -77,8 +77,8 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     setLayerListStore('activeLayerId', this.activeLayerId);
 
     // apply snapshot
-    this.applySnapshot(this.originPackedSnapshot);
-    this.applySnapshot(this.targetPackedSnapshot);
+    this.applySnapshot(inflateLayerSnapshot(this.originPackedSnapshot));
+    this.applySnapshot(inflateLayerSnapshot(this.targetPackedSnapshot));
 
     updateWebGLCanvas(false, 'Layer merge undo/redo');
 

@@ -1,14 +1,13 @@
-import { Size2D } from '@sledge-pdm/core';
+import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
-import { loadProjectJson } from '~/features/io/project/in/load';
+import { loadProject } from '~/features/io/project/in/load';
 import { dumpProjectJson } from '~/features/io/project/out/dump';
 import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
 import { dialog } from '~/utils/platform';
-import { rawToWebp } from '~/utils/wasm';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
@@ -26,7 +25,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
       snapshot: await dumpProjectJson(),
       thumbnail: thumbnailImageData
         ? {
-            webpBuffer: rawToWebp(thumbnailImageData.data, thumbnailImageData.width, thumbnailImageData.height),
+            packedBuffer: gzipDeflate(thumbnailImageData.data),
             width: thumbnailImageData.width,
             height: thumbnailImageData.height,
           }
@@ -124,7 +123,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
 
   const savedSnapshotStore = { ...snapshotStore };
   // load snapshot
-  await loadProjectJson(snapshot.snapshot);
+  await loadProject(snapshot.snapshot);
 
   setSnapshotStore(savedSnapshotStore);
   updateWebGLCanvas(false, 'snapshot loaded');

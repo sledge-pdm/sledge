@@ -1,10 +1,28 @@
+import { decodeWebp, encodeWebp, gzipDeflate, gzipInflate, toUint8Array } from '@sledge-pdm/core';
 import { bench, describe } from 'vitest';
 
-import { rawToWebp as wasmRawToWebp, webpToRaw as wasmWebpToRaw } from '@sledge-pdm/core';
-import { rawToWebp, setWasmImplementation, webpToRaw } from '~/utils/wasm';
-import { rawToWebp as gzipRawToWebp, webpToRaw as gzipWebpToRaw } from '~/utils/wasm_js/buffer';
+interface Compression {
+  encode: (buffer: Uint8Array, width: number, height: number) => Uint8Array;
+  decode: (buffer: Uint8Array, width: number, height: number) => Uint8Array;
+}
 
-type ImplKind = 'wasm' | 'js';
+class WebpCompression implements Compression {
+  encode(buffer: Uint8Array, width: number, height: number): Uint8Array {
+    return encodeWebp(buffer, width, height);
+  }
+  decode(buffer: Uint8Array, width: number, height: number): Uint8Array {
+    return toUint8Array(decodeWebp(buffer, width, height));
+  }
+}
+
+class DeflateCompression implements Compression {
+  encode(buffer: Uint8Array, _width: number, _height: number): Uint8Array {
+    return gzipDeflate(buffer);
+  }
+  decode(buffer: Uint8Array, _width: number, _height: number): Uint8Array {
+    return gzipInflate(buffer);
+  }
+}
 
 const WIDTH = 1024;
 const HEIGHT = 1024;
@@ -25,30 +43,14 @@ for (let i = 0; i < dirtyRaw.length; i += 97) {
   dirtyRaw[i] ^= 0xff;
 }
 
-const roundtripTask = (
-  encode: (buffer: Uint8Array, width: number, height: number) => Uint8Array,
-  decode: (buffer: Uint8Array, width: number, height: number) => Uint8Array
-): void => {
-  const c1 = encode(baseRaw, WIDTH, HEIGHT);
-  decode(c1, WIDTH, HEIGHT);
-  const c2 = encode(dirtyRaw, WIDTH, HEIGHT);
-  decode(c2, WIDTH, HEIGHT);
+const roundtripTask = (compression: Compression): void => {
+  const c1 = compression.encode(baseRaw, WIDTH, HEIGHT);
+  compression.decode(c1, WIDTH, HEIGHT);
+  const c2 = compression.encode(dirtyRaw, WIDTH, HEIGHT);
+  compression.decode(c2, WIDTH, HEIGHT);
 };
-
-// Tasks (bench only; results are not important)
-// - Mixed impl roundtrip (wasm=webp, js=gzip).
-// - Codec-only roundtrip (webp vs gzip).
-const run = (impl: ImplKind): void => {
-  setWasmImplementation(impl);
-  roundtripTask(rawToWebp, webpToRaw);
-};
-
-describe('compression:mixed', () => {
-  bench('wasm', () => run('wasm'));
-  bench('js', () => run('js'));
-});
 
 describe('codec_only:compression', () => {
-  bench('webp', () => roundtripTask(wasmRawToWebp, wasmWebpToRaw));
-  bench('gzip', () => roundtripTask(gzipRawToWebp, gzipWebpToRaw));
+  bench('webp', () => roundtripTask(new WebpCompression()));
+  bench('deflate', () => roundtripTask(new DeflateCompression()));
 });

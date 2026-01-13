@@ -19,7 +19,7 @@ export const dumpProjectJson = async (): Promise<ProjectV2> => {
       deflatedBuffer: Uint8Array; // deflate compressed buffer
     }
   >();
-  const size = canvasStore.canvas;
+  const size = canvasStore.size;
   allLayers().forEach((l) => {
     let buffer: Uint8ClampedArray;
     try {
@@ -36,18 +36,18 @@ export const dumpProjectJson = async (): Promise<ProjectV2> => {
     version: await getCurrentVersion(),
     projectVersion: 2,
     canvas: {
-      store: { canvas: { ...canvasStore.canvas } },
+      size: { ...canvasStore.size },
     },
-    project: {
-      store: { ...projectStore, loadProjectVersion: projectStore.loadProjectVersion ? { ...projectStore.loadProjectVersion } : undefined },
-    },
+    project: { ...projectStore, loadProjectVersion: projectStore.loadProjectVersion ? { ...projectStore.loadProjectVersion } : undefined },
     imagePool: {
-      store: { ...imagePoolStore },
+      entries: imagePoolStore.entries,
+      state: { ...imagePoolStore },
     },
     history: projectHistoryController.getSerialized(),
     layers: {
-      store: { ...layerListStore },
+      layers: layerListStore.layers,
       buffers: buffers,
+      state: { ...layerListStore },
     },
     snapshots: snapshotStore.snapshots,
   };

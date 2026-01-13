@@ -218,7 +218,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
             {createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString()}
           </p>
           <p class={itemDescription}>
-            {(snapshot.snapshot as ProjectV2).canvas.store.canvas.width}x{(snapshot.snapshot as ProjectV2).canvas.store.canvas.height}
+            {(snapshot.snapshot as ProjectV2).canvas.size.width}x{(snapshot.snapshot as ProjectV2).canvas.size.height}
           </p>
           <Show when={snapshot.thumbnail}>
             <canvas

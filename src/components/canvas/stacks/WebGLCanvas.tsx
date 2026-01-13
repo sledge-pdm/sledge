@@ -96,7 +96,7 @@ const WebGLCanvas: Component = () => {
       webGLRenderer = undefined;
     }
 
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
     try {
       webGLRenderer = new FrascoRenderer(canvasEl);
       webGLRenderer?.setLayers(allLayers());

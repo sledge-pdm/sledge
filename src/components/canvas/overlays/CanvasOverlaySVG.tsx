@@ -28,8 +28,8 @@ const areaPatternPath = extractFirstPath(rawAreaPattern);
 
 const CanvasOverlaySVG: Component = () => {
   // 論理キャンバスサイズ (ズーム非適用)
-  const logicalWidth = () => canvasStore.canvas.width;
-  const logicalHeight = () => canvasStore.canvas.height;
+  const logicalWidth = () => canvasStore.size.width;
+  const logicalHeight = () => canvasStore.size.height;
 
   const [penOutlinePath, setPenOutlinePath] = createSignal('');
   let cachedLocalPath: PathCmdList | undefined;
@@ -53,7 +53,7 @@ const CanvasOverlaySVG: Component = () => {
   );
 
   const updateSelectionOutline = () => {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
     const offset = getSelectionOffset();
     const mask = selectionManager.getCombinedMask();
     const pathString = mask_to_path(mask, width, height, offset.x, offset.y);

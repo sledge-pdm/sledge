@@ -12,7 +12,7 @@ import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {
-    const canvasSize: Size2D = { ...canvasStore.canvas };
+    const canvasSize: Size2D = { ...canvasStore.size };
     // create thumbnail (actual size)
     const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(canvasSize.width, canvasSize.height);
 

@@ -332,8 +332,8 @@ const Ruler: Component = () => {
       offsetOriginY: interactStore.offsetOrigin.y,
       horizontalFlipped: interactStore.horizontalFlipped,
       verticalFlipped: interactStore.verticalFlipped,
-      canvasWidth: canvasStore.canvas.width,
-      canvasHeight: canvasStore.canvas.height,
+      canvasWidth: canvasStore.size.width,
+      canvasHeight: canvasStore.size.height,
       sectionsRect: sectionsBetweenRect(),
       canvasAreaRect: canvasAreaRect(),
     };

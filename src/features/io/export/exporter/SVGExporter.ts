@@ -8,7 +8,7 @@ import { create_opacity_mask, mask_to_path } from '~/utils/wasm';
 
 export class SVGExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
 
     // 64x64以内の制限チェック
     if (width > 128 || height > 128) {
@@ -41,7 +41,7 @@ export class SVGExporter extends Exporter {
   }
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
 
     // 64x64以内の制限チェック
     if (width > 128 || height > 128) {

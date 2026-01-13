@@ -129,7 +129,7 @@ export default function TitleBar() {
       let fileName = fileStore.savedLocation.name ?? '[new project]';
       // non-custom titlebar (mac/linux)
       if (isDecorated()) {
-        const size = `(${canvasStore.canvas.width} x ${canvasStore.canvas.height})`;
+        const size = `(${canvasStore.size.width} x ${canvasStore.size.height})`;
         const projPath = fileStore.savedLocation.path;
         if (projPath) {
           title += `${fileName} ${size} - ${projPath}`;
@@ -198,7 +198,7 @@ export default function TitleBar() {
                   </div>
                   <div style={{ height: '8px', width: '1px', 'background-color': color.border, 'margin-left': '12px', 'margin-right': '12px' }} />
                   <p class={titleBarSize} style={{ opacity: 0.9 }}>
-                    {canvasStore.canvas.width} x {canvasStore.canvas.height}
+                    {canvasStore.size.width} x {canvasStore.size.height}
                   </p>
                 </Show>
               </Show>

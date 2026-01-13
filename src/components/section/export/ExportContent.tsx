@@ -452,7 +452,7 @@ const ExportContent: Component = () => {
       </div>
 
       <p class={estimatedSize}>
-        estimated: {canvasStore.canvas.width * finalScale()} x {canvasStore.canvas.height * finalScale()}
+        estimated: {canvasStore.size.width * finalScale()} x {canvasStore.size.height * finalScale()}
       </p>
 
       <div class={exportSection}>

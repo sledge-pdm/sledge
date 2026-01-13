@@ -53,8 +53,8 @@ class FloatingMoveManager {
 
   public getCompositePreview(): Uint8ClampedArray | undefined {
     if (!this.targetBuffer || !this.floatingBuffer) return undefined;
-    const width = this.targetBufferOriginal?.width ?? canvasStore.canvas?.width;
-    const height = this.targetBufferOriginal?.height ?? canvasStore.canvas?.height;
+    const width = this.targetBufferOriginal?.width ?? canvasStore.size?.width;
+    const height = this.targetBufferOriginal?.height ?? canvasStore.size?.height;
     if (!width || !height) return undefined;
 
     const expected = width * height * 4;
@@ -124,8 +124,8 @@ class FloatingMoveManager {
   }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
-    const width = canvasStore.canvas?.width;
-    const height = canvasStore.canvas?.height;
+    const width = canvasStore.size?.width;
+    const height = canvasStore.size?.height;
     if (width == null || height == null) return undefined;
     const base = layerManager.exportRawCanvas(targetLayerId);
     if (state === 'layer') {
@@ -145,8 +145,8 @@ class FloatingMoveManager {
     const base = layerManager.exportRawCanvas(targetLayerId);
     this.targetBufferOriginal = {
       buffer: base,
-      width: canvasStore.canvas.width,
-      height: canvasStore.canvas.height,
+      width: canvasStore.size.width,
+      height: canvasStore.size.height,
     };
     this.targetBuffer = this.getBaseBuffer(state, targetLayerId);
     if (!this.targetBuffer) return;

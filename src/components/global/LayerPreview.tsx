@@ -91,7 +91,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     if (!canvasRef || !ctx) return;
 
     const previewSize = calcPreviewSize({
-      canvasSize: canvasStore.canvas,
+      canvasSize: canvasStore.size,
       sizingMode: props.sizingMode,
       referenceSize: props.referenceSize,
       fitMode: props.fitMode,

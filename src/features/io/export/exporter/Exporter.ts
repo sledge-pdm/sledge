@@ -61,7 +61,7 @@ export async function convertLayerToBlob(
 }
 
 export function getScaledCanvas(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1) {
-  const { width, height } = canvasStore.canvas;
+  const { width, height } = canvasStore.size;
 
   const offscreen = document.createElement('canvas');
   offscreen.width = width;
@@ -86,7 +86,7 @@ export function getScaledCanvas(buffer: Uint8ClampedArray<ArrayBuffer>, scale: n
 }
 
 export function getScaledBuffer(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1): ImageData {
-  const { width, height } = canvasStore.canvas;
+  const { width, height } = canvasStore.size;
 
   const offscreen = document.createElement('canvas');
   offscreen.width = width;

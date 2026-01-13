@@ -68,8 +68,8 @@ export function isPositionWithinSelection(pos: Vec2) {
 // 現在の状況からFloat状態を作成
 export function startMove() {
   const layerId = layerListStore.activeLayerId;
-  const width = canvasStore.canvas.width;
-  const height = canvasStore.canvas.height;
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
   if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
@@ -153,8 +153,8 @@ export function cancelMove() {
 export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): Uint8ClampedArray | undefined {
   const selection = getCurrentSelection();
   const lid = props?.layerId ?? activeLayer().id;
-  const width = canvasStore.canvas.width;
-  const height = canvasStore.canvas.height;
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
 
   const bBox = selection.getBoundBox();
   if (!bBox) {
@@ -259,8 +259,8 @@ export function getCurrentSelectionBuffer():
       bbox: { x: number; y: number; width: number; height: number };
     }
   | undefined {
-  const width = canvasStore.canvas.width;
-  const height = canvasStore.canvas.height;
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
   selectionManager.commitOffset();
   const mask = selectionManager.getCombinedMask();
   const bbox = computeMaskBBox(mask, width, height);

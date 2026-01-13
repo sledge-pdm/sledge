@@ -101,7 +101,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
   }
 
   private applySize(size: Size2D) {
-    setCanvasStore('canvas', size);
+    setCanvasStore('size', size);
     adjustZoomToFit();
     eventBus.emit('canvas:sizeChanged', { newSize: size });
   }

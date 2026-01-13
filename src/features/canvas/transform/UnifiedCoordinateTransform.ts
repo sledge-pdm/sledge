@@ -24,7 +24,7 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    */
   private computeTransformMatrix(): DOMMatrix {
     const { zoom, offset, offsetOrigin, rotation, horizontalFlipped, verticalFlipped } = interactStore;
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
 
     // 現在の状態をハッシュ化してキャッシュ有効性を判定
     const currentHash = `${zoom}_${offset.x}_${offset.y}_${offsetOrigin.x}_${offsetOrigin.y}_${rotation}_${horizontalFlipped}_${verticalFlipped}_${width}_${height}`;
@@ -94,7 +94,7 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    */
   private computeNoZoomMatrix(): DOMMatrix {
     const { offset, offsetOrigin, rotation, horizontalFlipped, verticalFlipped } = interactStore;
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
 
     const currentHash = `nozoom_${offset.x}_${offset.y}_${offsetOrigin.x}_${offsetOrigin.y}_${rotation}_${horizontalFlipped}_${verticalFlipped}_${width}_${height}`;
 

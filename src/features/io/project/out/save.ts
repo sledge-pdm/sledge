@@ -25,7 +25,7 @@ async function folderSelection(nameWOExtension: string) {
 
 async function saveThumbnailData(selectedPath: string) {
   const fileId = await getFileUniqueId(selectedPath);
-  const { width, height } = canvasStore.canvas;
+  const { width, height } = canvasStore.size;
   const thumbSize = calcThumbnailSize(width, height);
   const thumbnailBlob = await canvasThumbnailGenerator.generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
   const thumbnailDataUrl = await blobToDataUrl(thumbnailBlob);

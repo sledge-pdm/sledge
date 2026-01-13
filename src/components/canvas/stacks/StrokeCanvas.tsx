@@ -168,7 +168,7 @@ export const StrokeCanvas: Component = () => {
 
   function isOnCanvas(canvasPosition: Vec2): boolean {
     return (
-      canvasPosition.x >= 0 && canvasPosition.y >= 0 && canvasPosition.x <= canvasStore.canvas.width && canvasPosition.y <= canvasStore.canvas.height
+      canvasPosition.x >= 0 && canvasPosition.y >= 0 && canvasPosition.x <= canvasStore.size.width && canvasPosition.y <= canvasStore.size.height
     );
   }
 
@@ -228,8 +228,8 @@ export const StrokeCanvas: Component = () => {
       class={strokeArea}
       ref={(el) => (innerArea = el)}
       style={{
-        width: `${canvasStore.canvas.width}px`,
-        height: `${canvasStore.canvas.height}px`,
+        width: `${canvasStore.size.width}px`,
+        height: `${canvasStore.size.height}px`,
         cursor: interactStore.strokeAreaCursor,
       }}
       onContextMenu={(e) => {

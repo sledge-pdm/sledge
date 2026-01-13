@@ -111,8 +111,8 @@ class SelectionAreaManager {
   }
 
   constructor() {
-    const width = canvasStore?.canvas?.width ?? 0;
-    const height = canvasStore?.canvas?.height ?? 0;
+    const width = canvasStore?.size?.width ?? 0;
+    const height = canvasStore?.size?.height ?? 0;
     this.selectionMask = new SelectionMask(width, height);
     this.previewMask = undefined;
 
@@ -373,8 +373,8 @@ class SelectionAreaManager {
   }
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
-    if (!canvasStore?.canvas) return;
-    const { width, height } = canvasStore.canvas;
+    if (!canvasStore?.size) return;
+    const { width, height } = canvasStore.size;
     const layerBuffer = layerManager.exportRawCanvas(srcLayerId);
 
     this.commitOffset();

@@ -19,7 +19,7 @@ export class LassoSelection extends SelectionBase {
   private readonly UPDATE_INTERVAL = 16; // 60fps相当
 
   getDisplayMode(preset: LassoSelectionPresetConfig): LassoDisplayMode {
-    if (canvasStore.canvas.width * canvasStore.canvas.height <= 1024 * 1024) return 'fill';
+    if (canvasStore.size.width * canvasStore.size.height <= 1024 * 1024) return 'fill';
 
     return 'outline';
   }
@@ -170,7 +170,7 @@ export class LassoSelection extends SelectionBase {
     if (displayMode === 'fill') {
       // 最低3点必要（線分を作るため）
       if (this.points.length >= 6) {
-        this.updatePartialMask(canvasStore.canvas.width, canvasStore.canvas.height, fillMode);
+        this.updatePartialMask(canvasStore.size.width, canvasStore.size.height, fillMode);
       }
 
       selectionManager.setPreviewFragment(this.previewFragment);
@@ -199,7 +199,7 @@ export class LassoSelection extends SelectionBase {
       const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
       const fillMode = preset.fillMode ?? 'nonzero';
       // 最終マスクを生成
-      this.updatePartialMask(canvasStore.canvas.width, canvasStore.canvas.height, fillMode);
+      this.updatePartialMask(canvasStore.size.width, canvasStore.size.height, fillMode);
     }
 
     this.points = [];

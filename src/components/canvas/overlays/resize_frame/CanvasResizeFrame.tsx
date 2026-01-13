@@ -59,8 +59,8 @@ export const CanvasResizeFrame: Component = () => {
   };
 
   onMount(() => {
-    const w = canvasStore.canvas.width;
-    const h = canvasStore.canvas.height;
+    const w = canvasStore.size.width;
+    const h = canvasStore.size.height;
     if (w > 0 && h > 0) {
       setRect({ x: 0, y: 0, width: w, height: h, rotation: 0 });
     }
@@ -72,8 +72,8 @@ export const CanvasResizeFrame: Component = () => {
   });
 
   createEffect(() => {
-    const w = canvasStore.canvas.width;
-    const h = canvasStore.canvas.height;
+    const w = canvasStore.size.width;
+    const h = canvasStore.size.height;
     if (!rect() && w > 0 && h > 0) {
       setRect({ x: 0, y: 0, width: w, height: h, rotation: 0 });
 

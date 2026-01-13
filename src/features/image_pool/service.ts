@@ -178,11 +178,11 @@ async function transferToLayer(layerId: string, entryId: string) {
 
 function createEntry(webpBuffer: Uint8Array, width: number, height: number, forceFit?: boolean) {
   const id = v4();
-  let initialScale = forceFit ? Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height) : 1;
+  let initialScale = forceFit ? Math.min(canvasStore.size.width / width, canvasStore.size.height / height) : 1;
 
   // at least ensure fit to prevent image overflow
-  if (width > canvasStore.canvas.width || height > canvasStore.canvas.height) {
-    initialScale = Math.min(canvasStore.canvas.width / width, canvasStore.canvas.height / height);
+  if (width > canvasStore.size.width || height > canvasStore.size.height) {
+    initialScale = Math.min(canvasStore.size.width / width, canvasStore.size.height / height);
   }
 
   const entry: ImagePoolEntry = {

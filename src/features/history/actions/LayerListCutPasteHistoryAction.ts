@@ -65,8 +65,8 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     arr.splice(index, 0, packed.layer);
     setLayerListStore('layers', arr);
 
-    const width = packed.image?.width ?? canvasStore.canvas.width;
-    const height = packed.image?.height ?? canvasStore.canvas.height;
+    const width = packed.image?.width ?? canvasStore.size.width;
+    const height = packed.image?.height ?? canvasStore.size.height;
     const buffer = packed.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
     layerManager.registerLayer(packed.layer.id, buffer, width, height, { inputSpace: 'layer' });
 

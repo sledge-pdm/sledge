@@ -65,7 +65,7 @@ export function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?: bool
 
 export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?: Vec2, skipHistory?: boolean): boolean {
   if (!isValidCanvasSize(newSize)) return false;
-  const oldSize = { width: canvasStore.canvas.width, height: canvasStore.canvas.height };
+  const oldSize = { width: canvasStore.size.width, height: canvasStore.size.height };
   const src = srcOrigin ?? { x: 0, y: 0 };
   const dest = destOrigin ?? { x: 0, y: 0 };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
@@ -75,7 +75,7 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
     act.registerBefore();
   }
 
-  setCanvasStore('canvas', newSize);
+  setCanvasStore('size', newSize);
   eventBus.emit('canvas:sizeChanged', { newSize });
 
   for (const l of allLayers()) {
@@ -176,8 +176,8 @@ const referenceLength = () => {
 
 export const getReferencedZoom = (length?: number) => {
   if (length === undefined) {
-    const width = canvasStore.canvas.width;
-    const height = canvasStore.canvas.height;
+    const width = canvasStore.size.width;
+    const height = canvasStore.size.height;
     length = width > height ? width : height;
   }
 
@@ -185,8 +185,8 @@ export const getReferencedZoom = (length?: number) => {
 };
 
 export const adjustZoomToFit = (width?: number, height?: number) => {
-  width = width ?? canvasStore.canvas.width;
-  height = height ?? canvasStore.canvas.height;
+  width = width ?? canvasStore.size.width;
+  height = height ?? canvasStore.size.height;
   if (!width || !height) return;
 
   const longerLength = width > height ? width : height;
@@ -199,7 +199,7 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 };
 
 export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas;
+  const canvasSize = canvasStore.size;
   const sectionBetweenArea = document.getElementById('sections-between-area');
   if (!sectionBetweenArea) return;
   const areaBound = sectionBetweenArea.getBoundingClientRect();

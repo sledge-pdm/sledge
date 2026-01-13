@@ -84,8 +84,8 @@ function insertAt(index: number, snapshot: LayerSnapshot) {
   const arr = [...layerListStore.layers];
   arr.splice(index, 0, snapshot.layer);
   setLayerListStore('layers', arr);
-  const width = snapshot.image?.width ?? canvasStore.canvas.width;
-  const height = snapshot.image?.height ?? canvasStore.canvas.height;
+  const width = snapshot.image?.width ?? canvasStore.size.width;
+  const height = snapshot.image?.height ?? canvasStore.size.height;
   const buffer = snapshot.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
   layerManager.registerLayer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
   updateWebGLCanvas(false, `Layer(${snapshot.layer.id}) inserted`);

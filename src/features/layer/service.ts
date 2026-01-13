@@ -163,8 +163,8 @@ export const addLayerTo = (
   );
 
   // Initialize anvil
-  const width = canvasStore.canvas.width;
-  const height = canvasStore.canvas.height;
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
   layerManager.registerLayer(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height, {
     inputSpace: 'canvas',
   });

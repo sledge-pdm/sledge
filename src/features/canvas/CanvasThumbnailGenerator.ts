@@ -13,8 +13,8 @@ export class CanvasThumbnailGenerator {
 
   generateCanvasThumbnail(width: number, height: number): ImageData | undefined {
     try {
-      const srcW = canvasStore.canvas.width;
-      const srcH = canvasStore.canvas.height;
+      const srcW = canvasStore.size.width;
+      const srcH = canvasStore.size.height;
       this.off.width = width;
       this.off.height = height;
       this.tmp.width = srcW;
@@ -43,8 +43,8 @@ export class CanvasThumbnailGenerator {
 
   generateCanvasThumbnailBlob(width: number, height: number): Promise<Blob> {
     try {
-      const srcW = canvasStore.canvas.width;
-      const srcH = canvasStore.canvas.height;
+      const srcW = canvasStore.size.width;
+      const srcH = canvasStore.size.height;
       this.off.width = width;
       this.off.height = height;
       this.tmp.width = srcW;

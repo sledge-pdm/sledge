@@ -107,8 +107,8 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   applyProjectLocation(undefined, 'new_project');
   const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
   const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
-  setCanvasStore('canvas', 'width', width);
-  setCanvasStore('canvas', 'height', height);
+  setCanvasStore('size', 'width', width);
+  setCanvasStore('size', 'height', height);
   eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
   addLayer(
     { name: 'layer 1', type: LayerType.Dot, enabled: true },
@@ -118,7 +118,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
     }
   );
   changeCanvasSizeWithNoOffset(globalConfig.default.canvasSize, true);
-  setCanvasStore('canvas', globalConfig.default.canvasSize);
+  setCanvasStore('size', globalConfig.default.canvasSize);
   const canvasSize = globalConfig.default.canvasSize;
   layerListStore.layers.forEach((layer) => {
     const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);

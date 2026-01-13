@@ -1,4 +1,4 @@
-import { ProjectV0, ProjectV1, ProjectV2 } from "@sledge-pdm/core";
+import { ProjectV0, ProjectV1, ProjectV2 } from '@sledge-pdm/core';
 
 export const SNAPSHOT_THUMBNAIL_SIZE = 500;
 

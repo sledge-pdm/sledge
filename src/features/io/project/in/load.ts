@@ -67,7 +67,7 @@ export async function loadProject(projectObj: any): Promise<void> {
     const imagePoolState = adapter.getImagePoolState();
     setImagePoolStore({
       ...imagePoolState,
-      entries,
+      entries: Array.isArray(entries) ? entries : [],
     });
   } catch (e) {
     logSystemWarn(`loadProject: failed in image pool ${String(e)}`);

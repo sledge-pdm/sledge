@@ -4,6 +4,7 @@ import { color, Icon } from '@sledge-pdm/ui';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { fileStore } from '~/stores/EditorStores';
 import { canvasStore, projectStore } from '~/stores/ProjectStores';
 import { window as platformWindow } from '~/utils/platform';
@@ -52,6 +53,26 @@ const titleBarSize = css`
   font-family: ZFB08;
   font-size: 8px;
   white-space: pre;
+  opacity: 0.9;
+`;
+
+const titleBarProjectVersion = css`
+  width: fit-content;
+  font-family: ZFB08;
+  font-size: 8px;
+  white-space: pre;
+  padding: 2px 4px;
+  background-color: var(--color-surface);
+  border-radius: 3px;
+  opacity: 0.9;
+`;
+
+const titleDivider = css`
+  height: 8px;
+  width: 1px;
+  background-color: var(--color-border);
+  margin-left: 12px;
+  margin-right: 12px;
 `;
 
 const titleBarSaveSection = css`
@@ -196,8 +217,16 @@ export default function TitleBar() {
                     </Show>
                     <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
-                  <div style={{ height: '8px', width: '1px', 'background-color': color.border, 'margin-left': '12px', 'margin-right': '12px' }} />
-                  <p class={titleBarSize} style={{ opacity: 0.9 }}>
+                  <Show
+                    when={
+                      import.meta.env.DEV || (projectStore.loadProjectVersion && projectStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION)
+                    }
+                  >
+                    <div class={titleDivider} />
+                    <p class={titleBarProjectVersion}>V{projectStore.loadProjectVersion?.project}</p>
+                  </Show>
+                  <div class={titleDivider} />
+                  <p class={titleBarSize} style={{}}>
                     {canvasStore.size.width} x {canvasStore.size.height}
                   </p>
                 </Show>

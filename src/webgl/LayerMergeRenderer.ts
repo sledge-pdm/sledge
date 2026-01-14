@@ -49,10 +49,6 @@ class LayerMergeRenderer {
 
     projectHistoryController.addAction(action);
   }
-
-  releaseRenderer() {
-    // no-op (shared renderer)
-  }
 }
 
 export default LayerMergeRenderer;

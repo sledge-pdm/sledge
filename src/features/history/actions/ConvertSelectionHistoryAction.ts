@@ -1,8 +1,9 @@
-import { ImagePoolEntry } from '~/features/image_pool';
+import { ImagePoolEntry, ImagePoolImagePersisted } from '~/features/image_pool';
+import { makeRuntimeImages } from '~/features/image_pool/service';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
-import { setImagePoolStore } from '~/stores/ProjectStores';
+import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
@@ -19,6 +20,8 @@ export interface ConvertSelectionHistoryActionProps extends BaseHistoryActionPro
   afterSnapshot?: PackedLayerSnapshot;
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
+  oldImages?: Map<string, ImagePoolImagePersisted>;
+  newImages?: Map<string, ImagePoolImagePersisted>;
 }
 
 export class ConvertSelectionHistoryAction extends BaseHistoryAction {
@@ -28,6 +31,8 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
 
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
+  oldImages?: Map<string, ImagePoolImagePersisted>;
+  newImages?: Map<string, ImagePoolImagePersisted>;
   beforeSnapshot?: PackedLayerSnapshot;
   afterSnapshot?: PackedLayerSnapshot;
 
@@ -37,12 +42,16 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
     this.layerId = props.layerId;
     this.oldEntries = props.oldEntries;
     this.newEntries = props.newEntries;
+    this.oldImages = props.oldImages ?? new Map();
+    this.newImages = props.newImages ?? new Map();
     this.beforeSnapshot = props.beforeSnapshot;
     this.afterSnapshot = props.afterSnapshot;
   }
 
   undo(): void {
+    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
     setImagePoolStore('entries', [...this.oldEntries]);
+    if (this.oldImages) setImagePoolStore('images', makeRuntimeImages(this.oldImages));
 
     if (this.beforeSnapshot) {
       if (floatingMoveManager.isMoving()) {
@@ -58,7 +67,9 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
   }
 
   redo(): void {
+    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
     setImagePoolStore('entries', [...this.newEntries]);
+    if (this.newImages) setImagePoolStore('images', makeRuntimeImages(this.newImages));
 
     if (this.afterSnapshot) {
       if (floatingMoveManager.isMoving()) {
@@ -84,6 +95,8 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
         afterSnapshot: this.afterSnapshot,
         oldEntries: this.props.oldEntries,
         newEntries: this.props.newEntries,
+        oldImages: this.oldImages,
+        newImages: this.newImages,
       } as ConvertSelectionHistoryActionProps,
     };
   }

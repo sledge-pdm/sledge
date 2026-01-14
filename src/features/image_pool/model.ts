@@ -1,13 +1,19 @@
 export type ImagePoolEntry = {
   id: string;
-  originalPath?: string; // original image file path (deprecated)
-  descriptionName?: string;
-
-  webpBuffer: Uint8Array; // webp-compressed image buffer
   base: { width: number; height: number };
-
   transform: { x: number; y: number; scaleX: number; scaleY: number; rotation: number; flipX: boolean; flipY: boolean };
-
   opacity: number;
   visible: boolean;
+  descriptionName?: string;
+};
+
+export type ImagePoolImagePersisted = { mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; deflatedBuffer: Uint8Array };
+
+export type ImagePoolImage = ImagePoolImagePersisted & {
+  blobUrl: string;
+};
+
+export type ImagePoolState = {
+  selectedEntryId: string | undefined;
+  preserveAspectRatio: boolean;
 };

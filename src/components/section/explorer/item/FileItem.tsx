@@ -102,9 +102,9 @@ const FileItem: Component<{
           icon: '/assets/icons/files/image.png',
           onSelect: async () => {
             if (!location.path || !location.name) return;
-            const entry = await createEntryFromLocalImage(normalizeJoin(location.path, location.name));
-            insertEntry(entry);
-            selectEntry(entry.id);
+            const { entry: poolEntry, image } = await createEntryFromLocalImage(normalizeJoin(location.path, location.name));
+            insertEntry(poolEntry, image);
+            selectEntry(poolEntry.id);
           },
         });
 

@@ -1,48 +1,165 @@
-import { decodeWebp, encodeWebp, type RawPixelData } from '@sledge-pdm/core';
+import { gzipDeflate, gzipInflate, type RawPixelData } from '@sledge-pdm/core';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
-import { ImagePoolEntry } from '~/features/image_pool/model';
+import { ImagePoolEntry, ImagePoolImage, ImagePoolImagePersisted } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
-import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
+import { bufferToBlob, loadImageData } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
+import { fs } from '~/utils/platform';
 import { flip_pixels_vertically } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+
+type ImageMimeType = ImagePoolImagePersisted['mimeType'];
+
+const DEFAULT_MIME: ImageMimeType = 'image/png';
+
+const normalizeMimeType = (mime?: string): ImageMimeType => {
+  const lower = mime?.toLowerCase();
+  if (lower === 'image/jpeg' || lower === 'image/jpg') return 'image/jpeg';
+  if (lower === 'image/png') return 'image/png';
+  if (lower === 'image/webp') return 'image/webp';
+  return DEFAULT_MIME;
+};
+
+const guessMimeFromPath = (filePath?: string): ImageMimeType => {
+  const ext = filePath?.split('.').pop()?.toLowerCase();
+  if (!ext) return DEFAULT_MIME;
+  if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+  if (ext === 'png') return 'image/png';
+  if (ext === 'webp') return 'image/webp';
+  return DEFAULT_MIME;
+};
+
+const cloneEntries = (entries: ImagePoolEntry[]): ImagePoolEntry[] =>
+  entries.map((e) => ({
+    ...e,
+    base: { ...e.base },
+    transform: { ...e.transform },
+  }));
+
+export const toPersistedImages = (images: Map<string, ImagePoolImage>): Map<string, ImagePoolImagePersisted> => {
+  const persisted = new Map<string, ImagePoolImagePersisted>();
+  images.forEach((image, id) => persisted.set(id, { mimeType: image.mimeType, deflatedBuffer: image.deflatedBuffer }));
+  return persisted;
+};
+
+export const clonePersistedImages = (images: Map<string, ImagePoolImagePersisted>): Map<string, ImagePoolImagePersisted> => {
+  const cloned = new Map<string, ImagePoolImagePersisted>();
+  images.forEach((image, id) => cloned.set(id, { mimeType: image.mimeType, deflatedBuffer: new Uint8Array(image.deflatedBuffer) }));
+  return cloned;
+};
+
+const hydrateImage = (persisted: ImagePoolImagePersisted): ImagePoolImage => {
+  const inflated = gzipInflate(persisted.deflatedBuffer) as Uint8Array<ArrayBuffer>;
+  const blobUrl = URL.createObjectURL(new Blob([inflated], { type: persisted.mimeType }));
+  return { ...persisted, blobUrl };
+};
+
+export const makeRuntimeImages = (images: Map<string, ImagePoolImagePersisted>): Map<string, ImagePoolImage> => {
+  const runtime = new Map<string, ImagePoolImage>();
+  images.forEach((image, id) => runtime.set(id, hydrateImage(image)));
+  return runtime;
+};
+
+const createImagePoolImage = (bytes: Uint8Array, mimeType: ImageMimeType): ImagePoolImage => {
+  const deflatedBuffer = gzipDeflate(bytes);
+  const blobUrl = URL.createObjectURL(new Blob([bytes as Uint8Array<ArrayBuffer>], { type: mimeType }));
+  return { mimeType, deflatedBuffer, blobUrl };
+};
+
+const setImageForEntry = (entryId: string, image: ImagePoolImage) => {
+  const images = new Map(imagePoolStore.images);
+  const prev = images.get(entryId);
+  if (prev) {
+    URL.revokeObjectURL(prev.blobUrl);
+  }
+  images.set(entryId, image);
+  setImagePoolStore('images', images);
+};
+
+const removeImageForEntry = (entryId: string) => {
+  const images = new Map(imagePoolStore.images);
+  const prev = images.get(entryId);
+  if (prev) {
+    URL.revokeObjectURL(prev.blobUrl);
+  }
+  images.delete(entryId);
+  setImagePoolStore('images', images);
+};
+
+const createEntryBase = (width: number, height: number, forceFit?: boolean): ImagePoolEntry => {
+  const id = v4();
+  let initialScale = forceFit ? Math.min(canvasStore.size.width / width, canvasStore.size.height / height) : 1;
+
+  // at least ensure fit to prevent image overflow
+  if (width > canvasStore.size.width || height > canvasStore.size.height) {
+    initialScale = Math.min(canvasStore.size.width / width, canvasStore.size.height / height);
+  }
+
+  return {
+    id,
+    base: { width, height },
+    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale, rotation: 0, flipX: false, flipY: false },
+    opacity: 1,
+    visible: true,
+  };
+};
+
+const createEntryWithImage = (
+  bytes: Uint8Array,
+  mimeType: ImageMimeType,
+  width: number,
+  height: number,
+  forceFit?: boolean
+): { entry: ImagePoolEntry; image: ImagePoolImage } => {
+  const entry = createEntryBase(width, height, forceFit);
+  const image = createImagePoolImage(bytes, mimeType);
+  return { entry, image };
+};
 
 export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
 
 // Insert entry with a given id (used for undo/redo to keep id stable)
-export function insertEntry(entry: ImagePoolEntry, noDiff?: boolean) {
-  const oldEntries = imagePoolStore.entries.slice();
+export function insertEntry(entry: ImagePoolEntry, image: ImagePoolImage, noDiff?: boolean) {
+  const oldEntries = cloneEntries(imagePoolStore.entries);
+  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
 
-  setImagePoolStore('entries', [...imagePoolStore.entries.filter((e) => e.id !== entry.id), entry]);
+  const newEntries = [...imagePoolStore.entries.filter((e) => e.id !== entry.id), entry];
+
+  setImagePoolStore('entries', newEntries);
+  setImageForEntry(entry.id, image);
+  const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
 
   if (!noDiff) {
     projectHistoryController.addAction(
       new ImagePoolHistoryAction({
         kind: 'add',
         oldEntries,
-        newEntries: imagePoolStore.entries.slice(),
+        newEntries: cloneEntries(newEntries),
+        oldImages,
+        newImages,
         context: { from: 'ImagePoolController.insertEntry' },
       })
     );
   }
 }
 
-export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>, noDiff?: boolean) {
-  let oldEntryIndex = imagePoolStore.entries.findIndex((e) => e.id === id);
+export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
+  const oldEntryIndex = imagePoolStore.entries.findIndex((e) => e.id === id);
   if (oldEntryIndex < 0) return;
 
   setImagePoolStore('entries', oldEntryIndex, patch);
 }
 
 export function removeEntry(id: string, noDiff?: boolean) {
-  const oldEntries = imagePoolStore.entries.slice();
+  const oldEntries = cloneEntries(imagePoolStore.entries);
+  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
   const entry = getEntry(id);
   if (!entry) {
     logUserWarn(`ImagePool entry ${id} not found.`, { label: 'ImagePool' });
@@ -50,16 +167,17 @@ export function removeEntry(id: string, noDiff?: boolean) {
   }
 
   if (imagePoolStore.entries.some((e) => e.id === id)) {
-    setImagePoolStore(
-      'entries',
-      imagePoolStore.entries.filter((e) => e.id !== id)
-    );
+    const newEntries = imagePoolStore.entries.filter((e) => e.id !== id);
+
+    setImagePoolStore('entries', newEntries);
+    removeImageForEntry(id);
+    const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
 
     if (imagePoolStore.selectedEntryId === id) {
       const index = oldEntries.findIndex((e) => e.id === id);
       const nextIndex = index - 1;
-      if (0 <= nextIndex && nextIndex < imagePoolStore.entries.length) {
-        selectEntry(oldEntries[nextIndex].id);
+      if (0 <= nextIndex && nextIndex < newEntries.length) {
+        selectEntry(newEntries[nextIndex].id);
       } else {
         selectEntry(undefined);
       }
@@ -69,7 +187,9 @@ export function removeEntry(id: string, noDiff?: boolean) {
         new ImagePoolHistoryAction({
           kind: 'remove',
           oldEntries,
-          newEntries: imagePoolStore.entries.slice(),
+          newEntries: cloneEntries(newEntries),
+          oldImages,
+          newImages,
           context: { from: 'ImagePoolController.removeEntry' },
         })
       );
@@ -80,16 +200,16 @@ export async function addImagesFromLocal(imagePaths: string | string[], forceFit
   if (Array.isArray(imagePaths)) {
     await Promise.all(
       imagePaths.map(async (p) => {
-        const entry = await createEntryFromLocalImage(p, forceFit);
-        insertEntry(entry, false);
+        const { entry, image } = await createEntryFromLocalImage(p, forceFit);
+        insertEntry(entry, image, false);
       })
     );
     if (imagePaths.length > 0) {
       logUserInfo(`Added ${imagePaths.length} image(s) to image pool.`);
     }
   } else {
-    const entry = await createEntryFromLocalImage(imagePaths, forceFit);
-    insertEntry(entry, false);
+    const { entry, image } = await createEntryFromLocalImage(imagePaths, forceFit);
+    insertEntry(entry, image, false);
     logUserInfo('Image added to image pool.');
   }
 }
@@ -97,8 +217,8 @@ export async function addImagesFromLocal(imagePaths: string | string[], forceFit
 export async function addImagesFromFiles(files: File[], forceFit?: boolean) {
   await Promise.all(
     files.map(async (file) => {
-      const entry = await createEntryFromFile(file, forceFit);
-      insertEntry(entry, false);
+      const { entry, image } = await createEntryFromFile(file, forceFit);
+      insertEntry(entry, image, false);
     })
   );
   if (files.length > 0) {
@@ -107,8 +227,8 @@ export async function addImagesFromFiles(files: File[], forceFit?: boolean) {
 }
 
 export async function addImagesFromRawBuffer(rawBuffer: RawPixelData, width: number, height: number, forceFit?: boolean) {
-  const entry = await createEntryFromRawBuffer(rawBuffer, width, height, forceFit);
-  insertEntry(entry, false);
+  const { entry, image } = await createEntryFromRawBuffer(rawBuffer, width, height, forceFit);
+  insertEntry(entry, image, false);
   logUserInfo('Image added to image pool.');
 }
 
@@ -117,7 +237,7 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
   if (!active) return;
 
   try {
-    transferToLayer(active.id, entryId);
+    await transferToLayer(active.id, entryId);
     if (removeAfter) removeEntry(entryId); // ImagePool から削除
     logUserInfo('Image transferred to active layer.');
   } catch (e) {
@@ -127,13 +247,21 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
 
 async function transferToLayer(layerId: string, entryId: string) {
   const entry = getEntry(entryId);
+  const image = imagePoolStore.images.get(entryId);
   const layer = getLayer(layerId);
   const layerW = layer.getWidth();
   const layerH = layer.getHeight();
   if (!layerW || !layerH || !entry) return;
+  if (!image) {
+    logSystemError(`ImagePool image missing for entry ${entryId}`, { label: 'ImagePool' });
+    return;
+  }
 
-  // TODO: replace with non-webp method
-  const rawEntryBuffer = decodeWebp(entry.webpBuffer, entry.base.width, entry.base.height);
+  const inflated = gzipInflate(image.deflatedBuffer) as Uint8Array<ArrayBuffer>;
+  const blob = new Blob([inflated], { type: image.mimeType });
+  const bitmap = await createImageBitmap(blob);
+  const imageData = await loadImageData(bitmap);
+  bitmap.close();
 
   const offsetX = Math.round(entry.transform.x);
   const offsetY = Math.round(entry.transform.y);
@@ -146,7 +274,7 @@ async function transferToLayer(layerId: string, entryId: string) {
 
   const rotate = normalizeRotation(entry.transform.rotation);
 
-  const entryBuffer = new Uint8Array(rawEntryBuffer);
+  const entryBuffer = new Uint8Array(imageData.data.buffer, imageData.data.byteOffset, imageData.data.byteLength);
   flip_pixels_vertically(entryBuffer, entry.base.width, entry.base.height);
   const entryTexture = layer.createTextureFromRaw(entryBuffer, { width: entry.base.width, height: entry.base.height });
 
@@ -176,54 +304,36 @@ async function transferToLayer(layerId: string, entryId: string) {
   updateLayerPreview(layerId);
 }
 
-function createEntry(webpBuffer: Uint8Array, width: number, height: number, forceFit?: boolean) {
-  const id = v4();
-  let initialScale = forceFit ? Math.min(canvasStore.size.width / width, canvasStore.size.height / height) : 1;
-
-  // at least ensure fit to prevent image overflow
-  if (width > canvasStore.size.width || height > canvasStore.size.height) {
-    initialScale = Math.min(canvasStore.size.width / width, canvasStore.size.height / height);
-  }
-
-  const entry: ImagePoolEntry = {
-    id,
-    webpBuffer,
-    base: { width, height },
-    transform: { x: 0, y: 0, scaleX: initialScale, scaleY: initialScale, rotation: 0, flipX: false, flipY: false },
-    opacity: 1,
-    visible: true,
-  };
-  return entry;
-}
-
 export async function createEntryFromLocalImage(imagePath: string, forceFit?: boolean) {
-  const bitmap = await loadLocalImage(imagePath);
-  const width = bitmap.width;
-  const height = bitmap.height;
-  const imageData = await loadImageData(bitmap);
-  const webpBuffer = encodeWebp(imageData.data, width, height);
-  bitmap.close();
-  const entry = createEntry(webpBuffer, width, height, forceFit);
+  const bytes = await fs.readFile(imagePath);
+  const mimeType = guessMimeFromPath(imagePath);
+  const byteArray = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes as ArrayBuffer);
+  const blob = new Blob([byteArray.slice()], { type: mimeType });
+  const bitmap = await createImageBitmap(blob);
+  const { entry, image } = createEntryWithImage(byteArray, mimeType, bitmap.width, bitmap.height, forceFit);
   entry.descriptionName = pathToFileLocation(imagePath)?.name;
-  return entry;
+  bitmap.close();
+  return { entry, image };
 }
 
 export async function createEntryFromFile(file: File, forceFit?: boolean) {
-  const bitmap = await createImageBitmap(file);
-  const width = bitmap.width;
-  const height = bitmap.height;
-  const imageData = await loadImageData(bitmap);
-  const webpBuffer = encodeWebp(imageData.data, width, height);
-  bitmap.close();
-  const entry = createEntry(webpBuffer, width, height, forceFit);
+  const mimeType = normalizeMimeType(file.type);
+  const buffer = new Uint8Array(await file.arrayBuffer());
+  const { width, height } = await createImageBitmap(new Blob([buffer], { type: mimeType })).then((bitmap) => {
+    const size = { width: bitmap.width, height: bitmap.height };
+    bitmap.close();
+    return size;
+  });
+  const { entry, image } = createEntryWithImage(buffer, mimeType, width, height, forceFit);
   entry.descriptionName = file.name;
-  return entry;
+  return { entry, image };
 }
 
 export async function createEntryFromRawBuffer(rawBuffer: RawPixelData, width: number, height: number, forceFit?: boolean) {
-  const webpBuffer = encodeWebp(rawBuffer, width, height);
-  const entry = createEntry(webpBuffer, width, height, forceFit);
-  return entry;
+  const blob = await bufferToBlob({ buffer: rawBuffer, width, height });
+  const buffer = new Uint8Array(await blob.arrayBuffer());
+  const { entry, image } = createEntryWithImage(buffer, 'image/png', width, height, forceFit);
+  return { entry, image };
 }
 
 export function selectEntry(id?: string) {

@@ -1,9 +1,11 @@
 import { getProjectAdapter } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
+import { ImagePoolImagePersisted } from '~/features/image_pool';
+import { makeRuntimeImages } from '~/features/image_pool/service';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn, logUserWarn } from '~/features/log';
 import { setIOStore } from '~/stores/EditorStores';
-import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
+import { imagePoolStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { updateWebGLCanvas } from '~/webgl/service';
 
@@ -77,9 +79,22 @@ export async function loadProject(projectObj: any): Promise<void> {
   try {
     const entries = adapter.getImagePoolEntries();
     const imagePoolState = adapter.getImagePoolState();
+    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    const images = new Map<string, ImagePoolImagePersisted>();
+    entries.forEach((entry) => {
+      const image = adapter.getImagePoolImageOf(entry.id);
+      if (image) {
+        images.set(entry.id, image);
+      } else {
+        logSystemWarn(`loadProject: imagePool image missing for entry ${entry.id}`);
+      }
+    });
+
     setImagePoolStore({
-      ...imagePoolState,
+      selectedEntryId: imagePoolState.selectedEntryId,
+      preserveAspectRatio: imagePoolState.preserveAspectRatio,
       entries,
+      images: makeRuntimeImages(images),
     });
   } catch (e) {
     logSystemWarn(`loadProject: failed in image pool ${String(e)}`);

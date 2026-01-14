@@ -128,12 +128,12 @@ const ClipboardListener: Component = () => {
         const data = await tryGetImageFromClipboard();
         if (data) {
           const { imageBuf, width, height } = data;
-          const entry = await createEntryFromRawBuffer(imageBuf, width, height);
+          const { entry, image } = await createEntryFromRawBuffer(imageBuf, width, height);
           entry.descriptionName = '[ from clipboard ]';
           const placementPos = interactStore.placementPosition ?? { x: 0, y: 0 };
           entry.transform.x = placementPos.x;
           entry.transform.y = placementPos.y;
-          insertEntry(entry);
+          insertEntry(entry, image);
           selectEntry(entry.id);
           logUserSuccess('pasted!', { label: LOG_LABEL });
         } else {

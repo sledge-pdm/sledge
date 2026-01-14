@@ -16,6 +16,7 @@ import { canvasStore, imagePoolStore, layerListStore } from '~/stores/ProjectSto
 import { eventBus } from '~/utils/EventBus';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { clonePersistedImages, toPersistedImages } from '../image_pool/service';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -282,18 +283,20 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   const { buffer, bbox } = selectionData;
 
   const oldEntries = imagePoolStore.entries.slice();
+  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
 
-  const entry = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
+  const { entry, image } = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
   entry.descriptionName = '[ from selection ]';
   entry.transform.x = bbox.x;
   entry.transform.y = bbox.y;
   entry.transform.scaleX = 1;
   entry.transform.scaleY = 1;
 
-  insertEntry(entry, true);
+  insertEntry(entry, image, true);
   selectEntry(entry.id);
 
   const newEntries = imagePoolStore.entries.slice();
+  const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
 
   let beforeSnapshot = undefined;
   let afterSnapshot = undefined;
@@ -308,6 +311,8 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
     layerId: layerListStore.activeLayerId,
     oldEntries,
     newEntries,
+    oldImages,
+    newImages,
     beforeSnapshot,
     afterSnapshot,
   });

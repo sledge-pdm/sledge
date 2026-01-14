@@ -1,5 +1,6 @@
 import { gzipDeflate, ProjectV2 } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
+import { toPersistedImages } from '~/features/image_pool/service';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore, snapshotStore } from '~/stores/ProjectStores';
@@ -41,7 +42,11 @@ export const dumpProjectJson = async (): Promise<ProjectV2> => {
     project: { ...projectStore },
     imagePool: {
       entries: imagePoolStore.entries,
-      state: { ...imagePoolStore },
+      images: toPersistedImages(imagePoolStore.images),
+      state: {
+        selectedEntryId: imagePoolStore.selectedEntryId,
+        preserveAspectRatio: imagePoolStore.preserveAspectRatio,
+      },
     },
     history: projectHistoryController.getSerialized(),
     layers: {

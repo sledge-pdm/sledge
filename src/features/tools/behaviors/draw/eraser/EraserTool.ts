@@ -1,11 +1,11 @@
-import { transparent } from '@sledge-pdm/core';
 import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
 import { PenTool } from '../pen/PenTool';
 
 export class EraserTool extends PenTool {
   protected categoryId: ToolCategoryId = TOOL_CATEGORIES.ERASER;
-  forceColor = transparent;
+
+  protected ERASER_MODE: boolean = true;
 
   onStart(args: ToolArgs): ToolResult {
     return super.onStart(args);

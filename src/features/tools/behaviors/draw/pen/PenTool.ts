@@ -1,5 +1,14 @@
 import { RGBA, transparent, Vec2 } from '@sledge-pdm/core';
-import { CircleKernel, Grip, GripInstrument, GripKernel, GripPoint, MaskStrokeInstrument, SquareKernel } from '@sledge-pdm/frasco';
+import {
+  CircleKernel,
+  Grip,
+  GripInstrument,
+  GripKernel,
+  GripPoint,
+  LinePreviewInstrument,
+  MaskStrokeInstrument,
+  SquareKernel,
+} from '@sledge-pdm/frasco';
 import { Consts } from '~/Consts';
 import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
@@ -13,7 +22,8 @@ export class PenTool implements ToolBehavior {
   isShift: boolean = false;
   isCtrl: boolean = false;
 
-  forceColor: RGBA | undefined = undefined;
+  protected ERASER_MODE: boolean = false;
+  manualEraserMode: boolean = false;
 
   private grip = new Grip({ inputSpace: 'canvas' });
   private circleKernel = new CircleKernel();
@@ -40,6 +50,8 @@ export class PenTool implements ToolBehavior {
     this.startPositionRaw = args.rawPosition;
     this.activeLayerId = args.layerId;
     this.hasStroke = false;
+    const buttons = args.event?.buttons;
+    this.manualEraserMode = buttons ? (buttons & 2) !== 0 : false;
 
     let layer;
     try {
@@ -66,11 +78,10 @@ export class PenTool implements ToolBehavior {
 
   handleDraw(args: ToolArgs): ToolResult {
     if (!this.activeLayerId) return { shouldUpdate: false };
-    if (this.isShift) {
-      return { shouldUpdate: false };
-    }
 
-    const point = this.buildPoint(args, args.rawPosition, args.color);
+    const position = this.isSnapMode() && this.startPositionRaw ? this.snapToAngle(args.rawPosition, this.startPositionRaw) : args.rawPosition;
+
+    const point = this.buildPoint(args, position, args.color);
     try {
       this.grip.addPoint(point);
       this.hasStroke = true;
@@ -105,8 +116,7 @@ export class PenTool implements ToolBehavior {
       return { shouldUpdate: false };
     }
 
-    const endPosition =
-      this.isShift && this.isCtrl && this.startPositionRaw ? this.snapToAngle(args.rawPosition, this.startPositionRaw) : args.rawPosition;
+    const endPosition = this.isSnapMode() && this.startPositionRaw ? this.snapToAngle(args.rawPosition, this.startPositionRaw) : args.rawPosition;
     const point = this.buildPoint(args, endPosition, args.color);
     try {
       this.grip.end(point);
@@ -144,7 +154,7 @@ export class PenTool implements ToolBehavior {
   } {
     const shape = (preset?.shape ?? 'circle') as 'circle' | 'square';
     const kernel = shape === 'square' ? this.squareKernel : this.circleKernel;
-    const instrument = new MaskStrokeInstrument();
+    const instrument = this.isShift ? new LinePreviewInstrument() : new MaskStrokeInstrument();
 
     return {
       kernel,
@@ -152,11 +162,19 @@ export class PenTool implements ToolBehavior {
     };
   }
 
+  private isSnapMode(): boolean {
+    return !!(this.isShift && this.isCtrl);
+  }
+
+  private isEraserMode(): boolean {
+    return this.ERASER_MODE || this.manualEraserMode;
+  }
+
   private buildPoint(args: ToolArgs, position: Vec2, color: RGBA): GripPoint {
     const presetName = args.presetName ?? DEFAULT_PRESET;
     const preset = getPresetOf(this.categoryId, presetName) as PenPresetConfig | undefined;
     const size = preset?.size ?? 1;
-    const finalColor = this.forceColor ?? (args.event?.buttons === 2 ? transparent : color);
+    const finalColor = this.isEraserMode() ? transparent : color;
 
     return {
       x: position.x,
@@ -175,5 +193,6 @@ export class PenTool implements ToolBehavior {
     this.startPosition = undefined;
     this.activeLayerId = undefined;
     this.hasStroke = false;
+    this.manualEraserMode = false;
   }
 }

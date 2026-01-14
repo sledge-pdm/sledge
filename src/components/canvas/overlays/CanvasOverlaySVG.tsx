@@ -1,10 +1,18 @@
+import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getSelectionOffset } from '~/features/selection/SelectionOperator';
-import { getPresetOf, getToolCategory } from '~/features/tools/ToolController';
+import {
+  getActiveToolCategoryId,
+  getCurrentPresetConfig,
+  getPresetOf,
+  getToolCategory,
+  isToolAllowedInCurrentLayer,
+} from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { previewMaskManager, PreviewShape } from '~/features/tools/behaviors/draw/PreviewMaskManager';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore } from '~/stores/ProjectStores';
@@ -33,7 +41,7 @@ const CanvasOverlaySVG: Component = () => {
 
   const [penOutlinePath, setPenOutlinePath] = createSignal('');
   let cachedLocalPath: PathCmdList | undefined;
-  let cachedKey: string | undefined;
+  let cachedPreview: PreviewShape | undefined;
   const borderDash = 6;
   const [selectionChanged, setSelectionChanged] = createSignal(false);
   const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
@@ -111,41 +119,42 @@ const CanvasOverlaySVG: Component = () => {
 
   // Cache local pen shape path
   createEffect(() => {
-    // const tool = getActiveToolCategoryId();
-    // if (tool !== TOOL_CATEGORIES.PEN && tool !== TOOL_CATEGORIES.ERASER) {
-    //   cachedLocalPath = undefined;
-    //   cachedKey = undefined;
-    //   return;
-    // }
-    // const preset = getCurrentPresetConfig(tool) as any;
-    // const size: number = preset?.size ?? 1;
-    // const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-    // const key = `${tool}-${size}-${shape}`;
-    // if (key === cachedKey && cachedLocalPath) return;
-    // const { mask, width, height } = getDrawnPixelMask(size, shape);
-    // const localPath = mask_to_path(mask, width, height, 0, 0);
-    // cachedLocalPath = PathCmdList.parse(localPath);
-    // cachedKey = key;
+    const tool = getActiveToolCategoryId();
+    const preset = getCurrentPresetConfig(tool) as any;
+    const size: number = preset?.size ?? 1;
+    const shape: 'circle' | 'square' = preset?.shape ?? 'square';
+
+    const kernel = shape === 'square' ? new SquareKernel() : new CircleKernel();
+    cachedPreview = previewMaskManager.get(kernel, { size, color: [0, 0, 0, 255], opacity: 1 });
+    if (!cachedPreview) {
+      cachedLocalPath = undefined;
+      return;
+    }
+    cachedLocalPath = PathCmdList.parse(cachedPreview.svgPath);
   });
 
   // Pen outline (logical coordinates)
   createEffect(() => {
-    // const tool = getActiveToolCategoryId();
-    // const mouse = interactStore.lastPointerOnCanvas;
-    // if ((tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
-    //   const preset = getCurrentPresetConfig(tool) as any;
-    //   const size: number = preset?.size ?? 1;
-    //   const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-    //   const { offsetX, offsetY } = getDrawnPixelMask(size, shape);
-    //   const even = size % 2 === 0;
-    //   const cx = even ? Math.round(mouse.x) : Math.floor(mouse.x);
-    //   const cy = even ? Math.round(mouse.y) : Math.floor(mouse.y);
-    //   const ox = cx + offsetX;
-    //   const oy = cy + offsetY;
-    //   setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, ox, oy));
-    // } else {
-    //   setPenOutlinePath('');
-    // }
+    const tool = getActiveToolCategoryId();
+    const mouse = interactStore.lastPointerOnCanvas;
+    if (
+      (tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) &&
+      mouse &&
+      cachedLocalPath &&
+      cachedPreview &&
+      isToolAllowedInCurrentLayer()
+    ) {
+      const preset = getCurrentPresetConfig(tool) as any;
+      const size: number = preset?.size ?? 1;
+      const even = size % 2 === 0;
+      const cx = even ? Math.round(mouse.x) : Math.floor(mouse.x);
+      const cy = even ? Math.round(mouse.y) : Math.floor(mouse.y);
+      const ox = cx + cachedPreview.bitmaskShape.offsetX;
+      const oy = cy + cachedPreview.bitmaskShape.offsetY;
+      setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, ox, oy));
+    } else {
+      setPenOutlinePath('');
+    }
   });
 
   // Wrapper: pan だけ (zoom は座標へ直接反映し stroke を不変に保つ)

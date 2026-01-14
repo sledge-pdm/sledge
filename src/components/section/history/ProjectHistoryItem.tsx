@@ -2,8 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { RGBAToHex } from '@sledge-pdm/core';
 import { Icon } from '@sledge-pdm/ui';
 import { Accessor, Component, Show } from 'solid-js';
-import { BaseHistoryAction } from '~/features/history';
-import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
+import { BaseHistoryAction, LayerHistoryAction } from '~/features/history';
 import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
 import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
@@ -108,23 +107,11 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       description = `Merge / ${lmaction.originPackedSnapshot?.layer.name} > ${lmaction.targetPackedSnapshot?.layer.name}`;
       break;
     case 'layer_buffer': {
-      const anvilAction = action as AnvilLayerHistoryAction;
+      const lhAction = action as LayerHistoryAction;
       if (context?.tool === 'fx') {
-        description = `${findLayerById(anvilAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
+        description = `${findLayerById(lhAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
       } else {
-        const patch: any = anvilAction.patch;
-        const pixels = patch.pixels
-          ? `${
-              patch.pixels.reduce((prev: number, pixelList: any) => {
-                prev += pixelList.idx.length;
-                return prev;
-              }, 0) ?? 0
-            } pixels`
-          : '';
-        const tiles = patch.tiles ? `${patch.tiles.length ?? 0} tiles` : '';
-        const whole = patch.whole ? `whole` : '';
-        const partial = patch.partial ? `partial(${patch.partial.boundBox.width}x${patch.partial.boundBox.height})` : '';
-        description = `${findLayerById(anvilAction.layerId)?.name} / ${[pixels, tiles, whole, partial].filter(Boolean).join(' ')}`;
+        description = `${findLayerById(lhAction.layerId)?.name} / ${lhAction.context.tool}`;
       }
       break;
     }

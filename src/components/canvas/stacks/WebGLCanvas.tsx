@@ -7,34 +7,30 @@ import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { canvasStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
-import { WebGLRenderer } from '~/webgl/WebGLRenderer';
+import { FrascoRenderer } from '~/webgl/FrascoRenderer';
 
 const webglCanvasStyle = css`
   position: absolute;
   z-index: var(--zindex-webgl-canvas);
 `;
 
-export let webGLRenderer: WebGLRenderer | undefined;
+export let webGLRenderer: FrascoRenderer | undefined;
 
 const WebGLCanvas: Component = () => {
   const LOG_LABEL = 'WebGLCanvas';
   let canvasEl!: HTMLCanvasElement;
-  let requireFullRender = false;
 
   const [updateRender, setUpdateRender] = createSignal(false);
-  const [onlyDirtyUpdate, setOnlyDirtyUpdate] = createSignal(false);
 
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {
         setUpdateRender(false);
         try {
-          webGLRenderer?.render(onlyDirtyUpdate());
-          requireFullRender = false;
+          webGLRenderer?.render();
         } catch (error) {
           logSystemError('Failed to render WebGL frame.', { label: LOG_LABEL, details: [error] });
         }
-        setOnlyDirtyUpdate(false);
       }
     }, Number(globalConfig.performance.targetFPS))
   );
@@ -49,8 +45,6 @@ const WebGLCanvas: Component = () => {
       details: [width, height],
       debugOnly: true,
     });
-    requireFullRender = true;
-    setOnlyDirtyUpdate(false);
     setUpdateRender(false);
   };
 
@@ -70,18 +64,12 @@ const WebGLCanvas: Component = () => {
       details: [width, height],
       debugOnly: true,
     });
-    requireFullRender = true;
-    setOnlyDirtyUpdate(false);
     setUpdateRender(true);
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
     /* console.log('[WebGLCanvas] Requesting update:', e.context); */
-    if (!e.onlyDirty) {
-      requireFullRender = true;
-    }
     setUpdateRender(true);
-    setOnlyDirtyUpdate(!requireFullRender && e.onlyDirty);
   };
 
   const handleResumeRequest = (e: Events['webgl:requestResume']) => {
@@ -96,13 +84,11 @@ const WebGLCanvas: Component = () => {
       webGLRenderer = undefined;
     }
 
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
     try {
-      webGLRenderer = new WebGLRenderer(canvasEl);
+      webGLRenderer = new FrascoRenderer(canvasEl);
       webGLRenderer?.setLayers(allLayers());
       webGLRenderer.resize(width, height);
-      requireFullRender = true;
-      setOnlyDirtyUpdate(false);
       setUpdateRender(true); // rise flag for init render
 
       startRenderLoop();

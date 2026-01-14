@@ -1,19 +1,18 @@
-import { rawToWebp } from '@sledge-pdm/anvil';
-import { Size2D } from '@sledge-pdm/core';
-import { confirm } from '@tauri-apps/plugin-dialog';
+import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
-import { loadProjectJson } from '~/features/io/project/in/load';
+import { loadProject } from '~/features/io/project/in/load';
 import { dumpProjectJson } from '~/features/io/project/out/dump';
 import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
 import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
+import { dialog } from '~/utils/platform';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {
-    const canvasSize: Size2D = { ...canvasStore.canvas };
+    const canvasSize: Size2D = { ...canvasStore.size };
     // create thumbnail (actual size)
     const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(canvasSize.width, canvasSize.height);
 
@@ -26,7 +25,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
       snapshot: await dumpProjectJson(),
       thumbnail: thumbnailImageData
         ? {
-            webpBuffer: rawToWebp(thumbnailImageData.data, thumbnailImageData.width, thumbnailImageData.height),
+            packedBuffer: gzipDeflate(thumbnailImageData.data),
             width: thumbnailImageData.width,
             height: thumbnailImageData.height,
           }
@@ -64,7 +63,7 @@ export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapsho
 }
 
 export async function deleteSnapshot(snapshot: ProjectSnapshot) {
-  const confirmResult = await confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
+  const confirmResult = await dialog.confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
     cancelLabel: 'Cancel',
     okLabel: 'Delete',
     kind: 'info',
@@ -92,7 +91,7 @@ export async function loadSnapshot(
     const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
     if (!created) return;
   } else {
-    const confirmResult = await confirm(
+    const confirmResult = await dialog.confirm(
       `Sure to load snapshot "${snapshot.name}"?
 This will NOT backup your current state (unless you did manually backup.)`,
       {
@@ -124,10 +123,10 @@ This will NOT backup your current state (unless you did manually backup.)`,
 
   const savedSnapshotStore = { ...snapshotStore };
   // load snapshot
-  await loadProjectJson(snapshot.snapshot);
+  await loadProject(snapshot.snapshot);
 
   setSnapshotStore(savedSnapshotStore);
-  updateWebGLCanvas(false, 'snapshot loaded');
+  updateWebGLCanvas('snapshot loaded');
   updateLayerPreviewAll();
 }
 

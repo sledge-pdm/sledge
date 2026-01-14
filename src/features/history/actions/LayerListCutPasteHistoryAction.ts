@@ -1,10 +1,10 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
-import { PackedLayerSnapshot } from '~/features/history/actions/types';
 import { findLayerById, removeLayer, setActiveLayerId } from '~/features/layer';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { inflateLayerSnapshot } from './utils';
 
 export interface LayerListCutPasteHistoryActionProps extends BaseHistoryActionProps {
   sourcePackedSnapshot: PackedLayerSnapshot;
@@ -42,9 +42,10 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     // remove inserted
     removeLayer(this.targetPackedSnapshot.layer.id, { noDiff: true });
     // restore original (with cutFreeze true)
-    this.reinsert(this.sourceIndex, this.sourcePackedSnapshot);
+    const inflated = inflateLayerSnapshot(this.sourcePackedSnapshot);
+    if (inflated) this.reinsert(this.sourceIndex, inflated);
     setActiveLayerId(this.activeLayerIdBefore);
-    updateWebGLCanvas(false, 'CutPaste undo');
+    updateWebGLCanvas('CutPaste undo');
   }
 
   redo(): void {
@@ -52,44 +53,24 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const orig = findLayerById(this.sourcePackedSnapshot.layer.id);
     if (orig) removeLayer(orig.id, { noDiff: true });
     // insert pasted (cutFreeze false)
-    this.reinsert(this.targetIndex, this.targetPackedSnapshot);
+    const inflated = inflateLayerSnapshot(this.targetPackedSnapshot);
+    if (inflated) this.reinsert(this.targetIndex, inflated);
     setActiveLayerId(this.activeLayerIdAfter);
-    updateWebGLCanvas(false, 'CutPaste redo');
+    updateWebGLCanvas('CutPaste redo');
   }
 
-  private reinsert(index: number, packed: PackedLayerSnapshot) {
+  private reinsert(index: number, packed: LayerSnapshot) {
     // 元スナップショットの layer.id を保持するため addLayerTo は使わず直接配列操作する。
     const arr = [...layerListStore.layers];
     arr.splice(index, 0, packed.layer);
     setLayerListStore('layers', arr);
 
-    let anvil: ReturnType<typeof getAnvil> | undefined;
-    try {
-      anvil = getAnvil(packed.layer.id);
-    } catch {
-      anvil = undefined;
-    }
-    if (packed.image) {
-      const width = packed.image.width;
-      const height = packed.image.height;
-      if (anvil) {
-        anvil.importWebp(packed.image.webpBuffer, width, height);
-      } else {
-        const rawBuffer = webpToRaw(packed.image.webpBuffer, width, height);
-        anvilManager.registerAnvil(packed.layer.id, rawBuffer, width, height);
-      }
-    } else {
-      const width = canvasStore.canvas.width;
-      const height = canvasStore.canvas.height;
-      const rawBuffer = new Uint8ClampedArray(width * height * 4);
-      if (anvil) {
-        anvil.replaceBuffer(rawBuffer);
-      } else {
-        anvilManager.registerAnvil(packed.layer.id, rawBuffer, width, height);
-      }
-    }
+    const width = packed.image?.width ?? canvasStore.size.width;
+    const height = packed.image?.height ?? canvasStore.size.height;
+    const buffer = packed.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
+    layerManager.registerLayer(packed.layer.id, buffer, width, height, { inputSpace: 'layer' });
 
-    updateWebGLCanvas(false, `CutPaste reinsert (${packed.layer.id})`);
+    updateWebGLCanvas(`CutPaste reinsert (${packed.layer.id})`);
     updateLayerPreview(packed.layer.id);
   }
 

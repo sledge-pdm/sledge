@@ -1,15 +1,14 @@
-import { FileLocation } from '@sledge-pdm/core';
-import { appConfigDir } from '@tauri-apps/api/path';
-import { mkdir, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { v4 } from 'uuid';
 import { dumpProject } from '~/features/io/project/out/dump';
-import { fileStore } from '~/stores/EditorStores';
+import { ioStore } from '~/stores/EditorStores';
+import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { fs, path } from '~/utils/platform';
 
 const EMERGENCY_BACKUP_FOLDER = 'backup';
 
 export async function getEmergencyBackupPath(): Promise<string> {
-  const dir = normalizeJoin(await appConfigDir(), EMERGENCY_BACKUP_FOLDER);
+  const dir = normalizeJoin(await path.appConfigDir(), EMERGENCY_BACKUP_FOLDER);
   return dir;
 }
 
@@ -17,18 +16,18 @@ export async function getEmergencyBackupPath(): Promise<string> {
 export async function saveEmergencyBackup(): Promise<FileLocation> {
   const packedProject = await dumpProject();
 
-  const loc = fileStore.savedLocation;
+  const loc = ioStore.savedLocation;
   // save to nested unique id dir to prevent overwriting project with same name
   const dirName = v4();
   // Use only the project name and sanitize it for filename safety
   const sanitize = (name: string) => name.replace(/[<>:"/\\|?*\x00-\x1F]/g, '').slice(0, 100);
   const projectName = loc.name ? sanitize(loc.name) : 'new_project';
 
-  const dir = normalizeJoin(await appConfigDir(), EMERGENCY_BACKUP_FOLDER, dirName);
-  await mkdir(dir, { recursive: true });
+  const dir = normalizeJoin(await path.appConfigDir(), EMERGENCY_BACKUP_FOLDER, dirName);
+  await fs.mkdir(dir, { recursive: true });
   const fileName = `${projectName}.sledge`;
 
-  await writeFile(normalizeJoin(dir, fileName), packedProject, {
+  await fs.writeFile(normalizeJoin(dir, fileName), packedProject, {
     create: true,
   });
 
@@ -39,10 +38,10 @@ export async function saveEmergencyBackup(): Promise<FileLocation> {
 }
 
 export async function getEmergencyBackups(): Promise<FileLocation[] | undefined> {
-  const dir = normalizeJoin(await appConfigDir(), EMERGENCY_BACKUP_FOLDER);
-  await mkdir(dir, { recursive: true });
+  const dir = normalizeJoin(await path.appConfigDir(), EMERGENCY_BACKUP_FOLDER);
+  await fs.mkdir(dir, { recursive: true });
 
-  const entries = await readDir(dir);
+  const entries = await fs.readDir(dir);
 
   const backupFiles: FileLocation[] = [];
 
@@ -50,7 +49,7 @@ export async function getEmergencyBackups(): Promise<FileLocation[] | undefined>
     entries.map(async (entry) => {
       if (entry.isDirectory) {
         const projectDir = normalizeJoin(dir, entry.name);
-        const projectEntries = await readDir(projectDir);
+        const projectEntries = await fs.readDir(projectDir);
         projectEntries.forEach((f) => {
           backupFiles.push({
             path: projectDir,

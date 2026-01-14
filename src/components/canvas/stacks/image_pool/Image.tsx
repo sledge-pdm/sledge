@@ -4,7 +4,7 @@ import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer, updateEntryPartial } from '~/features/image_pool';
-import { useWebpBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
+import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { imagePoolStore } from '~/stores/ProjectStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
@@ -58,7 +58,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
   let svgRef: SVGSVGElement;
   let entryInteract: OnCanvasFrameInteract | undefined;
 
-  const imageSrc = useWebpBlobUrl(entry.webpBuffer);
+  const imageSrc = useImageBlobUrl(() => imagePoolStore.images.get(entry.id));
 
   const viewWidth = createMemo(() => Math.abs(entry.base.width * entry.transform.scaleX));
   const viewHeight = createMemo(() => Math.abs(entry.base.height * entry.transform.scaleY));

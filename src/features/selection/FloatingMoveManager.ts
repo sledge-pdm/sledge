@@ -1,11 +1,9 @@
 // controllers/layer/SelectionManager.ts
-import { AntialiasMode, RgbaBuffer, toUint8Array, toUint8ClampedArray } from '@sledge-pdm/anvil';
 import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { projectHistoryController } from '~/features/history';
-import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
-// import { getActiveAgent, getAgentOf, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
@@ -33,20 +31,14 @@ class FloatingMoveManager {
   }
   private targetBufferOriginal:
     | {
-        webpBuffer: Uint8Array;
+        buffer: Uint8ClampedArray;
         width: number;
         height: number;
       }
     | undefined = undefined;
   private targetBuffer: Uint8ClampedArray | undefined = undefined;
   private floatingBuffer: FloatingBuffer | undefined = undefined;
-  private compositeBuffer:
-    | {
-        buffer: RgbaBuffer;
-        width: number;
-        height: number;
-      }
-    | undefined;
+  private compositeBuffer: Uint8ClampedArray | undefined;
 
   private overlayVersion = 0;
   private state: MoveMode | undefined = undefined;
@@ -61,37 +53,32 @@ class FloatingMoveManager {
 
   public getCompositePreview(): Uint8ClampedArray | undefined {
     if (!this.targetBuffer || !this.floatingBuffer) return undefined;
-    const width = this.targetBufferOriginal?.width ?? canvasStore.canvas?.width;
-    const height = this.targetBufferOriginal?.height ?? canvasStore.canvas?.height;
+    const width = this.targetBufferOriginal?.width ?? canvasStore.size?.width;
+    const height = this.targetBufferOriginal?.height ?? canvasStore.size?.height;
     if (!width || !height) return undefined;
 
-    if (!this.compositeBuffer || this.compositeBuffer.width !== width || this.compositeBuffer.height !== height) {
-      this.compositeBuffer = {
-        buffer: new RgbaBuffer(width, height),
-        width,
-        height,
-      };
+    const expected = width * height * 4;
+    if (!this.compositeBuffer || this.compositeBuffer.length !== expected) {
+      this.compositeBuffer = new Uint8ClampedArray(expected);
     }
 
-    const buffer = this.compositeBuffer.buffer;
-    buffer.overwriteWith(toUint8Array(this.targetBuffer), width, height);
+    this.compositeBuffer.set(this.targetBuffer);
     const originX = this.floatingBuffer.origin?.x ?? 0;
     const originY = this.floatingBuffer.origin?.y ?? 0;
-    buffer.blitFromRaw(
-      toUint8Array(this.floatingBuffer.buffer),
+    const offsetX = Math.round(originX + this.floatingBuffer.offset.x);
+    const offsetY = Math.round(originY + this.floatingBuffer.offset.y);
+    blendBuffer(
+      this.compositeBuffer,
+      width,
+      height,
+      this.floatingBuffer.buffer,
       this.floatingBuffer.width,
       this.floatingBuffer.height,
-      Math.round(originX + this.floatingBuffer.offset.x),
-      Math.round(originY + this.floatingBuffer.offset.y),
-      1,
-      1,
-      0,
-      AntialiasMode.Nearest,
-      false,
-      false
+      offsetX,
+      offsetY
     );
 
-    return buffer.data();
+    return this.compositeBuffer;
   }
 
   public getOverlayDescriptor():
@@ -129,7 +116,7 @@ class FloatingMoveManager {
 
   private requestFrame(immediate?: boolean, layerIdOverride?: string) {
     const layerId = layerIdOverride ?? this.targetLayerId;
-    updateWebGLCanvas(false, 'floating-move');
+    updateWebGLCanvas('floating-move');
     updateLayerPreview(layerId);
     const payload = immediate ? { immediate: true } : {};
     eventBus.emit('selection:updateSelectionMenu', payload);
@@ -137,31 +124,29 @@ class FloatingMoveManager {
   }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
-    const anvil = getAnvil(targetLayerId);
-    const width = anvil.getWidth();
-    const height = anvil.getHeight();
+    const width = canvasStore.size?.width;
+    const height = canvasStore.size?.height;
     if (width == null || height == null) return undefined;
+    const base = layerManager.exportRawCanvas(targetLayerId);
     if (state === 'layer') {
       return new Uint8ClampedArray(width * height * 4);
     } else if (state === 'selection') {
-      const anvil = getAnvil(targetLayerId);
       const mask = selectionManager.getCombinedMask();
-      return toUint8ClampedArray(anvil.getBufferHandle().cropWithMask(mask, width, height, 0, 0));
+      const cleared = new Uint8ClampedArray(base);
+      clearMaskedPixels(cleared, mask, width, height);
+      return cleared;
     } else if (state === 'pasted') {
-      const base = anvil.getBufferCopy();
-      return base ? base.slice() : undefined;
+      return new Uint8ClampedArray(base);
     }
   }
 
   public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
     this.compositeBuffer = undefined;
-    const anvil = getAnvil(targetLayerId);
-    const webpBuffer = anvil.exportWebp();
-    if (!webpBuffer) return;
+    const base = layerManager.exportRawCanvas(targetLayerId);
     this.targetBufferOriginal = {
-      webpBuffer: webpBuffer,
-      width: anvil.getWidth(),
-      height: anvil.getHeight(),
+      buffer: base,
+      width: canvasStore.size.width,
+      height: canvasStore.size.height,
     };
     this.targetBuffer = this.getBaseBuffer(state, targetLayerId);
     if (!this.targetBuffer) return;
@@ -220,21 +205,21 @@ class FloatingMoveManager {
       return;
     }
 
-    const anvil = getAnvil(this.targetLayerId);
-    anvil.addWholeDiffWebp(this.targetBufferOriginal.webpBuffer);
-    anvil.getBufferHandle().overwriteWith(toUint8Array(composed), this.targetBufferOriginal.width, this.targetBufferOriginal.height);
-    anvil.setAllDirty();
-
-    const patch = anvil.flushDiffs();
-    if (patch) {
-      projectHistoryController.addAction(
-        new AnvilLayerHistoryAction({
-          layerId: this.targetLayerId,
-          patch,
-          context: { tool: TOOL_CATEGORIES.MOVE },
-        })
-      );
+    const layer = layerManager.getLayerOptional(this.targetLayerId);
+    if (!layer) {
+      logSystemError('attempt to commit, but target layer is missing.', { label: this.LOG_LABEL });
+      return;
     }
+    layer.commitHistory();
+    layerManager.replaceLayerBuffer(this.targetLayerId, composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height, {
+      inputSpace: 'canvas',
+    });
+    projectHistoryController.addAction(
+      new LayerHistoryAction({
+        layerId: this.targetLayerId,
+        context: { tool: TOOL_CATEGORIES.MOVE },
+      })
+    );
 
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();
@@ -282,3 +267,47 @@ class FloatingMoveManager {
 }
 
 export const floatingMoveManager = new FloatingMoveManager();
+
+function clearMaskedPixels(buffer: Uint8ClampedArray, mask: Uint8Array, width: number, height: number) {
+  const expected = width * height;
+  if (mask.length !== expected) {
+    return;
+  }
+  for (let i = 0; i < expected; i++) {
+    if (mask[i] === 0) continue;
+    const idx = i * 4;
+    buffer[idx] = 0;
+    buffer[idx + 1] = 0;
+    buffer[idx + 2] = 0;
+    buffer[idx + 3] = 0;
+  }
+}
+
+function blendBuffer(
+  dst: Uint8ClampedArray,
+  dstWidth: number,
+  dstHeight: number,
+  src: Uint8ClampedArray,
+  srcWidth: number,
+  srcHeight: number,
+  offsetX: number,
+  offsetY: number
+) {
+  for (let y = 0; y < srcHeight; y++) {
+    const dstY = y + offsetY;
+    if (dstY < 0 || dstY >= dstHeight) continue;
+    for (let x = 0; x < srcWidth; x++) {
+      const dstX = x + offsetX;
+      if (dstX < 0 || dstX >= dstWidth) continue;
+      const srcIdx = (y * srcWidth + x) * 4;
+      const srcA = src[srcIdx + 3];
+      if (srcA === 0) continue;
+      const dstIdx = (dstY * dstWidth + dstX) * 4;
+      const invA = 255 - srcA;
+      dst[dstIdx] = Math.round((src[srcIdx] * srcA + dst[dstIdx] * invA) / 255);
+      dst[dstIdx + 1] = Math.round((src[srcIdx + 1] * srcA + dst[dstIdx + 1] * invA) / 255);
+      dst[dstIdx + 2] = Math.round((src[srcIdx + 2] * srcA + dst[dstIdx + 2] * invA) / 255);
+      dst[dstIdx + 3] = Math.min(255, srcA + Math.round((dst[dstIdx + 3] * invA) / 255));
+    }
+  }
+}

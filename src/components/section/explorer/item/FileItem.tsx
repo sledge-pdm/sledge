@@ -1,12 +1,12 @@
 import { css } from '@acab/ecsstatic';
-import { FileLocation } from '@sledge-pdm/core';
 import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
-import { DirEntry } from '@tauri-apps/plugin-fs';
 import { Component, createMemo, Show } from 'solid-js';
 import { createEntryFromLocalImage, insertEntry, selectEntry } from '~/features/image_pool';
 import { openExistingProject } from '~/features/io/window';
+import { FileLocation } from '~/types/FileLocation';
 import { isImportableFile, isOpenableFile, normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
+import { DirEntry } from '~/utils/platform';
 
 const fileItemContainer = css`
   display: flex;
@@ -58,7 +58,7 @@ export interface FilesConfig {
   pathEditMode: boolean;
 }
 
-const getIconForName = (name: string, isDirectory: boolean) => {
+const getIconForName = (name: string, isDirectory?: boolean) => {
   if (isDirectory) return '/assets/icons/files/folder.png';
   if (name.endsWith('.sledge')) return '/assets/icons/files/file_sledge.png';
   if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) return '/assets/icons/files/image.png';
@@ -102,9 +102,9 @@ const FileItem: Component<{
           icon: '/assets/icons/files/image.png',
           onSelect: async () => {
             if (!location.path || !location.name) return;
-            const entry = await createEntryFromLocalImage(normalizeJoin(location.path, location.name));
-            insertEntry(entry);
-            selectEntry(entry.id);
+            const { entry: poolEntry, image } = await createEntryFromLocalImage(normalizeJoin(location.path, location.name));
+            insertEntry(poolEntry, image);
+            selectEntry(poolEntry.id);
           },
         });
 

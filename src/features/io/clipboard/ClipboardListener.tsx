@@ -1,6 +1,4 @@
-import { toUint8Array } from '@sledge-pdm/anvil';
-import { Image } from '@tauri-apps/api/image';
-import { writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
+import { toUint8Array } from '@sledge-pdm/core';
 import { Component, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
@@ -8,12 +6,13 @@ import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { isInputFocused, tryGetImageFromClipboard, tryGetTextFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log/service';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { layerListStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
+import { clipboard, image } from '~/utils/platform';
 
 const LOG_LABEL = 'ClipboardListener';
 
@@ -28,8 +27,8 @@ const ClipboardListener: Component = () => {
         const bufData = getCurrentSelectionBuffer();
         if (!bufData) return;
         const { buffer, bbox } = bufData;
-        const image = await Image.new(toUint8Array(buffer), bbox.width, bbox.height);
-        await writeImage(image);
+        const clipboardImage = await image.create(toUint8Array(buffer), bbox.width, bbox.height);
+        await clipboard.writeImage(clipboardImage);
         setInteractStore('placementPosition', {
           x: bbox.x,
           y: bbox.y,
@@ -37,7 +36,7 @@ const ClipboardListener: Component = () => {
         logUserSuccess('selection copied!', { label: LOG_LABEL });
         return 'selection';
       } else {
-        await writeText(layerListStore.activeLayerId);
+        await clipboard.writeText(layerListStore.activeLayerId);
         logUserSuccess('layer copied!', { label: LOG_LABEL });
         return 'layer';
       }
@@ -80,7 +79,12 @@ const ClipboardListener: Component = () => {
       if (textData) {
         const srcLayer = findLayerById(textData);
         if (srcLayer) {
-          const srcAnvil = getAnvil(textData);
+          const srcFrascoLayer = layerManager.getLayerOptional(textData);
+          if (!srcFrascoLayer) {
+            logUserError('layer buffer not found.', { label: LOG_LABEL });
+            return;
+          }
+          const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.exportRaw());
           const isCut = srcLayer.cutFreeze;
           // 切り取りと分かった時点でcutFreezeは取り下げる
           setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });
@@ -93,8 +97,8 @@ const ClipboardListener: Component = () => {
             const insertionIndex = activeIndex();
             const inserted = addLayerTo(
               insertionIndex,
-              { ...unfreezedSourceLayer, cutFreeze: false }, // ensure cutFreeze=false
-              { initImage: srcAnvil.getBufferCopy(), noDiff: true, uniqueName: false }
+              { ...unfreezedSourceLayer, cutFreeze: false },
+              { initImage: srcBuffer, noDiff: true, uniqueName: false }
             );
 
             removeLayer(unfreezedSourceLayer.id, { noDiff: true });
@@ -116,7 +120,7 @@ const ClipboardListener: Component = () => {
               projectHistoryController.addAction(action);
             }
           } else {
-            addLayerTo(activeIndex(), srcLayer, { initImage: srcAnvil.getBufferCopy(), noDiff: false, uniqueName: false });
+            addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, noDiff: false, uniqueName: false });
           }
         }
       } else {
@@ -124,12 +128,12 @@ const ClipboardListener: Component = () => {
         const data = await tryGetImageFromClipboard();
         if (data) {
           const { imageBuf, width, height } = data;
-          const entry = await createEntryFromRawBuffer(imageBuf, width, height);
+          const { entry, image } = await createEntryFromRawBuffer(imageBuf, width, height);
           entry.descriptionName = '[ from clipboard ]';
           const placementPos = interactStore.placementPosition ?? { x: 0, y: 0 };
           entry.transform.x = placementPos.x;
           entry.transform.y = placementPos.y;
-          insertEntry(entry);
+          insertEntry(entry, image);
           selectEntry(entry.id);
           logUserSuccess('pasted!', { label: LOG_LABEL });
         } else {

@@ -1,10 +1,10 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
-import { anvilManager } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
+import { FileLocation } from '~/types/FileLocation';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
@@ -39,7 +39,6 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
       name: location.name,
       mode: BlendMode.normal,
       type: LayerType.Dot,
-      dotMagnification: 1,
       opacity: 1,
     },
     {
@@ -48,9 +47,9 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
     }
   );
 
-  anvilManager.registerAnvil(initLayer.id, new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
+  layerManager.registerLayer(initLayer.id, new Uint8ClampedArray(imageData.data), imageData.width, imageData.height, { inputSpace: 'canvas' });
 
-  updateWebGLCanvas(false, `Import ${location.name}`);
+  updateWebGLCanvas(`Import ${location.name}`);
   updateLayerPreview(initLayer.id);
 
   return true;
@@ -77,7 +76,6 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
         enabled: true,
         mode: BlendMode.normal,
         type: LayerType.Dot,
-        dotMagnification: 1,
         opacity: 1,
       },
       {
@@ -86,9 +84,9 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
       }
     );
 
-    anvilManager.registerAnvil(initLayer.id, new Uint8ClampedArray(data.imageBuf), data.width, data.height);
+    layerManager.registerLayer(initLayer.id, new Uint8ClampedArray(data.imageBuf), data.width, data.height, { inputSpace: 'canvas' });
 
-    updateWebGLCanvas(false, `Import from clipboard`);
+    updateWebGLCanvas(`Import from clipboard`);
     updateLayerPreview(initLayer.id);
 
     return true;

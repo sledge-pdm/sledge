@@ -1,12 +1,13 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
 import { color, Icon } from '@sledge-pdm/ui';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
-import { fileStore } from '~/stores/EditorStores';
-import { canvasStore, projectStore } from '~/stores/ProjectStores';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
+import { ioStore } from '~/stores/EditorStores';
+import { canvasStore } from '~/stores/ProjectStores';
+import { window as platformWindow } from '~/utils/platform';
 import './title_bar_region.css';
 
 const titleBarRoot = css`
@@ -52,6 +53,26 @@ const titleBarSize = css`
   font-family: ZFB08;
   font-size: 8px;
   white-space: pre;
+  opacity: 0.9;
+`;
+
+const titleBarProjectVersion = css`
+  width: fit-content;
+  font-family: ZFB08;
+  font-size: 8px;
+  white-space: pre;
+  padding: 2px 4px;
+  background-color: var(--color-surface);
+  border-radius: 3px;
+  opacity: 0.9;
+`;
+
+const titleDivider = css`
+  height: 8px;
+  width: 1px;
+  background-color: var(--color-border);
+  margin-left: 12px;
+  margin-right: 12px;
 `;
 
 const titleBarSaveSection = css`
@@ -110,7 +131,7 @@ export default function TitleBar() {
   const [windowTitle, setWindowTitle] = createSignal('');
 
   onMount(async () => {
-    const window = getCurrentWindow();
+    const window = platformWindow.getCurrentWindow();
     setIsMaximizable(await window.isMaximizable());
     setIsMinimizable(await window.isMinimizable());
     setIsClosable(await window.isClosable());
@@ -119,25 +140,25 @@ export default function TitleBar() {
     setWindowTitle(await window.title());
   });
 
-  getCurrentWindow().onResized(async () => {
-    setMaximized(await getCurrentWindow().isMaximized());
+  platformWindow.getCurrentWindow().onResized(async () => {
+    setMaximized(await platformWindow.getCurrentWindow().isMaximized());
   });
 
   createEffect(() => {
     if (location.pathname.startsWith('/editor')) {
       let title = '';
-      let fileName = fileStore.savedLocation.name ?? '[new project]';
+      let fileName = ioStore.savedLocation.name ?? '[new project]';
       // non-custom titlebar (mac/linux)
       if (isDecorated()) {
-        const size = `(${canvasStore.canvas.width} x ${canvasStore.canvas.height})`;
-        const projPath = fileStore.savedLocation.path;
+        const size = `(${canvasStore.size.width} x ${canvasStore.size.height})`;
+        const projPath = ioStore.savedLocation.path;
         if (projPath) {
           title += `${fileName} ${size} - ${projPath}`;
         } else {
           title += `${fileName} ${size}`;
         }
       } else {
-        const projPath = fileStore.savedLocation.path;
+        const projPath = ioStore.savedLocation.path;
         if (projPath) {
           title += `${fileName} - ${projPath}`;
         } else {
@@ -145,14 +166,14 @@ export default function TitleBar() {
         }
       }
 
-      getCurrentWindow().setTitle(title);
+      platformWindow.getCurrentWindow().setTitle(title);
     }
   });
 
   const borderWindowLabels: string[] = ['settings', 'restore'];
-  const shouldShowBorder = () => borderWindowLabels.find((l) => l === getCurrentWindow().label);
+  const shouldShowBorder = () => borderWindowLabels.find((l) => l === platformWindow.getCurrentWindow().label);
   const titleLessWindowLabels: string[] = ['about'];
-  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === getCurrentWindow().label);
+  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === platformWindow.getCurrentWindow().label);
 
   return (
     <header>
@@ -185,20 +206,24 @@ export default function TitleBar() {
                   >
                     <p class={titleBarTitle}>
                       <span class={titleBarTitle} style={{ opacity: 0.5 }}>
-                        {fileStore.savedLocation.path ? `${fileStore.savedLocation.path}/` : ''}
+                        {ioStore.savedLocation.path ? `${ioStore.savedLocation.path}/` : ''}
                       </span>
-                      {fileStore.savedLocation.name ?? '[new project]'}
+                      {ioStore.savedLocation.name ?? '[new project]'}
                     </p>
-                    <Show when={fileStore.openAs === 'image'}>
+                    <Show when={ioStore.openAs === 'image'}>
                       <div style={{ 'margin-left': '8px' }}>
                         <Icon src='icons/title_bar/image.png' base={8} />
                       </div>
                     </Show>
-                    <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
+                    <p class={titleBarTitleSub}>{ioStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
-                  <div style={{ height: '8px', width: '1px', 'background-color': color.border, 'margin-left': '12px', 'margin-right': '12px' }} />
-                  <p class={titleBarSize} style={{ opacity: 0.9 }}>
-                    {canvasStore.canvas.width} x {canvasStore.canvas.height}
+                  <Show when={import.meta.env.DEV || (ioStore.loadProjectVersion && ioStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION)}>
+                    <div class={titleDivider} />
+                    <p class={titleBarProjectVersion}>V{ioStore.loadProjectVersion?.project}</p>
+                  </Show>
+                  <div class={titleDivider} />
+                  <p class={titleBarSize} style={{}}>
+                    {canvasStore.size.width} x {canvasStore.size.height}
                   </p>
                 </Show>
               </Show>
@@ -217,7 +242,7 @@ export default function TitleBar() {
                   class={titleBarControlButtonContainer}
                   onClick={async (e) => {
                     e.preventDefault();
-                    await getCurrentWindow().minimize();
+                    await platformWindow.getCurrentWindow().minimize();
                   }}
                   data-tauri-drag-region-exclude
                 >
@@ -236,7 +261,7 @@ export default function TitleBar() {
                   class={titleBarControlButtonContainer}
                   onClick={async (e) => {
                     e.preventDefault();
-                    await getCurrentWindow().toggleMaximize();
+                    await platformWindow.getCurrentWindow().toggleMaximize();
                   }}
                   data-tauri-drag-region-exclude
                 >
@@ -255,7 +280,7 @@ export default function TitleBar() {
                   class={clsx(titleBarControlButtonContainer, titleBarControlCloseButtonContainer)}
                   onClick={async (e) => {
                     e.preventDefault();
-                    await getCurrentWindow().close();
+                    await platformWindow.getCurrentWindow().close();
                   }}
                   data-tauri-drag-region-exclude
                 >

@@ -84,7 +84,6 @@ export const fallbackLayerProps: CreateLayerProps = {
   opacity: 1,
   mode: BlendMode.normal,
   enabled: true,
-  dotMagnification: 1,
   cutFreeze: false,
 };
 
@@ -115,7 +114,6 @@ export const createLayer = (props: CreateLayerProps, checkUnique?: boolean): Lay
     opacity: props.opacity,
     mode: props.mode,
     enabled: props.enabled,
-    dotMagnification: props.dotMagnification,
     cutFreeze: props.cutFreeze,
   };
 };

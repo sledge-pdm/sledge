@@ -4,12 +4,12 @@ import CanvasControls from './overlays/CanvasControls';
 import CanvasStack from './stacks/CanvasStack';
 
 import { css } from '@acab/ecsstatic';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
+import { window as platformWindow } from '~/utils/platform';
 import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
@@ -117,10 +117,10 @@ const toMatrix3dString = (matrix: DOMMatrix): string => {
 };
 
 /**
- * 新しいCanvasArea実装
+ * 新しいCanvasArea実裁E
  * - 単一のTransformMatrix使用
- * - 二重transform構造の廃止
- * - パフォーマンス最適化
+ * - 二重transform構造の廁E��
+ * - パフォーマンス最適匁E
  */
 const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;
@@ -128,7 +128,7 @@ const CanvasArea: Component = () => {
 
   let interact: CanvasAreaInteract | undefined = undefined;
 
-  // 最後に適用されたtransform値（差分検出用）
+  // 最後に適用されたtransform値�E�差刁E���E用�E�E
   let lastTransformMatrix = '';
   let lastTransformArray: number[] | undefined;
 
@@ -155,7 +155,7 @@ const CanvasArea: Component = () => {
 
       const matrixString = toMatrix3dString(matrix);
 
-      // 差分検知による最適化
+      // 差刁E��知による最適匁E
       if (lastTransformMatrix !== matrixString) {
         canvasStack.style.transform = matrixString;
         lastTransformMatrix = matrixString;
@@ -171,11 +171,11 @@ const CanvasArea: Component = () => {
   };
 
   onMount(() => {
-    const unlistenOnResized = getCurrentWindow().onResized(async (e) => {
-      // 座標変換キャッシュをクリア
+    const unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
+      // 座標変換キャチE��ュをクリア
       coordinateTransform.clearCache();
 
-      const isMaximize = await getCurrentWindow().isMaximized();
+      const isMaximize = await platformWindow.getCurrentWindow().isMaximized();
       const flag = isMaximize ? globalConfig.editor.centerCanvasOnMaximize : globalConfig.editor.centerCanvasOnResize;
       if (flag === 'offset') {
         centeringCanvas();
@@ -186,7 +186,7 @@ const CanvasArea: Component = () => {
     });
 
     eventBus.on('window:sideSectionSideChanged', (e) => {
-      // 座標変換キャッシュをクリア
+      // 座標変換キャチE��ュをクリア
       coordinateTransform.clearCache();
       centeringCanvas();
     });

@@ -1,11 +1,9 @@
 use wasm_bindgen::prelude::*;
 
-// WebGL関連
-pub mod webgl;
-// 選択範囲関連
+pub mod fill;
 pub mod selection;
-// ユーティリティ
 pub mod utils;
+pub mod webgl;
 
 #[wasm_bindgen]
 extern "C" {

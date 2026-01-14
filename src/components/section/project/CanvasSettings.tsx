@@ -118,9 +118,9 @@ const CanvasSettings: Component = () => {
   const [sizePreset, setSizePreset] = createSignal<string>('undefined');
 
   createEffect(() => {
-    canvasStore.canvas;
+    canvasStore.size;
 
-    logSystemInfo('CanvasSettings: canvas changed', { label: 'CanvasSettings', details: [canvasStore.canvas], debugOnly: true });
+    logSystemInfo('CanvasSettings: canvas changed', { label: 'CanvasSettings', details: [canvasStore.size], debugOnly: true });
     updateButtonState();
     updateCurrentPreset();
   });
@@ -130,13 +130,13 @@ const CanvasSettings: Component = () => {
       setIsChangable(false);
       return;
     }
-    const changable = Number(widthInputRef.value) !== canvasStore.canvas.width || Number(heightInputRef.value) !== canvasStore.canvas.height;
+    const changable = Number(widthInputRef.value) !== canvasStore.size.width || Number(heightInputRef.value) !== canvasStore.size.height;
     setIsChangable(changable);
   };
 
   const updateCurrentPreset = () => {
-    const cw = widthInputRef ? Number(widthInputRef.value) : canvasStore.canvas.width;
-    const ch = heightInputRef ? Number(heightInputRef.value) : canvasStore.canvas.height;
+    const cw = widthInputRef ? Number(widthInputRef.value) : canvasStore.size.width;
+    const ch = heightInputRef ? Number(heightInputRef.value) : canvasStore.size.height;
     const matchedPreset = Object.entries(canvasSizePresets).find(([key, c]) => c?.width === cw && c?.height === ch);
 
     if (matchedPreset) {
@@ -149,7 +149,7 @@ const CanvasSettings: Component = () => {
 
   const handlePresetChange = (value: string) => {
     if (value === 'undefined') {
-      const canvas = canvasStore.canvas;
+      const canvas = canvasStore.size;
       widthInputRef.value = canvas.width.toString();
       heightInputRef.value = canvas.height.toString();
       setSizePreset('undefined');
@@ -208,7 +208,7 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInputStyle}
               type='number'
               name='width'
-              value={canvasStore.canvas.width}
+              value={canvasStore.size.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
               onInput={() => {
@@ -228,7 +228,7 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInputStyle}
               type='number'
               name='height'
-              value={canvasStore.canvas.height}
+              value={canvasStore.size.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
               onInput={() => {

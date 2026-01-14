@@ -1,10 +1,10 @@
 import { css } from '@acab/ecsstatic';
-import { open } from '@tauri-apps/plugin-shell';
 import { createSignal, onMount } from 'solid-js';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { pageRoot } from '~/styles/styles';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+import { shell } from '~/utils/platform';
 import {
   aaContainer,
   aaText,
@@ -27,7 +27,7 @@ import {
 
 const About = () => {
   const openLink = (url: string) => {
-    open(url);
+    shell.open(url);
   };
 
   const [version, setVersion] = createSignal('');

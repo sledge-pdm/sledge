@@ -1,11 +1,9 @@
 import { css } from '@acab/ecsstatic';
-import { ShapeMask } from '@sledge-pdm/anvil';
-import { clsx } from '@sledge-pdm/core';
+import { clsx, Vec2 } from '@sledge-pdm/core';
+import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
 import { color, showContextMenu } from '@sledge-pdm/ui';
-import { mask_to_path } from '@sledge/wasm';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
-import { EraserTool } from '~/features/tools/behaviors/draw/eraser/EraserTool';
-import { PenTool } from '~/features/tools/behaviors/draw/pen/PenTool';
+import { previewMaskManager } from '~/features/tools/behaviors/draw/PreviewMaskManager';
 import { getCurrentPresetConfig, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, EraserPresetConfig, PenPresetConfig } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
@@ -132,19 +130,22 @@ interface PreviewProps {
 }
 const PreviewSVG: Component<PreviewProps> = (props) => {
   const containerSize = props.containerSize;
-  const [shapeMask, setShapeMask] = createSignal<ShapeMask | undefined>();
+  const [offset, setOffset] = createSignal<Vec2>({ x: 0, y: 0 });
   const [penOutlinePath, setPenOutlinePath] = createSignal('');
 
   const updatePreview = () => {
     const shape = props.shape;
     const size = props.size;
-    const behavior = toolStore.tools[props.categoryId].behavior as PenTool | EraserTool;
-    const shapeMask = behavior.shapeStore.get(shape, size ?? 0);
-    if (shapeMask) {
-      setShapeMask(shapeMask);
-      const { mask, width, height, offsetX, offsetY } = shapeMask;
-      const localPath = mask_to_path(mask, width, height, offsetX + containerSize / 2, offsetY + containerSize / 2);
-      setPenOutlinePath(localPath);
+    const kernel = shape === 'circle' ? new CircleKernel() : new SquareKernel();
+    const preview = previewMaskManager.get(kernel, { size, color: [0, 0, 0, 255], opacity: 1 });
+    if (!preview) {
+      setPenOutlinePath('');
+    } else {
+      setOffset({
+        x: containerSize / 2 - preview.bitmaskShape.width / 2,
+        y: containerSize / 2 - preview.bitmaskShape.height / 2,
+      });
+      setPenOutlinePath(preview.svgPath ?? '');
     }
   };
 
@@ -154,13 +155,23 @@ const PreviewSVG: Component<PreviewProps> = (props) => {
 
   createEffect(() => {
     props.shape;
+    props.size;
     updatePreview();
   });
 
   return (
-    <Show when={shapeMask() ?? penOutlinePath()}>
+    <Show when={penOutlinePath()}>
       <svg viewBox={`0 0 ${containerSize} ${containerSize}`} xmlns='http://www.w3.org/2000/svg'>
-        <path d={penOutlinePath()} fill={color.onBackground} stroke={'none'} vector-effect='non-scaling-stroke' pointer-events='none' />
+        <path
+          d={penOutlinePath()}
+          fill={color.onBackground}
+          stroke={'none'}
+          vector-effect='non-scaling-stroke'
+          pointer-events='none'
+          style={{
+            translate: `${offset().x}px ${offset().y}px`,
+          }}
+        />
       </svg>
     </Show>
   );

@@ -27,16 +27,6 @@ export function combine_masks_replace(preview_mask: Uint8Array): Uint8Array;
  */
 export function combine_masks_subtract(base_mask: Uint8Array, preview_mask: Uint8Array): Uint8Array;
 
-/**
- * 2つのバッファを合成する（FloodFill結果を元のバッファに適用）
- * base_buffer: ベースとなるピクセルバッファ (RGBA)
- * overlay_buffer: 重ねるピクセルバッファ (RGBA) - FloodFillの結果
- * selection_mask: 選択範囲のマスク (0 or 1)
- * mode: 制限モード ("inside", "outside", "none")
- * width, height: 画像のサイズ
- */
-export function composite_fill_result(base_buffer: Uint8Array, overlay_buffer: Uint8Array, selection_mask: Uint8Array, mode: string, width: number, height: number): Uint8Array;
-
 export function create_opacity_mask(buffer: Uint8Array, width: number, height: number): Uint8Array;
 
 /**
@@ -51,33 +41,12 @@ export function create_opacity_mask(buffer: Uint8Array, width: number, height: n
  */
 export function fill_lasso_selection(mask: Uint8Array, width: number, height: number, points: Float32Array, fill_rule: string): boolean;
 
-/**
- * Point-in-polygon アルゴリズムを使用した直接的な実装（小さなポリゴン用）
- */
-export function fill_lasso_selection_point_in_polygon(mask: Uint8Array, width: number, height: number, points: Float32Array): boolean;
-
-/**
- * 選択範囲制限付きLasso選択
- */
-export function fill_lasso_selection_with_mask(mask: Uint8Array, width: number, height: number, points: Float32Array, existing_mask: Uint8Array, limit_mode: string): boolean;
+export function fill_mask_area(buffer: Uint8Array, mask: Uint8Array, fill_color_r: number, fill_color_g: number, fill_color_b: number, fill_color_a: number): boolean;
 
 /**
  * 矩形をマスクに描画
  */
 export function fill_rect_mask(mask: Uint8Array, width: number, height: number, start_x: number, start_y: number, rect_width: number, rect_height: number): void;
-
-/**
- * 選択範囲制限モードに応じてピクセルバッファをフィルタリングする
- * original_buffer: 元のピクセルバッファ (RGBA)
- * selection_mask: 選択範囲のマスク (0 or 1)
- * mode: 制限モード ("inside", "outside", "none")
- * width, height: 画像のサイズ
- *
- * "inside": 選択範囲外を透明化
- * "outside": 選択範囲内を透明化
- * "none": 元のバッファをそのまま返す
- */
-export function filter_by_selection_mask(original_buffer: Uint8Array, selection_mask: Uint8Array, mode: string, width: number, height: number): Uint8Array;
 
 /**
  * ピクセルデータを上下反転する関数
@@ -89,5 +58,21 @@ export function flip_pixels_vertically(pixels: Uint8Array, width: number, height
  * 選択範囲マスクからSVGパス文字列を生成
  */
 export function mask_to_path(mask: Uint8Array, width: number, height: number, offset_x: number, offset_y: number): string;
+
+/**
+ * スキャンライン方式のFloodFill実装
+ *
+ * この実装は以下の特徴を持ちます：
+ * - メモリ効率的なスキャンライン方式
+ * - スタックオーバーフロー回避
+ * - 高速な隣接色判定
+ * - 選択範囲制限サポート
+ */
+export function scanline_flood_fill(buffer: Uint8Array, width: number, height: number, start_x: number, start_y: number, fill_color_r: number, fill_color_g: number, fill_color_b: number, fill_color_a: number, threshold: number): boolean;
+
+/**
+ * 選択範囲制限付きスキャンライン FloodFill
+ */
+export function scanline_flood_fill_with_mask(buffer: Uint8Array, width: number, height: number, start_x: number, start_y: number, fill_color_r: number, fill_color_g: number, fill_color_b: number, fill_color_a: number, threshold: number, selection_mask: Uint8Array, limit_mode: string): boolean;
 
 export function trim_mask_with_box(mask: Uint8Array, mask_width: number, mask_height: number, box_x: number, box_y: number, box_width: number, box_height: number): Uint8Array;

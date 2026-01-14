@@ -44,7 +44,6 @@ export abstract class SelectionBase implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 
@@ -63,7 +62,6 @@ export abstract class SelectionBase implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 
@@ -104,7 +102,6 @@ export abstract class SelectionBase implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 
@@ -123,7 +120,6 @@ export abstract class SelectionBase implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 

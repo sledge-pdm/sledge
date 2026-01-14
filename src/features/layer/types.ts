@@ -26,7 +26,6 @@ export interface Layer {
   opacity: number;
   mode: BlendMode;
   enabled: boolean;
-  dotMagnification: number;
   cutFreeze: boolean;
 }
 

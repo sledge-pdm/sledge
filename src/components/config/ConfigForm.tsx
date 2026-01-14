@@ -1,8 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
 import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge-pdm/ui';
-import { appConfigDir } from '@tauri-apps/api/path';
-import { confirm, message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { ConfigSections, FieldMeta, FieldValueMeta, isHeaderMeta } from '~/config/ConfigMeta';
 import { GlobalConfig } from '~/config/GlobalConfig';
@@ -20,6 +18,7 @@ import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { accentedButton, flexRow } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
+import { dialog, path } from '~/utils/platform';
 import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';
 import KeyConfigSettings from './KeyConfigSettings';
@@ -213,7 +212,7 @@ const ConfigForm: Component<Props> = (props) => {
   };
 
   const loadDefaults = async () => {
-    const confirmed = await confirm('this operation will reset ALL settings.\nsure to reset?', {
+    const confirmed = await dialog.confirm('this operation will reset ALL settings.\nsure to reset?', {
       kind: 'warning',
       okLabel: 'reset settings.',
       cancelLabel: 'cancel.',
@@ -222,7 +221,7 @@ const ConfigForm: Component<Props> = (props) => {
 
     if (confirmed) {
       resetToDefaultConfig();
-      message('reset succeeded.');
+      dialog.message('reset succeeded.');
     }
   };
 
@@ -368,7 +367,7 @@ const ConfigForm: Component<Props> = (props) => {
         <a
           class={configFormLink}
           onClick={async () => {
-            await revealInFileBrowser(normalizeJoin(await appConfigDir(), Consts.globalConfigFileName));
+            await revealInFileBrowser(normalizeJoin(await path.appConfigDir(), Consts.globalConfigFileName));
           }}
         >
           Open Config File.

@@ -1,10 +1,11 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
+import { gzipDeflate } from '@sledge-pdm/core';
 import { getLayerIndex } from '~/features/layer';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { PackedLayerSnapshot } from './types';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { inflateLayerSnapshot } from './utils';
 
 export interface LayerMergeHistoryActionProps extends BaseHistoryActionProps {
   originIndex: number;
@@ -35,31 +36,26 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
   getSnapshot(index: number): PackedLayerSnapshot | undefined {
     const layer = layerListStore.layers[index];
     if (!layer) return;
-    const anvil = getAnvil(layer.id);
-
-    const webpBuffer = anvil.exportWebp();
+    const frascoLayer = layerManager.getLayerOptional(layer.id);
+    if (!frascoLayer) return;
+    const buffer = frascoLayer.exportRaw();
     return {
       layer: { ...layer },
-      image: {
-        webpBuffer,
-        width: anvil.getWidth(),
-        height: anvil.getHeight(),
-      },
+      image: { codec: 'deflate', packedBuffer: gzipDeflate(buffer), width: frascoLayer.getWidth(), height: frascoLayer.getHeight() },
     };
   }
 
-  applySnapshot(snapshot: PackedLayerSnapshot) {
+  applySnapshot(snapshot?: LayerSnapshot) {
+    if (!snapshot) return;
+
     const idx = getLayerIndex(snapshot.layer.id);
     if (idx >= 0) {
       setLayerListStore('layers', idx, snapshot.layer);
 
       if (snapshot.image) {
-        try {
-          const anvil = getAnvil(snapshot.layer.id);
-          anvil.importWebp(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-        } catch {
-          const rawBuffer = webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-          anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
+        const frascoLayer = layerManager.getLayerOptional(snapshot.layer.id);
+        if (frascoLayer) {
+          frascoLayer.replaceBuffer(snapshot.image.buffer, snapshot.image.width, snapshot.image.height);
         }
       }
     }
@@ -81,10 +77,10 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     setLayerListStore('activeLayerId', this.activeLayerId);
 
     // apply snapshot
-    this.applySnapshot(this.originPackedSnapshot);
-    this.applySnapshot(this.targetPackedSnapshot);
+    this.applySnapshot(inflateLayerSnapshot(this.originPackedSnapshot));
+    this.applySnapshot(inflateLayerSnapshot(this.targetPackedSnapshot));
 
-    updateWebGLCanvas(false, 'Layer merge undo/redo');
+    updateWebGLCanvas('Layer merge undo/redo');
 
     // swap
     this.originPackedSnapshot = swapOriginPackedSnapshot;

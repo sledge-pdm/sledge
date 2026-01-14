@@ -31,8 +31,6 @@ export {
   duplicateLayer,
   findLayerById,
   getActiveLayerIndex,
-  getCurrentPointingColor,
-  getCurrentPointingColorHex,
   getLayerIndex,
   isImagePoolActive,
   mergeToBelowLayer,

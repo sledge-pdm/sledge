@@ -1,8 +1,6 @@
-import { confirm } from '@tauri-apps/plugin-dialog';
-import { relaunch } from '@tauri-apps/plugin-process';
-import { check, Update } from '@tauri-apps/plugin-updater';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
-import { projectStore } from '~/stores/ProjectStores';
+import { ioStore } from '~/stores/EditorStores';
+import { dialog, process, Update, updater } from './platform';
 
 function isValidUpdate(update: Update): boolean {
   if (update.version.includes('dev') || update.version.includes('test')) {
@@ -19,7 +17,7 @@ function isValidUpdate(update: Update): boolean {
 export async function getUpdate(): Promise<Update | undefined> {
   logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
   try {
-    const update = await check({
+    const update = await updater.check({
       timeout: 5000,
     });
     if (update && isValidUpdate(update)) {
@@ -35,8 +33,8 @@ export async function getUpdate(): Promise<Update | undefined> {
 export async function askAndInstallUpdate() {
   logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
 
-  if (projectStore.isProjectChangedAfterSave) {
-    const confirmed = await confirm('There are unsaved changes.\nSure to update without save?', {
+  if (ioStore.isProjectChangedAfterSave) {
+    const confirmed = await dialog.confirm('There are unsaved changes.\nSure to update without save?', {
       kind: 'warning',
       title: 'Unsaved Changes',
       okLabel: 'update without save.',
@@ -48,7 +46,7 @@ export async function askAndInstallUpdate() {
   }
 
   try {
-    const update = await check({
+    const update = await updater.check({
       timeout: 5000,
     });
     if (update && isValidUpdate(update)) {
@@ -58,7 +56,7 @@ export async function askAndInstallUpdate() {
         details: [update.body],
       });
 
-      const confirmed = await confirm(
+      const confirmed = await dialog.confirm(
         `New version available.
 ${update.currentVersion} -> ${update.version}`,
         {
@@ -90,7 +88,7 @@ ${update.currentVersion} -> ${update.version}`,
         });
 
         logSystemInfo('update installed', { label: 'UpdateUtils', debugOnly: true });
-        await relaunch();
+        await process.relaunch();
       }
     }
   } catch (e) {

@@ -54,5 +54,5 @@ function setOrder(order: string[]) {
     if (!order.includes(l.id)) next.push(l);
   }
   setLayerListStore('layers', next);
-  updateWebGLCanvas(false, 'Layer order changed');
+  updateWebGLCanvas('Layer order changed');
 }

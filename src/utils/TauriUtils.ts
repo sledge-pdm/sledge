@@ -1,14 +1,12 @@
-import { getTauriVersion } from '@tauri-apps/api/app';
-import { invoke } from '@tauri-apps/api/core';
-import { EventCallback, listen } from '@tauri-apps/api/event';
 import { logSystemError, logSystemWarn } from '~/features/log/service';
+import { app, core, event, EventCallback } from './platform';
 
 let _isTauri: boolean | null = null;
 
 export async function isTauri(): Promise<boolean> {
   if (_isTauri !== null) return _isTauri;
   try {
-    await getTauriVersion();
+    await app.getTauriVersion();
     _isTauri = true;
   } catch {
     _isTauri = false;
@@ -23,7 +21,7 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
   }
 
   try {
-    const result = await invoke<T>(cmd, args);
+    const result = await core.invoke<T>(cmd, args);
     return result;
   } catch (e) {
     logSystemError(`[safeInvoke] '${cmd}' failed`, { label: 'TauriUtils', details: [e] });
@@ -37,6 +35,6 @@ export async function emitGlobalEvent(event: TauriGlobalEvent, msg?: Object) {
   return await safeInvoke('emit_global_event', { event, msg });
 }
 
-export function listenEvent(event: TauriGlobalEvent, handler: EventCallback<any>) {
-  return listen(event, handler);
+export function listenEvent(e: TauriGlobalEvent, handler: EventCallback<any>) {
+  return event.listen(e, handler);
 }

@@ -1,7 +1,8 @@
+import { toUint8ClampedArray } from '@sledge-pdm/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { convertToMimetype } from '~/features/io/FileExtensions';
 import { Layer } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { canvasStore } from '~/stores/ProjectStores';
 
 export abstract class Exporter {
@@ -39,9 +40,7 @@ export async function convertLayerToBlob(
 ): Promise<Blob> {
   if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
 
-  const bufferPointer = getAnvil(layer.id).getBufferPointer();
-  if (!bufferPointer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
-  const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(bufferPointer);
+  const buffer = toUint8ClampedArray(getLayer(layer.id).exportRaw()) as Uint8ClampedArray<ArrayBuffer>;
 
   const offscreen = getScaledCanvas(buffer, scale);
   const mimeType = convertToMimetype(format);
@@ -62,7 +61,7 @@ export async function convertLayerToBlob(
 }
 
 export function getScaledCanvas(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1) {
-  const { width, height } = canvasStore.canvas;
+  const { width, height } = canvasStore.size;
 
   const offscreen = document.createElement('canvas');
   offscreen.width = width;
@@ -87,7 +86,7 @@ export function getScaledCanvas(buffer: Uint8ClampedArray<ArrayBuffer>, scale: n
 }
 
 export function getScaledBuffer(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1): ImageData {
-  const { width, height } = canvasStore.canvas;
+  const { width, height } = canvasStore.size;
 
   const offscreen = document.createElement('canvas');
   offscreen.width = width;

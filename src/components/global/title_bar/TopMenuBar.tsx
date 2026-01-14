@@ -1,8 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { color, fonts, MenuList, MenuListOption } from '@sledge-pdm/ui';
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { confirm } from '@tauri-apps/plugin-dialog';
-import { Update } from '@tauri-apps/plugin-updater';
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
@@ -14,10 +11,11 @@ import { createNew, openExistingProject, openFromClipboard, openProject } from '
 import { activeLayer } from '~/features/layer';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
-import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
+import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { dialog, window as platformWindow, Update } from '~/utils/platform';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
 import { addSkippedVersion } from '~/utils/VersionUtils';
 import { openWindow } from '~/utils/WindowUtils';
@@ -109,7 +107,7 @@ const TopMenuBar: Component = () => {
   const [availableUpdate, setAvailableUpdate] = createSignal<Update | undefined>();
 
   onMount(async () => {
-    setIsDecorated(await getCurrentWindow().isDecorated());
+    setIsDecorated(await platformWindow.getCurrentWindow().isDecorated());
     const update = await getUpdate();
     setAvailableUpdate(update);
   });
@@ -151,7 +149,7 @@ const TopMenuBar: Component = () => {
             // clipboard data will loaded in new window, but ensure there's data
             const ensureData = await tryGetImageFromClipboard();
             if (!ensureData) {
-              const confirmed = await confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
+              const confirmed = await dialog.confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
                 title: 'Open from clipboard',
               });
               if (!confirmed) return;
@@ -160,11 +158,11 @@ const TopMenuBar: Component = () => {
             openFromClipboard();
           },
         },
-        ...(fileStore.recentFiles.length > 0
+        ...(ioStore.recentFiles.length > 0
           ? [
               { type: 'divider', label: 'recent' } as MenuListOption,
               { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
-              ...fileStore.recentFiles
+              ...ioStore.recentFiles
                 .map<MenuListOption | undefined>((loc) => {
                   if (!loc.name || !loc.path) return undefined;
                   return {
@@ -172,7 +170,7 @@ const TopMenuBar: Component = () => {
                     label: normalizeJoin(loc.path, loc.name),
                     title: normalizeJoin(loc.path, loc.name),
                     fontFamily: fonts.ZFB03,
-                    disabled: loc.path === fileStore.savedLocation.path && loc.name === fileStore.savedLocation.name,
+                    disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
                     onSelect: () => {
                       openExistingProject(loc);
                     },

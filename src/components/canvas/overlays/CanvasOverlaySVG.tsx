@@ -1,5 +1,4 @@
-import { TileIndex } from '@sledge-pdm/anvil';
-import { mask_to_path } from '@sledge/wasm';
+import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -13,20 +12,18 @@ import {
   isToolAllowedInCurrentLayer,
 } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { previewMaskManager, PreviewShape } from '~/features/tools/behaviors/draw/PreviewMaskManager';
 import { interactStore, logStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerListStore } from '~/stores/ProjectStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import { PathCmdList } from '~/types/PathCommand';
 import { eventBus, Events } from '~/utils/EventBus';
+import { mask_to_path } from '~/utils/wasm';
 
-import { ShapeMask } from '@sledge-pdm/anvil';
-import { Circle } from '~/features/tools/behaviors/draw/pen/shape/Circle';
-import { Square } from '~/features/tools/behaviors/draw/pen/shape/Square';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 
 import { RGBAToHex } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import '~/styles/selection_animations.css';
 
@@ -37,23 +34,14 @@ const extractFirstPath = (svg: string) => {
 };
 const areaPatternPath = extractFirstPath(rawAreaPattern);
 
-function getDrawnPixelMask(size: number, shape: 'circle' | 'square'): ShapeMask {
-  switch (shape) {
-    case 'circle':
-      return new Circle(size).createMask();
-    case 'square':
-      return new Square(size).createMask();
-  }
-}
-
 const CanvasOverlaySVG: Component = () => {
   // 論理キャンバスサイズ (ズーム非適用)
-  const logicalWidth = () => canvasStore.canvas.width;
-  const logicalHeight = () => canvasStore.canvas.height;
+  const logicalWidth = () => canvasStore.size.width;
+  const logicalHeight = () => canvasStore.size.height;
 
   const [penOutlinePath, setPenOutlinePath] = createSignal('');
   let cachedLocalPath: PathCmdList | undefined;
-  let cachedKey: string | undefined;
+  let cachedPreview: PreviewShape | undefined;
   const borderDash = 6;
   const [selectionChanged, setSelectionChanged] = createSignal(false);
   const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
@@ -73,7 +61,7 @@ const CanvasOverlaySVG: Component = () => {
   );
 
   const updateSelectionOutline = () => {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
     const offset = getSelectionOffset();
     const mask = selectionManager.getCombinedMask();
     const pathString = mask_to_path(mask, width, height, offset.x, offset.y);
@@ -132,36 +120,37 @@ const CanvasOverlaySVG: Component = () => {
   // Cache local pen shape path
   createEffect(() => {
     const tool = getActiveToolCategoryId();
-    if (tool !== TOOL_CATEGORIES.PEN && tool !== TOOL_CATEGORIES.ERASER) {
-      cachedLocalPath = undefined;
-      cachedKey = undefined;
-      return;
-    }
     const preset = getCurrentPresetConfig(tool) as any;
     const size: number = preset?.size ?? 1;
     const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-    const key = `${tool}-${size}-${shape}`;
-    if (key === cachedKey && cachedLocalPath) return;
-    const { mask, width, height } = getDrawnPixelMask(size, shape);
-    const localPath = mask_to_path(mask, width, height, 0, 0);
-    cachedLocalPath = PathCmdList.parse(localPath);
-    cachedKey = key;
+
+    const kernel = shape === 'square' ? new SquareKernel() : new CircleKernel();
+    cachedPreview = previewMaskManager.get(kernel, { size, color: [0, 0, 0, 255], opacity: 1 });
+    if (!cachedPreview) {
+      cachedLocalPath = undefined;
+      return;
+    }
+    cachedLocalPath = PathCmdList.parse(cachedPreview.svgPath);
   });
 
   // Pen outline (logical coordinates)
   createEffect(() => {
     const tool = getActiveToolCategoryId();
     const mouse = interactStore.lastPointerOnCanvas;
-    if ((tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) && mouse && cachedLocalPath && isToolAllowedInCurrentLayer()) {
+    if (
+      (tool === TOOL_CATEGORIES.PEN || tool === TOOL_CATEGORIES.ERASER) &&
+      mouse &&
+      cachedLocalPath &&
+      cachedPreview &&
+      isToolAllowedInCurrentLayer()
+    ) {
       const preset = getCurrentPresetConfig(tool) as any;
       const size: number = preset?.size ?? 1;
-      const shape: 'circle' | 'square' = preset?.shape ?? 'square';
-      const { offsetX, offsetY } = getDrawnPixelMask(size, shape);
       const even = size % 2 === 0;
       const cx = even ? Math.round(mouse.x) : Math.floor(mouse.x);
       const cy = even ? Math.round(mouse.y) : Math.floor(mouse.y);
-      const ox = cx + offsetX;
-      const oy = cy + offsetY;
+      const ox = cx + cachedPreview.bitmaskShape.offsetX;
+      const oy = cy + cachedPreview.bitmaskShape.offsetY;
       setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, ox, oy));
     } else {
       setPenOutlinePath('');
@@ -202,25 +191,6 @@ const CanvasOverlaySVG: Component = () => {
     };
   };
 
-  const [dirtyTiles, setDirtyTiles] = createSignal<TileIndex[]>();
-  const [tileSize, setTileSize] = createSignal(32);
-  createEffect(() => {
-    if (!globalConfig.debug.showDirtyTiles) return;
-    const timer = setInterval(() => {
-      try {
-        const activeAnvil = getAnvil(layerListStore.activeLayerId);
-        const tileSize = activeAnvil.getTileSize();
-        setTileSize(tileSize);
-        // JS TilesController
-        setDirtyTiles(activeAnvil.getDirtyTiles());
-      } catch (e) {
-        // ignore when anvil not ready
-      }
-    }, 50);
-    // Cleanup when showDirtyTiles becomes false or component unmounts
-    return () => clearInterval(timer);
-  });
-
   return (
     <>
       <div style={panWrapperStyle()}>
@@ -242,24 +212,6 @@ const CanvasOverlaySVG: Component = () => {
               } as JSX.CSSProperties
             }
           >
-            <For each={dirtyTiles()}>
-              {(tile) => {
-                return (
-                  <rect
-                    fill={'#ff000080'}
-                    x={tile.col * tileSize()}
-                    y={tile.row * tileSize()}
-                    width={tileSize()}
-                    height={tileSize()}
-                    style={{
-                      position: 'absolute',
-                      'z-index': 1011000,
-                    }}
-                    transform={`scale(${interactStore.zoom})`}
-                  />
-                );
-              }}
-            </For>
             <defs>
               <pattern
                 id='area-pattern-animate'

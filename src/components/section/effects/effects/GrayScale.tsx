@@ -1,3 +1,4 @@
+import { GrayscaleEffect } from '@sledge-pdm/frasco';
 import { Component } from 'solid-js';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
 import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
@@ -8,7 +9,7 @@ const GrayScale: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='grayscale.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'grayscale', (buffer) => buffer.grayscale());
+        applyEffect(props.selectedLayerId(), 'grayscale', (layer) => GrayscaleEffect.apply(layer));
       }}
     ></EffectWrapper>
   );

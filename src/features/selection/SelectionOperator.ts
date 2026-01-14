@@ -1,20 +1,22 @@
-import type { PackedDiffs, RawPixelData } from '@sledge-pdm/anvil';
 import { Vec2 } from '@sledge-pdm/core';
-import { combine_masks_subtract, trim_mask_with_box } from '@sledge/wasm';
-import { AnvilLayerHistoryAction, projectHistoryController } from '~/features/history';
+import { projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
+import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
+import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo, logUserWarn } from '~/features/log/service';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getCurrentSelection, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { imagePoolStore, layerListStore } from '~/stores/ProjectStores';
+import { canvasStore, imagePoolStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { clonePersistedImages, toPersistedImages } from '../image_pool/service';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -67,9 +69,8 @@ export function isPositionWithinSelection(pos: Vec2) {
 // 現在の状況からFloat状態を作成
 export function startMove() {
   const layerId = layerListStore.activeLayerId;
-  const anvil = getAnvil(layerId);
-  const width = anvil.getWidth();
-  const height = anvil.getHeight();
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
   if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
@@ -77,7 +78,7 @@ export function startMove() {
   } else {
     selectionManager.selectAll();
     const layerFloatingBuffer: FloatingBuffer = {
-      buffer: anvil.getBufferCopy() ?? new Uint8ClampedArray(width * height * 4),
+      buffer: layerManager.exportRawCanvas(layerId),
       width,
       height,
       offset: { x: 0, y: 0 },
@@ -121,7 +122,7 @@ export function cancelSelection() {
   }
   selectionManager.clear();
 
-  updateWebGLCanvas(false, 'selection cancelled');
+  updateWebGLCanvas('selection cancelled');
   updateLayerPreview(layerId);
 
   if (wasMoving || hadSelection) {
@@ -142,7 +143,7 @@ export function cancelMove() {
   const wasMoving = floatingMoveManager.isMoving();
   floatingMoveManager.cancel();
 
-  updateWebGLCanvas(false, 'move cancelled');
+  updateWebGLCanvas('move cancelled');
   updateLayerPreview(layerId);
 
   if (wasMoving) {
@@ -150,38 +151,50 @@ export function cancelMove() {
   }
 }
 
-export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): PackedDiffs | undefined {
+export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): Uint8ClampedArray | undefined {
   const selection = getCurrentSelection();
   const lid = props?.layerId ?? activeLayer().id;
-  const anvil = getAnvil(lid);
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
 
   const bBox = selection.getBoundBox();
   if (!bBox) {
     logUserWarn('No selection to delete.');
     return;
   }
-  const selectionBoundBox = {
+  const layer = layerManager.getLayerOptional(lid);
+  if (!layer) return;
+  const mask = selection.getMask();
+  const bounds = {
     x: bBox.left,
     y: bBox.top,
     width: bBox.right - bBox.left + 1,
     height: bBox.bottom - bBox.top + 1,
   };
+  const glBounds = {
+    x: bounds.x,
+    y: height - bounds.y - bounds.height,
+    width: bounds.width,
+    height: bounds.height,
+  };
+  const maskTexture = buildSelectionMaskTexture(layer, mask, width, height);
+  if (!maskTexture) return;
 
-  anvil.addPartialDiff(selectionBoundBox, anvil.getPartialBuffer(selectionBoundBox));
-  anvil.getBufferHandle().fillMaskArea(selection.getMask(), 0, 0, 0, 0);
+  if (!props?.noAction) {
+    layer.commitHistory(glBounds);
+  }
+  layer.applyEffectWithTextures({ fragmentSrc: CLEAR_WITH_MASK_300ES }, { u_mask: maskTexture }, glBounds);
+  layer.deleteTexture(maskTexture);
 
-  updateWebGLCanvas(false, 'delete selected area');
+  updateWebGLCanvas('delete selected area');
   updateLayerPreview(lid);
   logUserInfo('Selected area cleared.');
 
-  const diffs = anvil.flushDiffs();
   if (!props?.noAction) {
-    if (diffs) {
-      const acc = new AnvilLayerHistoryAction({ layerId: lid, patch: diffs, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
-      projectHistoryController.addAction(acc);
-    }
+    const acc = new LayerHistoryAction({ layerId: lid, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
+    projectHistoryController.addAction(acc);
   }
-  return diffs ?? undefined;
+  return layerManager.exportRawCanvas(lid);
 }
 
 export function invertSelectionArea() {
@@ -243,20 +256,20 @@ export const computeMaskBBox = (
 
 export function getCurrentSelectionBuffer():
   | {
-      buffer: RawPixelData;
+      buffer: Uint8ClampedArray;
       bbox: { x: number; y: number; width: number; height: number };
     }
   | undefined {
-  const activeAnvil = getAnvil(activeLayer().id);
-  const width = activeAnvil.getWidth();
-  const height = activeAnvil.getHeight();
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
   selectionManager.commitOffset();
   const mask = selectionManager.getCombinedMask();
   const bbox = computeMaskBBox(mask, width, height);
   if (!bbox) return;
 
   const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
-  const selectionBuffer = activeAnvil.getBufferHandle().sliceWithMask(trimmedMask, bbox.width, bbox.height, bbox.x, bbox.y);
+  const sourceBuffer = layerManager.exportRawCanvas(activeLayer().id);
+  const selectionBuffer = extractMaskedPatch(sourceBuffer, trimmedMask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
 
   return {
     buffer: selectionBuffer,
@@ -270,22 +283,27 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   const { buffer, bbox } = selectionData;
 
   const oldEntries = imagePoolStore.entries.slice();
+  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
 
-  const entry = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
+  const { entry, image } = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
   entry.descriptionName = '[ from selection ]';
   entry.transform.x = bbox.x;
   entry.transform.y = bbox.y;
   entry.transform.scaleX = 1;
   entry.transform.scaleY = 1;
 
-  insertEntry(entry, true);
+  insertEntry(entry, image, true);
   selectEntry(entry.id);
 
   const newEntries = imagePoolStore.entries.slice();
+  const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
 
-  let diffs: PackedDiffs | undefined = undefined;
+  let beforeSnapshot = undefined;
+  let afterSnapshot = undefined;
   if (deleteAfter) {
-    diffs = deleteSelectedArea({ noAction: true }) ?? undefined;
+    beforeSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
+    deleteSelectedArea({ noAction: true });
+    afterSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
   }
   cancelSelection();
 
@@ -293,7 +311,10 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
     layerId: layerListStore.activeLayerId,
     oldEntries,
     newEntries,
-    patch: diffs,
+    oldImages,
+    newImages,
+    beforeSnapshot,
+    afterSnapshot,
   });
   projectHistoryController.addAction(action);
 
@@ -303,7 +324,73 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
 
   if (deleteAfter) {
-    updateWebGLCanvas(false, 'delete selected area');
+    updateWebGLCanvas('delete selected area');
     updateLayerPreview(layerListStore.activeLayerId);
   }
 }
+
+function buildSelectionMaskTexture(layer: ReturnType<typeof layerManager.getLayerOptional>, mask: Uint8Array, width: number, height: number) {
+  if (!layer) return;
+  const expected = width * height;
+  if (mask.length !== expected) return;
+  const rgba = new Uint8ClampedArray(expected * 4);
+  for (let i = 0; i < expected; i++) {
+    const v = mask[i] ? 255 : 0;
+    const idx = i * 4;
+    rgba[idx] = v;
+    rgba[idx + 3] = 255;
+  }
+  flip_pixels_vertically(new Uint8Array(rgba.buffer), width, height);
+  const texture = layer.createTextureFromRaw(new Uint8Array(rgba.buffer), { width, height });
+  return texture;
+}
+
+function extractMaskedPatch(
+  source: Uint8ClampedArray,
+  mask: Uint8Array,
+  sourceWidth: number,
+  sourceHeight: number,
+  left: number,
+  top: number,
+  width: number,
+  height: number
+): Uint8ClampedArray {
+  const out = new Uint8ClampedArray(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    const srcY = top + y;
+    if (srcY < 0 || srcY >= sourceHeight) continue;
+    for (let x = 0; x < width; x++) {
+      const srcX = left + x;
+      if (srcX < 0 || srcX >= sourceWidth) continue;
+      const maskIdx = y * width + x;
+      if (mask[maskIdx] === 0) continue;
+      const srcIdx = (srcY * sourceWidth + srcX) * 4;
+      const dstIdx = (y * width + x) * 4;
+      out[dstIdx] = source[srcIdx];
+      out[dstIdx + 1] = source[srcIdx + 1];
+      out[dstIdx + 2] = source[srcIdx + 2];
+      out[dstIdx + 3] = source[srcIdx + 3];
+    }
+  }
+  return out;
+}
+
+const CLEAR_WITH_MASK_300ES = `#version 300 es
+precision highp float;
+
+in vec2 v_uv;
+out vec4 outColor;
+
+uniform sampler2D u_src;
+uniform sampler2D u_mask;
+
+void main() {
+  vec4 src = texture(u_src, v_uv);
+  float m = texture(u_mask, v_uv).r;
+  if (m > 0.0) {
+    outColor = vec4(0.0);
+  } else {
+    outColor = src;
+  }
+}
+`;

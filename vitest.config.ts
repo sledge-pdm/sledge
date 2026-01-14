@@ -1,36 +1,58 @@
+import { playwright } from '@vitest/browser-playwright';
 import dotenv from 'dotenv';
 import path from 'path';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
 import { defineConfig } from 'vitest/config';
 
-export default defineConfig({
+const sharedConf = {
   plugins: [wasmPlugin(), topLevelAwait()],
-  test: {
-    environment: 'node',
-    globals: true,
-    env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
-    setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
-    // app-level integration tests + feature-local unit tests
-    include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
-    exclude: ['**/dist/**', '**/node_modules/**', '**/target/**'],
-    server: {
-      deps: {
-        // Ensure Vite transforms the wasm-using anvil package instead of Node trying to load .wasm directly.
-        inline: ['@sledge-pdm/anvil', /@sledge-pdm\/anvil/],
-      },
-    },
-  },
-  optimizeDeps: {
-    exclude: ['@sledge-pdm/core', '@sledge-pdm/ui', '@sledge-pdm/ui'],
-  },
   resolve: {
     alias: {
       '~': path.resolve(__dirname, 'src'),
       '@assets': path.resolve(__dirname, 'public/assets'),
       '@sledge/wasm': path.resolve(__dirname, 'wasm/pkg/sledge_wasm.js'),
-      '@tauri-apps/plugin-fs': path.resolve(__dirname, 'test/mocks/tauri-plugin-fs.ts'),
-      '@tauri-apps/api/core': path.resolve(__dirname, 'test/mocks/tauri-api-core.ts'),
     },
+  },
+};
+
+export default defineConfig({
+  test: {
+    benchmark: {
+      include: ['test/**/*.bench.(js|ts)'],
+    },
+    projects: [
+      {
+        ...sharedConf,
+        test: {
+          name: 'unit',
+          environment: 'node',
+          globals: true,
+          env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
+          setupFiles: [path.resolve(__dirname, 'vitest-unit.setup.ts')],
+          include: ['test/unit/**/*.test.ts', 'test/unit/**/*.test.tsx', 'test/**/*.unit.test.tsx'],
+          exclude: ['**/dist/**', '**/node_modules/**', '**/target/**', 'test/e2e/**'],
+        },
+      },
+      {
+        ...sharedConf,
+        test: {
+          name: 'e2e',
+          environment: 'node',
+          globals: true,
+          env: dotenv.config({ path: path.resolve(__dirname, '.env.vitest') }).parsed,
+          setupFiles: [path.resolve(__dirname, 'vitest-e2e.setup.ts')],
+          include: ['test/e2e/**/*.test.ts', 'test/e2e/**/*.test.tsx', 'test/**/*.browser.test.tsx'],
+          exclude: ['**/dist/**', '**/node_modules/**', '**/target/**', 'test/unit/**'],
+          browser: {
+            provider: playwright(),
+            enabled: true,
+            headless: true,
+            instances: [{ browser: 'chromium' }],
+            screenshotFailures: false,
+          },
+        },
+      },
+    ],
   },
 });

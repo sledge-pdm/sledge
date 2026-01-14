@@ -1,100 +1,9 @@
-import { FileLocation } from '@sledge-pdm/core';
-import { homeDir, pictureDir } from '@tauri-apps/api/path';
-import { exists, mkdir } from '@tauri-apps/plugin-fs';
-import { platform } from '@tauri-apps/plugin-os';
 import { importableFileExtensions, openableFileExtensions } from '~/features/io/FileExtensions';
-import { fileStore, lastSettingsStore } from '~/stores/EditorStores';
+import { ioStore, lastSettingsStore } from '~/stores/EditorStores';
 import { safeInvoke } from '~/utils/TauriUtils';
 
-export async function getFileUniqueId(path: string): Promise<string> {
-  const buf = new TextEncoder().encode(path);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  const hex = Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-  return hex.slice(0, 16);
-}
-
-export const pathToFileLocation = (fullPath: string): FileLocation | undefined => {
-  if (!fullPath || !fullPath.trim()) return undefined;
-  const normalized = normalizePath(fullPath);
-  const sepIndex = normalized.lastIndexOf('/');
-  if (sepIndex <= 0 || sepIndex === normalized.length - 1) return undefined;
-  const dir = normalized.substring(0, sepIndex);
-  const name = normalized.substring(sepIndex + 1);
-  if (!dir.trim() || !name.trim()) return undefined;
-  return {
-    path: dir,
-    name,
-  };
-};
-
-export async function defaultProjectDir() {
-  const pf = platform();
-  if (pf === 'linux') {
-    const home = await homeDir();
-    const linuxPicDir = normalizeJoin(home, 'sledge');
-    if (!(await exists(linuxPicDir))) await mkdir(linuxPicDir, { recursive: true });
-    return linuxPicDir;
-  } else {
-    return await pictureDir();
-  }
-}
-
-export async function defaultPictureDir() {
-  const home = await homeDir();
-  const projectDir = normalizeJoin(home, 'sledge');
-  if (!(await exists(projectDir)))
-    await mkdir(projectDir, {
-      recursive: true,
-    });
-  return projectDir;
-}
-
-export async function projectSaveDir(): Promise<string> {
-  if (fileStore.savedLocation.path) {
-    return normalizePath(fileStore.savedLocation.path);
-  }
-  return await defaultProjectDir();
-}
-
-export async function exportDir(): Promise<string> {
-  if (fileStore.savedLocation.path) {
-    return normalizePath(fileStore.savedLocation.path);
-  }
-  if (lastSettingsStore.exportSettings.folderPath) {
-    return normalizePath(lastSettingsStore.exportSettings.folderPath);
-  }
-  return await defaultPictureDir();
-}
-
-export function exportFileName(): string {
-  if (fileStore.savedLocation.name) {
-    return getFileNameWithoutExtension(fileStore.savedLocation.name);
-  }
-  if (lastSettingsStore.exportSettings.fileName) {
-    return getFileNameWithoutExtension(lastSettingsStore.exportSettings.fileName);
-  }
-  return 'new project';
-}
-
-export const getFileNameWithoutExtension = (fileName?: string): string => {
-  if (!fileName) return '';
-  return fileName.replace(/\.[^/.]+$/, '');
-};
-
-/**
- * @deprecated use normalizedJoin.
- */
-export const join = (...paths: string[]): string => {
-  const currentPlatform = platform();
-
-  if (currentPlatform === 'windows') {
-    return paths.join('\\');
-  } else {
-    return paths.join('/');
-  }
-};
+import { FileLocation } from '~/types/FileLocation';
+import { fs, os, path } from './platform';
 
 const isUncPath = (value: string): boolean => {
   if (!value) return false;
@@ -143,7 +52,7 @@ export const normalizeJoin = (...paths: string[]): string => {
   });
 
   if (pieces.length === 0) return hasUnixRoot ? '/' : '';
-  const currentPlatform = platform();
+  const currentPlatform = os.platform();
   let joined = currentPlatform === 'windows' ? pieces.join('\\') : pieces.join('/');
   if (hasUnixRoot && joined) {
     joined = '/' + joined.replace(/^\/+/, '');
@@ -158,7 +67,7 @@ export const formatNativePath = (path: string): string => {
   const normalized = normalizePath(path);
   if (!normalized) return '';
 
-  const currentPlatform = platform();
+  const currentPlatform = os.platform();
   if (currentPlatform !== 'windows') return normalized;
 
   if (normalized.startsWith('//?/')) {
@@ -179,10 +88,98 @@ export const formatNativePath = (path: string): string => {
   return normalized.replace(/\//g, '\\');
 };
 
+export const getFileNameWithoutExtension = (fileName?: string): string => {
+  if (!fileName) return '';
+  return fileName.replace(/\.[^/.]+$/, '');
+};
+
+/**
+ * @deprecated use normalizedJoin.
+ */
+export const join = (...paths: string[]): string => {
+  const currentPlatform = os.platform();
+  if (currentPlatform === 'windows') {
+    return paths.join('\\');
+  }
+  return paths.join('/');
+};
+
+export const pathToFileLocation = (fullPath: string): FileLocation | undefined => {
+  if (!fullPath || !fullPath.trim()) return undefined;
+  const normalized = normalizePath(fullPath);
+  const sepIndex = normalized.lastIndexOf('/');
+  if (sepIndex <= 0 || sepIndex === normalized.length - 1) return undefined;
+  const dir = normalized.substring(0, sepIndex);
+  const name = normalized.substring(sepIndex + 1);
+  if (!dir.trim() || !name.trim()) return undefined;
+  return {
+    path: dir,
+    name,
+  };
+};
+
+export async function getFileUniqueId(path: string): Promise<string> {
+  const buf = new TextEncoder().encode(path);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  const hex = Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  return hex.slice(0, 16);
+}
+
+export async function defaultProjectDir() {
+  const pf = os.platform();
+  if (pf === 'linux') {
+    const home = await path.homeDir();
+    const linuxPicDir = normalizeJoin(home, 'sledge');
+    if (!(await fs.exists(linuxPicDir))) await fs.mkdir(linuxPicDir, { recursive: true });
+    return linuxPicDir;
+  } else {
+    return await path.pictureDir();
+  }
+}
+
+export async function defaultPictureDir() {
+  const home = await path.homeDir();
+  const projectDir = normalizeJoin(home, 'sledge');
+  if (!(await fs.exists(projectDir)))
+    await fs.mkdir(projectDir, {
+      recursive: true,
+    });
+  return projectDir;
+}
+
+export async function projectSaveDir(): Promise<string> {
+  if (ioStore.savedLocation.path) {
+    return normalizePath(ioStore.savedLocation.path);
+  }
+  return await defaultProjectDir();
+}
+
+export async function exportDir(): Promise<string> {
+  if (ioStore.savedLocation.path) {
+    return normalizePath(ioStore.savedLocation.path);
+  }
+  if (lastSettingsStore.exportSettings.folderPath) {
+    return normalizePath(lastSettingsStore.exportSettings.folderPath);
+  }
+  return await defaultPictureDir();
+}
+
+export function exportFileName(): string {
+  if (ioStore.savedLocation.name) {
+    return getFileNameWithoutExtension(ioStore.savedLocation.name);
+  }
+  if (lastSettingsStore.exportSettings.fileName) {
+    return getFileNameWithoutExtension(lastSettingsStore.exportSettings.fileName);
+  }
+  return 'new project';
+}
+
 export const getAvailableDriveLetters = async (): Promise<string[] | undefined> => {
-  const platformType = platform();
+  const platformType = os.platform();
   if (platformType !== 'windows') {
-    // console.warn('getAvailableDriveLetters is only available on Windows platform.');
+    // console.warn('getAvailableDriveLetters is only available on Windows ');
     return undefined;
   }
 
@@ -190,9 +187,9 @@ export const getAvailableDriveLetters = async (): Promise<string[] | undefined> 
 };
 
 export const getDefinedDriveLetters = async (): Promise<string[] | undefined> => {
-  const platformType = platform();
+  const platformType = os.platform();
   if (platformType !== 'windows') {
-    // console.warn('getAvailableDriveLetters is only available on Windows platform.');
+    // console.warn('getAvailableDriveLetters is only available on Windows ');
     return undefined;
   }
 

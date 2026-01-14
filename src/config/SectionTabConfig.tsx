@@ -1,43 +1,27 @@
 import { JSX } from 'solid-js';
+import {
+  DEFAULT_TAB_CONTROLS_BY_SIDE,
+  SECTION_TAB_CONTROLS,
+  SECTION_TAB_IDS,
+  SectionSide,
+  SectionTab,
+  SectionTabControl,
+  type SectionTabControlDefinition,
+} from '~/config/SectionTabDefinitions';
 import { EditorTab, EffectsTab, ExplorerTab, ExportTab, HistoryTab, PerilousTab, ProjectTab } from '~/config/SectionTabs';
 
-export type SectionSide = 'leftSide' | 'rightSide';
-
 export const SECTION_TABS = [
-  { id: 'editor', content: () => <EditorTab /> },
-  { id: 'effects', content: () => <EffectsTab /> },
-  { id: 'explorer', content: () => <ExplorerTab /> },
-  { id: 'project', content: () => <ProjectTab /> },
-  { id: 'export', content: () => <ExportTab /> },
-  { id: 'history', content: () => <HistoryTab /> },
-  { id: 'danger', content: () => <PerilousTab /> },
+  { id: SECTION_TAB_IDS[0], content: () => <EditorTab /> },
+  { id: SECTION_TAB_IDS[1], content: () => <EffectsTab /> },
+  { id: SECTION_TAB_IDS[2], content: () => <ExplorerTab /> },
+  { id: SECTION_TAB_IDS[3], content: () => <ProjectTab /> },
+  { id: SECTION_TAB_IDS[4], content: () => <ExportTab /> },
+  { id: SECTION_TAB_IDS[5], content: () => <HistoryTab /> },
+  { id: SECTION_TAB_IDS[6], content: () => <PerilousTab /> },
 ] as const satisfies readonly {
   id: string;
   content: () => JSX.Element;
 }[];
-export type SectionTab = (typeof SECTION_TABS)[number]['id'];
 
-export const SECTION_TAB_CONTROLS = [
-  { id: 'editor', defaultSide: 'leftSide', defaultOrder: 1 },
-  { id: 'effects', defaultSide: 'leftSide', defaultOrder: 2 },
-  { id: 'explorer', defaultSide: 'leftSide', defaultOrder: 3 },
-  { id: 'project', defaultSide: 'rightSide', defaultOrder: 1 },
-  { id: 'export', defaultSide: 'rightSide', defaultOrder: 2 },
-  { id: 'history', defaultSide: 'rightSide', defaultOrder: 3 },
-] as const satisfies readonly {
-  id: SectionTab;
-  defaultSide: SectionSide;
-  defaultOrder: number;
-}[];
-export type SectionTabControl = (typeof SECTION_TAB_CONTROLS)[number]['id'];
-export type SectionTabControlDefinition = (typeof SECTION_TAB_CONTROLS)[number];
-
-const controlsBySide = (side: SectionSide): SectionTabControl[] =>
-  SECTION_TAB_CONTROLS.filter((tab) => tab.defaultSide === side)
-    .sort((a, b) => a.defaultOrder - b.defaultOrder)
-    .map((tab) => tab.id);
-
-export const DEFAULT_TAB_CONTROLS_BY_SIDE: Record<SectionSide, SectionTabControl[]> = {
-  leftSide: controlsBySide('leftSide'),
-  rightSide: controlsBySide('rightSide'),
-};
+export { DEFAULT_TAB_CONTROLS_BY_SIDE, SECTION_TAB_CONTROLS, SECTION_TAB_IDS, type SectionSide, type SectionTab, type SectionTabControl };
+export type { SectionTabControlDefinition };

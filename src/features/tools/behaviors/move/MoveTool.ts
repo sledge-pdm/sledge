@@ -22,7 +22,6 @@ export class MoveTool implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 
@@ -30,7 +29,6 @@ export class MoveTool implements ToolBehavior {
     if (!isSelectionAvailable()) {
       return {
         shouldUpdate: false,
-        shouldRegisterToHistory: false,
       };
     }
 
@@ -40,7 +38,6 @@ export class MoveTool implements ToolBehavior {
     if (offsetFromStartX === 0 && offsetFromStartY === 0)
       return {
         shouldUpdate: false,
-        shouldRegisterToHistory: false,
       };
 
     const offset = { x: this.startOffset.x + offsetFromStartX, y: this.startOffset.y + offsetFromStartY };
@@ -49,7 +46,6 @@ export class MoveTool implements ToolBehavior {
 
     return {
       shouldUpdate: false, // プレビュー更新は非同期で行うため、ここではfalse
-      shouldRegisterToHistory: false,
     };
   }
 
@@ -64,7 +60,6 @@ export class MoveTool implements ToolBehavior {
 
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 }

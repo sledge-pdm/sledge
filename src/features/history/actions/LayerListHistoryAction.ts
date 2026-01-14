@@ -1,10 +1,10 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
 import { removeLayer } from '~/features/layer';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
-import { PackedLayerSnapshot } from './types';
+import { LayerSnapshot, PackedLayerSnapshot } from './types';
+import { inflateLayerSnapshot } from './utils';
 
 export interface LayerListHistoryActionProps extends BaseHistoryActionProps {
   kind: 'add' | 'delete';
@@ -40,7 +40,9 @@ export class LayerListHistoryAction extends BaseHistoryAction {
       }
       case 'delete': {
         if (!this.packedSnapshot) return;
-        insertAt(this.index, this.packedSnapshot);
+        const inflated = inflateLayerSnapshot(this.packedSnapshot);
+        if (!inflated) return;
+        insertAt(this.index, inflated);
         break;
       }
     }
@@ -50,7 +52,9 @@ export class LayerListHistoryAction extends BaseHistoryAction {
     switch (this.kind) {
       case 'add': {
         if (!this.packedSnapshot) return;
-        insertAt(this.index, this.packedSnapshot);
+        const inflated = inflateLayerSnapshot(this.packedSnapshot);
+        if (!inflated) return;
+        insertAt(this.index, inflated);
         break;
       }
       case 'delete': {
@@ -76,19 +80,14 @@ export class LayerListHistoryAction extends BaseHistoryAction {
   }
 }
 
-function insertAt(index: number, snapshot: PackedLayerSnapshot) {
+function insertAt(index: number, snapshot: LayerSnapshot) {
   const arr = [...layerListStore.layers];
   arr.splice(index, 0, snapshot.layer);
   setLayerListStore('layers', arr);
-  if (snapshot.image) {
-    try {
-      const anvil = getAnvil(snapshot.layer.id);
-      anvil.importWebp(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-    } catch {
-      const rawBuffer = webpToRaw(snapshot.image.webpBuffer, snapshot.image.width, snapshot.image.height);
-      anvilManager.registerAnvil(snapshot.layer.id, rawBuffer, snapshot.image.width, snapshot.image.height);
-    }
-  }
-  updateWebGLCanvas(false, `Layer(${snapshot.layer.id}) inserted`);
+  const width = snapshot.image?.width ?? canvasStore.size.width;
+  const height = snapshot.image?.height ?? canvasStore.size.height;
+  const buffer = snapshot.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
+  layerManager.registerLayer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
+  updateWebGLCanvas(`Layer(${snapshot.layer.id}) inserted`);
   updateLayerPreview(snapshot.layer.id);
 }

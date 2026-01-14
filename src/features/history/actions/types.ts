@@ -9,10 +9,12 @@ export interface LayerSnapshot {
   };
 }
 
+// Present Layer snapshot format
 export interface PackedLayerSnapshot {
   layer: Layer;
   image?: {
-    webpBuffer: Uint8Array;
+    codec: 'deflate' | 'webp';
+    packedBuffer: Uint8Array;
     width: number;
     height: number;
   };

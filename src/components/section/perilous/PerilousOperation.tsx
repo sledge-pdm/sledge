@@ -1,7 +1,7 @@
-import { confirm } from '@tauri-apps/plugin-dialog';
+import { dialog } from '~/utils/platform';
 
 export const confirmOperation = async (message: string, callback: () => void) => {
-  if (await confirm(message, { title: 'Confirm Operation', kind: 'warning' })) {
+  if (await dialog.confirm(message, { title: 'Confirm Operation', kind: 'warning' })) {
     callback();
   }
 };

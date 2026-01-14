@@ -1,6 +1,6 @@
 // Image pool feature - Main public interface
 
-export type { ImagePoolEntry } from './model';
+export type { ImagePoolEntry, ImagePoolImage, ImagePoolImagePersisted, ImagePoolState } from './model';
 
 export {
   addImagesFromFiles,

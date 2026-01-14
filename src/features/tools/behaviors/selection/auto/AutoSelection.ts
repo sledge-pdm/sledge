@@ -1,12 +1,11 @@
-import { Anvil, toUint8Array } from '@sledge-pdm/anvil';
-import { auto_select_region_mask } from '@sledge/wasm';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { eventBus } from '~/utils/EventBus';
+import { auto_select_region_mask } from '~/utils/wasm';
 
 export class AutoSelection extends SelectionBase {
   protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
@@ -16,10 +15,8 @@ export class AutoSelection extends SelectionBase {
 
     const threshold = (args.presetName ? (getPresetOf('autoSelection', args.presetName) as any)?.threshold : undefined) ?? 0;
 
-    const anvil = getAnvil(args.layerId);
-
     // 領域選択マスクを生成してプレビューに反映
-    const mask = this.computeRegionMask(anvil, args.position, threshold);
+    const mask = this.computeRegionMask(args.layerId, args.position, threshold);
     const preview = selectionManager.getPreviewMask();
     if (preview && mask) {
       preview.setMask(mask);
@@ -44,15 +41,16 @@ export class AutoSelection extends SelectionBase {
   }
 
   // 自動選択用 WASM を使って、選択マスク(0/1)を返す
-  private computeRegionMask(anvil: Anvil, position: { x: number; y: number }, threshold: number): Uint8Array | undefined {
-    const width = anvil.getWidth();
-    const height = anvil.getHeight();
+  private computeRegionMask(layerId: string, position: { x: number; y: number }, threshold: number): Uint8Array | undefined {
+    const layer = layerManager.getLayerOptional(layerId);
+    if (!layer) return undefined;
+    const width = layer.getWidth();
+    const height = layer.getHeight();
     if (width === 0 || height === 0) return undefined;
 
     // 元バッファ（RGBA）を直接渡して WASM 側で領域抽出
-    const buffer = anvil.getBufferPointer();
-    if (!buffer) return undefined;
-    const src = toUint8Array(buffer); // RGBA buffer
+    const buffer = layerManager.exportRawCanvas(layerId);
+    const src = new Uint8Array(buffer.buffer); // RGBA buffer
     // connectivity は現状 4 固定（0を指定し内部で4接続扱い）
     const mask = auto_select_region_mask(src, width, height, position.x, position.y, threshold ?? 0, 4);
     return mask;

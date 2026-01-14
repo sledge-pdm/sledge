@@ -50,11 +50,11 @@ const CanvasError: Component = () => {
 
   onMount(() => {
     eventBus.on('webgl:renderPaused', handleRenderPaused);
-
     return () => {
       eventBus.off('webgl:renderPaused', handleRenderPaused);
     };
   });
+
   return (
     <Show when={isPaused()}>
       <div class={errorLayout}>

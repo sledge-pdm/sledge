@@ -1,3 +1,4 @@
+import { PosterizeEffect } from '@sledge-pdm/frasco';
 import { Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -17,7 +18,7 @@ const Posterize: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='posterize.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'posterize', (buffer) => buffer.posterize(options.levels));
+        applyEffect(props.selectedLayerId(), 'posterize', (layer) => PosterizeEffect.apply(layer, { levels: options.levels }));
       }}
     >
       <EffectControl label='levels.'>

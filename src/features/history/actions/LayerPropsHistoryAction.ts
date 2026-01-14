@@ -61,14 +61,14 @@ export class LayerPropsHistoryAction extends BaseHistoryAction {
     if (!this.oldLayerProps) return;
     const idx = getLayerIndex(this.layerId);
     setLayerListStore('layers', idx, { id: this.layerId, ...this.oldLayerProps });
-    updateWebGLCanvas(false, this.context);
+    updateWebGLCanvas(this.context);
   }
 
   redo(): void {
     if (!this.newLayerProps) return;
     const idx = getLayerIndex(this.layerId);
     setLayerListStore('layers', idx, { id: this.layerId, ...this.newLayerProps });
-    updateWebGLCanvas(false, this.context);
+    updateWebGLCanvas(this.context);
   }
 
   serialize(): SerializedHistoryAction {

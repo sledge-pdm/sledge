@@ -22,7 +22,7 @@ const canvasStack = css`
 
 const CanvasStack: Component = () => {
   const gridSize = createMemo(() => {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
 
     const shorter = width > height ? height : width;
     let canvasStoreOrder = Math.floor(Math.log10(shorter)) - 1;
@@ -36,7 +36,7 @@ const CanvasStack: Component = () => {
   });
 
   createEffect(() => {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
     const frame = requestAnimationFrame(() => {
       eventBus.emit('canvas:layoutReady', { newSize: { width, height } });
     });
@@ -50,16 +50,16 @@ const CanvasStack: Component = () => {
     <div
       class={canvasStackContainer}
       style={{
-        width: `${canvasStore.canvas.width}px`,
-        height: `${canvasStore.canvas.height}px`,
+        width: `${canvasStore.size.width}px`,
+        height: `${canvasStore.size.height}px`,
       }}
     >
       <div
         id='canvas-stack'
         class={canvasStack}
         style={{
-          width: `${canvasStore.canvas.width}px`,
-          height: `${canvasStore.canvas.height}px`,
+          width: `${canvasStore.size.width}px`,
+          height: `${canvasStore.size.height}px`,
           'background-image': `url("${CheckerboardPattern}")`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,

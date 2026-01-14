@@ -1,14 +1,14 @@
-import { toUint8Array } from '@sledge-pdm/anvil';
-import { create_opacity_mask, mask_to_path } from '@sledge/wasm';
+import { toUint8Array, toUint8ClampedArray } from '@sledge-pdm/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { canvasStore } from '~/stores/ProjectStores';
+import { create_opacity_mask, mask_to_path } from '~/utils/wasm';
 
 export class SVGExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
 
     // 64x64以内の制限チェック
     if (width > 128 || height > 128) {
@@ -41,7 +41,7 @@ export class SVGExporter extends Exporter {
   }
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
-    const { width, height } = canvasStore.canvas;
+    const { width, height } = canvasStore.size;
 
     // 64x64以内の制限チェック
     if (width > 128 || height > 128) {
@@ -49,7 +49,7 @@ export class SVGExporter extends Exporter {
     }
 
     if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
-    const buffer = getAnvil(layer.id).getBufferCopy();
+    const buffer = toUint8ClampedArray(getLayer(layer.id).exportRaw()) as Uint8ClampedArray<ArrayBuffer>;
     if (!buffer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
 
     // wasmを使って不透明部分のマスクを作成

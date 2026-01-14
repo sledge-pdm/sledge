@@ -7,15 +7,13 @@ import Editor from './routes/editor/index';
 import Home from './routes/start/index';
 
 import { applyTheme, showContextMenu } from '@sledge-pdm/ui';
-import { listen } from '@tauri-apps/api/event';
-import { getCurrentWebview } from '@tauri-apps/api/webview';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, onMount } from 'solid-js';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
+import { event, window as platformWindow, webview } from '~/utils/platform';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
@@ -65,25 +63,25 @@ export default function App() {
     }
   };
 
-  listen('tauri://theme-changed', (e) => {
+  event.listen('tauri://theme-changed', (e) => {
     applyThemeToHtml(e.payload === 'dark' ? 'dark' : 'light');
   });
 
   onMount(async () => {
-    const webview = getCurrentWebview();
-    const window = getCurrentWindow();
+    const currentWebview = webview.getCurrentWebview();
+    const currentWindow = platformWindow.getCurrentWindow();
     applyThemeToHtml();
 
-    await webview.setZoom(zoomForIntegerize(await window.scaleFactor()));
+    await currentWebview.setZoom(zoomForIntegerize(await currentWindow.scaleFactor()));
 
-    window.onScaleChanged(async ({ payload }) => {
+    currentWindow.onScaleChanged(async ({ payload }) => {
       const { scaleFactor, size } = payload;
       logSystemInfo('scale changed', {
         label: LOG_LABEL,
         details: [scaleFactor, 'dprzoom', zoomForIntegerize(scaleFactor)],
         debugOnly: true,
       });
-      await webview.setZoom(zoomForIntegerize(scaleFactor));
+      await currentWebview.setZoom(zoomForIntegerize(scaleFactor));
     });
 
     // await checkForUpdates();

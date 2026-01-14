@@ -1,13 +1,9 @@
-import { FileLocation } from '@sledge-pdm/core';
-import { WebviewOptions } from '@tauri-apps/api/webview';
-import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
-import { getCurrentWindow, WindowOptions } from '@tauri-apps/api/window';
-import { message } from '@tauri-apps/plugin-dialog';
-import { exit } from '@tauri-apps/plugin-process';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
+import { FileLocation } from '~/types/FileLocation';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
+import { dialog, window as platformWindow, process, WebviewOptions, webviewWindow, WindowOptions } from './platform';
 
 export function zoomForIntegerize(dpr: number) {
   const n = Math.round(dpr - 0.01);
@@ -19,7 +15,7 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 export type WindowKind = 'start' | 'editor' | 'restore' | 'settings' | 'about';
 
 export async function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
-  const parent = kind === 'settings' || kind === 'about' ? getCurrentWindow().label : undefined;
+  const parent = kind === 'settings' || kind === 'about' ? platformWindow.getCurrentWindow().label : undefined;
   return safeInvoke('open_window', {
     kind,
     options: {
@@ -36,7 +32,7 @@ export function openDevTools(windowLabel: string): Promise<void> {
 }
 
 export async function closeWindowsByLabel(label: string) {
-  (await getAllWebviewWindows())
+  (await webviewWindow.getAllWebviewWindows())
     .filter((w) => w.label === label)
     .forEach(async (w) => {
       await w.close();
@@ -108,7 +104,7 @@ export async function reportAppStartupError(e: any) {
 
   alreadyShownErrors.add(errorMessage);
 
-  await message(
+  await dialog.message(
     `Something went wrong in startup.\n${errorMessage || '<No message available>'}
     \n${errorStack || '<No stack trace available>'}`,
     {
@@ -120,7 +116,7 @@ export async function reportAppStartupError(e: any) {
 
   alreadyShownErrors.delete(errorMessage);
   // kill process
-  await exit(0);
+  await process.exit(0);
 }
 
 export async function reportWindowStartError(e: any) {
@@ -137,7 +133,7 @@ export async function reportWindowStartError(e: any) {
   });
   alreadyShownErrors.add(errorMessage);
 
-  await message(
+  await dialog.message(
     `Something went wrong in window startup.\n${errorMessage || '<No message available>'}
     \n${errorStack || '<No stack trace available>'}`,
     {
@@ -148,10 +144,10 @@ export async function reportWindowStartError(e: any) {
   );
   alreadyShownErrors.delete(errorMessage);
 
-  // throwがあった時点でshowMainWindowには届かないのでvisible=falseのウィンドウが残留する
+  // throwがあった時点でshowMainWindowには届かなぁE�Eでvisible=falseのウィンドウが残留する
   // 確実に消しておく
-  getCurrentWindow().close();
-  getCurrentWindow().destroy();
+  platformWindow.getCurrentWindow().close();
+  platformWindow.getCurrentWindow().destroy();
 }
 
 export async function reportCriticalError(e: any) {
@@ -169,7 +165,7 @@ export async function reportCriticalError(e: any) {
 
   alreadyShownErrors.add(errorMessage);
 
-  await message(
+  await dialog.message(
     `Something went wrong.\n${errorMessage || '<No message available>'}
     \n${errorStack || '<No stack trace available>'}`,
     {
@@ -183,14 +179,14 @@ export async function reportCriticalError(e: any) {
 }
 
 export async function showMainWindow() {
-  // ネイティブスプラッシュを閉じてWebViewを表示
+  // ネイチE��ブスプラチE��ュを閉じてWebViewを表示
   try {
-    const windowLabel = getCurrentWindow().label;
+    const windowLabel = platformWindow.getCurrentWindow().label;
     await safeInvoke('show_main_window', { windowLabel });
     logSystemInfo('🌐 [PERF] Window transition completed', { label: 'WindowUtils', debugOnly: true });
   } catch (error) {
     logSystemError('Failed to transition from native splash.', { label: 'WindowUtils', details: [error] });
     // フォールバック
-    getCurrentWindow().show();
+    platformWindow.getCurrentWindow().show();
   }
 }

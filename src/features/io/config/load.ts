@@ -1,15 +1,15 @@
-import { BaseDirectory } from '@tauri-apps/api/path';
-import { exists, readTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { getDefaultSettings, getFallbackedSettings } from '~/features/io/config/set';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { loadConfigToGlobalStore } from '~/stores/GlobalStores';
+import { fs } from '~/utils/platform';
 
 const LOG_LABEL = 'ConfigLoader';
 
 export async function loadGlobalSettings() {
-  const isConfigExists = await exists(Consts.globalConfigFileName, { baseDir: BaseDirectory.AppConfig });
+  const baseDir = fs.BaseDirectory?.AppConfig;
+  const isConfigExists = baseDir ? await fs.exists(Consts.globalConfigFileName, { baseDir }) : await fs.exists(Consts.globalConfigFileName);
   const defaultSettings = getDefaultSettings();
   if (!isConfigExists) {
     logSystemWarn('No global settings found, create one with default values.', { label: LOG_LABEL });
@@ -17,9 +17,7 @@ export async function loadGlobalSettings() {
     await saveGlobalSettings(false);
     return defaultSettings;
   } else {
-    const configData = await readTextFile(Consts.globalConfigFileName, {
-      baseDir: BaseDirectory.AppConfig,
-    });
+    const configData = await fs.readTextFile(Consts.globalConfigFileName, baseDir ? { baseDir } : undefined);
 
     let configJson;
 

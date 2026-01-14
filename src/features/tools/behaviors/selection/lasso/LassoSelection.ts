@@ -1,6 +1,3 @@
-import { fill_lasso_selection } from '@sledge/wasm';
-import { getCurrentWebview } from '@tauri-apps/api/webview';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
 import { logSystemWarn } from '~/features/log/service';
 import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
@@ -10,6 +7,8 @@ import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/To
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { webview } from '~/utils/platform';
+import { fill_lasso_selection } from '~/utils/wasm';
 
 export type LassoDisplayMode = 'fill' | 'outline';
 export class LassoSelection extends SelectionBase {
@@ -20,7 +19,7 @@ export class LassoSelection extends SelectionBase {
   private readonly UPDATE_INTERVAL = 16; // 60fps相当
 
   getDisplayMode(preset: LassoSelectionPresetConfig): LassoDisplayMode {
-    if (canvasStore.canvas.width * canvasStore.canvas.height <= 1024 * 1024) return 'fill';
+    if (canvasStore.size.width * canvasStore.size.height <= 1024 * 1024) return 'fill';
 
     return 'outline';
   }
@@ -71,20 +70,18 @@ export class LassoSelection extends SelectionBase {
     return { x: Math.max(0, x), y: Math.max(0, y), width: Math.max(1, width), height: Math.max(1, height) };
   }
 
-  private updatePartialMask(anvil: any, mode: 'nonzero' | 'evenodd'): void {
+  private updatePartialMask(canvasW: number, canvasH: number, mode: 'nonzero' | 'evenodd'): void {
     if (!this.previewFragment || this.points.length < 6) return;
 
-    getCurrentWebview().clearAllBrowsingData();
+    webview.getCurrentWebview().clearAllBrowsingData();
 
     const bbox = this.calculateBoundingBox(this.points);
 
     // バウンディングボックスをキャンバス範囲内に制限
-    const canvasWidth = anvil.getWidth();
-    const canvasHeight = anvil.getHeight();
-    const clampedX = Math.max(0, Math.min(bbox.x, canvasWidth - 1));
-    const clampedY = Math.max(0, Math.min(bbox.y, canvasHeight - 1));
-    const clampedWidth = Math.min(bbox.width, canvasWidth - clampedX);
-    const clampedHeight = Math.min(bbox.height, canvasHeight - clampedY);
+    const clampedX = Math.max(0, Math.min(bbox.x, canvasW - 1));
+    const clampedY = Math.max(0, Math.min(bbox.y, canvasH - 1));
+    const clampedWidth = Math.min(bbox.width, canvasW - clampedX);
+    const clampedHeight = Math.min(bbox.height, canvasH - clampedY);
 
     // 新しいバウンディングボックスまたはサイズが変わった場合はマスクを再作成
     if (
@@ -124,8 +121,6 @@ export class LassoSelection extends SelectionBase {
     selectionManager.beginPreview(mode);
     this.startPosition = args.position;
 
-    const anvil = getAnvil(args.layerId);
-
     // 座標追跡を初期化
     this.points = [args.position.x, args.position.y];
     this.lastUpdateTime = performance.now();
@@ -152,8 +147,6 @@ export class LassoSelection extends SelectionBase {
   protected onMoveSelection(args: ToolArgs, mode: SelectionEditMode) {
     if (!this.previewFragment) return;
 
-    const anvil = getAnvil(args.layerId);
-
     // フレームレート制限による最適化
     const currentTime = performance.now();
     if (currentTime - this.lastUpdateTime < this.UPDATE_INTERVAL) {
@@ -177,7 +170,7 @@ export class LassoSelection extends SelectionBase {
     if (displayMode === 'fill') {
       // 最低3点必要（線分を作るため）
       if (this.points.length >= 6) {
-        this.updatePartialMask(anvil, fillMode);
+        this.updatePartialMask(canvasStore.size.width, canvasStore.size.height, fillMode);
       }
 
       selectionManager.setPreviewFragment(this.previewFragment);
@@ -188,8 +181,6 @@ export class LassoSelection extends SelectionBase {
 
   protected onEndSelection(args: ToolArgs, mode: SelectionEditMode) {
     if (!this.previewFragment) return;
-
-    const anvil = getAnvil(args.layerId);
 
     // 最終的なマスクを生成（ポリゴンを閉じるため）
     if (this.points.length >= 6) {
@@ -208,7 +199,7 @@ export class LassoSelection extends SelectionBase {
       const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
       const fillMode = preset.fillMode ?? 'nonzero';
       // 最終マスクを生成
-      this.updatePartialMask(anvil, fillMode);
+      this.updatePartialMask(canvasStore.size.width, canvasStore.size.height, fillMode);
     }
 
     this.points = [];

@@ -4,7 +4,7 @@ import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/out/save';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
-import { fileStore } from '~/stores/EditorStores';
+import { ioStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -87,13 +87,12 @@ const SaveSection: Component = () => {
       }
     | undefined
   >(undefined);
-  const isOWPossible = () =>
-    fileStore.savedLocation.name !== undefined && fileStore.savedLocation.path !== undefined && fileStore.openAs === 'project';
+  const isOWPossible = () => ioStore.savedLocation.name !== undefined && ioStore.savedLocation.path !== undefined && ioStore.openAs === 'project';
 
   const [saveLoading, setSaveLoading] = createSignal<boolean>(false);
   const save = async () => {
     setSaveLoading(true);
-    await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
+    await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
     setSaveLoading(false);
   };
 
@@ -159,7 +158,7 @@ const SaveSection: Component = () => {
       label: 'Save As...',
       onSelect: async () => {
         setSaveLoading(true);
-        await saveProject(fileStore.savedLocation.name);
+        await saveProject(ioStore.savedLocation.name);
         setSaveLoading(false);
       },
       color: color.onBackground,
@@ -168,10 +167,10 @@ const SaveSection: Component = () => {
       type: 'item',
       label: 'Open Saved Folder',
       onSelect: () => {
-        if (!fileStore.savedLocation.path || !fileStore.savedLocation.name) return;
-        revealInFileBrowser(normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name));
+        if (!ioStore.savedLocation.path || !ioStore.savedLocation.name) return;
+        revealInFileBrowser(normalizeJoin(ioStore.savedLocation.path, ioStore.savedLocation.name));
       },
-      disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
+      disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
       color: color.onBackground,
     },
   ]);

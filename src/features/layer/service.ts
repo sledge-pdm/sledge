@@ -1,21 +1,20 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
-import { RGBA, RGBAToHex } from '@sledge-pdm/core';
-import { confirm } from '@tauri-apps/plugin-dialog';
 import { adjustZoomToFit } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
-import { AnvilLayerHistoryAction } from '~/features/history/actions/AnvilLayerHistoryAction';
+import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
-import { anvilManager, getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
-import { interactStore } from '~/stores/EditorStores';
+import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerListStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { dialog } from '~/utils/platform';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { changeBaseLayerColor, createLayer } from './model';
@@ -24,7 +23,7 @@ import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 const LOG_LABEL = 'LayerService';
 
 // Layer property updates
-const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type', 'dotMagnification'];
+const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type'];
 
 export function setLayerName(layerId: string, newName: string): boolean {
   if (!newName || newName.trim() === '') {
@@ -68,7 +67,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
     });
     projectHistoryController.addAction(act);
   }
-  if (propNamesToUpdate.indexOf(propName) !== -1) updateWebGLCanvas(false, `Layer(${layerId}) prop updated(${propName})`);
+  if (propNamesToUpdate.indexOf(propName) !== -1) updateWebGLCanvas(`Layer(${layerId}) prop updated(${propName})`);
 }
 
 export function toggleLayerVisibility(layerIds?: string[]) {
@@ -84,19 +83,18 @@ export function toggleLayerVisibility(layerIds?: string[]) {
 export function duplicateLayer(layerId: string) {
   const layer = findLayerById(layerId);
   if (!layer) return;
-  const buffer = getAnvil(layerId).getBufferCopy();
+  const buffer = layerManager.exportRawCanvas(layerId);
   addLayer(
     {
       name: layer.name,
       type: layer.type,
       enabled: layer.enabled,
-      dotMagnification: layer.dotMagnification,
       opacity: layer.opacity,
       mode: layer.mode,
     },
     { initImage: buffer }
   );
-  updateWebGLCanvas(true, `Layer(${layerId}) duplicated`);
+  updateWebGLCanvas(`Layer(${layerId}) duplicated`);
   logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }
 
@@ -119,24 +117,6 @@ export async function mergeToBelowLayer(layerId: string) {
   logUserInfo(`Layer "${originLayer.name}" merged into "${targetLayer.name}".`, { label: LOG_LABEL });
 }
 
-export function getCurrentPointingColor(): RGBA | undefined {
-  const activeAnvil = getAnvil(layerListStore.activeLayerId);
-  const x = Math.floor(interactStore.lastPointerOnCanvas.x);
-  const y = Math.floor(interactStore.lastPointerOnCanvas.y);
-  if (!interactStore.lastPointerOnCanvas || !activeAnvil.getBufferHandle().isInBounds(x, y)) return undefined;
-  return activeAnvil.getPixel(x, y);
-}
-
-export function getCurrentPointingColorHex(): string | undefined {
-  const c = getCurrentPointingColor();
-  return c
-    ? RGBAToHex(c, {
-        excludeAlpha: false,
-        withSharp: true,
-      })
-    : undefined;
-}
-
 // Layer list management
 interface AddLayerOptions {
   initImage?: Uint8ClampedArray;
@@ -149,7 +129,6 @@ export const addLayer = (
     name?: string;
     type?: LayerType;
     enabled?: boolean;
-    dotMagnification?: number;
     opacity?: number;
     mode?: BlendMode;
   },
@@ -164,29 +143,19 @@ export const addLayerTo = (
     name?: string;
     type?: LayerType;
     enabled?: boolean;
-    dotMagnification?: number;
     opacity?: number;
     mode?: BlendMode;
     cutFreeze?: boolean;
   },
   options?: AddLayerOptions
 ) => {
-  const {
-    name = 'layer 1',
-    type = LayerType.Dot,
-    enabled = true,
-    dotMagnification = 1,
-    opacity = 1,
-    mode = BlendMode.normal,
-    cutFreeze = false,
-  } = layer;
+  const { name = 'layer 1', type = LayerType.Dot, enabled = true, opacity = 1, mode = BlendMode.normal, cutFreeze = false } = layer;
   const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
   const newLayer = createLayer(
     {
       name,
       type,
       enabled,
-      dotMagnification,
       opacity,
       mode,
       cutFreeze,
@@ -195,9 +164,11 @@ export const addLayerTo = (
   );
 
   // Initialize anvil
-  const width = canvasStore.canvas.width;
-  const height = canvasStore.canvas.height;
-  anvilManager.registerAnvil(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height);
+  const width = canvasStore.size.width;
+  const height = canvasStore.size.height;
+  layerManager.registerLayer(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height, {
+    inputSpace: 'canvas',
+  });
 
   const layers = [...allLayers()];
   layers.splice(index, 0, newLayer as any);
@@ -205,7 +176,7 @@ export const addLayerTo = (
   setLayerListStore('layers', layers);
   setActiveLayerId(newLayer.id);
 
-  updateWebGLCanvas(false, `Layer(${newLayer.id}) added`);
+  updateWebGLCanvas(`Layer(${newLayer.id}) added`);
   logUserInfo(`Layer "${newLayer.name}" added.`, { label: LOG_LABEL });
 
   if (!options?.noDiff) {
@@ -313,9 +284,12 @@ export function isImagePoolActive() {
 
 export const resetAllLayers = () => {
   layerListStore.layers.forEach((l) => {
-    getAnvil(l.id).resetBuffer();
+    const layer = layerManager.getLayerOptional(l.id);
+    if (layer) {
+      layer.clear([0, 0, 0, 0]);
+    }
   });
-  updateWebGLCanvas(false, `Reset all layers`);
+  updateWebGLCanvas(`Reset all layers`);
 
   adjustZoomToFit();
 };
@@ -332,7 +306,7 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
   const [moved] = updated.splice(fromIndex, 1);
   updated.splice(targetIndex, 0, moved);
   setLayerListStore('layers', updated);
-  updateWebGLCanvas(false, `Layer moved from ${fromIndex} to ${targetIndex}`);
+  updateWebGLCanvas(`Layer moved from ${fromIndex} to ${targetIndex}`);
 
   if (!noDiff) {
     const afterOrder = updated.map((l) => l.id);
@@ -362,7 +336,7 @@ export const removeLayersFromUser = async (layerIds?: string[], options?: Remove
       targets.length === 1
         ? `Sure to remove layer "${summarizeLayerNames(targets)}"?`
         : `Sure to remove ${targets.length} layers? (${summarizeLayerNames(targets)})`;
-    const removeConfirmed = await confirm(message, {
+    const removeConfirmed = await dialog.confirm(message, {
       title: 'Remove Layer',
     });
     if (!removeConfirmed) return;
@@ -395,7 +369,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
-  updateWebGLCanvas(false, `Layer(${layerId}) removed`);
+  updateWebGLCanvas(`Layer(${layerId}) removed`);
   logUserInfo(`Layer "${toRemove.name}" removed.`, { label: LOG_LABEL });
 
   if (!noDiff && snapshot) {
@@ -408,8 +382,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
     projectHistoryController.addAction(act);
   }
 
-  // Anvil インスタンスも破棄
-  anvilManager.removeAnvil(layerId);
+  layerManager.removeLayer(layerId);
 };
 
 export const clearLayersFromUser = async (layerIds?: string[]) => {
@@ -420,7 +393,7 @@ export const clearLayersFromUser = async (layerIds?: string[]) => {
   }
 
   if (globalConfig.editor.requireConfirmBeforeLayerClear) {
-    const confirmed = await confirm(
+    const confirmed = await dialog.confirm(
       targets.length === 1
         ? `Sure to clear layer "${summarizeLayerNames(targets)}"?`
         : `Sure to clear ${targets.length} layers? (${summarizeLayerNames(targets)})`,
@@ -440,25 +413,16 @@ export const clearLayerFromUser = async (layerId: string) => {
 };
 
 export function clearLayer(layerId: string) {
-  const anvil = getAnvil(layerId);
-  const w = anvil.getWidth();
-  const h = anvil.getHeight();
-  if (w == null || h == null) return;
-
-  anvil.addCurrentWholeDiff();
-
-  anvil.getBufferHandle().fillAllCodes(0);
-
-  const patch = anvil.flushDiffs();
-  if (patch)
-    projectHistoryController.addAction(
-      new AnvilLayerHistoryAction({
-        layerId,
-        patch,
-        context: { tool: 'clear' },
-      })
-    );
-  updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
+  const layer = getLayer(layerId);
+  layer.commitHistory();
+  layer.clear([0, 0, 0, 0]);
+  projectHistoryController.addAction(
+    new LayerHistoryAction({
+      layerId,
+      context: { tool: 'clear' },
+    })
+  );
+  updateWebGLCanvas(`Layer(${layerId}) cleared`);
   updateLayerPreview(layerId);
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
 }
@@ -470,23 +434,23 @@ export const activeIndex = () => allLayers().findIndex((layer) => layer.id === l
 
 // BaseLayer operations
 /**
- * ベースレイヤーのカラーモードを変更する
+ * ベ�Eスレイヤーのカラーモードを変更する
  */
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(false, `BaseLayer color mode changed to ${colorMode}`);
-  setProjectStore('isProjectChangedAfterSave', true);
+  updateWebGLCanvas(`BaseLayer color mode changed to ${colorMode}`);
+  setIOStore('isProjectChangedAfterSave', true);
 }
 
 /**
- * ベースレイヤーのカスタムカラーを変更する
+ * ベ�Eスレイヤーのカスタムカラーを変更する
  */
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(false, `BaseLayer custom color changed to ${customColor}`);
-  setProjectStore('isProjectChangedAfterSave', true);
+  updateWebGLCanvas(`BaseLayer custom color changed to ${customColor}`);
+  setIOStore('isProjectChangedAfterSave', true);
 }
 
 export function setSelectionEnabled(enabled: boolean) {

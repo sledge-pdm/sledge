@@ -169,7 +169,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     if (props.index !== -1) {
       setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
     }
-    updateWebGLCanvas(false, 'layer deactivated from layeritem');
+    updateWebGLCanvas('layer deactivated from layeritem');
   };
 
   const handlePointerDown = (e: PointerEvent) => {

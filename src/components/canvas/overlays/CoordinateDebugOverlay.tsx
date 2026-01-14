@@ -144,7 +144,7 @@ const CoordinateDebugOverlay: Component = () => {
         <div class={coordinateRow}>
           <span>Canvas Size:</span>
           <span>
-            {canvasStore.canvas.width}×{canvasStore.canvas.height}
+            {canvasStore.size.width}×{canvasStore.size.height}
           </span>
         </div>
         <div class={coordinateRow}>

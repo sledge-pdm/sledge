@@ -1,3 +1,5 @@
+import { CURRENT_PROJECT_VERSION } from '../io/types/Project';
+
 // Feature: history - base action types and abstract class
 export type HistoryActionTypes =
   | 'canvas_size'
@@ -15,6 +17,8 @@ export type HistoryActionTypes =
 export interface BaseHistoryActionProps {
   context?: any;
   label?: string;
+
+  version?: number;
 }
 
 export interface SerializedHistoryAction {
@@ -27,9 +31,12 @@ export abstract class BaseHistoryAction {
   context?: any;
   label?: string;
 
+  version?: number; // project version
+
   constructor(public readonly props: BaseHistoryActionProps) {
     this.context = props.context;
     this.label = props.label;
+    this.version = props.version ?? CURRENT_PROJECT_VERSION;
   }
   abstract undo(): void;
   abstract redo(): void;

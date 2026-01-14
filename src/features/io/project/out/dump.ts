@@ -1,7 +1,8 @@
+import { gzipDeflate, ProjectV2 } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
-import { ProjectV1 } from '~/features/io/types/Project';
+import { toPersistedImages } from '~/features/image_pool/service';
 import { allLayers } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { canvasStore, imagePoolStore, layerListStore, projectStore, snapshotStore } from '~/stores/ProjectStores';
 import { packr } from '~/utils/msgpackr';
 import { getCurrentVersion } from '~/utils/VersionUtils';
@@ -12,41 +13,48 @@ export const dumpProject = async (): Promise<Uint8Array> => {
   return packed instanceof Uint8Array ? packed : Uint8Array.of(packed);
 };
 
-export const dumpProjectJson = async (): Promise<ProjectV1> => {
+export const dumpProjectJson = async (): Promise<ProjectV2> => {
   const buffers = new Map<
-    string,
+    string, // layer id
     {
-      webpBuffer: Uint8Array;
+      deflatedBuffer: Uint8Array; // deflate compressed buffer
     }
   >();
-  const size = canvasStore.canvas;
+  const size = canvasStore.size;
   allLayers().forEach((l) => {
-    const anvil = getAnvil(l.id);
-    const webp = anvil.exportWebp();
+    let buffer: Uint8ClampedArray;
+    try {
+      buffer = layerManager.exportRawCanvas(l.id);
+    } catch {
+      buffer = new Uint8ClampedArray(size.width * size.height * 4);
+    }
+    const deflated = gzipDeflate(buffer);
     buffers.set(l.id, {
-      webpBuffer: webp,
+      deflatedBuffer: deflated,
     });
   });
-  const project: ProjectV1 = {
+  const project: ProjectV2 = {
     version: await getCurrentVersion(),
-    projectVersion: 1,
+    projectVersion: 2,
     canvas: {
-      store: { ...canvasStore },
+      size: { ...canvasStore.size },
     },
-    project: {
-      store: { ...projectStore },
-    },
+    project: { ...projectStore },
     imagePool: {
-      store: { ...imagePoolStore },
+      entries: imagePoolStore.entries,
+      images: toPersistedImages(imagePoolStore.images),
+      state: {
+        selectedEntryId: imagePoolStore.selectedEntryId,
+        preserveAspectRatio: imagePoolStore.preserveAspectRatio,
+      },
     },
     history: projectHistoryController.getSerialized(),
     layers: {
-      store: { ...layerListStore },
+      layers: layerListStore.layers,
       buffers: buffers,
+      state: { ...layerListStore },
     },
-    snapshots: {
-      store: { ...snapshotStore },
-    },
+    snapshots: snapshotStore.snapshots,
   };
 
   return project;

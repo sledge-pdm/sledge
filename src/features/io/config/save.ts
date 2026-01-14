@@ -1,9 +1,9 @@
-import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
 import { Consts } from '~/Consts';
 import { ensureAppConfigPath } from '~/features/config';
 import { getFallbackedSettings } from '~/features/io/config/set';
 import { logSystemError } from '~/features/log/service';
 import { getGlobalRootStore } from '~/stores/GlobalStores';
+import { fs } from '~/utils/platform';
 import { emitGlobalEvent } from '~/utils/TauriUtils';
 
 const LOG_LABEL = 'ConfigSave';
@@ -14,8 +14,9 @@ export async function saveGlobalSettings(triggerGlobalEvent: boolean) {
 
     const config = getGlobalRootStore();
     const fbConfig = getFallbackedSettings(config);
-    await writeTextFile(Consts.globalConfigFileName, JSON.stringify(fbConfig, null, 2), {
-      baseDir: BaseDirectory.AppConfig,
+    const baseDir = fs.BaseDirectory?.AppConfig;
+    await fs.writeTextFile(Consts.globalConfigFileName, JSON.stringify(fbConfig, null, 2), {
+      baseDir,
       create: true,
     });
     if (triggerGlobalEvent) await emitGlobalEvent('onSettingsSaved', { config: fbConfig });

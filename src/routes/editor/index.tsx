@@ -1,7 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
-import { UnlistenFn } from '@tauri-apps/api/event';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
@@ -24,6 +22,7 @@ import { tryLoadProject } from '~/routes/editor/load';
 import { appearanceStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/ProjectStores';
 import { flexCol, pageRoot } from '~/styles/styles';
+import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import { isFirstStartup, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
 
 const mainContainer = css`
@@ -48,7 +47,7 @@ export default function Editor() {
   let unlisten: UnlistenFn;
 
   onMount(async () => {
-    unlisten = await getCurrentWindow().onCloseRequested(handleCloseRequest);
+    unlisten = await platformWindow.getCurrentWindow().onCloseRequested(handleCloseRequest);
     try {
       await loadGlobalSettings();
       const lastState = await loadEditorState();

@@ -38,7 +38,7 @@ const FrameResizeMenu: Component = () => {
             const targetH = interactStore.canvasSizeFrameSize.height;
             if (!targetW || !targetH) return;
             const offset = interactStore.canvasSizeFrameOffset; // (startX, startY) フレーム左上（旧キャンバス座標）
-            const oldSize = { ...canvasStore.canvas };
+            const oldSize = { ...canvasStore.size };
             const newSize = { width: targetW, height: targetH };
             if (oldSize.width === newSize.width && oldSize.height === newSize.height && offset.x === 0 && offset.y === 0) {
               setInteractStore('isCanvasSizeFrameMode', false);

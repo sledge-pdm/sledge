@@ -1,12 +1,15 @@
 import { RGBA, Vec2 } from '@sledge-pdm/core';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { Layer } from '@sledge-pdm/frasco';
+import { LayerHistoryAction, projectHistoryController } from '~/features/history';
+import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
-import { FillPresetConfig } from '~/features/tools/Tools';
+import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { interactStore } from '~/stores/EditorStores';
+import { fill_mask_area, scanline_flood_fill, scanline_flood_fill_with_mask } from '~/utils/wasm';
 
 export interface FillProps {
   layerId: string;
@@ -22,7 +25,6 @@ export class FillTool implements ToolBehavior {
   onStart({ position, color, presetName, layerId }: ToolArgs): ToolResult {
     if (!interactStore.isPointerOnCanvas) {
       return {
-        shouldRegisterToHistory: false,
         shouldUpdate: false,
       };
     }
@@ -31,19 +33,17 @@ export class FillTool implements ToolBehavior {
     const preset = presetName ? (getPresetOf('fill', presetName) as FillPresetConfig) : undefined;
     if (!preset)
       return {
-        shouldRegisterToHistory: false,
         shouldUpdate: false,
       };
     const threshold = preset.threshold ?? 0;
     // const limitMode = getSelectionLimitMode();
-
-    const anvil = getAnvil(layerId);
-
-    anvil.addCurrentWholeDiff();
+    const layer = getLayer(layerId);
 
     const selectionFillMode = preset.selectionFillMode ?? 'inside';
     if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
-      anvil.floodFill({
+      fill({
+        layerId,
+        layer,
         startX: position.x,
         startY: position.y,
         color,
@@ -53,7 +53,9 @@ export class FillTool implements ToolBehavior {
       const selectionMask = selectionManager.getSelectionMask();
       if (selectionFillMode === 'inside') {
         //inside
-        anvil.floodFill({
+        fill({
+          layerId,
+          layer,
           startX: position.x,
           startY: position.y,
           color,
@@ -65,7 +67,9 @@ export class FillTool implements ToolBehavior {
         });
       } else {
         //area
-        anvil.fillWithMaskArea({
+        fillArea({
+          layerId,
+          layer,
           mask: selectionMask.getMask(),
           color,
         });
@@ -78,21 +82,72 @@ export class FillTool implements ToolBehavior {
 
     return {
       shouldUpdate: true,
-      shouldRegisterToHistory: true,
     };
   }
 
   onMove(args: ToolArgs): ToolResult {
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
   }
 
   onEnd(args: ToolArgs): ToolResult {
     return {
       shouldUpdate: false,
-      shouldRegisterToHistory: false,
     };
+  }
+}
+
+function fill(args: {
+  layerId: string;
+  layer: Layer;
+  startX: number;
+  startY: number;
+  color: RGBA;
+  threshold: number;
+  mask?: {
+    buffer: Uint8Array;
+    mode: 'inside' | 'outside' | 'none';
+  };
+}) {
+  const { layerId, layer, startX, startY, color, threshold, mask } = args;
+  const buf = layer.exportRaw({ flipY: true });
+  const width = layer.getWidth();
+  const height = layer.getHeight();
+  let result = false;
+  if (mask) {
+    result = scanline_flood_fill_with_mask(buf, width, height, startX, startY, ...color, threshold ?? 0, mask.buffer, mask.mode);
+  } else {
+    result = scanline_flood_fill(buf, width, height, startX, startY, ...color, threshold ?? 0);
+  }
+
+  if (result) {
+    layer.commitHistory();
+    layerManager.replaceLayerBuffer(layerId, buf, width, height, { inputSpace: 'canvas' });
+    projectHistoryController.addAction(
+      new LayerHistoryAction({
+        layerId: layerId,
+        context: { tool: TOOL_CATEGORIES.FILL },
+      })
+    );
+  }
+}
+
+function fillArea(args: { layerId: string; layer: Layer; color: RGBA; mask: Uint8Array }) {
+  const { layerId, layer, color, mask } = args;
+  const buf = layer.exportRaw({ flipY: true });
+  const width = layer.getWidth();
+  const height = layer.getHeight();
+  const result = fill_mask_area(buf, mask, ...color);
+
+  if (result) {
+    layer.commitHistory();
+    layerManager.replaceLayerBuffer(layerId, buf, width, height, { inputSpace: 'canvas' });
+    projectHistoryController.addAction(
+      new LayerHistoryAction({
+        layerId: layerId,
+        context: { tool: TOOL_CATEGORIES.FILL },
+      })
+    );
   }
 }

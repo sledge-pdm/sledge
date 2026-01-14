@@ -1,3 +1,4 @@
+import { BrightnessContrastEffect } from '@sledge-pdm/frasco';
 import { Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -20,7 +21,9 @@ const BrightnessContrast: Component<EffectSectionProps> = (props) => {
       title='brightness and contrast.'
       onApply={() => {
         const layerId = props.selectedLayerId();
-        applyEffect(layerId, 'brightness and contrast', (buffer) => buffer.brightnessAndContrast(options.brightness, options.contrast));
+        applyEffect(layerId, 'brightness and contrast', (layer) =>
+          BrightnessContrastEffect.apply(layer, { brightness: options.brightness, contrast: options.contrast })
+        );
       }}
     >
       <EffectControl label='brightness.'>

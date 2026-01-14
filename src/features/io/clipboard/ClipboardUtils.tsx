@@ -1,5 +1,5 @@
-import { readImage, readText } from '@tauri-apps/plugin-clipboard-manager';
 import { logSystemError } from '~/features/log/service';
+import { clipboard } from '~/utils/platform';
 
 const LOG_LABEL = 'ClipboardUtils';
 
@@ -23,7 +23,7 @@ export async function tryGetImageFromClipboard(): Promise<
   | undefined
 > {
   try {
-    const clipboardImage = await readImage();
+    const clipboardImage = await clipboard.readImage();
     const imageBuf = await clipboardImage.rgba();
     const size = await clipboardImage.size();
     // imageBuf is stored in JS heap so we can release original resource data
@@ -37,7 +37,7 @@ export async function tryGetImageFromClipboard(): Promise<
 
 export async function tryGetTextFromClipboard(): Promise<string | undefined> {
   try {
-    const clipboardText = await readText();
+    const clipboardText = await clipboard.readText();
     return clipboardText;
   } catch (e) {
     logSystemError('failed to get text from clipboard.', { label: LOG_LABEL, details: [e] });

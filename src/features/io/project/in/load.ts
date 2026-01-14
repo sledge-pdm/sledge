@@ -1,87 +1,117 @@
-import { webpToRaw } from '@sledge-pdm/anvil';
+import { getProjectAdapter } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
-import { ProjectV0, ProjectV1 } from '~/features/io/types/Project';
-import { allLayers } from '~/features/layer';
-import { anvilManager } from '~/features/layer/anvil/AnvilManager';
-import { canvasStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
+import { ImagePoolImagePersisted } from '~/features/image_pool';
+import { makeRuntimeImages } from '~/features/image_pool/service';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { logSystemWarn, logUserWarn } from '~/features/log';
+import { setIOStore } from '~/stores/EditorStores';
+import { imagePoolStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { updateWebGLCanvas } from '~/webgl/service';
 
-export const loadProjectJson = async (project: any) => {
-  if (!project.version || !project.projectVersion) {
-    // handle as V0 if there's no info
-    project = project as ProjectV0;
-    loadV0(project);
+export async function loadProject(projectObj: any): Promise<void> {
+  const adapter = getProjectAdapter(projectObj);
+
+  if (!adapter) {
+    throw new Error('Failed to load project: corrupted or unknown project version');
+  }
+
+  const failedParts: string[] = [];
+
+  // versions
+  const versions = adapter.getVersions();
+  setIOStore('loadProjectVersion', { sledge: versions.sledge ?? undefined, project: versions.project ?? undefined });
+
+  // canvas
+  try {
+    const canvasInfo = adapter.getCanvasInfo();
+    setCanvasStore('size', canvasInfo.size);
+    eventBus.emit('canvas:sizeChanged', { newSize: canvasInfo.size });
+  } catch (e) {
+    logSystemWarn(`loadProject: failed in canvas ${String(e)}`);
+    failedParts.push('canvas');
+  }
+
+  // layers
+  try {
+    const layers = adapter.getLayers();
+    const layerListState = adapter.getLayerListState();
+    setLayerListStore({
+      layers,
+      ...layerListState,
+    });
+    const canvasInfo = adapter.getCanvasInfo();
+    layers.forEach((layer) => {
+      let buffer = adapter.getRawBufferOf(layer.id);
+      if (!buffer) {
+        logSystemWarn(`loadProject: failed in layer ${layer.id} layer exists but layer not set`);
+        buffer = new Uint8ClampedArray(canvasInfo.size.width * canvasInfo.size.height * 4);
+        failedParts.push(`layer[${layer.id}]`);
+      }
+
+      layerManager.registerLayer(layer.id, buffer, canvasInfo.size.width, canvasInfo.size.height, { inputSpace: 'canvas' });
+    });
+  } catch (e) {
+    logSystemWarn(`loadProject: failed in layers ${String(e)}`);
+    failedParts.push('layers');
+  }
+
+  // project
+  try {
+    setProjectStore(adapter.getProjectInfo());
+  } catch (e) {
+    logSystemWarn(`loadProject: failed in project ${String(e)}`);
+    failedParts.push('project');
+  }
+
+  // history
+  try {
+    const history = adapter.getHistory();
+    if (history && history.undoStack && history.redoStack) {
+      projectHistoryController.setSerialized(history.undoStack, history.redoStack);
+    }
+  } catch (e) {
+    logSystemWarn(`loadProject: failed in history ${String(e)}`);
+    failedParts.push('history');
+  }
+
+  // image pool
+  try {
+    const entries = adapter.getImagePoolEntries();
+    const imagePoolState = adapter.getImagePoolState();
+    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    const images = new Map<string, ImagePoolImagePersisted>();
+    entries.forEach((entry) => {
+      const image = adapter.getImagePoolImageOf(entry.id);
+      if (image) {
+        images.set(entry.id, image);
+      } else {
+        logSystemWarn(`loadProject: imagePool image missing for entry ${entry.id}`);
+      }
+    });
+
+    setImagePoolStore({
+      selectedEntryId: imagePoolState.selectedEntryId,
+      preserveAspectRatio: imagePoolState.preserveAspectRatio,
+      entries,
+      images: makeRuntimeImages(images),
+    });
+  } catch (e) {
+    logSystemWarn(`loadProject: failed in image pool ${String(e)}`);
+    failedParts.push('image pool');
+  }
+
+  // snapshots
+  try {
+    setSnapshotStore('snapshots', adapter.getSnapshots());
+  } catch (e) {
+    logSystemWarn(`loadProject: failed in snapshots ${String(e)}`);
+    failedParts.push('snapshots');
+  }
+
+  if (failedParts.length > 0) {
+    logUserWarn('Some parts are not loaded in error: ' + failedParts.join(', ') + "\nDO NOT SAVE PROJECT IF THIS ISN'T AN INTENTIONAL ERROR!!");
   } else {
-    switch (project.projectVersion) {
-      case 0:
-      default:
-        project = project as ProjectV0;
-        loadV0(project);
-        break;
-      case 1:
-        project = project as ProjectV1;
-        loadV1(project);
-        break;
-    }
-  }
-};
-
-export function loadV0(project: ProjectV0) {
-  setCanvasStore(project.canvasStore);
-  setLayerListStore(project.layerListStore);
-  setProjectStore(project.projectStore);
-  setProjectStore('loadProjectVersion', {
-    sledge: undefined,
-    project: 0,
-  });
-  setImagePoolStore(project.imagePoolStore);
-
-  if (project.imagePool && Array.isArray(project.imagePool)) {
-    setImagePoolStore('entries', project.imagePool);
-  }
-  eventBus.emit('canvas:sizeChanged', { newSize: project.canvasStore.canvas });
-
-  const canvasSize = project.canvasStore.canvas;
-  project.layerListStore.layers.forEach((layer) => {
-    const buffer = project.layerBuffers?.get(layer.id);
-    if (buffer) {
-      anvilManager.registerAnvil(layer.id, buffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height);
-    } else {
-      const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
-      anvilManager.registerAnvil(layer.id, newBuffer, project.canvasStore.canvas.width, project.canvasStore.canvas.height);
-    }
-  });
-}
-
-export function loadV1(project: ProjectV1) {
-  if (project.canvas) setCanvasStore(project.canvas.store);
-  if (project.layers) setLayerListStore(project.layers.store);
-  if (project.project) setProjectStore(project.project.store);
-  setProjectStore('loadProjectVersion', {
-    sledge: project.version ?? undefined,
-    project: 1,
-  });
-  if (project.imagePool) setImagePoolStore(project.imagePool.store);
-  if (project.snapshots) setSnapshotStore(project.snapshots.store);
-
-  const canvasSize = canvasStore.canvas;
-  eventBus.emit('canvas:sizeChanged', { newSize: canvasSize });
-
-  allLayers().forEach((layer) => {
-    const data = project.layers.buffers.get(layer.id);
-    if (!data) return;
-
-    const { webpBuffer } = data;
-    if (webpBuffer) {
-      const buffer = webpToRaw(webpBuffer, canvasSize.width, canvasSize.height);
-      anvilManager.registerAnvil(layer.id, buffer, canvasSize.width, canvasSize.height);
-    } else {
-      const newBuffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
-      anvilManager.registerAnvil(layer.id, newBuffer, canvasSize.width, canvasSize.height);
-    }
-  });
-
-  if (project.history && project.history.undoStack && project.history.redoStack) {
-    projectHistoryController.setSerialized(project.history.undoStack, project.history.redoStack);
+    updateWebGLCanvas('Project Load');
   }
 }

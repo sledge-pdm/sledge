@@ -1,16 +1,16 @@
 import { Size2D, Vec2 } from '@sledge-pdm/core';
-import { message } from '@tauri-apps/plugin-dialog';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
 import { allLayers } from '~/features/layer';
-import { getAnvil } from '~/features/layer/anvil/AnvilManager';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
 import { WindowPos } from '~/types/CoordinateTypes';
 import { eventBus } from '~/utils/EventBus';
+import { dialog } from '~/utils/platform';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
 export function isValidCanvasSize(size: Size2D): boolean {
@@ -36,7 +36,7 @@ export function isValidCanvasSize(size: Size2D): boolean {
 
     if (requestedBufferSize > bufferSizeLimit) {
       const maxSidePixels = Math.floor(safeSideLength);
-      message(
+      dialog.message(
         `Canvas size exceeds WebGL limitations.
 
 Requested: ${size.width}×${size.height} (${(requestedBufferSize / 1024 / 1024).toFixed(2)} MB)
@@ -65,26 +65,26 @@ export function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?: bool
 
 export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?: Vec2, skipHistory?: boolean): boolean {
   if (!isValidCanvasSize(newSize)) return false;
-  const oldSize = { width: canvasStore.canvas.width, height: canvasStore.canvas.height };
-  srcOrigin = srcOrigin ?? { x: 0, y: 0 };
-  if (oldSize.width === newSize.width && oldSize.height === newSize.height && srcOrigin.x === 0 && srcOrigin.y === 0) return false;
+  const oldSize = { width: canvasStore.size.width, height: canvasStore.size.height };
+  const src = srcOrigin ?? { x: 0, y: 0 };
+  const dest = destOrigin ?? { x: 0, y: 0 };
+  if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
+    return false;
   const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
   if (!skipHistory) {
     act.registerBefore();
   }
 
-  setCanvasStore('canvas', newSize);
+  setCanvasStore('size', newSize);
   eventBus.emit('canvas:sizeChanged', { newSize });
 
   for (const l of allLayers()) {
-    const anvil = getAnvil(l.id);
-    anvil.resizeWithOffset(newSize, {
-      srcOrigin,
-      destOrigin,
-    });
+    const baseBuffer = layerManager.exportRawCanvas(l.id);
+    const resized = resizeBufferWithOrigins(baseBuffer, oldSize, newSize, src, dest);
+    layerManager.replaceLayerBuffer(l.id, resized, newSize.width, newSize.height, { inputSpace: 'canvas' });
     updateLayerPreview(l.id);
   }
-  updateWebGLCanvas(false, 'changeCanvasSize');
+  updateWebGLCanvas('changeCanvasSize');
   if (!skipHistory) {
     act.registerAfter();
     projectHistoryController.addAction(act);
@@ -106,6 +106,50 @@ export function getMaxZoom() {
 }
 export function clipZoom(zoom: number) {
   return Math.max(getMinZoom(), Math.min(getMaxZoom(), zoom));
+}
+
+function resizeBufferWithOrigins(buffer: Uint8ClampedArray, oldSize: Size2D, newSize: Size2D, srcOrigin: Vec2, destOrigin: Vec2): Uint8ClampedArray {
+  const oldW = Math.floor(oldSize.width);
+  const oldH = Math.floor(oldSize.height);
+  const newW = Math.floor(newSize.width);
+  const newH = Math.floor(newSize.height);
+  if (oldW <= 0 || oldH <= 0 || newW <= 0 || newH <= 0) {
+    return new Uint8ClampedArray(0);
+  }
+
+  const srcX = Math.floor(srcOrigin.x);
+  const srcY = Math.floor(srcOrigin.y);
+  const destX = Math.floor(destOrigin.x);
+  const destY = Math.floor(destOrigin.y);
+
+  const validDxMin = destX - srcX;
+  const validDxMax = destX - srcX + oldW;
+  const validDyMin = destY - srcY;
+  const validDyMax = destY - srcY + oldH;
+
+  const copyLeft = Math.max(0, validDxMin);
+  const copyTop = Math.max(0, validDyMin);
+  const copyRight = Math.min(newW, validDxMax);
+  const copyBottom = Math.min(newH, validDyMax);
+
+  const out = new Uint8ClampedArray(newW * newH * 4);
+  if (copyLeft >= copyRight || copyTop >= copyBottom) {
+    return out;
+  }
+
+  const rowCopyWidth = copyRight - copyLeft;
+  const rowBytes = rowCopyWidth * 4;
+  for (let dy = copyTop; dy < copyBottom; dy++) {
+    const sy = dy - destY + srcY;
+    if (sy < 0 || sy >= oldH) continue;
+    const sxFirst = copyLeft - destX + srcX;
+    if (sxFirst < 0 || sxFirst + rowCopyWidth > oldW) continue;
+    const srcIndex = (sy * oldW + sxFirst) * 4;
+    const dstIndex = (dy * newW + copyLeft) * 4;
+    out.set(buffer.subarray(srcIndex, srcIndex + rowBytes), dstIndex);
+  }
+
+  return out;
 }
 
 const referenceLengthRatio = 0.85;
@@ -132,8 +176,8 @@ const referenceLength = () => {
 
 export const getReferencedZoom = (length?: number) => {
   if (length === undefined) {
-    const width = canvasStore.canvas.width;
-    const height = canvasStore.canvas.height;
+    const width = canvasStore.size.width;
+    const height = canvasStore.size.height;
     length = width > height ? width : height;
   }
 
@@ -141,8 +185,8 @@ export const getReferencedZoom = (length?: number) => {
 };
 
 export const adjustZoomToFit = (width?: number, height?: number) => {
-  width = width ?? canvasStore.canvas.width;
-  height = height ?? canvasStore.canvas.height;
+  width = width ?? canvasStore.size.width;
+  height = height ?? canvasStore.size.height;
   if (!width || !height) return;
 
   const longerLength = width > height ? width : height;
@@ -155,7 +199,7 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 };
 
 export const centeringCanvas = () => {
-  const canvasSize = canvasStore.canvas;
+  const canvasSize = canvasStore.size;
   const sectionBetweenArea = document.getElementById('sections-between-area');
   if (!sectionBetweenArea) return;
   const areaBound = sectionBetweenArea.getBoundingClientRect();

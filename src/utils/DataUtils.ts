@@ -1,6 +1,6 @@
-import { RawPixelData, toUint8ClampedArray } from '@sledge-pdm/anvil';
-import { readFile } from '@tauri-apps/plugin-fs';
+import { RawPixelData, toUint8ClampedArray } from '@sledge-pdm/core';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
+import { fs } from '~/utils/platform';
 
 export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ export function dataUrlToBytes(dataUrl: string): Uint8Array {
 
 /** ローカル画像を安全に ImageBitmap へ変換 */
 export async function loadLocalImage(path: string): Promise<ImageBitmap> {
-  const bytes = await readFile(path);
+  const bytes = await fs.readFile(path);
   const blob = new Blob([bytes.slice()]);
   const url = URL.createObjectURL(blob);
   const bitmap = await createImageBitmap(blob);

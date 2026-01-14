@@ -22,7 +22,7 @@ B. 補完アルゴリズム(bresenham, 矩形領域, etc 最適化されたや�
 
 - browser modeでの動作が可能になったので、unit/e2eテストを書いていく　frasco移行箇所だけでなく全機能に対して書いていく
 
-- ImagePoolでwebp変換を利用し続けている > BlobUrl保持などで代用できるかも？
+- ~~ImagePoolでwebp変換を利用し続けている > BlobUrl保持などで代用できるかも？~~
 
 - ~~ペンのプレビュー(frasco/grip側は基本形=kernelのマスク出力に対応済み mask_to_pathがwasm実装なので0/1のフラグバッファとはいえ代替の方法があるならそれでもいい)~~ > 完了
 

@@ -88,6 +88,6 @@ function insertAt(index: number, snapshot: LayerSnapshot) {
   const height = snapshot.image?.height ?? canvasStore.size.height;
   const buffer = snapshot.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
   layerManager.registerLayer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
-  updateWebGLCanvas(false, `Layer(${snapshot.layer.id}) inserted`);
+  updateWebGLCanvas(`Layer(${snapshot.layer.id}) inserted`);
   updateLayerPreview(snapshot.layer.id);
 }

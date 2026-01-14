@@ -4,8 +4,8 @@ import { addRecentFile } from '~/features/config/RecentFileController';
 import { dumpProject } from '~/features/io/project/out/dump';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
-import { fileStore, setFileStore } from '~/stores/EditorStores';
-import { canvasStore, projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { ioStore, setIOStore } from '~/stores/EditorStores';
+import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
@@ -38,10 +38,10 @@ export async function saveProject(name?: string, existingPath?: string): Promise
 
   let fileNameWOExtension = name ? getFileNameWithoutExtension(name) : 'new project';
 
-  if (fileStore.openAs === 'project' && existingPath && name) {
+  if (ioStore.openAs === 'project' && existingPath && name) {
     // alert if overwriting when current project version is not equal to loaded project version
-    const loadedProjectVersion = projectStore.loadProjectVersion?.project ?? 0;
-    const isOW = fileStore.savedLocation.path === existingPath && fileStore.savedLocation.name === name;
+    const loadedProjectVersion = ioStore.loadProjectVersion?.project ?? 0;
+    const isOW = ioStore.savedLocation.path === existingPath && ioStore.savedLocation.name === name;
     if (isOW && loadedProjectVersion !== CURRENT_PROJECT_VERSION) {
       const confirmResult = await dialog.confirm(
         `Trying to overwrite project that has outdated version.
@@ -73,7 +73,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
   if (typeof selectedPath === 'string') {
     try {
       // overwrite project versions
-      setProjectStore('loadProjectVersion', {
+      setIOStore('loadProjectVersion', {
         sledge: await getCurrentVersion(),
         project: CURRENT_PROJECT_VERSION,
       });
@@ -84,7 +84,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       await fs.writeFile(selectedPath, data);
       addRecentFile(pathToFileLocation(selectedPath));
 
-      setFileStore('openAs', 'project');
+      setIOStore('openAs', 'project');
       setSavedLocation(selectedPath);
       // @ts-ignore
       window.__PATH__ = selectedPath;
@@ -92,7 +92,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });
 
-      setProjectStore('isProjectChangedAfterSave', false);
+      setIOStore('isProjectChangedAfterSave', false);
       logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return true;
     } catch (error) {

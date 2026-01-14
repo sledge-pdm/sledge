@@ -45,7 +45,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const inflated = inflateLayerSnapshot(this.sourcePackedSnapshot);
     if (inflated) this.reinsert(this.sourceIndex, inflated);
     setActiveLayerId(this.activeLayerIdBefore);
-    updateWebGLCanvas(false, 'CutPaste undo');
+    updateWebGLCanvas('CutPaste undo');
   }
 
   redo(): void {
@@ -56,7 +56,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const inflated = inflateLayerSnapshot(this.targetPackedSnapshot);
     if (inflated) this.reinsert(this.targetIndex, inflated);
     setActiveLayerId(this.activeLayerIdAfter);
-    updateWebGLCanvas(false, 'CutPaste redo');
+    updateWebGLCanvas('CutPaste redo');
   }
 
   private reinsert(index: number, packed: LayerSnapshot) {
@@ -70,7 +70,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const buffer = packed.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
     layerManager.registerLayer(packed.layer.id, buffer, width, height, { inputSpace: 'layer' });
 
-    updateWebGLCanvas(false, `CutPaste reinsert (${packed.layer.id})`);
+    updateWebGLCanvas(`CutPaste reinsert (${packed.layer.id})`);
     updateLayerPreview(packed.layer.id);
   }
 

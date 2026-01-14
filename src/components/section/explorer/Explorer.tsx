@@ -6,7 +6,7 @@ import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
 import { getParentDirectory, normalizeDirectoryPath } from '~/components/section/explorer/utils/path';
 import { showTabContent } from '~/features/config/TabContentController';
-import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
+import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
 import { FileLocation } from '~/types/FileLocation';
 import { eventBus } from '~/utils/EventBus';
 import { exportDir, getDefinedDriveLetters, isOpenableFile, normalizeJoin, normalizePath } from '~/utils/FileUtils';
@@ -324,7 +324,7 @@ const Explorer: Component = () => {
   };
 
   onMount(async () => {
-    const openPath = fileStore.savedLocation.path ? normalizePath(fileStore.savedLocation.path) : undefined;
+    const openPath = ioStore.savedLocation.path ? normalizePath(ioStore.savedLocation.path) : undefined;
     const fallbackPath = await exportDir();
     defaultExplorerPath = fallbackPath;
     const editorSavedPath = appearanceStore.explorerPath ?? undefined;
@@ -499,9 +499,9 @@ const Explorer: Component = () => {
                       {
                         type: 'item',
                         label: 'back to saved folder',
-                        disabled: !fileStore.savedLocation.path || !fileStore.savedLocation.name,
+                        disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
                         onSelect: () => {
-                          if (fileStore.savedLocation.path) void navigatePath(fileStore.savedLocation.path);
+                          if (ioStore.savedLocation.path) void navigatePath(ioStore.savedLocation.path);
                         },
                       },
                       {
@@ -533,8 +533,8 @@ const Explorer: Component = () => {
                   };
 
                   const openPath =
-                    fileStore.savedLocation.path && fileStore.savedLocation.name
-                      ? normalizeJoin(fileStore.savedLocation.path, fileStore.savedLocation.name)
+                    ioStore.savedLocation.path && ioStore.savedLocation.name
+                      ? normalizeJoin(ioStore.savedLocation.path, ioStore.savedLocation.name)
                       : undefined;
                   const isMe = openPath && openPath === path;
                   const isPartOfMe = openPath && openPath.startsWith(path.endsWith('/') ? path : path + '/');

@@ -1,5 +1,5 @@
 import { importableFileExtensions, openableFileExtensions } from '~/features/io/FileExtensions';
-import { fileStore, lastSettingsStore } from '~/stores/EditorStores';
+import { ioStore, lastSettingsStore } from '~/stores/EditorStores';
 import { safeInvoke } from '~/utils/TauriUtils';
 
 import { FileLocation } from '~/types/FileLocation';
@@ -150,15 +150,15 @@ export async function defaultPictureDir() {
 }
 
 export async function projectSaveDir(): Promise<string> {
-  if (fileStore.savedLocation.path) {
-    return normalizePath(fileStore.savedLocation.path);
+  if (ioStore.savedLocation.path) {
+    return normalizePath(ioStore.savedLocation.path);
   }
   return await defaultProjectDir();
 }
 
 export async function exportDir(): Promise<string> {
-  if (fileStore.savedLocation.path) {
-    return normalizePath(fileStore.savedLocation.path);
+  if (ioStore.savedLocation.path) {
+    return normalizePath(ioStore.savedLocation.path);
   }
   if (lastSettingsStore.exportSettings.folderPath) {
     return normalizePath(lastSettingsStore.exportSettings.folderPath);
@@ -167,8 +167,8 @@ export async function exportDir(): Promise<string> {
 }
 
 export function exportFileName(): string {
-  if (fileStore.savedLocation.name) {
-    return getFileNameWithoutExtension(fileStore.savedLocation.name);
+  if (ioStore.savedLocation.name) {
+    return getFileNameWithoutExtension(ioStore.savedLocation.name);
   }
   if (lastSettingsStore.exportSettings.fileName) {
     return getFileNameWithoutExtension(lastSettingsStore.exportSettings.fileName);

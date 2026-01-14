@@ -84,7 +84,7 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
     layerManager.replaceLayerBuffer(l.id, resized, newSize.width, newSize.height, { inputSpace: 'canvas' });
     updateLayerPreview(l.id);
   }
-  updateWebGLCanvas(false, 'changeCanvasSize');
+  updateWebGLCanvas('changeCanvasSize');
   if (!skipHistory) {
     act.registerAfter();
     projectHistoryController.addAction(act);

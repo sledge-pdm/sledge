@@ -11,7 +11,7 @@ import {
   setActiveToolCategory,
   updateToolPresetConfig,
 } from '~/features/tools/ToolController';
-import { fileStore, interactStore, setAppearanceStore, toolStore } from '~/stores/EditorStores';
+import { interactStore, ioStore, setAppearanceStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
 import { window as platformWindow } from '~/utils/platform';
 import { isKeyMatchesToEntry } from '../config/KeyConfigController';
@@ -47,7 +47,7 @@ const KeyListener: Component = () => {
 
     if (isKeyMatchesToEntry(e, keyConfigStore()['save']) && !e.repeat) {
       e.preventDefault(); // Prevent default save action
-      saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
+      saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore()['undo'])) {

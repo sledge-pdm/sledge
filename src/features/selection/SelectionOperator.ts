@@ -121,7 +121,7 @@ export function cancelSelection() {
   }
   selectionManager.clear();
 
-  updateWebGLCanvas(false, 'selection cancelled');
+  updateWebGLCanvas('selection cancelled');
   updateLayerPreview(layerId);
 
   if (wasMoving || hadSelection) {
@@ -142,7 +142,7 @@ export function cancelMove() {
   const wasMoving = floatingMoveManager.isMoving();
   floatingMoveManager.cancel();
 
-  updateWebGLCanvas(false, 'move cancelled');
+  updateWebGLCanvas('move cancelled');
   updateLayerPreview(layerId);
 
   if (wasMoving) {
@@ -185,7 +185,7 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   layer.applyEffectWithTextures({ fragmentSrc: CLEAR_WITH_MASK_300ES }, { u_mask: maskTexture }, glBounds);
   layer.deleteTexture(maskTexture);
 
-  updateWebGLCanvas(false, 'delete selected area');
+  updateWebGLCanvas('delete selected area');
   updateLayerPreview(lid);
   logUserInfo('Selected area cleared.');
 
@@ -319,7 +319,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
 
   if (deleteAfter) {
-    updateWebGLCanvas(false, 'delete selected area');
+    updateWebGLCanvas('delete selected area');
     updateLayerPreview(layerListStore.activeLayerId);
   }
 }

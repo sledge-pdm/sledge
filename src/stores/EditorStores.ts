@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import { ToolCategoryId, ToolPresets } from '~/features/tools/Tools';
 import { AppearanceStore, createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { ColorStore, defaultColorStore } from '~/stores/editor/ColorStore';
-import { FileStore, defaultFileStore } from '~/stores/editor/FileStore';
+import { IOStore, defaultIOStore } from '~/stores/editor/IOStore';
 import { InteractStore, defaultInteractStore } from '~/stores/editor/InteractStore';
 import { LogStore, defaultLogStore } from '~/stores/editor/LogStore';
 import { ToolStore, defaultToolStore } from '~/stores/editor/ToolStore';
@@ -14,7 +14,7 @@ import { eventBus } from '~/utils/EventBus';
 export const initEditorStore = () => {
   const [appearanceStore, setAppearanceStore] = createStore<AppearanceStore>(createDefaultAppearanceStore());
   const [colorStore, setColorStore] = createStore<ColorStore>(defaultColorStore);
-  const [fileStore, setFileStore] = createStore<FileStore>(defaultFileStore);
+  const [ioStore, setIOStore] = createStore<IOStore>(defaultIOStore);
   const [interactStore, setInteractStore] = createStore<InteractStore>(defaultInteractStore);
   const [logStore, setLogStore] = createStore<LogStore>(defaultLogStore);
   const [toolStore, setToolStore] = createStore<ToolStore>(defaultToolStore);
@@ -25,8 +25,8 @@ export const initEditorStore = () => {
     setAppearanceStore,
     colorStore,
     setColorStore,
-    fileStore,
-    setFileStore,
+    ioStore,
+    setIOStore,
     interactStore,
     setInteractStore,
     logStore,
@@ -46,8 +46,8 @@ export const setAppearanceStore = editorStore.setAppearanceStore;
 export const colorStore = editorStore.colorStore;
 export const setColorStore = editorStore.setColorStore;
 
-export const fileStore = editorStore.fileStore;
-export const setFileStore = editorStore.setFileStore;
+export const ioStore = editorStore.ioStore;
+export const setIOStore = editorStore.setIOStore;
 
 export const interactStore = editorStore.interactStore;
 export const setInteractStore = editorStore.setInteractStore;
@@ -84,9 +84,9 @@ export const getEditorStateStore = (): EditorStateStore => {
     appearanceStore: appearanceStore,
     colorStore: colorStore,
     lastSettingsStore: lastSettingsStore,
-    lastOpenAs: fileStore.openAs,
-    lastPath: fileStore.savedLocation,
-    recentFiles: fileStore.recentFiles,
+    lastOpenAs: ioStore.openAs,
+    lastPath: ioStore.savedLocation,
+    recentFiles: ioStore.recentFiles,
     presets: Object.values(toolStore.tools)
       .map((tool) => {
         if (!tool.presets) return null;
@@ -110,7 +110,7 @@ export const loadEditorStateStore = (
   if (state.lastSettingsStore) setLastSettingsStore(state.lastSettingsStore);
   if (state.colorStore) setColorStore(state.colorStore);
 
-  setFileStore('recentFiles', state.recentFiles ?? []);
+  setIOStore('recentFiles', state.recentFiles ?? []);
   state.presets?.forEach((record) => {
     setToolStore('tools', record.toolId, 'presets', record.presets);
     eventBus.emit('tools:presetLoaded', { toolId: record.toolId });

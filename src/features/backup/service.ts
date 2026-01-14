@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 import { dumpProject } from '~/features/io/project/out/dump';
-import { fileStore } from '~/stores/EditorStores';
+import { ioStore } from '~/stores/EditorStores';
 import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { fs, path } from '~/utils/platform';
@@ -16,7 +16,7 @@ export async function getEmergencyBackupPath(): Promise<string> {
 export async function saveEmergencyBackup(): Promise<FileLocation> {
   const packedProject = await dumpProject();
 
-  const loc = fileStore.savedLocation;
+  const loc = ioStore.savedLocation;
   // save to nested unique id dir to prevent overwriting project with same name
   const dirName = v4();
   // Use only the project name and sanitize it for filename safety

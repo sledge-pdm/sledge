@@ -16,7 +16,7 @@ export type Events = {
 
   'tools:presetLoaded': { toolId?: string };
 
-  'webgl:requestUpdate': { onlyDirty: boolean; context: string };
+  'webgl:requestUpdate': { context: string };
   'webgl:requestResume': {};
   'webgl:renderPaused': {};
 

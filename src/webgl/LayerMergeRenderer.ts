@@ -43,7 +43,7 @@ class LayerMergeRenderer {
       setLayerListStore('activeLayerId', this.targetLayer.id);
     }
 
-    updateWebGLCanvas(false, 'Layer merge');
+    updateWebGLCanvas('Layer merge');
     updateLayerPreview(this.targetLayer.id);
     updateLayerPreview(this.originLayer.id);
 

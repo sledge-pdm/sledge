@@ -11,8 +11,8 @@ import { ConvertSelectionHistoryAction } from '~/features/history/actions/Conver
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { logSystemError } from '~/features/log/service';
+import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { setProjectStore } from '~/stores/ProjectStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
 
 export class ProjectHistoryController {
@@ -102,6 +102,7 @@ export class ProjectHistoryController {
       this.emitChange();
     }
   }
+
   redo(): void {
     const action = this.redoStack.pop();
     if (action) {
@@ -110,29 +111,35 @@ export class ProjectHistoryController {
       this.emitChange();
     }
   }
+
   canUndo(): boolean {
     return this.undoStack.length > 0;
   }
+
   canRedo(): boolean {
     return this.redoStack.length > 0;
   }
+
   onChange(listener: (s: { canUndo: boolean; canRedo: boolean; lastLabel?: string }) => void): () => void {
     this.listeners.add(listener);
     listener({ canUndo: this.canUndo(), canRedo: this.canRedo(), lastLabel: this.undoStack[this.undoStack.length - 1]?.label });
     return () => this.listeners.delete(listener);
   }
+
   clearHistory() {
     this.undoStack = [];
     this.redoStack = [];
   }
+
   isHistoryAvailable() {
     return this.canUndo() || this.canRedo();
   }
+
   private emitChange() {
     const lastLabel = this.undoStack[this.undoStack.length - 1]?.label;
     const snap = { canUndo: this.canUndo(), canRedo: this.canRedo(), lastLabel };
     this.listeners.forEach((l) => l(snap));
-    setProjectStore('isProjectChangedAfterSave', true);
+    setIOStore('isProjectChangedAfterSave', true);
   }
 }
 export const projectHistoryController = new ProjectHistoryController();

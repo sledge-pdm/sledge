@@ -9,9 +9,9 @@ import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
-import { setFileStore } from '~/stores/EditorStores';
+import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { layerListStore, setCanvasStore, setProjectStore } from '~/stores/ProjectStores';
+import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
 import { FileLocation } from '~/types/FileLocation';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -67,7 +67,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
   const path = normalizeJoin(loc.path, loc.name);
   if (loc.name?.endsWith('.sledge')) {
     // project file
-    setFileStore('openAs', 'project');
+    setIOStore('openAs', 'project');
     try {
       const projectObj = await unpackProject(path);
       if (!projectObj) {
@@ -75,7 +75,7 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
       }
       setSavedLocation(path);
       await loadProject(projectObj);
-      setProjectStore('isProjectChangedAfterSave', false);
+      setIOStore('isProjectChangedAfterSave', false);
       return false;
     } catch (error) {
       logSystemError('Failed to read project.', { label: LOG_LABEL, details: [path, error] });
@@ -84,10 +84,10 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
     }
   } else {
     // image file
-    setFileStore('openAs', 'image');
+    setIOStore('openAs', 'image');
     const isImportSuccessful = await loadProjectFromLocalImage(loc);
     if (isImportSuccessful) {
-      setProjectStore('isProjectChangedAfterSave', false);
+      setIOStore('isProjectChangedAfterSave', false);
       return false;
     } else {
       logSystemError('Failed to import image from path.', { label: LOG_LABEL, details: [path] });
@@ -99,8 +99,8 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
 
 async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; height?: number }): Promise<boolean> {
   // create new (fallback)
-  setFileStore('openAs', 'new_project');
-  setProjectStore('loadProjectVersion', {
+  setIOStore('openAs', 'new_project');
+  setIOStore('loadProjectVersion', {
     project: CURRENT_PROJECT_VERSION,
     sledge: await getCurrentVersion(),
   });
@@ -124,7 +124,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
     const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
     layerManager.registerLayer(layer.id, buffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
   });
-  setProjectStore('isProjectChangedAfterSave', false);
+  setIOStore('isProjectChangedAfterSave', false);
   return true;
 }
 

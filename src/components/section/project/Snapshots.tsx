@@ -1,7 +1,7 @@
 import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
-import { clsx, gzipInflate, ProjectV2, toUint8ClampedArray } from '@sledge-pdm/core';
+import { clsx, getProjectAdapter, gzipInflate, toUint8ClampedArray } from '@sledge-pdm/core';
 import { Icon } from '@sledge-pdm/ui';
 import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
@@ -185,6 +185,8 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
   const createdAt = new Date(snapshot.createdAt);
   const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(snapshot.createdAt);
 
+  const adapter = getProjectAdapter(snapshot.snapshot);
+
   return (
     <div class={itemRoot}>
       <div
@@ -218,7 +220,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
             {createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString()}
           </p>
           <p class={itemDescription}>
-            {(snapshot.snapshot as ProjectV2).canvas.size.width}x{(snapshot.snapshot as ProjectV2).canvas.size.height}
+            {adapter?.getCanvasInfo().size.width}x{adapter?.getCanvasInfo().size.height}
           </p>
           <Show when={snapshot.thumbnail}>
             <canvas

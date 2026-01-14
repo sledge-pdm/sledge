@@ -21,7 +21,7 @@ export class LayerHistoryAction extends BaseHistoryAction {
     } catch {
       return;
     }
-    updateWebGLCanvas(true, `Layer(${this.layerId}) undo`);
+    updateWebGLCanvas(`Layer(${this.layerId}) undo`);
     updateLayerPreview(this.layerId);
   }
 
@@ -31,7 +31,7 @@ export class LayerHistoryAction extends BaseHistoryAction {
     } catch {
       return;
     }
-    updateWebGLCanvas(true, `Layer(${this.layerId}) redo`);
+    updateWebGLCanvas(`Layer(${this.layerId}) redo`);
     updateLayerPreview(this.layerId);
   }
 

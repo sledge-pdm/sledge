@@ -49,7 +49,7 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
 
   layerManager.registerLayer(initLayer.id, new Uint8ClampedArray(imageData.data), imageData.width, imageData.height, { inputSpace: 'canvas' });
 
-  updateWebGLCanvas(false, `Import ${location.name}`);
+  updateWebGLCanvas(`Import ${location.name}`);
   updateLayerPreview(initLayer.id);
 
   return true;
@@ -86,7 +86,7 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
 
     layerManager.registerLayer(initLayer.id, new Uint8ClampedArray(data.imageBuf), data.width, data.height, { inputSpace: 'canvas' });
 
-    updateWebGLCanvas(false, `Import from clipboard`);
+    updateWebGLCanvas(`Import from clipboard`);
     updateLayerPreview(initLayer.id);
 
     return true;

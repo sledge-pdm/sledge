@@ -118,7 +118,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
         layerManager.registerLayer(snap.layer.id, buffer, width, height, { inputSpace: 'layer' });
       }
     }
-    updateWebGLCanvas(true, `canvas resize restore`);
+    updateWebGLCanvas(`canvas resize restore`);
   }
 
   serialize(): SerializedHistoryAction {

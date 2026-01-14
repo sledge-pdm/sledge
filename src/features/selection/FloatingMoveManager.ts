@@ -116,7 +116,7 @@ class FloatingMoveManager {
 
   private requestFrame(immediate?: boolean, layerIdOverride?: string) {
     const layerId = layerIdOverride ?? this.targetLayerId;
-    updateWebGLCanvas(false, 'floating-move');
+    updateWebGLCanvas('floating-move');
     updateLayerPreview(layerId);
     const payload = immediate ? { immediate: true } : {};
     eventBus.emit('selection:updateSelectionMenu', payload);

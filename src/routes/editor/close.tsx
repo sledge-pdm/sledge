@@ -1,7 +1,6 @@
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { saveProject } from '~/features/io/project/out/save';
-import { fileStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/ProjectStores';
+import { ioStore } from '~/stores/EditorStores';
 import { CloseRequestedEvent, dialog } from '~/utils/platform';
 
 const BUTTON_YES = 'Save and Quit';
@@ -10,7 +9,7 @@ const BUTTON_CANCEL = 'Cancel';
 
 export const handleCloseRequest = async (event: CloseRequestedEvent) => {
   await saveEditorStateImmediate();
-  if (projectStore.isProjectChangedAfterSave) {
+  if (ioStore.isProjectChangedAfterSave) {
     const button = await dialog.message('There are unsaved changes.\nSure to quit?', {
       kind: 'warning',
       title: 'Unsaved Changes',
@@ -19,7 +18,7 @@ export const handleCloseRequest = async (event: CloseRequestedEvent) => {
 
     switch (button) {
       case BUTTON_YES:
-        const saveSuccessful = await saveProject(fileStore.savedLocation.name, fileStore.savedLocation.path);
+        const saveSuccessful = await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
         if (saveSuccessful) return;
 
         event.preventDefault();

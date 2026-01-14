@@ -14,6 +14,6 @@ export function applyEffect(layerId: string | undefined, fxName: string, mutator
   mutator(layer);
   projectHistoryController.addAction(new LayerHistoryAction({ layerId, context: { tool: 'fx', fxName } }));
 
-  updateWebGLCanvas(false, `Apply FX for ${layerId}`);
+  updateWebGLCanvas(`Apply FX for ${layerId}`);
   updateLayerPreview(layerId);
 }

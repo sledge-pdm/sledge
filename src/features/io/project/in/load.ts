@@ -2,8 +2,10 @@ import { getProjectAdapter } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn, logUserWarn } from '~/features/log';
+import { setIOStore } from '~/stores/EditorStores';
 import { setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { updateWebGLCanvas } from '~/webgl/service';
 
 export async function loadProject(projectObj: any): Promise<void> {
   const adapter = getProjectAdapter(projectObj);
@@ -13,6 +15,10 @@ export async function loadProject(projectObj: any): Promise<void> {
   }
 
   const failedParts: string[] = [];
+
+  // versions
+  const versions = adapter.getVersions();
+  setIOStore('loadProjectVersion', { sledge: versions.sledge ?? undefined, project: versions.project ?? undefined });
 
   // canvas
   try {
@@ -34,8 +40,14 @@ export async function loadProject(projectObj: any): Promise<void> {
     });
     const canvasInfo = adapter.getCanvasInfo();
     layers.forEach((layer) => {
-      const buffer = adapter.getRawBufferOf(layer.id);
-      if (buffer) layerManager.registerLayer(layer.id, buffer, canvasInfo.size.width, canvasInfo.size.height, { inputSpace: 'canvas' });
+      let buffer = adapter.getRawBufferOf(layer.id);
+      if (!buffer) {
+        logSystemWarn(`loadProject: failed in layer ${layer.id} layer exists but layer not set`);
+        buffer = new Uint8ClampedArray(canvasInfo.size.width * canvasInfo.size.height * 4);
+        failedParts.push(`layer[${layer.id}]`);
+      }
+
+      layerManager.registerLayer(layer.id, buffer, canvasInfo.size.width, canvasInfo.size.height, { inputSpace: 'canvas' });
     });
   } catch (e) {
     logSystemWarn(`loadProject: failed in layers ${String(e)}`);
@@ -67,7 +79,7 @@ export async function loadProject(projectObj: any): Promise<void> {
     const imagePoolState = adapter.getImagePoolState();
     setImagePoolStore({
       ...imagePoolState,
-      entries: Array.isArray(entries) ? entries : [],
+      entries,
     });
   } catch (e) {
     logSystemWarn(`loadProject: failed in image pool ${String(e)}`);
@@ -84,5 +96,7 @@ export async function loadProject(projectObj: any): Promise<void> {
 
   if (failedParts.length > 0) {
     logUserWarn('Some parts are not loaded in error: ' + failedParts.join(', ') + "\nDO NOT SAVE PROJECT IF THIS ISN'T AN INTENTIONAL ERROR!!");
+  } else {
+    updateWebGLCanvas('Project Load');
   }
 }

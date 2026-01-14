@@ -19,22 +19,18 @@ export let webGLRenderer: FrascoRenderer | undefined;
 const WebGLCanvas: Component = () => {
   const LOG_LABEL = 'WebGLCanvas';
   let canvasEl!: HTMLCanvasElement;
-  let requireFullRender = false;
 
   const [updateRender, setUpdateRender] = createSignal(false);
-  const [onlyDirtyUpdate, setOnlyDirtyUpdate] = createSignal(false);
 
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
       if (updateRender()) {
         setUpdateRender(false);
         try {
-          webGLRenderer?.render(onlyDirtyUpdate());
-          requireFullRender = false;
+          webGLRenderer?.render();
         } catch (error) {
           logSystemError('Failed to render WebGL frame.', { label: LOG_LABEL, details: [error] });
         }
-        setOnlyDirtyUpdate(false);
       }
     }, Number(globalConfig.performance.targetFPS))
   );
@@ -49,8 +45,6 @@ const WebGLCanvas: Component = () => {
       details: [width, height],
       debugOnly: true,
     });
-    requireFullRender = true;
-    setOnlyDirtyUpdate(false);
     setUpdateRender(false);
   };
 
@@ -70,18 +64,12 @@ const WebGLCanvas: Component = () => {
       details: [width, height],
       debugOnly: true,
     });
-    requireFullRender = true;
-    setOnlyDirtyUpdate(false);
     setUpdateRender(true);
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
     /* console.log('[WebGLCanvas] Requesting update:', e.context); */
-    if (!e.onlyDirty) {
-      requireFullRender = true;
-    }
     setUpdateRender(true);
-    setOnlyDirtyUpdate(!requireFullRender && e.onlyDirty);
   };
 
   const handleResumeRequest = (e: Events['webgl:requestResume']) => {
@@ -101,8 +89,6 @@ const WebGLCanvas: Component = () => {
       webGLRenderer = new FrascoRenderer(canvasEl);
       webGLRenderer?.setLayers(allLayers());
       webGLRenderer.resize(width, height);
-      requireFullRender = true;
-      setOnlyDirtyUpdate(false);
       setUpdateRender(true); // rise flag for init render
 
       startRenderLoop();

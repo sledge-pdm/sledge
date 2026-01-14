@@ -5,8 +5,8 @@ import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
-import { fileStore } from '~/stores/EditorStores';
-import { canvasStore, projectStore } from '~/stores/ProjectStores';
+import { ioStore } from '~/stores/EditorStores';
+import { canvasStore } from '~/stores/ProjectStores';
 import { window as platformWindow } from '~/utils/platform';
 import './title_bar_region.css';
 
@@ -147,18 +147,18 @@ export default function TitleBar() {
   createEffect(() => {
     if (location.pathname.startsWith('/editor')) {
       let title = '';
-      let fileName = fileStore.savedLocation.name ?? '[new project]';
+      let fileName = ioStore.savedLocation.name ?? '[new project]';
       // non-custom titlebar (mac/linux)
       if (isDecorated()) {
         const size = `(${canvasStore.size.width} x ${canvasStore.size.height})`;
-        const projPath = fileStore.savedLocation.path;
+        const projPath = ioStore.savedLocation.path;
         if (projPath) {
           title += `${fileName} ${size} - ${projPath}`;
         } else {
           title += `${fileName} ${size}`;
         }
       } else {
-        const projPath = fileStore.savedLocation.path;
+        const projPath = ioStore.savedLocation.path;
         if (projPath) {
           title += `${fileName} - ${projPath}`;
         } else {
@@ -206,24 +206,20 @@ export default function TitleBar() {
                   >
                     <p class={titleBarTitle}>
                       <span class={titleBarTitle} style={{ opacity: 0.5 }}>
-                        {fileStore.savedLocation.path ? `${fileStore.savedLocation.path}/` : ''}
+                        {ioStore.savedLocation.path ? `${ioStore.savedLocation.path}/` : ''}
                       </span>
-                      {fileStore.savedLocation.name ?? '[new project]'}
+                      {ioStore.savedLocation.name ?? '[new project]'}
                     </p>
-                    <Show when={fileStore.openAs === 'image'}>
+                    <Show when={ioStore.openAs === 'image'}>
                       <div style={{ 'margin-left': '8px' }}>
                         <Icon src='icons/title_bar/image.png' base={8} />
                       </div>
                     </Show>
-                    <p class={titleBarTitleSub}>{projectStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
+                    <p class={titleBarTitleSub}>{ioStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
-                  <Show
-                    when={
-                      import.meta.env.DEV || (projectStore.loadProjectVersion && projectStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION)
-                    }
-                  >
+                  <Show when={import.meta.env.DEV || (ioStore.loadProjectVersion && ioStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION)}>
                     <div class={titleDivider} />
-                    <p class={titleBarProjectVersion}>V{projectStore.loadProjectVersion?.project}</p>
+                    <p class={titleBarProjectVersion}>V{ioStore.loadProjectVersion?.project}</p>
                   </Show>
                   <div class={titleDivider} />
                   <p class={titleBarSize} style={{}}>

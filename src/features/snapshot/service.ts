@@ -126,7 +126,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
   await loadProject(snapshot.snapshot);
 
   setSnapshotStore(savedSnapshotStore);
-  updateWebGLCanvas(false, 'snapshot loaded');
+  updateWebGLCanvas('snapshot loaded');
   updateLayerPreviewAll();
 }
 

@@ -80,7 +80,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     this.applySnapshot(inflateLayerSnapshot(this.originPackedSnapshot));
     this.applySnapshot(inflateLayerSnapshot(this.targetPackedSnapshot));
 
-    updateWebGLCanvas(false, 'Layer merge undo/redo');
+    updateWebGLCanvas('Layer merge undo/redo');
 
     // swap
     this.originPackedSnapshot = swapOriginPackedSnapshot;

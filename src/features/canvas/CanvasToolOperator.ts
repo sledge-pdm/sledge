@@ -73,7 +73,7 @@ export default class CanvasToolOperator {
       }
 
       if (result.shouldUpdate) {
-        updateWebGLCanvas(true, 'CanvasToolOperator (action: ' + DrawState[state] + ')');
+        updateWebGLCanvas('CanvasToolOperator (action: ' + DrawState[state] + ')');
         updateLayerPreview(layer.id);
       }
 

@@ -172,7 +172,7 @@ async function transferToLayer(layerId: string, entryId: string) {
       context: { tool: 'image' },
     })
   );
-  updateWebGLCanvas(false, `Image Transfer to Layer(${layerId})`);
+  updateWebGLCanvas(`Image Transfer to Layer(${layerId})`);
   updateLayerPreview(layerId);
 }
 

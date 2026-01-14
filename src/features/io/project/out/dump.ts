@@ -38,7 +38,7 @@ export const dumpProjectJson = async (): Promise<ProjectV2> => {
     canvas: {
       size: { ...canvasStore.size },
     },
-    project: { ...projectStore, loadProjectVersion: projectStore.loadProjectVersion ? { ...projectStore.loadProjectVersion } : undefined },
+    project: { ...projectStore },
     imagePool: {
       entries: imagePoolStore.entries,
       state: { ...imagePoolStore },

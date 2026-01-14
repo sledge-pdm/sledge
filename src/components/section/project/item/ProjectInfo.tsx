@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { adjustZoomToFit } from '~/features/canvas';
 import { loadProjectFromLocation } from '~/routes/editor/load';
-import { fileStore } from '~/stores/EditorStores';
+import { ioStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, FileInfo, fs } from '~/utils/platform';
@@ -63,7 +63,7 @@ const ProjectInfo: Component = () => {
   const [savedStat, setSavedStat] = createSignal<FileInfo>();
 
   onMount(async () => {
-    const location = fileStore.savedLocation;
+    const location = ioStore.savedLocation;
     if (location.path && location.name) {
       const path = normalizeJoin(location.path, location.name);
       const fileStat = await fs.stat(path);
@@ -93,14 +93,14 @@ const ProjectInfo: Component = () => {
         <div class={locationInfoStyle}>
           <div class={locationRowStyle}>
             <p class={locationLabelStyle}>path</p>
-            <Show when={fileStore.savedLocation.path} fallback={<p class={placeholderStyle}></p>}>
-              <p class={locationValueStyle}>{fileStore.savedLocation.path || '<unknown>'}</p>
+            <Show when={ioStore.savedLocation.path} fallback={<p class={placeholderStyle}></p>}>
+              <p class={locationValueStyle}>{ioStore.savedLocation.path || '<unknown>'}</p>
             </Show>
           </div>
           <div class={locationRowStyle}>
             <p class={locationLabelStyle}>file</p>
-            <Show when={fileStore.savedLocation.name} fallback={<p class={placeholderStyle}>[ unsaved project ]</p>}>
-              <p class={locationValueStyle}>{fileStore.savedLocation.name || '<unknown>'}</p>
+            <Show when={ioStore.savedLocation.name} fallback={<p class={placeholderStyle}>[ unsaved project ]</p>}>
+              <p class={locationValueStyle}>{ioStore.savedLocation.name || '<unknown>'}</p>
             </Show>
           </div>
           <div class={locationRowStyle}>
@@ -112,11 +112,11 @@ const ProjectInfo: Component = () => {
         </div>
 
         <div class={linksContainer}>
-          <Show when={fileStore.savedLocation.name && fileStore.savedLocation.path}>
+          <Show when={ioStore.savedLocation.name && ioStore.savedLocation.path}>
             <a
               href='#'
               onClick={(e) => {
-                const loc = fileStore.savedLocation;
+                const loc = ioStore.savedLocation;
                 if (!loc || !loc.path || !loc.name) return;
                 revealInFileBrowser(normalizeJoin(loc.path, loc.name));
               }}
@@ -131,7 +131,7 @@ const ProjectInfo: Component = () => {
                 const confirmed = await dialog.confirm(`Sure to reopen this project?
 Unsaved changes will be discarded!`);
                 if (confirmed) {
-                  await loadProjectFromLocation(fileStore.savedLocation);
+                  await loadProjectFromLocation(ioStore.savedLocation);
                   adjustZoomToFit();
                 }
               }}

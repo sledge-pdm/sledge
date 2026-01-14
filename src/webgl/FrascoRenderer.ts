@@ -96,7 +96,7 @@ export class FrascoRenderer {
     layerManager.resizeAll(width, height);
   }
 
-  public render(_onlyDirty?: boolean): void {
+  public render(): void {
     this.checkDisposed();
     if (this.width === 0 || this.height === 0) return;
 
@@ -122,7 +122,7 @@ export class FrascoRenderer {
   public readPixelsFlipped(options?: { skipRender?: boolean }): Uint8ClampedArray {
     this.checkDisposed();
     if (!options?.skipRender) {
-      this.render(false);
+      this.render();
     }
     const raw = this.readPixelsRaw();
     const flipped = new Uint8Array(raw.buffer.slice(0));

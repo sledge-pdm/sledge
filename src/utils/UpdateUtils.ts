@@ -1,5 +1,5 @@
 import { logSystemError, logSystemInfo } from '~/features/log/service';
-import { projectStore } from '~/stores/ProjectStores';
+import { ioStore } from '~/stores/EditorStores';
 import { dialog, process, Update, updater } from './platform';
 
 function isValidUpdate(update: Update): boolean {
@@ -33,7 +33,7 @@ export async function getUpdate(): Promise<Update | undefined> {
 export async function askAndInstallUpdate() {
   logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
 
-  if (projectStore.isProjectChangedAfterSave) {
+  if (ioStore.isProjectChangedAfterSave) {
     const confirmed = await dialog.confirm('There are unsaved changes.\nSure to update without save?', {
       kind: 'warning',
       title: 'Unsaved Changes',

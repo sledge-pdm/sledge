@@ -53,7 +53,7 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
       if (inflated) this.applySnapshot(inflated);
     }
 
-    updateWebGLCanvas(true, `Anvil(${this.layerId}) undo`);
+    updateWebGLCanvas(`Anvil(${this.layerId}) undo`);
     updateLayerPreview(this.layerId);
   }
 
@@ -69,7 +69,7 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
       if (inflated) this.applySnapshot(inflated);
     }
 
-    updateWebGLCanvas(true, `Anvil(${this.layerId}) redo`);
+    updateWebGLCanvas(`Anvil(${this.layerId}) redo`);
     updateLayerPreview(this.layerId);
   }
 

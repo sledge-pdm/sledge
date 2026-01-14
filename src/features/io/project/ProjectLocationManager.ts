@@ -1,4 +1,4 @@
-import { fileStore, setFileStore } from '~/stores/EditorStores';
+import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/ProjectStores';
 import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
@@ -11,11 +11,11 @@ const emptyLocation: FileLocation = {
 };
 
 export const getActiveProjectLocation = (): FileLocation => ({
-  name: fileStore.savedLocation.name,
-  path: fileStore.savedLocation.path,
+  name: ioStore.savedLocation.name,
+  path: ioStore.savedLocation.path,
 });
 
-export const hasActiveProjectLocation = () => Boolean(fileStore.savedLocation.path && fileStore.savedLocation.name);
+export const hasActiveProjectLocation = () => Boolean(ioStore.savedLocation.path && ioStore.savedLocation.name);
 
 export function applyProjectLocation(location: FileLocation | undefined, openAs: ProjectOpenMode = 'project'): void {
   const resolved = location
@@ -25,8 +25,8 @@ export function applyProjectLocation(location: FileLocation | undefined, openAs:
       }
     : emptyLocation;
 
-  setFileStore('savedLocation', resolved);
-  setFileStore('openAs', openAs);
+  setIOStore('savedLocation', resolved);
+  setIOStore('openAs', openAs);
 
   if (openAs === 'project' && resolved.path && resolved.name) {
     setProjectStore('lastSavedPath', normalizeJoin(resolved.path, resolved.name));

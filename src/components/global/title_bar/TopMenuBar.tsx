@@ -11,7 +11,7 @@ import { createNew, openExistingProject, openFromClipboard, openProject } from '
 import { activeLayer } from '~/features/layer';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
-import { appearanceStore, fileStore, setAppearanceStore } from '~/stores/EditorStores';
+import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -158,11 +158,11 @@ const TopMenuBar: Component = () => {
             openFromClipboard();
           },
         },
-        ...(fileStore.recentFiles.length > 0
+        ...(ioStore.recentFiles.length > 0
           ? [
               { type: 'divider', label: 'recent' } as MenuListOption,
               { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
-              ...fileStore.recentFiles
+              ...ioStore.recentFiles
                 .map<MenuListOption | undefined>((loc) => {
                   if (!loc.name || !loc.path) return undefined;
                   return {
@@ -170,7 +170,7 @@ const TopMenuBar: Component = () => {
                     label: normalizeJoin(loc.path, loc.name),
                     title: normalizeJoin(loc.path, loc.name),
                     fontFamily: fonts.ZFB03,
-                    disabled: loc.path === fileStore.savedLocation.path && loc.name === fileStore.savedLocation.name,
+                    disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
                     onSelect: () => {
                       openExistingProject(loc);
                     },

@@ -11,8 +11,9 @@ import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
+import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerListStore, setLayerListStore, setProjectStore } from '~/stores/ProjectStores';
+import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
 import { dialog } from '~/utils/platform';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
@@ -66,7 +67,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
     });
     projectHistoryController.addAction(act);
   }
-  if (propNamesToUpdate.indexOf(propName) !== -1) updateWebGLCanvas(false, `Layer(${layerId}) prop updated(${propName})`);
+  if (propNamesToUpdate.indexOf(propName) !== -1) updateWebGLCanvas(`Layer(${layerId}) prop updated(${propName})`);
 }
 
 export function toggleLayerVisibility(layerIds?: string[]) {
@@ -93,7 +94,7 @@ export function duplicateLayer(layerId: string) {
     },
     { initImage: buffer }
   );
-  updateWebGLCanvas(true, `Layer(${layerId}) duplicated`);
+  updateWebGLCanvas(`Layer(${layerId}) duplicated`);
   logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }
 
@@ -175,7 +176,7 @@ export const addLayerTo = (
   setLayerListStore('layers', layers);
   setActiveLayerId(newLayer.id);
 
-  updateWebGLCanvas(false, `Layer(${newLayer.id}) added`);
+  updateWebGLCanvas(`Layer(${newLayer.id}) added`);
   logUserInfo(`Layer "${newLayer.name}" added.`, { label: LOG_LABEL });
 
   if (!options?.noDiff) {
@@ -288,7 +289,7 @@ export const resetAllLayers = () => {
       layer.clear([0, 0, 0, 0]);
     }
   });
-  updateWebGLCanvas(false, `Reset all layers`);
+  updateWebGLCanvas(`Reset all layers`);
 
   adjustZoomToFit();
 };
@@ -305,7 +306,7 @@ export const moveLayer = (fromIndex: number, targetIndex: number, options?: Move
   const [moved] = updated.splice(fromIndex, 1);
   updated.splice(targetIndex, 0, moved);
   setLayerListStore('layers', updated);
-  updateWebGLCanvas(false, `Layer moved from ${fromIndex} to ${targetIndex}`);
+  updateWebGLCanvas(`Layer moved from ${fromIndex} to ${targetIndex}`);
 
   if (!noDiff) {
     const afterOrder = updated.map((l) => l.id);
@@ -368,7 +369,7 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
 
   setLayerListStore('layers', layers);
   setLayerListStore('activeLayerId', layers[newActiveIndex].id);
-  updateWebGLCanvas(false, `Layer(${layerId}) removed`);
+  updateWebGLCanvas(`Layer(${layerId}) removed`);
   logUserInfo(`Layer "${toRemove.name}" removed.`, { label: LOG_LABEL });
 
   if (!noDiff && snapshot) {
@@ -421,7 +422,7 @@ export function clearLayer(layerId: string) {
       context: { tool: 'clear' },
     })
   );
-  updateWebGLCanvas(true, `Layer(${layerId}) cleared`);
+  updateWebGLCanvas(`Layer(${layerId}) cleared`);
   updateLayerPreview(layerId);
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
 }
@@ -438,8 +439,8 @@ export const activeIndex = () => allLayers().findIndex((layer) => layer.id === l
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(false, `BaseLayer color mode changed to ${colorMode}`);
-  setProjectStore('isProjectChangedAfterSave', true);
+  updateWebGLCanvas(`BaseLayer color mode changed to ${colorMode}`);
+  setIOStore('isProjectChangedAfterSave', true);
 }
 
 /**
@@ -448,8 +449,8 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);
   setLayerListStore('baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(false, `BaseLayer custom color changed to ${customColor}`);
-  setProjectStore('isProjectChangedAfterSave', true);
+  updateWebGLCanvas(`BaseLayer custom color changed to ${customColor}`);
+  setIOStore('isProjectChangedAfterSave', true);
 }
 
 export function setSelectionEnabled(enabled: boolean) {

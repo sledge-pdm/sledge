@@ -1,4 +1,4 @@
-import type { RawPixelData, RGBA } from '@sledge-pdm/core';
+﻿import type { RawPixelData, RGBA } from '@sledge-pdm/core';
 import { Layer, TextureHistoryBackend } from '@sledge-pdm/frasco';
 import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flip_pixels_vertically } from '~/utils/wasm';
@@ -94,7 +94,7 @@ export class LayerManager {
   exportRawCanvas(layerId: string): Uint8ClampedArray {
     const layer = this.layers.get(layerId);
     if (layer) {
-      const raw = layer.exportRaw({ flipY: true });
+      const raw = layer.readPixels({ flipY: true });
       return new Uint8ClampedArray(raw.buffer);
     }
     const pending = this.pending.get(layerId);
@@ -118,7 +118,7 @@ export class LayerManager {
     }
     const existing = this.getLayerOptional(layerId);
     if (existing) {
-      existing.replaceBuffer(normalized, width, height);
+      existing.writePixels(normalized, { width, height });
       return;
     }
     this.registerLayer(layerId, buffer, width, height, { inputSpace });
@@ -183,3 +183,5 @@ export class LayerManager {
 
 export const layerManager = new LayerManager();
 export const getLayer = (layerId: string): Layer => layerManager.getLayer(layerId);
+
+

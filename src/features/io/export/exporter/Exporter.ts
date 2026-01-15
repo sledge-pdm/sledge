@@ -1,4 +1,4 @@
-import { toUint8ClampedArray } from '@sledge-pdm/core';
+﻿import { toUint8ClampedArray } from '@sledge-pdm/core';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { convertToMimetype } from '~/features/io/FileExtensions';
 import { Layer } from '~/features/layer';
@@ -40,7 +40,7 @@ export async function convertLayerToBlob(
 ): Promise<Blob> {
   if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
 
-  const buffer = toUint8ClampedArray(getLayer(layer.id).exportRaw()) as Uint8ClampedArray<ArrayBuffer>;
+  const buffer = toUint8ClampedArray(getLayer(layer.id).readPixels()) as Uint8ClampedArray<ArrayBuffer>;
 
   const offscreen = getScaledCanvas(buffer, scale);
   const mimeType = convertToMimetype(format);
@@ -112,3 +112,4 @@ export function getScaledBuffer(buffer: Uint8ClampedArray<ArrayBuffer>, scale: n
 
   return imageData;
 }
+

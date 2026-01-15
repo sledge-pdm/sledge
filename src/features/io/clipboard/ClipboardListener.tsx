@@ -1,4 +1,4 @@
-import { toUint8Array } from '@sledge-pdm/core';
+﻿import { toUint8Array } from '@sledge-pdm/core';
 import { Component, onMount } from 'solid-js';
 import { projectHistoryController } from '~/features/history';
 import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
@@ -84,9 +84,9 @@ const ClipboardListener: Component = () => {
             logUserError('layer buffer not found.', { label: LOG_LABEL });
             return;
           }
-          const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.exportRaw());
+          const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.readPixels());
           const isCut = srcLayer.cutFreeze;
-          // 切り取りと分かった時点でcutFreezeは取り下げる
+          // 蛻・ｊ蜿悶ｊ縺ｨ蛻・°縺｣縺滓凾轤ｹ縺ｧcutFreeze縺ｯ蜿悶ｊ荳九￡繧・
           setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });
           const unfreezedSourceLayer = findLayerById(textData);
           if (unfreezedSourceLayer && isCut) {
@@ -111,9 +111,9 @@ const ClipboardListener: Component = () => {
             if (sourcePackedSnapshot && targetPackedSnapshot) {
               const action = new LayerListCutPasteHistoryAction({
                 sourcePackedSnapshot,
-                sourceIndex, // 挿入前に取得した index
+                sourceIndex, // 謖ｿ蜈･蜑阪↓蜿門ｾ励＠縺・index
                 targetPackedSnapshot,
-                targetIndex, // 削除後の挿入レイヤー index
+                targetIndex, // 蜑企勁蠕後・謖ｿ蜈･繝ｬ繧､繝､繝ｼ index
                 activeLayerIdBefore,
                 activeLayerIdAfter,
               });
@@ -175,3 +175,4 @@ const ClipboardListener: Component = () => {
 };
 
 export default ClipboardListener;
+

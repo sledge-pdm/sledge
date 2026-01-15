@@ -1,4 +1,4 @@
-import { decodeWebp, gzipDeflate, gzipInflate } from '@sledge-pdm/core';
+﻿import { decodeWebp, gzipDeflate, gzipInflate } from '@sledge-pdm/core';
 import { LayerSnapshot, PackedLayerSnapshot } from '~/features/history/actions/types';
 import { findLayerById } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
@@ -8,7 +8,7 @@ export function getPackedLayerSnapshot(layerId: string): PackedLayerSnapshot | u
   if (!layer) return;
   const frascoLayer = layerManager.getLayerOptional(layerId);
   if (!frascoLayer) return;
-  const buffer = frascoLayer.exportRaw();
+  const buffer = frascoLayer.readPixels();
   return {
     layer: { ...layer },
     image: {
@@ -53,3 +53,4 @@ export function inflateLayerSnapshot(snapshot?: PackedLayerSnapshot): LayerSnaps
 
   return undefined;
 }
+

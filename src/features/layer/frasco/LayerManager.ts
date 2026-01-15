@@ -1,5 +1,6 @@
 import type { RawPixelData, RGBA } from '@sledge-pdm/core';
 import { Layer, TextureHistoryBackend } from '@sledge-pdm/frasco';
+import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flip_pixels_vertically } from '~/utils/wasm';
 
 type InputSpace = 'canvas' | 'layer';
@@ -51,6 +52,7 @@ export class LayerManager {
     }
     const layer = this.createLayer(layerId, buffer, width, height, inputSpace, historyMaxItems);
     this.layers.set(layerId, layer);
+
     return layer;
   }
 
@@ -85,7 +87,7 @@ export class LayerManager {
 
   resizeAll(width: number, height: number): void {
     for (const layer of this.layers.values()) {
-      layer.resize(width, height);
+      layer.resizeClear(width, height);
     }
   }
 
@@ -158,6 +160,14 @@ export class LayerManager {
     const normalized = this.normalizeBuffer(buffer, width, height, inputSpace);
     const layer = new Layer(gl, { width, height, data: normalized });
     layer.setHistoryBackend(new TextureHistoryBackend(), historyMaxItems);
+    layer.addListener('historyRegistered', (e) => {
+      projectHistoryController.addAction(
+        new LayerHistoryAction({
+          layerId: layerId,
+          context: { tool: 'tool context stub' }, // TODO: give a action context for layer?
+        })
+      );
+    });
     return layer;
   }
 

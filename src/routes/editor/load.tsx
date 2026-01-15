@@ -1,5 +1,5 @@
 import { getEmergencyBackups } from '~/features/backup';
-import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
+import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
 import { loadProject } from '~/features/io/project/in/load';
 import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/in/loadFrom';
@@ -117,7 +117,9 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
       uniqueName: false,
     }
   );
-  changeCanvasSizeWithNoOffset(globalConfig.default.canvasSize, true);
+  changeCanvasSize(globalConfig.default.canvasSize, {
+    skipHistory: true,
+  });
   setCanvasStore('size', globalConfig.default.canvasSize);
   const canvasSize = globalConfig.default.canvasSize;
   layerListStore.layers.forEach((layer) => {

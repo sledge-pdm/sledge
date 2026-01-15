@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal } from 'solid-js';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSizeWithNoOffset, setRotation } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, changeCanvasSize, setRotation } from '~/features/canvas';
 import { logSystemInfo } from '~/features/log/service';
 import { canvasStore } from '~/stores/ProjectStores';
 
@@ -110,7 +110,9 @@ const CanvasSettings: Component = () => {
     const height = Number(heightInputRef.value);
     const newSize = { width, height };
 
-    const result = changeCanvasSizeWithNoOffset(newSize, false);
+    const result = changeCanvasSize(newSize, {
+      skipHistory: false,
+    });
     if (result) adjustZoomToFit();
   };
 

@@ -44,7 +44,11 @@ const FrameResizeMenu: Component = () => {
               setInteractStore('isCanvasSizeFrameMode', false);
               return; // no-op
             }
-            changeCanvasSize(newSize, offset, { x: 0, y: 0 }, false);
+            changeCanvasSize(newSize, {
+              skipHistory: false,
+              srcOrigin: offset,
+              destOrigin: { x: 0, y: 0 },
+            });
           }}
           label='commit.'
           title='commit.'

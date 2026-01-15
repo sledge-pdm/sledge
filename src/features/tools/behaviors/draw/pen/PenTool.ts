@@ -10,7 +10,6 @@ import {
   SquareKernel,
 } from '@sledge-pdm/frasco';
 import { Consts } from '~/Consts';
-import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
@@ -126,13 +125,6 @@ export class PenTool implements ToolBehavior {
     }
 
     this.resetStrokeState();
-
-    projectHistoryController.addAction(
-      new LayerHistoryAction({
-        layerId: args.layerId,
-        context: { tool: this.categoryId },
-      })
-    );
 
     return {
       shouldUpdate: true,

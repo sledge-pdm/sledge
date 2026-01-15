@@ -59,15 +59,16 @@ For larger canvases, consider using multiple smaller images or wait for tiled re
   return true;
 }
 
-export function changeCanvasSizeWithNoOffset(newSize: Size2D, skipHistory?: boolean): boolean {
-  return changeCanvasSize(newSize, undefined, undefined, skipHistory);
+interface ChangeCanvasSizeOptions {
+  srcOrigin?: Vec2;
+  destOrigin?: Vec2;
+  skipHistory?: boolean;
 }
 
-export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?: Vec2, skipHistory?: boolean): boolean {
+export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptions): boolean {
+  const { skipHistory = false, srcOrigin: src = { x: 0, y: 0 }, destOrigin: dest = { x: 0, y: 0 } } = options;
   if (!isValidCanvasSize(newSize)) return false;
   const oldSize = { width: canvasStore.size.width, height: canvasStore.size.height };
-  const src = srcOrigin ?? { x: 0, y: 0 };
-  const dest = destOrigin ?? { x: 0, y: 0 };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
     return false;
   const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
@@ -79,9 +80,16 @@ export function changeCanvasSize(newSize: Size2D, srcOrigin?: Vec2, destOrigin?:
   eventBus.emit('canvas:sizeChanged', { newSize });
 
   for (const l of allLayers()) {
-    const baseBuffer = layerManager.exportRawCanvas(l.id);
-    const resized = resizeBufferWithOrigins(baseBuffer, oldSize, newSize, src, dest);
-    layerManager.replaceLayerBuffer(l.id, resized, newSize.width, newSize.height, { inputSpace: 'canvas' });
+    const frascoLayer = layerManager.getLayerOptional(l.id);
+    if (frascoLayer) {
+      const srcLayerOrigin = toLayerOrigin(src, oldSize.height);
+      const destLayerOrigin = toLayerOrigin(dest, newSize.height);
+      frascoLayer.resizePreserve(newSize.width, newSize.height, srcLayerOrigin, destLayerOrigin);
+    } else {
+      const baseBuffer = layerManager.exportRawCanvas(l.id);
+      const resized = resizeBufferWithOrigins(baseBuffer, oldSize, newSize, src, dest);
+      layerManager.replaceLayerBuffer(l.id, resized, newSize.width, newSize.height, { inputSpace: 'canvas' });
+    }
     updateLayerPreview(l.id);
   }
   updateWebGLCanvas('changeCanvasSize');
@@ -150,6 +158,12 @@ function resizeBufferWithOrigins(buffer: Uint8ClampedArray, oldSize: Size2D, new
   }
 
   return out;
+}
+
+function toLayerOrigin(origin: Vec2, height: number): Vec2 {
+  const x = Math.floor(origin.x);
+  const y = Math.floor(origin.y);
+  return { x, y: height - 1 - y };
 }
 
 const referenceLengthRatio = 0.85;

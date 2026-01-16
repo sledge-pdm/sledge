@@ -1,11 +1,11 @@
 import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge-pdm/core';
 import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
 import { unpackProject } from '~/features/io/project/in/unpack';
 import { logSystemWarn } from '~/features/log/service';
 import { pageRoot } from '~/styles/styles';
-import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, fs, window as platformWindow } from '~/utils/platform';

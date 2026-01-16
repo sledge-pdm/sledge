@@ -1,8 +1,8 @@
 import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge-pdm/core';
 import { Component, createEffect, For } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { thumbnailDir } from '~/features/io/project/out/save';
-import { FileLocation } from '~/types/FileLocation';
 import { getFileUniqueId, normalizeJoin } from '~/utils/FileUtils';
 import { core } from '~/utils/platform';
 import ListFileItem from './ListFileItem';

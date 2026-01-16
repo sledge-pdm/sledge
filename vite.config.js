@@ -42,7 +42,7 @@ export default defineConfig({
   },
   publicDir: './public',
   optimizeDeps: {
-    exclude: ['@sledge-pdm/core', '@sledge-pdm/ui', '@sledge-pdm/ui'],
+    exclude: ['@sledge-pdm/core', '@sledge-pdm/frasco', '@sledge-pdm/ui'],
   },
   resolve: {
     alias: {

@@ -1,3 +1,4 @@
+import { FileLocation } from '@sledge-pdm/core';
 import { getEmergencyBackups } from '~/features/backup';
 import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
@@ -12,7 +13,6 @@ import { logSystemError, logUserError } from '~/features/log/service';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
-import { FileLocation } from '~/types/FileLocation';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog } from '~/utils/platform';

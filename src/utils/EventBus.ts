@@ -1,6 +1,5 @@
-import { Size2D } from '@sledge-pdm/core';
+import { FileLocation, Size2D } from '@sledge-pdm/core';
 import mitt from 'mitt';
-import { FileLocation } from '~/types/FileLocation';
 
 export type Events = {
   'project:saved': { location: FileLocation };

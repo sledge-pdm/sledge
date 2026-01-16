@@ -1,6 +1,6 @@
+import { FileLocation } from '@sledge-pdm/core';
 import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { setIOStore } from '~/stores/EditorStores';
-import { FileLocation } from '~/types/FileLocation';
 
 export const addRecentFile = (fileLocation?: FileLocation) => {
   if (!fileLocation) return;

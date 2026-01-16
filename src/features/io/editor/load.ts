@@ -1,7 +1,7 @@
+import { FileLocation } from '@sledge-pdm/core';
 import { Consts } from '~/Consts';
 import { logSystemError } from '~/features/log/service';
 import { EditorStateStore, loadEditorStateStore } from '~/stores/EditorStores';
-import { FileLocation } from '~/types/FileLocation';
 import { fs } from '~/utils/platform';
 
 export async function loadEditorState(): Promise<

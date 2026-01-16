@@ -1,6 +1,6 @@
+import { FileLocation } from '@sledge-pdm/core';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
-import { FileLocation } from '~/types/FileLocation';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
 import { dialog, window as platformWindow, process, WebviewOptions, webviewWindow, WindowOptions } from './platform';

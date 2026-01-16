@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge-pdm/core';
 import { color, Dropdown, DropdownOption, Icon, MenuList } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -7,7 +8,6 @@ import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileIt
 import { getParentDirectory, normalizeDirectoryPath } from '~/components/section/explorer/utils/path';
 import { showTabContent } from '~/features/config/TabContentController';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
-import { FileLocation } from '~/types/FileLocation';
 import { eventBus } from '~/utils/EventBus';
 import { exportDir, getDefinedDriveLetters, isOpenableFile, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';

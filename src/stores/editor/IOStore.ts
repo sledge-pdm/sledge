@@ -1,4 +1,4 @@
-import { FileLocation } from '~/types/FileLocation';
+import { FileLocation } from '@sledge-pdm/core';
 
 export type IOStore = {
   openAs: 'project' | 'new_project' | 'image';

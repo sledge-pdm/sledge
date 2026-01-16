@@ -2,7 +2,7 @@ import { importableFileExtensions, openableFileExtensions } from '~/features/io/
 import { ioStore, lastSettingsStore } from '~/stores/EditorStores';
 import { safeInvoke } from '~/utils/TauriUtils';
 
-import { FileLocation } from '~/types/FileLocation';
+import { FileLocation } from '@sledge-pdm/core';
 import { fs, os, path } from './platform';
 
 const isUncPath = (value: string): boolean => {

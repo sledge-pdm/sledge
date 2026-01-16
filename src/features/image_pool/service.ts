@@ -12,6 +12,7 @@ import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/Project
 import { bufferToBlob, loadImageData } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { fs } from '~/utils/platform';
+import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { flip_pixels_vertically } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
@@ -276,7 +277,7 @@ async function transferToLayer(layerId: string, entryId: string) {
 
   const entryBuffer = new Uint8Array(imageData.data.buffer, imageData.data.byteOffset, imageData.data.byteLength);
   flip_pixels_vertically(entryBuffer, entry.base.width, entry.base.height);
-  const entryTexture = layer.createTextureFromRaw(entryBuffer, { width: entry.base.width, height: entry.base.height });
+  const entryTexture = createTexture(layer.getGLContext(), entry.base.width, entry.base.height, entryBuffer);
 
   layer.commitHistory();
   layer.applyEffectWithTextures(
@@ -293,7 +294,7 @@ async function transferToLayer(layerId: string, entryId: string) {
     },
     { u_patch: entryTexture }
   );
-  layer.deleteTexture(entryTexture);
+  deleteTexture(layer.getGLContext(), entryTexture);
   projectHistoryController.addAction(
     new LayerHistoryAction({
       layerId,

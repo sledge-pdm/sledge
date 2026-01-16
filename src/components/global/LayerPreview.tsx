@@ -3,7 +3,7 @@ import { color } from '@sledge-pdm/ui';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { Layer } from '~/features/layer';
-import { LayerThumbnailGenerator } from '~/features/layer/LayerThumbnailGenerator';
+import { layerThumbnailGenerator } from '~/features/layer/LayerThumbnailGenerator';
 import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { calcPreviewSize } from '~/utils/ThumbnailUtils';
@@ -40,7 +40,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
   let canvasRef: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
-  const thumbnailGen = new LayerThumbnailGenerator();
+  const thumbnailGen = layerThumbnailGenerator;
 
   // RAF and update state management
   const [needsUpdate, setNeedsUpdate] = createSignal<boolean>(false);

@@ -1,7 +1,7 @@
+import { FileLocation } from '@sledge-pdm/core';
 import { v4 } from 'uuid';
 import { dumpProject } from '~/features/io/project/out/dump';
 import { ioStore } from '~/stores/EditorStores';
-import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { fs, path } from '~/utils/platform';
 

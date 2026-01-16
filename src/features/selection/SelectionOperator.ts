@@ -14,6 +14,7 @@ import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
 import { canvasStore, imagePoolStore, layerListStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
+import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { clonePersistedImages, toPersistedImages } from '../image_pool/service';
@@ -184,7 +185,7 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
     layer.commitHistory(glBounds);
   }
   layer.applyEffectWithTextures({ fragmentSrc: CLEAR_WITH_MASK_300ES }, { u_mask: maskTexture }, glBounds);
-  layer.deleteTexture(maskTexture);
+  deleteTexture(layer.getGLContext(), maskTexture);
 
   updateWebGLCanvas('delete selected area');
   updateLayerPreview(lid);
@@ -341,7 +342,7 @@ function buildSelectionMaskTexture(layer: ReturnType<typeof layerManager.getLaye
     rgba[idx + 3] = 255;
   }
   flip_pixels_vertically(new Uint8Array(rgba.buffer), width, height);
-  const texture = layer.createTextureFromRaw(new Uint8Array(rgba.buffer), { width, height });
+  const texture = createTexture(layer.getGLContext(), width, height, new Uint8Array(rgba.buffer));
   return texture;
 }
 

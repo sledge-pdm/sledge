@@ -1,10 +1,10 @@
-import { changeCanvasSizeWithNoOffset } from '~/features/canvas';
+import { FileLocation } from '@sledge-pdm/core';
+import { changeCanvasSize } from '~/features/canvas';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { applyProjectLocation, applyProjectLocationFromPath } from '~/features/io/project/ProjectLocationManager';
 import { addLayer, BlendMode, LayerType } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
-import { FileLocation } from '~/types/FileLocation';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
@@ -25,12 +25,14 @@ export async function loadProjectFromImagePath(location: FileLocation): Promise<
     applyProjectLocation(undefined, 'image');
   }
 
-  changeCanvasSizeWithNoOffset(
+  changeCanvasSize(
     {
       width: imageData.width,
       height: imageData.height,
     },
-    true
+    {
+      skipHistory: true,
+    }
   );
 
   const initLayer = addLayer(
@@ -63,12 +65,14 @@ export async function loadProjectFromClipboardImage(): Promise<boolean> {
 
     applyProjectLocation(undefined, 'image');
 
-    changeCanvasSizeWithNoOffset(
+    changeCanvasSize(
       {
         width: data.width,
         height: data.height,
       },
-      true
+      {
+        skipHistory: true,
+      }
     );
 
     const initLayer = addLayer(

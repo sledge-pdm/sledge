@@ -146,9 +146,9 @@ const CanvasOverlaySVG: Component = () => {
     ) {
       const preset = getCurrentPresetConfig(tool) as any;
       const size: number = preset?.size ?? 1;
-      const even = size % 2 === 0;
-      const cx = even ? Math.round(mouse.x) : Math.floor(mouse.x);
-      const cy = even ? Math.round(mouse.y) : Math.floor(mouse.y);
+      // const cx = mouse.x;
+      // const cy = mouse.y;
+      const { x: cx, y: cy } = cachedPreview.bitmaskShape.prePositionTransform(mouse);
       const ox = cx + cachedPreview.bitmaskShape.offsetX;
       const oy = cy + cachedPreview.bitmaskShape.offsetY;
       setPenOutlinePath(cachedLocalPath.toStringTranslated(interactStore.zoom, ox, oy));

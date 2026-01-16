@@ -1,4 +1,4 @@
-import { gzipDeflate, Size2D } from '@sledge-pdm/core';
+﻿import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { allLayers } from '~/features/layer';
@@ -55,7 +55,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       }
       const width = frascoLayer.getWidth();
       const height = frascoLayer.getHeight();
-      const packedBuffer = gzipDeflate(frascoLayer.exportRaw());
+      const packedBuffer = gzipDeflate(frascoLayer.readPixels());
       return {
         version: CURRENT_PROJECT_VERSION,
         layer: { ...l },
@@ -113,7 +113,9 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       const { buffer, width, height } = inflated.image;
       const frascoLayer = layerManager.getLayerOptional(snap.layer.id);
       if (frascoLayer) {
-        frascoLayer.replaceBuffer(buffer, width, height);
+        frascoLayer.writePixels(buffer, {
+          bounds: { x: 0, y: 0, width, height },
+        });
       } else {
         layerManager.registerLayer(snap.layer.id, buffer, width, height, { inputSpace: 'layer' });
       }

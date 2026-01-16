@@ -1,4 +1,4 @@
-import { RGBA, Vec2 } from '@sledge-pdm/core';
+﻿import { RGBA, Vec2 } from '@sledge-pdm/core';
 import { Layer } from '@sledge-pdm/frasco';
 import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
@@ -111,7 +111,7 @@ function fill(args: {
   };
 }) {
   const { layerId, layer, startX, startY, color, threshold, mask } = args;
-  const buf = layer.exportRaw({ flipY: true });
+  const buf = layer.readPixels({ flipY: true });
   const width = layer.getWidth();
   const height = layer.getHeight();
   let result = false;
@@ -135,7 +135,7 @@ function fill(args: {
 
 function fillArea(args: { layerId: string; layer: Layer; color: RGBA; mask: Uint8Array }) {
   const { layerId, layer, color, mask } = args;
-  const buf = layer.exportRaw({ flipY: true });
+  const buf = layer.readPixels({ flipY: true });
   const width = layer.getWidth();
   const height = layer.getHeight();
   const result = fill_mask_area(buf, mask, ...color);

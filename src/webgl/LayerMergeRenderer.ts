@@ -1,4 +1,4 @@
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+﻿import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { projectHistoryController } from '~/features/history';
 import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { activeLayer, BlendMode, getLayerIndex, Layer } from '~/features/layer';
@@ -33,7 +33,7 @@ class LayerMergeRenderer {
     renderer.setIncludeBaseLayer(prevIncludeBaseLayer);
     const targetLayer = layerManager.getLayerOptional(this.targetLayer.id);
     if (!targetLayer) return;
-    targetLayer.replaceBuffer(out);
+    targetLayer.writePixels(out);
 
     setLayerListStore('layers', tIdx, 'mode', BlendMode.normal);
     setLayerListStore('layers', tIdx, 'opacity', 1.0);

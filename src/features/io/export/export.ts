@@ -1,3 +1,4 @@
+import { FileLocation } from '@sledge-pdm/core';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { JPEGExporter } from '~/features/io/export/exporter/JPEGExporter';
 import { LosslessWebPExporter } from '~/features/io/export/exporter/LosslessWebPExporter';
@@ -7,7 +8,6 @@ import { SVGExporter } from '~/features/io/export/exporter/SVGExporter';
 import { convertToExtension, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { allLayers } from '~/features/layer';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
-import { FileLocation } from '~/types/FileLocation';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, fs } from '~/utils/platform';
 

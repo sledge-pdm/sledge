@@ -1,5 +1,6 @@
-import type { RawPixelData, RGBA } from '@sledge-pdm/core';
-import { Layer, TextureHistoryBackend } from '@sledge-pdm/frasco';
+﻿import type { RawPixelData, RGBA } from '@sledge-pdm/core';
+import { Layer, SurfaceBounds, TextureHistoryBackend } from '@sledge-pdm/frasco';
+import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flip_pixels_vertically } from '~/utils/wasm';
 
 type InputSpace = 'canvas' | 'layer';
@@ -51,6 +52,7 @@ export class LayerManager {
     }
     const layer = this.createLayer(layerId, buffer, width, height, inputSpace, historyMaxItems);
     this.layers.set(layerId, layer);
+
     return layer;
   }
 
@@ -85,14 +87,14 @@ export class LayerManager {
 
   resizeAll(width: number, height: number): void {
     for (const layer of this.layers.values()) {
-      layer.resize(width, height);
+      layer.resizeClear(width, height);
     }
   }
 
   exportRawCanvas(layerId: string): Uint8ClampedArray {
     const layer = this.layers.get(layerId);
     if (layer) {
-      const raw = layer.exportRaw({ flipY: true });
+      const raw = layer.readPixels({ flipY: true });
       return new Uint8ClampedArray(raw.buffer);
     }
     const pending = this.pending.get(layerId);
@@ -116,7 +118,8 @@ export class LayerManager {
     }
     const existing = this.getLayerOptional(layerId);
     if (existing) {
-      existing.replaceBuffer(normalized, width, height);
+      const bounds: SurfaceBounds = { x: 0, y: 0, width, height };
+      existing.writePixels(normalized, { bounds });
       return;
     }
     this.registerLayer(layerId, buffer, width, height, { inputSpace });
@@ -128,7 +131,8 @@ export class LayerManager {
       return undefined;
     }
     const glY = layer.getHeight() - 1 - y;
-    const pixels = layer.readPixels({ x, y: glY, width: 1, height: 1 });
+    const bounds: SurfaceBounds = { x, y: glY, width: 1, height: 1 };
+    const pixels = layer.readPixels({ bounds });
     return [pixels[0], pixels[1], pixels[2], pixels[3]];
   }
 
@@ -158,6 +162,14 @@ export class LayerManager {
     const normalized = this.normalizeBuffer(buffer, width, height, inputSpace);
     const layer = new Layer(gl, { width, height, data: normalized });
     layer.setHistoryBackend(new TextureHistoryBackend(), historyMaxItems);
+    layer.addListener('historyRegistered', (e) => {
+      projectHistoryController.addAction(
+        new LayerHistoryAction({
+          layerId: layerId,
+          context: { tool: 'tool context stub' }, // TODO: give a action context for layer?
+        })
+      );
+    });
     return layer;
   }
 

@@ -52,4 +52,3 @@ class LayerMergeRenderer {
 }
 
 export default LayerMergeRenderer;
-

@@ -175,4 +175,3 @@ const ClipboardListener: Component = () => {
 };
 
 export default ClipboardListener;
-

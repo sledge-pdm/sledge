@@ -1,4 +1,5 @@
 ﻿import { gzipDeflate } from '@sledge-pdm/core';
+import { SurfaceBounds } from '@sledge-pdm/frasco';
 import { getLayerIndex } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
@@ -55,7 +56,8 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
       if (snapshot.image) {
         const frascoLayer = layerManager.getLayerOptional(snapshot.layer.id);
         if (frascoLayer) {
-          frascoLayer.writePixels(snapshot.image.buffer, { width: snapshot.image.width, height: snapshot.image.height });
+          const bounds: SurfaceBounds = { x: 0, y: 0, width: snapshot.image.width, height: snapshot.image.height };
+          frascoLayer.writePixels(snapshot.image.buffer, { bounds });
         }
       }
     }
@@ -111,5 +113,3 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     };
   }
 }
-
-

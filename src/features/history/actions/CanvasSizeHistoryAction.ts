@@ -113,7 +113,9 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
       const { buffer, width, height } = inflated.image;
       const frascoLayer = layerManager.getLayerOptional(snap.layer.id);
       if (frascoLayer) {
-        frascoLayer.writePixels(buffer, { width, height });
+        frascoLayer.writePixels(buffer, {
+          bounds: { x: 0, y: 0, width, height },
+        });
       } else {
         layerManager.registerLayer(snap.layer.id, buffer, width, height, { inputSpace: 'layer' });
       }
@@ -135,5 +137,3 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
     };
   }
 }
-
-

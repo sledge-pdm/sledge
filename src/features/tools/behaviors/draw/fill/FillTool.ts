@@ -151,4 +151,3 @@ function fillArea(args: { layerId: string; layer: Layer; color: RGBA; mask: Uint
     );
   }
 }
-

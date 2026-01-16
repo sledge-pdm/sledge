@@ -74,4 +74,3 @@ export class SVGExporter extends Exporter {
     return new Blob([svgContent], { type: 'image/svg+xml' });
   }
 }
-

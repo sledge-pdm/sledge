@@ -53,4 +53,3 @@ export function inflateLayerSnapshot(snapshot?: PackedLayerSnapshot): LayerSnaps
 
   return undefined;
 }
-

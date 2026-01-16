@@ -1,5 +1,5 @@
 ﻿import type { RawPixelData, RGBA } from '@sledge-pdm/core';
-import { Layer, TextureHistoryBackend } from '@sledge-pdm/frasco';
+import { Layer, SurfaceBounds, TextureHistoryBackend } from '@sledge-pdm/frasco';
 import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flip_pixels_vertically } from '~/utils/wasm';
 
@@ -118,7 +118,8 @@ export class LayerManager {
     }
     const existing = this.getLayerOptional(layerId);
     if (existing) {
-      existing.writePixels(normalized, { width, height });
+      const bounds: SurfaceBounds = { x: 0, y: 0, width, height };
+      existing.writePixels(normalized, { bounds });
       return;
     }
     this.registerLayer(layerId, buffer, width, height, { inputSpace });
@@ -130,7 +131,8 @@ export class LayerManager {
       return undefined;
     }
     const glY = layer.getHeight() - 1 - y;
-    const pixels = layer.readPixels({ x, y: glY, width: 1, height: 1 });
+    const bounds: SurfaceBounds = { x, y: glY, width: 1, height: 1 };
+    const pixels = layer.readPixels({ bounds });
     return [pixels[0], pixels[1], pixels[2], pixels[3]];
   }
 
@@ -183,5 +185,3 @@ export class LayerManager {
 
 export const layerManager = new LayerManager();
 export const getLayer = (layerId: string): Layer => layerManager.getLayer(layerId);
-
-

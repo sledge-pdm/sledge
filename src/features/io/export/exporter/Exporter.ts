@@ -112,4 +112,3 @@ export function getScaledBuffer(buffer: Uint8ClampedArray<ArrayBuffer>, scale: n
 
   return imageData;
 }
-

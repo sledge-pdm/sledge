@@ -25,4 +25,3 @@ export class LosslessWebPExporter extends Exporter {
     return blob;
   }
 }
-

@@ -22,9 +22,9 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@jaames/iro": "^5.5.2",
-    "@sledge-pdm/core": "^1.1.7",
-    "@sledge-pdm/frasco": "^0.1.6",
-    "@sledge-pdm/ui": "^1.1.3",
+    "@sledge-pdm/core": "^1.1.9",
+    "@sledge-pdm/frasco": "^0.1.9",
+    "@sledge-pdm/ui": "1.1.7",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
     "@solid-primitives/raf": "^2.3.2",

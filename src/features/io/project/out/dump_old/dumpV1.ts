@@ -15,7 +15,7 @@
 //       webpBuffer: Uint8Array;
 //     }
 //   >();
-//   const size = canvasStore.canvas;
+//   const size = projectStore.canvas.canvas;
 //   allLayers().forEach((l) => {
 //     let buffer: Uint8ClampedArray;
 //     try {

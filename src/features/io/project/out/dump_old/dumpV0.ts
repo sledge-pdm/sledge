@@ -13,7 +13,7 @@
 //     try {
 //       map.set(layer.id, layerManager.exportRawCanvas(layer.id));
 //     } catch {
-//       const size = canvasStore.canvas;
+//       const size = projectStore.canvas.canvas;
 //       map.set(layer.id, new Uint8ClampedArray(size.width * size.height * 4));
 //     }
 //   });

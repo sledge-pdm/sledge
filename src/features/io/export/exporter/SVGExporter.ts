@@ -3,12 +3,12 @@ import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { create_opacity_mask, mask_to_path } from '~/utils/wasm';
 
 export class SVGExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
-    const { width, height } = canvasStore.size;
+    const { width, height } = projectStore.canvas.size;
 
     // 64x64莉･蜀・・蛻ｶ髯舌メ繧ｧ繝・け
     if (width > 128 || height > 128) {
@@ -41,7 +41,7 @@ export class SVGExporter extends Exporter {
   }
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
-    const { width, height } = canvasStore.size;
+    const { width, height } = projectStore.canvas.size;
 
     // 64x64莉･蜀・・蛻ｶ髯舌メ繧ｧ繝・け
     if (width > 128 || height > 128) {

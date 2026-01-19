@@ -3,10 +3,10 @@ import { StrokeCanvas } from './StrokeCanvas';
 
 import { css } from '@acab/ecsstatic';
 import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
-import { canvasStore } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
+import { projectStore } from '~/stores/RuntimeProject';
 import CheckerboardPattern from '/assets/patterns/CheckerboardPattern.svg';
 
 const canvasStackContainer = css`
@@ -22,7 +22,7 @@ const canvasStack = css`
 
 const CanvasStack: Component = () => {
   const gridSize = createMemo(() => {
-    const { width, height } = canvasStore.size;
+    const { width, height } = projectStore.canvas.size;
 
     const shorter = width > height ? height : width;
     let canvasStoreOrder = Math.floor(Math.log10(shorter)) - 1;
@@ -36,7 +36,7 @@ const CanvasStack: Component = () => {
   });
 
   createEffect(() => {
-    const { width, height } = canvasStore.size;
+    const { width, height } = projectStore.canvas.size;
     const frame = requestAnimationFrame(() => {
       eventBus.emit('canvas:layoutReady', { newSize: { width, height } });
     });
@@ -50,16 +50,16 @@ const CanvasStack: Component = () => {
     <div
       class={canvasStackContainer}
       style={{
-        width: `${canvasStore.size.width}px`,
-        height: `${canvasStore.size.height}px`,
+        width: `${projectStore.canvas.size.width}px`,
+        height: `${projectStore.canvas.size.height}px`,
       }}
     >
       <div
         id='canvas-stack'
         class={canvasStack}
         style={{
-          width: `${canvasStore.size.width}px`,
-          height: `${canvasStore.size.height}px`,
+          width: `${projectStore.canvas.size.width}px`,
+          height: `${projectStore.canvas.size.height}px`,
           'background-image': `url("${CheckerboardPattern}")`,
           'background-size': `${gridSize() * 2}px ${gridSize() * 2}px`,
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,

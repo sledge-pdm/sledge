@@ -8,7 +8,8 @@ import { ImagePoolEntry, ImagePoolImage, ImagePoolImagePersisted } from '~/featu
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service';
-import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { bufferToBlob, loadImageData } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { fs } from '~/utils/platform';
@@ -96,11 +97,11 @@ const removeImageForEntry = (entryId: string) => {
 
 const createEntryBase = (width: number, height: number, forceFit?: boolean): ImagePoolEntry => {
   const id = v4();
-  let initialScale = forceFit ? Math.min(canvasStore.size.width / width, canvasStore.size.height / height) : 1;
+  let initialScale = forceFit ? Math.min(projectStore.canvas.size.width / width, projectStore.canvas.size.height / height) : 1;
 
   // at least ensure fit to prevent image overflow
-  if (width > canvasStore.size.width || height > canvasStore.size.height) {
-    initialScale = Math.min(canvasStore.size.width / width, canvasStore.size.height / height);
+  if (width > projectStore.canvas.size.width || height > projectStore.canvas.size.height) {
+    initialScale = Math.min(projectStore.canvas.size.width / width, projectStore.canvas.size.height / height);
   }
 
   return {

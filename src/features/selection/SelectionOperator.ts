@@ -12,7 +12,8 @@ import { getCurrentSelection, selectionManager } from '~/features/selection/Sele
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { canvasStore, imagePoolStore, layerListStore } from '~/stores/ProjectStores';
+import { imagePoolStore, layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
@@ -70,8 +71,8 @@ export function isPositionWithinSelection(pos: Vec2) {
 // 現在の状況からFloat状態を作成
 export function startMove() {
   const layerId = layerListStore.activeLayerId;
-  const width = canvasStore.size.width;
-  const height = canvasStore.size.height;
+  const width = projectStore.canvas.size.width;
+  const height = projectStore.canvas.size.height;
   if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
@@ -155,8 +156,8 @@ export function cancelMove() {
 export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): Uint8ClampedArray | undefined {
   const selection = getCurrentSelection();
   const lid = props?.layerId ?? activeLayer().id;
-  const width = canvasStore.size.width;
-  const height = canvasStore.size.height;
+  const width = projectStore.canvas.size.width;
+  const height = projectStore.canvas.size.height;
 
   const bBox = selection.getBoundBox();
   if (!bBox) {
@@ -261,8 +262,8 @@ export function getCurrentSelectionBuffer():
       bbox: { x: number; y: number; width: number; height: number };
     }
   | undefined {
-  const width = canvasStore.size.width;
-  const height = canvasStore.size.height;
+  const width = projectStore.canvas.size.width;
+  const height = projectStore.canvas.size.height;
   selectionManager.commitOffset();
   const mask = selectionManager.getCombinedMask();
   const bbox = computeMaskBBox(mask, width, height);

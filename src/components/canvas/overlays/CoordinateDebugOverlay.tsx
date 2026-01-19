@@ -3,7 +3,7 @@ import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { coordinateTransform, getDebugTransformInfo } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { CanvasPos, WindowPos } from '~/types/CoordinateTypes';
 
 const debugOverlay = css`
@@ -144,7 +144,7 @@ const CoordinateDebugOverlay: Component = () => {
         <div class={coordinateRow}>
           <span>Canvas Size:</span>
           <span>
-            {canvasStore.size.width}×{canvasStore.size.height}
+            {projectStore.canvas.size.width}×{projectStore.canvas.size.height}
           </span>
         </div>
         <div class={coordinateRow}>

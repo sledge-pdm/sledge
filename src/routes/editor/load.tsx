@@ -12,7 +12,8 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { layerListStore, setCanvasStore } from '~/stores/ProjectStores';
+import { layerListStore } from '~/stores/ProjectStores';
+import { setProjectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog } from '~/utils/platform';
@@ -107,8 +108,8 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   applyProjectLocation(undefined, 'new_project');
   const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
   const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
-  setCanvasStore('size', 'width', width);
-  setCanvasStore('size', 'height', height);
+  setProjectStore('canvas', 'size', 'width', width);
+  setProjectStore('canvas', 'size', 'height', height);
   eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
   addLayer(
     { name: 'layer 1', type: LayerType.Dot, enabled: true },
@@ -120,7 +121,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   changeCanvasSize(globalConfig.default.canvasSize, {
     skipHistory: true,
   });
-  setCanvasStore('size', globalConfig.default.canvasSize);
+  setProjectStore('canvas', 'size', globalConfig.default.canvasSize);
   const canvasSize = globalConfig.default.canvasSize;
   layerListStore.layers.forEach((layer) => {
     const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);

@@ -38,8 +38,8 @@ export const setImagePoolStore = projectRootStore.setImagePoolStore;
 export const layerListStore = projectRootStore.layerListStore;
 export const setLayerListStore = projectRootStore.setLayerListStore;
 
-export const projectStore = projectRootStore.projectStore;
-export const setProjectStore = projectRootStore.setProjectStore;
+export const projectStoreFormer = projectRootStore.projectStore;
+export const setProjectStoreFormer = projectRootStore.setProjectStore;
 
 export const snapshotStore = projectRootStore.snapshotStore;
 export const setSnapshotStore = projectRootStore.setSnapshotStore;

@@ -8,7 +8,7 @@ import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
 import { allLayers } from '~/features/layer';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { accentedButton, flexCol } from '~/styles/styles';
 import { eventBus, Events } from '~/utils/EventBus';
 import { exportDir, exportFileName, normalizeJoin, normalizePath } from '~/utils/FileUtils';
@@ -452,7 +452,7 @@ const ExportContent: Component = () => {
       </div>
 
       <p class={estimatedSize}>
-        estimated: {canvasStore.size.width * finalScale()} x {canvasStore.size.height * finalScale()}
+        estimated: {projectStore.canvas.size.width * finalScale()} x {projectStore.canvas.size.height * finalScale()}
       </p>
 
       <div class={exportSection}>

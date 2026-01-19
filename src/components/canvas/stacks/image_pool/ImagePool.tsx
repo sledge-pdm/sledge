@@ -1,7 +1,8 @@
 import { Component, For } from 'solid-js';
 
 import { isImagePoolActive } from '~/features/layer';
-import { canvasStore, imagePoolStore } from '~/stores/ProjectStores';
+import { imagePoolStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import Image from './Image';
 
 export const ImagePool: Component = () => {
@@ -11,8 +12,8 @@ export const ImagePool: Component = () => {
         position: 'absolute',
         top: 0,
         left: 0,
-        width: `${canvasStore.size.width}px`,
-        height: `${canvasStore.size.height}px`,
+        width: `${projectStore.canvas.size.width}px`,
+        height: `${projectStore.canvas.size.height}px`,
         visibility: !isImagePoolActive() ? 'collapse' : 'visible',
         'z-index': 'var(--zindex-image-pool)',
         'pointer-events': 'none',

@@ -1,6 +1,6 @@
 import { FileLocation } from '@sledge-pdm/core';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
-import { setProjectStore } from '~/stores/ProjectStores';
+import { setProjectStoreFormer } from '~/stores/ProjectStores';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 
 export type ProjectOpenMode = 'project' | 'new_project' | 'image';
@@ -29,9 +29,9 @@ export function applyProjectLocation(location: FileLocation | undefined, openAs:
   setIOStore('openAs', openAs);
 
   if (openAs === 'project' && resolved.path && resolved.name) {
-    setProjectStore('lastSavedPath', normalizeJoin(resolved.path, resolved.name));
+    setProjectStoreFormer('lastSavedPath', normalizeJoin(resolved.path, resolved.name));
   } else {
-    setProjectStore('lastSavedPath', undefined);
+    setProjectStoreFormer('lastSavedPath', undefined);
   }
 }
 

@@ -1,16 +1,17 @@
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
-import { dumpProject } from '~/features/io/project/out/dump';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
-import { canvasStore, setProjectStore } from '~/stores/ProjectStores';
+import { setProjectStoreFormer } from '~/stores/ProjectStores';
+import { getProjectFromRuntime, projectStore } from '~/stores/RuntimeProject';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
+import { packr } from '~/utils/msgpackr';
 import { dialog, fs, path } from '~/utils/platform';
 
 async function folderSelection(nameWOExtension: string) {
@@ -25,11 +26,20 @@ async function folderSelection(nameWOExtension: string) {
 
 async function saveThumbnailData(selectedPath: string) {
   const fileId = await getFileUniqueId(selectedPath);
-  const { width, height } = canvasStore.size;
+  const { width, height } = projectStore.canvas.size;
   const thumbSize = calcThumbnailSize(width, height);
   const thumbnailBlob = await canvasThumbnailGenerator.generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
   const thumbnailDataUrl = await blobToDataUrl(thumbnailBlob);
   return await saveThumbnailExternal(fileId, thumbnailDataUrl);
+}
+
+/**
+ * @description get MessagePack-compressed current project (including buffers)
+ */
+export async function getPackedCurrentProject(): Promise<Uint8Array> {
+  const project = await getProjectFromRuntime();
+  const packed = packr.pack(project);
+  return packed;
 }
 
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
@@ -78,17 +88,19 @@ After overwrite, you cannot open this project in old version of sledge.`,
         project: CURRENT_PROJECT_VERSION,
       });
 
-      const thumbpath = await saveThumbnailData(selectedPath);
+      // const thumbpath = await saveThumbnailData(selectedPath);
 
-      const data = await dumpProject();
+      let data = await getPackedCurrentProject();
       await fs.writeFile(selectedPath, data);
+      // @ts-ignore
+      data = null;
       addRecentFile(pathToFileLocation(selectedPath));
 
       setIOStore('openAs', 'project');
       setSavedLocation(selectedPath);
       // @ts-ignore
       window.__PATH__ = selectedPath;
-      setProjectStore('lastSavedAt', new Date());
+      setProjectStoreFormer('lastSavedAt', new Date());
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });
 

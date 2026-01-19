@@ -5,11 +5,14 @@ import { makeRuntimeImages } from '~/features/image_pool/service';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn, logUserWarn } from '~/features/log';
 import { setIOStore } from '~/stores/EditorStores';
-import { imagePoolStore, setCanvasStore, setImagePoolStore, setLayerListStore, setProjectStore, setSnapshotStore } from '~/stores/ProjectStores';
+import { imagePoolStore, setImagePoolStore, setLayerListStore, setProjectStoreFormer, setSnapshotStore } from '~/stores/ProjectStores';
+import { initRuntimeProject, setProjectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { updateWebGLCanvas } from '~/webgl/service';
 
 export async function loadProject(projectObj: any): Promise<void> {
+  initRuntimeProject(projectObj);
+
   const adapter = getProjectAdapter(projectObj);
 
   if (!adapter) {
@@ -25,7 +28,7 @@ export async function loadProject(projectObj: any): Promise<void> {
   // canvas
   try {
     const canvasInfo = adapter.getCanvasInfo();
-    setCanvasStore('size', canvasInfo.size);
+    setProjectStore('canvas', 'size', canvasInfo.size);
     eventBus.emit('canvas:sizeChanged', { newSize: canvasInfo.size });
   } catch (e) {
     logSystemWarn(`loadProject: failed in canvas ${String(e)}`);
@@ -58,7 +61,7 @@ export async function loadProject(projectObj: any): Promise<void> {
 
   // project
   try {
-    setProjectStore(adapter.getProjectInfo());
+    setProjectStoreFormer(adapter.getProjectInfo());
   } catch (e) {
     logSystemWarn(`loadProject: failed in project ${String(e)}`);
     failedParts.push('project');

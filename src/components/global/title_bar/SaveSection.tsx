@@ -5,7 +5,7 @@ import { Component, createEffect, createMemo, createSignal, onMount, Show } from
 import { saveProject } from '~/features/io/project/out/save';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { ioStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/ProjectStores';
+import { projectStoreFormer } from '~/stores/ProjectStores';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
@@ -96,10 +96,10 @@ const SaveSection: Component = () => {
     setSaveLoading(false);
   };
 
-  const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStore.lastSavedAt?.getTime());
+  const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStoreFormer.lastSavedAt?.getTime());
 
   createEffect(() => {
-    updatePastTimeStamp(projectStore.lastSavedAt?.getTime());
+    updatePastTimeStamp(projectStoreFormer.lastSavedAt?.getTime());
   });
 
   const setTimeredSaveLog = (text: { text: string; color: string }) => {

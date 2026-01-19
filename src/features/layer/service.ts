@@ -13,7 +13,8 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { dialog } from '~/utils/platform';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
@@ -164,8 +165,8 @@ export const addLayerTo = (
   );
 
   // Initialize anvil
-  const width = canvasStore.size.width;
-  const height = canvasStore.size.height;
+  const width = projectStore.canvas.size.width;
+  const height = projectStore.canvas.size.height;
   layerManager.registerLayer(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height, {
     inputSpace: 'canvas',
   });

@@ -114,7 +114,7 @@ export function initRuntimeProject(project: Project) {
 /**
  *  @description Get project data for files with current runtime state
  */
-export async function getProjectFromRuntime() {
+export async function getProjectFromRuntime(): Promise<Project> {
   const buffers = new Map<
     string, // layer id
     {
@@ -137,14 +137,15 @@ export async function getProjectFromRuntime() {
 
   const serializedHistory = projectHistoryController.getSerialized();
 
-  const project: ProjectV2 = {
+  const project: Project = {
     version: await getCurrentVersion(),
     projectVersion: 2,
-    ...projectStore,
+    ...{ ...projectStore },
     history: serializedHistory,
     layers: {
       buffers,
-      ...projectStore.layers,
+      layers: projectStore.layers.layers,
+      state: projectStore.layers.state,
     },
     imagePool: { images: toPersistedImages(imagePoolStore.images), ...projectStore.imagePool },
   };

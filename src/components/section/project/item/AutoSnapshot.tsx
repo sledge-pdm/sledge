@@ -3,7 +3,7 @@ import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { escapeCurrentAutosave } from '~/features/snapshot';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
-import { projectStore, setProjectStore } from '~/stores/ProjectStores';
+import { projectStoreFormer, setProjectStoreFormer } from '~/stores/ProjectStores';
 
 const caption = css`
   font-family: ZFB03;
@@ -34,9 +34,9 @@ const AutoSnapshot: Component = () => {
       <p class={caption}>Auto Snapshot.</p>
       <div class={container}>
         <ToggleSwitch
-          checked={projectStore.autoSnapshotEnabled || false}
+          checked={projectStoreFormer.autoSnapshotEnabled || false}
           onChange={(checked: boolean) => {
-            setProjectStore('autoSnapshotEnabled', checked);
+            setProjectStoreFormer('autoSnapshotEnabled', checked);
             if (checked) {
               escapeCurrentAutosave();
               AutoSnapshotManager.getInstance().doSave();
@@ -46,23 +46,23 @@ const AutoSnapshot: Component = () => {
           name='auto-snapshot-enabled'
           labelMode='right'
         >
-          {projectStore.autoSnapshotEnabled ? 'enabled' : 'disabled'}
+          {projectStoreFormer.autoSnapshotEnabled ? 'enabled' : 'disabled'}
         </ToggleSwitch>
 
         <div
           class={intervalControlsStyle}
           style={{
-            opacity: projectStore.autoSnapshotEnabled ? 1 : 0.5,
-            'pointer-events': projectStore.autoSnapshotEnabled ? 'auto' : 'none',
+            opacity: projectStoreFormer.autoSnapshotEnabled ? 1 : 0.5,
+            'pointer-events': projectStoreFormer.autoSnapshotEnabled ? 'auto' : 'none',
           }}
         >
           <Dropdown
             options={autoSnapshotIntervalOptions}
-            value={projectStore.autoSnapshotInterval ?? 15}
+            value={projectStoreFormer.autoSnapshotInterval ?? 15}
             wheelSpin={false}
-            disabled={!projectStore.autoSnapshotEnabled}
+            disabled={!projectStoreFormer.autoSnapshotEnabled}
             onChange={(value) => {
-              setProjectStore('autoSnapshotInterval', value);
+              setProjectStoreFormer('autoSnapshotInterval', value);
             }}
           />
         </div>

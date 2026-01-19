@@ -17,6 +17,7 @@ import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 
 export type PixelFragment = {
@@ -374,7 +375,7 @@ class SelectionAreaManager {
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
     if (!canvasStore?.size) return;
-    const { width, height } = canvasStore.size;
+    const { width, height } = projectStore.canvas.size;
     const layerBuffer = layerManager.exportRawCanvas(srcLayerId);
 
     this.commitOffset();

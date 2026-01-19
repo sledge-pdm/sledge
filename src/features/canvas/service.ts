@@ -7,7 +7,7 @@ import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore, setCanvasStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { WindowPos } from '~/types/CoordinateTypes';
 import { eventBus } from '~/utils/EventBus';
 import { dialog } from '~/utils/platform';
@@ -68,7 +68,7 @@ interface ChangeCanvasSizeOptions {
 export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptions): boolean {
   const { skipHistory = false, srcOrigin: src = { x: 0, y: 0 }, destOrigin: dest = { x: 0, y: 0 } } = options;
   if (!isValidCanvasSize(newSize)) return false;
-  const oldSize = { width: canvasStore.size.width, height: canvasStore.size.height };
+  const oldSize = { width: projectStore.canvas.size.width, height: projectStore.canvas.size.height };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
     return false;
   const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
@@ -76,7 +76,7 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
     act.registerBefore();
   }
 
-  setCanvasStore('size', newSize);
+  setProjectStore('canvas', 'size', newSize);
   eventBus.emit('canvas:sizeChanged', { newSize });
 
   for (const l of allLayers()) {
@@ -190,8 +190,8 @@ const referenceLength = () => {
 
 export const getReferencedZoom = (length?: number) => {
   if (length === undefined) {
-    const width = canvasStore.size.width;
-    const height = canvasStore.size.height;
+    const width = projectStore.canvas.size.width;
+    const height = projectStore.canvas.size.height;
     length = width > height ? width : height;
   }
 
@@ -199,8 +199,8 @@ export const getReferencedZoom = (length?: number) => {
 };
 
 export const adjustZoomToFit = (width?: number, height?: number) => {
-  width = width ?? canvasStore.size.width;
-  height = height ?? canvasStore.size.height;
+  width = width ?? projectStore.canvas.size.width;
+  height = height ?? projectStore.canvas.size.height;
   if (!width || !height) return;
 
   const longerLength = width > height ? width : height;
@@ -213,7 +213,7 @@ export const adjustZoomToFit = (width?: number, height?: number) => {
 };
 
 export const centeringCanvas = () => {
-  const canvasSize = canvasStore.size;
+  const canvasSize = projectStore.canvas.size;
   const sectionBetweenArea = document.getElementById('sections-between-area');
   if (!sectionBetweenArea) return;
   const areaBound = sectionBetweenArea.getBoundingClientRect();

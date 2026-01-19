@@ -13,7 +13,7 @@ import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPos
 import { getActiveToolCategory } from '~/features/tools/ToolController';
 import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
@@ -168,7 +168,10 @@ export const StrokeCanvas: Component = () => {
 
   function isOnCanvas(canvasPosition: Vec2): boolean {
     return (
-      canvasPosition.x >= 0 && canvasPosition.y >= 0 && canvasPosition.x <= canvasStore.size.width && canvasPosition.y <= canvasStore.size.height
+      canvasPosition.x >= 0 &&
+      canvasPosition.y >= 0 &&
+      canvasPosition.x <= projectStore.canvas.size.width &&
+      canvasPosition.y <= projectStore.canvas.size.height
     );
   }
 
@@ -228,8 +231,8 @@ export const StrokeCanvas: Component = () => {
       class={strokeArea}
       ref={(el) => (innerArea = el)}
       style={{
-        width: `${canvasStore.size.width}px`,
-        height: `${canvasStore.size.height}px`,
+        width: `${projectStore.canvas.size.width}px`,
+        height: `${projectStore.canvas.size.height}px`,
         cursor: interactStore.strokeAreaCursor,
       }}
       onContextMenu={(e) => {

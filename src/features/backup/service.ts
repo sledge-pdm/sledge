@@ -1,9 +1,9 @@
 import { FileLocation } from '@sledge-pdm/core';
 import { v4 } from 'uuid';
-import { dumpProject } from '~/features/io/project/out/dump';
 import { ioStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { fs, path } from '~/utils/platform';
+import { getPackedCurrentProject } from '../io/project/out/save';
 
 const EMERGENCY_BACKUP_FOLDER = 'backup';
 
@@ -14,7 +14,7 @@ export async function getEmergencyBackupPath(): Promise<string> {
 
 // create snapshot of current project, and save as emergency backup
 export async function saveEmergencyBackup(): Promise<FileLocation> {
-  const packedProject = await dumpProject();
+  const packedProject = await getPackedCurrentProject();
 
   const loc = ioStore.savedLocation;
   // save to nested unique id dir to prevent overwriting project with same name

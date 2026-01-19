@@ -2,17 +2,17 @@ import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { loadProject } from '~/features/io/project/in/load';
-import { dumpProjectJson } from '~/features/io/project/out/dump';
 import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
-import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
+import { setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
+import { getProjectFromRuntime, projectStore } from '~/stores/RuntimeProject';
 import { dialog } from '~/utils/platform';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {
-    const canvasSize: Size2D = { ...canvasStore.size };
+    const canvasSize: Size2D = { ...projectStore.canvas.size };
     // create thumbnail (actual size)
     const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(canvasSize.width, canvasSize.height);
 
@@ -22,7 +22,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
       id: createUniqueId(),
       name: name ?? `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,
       description: undefined,
-      snapshot: await dumpProjectJson(),
+      snapshot: await getProjectFromRuntime(),
       thumbnail: thumbnailImageData
         ? {
             packedBuffer: gzipDeflate(thumbnailImageData.data),

@@ -1,6 +1,7 @@
 import { findLayerById, removeLayer, setActiveLayerId } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
@@ -65,8 +66,8 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     arr.splice(index, 0, packed.layer);
     setLayerListStore('layers', arr);
 
-    const width = packed.image?.width ?? canvasStore.size.width;
-    const height = packed.image?.height ?? canvasStore.size.height;
+    const width = packed.image?.width ?? projectStore.canvas.size.width;
+    const height = packed.image?.height ?? projectStore.canvas.size.height;
     const buffer = packed.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
     layerManager.registerLayer(packed.layer.id, buffer, width, height, { inputSpace: 'layer' });
 

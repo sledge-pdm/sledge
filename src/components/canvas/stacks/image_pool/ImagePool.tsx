@@ -1,6 +1,5 @@
 import { Component, For } from 'solid-js';
 
-import { imagePoolStore } from '~/stores/ProjectStores';
 import { projectStore } from '~/stores/RuntimeProject';
 import Image from './Image';
 
@@ -18,7 +17,7 @@ export const ImagePool: Component = () => {
         'touch-action': 'none',
       }}
     >
-      <For each={imagePoolStore.entries}>{(entry, i) => entry && <Image entry={entry} index={i()} />}</For>
+      <For each={projectStore.imagePool.entries}>{(entry, i) => entry && <Image entry={entry} index={i()} />}</For>
     </div>
   );
 };

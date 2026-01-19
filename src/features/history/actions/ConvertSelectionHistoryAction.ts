@@ -1,9 +1,9 @@
 import { ImagePoolEntry, ImagePoolImagePersisted } from '~/features/image_pool';
-import { makeRuntimeImages } from '~/features/image_pool/service';
+import { makeRuntimeImages, runtimeImages, setRuntimeImages } from '~/features/image_pool/service';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
-import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { setProjectStore } from '~/stores/RuntimeProject';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
@@ -49,9 +49,9 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
   }
 
   undo(): void {
-    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
-    setImagePoolStore('entries', [...this.oldEntries]);
-    if (this.oldImages) setImagePoolStore('images', makeRuntimeImages(this.oldImages));
+    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    setProjectStore('imagePool', 'entries', [...this.oldEntries]);
+    if (this.oldImages) setRuntimeImages(makeRuntimeImages(this.oldImages));
 
     if (this.beforeSnapshot) {
       if (floatingMoveManager.isMoving()) {
@@ -67,9 +67,9 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
   }
 
   redo(): void {
-    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
-    setImagePoolStore('entries', [...this.newEntries]);
-    if (this.newImages) setImagePoolStore('images', makeRuntimeImages(this.newImages));
+    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    setProjectStore('imagePool', 'entries', [...this.newEntries]);
+    if (this.newImages) setRuntimeImages(makeRuntimeImages(this.newImages));
 
     if (this.afterSnapshot) {
       if (floatingMoveManager.isMoving()) {

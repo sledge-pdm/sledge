@@ -1,7 +1,7 @@
 import { normalizeRotation } from '~/features/canvas';
 import { getEntry, updateEntryPartial } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
-import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 
 type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'r';
 
@@ -73,10 +73,10 @@ class ImageEntryInteract {
     if (this.mode === 'drag') {
       const nx = this.startX + dx;
       const ny = this.startY + dy;
-      const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
+      const index = projectStore.imagePool.entries.findIndex((e) => e.id === this.entryId);
       if (index < 0) return;
-      setImagePoolStore('entries', index, 'transform', 'x', nx);
-      setImagePoolStore('entries', index, 'transform', 'y', ny);
+      setProjectStore('imagePool', 'entries', index, 'transform', 'x', nx);
+      setProjectStore('imagePool', 'entries', index, 'transform', 'y', ny);
     } else if (this.mode === 'resize') {
       const baseW = entry.base.width;
       const baseH = entry.base.height;
@@ -114,7 +114,7 @@ class ImageEntryInteract {
       }
 
       // アスペクト固定: グローバル設定を基本に、Shift キーが押されていれば必ず固定
-      const keepAspect = imagePoolStore.preserveAspectRatio || e.shiftKey;
+      const keepAspect = projectStore.imagePool.state.preserveAspectRatio || e.shiftKey;
       if (keepAspect) {
         switch (this.resizePos) {
           case 'e':
@@ -200,12 +200,12 @@ class ImageEntryInteract {
           break;
       }
 
-      const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
+      const index = projectStore.imagePool.entries.findIndex((e) => e.id === this.entryId);
       if (index < 0) return;
-      setImagePoolStore('entries', index, 'transform', 'x', newX);
-      setImagePoolStore('entries', index, 'transform', 'y', newY);
-      setImagePoolStore('entries', index, 'transform', 'scaleX', nextScaleX);
-      setImagePoolStore('entries', index, 'transform', 'scaleY', nextScaleY);
+      setProjectStore('imagePool', 'entries', index, 'transform', 'x', newX);
+      setProjectStore('imagePool', 'entries', index, 'transform', 'y', newY);
+      setProjectStore('imagePool', 'entries', index, 'transform', 'scaleX', nextScaleX);
+      setProjectStore('imagePool', 'entries', index, 'transform', 'scaleY', nextScaleY);
     } else if (this.mode === 'rotate') {
       // client rect of svg control (=image)
       const svgRect = this.svgRoot.getBoundingClientRect();
@@ -222,9 +222,9 @@ class ImageEntryInteract {
 
       newRotation = normalizeRotation(newRotation);
 
-      const index = imagePoolStore.entries.findIndex((e) => e.id === this.entryId);
+      const index = projectStore.imagePool.entries.findIndex((e) => e.id === this.entryId);
       if (index < 0) return;
-      setImagePoolStore('entries', index, 'transform', 'rotation', newRotation);
+      setProjectStore('imagePool', 'entries', index, 'transform', 'rotation', newRotation);
     }
   };
 

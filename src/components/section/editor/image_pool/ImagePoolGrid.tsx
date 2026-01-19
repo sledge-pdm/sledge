@@ -1,13 +1,14 @@
 import { color, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, For } from 'solid-js';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
+import { runtimeImages } from '~/features/image_pool/service';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
-import { imagePoolStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
-  const imageSrc = useImageBlobUrl(() => imagePoolStore.images.get(props.entry.id));
+  const imageSrc = useImageBlobUrl(() => runtimeImages().get(props.entry.id));
 
   return (
     <div
@@ -18,7 +19,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
         'box-sizing': 'border-box',
         cursor: 'pointer',
         margin: '-1px',
-        border: imagePoolStore.selectedEntryId === props.entry.id ? `1px solid ${color.active}` : `1px solid ${color.border}`,
+        border: projectStore.imagePool.state.selectedEntryId === props.entry.id ? `1px solid ${color.active}` : `1px solid ${color.border}`,
         opacity: props.entry.visible ? 1 : 0.5,
       }}
       onContextMenu={(e) => {
@@ -83,7 +84,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
             e.currentTarget.alt = 'missing';
           }}
           onClick={(e) => {
-            if (imagePoolStore.selectedEntryId === props.entry.id) {
+            if (projectStore.imagePool.state.selectedEntryId === props.entry.id) {
               selectEntry(undefined);
             } else {
               selectEntry(props.entry.id);
@@ -98,7 +99,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
 const ImagePoolGrid: Component = () => {
   return (
     <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '8px' }}>
-      <For each={imagePoolStore.entries}>{(entry) => <Item entry={entry} />}</For>
+      <For each={projectStore.imagePool.entries}>{(entry) => <Item entry={entry} />}</For>
     </div>
   );
 };

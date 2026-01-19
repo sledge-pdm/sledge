@@ -4,9 +4,10 @@ import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer, updateEntryPartial } from '~/features/image_pool';
+import { runtimeImages } from '~/features/image_pool/service';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
-import { imagePoolStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
 const imageRoot = css`
@@ -58,7 +59,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
   let svgRef: SVGSVGElement;
   let entryInteract: OnCanvasFrameInteract | undefined;
 
-  const imageSrc = useImageBlobUrl(() => imagePoolStore.images.get(entry.id));
+  const imageSrc = useImageBlobUrl(() => runtimeImages().get(entry.id));
 
   const viewWidth = createMemo(() => Math.abs(entry.base.width * entry.transform.scaleX));
   const viewHeight = createMemo(() => Math.abs(entry.base.height * entry.transform.scaleY));
@@ -128,7 +129,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
     const handleImageSelection = (e: MouseEvent) => {
       if (!canvasArea?.contains(e.target as HTMLElement)) return;
       if (containerRef && !containerRef.contains(e.target as HTMLElement)) {
-        if (imagePoolStore.selectedEntryId === entry.id) {
+        if (projectStore.imagePool.state.selectedEntryId === entry.id) {
           selectEntry(undefined);
         }
       } else {
@@ -144,7 +145,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
   });
 
   createEffect(() => {
-    const preserveAspectRatio = imagePoolStore.preserveAspectRatio;
+    const preserveAspectRatio = projectStore.imagePool.state.preserveAspectRatio;
     entryInteract?.setOptions({ keepAspect: preserveAspectRatio ? 'always' : 'shift' });
   });
 
@@ -198,11 +199,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
       id={entry.id}
       ref={(el) => (containerRef = el)}
       style={{
-        display: entry.visible || imagePoolStore.selectedEntryId === entry.id ? 'flex' : 'none',
+        display: entry.visible || projectStore.imagePool.state.selectedEntryId === entry.id ? 'flex' : 'none',
         width: `${viewWidth()}px`,
         height: `${viewHeight()}px`,
         transform: `translate(${entry.transform.x}px, ${entry.transform.y}px)`,
-        cursor: imagePoolStore.selectedEntryId === entry.id ? 'all-scroll' : undefined,
+        cursor: projectStore.imagePool.state.selectedEntryId === entry.id ? 'all-scroll' : undefined,
       }}
       tabIndex={index}
       onClick={(e) => {
@@ -227,7 +228,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
             'image-rendering': 'pixelated',
             'transform-origin': 'center center',
             scale: `${entry.transform.flipX ? -1 : 1} ${entry.transform.flipY ? -1 : 1}`,
-            opacity: entry.visible ? 1 : imagePoolStore.selectedEntryId === entry.id ? 0.5 : 0,
+            opacity: entry.visible ? 1 : projectStore.imagePool.state.selectedEntryId === entry.id ? 0.5 : 0,
           }}
         />
       </div>
@@ -247,7 +248,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         <rect
           class={clsx('border-rect', overlay)}
           fill='none'
-          stroke-opacity={imagePoolStore.selectedEntryId === entry.id ? 1 : 0.15}
+          stroke-opacity={projectStore.imagePool.state.selectedEntryId === entry.id ? 1 : 0.15}
           stroke={color.selectionBorder}
           stroke-width={1 / interactStore.zoom}
           vector-effect={'non-scaling-stroke'}
@@ -259,7 +260,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           corner
           rotate
           size={8 / interactStore.zoom}
-          visible={imagePoolStore.selectedEntryId === entry.id}
+          visible={projectStore.imagePool.state.selectedEntryId === entry.id}
           elementProps={{
             stroke: 'black',
             fill: 'white',
@@ -283,7 +284,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
             left: 0,
             'transform-origin': '0 0',
             transform: `scale(${1 / interactStore.zoom}) translate(8px, 8px) `,
-            opacity: imagePoolStore.selectedEntryId === entry.id ? 1 : 0.5,
+            opacity: projectStore.imagePool.state.selectedEntryId === entry.id ? 1 : 0.5,
             'pointer-events': 'all',
             cursor: 'pointer',
           }}

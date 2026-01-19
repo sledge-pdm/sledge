@@ -12,13 +12,12 @@ import { getCurrentSelection, selectionManager } from '~/features/selection/Sele
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { imagePoolStore } from '~/stores/ProjectStores';
 import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
-import { clonePersistedImages, toPersistedImages } from '../image_pool/service';
+import { clonePersistedImages, runtimeImages, toPersistedImages } from '../image_pool/service';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -284,8 +283,8 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   if (!selectionData) return;
   const { buffer, bbox } = selectionData;
 
-  const oldEntries = imagePoolStore.entries.slice();
-  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+  const oldEntries = projectStore.imagePool.entries.slice();
+  const oldImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
   const { entry, image } = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
   entry.descriptionName = '[ from selection ]';
@@ -297,8 +296,8 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   insertEntry(entry, image, true);
   selectEntry(entry.id);
 
-  const newEntries = imagePoolStore.entries.slice();
-  const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+  const newEntries = projectStore.imagePool.entries.slice();
+  const newImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
   let beforeSnapshot = undefined;
   let afterSnapshot = undefined;

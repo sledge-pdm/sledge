@@ -1,11 +1,10 @@
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
-import { setProjectStoreFormer } from '~/stores/ProjectStores';
-import { getProjectFromRuntime, projectStore } from '~/stores/RuntimeProject';
+import { getProjectFromRuntime, projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
 import { eventBus } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
@@ -100,7 +99,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       setSavedLocation(selectedPath);
       // @ts-ignore
       window.__PATH__ = selectedPath;
-      setProjectStoreFormer('lastSavedAt', new Date());
+      setProjectStore('project', 'lastSavedAt', new Date());
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });
 

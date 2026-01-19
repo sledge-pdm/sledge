@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { ioStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { fs, path } from '~/utils/platform';
-import { getPackedCurrentProject } from '../io/project/out/save';
+import { getPackedCurrentProject } from '../io/project/save';
 
 const EMERGENCY_BACKUP_FOLDER = 'backup';
 

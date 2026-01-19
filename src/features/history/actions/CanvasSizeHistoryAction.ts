@@ -1,6 +1,6 @@
 ﻿import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { adjustZoomToFit } from '~/features/canvas';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';

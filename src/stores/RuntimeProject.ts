@@ -1,11 +1,13 @@
-import { getProjectAdapter, gzipDeflate, ProjectV2 } from '@sledge-pdm/core';
+import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectV2 } from '@sledge-pdm/core';
 import { createStore } from 'solid-js/store';
 import { projectHistoryController } from '~/features/history';
-import { ImagePoolImage, ImagePoolImagePersisted } from '~/features/image_pool';
-import { makeRuntimeImages, toPersistedImages } from '~/features/image_pool/service';
+import { ImagePoolImagePersisted } from '~/features/image_pool';
+import { makeRuntimeImages, runtimeImages, setRuntimeImages, toPersistedImages } from '~/features/image_pool/service';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers, Layer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { getCurrentVersion } from '~/utils/VersionUtils';
+import { setIOStore } from './EditorStores';
 
 type Project = ProjectV2;
 
@@ -64,19 +66,16 @@ function init() {
 
 export const [projectStore, setProjectStore] = init();
 
-const [imagePoolStore, setImagePoolStore] = createStore<{
-  images: Map<string, ImagePoolImage>;
-}>({
-  images: new Map<string, ImagePoolImage>(),
-});
-
-export function initRuntimeProject(project: Project) {
+export function initRuntimeProject(project: ProjectBase) {
   // things which is not included in RuntimeProject
   const adapter = getProjectAdapter(project);
 
   if (!adapter) {
     throw new Error('Failed to load project to runtime');
   }
+
+  const versions = adapter.getVersions();
+  setIOStore('loadProjectVersion', { sledge: versions.sledge ?? undefined, project: versions.project ?? undefined });
 
   const canvasInfo = adapter.getCanvasInfo();
   adapter.getLayers().forEach((layer) => {
@@ -94,23 +93,31 @@ export function initRuntimeProject(project: Project) {
 
   const entries = adapter.getImagePoolEntries();
   // const imagePoolState = adapter.getImagePoolState();
-  imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
+  runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
   const persistedImages = new Map<string, ImagePoolImagePersisted>();
   entries.forEach((entry) => {
     const image = adapter.getImagePoolImageOf(entry.id);
     if (image) persistedImages.set(entry.id, image);
   });
-  setImagePoolStore({
-    images: makeRuntimeImages(persistedImages),
-  });
+  setRuntimeImages(makeRuntimeImages(persistedImages));
 
   // TODO: convert snapshots into lightweight runtime structures
 
   // set runtime project
-  const { buffers, ...layers } = project.layers;
-  const { images, ...imagePool } = project.imagePool; // images は別途 makeRuntimeImages などで復元する
-  const { history: historyDispose, version, projectVersion, ...rest } = project;
-  const runtime: RuntimeProject = { ...rest, layers, imagePool };
+  const runtime: RuntimeProject = {
+    canvas: adapter.getCanvasInfo(),
+    imagePool: {
+      entries: adapter.getImagePoolEntries(),
+      state: adapter.getImagePoolState(),
+    },
+    layers: {
+      layers: adapter.getLayers(),
+      state: adapter.getLayerListState(),
+    },
+    project: adapter.getProjectInfo(),
+    snapshots: adapter.getSnapshots(),
+  };
+
   setProjectStore(runtime);
 }
 
@@ -142,7 +149,7 @@ export async function getProjectFromRuntime(): Promise<Project> {
 
   const project: Project = {
     version: await getCurrentVersion(),
-    projectVersion: 2,
+    projectVersion: CURRENT_PROJECT_VERSION,
     ...{ ...projectStore },
     history: serializedHistory,
     layers: {
@@ -150,7 +157,7 @@ export async function getProjectFromRuntime(): Promise<Project> {
       layers: projectStore.layers.layers,
       state: projectStore.layers.state,
     },
-    imagePool: { images: toPersistedImages(imagePoolStore.images), ...projectStore.imagePool },
+    imagePool: { images: toPersistedImages(runtimeImages()), ...projectStore.imagePool },
   };
 
   return project;

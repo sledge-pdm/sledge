@@ -1,6 +1,6 @@
 import { MenuListOption } from '@sledge-pdm/ui';
 import { projectHistoryController } from '~/features/history';
-import { saveProject } from '~/features/io/project/out/save';
+import { saveProject } from '~/features/io/project/save';
 import { webview } from '~/utils/platform';
 import { openDevTools } from '~/utils/WindowUtils';
 

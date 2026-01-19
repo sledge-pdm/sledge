@@ -20,7 +20,7 @@ import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { tryLoadProject } from '~/routes/editor/load';
 import { appearanceStore } from '~/stores/EditorStores';
-import { projectStoreFormer } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import { isFirstStartup, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
@@ -80,10 +80,10 @@ export default function Editor() {
   });
 
   createEffect(() => {
-    if (projectStoreFormer.autoSnapshotEnabled && projectStoreFormer.autoSnapshotInterval) {
+    if (projectStore.project.autoSnapshotEnabled && projectStore.project.autoSnapshotInterval) {
       const manager = AutoSnapshotManager.getInstance();
-      if (projectStoreFormer.autoSnapshotInterval === manager.getCurrentInterval()) return;
-      manager.start(projectStoreFormer.autoSnapshotInterval);
+      if (projectStore.project.autoSnapshotInterval === manager.getCurrentInterval()) return;
+      manager.start(projectStore.project.autoSnapshotInterval);
     }
   });
 

@@ -1,4 +1,4 @@
-import { CURRENT_PROJECT_VERSION } from '../io/types/Project';
+import { CURRENT_PROJECT_VERSION } from '../io/project/Project';
 
 // Feature: history - base action types and abstract class
 export type HistoryActionTypes =

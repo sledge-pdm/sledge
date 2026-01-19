@@ -2,19 +2,19 @@ import { FileLocation } from '@sledge-pdm/core';
 import { getEmergencyBackups } from '~/features/backup';
 import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
-import { loadProject } from '~/features/io/project/in/load';
-import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/in/loadFrom';
-import { unpackProject } from '~/features/io/project/in/unpack';
+import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/loadFrom';
+
+import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { applyProjectLocation } from '~/features/io/project/ProjectLocationManager';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
 import { addLayer, LayerType } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { initRuntimeProject, projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { unpackFromPath } from '~/utils/msgpackr';
 import { dialog } from '~/utils/platform';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { getFromClipboardQuery, getNewProjectQuery, getOpenLocation, openWindow } from '~/utils/WindowUtils';
@@ -69,12 +69,12 @@ export async function loadProjectFromLocation(loc: FileLocation): Promise<boolea
     // project file
     setIOStore('openAs', 'project');
     try {
-      const projectObj = await unpackProject(path);
+      const projectObj = await unpackFromPath(path);
       if (!projectObj) {
         throw new Error('Failed to read project from path: reading ' + path);
       }
       setSavedLocation(path);
-      await loadProject(projectObj);
+      initRuntimeProject(projectObj);
       setIOStore('isProjectChangedAfterSave', false);
       return false;
     } catch (error) {

@@ -4,7 +4,7 @@ import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, 
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { CanvasPos } from '~/types/CoordinateTypes';
 
 export const CanvasResizeFrame: Component = () => {
@@ -59,8 +59,8 @@ export const CanvasResizeFrame: Component = () => {
   };
 
   onMount(() => {
-    const w = canvasStore.size.width;
-    const h = canvasStore.size.height;
+    const w = projectStore.canvas.size.width;
+    const h = projectStore.canvas.size.height;
     if (w > 0 && h > 0) {
       setRect({ x: 0, y: 0, width: w, height: h, rotation: 0 });
     }
@@ -72,8 +72,8 @@ export const CanvasResizeFrame: Component = () => {
   });
 
   createEffect(() => {
-    const w = canvasStore.size.width;
-    const h = canvasStore.size.height;
+    const w = projectStore.canvas.size.width;
+    const h = projectStore.canvas.size.height;
     if (!rect() && w > 0 && h > 0) {
       setRect({ x: 0, y: 0, width: w, height: h, rotation: 0 });
 

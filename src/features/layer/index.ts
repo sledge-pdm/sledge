@@ -32,7 +32,6 @@ export {
   findLayerById,
   getActiveLayerIndex,
   getLayerIndex,
-  isImagePoolActive,
   mergeToBelowLayer,
   moveLayer,
   removeLayer,
@@ -41,7 +40,6 @@ export {
   // BaseLayer operations
   setBaseLayerColorMode,
   setBaseLayerCustomColor,
-  setImagePoolActive,
   // Layer properties
   setLayerName,
   setLayerProp,

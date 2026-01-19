@@ -5,7 +5,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { getBaseLayerColor } from '~/features/layer/model';
 import type { Layer } from '~/features/layer/types';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { flip_pixels_vertically } from '~/utils/wasm';
 
 const MAX_LAYERS = 16;
@@ -100,7 +100,7 @@ export class FrascoRenderer {
     this.checkDisposed();
     if (this.width === 0 || this.height === 0) return;
 
-    const baseColor: RGBA = this.includeBaseLayer ? getBaseLayerColor(layerListStore.baseLayer) : [0, 0, 0, 0];
+    const baseColor: RGBA = this.includeBaseLayer ? getBaseLayerColor(projectStore.layers.state.baseLayer) : [0, 0, 0, 0];
     const layers = this.layers.toReversed().slice(0, MAX_LAYERS);
     const composite = this.buildCompositeLayers(layers);
 
@@ -163,7 +163,7 @@ export class FrascoRenderer {
 
   private getPreviewTexture(layer: Layer): WebGLTexture | undefined {
     if (!floatingMoveManager.isMoving()) return;
-    if (layer.id !== layerListStore.activeLayerId) return;
+    if (layer.id !== projectStore.layers.state.activeLayerId) return;
     const buffer = floatingMoveManager.getPreviewBuffer();
     if (!buffer || buffer.length !== this.width * this.height * 4) return;
 

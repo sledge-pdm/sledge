@@ -4,7 +4,7 @@ import { projectHistoryController } from '~/features/history';
 import { css } from '@acab/ecsstatic';
 import FrameResizeMenu from '~/components/canvas/overlays/resize_frame/FrameResizeMenu';
 import { interactStore } from '~/stores/EditorStores';
-import { layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 
 const topRightNav = css`
   display: flex;
@@ -73,7 +73,7 @@ const CanvasControls: Component = () => {
   });
 
   createEffect(() => {
-    layerListStore.activeLayerId;
+    projectStore.layers.state.activeLayerId;
 
     // keep effect to refresh when active layer changes, but values come from projectHistory
     setActiveCanUndo(projectHistoryController.canUndo());

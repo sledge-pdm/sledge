@@ -1,6 +1,12 @@
-// controllers/layer/SelectionManager.ts
-
 import { Vec2 } from '@sledge-pdm/core';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { logSystemWarn } from '~/features/log/service';
+import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
+import SelectionMask from '~/features/selection/SelectionMask';
+import { SelectionEditMode } from '~/stores/editor/InteractStore';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { projectStore } from '~/stores/RuntimeProject';
+import { eventBus } from '~/utils/EventBus';
 import {
   apply_mask_offset,
   combine_masks_add,
@@ -9,15 +15,6 @@ import {
   fill_rect_mask,
   trim_mask_with_box,
 } from '~/utils/wasm';
-// import { getActiveAgent, getBufferOf } from '~/features/layer/agent/LayerAgentManager'; // legacy
-import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { logSystemInfo, logSystemWarn } from '~/features/log/service';
-import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
-import SelectionMask from '~/features/selection/SelectionMask';
-import { SelectionEditMode } from '~/stores/editor/InteractStore';
-import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
-import { eventBus } from '~/utils/EventBus';
 
 export type PixelFragment = {
   kind: 'pixel';
@@ -111,23 +108,14 @@ class SelectionAreaManager {
   }
 
   constructor() {
-    const width = canvasStore?.size?.width ?? 0;
-    const height = canvasStore?.size?.height ?? 0;
-    this.selectionMask = new SelectionMask(width, height);
+    this.selectionMask = new SelectionMask(0, 0);
     this.previewMask = undefined;
 
-    // キャンバスサイズ変更が来たら、両方のマスクをリサイズ
     eventBus.on('canvas:sizeChanged', (e: any) => {
-      logSystemInfo('SelectionManager: Received canvas:sizeChanged event', {
-        label: 'SelectionAreaManager',
-        details: [e.newSize],
-        debugOnly: true,
-      });
       this.selectionMask.changeSize(e.newSize);
       if (this.previewMask) {
         this.previewMask.changeSize(e.newSize);
       }
-      // console.log('SelectionManager: Mask size updated to', e.newSize);
     });
   }
 
@@ -373,8 +361,8 @@ class SelectionAreaManager {
   }
 
   public getFloatingBuffer(srcLayerId: string): FloatingBuffer | undefined {
-    if (!canvasStore?.size) return;
-    const { width, height } = canvasStore.size;
+    if (!projectStore.canvas.size) return;
+    const { width, height } = projectStore.canvas.size;
     const layerBuffer = layerManager.exportRawCanvas(srcLayerId);
 
     this.commitOffset();

@@ -1,5 +1,5 @@
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
-import { saveProject } from '~/features/io/project/out/save';
+import { saveProject } from '~/features/io/project/save';
 import { ioStore } from '~/stores/EditorStores';
 import { CloseRequestedEvent, dialog } from '~/utils/platform';
 

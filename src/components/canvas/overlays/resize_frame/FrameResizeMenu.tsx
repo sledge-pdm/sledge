@@ -3,7 +3,7 @@ import { color, Icon } from '@sledge-pdm/ui';
 import { Component, createSignal, Show } from 'solid-js';
 import { changeCanvasSize } from '~/features/canvas';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 
 const frameContainer = css`
   display: flex;
@@ -38,7 +38,7 @@ const FrameResizeMenu: Component = () => {
             const targetH = interactStore.canvasSizeFrameSize.height;
             if (!targetW || !targetH) return;
             const offset = interactStore.canvasSizeFrameOffset; // (startX, startY) フレーム左上（旧キャンバス座標）
-            const oldSize = { ...canvasStore.size };
+            const oldSize = { ...projectStore.canvas.size };
             const newSize = { width: targetW, height: targetH };
             if (oldSize.width === newSize.width && oldSize.height === newSize.height && offset.x === 0 && offset.y === 0) {
               setInteractStore('isCanvasSizeFrameMode', false);

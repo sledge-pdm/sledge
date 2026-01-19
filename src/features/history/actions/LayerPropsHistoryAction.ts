@@ -1,5 +1,5 @@
 import { findLayerById, getLayerIndex, Layer } from '~/features/layer';
-import { setLayerListStore } from '~/stores/ProjectStores';
+import { setProjectStore } from '~/stores/RuntimeProject';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
@@ -60,14 +60,14 @@ export class LayerPropsHistoryAction extends BaseHistoryAction {
   undo(): void {
     if (!this.oldLayerProps) return;
     const idx = getLayerIndex(this.layerId);
-    setLayerListStore('layers', idx, { id: this.layerId, ...this.oldLayerProps });
+    setProjectStore('layers', 'layers', idx, { id: this.layerId, ...this.oldLayerProps });
     updateWebGLCanvas(this.context);
   }
 
   redo(): void {
     if (!this.newLayerProps) return;
     const idx = getLayerIndex(this.layerId);
-    setLayerListStore('layers', idx, { id: this.layerId, ...this.newLayerProps });
+    setProjectStore('layers', 'layers', idx, { id: this.layerId, ...this.newLayerProps });
     updateWebGLCanvas(this.context);
   }
 

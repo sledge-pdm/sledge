@@ -4,9 +4,9 @@ import { color, Icon } from '@sledge-pdm/ui';
 import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { ioStore } from '~/stores/EditorStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { window as platformWindow } from '~/utils/platform';
 import './title_bar_region.css';
 
@@ -150,7 +150,7 @@ export default function TitleBar() {
       let fileName = ioStore.savedLocation.name ?? '[new project]';
       // non-custom titlebar (mac/linux)
       if (isDecorated()) {
-        const size = `(${canvasStore.size.width} x ${canvasStore.size.height})`;
+        const size = `(${projectStore.canvas.size.width} x ${projectStore.canvas.size.height})`;
         const projPath = ioStore.savedLocation.path;
         if (projPath) {
           title += `${fileName} ${size} - ${projPath}`;
@@ -223,7 +223,7 @@ export default function TitleBar() {
                   </Show>
                   <div class={titleDivider} />
                   <p class={titleBarSize} style={{}}>
-                    {canvasStore.size.width} x {canvasStore.size.height}
+                    {projectStore.canvas.size.width} x {projectStore.canvas.size.height}
                   </p>
                 </Show>
               </Show>

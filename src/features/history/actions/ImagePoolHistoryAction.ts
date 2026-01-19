@@ -1,6 +1,6 @@
 import { ImagePoolEntry, ImagePoolImagePersisted } from '~/features/image_pool';
-import { makeRuntimeImages } from '~/features/image_pool/service';
-import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { makeRuntimeImages, runtimeImages, setRuntimeImages } from '~/features/image_pool/service';
+import { setProjectStore } from '~/stores/RuntimeProject';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface ImagePoolHistoryActionProps extends BaseHistoryActionProps {
@@ -31,15 +31,15 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
   }
 
   undo(): void {
-    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
-    setImagePoolStore('entries', [...this.oldEntries]);
-    setImagePoolStore('images', makeRuntimeImages(this.oldImages));
+    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    setProjectStore('imagePool', 'entries', [...this.oldEntries]);
+    setRuntimeImages(makeRuntimeImages(this.oldImages));
   }
 
   redo(): void {
-    imagePoolStore.images.forEach((image) => URL.revokeObjectURL(image.blobUrl));
-    setImagePoolStore('entries', [...this.newEntries]);
-    setImagePoolStore('images', makeRuntimeImages(this.newImages));
+    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    setProjectStore('imagePool', 'entries', [...this.newEntries]);
+    setRuntimeImages(makeRuntimeImages(this.newImages));
   }
 
   serialize(): SerializedHistoryAction {

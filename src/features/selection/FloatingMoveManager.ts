@@ -7,7 +7,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
@@ -53,8 +53,8 @@ class FloatingMoveManager {
 
   public getCompositePreview(): Uint8ClampedArray | undefined {
     if (!this.targetBuffer || !this.floatingBuffer) return undefined;
-    const width = this.targetBufferOriginal?.width ?? canvasStore.size?.width;
-    const height = this.targetBufferOriginal?.height ?? canvasStore.size?.height;
+    const width = this.targetBufferOriginal?.width ?? projectStore.canvas.size?.width;
+    const height = this.targetBufferOriginal?.height ?? projectStore.canvas.size?.height;
     if (!width || !height) return undefined;
 
     const expected = width * height * 4;
@@ -124,8 +124,8 @@ class FloatingMoveManager {
   }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
-    const width = canvasStore.size?.width;
-    const height = canvasStore.size?.height;
+    const width = projectStore.canvas.size?.width;
+    const height = projectStore.canvas.size?.height;
     if (width == null || height == null) return undefined;
     const base = layerManager.exportRawCanvas(targetLayerId);
     if (state === 'layer') {
@@ -145,8 +145,8 @@ class FloatingMoveManager {
     const base = layerManager.exportRawCanvas(targetLayerId);
     this.targetBufferOriginal = {
       buffer: base,
-      width: canvasStore.size.width,
-      height: canvasStore.size.height,
+      width: projectStore.canvas.size.width,
+      height: projectStore.canvas.size.height,
     };
     this.targetBuffer = this.getBaseBuffer(state, targetLayerId);
     if (!this.targetBuffer) return;

@@ -2,7 +2,6 @@ import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal } from 'solid-js';
 import { adjustZoomToFit, centeringCanvas, changeCanvasSize, setRotation } from '~/features/canvas';
 import { logSystemInfo } from '~/features/log/service';
-import { canvasStore } from '~/stores/ProjectStores';
 
 import { Button, color, Dropdown, Icon } from '@sledge-pdm/ui';
 import SectionItem from '~/components/section/SectionItem';
@@ -10,6 +9,7 @@ import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { sectionContent } from '../SectionStyles';
 
 const canvasContentStyle = css`
@@ -120,9 +120,9 @@ const CanvasSettings: Component = () => {
   const [sizePreset, setSizePreset] = createSignal<string>('undefined');
 
   createEffect(() => {
-    canvasStore.size;
+    projectStore.canvas.size;
 
-    logSystemInfo('CanvasSettings: canvas changed', { label: 'CanvasSettings', details: [canvasStore.size], debugOnly: true });
+    logSystemInfo('CanvasSettings: canvas changed', { label: 'CanvasSettings', details: [projectStore.canvas.size], debugOnly: true });
     updateButtonState();
     updateCurrentPreset();
   });
@@ -132,13 +132,14 @@ const CanvasSettings: Component = () => {
       setIsChangable(false);
       return;
     }
-    const changable = Number(widthInputRef.value) !== canvasStore.size.width || Number(heightInputRef.value) !== canvasStore.size.height;
+    const changable =
+      Number(widthInputRef.value) !== projectStore.canvas.size.width || Number(heightInputRef.value) !== projectStore.canvas.size.height;
     setIsChangable(changable);
   };
 
   const updateCurrentPreset = () => {
-    const cw = widthInputRef ? Number(widthInputRef.value) : canvasStore.size.width;
-    const ch = heightInputRef ? Number(heightInputRef.value) : canvasStore.size.height;
+    const cw = widthInputRef ? Number(widthInputRef.value) : projectStore.canvas.size.width;
+    const ch = heightInputRef ? Number(heightInputRef.value) : projectStore.canvas.size.height;
     const matchedPreset = Object.entries(canvasSizePresets).find(([key, c]) => c?.width === cw && c?.height === ch);
 
     if (matchedPreset) {
@@ -151,7 +152,7 @@ const CanvasSettings: Component = () => {
 
   const handlePresetChange = (value: string) => {
     if (value === 'undefined') {
-      const canvas = canvasStore.size;
+      const canvas = projectStore.canvas.size;
       widthInputRef.value = canvas.width.toString();
       heightInputRef.value = canvas.height.toString();
       setSizePreset('undefined');
@@ -210,7 +211,7 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInputStyle}
               type='number'
               name='width'
-              value={canvasStore.size.width}
+              value={projectStore.canvas.size.width}
               min={Consts.minCanvasWidth}
               max={Consts.maxCanvasWidth}
               onInput={() => {
@@ -230,7 +231,7 @@ const CanvasSettings: Component = () => {
               class={canvasSizeInputStyle}
               type='number'
               name='height'
-              value={canvasStore.size.height}
+              value={projectStore.canvas.size.height}
               min={Consts.minCanvasHeight}
               max={Consts.maxCanvasHeight}
               onInput={() => {
@@ -258,7 +259,7 @@ const CanvasSettings: Component = () => {
         {/* <div class={defaultButtonContainerStyle}>
           <Button
             onClick={async () => {
-              setGlobalConfig('default', 'canvasSize', canvasStore.canvas);
+              setGlobalConfig('default', 'canvasSize', projectStore.canvas.canvas);
               await saveGlobalSettings(true);
             }}
           >

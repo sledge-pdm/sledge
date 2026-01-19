@@ -3,10 +3,10 @@ import { FileLocation } from '@sledge-pdm/core';
 import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
 import { loadGlobalSettings } from '~/features/io/config/load';
-import { unpackProject } from '~/features/io/project/in/unpack';
 import { logSystemWarn } from '~/features/log/service';
 import { pageRoot } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
+import { unpackFromPath } from '~/utils/msgpackr';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, fs, window as platformWindow } from '~/utils/platform';
 import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
@@ -89,7 +89,7 @@ const Restore = () => {
       await Promise.all(
         emergencyBackups.map(async (backupLoc) => {
           const backupPath = normalizeJoin(backupLoc.path!, backupLoc.name!);
-          const parsed = await unpackProject(backupPath);
+          const parsed = await unpackFromPath(backupPath);
           // Simple runtime validation for ProjectV1 structure
           if (
             parsed &&

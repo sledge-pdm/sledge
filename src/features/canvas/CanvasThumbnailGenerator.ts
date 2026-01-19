@@ -1,6 +1,6 @@
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { logSystemWarn } from '~/features/log/service';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 
 export class CanvasThumbnailGenerator {
   private off: OffscreenCanvas;
@@ -13,8 +13,8 @@ export class CanvasThumbnailGenerator {
 
   generateCanvasThumbnail(width: number, height: number): ImageData | undefined {
     try {
-      const srcW = canvasStore.size.width;
-      const srcH = canvasStore.size.height;
+      const srcW = projectStore.canvas.size.width;
+      const srcH = projectStore.canvas.size.height;
       this.off.width = width;
       this.off.height = height;
       this.tmp.width = srcW;
@@ -43,8 +43,8 @@ export class CanvasThumbnailGenerator {
 
   generateCanvasThumbnailBlob(width: number, height: number): Promise<Blob> {
     try {
-      const srcW = canvasStore.size.width;
-      const srcH = canvasStore.size.height;
+      const srcW = projectStore.canvas.size.width;
+      const srcH = projectStore.canvas.size.height;
       this.off.width = width;
       this.off.height = height;
       this.tmp.width = srcW;

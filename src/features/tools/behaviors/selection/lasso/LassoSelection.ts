@@ -5,7 +5,7 @@ import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { webview } from '~/utils/platform';
 import { fill_lasso_selection } from '~/utils/wasm';
@@ -19,7 +19,7 @@ export class LassoSelection extends SelectionBase {
   private readonly UPDATE_INTERVAL = 16; // 60fps相当
 
   getDisplayMode(preset: LassoSelectionPresetConfig): LassoDisplayMode {
-    if (canvasStore.size.width * canvasStore.size.height <= 1024 * 1024) return 'fill';
+    if (projectStore.canvas.size.width * projectStore.canvas.size.height <= 1024 * 1024) return 'fill';
 
     return 'outline';
   }
@@ -170,7 +170,7 @@ export class LassoSelection extends SelectionBase {
     if (displayMode === 'fill') {
       // 最低3点必要（線分を作るため）
       if (this.points.length >= 6) {
-        this.updatePartialMask(canvasStore.size.width, canvasStore.size.height, fillMode);
+        this.updatePartialMask(projectStore.canvas.size.width, projectStore.canvas.size.height, fillMode);
       }
 
       selectionManager.setPreviewFragment(this.previewFragment);
@@ -199,7 +199,7 @@ export class LassoSelection extends SelectionBase {
       const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
       const fillMode = preset.fillMode ?? 'nonzero';
       // 最終マスクを生成
-      this.updatePartialMask(canvasStore.size.width, canvasStore.size.height, fillMode);
+      this.updatePartialMask(projectStore.canvas.size.width, projectStore.canvas.size.height, fillMode);
     }
 
     this.points = [];

@@ -12,12 +12,12 @@ import { getCurrentSelection, selectionManager } from '~/features/selection/Sele
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { canvasStore, imagePoolStore, layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
-import { clonePersistedImages, toPersistedImages } from '../image_pool/service';
+import { clonePersistedImages, runtimeImages, toPersistedImages } from '../image_pool/service';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -69,9 +69,9 @@ export function isPositionWithinSelection(pos: Vec2) {
 
 // 現在の状況からFloat状態を作成
 export function startMove() {
-  const layerId = layerListStore.activeLayerId;
-  const width = canvasStore.size.width;
-  const height = canvasStore.size.height;
+  const layerId = projectStore.layers.state.activeLayerId;
+  const width = projectStore.canvas.size.width;
+  const height = projectStore.canvas.size.height;
   if (width == null || height == null) return;
 
   if (isSelectionAvailable()) {
@@ -155,8 +155,8 @@ export function cancelMove() {
 export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolean }): Uint8ClampedArray | undefined {
   const selection = getCurrentSelection();
   const lid = props?.layerId ?? activeLayer().id;
-  const width = canvasStore.size.width;
-  const height = canvasStore.size.height;
+  const width = projectStore.canvas.size.width;
+  const height = projectStore.canvas.size.height;
 
   const bBox = selection.getBoundBox();
   if (!bBox) {
@@ -261,8 +261,8 @@ export function getCurrentSelectionBuffer():
       bbox: { x: number; y: number; width: number; height: number };
     }
   | undefined {
-  const width = canvasStore.size.width;
-  const height = canvasStore.size.height;
+  const width = projectStore.canvas.size.width;
+  const height = projectStore.canvas.size.height;
   selectionManager.commitOffset();
   const mask = selectionManager.getCombinedMask();
   const bbox = computeMaskBBox(mask, width, height);
@@ -283,8 +283,8 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   if (!selectionData) return;
   const { buffer, bbox } = selectionData;
 
-  const oldEntries = imagePoolStore.entries.slice();
-  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+  const oldEntries = projectStore.imagePool.entries.slice();
+  const oldImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
   const { entry, image } = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
   entry.descriptionName = '[ from selection ]';
@@ -296,20 +296,20 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   insertEntry(entry, image, true);
   selectEntry(entry.id);
 
-  const newEntries = imagePoolStore.entries.slice();
-  const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+  const newEntries = projectStore.imagePool.entries.slice();
+  const newImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
   let beforeSnapshot = undefined;
   let afterSnapshot = undefined;
   if (deleteAfter) {
-    beforeSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
+    beforeSnapshot = getPackedLayerSnapshot(projectStore.layers.state.activeLayerId);
     deleteSelectedArea({ noAction: true });
-    afterSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
+    afterSnapshot = getPackedLayerSnapshot(projectStore.layers.state.activeLayerId);
   }
   cancelSelection();
 
   const action = new ConvertSelectionHistoryAction({
-    layerId: layerListStore.activeLayerId,
+    layerId: projectStore.layers.state.activeLayerId,
     oldEntries,
     newEntries,
     oldImages,
@@ -326,7 +326,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
 
   if (deleteAfter) {
     updateWebGLCanvas('delete selected area');
-    updateLayerPreview(layerListStore.activeLayerId);
+    updateLayerPreview(projectStore.layers.state.activeLayerId);
   }
 }
 

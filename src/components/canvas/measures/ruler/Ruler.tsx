@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal, For, onCleanup, onMount } from '
 import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { calculateRulerMarks, RectSnapshot, RulerCalculationContext, RulerCalculationResult, RulerMark } from './RulerCalculator';
 
 const rulerRoot = css`
@@ -332,8 +332,8 @@ const Ruler: Component = () => {
       offsetOriginY: interactStore.offsetOrigin.y,
       horizontalFlipped: interactStore.horizontalFlipped,
       verticalFlipped: interactStore.verticalFlipped,
-      canvasWidth: canvasStore.size.width,
-      canvasHeight: canvasStore.size.height,
+      canvasWidth: projectStore.canvas.size.width,
+      canvasHeight: projectStore.canvas.size.height,
       sectionsRect: sectionsBetweenRect(),
       canvasAreaRect: canvasAreaRect(),
     };

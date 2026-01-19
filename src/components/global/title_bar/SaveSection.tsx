@@ -2,10 +2,10 @@ import { css } from '@acab/ecsstatic';
 import { color, Icon, MenuList, MenuListOption } from '@sledge-pdm/ui';
 import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
-import { saveProject } from '~/features/io/project/out/save';
+import { saveProject } from '~/features/io/project/save';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { ioStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
@@ -96,10 +96,10 @@ const SaveSection: Component = () => {
     setSaveLoading(false);
   };
 
-  const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStore.lastSavedAt?.getTime());
+  const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStore.project.lastSavedAt?.getTime());
 
   createEffect(() => {
-    updatePastTimeStamp(projectStore.lastSavedAt?.getTime());
+    updatePastTimeStamp(projectStore.project.lastSavedAt?.getTime());
   });
 
   const setTimeredSaveLog = (text: { text: string; color: string }) => {

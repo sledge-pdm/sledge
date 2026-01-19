@@ -1,7 +1,6 @@
 import { Component, For } from 'solid-js';
 
-import { isImagePoolActive } from '~/features/layer';
-import { canvasStore, imagePoolStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import Image from './Image';
 
 export const ImagePool: Component = () => {
@@ -11,15 +10,14 @@ export const ImagePool: Component = () => {
         position: 'absolute',
         top: 0,
         left: 0,
-        width: `${canvasStore.size.width}px`,
-        height: `${canvasStore.size.height}px`,
-        visibility: !isImagePoolActive() ? 'collapse' : 'visible',
+        width: `${projectStore.canvas.size.width}px`,
+        height: `${projectStore.canvas.size.height}px`,
         'z-index': 'var(--zindex-image-pool)',
         'pointer-events': 'none',
         'touch-action': 'none',
       }}
     >
-      <For each={imagePoolStore.entries}>{(entry, i) => entry && <Image entry={entry} index={i()} />}</For>
+      <For each={projectStore.imagePool.entries}>{(entry, i) => entry && <Image entry={entry} index={i()} />}</For>
     </div>
   );
 };

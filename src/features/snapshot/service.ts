@@ -1,18 +1,16 @@
 import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
-import { loadProject } from '~/features/io/project/in/load';
-import { dumpProjectJson } from '~/features/io/project/out/dump';
 import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
-import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
-import { canvasStore, setSnapshotStore, snapshotStore } from '~/stores/ProjectStores';
+import { getProjectFromRuntime, initRuntimeProject, projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { dialog } from '~/utils/platform';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
+import { ProjectSnapshot } from './types';
 
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {
-    const canvasSize: Size2D = { ...canvasStore.size };
+    const canvasSize: Size2D = { ...projectStore.canvas.size };
     // create thumbnail (actual size)
     const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(canvasSize.width, canvasSize.height);
 
@@ -22,7 +20,7 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
       id: createUniqueId(),
       name: name ?? `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,
       description: undefined,
-      snapshot: await dumpProjectJson(),
+      snapshot: await getProjectFromRuntime(),
       thumbnail: thumbnailImageData
         ? {
             packedBuffer: gzipDeflate(thumbnailImageData.data),
@@ -41,22 +39,19 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
 export async function registerCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   const snapshot = await createCurrentProjectSnapshot(name);
   if (snapshot) {
-    setSnapshotStore('snapshots', [...snapshotStore.snapshots, snapshot]);
+    setProjectStore('snapshots', [...projectStore.snapshots, snapshot]);
   }
   return snapshot;
 }
 
 export function addSnapshot(snapshot: ProjectSnapshot) {
-  setSnapshotStore('snapshots', [...snapshotStore.snapshots, snapshot]);
+  setProjectStore('snapshots', [...projectStore.snapshots, snapshot]);
 }
 
 export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapshot) {
-  const old = snapshotStore.snapshots.find((s) => s.name === name);
+  const old = projectStore.snapshots.find((s) => s.name === name);
   if (old) {
-    setSnapshotStore(
-      'snapshots',
-      snapshotStore.snapshots.map((s) => (s.name === name ? snapshot : s))
-    );
+    setProjectStore('snapshots', (snapshots: ProjectSnapshot[]) => snapshots.map((s) => (s.name === name ? snapshot : s)));
   } else {
     addSnapshot(snapshot);
   }
@@ -72,9 +67,8 @@ export async function deleteSnapshot(snapshot: ProjectSnapshot) {
 
   if (!confirmResult) return;
 
-  setSnapshotStore(
-    'snapshots',
-    snapshotStore.snapshots.filter((s) => {
+  setProjectStore('snapshots', (snapshots: ProjectSnapshot[]) =>
+    snapshots.filter((s) => {
       return s.id !== snapshot.id;
     })
   );
@@ -105,7 +99,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
     if (!confirmResult) return;
   }
 
-  setSnapshotStore('snapshots', (snapshots) => {
+  setProjectStore('snapshots', (snapshots: ProjectSnapshot[]) => {
     const filtered = snapshots.map((snapshot) => {
       if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
         const now = new Date();
@@ -121,17 +115,17 @@ This will NOT backup your current state (unless you did manually backup.)`,
 
   escapeCurrentAutosave();
 
-  const savedSnapshotStore = { ...snapshotStore };
+  const savedSnapshotStore = { ...projectStore.snapshots };
   // load snapshot
-  await loadProject(snapshot.snapshot);
+  initRuntimeProject(snapshot.snapshot);
 
-  setSnapshotStore(savedSnapshotStore);
+  setProjectStore('snapshots', savedSnapshotStore);
   updateWebGLCanvas('snapshot loaded');
   updateLayerPreviewAll();
 }
 
 export function escapeCurrentAutosave() {
-  setSnapshotStore('snapshots', (snapshots) => {
+  setProjectStore('snapshots', (snapshots: ProjectSnapshot[]) => {
     const filtered = snapshots.map((snapshot) => {
       if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
         const now = new Date();

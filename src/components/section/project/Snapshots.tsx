@@ -5,9 +5,8 @@ import { clsx, getProjectAdapter, gzipInflate, toUint8ClampedArray } from '@sled
 import { Icon } from '@sledge-pdm/ui';
 import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
-import { deleteSnapshot, loadSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';
-import { ProjectSnapshot } from '~/stores/project/SnapshotStore';
-import { snapshotStore } from '~/stores/ProjectStores';
+import { deleteSnapshot, loadSnapshot, ProjectSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';
+import { projectStore } from '~/stores/RuntimeProject';
 import { enabledButton, errorButton } from '~/styles/styles';
 import { useTimeAgoText } from '~/utils/TimeUtils';
 import { sectionContent } from '../SectionStyles';
@@ -43,7 +42,7 @@ const noSnapshotsText = css`
 const Snapshots: Component = () => {
   const [backupBeforeRestore, setBackupBeforeRestore] = createSignal(false);
 
-  const sortedSnapshots = createMemo(() => snapshotStore.snapshots.toSorted((a, b) => b.createdAt - a.createdAt));
+  const sortedSnapshots = createMemo(() => projectStore.snapshots.toSorted((a, b) => b.createdAt - a.createdAt));
 
   return (
     <SectionItem title='snapshots.'>
@@ -73,7 +72,7 @@ const Snapshots: Component = () => {
         </div>
 
         <div class={snapshotsContainer}>
-          <Show when={snapshotStore.snapshots.length > 0} fallback={<p class={noSnapshotsText}>[ no snapshots ]</p>}>
+          <Show when={projectStore.snapshots.length > 0} fallback={<p class={noSnapshotsText}>[ no snapshots ]</p>}>
             <For each={sortedSnapshots()}>
               {(snapshot) => {
                 return (

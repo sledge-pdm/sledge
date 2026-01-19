@@ -113,7 +113,7 @@ const TopMenuBar: Component = () => {
   });
 
   const getCurrentEditTarget = () => {
-    // if (imagePoolStore.selectedEntryId !== undefined) {
+    // if (projectStore.imagePool.selectedEntryId !== undefined) {
     //   currentEditTarget= 'image';
     // }
     if (isSelectionAvailable()) {

@@ -2,7 +2,7 @@ import { Component, onMount } from 'solid-js';
 import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { projectHistoryController } from '~/features/history';
-import { saveProject } from '~/features/io/project/out/save';
+import { saveProject } from '~/features/io/project/save';
 import { clearLayersFromUser, duplicateLayers, removeLayersFromUser, toggleLayerVisibility } from '~/features/layer/service';
 import {
   getActiveToolCategoryId,

@@ -11,7 +11,7 @@ import {
   removeLayersFromUser,
   toggleLayerVisibility,
 } from '~/features/layer/service';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { errorButton, flexRow } from '~/styles/styles';
 
 const iconsContainer = css`
@@ -40,8 +40,8 @@ const LayerListButtonsRow: Component<Props> = (props) => {
   const areTargetsEnabled = () => targets().every((id) => findLayerById(id)?.enabled);
   const visibilityIcon = () => (areTargetsEnabled() ? '/assets/icons/layer/visible_9.png' : '/assets/icons/layer/invisible_9.png');
   const visibilityTitle = () => (areTargetsEnabled() ? 'hide selected layer(s).' : 'show selected layer(s).');
-  const isBottomLayerTarget = () => layerListStore.layers.findIndex((l) => l.id === targetLayerId()) === layerListStore.layers.length - 1;
-  const isRemoveDisabled = () => layerListStore.layers.length <= 1 || layerListStore.layers.length === targetCount();
+  const isBottomLayerTarget = () => projectStore.layers.layers.findIndex((l) => l.id === targetLayerId()) === projectStore.layers.layers.length - 1;
+  const isRemoveDisabled = () => projectStore.layers.layers.length <= 1 || projectStore.layers.layers.length === targetCount();
 
   return (
     <div class={flexRow}>
@@ -80,10 +80,10 @@ const LayerListButtonsRow: Component<Props> = (props) => {
           iconSrc={'/assets/icons/layer/selection_mode_9.png'}
           title={'toggle layer selection mode.'}
           // disabled={appearanceStore.selectionEnabled}
-          iconColor={layerListStore.selectionEnabled ? color.enabled : color.onBackground}
+          iconColor={projectStore.layers.state.selectionEnabled ? color.enabled : color.onBackground}
           onClick={async () => {
-            setLayerListStore('selectionEnabled', (v) => !v);
-            setLayerListStore('selected', new Set());
+            setProjectStore('layers', 'state', 'selectionEnabled', (v) => !v);
+            setProjectStore('layers', 'state', 'selected', new Set());
           }}
         />
       </div>

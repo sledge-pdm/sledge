@@ -1,6 +1,6 @@
 import { removeLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { canvasStore, layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
@@ -58,7 +58,7 @@ export class LayerListHistoryAction extends BaseHistoryAction {
         break;
       }
       case 'delete': {
-        const id = this.packedSnapshot?.layer.id ?? layerListStore.layers[this.index]?.id;
+        const id = this.packedSnapshot?.layer.id ?? projectStore.layers.layers[this.index]?.id;
         if (!id) return;
         removeLayer(id, { noDiff: true });
         break;
@@ -81,11 +81,11 @@ export class LayerListHistoryAction extends BaseHistoryAction {
 }
 
 function insertAt(index: number, snapshot: LayerSnapshot) {
-  const arr = [...layerListStore.layers];
+  const arr = [...projectStore.layers.layers];
   arr.splice(index, 0, snapshot.layer);
-  setLayerListStore('layers', arr);
-  const width = snapshot.image?.width ?? canvasStore.size.width;
-  const height = snapshot.image?.height ?? canvasStore.size.height;
+  setProjectStore('layers', 'layers', arr);
+  const width = snapshot.image?.width ?? projectStore.canvas.size.width;
+  const height = snapshot.image?.height ?? projectStore.canvas.size.height;
   const buffer = snapshot.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
   layerManager.registerLayer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
   updateWebGLCanvas(`Layer(${snapshot.layer.id}) inserted`);

@@ -4,7 +4,7 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { Layer } from '~/features/layer';
 import { layerThumbnailGenerator } from '~/features/layer/LayerThumbnailGenerator';
-import { canvasStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus, Events } from '~/utils/EventBus';
 import { calcPreviewSize } from '~/utils/ThumbnailUtils';
 
@@ -91,7 +91,7 @@ const LayerPreview: Component<Props> = (props: Props) => {
     if (!canvasRef || !ctx) return;
 
     const previewSize = calcPreviewSize({
-      canvasSize: canvasStore.size,
+      canvasSize: projectStore.canvas.size,
       sizingMode: props.sizingMode,
       referenceSize: props.referenceSize,
       fitMode: props.fitMode,

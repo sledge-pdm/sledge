@@ -7,7 +7,7 @@ import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
 import { addImagesFromLocal, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
-import { imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 
 const imagesSectionsContent = css`
   margin-top: 8px;
@@ -38,7 +38,7 @@ const noImageText = css`
 
 const Images: Component = () => {
   const selectedEntry = createMemo<ImagePoolEntry | undefined>(() =>
-    imagePoolStore.selectedEntryId ? getEntry(imagePoolStore.selectedEntryId) : undefined
+    projectStore.imagePool.state.selectedEntryId ? getEntry(projectStore.imagePool.state.selectedEntryId) : undefined
   );
 
   return (
@@ -65,17 +65,17 @@ const Images: Component = () => {
       ]}
     >
       <div class={clsx('ignore-image-select', sectionContent, imagesSectionsContent)}>
-        <Show when={imagePoolStore.entries.length > 0} fallback={<p class={noImageText}>no images</p>}>
+        <Show when={projectStore.imagePool.entries.length > 0} fallback={<p class={noImageText}>no images</p>}>
           <div class={gridContainer}>
             <ImagePoolGrid />
           </div>
-          <Show when={imagePoolStore.selectedEntryId !== undefined}>
+          <Show when={projectStore.imagePool.state.selectedEntryId !== undefined}>
             <div class={optionsContainer}>
               <Checkbox
-                checked={imagePoolStore.preserveAspectRatio}
+                checked={projectStore.imagePool.state.preserveAspectRatio}
                 label='preserve ratio.'
                 labelMode='right'
-                onChange={(checked) => setImagePoolStore('preserveAspectRatio', checked)}
+                onChange={(checked) => setProjectStore('imagePool', 'state', 'preserveAspectRatio', checked)}
               />
               <div class={infoContainer}>
                 <InfoRow label='image size'>

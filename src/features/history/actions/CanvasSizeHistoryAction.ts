@@ -1,10 +1,10 @@
 ﻿import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { adjustZoomToFit } from '~/features/canvas';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/types/Project';
+import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
-import { setCanvasStore } from '~/stores/ProjectStores';
+import { setProjectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
@@ -101,7 +101,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
   }
 
   private applySize(size: Size2D) {
-    setCanvasStore('size', size);
+    setProjectStore('canvas', 'size', size);
     adjustZoomToFit();
     eventBus.emit('canvas:sizeChanged', { newSize: size });
   }

@@ -6,7 +6,7 @@ import LayerListButtonsRow from '~/components/section/editor/layer/row/LayerList
 import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';
 import SectionItem from '~/components/section/SectionItem';
 import { allLayers, moveLayer } from '~/features/layer';
-import { layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { ensureDropLine, getDropCandidates, getDropIndex, hideDropLine, updateDropLine } from '~/utils/dndUtils';
 import { sectionContent } from '../../SectionStyles';
 import BaseLayerItem from './BaseLayerItem';
@@ -100,8 +100,8 @@ const LayerList: Component = () => {
         <LayerListButtonsRow onUpdate={(type) => setItems(allLayers())} />
         <LayerListPropsRow />
 
-        <Show when={layerListStore.selected.size > 0}>
-          <p class={selectionInfo}>{layerListStore.selected.size} layers selected.</p>
+        <Show when={projectStore.layers.state.selected.size > 0}>
+          <p class={selectionInfo}>{projectStore.layers.state.selected.size} layers selected.</p>
         </Show>
 
         <div class={layerList} ref={(el) => (listEl = el)}>

@@ -1,4 +1,5 @@
 import { gzipDeflate, gzipInflate, type RawPixelData } from '@sledge-pdm/core';
+import { createSignal } from 'solid-js';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
@@ -8,7 +9,7 @@ import { ImagePoolEntry, ImagePoolImage, ImagePoolImagePersisted } from '~/featu
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service';
-import { canvasStore, imagePoolStore, setImagePoolStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { bufferToBlob, loadImageData } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { fs } from '~/utils/platform';
@@ -74,33 +75,35 @@ const createImagePoolImage = (bytes: Uint8Array, mimeType: ImageMimeType): Image
   return { mimeType, deflatedBuffer, blobUrl };
 };
 
+export const [runtimeImages, setRuntimeImages] = createSignal<Map<string, ImagePoolImage>>(new Map());
+
 const setImageForEntry = (entryId: string, image: ImagePoolImage) => {
-  const images = new Map(imagePoolStore.images);
+  const images = new Map(runtimeImages());
   const prev = images.get(entryId);
   if (prev) {
     URL.revokeObjectURL(prev.blobUrl);
   }
   images.set(entryId, image);
-  setImagePoolStore('images', images);
+  setRuntimeImages(images);
 };
 
 const removeImageForEntry = (entryId: string) => {
-  const images = new Map(imagePoolStore.images);
+  const images = new Map(runtimeImages());
   const prev = images.get(entryId);
   if (prev) {
     URL.revokeObjectURL(prev.blobUrl);
   }
   images.delete(entryId);
-  setImagePoolStore('images', images);
+  setRuntimeImages(images);
 };
 
 const createEntryBase = (width: number, height: number, forceFit?: boolean): ImagePoolEntry => {
   const id = v4();
-  let initialScale = forceFit ? Math.min(canvasStore.size.width / width, canvasStore.size.height / height) : 1;
+  let initialScale = forceFit ? Math.min(projectStore.canvas.size.width / width, projectStore.canvas.size.height / height) : 1;
 
   // at least ensure fit to prevent image overflow
-  if (width > canvasStore.size.width || height > canvasStore.size.height) {
-    initialScale = Math.min(canvasStore.size.width / width, canvasStore.size.height / height);
+  if (width > projectStore.canvas.size.width || height > projectStore.canvas.size.height) {
+    initialScale = Math.min(projectStore.canvas.size.width / width, projectStore.canvas.size.height / height);
   }
 
   return {
@@ -124,18 +127,18 @@ const createEntryWithImage = (
   return { entry, image };
 };
 
-export const getEntry = (id: string): ImagePoolEntry | undefined => imagePoolStore.entries.find((e) => e.id === id);
+export const getEntry = (id: string): ImagePoolEntry | undefined => projectStore.imagePool.entries.find((e) => e.id === id);
 
 // Insert entry with a given id (used for undo/redo to keep id stable)
 export function insertEntry(entry: ImagePoolEntry, image: ImagePoolImage, noDiff?: boolean) {
-  const oldEntries = cloneEntries(imagePoolStore.entries);
-  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+  const oldEntries = cloneEntries(projectStore.imagePool.entries);
+  const oldImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
-  const newEntries = [...imagePoolStore.entries.filter((e) => e.id !== entry.id), entry];
+  const newEntries = [...projectStore.imagePool.entries.filter((e) => e.id !== entry.id), entry];
 
-  setImagePoolStore('entries', newEntries);
+  setProjectStore('imagePool', 'entries', newEntries);
   setImageForEntry(entry.id, image);
-  const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+  const newImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
   if (!noDiff) {
     projectHistoryController.addAction(
@@ -152,29 +155,29 @@ export function insertEntry(entry: ImagePoolEntry, image: ImagePoolImage, noDiff
 }
 
 export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
-  const oldEntryIndex = imagePoolStore.entries.findIndex((e) => e.id === id);
+  const oldEntryIndex = projectStore.imagePool.entries.findIndex((e) => e.id === id);
   if (oldEntryIndex < 0) return;
 
-  setImagePoolStore('entries', oldEntryIndex, patch);
+  setProjectStore('imagePool', 'entries', oldEntryIndex, patch);
 }
 
 export function removeEntry(id: string, noDiff?: boolean) {
-  const oldEntries = cloneEntries(imagePoolStore.entries);
-  const oldImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+  const oldEntries = cloneEntries(projectStore.imagePool.entries);
+  const oldImages = clonePersistedImages(toPersistedImages(runtimeImages()));
   const entry = getEntry(id);
   if (!entry) {
     logUserWarn(`ImagePool entry ${id} not found.`, { label: 'ImagePool' });
     return;
   }
 
-  if (imagePoolStore.entries.some((e) => e.id === id)) {
-    const newEntries = imagePoolStore.entries.filter((e) => e.id !== id);
+  if (projectStore.imagePool.entries.some((e) => e.id === id)) {
+    const newEntries = projectStore.imagePool.entries.filter((e) => e.id !== id);
 
-    setImagePoolStore('entries', newEntries);
+    setProjectStore('imagePool', 'entries', newEntries);
     removeImageForEntry(id);
-    const newImages = clonePersistedImages(toPersistedImages(imagePoolStore.images));
+    const newImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
-    if (imagePoolStore.selectedEntryId === id) {
+    if (projectStore.imagePool.state.selectedEntryId === id) {
       const index = oldEntries.findIndex((e) => e.id === id);
       const nextIndex = index - 1;
       if (0 <= nextIndex && nextIndex < newEntries.length) {
@@ -248,7 +251,7 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
 
 async function transferToLayer(layerId: string, entryId: string) {
   const entry = getEntry(entryId);
-  const image = imagePoolStore.images.get(entryId);
+  const image = runtimeImages().get(entryId);
   const layer = getLayer(layerId);
   const layerW = layer.getWidth();
   const layerH = layer.getHeight();
@@ -338,7 +341,7 @@ export async function createEntryFromRawBuffer(rawBuffer: RawPixelData, width: n
 }
 
 export function selectEntry(id?: string) {
-  setImagePoolStore('selectedEntryId', id);
+  setProjectStore('imagePool', 'state', 'selectedEntryId', id);
 }
 
 export function showEntry(id: string) {

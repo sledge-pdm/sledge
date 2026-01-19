@@ -9,7 +9,7 @@ const GrayScale: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='grayscale.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'grayscale', (layer) => GrayscaleEffect.apply(layer));
+        applyEffect(props.selectedLayerId(), 'grayscale', (layer) => GrayscaleEffect.apply(layer, { context: { tool: 'fx', fxName: 'grayscale' } }));
       }}
     ></EffectWrapper>
   );

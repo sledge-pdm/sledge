@@ -61,7 +61,7 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
   index,
 }) => {
   action = action ?? {};
-  const { context } = action ?? {};
+  const { context } = action ?? { context: {} };
   let colorIcon:
     | {
         old: string;
@@ -111,7 +111,7 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       if (context?.tool === 'fx') {
         description = `${findLayerById(lhAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
       } else {
-        description = `${findLayerById(lhAction.layerId)?.name} / ${lhAction.context.tool}`;
+        description = `${findLayerById(lhAction.layerId)?.name} / ${context?.tool}`;
       }
       break;
     }

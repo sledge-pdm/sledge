@@ -1,9 +1,8 @@
-// Layer domain service - Stateful layer operations with external dependencies
+﻿// Layer domain service - Stateful layer operations with external dependencies
 
 import { FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
 import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
-import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
 import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
@@ -408,14 +407,8 @@ export const clearLayerFromUser = async (layerId: string) => {
 
 export function clearLayer(layerId: string) {
   const layer = getLayer(layerId);
-  layer.commitHistory();
+  layer.commitHistory(undefined, { context: { tool: 'clear' } });
   layer.clear([0, 0, 0, 0]);
-  projectHistoryController.addAction(
-    new LayerHistoryAction({
-      layerId,
-      context: { tool: 'clear' },
-    })
-  );
   updateWebGLCanvas(`Layer(${layerId}) cleared`);
   updateLayerPreview(layerId);
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
@@ -426,10 +419,6 @@ export const findLayerById = (id: string) => allLayers().find((layer) => layer.i
 export const activeLayer = () => findLayerById(projectStore.layers.state.activeLayerId) || allLayers()[0];
 export const activeIndex = () => allLayers().findIndex((layer) => layer.id === projectStore.layers.state.activeLayerId);
 
-// BaseLayer operations
-/**
- * ベ�Eスレイヤーのカラーモードを変更する
- */
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, colorMode, customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
@@ -437,9 +426,6 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
   setIOStore('isProjectChangedAfterSave', true);
 }
 
-/**
- * ベ�Eスレイヤーのカスタムカラーを変更する
- */
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, 'custom', customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
@@ -483,14 +469,14 @@ export const flipLayer = (
 ) => {
   const layer = getLayer(layerId);
   if (!layer) return;
-  FlipEffect.apply(layer, options);
+  FlipEffect.apply(layer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
   updateWebGLCanvas();
 };
 
 export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => {
   allLayers().forEach((layer) => {
     const frascoLayer = getLayer(layer.id);
-    if (frascoLayer) FlipEffect.apply(frascoLayer, options);
+    if (frascoLayer) FlipEffect.apply(frascoLayer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
   });
   updateWebGLCanvas();
 };

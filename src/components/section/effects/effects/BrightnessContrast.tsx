@@ -22,7 +22,11 @@ const BrightnessContrast: Component<EffectSectionProps> = (props) => {
       onApply={() => {
         const layerId = props.selectedLayerId();
         applyEffect(layerId, 'brightness and contrast', (layer) =>
-          BrightnessContrastEffect.apply(layer, { brightness: options.brightness, contrast: options.contrast })
+          BrightnessContrastEffect.apply(layer, {
+            brightness: options.brightness,
+            contrast: options.contrast,
+            context: { tool: 'fx', fxName: 'brightness and contrast' },
+          })
         );
       }}
     >

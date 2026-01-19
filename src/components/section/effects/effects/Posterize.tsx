@@ -18,7 +18,9 @@ const Posterize: Component<EffectSectionProps> = (props) => {
     <EffectWrapper
       title='posterize.'
       onApply={() => {
-        applyEffect(props.selectedLayerId(), 'posterize', (layer) => PosterizeEffect.apply(layer, { levels: options.levels }));
+        applyEffect(props.selectedLayerId(), 'posterize', (layer) =>
+          PosterizeEffect.apply(layer, { levels: options.levels, context: { tool: 'fx', fxName: 'posterize' } })
+        );
       }}
     >
       <EffectControl label='levels.'>

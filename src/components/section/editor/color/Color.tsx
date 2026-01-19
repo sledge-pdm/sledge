@@ -14,13 +14,14 @@ import { getActiveToolCategoryId, setActiveToolCategory } from '~/features/tools
 import { accentedButton, flexCol } from '~/styles/styles';
 
 const colorSectionContainer = css`
-  padding-left: 4px;
-  margin-top: 14px;
+  margin-top: 16px;
 `;
+
 const mainContainer = css`
   display: flex;
   flex-direction: row;
 `;
+
 const currentColorContainer = css`
   display: flex;
   flex-direction: row;
@@ -28,6 +29,7 @@ const currentColorContainer = css`
   padding-top: 4px;
   padding-right: 8px;
 `;
+
 const currentColorSharp = css`
   font-family: ZFB21;
   text-transform: uppercase;
@@ -36,6 +38,7 @@ const currentColorSharp = css`
   opacity: 0.25;
   margin-left: 22px;
 `;
+
 const currentColorLabel = css`
   font-family: ZFB21;
   text-transform: uppercase;
@@ -50,12 +53,14 @@ const currentColorLabel = css`
     color: var(--color-active);
   }
 `;
+
 const currentColorForm = css`
   display: flex;
   flex-direction: row;
   align-items: center;
   margin-right: auto;
 `;
+
 const currentColorInput = css`
   width: 86px;
   padding: 0px;
@@ -67,6 +72,7 @@ const currentColorInput = css`
   font-family: ZFB21;
   opacity: 1;
 `;
+
 const currentApplyButton = css`
   margin-left: 4px;
 `;
@@ -77,6 +83,7 @@ const tabsContainer = css`
   gap: 10px;
   margin-right: 12px;
 `;
+
 const tabItem = css`
   font-family: ZFB09;
   transform: rotate(180deg);
@@ -90,6 +97,7 @@ const tabItem = css`
     color: var(--color-active);
   }
 `;
+
 const tabItemActive = css`
   opacity: 0.75;
   color: var(--color-active);
@@ -109,6 +117,7 @@ const paletteContainer = css`
   margin-left: 12px;
   margin-top: 4px;
 `;
+
 const pipetteContainer = css`
   display: flex;
   flex-direction: column;

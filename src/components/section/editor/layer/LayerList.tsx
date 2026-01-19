@@ -13,7 +13,7 @@ import BaseLayerItem from './BaseLayerItem';
 import LayerItem from './LayerItem';
 
 const layerListSectionContent = css`
-  padding-left: 2px;
+  padding-left: 8px;
   padding-right: 4px;
   padding-top: 2px;
   margin-top: 8px;

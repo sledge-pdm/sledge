@@ -1,6 +1,5 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
-import { spacing } from '@sledge-pdm/ui';
 import { Component, For, Show } from 'solid-js';
 import ToolPresetManager from '~/components/section/editor/tool/ToolPresetManager';
 import SectionItem from '~/components/section/SectionItem';
@@ -12,7 +11,6 @@ import ToolItem from './ToolItem';
 
 const toolsSectionContent = css`
   margin-top: 8px;
-  padding-left: 8px;
 `;
 
 const mainTools: ToolCategoryId[] = ['pen', 'eraser', 'fill', 'rectSelection', 'lassoSelection', 'autoSelection', 'move'];
@@ -21,7 +19,7 @@ const Tools: Component = () => {
   return (
     <SectionItem title='tool.'>
       <div class={clsx(sectionContent, toolsSectionContent)}>
-        <div class={flexRow} style={{ 'margin-bottom': spacing.xs, gap: '16px' }}>
+        <div class={flexRow} style={{ gap: '16px' }}>
           <For each={mainTools}>
             {(categoryId) => {
               const isInUse = () => categoryId === toolStore.activeToolCategory;

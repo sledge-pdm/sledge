@@ -11,7 +11,6 @@ import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 
 const imagesSectionsContent = css`
   margin-top: 8px;
-  padding-left: 8px;
 `;
 
 const gridContainer = css`
@@ -65,7 +64,7 @@ const Images: Component = () => {
       ]}
     >
       <div class={clsx('ignore-image-select', sectionContent, imagesSectionsContent)}>
-        <Show when={projectStore.imagePool.entries.length > 0} fallback={<p class={noImageText}>no images</p>}>
+        <Show when={projectStore.imagePool.entries.length > 0} fallback={<p class={noImageText}>[ no images ]</p>}>
           <div class={gridContainer}>
             <ImagePoolGrid />
           </div>

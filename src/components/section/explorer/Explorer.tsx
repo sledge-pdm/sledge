@@ -93,6 +93,14 @@ const entriesContainer = css`
   flex-wrap: wrap;
 `;
 
+const errorText = css`
+  color: var(--color-error);
+`;
+
+const emptyText = css`
+  color: var(--color-muted);
+`;
+
 const Explorer: Component = () => {
   let inputRef: HTMLInputElement | undefined = undefined;
   const [configStore, setConfigStore] = createStore<FilesConfig>({
@@ -560,10 +568,10 @@ const Explorer: Component = () => {
             }
           >
             <Match when={entries() === undefined}>
-              <p>failed to open directory.</p>
+              <p class={errorText}>failed to open directory.</p>
             </Match>
             <Match when={entries() !== undefined && (visibleEntries()?.length ?? 0) === 0}>
-              <p>
+              <p class={emptyText}>
                 {configStore.showOnlySledgeOpenable && (entries()?.length ?? 0) > 0
                   ? 'no sledge-compatible files in this folder.'
                   : 'this directory is empty.'}

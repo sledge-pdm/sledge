@@ -246,6 +246,31 @@ const TopMenuBar: Component = () => {
       menu: () => [
         {
           type: 'label',
+          label: getCurrentEditTarget(),
+        },
+        {
+          type: 'item',
+          label: 'Copy.',
+          onSelect: () => {
+            eventBus.emit('clipboard:doCopy', {});
+          },
+        },
+        {
+          type: 'item',
+          label: 'Cut.',
+          onSelect: () => {
+            eventBus.emit('clipboard:doCut', {});
+          },
+        },
+        {
+          type: 'item',
+          label: 'Paste.',
+          onSelect: () => {
+            eventBus.emit('clipboard:doPaste', {});
+          },
+        },
+        {
+          type: 'label',
           label: 'canvas',
         },
         {
@@ -280,31 +305,6 @@ const TopMenuBar: Component = () => {
           onSelect: () => {
             // layer coordinate cw = canvas ccw
             rotateAllLayer('cw');
-          },
-        },
-        {
-          type: 'label',
-          label: getCurrentEditTarget(),
-        },
-        {
-          type: 'item',
-          label: 'Copy.',
-          onSelect: () => {
-            eventBus.emit('clipboard:doCopy', {});
-          },
-        },
-        {
-          type: 'item',
-          label: 'Cut.',
-          onSelect: () => {
-            eventBus.emit('clipboard:doCut', {});
-          },
-        },
-        {
-          type: 'item',
-          label: 'Paste.',
-          onSelect: () => {
-            eventBus.emit('clipboard:doPaste', {});
           },
         },
       ],

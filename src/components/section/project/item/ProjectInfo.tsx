@@ -24,16 +24,19 @@ const locationInfoStyle = css`
 
 const locationRowStyle = css`
   display: flex;
+  flex-direction: row;
 `;
 
 const locationLabelStyle = css`
   font-family: ZFB03;
+  min-width: 40px;
   width: 40px;
   font-size: 8px;
 `;
 
 const locationValueStyle = css`
-  white-space: wrap;
+  overflow-wrap: break-word;
+  min-width: calc(100% - 60px);
 `;
 
 const placeholderStyle = css`

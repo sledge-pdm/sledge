@@ -14,8 +14,8 @@ export const sectionContent = css`
   width: 100%;
   padding-top: 4px;
   padding-left: 16px;
+  padding-right: 8px;
   padding-bottom: 12px;
-  box-sizing: border-box;
   overflow: visible;
 `;
 
@@ -42,6 +42,4 @@ export const sectionSubContent = css`
   width: 100%;
   gap: 8px;
   padding-left: 12px;
-  box-sizing: border-box;
-  overflow: visible;
 `;

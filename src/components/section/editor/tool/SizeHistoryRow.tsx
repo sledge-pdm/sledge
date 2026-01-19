@@ -9,6 +9,10 @@ import { DEFAULT_PRESET, EraserPresetConfig, PenPresetConfig } from '~/features/
 import { toolStore } from '~/stores/EditorStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
+const root = css`
+  margin-bottom: 8px;
+`;
+
 const container = css`
   display: flex;
   flex-direction: row;
@@ -18,6 +22,7 @@ const container = css`
   height: 28px;
   justify-content: end;
 `;
+
 const item = css`
   position: relative;
   display: flex;
@@ -29,9 +34,11 @@ const item = css`
 
   cursor: pointer;
 `;
+
 const itemActive = css`
   border: 1px solid var(--color-enabled);
 `;
+
 const preview = css`
   display: flex;
   flex-direction: row;
@@ -40,6 +47,7 @@ const preview = css`
   width: 100%;
   height: 100%;
 `;
+
 const sizeLabel = css`
   position: absolute;
   bottom: 0;
@@ -62,62 +70,64 @@ const SizeHistoryRow: Component<Props> = (props) => {
   const preset = createMemo(() => getPreset());
 
   return (
-    <div class={container}>
-      <For each={preset().sizeHistory ?? []}>
-        {(size, index) => {
-          const isCurrentSize = () => size === preset().size;
-          return (
-            <div
-              class={clsx(item, isCurrentSize() && itemActive)}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopImmediatePropagation();
+    <div class={root}>
+      <div class={container}>
+        <For each={preset().sizeHistory ?? []}>
+          {(size, index) => {
+            const isCurrentSize = () => size === preset().size;
+            return (
+              <div
+                class={clsx(item, isCurrentSize() && itemActive)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopImmediatePropagation();
 
-                updateToolPresetConfig(props.categoryId, toolStore.tools[props.categoryId].presets?.selected ?? DEFAULT_PRESET, 'size', size);
-              }}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopImmediatePropagation();
+                  updateToolPresetConfig(props.categoryId, toolStore.tools[props.categoryId].presets?.selected ?? DEFAULT_PRESET, 'size', size);
+                }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopImmediatePropagation();
 
-                showContextMenu(
-                  [
-                    { type: 'label', label: `${size}px` },
-                    {
-                      ...ContextMenuItems.BaseRemove,
-                      onSelect: () => {
-                        const removedHistory = preset().sizeHistory?.filter((s) => s !== size);
-                        updateToolPresetConfig(
-                          props.categoryId,
-                          toolStore.tools[props.categoryId].presets?.selected ?? DEFAULT_PRESET,
-                          'sizeHistory',
-                          removedHistory
-                        );
+                  showContextMenu(
+                    [
+                      { type: 'label', label: `${size}px` },
+                      {
+                        ...ContextMenuItems.BaseRemove,
+                        onSelect: () => {
+                          const removedHistory = preset().sizeHistory?.filter((s) => s !== size);
+                          updateToolPresetConfig(
+                            props.categoryId,
+                            toolStore.tools[props.categoryId].presets?.selected ?? DEFAULT_PRESET,
+                            'sizeHistory',
+                            removedHistory
+                          );
+                        },
                       },
-                    },
-                    {
-                      ...ContextMenuItems.BaseClear,
-                      onSelect: () => {
-                        updateToolPresetConfig(
-                          props.categoryId,
-                          toolStore.tools[props.categoryId].presets?.selected ?? DEFAULT_PRESET,
-                          'sizeHistory',
-                          []
-                        );
+                      {
+                        ...ContextMenuItems.BaseClear,
+                        onSelect: () => {
+                          updateToolPresetConfig(
+                            props.categoryId,
+                            toolStore.tools[props.categoryId].presets?.selected ?? DEFAULT_PRESET,
+                            'sizeHistory',
+                            []
+                          );
+                        },
                       },
-                    },
-                  ],
-                  e
-                );
-              }}
-            >
-              <div class={preview}>
-                <PreviewSVG categoryId={props.categoryId} shape={preset().shape ?? 'circle'} size={size} containerSize={28} />
+                    ],
+                    e
+                  );
+                }}
+              >
+                <div class={preview}>
+                  <PreviewSVG categoryId={props.categoryId} shape={preset().shape ?? 'circle'} size={size} containerSize={28} />
+                </div>
+                <p class={sizeLabel}>{size}px</p>
               </div>
-              <p class={sizeLabel}>{size}px</p>
-            </div>
-          );
-        }}
-      </For>
+            );
+          }}
+        </For>
+      </div>
     </div>
   );
 };

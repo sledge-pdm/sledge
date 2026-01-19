@@ -12,8 +12,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { layerListStore } from '~/stores/ProjectStores';
-import { setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog } from '~/utils/platform';
@@ -123,7 +122,7 @@ async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; 
   });
   setProjectStore('canvas', 'size', globalConfig.default.canvasSize);
   const canvasSize = globalConfig.default.canvasSize;
-  layerListStore.layers.forEach((layer) => {
+  projectStore.layers.layers.forEach((layer) => {
     const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
     layerManager.registerLayer(layer.id, buffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
   });

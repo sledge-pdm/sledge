@@ -53,7 +53,7 @@
 //     },
 //     history: projectHistoryController.getSerialized(),
 //     layers: {
-//       layers: layerListStore.layers,
+//       layers: projectStore.layers.layers,
 //       buffers: buffers,
 //       state: { ...layerListStore },
 //     },

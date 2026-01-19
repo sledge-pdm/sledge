@@ -13,8 +13,7 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { dialog } from '~/utils/platform';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
@@ -49,7 +48,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
   if (beforeValue === newValue) return;
   const before = { ...layer } as any;
   const idx = getLayerIndex(layerId);
-  setLayerListStore('layers', idx, propName, newValue as any);
+  setProjectStore('layers', 'layers', idx, propName, newValue as any);
   const after = { ...findLayerById(layerId)! } as any;
   // Remove id from snapshots
   delete before.id;
@@ -108,10 +107,10 @@ export function duplicateLayers(layerIds?: string[]) {
 export async function mergeToBelowLayer(layerId: string) {
   const originLayerIndex = getLayerIndex(layerId);
   const targetLayerIndex = originLayerIndex + 1;
-  if (targetLayerIndex >= layerListStore.layers.length) return;
+  if (targetLayerIndex >= projectStore.layers.layers.length) return;
 
-  const originLayer = layerListStore.layers[originLayerIndex];
-  const targetLayer = layerListStore.layers[targetLayerIndex];
+  const originLayer = projectStore.layers.layers[originLayerIndex];
+  const targetLayer = projectStore.layers.layers[targetLayerIndex];
 
   const mergeRenderer = new LayerMergeRenderer(originLayer, targetLayer);
   await mergeRenderer.mergeLayer();
@@ -174,7 +173,7 @@ export const addLayerTo = (
   const layers = [...allLayers()];
   layers.splice(index, 0, newLayer as any);
 
-  setLayerListStore('layers', layers);
+  setProjectStore('layers', 'layers', layers);
   setActiveLayerId(newLayer.id);
 
   updateWebGLCanvas(`Layer(${newLayer.id}) added`);
@@ -203,7 +202,7 @@ export function setActiveLayerId(id: string): void {
       logUserError('Cannot set inactive layer to active', { label: LOG_LABEL });
       return;
     }
-    if (layerListStore.activeLayerId === id) return;
+    if (projectStore.layers.state.activeLayerId === id) return;
 
     // cancel if move is not committed
     if (floatingMoveManager.isMoving()) {
@@ -211,16 +210,16 @@ export function setActiveLayerId(id: string): void {
       cancelSelection();
     }
 
-    setLayerListStore('activeLayerId', id);
+    setProjectStore('layers', 'state', 'activeLayerId', id);
   }
 }
 
 export function getActiveLayerIndex(): number {
-  return getLayerIndex(layerListStore.activeLayerId);
+  return getLayerIndex(projectStore.layers.state.activeLayerId);
 }
 
 export function getLayerIndex(layerId: string) {
-  return layerListStore.layers.findIndex((l) => l.id === layerId);
+  return projectStore.layers.layers.findIndex((l) => l.id === layerId);
 }
 
 type LayerOrder = 'asc' | 'desc';
@@ -240,12 +239,12 @@ function getOperationTargetLayerIds(layerIds?: string[], options?: { fallbackToA
 
   let targets: string[] = [];
   if (!layerIds || layerIds.length === 0) {
-    if (layerListStore.selectionEnabled && layerListStore.selected.size > 0) {
-      targets = Array.from(layerListStore.selected);
+    if (projectStore.layers.state.selectionEnabled && projectStore.layers.state.selected.size > 0) {
+      targets = Array.from(projectStore.layers.state.selected);
     }
 
-    if (targets.length === 0 && fallbackToActive && layerListStore.activeLayerId) {
-      targets = [layerListStore.activeLayerId];
+    if (targets.length === 0 && fallbackToActive && projectStore.layers.state.activeLayerId) {
+      targets = [projectStore.layers.state.activeLayerId];
     }
   } else {
     targets = layerIds;
@@ -255,7 +254,7 @@ function getOperationTargetLayerIds(layerIds?: string[], options?: { fallbackToA
 }
 
 export function summarizeLayerNames(layerIds: string[]) {
-  const names = layerIds.map((id) => layerListStore.layers.find((l) => l.id === id)?.name ?? id);
+  const names = layerIds.map((id) => projectStore.layers.layers.find((l) => l.id === id)?.name ?? id);
   if (names.length === 0) return '';
   if (names.length <= 3) return names.join(', ');
   return `${names.slice(0, 3).join(', ')}... (+${names.length - 3})`;
@@ -263,7 +262,7 @@ export function summarizeLayerNames(layerIds: string[]) {
 
 function dropFromSelection(layerIds: string[]) {
   if (!layerIds.length) return;
-  setLayerListStore('selected', (set: Set<string>) => {
+  setProjectStore('layers', 'state', 'selected', (set: Set<string>) => {
     const updated = new Set(set);
     layerIds.forEach((id) => updated.delete(id));
     return updated;
@@ -271,20 +270,12 @@ function dropFromSelection(layerIds: string[]) {
 }
 
 export function resetSelectionState() {
-  setLayerListStore('selectionEnabled', false);
-  setLayerListStore('selected', () => new Set<string>());
-}
-
-export function setImagePoolActive(active: boolean) {
-  setLayerListStore('isImagePoolActive', active);
-}
-
-export function isImagePoolActive() {
-  return layerListStore.isImagePoolActive;
+  setProjectStore('layers', 'state', 'selectionEnabled', false);
+  setProjectStore('layers', 'state', 'selected', () => new Set<string>());
 }
 
 export const resetAllLayers = () => {
-  layerListStore.layers.forEach((l) => {
+  projectStore.layers.layers.forEach((l) => {
     const layer = layerManager.getLayerOptional(l.id);
     if (layer) {
       layer.clear([0, 0, 0, 0]);
@@ -302,11 +293,11 @@ interface MoveLayerOptions {
 export const moveLayer = (fromIndex: number, targetIndex: number, options?: MoveLayerOptions) => {
   const { noDiff = false } = options ?? {};
 
-  const beforeOrder = layerListStore.layers.map((l) => l.id);
-  const updated = [...layerListStore.layers];
+  const beforeOrder = projectStore.layers.layers.map((l) => l.id);
+  const updated = [...projectStore.layers.layers];
   const [moved] = updated.splice(fromIndex, 1);
   updated.splice(targetIndex, 0, moved);
-  setLayerListStore('layers', updated);
+  setProjectStore('layers', 'layers', updated);
   updateWebGLCanvas(`Layer moved from ${fromIndex} to ${targetIndex}`);
 
   if (!noDiff) {
@@ -327,7 +318,7 @@ export const removeLayersFromUser = async (layerIds?: string[], options?: Remove
     return;
   }
 
-  if (layerListStore.layers.length - targets.length < 1) {
+  if (projectStore.layers.layers.length - targets.length < 1) {
     logUserWarn('Cannot remove all layers. At least one layer must remain.', { label: LOG_LABEL });
     return;
   }
@@ -368,8 +359,8 @@ export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
   const snapshot = getPackedLayerSnapshot(toRemove.id);
   layers.splice(index, 1);
 
-  setLayerListStore('layers', layers);
-  setLayerListStore('activeLayerId', layers[newActiveIndex].id);
+  setProjectStore('layers', 'layers', layers);
+  setProjectStore('layers', 'state', 'activeLayerId', layers[newActiveIndex].id);
   updateWebGLCanvas(`Layer(${layerId}) removed`);
   logUserInfo(`Layer "${toRemove.name}" removed.`, { label: LOG_LABEL });
 
@@ -428,18 +419,18 @@ export function clearLayer(layerId: string) {
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
 }
 
-export const allLayers = () => layerListStore.layers;
+export const allLayers = () => projectStore.layers.layers;
 export const findLayerById = (id: string) => allLayers().find((layer) => layer.id === id);
-export const activeLayer = () => findLayerById(layerListStore.activeLayerId) || allLayers()[0];
-export const activeIndex = () => allLayers().findIndex((layer) => layer.id === layerListStore.activeLayerId);
+export const activeLayer = () => findLayerById(projectStore.layers.state.activeLayerId) || allLayers()[0];
+export const activeIndex = () => allLayers().findIndex((layer) => layer.id === projectStore.layers.state.activeLayerId);
 
 // BaseLayer operations
 /**
  * ベ�Eスレイヤーのカラーモードを変更する
  */
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
-  const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, colorMode, customColor);
-  setLayerListStore('baseLayer', updatedBaseLayer);
+  const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, colorMode, customColor);
+  setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
   updateWebGLCanvas(`BaseLayer color mode changed to ${colorMode}`);
   setIOStore('isProjectChangedAfterSave', true);
 }
@@ -448,29 +439,29 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
  * ベ�Eスレイヤーのカスタムカラーを変更する
  */
 export function setBaseLayerCustomColor(customColor: string) {
-  const updatedBaseLayer = changeBaseLayerColor(layerListStore.baseLayer, 'custom', customColor);
-  setLayerListStore('baseLayer', updatedBaseLayer);
+  const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, 'custom', customColor);
+  setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
   updateWebGLCanvas(`BaseLayer custom color changed to ${customColor}`);
   setIOStore('isProjectChangedAfterSave', true);
 }
 
 export function setSelectionEnabled(enabled: boolean) {
-  setLayerListStore('selectionEnabled', enabled);
+  setProjectStore('layers', 'state', 'selectionEnabled', enabled);
 }
 export function isSelectionEnabled() {
-  return layerListStore.selectionEnabled;
+  return projectStore.layers.state.selectionEnabled;
 }
 
 export function selectLayer(layerId: string) {
   if (!findLayerById(layerId)) return;
-  setLayerListStore('selected', (set: Set<string>) => {
+  setProjectStore('layers', 'state', 'selected', (set: Set<string>) => {
     const updated = new Set(set);
     updated.add(layerId);
     return updated;
   });
 }
 export function deselectLayer(layerId: string) {
-  setLayerListStore('selected', (set: Set<string>) => {
+  setProjectStore('layers', 'state', 'selected', (set: Set<string>) => {
     const updated = new Set(set);
     updated.delete(layerId);
     return updated;

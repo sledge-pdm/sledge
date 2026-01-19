@@ -6,8 +6,8 @@ import BrightnessContrast from '~/components/section/effects/effects/BrightnessC
 import GrayScale from '~/components/section/effects/effects/GrayScale';
 import Invert from '~/components/section/effects/effects/Invert';
 import Posterize from '~/components/section/effects/effects/Posterize';
-import { activeLayer, findLayerById } from '~/features/layer';
-import { layerListStore } from '~/stores/ProjectStores';
+import { activeLayer, allLayers, findLayerById } from '~/features/layer';
+import { projectStore } from '~/stores/RuntimeProject';
 
 const effectsContainer = css`
   display: flex;
@@ -44,10 +44,9 @@ export interface EffectSectionProps {
 
 const Effects: Component = () => {
   const [selectedLayerId, setSelectedLayerId] = createSignal(activeLayer()?.id);
-  const selectedLayer = () => findLayerById(selectedLayerId()) ?? layerListStore.layers[0];
+  const selectedLayer = () => findLayerById(selectedLayerId()) ?? projectStore.layers.layers[0];
   const layersOption = createMemo<DropdownOption<string>[]>(() => {
-    const layers = layerListStore.layers;
-    return layers.map((l) => {
+    return allLayers().map((l) => {
       return {
         label: l.name,
         value: l.id,

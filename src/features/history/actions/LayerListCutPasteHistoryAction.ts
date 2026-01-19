@@ -1,7 +1,6 @@
 import { findLayerById, removeLayer, setActiveLayerId } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
@@ -62,9 +61,9 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
 
   private reinsert(index: number, packed: LayerSnapshot) {
     // 元スナップショットの layer.id を保持するため addLayerTo は使わず直接配列操作する。
-    const arr = [...layerListStore.layers];
+    const arr = [...projectStore.layers.layers];
     arr.splice(index, 0, packed.layer);
-    setLayerListStore('layers', arr);
+    setProjectStore('layers', 'layers', arr);
 
     const width = packed.image?.width ?? projectStore.canvas.size.width;
     const height = packed.image?.height ?? projectStore.canvas.size.height;

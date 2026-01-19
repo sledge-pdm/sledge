@@ -15,7 +15,7 @@ import {
   summarizeLayerNames,
   toggleLayerVisibility,
 } from '~/features/layer/service';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { updateWebGLCanvas } from '~/webgl/service';
@@ -147,11 +147,11 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   const onDetClicked = (e: MouseEvent) => {
     e.stopPropagation();
     if (e.shiftKey) {
-      if (!layerListStore.selectionEnabled) {
-        setLayerListStore('selectionEnabled', true);
-        setLayerListStore('selected', () => new Set<string>([props.layer.id]));
+      if (!projectStore.layers.state.selectionEnabled) {
+        setProjectStore('layers', 'state', 'selectionEnabled', true);
+        setProjectStore('layers', 'state', 'selected', () => new Set<string>([props.layer.id]));
       } else {
-        setLayerListStore('selected', (set: Set<string>) => {
+        setProjectStore('layers', 'state', 'selected', (set: Set<string>) => {
           const updated = new Set(set);
           if (updated.has(props.layer.id)) updated.delete(props.layer.id);
           else updated.add(props.layer.id);
@@ -167,7 +167,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   const onPreviewClicked = (e: MouseEvent) => {
     e.stopPropagation();
     if (props.index !== -1) {
-      setLayerListStore('layers', props.index, 'enabled', (v: boolean) => !v);
+      setProjectStore('layers', 'layers', props.index, 'enabled', (v: boolean) => !v);
     }
     updateWebGLCanvas('layer deactivated from layeritem');
   };
@@ -203,8 +203,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     window.removeEventListener('pointerdown', handlePointerDown);
   });
 
-  const isActive = () => layerListStore.activeLayerId === props.layer.id;
-  const isSelectionMode = () => layerListStore.selectionEnabled && layerListStore.selected.size > 0;
+  const isActive = () => projectStore.layers.state.activeLayerId === props.layer.id;
+  const isSelectionMode = () => projectStore.layers.state.selectionEnabled && projectStore.layers.state.selected.size > 0;
   const contextTargets = () => (isSelectionMode() ? undefined : [props.layer.id]);
   const resolvedContextTargets = () => contextTargets() ?? getSelectedLayers();
   const contextMenuLabel = () => {
@@ -293,7 +293,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               <Icon src='/assets/icons/misc/triangle_7.png' base={7} color={color.surface} />
             </div>
           </div>
-          <Show when={layerListStore.selectionEnabled}>
+          <Show when={projectStore.layers.state.selectionEnabled}>
             <div
               class={selectCheckboxContainer}
               onClick={(e) => {
@@ -301,7 +301,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               }}
             >
               <Checkbox
-                checked={layerListStore.selected.has(props.layer.id)}
+                checked={projectStore.layers.state.selected.has(props.layer.id)}
                 onChange={(e) => {
                   if (e) selectLayer(props.layer.id);
                   else deselectLayer(props.layer.id);
@@ -358,7 +358,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
               </p>
             )}
           </div>
-          <Show when={!layerListStore.selectionEnabled}>
+          <Show when={!projectStore.layers.state.selectionEnabled}>
             <Light class={activeLight} on={isActive()} />
           </Show>
         </div>

@@ -3,7 +3,7 @@
 import { hexWithSharpToRGBA } from '@sledge-pdm/core';
 import { DropdownOption } from '@sledge-pdm/ui';
 import { v4 } from 'uuid';
-import { layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { BaseLayer, BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 
 // BlendMode utilities
@@ -122,7 +122,7 @@ export const createLayer = (props: CreateLayerProps, checkUnique?: boolean): Lay
  * Get a unique layer name by appending a number if needed
  */
 function getNumberUniqueLayerName(baseName: string): string {
-  const existingNames = layerListStore.layers.map((l) => l.name);
+  const existingNames = projectStore.layers.layers.map((l) => l.name);
 
   // Extract base part and existing number from baseName
   const match = baseName.match(/^(.+?)\s+(\d+)$/);

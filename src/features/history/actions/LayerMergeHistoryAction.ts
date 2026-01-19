@@ -2,7 +2,7 @@
 import { SurfaceBounds } from '@sledge-pdm/frasco';
 import { getLayerIndex } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
@@ -35,7 +35,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
   }
 
   getSnapshot(index: number): PackedLayerSnapshot | undefined {
-    const layer = layerListStore.layers[index];
+    const layer = projectStore.layers.layers[index];
     if (!layer) return;
     const frascoLayer = layerManager.getLayerOptional(layer.id);
     if (!frascoLayer) return;
@@ -51,7 +51,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
 
     const idx = getLayerIndex(snapshot.layer.id);
     if (idx >= 0) {
-      setLayerListStore('layers', idx, snapshot.layer);
+      setProjectStore('layers', 'layers', idx, snapshot.layer);
 
       if (snapshot.image) {
         const frascoLayer = layerManager.getLayerOptional(snapshot.layer.id);
@@ -74,9 +74,9 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     }
     const swapOriginPackedSnapshot = this.getSnapshot(this.originIndex);
     const swapTargetPackedSnapshot = this.getSnapshot(this.targetIndex);
-    const swapActiveLayerId = layerListStore.activeLayerId;
+    const swapActiveLayerId = projectStore.layers.state.activeLayerId;
 
-    setLayerListStore('activeLayerId', this.activeLayerId);
+    setProjectStore('layers', 'state', 'activeLayerId', this.activeLayerId);
 
     // apply snapshot
     this.applySnapshot(inflateLayerSnapshot(this.originPackedSnapshot));

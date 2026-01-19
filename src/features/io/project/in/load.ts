@@ -5,7 +5,7 @@ import { makeRuntimeImages } from '~/features/image_pool/service';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn, logUserWarn } from '~/features/log';
 import { setIOStore } from '~/stores/EditorStores';
-import { imagePoolStore, setImagePoolStore, setLayerListStore, setProjectStoreFormer, setSnapshotStore } from '~/stores/ProjectStores';
+import { imagePoolStore, setImagePoolStore, setProjectStoreFormer, setSnapshotStore } from '~/stores/ProjectStores';
 import { initRuntimeProject, setProjectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { updateWebGLCanvas } from '~/webgl/service';
@@ -39,7 +39,7 @@ export async function loadProject(projectObj: any): Promise<void> {
   try {
     const layers = adapter.getLayers();
     const layerListState = adapter.getLayerListState();
-    setLayerListStore({
+    setProjectStore('layers', {
       layers,
       ...layerListState,
     });

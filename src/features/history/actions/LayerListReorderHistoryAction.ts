@@ -1,5 +1,5 @@
 import type { Layer } from '~/features/layer';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
@@ -44,15 +44,15 @@ export class LayerListReorderHistoryAction extends BaseHistoryAction {
 }
 
 function setOrder(order: string[]) {
-  const map = new Map(layerListStore.layers.map((l) => [l.id, l] as const));
+  const map = new Map(projectStore.layers.layers.map((l) => [l.id, l] as const));
   const next: Layer[] = [];
   for (const id of order) {
     const l = map.get(id);
     if (l) next.push(l);
   }
-  for (const l of layerListStore.layers) {
+  for (const l of projectStore.layers.layers) {
     if (!order.includes(l.id)) next.push(l);
   }
-  setLayerListStore('layers', next);
+  setProjectStore('layers', 'layers', next);
   updateWebGLCanvas('Layer order changed');
 }

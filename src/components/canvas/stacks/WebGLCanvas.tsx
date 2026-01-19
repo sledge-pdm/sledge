@@ -5,7 +5,6 @@ import { allLayers } from '~/features/layer';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { layerListStore } from '~/stores/ProjectStores';
 import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus, Events } from '~/utils/EventBus';
 import { FrascoRenderer } from '~/webgl/FrascoRenderer';
@@ -106,7 +105,7 @@ const WebGLCanvas: Component = () => {
   });
 
   createEffect(() => {
-    const layers = layerListStore.layers;
+    const layers = projectStore.layers.layers;
     webGLRenderer?.setLayers(layers);
   });
 

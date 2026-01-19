@@ -3,7 +3,7 @@ import { projectHistoryController } from '~/features/history';
 import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { activeLayer, BlendMode, getLayerIndex, Layer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { layerListStore, setLayerListStore } from '~/stores/ProjectStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
 import { FrascoRenderer } from '~/webgl/FrascoRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
@@ -35,12 +35,12 @@ class LayerMergeRenderer {
     if (!targetLayer) return;
     targetLayer.writePixels(out);
 
-    setLayerListStore('layers', tIdx, 'mode', BlendMode.normal);
-    setLayerListStore('layers', tIdx, 'opacity', 1.0);
+    setProjectStore('layers', 'layers', tIdx, 'mode', BlendMode.normal);
+    setProjectStore('layers', 'layers', tIdx, 'opacity', 1.0);
 
-    setLayerListStore('layers', oIdx, 'enabled', false);
-    if (layerListStore.activeLayerId === this.originLayer.id) {
-      setLayerListStore('activeLayerId', this.targetLayer.id);
+    setProjectStore('layers', 'layers', oIdx, 'enabled', false);
+    if (projectStore.layers.state.activeLayerId === this.originLayer.id) {
+      setProjectStore('layers', 'state', 'activeLayerId', this.targetLayer.id);
     }
 
     updateWebGLCanvas('Layer merge');

@@ -6,7 +6,6 @@ export type LayerListStore = {
   activeLayerId: string;
   selectionEnabled: boolean;
   selected: Set<string>;
-  isImagePoolActive: boolean;
 };
 
 export const defaultLayerListStore: LayerListStore = {
@@ -17,5 +16,4 @@ export const defaultLayerListStore: LayerListStore = {
   activeLayerId: '',
   selectionEnabled: false,
   selected: new Set<string>(),
-  isImagePoolActive: true,
 };

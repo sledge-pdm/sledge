@@ -34,7 +34,6 @@ const runtimeProjectBeforeInit: RuntimeProject = {
       activeLayerId: '',
       selectionEnabled: false,
       selected: new Set<string>(),
-      isImagePoolActive: true,
       baseLayer: {
         colorMode: 'transparent',
       },
@@ -59,7 +58,11 @@ const runtimeProjectBeforeInit: RuntimeProject = {
   },
 };
 
-export const [projectStore, setProjectStore] = createStore<RuntimeProject>(runtimeProjectBeforeInit);
+function init() {
+  return createStore<RuntimeProject>(runtimeProjectBeforeInit);
+}
+
+export const [projectStore, setProjectStore] = init();
 
 const [imagePoolStore, setImagePoolStore] = createStore<{
   images: Map<string, ImagePoolImage>;

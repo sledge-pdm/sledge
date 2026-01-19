@@ -10,7 +10,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log/service';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus, Events } from '~/utils/EventBus';
 import { clipboard, image } from '~/utils/platform';
 
@@ -36,7 +36,7 @@ const ClipboardListener: Component = () => {
         logUserSuccess('selection copied!', { label: LOG_LABEL });
         return 'selection';
       } else {
-        await clipboard.writeText(layerListStore.activeLayerId);
+        await clipboard.writeText(projectStore.layers.state.activeLayerId);
         logUserSuccess('layer copied!', { label: LOG_LABEL });
         return 'layer';
       }
@@ -56,11 +56,11 @@ const ClipboardListener: Component = () => {
     if (copyMode === 'layer') {
       // this literally delete original layer to copy so cannot paste after.
       // this should be like an "archive" operation, that freezes layer but not delete from list and anvilManager. like below.
-      setLayerProp(layerListStore.activeLayerId, 'cutFreeze', true, { noDiff: true }); // history added
-      // removeLayer(layerListStore.activeLayerId, { noDiff: false }); // history added
+      setLayerProp(projectStore.layers.state.activeLayerId, 'cutFreeze', true, { noDiff: true }); // history added
+      // removeLayer(projectStore.layers.state.activeLayerId, { noDiff: false }); // history added
     } else {
       deleteSelectedArea({
-        layerId: layerListStore.activeLayerId,
+        layerId: projectStore.layers.state.activeLayerId,
         noAction: false,
       }); // history added
     }

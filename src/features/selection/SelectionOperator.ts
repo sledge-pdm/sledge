@@ -12,7 +12,7 @@ import { getCurrentSelection, selectionManager } from '~/features/selection/Sele
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { imagePoolStore, layerListStore } from '~/stores/ProjectStores';
+import { imagePoolStore } from '~/stores/ProjectStores';
 import { projectStore } from '~/stores/RuntimeProject';
 import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
@@ -70,7 +70,7 @@ export function isPositionWithinSelection(pos: Vec2) {
 
 // 現在の状況からFloat状態を作成
 export function startMove() {
-  const layerId = layerListStore.activeLayerId;
+  const layerId = projectStore.layers.state.activeLayerId;
   const width = projectStore.canvas.size.width;
   const height = projectStore.canvas.size.height;
   if (width == null || height == null) return;
@@ -303,14 +303,14 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   let beforeSnapshot = undefined;
   let afterSnapshot = undefined;
   if (deleteAfter) {
-    beforeSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
+    beforeSnapshot = getPackedLayerSnapshot(projectStore.layers.state.activeLayerId);
     deleteSelectedArea({ noAction: true });
-    afterSnapshot = getPackedLayerSnapshot(layerListStore.activeLayerId);
+    afterSnapshot = getPackedLayerSnapshot(projectStore.layers.state.activeLayerId);
   }
   cancelSelection();
 
   const action = new ConvertSelectionHistoryAction({
-    layerId: layerListStore.activeLayerId,
+    layerId: projectStore.layers.state.activeLayerId,
     oldEntries,
     newEntries,
     oldImages,
@@ -327,7 +327,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
 
   if (deleteAfter) {
     updateWebGLCanvas('delete selected area');
-    updateLayerPreview(layerListStore.activeLayerId);
+    updateLayerPreview(projectStore.layers.state.activeLayerId);
   }
 }
 

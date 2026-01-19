@@ -1,7 +1,7 @@
 import { color, ColorBox, Dropdown, spacing, text } from '@sledge-pdm/ui';
 import { Component, createSignal } from 'solid-js';
 import { BaseLayerColorMode, setBaseLayerColorMode, setBaseLayerCustomColor } from '~/features/layer';
-import { layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 import { flexRow } from '~/styles/styles';
 
 interface BaseLayerItemProps {}
@@ -15,7 +15,7 @@ const colorModeOptions = [
 
 const BaseLayerItem: Component<BaseLayerItemProps> = () => {
   let colorInput: HTMLInputElement | undefined;
-  const baseLayer = () => layerListStore.baseLayer;
+  const baseLayer = () => projectStore.layers.state.baseLayer;
   const [customColor, setCustomColor] = createSignal(baseLayer().customColor || '#FFFFFF');
 
   const handleColorModeChange = (newMode: BaseLayerColorMode) => {

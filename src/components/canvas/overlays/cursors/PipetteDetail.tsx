@@ -5,7 +5,7 @@ import { Component, Show } from 'solid-js';
 import { currentColor } from '~/features/color';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { interactStore } from '~/stores/EditorStores';
-import { layerListStore } from '~/stores/ProjectStores';
+import { projectStore } from '~/stores/RuntimeProject';
 
 const pipetteDetailContainer = css`
   position: fixed;
@@ -31,7 +31,7 @@ const PipetteDetail: Component<Props> = (props) => {
   const getCurrentPointingColor = (): RGBA | undefined => {
     const x = Math.floor(interactStore.lastPointerOnCanvas.x);
     const y = Math.floor(interactStore.lastPointerOnCanvas.y);
-    return layerManager.readPixelCanvas(layerListStore.activeLayerId, x, y);
+    return layerManager.readPixelCanvas(projectStore.layers.state.activeLayerId, x, y);
   };
   const getCurrentPointingColorHex = (): string | undefined => {
     const color = getCurrentPointingColor();

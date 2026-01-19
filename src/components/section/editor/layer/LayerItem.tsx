@@ -9,13 +9,14 @@ import {
   clearLayersFromUser,
   deselectLayer,
   duplicateLayers,
+  flipLayer,
   getSelectedLayers,
   removeLayersFromUser,
   selectLayer,
   summarizeLayerNames,
   toggleLayerVisibility,
 } from '~/features/layer/service';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { updateWebGLCanvas } from '~/webgl/service';
@@ -271,6 +272,22 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                 {
                   ...(findLayerById(props.layer.id)?.enabled ? ContextMenuItems.BaseImageHide : ContextMenuItems.BaseImageShow),
                   onSelect: () => toggleLayerVisibility(targetLayers),
+                },
+                {
+                  type: 'item',
+                  label: 'flip horizontally.',
+                  icon: '/assets/icons/context_menu/flip_horizontal.png',
+                  onSelect: () => {
+                    flipLayer(projectStore.layers.state.activeLayerId, { flipX: true });
+                  },
+                },
+                {
+                  type: 'item',
+                  label: 'flip vertically.',
+                  icon: '/assets/icons/context_menu/flip_vertical.png',
+                  onSelect: () => {
+                    flipLayer(projectStore.layers.state.activeLayerId, { flipY: true });
+                  },
                 },
               ],
               e

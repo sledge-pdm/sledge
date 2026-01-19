@@ -1,5 +1,5 @@
 import { findLayerById, getLayerIndex, Layer } from '~/features/layer';
-import { setProjectStore } from '~/stores/RuntimeProject';
+import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 

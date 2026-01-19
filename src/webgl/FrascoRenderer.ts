@@ -5,7 +5,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { getBaseLayerColor } from '~/features/layer/model';
 import type { Layer } from '~/features/layer/types';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flip_pixels_vertically } from '~/utils/wasm';
 
 const MAX_LAYERS = 16;

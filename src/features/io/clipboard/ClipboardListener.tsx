@@ -10,7 +10,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log/service';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus, Events } from '~/utils/EventBus';
 import { clipboard, image } from '~/utils/platform';
 

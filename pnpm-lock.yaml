@@ -15,11 +15,11 @@ importers:
         specifier: ^5.5.2
         version: 5.5.2
       '@sledge-pdm/core':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.1.12
+        version: 1.1.12
       '@sledge-pdm/frasco':
-        specifier: ^0.1.9
-        version: 0.1.9
+        specifier: ^0.1.12
+        version: 0.1.12
       '@sledge-pdm/ui':
         specifier: 1.1.7
         version: 1.1.7
@@ -871,11 +871,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@sledge-pdm/core@1.1.10':
-    resolution: {integrity: sha512-PIWaW0APqqeMefeILKeY/jchDdxHU/ua/yvkp7wyOEXC+SMRPsW1pbTXtg9lGJZGdXIRIuRBTSN0yIlv25Ra2A==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.1.10/d6ba19dad839e5198a5e17fbe1846cf8383a4ad1}
+  '@sledge-pdm/core@1.1.12':
+    resolution: {integrity: sha512-gGmlhduhOYYbAvy/rgGOxi7Z3ldcUCfXoo3n+2znb/LdPo3Djj9GfmAVIKKExd9hbA2KUNn5Ay8Pi8M4j3T/Jg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.1.12/c4703b28f577c3296476ff1d1612aa013a722f78}
 
-  '@sledge-pdm/frasco@0.1.9':
-    resolution: {integrity: sha512-tR7R9XsFbJucfd3o+eCopkTK0T0IG+5Cew2J3xGj/Nef269n7TrWpQ1RhH6LrstArpqLuzd7KNLhNIDlQ0r9hw==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.1.9/a4368cfc162c48aeba4c627bc067d1051b3240a0}
+  '@sledge-pdm/frasco@0.1.12':
+    resolution: {integrity: sha512-k2KRVaCTGfzmZ+LE+tsHdSlxIuKSM/DettX7HPiZlDowqW18kmcSbpTt7S58ap3AjQCYWaVgGwzisA9IqkcgeQ==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.1.12/3643100862cff183102b0ef0c694fea74a760bc7}
 
   '@sledge-pdm/ui@1.1.7':
     resolution: {integrity: sha512-GQJQelyb17yicJQoFAbi4ELExQMRAvVRsbWt1kGsnHuakGSpg5lOAJzYWu2xHXhUhGCHJj/t7sAT/K+X3ARZ5A==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.1.7/f033dc929b4ddff07bcb658f80a69fea9505a2a7}
@@ -2959,19 +2959,19 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.55.1':
     optional: true
 
-  '@sledge-pdm/core@1.1.10':
+  '@sledge-pdm/core@1.1.12':
     dependencies:
       '@types/pako': 2.0.4
       msgpackr: 1.11.8
       pako: 2.1.0
 
-  '@sledge-pdm/frasco@0.1.9':
+  '@sledge-pdm/frasco@0.1.12':
     dependencies:
-      '@sledge-pdm/core': 1.1.10
+      '@sledge-pdm/core': 1.1.12
 
   '@sledge-pdm/ui@1.1.7':
     dependencies:
-      '@sledge-pdm/core': 1.1.10
+      '@sledge-pdm/core': 1.1.12
       solid-js: 1.9.10
 
   '@solid-primitives/deep@0.3.3(solid-js@1.9.10)':

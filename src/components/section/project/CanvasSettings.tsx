@@ -9,7 +9,7 @@ import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { sectionContent } from '../SectionStyles';
 
 const canvasContentStyle = css`

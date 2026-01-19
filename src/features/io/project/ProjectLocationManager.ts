@@ -1,6 +1,6 @@
 import { FileLocation } from '@sledge-pdm/core';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
-import { setProjectStore } from '~/stores/RuntimeProject';
+import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
 
 export type ProjectOpenMode = 'project' | 'new_project' | 'image';

@@ -6,7 +6,7 @@ import LayerListButtonsRow from '~/components/section/editor/layer/row/LayerList
 import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';
 import SectionItem from '~/components/section/SectionItem';
 import { allLayers, moveLayer } from '~/features/layer';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { ensureDropLine, getDropCandidates, getDropIndex, hideDropLine, updateDropLine } from '~/utils/dndUtils';
 import { sectionContent } from '../../SectionStyles';
 import BaseLayerItem from './BaseLayerItem';

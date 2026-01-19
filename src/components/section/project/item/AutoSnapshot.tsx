@@ -3,7 +3,7 @@ import { Dropdown, DropdownOption, ToggleSwitch } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { escapeCurrentAutosave } from '~/features/snapshot';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 
 const caption = css`
   font-family: ZFB03;

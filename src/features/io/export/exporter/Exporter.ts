@@ -3,7 +3,7 @@ import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { convertToMimetype } from '~/features/io/FileExtensions';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 
 export abstract class Exporter {
   abstract canvasToBlob(quality?: number, scale?: number): Promise<Blob>;

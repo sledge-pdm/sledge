@@ -7,7 +7,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 

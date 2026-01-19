@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { CanvasPos, CoordinateTransform, WindowPos } from '~/types/CoordinateTypes';
 
 /**

@@ -13,7 +13,7 @@ import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPos
 import { getActiveToolCategory } from '~/features/tools/ToolController';
 import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { eventBus } from '~/utils/EventBus';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';

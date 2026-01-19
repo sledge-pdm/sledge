@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal, For, onCleanup, onMount } from '
 import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { calculateRulerMarks, RectSnapshot, RulerCalculationContext, RulerCalculationResult, RulerMark } from './RulerCalculator';
 
 const rulerRoot = css`

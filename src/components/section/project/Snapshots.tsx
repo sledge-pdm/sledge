@@ -6,7 +6,7 @@ import { Icon } from '@sledge-pdm/ui';
 import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
 import { deleteSnapshot, loadSnapshot, ProjectSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { enabledButton, errorButton } from '~/styles/styles';
 import { useTimeAgoText } from '~/utils/TimeUtils';
 import { sectionContent } from '../SectionStyles';

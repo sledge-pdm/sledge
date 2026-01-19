@@ -1,6 +1,6 @@
 import { Component, For } from 'solid-js';
 
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import Image from './Image';
 
 export const ImagePool: Component = () => {

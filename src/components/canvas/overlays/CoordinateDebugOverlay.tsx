@@ -3,7 +3,7 @@ import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { coordinateTransform, getDebugTransformInfo } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { CanvasPos, WindowPos } from '~/types/CoordinateTypes';
 
 const debugOverlay = css`

@@ -12,7 +12,7 @@ import { getCurrentSelection, selectionManager } from '~/features/selection/Sele
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';

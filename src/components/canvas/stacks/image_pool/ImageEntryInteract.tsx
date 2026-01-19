@@ -1,7 +1,7 @@
 import { normalizeRotation } from '~/features/canvas';
 import { getEntry, updateEntryPartial } from '~/features/image_pool';
 import { interactStore } from '~/stores/EditorStores';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 
 type ResizePos = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'r';
 

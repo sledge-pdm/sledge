@@ -4,7 +4,7 @@ import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { Layer } from '~/features/layer';
 import { layerThumbnailGenerator } from '~/features/layer/LayerThumbnailGenerator';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus, Events } from '~/utils/EventBus';
 import { calcPreviewSize } from '~/utils/ThumbnailUtils';
 

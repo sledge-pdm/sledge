@@ -1,6 +1,6 @@
 import { ImagePoolEntry, ImagePoolImagePersisted } from '~/features/image_pool';
 import { makeRuntimeImages, runtimeImages, setRuntimeImages } from '~/features/image_pool/service';
-import { setProjectStore } from '~/stores/RuntimeProject';
+import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface ImagePoolHistoryActionProps extends BaseHistoryActionProps {

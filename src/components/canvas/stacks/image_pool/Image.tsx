@@ -7,7 +7,7 @@ import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transfe
 import { runtimeImages } from '~/features/image_pool/service';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
 const imageRoot = css`

@@ -3,7 +3,7 @@ import { makeRuntimeImages, runtimeImages, setRuntimeImages } from '~/features/i
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
-import { setProjectStore } from '~/stores/RuntimeProject';
+import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';

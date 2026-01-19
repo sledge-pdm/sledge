@@ -1,70 +1,15 @@
-import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectV2 } from '@sledge-pdm/core';
-import { createStore } from 'solid-js/store';
+import { getProjectAdapter, gzipDeflate, gzipInflate, ProjectBase } from '@sledge-pdm/core';
+import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
+import { HistoryStacks } from 'node_modules/@sledge-pdm/core/dist/src/project/adapters/parts/History';
 import { projectHistoryController } from '~/features/history';
 import { ImagePoolImagePersisted } from '~/features/image_pool';
 import { makeRuntimeImages, runtimeImages, setRuntimeImages, toPersistedImages } from '~/features/image_pool/service';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
-import { allLayers, Layer } from '~/features/layer';
+import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
-
-type Project = ProjectV2;
-
-/**
- * @description Project that projected into SolidJS Store. Do not include props that doesn't use SolidJS Store.
- */
-export type RuntimeProject = {
-  canvas: Project['canvas'];
-  layers: Omit<Project['layers'], 'buffers'>;
-  imagePool: Pick<Project['imagePool'], 'entries' | 'state'>;
-  // history: Project['history'];
-  project: Project['project'];
-  snapshots: Project['snapshots']; // TODO: change on-memory structure (refer todo.md)
-};
-
-const runtimeProjectBeforeInit: RuntimeProject = {
-  canvas: {
-    size: {
-      width: 1024,
-      height: 1024,
-    },
-  },
-  layers: {
-    layers: new Array<Layer>(),
-    state: {
-      activeLayerId: '',
-      selectionEnabled: false,
-      selected: new Set<string>(),
-      baseLayer: {
-        colorMode: 'transparent',
-      },
-    },
-  },
-  project: {
-    thumbnailPath: undefined as string | undefined,
-    lastSavedPath: undefined,
-    lastSavedAt: undefined as Date | undefined,
-
-    autoSnapshotEnabled: false,
-    autoSnapshotInterval: 60,
-  },
-  snapshots: [],
-  imagePool: {
-    entries: [],
-    // images: new Map(), move to local store?
-    state: {
-      selectedEntryId: undefined,
-      preserveAspectRatio: true,
-    },
-  },
-};
-
-function init() {
-  return createStore<RuntimeProject>(runtimeProjectBeforeInit);
-}
-
-export const [projectStore, setProjectStore] = init();
+import { CurrentProject, projectStore, RuntimeProject, setProjectStore } from './RuntimeProjectStore';
 
 export function initRuntimeProject(project: ProjectBase) {
   // things which is not included in RuntimeProject
@@ -78,7 +23,8 @@ export function initRuntimeProject(project: ProjectBase) {
   setIOStore('loadProjectVersion', { sledge: versions.sledge ?? undefined, project: versions.project ?? undefined });
 
   const canvasInfo = adapter.getCanvasInfo();
-  adapter.getLayers().forEach((layer) => {
+  const layers = adapter.getLayers() ?? [];
+  layers.forEach((layer) => {
     let buffer = adapter.getRawBufferOf(layer.id);
     if (!buffer) {
       buffer = new Uint8ClampedArray(canvasInfo.size.width * canvasInfo.size.height * 4);
@@ -86,14 +32,20 @@ export function initRuntimeProject(project: ProjectBase) {
     layerManager.registerLayer(layer.id, buffer, canvasInfo.size.width, canvasInfo.size.height, { inputSpace: 'canvas' });
   });
 
-  const history = adapter.getHistory();
-  if (history && history.undoStack && history.redoStack) {
+  let history: HistoryStacks | null = adapter.getHistory();
+  if (history.undoStack && history.redoStack) {
     projectHistoryController.setSerialized(history.undoStack, history.redoStack);
+  }
+  if (history.layerHistories) {
+    for (const [layerId, stacks] of Object.entries(history.layerHistories)) {
+      layerManager.importHistoryRaw(layerId, inflateLayerHistory(stacks.undoStack ?? []), inflateLayerHistory(stacks.redoStack ?? []));
+    }
   }
 
   const entries = adapter.getImagePoolEntries();
   // const imagePoolState = adapter.getImagePoolState();
-  runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
+  const existingRuntimeImages = runtimeImages() ?? [];
+  existingRuntimeImages.forEach((image) => URL.revokeObjectURL(image.blobUrl));
   const persistedImages = new Map<string, ImagePoolImagePersisted>();
   entries.forEach((entry) => {
     const image = adapter.getImagePoolImageOf(entry.id);
@@ -107,15 +59,15 @@ export function initRuntimeProject(project: ProjectBase) {
   const runtime: RuntimeProject = {
     canvas: adapter.getCanvasInfo(),
     imagePool: {
-      entries: adapter.getImagePoolEntries(),
+      entries: adapter.getImagePoolEntries() ?? [],
       state: adapter.getImagePoolState(),
     },
     layers: {
-      layers: adapter.getLayers(),
+      layers: adapter.getLayers() ?? [],
       state: adapter.getLayerListState(),
     },
     project: adapter.getProjectInfo(),
-    snapshots: adapter.getSnapshots(),
+    snapshots: adapter.getSnapshots() ?? [],
   };
 
   setProjectStore(runtime);
@@ -124,7 +76,7 @@ export function initRuntimeProject(project: ProjectBase) {
 /**
  *  @description Get project data for files with current runtime state
  */
-export async function getProjectFromRuntime(): Promise<Project> {
+export async function getProjectFromRuntime(): Promise<CurrentProject> {
   const buffers = new Map<
     string, // layer id
     {
@@ -146,12 +98,25 @@ export async function getProjectFromRuntime(): Promise<Project> {
   });
 
   const serializedHistory = projectHistoryController.getSerialized();
+  const layerHistories: Record<string, { undoStack: PackedHistorySnapshot[]; redoStack: PackedHistorySnapshot[] }> = {};
+  allLayers().forEach((l) => {
+    const layer = layerManager.getLayerOptional(l.id);
+    if (!layer) return;
+    const raw = layer.exportHistoryRaw();
+    if (!raw) return;
 
-  const project: Project = {
+    layerHistories[l.id] = {
+      undoStack: deflateLayerHistory(raw.undoStack),
+      redoStack: deflateLayerHistory(raw.redoStack),
+    };
+  });
+
+  const project: CurrentProject = {
     version: await getCurrentVersion(),
     projectVersion: CURRENT_PROJECT_VERSION,
     ...{ ...projectStore },
-    history: serializedHistory,
+
+    history: { ...serializedHistory, layerHistories },
     layers: {
       buffers,
       layers: projectStore.layers.layers,
@@ -159,6 +124,32 @@ export async function getProjectFromRuntime(): Promise<Project> {
     },
     imagePool: { images: toPersistedImages(runtimeImages()), ...projectStore.imagePool },
   };
+  project.history.layerHistories = layerHistories;
 
   return project;
+}
+
+type PackedHistorySnapshot = {
+  bounds: { x: number; y: number; width: number; height: number };
+  size: { width: number; height: number };
+  deflated: Uint8Array;
+  fullLayer?: boolean;
+};
+
+function deflateLayerHistory(stacks: HistoryRawSnapshot[]): PackedHistorySnapshot[] {
+  return stacks.map((snapshot) => ({
+    bounds: snapshot.bounds,
+    size: snapshot.size,
+    deflated: gzipDeflate(snapshot.buffer),
+    fullLayer: snapshot.fullLayer,
+  }));
+}
+
+function inflateLayerHistory(stacks: PackedHistorySnapshot[]): HistoryRawSnapshot[] {
+  return stacks.map((snapshot) => ({
+    bounds: snapshot.bounds,
+    size: snapshot.size,
+    buffer: gzipInflate(snapshot.deflated),
+    fullLayer: snapshot.fullLayer,
+  }));
 }

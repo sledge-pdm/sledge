@@ -5,7 +5,7 @@ import { allLayers } from '~/features/layer';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus, Events } from '~/utils/EventBus';
 import { FrascoRenderer } from '~/webgl/FrascoRenderer';
 

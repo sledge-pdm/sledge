@@ -5,7 +5,7 @@ import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import {
   apply_mask_offset,
@@ -108,7 +108,9 @@ class SelectionAreaManager {
   }
 
   constructor() {
-    this.selectionMask = new SelectionMask(0, 0);
+    const width = projectStore.canvas.size.width ?? 0;
+    const height = projectStore.canvas.size.height ?? 0;
+    this.selectionMask = new SelectionMask(width, height);
     this.previewMask = undefined;
 
     eventBus.on('canvas:sizeChanged', (e: any) => {

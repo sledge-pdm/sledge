@@ -6,7 +6,7 @@ import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import CheckerboardPattern from '/assets/patterns/CheckerboardPattern.svg';
 
 const canvasStackContainer = css`

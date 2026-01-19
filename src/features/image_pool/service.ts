@@ -9,7 +9,7 @@ import { ImagePoolEntry, ImagePoolImage, ImagePoolImagePersisted } from '~/featu
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { bufferToBlob, loadImageData } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { fs } from '~/utils/platform';

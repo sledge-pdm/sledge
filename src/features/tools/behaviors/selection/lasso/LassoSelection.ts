@@ -5,7 +5,7 @@ import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { webview } from '~/utils/platform';
 import { fill_lasso_selection } from '~/utils/wasm';

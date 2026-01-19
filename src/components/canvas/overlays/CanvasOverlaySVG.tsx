@@ -24,7 +24,7 @@ import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { RGBAToHex } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
 import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import '~/styles/selection_animations.css';
 
 // raw SVG 文字列から最初の <path .../> だけを抽出（self-closing想定）。失敗時は全体を返す。

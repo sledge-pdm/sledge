@@ -495,7 +495,10 @@ export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => 
   updateWebGLCanvas();
 };
 
-export const rotateAllLayer = (direction: 'cw' | 'ccw') => {
+/**
+ * @params layerDirection - direction in Layer coordinate. (Use opposite direction if meaning canvas coordinate)
+ */
+export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
   const beforeSize = { width: projectStore.canvas.size.width, height: projectStore.canvas.size.height };
   const afterSize = { width: beforeSize.height, height: beforeSize.width };
   const layerIds = allLayers().map((l) => l.id);
@@ -516,7 +519,7 @@ export const rotateAllLayer = (direction: 'cw' | 'ccw') => {
 
   allLayers().forEach((layer) => {
     const frascoLayer = getLayer(layer.id);
-    if (frascoLayer) Rotate90Effect.apply(frascoLayer, { direction, silentHistory: true });
+    if (frascoLayer) Rotate90Effect.apply(frascoLayer, { direction: layerDirection, silentHistory: true });
     updateLayerPreview(layer.id);
   });
 

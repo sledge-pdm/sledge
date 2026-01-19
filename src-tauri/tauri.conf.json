@@ -7,7 +7,7 @@
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "pnpm vite:dev",
-    "beforeBuildCommand": "pnpm prettier && pnpm vite:build"
+    "beforeBuildCommand": "pnpm vite:build"
   },
   "app": {
     "security": {

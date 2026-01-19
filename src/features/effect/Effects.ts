@@ -1,6 +1,4 @@
 import type { Layer } from '@sledge-pdm/frasco';
-import { projectHistoryController } from '~/features/history';
-import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 
@@ -12,7 +10,6 @@ export function applyEffect(layerId: string | undefined, fxName: string, mutator
   if (!layer) return;
 
   mutator(layer);
-  projectHistoryController.addAction(new LayerHistoryAction({ layerId, context: { tool: 'fx', fxName } }));
 
   updateWebGLCanvas(`Apply FX for ${layerId}`);
   updateLayerPreview(layerId);

@@ -207,7 +207,7 @@ export class LayerManager {
       projectHistoryController.addAction(
         new LayerHistoryAction({
           layerId: layerId,
-          context: { tool: 'tool context stub' }, // TODO: give a action context for layer?
+          context: e.context,
         })
       );
     });

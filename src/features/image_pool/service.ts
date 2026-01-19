@@ -1,4 +1,4 @@
-import { gzipDeflate, gzipInflate, type RawPixelData } from '@sledge-pdm/core';
+﻿import { gzipDeflate, gzipInflate, type RawPixelData } from '@sledge-pdm/core';
 import { createSignal } from 'solid-js';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
@@ -242,7 +242,7 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
 
   try {
     await transferToLayer(active.id, entryId);
-    if (removeAfter) removeEntry(entryId); // ImagePool から削除
+    if (removeAfter) removeEntry(entryId);
     logUserInfo('Image transferred to active layer.');
   } catch (e) {
     logSystemError('Image transfer failed.', { label: 'ImagePool', details: [e] });
@@ -282,7 +282,7 @@ async function transferToLayer(layerId: string, entryId: string) {
   flip_pixels_vertically(entryBuffer, entry.base.width, entry.base.height);
   const entryTexture = createTexture(layer.getGLContext(), entry.base.width, entry.base.height, entryBuffer);
 
-  layer.commitHistory();
+  layer.commitHistory(undefined, { silent: true });
   layer.applyEffectWithTextures(
     {
       fragmentSrc: IMAGE_POOL_TRANSFER_300ES,

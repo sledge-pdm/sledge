@@ -1,7 +1,6 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { projectHistoryController } from '~/features/history';
 import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
-import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
@@ -181,8 +180,10 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   const maskTexture = buildSelectionMaskTexture(layer, mask, width, height);
   if (!maskTexture) return;
 
-  if (!props?.noAction) {
-    layer.commitHistory(glBounds);
+  if (props?.noAction) {
+    layer.commitHistory(glBounds, { silent: true });
+  } else {
+    layer.commitHistory(glBounds, { context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
   }
   layer.applyEffectWithTextures({ fragmentSrc: CLEAR_WITH_MASK_300ES }, { u_mask: maskTexture }, glBounds);
   deleteTexture(layer.getGLContext(), maskTexture);
@@ -191,10 +192,6 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   updateLayerPreview(lid);
   logUserInfo('Selected area cleared.');
 
-  if (!props?.noAction) {
-    const acc = new LayerHistoryAction({ layerId: lid, context: { tool: TOOL_CATEGORIES.RECT_SELECTION } });
-    projectHistoryController.addAction(acc);
-  }
   return layerManager.exportRawCanvas(lid);
 }
 

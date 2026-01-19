@@ -122,14 +122,8 @@ function fill(args: {
   }
 
   if (result) {
-    layer.commitHistory();
+    layer.commitHistory(undefined, { context: { tool: TOOL_CATEGORIES.FILL } });
     layerManager.replaceLayerBuffer(layerId, buf, width, height, { inputSpace: 'canvas' });
-    projectHistoryController.addAction(
-      new LayerHistoryAction({
-        layerId: layerId,
-        context: { tool: TOOL_CATEGORIES.FILL },
-      })
-    );
   }
 }
 
@@ -141,7 +135,7 @@ function fillArea(args: { layerId: string; layer: Layer; color: RGBA; mask: Uint
   const result = fill_mask_area(buf, mask, ...color);
 
   if (result) {
-    layer.commitHistory();
+    layer.commitHistory(undefined, { silent: true });
     layerManager.replaceLayerBuffer(layerId, buf, width, height, { inputSpace: 'canvas' });
     projectHistoryController.addAction(
       new LayerHistoryAction({

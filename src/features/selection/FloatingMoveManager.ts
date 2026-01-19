@@ -1,8 +1,6 @@
-// controllers/layer/SelectionManager.ts
+﻿// controllers/layer/SelectionManager.ts
 import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
-import { projectHistoryController } from '~/features/history';
-import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -210,16 +208,10 @@ class FloatingMoveManager {
       logSystemError('attempt to commit, but target layer is missing.', { label: this.LOG_LABEL });
       return;
     }
-    layer.commitHistory();
+    layer.commitHistory(undefined, { context: { tool: TOOL_CATEGORIES.MOVE } });
     layerManager.replaceLayerBuffer(this.targetLayerId, composed, this.targetBufferOriginal.width, this.targetBufferOriginal.height, {
       inputSpace: 'canvas',
     });
-    projectHistoryController.addAction(
-      new LayerHistoryAction({
-        layerId: this.targetLayerId,
-        context: { tool: TOOL_CATEGORIES.MOVE },
-      })
-    );
 
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
       selectionManager.clear();

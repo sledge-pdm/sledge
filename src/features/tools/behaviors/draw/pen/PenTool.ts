@@ -61,7 +61,7 @@ export class PenTool implements ToolBehavior {
     }
     const { kernel, instrument } = this.resolveShape(preset);
     const point = this.buildPoint(args, args.rawPosition, args.color);
-    this.grip.start(layer, kernel, point, instrument);
+    this.grip.start(layer, kernel, point, instrument, { context: { tool: this.categoryId } });
     this.hasStroke = true;
 
     return { shouldUpdate: true };

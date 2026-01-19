@@ -3,7 +3,7 @@ import { projectHistoryController } from '~/features/history';
 import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { activeLayer, BlendMode, getLayerIndex, Layer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { FrascoRenderer } from '~/webgl/FrascoRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 

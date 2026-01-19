@@ -5,7 +5,7 @@ import { Component, Show } from 'solid-js';
 import { currentColor } from '~/features/color';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { interactStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 
 const pipetteDetailContainer = css`
   position: fixed;

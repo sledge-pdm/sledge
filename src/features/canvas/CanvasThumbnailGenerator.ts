@@ -1,6 +1,6 @@
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { logSystemWarn } from '~/features/log/service';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 
 export class CanvasThumbnailGenerator {
   private off: OffscreenCanvas;

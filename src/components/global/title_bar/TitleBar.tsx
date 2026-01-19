@@ -6,7 +6,7 @@ import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { ioStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { window as platformWindow } from '~/utils/platform';
 import './title_bar_region.css';
 

@@ -4,7 +4,7 @@ import { projectHistoryController } from '~/features/history';
 import { css } from '@acab/ecsstatic';
 import FrameResizeMenu from '~/components/canvas/overlays/resize_frame/FrameResizeMenu';
 import { interactStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 
 const topRightNav = css`
   display: flex;

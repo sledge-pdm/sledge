@@ -7,7 +7,7 @@ import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { WindowPos } from '~/types/CoordinateTypes';
 import { eventBus } from '~/utils/EventBus';
 import { dialog } from '~/utils/platform';
@@ -71,8 +71,21 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
   const oldSize = { width: projectStore.canvas.size.width, height: projectStore.canvas.size.height };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
     return false;
-  const act = new CanvasSizeHistoryAction({ beforeSize: oldSize, afterSize: newSize, context: { from: 'changeCanvasSize' } });
+  const layerIds = allLayers().map((l) => l.id);
+  const act = new CanvasSizeHistoryAction({
+    beforeSize: oldSize,
+    afterSize: newSize,
+    context: { from: 'changeCanvasSize' },
+    historyMode: 'layer',
+    layerIds,
+  });
   if (!skipHistory) {
+    for (const layerId of layerIds) {
+      const frascoLayer = layerManager.getLayerOptional(layerId);
+      if (frascoLayer) {
+        frascoLayer.commitHistory(undefined, { silent: true });
+      }
+    }
     act.registerBefore();
   }
 
@@ -351,11 +364,13 @@ export function rotateInCenter(centerWindowPosition: WindowPos, rotation: number
     y: interactStore.offset.y + deltaWindowY,
   });
 }
+
 export const toggleVerticalFlip = () => {
   setInteractStore('verticalFlipped', (v) => !v);
   coordinateTransform.clearCache();
   eventBus.emit('selection:updateSelectionMenu', {});
 };
+
 export const setVerticalFlip = (flipped: boolean) => {
   setInteractStore('verticalFlipped', flipped);
   coordinateTransform.clearCache();

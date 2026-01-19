@@ -1,4 +1,5 @@
-﻿import type { RawPixelData, RGBA } from '@sledge-pdm/core';
+import type { RawPixelData, RGBA } from '@sledge-pdm/core';
+import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
 import { Layer, SurfaceBounds, TextureHistoryBackend } from '@sledge-pdm/frasco';
 import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { flip_pixels_vertically } from '~/utils/wasm';
@@ -11,6 +12,7 @@ type PendingLayer = {
   buffer: RawPixelData;
   inputSpace: InputSpace;
   historyMaxItems: number;
+  historyRaw?: { undoStack: HistoryRawSnapshot[]; redoStack: HistoryRawSnapshot[] };
 };
 
 export class LayerManager {
@@ -71,7 +73,15 @@ export class LayerManager {
     const pending = this.pending.get(layerId);
     if (!pending) throw new Error(`LayerManager: layer not found for layerId: ${layerId}`);
     if (!this.gl) throw new Error('LayerManager: WebGL2 context not set');
-    const layer = this.createLayer(layerId, pending.buffer, pending.width, pending.height, pending.inputSpace, pending.historyMaxItems);
+    const layer = this.createLayer(
+      layerId,
+      pending.buffer,
+      pending.width,
+      pending.height,
+      pending.inputSpace,
+      pending.historyMaxItems,
+      pending.historyRaw
+    );
     this.pending.delete(layerId);
     this.layers.set(layerId, layer);
     return layer;
@@ -125,6 +135,18 @@ export class LayerManager {
     this.registerLayer(layerId, buffer, width, height, { inputSpace });
   }
 
+  importHistoryRaw(layerId: string, undoStack: HistoryRawSnapshot[], redoStack: HistoryRawSnapshot[]): void {
+    const existing = this.layers.get(layerId);
+    if (existing) {
+      existing.importHistoryRaw(undoStack, redoStack);
+      return;
+    }
+    const pending = this.pending.get(layerId);
+    if (pending) {
+      pending.historyRaw = { undoStack, redoStack };
+    }
+  }
+
   readPixelCanvas(layerId: string, x: number, y: number): RGBA | undefined {
     const layer = this.getLayerOptional(layerId);
     if (!layer || !this.isInBounds(layerId, x, y)) {
@@ -151,17 +173,36 @@ export class LayerManager {
   private flushPending(): void {
     if (!this.gl || this.pending.size === 0) return;
     for (const [layerId, pending] of this.pending.entries()) {
-      const layer = this.createLayer(layerId, pending.buffer, pending.width, pending.height, pending.inputSpace, pending.historyMaxItems);
+      const layer = this.createLayer(
+        layerId,
+        pending.buffer,
+        pending.width,
+        pending.height,
+        pending.inputSpace,
+        pending.historyMaxItems,
+        pending.historyRaw
+      );
       this.layers.set(layerId, layer);
     }
     this.pending.clear();
   }
 
-  private createLayer(layerId: string, buffer: RawPixelData, width: number, height: number, inputSpace: InputSpace, historyMaxItems: number): Layer {
+  private createLayer(
+    layerId: string,
+    buffer: RawPixelData,
+    width: number,
+    height: number,
+    inputSpace: InputSpace,
+    historyMaxItems: number,
+    historyRaw?: { undoStack: HistoryRawSnapshot[]; redoStack: HistoryRawSnapshot[] }
+  ): Layer {
     const gl = this.getContext();
     const normalized = this.normalizeBuffer(buffer, width, height, inputSpace);
     const layer = new Layer(gl, { width, height, data: normalized });
     layer.setHistoryBackend(new TextureHistoryBackend(), historyMaxItems);
+    if (historyRaw) {
+      layer.importHistoryRaw(historyRaw.undoStack, historyRaw.redoStack);
+    }
     layer.addListener('historyRegistered', (e) => {
       projectHistoryController.addAction(
         new LayerHistoryAction({

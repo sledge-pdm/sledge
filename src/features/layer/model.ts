@@ -3,7 +3,7 @@
 import { hexWithSharpToRGBA } from '@sledge-pdm/core';
 import { DropdownOption } from '@sledge-pdm/ui';
 import { v4 } from 'uuid';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { BaseLayer, BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 
 // BlendMode utilities

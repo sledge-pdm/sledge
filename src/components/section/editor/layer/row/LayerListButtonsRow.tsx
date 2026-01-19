@@ -11,7 +11,7 @@ import {
   removeLayersFromUser,
   toggleLayerVisibility,
 } from '~/features/layer/service';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { errorButton, flexRow } from '~/styles/styles';
 
 const iconsContainer = css`

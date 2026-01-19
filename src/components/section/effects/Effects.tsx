@@ -7,7 +7,7 @@ import GrayScale from '~/components/section/effects/effects/GrayScale';
 import Invert from '~/components/section/effects/effects/Invert';
 import Posterize from '~/components/section/effects/effects/Posterize';
 import { activeLayer, allLayers, findLayerById } from '~/features/layer';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 
 const effectsContainer = css`
   display: flex;

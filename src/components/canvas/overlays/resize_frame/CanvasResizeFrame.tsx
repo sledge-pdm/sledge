@@ -4,7 +4,7 @@ import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, 
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { setInteractStore } from '~/stores/EditorStores';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { CanvasPos } from '~/types/CoordinateTypes';
 
 export const CanvasResizeFrame: Component = () => {

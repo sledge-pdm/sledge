@@ -1,7 +1,8 @@
 // Layer domain service - Stateful layer operations with external dependencies
 
+import { FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
-import { projectHistoryController } from '~/features/history';
+import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
 import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
 import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
 import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
@@ -13,7 +14,8 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProject';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
+import { eventBus } from '~/utils/EventBus';
 import { dialog } from '~/utils/platform';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
@@ -467,6 +469,62 @@ export function deselectLayer(layerId: string) {
     return updated;
   });
 }
+
 export function getSelectedLayers(noFallbackToActive: boolean = false): string[] {
   return getOperationTargetLayerIds(undefined, { fallbackToActive: !noFallbackToActive });
 }
+
+export const flipLayer = (
+  layerId: string,
+  options?: {
+    flipX?: boolean;
+    flipY?: boolean;
+  }
+) => {
+  const layer = getLayer(layerId);
+  if (!layer) return;
+  FlipEffect.apply(layer, options);
+  updateWebGLCanvas();
+};
+
+export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => {
+  allLayers().forEach((layer) => {
+    const frascoLayer = getLayer(layer.id);
+    if (frascoLayer) FlipEffect.apply(frascoLayer, options);
+  });
+  updateWebGLCanvas();
+};
+
+export const rotateAllLayer = (direction: 'cw' | 'ccw') => {
+  const beforeSize = { width: projectStore.canvas.size.width, height: projectStore.canvas.size.height };
+  const afterSize = { width: beforeSize.height, height: beforeSize.width };
+  const layerIds = allLayers().map((l) => l.id);
+  const act = new CanvasSizeHistoryAction({
+    beforeSize,
+    afterSize,
+    context: { from: 'rotateAllLayer' },
+    historyMode: 'layer',
+    layerIds,
+  });
+  for (const layerId of layerIds) {
+    const frascoLayer = layerManager.getLayerOptional(layerId);
+    if (frascoLayer) {
+      frascoLayer.commitHistory(undefined, { silent: true });
+    }
+  }
+  act.registerBefore();
+
+  allLayers().forEach((layer) => {
+    const frascoLayer = getLayer(layer.id);
+    if (frascoLayer) Rotate90Effect.apply(frascoLayer, { direction, silentHistory: true });
+    updateLayerPreview(layer.id);
+  });
+
+  setProjectStore('canvas', 'size', afterSize);
+  eventBus.emit('canvas:sizeChanged', { newSize: afterSize });
+  adjustZoomToFit();
+
+  act.registerAfter();
+  projectHistoryController.addAction(act);
+  updateWebGLCanvas();
+};

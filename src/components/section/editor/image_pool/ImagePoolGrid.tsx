@@ -3,7 +3,7 @@ import { Component, For } from 'solid-js';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { runtimeImages } from '~/features/image_pool/service';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
-import { projectStore } from '~/stores/RuntimeProject';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 

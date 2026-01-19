@@ -9,6 +9,7 @@ import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
+import { flipAllLayer, rotateAllLayer } from '~/features/layer/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
@@ -243,6 +244,42 @@ const TopMenuBar: Component = () => {
       text: 'Edit.',
       action: () => {},
       menu: () => [
+        {
+          type: 'label',
+          label: 'canvas',
+        },
+        {
+          type: 'item',
+          label: 'flip horizontally.',
+          icon: '/assets/icons/context_menu/flip_horizontal.png',
+          onSelect: () => {
+            flipAllLayer({ flipX: true });
+          },
+        },
+        {
+          type: 'item',
+          label: 'flip vertically.',
+          icon: '/assets/icons/context_menu/flip_vertical.png',
+          onSelect: () => {
+            flipAllLayer({ flipY: true });
+          },
+        },
+        {
+          type: 'item',
+          label: 'rotate 90 (right).',
+          icon: '/assets/icons/context_menu/rotate_clockwise.png',
+          onSelect: () => {
+            rotateAllLayer('cw');
+          },
+        },
+        {
+          type: 'item',
+          label: 'rotate 90 (left).',
+          icon: '/assets/icons/context_menu/rotate_counterclockwise.png',
+          onSelect: () => {
+            rotateAllLayer('ccw');
+          },
+        },
         {
           type: 'label',
           label: getCurrentEditTarget(),

@@ -51,6 +51,7 @@ export const performanceMetas: FieldMeta[] = [
       min: 10,
       max: 100,
       step: 1,
+      labelWidth: 32,
       allowFloat: false,
     },
     tips: `the maximum number of history items to keep.`,

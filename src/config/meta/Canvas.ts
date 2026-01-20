@@ -31,15 +31,17 @@ export const canvasMetas: FieldMeta[] = [
   {
     section: ConfigSections.Canvas,
     path: 'editor/rotateDegreePerWheelScroll',
-    label: 'rotate degree per wheel',
+    label: 'rotate degree per shift+wheel',
     component: 'Slider',
     props: {
       min: 1,
       max: 45,
       step: 1,
+      labelWidth: 32,
+      allowFloat: false,
     },
     customFormat: (v) => v + '°',
-    tips: `the amount of rotation per wheel scroll.`,
+    tips: `the amount of rotation per wheel scroll with pressing shift key.`,
   },
   {
     section: ConfigSections.Canvas,
@@ -50,6 +52,7 @@ export const canvasMetas: FieldMeta[] = [
       min: 1,
       max: 15,
       step: 1,
+      labelWidth: 32,
       allowFloat: false,
     },
     customFormat: (v) => v + '°',

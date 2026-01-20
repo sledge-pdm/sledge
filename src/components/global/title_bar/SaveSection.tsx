@@ -23,7 +23,7 @@ const saveSectionContainer = css`
   position: relative;
   align-items: baseline;
   overflow: visible;
-  gap: 4px;
+  gap: 6px;
   pointer-events: all;
 `;
 

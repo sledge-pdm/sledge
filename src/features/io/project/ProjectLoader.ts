@@ -31,6 +31,7 @@ interface ProjectObjLoadOption extends LoadOption {
 }
 
 interface ImageLoadOptions extends LoadOption {
+  imageContext: 'file' | 'clipboard';
   name?: string;
   buffer: RawPixelData;
   width: number;
@@ -38,9 +39,18 @@ interface ImageLoadOptions extends LoadOption {
   loc?: FileLocation;
 }
 
+export enum ErrorTypes {
+  FILE_NOT_FOUND,
+  FAILED_LOAD_RUNTIME,
+  // todo: more
+}
+
 interface InternalLoadResult {
   ok: boolean;
-  error?: string;
+  error?: {
+    type: ErrorTypes;
+    detail: string;
+  };
   path?: string;
 }
 
@@ -67,6 +77,10 @@ export class ProjectLoader<T extends LoadOption> {
     return new ProjectLoader<PathLoadOption>('path', option);
   }
 
+  static isProjectPath(path: string) {
+    return path.endsWith('.sledge');
+  }
+
   static fromProject(option: ProjectObjLoadOption) {
     return new ProjectLoader<ProjectObjLoadOption>('projectObj', option);
   }
@@ -76,7 +90,7 @@ export class ProjectLoader<T extends LoadOption> {
   }
 
   public async load(): Promise<LoadResult> {
-    let result;
+    let result: InternalLoadResult;
     switch (this.type) {
       case 'new':
         result = await loadNewProject(this.options as unknown as NewProjectLoadOption);
@@ -86,18 +100,18 @@ export class ProjectLoader<T extends LoadOption> {
         const path = options.path;
         // check if the file exists
         const fileExists = await fs.exists(path);
-        if (!fileExists) {
+        if (fileExists) {
+          if (ProjectLoader.isProjectPath(path)) result = await loadFromPathProject(path);
+          else result = await loadFromPathImage(path);
+        } else {
           logSystemError('Project file not found.', { label: LOG_LABEL, details: [path] });
           logUserError('failed to open project file.', { label: LOG_LABEL, persistent: true });
           result = {
             ok: false,
-            error: `Project file not found.`,
+            error: { type: ErrorTypes.FILE_NOT_FOUND, detail: `Project file not found.` },
             path,
           };
         }
-        const loc = pathToFileLocation(path);
-        if (loc?.name?.endsWith('.sledge')) result = await loadFromPathProject(path);
-        else result = await loadFromPathImage(path);
         break;
       case 'projectObj':
         result = await loadFromProjectObj(this.options as unknown as ProjectObjLoadOption);
@@ -138,7 +152,10 @@ async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLo
   } catch (e) {
     return {
       ok: false,
-      error: `Error loading new project: ${e}`,
+      error: {
+        type: ErrorTypes.FAILED_LOAD_RUNTIME,
+        detail: `Error loading new project: ${e}`,
+      },
     };
   }
 }
@@ -161,7 +178,10 @@ async function loadFromPathProject(path: string): Promise<InternalLoadResult> {
     logUserError('failed to open project file.', { label: LOG_LABEL, details: [e], persistent: true });
     return {
       ok: false,
-      error: `Error loading project from path: ${e}`,
+      error: {
+        type: ErrorTypes.FAILED_LOAD_RUNTIME,
+        detail: `Error loading project from path: ${e}`,
+      },
       path,
     };
   }
@@ -174,6 +194,7 @@ async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
     const imageData = await loadImageData(bitmap);
     const loc = pathToFileLocation(path);
     const result = await loadFromImage({
+      imageContext: 'file',
       name: loc?.name,
       buffer: new Uint8ClampedArray(imageData.data),
       width: imageData.width,
@@ -190,7 +211,7 @@ async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
     logUserError('failed to import image.', { label: LOG_LABEL, persistent: true });
     return {
       ok: false,
-      error: `Error loading project from image: ${e}`,
+      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from image: ${e}` },
       path,
     };
   }
@@ -200,7 +221,7 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
   try {
     setIOStore('openAs', 'project');
     const project = options.project;
-    initRuntimeProject(project);
+    await initRuntimeProject(project);
     setIOStore('isProjectChangedAfterSave', false);
     return {
       ok: true,
@@ -208,7 +229,7 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
   } catch (e) {
     return {
       ok: false,
-      error: `Error loading project from project data: ${e}`,
+      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from project data: ${e}` },
     };
   }
 }
@@ -236,7 +257,7 @@ async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadRes
   } catch (e) {
     return {
       ok: false,
-      error: `Error loading project from image: ${e}`,
+      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from image: ${e}` },
     };
   }
 }

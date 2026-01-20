@@ -3,6 +3,11 @@
 * startupロード時のエラーハンドリング方法をまとめる　ややこしすぎる
 * ウィンドウの状態はややこしいのでここには書かない　成功したときも書かないので以下は失敗したときの話であると理解すること
 
+## かつてはどうだったか
+
+* （修正に伴い当初の問題を見失うかもしれないので書いておく）
+* エラーハンドリングがひどく、既存プロジェクトを読み込めなければ即時でalertのみ表示して終了、しかも内部でのエラーハンドリングが握りつぶされて原因特定、デバッグが困難だった
+
 ## 基本方針
 
 * コードの複雑化を防ぐためデバッグ時とユーザーが見るエラーの差は極力なくす(devtoolsへの流し+alertなどはOKだが、"デバッグ時のみ表示される警告"はそれ自体が果たしてユーザーに表示されるものかが見ただけではわからず、本番環境でのUX整合がとりづらい。可能な限り本番環境とデバッグ環境でのエラーハンドリングは合わせる。)
@@ -47,24 +52,25 @@
 
 ### `PROJECT`(globalConfig.default.open === 'last' && loc.name?.endsWith('.sledge'))
 
--  (!)`PROJECT` -> (o)`NEW`; [Last project file({path}) not found. Opened new project.] > OK(nothing),"Open Containing Folder"(Open Containing Folder)
--  (!)`PROJECT` -> (x)`NEW`; [Last project file({path}) not found. Opened new project.] > OK(close window),"Open Containing Folder"(Open Containing Folder)
+-  (!)`PROJECT` -> (o)`NEW`; [Last project file({path}) not found. Opening new project.] > OK(nothing),"Open Containing Folder"(Open Containing Folder)
+-  (!)`PROJECT` -> (x)`NEW`; [Last project file({path}) not found. Opening new project.] > OK(close window),"Open Containing Folder"(Open Containing Folder)
 
 -  (o)`PROJECT`: *nothing(succeeded)*
--  (x)`PROJECT` -> (o)`NEW`: [Failed to load last project({path}). Opened new project.] > OK(nothing)
+-  (x)`PROJECT` -> (o)`NEW`: [Failed to load last project({path}). Opening new project.] > OK(nothing)
 -  (x)`PROJECT` -> (x)`NEW`: [Failed to load last project({path}). Tried to load new project but failed.] > OK(close window)
 
 ### `IMG_PROJECT`(globalConfig.default.open === 'last' && !loc.name?.endsWith('.sledge'))
 
--  (!)`IMG_PROJECT` -> (o)`NEW`; [Last project file({path}) not found. Opened new project.] > OK(nothing),"Open Containing Folder"(Open Containing Folder)
--  (!)`IMG_PROJECT` -> (x)`NEW`; [Last project file({path}) not found. Opened new project.] > OK(close window),"Open Containing Folder"(Open Containing Folder)
+-  (!)`IMG_PROJECT` -> (o)`NEW`; [Last project file({path}) not found. Opening new project.] > OK(nothing),"Open Containing Folder"(Open Containing Folder)
+-  (!)`IMG_PROJECT` -> (x)`NEW`; [Last project file({path}) not found. Opening new project.] > OK(close window),"Open Containing Folder"(Open Containing Folder)
 
 -  (o)`IMG_PROJECT`: *nothing(succeeded)*
--  (x)`IMG_PROJECT` -> (o)`NEW`: [Failed to load last project({path}). Opened new project.] > OK(nothing)
+-  (x)`IMG_PROJECT` -> (o)`NEW`: [Failed to load last project({path}). Opening new project.] > OK(nothing)
 -  (x)`IMG_PROJECT` -> (x)`NEW`: [Failed to load last project({path}). Tried to load new project but failed.] > OK(close window)
 
 ### `CLIPBOARD_IMAGE`(clipboard=true)
 
 -  (o)`CLIPBOARD_IMAGE`: *nothing(succeeded)*
--  (x)`CLIPBOARD_IMAGE` -> (o)`NEW`: [Failed to load project from clipboard. Opened new project.] > OK(nothing)
--  (x)`CLIPBOARD_IMAGE` -> (x)`NEW`: [Failed to load project from clipboard. Tried to load new project but failed.] > OK(close window)
+-  (x)`CLIPBOARD_IMAGE`: [Failed to load project from clipboard.] > OK(nothing)
+
+> loading clipboard should have tolerance for failure bc it must be loaded from existing window (not from startup)

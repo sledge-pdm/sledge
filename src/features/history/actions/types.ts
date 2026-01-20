@@ -13,7 +13,6 @@ export interface LayerSnapshot {
 export interface PackedLayerSnapshot {
   layer: Layer;
   image?: {
-    codec: 'deflate' | 'webp';
     packedBuffer: Uint8Array;
     width: number;
     height: number;

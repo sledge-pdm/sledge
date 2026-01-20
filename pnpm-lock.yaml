@@ -14,12 +14,15 @@ importers:
       '@jaames/iro':
         specifier: ^5.5.2
         version: 5.5.2
+      '@jsquash/webp':
+        specifier: ^1.5.0
+        version: 1.5.0
       '@sledge-pdm/core':
-        specifier: ^1.1.12
-        version: 1.1.12
+        specifier: ^1.2.0
+        version: 1.2.0
       '@sledge-pdm/frasco':
-        specifier: ^0.1.13
-        version: 0.1.13
+        specifier: ^0.2.0
+        version: 0.2.0
       '@sledge-pdm/ui':
         specifier: ^1.2.0
         version: 1.2.0
@@ -143,7 +146,7 @@ importers:
         version: 7.3.1(@types/node@25.0.7)
       vite-plugin-glsl:
         specifier: ^1.5.5
-        version: 1.5.5(esbuild@0.27.2)(vite@7.3.1(@types/node@25.0.7))
+        version: 1.5.5(@rollup/pluginutils@5.3.0(rollup@4.55.1))(esbuild@0.27.2)(vite@7.3.1(@types/node@25.0.7))
       vite-plugin-inspect:
         specifier: ^11.3.3
         version: 11.3.3(vite@7.3.1(@types/node@25.0.7))
@@ -683,6 +686,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
+  '@jsquash/webp@1.5.0':
+    resolution: {integrity: sha512-KggLoj2MnRSfIqTeKe1EmbljTX2vuV7mh79k89PCL1pyqiDULcPM1L47twxXt0hkb68F70bXiL31MxsuoZtKFw==}
+
   '@keyv/bigmap@1.3.0':
     resolution: {integrity: sha512-KT01GjzV6AQD5+IYrcpoYLkCu1Jod3nau1Z7EsEuViO3TZGRacSbO9MfHmbJ1WaOXFtWLxPVj169cn2WNKPkIg==}
     engines: {node: '>= 18'}
@@ -739,6 +745,15 @@ packages:
 
   '@rollup/plugin-virtual@3.0.2':
     resolution: {integrity: sha512-10monEYsBp3scM4/ND4LNH5Rxvh3e/cVeL3jWTgZ2SrQ+BmUoQcopVQvnaMcOnykb1VkxUFuDAN+0FnpTFRy2A==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+
+  '@rollup/pluginutils@5.3.0':
+    resolution: {integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -871,11 +886,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@sledge-pdm/core@1.1.12':
-    resolution: {integrity: sha512-gGmlhduhOYYbAvy/rgGOxi7Z3ldcUCfXoo3n+2znb/LdPo3Djj9GfmAVIKKExd9hbA2KUNn5Ay8Pi8M4j3T/Jg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.1.12/c4703b28f577c3296476ff1d1612aa013a722f78}
+  '@sledge-pdm/core@1.2.0':
+    resolution: {integrity: sha512-HO/3q0954anbx4UFT9W6sbT9HF9rjShZM7luTNyksMdFJwF9JlzgTGrRF+zk3FpGxdmQ7s6plfeyvOTveoJznA==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.2.0/798f0fddd4902c9785fb5f1086d43c0b0b4bec9c}
 
-  '@sledge-pdm/frasco@0.1.13':
-    resolution: {integrity: sha512-gK+EyQHal4BFoaZVty7YIZdU1d/RqY8/phj3COKxc5rvK+YECRhgbaU9PoG+16eVK5kUzrmZVVmwBZSt3GScmw==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.1.13/f11c3ba060662b9c7def73d2255bb5842aa9bf49}
+  '@sledge-pdm/frasco@0.2.0':
+    resolution: {integrity: sha512-VsUyLzfuRzjXsXIVj+DgYekCuXt5TdkrMBVt4oZRoH4IQeceYJIgS8nNfEEZ6UvoefTsrjJAolSHoRk2SkMRXg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.2.0/f669d442ea4c7bfe5ef4b6f4e027ecb2f9d0401e}
 
   '@sledge-pdm/ui@1.2.0':
     resolution: {integrity: sha512-EP4k1GmbpnRSV0Tks6VUEoHzsq6FGrDmhpDUVWnbsHUuEvgfzkD1AL22Q/yZtOH165S7q99xiPpE3II4PeQ4Qg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.2.0/7d3fd01797ef5d4d695e6d7baa7e7afe1a898631}
@@ -1536,6 +1551,9 @@ packages:
   estraverse@5.3.0:
     resolution: {integrity: sha512-MMdARuVEQziNTeJD8DgMqmhwR11BRQ/cBP+pLtYdSTnf3MIO8fFeiINEbX36ZdNlfU/7A9f3gUw49B3oQsvwBA==}
     engines: {node: '>=4.0'}
+
+  estree-walker@2.0.2:
+    resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
 
   estree-walker@3.0.3:
     resolution: {integrity: sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==}
@@ -2386,6 +2404,9 @@ packages:
       jsdom:
         optional: true
 
+  wasm-feature-detect@1.8.0:
+    resolution: {integrity: sha512-zksaLKM2fVlnB5jQQDqKXXwYHLQUVH9es+5TOOHwGOVJOCeRBCiPjwSg+3tN2AdTCzjgli4jijCH290kXb/zWQ==}
+
   which@1.3.1:
     resolution: {integrity: sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==}
     hasBin: true
@@ -2840,6 +2861,10 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@jsquash/webp@1.5.0':
+    dependencies:
+      wasm-feature-detect: 1.8.0
+
   '@keyv/bigmap@1.3.0(keyv@5.5.5)':
     dependencies:
       hashery: 1.4.0
@@ -2883,6 +2908,15 @@ snapshots:
   '@rollup/plugin-virtual@3.0.2(rollup@4.55.1)':
     optionalDependencies:
       rollup: 4.55.1
+
+  '@rollup/pluginutils@5.3.0(rollup@4.55.1)':
+    dependencies:
+      '@types/estree': 1.0.8
+      estree-walker: 2.0.2
+      picomatch: 4.0.3
+    optionalDependencies:
+      rollup: 4.55.1
+    optional: true
 
   '@rollup/rollup-android-arm-eabi@4.55.1':
     optional: true
@@ -2959,19 +2993,19 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.55.1':
     optional: true
 
-  '@sledge-pdm/core@1.1.12':
+  '@sledge-pdm/core@1.2.0':
     dependencies:
       '@types/pako': 2.0.4
       msgpackr: 1.11.8
       pako: 2.1.0
 
-  '@sledge-pdm/frasco@0.1.13':
+  '@sledge-pdm/frasco@0.2.0':
     dependencies:
-      '@sledge-pdm/core': 1.1.12
+      '@sledge-pdm/core': 1.2.0
 
   '@sledge-pdm/ui@1.2.0':
     dependencies:
-      '@sledge-pdm/core': 1.1.12
+      '@sledge-pdm/core': 1.2.0
       solid-js: 1.9.10
 
   '@solid-primitives/deep@0.3.3(solid-js@1.9.10)':
@@ -3685,6 +3719,9 @@ snapshots:
 
   estraverse@5.3.0: {}
 
+  estree-walker@2.0.2:
+    optional: true
+
   estree-walker@3.0.3:
     dependencies:
       '@types/estree': 1.0.8
@@ -4365,10 +4402,11 @@ snapshots:
     dependencies:
       vite: 7.3.1(@types/node@25.0.7)
 
-  vite-plugin-glsl@1.5.5(esbuild@0.27.2)(vite@7.3.1(@types/node@25.0.7)):
+  vite-plugin-glsl@1.5.5(@rollup/pluginutils@5.3.0(rollup@4.55.1))(esbuild@0.27.2)(vite@7.3.1(@types/node@25.0.7)):
     dependencies:
       vite: 7.3.1(@types/node@25.0.7)
     optionalDependencies:
+      '@rollup/pluginutils': 5.3.0(rollup@4.55.1)
       esbuild: 0.27.2
 
   vite-plugin-inspect@11.3.3(vite@7.3.1(@types/node@25.0.7)):
@@ -4469,6 +4507,8 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  wasm-feature-detect@1.8.0: {}
 
   which@1.3.1:
     dependencies:

@@ -1,4 +1,4 @@
-﻿import { encodeWebp, toUint8ClampedArray } from '@sledge-pdm/core';
+import { encode as encodeWebp } from '@jsquash/webp';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
@@ -9,18 +9,18 @@ export class LosslessWebPExporter extends Exporter {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
     const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(webGLRenderer.readPixelsFlipped());
     const scaledBuffer = getScaledBuffer(buffer, scale);
-    const webpBuffer = encodeWebp(scaledBuffer.data, scaledBuffer.width, scaledBuffer.height);
-    const blob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });
+    const webpBuffer = await encodeWebp(scaledBuffer, { lossless: 1 });
+    const blob = new Blob([new Uint8Array(webpBuffer)], { type: 'image/webp' });
     if (!blob) throw new Error('Failed to export WebP: blob is undefined');
     return blob;
   }
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
     if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
-    const buffer = toUint8ClampedArray(getLayer(layer.id).readPixels()) as Uint8ClampedArray<ArrayBuffer>;
+    const buffer = new Uint8ClampedArray(getLayer(layer.id).readPixels());
     const scaledBuffer = getScaledBuffer(buffer, scale);
-    const webpBuffer = encodeWebp(scaledBuffer.data, scaledBuffer.width, scaledBuffer.height);
-    const blob = new Blob([new Uint8ClampedArray(webpBuffer)], { type: 'image/webp' });
+    const webpBuffer = await encodeWebp(scaledBuffer, { lossless: 1 });
+    const blob = new Blob([new Uint8Array(webpBuffer)], { type: 'image/webp' });
     if (!blob) throw new Error('Failed to export WebP: blob is undefined');
     return blob;
   }

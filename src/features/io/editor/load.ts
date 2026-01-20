@@ -1,16 +1,9 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { Consts } from '~/Consts';
 import { logSystemError } from '~/features/log/service';
 import { EditorStateStore, loadEditorStateStore } from '~/stores/EditorStores';
 import { fs } from '~/utils/platform';
 
-export async function loadEditorState(): Promise<
-  | {
-      lastOpenAs?: 'project' | 'new_project' | 'image';
-      lastPath?: FileLocation;
-    }
-  | undefined
-> {
+export async function loadEditorState(): Promise<EditorStateStore | undefined> {
   const baseDir = fs.BaseDirectory?.AppConfig;
   const isFileExists = baseDir ? await fs.exists(Consts.editorStateFileName, { baseDir }) : await fs.exists(Consts.editorStateFileName);
   if (isFileExists) {

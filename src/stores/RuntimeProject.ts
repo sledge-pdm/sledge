@@ -11,7 +11,7 @@ import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
 import { CurrentProject, projectStore, RuntimeProject, setProjectStore } from './RuntimeProjectStore';
 
-export function initRuntimeProject(project: ProjectBase) {
+export async function initRuntimeProject(project: ProjectBase) {
   // things which is not included in RuntimeProject
   const adapter = getProjectAdapter(project);
 
@@ -25,13 +25,15 @@ export function initRuntimeProject(project: ProjectBase) {
   const canvasInfo = adapter.getCanvasInfo();
 
   const layers = adapter.getLayers() ?? [];
-  layers.forEach((layer) => {
-    let buffer = adapter.getRawBufferOf(layer.id);
-    if (!buffer) {
-      buffer = new Uint8ClampedArray(canvasInfo.size.width * canvasInfo.size.height * 4);
-    }
-    layerManager.registerLayer(layer.id, buffer, canvasInfo.size.width, canvasInfo.size.height, { inputSpace: 'canvas' });
-  });
+  Promise.all(
+    layers.map(async (layer) => {
+      let buffer = await adapter.getRawBufferOf(layer.id);
+      if (!buffer) {
+        buffer = new Uint8ClampedArray(canvasInfo.size.width * canvasInfo.size.height * 4);
+      }
+      layerManager.registerLayer(layer.id, buffer, canvasInfo.size.width, canvasInfo.size.height, { inputSpace: 'canvas' });
+    })
+  );
 
   let history: HistoryStacks | null = adapter.getHistory();
   if (history.undoStack && history.redoStack) {
@@ -68,7 +70,7 @@ export function initRuntimeProject(project: ProjectBase) {
       state: adapter.getLayerListState(),
     },
     project: adapter.getProjectInfo(),
-    snapshots: adapter.getSnapshots() ?? [],
+    snapshots: (await adapter.getSnapshots()) ?? [],
   };
 
   setProjectStore(runtime);

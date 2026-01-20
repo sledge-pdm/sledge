@@ -1,7 +1,7 @@
 {
   "name": "sledge",
   "type": "module",
-  "packageManager": "pnpm@10.25.0",
+  "packageManager": "pnpm@10.28.1",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "vite:dev": "vite",
@@ -22,8 +22,8 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@jaames/iro": "^5.5.2",
-    "@sledge-pdm/core": "^1.1.12",
-    "@sledge-pdm/frasco": "^0.1.13",
+    "@sledge-pdm/core": "^1.2.0",
+    "@sledge-pdm/frasco": "^0.2.0",
     "@sledge-pdm/ui": "^1.2.0",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
@@ -47,7 +47,8 @@
     "mitt": "^3.0.1",
     "msgpackr": "^1.11.8",
     "solid-js": "^1.9.10",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "@jsquash/webp": "^1.5.0"
   },
   "devDependencies": {
     "@acab/ecsstatic": "^0.9.0",

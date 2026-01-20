@@ -1,9 +1,10 @@
 import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
+import { ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { logSystemError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
-import { getProjectFromRuntime, initRuntimeProject } from '~/stores/RuntimeProject';
+import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { dialog } from '~/utils/platform';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
@@ -118,7 +119,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
 
   const savedSnapshotStore = { ...projectStore.snapshots };
   // load snapshot
-  initRuntimeProject(snapshot.snapshot);
+  await ProjectLoader.fromProject({ project: snapshot.snapshot }).load();
 
   setProjectStore('snapshots', savedSnapshotStore);
   updateWebGLCanvas('snapshot loaded');

@@ -15,11 +15,14 @@ import { loadEditorState } from '~/features/io/editor/load';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import KeyListener from '~/features/io/KeyListener';
+import { ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { logUserWarn } from '~/features/log/service';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
-import { tryLoadProject } from '~/routes/editor/load';
+import { getInitialLoader, InitialLoadTypes } from '~/routes/editor/load';
+import { reportInitialLoadError } from '~/routes/editor/loadError';
 import { appearanceStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
@@ -51,15 +54,47 @@ export default function Editor() {
     try {
       await showMainWindow();
       await loadGlobalSettings();
-      const lastState = await loadEditorState();
-      await tryLoadProject(lastState);
-      // Save editor state if load succeeded.
-      // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
-      await saveEditorStateImmediate();
-      setIsLoading(false);
+      const editorState = await loadEditorState();
+      // const result = await tryLoadProject(editorState);
+      // TODO: EditorStateの扱い( (x)EDITOR_STATEパス )
+      const { initialLoadType, loader, fatalError, targetPath } = await getInitialLoader(editorState!);
+      if (!loader) {
+        // ローダーが用意できなかった = フォールバック(NEW_PROJECT_FALLBACK)すらしていないので単純にloadと同様に落とす
+        await reportInitialLoadError(initialLoadType, fatalError, undefined, targetPath);
+        return;
+      }
+      const result = await loader.load();
+      if (result.ok) {
+        // TODO: 下の説明を解読する　なにこれ
+        // Save editor state if load succeeded.
+        // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
+        await saveEditorStateImmediate();
+        adjustZoomToFit();
+      } else {
+        switch (initialLoadType) {
+          case InitialLoadTypes.PATH_PROJECT:
+          case InitialLoadTypes.PATH_PROJECT_LAST:
+          case InitialLoadTypes.PATH_IMAGE_PROJECT:
+          case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
+            const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
+            if (fallbackResult.ok) {
+              await saveEditorStateImmediate();
+              adjustZoomToFit();
+              await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
+            } else {
+              await reportInitialLoadError(InitialLoadTypes.NEW_PROJECT_FALLBACK, result.error, initialLoadType, targetPath);
+            }
+            break;
+          default:
+            await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
+            break;
+        }
+      }
 
-      adjustZoomToFit();
+      setIsLoading(false);
     } catch (e) {
+      // ここいる？？
+      // プロジェクト読み込みの段階はエラー吐かない想定なので、ここはCONFIG,EDITOR_STATEまでのキャッチでいいかも　要検討
       unlisten();
       if (isFirst) await reportAppStartupError(e);
       else await reportWindowStartError(e);

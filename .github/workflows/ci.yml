@@ -94,10 +94,6 @@ jobs:
       - name: Prettier check
         run: pnpm exec prettier --check .
 
-      - name: Stylelint (CSS no-fix)
-        run: pnpm exec stylelint -c .stylelintrc.json "src/**/*.css" || true
-        # NOTE: Using || true so stylelint warnings (non-error) don't fail build; adjust if needed.
-
       - name: Cache Playwright Browsers
         uses: actions/cache@v4
         id: playwright-cache

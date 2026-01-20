@@ -2,13 +2,25 @@ import { LayerThumbnail } from '@sledge-pdm/frasco';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
 
-const THUMBNAIL_SCALE = 8;
+const THUMBNAIL_BASE_SIZE = 512;
+
+const calcThumbnailScale = (width: number, height: number): number => {
+  const safeWidth = Math.max(1, Math.floor(width));
+  const safeHeight = Math.max(1, Math.floor(height));
+  const geometricMean = Math.sqrt(safeWidth * safeHeight);
+  if (!Number.isFinite(geometricMean)) return 1;
+
+  const ratio = geometricMean / THUMBNAIL_BASE_SIZE;
+  const exponent = Math.max(0, Math.ceil(Math.log2(ratio)));
+  return 2 ** exponent;
+};
 
 type LayerRef = NonNullable<ReturnType<typeof layerManager.getLayerOptional>>;
 
 type CacheEntry = {
   layer: LayerRef;
   thumbnail: LayerThumbnail;
+  scale: number;
 };
 
 export class LayerThumbnailGenerator {
@@ -34,8 +46,10 @@ export class LayerThumbnailGenerator {
   }
 
   private ensureThumbnail(layerId: string, layer: LayerRef): CacheEntry {
+    const size = layer.getSize();
+    const scale = calcThumbnailScale(size.width, size.height);
     const existing = this.caches.get(layerId);
-    if (existing && existing.layer === layer) {
+    if (existing && existing.layer === layer && existing.scale === scale) {
       return existing;
     }
 
@@ -44,8 +58,8 @@ export class LayerThumbnailGenerator {
       this.caches.delete(layerId);
     }
 
-    const thumbnail = new LayerThumbnail(layer, { scale: THUMBNAIL_SCALE });
-    const entry = { layer, thumbnail };
+    const thumbnail = new LayerThumbnail(layer, { scale });
+    const entry = { layer, thumbnail, scale };
     this.caches.set(layerId, entry);
     return entry;
   }

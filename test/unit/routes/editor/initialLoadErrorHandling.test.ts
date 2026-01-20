@@ -334,8 +334,8 @@ describe('initial load error handling', () => {
     await initInitialLoad();
 
     expect(dialogMessages[0]?.message).toBe(formatLoadErrorMessage(ERROR_CLIPBOARD_IMAGE_FAILED));
-    expect(close).not.toHaveBeenCalled();
-    expect(destroy).not.toHaveBeenCalled();
+    expect(close).toHaveBeenCalled();
+    expect(destroy).toHaveBeenCalled();
   });
 
   it('(!)PROJECT -> (o)NEW (Open Containing Folder)', async () => {

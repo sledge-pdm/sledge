@@ -6,6 +6,7 @@ import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
 import { eventBus } from '~/utils/EventBus';
 import WebGLCanvas from './WebGLCanvas';
 
+import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import CheckerboardPattern from '/assets/patterns/CheckerboardPattern.svg';
 
@@ -24,15 +25,13 @@ const CanvasStack: Component = () => {
   const gridSize = createMemo(() => {
     const { width, height } = projectStore.canvas.size;
 
+    const zoom = Math.max(interactStore.zoom, 0.0001);
     const shorter = width > height ? height : width;
-    let canvasStoreOrder = Math.floor(Math.log10(shorter)) - 1;
-    let gridSize = Math.pow(10, canvasStoreOrder);
-    if (gridSize < 1) {
-      gridSize = 1;
-    } else if (gridSize > 100) {
-      gridSize = 100;
-    }
-    return gridSize;
+    const effectiveShorter = shorter / zoom;
+    if (!Number.isFinite(effectiveShorter) || effectiveShorter <= 0) return 1;
+    const order = Math.floor(Math.log10(effectiveShorter)) - 1;
+    let gridSize = Math.pow(10, order);
+    return Math.min(100, Math.max(1, gridSize));
   });
 
   createEffect(() => {

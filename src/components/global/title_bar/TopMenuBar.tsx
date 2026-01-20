@@ -292,7 +292,7 @@ const TopMenuBar: Component = () => {
         {
           type: 'item',
           label: 'rotate 90 (right).',
-          icon: '/assets/icons/context_menu/rotate_clockwise.png',
+          icon: '/assets/icons/context_menu/canvas_rotate_clockwise.png',
           onSelect: () => {
             // layer coordinate ccw = canvas cw
             rotateAllLayer('ccw');
@@ -301,7 +301,7 @@ const TopMenuBar: Component = () => {
         {
           type: 'item',
           label: 'rotate 90 (left).',
-          icon: '/assets/icons/context_menu/rotate_counterclockwise.png',
+          icon: '/assets/icons/context_menu/canvas_rotate_counterclockwise.png',
           onSelect: () => {
             // layer coordinate cw = canvas ccw
             rotateAllLayer('cw');

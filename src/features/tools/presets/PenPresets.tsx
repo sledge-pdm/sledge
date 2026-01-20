@@ -9,7 +9,7 @@ export const penPresetFields: PresetFieldMeta<PenPresetConfig>[] = [
     label: 'Size',
     component: 'Slider',
     props: {
-      labelWidth: 48,
+      labelWidth: 40,
       min: 1,
       max: Consts.maxPenSize,
       step: 1,

@@ -11,6 +11,7 @@ export const fillPresetFields: PresetFieldMeta<FillPresetConfig>[] = [
       min: 0,
       max: 255,
       step: 1,
+      labelWidth: 40,
       allowFloat: false,
     },
     tips: 'Color tolerance for fill operation',

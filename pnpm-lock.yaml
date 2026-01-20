@@ -21,8 +21,8 @@ importers:
         specifier: ^0.1.13
         version: 0.1.13
       '@sledge-pdm/ui':
-        specifier: 1.1.7
-        version: 1.1.7
+        specifier: ^1.2.0
+        version: 1.2.0
       '@solid-primitives/deep':
         specifier: ^0.3.3
         version: 0.3.3(solid-js@1.9.10)
@@ -877,8 +877,8 @@ packages:
   '@sledge-pdm/frasco@0.1.13':
     resolution: {integrity: sha512-gK+EyQHal4BFoaZVty7YIZdU1d/RqY8/phj3COKxc5rvK+YECRhgbaU9PoG+16eVK5kUzrmZVVmwBZSt3GScmw==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.1.13/f11c3ba060662b9c7def73d2255bb5842aa9bf49}
 
-  '@sledge-pdm/ui@1.1.7':
-    resolution: {integrity: sha512-GQJQelyb17yicJQoFAbi4ELExQMRAvVRsbWt1kGsnHuakGSpg5lOAJzYWu2xHXhUhGCHJj/t7sAT/K+X3ARZ5A==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.1.7/f033dc929b4ddff07bcb658f80a69fea9505a2a7}
+  '@sledge-pdm/ui@1.2.0':
+    resolution: {integrity: sha512-EP4k1GmbpnRSV0Tks6VUEoHzsq6FGrDmhpDUVWnbsHUuEvgfzkD1AL22Q/yZtOH165S7q99xiPpE3II4PeQ4Qg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.2.0/7d3fd01797ef5d4d695e6d7baa7e7afe1a898631}
 
   '@solid-primitives/deep@0.3.3':
     resolution: {integrity: sha512-YnCV2OFbBlNYlww0lSD7oDpk9zN20KQWr699s6euwd6+oRE1nbI+vqrfYuqC7E0WPDfk0DIG+ylY1xvY31ZlTg==}
@@ -2969,7 +2969,7 @@ snapshots:
     dependencies:
       '@sledge-pdm/core': 1.1.12
 
-  '@sledge-pdm/ui@1.1.7':
+  '@sledge-pdm/ui@1.2.0':
     dependencies:
       '@sledge-pdm/core': 1.1.12
       solid-js: 1.9.10

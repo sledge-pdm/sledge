@@ -62,7 +62,7 @@ const titleBarProjectVersion = css`
   font-size: 8px;
   white-space: pre;
   padding: 2px 4px;
-  background-color: var(--color-surface);
+  background-color: var(--color-border-secondary);
   border-radius: 3px;
   opacity: 0.9;
 `;
@@ -212,12 +212,17 @@ export default function TitleBar() {
                     </p>
                     <Show when={ioStore.openAs === 'image'}>
                       <div style={{ 'margin-left': '8px' }}>
-                        <Icon src='icons/title_bar/image.png' base={8} />
+                        <Icon src='/assets/icons/title_bar/image.png' base={8} />
                       </div>
                     </Show>
                     <p class={titleBarTitleSub}>{ioStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
-                  <Show when={import.meta.env.DEV || (ioStore.loadProjectVersion && ioStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION)}>
+                  <Show
+                    when={
+                      ioStore.openAs === 'project' &&
+                      (import.meta.env.DEV || (ioStore.loadProjectVersion && ioStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION))
+                    }
+                  >
                     <div class={titleDivider} />
                     <p class={titleBarProjectVersion}>V{ioStore.loadProjectVersion?.project}</p>
                   </Show>

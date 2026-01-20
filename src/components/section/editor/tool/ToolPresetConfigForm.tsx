@@ -66,7 +66,7 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
               style={{ width: '100%', 'min-height': fieldMeta.component !== 'Custom' ? '24px' : undefined, 'align-items': 'center' }}
             >
               <Show when={fieldMeta.label}>
-                <div class={flexRow} style={{ width: '80px' }}>
+                <div class={flexRow} style={{ 'min-width': '72px' }}>
                   <label class={label} for={fieldMeta.key}>
                     {fieldMeta.label}
                   </label>

@@ -8,7 +8,7 @@ export const eraserPresetFields: PresetFieldMeta<EraserPresetConfig>[] = [
     label: 'Size',
     component: 'Slider',
     props: {
-      labelWidth: 48,
+      labelWidth: 40,
       min: 1,
       max: 100,
       step: 1,

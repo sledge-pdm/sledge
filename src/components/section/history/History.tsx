@@ -11,8 +11,14 @@ const historyContentStyle = css`
   gap: 8px;
 `;
 
-const redoUndoContentStyle = css`
+const redoContentStyle = css`
+  flex-direction: column;
+  padding: 0;
+`;
+
+const undoContentStyle = css`
   flex-direction: column-reverse;
+  padding: 0;
 `;
 
 const mutedTextStyle = css`
@@ -44,8 +50,8 @@ const History: Component = () => {
         </div> */}
 
         <p class={sectionSubCaption}>redo stack ({historyStore.redoStack.length})</p>
-        <div class={`${sectionSubContent} ${redoUndoContentStyle}`}>
-          <Show when={historyStore.redoStack.length > 0} fallback={<p class={mutedTextStyle}>&lt; no redo stack &gt;</p>}>
+        <div class={`${sectionSubContent} ${redoContentStyle}`}>
+          <Show when={historyStore.redoStack.length > 0} fallback={<p class={mutedTextStyle}>[ no redo stack ]</p>}>
             <For each={historyStore.redoStack}>
               {(action, i) => {
                 const index = () => historyStore.redoStack.length - i();
@@ -56,8 +62,8 @@ const History: Component = () => {
         </div>
 
         <p class={sectionSubCaption}>{`undo stack (${historyStore.undoStack.length})`}</p>
-        <div class={`${sectionSubContent} ${redoUndoContentStyle}`}>
-          <Show when={historyStore.undoStack.length > 0} fallback={<p class={mutedTextStyle}>&lt; no undo stack &gt;</p>}>
+        <div class={`${sectionSubContent} ${undoContentStyle}`}>
+          <Show when={historyStore.undoStack.length > 0} fallback={<p class={mutedTextStyle}>[ no undo stack ]</p>}>
             <For each={historyStore.undoStack}>
               {(action, i) => {
                 const index = () => i() + 1;

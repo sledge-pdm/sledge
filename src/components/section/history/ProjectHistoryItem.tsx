@@ -29,7 +29,8 @@ const colorIconStyle = css`
 `;
 
 const indexStyle = css`
-  width: 18px;
+  width: 16px;
+  opacity: 0.75;
 `;
 
 const descriptionStyle = css`
@@ -55,11 +56,7 @@ function getIconForTool(tool?: string) {
   return '';
 }
 
-const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({
-  undo = true,
-  action,
-  index,
-}) => {
+const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({ action, index }) => {
   action = action ?? {};
   const { context } = action ?? { context: {} };
   let colorIcon:
@@ -68,17 +65,27 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
         new: string;
       }
     | undefined = undefined;
-  let icon = getIconForTool(context?.tool);
-  let description = '';
+  let icon: string | undefined;
+  let description: string | undefined;
+  let getActionIconSrc = (fileName: string) => `/assets/icons/actions/${fileName}`;
+
   switch (action?.type) {
     case 'canvas_size':
       const csaction = action as CanvasSizeHistoryAction;
-      const bigger = csaction.afterSize.width * csaction.afterSize.height >= csaction.beforeSize.width * csaction.beforeSize.height;
-      icon = bigger ? '/assets/icons/actions/canvas_size_bigger.png' : '/assets/icons/actions/canvas_size_smaller.png';
-      description = `${csaction.beforeSize.width}x${csaction.beforeSize.height} -> ${csaction.afterSize.width}x${csaction.afterSize.height}`;
+      if (!context.action || context.action === 'resize') {
+        const bigger = csaction.afterSize.width * csaction.afterSize.height >= csaction.beforeSize.width * csaction.beforeSize.height;
+        icon = getActionIconSrc(bigger ? 'canvas_size_bigger.png' : 'canvas_size_smaller.png');
+        description = `${csaction.beforeSize.width}x${csaction.beforeSize.height} -> ${csaction.afterSize.width}x${csaction.afterSize.height}`;
+      }
+      if (context.action === 'rotate') {
+        const layerDirection = context.layerDirection ?? 'cw';
+        // use opposite icon because it's layer direction
+        icon = getActionIconSrc(layerDirection === 'cw' ? 'canvas_rotate_counterclockwise.png' : 'canvas_rotate_clockwise.png');
+        description = `rotate canvas`;
+      }
       break;
     case 'image_pool':
-      icon = '/assets/icons/actions/image.png';
+      icon = getActionIconSrc('image.png');
       const ipaction = action as ImagePoolHistoryAction;
       description = `${ipaction.kind} image`;
       break;
@@ -93,43 +100,44 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
       };
       break;
     case 'convert_selection':
-      icon = '/assets/icons/actions/image.png';
+      icon = getActionIconSrc('image.png');
       description = `convert selection to image`;
       break;
     case 'layer_list':
-      icon = '/assets/icons/actions/layer.png';
+      icon = getActionIconSrc('layer.png');
       const llaction = action as LayerListHistoryAction;
       description = `${llaction.kind} / ${llaction.packedSnapshot?.layer.name}`;
       break;
     case 'layer_merge':
-      icon = '/assets/icons/actions/layer.png';
+      icon = getActionIconSrc('layer.png');
       const lmaction = action as LayerMergeHistoryAction;
       description = `Merge / ${lmaction.originPackedSnapshot?.layer.name} > ${lmaction.targetPackedSnapshot?.layer.name}`;
       break;
     case 'layer_buffer': {
       const lhAction = action as LayerHistoryAction;
-      if (context?.tool === 'fx') {
-        description = `${findLayerById(lhAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
-      } else {
-        description = `${findLayerById(lhAction.layerId)?.name} / ${context?.tool}`;
+      if (context.tool) {
+        icon = getIconForTool(context.tool);
+        if (context.tool === 'fx') {
+          description = `${findLayerById(lhAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
+        } else {
+          description = `${findLayerById(lhAction.layerId)?.name} / ${context?.tool}`;
+        }
       }
       break;
     }
     case 'layer_props':
-      icon = '/assets/icons/actions/layer.png';
+      icon = getActionIconSrc('layer.png');
       const lpaction = action as LayerPropsHistoryAction;
       description = `${findLayerById(lpaction.layerId)?.name} ${context.propName}: ${context.before} > ${context.after}`;
       break;
-    default:
-      description = '<unknown>';
   }
+
+  if (!icon) icon = getActionIconSrc('unknown.png');
+  if (!description) description = '<unknown>';
 
   return (
     <div class={historyRowStyle} title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}>
       <p class={indexStyle}>{typeof index === 'function' ? index() : index}</p>
-      {/* <div>
-        <Icon src={undo ? '/assets/icons/misc/undo.png' : '/assets/icons/misc/redo.png'} color={var(--color-on-background)} base={8} scale={1} />
-      </div> */}
       <Show
         when={colorIcon}
         fallback={
@@ -138,12 +146,8 @@ const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; ind
           </div>
         }
       >
-        <div class={colorIconStyle} style={{ 'background-color': colorIcon!.new }}>
-          {/* <div style={{ width: '6px', height: '6px', position: 'absolute', top: 0, left: 0, 'background-color': colorIcon!.old }} />
-          <div style={{ width: '6px', height: '6px', position: 'absolute', top: '2px', left: '2px', 'background-color': colorIcon!.new }} /> */}
-        </div>
+        <div class={colorIconStyle} style={{ 'background-color': colorIcon!.new }}></div>
       </Show>
-      {/* <p style={{ width: '100px', opacity: 0.75 }}>{action.type}</p> */}
       <p class={descriptionStyle}>{description}</p>
     </div>
   );

@@ -491,7 +491,7 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
   const act = new CanvasSizeHistoryAction({
     beforeSize,
     afterSize,
-    context: { from: 'rotateAllLayer' },
+    context: { action: 'rotate', layerDirection, from: 'rotateAllLayer' },
     historyMode: 'layer',
     layerIds,
   });

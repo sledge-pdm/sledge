@@ -75,7 +75,7 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
   const act = new CanvasSizeHistoryAction({
     beforeSize: oldSize,
     afterSize: newSize,
-    context: { from: 'changeCanvasSize' },
+    context: { action: 'resize', from: 'changeCanvasSize' },
     historyMode: 'layer',
     layerIds,
   });

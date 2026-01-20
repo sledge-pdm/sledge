@@ -1,7 +1,6 @@
 {
   "name": "sledge",
   "type": "module",
-  "packageManager": "pnpm@10.28.1",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "vite:dev": "vite",

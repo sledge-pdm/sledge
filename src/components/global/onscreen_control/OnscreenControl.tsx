@@ -368,7 +368,7 @@ const OnscreenControl: Component = () => {
         </div>
         {/* ズームを操作するフェーダー */}
         <div class={zoomContainer} title='Zoom Control - Up: Zoom in, Down: Zoom out'>
-          <div class={zoomBackground} onPointerDown={handlePanPointerDown}>
+          <div class={zoomBackground} onPointerDown={handleZoomPointerDown}>
             <Icon src={'/assets/icons/onscreen_control/bar_frame_48.png'} base={48} scale={1} color={color.onBackground} />
           </div>
           <div
@@ -376,7 +376,7 @@ const OnscreenControl: Component = () => {
             style={{
               top: `${zoomFaderPosition() * 100}%`,
             }}
-            onPointerDown={handlePanPointerDown}
+            onPointerDown={handleZoomPointerDown}
           >
             <Icon src={'/assets/icons/onscreen_control/bar_handle_8.png'} base={8} scale={2} color={color.onBackground} />
           </div>

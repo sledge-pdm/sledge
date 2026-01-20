@@ -28,7 +28,7 @@ const closeCurrentWindow = async () => {
   await currentWindow.destroy();
 };
 
-const showDialog = async (message: string, options: { closeOnOk?: boolean; openContainingFolder?: boolean; path?: string }) => {
+const showDialog = async (message: string, options: { closeWindowOnOk?: boolean; openContainingFolder?: boolean; path?: string }) => {
   const formatted = formatLoadErrorMessage(message, options.path);
   if (options.openContainingFolder && options.path) {
     const button = await dialog.message(formatted, {
@@ -37,7 +37,7 @@ const showDialog = async (message: string, options: { closeOnOk?: boolean; openC
       buttons: { ok: BUTTON_OK, open: BUTTON_OPEN_CONTAINING_FOLDER },
     });
     if (button === 'open') await revealInFileBrowser(options.path);
-    if (options.closeOnOk) await closeCurrentWindow();
+    if (options.closeWindowOnOk) await closeCurrentWindow();
     return;
   }
 
@@ -47,7 +47,7 @@ const showDialog = async (message: string, options: { closeOnOk?: boolean; openC
     okLabel: BUTTON_OK,
   });
 
-  if (options.closeOnOk) await closeCurrentWindow();
+  if (options.closeWindowOnOk) await closeCurrentWindow();
 };
 
 export async function reportInitialLoadError(
@@ -65,11 +65,11 @@ export async function reportInitialLoadError(
 
   switch (type) {
     case InitialLoadTypes.NEW_PROJECT:
-      await showDialog(ERROR_NEW_PROJECT, { closeOnOk: true });
+      await showDialog(ERROR_NEW_PROJECT, { closeWindowOnOk: true });
       return;
 
     case InitialLoadTypes.IMAGE_CLIPBOARD:
-      await showDialog(ERROR_CLIPBOARD_IMAGE_FAILED, {});
+      await showDialog(ERROR_CLIPBOARD_IMAGE_FAILED, { closeWindowOnOk: true  });
       return;
 
     case InitialLoadTypes.PATH_PROJECT:
@@ -84,18 +84,18 @@ export async function reportInitialLoadError(
 
     case InitialLoadTypes.NEW_PROJECT_FALLBACK:
       if (!isPathFallback) {
-        await showDialog(error?.detail ?? ERROR_UNKNOWN, { closeOnOk: true });
+        await showDialog(error?.detail ?? ERROR_UNKNOWN, { closeWindowOnOk: true });
         return;
       }
       await showDialog(isFileNotFound ? ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW : ERROR_LAST_PROJECT_FAILED_NEW_FAILED, {
-        closeOnOk: true,
+        closeWindowOnOk: true,
         openContainingFolder: isFileNotFound,
         path: targetPath,
       });
       return;
 
     default:
-      await showDialog(error?.detail ?? ERROR_UNKNOWN, { closeOnOk: true });
+      await showDialog(error?.detail ?? ERROR_UNKNOWN, { closeWindowOnOk: true });
       return;
   }
 }

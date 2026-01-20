@@ -11,7 +11,7 @@ const loadingText = css`
 const Loading: Component = () => {
   return (
     <div class={pageRoot} style={{ 'align-items': 'center', 'justify-content': 'center' }}>
-      <p class={loadingText}>loading.</p>
+      <p class={loadingText}>loading...</p>
     </div>
   );
 };

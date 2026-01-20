@@ -127,8 +127,8 @@ const ClipboardListener: Component = () => {
         // 2. check image paste
         const data = await tryGetImageFromClipboard();
         if (data) {
-          const { imageBuf, width, height } = data;
-          const { entry, image } = await createEntryFromRawBuffer(imageBuf, width, height);
+          const { buffer, width, height } = data;
+          const { entry, image } = await createEntryFromRawBuffer(buffer, width, height);
           entry.descriptionName = '[ from clipboard ]';
           const placementPos = interactStore.placementPosition ?? { x: 0, y: 0 };
           entry.transform.x = placementPos.x;

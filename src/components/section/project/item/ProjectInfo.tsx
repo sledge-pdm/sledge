@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { adjustZoomToFit } from '~/features/canvas';
-import { loadProjectFromLocation } from '~/routes/editor/load';
+import { ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { ioStore } from '~/stores/EditorStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
@@ -134,8 +134,18 @@ const ProjectInfo: Component = () => {
                 const confirmed = await dialog.confirm(`Sure to reopen this project?
 Unsaved changes will be discarded!`);
                 if (confirmed) {
-                  await loadProjectFromLocation(ioStore.savedLocation);
-                  adjustZoomToFit();
+                  const loc = ioStore.savedLocation;
+                  if (!loc.path || !loc.name) {
+                    await dialog.message('Failed to reopen project. (invalid path)');
+                    return;
+                  }
+                  const result = await ProjectLoader.fromPath({ path: normalizeJoin(loc.path, loc.name) }).load();
+                  if (result.ok) {
+                    adjustZoomToFit();
+                  } else {
+                    await dialog.message(`Failed to reopen project. (load failed)\n${result.error ?? 'unknown error'}`);
+                    return;
+                  }
                 }
               }}
             >

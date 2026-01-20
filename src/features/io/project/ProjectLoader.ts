@@ -1,0 +1,242 @@
+import { FileLocation, ProjectBase, RawPixelData } from '@sledge-pdm/core';
+import { changeCanvasSize } from '~/features/canvas';
+import { setSavedLocation } from '~/features/config';
+import { addLayer } from '~/features/layer';
+import { logSystemError, logUserError } from '~/features/log/service';
+import { setIOStore } from '~/stores/EditorStores';
+import { initRuntimeProject } from '~/stores/RuntimeProject';
+import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
+import { pathToFileLocation } from '~/utils/FileUtils';
+import { unpackFromPath } from '~/utils/msgpackr';
+import { fs } from '~/utils/platform';
+import { getCurrentVersion } from '~/utils/VersionUtils';
+import { CURRENT_PROJECT_VERSION } from './Project';
+import { applyProjectLocation, applyProjectLocationFromPath } from './ProjectLocationManager';
+
+interface LoadOption {}
+
+type LoadType = 'new' | 'path' | 'projectObj' | 'image';
+
+interface NewProjectLoadOption extends LoadOption {
+  width: number;
+  height: number;
+}
+
+interface PathLoadOption extends LoadOption {
+  path: string;
+}
+
+interface ProjectObjLoadOption extends LoadOption {
+  project: ProjectBase;
+}
+
+interface ImageLoadOptions extends LoadOption {
+  name?: string;
+  buffer: RawPixelData;
+  width: number;
+  height: number;
+  loc?: FileLocation;
+}
+
+interface InternalLoadResult {
+  ok: boolean;
+  error?: string;
+  path?: string;
+}
+
+export interface LoadResult extends InternalLoadResult {
+  type: LoadType;
+}
+
+const LOG_LABEL = 'ProjectLoader';
+
+/**
+ * @description Class to utilize project load. Note that this class just handles "loading current window".
+ */
+export class ProjectLoader<T extends LoadOption> {
+  constructor(
+    private type: LoadType,
+    private options: T
+  ) {}
+
+  static fromNew(option: NewProjectLoadOption) {
+    return new ProjectLoader<NewProjectLoadOption>('new', option);
+  }
+
+  static fromPath(option: PathLoadOption) {
+    return new ProjectLoader<PathLoadOption>('path', option);
+  }
+
+  static fromProject(option: ProjectObjLoadOption) {
+    return new ProjectLoader<ProjectObjLoadOption>('projectObj', option);
+  }
+
+  static fromImage(option: ImageLoadOptions) {
+    return new ProjectLoader<ImageLoadOptions>('image', option);
+  }
+
+  public async load(): Promise<LoadResult> {
+    let result;
+    switch (this.type) {
+      case 'new':
+        result = await loadNewProject(this.options as unknown as NewProjectLoadOption);
+        break;
+      case 'path':
+        const options = this.options as unknown as PathLoadOption;
+        const path = options.path;
+        // check if the file exists
+        const fileExists = await fs.exists(path);
+        if (!fileExists) {
+          logSystemError('Project file not found.', { label: LOG_LABEL, details: [path] });
+          logUserError('failed to open project file.', { label: LOG_LABEL, persistent: true });
+          result = {
+            ok: false,
+            error: `Project file not found.`,
+            path,
+          };
+        }
+        const loc = pathToFileLocation(path);
+        if (loc?.name?.endsWith('.sledge')) result = await loadFromPathProject(path);
+        else result = await loadFromPathImage(path);
+        break;
+      case 'projectObj':
+        result = await loadFromProjectObj(this.options as unknown as ProjectObjLoadOption);
+        break;
+      case 'image':
+        result = await loadFromImage(this.options as unknown as ImageLoadOptions);
+        break;
+    }
+
+    return { ...result, type: this.type };
+  }
+}
+
+async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLoadResult> {
+  try {
+    const { width, height } = options;
+    setIOStore('openAs', 'new_project');
+    setIOStore('loadProjectVersion', {
+      project: CURRENT_PROJECT_VERSION,
+      sledge: await getCurrentVersion(),
+    });
+    applyProjectLocation(undefined, 'new_project');
+    const size = { width, height };
+    changeCanvasSize(size, {
+      skipHistory: true,
+    });
+    addLayer(
+      { name: 'layer 1' },
+      {
+        noDiff: true,
+        uniqueName: false,
+      }
+    );
+    setIOStore('isProjectChangedAfterSave', false);
+    return {
+      ok: true,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: `Error loading new project: ${e}`,
+    };
+  }
+}
+
+async function loadFromPathProject(path: string): Promise<InternalLoadResult> {
+  try {
+    setIOStore('openAs', 'project');
+    if (!applyProjectLocationFromPath(path, 'project')) applyProjectLocation(undefined, 'project');
+    const unpacked = await unpackFromPath(path);
+    setSavedLocation(path);
+    const result = await loadFromProjectObj({
+      project: unpacked,
+    });
+    return {
+      ...result,
+      path,
+    };
+  } catch (e) {
+    logSystemError('Failed to read project.', { label: LOG_LABEL, details: [path, e] });
+    logUserError('failed to open project file.', { label: LOG_LABEL, details: [e], persistent: true });
+    return {
+      ok: false,
+      error: `Error loading project from path: ${e}`,
+      path,
+    };
+  }
+}
+
+async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
+  try {
+    setIOStore('openAs', 'image');
+    const bitmap = await loadLocalImage(path);
+    const imageData = await loadImageData(bitmap);
+    const loc = pathToFileLocation(path);
+    const result = await loadFromImage({
+      name: loc?.name,
+      buffer: new Uint8ClampedArray(imageData.data),
+      width: imageData.width,
+      height: imageData.height,
+      loc,
+    });
+    setIOStore('isProjectChangedAfterSave', false);
+    return {
+      ...result,
+      path,
+    };
+  } catch (e) {
+    logSystemError('Failed to import image from path.', { label: LOG_LABEL, details: [path, e] });
+    logUserError('failed to import image.', { label: LOG_LABEL, persistent: true });
+    return {
+      ok: false,
+      error: `Error loading project from image: ${e}`,
+      path,
+    };
+  }
+}
+
+async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<InternalLoadResult> {
+  try {
+    setIOStore('openAs', 'project');
+    const project = options.project;
+    initRuntimeProject(project);
+    setIOStore('isProjectChangedAfterSave', false);
+    return {
+      ok: true,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: `Error loading project from project data: ${e}`,
+    };
+  }
+}
+
+async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadResult> {
+  const { name, width, height, buffer, loc } = options;
+  try {
+    setIOStore('openAs', 'image');
+    applyProjectLocation(loc, 'image');
+    const size = { width, height };
+    changeCanvasSize(size, {
+      skipHistory: true,
+    });
+    addLayer(
+      { name },
+      {
+        noDiff: true,
+        uniqueName: false,
+        initImage: buffer,
+      }
+    );
+    return {
+      ok: true,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: `Error loading project from image: ${e}`,
+    };
+  }
+}

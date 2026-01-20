@@ -49,6 +49,7 @@ export default function Editor() {
   onMount(async () => {
     unlisten = await platformWindow.getCurrentWindow().onCloseRequested(handleCloseRequest);
     try {
+      await showMainWindow();
       await loadGlobalSettings();
       const lastState = await loadEditorState();
       await tryLoadProject(lastState);
@@ -56,12 +57,7 @@ export default function Editor() {
       // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
       await saveEditorStateImmediate();
       setIsLoading(false);
-      // Adjusting zoom before showing window seems to be not working on some OS except windows
-      adjustZoomToFit();
 
-      await showMainWindow();
-
-      // So make sure it's properly zoomed on init
       adjustZoomToFit();
     } catch (e) {
       unlisten();
@@ -86,18 +82,6 @@ export default function Editor() {
       manager.start(projectStore.project.autoSnapshotInterval);
     }
   });
-
-  // listen('tauri://drag-drop', async (e: any) => {
-  //   const paths = e.payload.paths as string[];
-  //   addImagesFromLocal(paths.filter((p) => importableFileExtensions.some((ext) => p.endsWith(`.${ext}`))));
-
-  //   paths
-  //     .filter((p) => p.endsWith('.sledge'))
-  //     .forEach((p) => {
-  //       const loc = pathToFileLocation(p);
-  //       if (loc) openExistingProject(loc);
-  //     });
-  // });
 
   const isFileDrag = (event: DragEvent) => {
     const types = event.dataTransfer?.types;

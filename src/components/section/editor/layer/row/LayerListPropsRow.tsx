@@ -46,7 +46,7 @@ const LayerListPropsRow: Component = () => {
         }}
       >
         <Dropdown
-          value={activeLayer().mode}
+          value={activeLayer()?.mode}
           options={blendModeOptions}
           wheelSpin={true}
           onChange={(e) => {
@@ -55,9 +55,9 @@ const LayerListPropsRow: Component = () => {
         />
       </div>
       <div class={flexRow} style={{ width: '100%', 'align-items': 'center' }}>
-        <p style={{ width: '40px' }}>{Math.ceil(activeLayer().opacity * 100)}%</p>
+        <p style={{ width: '40px' }}>{Math.ceil(activeLayer()?.opacity * 100)}%</p>
         <Slider
-          value={activeLayer().opacity}
+          value={activeLayer()?.opacity}
           min={0}
           max={1}
           allowFloat={true}

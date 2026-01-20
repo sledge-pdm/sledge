@@ -16,7 +16,7 @@ export function isInputFocused() {
 
 export async function tryGetImageFromClipboard(): Promise<
   | {
-      imageBuf: Uint8Array;
+      buffer: Uint8Array;
       width: number;
       height: number;
     }
@@ -24,11 +24,11 @@ export async function tryGetImageFromClipboard(): Promise<
 > {
   try {
     const clipboardImage = await clipboard.readImage();
-    const imageBuf = await clipboardImage.rgba();
+    const buffer = await clipboardImage.rgba();
     const size = await clipboardImage.size();
     // imageBuf is stored in JS heap so we can release original resource data
     clipboardImage.close();
-    return { imageBuf, width: size.width, height: size.height };
+    return { buffer, width: size.width, height: size.height };
   } catch (e) {
     logSystemError('failed to get image from clipboard.', { label: LOG_LABEL, details: [e] });
     return undefined;

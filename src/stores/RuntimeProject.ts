@@ -23,6 +23,7 @@ export function initRuntimeProject(project: ProjectBase) {
   setIOStore('loadProjectVersion', { sledge: versions.sledge ?? undefined, project: versions.project ?? undefined });
 
   const canvasInfo = adapter.getCanvasInfo();
+
   const layers = adapter.getLayers() ?? [];
   layers.forEach((layer) => {
     let buffer = adapter.getRawBufferOf(layer.id);

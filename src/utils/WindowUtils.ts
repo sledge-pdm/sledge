@@ -1,7 +1,5 @@
-import { FileLocation } from '@sledge-pdm/core';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
-import { pathToFileLocation } from '~/utils/FileUtils';
 import { safeInvoke } from './TauriUtils';
 import { dialog, window as platformWindow, process, WebviewOptions, webviewWindow, WindowOptions } from './platform';
 
@@ -54,10 +52,9 @@ export const getProjectFromClipboardSearchParams = (): string => {
   return sp.toString();
 };
 
-export function getOpenLocation(): FileLocation | undefined {
+export function getOpenPath(): string | undefined {
   // @ts-ignore
-  const openPath = window.__PATH__;
-  return pathToFileLocation(openPath);
+  return window.__PATH__;
 }
 
 export function getNewProjectQuery(): {
@@ -179,14 +176,7 @@ export async function reportCriticalError(e: any) {
 }
 
 export async function showMainWindow() {
-  // ネイチE��ブスプラチE��ュを閉じてWebViewを表示
-  try {
-    const windowLabel = platformWindow.getCurrentWindow().label;
-    await safeInvoke('show_main_window', { windowLabel });
-    logSystemInfo('🌐 [PERF] Window transition completed', { label: 'WindowUtils', debugOnly: true });
-  } catch (error) {
-    logSystemError('Failed to transition from native splash.', { label: 'WindowUtils', details: [error] });
-    // フォールバック
-    platformWindow.getCurrentWindow().show();
-  }
+  const windowLabel = platformWindow.getCurrentWindow().label;
+  await safeInvoke('show_main_window', { windowLabel });
+  logSystemInfo('🌐 [PERF] Window transition completed', { label: 'WindowUtils', debugOnly: true });
 }

@@ -1,5 +1,6 @@
 ﻿// Layer domain service - Stateful layer operations with external dependencies
 
+import { RawPixelData } from '@sledge-pdm/core';
 import { FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
 import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
@@ -120,7 +121,7 @@ export async function mergeToBelowLayer(layerId: string) {
 
 // Layer list management
 interface AddLayerOptions {
-  initImage?: Uint8ClampedArray;
+  initImage?: RawPixelData;
   noDiff?: boolean;
   uniqueName?: boolean;
 }
@@ -177,6 +178,7 @@ export const addLayerTo = (
   setProjectStore('layers', 'layers', layers);
   setActiveLayerId(newLayer.id);
 
+  updateLayerPreview(newLayer.id);
   updateWebGLCanvas(`Layer(${newLayer.id}) added`);
   logUserInfo(`Layer "${newLayer.name}" added.`, { label: LOG_LABEL });
 

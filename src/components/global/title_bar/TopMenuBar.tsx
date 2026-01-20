@@ -61,13 +61,6 @@ const saveSectionContainer = css`
   align-self: center;
 `;
 
-interface Item {
-  id: string;
-  text: string;
-  action: () => void;
-  menu?: () => MenuListOption[];
-}
-
 const TopMenuBar: Component = () => {
   let canvasControlsRef: HTMLDivElement | undefined;
 
@@ -287,7 +280,7 @@ const TopMenuBar: Component = () => {
         </Show>
       </div>
 
-      <Show when={isDecorated()}>
+      <Show when={!ioStore.isInInitialLoading && isDecorated()}>
         <div class={saveSectionContainer}>
           <SaveSection />
         </div>

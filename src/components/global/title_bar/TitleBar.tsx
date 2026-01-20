@@ -230,7 +230,7 @@ export default function TitleBar() {
               </Show>
             </div>
 
-            <Show when={location.pathname.startsWith('/editor')}>
+            <Show when={!ioStore.isInInitialLoading && location.pathname.startsWith('/editor')}>
               <div class={titleBarSaveSection}>
                 <SaveSection />
               </div>

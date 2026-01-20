@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
-import { createEffect, createSignal, onMount, Show } from 'solid-js';
+import { createEffect, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import BottomBar from '~/components/global/BottomBar';
@@ -21,7 +21,7 @@ import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { getInitialLoader, InitialLoadTypes } from '~/routes/editor/load';
 import { reportInitialLoadError } from '~/routes/editor/loadError';
-import { appearanceStore } from '~/stores/EditorStores';
+import { appearanceStore, ioStore, setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, pageRoot } from '~/styles/styles';
@@ -45,13 +45,12 @@ const mainContent = css`
 export default function Editor() {
   const isFirst = isFirstStartup();
 
-  const [isLoading, setIsLoading] = createSignal(true);
-
   let unlisten: UnlistenFn;
 
   onMount(async () => {
     unlisten = await platformWindow.getCurrentWindow().onCloseRequested(handleCloseRequest);
     try {
+      setIOStore('isInInitialLoading', true);
       await showMainWindow();
       await loadGlobalSettings();
       const editorState = await loadEditorState();
@@ -61,37 +60,36 @@ export default function Editor() {
       if (!loader) {
         // ローダーが用意できなかった = フォールバック(NEW_PROJECT_FALLBACK)すらしていないので単純にloadと同様に落とす
         await reportInitialLoadError(initialLoadType, fatalError, undefined, targetPath);
-        return;
-      }
-      const result = await loader.load();
-      if (result.ok) {
-        // TODO: 下の説明を解読する　なにこれ
-        // Save editor state if load succeeded.
-        // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
-        await saveEditorStateImmediate();
-        adjustZoomToFit();
       } else {
-        switch (initialLoadType) {
-          case InitialLoadTypes.PATH_PROJECT:
-          case InitialLoadTypes.PATH_PROJECT_LAST:
-          case InitialLoadTypes.PATH_IMAGE_PROJECT:
-          case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
-            const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
-            if (fallbackResult.ok) {
-              await saveEditorStateImmediate();
-              adjustZoomToFit();
+        const result = await loader.load();
+        if (result.ok) {
+          // TODO: 下の説明を解読する　なにこれ
+          // Save editor state if load succeeded.
+          // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
+          await saveEditorStateImmediate();
+          adjustZoomToFit();
+        } else {
+          switch (initialLoadType) {
+            case InitialLoadTypes.PATH_PROJECT:
+            case InitialLoadTypes.PATH_PROJECT_LAST:
+            case InitialLoadTypes.PATH_IMAGE_PROJECT:
+            case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
+              const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
+              if (fallbackResult.ok) {
+                await saveEditorStateImmediate();
+                adjustZoomToFit();
+                await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
+              } else {
+                await reportInitialLoadError(InitialLoadTypes.NEW_PROJECT_FALLBACK, result.error, initialLoadType, targetPath);
+              }
+              break;
+            default:
               await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
-            } else {
-              await reportInitialLoadError(InitialLoadTypes.NEW_PROJECT_FALLBACK, result.error, initialLoadType, targetPath);
-            }
-            break;
-          default:
-            await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
-            break;
+              break;
+          }
         }
       }
-
-      setIsLoading(false);
+      setIOStore('isInInitialLoading', false);
     } catch (e) {
       // ここいる？？
       // プロジェクト読み込みの段階はエラー吐かない想定なので、ここはCONFIG,EDITOR_STATEまでのキャッチでいいかも　要検討
@@ -149,7 +147,7 @@ export default function Editor() {
   };
 
   return (
-    <Show when={!isLoading()} fallback={<Loading />}>
+    <Show when={ioStore ? !ioStore.isInInitialLoading : false} fallback={<Loading />}>
       <div
         class={pageRoot}
         onDragOver={(e) => {

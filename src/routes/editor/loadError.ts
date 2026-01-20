@@ -69,7 +69,7 @@ export async function reportInitialLoadError(
       return;
 
     case InitialLoadTypes.IMAGE_CLIPBOARD:
-      await showDialog(ERROR_CLIPBOARD_IMAGE_FAILED, { closeWindowOnOk: true  });
+      await showDialog(ERROR_CLIPBOARD_IMAGE_FAILED, { closeWindowOnOk: true });
       return;
 
     case InitialLoadTypes.PATH_PROJECT:

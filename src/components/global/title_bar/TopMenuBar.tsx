@@ -1,8 +1,9 @@
 import { css } from '@acab/ecsstatic';
-import { color, fonts, MenuList, MenuListOption } from '@sledge-pdm/ui';
-import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { color, fonts, MenuListOption } from '@sledge-pdm/ui';
+import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
+import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
 import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
@@ -29,6 +30,8 @@ const topMenuBarRoot = css`
   background-color: var(--color-controls);
   height: 28px;
   align-items: end;
+  padding-left: 16px;
+  padding-right: 8px;
   z-index: var(--zindex-title-bar);
 `;
 
@@ -36,8 +39,7 @@ const menuListLeft = css`
   display: flex;
   flex-direction: row;
   flex-grow: 1;
-  padding-left: 16px;
-  gap: var(--spacing-xs);
+  gap: 8px;
 `;
 
 const menuListCanvasControls = css`
@@ -45,53 +47,18 @@ const menuListCanvasControls = css`
   flex-direction: row;
   height: 100%;
   align-items: center;
-  margin-right: 6px;
 `;
 
 const menuListRight = css`
   display: flex;
   flex-direction: row;
-  margin-right: 6px;
-`;
-
-const menuItem = css`
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  justify-content: center;
-  align-items: center;
-  height: 26px;
-`;
-
-const menuItemText = css`
-  font-family: ZFB11;
-  font-size: 8px;
-  text-rendering: geometricPrecision;
-  margin: 0;
-  align-content: center;
-  text-align: center;
-  width: 100%;
-  height: 30px;
   margin-left: 8px;
-  margin-right: 8px;
-`;
-
-const menuItemBackground = css`
-  display: flex;
-  flex-direction: row;
-  position: absolute;
-  align-items: center;
-  left: 0;
-  right: 0;
-  height: 26px;
-  z-index: -1;
 `;
 
 const saveSectionContainer = css`
   display: flex;
   flex-direction: row;
   align-self: center;
-  margin-right: 8px;
 `;
 
 interface Item {
@@ -114,19 +81,15 @@ const TopMenuBar: Component = () => {
   });
 
   const getCurrentEditTarget = () => {
-    // if (projectStore.imagePool.selectedEntryId !== undefined) {
-    //   currentEditTarget= 'image';
-    // }
     if (isSelectionAvailable()) {
       return 'selection';
     }
     return `layer: ${activeLayer()?.name}`;
   };
 
-  const leftItems = createMemo<Item[]>(() => [
-    {
-      id: 'project',
-      text: 'Files.',
+  const FilesMenuItem = createMemo<TopMenuBarItemProps>(() => {
+    return {
+      label: 'Files.',
       action: () => {},
       menu: () => [
         {
@@ -181,10 +144,12 @@ const TopMenuBar: Component = () => {
             ]
           : []),
       ],
-    },
-    {
-      id: 'view',
-      text: 'view.',
+    };
+  });
+
+  const ViewMenuItem = createMemo<TopMenuBarItemProps>(() => {
+    return {
+      label: 'View.',
       action: () => {},
       menu: () => [
         {
@@ -238,10 +203,12 @@ const TopMenuBar: Component = () => {
           color: color.muted,
         },
       ],
-    },
-    {
-      id: 'edit',
-      text: 'Edit.',
+    };
+  });
+
+  const EditMenuItem = createMemo<TopMenuBarItemProps>(() => {
+    return {
+      label: 'Edit.',
       action: () => {},
       menu: () => [
         {
@@ -251,23 +218,17 @@ const TopMenuBar: Component = () => {
         {
           type: 'item',
           label: 'Copy.',
-          onSelect: () => {
-            eventBus.emit('clipboard:doCopy', {});
-          },
+          onSelect: () => eventBus.emit('clipboard:doCopy', {}),
         },
         {
           type: 'item',
           label: 'Cut.',
-          onSelect: () => {
-            eventBus.emit('clipboard:doCut', {});
-          },
+          onSelect: () => eventBus.emit('clipboard:doCut', {}),
         },
         {
           type: 'item',
           label: 'Paste.',
-          onSelect: () => {
-            eventBus.emit('clipboard:doPaste', {});
-          },
+          onSelect: () => eventBus.emit('clipboard:doPaste', {}),
         },
         {
           type: 'label',
@@ -277,83 +238,53 @@ const TopMenuBar: Component = () => {
           type: 'item',
           label: 'flip horizontally.',
           icon: '/assets/icons/context_menu/flip_horizontal.png',
-          onSelect: () => {
-            flipAllLayer({ flipX: true });
-          },
+          onSelect: () => flipAllLayer({ flipX: true }),
         },
         {
           type: 'item',
           label: 'flip vertically.',
           icon: '/assets/icons/context_menu/flip_vertical.png',
-          onSelect: () => {
-            flipAllLayer({ flipY: true });
-          },
+          onSelect: () => flipAllLayer({ flipY: true }),
         },
         {
           type: 'item',
           label: 'rotate 90 (right).',
           icon: '/assets/icons/context_menu/canvas_rotate_clockwise.png',
-          onSelect: () => {
-            // layer coordinate ccw = canvas cw
-            rotateAllLayer('ccw');
-          },
+          // layer coordinate ccw = canvas cw
+          onSelect: () => rotateAllLayer('ccw'),
         },
         {
           type: 'item',
           label: 'rotate 90 (left).',
           icon: '/assets/icons/context_menu/canvas_rotate_counterclockwise.png',
-          onSelect: () => {
-            // layer coordinate cw = canvas ccw
-            rotateAllLayer('cw');
-          },
+          // layer coordinate ccw = canvas cw
+          onSelect: () => rotateAllLayer('cw'),
         },
       ],
-    },
-  ]);
+    };
+  });
 
-  const rightItems: Item[] = [
-    {
-      id: 'settings',
-      text: 'SETTINGS.',
-      action: () => {
-        openWindow('settings');
-      },
+  const settingMenuItem: TopMenuBarItemProps = {
+    label: 'SETTINGS.',
+    action: () => {
+      openWindow('settings');
     },
-  ];
+  };
 
   return (
     <div class={topMenuBarRoot}>
       <div class={menuListLeft}>
-        <For each={leftItems()}>
-          {(item, i) => {
-            let containerRef: HTMLDivElement;
-            const [menuOpen, setMenuOpen] = createSignal(false);
-            return (
-              <div ref={(el) => (containerRef = el)} class={menuItem}>
-                <a
-                  class={menuItemText}
-                  onClick={(e) => {
-                    item.action();
-                    if (item.menu) setMenuOpen(true);
-                  }}
-                >
-                  {item.text}
-                </a>
-                <div class={menuItemBackground} />
-                <Show when={item.menu?.() && menuOpen()}>
-                  <MenuList
-                    options={item.menu?.()!}
-                    onClose={() => setMenuOpen(false)}
-                    style={{
-                      'margin-top': '4px',
-                      'min-width': '120px',
-                    }}
-                  />
-                </Show>
-              </div>
-            );
-          }}
-        </For>
+        <TopMenuBarItem {...FilesMenuItem()} />
+        <TopMenuBarItem {...ViewMenuItem()} />
+        <Show when={!ioStore.isInInitialLoading}>
+          <TopMenuBarItem {...EditMenuItem()} />
+        </Show>
+      </div>
+
+      <div class={menuListCanvasControls} ref={canvasControlsRef}>
+        <Show when={!ioStore.isInInitialLoading}>
+          <CanvasControlMenu />
+        </Show>
       </div>
 
       <Show when={isDecorated()}>
@@ -362,66 +293,40 @@ const TopMenuBar: Component = () => {
         </div>
       </Show>
 
-      <div class={menuListCanvasControls} ref={canvasControlsRef}>
-        <CanvasControlMenu />
-      </div>
-
       <div class={menuListRight}>
-        <For each={rightItems}>
-          {(item, i) => {
-            return (
-              <div class={menuItem}>
-                <a class={menuItemText} onClick={(e) => item.action()}>
-                  {item.text}
-                </a>
-                <div class={menuItemBackground} />
-              </div>
-            );
-          }}
-        </For>
+        <TopMenuBarItem {...settingMenuItem} />
       </div>
 
       <Show when={availableUpdate() && !globalConfig.general.skippedVersions.includes(availableUpdate()?.version || '')}>
-        <div class={menuItem}>
-          <a
-            class={menuItemText}
-            style={{
-              'font-family': 'ZFB09',
-              'font-size': '8px',
-              opacity: 1,
-              'white-space': 'nowrap',
-              color: color.active,
-            }}
-            onClick={async (e) => {
-              await askAndInstallUpdate();
-            }}
-          >
-            ! update
-          </a>
-          <div class={menuItemBackground} />
-        </div>
-        <div class={menuItem}>
-          <a
-            class={menuItemText}
-            style={{
-              'font-family': 'ZFB09',
-              'font-size': '8px',
-              opacity: 1,
-              'white-space': 'nowrap',
-              color: color.muted,
-            }}
-            title={'You can restore skipped updates from settings.'}
-            onClick={(e) => {
-              const skippingVersion = availableUpdate()?.version;
-              if (skippingVersion) {
-                addSkippedVersion(skippingVersion);
-              }
-            }}
-          >
-            [skip]
-          </a>
-          <div class={menuItemBackground} />
-        </div>
+        <TopMenuBarItem
+          label='! update'
+          labelStyleOverride={{
+            'font-family': 'ZFB09',
+            'font-size': '8px',
+            opacity: 1,
+            'white-space': 'nowrap',
+            color: color.active,
+          }}
+          action={async () => {
+            await askAndInstallUpdate();
+          }}
+        />
+        <TopMenuBarItem
+          label='[skip]'
+          labelStyleOverride={{
+            'font-family': 'ZFB09',
+            opacity: 1,
+            'white-space': 'nowrap',
+            color: color.muted,
+          }}
+          title={'You can restore skipped updates from settings.'}
+          action={() => {
+            const skippingVersion = availableUpdate()?.version;
+            if (skippingVersion) {
+              addSkippedVersion(skippingVersion);
+            }
+          }}
+        />
       </Show>
     </div>
   );

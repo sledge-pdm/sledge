@@ -9,6 +9,7 @@ import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { unpackFromPath } from '~/utils/msgpackr';
 import { dialog } from '~/utils/platform';
+import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
 import { ProjectLoader } from '../io/project/ProjectLoader';
 import { ProjectSnapshot, RuntimeProjectSnapshot } from './types';
@@ -48,7 +49,8 @@ export async function loadFullSnapshot(snapshot: ProjectSnapshot | RuntimeProjec
 export async function createCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot> {
   try {
     const canvasSize: Size2D = { ...projectStore.canvas.size };
-    const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(canvasSize.width, canvasSize.height);
+    const thumbSize = calcThumbnailSize(canvasSize.width, canvasSize.height);
+    const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(thumbSize.width, thumbSize.height);
 
     const now = new Date();
     const currentProject = await getProjectFromRuntime();

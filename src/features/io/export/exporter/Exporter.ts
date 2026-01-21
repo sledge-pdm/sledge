@@ -1,5 +1,5 @@
 ﻿import { toUint8ClampedArray } from '@sledge-pdm/core';
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { convertToMimetype } from '~/features/io/FileExtensions';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
@@ -11,9 +11,9 @@ export abstract class Exporter {
 }
 
 export async function convertCanvasToBlob(format: 'png' | 'jpeg' | 'webp_lossy', quality: number = 0.92, scale: number = 1): Promise<Blob> {
-  if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
+  if (frascoRenderer === undefined) throw new Error('Export Error: Renderer not defined');
 
-  const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(webGLRenderer.readPixelsFlipped());
+  const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(frascoRenderer.readPixelsFlipped());
   const offscreen = getScaledCanvas(buffer, scale);
   const mimeType = convertToMimetype(format);
 
@@ -38,7 +38,7 @@ export async function convertLayerToBlob(
   quality: number = 0.92,
   scale: number = 1
 ): Promise<Blob> {
-  if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
+  if (frascoRenderer === undefined) throw new Error('Export Error: Renderer not defined');
 
   const buffer = toUint8ClampedArray(getLayer(layer.id).readPixels()) as Uint8ClampedArray<ArrayBuffer>;
 

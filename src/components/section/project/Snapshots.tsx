@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
 import { clsx, getProjectAdapter, gzipInflate, ProjectAdapter, toUint8ClampedArray } from '@sledge-pdm/core';
@@ -158,29 +158,39 @@ const itemButtonContainer = css`
 `;
 
 const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapshot; onRestore?: () => void; onDelete?: () => void }> = (props) => {
-  const { snapshot } = props;
+  const { thumbnail, ...snapshot } = props.snapshot;
 
   const [expanded, setExpanded] = createSignal(false);
 
   let canvasRef: HTMLCanvasElement;
 
-  onMount(() => {
-    updateCanvas();
-  });
-
-  const updateCanvas = () => {
-    if (canvasRef && snapshot.thumbnail) {
-      const { packedBuffer, width, height } = snapshot.thumbnail;
-      const rawBuffer = gzipInflate(packedBuffer);
+  const loadThumbnail = () => {
+    if (canvasRef && thumbnail) {
+      const { packedBuffer, width, height } = thumbnail;
+      const rawBuffer = toUint8ClampedArray(gzipInflate(packedBuffer)) as Uint8ClampedArray<ArrayBuffer>;
       const ctx = canvasRef.getContext('2d') as CanvasRenderingContext2D;
       if (ctx) {
-        const imgData = new ImageData(toUint8ClampedArray(rawBuffer).slice(), width, height);
-        ctx.putImageData(imgData, 0, 0);
+        ctx.putImageData(new ImageData(rawBuffer, width, height), 0, 0);
         const tr = height / width;
         canvasRef.style.height = `${canvasRef.clientWidth * tr}px`;
       }
     }
   };
+
+  const unloadThumbnail = () => {
+    if (canvasRef && thumbnail) {
+      const ctx = canvasRef.getContext('2d') as CanvasRenderingContext2D;
+      if (ctx) {
+        const { width, height } = thumbnail;
+        ctx.clearRect(0, 0, width, height);
+      }
+    }
+  };
+
+  createEffect(() => {
+    if (expanded()) loadThumbnail();
+    else unloadThumbnail();
+  });
 
   const createdAt = new Date(snapshot.createdAt);
   const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(snapshot.createdAt);
@@ -188,7 +198,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapsh
   const [optionalAdapter, setOptionalAdapter] = createSignal<ProjectAdapter<any> | undefined>(undefined);
 
   createEffect(() => {
-    if (snapshot.project) {
+    if (expanded() && snapshot.project) {
       try {
         const adapter = getProjectAdapter(snapshot.project);
         setOptionalAdapter(adapter);
@@ -219,12 +229,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapsh
         </div>
       </div>
 
-      <div
-        style={{
-          visibility: expanded() ? 'visible' : 'collapse',
-          height: expanded() ? 'auto' : 0,
-        }}
-      >
+      <Show when={expanded()}>
         <div class={itemContent}>
           <p class={itemDescription}>{snapshot.description ?? '[ no description ]'}</p>
           <p class={itemDescription}>
@@ -235,14 +240,8 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapsh
               {optionalAdapter()?.getCanvasInfo().size.width}x{optionalAdapter()?.getCanvasInfo().size.height}
             </p>
           </Show>
-          <Show when={snapshot.thumbnail}>
-            <canvas
-              id={snapshot.id}
-              class={thumbCanvas}
-              ref={(ref) => (canvasRef = ref)}
-              width={snapshot.thumbnail!.width}
-              height={snapshot.thumbnail!.height}
-            />
+          <Show when={thumbnail}>
+            <canvas id={snapshot.id} class={thumbCanvas} ref={(ref) => (canvasRef = ref)} width={thumbnail!.width} height={thumbnail!.height} />
           </Show>
 
           <div class={itemButtonContainer}>
@@ -252,7 +251,7 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapsh
             </button>
           </div>
         </div>
-      </div>
+      </Show>
     </div>
   );
 };

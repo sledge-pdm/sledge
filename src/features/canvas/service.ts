@@ -1,5 +1,5 @@
 import { Size2D, Vec2 } from '@sledge-pdm/core';
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
@@ -17,7 +17,7 @@ export function isValidCanvasSize(size: Size2D): boolean {
   if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;
   if (size.height < Consts.minCanvasHeight || Consts.maxCanvasHeight < size.height) return false;
 
-  const maxTextureSize = webGLRenderer?.getMaxTextureSize();
+  const maxTextureSize = frascoRenderer?.getMaxTextureSize();
   if (maxTextureSize) {
     // WebGL制限の計算: 描画バッファは最大テクスチャサイズの1/8に制限される
     // 理論上限: sqrt(maxTextureSize² / 8) ≈ 5792 pixels per side (for 16384 max texture size)

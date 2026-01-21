@@ -21,8 +21,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1
       '@sledge-pdm/frasco':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.1
+        version: 0.2.1
       '@sledge-pdm/ui':
         specifier: ^1.2.0
         version: 1.2.0
@@ -829,8 +829,8 @@ packages:
   '@sledge-pdm/core@1.2.1':
     resolution: {integrity: sha512-oPTYlWb+dIqvzuJ5CKwtFA7Krju74E24Mn3p75KQ/e6Q8n3qPYGkitQvm2sbBrNoLYVeNMcFtYeUZ1ZhIspDkA==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.2.1/6c804b2978ba69f29258359f5a52030ed8be053a}
 
-  '@sledge-pdm/frasco@0.2.0':
-    resolution: {integrity: sha512-VsUyLzfuRzjXsXIVj+DgYekCuXt5TdkrMBVt4oZRoH4IQeceYJIgS8nNfEEZ6UvoefTsrjJAolSHoRk2SkMRXg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.2.0/f669d442ea4c7bfe5ef4b6f4e027ecb2f9d0401e}
+  '@sledge-pdm/frasco@0.2.1':
+    resolution: {integrity: sha512-QQY6NDPN4qwguf3uW+HwPh+h3o97i0BBZgG4r92jblMRoP22wq8k+yYfg3h7NUiYIUQOm5eYpzb0b/Kg4XYVQg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.2.1/c5f245a23ac49036aa9eb21389cc92059c54c1e6}
 
   '@sledge-pdm/ui@1.2.0':
     resolution: {integrity: sha512-EP4k1GmbpnRSV0Tks6VUEoHzsq6FGrDmhpDUVWnbsHUuEvgfzkD1AL22Q/yZtOH165S7q99xiPpE3II4PeQ4Qg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.2.0/7d3fd01797ef5d4d695e6d7baa7e7afe1a898631}
@@ -2599,7 +2599,7 @@ snapshots:
       msgpackr: 1.11.8
       pako: 2.1.0
 
-  '@sledge-pdm/frasco@0.2.0':
+  '@sledge-pdm/frasco@0.2.1':
     dependencies:
       '@sledge-pdm/core': 1.2.1
 

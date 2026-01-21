@@ -5,6 +5,19 @@ export function calcThumbnailSize(origW: number, origH: number): Size2D {
   return calcFitSize(origW, origH, Consts.projectThumbnailSize, Consts.projectThumbnailSize);
 }
 
+const THUMBNAIL_BASE_SIZE = 512;
+
+export function calcThumbnailScale(width: number, height: number): number {
+  const safeWidth = Math.max(1, Math.floor(width));
+  const safeHeight = Math.max(1, Math.floor(height));
+  const geometricMean = Math.sqrt(safeWidth * safeHeight);
+  if (!Number.isFinite(geometricMean)) return 1;
+
+  const ratio = geometricMean / THUMBNAIL_BASE_SIZE;
+  const exponent = Math.max(0, Math.ceil(Math.log2(ratio)));
+  return 2 ** exponent;
+}
+
 function calcFitSize(origW: number, origH: number, maxW: number, maxH: number): Size2D {
   const scale = Math.min(maxW / origW, maxH / origH);
   return { width: Math.round(origW * scale), height: Math.round(origH * scale) };

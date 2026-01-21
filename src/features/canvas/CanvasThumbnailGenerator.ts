@@ -1,36 +1,37 @@
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { FrascoThumbnail } from '@sledge-pdm/frasco';
+import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { logSystemWarn } from '~/features/log/service';
 import { projectStore } from '~/stores/RuntimeProjectStore';
+import { calcThumbnailScale } from '~/utils/ThumbnailUtils';
+
+type CacheEntry = {
+  thumbnail: FrascoThumbnail;
+  scale: number;
+};
 
 export class CanvasThumbnailGenerator {
   private off: OffscreenCanvas;
-  private tmp: OffscreenCanvas;
+  private cache?: CacheEntry;
+  private currentGL?: WebGL2RenderingContext;
 
   constructor() {
     this.off = new OffscreenCanvas(1, 1);
-    this.tmp = new OffscreenCanvas(1, 1);
   }
 
   generateCanvasThumbnail(width: number, height: number): ImageData | undefined {
     try {
-      const srcW = projectStore.canvas.size.width;
-      const srcH = projectStore.canvas.size.height;
-      this.off.width = width;
-      this.off.height = height;
-      this.tmp.width = srcW;
-      this.tmp.height = srcH;
+      const renderer = frascoRenderer;
+      if (!renderer || width <= 0 || height <= 0) {
+        return undefined;
+      }
 
-      const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
-      const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
+      const canvasSize = projectStore.canvas.size;
+      const entry = this.ensureThumbnail(renderer.getGLContext(), canvasSize);
+      if (!entry) return undefined;
 
-      const buffer = webGLRenderer!.readPixelsFlipped();
-      const imgData = new ImageData(buffer.slice(), srcW, srcH);
-      tctx.putImageData(imgData, 0, 0);
-
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
-
-      return ctx.getImageData(0, 0, width, height);
+      const layers = renderer.getCompositeLayers();
+      const baseColor = renderer.getBaseColor();
+      return entry.thumbnail.getImageData(layers, canvasSize, width, height, baseColor);
     } catch (err) {
       // Suppress errors during canvas thumbnail generation and return undefined
       logSystemWarn('CanvasThumbnailGenerator.generateCanvasThumbnail suppressed error.', {
@@ -43,23 +44,13 @@ export class CanvasThumbnailGenerator {
 
   generateCanvasThumbnailBlob(width: number, height: number): Promise<Blob> {
     try {
-      const srcW = projectStore.canvas.size.width;
-      const srcH = projectStore.canvas.size.height;
-      this.off.width = width;
-      this.off.height = height;
-      this.tmp.width = srcW;
-      this.tmp.height = srcH;
+      const img = this.generateCanvasThumbnail(width, height);
+      if (!img) return Promise.resolve(new Blob());
 
+      this.off.width = img.width;
+      this.off.height = img.height;
       const ctx = this.off.getContext('2d', { willReadFrequently: true })!;
-      const tctx = this.tmp.getContext('2d', { willReadFrequently: true })!;
-
-      const buffer = webGLRenderer!.readPixelsFlipped();
-      const imgData = new ImageData(buffer.slice(), srcW, srcH);
-      tctx.putImageData(imgData, 0, 0);
-
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(this.tmp, 0, 0, srcW, srcH, 0, 0, width, height);
-
+      ctx.putImageData(img, 0, 0);
       return this.off.convertToBlob();
     } catch (err) {
       // Suppress blob generation errors and return an empty blob as fallback
@@ -69,6 +60,23 @@ export class CanvasThumbnailGenerator {
       });
       return Promise.resolve(new Blob());
     }
+  }
+
+  private ensureThumbnail(gl: WebGL2RenderingContext, canvasSize: { width: number; height: number }): CacheEntry | undefined {
+    const scale = calcThumbnailScale(canvasSize.width, canvasSize.height);
+    const cached = this.cache;
+    if (cached && this.currentGL === gl && cached.scale === scale) {
+      return cached;
+    }
+    if (cached) {
+      cached.thumbnail.dispose();
+      this.cache = undefined;
+    }
+    const thumbnail = new FrascoThumbnail(gl, { scale });
+    const entry = { thumbnail, scale };
+    this.cache = entry;
+    this.currentGL = gl;
+    return entry;
   }
 }
 

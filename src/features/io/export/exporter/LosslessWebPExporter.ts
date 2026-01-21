@@ -1,13 +1,13 @@
 import { encode as encodeWebp } from '@jsquash/webp';
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 
 export class LosslessWebPExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {
-    if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
-    const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(webGLRenderer.readPixelsFlipped());
+    if (!frascoRenderer) throw new Error('Export Error: Renderer not defined');
+    const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(frascoRenderer.readPixelsFlipped());
     const scaledBuffer = getScaledBuffer(buffer, scale);
     const webpBuffer = await encodeWebp(scaledBuffer, { lossless: 1 });
     const blob = new Blob([new Uint8Array(webpBuffer)], { type: 'image/webp' });
@@ -16,7 +16,7 @@ export class LosslessWebPExporter extends Exporter {
   }
 
   async layerToBlob(layer: Layer, quality?: number, scale: number = 1): Promise<Blob> {
-    if (!webGLRenderer) throw new Error('Export Error: Renderer not defined');
+    if (!frascoRenderer) throw new Error('Export Error: Renderer not defined');
     const buffer = new Uint8ClampedArray(getLayer(layer.id).readPixels());
     const scaledBuffer = getScaledBuffer(buffer, scale);
     const webpBuffer = await encodeWebp(scaledBuffer, { lossless: 1 });

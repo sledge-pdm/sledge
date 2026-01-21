@@ -1,142 +1,109 @@
-import { FileLocation } from '@sledge-pdm/core';
-import { getEmergencyBackups } from '~/features/backup';
-import { changeCanvasSize } from '~/features/canvas';
-import { setSavedLocation } from '~/features/config';
-import { loadProjectFromClipboardImage, loadProjectFromImagePath as loadProjectFromLocalImage } from '~/features/io/project/loadFrom';
+import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 
-import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
-import { applyProjectLocation } from '~/features/io/project/ProjectLocationManager';
-import { addLayer, LayerType } from '~/features/layer';
-import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { logSystemError, logUserError } from '~/features/log/service';
-import { setIOStore } from '~/stores/EditorStores';
+import { ErrorTypes, LoadError, ProjectLoader } from '~/features/io/project/ProjectLoader';
+import { EditorStateStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { initRuntimeProject } from '~/stores/RuntimeProject';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
-import { normalizeJoin } from '~/utils/FileUtils';
-import { unpackFromPath } from '~/utils/msgpackr';
-import { dialog } from '~/utils/platform';
-import { getCurrentVersion } from '~/utils/VersionUtils';
-import { getFromClipboardQuery, getNewProjectQuery, getOpenLocation, openWindow } from '~/utils/WindowUtils';
+import { normalizeJoin, normalizePath } from '~/utils/FileUtils';
+import { getFromClipboardQuery, getNewProjectQuery, getOpenPath } from '~/utils/WindowUtils';
 
-const LOG_LABEL = 'ProjectLoader';
-
-export async function tryLoadProject(lastState?: { lastOpenAs?: 'project' | 'new_project' | 'image'; lastPath?: FileLocation }): Promise<boolean> {
-  const openingLocation = getOpenLocation();
-  const clipboardQuery = getFromClipboardQuery();
-  const newProjectQuery = getNewProjectQuery();
-
-  const emergencyBackups = await getEmergencyBackups();
-  if (emergencyBackups && emergencyBackups.length > 0) {
-    await openWindow('restore');
-  }
-
-  let lastLocation = lastState?.lastPath;
-
-  if (openingLocation && openingLocation.path && openingLocation.name) {
-    return await loadProjectFromLocation(openingLocation);
-  }
-
-  if (clipboardQuery) {
-    return await loadProjectFromClipboardImage();
-  }
-
-  if (newProjectQuery.new) {
-    return await loadNewProject(newProjectQuery);
-  }
-
-  if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
-    try {
-      return await loadProjectFromLocation(lastLocation);
-    } catch (e) {
-      logSystemError('Failed to load last project, falling back to a new project.', { label: LOG_LABEL, details: [e] });
-      logUserError('failed to load last project. created a new project.', { label: LOG_LABEL, persistent: true });
-      const createdNewProject = await loadNewProject();
-      await notifyLastProjectFallback(e);
-      return createdNewProject;
-    }
-  }
-
-  return await loadNewProject();
+export enum InitialLoadTypes {
+  // Configs
+  GLOBAL_CONFIG,
+  EDITOR_STATE,
+  // Project
+  NEW_PROJECT,
+  NEW_PROJECT_FALLBACK,
+  PATH_PROJECT,
+  PATH_IMAGE_PROJECT,
+  PATH_PROJECT_LAST,
+  PATH_IMAGE_PROJECT_LAST,
+  IMAGE_CLIPBOARD,
+  // Unknown
+  UNKNOWN,
 }
 
-export async function loadProjectFromLocation(loc: FileLocation): Promise<boolean> {
-  if (!loc.path || !loc.name) {
-    throw new Error('Failed to read project from path');
-  }
-  const path = normalizeJoin(loc.path, loc.name);
-  if (loc.name?.endsWith('.sledge')) {
-    // project file
-    setIOStore('openAs', 'project');
-    try {
-      const projectObj = await unpackFromPath(path);
-      if (!projectObj) {
-        throw new Error('Failed to read project from path: reading ' + path);
+/**
+ * @description Get the type and loader to read from the given query etc.
+ */
+export async function getInitialLoader(editorState: EditorStateStore): Promise<{
+  initialLoadType: InitialLoadTypes;
+  loader?: ProjectLoader<any>;
+  fatalError?: LoadError;
+  targetPath?: string;
+}> {
+  try {
+    const openingPath = getOpenPath();
+    const clipboardQuery = getFromClipboardQuery();
+    const newProjectQuery = getNewProjectQuery();
+    let lastLocation = editorState?.lastPath;
+
+    if (openingPath) {
+      const isProject = ProjectLoader.isProjectPath(openingPath);
+      const normalizedPath = normalizePath(openingPath);
+      return {
+        initialLoadType: isProject ? InitialLoadTypes.PATH_PROJECT : InitialLoadTypes.PATH_IMAGE_PROJECT,
+        loader: ProjectLoader.fromPath({ path: normalizedPath }),
+        targetPath: normalizedPath,
+      };
+    }
+    if (clipboardQuery) {
+      const data = await tryGetImageFromClipboard();
+      if (!data) {
+        return {
+          initialLoadType: InitialLoadTypes.IMAGE_CLIPBOARD,
+          loader: undefined,
+          fatalError: {
+            type: ErrorTypes.INTERNAL_ERROR,
+            detail: 'Could not read clipboard image',
+            stacktrace: undefined,
+          },
+          targetPath: undefined,
+        };
       }
-      setSavedLocation(path);
-      initRuntimeProject(projectObj);
-      setIOStore('isProjectChangedAfterSave', false);
-      return false;
-    } catch (error) {
-      logSystemError('Failed to read project.', { label: LOG_LABEL, details: [path, error] });
-      logUserError('failed to open project file.', { label: LOG_LABEL, details: [error], persistent: true });
-      throw new Error('Failed to read project.\n' + error);
+      return {
+        initialLoadType: InitialLoadTypes.IMAGE_CLIPBOARD,
+        loader: ProjectLoader.fromImage({
+          imageContext: 'clipboard',
+          name: 'From Clipboard',
+          ...data,
+        }),
+      };
     }
-  } else {
-    // image file
-    setIOStore('openAs', 'image');
-    const isImportSuccessful = await loadProjectFromLocalImage(loc);
-    if (isImportSuccessful) {
-      setIOStore('isProjectChangedAfterSave', false);
-      return false;
-    } else {
-      logSystemError('Failed to import image from path.', { label: LOG_LABEL, details: [path] });
-      logUserError('failed to import image.', { label: LOG_LABEL, persistent: true });
-      throw new Error('Failed to import image from path:' + path);
+
+    if (newProjectQuery.new) {
+      const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
+      const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
+      return {
+        initialLoadType: InitialLoadTypes.NEW_PROJECT,
+        loader: ProjectLoader.fromNew({ width, height }),
+      };
     }
+
+    if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
+      const lastPath = normalizeJoin(lastLocation.path, lastLocation.name);
+      const isProject = ProjectLoader.isProjectPath(lastPath);
+      return {
+        initialLoadType: isProject ? InitialLoadTypes.PATH_PROJECT_LAST : InitialLoadTypes.PATH_IMAGE_PROJECT_LAST,
+        loader: ProjectLoader.fromPath({ path: lastPath }),
+        targetPath: lastPath,
+      };
+    }
+
+    const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
+    const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
+    return {
+      initialLoadType: InitialLoadTypes.NEW_PROJECT_FALLBACK,
+      loader: ProjectLoader.fromNew({ width, height }),
+    };
+  } catch (e) {
+    return {
+      initialLoadType: InitialLoadTypes.UNKNOWN,
+      loader: undefined,
+      fatalError: {
+        type: ErrorTypes.UNKNOWN_ERROR,
+        detail: `Unknown error while initial project load: ${e}`,
+        stacktrace: e instanceof Error ? e.stack : undefined,
+      },
+    };
   }
-}
-
-async function loadNewProject(newProjectQuery?: { new: boolean; width?: number; height?: number }): Promise<boolean> {
-  // create new (fallback)
-  setIOStore('openAs', 'new_project');
-  setIOStore('loadProjectVersion', {
-    project: CURRENT_PROJECT_VERSION,
-    sledge: await getCurrentVersion(),
-  });
-  applyProjectLocation(undefined, 'new_project');
-  const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
-  const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
-  setProjectStore('canvas', 'size', 'width', width);
-  setProjectStore('canvas', 'size', 'height', height);
-  eventBus.emit('canvas:sizeChanged', { newSize: { width, height } });
-  addLayer(
-    { name: 'layer 1', type: LayerType.Dot, enabled: true },
-    {
-      noDiff: true,
-      uniqueName: false,
-    }
-  );
-  changeCanvasSize(globalConfig.default.canvasSize, {
-    skipHistory: true,
-  });
-  setProjectStore('canvas', 'size', globalConfig.default.canvasSize);
-  const canvasSize = globalConfig.default.canvasSize;
-  projectStore.layers.layers.forEach((layer) => {
-    const buffer = new Uint8ClampedArray(canvasSize.width * canvasSize.height * 4);
-    layerManager.registerLayer(layer.id, buffer, canvasSize.width, canvasSize.height, { inputSpace: 'canvas' });
-  });
-  setIOStore('isProjectChangedAfterSave', false);
-  return true;
-}
-
-async function notifyLastProjectFallback(error: unknown) {
-  const errorMessage = error instanceof Error ? error.message : error ? String(error) : undefined;
-  const fallbackMessage = errorMessage && errorMessage.trim().length > 0 ? errorMessage : '<No message available>';
-  await dialog.message(`Failed to reopen the last project. A new project was created instead.\n${fallbackMessage}`, {
-    kind: 'warning',
-    title: 'Project load',
-    okLabel: 'OK',
-  });
 }

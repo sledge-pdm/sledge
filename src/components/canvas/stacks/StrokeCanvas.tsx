@@ -6,6 +6,7 @@ import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import CanvasToolOperator, { DrawState } from '~/features/canvas/CanvasToolOperator';
 import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/transform/CanvasPositionCalculator';
+import { clipboardCopy, clipboardCut } from '~/features/io/clipboard/ClipboardActions';
 import { activeLayer } from '~/features/layer';
 import { logSystemInfo, logSystemWarn, logUserError } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -15,7 +16,6 @@ import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { eventBus } from '~/utils/EventBus';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 
 const strokeArea = css`
@@ -247,15 +247,11 @@ export const StrokeCanvas: Component = () => {
               { type: 'label', label: 'selection' },
               {
                 ...ContextMenuItems.BaseCopy,
-                onSelect: async () => {
-                  eventBus.emit('clipboard:doCopy', {});
-                },
+                onSelect: async () => await clipboardCopy(),
               },
               {
                 ...ContextMenuItems.BaseCut,
-                onSelect: async () => {
-                  eventBus.emit('clipboard:doCut', {});
-                },
+                onSelect: async () => await clipboardCut(),
               },
               {
                 ...ContextMenuItems.BaseRemove,

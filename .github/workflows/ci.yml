@@ -72,7 +72,7 @@ jobs:
       - name: Setup pnpm (install first for node cache detection)
         uses: pnpm/action-setup@v4
         with:
-          version: 10.25.0
+          version: latest
           run_install: false
 
       - name: Setup Node
@@ -93,10 +93,6 @@ jobs:
 
       - name: Prettier check
         run: pnpm exec prettier --check .
-
-      - name: Stylelint (CSS no-fix)
-        run: pnpm exec stylelint -c .stylelintrc.json "src/**/*.css" || true
-        # NOTE: Using || true so stylelint warnings (non-error) don't fail build; adjust if needed.
 
       - name: Cache Playwright Browsers
         uses: actions/cache@v4

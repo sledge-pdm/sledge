@@ -6,7 +6,6 @@ export type Events = {
   'project:saveFailed': { error: any };
   'project:saveCancelled': {};
 
-  'canvas:sizeChanged': { newSize: Size2D };
   'canvas:layoutReady': { newSize: Size2D };
 
   'selection:updateSelectionPath': { immediate?: boolean };
@@ -22,10 +21,6 @@ export type Events = {
   'preview:requestUpdate': { layerId?: string };
 
   'window:sideSectionSideChanged': {};
-
-  'clipboard:doCopy': {};
-  'clipboard:doCut': {};
-  'clipboard:doPaste': {};
 
   'export:requestExportPath': { newPath: string };
 };

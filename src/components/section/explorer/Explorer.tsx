@@ -8,10 +8,10 @@ import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileIt
 import { getParentDirectory, normalizeDirectoryPath } from '~/components/section/explorer/utils/path';
 import { showTabContent } from '~/features/config/TabContentController';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
-import { eventBus } from '~/utils/EventBus';
 import { exportDir, getDefinedDriveLetters, isOpenableFile, normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, DirEntry, fs } from '~/utils/platform';
+import { openExportWithPath } from '../export/Export';
 
 // Styles
 const explorerContainer = css`
@@ -517,8 +517,7 @@ const Explorer: Component = () => {
                         label: 'Export to this folder',
                         onSelect: () => {
                           showTabContent('export', 'rightSide');
-
-                          eventBus.emit('export:requestExportPath', { newPath: currentPath() });
+                          openExportWithPath(currentPath());
                         },
                       },
                     ]}

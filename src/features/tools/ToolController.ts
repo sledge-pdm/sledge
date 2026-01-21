@@ -89,5 +89,5 @@ export function isToolAllowedInCurrentLayer(category?: ToolCategory): boolean {
   // if (category.behavior.acceptInactiveLayer) return true;
 
   // otherwise it's up to whether the layer is enabled
-  return activeLayer().enabled;
+  return activeLayer()?.enabled;
 }

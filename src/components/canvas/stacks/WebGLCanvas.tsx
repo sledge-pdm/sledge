@@ -1,12 +1,17 @@
 import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { allLayers } from '~/features/layer';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus, Events } from '~/utils/EventBus';
+
+export const notifyCanvasLayoutReady = (size: { width: number; height: number }) => {
+  eventBus.emit('canvas:layoutReady', { newSize: size });
+};
+
 import { FrascoRenderer } from '~/webgl/FrascoRenderer';
 
 const webglCanvasStyle = css`
@@ -37,8 +42,8 @@ const WebGLCanvas: Component = () => {
 
   let waitingForLayoutUpdate = false;
 
-  const handleCanvasSizeChangedEvent = (e: Events['canvas:sizeChanged']) => {
-    const { width, height } = e.newSize;
+  createEffect(() => {
+    const { width, height } = projectStore.canvas.size;
     waitingForLayoutUpdate = true;
     logSystemInfo('Queued layout-aware resize', {
       label: LOG_LABEL,
@@ -46,7 +51,18 @@ const WebGLCanvas: Component = () => {
       debugOnly: true,
     });
     setUpdateRender(false);
-  };
+  });
+
+  // const handleCanvasSizeChangedEvent = (e: Events['canvas:sizeChanged']) => {
+  //   const { width, height } = e.newSize;
+  //   waitingForLayoutUpdate = true;
+  //   logSystemInfo('Queued layout-aware resize', {
+  //     label: LOG_LABEL,
+  //     details: [width, height],
+  //     debugOnly: true,
+  //   });
+  //   setUpdateRender(false);
+  // };
 
   const handleCanvasLayoutReady = (e: Events['canvas:layoutReady']) => {
     if (!waitingForLayoutUpdate) return;
@@ -102,6 +118,20 @@ const WebGLCanvas: Component = () => {
 
   onMount(() => {
     init();
+    // eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+    eventBus.on('canvas:layoutReady', handleCanvasLayoutReady);
+    eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
+    eventBus.on('webgl:requestResume', handleResumeRequest);
+
+    return () => {
+      webGLRenderer?.dispose();
+      webGLRenderer = undefined;
+      stopRenderLoop();
+      // eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+      eventBus.off('canvas:layoutReady', handleCanvasLayoutReady);
+      eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
+      eventBus.off('webgl:requestResume', handleResumeRequest);
+    };
   });
 
   createEffect(() => {
@@ -113,23 +143,6 @@ const WebGLCanvas: Component = () => {
     if (!isRunning()) {
       eventBus.emit('webgl:renderPaused', {});
     }
-  });
-
-  onMount(() => {
-    eventBus.on('canvas:sizeChanged', handleCanvasSizeChangedEvent);
-    eventBus.on('canvas:layoutReady', handleCanvasLayoutReady);
-    eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
-    eventBus.on('webgl:requestResume', handleResumeRequest);
-  });
-
-  onCleanup(() => {
-    webGLRenderer?.dispose();
-    webGLRenderer = undefined;
-    stopRenderLoop();
-    eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
-    eventBus.off('canvas:layoutReady', handleCanvasLayoutReady);
-    eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
-    eventBus.off('webgl:requestResume', handleResumeRequest);
   });
 
   const imageRendering = () => {

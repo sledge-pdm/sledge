@@ -19,6 +19,6 @@
     "types": ["vite/client"],
     "rootDirs": ["src"]
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "vitest.config.ts", "vitest-bench.config.ts"],
   "exclude": ["src-tauri/target", "**/out/tauri-codegen-assets/**"]
 }

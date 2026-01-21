@@ -42,7 +42,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     const buffer = frascoLayer.readPixels();
     return {
       layer: { ...layer },
-      image: { codec: 'deflate', packedBuffer: gzipDeflate(buffer), width: frascoLayer.getWidth(), height: frascoLayer.getHeight() },
+      image: { packedBuffer: gzipDeflate(buffer), width: frascoLayer.getWidth(), height: frascoLayer.getHeight() },
     };
   }
 

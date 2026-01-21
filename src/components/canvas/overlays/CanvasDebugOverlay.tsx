@@ -6,16 +6,6 @@ import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { logSystemInfo } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 
-const canvasDebugOverlayTopLeft = css`
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  left: var(--spacing-sm);
-  top: var(--spacing-sm);
-  pointer-events: none;
-  z-index: var(--zindex-canvas-overlay);
-`;
-
 const canvasDebugOverlayBottomLeft = css`
   display: flex;
   flex-direction: row;
@@ -76,7 +66,7 @@ const CanvasDebugOverlay: Component = () => {
   };
 
   onMount(() => {
-    let intervalId: number | undefined;
+    let intervalId: NodeJS.Timeout | undefined;
     const startTimerId = window.setTimeout(() => {
       intervalId = setInterval(callback, 500);
     }, 100);

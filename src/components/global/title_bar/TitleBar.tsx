@@ -120,6 +120,7 @@ const titleBarControlButtonImg = css`
 const titleInfo = css`
   display: flex;
   flex-direction: row;
+  height: '8px';
 `;
 
 export default function TitleBar() {
@@ -196,14 +197,9 @@ export default function TitleBar() {
             }
           >
             <div class={titleBarTitleContainer}>
-              <Show when={shouldShowTitle()}>
+              <Show when={!ioStore.isInInitialLoading && shouldShowTitle()}>
                 <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
-                  <div
-                    class={titleInfo}
-                    style={{
-                      height: '8px',
-                    }}
-                  >
+                  <div class={titleInfo}>
                     <p class={titleBarTitle}>
                       <span class={titleBarTitle} style={{ opacity: 0.5 }}>
                         {ioStore.savedLocation.path ? `${ioStore.savedLocation.path}/` : ''}
@@ -227,14 +223,14 @@ export default function TitleBar() {
                     <p class={titleBarProjectVersion}>V{ioStore.loadProjectVersion?.project}</p>
                   </Show>
                   <div class={titleDivider} />
-                  <p class={titleBarSize} style={{}}>
+                  <p class={titleBarSize}>
                     {projectStore.canvas.size.width} x {projectStore.canvas.size.height}
                   </p>
                 </Show>
               </Show>
             </div>
 
-            <Show when={location.pathname.startsWith('/editor')}>
+            <Show when={!ioStore.isInInitialLoading && location.pathname.startsWith('/editor')}>
               <div class={titleBarSaveSection}>
                 <SaveSection />
               </div>

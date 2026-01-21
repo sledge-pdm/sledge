@@ -2,10 +2,13 @@ import { onMount } from 'solid-js';
 import RecentFileList from '~/components/global/RecentFileList';
 import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import ThemeToggle from '~/components/global/ThemeToggle';
-import { loadGlobalSettings } from '~/features/io/config/load';
+import { loadGlobalConfig } from '~/features/io/config/load';
+import { ErrorTypes } from '~/features/io/project/ProjectLoader';
 import { createNew, openExistingProject, openProject } from '~/features/io/window';
+import { InitialLoadTypes } from '~/routes/editor/load';
+import { reportInitialLoadError } from '~/routes/editor/loadError';
 import { ioStore } from '~/stores/EditorStores';
-import { openWindow, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+import { openWindow, showMainWindow } from '~/utils/WindowUtils';
 import {
   header as menuContainer,
   headerItem as menuItem,
@@ -21,10 +24,14 @@ import {
 export default function Home() {
   onMount(async () => {
     try {
-      await loadGlobalSettings();
+      await loadGlobalConfig();
       await showMainWindow();
     } catch (e) {
-      await reportWindowStartError(e);
+      await reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
+        type: ErrorTypes.UNKNOWN_ERROR,
+        detail: `Unknown error while start window load.\n${e}`,
+        stacktrace: e instanceof Error ? e.stack : undefined,
+      });
     }
   });
 

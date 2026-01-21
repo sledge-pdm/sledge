@@ -1,6 +1,7 @@
 import { FileLocation } from '@sledge-pdm/core';
 
 export type IOStore = {
+  isInInitialLoading: boolean;
   openAs: 'project' | 'new_project' | 'image';
   savedLocation: FileLocation;
   recentFiles: FileLocation[];
@@ -13,6 +14,7 @@ export type IOStore = {
 };
 
 export const defaultIOStore: IOStore = {
+  isInInitialLoading: true,
   openAs: 'new_project',
   savedLocation: {
     name: undefined,

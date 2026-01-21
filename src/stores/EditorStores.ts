@@ -99,12 +99,7 @@ export const getEditorStateStore = (): EditorStateStore => {
   };
 };
 
-export const loadEditorStateStore = (
-  state: EditorStateStore
-): {
-  lastOpenAs?: 'project' | 'new_project' | 'image';
-  lastPath?: FileLocation;
-} => {
+export const loadEditorStateStore = (state: EditorStateStore): EditorStateStore => {
   console.log(state.appearanceStore);
   if (state.appearanceStore) setAppearanceStore(sanitizeAppearanceStore(state.appearanceStore));
   if (state.lastSettingsStore) setLastSettingsStore(state.lastSettingsStore);
@@ -119,8 +114,5 @@ export const loadEditorStateStore = (
   // init explorer path on load
   setAppearanceStore('explorerPath', undefined);
 
-  return {
-    lastOpenAs: state.lastOpenAs,
-    lastPath: state.lastPath,
-  };
+  return state;
 };

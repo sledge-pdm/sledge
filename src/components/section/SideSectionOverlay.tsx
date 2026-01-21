@@ -8,6 +8,10 @@ import { getTabContent } from '~/features/config/TabContentController';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 
+export const notifySideSectionSideChanged = () => {
+  eventBus.emit('window:sideSectionSideChanged', {});
+};
+
 const container = css`
   display: flex;
   height: 100%;
@@ -87,7 +91,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
           Object.assign(event.target.style, {
             width: `${event.rect.width}px`,
           });
-          eventBus.emit('window:sideSectionSideChanged', {});
+          notifySideSectionSideChanged();
         },
       },
     });
@@ -111,7 +115,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
           Object.assign(event.target.style, {
             width: `${event.rect.width}px`,
           });
-          eventBus.emit('window:sideSectionSideChanged', {});
+          notifySideSectionSideChanged();
         },
       },
     });

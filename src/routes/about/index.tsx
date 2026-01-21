@@ -1,9 +1,12 @@
 import { css } from '@acab/ecsstatic';
 import { createSignal, onMount } from 'solid-js';
-import { loadGlobalSettings } from '~/features/io/config/load';
+import { loadGlobalConfig } from '~/features/io/config/load';
+import { ErrorTypes } from '~/features/io/project/ProjectLoader';
+import { InitialLoadTypes } from '~/routes/editor/load';
+import { reportInitialLoadError } from '~/routes/editor/loadError';
 import { pageRoot } from '~/styles/styles';
 import { getCurrentVersion } from '~/utils/VersionUtils';
-import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+import { showMainWindow } from '~/utils/WindowUtils';
 import { shell } from '~/utils/platform';
 import {
   aaContainer,
@@ -34,11 +37,15 @@ const About = () => {
 
   onMount(async () => {
     try {
-      await loadGlobalSettings();
+      await loadGlobalConfig();
       setVersion(await getCurrentVersion());
       await showMainWindow();
     } catch (e) {
-      await reportWindowStartError(e);
+      await reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
+        type: ErrorTypes.UNKNOWN_ERROR,
+        detail: `Unknown error while about window load.\n${e}`,
+        stacktrace: e instanceof Error ? e.stack : undefined,
+      });
     }
   });
 

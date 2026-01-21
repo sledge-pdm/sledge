@@ -11,7 +11,7 @@ import { performanceMetas } from '~/config/meta/Performance';
 import { protectionMetas } from '~/config/meta/Protection';
 import { startupMetas } from '~/config/meta/Startup';
 import { Consts } from '~/Consts';
-import { loadGlobalSettings } from '~/features/io/config/load';
+import { loadGlobalConfig } from '~/features/io/config/load';
 import { resetToDefaultConfig } from '~/features/io/config/reset';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
@@ -249,7 +249,7 @@ const ConfigForm: Component<Props> = (props) => {
 
   let originalConfig: GlobalConfig | undefined;
   onMount(async () => {
-    await loadGlobalSettings();
+    await loadGlobalConfig();
 
     const settingsMeta = [
       ...generalMetas,
@@ -272,7 +272,7 @@ const ConfigForm: Component<Props> = (props) => {
   });
 
   listenEvent('onSettingsSaved', async () => {
-    await loadGlobalSettings();
+    await loadGlobalConfig();
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
     checkDirty();
   });

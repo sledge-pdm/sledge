@@ -13,6 +13,6 @@
   "chatgpt.openOnStartup": true,
 
   "path-autocomplete.pathMappings": {
-    "/": "${folder}/assets"
+    "/": "${folder}/public/assets"
   }
 }

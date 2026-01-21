@@ -3,8 +3,7 @@ import { StrokeCanvas } from './StrokeCanvas';
 
 import { css } from '@acab/ecsstatic';
 import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
-import { eventBus } from '~/utils/EventBus';
-import WebGLCanvas from './WebGLCanvas';
+import WebGLCanvas, { notifyCanvasLayoutReady } from './WebGLCanvas';
 
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -37,7 +36,7 @@ const CanvasStack: Component = () => {
   createEffect(() => {
     const { width, height } = projectStore.canvas.size;
     const frame = requestAnimationFrame(() => {
-      eventBus.emit('canvas:layoutReady', { newSize: { width, height } });
+      notifyCanvasLayoutReady({ width, height });
     });
 
     onCleanup(() => {

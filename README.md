@@ -14,7 +14,7 @@
 
 <br>
 
-<img src="https://github.com/sledge-pdm/sledge-assets/blob/main/readme_top.jpg?raw=true" alt="the visual of sledge." width=600 />
+<img src="public/readme_top.jpg" alt="the visual of sledge." width=600 />
 
 </div>
 
@@ -61,9 +61,9 @@
 - [Tauri](https://github.com/tauri-apps/tauri) / main framework
 - [Vite](https://github.com/vitejs/vite) / development server
 - [SolidJS](https://github.com/solidjs/solid) / frontend UI
-- [ecsstatic](https://www.ecsstatic.dev/) / stylesheet generation
-- [anvil](https://github.com/sledge-pdm/anvil) / image buffer operation
+- [@sledge-pdm/frasco](https://github.com/sledge-pdm/frasco) / effective canvas operation with WebGL
 - [WebGL2](https://developer.mozilla.org/ja/docs/Web/API/WebGL_API) / layer blend & rendering
+- [ecsstatic](https://www.ecsstatic.dev/) / stylesheet generation
 - [mitt](https://github.com/developit/mitt) / eventbus
 - [iro.js](https://iro.js.org/) / color picker
 - [msgpackr](https://github.com/kriszyp/msgpackr/issues) / project file compression

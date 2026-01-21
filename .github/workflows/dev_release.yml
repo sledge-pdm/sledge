@@ -1,4 +1,4 @@
-name: development-release
+name: dev-release
 
 on:
   push:
@@ -6,7 +6,25 @@ on:
   workflow_dispatch: {}
 
 jobs:
+  update-dev-latest-tag:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Update dev-latest tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f dev-latest ${{ github.sha }}
+          git push -f origin dev-latest
+
   build:
+    needs: update-dev-latest-tag
     permissions:
       contents: write
       packages: read
@@ -73,7 +91,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: ${{ github.ref_name }}
+          tagName: dev-latest
           releaseName: 'Development Build ${{ github.ref_name }}'
           releaseBody: 'This is a development build. Use at your own risk.'
           releaseDraft: false # Don't care because it's a dev build

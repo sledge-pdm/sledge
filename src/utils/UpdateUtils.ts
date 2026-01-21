@@ -1,6 +1,8 @@
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { ioStore } from '~/stores/EditorStores';
-import { dialog, process, Update, updater } from './platform';
+import { Update as PluginUpdate } from '@tauri-apps/plugin-updater';
+import { dialog, process, Update } from './platform';
+import { safeInvoke } from './TauriUtils';
 
 function isValidUpdate(update: Update): boolean {
   if (update.version.includes('dev') || update.version.includes('test')) {
@@ -14,14 +16,33 @@ function isValidUpdate(update: Update): boolean {
   return true;
 }
 
+type UpdaterMetadata = {
+  rid: number;
+  currentVersion: string;
+  version: string;
+  date?: string;
+  body?: string;
+  rawJson: Record<string, unknown>;
+};
+
+const UPDATE_CHANNEL: 'stable' | 'rust' = 'stable';
+
+function toUpdate(metadata: UpdaterMetadata): Update {
+  return new PluginUpdate(metadata) as unknown as Update;
+}
+
 export async function getUpdate(): Promise<Update | undefined> {
   logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
   try {
-    const update = await updater.check({
+    const metadata = await safeInvoke<UpdaterMetadata | null>('check_update_with_channel', {
+      channel: UPDATE_CHANNEL,
       timeout: 5000,
     });
-    if (update && isValidUpdate(update)) {
-      return update;
+    if (metadata) {
+      const update = toUpdate(metadata);
+      if (isValidUpdate(update)) {
+        return update;
+      }
     }
   } catch (e) {
     logSystemError('failed to update.', { label: 'UpdateUtils', details: [e] });
@@ -46,10 +67,15 @@ export async function askAndInstallUpdate() {
   }
 
   try {
-    const update = await updater.check({
+    const metadata = await safeInvoke<UpdaterMetadata | null>('check_update_with_channel', {
+      channel: UPDATE_CHANNEL,
       timeout: 5000,
     });
-    if (update && isValidUpdate(update)) {
+    if (metadata) {
+      const update = toUpdate(metadata);
+      if (!isValidUpdate(update)) {
+        return;
+      }
       logSystemInfo(`found update ${update.version} from ${update.date}`, {
         label: 'UpdateUtils',
         debugOnly: true,
@@ -67,29 +93,31 @@ ${update.currentVersion} -> ${update.version}`,
         }
       );
 
-      if (confirmed) {
-        let downloaded = 0;
-        let contentLength = 0;
-        // alternatively we could also call update.download() and update.install() separately
-        await update.downloadAndInstall((event) => {
-          switch (event.event) {
-            case 'Started':
-              contentLength = event.data.contentLength || 0;
-              logSystemInfo(`started downloading ${event.data.contentLength} bytes`, { label: 'UpdateUtils', debugOnly: true });
-              break;
-            case 'Progress':
-              downloaded += event.data.chunkLength || 0;
-              logSystemInfo(`downloaded ${downloaded} from ${contentLength}`, { label: 'UpdateUtils', debugOnly: true });
-              break;
-            case 'Finished':
-              logSystemInfo('download finished', { label: 'UpdateUtils', debugOnly: true });
-              break;
-          }
-        });
-
-        logSystemInfo('update installed', { label: 'UpdateUtils', debugOnly: true });
-        await process.relaunch();
+      if (!confirmed) {
+        return;
       }
+
+      let downloaded = 0;
+      let contentLength = 0;
+      // alternatively we could also call update.download() and update.install() separately
+      await update.downloadAndInstall((event) => {
+        switch (event.event) {
+          case 'Started':
+            contentLength = event.data.contentLength || 0;
+            logSystemInfo(`started downloading ${event.data.contentLength} bytes`, { label: 'UpdateUtils', debugOnly: true });
+            break;
+          case 'Progress':
+            downloaded += event.data.chunkLength || 0;
+            logSystemInfo(`downloaded ${downloaded} from ${contentLength}`, { label: 'UpdateUtils', debugOnly: true });
+            break;
+          case 'Finished':
+            logSystemInfo('download finished', { label: 'UpdateUtils', debugOnly: true });
+            break;
+        }
+      });
+
+      logSystemInfo('update installed', { label: 'UpdateUtils', debugOnly: true });
+      await process.relaunch();
     }
   } catch (e) {
     logSystemError('failed to update.', { label: 'UpdateUtils', details: [e] });

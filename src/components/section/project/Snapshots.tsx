@@ -1,11 +1,12 @@
-import { Component, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
-import { clsx, getProjectAdapter, gzipInflate, toUint8ClampedArray } from '@sledge-pdm/core';
+import { clsx, getProjectAdapter, gzipInflate, ProjectAdapter, toUint8ClampedArray } from '@sledge-pdm/core';
 import { Icon } from '@sledge-pdm/ui';
 import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
-import { deleteSnapshot, loadSnapshot, ProjectSnapshot, registerCurrentProjectSnapshot } from '~/features/snapshot';
+import { logSystemWarn } from '~/features/log';
+import { deleteSnapshot, loadSnapshot, ProjectSnapshot, registerCurrentProjectSnapshot, RuntimeProjectSnapshot } from '~/features/snapshot';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { enabledButton, errorButton } from '~/styles/styles';
 import { useTimeAgoText } from '~/utils/TimeUtils';
@@ -156,7 +157,7 @@ const itemButtonContainer = css`
   gap: 8px;
 `;
 
-const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => void; onDelete?: () => void }> = (props) => {
+const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapshot; onRestore?: () => void; onDelete?: () => void }> = (props) => {
   const { snapshot } = props;
 
   const [expanded, setExpanded] = createSignal(false);
@@ -184,7 +185,18 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
   const createdAt = new Date(snapshot.createdAt);
   const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(snapshot.createdAt);
 
-  const adapter = getProjectAdapter(snapshot.snapshot);
+  const [optionalAdapter, setOptionalAdapter] = createSignal<ProjectAdapter<any> | undefined>(undefined);
+
+  createEffect(() => {
+    if (snapshot.project) {
+      try {
+        const adapter = getProjectAdapter(snapshot.project);
+        setOptionalAdapter(adapter);
+      } catch (e) {
+        logSystemWarn(`failed to load snapshot project data in ${snapshot.id} although it's defined.`);
+      }
+    }
+  });
 
   return (
     <div class={itemRoot}>
@@ -218,9 +230,11 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot; onRestore?: () => voi
           <p class={itemDescription}>
             {createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString()}
           </p>
-          <p class={itemDescription}>
-            {adapter?.getCanvasInfo().size.width}x{adapter?.getCanvasInfo().size.height}
-          </p>
+          <Show when={optionalAdapter() !== undefined}>
+            <p class={itemDescription}>
+              {optionalAdapter()?.getCanvasInfo().size.width}x{optionalAdapter()?.getCanvasInfo().size.height}
+            </p>
+          </Show>
           <Show when={snapshot.thumbnail}>
             <canvas
               id={snapshot.id}

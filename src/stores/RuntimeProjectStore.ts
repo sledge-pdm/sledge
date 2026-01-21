@@ -1,6 +1,7 @@
 import { ProjectV2 } from '@sledge-pdm/core';
 import { createStore } from 'solid-js/store';
 import { Layer } from '~/features/layer';
+import { ProjectSnapshot, RuntimeProjectSnapshot } from '~/features/snapshot';
 
 export type CurrentProject = ProjectV2;
 
@@ -12,7 +13,7 @@ export type RuntimeProject = {
   layers: Pick<CurrentProject['layers'], 'layers' | 'state'>;
   imagePool: Pick<CurrentProject['imagePool'], 'entries' | 'state'>;
   project: CurrentProject['project'];
-  snapshots: CurrentProject['snapshots']; // TODO: change on-memory structure (refer todo.md)
+  snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[];
 };
 
 const runtimeProjectBeforeInit: RuntimeProject = {

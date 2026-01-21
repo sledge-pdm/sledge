@@ -2,8 +2,6 @@
 
 - browser modeでの動作が可能になったので、unit/e2eテストを書いていく　frasco移行箇所だけでなく全機能に対して書いていく
 
-- エラーハンドリングの改善(特にプロジェクト読み込み時　`apps\sledge\src\routes\editor\load_error_handling.md`も参照)
-
 - ImagePoolにおける命名がひどい(RuntimeImage - PersistedImage　なんのことだかわからない)ので構造から何とかするべき
 
 - 書き込んだLayerがdisposedな時など、書き込めなくなる状態において自動的にレンダーを再開したい（もし再開すらできなければエラーを出したい > 関連:エラーハンドリングの改善）

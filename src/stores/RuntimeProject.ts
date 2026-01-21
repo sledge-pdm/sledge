@@ -1,12 +1,14 @@
 import { getProjectAdapter, gzipDeflate, gzipInflate, ProjectBase } from '@sledge-pdm/core';
 import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
 import { HistoryStacks } from 'node_modules/@sledge-pdm/core/dist/src/project/adapters/parts/History';
+import { unwrap } from 'solid-js/store';
 import { projectHistoryController } from '~/features/history';
 import { ImagePoolImagePersisted } from '~/features/image_pool';
 import { makeRuntimeImages, runtimeImages, setRuntimeImages, toPersistedImages } from '~/features/image_pool/service';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { getAllFullSnapshots, RuntimeProjectSnapshot } from '~/features/snapshot';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
 import { CurrentProject, projectStore, RuntimeProject, setProjectStore } from './RuntimeProjectStore';
@@ -20,7 +22,7 @@ export async function initRuntimeProject(project: ProjectBase) {
   }
 
   const versions = adapter.getVersions();
-  setIOStore('loadProjectVersion', { sledge: versions.sledge ?? undefined, project: versions.project ?? undefined });
+  setIOStore('loadProjectVersion', { sledge: versions?.sledge ?? undefined, project: versions?.project ?? undefined });
 
   const canvasInfo = adapter.getCanvasInfo();
 
@@ -57,6 +59,10 @@ export async function initRuntimeProject(project: ProjectBase) {
   setRuntimeImages(makeRuntimeImages(persistedImages));
 
   // TODO: convert snapshots into lightweight runtime structures
+  const runtimeSnapshots = (await adapter.getSnapshots()).map((fullSnapshot) => {
+    const { project, ...runtime } = fullSnapshot;
+    return runtime as RuntimeProjectSnapshot;
+  });
 
   // set runtime project
   const runtime: RuntimeProject = {
@@ -70,7 +76,7 @@ export async function initRuntimeProject(project: ProjectBase) {
       state: adapter.getLayerListState(),
     },
     project: adapter.getProjectInfo(),
-    snapshots: (await adapter.getSnapshots()) ?? [],
+    snapshots: runtimeSnapshots ?? [],
   };
 
   setProjectStore(runtime);
@@ -114,20 +120,23 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
     };
   });
 
+  const runtimeSnapshots = await getAllFullSnapshots();
+
+  const clonedProjectStore = structuredClone(unwrap(projectStore));
   const project: CurrentProject = {
     version: await getCurrentVersion(),
     projectVersion: CURRENT_PROJECT_VERSION,
-    ...{ ...projectStore },
+    ...{ ...clonedProjectStore },
 
     history: { ...serializedHistory, layerHistories },
     layers: {
       buffers,
-      layers: projectStore.layers.layers,
-      state: projectStore.layers.state,
+      layers: clonedProjectStore.layers.layers,
+      state: clonedProjectStore.layers.state,
     },
-    imagePool: { images: toPersistedImages(runtimeImages()), ...projectStore.imagePool },
+    imagePool: { images: toPersistedImages(runtimeImages()), ...clonedProjectStore.imagePool },
+    snapshots: runtimeSnapshots,
   };
-  project.history.layerHistories = layerHistories;
 
   return project;
 }

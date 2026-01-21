@@ -4129,6 +4129,7 @@ dependencies = [
  "cocoa",
  "dotenvy",
  "log",
+ "semver",
  "serde",
  "serde_json",
  "sysinfo",

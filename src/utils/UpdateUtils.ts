@@ -1,6 +1,6 @@
+import { Update as PluginUpdate } from '@tauri-apps/plugin-updater';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { ioStore } from '~/stores/EditorStores';
-import { Update as PluginUpdate } from '@tauri-apps/plugin-updater';
 import { dialog, process, Update } from './platform';
 import { safeInvoke } from './TauriUtils';
 

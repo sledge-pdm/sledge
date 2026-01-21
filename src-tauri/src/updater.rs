@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::env;
 use tauri::{Manager, ResourceId, Runtime, Webview};
-use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_updater::{Update, UpdaterExt};
 use url::Url;
 
 #[derive(Serialize, Default)]
@@ -25,17 +25,43 @@ fn read_endpoint_from_env(key: &str) -> Option<Url> {
         .and_then(|value| Url::parse(value.trim()).ok())
 }
 
-#[tauri::command]
-pub(crate) async fn check_update_with_channel<R: Runtime>(
-    webview: Webview<R>,
-    channel: Option<String>,
+fn parse_version(value: &str) -> Option<semver::Version> {
+    semver::Version::parse(value.trim_start_matches('v')).ok()
+}
+
+fn select_latest_update(stable: Option<Update>, dev: Option<Update>) -> Option<Update> {
+    match (stable, dev) {
+        (Some(stable), Some(dev)) => {
+            let stable_version = parse_version(&stable.version);
+            let dev_version = parse_version(&dev.version);
+            match (stable_version, dev_version) {
+                (Some(stable_version), Some(dev_version)) => {
+                    if stable_version >= dev_version {
+                        Some(stable)
+                    } else {
+                        Some(dev)
+                    }
+                }
+                (Some(_), None) => Some(stable),
+                (None, Some(_)) => Some(dev),
+                (None, None) => Some(stable),
+            }
+        }
+        (Some(stable), None) => Some(stable),
+        (None, Some(dev)) => Some(dev),
+        (None, None) => None,
+    }
+}
+
+async fn check_with_endpoint<R: Runtime>(
+    webview: &Webview<R>,
+    endpoint: Option<Url>,
     headers: Option<Vec<(String, String)>>,
     timeout: Option<u64>,
     proxy: Option<String>,
     target: Option<String>,
     allow_downgrades: Option<bool>,
-) -> Result<Option<Metadata>, String> {
-    let _ = dotenvy::dotenv();
+) -> Result<Option<Update>, String> {
     let mut builder = webview.updater_builder();
 
     if let Some(headers) = headers {
@@ -58,24 +84,65 @@ pub(crate) async fn check_update_with_channel<R: Runtime>(
     if allow_downgrades.unwrap_or(false) {
         builder = builder.version_comparator(|current, update| update.version != current);
     }
+    if let Some(endpoint) = endpoint {
+        builder = builder
+            .endpoints(vec![endpoint])
+            .map_err(|e| format!("Failed to set endpoints: {e}"))?;
+    }
+
+    let updater = builder.build().map_err(|e| e.to_string())?;
+    updater.check().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub(crate) async fn check_update_with_channel<R: Runtime>(
+    webview: Webview<R>,
+    channel: Option<String>,
+    headers: Option<Vec<(String, String)>>,
+    timeout: Option<u64>,
+    proxy: Option<String>,
+    target: Option<String>,
+    allow_downgrades: Option<bool>,
+) -> Result<Option<Metadata>, String> {
+    let _ = dotenvy::dotenv();
 
     let stable_endpoint = read_endpoint_from_env("SLEDGE_UPDATER_STABLE_ENDPOINT");
     let dev_endpoint = read_endpoint_from_env("SLEDGE_UPDATER_DEV_ENDPOINT");
 
-    if is_dev_channel(channel.as_deref()) {
-        if let Some(dev_endpoint) = dev_endpoint {
-            builder = builder
-                .endpoints(vec![dev_endpoint])
-                .map_err(|e| format!("Failed to set dev endpoints: {e}"))?;
-        }
-    } else if let Some(stable_endpoint) = stable_endpoint {
-        builder = builder
-            .endpoints(vec![stable_endpoint])
-            .map_err(|e| format!("Failed to set stable endpoints: {e}"))?;
-    }
-
-    let updater = builder.build().map_err(|e| e.to_string())?;
-    let update = updater.check().await.map_err(|e| e.to_string())?;
+    let update = if is_dev_channel(channel.as_deref()) {
+        let stable = check_with_endpoint(
+            &webview,
+            stable_endpoint,
+            headers.clone(),
+            timeout,
+            proxy.clone(),
+            target.clone(),
+            allow_downgrades,
+        )
+        .await?;
+        let dev = check_with_endpoint(
+            &webview,
+            dev_endpoint,
+            headers,
+            timeout,
+            proxy,
+            target,
+            allow_downgrades,
+        )
+        .await?;
+        select_latest_update(stable, dev)
+    } else {
+        check_with_endpoint(
+            &webview,
+            stable_endpoint,
+            headers,
+            timeout,
+            proxy,
+            target,
+            allow_downgrades,
+        )
+        .await?
+    };
 
     if let Some(update) = update {
         let formatted_date = update.date.map(|date| date.to_string());

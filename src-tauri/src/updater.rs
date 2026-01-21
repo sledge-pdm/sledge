@@ -1,5 +1,4 @@
 use serde::Serialize;
-use std::env;
 use tauri::{Manager, ResourceId, Runtime, Webview};
 use tauri_plugin_updater::{Update, UpdaterExt};
 use url::Url;
@@ -19,11 +18,10 @@ fn is_dev_channel(channel: Option<&str>) -> bool {
     matches!(channel, Some("dev" | "rust"))
 }
 
-fn read_endpoint_from_env(key: &str) -> Option<Url> {
-    env::var(key)
-        .ok()
-        .and_then(|value| Url::parse(value.trim()).ok())
-}
+const STABLE_ENDPOINT: &str =
+    "https://github.com/sledge-pdm/sledge/releases/latest/download/latest.json";
+const DEV_ENDPOINT: &str =
+    "https://github.com/sledge-pdm/sledge/releases/download/dev-latest/latest.json";
 
 fn parse_version(value: &str) -> Option<semver::Version> {
     semver::Version::parse(value.trim_start_matches('v')).ok()
@@ -104,10 +102,8 @@ pub(crate) async fn check_update_with_channel<R: Runtime>(
     target: Option<String>,
     allow_downgrades: Option<bool>,
 ) -> Result<Option<Metadata>, String> {
-    let _ = dotenvy::dotenv();
-
-    let stable_endpoint = read_endpoint_from_env("SLEDGE_UPDATER_STABLE_ENDPOINT");
-    let dev_endpoint = read_endpoint_from_env("SLEDGE_UPDATER_DEV_ENDPOINT");
+    let stable_endpoint = Url::parse(STABLE_ENDPOINT).ok();
+    let dev_endpoint = Url::parse(DEV_ENDPOINT).ok();
 
     let update = if is_dev_channel(channel.as_deref()) {
         let stable = check_with_endpoint(

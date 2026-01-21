@@ -21,7 +21,7 @@ import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { getInitialLoader, InitialLoadTypes } from '~/routes/editor/load';
 import { reportInitialLoadError } from '~/routes/editor/loadError';
-import { appearanceStore, ioStore, setIOStore } from '~/stores/EditorStores';
+import { appearanceStore, EditorStateStore, ioStore, setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, pageRoot } from '~/styles/styles';
@@ -49,11 +49,21 @@ export default function Editor() {
 
   onMount(async () => {
     unlisten = await platformWindow.getCurrentWindow().onCloseRequested(handleCloseRequest);
+    setIOStore('isInInitialLoading', true);
+    await showMainWindow();
+
+    let editorState : EditorStateStore |undefined;
     try {
-      setIOStore('isInInitialLoading', true);
-      await showMainWindow();
       await loadGlobalSettings();
-      const editorState = await loadEditorState();
+      editorState = await loadEditorState();
+    } catch (e) {
+      unlisten();
+      if (isFirst) await reportAppStartupError(e);
+      else await reportWindowStartError(e);
+      return;
+    }
+
+    try {
       // const result = await tryLoadProject(editorState);
       // TODO: EditorStateの扱い( (x)EDITOR_STATEパス )
       const { initialLoadType, loader, fatalError, targetPath } = await getInitialLoader(editorState!);
@@ -89,13 +99,14 @@ export default function Editor() {
           }
         }
       }
-      setIOStore('isInInitialLoading', false);
     } catch (e) {
-      // ここいる？？
-      // プロジェクト読み込みの段階はエラー吐かない想定なので、ここはCONFIG,EDITOR_STATEまでのキャッチでいいかも　要検討
+      // プロジェクト読み込みの段階はエラー吐かない想定なので、ここは既定の起動エラー扱いに戻す
       unlisten();
       if (isFirst) await reportAppStartupError(e);
       else await reportWindowStartError(e);
+      return;
+    } finally {
+      setIOStore('isInInitialLoading', false);
     }
 
     return () => {

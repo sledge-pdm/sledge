@@ -41,16 +41,19 @@ interface ImageLoadOptions extends LoadOption {
 
 export enum ErrorTypes {
   FILE_NOT_FOUND,
+  INTERNAL_ERROR,
   FAILED_LOAD_RUNTIME,
-  // todo: more
+  UNKNOWN_ERROR,
+}
+
+export interface LoadError {
+  type: ErrorTypes;
+  detail: string;
 }
 
 interface InternalLoadResult {
   ok: boolean;
-  error?: {
-    type: ErrorTypes;
-    detail: string;
-  };
+  error?: LoadError;
   path?: string;
 }
 
@@ -96,22 +99,7 @@ export class ProjectLoader<T extends LoadOption> {
         result = await loadNewProject(this.options as unknown as NewProjectLoadOption);
         break;
       case 'path':
-        const options = this.options as unknown as PathLoadOption;
-        const path = options.path;
-        // check if the file exists
-        const fileExists = await fs.exists(path);
-        if (fileExists) {
-          if (ProjectLoader.isProjectPath(path)) result = await loadFromPathProject(path);
-          else result = await loadFromPathImage(path);
-        } else {
-          logSystemError('Project file not found.', { label: LOG_LABEL, details: [path] });
-          logUserError('failed to open project file.', { label: LOG_LABEL, persistent: true });
-          result = {
-            ok: false,
-            error: { type: ErrorTypes.FILE_NOT_FOUND, detail: `Project file not found.` },
-            path,
-          };
-        }
+        result = await loadFromPath(this.options as unknown as PathLoadOption);
         break;
       case 'projectObj':
         result = await loadFromProjectObj(this.options as unknown as ProjectObjLoadOption);
@@ -156,6 +144,30 @@ async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLo
         type: ErrorTypes.FAILED_LOAD_RUNTIME,
         detail: `Error loading new project: ${e}`,
       },
+    };
+  }
+}
+
+async function loadFromPath(options: PathLoadOption): Promise<InternalLoadResult> {
+  const path = options.path;
+
+  let fileExists = false;
+  try {
+    fileExists = await fs.exists(path);
+  } catch (_e) {
+    // Let pass through as not existing file
+  }
+
+  if (fileExists) {
+    if (ProjectLoader.isProjectPath(path)) return await loadFromPathProject(path);
+    else return await loadFromPathImage(path);
+  } else {
+    logSystemError('Project file not found.', { label: LOG_LABEL, details: [path] });
+    logUserError('failed to open project file.', { label: LOG_LABEL, persistent: true });
+    return {
+      ok: false,
+      error: { type: ErrorTypes.FILE_NOT_FOUND, detail: `Project file not found.` },
+      path,
     };
   }
 }

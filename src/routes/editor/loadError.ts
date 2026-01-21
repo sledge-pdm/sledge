@@ -30,6 +30,11 @@ export const formatLoadErrorMessage = (message: string, path?: string) => {
   return message.replace('{path}', path);
 };
 
+const appendStacktrace = (message: string, stacktrace?: string) => {
+  if (!stacktrace) return message;
+  return `${message}\n\nstacktrace:\n${stacktrace}`;
+};
+
 const closeCurrentWindow = async () => {
   const currentWindow = platformWindow.getCurrentWindow();
   await currentWindow.close();
@@ -39,9 +44,9 @@ const closeCurrentWindow = async () => {
 const showDialog = async (
   errorType: ErrorTypes,
   message: string,
-  options: { closeWindowOnOk?: boolean; openPathButton?: boolean; path?: string }
+  options: { closeWindowWithOK?: boolean; openPathButton?: boolean; path?: string; stacktrace?: string }
 ) => {
-  const formatted = formatLoadErrorMessage(message, options.path);
+  const formatted = appendStacktrace(formatLoadErrorMessage(message, options.path), options.stacktrace);
   if (options.openPathButton && options.path) {
     const button = await dialog.message(formatted, {
       kind: 'error',
@@ -49,7 +54,7 @@ const showDialog = async (
       buttons: { ok: BUTTON_OK, open: BUTTON_OPEN_CONTAINING_FOLDER },
     });
     if (button === 'open') await revealInFileBrowser(options.path);
-    if (options.closeWindowOnOk) await closeCurrentWindow();
+    if (options.closeWindowWithOK) await closeCurrentWindow();
     return;
   }
 
@@ -59,7 +64,7 @@ const showDialog = async (
     okLabel: BUTTON_OK,
   });
 
-  if (options.closeWindowOnOk) await closeCurrentWindow();
+  if (options.closeWindowWithOK) await closeCurrentWindow();
 };
 
 const errorFallback: LoadError = {
@@ -70,19 +75,23 @@ const errorFallback: LoadError = {
 export async function reportInitialLoadError(type: InitialLoadTypes, error?: LoadError, fallbackBeforeType?: InitialLoadTypes, targetPath?: string) {
   const fallbackedError: LoadError = Object.assign(errorFallback, error);
   const isFileNotFound = fallbackedError.type === ErrorTypes.FILE_NOT_FOUND;
-  const isPathFallback =
+  const isPathProjectFallback =
     fallbackBeforeType === InitialLoadTypes.PATH_PROJECT ||
     fallbackBeforeType === InitialLoadTypes.PATH_PROJECT_LAST ||
     fallbackBeforeType === InitialLoadTypes.PATH_IMAGE_PROJECT ||
     fallbackBeforeType === InitialLoadTypes.PATH_IMAGE_PROJECT_LAST;
 
   switch (type) {
+    case InitialLoadTypes.GLOBAL_CONFIG:
+    case InitialLoadTypes.EDITOR_STATE:
+      await showDialog(fallbackedError.type, fallbackedError.detail, { closeWindowWithOK: false, stacktrace: fallbackedError.stacktrace });
+      break;
     case InitialLoadTypes.NEW_PROJECT:
-      await showDialog(fallbackedError.type, ERROR_NEW_PROJECT, { closeWindowOnOk: true });
+      await showDialog(fallbackedError.type, ERROR_NEW_PROJECT, { closeWindowWithOK: true, stacktrace: fallbackedError.stacktrace });
       return;
 
     case InitialLoadTypes.IMAGE_CLIPBOARD:
-      await showDialog(fallbackedError.type, ERROR_CLIPBOARD_IMAGE_FAILED, { closeWindowOnOk: true });
+      await showDialog(fallbackedError.type, ERROR_CLIPBOARD_IMAGE_FAILED, { closeWindowWithOK: true, stacktrace: fallbackedError.stacktrace });
       return;
 
     case InitialLoadTypes.PATH_PROJECT:
@@ -90,25 +99,31 @@ export async function reportInitialLoadError(type: InitialLoadTypes, error?: Loa
     case InitialLoadTypes.PATH_PROJECT_LAST:
     case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
       await showDialog(fallbackedError.type, isFileNotFound ? ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW : ERROR_LAST_PROJECT_FAILED_OPENED_NEW, {
+        closeWindowWithOK: false,
         openPathButton: isFileNotFound,
         path: targetPath,
+        stacktrace: fallbackedError.stacktrace,
       });
       return;
 
     case InitialLoadTypes.NEW_PROJECT_FALLBACK:
-      if (!isPathFallback) {
-        await showDialog(fallbackedError.type, ERROR_NEW_PROJECT_FALLBACK_BUT_ITS_NOT, { closeWindowOnOk: true });
+      if (!isPathProjectFallback) {
+        await showDialog(fallbackedError.type, ERROR_NEW_PROJECT_FALLBACK_BUT_ITS_NOT, {
+          closeWindowWithOK: true,
+          stacktrace: fallbackedError.stacktrace,
+        });
         return;
       }
       await showDialog(fallbackedError.type, isFileNotFound ? ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW : ERROR_LAST_PROJECT_FAILED_NEW_FAILED, {
-        closeWindowOnOk: true,
+        closeWindowWithOK: true,
         openPathButton: isFileNotFound,
         path: targetPath,
+        stacktrace: fallbackedError.stacktrace,
       });
       return;
 
     default:
-      await showDialog(fallbackedError.type, error?.detail ?? ERROR_UNKNOWN, { closeWindowOnOk: true });
+      await showDialog(fallbackedError.type, error?.detail ?? ERROR_UNKNOWN, { closeWindowWithOK: true, stacktrace: fallbackedError.stacktrace });
       return;
   }
 }

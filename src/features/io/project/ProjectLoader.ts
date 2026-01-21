@@ -49,7 +49,10 @@ export enum ErrorTypes {
 export interface LoadError {
   type: ErrorTypes;
   detail: string;
+  stacktrace?: string;
 }
+
+const getErrorStacktrace = (e: unknown): string | undefined => (e instanceof Error ? e.stack : undefined);
 
 interface InternalLoadResult {
   ok: boolean;
@@ -143,6 +146,7 @@ async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLo
       error: {
         type: ErrorTypes.FAILED_LOAD_RUNTIME,
         detail: `Error loading new project: ${e}`,
+        stacktrace: getErrorStacktrace(e),
       },
     };
   }
@@ -193,6 +197,7 @@ async function loadFromPathProject(path: string): Promise<InternalLoadResult> {
       error: {
         type: ErrorTypes.FAILED_LOAD_RUNTIME,
         detail: `Error loading project from path: ${e}`,
+        stacktrace: getErrorStacktrace(e),
       },
       path,
     };
@@ -223,7 +228,7 @@ async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
     logUserError('failed to import image.', { label: LOG_LABEL, persistent: true });
     return {
       ok: false,
-      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from image: ${e}` },
+      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from image: ${e}`, stacktrace: getErrorStacktrace(e) },
       path,
     };
   }
@@ -241,7 +246,7 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
   } catch (e) {
     return {
       ok: false,
-      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from project data: ${e}` },
+      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from project data: ${e}`, stacktrace: getErrorStacktrace(e) },
     };
   }
 }
@@ -269,7 +274,7 @@ async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadRes
   } catch (e) {
     return {
       ok: false,
-      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from image: ${e}` },
+      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from image: ${e}`, stacktrace: getErrorStacktrace(e) },
     };
   }
 }

@@ -1,20 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeDefaultGlobalConfig } from '~/config/GlobalConfig';
+import { GLOBAL_CONFIG_ERROR_FAILED_PARSE_JSON } from '~/features/io/config/load';
+import { EDITOR_STATE_ERROR_FAILED_PARSE_JSON } from '~/features/io/editor/load';
 import { ErrorTypes } from '~/features/io/project/ProjectLoader';
 import { InitialLoadTypes } from '~/routes/editor/load';
-import {
-  ERROR_CLIPBOARD_IMAGE_FAILED,
-  ERROR_DIALOG_TITLES,
-  ERROR_LAST_PROJECT_FAILED_NEW_FAILED,
-  ERROR_LAST_PROJECT_FAILED_OPENED_NEW,
-  ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW,
-  ERROR_NEW_PROJECT,
-  formatLoadErrorMessage,
-} from '~/routes/editor/loadError';
 import type { EditorStateStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { setPlatform } from '~/utils/platform';
 import { TestMockPlatform } from '~/utils/platform/TestMockPlatform';
+
+vi.mock('~/routes/editor/loadError', async () => {
+  const actual = await vi.importActual<typeof import('~/routes/editor/loadError')>('~/routes/editor/loadError');
+  return {
+    ...actual,
+    reportInitialLoadError: vi.fn(async () => {}),
+  };
+});
 
 vi.mock('~/features/canvas', () => ({
   changeCanvasSize: vi.fn(),
@@ -88,6 +89,11 @@ const mockClipboardReadImageFailure = async (platform: TestMockPlatform, error: 
   }) as any;
 };
 
+const getReportInitialLoadErrorMock = async () => {
+  const { reportInitialLoadError } = await import('~/routes/editor/loadError');
+  return vi.mocked(reportInitialLoadError);
+};
+
 const initInitialLoad = async (editorState?: EditorStateStore) => {
   const { ProjectLoader } = await import('~/features/io/project/ProjectLoader');
   const { getInitialLoader, InitialLoadTypes } = await import('~/routes/editor/load');
@@ -126,6 +132,7 @@ const initInitialLoad = async (editorState?: EditorStateStore) => {
 beforeEach(() => {
   setWindowContext({ search: '', openPath: undefined });
   setGlobalConfig(makeDefaultGlobalConfig());
+  vi.clearAllMocks();
   vi.spyOn(console, 'error').mockImplementation(() => {});
   vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
@@ -146,9 +153,13 @@ describe('initial load error handling', () => {
     platform.fs.exists = vi.fn(async () => true) as any;
     platform.fs.readTextFile = vi.fn(async () => '{broken-json') as any;
 
-    const { loadGlobalSettings } = await import('~/features/io/config/load');
+    const { loadGlobalConfig: loadGlobalSettings } = await import('~/features/io/config/load');
     const result = await loadGlobalSettings();
-    expect(result.globalConfigStore.default.open).toBe('last');
+    expect(result.error?.type).toBe(ErrorTypes.INTERNAL_ERROR);
+    expect(result.error?.detail).toBe(GLOBAL_CONFIG_ERROR_FAILED_PARSE_JSON);
+
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).not.toHaveBeenCalled();
   });
 
   it('(x)EDITOR_STATE', async () => {
@@ -157,12 +168,17 @@ describe('initial load error handling', () => {
     platform.fs.readTextFile = vi.fn(async () => '{broken-json') as any;
 
     const { loadEditorState } = await import('~/features/io/editor/load');
+
     const result = await loadEditorState();
-    expect(result).toBeUndefined();
+    expect(result.error?.type).toBe(ErrorTypes.INTERNAL_ERROR);
+    expect(result.error?.detail).toBe(EDITOR_STATE_ERROR_FAILED_PARSE_JSON);
+
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).not.toHaveBeenCalled();
   });
 
   it('(!)PROJECT -> (o)NEW', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => false) as any;
 
     setWindowContext({ openPath: MISSING_PROJECT_PATH });
@@ -171,14 +187,17 @@ describe('initial load error handling', () => {
 
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FILE_NOT_FOUND]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW, MISSING_PROJECT_PATH));
-    expect(close).not.toHaveBeenCalled();
-    expect(destroy).not.toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.PATH_PROJECT,
+      expect.objectContaining({ type: ErrorTypes.FILE_NOT_FOUND }),
+      undefined,
+      MISSING_PROJECT_PATH
+    );
   });
 
   it('(!)PROJECT -> (x)NEW', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => false) as any;
 
     setWindowContext({ openPath: MISSING_PROJECT_PATH });
@@ -187,14 +206,17 @@ describe('initial load error handling', () => {
 
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FILE_NOT_FOUND]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW, MISSING_PROJECT_PATH));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.NEW_PROJECT_FALLBACK,
+      expect.objectContaining({ type: ErrorTypes.FILE_NOT_FOUND }),
+      InitialLoadTypes.PATH_PROJECT,
+      MISSING_PROJECT_PATH
+    );
   });
 
   it('(x)PROJECT -> (o)NEW', async () => {
-    const { platform, dialogs } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => true) as any;
     await mockUnpackFromPathFailure(new Error('boom'));
     await mockLayerSuccess();
@@ -203,12 +225,17 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: BROKEN_PROJECT_PATH });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FAILED_LOAD_RUNTIME]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_FAILED_OPENED_NEW, BROKEN_PROJECT_PATH));
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.PATH_PROJECT,
+      expect.objectContaining({ type: ErrorTypes.FAILED_LOAD_RUNTIME }),
+      undefined,
+      BROKEN_PROJECT_PATH
+    );
   });
 
   it('(x)PROJECT -> (x)NEW', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => true) as any;
     await mockUnpackFromPathFailure(new Error('boom'));
     await mockLayerSuccess();
@@ -217,35 +244,40 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: BROKEN_PROJECT_PATH });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FAILED_LOAD_RUNTIME]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_FAILED_NEW_FAILED, BROKEN_PROJECT_PATH));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.NEW_PROJECT_FALLBACK,
+      expect.objectContaining({ type: ErrorTypes.FAILED_LOAD_RUNTIME }),
+      InitialLoadTypes.PATH_PROJECT,
+      BROKEN_PROJECT_PATH
+    );
   });
 
   it('(x)CONFIG -> ... -> (x)PROJECT', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => true) as any;
     platform.fs.readTextFile = vi.fn(async () => '{broken-json') as any;
     await mockUnpackFromPathFailure(new Error('boom'));
     await mockLayerSuccess();
     await mockCanvasFailure(new Error('canvas fail'));
 
-    const { loadGlobalSettings } = await import('~/features/io/config/load');
+    const { loadGlobalConfig: loadGlobalSettings } = await import('~/features/io/config/load');
     await loadGlobalSettings();
 
     setWindowContext({ openPath: BROKEN_PROJECT_PATH });
     await initInitialLoad();
 
-    expect(dialogs).toHaveLength(1);
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FAILED_LOAD_RUNTIME]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_FAILED_NEW_FAILED, BROKEN_PROJECT_PATH));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.NEW_PROJECT_FALLBACK,
+      expect.objectContaining({ type: ErrorTypes.FAILED_LOAD_RUNTIME }),
+      InitialLoadTypes.PATH_PROJECT,
+      BROKEN_PROJECT_PATH
+    );
   });
 
   it('(x)EDITOR_STATE -> ... -> (x)PROJECT', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => true) as any;
     platform.fs.readTextFile = vi.fn(async () => '{broken-json') as any;
     await mockUnpackFromPathFailure(new Error('boom'));
@@ -258,15 +290,17 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: BROKEN_PROJECT_PATH });
     await initInitialLoad();
 
-    expect(dialogs).toHaveLength(1);
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FAILED_LOAD_RUNTIME]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_FAILED_NEW_FAILED, BROKEN_PROJECT_PATH));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.NEW_PROJECT_FALLBACK,
+      expect.objectContaining({ type: ErrorTypes.FAILED_LOAD_RUNTIME }),
+      InitialLoadTypes.PATH_PROJECT,
+      BROKEN_PROJECT_PATH
+    );
   });
 
   it('(x)IMG_PROJECT -> (o)NEW', async () => {
-    const { platform, dialogs } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => true) as any;
     await mockLoadLocalImageFailure(new Error('image read failed'));
     await mockLayerSuccess();
@@ -275,12 +309,17 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: IMAGE_PROJECT_PATH });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FAILED_LOAD_RUNTIME]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_FAILED_OPENED_NEW, IMAGE_PROJECT_PATH));
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.PATH_IMAGE_PROJECT,
+      expect.objectContaining({ type: ErrorTypes.FAILED_LOAD_RUNTIME }),
+      undefined,
+      IMAGE_PROJECT_PATH
+    );
   });
 
   it('(!)IMG_PROJECT -> (o)NEW', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => false) as any;
     await mockLayerSuccess();
     await mockCanvasSuccess();
@@ -288,14 +327,17 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: MISSING_IMAGE_PATH });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FILE_NOT_FOUND]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW, MISSING_IMAGE_PATH));
-    expect(close).not.toHaveBeenCalled();
-    expect(destroy).not.toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.PATH_IMAGE_PROJECT,
+      expect.objectContaining({ type: ErrorTypes.FILE_NOT_FOUND }),
+      undefined,
+      MISSING_IMAGE_PATH
+    );
   });
 
   it('(!)IMG_PROJECT -> (x)NEW', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => false) as any;
     await mockLayerSuccess();
     await mockCanvasFailure(new Error('canvas fail'));
@@ -303,14 +345,17 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: MISSING_IMAGE_PATH });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FILE_NOT_FOUND]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW, MISSING_IMAGE_PATH));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.NEW_PROJECT_FALLBACK,
+      expect.objectContaining({ type: ErrorTypes.FILE_NOT_FOUND }),
+      InitialLoadTypes.PATH_IMAGE_PROJECT,
+      MISSING_IMAGE_PATH
+    );
   });
 
   it('(x)IMG_PROJECT -> (x)NEW', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     platform.fs.exists = vi.fn(async () => true) as any;
     await mockLoadLocalImageFailure(new Error('image read failed'));
     await mockLayerSuccess();
@@ -319,37 +364,46 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: IMAGE_PROJECT_PATH });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FAILED_LOAD_RUNTIME]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_LAST_PROJECT_FAILED_NEW_FAILED, IMAGE_PROJECT_PATH));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.NEW_PROJECT_FALLBACK,
+      expect.objectContaining({ type: ErrorTypes.FAILED_LOAD_RUNTIME }),
+      InitialLoadTypes.PATH_IMAGE_PROJECT,
+      IMAGE_PROJECT_PATH
+    );
   });
 
   it('(x)NEW', async () => {
-    const { dialogs, close, destroy } = createPlatformMock();
+    createPlatformMock();
     await mockLayerSuccess();
     await mockCanvasFailure(new Error('canvas fail'));
 
     setWindowContext({ search: '?new=true' });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FAILED_LOAD_RUNTIME]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_NEW_PROJECT));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.NEW_PROJECT,
+      expect.objectContaining({ type: ErrorTypes.FAILED_LOAD_RUNTIME }),
+      undefined,
+      undefined
+    );
   });
 
   it('(x)CLIPBOARD_IMAGE', async () => {
-    const { platform, dialogs, close, destroy } = createPlatformMock();
+    const { platform } = createPlatformMock();
     await mockClipboardReadImageFailure(platform, new Error('clipboard fail'));
 
     setWindowContext({ search: '?clipboard=true' });
     await initInitialLoad();
 
-    expect(dialogs[0]?.options?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.INTERNAL_ERROR]);
-    expect(dialogs[0]?.message).toBe(formatLoadErrorMessage(ERROR_CLIPBOARD_IMAGE_FAILED));
-    expect(close).toHaveBeenCalled();
-    expect(destroy).toHaveBeenCalled();
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.IMAGE_CLIPBOARD,
+      expect.objectContaining({ type: ErrorTypes.INTERNAL_ERROR }),
+      undefined,
+      undefined
+    );
   });
 
   it('(!)PROJECT -> (o)NEW (Open Containing Folder)', async () => {
@@ -364,7 +418,13 @@ describe('initial load error handling', () => {
     setWindowContext({ openPath: MISSING_PROJECT_PATH });
     await initInitialLoad();
 
-    expect(message.mock.calls[0]?.[1]?.title).toBe(ERROR_DIALOG_TITLES[ErrorTypes.FILE_NOT_FOUND]);
-    expect(revealSpy).toHaveBeenCalledWith(MISSING_PROJECT_PATH);
+    const reportInitialLoadError = await getReportInitialLoadErrorMock();
+    expect(reportInitialLoadError).toHaveBeenCalledWith(
+      InitialLoadTypes.PATH_PROJECT,
+      expect.objectContaining({ type: ErrorTypes.FILE_NOT_FOUND }),
+      undefined,
+      MISSING_PROJECT_PATH
+    );
+    expect(revealSpy).not.toHaveBeenCalled();
   });
 });

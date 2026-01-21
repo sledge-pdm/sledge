@@ -3,8 +3,10 @@ import { Button, Icon } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { confirmOperation } from '~/components/section/perilous/PerilousOperation';
 import SectionItem from '~/components/section/SectionItem';
+import { ErrorTypes } from '~/features/io/project/ProjectLoader';
 import { resetAllLayers } from '~/features/layer';
-import { reportAppStartupError } from '~/utils/WindowUtils';
+import { InitialLoadTypes } from '~/routes/editor/load';
+import { reportInitialLoadError } from '~/routes/editor/loadError';
 import { sectionContent, sectionRoot } from '../SectionStyles';
 
 const dangerHeaderStyle = css`
@@ -79,7 +81,11 @@ const PerilousLayers: Component = () => {
                 hoverContent='!!!!!!!!!!!!!'
                 onClick={() => {
                   confirmOperation(REPORT_FATAL_ERROR_MSG, () => {
-                    reportAppStartupError('FAKE FATAL ERROR!');
+                    reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
+                      type: ErrorTypes.UNKNOWN_ERROR,
+                      detail: 'FAKE FATAL ERROR!',
+                      stacktrace: undefined,
+                    });
                   });
                 }}
               >

@@ -7,6 +7,10 @@ import { normalizeJoin, normalizePath } from '~/utils/FileUtils';
 import { getFromClipboardQuery, getNewProjectQuery, getOpenPath } from '~/utils/WindowUtils';
 
 export enum InitialLoadTypes {
+  // Configs
+  GLOBAL_CONFIG,
+  EDITOR_STATE,
+  // Project
   NEW_PROJECT,
   NEW_PROJECT_FALLBACK,
   PATH_PROJECT,
@@ -14,6 +18,7 @@ export enum InitialLoadTypes {
   PATH_PROJECT_LAST,
   PATH_IMAGE_PROJECT_LAST,
   IMAGE_CLIPBOARD,
+  // Unknown
   UNKNOWN,
 }
 
@@ -50,6 +55,7 @@ export async function getInitialLoader(editorState: EditorStateStore): Promise<{
           fatalError: {
             type: ErrorTypes.INTERNAL_ERROR,
             detail: 'Could not read clipboard image',
+            stacktrace: undefined,
           },
           targetPath: undefined,
         };
@@ -96,6 +102,7 @@ export async function getInitialLoader(editorState: EditorStateStore): Promise<{
       fatalError: {
         type: ErrorTypes.UNKNOWN_ERROR,
         detail: `Unknown error while initial project load: ${e}`,
+        stacktrace: e instanceof Error ? e.stack : undefined,
       },
     };
   }

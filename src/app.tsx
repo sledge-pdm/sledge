@@ -8,7 +8,7 @@ import Home from './routes/start/index';
 
 import { applyTheme, showContextMenu } from '@sledge-pdm/ui';
 import { createEffect, onMount } from 'solid-js';
-import { loadGlobalSettings } from '~/features/io/config/load';
+import { loadGlobalConfig } from '~/features/io/config/load';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
@@ -52,7 +52,7 @@ export default function App() {
   });
 
   listenEvent('onSettingsSaved', () => {
-    loadGlobalSettings();
+    loadGlobalConfig();
   });
 
   const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {

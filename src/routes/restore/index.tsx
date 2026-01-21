@@ -2,14 +2,17 @@ import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge-pdm/core';
 import { createSignal, For, onMount } from 'solid-js';
 import { getEmergencyBackupPath, getEmergencyBackups } from '~/features/backup';
-import { loadGlobalSettings } from '~/features/io/config/load';
+import { loadGlobalConfig } from '~/features/io/config/load';
+import { ErrorTypes } from '~/features/io/project/ProjectLoader';
 import { logSystemWarn } from '~/features/log/service';
+import { InitialLoadTypes } from '~/routes/editor/load';
+import { reportInitialLoadError } from '~/routes/editor/loadError';
 import { pageRoot } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { unpackFromPath } from '~/utils/msgpackr';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, fs, window as platformWindow } from '~/utils/platform';
-import { reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+import { showMainWindow } from '~/utils/WindowUtils';
 
 const root = css`
   display: flex;
@@ -81,7 +84,7 @@ const Restore = () => {
 
   onMount(async () => {
     try {
-      await loadGlobalSettings();
+      await loadGlobalConfig();
       const emergencyBackups = await getEmergencyBackups();
       if (!emergencyBackups) return;
 
@@ -121,7 +124,11 @@ const Restore = () => {
 
       await showMainWindow();
     } catch (e) {
-      await reportWindowStartError(e);
+      await reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
+        type: ErrorTypes.UNKNOWN_ERROR,
+        detail: `Unknown error while restore window load.\n${e}`,
+        stacktrace: e instanceof Error ? e.stack : undefined,
+      });
     }
   });
 

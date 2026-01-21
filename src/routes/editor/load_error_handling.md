@@ -40,8 +40,12 @@
 - (x)CONFIG -> ... -> (o)2.: [Failed to load config, fallback-ed (w/ details)] > OK(nothing)
 - ... -> (x)EDITOR_STATE -> (o)2.: [Failed to load editor state, fallback-ed (w/ details)] > OK(nothing)
 
-- (x)CONFIG -> ... -> (x)2.: *show nothing in 1.*
-- ... -> (x)EDITOR_STATE -> (x)2.: *show nothing in 1.*
+- (x)CONFIG -> ... -> (x)2.: [Failed to load config, fallback-ed (w/ details)] > OK(nothing) + 2.
+- ... -> (x)EDITOR_STATE -> (x)2.: [Failed to load editor state, fallback-ed (w/ details)] > OK(nothing) + 2.
+
+> Note that actual dialog use `await` that pauses process  in background window (like `alert`).
+> Therefore, After emitting error in 1., the app will pause process before move on to 2.
+> `Error in CONFIG|EDITOR_STATE`=>`Show 1. Dialog(process pause)`=>`User press OK`=>`Try 2.(if continue) / close window(if close)`
 
 ## 2. プロジェクト
 

@@ -1,7 +1,7 @@
-import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
+﻿import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { safeInvoke } from './TauriUtils';
-import { dialog, window as platformWindow, process, WebviewOptions, webviewWindow, WindowOptions } from './platform';
+import { dialog, window as platformWindow, WebviewOptions, webviewWindow, WindowOptions } from './platform';
 
 export function zoomForIntegerize(dpr: number) {
   const n = Math.round(dpr - 0.01);
@@ -82,70 +82,6 @@ export function isFirstStartup(): boolean {
 }
 
 const alreadyShownErrors: Set<string> = new Set();
-
-export async function reportAppStartupError(e: any) {
-  const errorMessage = e instanceof Error ? e.message : String(e);
-  const errorStack = e instanceof Error ? e.stack : undefined;
-  if (alreadyShownErrors.has(errorMessage)) {
-    logSystemWarn('Critical error already reported.', { label: 'WindowUtils', details: [errorMessage] });
-    return; // Avoid reporting the same error multiple times
-  }
-
-  // startup error won't affect project file
-  // await saveEmergencyBackup();
-
-  logSystemError('Reporting startup error.', {
-    label: 'WindowUtils',
-    details: [{ message: errorMessage, stack: errorStack }],
-  });
-
-  alreadyShownErrors.add(errorMessage);
-
-  await dialog.message(
-    `Something went wrong in startup.\n${errorMessage || '<No message available>'}
-    \n${errorStack || '<No stack trace available>'}`,
-    {
-      kind: 'error',
-      title: 'Error',
-      okLabel: 'Quit app',
-    }
-  );
-
-  alreadyShownErrors.delete(errorMessage);
-  // kill process
-  await process.exit(0);
-}
-
-export async function reportWindowStartError(e: any) {
-  const errorMessage = e instanceof Error ? e.message : String(e);
-  const errorStack = e instanceof Error ? e.stack : undefined;
-  if (alreadyShownErrors.has(errorMessage)) {
-    logSystemWarn('Critical error already reported.', { label: 'WindowUtils', details: [errorMessage] });
-    return; // Avoid reporting the same error multiple times
-  }
-
-  logSystemError('Reporting window startup error.', {
-    label: 'WindowUtils',
-    details: [{ message: errorMessage, stack: errorStack }],
-  });
-  alreadyShownErrors.add(errorMessage);
-
-  await dialog.message(
-    `Something went wrong in window startup.\n${errorMessage || '<No message available>'}
-    \n${errorStack || '<No stack trace available>'}`,
-    {
-      kind: 'error',
-      title: 'Error',
-      okLabel: 'Close',
-    }
-  );
-  alreadyShownErrors.delete(errorMessage);
-
-  // throwがあった時点でshowMainWindowには届かなぁE�Eでvisible=falseのウィンドウが残留する
-  // 確実に消しておく
-  platformWindow.getCurrentWindow().close();
-  platformWindow.getCurrentWindow().destroy();
-}
 
 export async function reportCriticalError(e: any) {
   const errorMessage = e instanceof Error ? e.message : String(e);

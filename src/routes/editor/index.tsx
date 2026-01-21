@@ -10,12 +10,12 @@ import SideSectionControls from '~/components/section/SideSectionControls';
 import { adjustZoomToFit } from '~/features/canvas';
 import { addImagesFromFiles, addImagesFromLocal } from '~/features/image_pool';
 import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
-import { loadGlobalSettings } from '~/features/io/config/load';
+import { loadGlobalConfig } from '~/features/io/config/load';
 import { loadEditorState } from '~/features/io/editor/load';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import KeyListener from '~/features/io/KeyListener';
-import { ProjectLoader } from '~/features/io/project/ProjectLoader';
+import { ErrorTypes, ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { logUserWarn } from '~/features/log/service';
 import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
@@ -26,7 +26,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
-import { isFirstStartup, reportAppStartupError, reportWindowStartError, showMainWindow } from '~/utils/WindowUtils';
+import { isFirstStartup, showMainWindow } from '~/utils/WindowUtils';
 
 const mainContainer = css`
   display: flex;
@@ -47,63 +47,90 @@ export default function Editor() {
 
   let unlisten: UnlistenFn;
 
+  // throwable
+  const loadConfigs = async (): Promise<EditorStateStore> => {
+    const { error: configError } = await loadGlobalConfig();
+    const { store: editorStateStore, error: editorStateError } = await loadEditorState();
+
+    // report error to be reported
+    // TODO: Config系はエラー複雑めなのでおそらくerror.detailsを用いる。フォールバックがあった＋それを通知したい場合はloadXXXのerrorにそれを含めておくこと
+    if (configError?.type === ErrorTypes.UNKNOWN_ERROR || configError?.type === ErrorTypes.FAILED_LOAD_RUNTIME) {
+      await reportInitialLoadError(InitialLoadTypes.GLOBAL_CONFIG, configError, undefined);
+    }
+    if (editorStateError?.type === ErrorTypes.UNKNOWN_ERROR || editorStateError?.type === ErrorTypes.FAILED_LOAD_RUNTIME) {
+      await reportInitialLoadError(InitialLoadTypes.EDITOR_STATE, configError, undefined);
+    }
+
+    return editorStateStore;
+  };
+
+  // Not throwable / return if result was ok or not
+  const loadProject = async (editorState: EditorStateStore): Promise<boolean> => {
+    const { initialLoadType, loader, fatalError, targetPath } = await getInitialLoader(editorState);
+    if (!loader) {
+      await reportInitialLoadError(initialLoadType, fatalError, undefined, targetPath);
+    } else {
+      const result = await loader.load();
+      if (result.ok) {
+        return true;
+      } else {
+        switch (initialLoadType) {
+          case InitialLoadTypes.PATH_PROJECT:
+          case InitialLoadTypes.PATH_PROJECT_LAST:
+          case InitialLoadTypes.PATH_IMAGE_PROJECT:
+          case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
+            const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
+            if (fallbackResult.ok) {
+              await saveEditorStateImmediate();
+              adjustZoomToFit();
+              await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
+            } else {
+              await reportInitialLoadError(InitialLoadTypes.NEW_PROJECT_FALLBACK, result.error, initialLoadType, targetPath);
+            }
+            break;
+          default:
+            await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
+            break;
+        }
+      }
+    }
+
+    return false;
+  };
+
   onMount(async () => {
     unlisten = await platformWindow.getCurrentWindow().onCloseRequested(handleCloseRequest);
     setIOStore('isInInitialLoading', true);
     await showMainWindow();
 
-    let editorState : EditorStateStore |undefined;
+    let editorState: EditorStateStore;
     try {
-      await loadGlobalSettings();
-      editorState = await loadEditorState();
+      editorState = await loadConfigs();
     } catch (e) {
       unlisten();
-      if (isFirst) await reportAppStartupError(e);
-      else await reportWindowStartError(e);
+      await reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
+        type: ErrorTypes.UNKNOWN_ERROR,
+        detail: `Unknown error while initial load.\n${e}`,
+        stacktrace: e instanceof Error ? e.stack : undefined,
+      });
       return;
     }
-
     try {
-      // const result = await tryLoadProject(editorState);
-      // TODO: EditorStateの扱い( (x)EDITOR_STATEパス )
-      const { initialLoadType, loader, fatalError, targetPath } = await getInitialLoader(editorState!);
-      if (!loader) {
-        // ローダーが用意できなかった = フォールバック(NEW_PROJECT_FALLBACK)すらしていないので単純にloadと同様に落とす
-        await reportInitialLoadError(initialLoadType, fatalError, undefined, targetPath);
-      } else {
-        const result = await loader.load();
-        if (result.ok) {
-          // TODO: 下の説明を解読する　なにこれ
-          // Save editor state if load succeeded.
-          // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
-          await saveEditorStateImmediate();
-          adjustZoomToFit();
-        } else {
-          switch (initialLoadType) {
-            case InitialLoadTypes.PATH_PROJECT:
-            case InitialLoadTypes.PATH_PROJECT_LAST:
-            case InitialLoadTypes.PATH_IMAGE_PROJECT:
-            case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
-              const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
-              if (fallbackResult.ok) {
-                await saveEditorStateImmediate();
-                adjustZoomToFit();
-                await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
-              } else {
-                await reportInitialLoadError(InitialLoadTypes.NEW_PROJECT_FALLBACK, result.error, initialLoadType, targetPath);
-              }
-              break;
-            default:
-              await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
-              break;
-          }
-        }
+      const isOK = await loadProject(editorState);
+      if (isOK) {
+        // Save editor state if load succeeded.
+        // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
+        await saveEditorStateImmediate();
+        adjustZoomToFit();
       }
     } catch (e) {
       // プロジェクト読み込みの段階はエラー吐かない想定なので、ここは既定の起動エラー扱いに戻す
       unlisten();
-      if (isFirst) await reportAppStartupError(e);
-      else await reportWindowStartError(e);
+      await reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
+        type: ErrorTypes.UNKNOWN_ERROR,
+        detail: `Unknown error while initial load.\n${e}`,
+        stacktrace: e instanceof Error ? e.stack : undefined,
+      });
       return;
     } finally {
       setIOStore('isInInitialLoading', false);

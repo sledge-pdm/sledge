@@ -4,6 +4,7 @@ import { Cursor } from '~/config/types/Cursor';
 import { FPS } from '~/config/types/FPS';
 import { CanvasRenderingMode } from '~/features/canvas';
 import { CanvasCenteringMode } from '~/features/canvas/model';
+import { UpdateChannel } from '~/utils/UpdateUtils';
 
 export type GlobalConfig = {
   general: {
@@ -35,6 +36,7 @@ export type GlobalConfig = {
     showDirtyTiles: boolean;
     useRawMove: boolean;
     disableCompletionLine: boolean;
+    updateChannel: UpdateChannel;
   };
   keyConfig: KeyConfigStore;
 };
@@ -69,6 +71,7 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
     showDirtyTiles: false,
     useRawMove: false,
     disableCompletionLine: false,
+    updateChannel: 'stable',
   },
   keyConfig: makeDefaultKeyConfigStore(),
 });

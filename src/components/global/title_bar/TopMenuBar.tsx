@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { color, fonts, MenuListOption } from '@sledge-pdm/ui';
-import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
@@ -69,6 +69,12 @@ const TopMenuBar: Component = () => {
 
   onMount(async () => {
     setIsDecorated(await platformWindow.getCurrentWindow().isDecorated());
+    const update = await getUpdate();
+    setAvailableUpdate(update);
+  });
+
+  createEffect(async () => {
+    globalConfig.debug.updateChannel;
     const update = await getUpdate();
     setAvailableUpdate(update);
   });

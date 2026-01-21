@@ -4,8 +4,8 @@ import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { PackedLayerSnapshot } from './types';
@@ -125,7 +125,7 @@ export class CanvasSizeHistoryAction extends BaseHistoryAction {
   private applySize(size: Size2D) {
     setProjectStore('canvas', 'size', size);
     adjustZoomToFit();
-    eventBus.emit('canvas:sizeChanged', { newSize: size });
+    selectionManager.resizeSelectionMask(size);
   }
 
   private restoreSnapshots(snapshots: PackedLayerSnapshot[]) {

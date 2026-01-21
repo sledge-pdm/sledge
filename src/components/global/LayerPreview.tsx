@@ -66,20 +66,19 @@ const LayerPreview: Component<Props> = (props: Props) => {
     }
   };
 
-  const handleCanvasSizeChanged = () => {
-    requestUpdate();
-  };
+  createEffect(() => {
+    projectStore.canvas.size;
+    performUpdate();
+  });
 
   onMount(() => {
     performUpdate();
     eventBus.on('preview:requestUpdate', handleUpdateReqEvent);
-    eventBus.on('canvas:sizeChanged', handleCanvasSizeChanged);
   });
 
   onCleanup(() => {
     stopRenderLoop();
     eventBus.off('preview:requestUpdate', handleUpdateReqEvent);
-    eventBus.off('canvas:sizeChanged', handleCanvasSizeChanged);
   });
 
   createEffect(() => {

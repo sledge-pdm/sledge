@@ -116,19 +116,12 @@ const toMatrix3dString = (matrix: DOMMatrix): string => {
   return matrix.toString();
 };
 
-/**
- * 譁ｰ縺励＞CanvasArea螳溯｣・
- * - 蜊倅ｸ縺ｮTransformMatrix菴ｿ逕ｨ
- * - 莠碁㍾transform讒矩縺ｮ蟒・ｭ｢
- * - 繝代ヵ繧ｩ繝ｼ繝槭Φ繧ｹ譛驕ｩ蛹・
- */
 const CanvasArea: Component = () => {
   let wrapper: HTMLDivElement;
   let canvasStack: HTMLDivElement;
 
   let interact: CanvasAreaInteract | undefined = undefined;
 
-  // 譛蠕後↓驕ｩ逕ｨ縺輔ｌ縺殳ransform蛟､・亥ｷｮ蛻・､懷・逕ｨ・・
   let lastTransformMatrix = '';
   let lastTransformArray: number[] | undefined;
 
@@ -138,10 +131,6 @@ const CanvasArea: Component = () => {
     }, 60)
   );
 
-  /**
-   * 邨ｱ荳縺輔ｌ縺鬱ransform譖ｴ譁ｰ
-   * CanvasStack縺ｫ蜊倅ｸ縺ｮmatrix3d transform繧帝←逕ｨ
-   */
   const updateTransform = () => {
     try {
       const matrix = coordinateTransform.getTransformMatrix();
@@ -155,7 +144,6 @@ const CanvasArea: Component = () => {
 
       const matrixString = toMatrix3dString(matrix);
 
-      // 蟾ｮ蛻・､懃衍縺ｫ繧医ｋ譛驕ｩ蛹・
       if (lastTransformMatrix !== matrixString) {
         canvasStack.style.transform = matrixString;
         lastTransformMatrix = matrixString;
@@ -172,7 +160,7 @@ const CanvasArea: Component = () => {
 
   onMount(() => {
     const unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
-      // 蠎ｧ讓吝､画鋤繧ｭ繝｣繝・す繝･繧偵け繝ｪ繧｢
+      // 蠎ｧ讓吝､画鋤繧ｭ繝｣繝�繧ｷ繝･繧偵け繝ｪ繧｢
       coordinateTransform.clearCache();
 
       const isMaximize = await platformWindow.getCurrentWindow().isMaximized();
@@ -186,7 +174,7 @@ const CanvasArea: Component = () => {
     });
 
     eventBus.on('window:sideSectionSideChanged', (e) => {
-      // 蠎ｧ讓吝､画鋤繧ｭ繝｣繝・す繝･繧偵け繝ｪ繧｢
+      // 蠎ｧ讓吝､画鋤繧ｭ繝｣繝�繧ｷ繝･繧偵け繝ｪ繧｢
       coordinateTransform.clearCache();
       centeringCanvas();
     });

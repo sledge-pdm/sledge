@@ -90,8 +90,6 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
   }
 
   setProjectStore('canvas', 'size', newSize);
-  eventBus.emit('canvas:sizeChanged', { newSize });
-
   for (const l of allLayers()) {
     const frascoLayer = layerManager.getLayerOptional(l.id);
     if (frascoLayer) {
@@ -106,6 +104,8 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
     updateLayerPreview(l.id);
   }
   updateWebGLCanvas('changeCanvasSize');
+  selectionManager.resizeSelectionMask(newSize);
+
   if (!skipHistory) {
     act.registerAfter();
     projectHistoryController.addAction(act);

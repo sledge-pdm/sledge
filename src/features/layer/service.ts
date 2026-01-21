@@ -15,10 +15,10 @@ import { cancelMove, cancelSelection } from '~/features/selection/SelectionOpera
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
 import { dialog } from '~/utils/platform';
 import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { selectionManager } from '../selection/SelectionAreaManager';
 import { changeBaseLayerColor, createLayer } from './model';
 import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
 
@@ -512,7 +512,7 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
   });
 
   setProjectStore('canvas', 'size', afterSize);
-  eventBus.emit('canvas:sizeChanged', { newSize: afterSize });
+  selectionManager.resizeSelectionMask(afterSize);
   adjustZoomToFit();
 
   act.registerAfter();

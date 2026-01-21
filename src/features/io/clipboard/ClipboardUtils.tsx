@@ -26,7 +26,7 @@ export async function tryGetImageFromClipboard(): Promise<
     const clipboardImage = await clipboard.readImage();
     const buffer = await clipboardImage.rgba();
     const size = await clipboardImage.size();
-    // imageBuf is stored in JS heap so we can release original resource data
+    // buffer is stored in JS heap so we can release original resource data
     clipboardImage.close();
     return { buffer, width: size.width, height: size.height };
   } catch (e) {

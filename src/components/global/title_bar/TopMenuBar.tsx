@@ -6,6 +6,7 @@ import SaveSection from '~/components/global/title_bar/SaveSection';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
 import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
+import { clipboardCopy, clipboardCut, clipboardPaste } from '~/features/io/clipboard/ClipboardActions';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
@@ -15,7 +16,6 @@ import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, window as platformWindow, Update } from '~/utils/platform';
 import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
@@ -211,17 +211,17 @@ const TopMenuBar: Component = () => {
         {
           type: 'item',
           label: 'Copy.',
-          onSelect: () => eventBus.emit('clipboard:doCopy', {}),
+          onSelect: async () => await clipboardCopy(),
         },
         {
           type: 'item',
           label: 'Cut.',
-          onSelect: () => eventBus.emit('clipboard:doCut', {}),
+          onSelect: async () => await clipboardCut(),
         },
         {
           type: 'item',
           label: 'Paste.',
-          onSelect: () => eventBus.emit('clipboard:doPaste', {}),
+          onSelect: async () => await clipboardPaste(),
         },
         {
           type: 'label',

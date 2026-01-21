@@ -1,4 +1,4 @@
-import { Vec2 } from '@sledge-pdm/core';
+import { Size2D, Vec2 } from '@sledge-pdm/core';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
 import { FloatingBuffer } from '~/features/selection/FloatingMoveManager';
@@ -112,13 +112,13 @@ class SelectionAreaManager {
     const height = projectStore.canvas.size.height ?? 0;
     this.selectionMask = new SelectionMask(width, height);
     this.previewMask = undefined;
+  }
 
-    eventBus.on('canvas:sizeChanged', (e: any) => {
-      this.selectionMask.changeSize(e.newSize);
-      if (this.previewMask) {
-        this.previewMask.changeSize(e.newSize);
-      }
-    });
+  resizeSelectionMask(size: Size2D) {
+    this.selectionMask.changeSize(size);
+    if (this.previewMask) {
+      this.previewMask.changeSize(size);
+    }
   }
 
   isMaskOverlap(pos: Vec2, withMoveOffset?: boolean) {

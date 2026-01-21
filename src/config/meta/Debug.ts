@@ -24,7 +24,7 @@ export const debugMetas: FieldMeta[] = [
     component: 'ToggleSwitch',
     tips: 'disable line completion between samples for pen/eraser.',
   },
-  { section: ConfigSections.Debug, kind: 'header', header: 'pen/eraser (experimental)' },
+  { section: ConfigSections.Debug, kind: 'header', header: 'updates' },
   {
     section: ConfigSections.Debug,
     path: 'debug/updateChannel',

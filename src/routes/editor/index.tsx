@@ -64,7 +64,7 @@ export default function Editor() {
     return editorStateStore;
   };
 
-  // Not throwable / return if result was ok or not
+  // Not throwable / return if loading itself was OK or not
   const loadProject = async (editorState: EditorStateStore): Promise<boolean> => {
     const { initialLoadType, loader, fatalError, targetPath } = await getInitialLoader(editorState);
     if (!loader) {
@@ -75,15 +75,17 @@ export default function Editor() {
         return true;
       } else {
         switch (initialLoadType) {
-          case InitialLoadTypes.PATH_PROJECT:
           case InitialLoadTypes.PATH_PROJECT_LAST:
-          case InitialLoadTypes.PATH_IMAGE_PROJECT:
           case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
+            // Remove lastPath(ioStore.savedLocation) from editorState when failed to load last project.
+            setIOStore('savedLocation', { path: undefined, name: undefined });
+            await saveEditorStateImmediate();
+          case InitialLoadTypes.PATH_PROJECT:
+          case InitialLoadTypes.PATH_IMAGE_PROJECT:
             const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
             if (fallbackResult.ok) {
-              await saveEditorStateImmediate();
-              adjustZoomToFit();
               await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
+              return true;
             } else {
               await reportInitialLoadError(InitialLoadTypes.NEW_PROJECT_FALLBACK, result.error, initialLoadType, targetPath);
             }
@@ -110,7 +112,7 @@ export default function Editor() {
       unlisten();
       await reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
         type: ErrorTypes.UNKNOWN_ERROR,
-        detail: `Unknown error while initial load.\n${e}`,
+        detail: `Unknown error while initial config load.\n${e}`,
         stacktrace: e instanceof Error ? e.stack : undefined,
       });
       return;
@@ -118,17 +120,13 @@ export default function Editor() {
     try {
       const isOK = await loadProject(editorState);
       if (isOK) {
-        // Save editor state if load succeeded.
-        // This will replace last saved project paths, so that prevent getting same error after failed to open last project.
-        await saveEditorStateImmediate();
         adjustZoomToFit();
       }
     } catch (e) {
-      // プロジェクト読み込みの段階はエラー吐かない想定なので、ここは既定の起動エラー扱いに戻す
       unlisten();
       await reportInitialLoadError(InitialLoadTypes.UNKNOWN, {
         type: ErrorTypes.UNKNOWN_ERROR,
-        detail: `Unknown error while initial load.\n${e}`,
+        detail: `Unknown error while initial project load.\n${e}`,
         stacktrace: e instanceof Error ? e.stack : undefined,
       });
       return;

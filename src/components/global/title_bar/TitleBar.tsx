@@ -62,7 +62,7 @@ const titleBarProjectVersion = css`
   font-size: 8px;
   white-space: pre;
   padding: 2px 4px;
-  background-color: var(--color-border-secondary);
+  background-color: var(--color-surface);
   border-radius: 3px;
   opacity: 0.9;
 `;

@@ -92,7 +92,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: dev-latest
+          tagName: ${{ github.ref_name }}
           releaseName: '${{ github.ref_name }}'
           releaseBody: 'This is a development build. If you are new for sledge, install the stable version (x.y.z) instead of this.'
           releaseDraft: false
@@ -102,3 +102,28 @@ jobs:
           updaterJsonPreferNsis: true
           updaterJsonKeepUniversal: true
           args: ${{ matrix.args }}
+
+  sync-dev-latest-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release assets for current tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${{ github.ref_name }}" --dir dist
+
+      - name: Recreate dev-latest release with latest assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view dev-latest >/dev/null 2>&1; then
+            gh release delete dev-latest -y
+          fi
+          gh release create dev-latest dist/* \
+            --prerelease \
+            --title "dev-latest" \
+            --notes "Development channel release (auto-updated)."
+          gh release edit dev-latest --target "${{ github.sha }}"

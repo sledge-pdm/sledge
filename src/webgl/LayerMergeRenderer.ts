@@ -1,4 +1,4 @@
-﻿import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+﻿import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { projectHistoryController } from '~/features/history';
 import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
 import { activeLayer, BlendMode, getLayerIndex, Layer } from '~/features/layer';
@@ -14,7 +14,7 @@ class LayerMergeRenderer {
   ) {}
 
   private getRenderer(): FrascoRenderer | undefined {
-    return webGLRenderer;
+    return frascoRenderer;
   }
 
   async mergeLayer(): Promise<void> {

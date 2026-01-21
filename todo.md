@@ -8,8 +8,6 @@
 
 - ProjectLoaderのnew/image系ロードで、既存のRuntimeProject（imagePool/snapshots/historyなど）がどこまで初期化されるのか不透明で、状態漏れの印象がある
 
-- Snapshotロード時のsnapshots退避/復帰が配列のスプレッドに見えていて、順序や構造が崩れる可能性がありそうで要確認
-
 - autosave/backupの保持ポリシーが実質無制限に見えるため、長期運用でディスクを食い続ける懸念（世代数/容量上限の設計が必要）
 
 - FrascoRendererがMAX_LAYERS=16で黙って切り捨てる構造なので、層数が増えたときのUI/警告/代替描画が不足している印象
@@ -29,12 +27,6 @@
 - platform抽象化外のwindow/document依存が点在しており、browser modeやテスト環境での再利用性が低い
 
 ### パフォーマンスtodo
-
-- Snapshotは基本的にプロジェクトそのものと同じサイズとみなせるので、2MBのプロジェクトで10回スナップショットを取ると22MBになる(多分。もっとひどいか、もしくはもっと軽い可能性はあるが)。
-  これ自体(project in project)にほぼ異存はないのだが、以下の点で疑問が残る
-  1. 現状ProjectがMsgpackを使っているが、snapshot自体にもMsgpackをかけるべきかもしれない。
-     project.snapshots[i]の内容が親のprojectのmsgpack packing一回でpackedされたことになっているのか疑問が残る。
-  2. 読み込み時にsnapshot全体を取得する必要が今のところない。thumbnailとかの情報は入っており、canvasサイズなどのproject内部情報にしてもsnapshot.snapshotから出すか、内部内容を持ち出すにしてもロード時に必要な情報を読みだせたらsnapshotの内容はオンメモリからは捨てても問題ないような気がする
 
 - AutoSnapshotManagerがsetInterval+async保存でロック/スロットリングが無く、重いプロジェクトだと保存の重なりやI/O詰まりが起きそう
 

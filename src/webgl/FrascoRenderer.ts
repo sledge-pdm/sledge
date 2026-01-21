@@ -78,6 +78,19 @@ export class FrascoRenderer {
     return this.includeBaseLayer;
   }
 
+  public getGLContext(): WebGL2RenderingContext {
+    return this.gl;
+  }
+
+  public getCompositeLayers(): CompositeLayer[] {
+    const layers = this.layers.toReversed().slice(0, MAX_LAYERS);
+    return this.buildCompositeLayers(layers);
+  }
+
+  public getBaseColor(): RGBA {
+    return this.includeBaseLayer ? getBaseLayerColor(projectStore.layers.state.baseLayer) : [0, 0, 0, 0];
+  }
+
   public resize(width: number, height: number): void {
     this.checkDisposed();
     if (width <= 0 || height <= 0) return;

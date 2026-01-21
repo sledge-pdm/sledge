@@ -22,7 +22,7 @@
     "@jaames/iro": "^5.5.2",
     "@jsquash/webp": "^1.5.0",
     "@sledge-pdm/core": "^1.2.1",
-    "@sledge-pdm/frasco": "^0.2.0",
+    "@sledge-pdm/frasco": "^0.2.1",
     "@sledge-pdm/ui": "^1.2.0",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",

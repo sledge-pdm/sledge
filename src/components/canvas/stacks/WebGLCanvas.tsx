@@ -19,7 +19,7 @@ const webglCanvasStyle = css`
   z-index: var(--zindex-webgl-canvas);
 `;
 
-export let webGLRenderer: FrascoRenderer | undefined;
+export let frascoRenderer: FrascoRenderer | undefined;
 
 const WebGLCanvas: Component = () => {
   const LOG_LABEL = 'WebGLCanvas';
@@ -32,7 +32,7 @@ const WebGLCanvas: Component = () => {
       if (updateRender()) {
         setUpdateRender(false);
         try {
-          webGLRenderer?.render();
+          frascoRenderer?.render();
         } catch (error) {
           logSystemError('Failed to render WebGL frame.', { label: LOG_LABEL, details: [error] });
         }
@@ -53,26 +53,15 @@ const WebGLCanvas: Component = () => {
     setUpdateRender(false);
   });
 
-  // const handleCanvasSizeChangedEvent = (e: Events['canvas:sizeChanged']) => {
-  //   const { width, height } = e.newSize;
-  //   waitingForLayoutUpdate = true;
-  //   logSystemInfo('Queued layout-aware resize', {
-  //     label: LOG_LABEL,
-  //     details: [width, height],
-  //     debugOnly: true,
-  //   });
-  //   setUpdateRender(false);
-  // };
-
   const handleCanvasLayoutReady = (e: Events['canvas:layoutReady']) => {
     if (!waitingForLayoutUpdate) return;
     waitingForLayoutUpdate = false;
 
     const { width, height } = e.newSize;
     try {
-      webGLRenderer?.resize(width, height);
+      frascoRenderer?.resize(width, height);
     } catch (error) {
-      logSystemError('Failed to resize WebGLRenderer after layout update', { label: LOG_LABEL, details: [error] });
+      logSystemError('Failed to resize frascoRenderer after layout update', { label: LOG_LABEL, details: [error] });
     }
 
     logSystemInfo('Layout-ready resize applied', {
@@ -95,16 +84,16 @@ const WebGLCanvas: Component = () => {
   };
 
   const init = () => {
-    if (webGLRenderer) {
-      webGLRenderer.dispose();
-      webGLRenderer = undefined;
+    if (frascoRenderer) {
+      frascoRenderer.dispose();
+      frascoRenderer = undefined;
     }
 
     const { width, height } = projectStore.canvas.size;
     try {
-      webGLRenderer = new FrascoRenderer(canvasEl);
-      webGLRenderer?.setLayers(allLayers());
-      webGLRenderer.resize(width, height);
+      frascoRenderer = new FrascoRenderer(canvasEl);
+      frascoRenderer?.setLayers(allLayers());
+      frascoRenderer.resize(width, height);
       setUpdateRender(true); // rise flag for init render
 
       startRenderLoop();
@@ -112,7 +101,7 @@ const WebGLCanvas: Component = () => {
       logSystemInfo('Starting render loop', { label: LOG_LABEL, debugOnly: true });
     } catch (error) {
       logSystemError('Failed to initialize WebGLRenderer', { label: LOG_LABEL, details: [error] });
-      webGLRenderer = undefined;
+      frascoRenderer = undefined;
     }
   };
 
@@ -124,8 +113,8 @@ const WebGLCanvas: Component = () => {
     eventBus.on('webgl:requestResume', handleResumeRequest);
 
     return () => {
-      webGLRenderer?.dispose();
-      webGLRenderer = undefined;
+      frascoRenderer?.dispose();
+      frascoRenderer = undefined;
       stopRenderLoop();
       // eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
       eventBus.off('canvas:layoutReady', handleCanvasLayoutReady);
@@ -136,7 +125,7 @@ const WebGLCanvas: Component = () => {
 
   createEffect(() => {
     const layers = projectStore.layers.layers;
-    webGLRenderer?.setLayers(layers);
+    frascoRenderer?.setLayers(layers);
   });
 
   createEffect(() => {

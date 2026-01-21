@@ -1,5 +1,5 @@
 ﻿import { toUint8Array, toUint8ClampedArray } from '@sledge-pdm/core';
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
@@ -15,8 +15,8 @@ export class SVGExporter extends Exporter {
       throw new Error('SVG export is only supported for images 128x128 or smaller');
     }
 
-    if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
-    const buffer = webGLRenderer.readPixelsFlipped();
+    if (frascoRenderer === undefined) throw new Error('Export Error: Renderer not defined');
+    const buffer = frascoRenderer.readPixelsFlipped();
 
     // wasm繧剃ｽｿ縺｣縺ｦ荳埼乗・驛ｨ蛻・・繝槭せ繧ｯ繧剃ｽ懈・
     const mask = create_opacity_mask(toUint8Array(buffer), width, height);
@@ -48,7 +48,7 @@ export class SVGExporter extends Exporter {
       throw new Error('SVG export is only supported for images 128x128 or smaller');
     }
 
-    if (webGLRenderer === undefined) throw new Error('Export Error: Renderer not defined');
+    if (frascoRenderer === undefined) throw new Error('Export Error: Renderer not defined');
     const buffer = toUint8ClampedArray(getLayer(layer.id).readPixels()) as Uint8ClampedArray<ArrayBuffer>;
     if (!buffer) throw new Error(`Export Error: Cannot export layer ${layer.name}.`);
 

@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
 import { createEffect, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import { webGLRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/Loading';
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
@@ -136,7 +136,7 @@ export default function Editor() {
 
     return () => {
       unlisten();
-      webGLRenderer?.dispose();
+      frascoRenderer?.dispose();
       AutoSnapshotManager.getInstance().stop();
       if (import.meta.hot) {
         window.location.reload();

@@ -5,13 +5,14 @@ import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
 import { defineConfig } from 'vitest/config';
 
+const projectRoot = path.resolve(__dirname, '..');
 const sharedConf = {
   plugins: [wasmPlugin(), topLevelAwait()],
   resolve: {
     alias: {
-      '~': path.resolve(__dirname, 'src'),
-      '@assets': path.resolve(__dirname, 'public/assets'),
-      '@sledge/wasm': path.resolve(__dirname, 'wasm/pkg/sledge_wasm.js'),
+      '~': path.resolve(projectRoot, 'src'),
+      '@assets': path.resolve(projectRoot, 'public/assets'),
+      '@sledge/wasm': path.resolve(projectRoot, 'wasm/pkg/sledge_wasm.js'),
     },
   },
 };

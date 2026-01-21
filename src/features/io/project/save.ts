@@ -3,6 +3,7 @@ import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
+import { makeSnapshotsAllRuntime } from '~/features/snapshot';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
@@ -101,6 +102,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       // @ts-ignore
       window.__PATH__ = selectedPath;
       setProjectStore('project', 'lastSavedAt', new Date());
+      makeSnapshotsAllRuntime();
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });
 

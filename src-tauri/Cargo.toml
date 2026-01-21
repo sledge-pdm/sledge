@@ -1,6 +1,6 @@
 [package]
 name = "sledge"
-version = "0.1.5"
+version = "0.2.0-dev.1"
 description = "Pixel-based drawing tool."
 authors = ["innsbluck"]
 license = "MIT"

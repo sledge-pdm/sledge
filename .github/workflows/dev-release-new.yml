@@ -1,0 +1,220 @@
+﻿name: dev-release-new
+
+on:
+  push:
+    tags:
+      - 'dev-release'
+  workflow_dispatch: {}
+
+concurrency:
+  group: dev-release
+  cancel-in-progress: false
+
+jobs:
+  resolve-dev-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      dev_base: ${{ steps.calc.outputs.base }}
+      dev_n: ${{ steps.calc.outputs.next_n }}
+      dev_version: ${{ steps.calc.outputs.version }}
+      dev_tag: ${{ steps.calc.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Calculate dev version
+        id: calc
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          base=$(python - <<'PY'
+          import pathlib
+          import re
+
+          text = pathlib.Path('src-tauri/Cargo.toml').read_text()
+          match = re.search(r'^version = "([^"]+)"', text, re.MULTILINE)
+          if not match:
+              raise SystemExit('version not found in Cargo.toml')
+          version = match.group(1)
+          base_version = version.split('-', 1)[0]
+          print(base_version)
+          PY
+          )
+
+          releases=$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100")
+          max_n=$(printf '%s' "$releases" | jq -r --arg base "$base" '
+            [.[].tag_name
+              | select(startswith("v" + $base + "-dev."))
+              | sub("^v" + $base + "-dev\\."; "")
+              | tonumber?
+            ] | max // 0
+          ')
+
+          next_n=$((max_n + 1))
+          version="${base}-dev.${next_n}"
+          tag="v${version}"
+
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "next_n=$next_n" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  update-dev-latest-tag:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Update dev-latest tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f dev-latest ${{ github.sha }}
+          git push -f origin dev-latest
+
+  build:
+    needs: [resolve-dev-version, update-dev-latest-tag]
+    permissions:
+      contents: write
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            args: '--target universal-apple-darwin'
+          - platform: 'ubuntu-22.04'
+            args: ''
+          - platform: 'windows-latest'
+            args: ''
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: install x86_64-apple-darwin binary (macOS only)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          rustup target add x86_64-apple-darwin
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            src-tauri
+            wasm
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Configure pnpm Auth for private registry
+        run: pnpm config set //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
+
+      - name: install frontend dependencies
+        run: pnpm install
+
+      - name: sync Cargo version
+        shell: pwsh
+        env:
+          DEV_VERSION: ${{ needs.resolve-dev-version.outputs.dev_version }}
+        run: |
+          $manifest = 'src-tauri/Cargo.toml'
+          $text = Get-Content -LiteralPath $manifest -Raw
+          $pattern = '(?s)(\[package\].*?\n)version = "[^"]+"'
+          if (-not [regex]::IsMatch($text, $pattern)) {
+            throw "Failed to locate package version in $manifest"
+          }
+          $replacement = "`$1version = \"$env:DEV_VERSION\""
+          $newText = [regex]::Replace($text, $pattern, $replacement, 1)
+          Set-Content -LiteralPath $manifest -Value $newText -Encoding utf8
+
+      # Tauri Build + Release Upload
+      - uses: tauri-apps/tauri-action@v0
+        id: tauri-build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ needs.resolve-dev-version.outputs.dev_tag }}
+          releaseName: ${{ needs.resolve-dev-version.outputs.dev_tag }}
+          releaseBody: 'This is a development build. If you are new for sledge, install the stable version (x.y.z) instead of this.'
+          releaseDraft: false
+          prerelease: true
+          releaseCommitish: ${{ github.sha }}
+          projectPath: '.'
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          updaterJsonKeepUniversal: true
+          args: ${{ matrix.args }}
+
+  sync-dev-latest-release:
+    needs: [build, resolve-dev-version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download release assets for current tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${{ needs.resolve-dev-version.outputs.dev_tag }}" --dir dist
+
+      - name: Recreate dev-latest release with latest assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view dev-latest >/dev/null 2>&1; then
+            gh release delete dev-latest -y
+          fi
+          gh release create dev-latest dist/* \
+            --prerelease \
+            --title "dev-latest" \
+            --notes "Development channel release (auto-updated)."
+          gh release edit dev-latest --target "${{ github.sha }}"
+
+  cleanup-trigger-tag:
+    needs: [resolve-dev-version, update-dev-latest-tag, build, sync-dev-latest-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: always()
+    steps:
+      - name: Delete dev-release tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/git/refs/tags/dev-release" >/dev/null 2>&1; then
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/dev-release"
+          fi

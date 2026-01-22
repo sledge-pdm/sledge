@@ -33,8 +33,8 @@ fn parse_channels(channel: Option<&str>) -> ChannelSelection {
         dev: false,
     };
 
-    let _split_chars = ['|', ',', ' ', '\t'];
-    for token in channel.split(|c: char| matches!(c, _split_chars)) {
+    let split_chars = ['|', ',', ' ', '\t'];
+    for token in channel.split(|c| split_chars.contains(&c)) {
         match token {
             "stable" => selection.stable = true,
             "dev" => selection.dev = true,

@@ -2,7 +2,7 @@ import { Component, createEffect, createMemo, createSignal, For, Show } from 'so
 
 import { css } from '@acab/ecsstatic';
 import { clsx, getProjectAdapter, gzipInflate, ProjectAdapter, toUint8ClampedArray } from '@sledge-pdm/core';
-import { Icon } from '@sledge-pdm/ui';
+import { Icon, Nothing } from '@sledge-pdm/ui';
 import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
 import { logSystemWarn } from '~/features/log';
@@ -33,11 +33,6 @@ const snapshotsContainer = css`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`;
-const noSnapshotsText = css`
-  color: var(--color-muted);
-  align-self: center;
-  margin: 8px 0;
 `;
 
 const Snapshots: Component = () => {
@@ -73,7 +68,7 @@ const Snapshots: Component = () => {
         </div>
 
         <div class={snapshotsContainer}>
-          <Show when={projectStore.snapshots.length > 0} fallback={<p class={noSnapshotsText}>[ no snapshots ]</p>}>
+          <Show when={projectStore.snapshots.length > 0} fallback={<Nothing>no snapshots.</Nothing>}>
             <For each={sortedSnapshots()}>
               {(snapshot) => {
                 return (

@@ -5,16 +5,19 @@ import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
+import { adjustZoomToFit } from '~/features/canvas';
 import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { clipboardCopy, clipboardCut, clipboardPaste } from '~/features/io/clipboard/ClipboardActions';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
-import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
+import { ProjectLoader } from '~/features/io/project/ProjectLoader';
+import { openExistingProject, openNewEditorWindow, openNewProjectWithClipboard, openProjectWithExplorer } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
 import { flipAllLayer, rotateAllLayer } from '~/features/layer/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, window as platformWindow } from '~/utils/platform';
 import { openWindow } from '~/utils/WindowUtils';
@@ -74,63 +77,102 @@ const TopMenuBar: Component = () => {
     return `layer: ${activeLayer()?.name}`;
   };
 
+  const recentFileItems = createMemo<MenuListOption[]>(() => {
+    if (ioStore.recentFiles.length > 0) {
+      return [
+        { type: 'divider', label: 'recent' } as MenuListOption,
+        { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
+        ...ioStore.recentFiles
+          .toReversed()
+          .map<MenuListOption | undefined>((loc) => {
+            if (!loc.name || !loc.path) return undefined;
+            const fullpath = normalizeJoin(loc.path, loc.name);
+            return {
+              type: 'item',
+              label: fullpath,
+              title: fullpath,
+              // fontFamily: fonts.ZFB03,
+              icon: ProjectLoader.isProjectPath(fullpath) ? '/assets/icons/files/file_sledge.png' : '/assets/icons/files/image.png',
+              disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
+              onSelect: () => {
+                openExistingProject(loc);
+              },
+            };
+          })
+          .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
+      ];
+    }
+
+    return [];
+  });
+
   const FilesMenuItem = createMemo<TopMenuBarItemProps>(() => {
     return {
       label: 'Files.',
       action: () => {},
-      menu: () => [
-        {
-          type: 'item',
-          label: '+ new project.',
-          onSelect: () => {
-            createNew();
+      menu: () =>
+        [
+          {
+            type: 'item',
+            label: 'new project.',
+            icon: '/assets/icons/title_bar/addadd.png',
+            onSelect: () => {
+              openNewEditorWindow(ProjectLoader.getRequestFromNew({ ...globalConfig.default.canvasSize }));
+            },
           },
-        },
-        {
-          type: 'item',
-          label: '> open project.',
-          onSelect: () => {
-            openProject();
+          {
+            type: 'item',
+            label: 'open project.',
+            icon: '/assets/icons/title_bar/open_folder.png',
+            onSelect: () => {
+              openProjectWithExplorer();
+            },
           },
-        },
-        {
-          type: 'item',
-          label: '> from clipboard.',
-          onSelect: async () => {
-            // clipboard data will loaded in new window, but ensure there's data
-            const ensureData = await tryGetImageFromClipboard();
-            if (!ensureData) {
-              const confirmed = await dialog.confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
-                title: 'Open from clipboard',
-              });
-              if (!confirmed) return;
-            }
-
-            openFromClipboard();
+          ...(import.meta.env.DEV
+            ? [
+                {
+                  type: 'item',
+                  label: 'reload project.',
+                  icon: '/assets/icons/title_bar/reload.png',
+                  onSelect: async () => {
+                    const confirmed = await dialog.confirm(`Sure to reload this project?
+Unsaved changes will be discarded!`);
+                    if (confirmed) {
+                      const loc = ioStore.savedLocation;
+                      if (!loc.path || !loc.name) {
+                        await dialog.message('Failed to reload project. (invalid path)');
+                        return;
+                      }
+                      const result = await ProjectLoader.fromPath({ path: normalizeJoin(loc.path, loc.name) }).load();
+                      if (result.ok) {
+                        adjustZoomToFit();
+                      } else {
+                        await dialog.message(`Failed to reload project. (load failed)\n${result.error ?? 'unknown error'}`);
+                        return;
+                      }
+                    }
+                  },
+                },
+              ]
+            : []),
+          {
+            type: 'item',
+            label: 'from clipboard.',
+            icon: '/assets/icons/title_bar/clipboard.png',
+            onSelect: async () => {
+              // clipboard data will loaded in new window, but ensure there's data
+              const ensureData = await tryGetImageFromClipboard();
+              if (!ensureData) {
+                const confirmed = await dialog.confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
+                  title: 'Open from clipboard',
+                });
+                if (!confirmed) return;
+              }
+              openNewProjectWithClipboard();
+            },
           },
-        },
-        ...(ioStore.recentFiles.length > 0
-          ? [
-              { type: 'divider', label: 'recent' } as MenuListOption,
-              { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
-              ...ioStore.recentFiles
-                .map<MenuListOption | undefined>((loc) => {
-                  if (!loc.name || !loc.path) return undefined;
-                  return {
-                    type: 'item',
-                    label: normalizeJoin(loc.path, loc.name),
-                    title: normalizeJoin(loc.path, loc.name),
-                    fontFamily: fonts.ZFB03,
-                    disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
-                    onSelect: () => {
-                      openExistingProject(loc);
-                    },
-                  };
-                })
-                .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
-            ]
-          : []),
-      ],
+          ...recentFileItems(),
+        ] as MenuListOption[],
     };
   });
 
@@ -146,7 +188,7 @@ const TopMenuBar: Component = () => {
         {
           label: 'ruler',
           type: 'item',
-          icon: appearanceStore.ruler ? '/assets/icons/misc/check_8.png' : undefined,
+          icon: appearanceStore.ruler ? '/assets/icons/misc/check_8.png' : '/assets/icons/misc/empty.png',
           onSelect: () => {
             setAppearanceStore('ruler', (v) => !v);
           },
@@ -155,7 +197,7 @@ const TopMenuBar: Component = () => {
         {
           label: 'onscreen control',
           type: 'item',
-          icon: appearanceStore.onscreenControl ? '/assets/icons/misc/check_8.png' : undefined,
+          icon: appearanceStore.onscreenControl ? '/assets/icons/misc/check_8.png' : '/assets/icons/misc/empty.png',
           onSelect: () => {
             setAppearanceStore('onscreenControl', (v) => !v);
           },
@@ -170,7 +212,7 @@ const TopMenuBar: Component = () => {
           return {
             label: control.id,
             type: 'item',
-            icon: shown ? '/assets/icons/misc/check_8.png' : undefined,
+            icon: shown ? '/assets/icons/misc/check_8.png' : '/assets/icons/misc/empty.png',
             title: control.id,
             onSelect: () => {
               // toggle Controls' visibility, not show/hide content
@@ -205,16 +247,19 @@ const TopMenuBar: Component = () => {
         {
           type: 'item',
           label: 'Copy.',
+          icon: '/assets/icons/context_menu/copy.png',
           onSelect: async () => await clipboardCopy(),
         },
         {
           type: 'item',
           label: 'Cut.',
+          icon: '/assets/icons/context_menu/cut.png',
           onSelect: async () => await clipboardCut(),
         },
         {
           type: 'item',
           label: 'Paste.',
+          icon: '/assets/icons/context_menu/paste.png',
           onSelect: async () => await clipboardPaste(),
         },
         {
@@ -280,11 +325,11 @@ const TopMenuBar: Component = () => {
         </div>
       </Show>
 
+      <UpdateSection />
+
       <div class={menuListRight}>
         <TopMenuBarItem {...settingMenuItem} />
       </div>
-
-      <UpdateSection />
     </div>
   );
 };

@@ -66,7 +66,6 @@ export const TopMenuBarItem: Component<TopMenuBarItemProps> = (props) => {
           onClose={() => setMenuOpen(false)}
           style={{
             'margin-top': '4px',
-            'min-width': '120px',
           }}
         />
       </Show>

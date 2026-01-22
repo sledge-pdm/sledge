@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { Nothing } from '@sledge-pdm/ui';
 import { Component, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import HistoryItemRow from '~/components/section/history/ProjectHistoryItem';
@@ -19,10 +20,6 @@ const redoContentStyle = css`
 const undoContentStyle = css`
   flex-direction: column-reverse;
   padding: 0;
-`;
-
-const mutedTextStyle = css`
-  color: var(--color-muted);
 `;
 
 const History: Component = () => {
@@ -51,7 +48,7 @@ const History: Component = () => {
 
         <p class={sectionSubCaption}>redo stack ({historyStore.redoStack.length})</p>
         <div class={`${sectionSubContent} ${redoContentStyle}`}>
-          <Show when={historyStore.redoStack.length > 0} fallback={<p class={mutedTextStyle}>[ no redo stack ]</p>}>
+          <Show when={historyStore.redoStack.length > 0} fallback={<Nothing>no redo stack.</Nothing>}>
             <For each={historyStore.redoStack}>
               {(action, i) => {
                 const index = () => historyStore.redoStack.length - i();
@@ -63,7 +60,7 @@ const History: Component = () => {
 
         <p class={sectionSubCaption}>{`undo stack (${historyStore.undoStack.length})`}</p>
         <div class={`${sectionSubContent} ${undoContentStyle}`}>
-          <Show when={historyStore.undoStack.length > 0} fallback={<p class={mutedTextStyle}>[ no undo stack ]</p>}>
+          <Show when={historyStore.undoStack.length > 0} fallback={<Nothing>no undo stack.</Nothing>}>
             <For each={historyStore.undoStack}>
               {(action, i) => {
                 const index = () => i() + 1;

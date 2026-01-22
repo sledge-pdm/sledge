@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge-pdm/core';
-import { color, Dropdown, DropdownOption, Icon, MenuList } from '@sledge-pdm/ui';
+import { color, Dropdown, DropdownOption, Icon, MenuList, Nothing } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
@@ -570,11 +570,10 @@ const Explorer: Component = () => {
               <p class={errorText}>failed to open directory.</p>
             </Match>
             <Match when={entries() !== undefined && (visibleEntries()?.length ?? 0) === 0}>
-              <p class={emptyText}>
-                {configStore.showOnlySledgeOpenable && (entries()?.length ?? 0) > 0
-                  ? 'no sledge-compatible files in this folder.'
-                  : 'this directory is empty.'}
-              </p>
+              <Nothing>no files.</Nothing>
+              <Show when={configStore.showOnlySledgeOpenable}>
+                <Nothing>try turning off filter config.</Nothing>
+              </Show>
             </Match>
           </Switch>
         </div>

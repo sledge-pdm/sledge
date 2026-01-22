@@ -1,6 +1,7 @@
-import { FileLocation, ProjectBase, RawPixelData } from '@sledge-pdm/core';
+import { ProjectBase, RawPixelData } from '@sledge-pdm/core';
 import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
+import { addRecentFile } from '~/features/config/RecentFileController';
 import { addLayer } from '~/features/layer';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { setIOStore } from '~/stores/EditorStores';
@@ -10,12 +11,13 @@ import { pathToFileLocation } from '~/utils/FileUtils';
 import { unpackFromPath } from '~/utils/msgpackr';
 import { fs } from '~/utils/platform';
 import { getCurrentVersion } from '~/utils/VersionUtils';
+import { tryGetImageFromClipboard } from '../clipboard/ClipboardUtils';
 import { CURRENT_PROJECT_VERSION } from './Project';
 import { applyProjectLocation, applyProjectLocationFromPath } from './ProjectLocationManager';
 
-interface LoadOption {}
+type LoadType = 'new' | 'path' | 'projectObj' | 'image' | 'clipboard';
 
-type LoadType = 'new' | 'path' | 'projectObj' | 'image';
+interface LoadOption {}
 
 interface NewProjectLoadOption extends LoadOption {
   width: number;
@@ -31,12 +33,14 @@ interface ProjectObjLoadOption extends LoadOption {
 }
 
 interface ImageLoadOptions extends LoadOption {
-  imageContext: 'file' | 'clipboard';
   name?: string;
   buffer: RawPixelData;
   width: number;
   height: number;
-  loc?: FileLocation;
+}
+
+interface ClipboardLoadOptions extends LoadOption {
+  name?: string;
 }
 
 export enum ErrorTypes {
@@ -60,6 +64,13 @@ interface InternalLoadResult {
   path?: string;
 }
 
+export type InitialLoadRequest =
+  | { type: 'new'; option: { width: number; height: number } }
+  | { type: 'path'; option: { path: string } }
+  | { type: 'projectObj'; option: { project: ProjectBase } }
+  | { type: 'image'; option: ImageLoadOptions }
+  | { type: 'clipboard'; option: ClipboardLoadOptions };
+
 export interface LoadResult extends InternalLoadResult {
   type: LoadType;
 }
@@ -75,24 +86,40 @@ export class ProjectLoader<T extends LoadOption> {
     private options: T
   ) {}
 
+  static getRequestFromNew(option: NewProjectLoadOption): InitialLoadRequest {
+    return { type: 'new', option };
+  }
+  static getRequestFromPath(option: PathLoadOption): InitialLoadRequest {
+    return { type: 'path', option };
+  }
+  static getRequestFromProjectObj(option: ProjectObjLoadOption): InitialLoadRequest {
+    return { type: 'projectObj', option };
+  }
+  static getRequestFromImage(option: ImageLoadOptions): InitialLoadRequest {
+    return { type: 'image', option };
+  }
+  static getRequestFromClipboard(option: ClipboardLoadOptions): InitialLoadRequest {
+    return { type: 'clipboard', option };
+  }
+
   static fromNew(option: NewProjectLoadOption) {
     return new ProjectLoader<NewProjectLoadOption>('new', option);
   }
-
   static fromPath(option: PathLoadOption) {
     return new ProjectLoader<PathLoadOption>('path', option);
+  }
+  static fromProjectObj(option: ProjectObjLoadOption) {
+    return new ProjectLoader<ProjectObjLoadOption>('projectObj', option);
+  }
+  static fromImage(option: ImageLoadOptions) {
+    return new ProjectLoader<ImageLoadOptions>('image', option);
+  }
+  static fromClipboard(option: ClipboardLoadOptions) {
+    return new ProjectLoader<ClipboardLoadOptions>('clipboard', option);
   }
 
   static isProjectPath(path: string) {
     return path.endsWith('.sledge');
-  }
-
-  static fromProject(option: ProjectObjLoadOption) {
-    return new ProjectLoader<ProjectObjLoadOption>('projectObj', option);
-  }
-
-  static fromImage(option: ImageLoadOptions) {
-    return new ProjectLoader<ImageLoadOptions>('image', option);
   }
 
   public async load(): Promise<LoadResult> {
@@ -109,6 +136,9 @@ export class ProjectLoader<T extends LoadOption> {
         break;
       case 'image':
         result = await loadFromImage(this.options as unknown as ImageLoadOptions);
+        break;
+      case 'clipboard':
+        result = await loadFromClipboard(this.options as unknown as ClipboardLoadOptions);
         break;
     }
 
@@ -163,8 +193,11 @@ async function loadFromPath(options: PathLoadOption): Promise<InternalLoadResult
   }
 
   if (fileExists) {
-    if (ProjectLoader.isProjectPath(path)) return await loadFromPathProject(path);
-    else return await loadFromPathImage(path);
+    const result = ProjectLoader.isProjectPath(path) ? await loadFromPathProject(path) : await loadFromPathImage(path);
+    if (result.ok) {
+      addRecentFile(pathToFileLocation(path));
+    }
+    return result;
   } else {
     logSystemError('Project file not found.', { label: LOG_LABEL, details: [path] });
     logUserError('failed to open project file.', { label: LOG_LABEL, persistent: true });
@@ -210,13 +243,12 @@ async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
     const bitmap = await loadLocalImage(path);
     const imageData = await loadImageData(bitmap);
     const loc = pathToFileLocation(path);
+    applyProjectLocation(loc, 'image');
     const result = await loadFromImage({
-      imageContext: 'file',
       name: loc?.name,
       buffer: new Uint8ClampedArray(imageData.data),
       width: imageData.width,
       height: imageData.height,
-      loc,
     });
     setIOStore('isProjectChangedAfterSave', false);
     return {
@@ -252,10 +284,9 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
 }
 
 async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadResult> {
-  const { name, width, height, buffer, loc } = options;
+  const { name, width, height, buffer } = options;
   try {
     setIOStore('openAs', 'image');
-    applyProjectLocation(loc, 'image');
     const size = { width, height };
     changeCanvasSize(size, {
       skipHistory: true,
@@ -275,6 +306,39 @@ async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadRes
     return {
       ok: false,
       error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from image: ${e}`, stacktrace: getErrorStacktrace(e) },
+    };
+  }
+}
+
+async function loadFromClipboard(options: ClipboardLoadOptions): Promise<InternalLoadResult> {
+  try {
+    const imgData = await tryGetImageFromClipboard();
+    if (!imgData) {
+      throw new Error('failed to load image.');
+    }
+
+    const { width, height, buffer } = imgData;
+
+    setIOStore('openAs', 'image');
+    const size = { width, height };
+    changeCanvasSize(size, {
+      skipHistory: true,
+    });
+    addLayer(
+      { name: options.name ?? 'clipboard image' },
+      {
+        noDiff: true,
+        uniqueName: false,
+        initImage: buffer,
+      }
+    );
+    return {
+      ok: true,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: { type: ErrorTypes.FAILED_LOAD_RUNTIME, detail: `Error loading project from clipboard: ${e}`, stacktrace: getErrorStacktrace(e) },
     };
   }
 }

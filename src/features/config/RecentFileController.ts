@@ -5,9 +5,9 @@ import { setIOStore } from '~/stores/EditorStores';
 export const addRecentFile = (fileLocation?: FileLocation) => {
   if (!fileLocation) return;
   setIOStore('recentFiles', (files) => {
-    files = files.filter((loc) => loc.path !== fileLocation.path || loc.name !== fileLocation.name);
-    files.unshift(fileLocation);
-    return [...files];
+    const filtered = files.filter((loc) => loc.path !== fileLocation.path || loc.name !== fileLocation.name);
+    filtered.push(fileLocation);
+    return [...filtered];
   });
   saveEditorStateDebounced();
 };

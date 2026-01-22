@@ -24,8 +24,8 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1
       '@sledge-pdm/ui':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.2.2
+        version: 1.2.2
       '@solid-primitives/deep':
         specifier: ^0.3.3
         version: 0.3.3(solid-js@1.9.10)
@@ -80,6 +80,9 @@ importers:
       '@tauri-apps/plugin-updater':
         specifier: ^2.9.0
         version: 2.9.0
+      base64-arraybuffer:
+        specifier: ^1.0.2
+        version: 1.0.2
       interactjs:
         specifier: ^1.10.27
         version: 1.10.27
@@ -832,8 +835,8 @@ packages:
   '@sledge-pdm/frasco@0.2.1':
     resolution: {integrity: sha512-QQY6NDPN4qwguf3uW+HwPh+h3o97i0BBZgG4r92jblMRoP22wq8k+yYfg3h7NUiYIUQOm5eYpzb0b/Kg4XYVQg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.2.1/c5f245a23ac49036aa9eb21389cc92059c54c1e6}
 
-  '@sledge-pdm/ui@1.2.0':
-    resolution: {integrity: sha512-EP4k1GmbpnRSV0Tks6VUEoHzsq6FGrDmhpDUVWnbsHUuEvgfzkD1AL22Q/yZtOH165S7q99xiPpE3II4PeQ4Qg==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.2.0/7d3fd01797ef5d4d695e6d7baa7e7afe1a898631}
+  '@sledge-pdm/ui@1.2.2':
+    resolution: {integrity: sha512-PhLq08MFz2bWsa9FUSIjxIEOpX6WuwcGaJFKBIpnLvpLph9WcQ8JSTHDNGV+JtDdGqVWMn5gzv1GXpg7JzFYzw==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/ui/1.2.2/e5ba2a61435999b3e8d161e114160e0665a919c9}
 
   '@solid-primitives/deep@0.3.3':
     resolution: {integrity: sha512-YnCV2OFbBlNYlww0lSD7oDpk9zN20KQWr699s6euwd6+oRE1nbI+vqrfYuqC7E0WPDfk0DIG+ylY1xvY31ZlTg==}
@@ -1257,6 +1260,10 @@ packages:
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+
+  base64-arraybuffer@1.0.2:
+    resolution: {integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==}
+    engines: {node: '>= 0.6.0'}
 
   baseline-browser-mapping@2.9.14:
     resolution: {integrity: sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==}
@@ -2603,7 +2610,7 @@ snapshots:
     dependencies:
       '@sledge-pdm/core': 1.2.1
 
-  '@sledge-pdm/ui@1.2.0':
+  '@sledge-pdm/ui@1.2.2':
     dependencies:
       '@sledge-pdm/core': 1.2.1
       solid-js: 1.9.10
@@ -3042,6 +3049,8 @@ snapshots:
       solid-js: 1.9.10
 
   balanced-match@1.0.2: {}
+
+  base64-arraybuffer@1.0.2: {}
 
   baseline-browser-mapping@2.9.14: {}
 

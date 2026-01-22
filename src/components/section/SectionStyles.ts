@@ -41,5 +41,5 @@ export const sectionSubContent = css`
   flex-direction: column;
   width: 100%;
   gap: 8px;
-  padding-left: 12px;
+  padding-left: 8px;
 `;

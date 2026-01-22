@@ -1,23 +1,30 @@
 import { FileLocation } from '@sledge-pdm/core';
-import { addRecentFile } from '~/features/config/RecentFileController';
 import { importableFileExtensions } from '~/features/io/FileExtensions';
 import { logUserWarn } from '~/features/log/service';
-import { normalizeJoin, pathToFileLocation } from '~/utils/FileUtils';
+import { globalConfig } from '~/stores/GlobalStores';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, path } from '~/utils/platform';
-import { getNewProjectSearchParams, getProjectFromClipboardSearchParams, openWindow } from '~/utils/WindowUtils';
+import { openEditorWindow } from '~/utils/WindowUtils';
+import { InitialLoadRequest, ProjectLoader } from './project/ProjectLoader';
 
-export const createNew = () => {
-  openWindow('editor', { query: getNewProjectSearchParams() });
-};
-
-export const openExistingProject = async (selectedFile: FileLocation) => {
-  if (!selectedFile.path || !selectedFile.name) return;
-  await openWindow('editor', { openPath: normalizeJoin(selectedFile.path, selectedFile.name) });
-};
-
-export const openFromClipboard = () => {
-  openWindow('editor', { query: getProjectFromClipboardSearchParams() });
-};
+export function openNewEditorWindow(request: InitialLoadRequest) {
+  openEditorWindow({ loadRequest: request });
+}
+export function openNewProject() {
+  openEditorWindow({ loadRequest: ProjectLoader.getRequestFromNew({ ...globalConfig.default.canvasSize }) });
+}
+export function openNewProjectWithClipboard() {
+  openEditorWindow({ loadRequest: ProjectLoader.getRequestFromClipboard({ name: 'from clipboard' }) });
+}
+export function openExistingProject(pathOrLocation: FileLocation | string) {
+  if (typeof pathOrLocation === 'string') {
+    openEditorWindow({ loadRequest: ProjectLoader.getRequestFromPath({ path: pathOrLocation }) });
+  } else {
+    if (!pathOrLocation.path || !pathOrLocation.name) return;
+    const fullpath = normalizeJoin(pathOrLocation.path, pathOrLocation.name);
+    openEditorWindow({ loadRequest: ProjectLoader.getRequestFromPath({ path: fullpath }) });
+  }
+}
 
 export async function openNewFile(): Promise<string | undefined> {
   const home = await path.homeDir();
@@ -49,13 +56,10 @@ export async function openNewFile(): Promise<string | undefined> {
   return file.toString();
 }
 
-export const openProject = () => {
-  openNewFile().then((file: string | undefined) => {
-    if (file !== undefined) {
-      const loc = pathToFileLocation(file);
-      if (!loc) return;
-      addRecentFile(loc);
-      openExistingProject(loc);
+export const openProjectWithExplorer = () => {
+  openNewFile().then((path: string | undefined) => {
+    if (path !== undefined) {
+      openNewEditorWindow(ProjectLoader.getRequestFromPath({ path }));
     }
   });
 };

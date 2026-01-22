@@ -1,5 +1,5 @@
 import { getProjectAdapter, gzipDeflate, Size2D } from '@sledge-pdm/core';
-import { createUniqueId } from 'solid-js';
+import { batch, createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
@@ -20,9 +20,9 @@ export async function getAllFullSnapshots(): Promise<ProjectSnapshot[]> {
 }
 
 export function makeSnapshotsAllRuntime() {
-  setProjectStore('snapshots', (snapshots) => {
-    return snapshots.map((snapshot) => {
-      return { ...snapshot, project: undefined } as RuntimeProjectSnapshot;
+  batch(() => {
+    projectStore.snapshots.forEach((_s, i) => {
+      setProjectStore('snapshots', i, 'project', undefined);
     });
   });
 }
@@ -163,7 +163,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
     return;
   }
   // load snapshot
-  await ProjectLoader.fromProject({ project: fullSnapshot.project }).load();
+  await ProjectLoader.fromProjectObj({ project: fullSnapshot.project }).load();
 
   setIOStore('isProjectChangedAfterSave', false);
 

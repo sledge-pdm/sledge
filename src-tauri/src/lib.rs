@@ -24,6 +24,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
             app,
             SledgeWindowKind::Editor,
             Some(WindowOpenOptions {
+                base64_msgpackr_load_request: None,
                 query: None,
                 initialization_script: None,
                 open_path: None,
@@ -44,6 +45,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
             app.clone(),
             SledgeWindowKind::Editor,
             Some(WindowOpenOptions {
+                base64_msgpackr_load_request: None,
                 query: None,
                 initialization_script: None,
                 open_path: Some(file.to_string_lossy().into_owned()),

@@ -1,6 +1,9 @@
-﻿import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
+﻿import { encode as encodeBase64 } from 'base64-arraybuffer';
+import { InitialLoadRequest } from '~/features/io/project/ProjectLoader';
+import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { safeInvoke } from './TauriUtils';
+import { packr } from './msgpackr';
 import { dialog, window as platformWindow, WebviewOptions, webviewWindow, WindowOptions } from './platform';
 
 export function zoomForIntegerize(dpr: number) {
@@ -12,15 +15,42 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 
 export type WindowKind = 'start' | 'editor' | 'restore' | 'settings' | 'about';
 
-export async function openWindow(kind: WindowKind, options?: { query?: string; openPath?: string; initializationScript?: string }): Promise<void> {
+export async function openWindow(kind: Exclude<WindowKind, 'editor'>): Promise<void> {
   const parent = kind === 'settings' || kind === 'about' ? platformWindow.getCurrentWindow().label : undefined;
   return safeInvoke('open_window', {
     kind,
     options: {
-      query: options?.query,
-      open_path: options?.openPath,
-      initialization_script: options?.initializationScript,
+      // all options undefined except parent
       parent,
+    },
+  });
+}
+
+export function getBase64MsgpackrRequest(request: InitialLoadRequest): string | undefined {
+  const packed = packr.pack(request);
+  if (packed) {
+    return encodeBase64(new Uint8Array(packed).buffer);
+  }
+  return undefined;
+}
+
+export async function openEditorWindow(options: {
+  loadRequest?: InitialLoadRequest;
+  query?: string;
+  openPath?: string;
+  initializationScript?: string;
+}): Promise<void> {
+  let base64MsgpackrReq: string | undefined;
+  if (options.loadRequest) {
+    base64MsgpackrReq = getBase64MsgpackrRequest(options.loadRequest);
+  }
+
+  return safeInvoke('open_window', {
+    kind: 'editor',
+    options: {
+      ...options,
+      base64_msgpackr_load_request: base64MsgpackrReq,
+      parent: undefined,
     },
   });
 }

@@ -44,9 +44,6 @@ export async function getInitialLoader(editorState: EditorStateStore): Promise<{
       };
     }
 
-    // const clipboardQuery = getFromClipboardQuery();
-    // const newProjectQuery = getNewProjectQuery();
-
     let request: InitialLoadRequest | undefined = undefined;
 
     // @ts-ignore
@@ -80,55 +77,13 @@ export async function getInitialLoader(editorState: EditorStateStore): Promise<{
             loader: ProjectLoader.fromProjectObj(request.option),
           };
         case 'image':
-          const initialLoadType: InitialLoadTypes =
-            request.option.imageContext === 'clipboard' ? InitialLoadTypes.IMAGE_CLIPBOARD : InitialLoadTypes.UNKNOWN;
-          return { initialLoadType, loader: ProjectLoader.fromImage(request.option) };
+          return { initialLoadType: InitialLoadTypes.UNKNOWN, loader: ProjectLoader.fromImage(request.option) };
+        case 'clipboard':
+          return { initialLoadType: InitialLoadTypes.IMAGE_CLIPBOARD, loader: ProjectLoader.fromClipboard(request.option) };
       }
     }
 
-    // if (openingPath) {
-    //   const isProject = ProjectLoader.isProjectPath(openingPath);
-    //   const normalizedPath = normalizePath(openingPath);
-    //   return {
-    //     initialLoadType: isProject ? InitialLoadTypes.PATH_PROJECT : InitialLoadTypes.PATH_IMAGE_PROJECT,
-    //     loader: ProjectLoader.fromPath({ path: normalizedPath }),
-    //     targetPath: normalizedPath,
-    //   };
-    // }
-    // if (clipboardQuery) {
-    //   const data = await tryGetImageFromClipboard();
-    //   if (!data) {
-    //     return {
-    //       initialLoadType: InitialLoadTypes.IMAGE_CLIPBOARD,
-    //       loader: undefined,
-    //       fatalError: {
-    //         type: ErrorTypes.INTERNAL_ERROR,
-    //         detail: 'Could not read clipboard image',
-    //         stacktrace: undefined,
-    //       },
-    //       targetPath: undefined,
-    //     };
-    //   }
-    //   return {
-    //     initialLoadType: InitialLoadTypes.IMAGE_CLIPBOARD,
-    //     loader: ProjectLoader.fromImage({
-    //       imageContext: 'clipboard',
-    //       name: 'From Clipboard',
-    //       ...data,
-    //     }),
-    //   };
-    // }
-
-    // if (newProjectQuery.new) {
-    //   const width = newProjectQuery?.width ?? globalConfig.default.canvasSize.width;
-    //   const height = newProjectQuery?.height ?? globalConfig.default.canvasSize.height;
-    //   return {
-    //     initialLoadType: InitialLoadTypes.NEW_PROJECT,
-    //     loader: ProjectLoader.fromNew({ width, height }),
-    //   };
-    // }
-
-    let lastLocation = editorState?.lastPath;
+    const lastLocation = editorState?.lastPath;
     if (globalConfig.default.open === 'last' && lastLocation && lastLocation.path && lastLocation.name) {
       const lastPath = normalizeJoin(lastLocation.path, lastLocation.name);
       const isProject = ProjectLoader.isProjectPath(lastPath);

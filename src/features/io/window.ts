@@ -5,7 +5,6 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, path } from '~/utils/platform';
 import { openEditorWindow } from '~/utils/WindowUtils';
-import { tryGetImageFromClipboard } from './clipboard/ClipboardUtils';
 import { InitialLoadRequest, ProjectLoader } from './project/ProjectLoader';
 
 export function openNewEditorWindow(request: InitialLoadRequest) {
@@ -15,11 +14,7 @@ export function openNewProject() {
   openEditorWindow({ loadRequest: ProjectLoader.getRequestFromNew({ ...globalConfig.default.canvasSize }) });
 }
 export function openNewProjectWithClipboard() {
-  // TODO: make from clipboard way in loader instead of passing raw image
-  tryGetImageFromClipboard().then((imgData) => {
-    if (!imgData) return;
-    openEditorWindow({ loadRequest: ProjectLoader.getRequestFromImage({ ...imgData, imageContext: 'clipboard' }) });
-  });
+  openEditorWindow({ loadRequest: ProjectLoader.getRequestFromClipboard({ name: 'from clipboard' }) });
 }
 export function openExistingProject(pathOrLocation: FileLocation | string) {
   if (typeof pathOrLocation === 'string') {

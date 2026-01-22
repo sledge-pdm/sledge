@@ -25,6 +25,15 @@ export async function openWindow(kind: Exclude<WindowKind, 'editor'>): Promise<v
     },
   });
 }
+
+export function getBase64MsgpackrRequest(request: InitialLoadRequest): string | undefined {
+  const packed = packr.pack(request);
+  if (packed) {
+    return encodeBase64(new Uint8Array(packed).buffer);
+  }
+  return undefined;
+}
+
 export async function openEditorWindow(options: {
   loadRequest?: InitialLoadRequest;
   query?: string;
@@ -33,10 +42,7 @@ export async function openEditorWindow(options: {
 }): Promise<void> {
   let base64MsgpackrReq: string | undefined;
   if (options.loadRequest) {
-    const packed = packr.pack(options.loadRequest);
-    if (packed) {
-      base64MsgpackrReq = encodeBase64(new Uint8Array(packed).buffer);
-    }
+    base64MsgpackrReq = getBase64MsgpackrRequest(options.loadRequest);
   }
 
   return safeInvoke('open_window', {

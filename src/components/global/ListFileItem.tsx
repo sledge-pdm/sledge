@@ -1,5 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge-pdm/core';
+import { Nothing } from '@sledge-pdm/ui';
 import { Component, createSignal, Show } from 'solid-js';
 
 const thumb = css`
@@ -94,7 +95,7 @@ const ListFileItem: Component<FileItemProps> = (props) => {
             }}
           >
             <Show when={props.thumbnail} fallback={<p>loading...</p>}>
-              <Show when={props.thumbnail !== 'failed'} fallback={<p>NO IMAGE</p>}>
+              <Show when={props.thumbnail !== 'failed'} fallback={<Nothing>no image.</Nothing>}>
                 <img class={thumbImg} src={props.thumbnail} />
               </Show>
             </Show>

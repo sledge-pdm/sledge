@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
-import { Checkbox } from '@sledge-pdm/ui';
+import { Checkbox, Nothing } from '@sledge-pdm/ui';
 import { Component, createMemo, JSX, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
@@ -27,12 +27,6 @@ const infoContainer = css`
   display: flex;
   flex-direction: column;
   gap: 4px;
-`;
-
-const noImageText = css`
-  align-self: center;
-  justify-self: center;
-  color: var(--color-muted);
 `;
 
 const Images: Component = () => {
@@ -64,7 +58,7 @@ const Images: Component = () => {
       ]}
     >
       <div class={clsx('ignore-image-select', sectionContent, imagesSectionsContent)}>
-        <Show when={projectStore.imagePool.entries.length > 0} fallback={<p class={noImageText}>[ no images ]</p>}>
+        <Show when={projectStore.imagePool.entries.length > 0} fallback={<Nothing>no images.</Nothing>}>
           <div class={gridContainer}>
             <ImagePoolGrid />
           </div>

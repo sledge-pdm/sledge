@@ -5,10 +5,12 @@ import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
+import { adjustZoomToFit } from '~/features/canvas';
 import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { clipboardCopy, clipboardCut, clipboardPaste } from '~/features/io/clipboard/ClipboardActions';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
+import { ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
 import { flipAllLayer, rotateAllLayer } from '~/features/layer/service';
@@ -78,59 +80,90 @@ const TopMenuBar: Component = () => {
     return {
       label: 'Files.',
       action: () => {},
-      menu: () => [
-        {
-          type: 'item',
-          label: '+ new project.',
-          onSelect: () => {
-            createNew();
+      menu: () =>
+        [
+          {
+            type: 'item',
+            icon: '/assets/icons/title_bar/addadd.png',
+            label: 'new project.',
+            onSelect: () => {
+              createNew();
+            },
           },
-        },
-        {
-          type: 'item',
-          label: '> open project.',
-          onSelect: () => {
-            openProject();
+          {
+            type: 'item',
+            icon: '/assets/icons/title_bar/open_folder.png',
+            label: 'open project.',
+            onSelect: () => {
+              openProject();
+            },
           },
-        },
-        {
-          type: 'item',
-          label: '> from clipboard.',
-          onSelect: async () => {
-            // clipboard data will loaded in new window, but ensure there's data
-            const ensureData = await tryGetImageFromClipboard();
-            if (!ensureData) {
-              const confirmed = await dialog.confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
-                title: 'Open from clipboard',
-              });
-              if (!confirmed) return;
-            }
+          ...(import.meta.env.DEV
+            ? [
+                {
+                  type: 'item',
+                  label: 'reload project.',
+                  icon: '/assets/icons/title_bar/reload.png',
+                  onSelect: async () => {
+                    const confirmed = await dialog.confirm(`Sure to reload this project?
+Unsaved changes will be discarded!`);
+                    if (confirmed) {
+                      const loc = ioStore.savedLocation;
+                      if (!loc.path || !loc.name) {
+                        await dialog.message('Failed to reload project. (invalid path)');
+                        return;
+                      }
+                      const result = await ProjectLoader.fromPath({ path: normalizeJoin(loc.path, loc.name) }).load();
+                      if (result.ok) {
+                        adjustZoomToFit();
+                      } else {
+                        await dialog.message(`Failed to reload project. (load failed)\n${result.error ?? 'unknown error'}`);
+                        return;
+                      }
+                    }
+                  },
+                },
+              ]
+            : []),
+          {
+            type: 'item',
+            label: 'from clipboard.',
+            icon: '/assets/icons/title_bar/clipboard.png',
+            onSelect: async () => {
+              // clipboard data will loaded in new window, but ensure there's data
+              const ensureData = await tryGetImageFromClipboard();
+              if (!ensureData) {
+                const confirmed = await dialog.confirm(`Current clipboard data may not be an loadable Image.\nOpen anyway?`, {
+                  title: 'Open from clipboard',
+                });
+                if (!confirmed) return;
+              }
 
-            openFromClipboard();
+              openFromClipboard();
+            },
           },
-        },
-        ...(ioStore.recentFiles.length > 0
-          ? [
-              { type: 'divider', label: 'recent' } as MenuListOption,
-              { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
-              ...ioStore.recentFiles
-                .map<MenuListOption | undefined>((loc) => {
-                  if (!loc.name || !loc.path) return undefined;
-                  return {
-                    type: 'item',
-                    label: normalizeJoin(loc.path, loc.name),
-                    title: normalizeJoin(loc.path, loc.name),
-                    fontFamily: fonts.ZFB03,
-                    disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
-                    onSelect: () => {
-                      openExistingProject(loc);
-                    },
-                  };
-                })
-                .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
-            ]
-          : []),
-      ],
+          ...(ioStore.recentFiles.length > 0
+            ? [
+                { type: 'divider', label: 'recent' } as MenuListOption,
+                { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
+                ...ioStore.recentFiles
+                  .map<MenuListOption | undefined>((loc) => {
+                    if (!loc.name || !loc.path) return undefined;
+                    return {
+                      type: 'item',
+                      label: normalizeJoin(loc.path, loc.name),
+                      title: normalizeJoin(loc.path, loc.name),
+                      fontFamily: fonts.ZFB03,
+                      disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
+                      onSelect: () => {
+                        openExistingProject(loc);
+                      },
+                    };
+                  })
+                  .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
+              ]
+            : []),
+        ] as MenuListOption[],
     };
   });
 

@@ -35,6 +35,7 @@ export type GlobalConfig = {
     showDirtyTiles: boolean;
     useRawMove: boolean;
     disableCompletionLine: boolean;
+    updateChannel: string;
   };
   keyConfig: KeyConfigStore;
 };
@@ -69,6 +70,7 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
     showDirtyTiles: false,
     useRawMove: false,
     disableCompletionLine: false,
+    updateChannel: 'stable',
   },
   keyConfig: makeDefaultKeyConfigStore(),
 });

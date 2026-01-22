@@ -1,4 +1,4 @@
-name: development-release
+name: dev-release
 
 on:
   push:
@@ -6,7 +6,25 @@ on:
   workflow_dispatch: {}
 
 jobs:
+  update-dev-latest-tag:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Update dev-latest tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f dev-latest ${{ github.sha }}
+          git push -f origin dev-latest
+
   build:
+    needs: update-dev-latest-tag
     permissions:
       contents: write
       packages: read
@@ -52,6 +70,7 @@ jobs:
         with:
           workspaces: |
             src-tauri
+            wasm
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
@@ -74,9 +93,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'Development Build ${{ github.ref_name }}'
-          releaseBody: 'This is a development build. Use at your own risk.'
-          releaseDraft: false # Don't care because it's a dev build
+          releaseName: '${{ github.ref_name }}'
+          releaseBody: 'This is a development build. If you are new for sledge, install the stable version (x.y.z) instead of this.'
+          releaseDraft: false
           prerelease: true
           projectPath: '.'
           includeUpdaterJson: true
@@ -84,28 +103,29 @@ jobs:
           updaterJsonKeepUniversal: true
           args: ${{ matrix.args }}
 
-      - name: Upload dev artifacts
-        uses: actions/upload-artifact@v4
-        if: matrix.platform == 'ubuntu-22.04'
-        with:
-          name: binaries-linux
-          path: |
-            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.deb
-            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.rpm
+  sync-dev-latest-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download release assets for current tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${{ github.ref_name }}" --dir dist
 
-      - name: Upload dev artifacts
-        uses: actions/upload-artifact@v4
-        if: matrix.platform == 'macos-latest'
-        with:
-          name: binaries-macos
-          path: |
-            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
-            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
-
-      - name: Upload dev artifacts
-        uses: actions/upload-artifact@v4
-        if: matrix.platform == 'windows-latest'
-        with:
-          name: binaries-windows
-          path: |
-            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.exe
+      - name: Recreate dev-latest release with latest assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view dev-latest >/dev/null 2>&1; then
+            gh release delete dev-latest -y
+          fi
+          gh release create dev-latest dist/* \
+            --prerelease \
+            --title "dev-latest" \
+            --notes "Development channel release (auto-updated)."
+          gh release edit dev-latest --target "${{ github.sha }}"

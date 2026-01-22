@@ -50,4 +50,10 @@ export default [
       'no-restricted-imports': 'off',
     },
   },
+  {
+    files: ['src/utils/UpdateUtils.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
 ];

@@ -153,7 +153,7 @@ jobs:
           if (-not [regex]::IsMatch($text, $pattern)) {
             throw "Failed to locate package version in $manifest"
           }
-          $replacement = "`$1version = \"$env:DEV_VERSION\""
+          $replacement = '$1version = "{0}"' -f $env:DEV_VERSION
           $newText = [regex]::Replace($text, $pattern, $replacement, 1)
           Set-Content -LiteralPath $manifest -Value $newText -Encoding utf8
 

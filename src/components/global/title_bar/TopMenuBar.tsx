@@ -11,12 +11,13 @@ import { clipboardCopy, clipboardCut, clipboardPaste } from '~/features/io/clipb
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { ProjectLoader } from '~/features/io/project/ProjectLoader';
-import { createNew, openExistingProject, openFromClipboard, openProject } from '~/features/io/window';
+import { openExistingProject, openNewEditorWindow, openNewProjectWithClipboard, openProjectWithExplorer } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
 import { flipAllLayer, rotateAllLayer } from '~/features/layer/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
+import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, window as platformWindow } from '~/utils/platform';
 import { openWindow } from '~/utils/WindowUtils';
@@ -76,6 +77,35 @@ const TopMenuBar: Component = () => {
     return `layer: ${activeLayer()?.name}`;
   };
 
+  const recentFileItems = createMemo<MenuListOption[]>(() => {
+    if (ioStore.recentFiles.length > 0) {
+      return [
+        { type: 'divider', label: 'recent' } as MenuListOption,
+        { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
+        ...ioStore.recentFiles
+          .toReversed()
+          .map<MenuListOption | undefined>((loc) => {
+            if (!loc.name || !loc.path) return undefined;
+            const fullpath = normalizeJoin(loc.path, loc.name);
+            return {
+              type: 'item',
+              label: fullpath,
+              title: fullpath,
+              // fontFamily: fonts.ZFB03,
+              icon: ProjectLoader.isProjectPath(fullpath) ? '/assets/icons/files/file_sledge.png' : '/assets/icons/files/image.png',
+              disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
+              onSelect: () => {
+                openExistingProject(loc);
+              },
+            };
+          })
+          .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
+      ];
+    }
+
+    return [];
+  });
+
   const FilesMenuItem = createMemo<TopMenuBarItemProps>(() => {
     return {
       label: 'Files.',
@@ -84,18 +114,18 @@ const TopMenuBar: Component = () => {
         [
           {
             type: 'item',
-            icon: '/assets/icons/title_bar/addadd.png',
             label: 'new project.',
+            icon: '/assets/icons/title_bar/addadd.png',
             onSelect: () => {
-              createNew();
+              openNewEditorWindow(ProjectLoader.getRequestFromNew({ ...globalConfig.default.canvasSize }));
             },
           },
           {
             type: 'item',
-            icon: '/assets/icons/title_bar/open_folder.png',
             label: 'open project.',
+            icon: '/assets/icons/title_bar/open_folder.png',
             onSelect: () => {
-              openProject();
+              openProjectWithExplorer();
             },
           },
           ...(import.meta.env.DEV
@@ -138,31 +168,10 @@ Unsaved changes will be discarded!`);
                 });
                 if (!confirmed) return;
               }
-
-              openFromClipboard();
+              openNewProjectWithClipboard();
             },
           },
-          ...(ioStore.recentFiles.length > 0
-            ? [
-                { type: 'divider', label: 'recent' } as MenuListOption,
-                { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
-                ...ioStore.recentFiles
-                  .map<MenuListOption | undefined>((loc) => {
-                    if (!loc.name || !loc.path) return undefined;
-                    return {
-                      type: 'item',
-                      label: normalizeJoin(loc.path, loc.name),
-                      title: normalizeJoin(loc.path, loc.name),
-                      fontFamily: fonts.ZFB03,
-                      disabled: loc.path === ioStore.savedLocation.path && loc.name === ioStore.savedLocation.name,
-                      onSelect: () => {
-                        openExistingProject(loc);
-                      },
-                    };
-                  })
-                  .filter((item): item is Exclude<typeof item, undefined> => item !== undefined),
-              ]
-            : []),
+          ...recentFileItems(),
         ] as MenuListOption[],
     };
   });
@@ -179,7 +188,7 @@ Unsaved changes will be discarded!`);
         {
           label: 'ruler',
           type: 'item',
-          icon: appearanceStore.ruler ? '/assets/icons/misc/check_8.png' : undefined,
+          icon: appearanceStore.ruler ? '/assets/icons/misc/check_8.png' : '/assets/icons/misc/empty.png',
           onSelect: () => {
             setAppearanceStore('ruler', (v) => !v);
           },
@@ -188,7 +197,7 @@ Unsaved changes will be discarded!`);
         {
           label: 'onscreen control',
           type: 'item',
-          icon: appearanceStore.onscreenControl ? '/assets/icons/misc/check_8.png' : undefined,
+          icon: appearanceStore.onscreenControl ? '/assets/icons/misc/check_8.png' : '/assets/icons/misc/empty.png',
           onSelect: () => {
             setAppearanceStore('onscreenControl', (v) => !v);
           },
@@ -203,7 +212,7 @@ Unsaved changes will be discarded!`);
           return {
             label: control.id,
             type: 'item',
-            icon: shown ? '/assets/icons/misc/check_8.png' : undefined,
+            icon: shown ? '/assets/icons/misc/check_8.png' : '/assets/icons/misc/empty.png',
             title: control.id,
             onSelect: () => {
               // toggle Controls' visibility, not show/hide content
@@ -238,16 +247,19 @@ Unsaved changes will be discarded!`);
         {
           type: 'item',
           label: 'Copy.',
+          icon: '/assets/icons/context_menu/copy.png',
           onSelect: async () => await clipboardCopy(),
         },
         {
           type: 'item',
           label: 'Cut.',
+          icon: '/assets/icons/context_menu/cut.png',
           onSelect: async () => await clipboardCut(),
         },
         {
           type: 'item',
           label: 'Paste.',
+          icon: '/assets/icons/context_menu/paste.png',
           onSelect: async () => await clipboardPaste(),
         },
         {
@@ -313,11 +325,11 @@ Unsaved changes will be discarded!`);
         </div>
       </Show>
 
+      <UpdateSection />
+
       <div class={menuListRight}>
         <TopMenuBarItem {...settingMenuItem} />
       </div>
-
-      <UpdateSection />
     </div>
   );
 };

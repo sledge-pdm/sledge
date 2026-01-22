@@ -1,6 +1,7 @@
 import { FileLocation, ProjectBase, RawPixelData } from '@sledge-pdm/core';
 import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
+import { addRecentFile } from '~/features/config/RecentFileController';
 import { addLayer } from '~/features/layer';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { setIOStore } from '~/stores/EditorStores';
@@ -13,9 +14,9 @@ import { getCurrentVersion } from '~/utils/VersionUtils';
 import { CURRENT_PROJECT_VERSION } from './Project';
 import { applyProjectLocation, applyProjectLocationFromPath } from './ProjectLocationManager';
 
-interface LoadOption {}
-
 type LoadType = 'new' | 'path' | 'projectObj' | 'image';
+
+interface LoadOption {}
 
 interface NewProjectLoadOption extends LoadOption {
   width: number;
@@ -60,6 +61,12 @@ interface InternalLoadResult {
   path?: string;
 }
 
+export type InitialLoadRequest =
+  | { type: 'new'; option: { width: number; height: number } }
+  | { type: 'path'; option: { path: string } }
+  | { type: 'projectObj'; option: { project: ProjectBase } }
+  | { type: 'image'; option: ImageLoadOptions };
+
 export interface LoadResult extends InternalLoadResult {
   type: LoadType;
 }
@@ -75,24 +82,34 @@ export class ProjectLoader<T extends LoadOption> {
     private options: T
   ) {}
 
+  static getRequestFromNew(option: NewProjectLoadOption): InitialLoadRequest {
+    return { type: 'new', option };
+  }
+  static getRequestFromPath(option: PathLoadOption): InitialLoadRequest {
+    return { type: 'path', option };
+  }
+  static getRequestFromProjectObj(option: ProjectObjLoadOption): InitialLoadRequest {
+    return { type: 'projectObj', option };
+  }
+  static getRequestFromImage(option: ImageLoadOptions): InitialLoadRequest {
+    return { type: 'image', option };
+  }
+
   static fromNew(option: NewProjectLoadOption) {
     return new ProjectLoader<NewProjectLoadOption>('new', option);
   }
-
   static fromPath(option: PathLoadOption) {
     return new ProjectLoader<PathLoadOption>('path', option);
+  }
+  static fromProjectObj(option: ProjectObjLoadOption) {
+    return new ProjectLoader<ProjectObjLoadOption>('projectObj', option);
+  }
+  static fromImage(option: ImageLoadOptions) {
+    return new ProjectLoader<ImageLoadOptions>('image', option);
   }
 
   static isProjectPath(path: string) {
     return path.endsWith('.sledge');
-  }
-
-  static fromProject(option: ProjectObjLoadOption) {
-    return new ProjectLoader<ProjectObjLoadOption>('projectObj', option);
-  }
-
-  static fromImage(option: ImageLoadOptions) {
-    return new ProjectLoader<ImageLoadOptions>('image', option);
   }
 
   public async load(): Promise<LoadResult> {
@@ -163,8 +180,11 @@ async function loadFromPath(options: PathLoadOption): Promise<InternalLoadResult
   }
 
   if (fileExists) {
-    if (ProjectLoader.isProjectPath(path)) return await loadFromPathProject(path);
-    else return await loadFromPathImage(path);
+    const result = ProjectLoader.isProjectPath(path) ? await loadFromPathProject(path) : await loadFromPathImage(path);
+    if (result.ok) {
+      addRecentFile(pathToFileLocation(path));
+    }
+    return result;
   } else {
     logSystemError('Project file not found.', { label: LOG_LABEL, details: [path] });
     logUserError('failed to open project file.', { label: LOG_LABEL, persistent: true });

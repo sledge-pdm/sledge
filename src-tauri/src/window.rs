@@ -34,6 +34,7 @@ fn next_editor_label(app: &AppHandle) -> String {
 
 #[derive(Deserialize, Serialize)]
 pub struct WindowOpenOptions {
+    pub base64_msgpackr_load_request: Option<String>,
     pub query: Option<String>,
     pub initialization_script: Option<String>,
     pub open_path: Option<String>,
@@ -50,11 +51,23 @@ pub async fn open_window(
 
     let open_path = options.as_ref().and_then(|opts| opts.open_path.clone());
     let parent = options.as_ref().and_then(|opts| opts.parent.clone());
+    let base64_msgpackr_load_request = options
+        .as_ref()
+        .and_then(|opts| opts.base64_msgpackr_load_request.as_ref())
+        .cloned();
 
     let path_script = format!(
         "window.__PATH__={};",
         serde_json::to_string(&open_path.unwrap_or_default()).unwrap_or_default()
     );
+
+    let load_request_script = match base64_msgpackr_load_request {
+        Some(payload) => format!(
+            "window.__BASE64_MSGPACKR_LOAD_REQUEST__={};",
+            serde_json::to_string(&payload).unwrap_or_else(|_| "null".to_string())
+        ),
+        None => "window.__BASE64_MSGPACKR_LOAD_REQUEST__=undefined;".to_string(),
+    };
 
     let custom_script = options
         .as_ref()
@@ -62,7 +75,7 @@ pub async fn open_window(
         .cloned()
         .unwrap_or_default();
 
-    let initialization_script = format!("{}{}", path_script, custom_script);
+    let initialization_script = format!("{}{}{}", path_script, load_request_script, custom_script);
 
     let query = options
         .as_ref()

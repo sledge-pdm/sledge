@@ -42,6 +42,7 @@
     "@tauri-apps/plugin-process": "^2.3.1",
     "@tauri-apps/plugin-shell": "^2.3.4",
     "@tauri-apps/plugin-updater": "^2.9.0",
+    "base64-arraybuffer": "^1.0.2",
     "interactjs": "^1.10.27",
     "mitt": "^3.0.1",
     "msgpackr": "^1.11.8",

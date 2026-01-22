@@ -4,7 +4,7 @@ import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { loadGlobalConfig } from '~/features/io/config/load';
 import { ErrorTypes } from '~/features/io/project/ProjectLoader';
-import { createNew, openExistingProject, openProject } from '~/features/io/window';
+import { openExistingProject, openNewProject, openProjectWithExplorer } from '~/features/io/window';
 import { InitialLoadTypes } from '~/routes/editor/load';
 import { reportInitialLoadError } from '~/routes/editor/loadError';
 import { ioStore } from '~/stores/EditorStores';
@@ -41,10 +41,10 @@ export default function Home() {
         <p class={startHeader}>HELLO.</p>
 
         <div class={menuContainer}>
-          <a class={menuItem} onClick={() => createNew()}>
+          <a class={menuItem} onClick={() => openNewProject()}>
             +&ensp;new.
           </a>
-          <a class={`${menuItem} ${openButtonMargin}`} onClick={(e) => openProject()}>
+          <a class={`${menuItem} ${openButtonMargin}`} onClick={(e) => openProjectWithExplorer()}>
             &gt;&ensp;open.
           </a>
         </div>

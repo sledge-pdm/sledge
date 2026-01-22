@@ -1,11 +1,69 @@
-name: dev-release
+﻿name: dev-release
 
 on:
   push:
-    tags: ['v*.*.*-dev.*']
+    tags:
+      - 'dev-release'
   workflow_dispatch: {}
 
+concurrency:
+  group: dev-release
+  cancel-in-progress: false
+
 jobs:
+  resolve-dev-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      dev_base: ${{ steps.calc.outputs.base }}
+      dev_n: ${{ steps.calc.outputs.next_n }}
+      dev_version: ${{ steps.calc.outputs.version }}
+      dev_tag: ${{ steps.calc.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Calculate dev version
+        id: calc
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          base=$(python - <<'PY'
+          import pathlib
+          import re
+
+          text = pathlib.Path('src-tauri/Cargo.toml').read_text()
+          match = re.search(r'^version = "([^"]+)"', text, re.MULTILINE)
+          if not match:
+              raise SystemExit('version not found in Cargo.toml')
+          version = match.group(1)
+          base_version = version.split('-', 1)[0]
+          print(base_version)
+          PY
+          )
+
+          releases=$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100")
+          max_n=$(printf '%s' "$releases" | jq -r --arg base "$base" '
+            [.[].tag_name
+              | select(startswith("v" + $base + "-dev."))
+              | sub("^v" + $base + "-dev\\."; "")
+              | tonumber?
+            ] | max // 0
+          ')
+
+          next_n=$((max_n + 1))
+          version="${base}-dev.${next_n}"
+          tag="v${version}"
+
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "next_n=$next_n" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
   update-dev-latest-tag:
     permissions:
       contents: write
@@ -24,7 +82,7 @@ jobs:
           git push -f origin dev-latest
 
   build:
-    needs: update-dev-latest-tag
+    needs: [resolve-dev-version, update-dev-latest-tag]
     permissions:
       contents: write
       packages: read
@@ -34,7 +92,7 @@ jobs:
         include:
           - platform: 'macos-latest'
             args: '--target universal-apple-darwin'
-          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
+          - platform: 'ubuntu-22.04'
             args: ''
           - platform: 'windows-latest'
             args: ''
@@ -73,7 +131,7 @@ jobs:
             wasm
 
       - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -84,6 +142,21 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
+      - name: sync Cargo version
+        shell: pwsh
+        env:
+          DEV_VERSION: ${{ needs.resolve-dev-version.outputs.dev_version }}
+        run: |
+          $manifest = 'src-tauri/Cargo.toml'
+          $text = Get-Content -LiteralPath $manifest -Raw
+          $pattern = '(?s)(\[package\].*?\n)version = "[^"]+"'
+          if (-not [regex]::IsMatch($text, $pattern)) {
+            throw "Failed to locate package version in $manifest"
+          }
+          $replacement = '$1version = "{0}"' -f $env:DEV_VERSION
+          $newText = [regex]::Replace($text, $pattern, $replacement, 1)
+          Set-Content -LiteralPath $manifest -Value $newText -Encoding utf8
+
       # Tauri Build + Release Upload
       - uses: tauri-apps/tauri-action@v0
         id: tauri-build
@@ -92,11 +165,12 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: '${{ github.ref_name }}'
+          tagName: ${{ needs.resolve-dev-version.outputs.dev_tag }}
+          releaseName: ${{ needs.resolve-dev-version.outputs.dev_tag }}
           releaseBody: 'This is a development build. If you are new for sledge, install the stable version (x.y.z) instead of this.'
           releaseDraft: false
           prerelease: true
+          releaseCommitish: ${{ github.sha }}
           projectPath: '.'
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
@@ -104,7 +178,7 @@ jobs:
           args: ${{ matrix.args }}
 
   sync-dev-latest-release:
-    needs: build
+    needs: [build, resolve-dev-version]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -115,7 +189,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download "${{ github.ref_name }}" --dir dist
+          gh release download "${{ needs.resolve-dev-version.outputs.dev_tag }}" --dir dist
 
       - name: Recreate dev-latest release with latest assets
         env:
@@ -129,3 +203,18 @@ jobs:
             --title "dev-latest" \
             --notes "Development channel release (auto-updated)."
           gh release edit dev-latest --target "${{ github.sha }}"
+
+  cleanup-trigger-tag:
+    needs: [resolve-dev-version, update-dev-latest-tag, build, sync-dev-latest-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: always()
+    steps:
+      - name: Delete dev-release tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/git/refs/tags/dev-release" >/dev/null 2>&1; then
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/dev-release"
+          fi

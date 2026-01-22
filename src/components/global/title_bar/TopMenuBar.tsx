@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { color, fonts, MenuListOption } from '@sledge-pdm/ui';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
@@ -15,12 +15,10 @@ import { flipAllLayer, rotateAllLayer } from '~/features/layer/service';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
-import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
-import { dialog, window as platformWindow, Update } from '~/utils/platform';
-import { askAndInstallUpdate, getUpdate } from '~/utils/UpdateUtils';
-import { addSkippedVersion } from '~/utils/VersionUtils';
+import { dialog, window as platformWindow } from '~/utils/platform';
 import { openWindow } from '~/utils/WindowUtils';
+import { UpdateSection } from './UpdateSection';
 
 const topMenuBarRoot = css`
   display: flex;
@@ -65,18 +63,8 @@ const TopMenuBar: Component = () => {
   let canvasControlsRef: HTMLDivElement | undefined;
 
   const [isDecorated, setIsDecorated] = createSignal(true);
-  const [availableUpdate, setAvailableUpdate] = createSignal<Update | undefined>();
-
   onMount(async () => {
     setIsDecorated(await platformWindow.getCurrentWindow().isDecorated());
-    const update = await getUpdate();
-    setAvailableUpdate(update);
-  });
-
-  createEffect(async () => {
-    globalConfig.debug.updateChannel;
-    const update = await getUpdate();
-    setAvailableUpdate(update);
   });
 
   const getCurrentEditTarget = () => {
@@ -296,37 +284,7 @@ const TopMenuBar: Component = () => {
         <TopMenuBarItem {...settingMenuItem} />
       </div>
 
-      <Show when={availableUpdate() && !globalConfig.general.skippedVersions.includes(availableUpdate()?.version || '')}>
-        <TopMenuBarItem
-          label='! update'
-          labelStyleOverride={{
-            'font-family': 'ZFB09',
-            'font-size': '8px',
-            opacity: 1,
-            'white-space': 'nowrap',
-            color: color.active,
-          }}
-          action={async () => {
-            await askAndInstallUpdate();
-          }}
-        />
-        <TopMenuBarItem
-          label='[skip]'
-          labelStyleOverride={{
-            'font-family': 'ZFB09',
-            opacity: 1,
-            'white-space': 'nowrap',
-            color: color.muted,
-          }}
-          title={'You can restore skipped updates from settings.'}
-          action={() => {
-            const skippingVersion = availableUpdate()?.version;
-            if (skippingVersion) {
-              addSkippedVersion(skippingVersion);
-            }
-          }}
-        />
-      </Show>
+      <UpdateSection />
     </div>
   );
 };

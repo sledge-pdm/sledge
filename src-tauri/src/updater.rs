@@ -14,8 +14,41 @@ pub(crate) struct Metadata {
     raw_json: serde_json::Value,
 }
 
-fn is_dev_channel(channel: Option<&str>) -> bool {
-    matches!(channel, Some("dev" | "rust"))
+#[derive(Copy, Clone)]
+struct ChannelSelection {
+    stable: bool,
+    dev: bool,
+}
+
+fn parse_channels(channel: Option<&str>) -> ChannelSelection {
+    let Some(channel) = channel else {
+        return ChannelSelection {
+            stable: true,
+            dev: false,
+        };
+    };
+
+    let mut selection = ChannelSelection {
+        stable: false,
+        dev: false,
+    };
+
+    for token in channel.split(|c| matches!(c, '|' | ',' | ' ' | '\t')) {
+        match token {
+            "stable" => selection.stable = true,
+            "dev" => selection.dev = true,
+            _ => {}
+        }
+    }
+
+    if !selection.stable && !selection.dev {
+        ChannelSelection {
+            stable: true,
+            dev: false,
+        }
+    } else {
+        selection
+    }
 }
 
 const STABLE_ENDPOINT: &str =
@@ -105,7 +138,9 @@ pub(crate) async fn check_update_with_channel<R: Runtime>(
     let stable_endpoint = Url::parse(STABLE_ENDPOINT).ok();
     let dev_endpoint = Url::parse(DEV_ENDPOINT).ok();
 
-    let update = if is_dev_channel(channel.as_deref()) {
+    let selection = parse_channels(channel.as_deref());
+
+    let update = if selection.dev && selection.stable {
         let stable = check_with_endpoint(
             &webview,
             stable_endpoint,
@@ -127,6 +162,17 @@ pub(crate) async fn check_update_with_channel<R: Runtime>(
         )
         .await?;
         select_latest_update(stable, dev)
+    } else if selection.dev {
+        check_with_endpoint(
+            &webview,
+            dev_endpoint,
+            headers,
+            timeout,
+            proxy,
+            target,
+            allow_downgrades,
+        )
+        .await?
     } else {
         check_with_endpoint(
             &webview,

@@ -4,7 +4,6 @@ import { Cursor } from '~/config/types/Cursor';
 import { FPS } from '~/config/types/FPS';
 import { CanvasRenderingMode } from '~/features/canvas';
 import { CanvasCenteringMode } from '~/features/canvas/model';
-import { UpdateChannel } from '~/utils/UpdateUtils';
 
 export type GlobalConfig = {
   general: {
@@ -36,7 +35,7 @@ export type GlobalConfig = {
     showDirtyTiles: boolean;
     useRawMove: boolean;
     disableCompletionLine: boolean;
-    updateChannel: UpdateChannel;
+    updateChannel: string;
   };
   keyConfig: KeyConfigStore;
 };

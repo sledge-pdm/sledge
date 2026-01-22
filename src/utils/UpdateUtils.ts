@@ -5,18 +5,6 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { dialog, process, Update } from './platform';
 import { safeInvoke } from './TauriUtils';
 
-function isValidUpdate(update: Update): boolean {
-  if (update.version.includes('dev') || update.version.includes('test')) {
-    if (import.meta.env.DEV) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 type UpdaterMetadata = {
   rid: number;
   currentVersion: string;
@@ -25,8 +13,6 @@ type UpdaterMetadata = {
   body?: string;
   rawJson: Record<string, unknown>;
 };
-
-export type UpdateChannel = 'stable' | 'rust';
 
 function toUpdate(metadata: UpdaterMetadata): Update {
   return new PluginUpdate(metadata) as unknown as Update;
@@ -41,9 +27,7 @@ export async function getUpdate(): Promise<Update | undefined> {
     });
     if (metadata) {
       const update = toUpdate(metadata);
-      if (isValidUpdate(update)) {
-        return update;
-      }
+      return update;
     }
   } catch (e) {
     logSystemError('failed to update.', { label: 'UpdateUtils', details: [e] });
@@ -62,9 +46,6 @@ export async function askAndInstallUpdate() {
     });
     if (metadata) {
       const update = toUpdate(metadata);
-      if (!isValidUpdate(update)) {
-        return;
-      }
       logSystemInfo(`found update ${update.version} from ${update.date}`, {
         label: 'UpdateUtils',
         debugOnly: true,

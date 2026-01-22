@@ -1,4 +1,12 @@
+import { css } from '@acab/ecsstatic';
+import { Dropdown } from '@sledge-pdm/ui';
+import { Show } from 'solid-js';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
+import { flexCol } from '~/styles/styles';
+
+const devWarnText = css`
+  color: var(--color-warn);
+`;
 
 export const debugMetas: FieldMeta[] = [
   { section: ConfigSections.Debug, kind: 'header', header: 'monitor' },
@@ -29,13 +37,28 @@ export const debugMetas: FieldMeta[] = [
     section: ConfigSections.Debug,
     path: 'debug/updateChannel',
     label: 'update channel',
-    component: 'Dropdown',
-    props: {
-      options: [
-        { label: 'stable', value: 'stable' },
-        { label: 'dev', value: 'dev' },
-      ],
+    component: ({ value, onChange }) => {
+      return (
+        <div class={flexCol} style={{ gap: '8px' }}>
+          <Dropdown
+            value={value()}
+            options={[
+              { label: 'stable', value: 'stable' },
+              { label: 'stable + dev', value: 'stable|dev' },
+              { label: 'dev only', value: 'dev' },
+            ]}
+            onChange={(v) => onChange(v)}
+          />
+          <Show when={value().includes('dev')}>
+            <p class={devWarnText}>
+              Dev builds can be unstable and may put your computer or projects at risk.
+              <br />
+              Use at your own risk!
+            </p>
+          </Show>
+        </div>
+      );
     },
-    tips: 'preferring update chennel.',
+    tips: 'preferred update channel.',
   },
 ];

@@ -16,6 +16,18 @@ const sharedConf = {
       '@sledge/wasm': path.resolve(projectRoot, 'wasm/pkg/sledge_wasm.js'),
     },
   },
+  optimizeDeps: {
+    include: [
+      'solid-js',
+      'solid-js/store',
+      'mitt',
+      'uuid',
+      '@acab/ecsstatic',
+      '@sledge-pdm/frasco',
+      '@solid-primitives/raf',
+      '@solid-primitives/scheduled',
+    ],
+  },
 };
 
 export default defineConfig({

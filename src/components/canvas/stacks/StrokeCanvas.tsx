@@ -25,7 +25,7 @@ const strokeArea = css`
   z-index: var(--zindex-interact-area);
 `;
 
-// レイヤーごとのキャンバスの上でタチE��イベントを受ける領域
+// レイヤーごとのキャンバスの上でタッチイベントを受ける領域
 export const StrokeCanvas: Component = () => {
   const LOG_LABEL = 'StrokeCanvas';
   const logDebug = (message: string, ...details: unknown[]) => {
@@ -59,14 +59,14 @@ export const StrokeCanvas: Component = () => {
     }
     if (e.pointerType === 'touch') return false;
 
-    // 基本皁E��はCanvasAreaInteractのisDraggableと送E�E関俁E
+    // 基本的にはCanvasAreaInteractのisDraggableと逆の関係
     if (CanvasAreaInteract.isDraggable(e)) {
-      // キャンバスドラチE��が有効な場合�E描画不可
+      // キャンバスドラッグが有効な場合は描画不可
       return false;
     }
 
-    // マウスおよびペンにおいては右、左クリチE��相当�EクリチE��だけを描画可能なクリチE��とする�E�中クリチE��は弾く！E
-    // 右クリチE��はチE�EルのallowRightClickによってほぼ弾かれめE
+    // マウスおよびペンにおいては右、左クリック相当のクリックだけを描画可能なクリックとする（中クリックは弾く）
+    // 右クリックはツールのallowRightClickによってほぼ弾かれる
     if ((e.pointerType === 'mouse' || e.pointerType === 'pen') && e.buttons !== 1 && e.buttons !== 2) {
       return false;
     }
@@ -203,7 +203,7 @@ export const StrokeCanvas: Component = () => {
         if (!focused) {
           operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
         } else {
-          // pipetteのみ復帰時も戻ぁE
+          // pipetteのみ復帰時も戻す
           if (toolStore.activeToolCategory === 'pipette')
             operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
         }

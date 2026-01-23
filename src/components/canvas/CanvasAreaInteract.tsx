@@ -57,6 +57,35 @@ class CanvasAreaInteract {
   // タッチ回転用スナッパ（2本指ジェスチャ中のみ動作）
   private rotationSnapper = new TouchRotationSnapper();
 
+  private releasePointerCaptureSafely(pointerId: number) {
+    if (this.wrapperRef.hasPointerCapture(pointerId)) {
+      try {
+        this.wrapperRef.releasePointerCapture(pointerId);
+      } catch {}
+    }
+  }
+
+  private resetGestureMetrics() {
+    this.lastDist = 0;
+    this.lastAngle = 0;
+    this.lastAppliedDist = 0;
+    this.lastAppliedAngle = 0;
+    this.lastAppliedMidX = 0;
+    this.lastAppliedMidY = 0;
+  }
+
+  private clearAllPointers(reason: string) {
+    if (this.pointers.size === 0) return;
+    logDebugWarn(`clearAllPointers: ${reason}`, Array.from(this.pointers.keys()));
+    for (const pointerId of this.pointers.keys()) {
+      this.releasePointerCaptureSafely(pointerId);
+    }
+    this.pointers.clear();
+    setInteractStore('isDragging', false);
+    this.rotationSnapper.onGestureEnd();
+    this.resetGestureMetrics();
+  }
+
   private getTouchPointers(): TrackedPointer[] {
     return Array.from(this.pointers.values()).filter((pointer) => pointer.type === 'touch');
   }
@@ -121,6 +150,9 @@ class CanvasAreaInteract {
     this.lastPointY = e.clientY;
 
     if (e.pointerType === 'touch') {
+      if (this.pointers.size > 0 && this.getTouchPointers().length === 0) {
+        this.clearAllPointers('touch-start');
+      }
       this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType });
       // タッチ
       const touchPointers = this.getTouchPointers();
@@ -186,6 +218,11 @@ class CanvasAreaInteract {
     this.updateCursor('auto');
     if (!this.pointers.has(e.pointerId)) {
       logDebugWarn(`handlePointerMove cancelled because don't have current pointer`);
+      return;
+    }
+    if (e.buttons === 0 && e.pointerType !== 'touch') {
+      logDebugWarn(`handlePointerMove detected buttons=0. treat as pointerup`, e.pointerId);
+      this.handlePointerUp(e);
       return;
     }
     const prev = this.pointers.get(e.pointerId)!;
@@ -282,9 +319,7 @@ class CanvasAreaInteract {
     this.lastPointY = e.clientY;
 
     this.pointers.delete(e.pointerId);
-    if (this.wrapperRef.hasPointerCapture(e.pointerId)) {
-      this.wrapperRef.releasePointerCapture(e.pointerId);
-    }
+    this.releasePointerCaptureSafely(e.pointerId);
     const touchPointers = this.getTouchPointers();
     if (touchPointers.length < 2) {
       // 2本指ピンチ終了時にスナップ状態リセット
@@ -292,11 +327,17 @@ class CanvasAreaInteract {
     }
     if (this.pointers.size === 0) {
       setInteractStore('isDragging', false);
-      this.lastDist = 0;
+      this.resetGestureMetrics();
     }
   }
 
   private handlePointerCancel(e: PointerEvent) {
+    this.handlePointerUp(e);
+  }
+
+  private handleLostPointerCapture(e: PointerEvent) {
+    if (!this.pointers.has(e.pointerId)) return;
+    logDebugWarn(`lostpointercapture detected. cleanup pointer`, e.pointerId);
     this.handlePointerUp(e);
   }
 
@@ -360,6 +401,7 @@ class CanvasAreaInteract {
   private onPointerMove = this.handlePointerMove.bind(this);
   private onPointerUp = this.handlePointerUp.bind(this);
   private onPointerCancel = this.handlePointerCancel.bind(this);
+  private onLostPointerCapture = this.handleLostPointerCapture.bind(this);
   private onWheel = this.handleWheel.bind(this);
   private onKeyDown = this.handleKeyDown.bind(this);
   private onKeyUp = this.handleKeyUp.bind(this);
@@ -372,6 +414,7 @@ class CanvasAreaInteract {
     window.addEventListener('pointerup', this.onPointerUp);
     window.addEventListener('pointercancel', this.onPointerCancel);
     this.wrapperRef.addEventListener('pointercancel', this.onPointerCancel);
+    this.wrapperRef.addEventListener('lostpointercapture', this.onLostPointerCapture);
     this.wrapperRef.addEventListener('wheel', this.onWheel);
     // keyboard
     window.addEventListener('keydown', this.onKeyDown);
@@ -386,6 +429,7 @@ class CanvasAreaInteract {
     window.removeEventListener('pointerup', this.onPointerUp);
     window.removeEventListener('pointercancel', this.onPointerCancel);
     this.wrapperRef.removeEventListener('pointercancel', this.onPointerCancel);
+    this.wrapperRef.removeEventListener('lostpointercapture', this.onLostPointerCapture);
     this.wrapperRef.removeEventListener('wheel', this.onWheel);
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);

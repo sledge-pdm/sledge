@@ -13,7 +13,7 @@ import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
 import { loadGlobalConfig } from '~/features/io/config/load';
 import { loadEditorState } from '~/features/io/editor/load';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
-import { importableFileExtensions } from '~/features/io/FileExtensions';
+import { isImportableFile, isSledgeProjectFile } from '~/features/io/Extensions';
 import KeyListener from '~/features/io/KeyListener';
 import { ErrorTypes, ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { logUserWarn } from '~/features/log/service';
@@ -165,8 +165,8 @@ export default function Editor() {
     const files = Array.from(event.dataTransfer?.files ?? []);
     if (files.length === 0) return;
 
-    const imageFiles = files.filter((file) => importableFileExtensions.some((ext) => file.name.toLowerCase().endsWith(`.${ext}`)));
-    const projectFiles = files.filter((file) => file.name.toLowerCase().endsWith('.sledge'));
+    const imageFiles = files.filter((file) => isImportableFile(file.name));
+    const projectFiles = files.filter((file) => isSledgeProjectFile(file.name));
     if (projectFiles.length > 0) {
       logUserWarn('Drag&drop-ing sledge files is not supported. Open from explorer instead.', { label: 'ProjectImport' });
     }

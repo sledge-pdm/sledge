@@ -1,6 +1,6 @@
 ﻿import { toUint8ClampedArray } from '@sledge-pdm/core';
 import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import { convertToMimetype } from '~/features/io/FileExtensions';
+import { EXPORT_TYPES } from '~/features/io/export/types';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -15,8 +15,7 @@ export async function convertCanvasToBlob(format: 'png' | 'jpeg' | 'webp_lossy',
 
   const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(frascoRenderer.readPixelsFlipped());
   const offscreen = getScaledCanvas(buffer, scale);
-  const mimeType = convertToMimetype(format);
-
+  const mimeType = EXPORT_TYPES[format].mimeType;
   if (!mimeType) {
     throw new Error('Export Error: Mime Type not found.');
   }
@@ -43,8 +42,7 @@ export async function convertLayerToBlob(
   const buffer = toUint8ClampedArray(getLayer(layer.id).readPixels()) as Uint8ClampedArray<ArrayBuffer>;
 
   const offscreen = getScaledCanvas(buffer, scale);
-  const mimeType = convertToMimetype(format);
-
+  const mimeType = EXPORT_TYPES[format].mimeType;
   if (!mimeType) {
     throw new Error('Export Error: Mime Type not found.');
   }

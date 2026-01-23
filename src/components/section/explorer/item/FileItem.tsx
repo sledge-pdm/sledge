@@ -3,8 +3,9 @@ import { FileLocation } from '@sledge-pdm/core';
 import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createMemo, Show } from 'solid-js';
 import { createEntryFromLocalImage, insertEntry, selectEntry } from '~/features/image_pool';
+import { getFileExtensionInfo, isImportableFile, isOpenableFile } from '~/features/io/Extensions';
 import { openExistingProject } from '~/features/io/window';
-import { isImportableFile, isOpenableFile, normalizeJoin } from '~/utils/FileUtils';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { DirEntry } from '~/utils/platform';
 
@@ -60,8 +61,9 @@ export interface FilesConfig {
 
 const getIconForName = (name: string, isDirectory?: boolean) => {
   if (isDirectory) return '/assets/icons/files/folder.png';
-  if (name.endsWith('.sledge')) return '/assets/icons/files/file_sledge.png';
-  if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) return '/assets/icons/files/image.png';
+  const info = getFileExtensionInfo(name);
+  if (info?.project) return '/assets/icons/files/file_sledge.png';
+  if (info?.image) return '/assets/icons/files/image.png';
   return '/assets/icons/files/file.png';
 };
 

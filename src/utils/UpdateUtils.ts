@@ -23,6 +23,10 @@ export async function getUpdate(): Promise<Update | undefined> {
   try {
     const metadata = await safeInvoke<UpdaterMetadata | null>('check_update_with_channel', {
       channel: globalConfig.debug.updateChannel ?? 'stable',
+      headers: [
+        ['Cache-Control', 'no-cache'],
+        ['Pragma', 'no-cache'],
+      ],
       timeout: 5000,
     });
     if (metadata) {
@@ -42,6 +46,10 @@ export async function askAndInstallUpdate() {
   try {
     const metadata = await safeInvoke<UpdaterMetadata | null>('check_update_with_channel', {
       channel: globalConfig.debug.updateChannel ?? 'stable',
+      headers: [
+        ['Cache-Control', 'no-cache'],
+        ['Pragma', 'no-cache'],
+      ],
       timeout: 5000,
     });
     if (metadata) {

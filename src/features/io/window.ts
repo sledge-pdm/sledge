@@ -1,5 +1,5 @@
 import { FileLocation } from '@sledge-pdm/core';
-import { importableFileExtensions } from '~/features/io/FileExtensions';
+import { IMPORTABLE_FILE_EXTENSIONS, OPENABLE_FILE_EXTENSIONS } from '~/features/io/Extensions';
 import { logUserWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -35,7 +35,7 @@ export async function openNewFile(): Promise<string | undefined> {
     filters: [
       {
         name: 'all files.',
-        extensions: ['sledge', ...importableFileExtensions],
+        extensions: [...OPENABLE_FILE_EXTENSIONS],
       },
       {
         name: 'sledge files.',
@@ -43,7 +43,7 @@ export async function openNewFile(): Promise<string | undefined> {
       },
       {
         name: 'image files.',
-        extensions: [...importableFileExtensions],
+        extensions: [...IMPORTABLE_FILE_EXTENSIONS],
       },
     ],
   });

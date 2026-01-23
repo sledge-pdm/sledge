@@ -11,13 +11,13 @@ export const UpdateSection: Component = () => {
 
   onMount(async () => {
     const update = await getUpdate();
-    setAvailableUpdate(update);
+    if (!availableUpdate()) setAvailableUpdate(update);
   });
 
   createEffect(async () => {
     globalConfig.debug.updateChannel;
     const update = await getUpdate();
-    setAvailableUpdate(update);
+    if (!availableUpdate()) setAvailableUpdate(update);
   });
 
   return (

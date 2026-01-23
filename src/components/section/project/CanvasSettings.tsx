@@ -94,7 +94,7 @@ const actionsContainer = css`
   flex-direction: column;
   width: 100%;
   margin-top: 16px;
-  align-items: start;
+  align-items: end;
 `;
 
 const adjustZoomButtonStyle = css`

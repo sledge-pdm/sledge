@@ -5,7 +5,7 @@ import { Component, createEffect, createMemo, createSignal, onMount, Show } from
 import { createStore } from 'solid-js/store';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
-import { convertToExtension, convertToLabel, exportableFileTypes, ExportableFileTypes } from '~/features/io/FileExtensions';
+import { EXPORT_TYPES, ExportableTypes } from '~/features/io/export/types';
 import { allLayers } from '~/features/layer';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -150,8 +150,6 @@ const scaleOptions: DropdownOption<number>[] = [
   { label: 'CUSTOM', value: 0 },
 ];
 
-const qualityMutableExtensions: Partial<ExportableFileTypes>[] = ['webp_lossy', 'jpeg'];
-
 export interface ExportSettings {
   folderPath?: string;
   fileName?: string;
@@ -160,10 +158,10 @@ export interface ExportSettings {
 }
 
 const ExportContent: Component = () => {
-  const fileTypeOptions: DropdownOption<ExportableFileTypes>[] = exportableFileTypes.map((type) => {
+  const fileTypeOptions: DropdownOption<ExportableTypes>[] = Object.entries(EXPORT_TYPES).map(([type, value]) => {
     return {
-      label: convertToLabel(type) ?? '[unknown]',
-      value: type,
+      label: value.label,
+      value: type as ExportableTypes,
     };
   });
 
@@ -261,6 +259,7 @@ const ExportContent: Component = () => {
   };
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
+  const selectedExportType = () => EXPORT_TYPES[settings.exportOptions.format];
 
   let menuButtonContainerRef: HTMLDivElement;
 
@@ -386,7 +385,7 @@ const ExportContent: Component = () => {
               onInput={(e) => setSettings('fileName', e.target.value)}
             />
             <Show when={!settings.exportOptions.perLayer}>
-              <p>.{convertToExtension(settings.exportOptions.format)}</p>
+              <p>.{selectedExportType().fileExtension}</p>
             </Show>
           </div>
         </div>
@@ -399,10 +398,7 @@ const ExportContent: Component = () => {
         </div>
       </div>
 
-      <div
-        class={clsx(qualityField, !qualityMutableExtensions.includes(settings.exportOptions.format) && qualityFieldDisabled)}
-        style={{ 'flex-grow': 1 }}
-      >
+      <div class={clsx(qualityField, !selectedExportType().qualityMutable && qualityFieldDisabled)} style={{ 'flex-grow': 1 }}>
         <p class={sectionSubCaption}>Quality.</p>
         <div class={sectionSubContent}>
           <Slider
@@ -471,7 +467,7 @@ const ExportContent: Component = () => {
                       return normalizeJoin(
                         settings.folderPath!,
                         settings.fileName!,
-                        `${settings.fileName}_${layer.name}.${convertToExtension(settings.exportOptions.format)}`
+                        `${settings.fileName}_${layer.name}.${selectedExportType().fileExtension}`
                       );
                     })
                     .join('\n')

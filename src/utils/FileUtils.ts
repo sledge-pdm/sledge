@@ -1,4 +1,3 @@
-import { importableFileExtensions, openableFileExtensions } from '~/features/io/FileExtensions';
 import { ioStore, lastSettingsStore } from '~/stores/EditorStores';
 import { safeInvoke } from '~/utils/TauriUtils';
 
@@ -194,14 +193,4 @@ export const getDefinedDriveLetters = async (): Promise<string[] | undefined> =>
   }
 
   return await safeInvoke('get_defined_drive_letters');
-};
-
-export const isOpenableFile = (name: string) => {
-  if (!name.includes('.')) return false;
-  return openableFileExtensions.some((ext) => name.endsWith(`.${ext}`));
-};
-
-export const isImportableFile = (name: string) => {
-  if (!name.includes('.')) return false;
-  return importableFileExtensions.some((ext) => name.endsWith(`.${ext}`));
 };

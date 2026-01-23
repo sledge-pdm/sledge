@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { convertToExtension, convertToLabel, convertToMimetype, openableFileExtensions } from '~/features/io/FileExtensions';
+import { OPENABLE_FILE_EXTENSIONS } from '~/features/io/Extensions';
+import { EXPORT_TYPES } from '~/features/io/export/types';
 
-describe('FileExtensions', () => {
-  it('maps known types to labels', () => {
-    expect(convertToLabel('webp_lossy')).toBe('webp (lossy)');
-    expect(convertToLabel('jpg')).toBe('jpeg');
+describe('Extensions', () => {
+  it('maps known export types to labels', () => {
+    expect(EXPORT_TYPES.webp_lossy.label).toBe('webp (lossy)');
+    expect(EXPORT_TYPES.jpeg.label).toBe('jpeg');
   });
 
-  it('maps known types to extensions', () => {
-    expect(convertToExtension('jpeg')).toBe('jpg');
-    expect(convertToExtension('webp_lossless')).toBe('webp');
+  it('maps known export types to extensions', () => {
+    expect(EXPORT_TYPES.jpeg.fileExtension).toBe('jpg');
+    expect(EXPORT_TYPES.webp_lossless.fileExtension).toBe('webp');
+    expect(EXPORT_TYPES.svg.fileExtension).toBe('svg');
   });
 
-  it('maps known types to mimetypes', () => {
-    expect(convertToMimetype('png')).toBe('image/png');
-    expect(convertToMimetype('jpg')).toBe('image/jpeg');
+  it('maps known export types to mimetypes', () => {
+    expect(EXPORT_TYPES.png.mimeType).toBe('image/png');
+    expect(EXPORT_TYPES.jpeg.mimeType).toBe('image/jpeg');
   });
 
   it('keeps openable extensions list stable', () => {
-    expect(openableFileExtensions).toContain('sledge');
+    expect(OPENABLE_FILE_EXTENSIONS).toContain('sledge');
   });
 });

@@ -48,12 +48,12 @@ const menuListCanvasControls = css`
   flex-direction: row;
   height: 100%;
   align-items: center;
+  margin-right: 8px;
 `;
 
 const menuListRight = css`
   display: flex;
   flex-direction: row;
-  margin-left: 8px;
 `;
 
 const saveSectionContainer = css`

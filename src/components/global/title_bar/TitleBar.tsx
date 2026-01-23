@@ -1,12 +1,16 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
 import { color, Icon } from '@sledge-pdm/ui';
-import { createEffect, createSignal, onMount, Show } from 'solid-js';
+import { useLocation } from '@solidjs/router';
+import { createEffect, createMemo, onMount, Show } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { ioStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
+import { flexRow } from '~/styles/styles';
+import { normalizeJoin } from '~/utils/FileUtils';
 import { window as platformWindow } from '~/utils/platform';
 import './title_bar_region.css';
 
@@ -24,9 +28,11 @@ const titleBarTitleContainer = css`
   display: flex;
   flex-direction: row;
   width: 100%;
+  flex: 1;
   margin-right: auto;
   padding-left: 24px;
   align-items: center;
+  overflow: hidden;
 `;
 
 const titleBarTitle = css`
@@ -117,57 +123,54 @@ const titleBarControlButtonImg = css`
   padding: 1px;
 `;
 
-const titleInfo = css`
-  display: flex;
-  flex-direction: row;
-  height: '8px';
-`;
-
 export default function TitleBar() {
-  const [isMaximizable, setIsMaximizable] = createSignal(false);
-  const [isMinimizable, setIsMinimizable] = createSignal(false);
-  const [isClosable, setIsClosable] = createSignal(false);
-  const [isMaximized, setMaximized] = createSignal(false);
-  const [isDecorated, setIsDecorated] = createSignal(true);
-  const [windowTitle, setWindowTitle] = createSignal('');
+  const [windowState, setWindowState] = createStore({
+    maximizable: false,
+    minimizable: false,
+    closable: false,
+    maximized: false,
+    decorated: true,
+    title: '',
+  });
 
   onMount(async () => {
     const window = platformWindow.getCurrentWindow();
-    setIsMaximizable(await window.isMaximizable());
-    setIsMinimizable(await window.isMinimizable());
-    setIsClosable(await window.isClosable());
-    setMaximized(await window.isMaximized());
-    setIsDecorated(await window.isDecorated());
-    setWindowTitle(await window.title());
+    setWindowState({
+      maximizable: await window.isMaximizable(),
+      minimizable: await window.isMinimizable(),
+      closable: await window.isClosable(),
+      maximized: await window.isMaximized(),
+      decorated: await window.isDecorated(),
+      title: await window.title(),
+    });
   });
 
   platformWindow.getCurrentWindow().onResized(async () => {
-    setMaximized(await platformWindow.getCurrentWindow().isMaximized());
+    setWindowState('maximized', await platformWindow.getCurrentWindow().isMaximized());
   });
 
+  // get window title according to current situation.
+  const windowTitle = createMemo(() => {
+    const fileName = ioStore.savedLocation.name ?? '[new project]';
+    const projPath =
+      ioStore.savedLocation.path && ioStore.savedLocation.name ? normalizeJoin(ioStore.savedLocation.path, ioStore.savedLocation.name) : undefined;
+    // mac/linux does not have custom titlebar, so show some additional info here
+    if (windowState.decorated) {
+      const sizeText = `(${projectStore.canvas.size.width}x${projectStore.canvas.size.height})`;
+      if (projPath) return `${fileName} - ${projPath} | ${sizeText}`;
+      else return `${fileName} | ${sizeText}`;
+    } else {
+      const projPath = ioStore.savedLocation.path;
+      if (projPath) return `${fileName} - ${projPath}`;
+      else return `${fileName}`;
+    }
+  });
+
+  const location = useLocation();
   createEffect(() => {
     if (location.pathname.startsWith('/editor')) {
-      let title = '';
-      let fileName = ioStore.savedLocation.name ?? '[new project]';
-      // non-custom titlebar (mac/linux)
-      if (isDecorated()) {
-        const size = `(${projectStore.canvas.size.width} x ${projectStore.canvas.size.height})`;
-        const projPath = ioStore.savedLocation.path;
-        if (projPath) {
-          title += `${fileName} ${size} - ${projPath}`;
-        } else {
-          title += `${fileName} ${size}`;
-        }
-      } else {
-        const projPath = ioStore.savedLocation.path;
-        if (projPath) {
-          title += `${fileName} - ${projPath}`;
-        } else {
-          title += `${fileName}`;
-        }
-      }
-
-      platformWindow.getCurrentWindow().setTitle(title);
+      // NOTE: THIS DOES NOT CHANGE TITLE IN GTK WINDOW TITLEBAR
+      platformWindow.getCurrentWindow().setTitle(windowTitle());
     }
   });
 
@@ -184,22 +187,19 @@ export default function TitleBar() {
           'pointer-events': 'all',
         }}
       >
-        <Show when={!isDecorated()}>
+        <Show when={!windowState.decorated}>
           <nav
             class={titleBarRoot}
             data-tauri-drag-region
-            style={
-              !shouldShowTitle()
-                ? {
-                    'background-color': 'transparent',
-                  }
-                : {}
-            }
+            style={{
+              'background-color': shouldShowTitle() ? undefined : 'transparent',
+            }}
           >
             <div class={titleBarTitleContainer}>
               <Show when={!ioStore.isInInitialLoading && shouldShowTitle()}>
-                <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowTitle()}</p>}>
-                  <div class={titleInfo}>
+                <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowState.title}</p>}>
+                  {/* title */}
+                  <div class={flexRow}>
                     <p class={titleBarTitle}>
                       <span class={titleBarTitle} style={{ opacity: 0.5 }}>
                         {ioStore.savedLocation.path ? `${ioStore.savedLocation.path}/` : ''}
@@ -213,6 +213,7 @@ export default function TitleBar() {
                     </Show>
                     <p class={titleBarTitleSub}>{ioStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
                   </div>
+                  {/* project version (shown when older version, or DEV environment) */}
                   <Show
                     when={
                       ioStore.openAs === 'project' &&
@@ -222,6 +223,7 @@ export default function TitleBar() {
                     <div class={titleDivider} />
                     <p class={titleBarProjectVersion}>V{ioStore.loadProjectVersion?.project}</p>
                   </Show>
+                  {/* canvas size */}
                   <div class={titleDivider} />
                   <p class={titleBarSize}>
                     {projectStore.canvas.size.width} x {projectStore.canvas.size.height}
@@ -238,7 +240,7 @@ export default function TitleBar() {
               <div style={{ height: '18px', width: '1px', 'background-color': color.border, 'margin-left': '0px', 'margin-right': '12px' }} />
             </Show>
             <div class={titleBarControls} data-tauri-drag-region-exclude>
-              <Show when={isMinimizable()}>
+              <Show when={windowState.minimizable}>
                 <div
                   class={titleBarControlButtonContainer}
                   onClick={async (e) => {
@@ -257,7 +259,7 @@ export default function TitleBar() {
                 </div>
               </Show>
 
-              <Show when={isMaximizable()}>
+              <Show when={windowState.maximizable}>
                 <div
                   class={titleBarControlButtonContainer}
                   onClick={async (e) => {
@@ -268,7 +270,7 @@ export default function TitleBar() {
                 >
                   <Icon
                     class={titleBarControlButtonImg}
-                    src={isMaximized() ? '/assets/icons/title_bar/quit_maximize_10.png' : '/assets/icons/title_bar/maximize_10.png'}
+                    src={windowState.maximized ? '/assets/icons/title_bar/quit_maximize_10.png' : '/assets/icons/title_bar/maximize_10.png'}
                     color={color.onBackground}
                     base={10}
                     data-tauri-drag-region-exclude
@@ -276,7 +278,7 @@ export default function TitleBar() {
                 </div>
               </Show>
 
-              <Show when={isClosable()}>
+              <Show when={windowState.closable}>
                 <div
                   class={clsx(titleBarControlButtonContainer, titleBarControlCloseButtonContainer)}
                   onClick={async (e) => {

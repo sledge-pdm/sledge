@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { OPENABLE_FILE_EXTENSIONS } from '~/features/io/Extensions';
+import { getFileExtensionInfo, OPENABLE_FILE_EXTENSIONS } from '~/features/io/Extensions';
 import { EXPORT_TYPES } from '~/features/io/export/types';
 
 describe('Extensions', () => {
@@ -9,7 +9,7 @@ describe('Extensions', () => {
   });
 
   it('maps known export types to extensions', () => {
-    expect(EXPORT_TYPES.jpeg.fileExtension).toBe('jpg');
+    expect(EXPORT_TYPES.jpeg.fileExtension).toBe('jpeg');
     expect(EXPORT_TYPES.webp_lossless.fileExtension).toBe('webp');
     expect(EXPORT_TYPES.svg.fileExtension).toBe('svg');
   });
@@ -21,5 +21,16 @@ describe('Extensions', () => {
 
   it('keeps openable extensions list stable', () => {
     expect(OPENABLE_FILE_EXTENSIONS).toContain('sledge');
+  });
+
+  it('get extension info', () => {
+    const pngInfo = getFileExtensionInfo('/some/path/to/image.png');
+    expect(pngInfo?.image).toBeTruthy();
+    expect(pngInfo?.importable).toBeTruthy();
+    expect(pngInfo?.exportable).toBeTruthy();
+    const svgInfo = getFileExtensionInfo('/some/path/to/path.svg');
+    expect(svgInfo?.image).toBeTruthy();
+    expect(svgInfo?.importable).toBeFalsy();
+    expect(svgInfo?.exportable).toBeTruthy();
   });
 });

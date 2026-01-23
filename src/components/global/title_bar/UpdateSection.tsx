@@ -24,7 +24,7 @@ export const UpdateSection: Component = () => {
       await checkUpdate();
     }
   });
-  
+
   const checkUpdate = async () => {
     const update = await getUpdate();
     if (!availableUpdate()) setAvailableUpdate(update);

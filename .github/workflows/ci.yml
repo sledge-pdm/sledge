@@ -100,7 +100,7 @@ jobs:
         with:
           path: |
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('package.json', 'pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-playwright-chromium
 

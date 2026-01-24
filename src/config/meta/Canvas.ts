@@ -27,6 +27,13 @@ export const canvasMetas: FieldMeta[] = [
     component: 'ToggleSwitch',
     tips: `whether if shows pointed pixel as rect.`,
   },
+  {
+    section: ConfigSections.Canvas,
+    path: 'editor/useRawMove',
+    label: 'use raw pointer update',
+    component: 'ToggleSwitch',
+    tips: 'use higher frequency pointer tracking.',
+  },
   { section: ConfigSections.Canvas, kind: 'header', header: 'zoom / rotate' },
   {
     section: ConfigSections.Canvas,

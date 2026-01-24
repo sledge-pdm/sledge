@@ -1,14 +1,13 @@
 import { color, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, For } from 'solid-js';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
-import { runtimeImages } from '~/features/image_pool/service';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
-  const imageSrc = useImageBlobUrl(() => runtimeImages().get(props.entry.id));
+  const imageSrc = useImageBlobUrl(() => props.entry.id);
 
   return (
     <div

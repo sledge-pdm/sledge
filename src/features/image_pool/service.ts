@@ -1,11 +1,10 @@
 ﻿import { gzipDeflate, gzipInflate, type RawPixelData } from '@sledge-pdm/core';
-import { createSignal } from 'solid-js';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
 import { projectHistoryController } from '~/features/history';
 import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
 import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
-import { ImagePoolEntry, ImagePoolImage, ImagePoolImagePersisted } from '~/features/image_pool/model';
+import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserInfo, logUserWarn } from '~/features/log/service';
@@ -16,8 +15,10 @@ import { fs } from '~/utils/platform';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { flip_pixels_vertically } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { removeImagePoolBlobUrl } from './blobManager';
+import { getImagePoolImage, removeImagePoolImage, setImagePoolImage } from './imageStore';
 
-type ImageMimeType = ImagePoolImagePersisted['mimeType'];
+type ImageMimeType = ImagePoolImage['mimeType'];
 
 const DEFAULT_MIME: ImageMimeType = 'image/png';
 
@@ -38,63 +39,25 @@ const guessMimeFromPath = (filePath?: string): ImageMimeType => {
   return DEFAULT_MIME;
 };
 
-const cloneEntries = (entries: ImagePoolEntry[]): ImagePoolEntry[] =>
-  entries.map((e) => ({
-    ...e,
-    base: { ...e.base },
-    transform: { ...e.transform },
-  }));
+const cloneEntry = (entry: ImagePoolEntry): ImagePoolEntry => ({
+  ...entry,
+  base: { ...entry.base },
+  transform: { ...entry.transform },
+});
 
-export const toPersistedImages = (images: Map<string, ImagePoolImage>): Map<string, ImagePoolImagePersisted> => {
-  const persisted = new Map<string, ImagePoolImagePersisted>();
-  images.forEach((image, id) => persisted.set(id, { mimeType: image.mimeType, deflatedBuffer: image.deflatedBuffer }));
-  return persisted;
-};
-
-export const clonePersistedImages = (images: Map<string, ImagePoolImagePersisted>): Map<string, ImagePoolImagePersisted> => {
-  const cloned = new Map<string, ImagePoolImagePersisted>();
-  images.forEach((image, id) => cloned.set(id, { mimeType: image.mimeType, deflatedBuffer: new Uint8Array(image.deflatedBuffer) }));
-  return cloned;
-};
-
-const hydrateImage = (persisted: ImagePoolImagePersisted): ImagePoolImage => {
-  const inflated = gzipInflate(persisted.deflatedBuffer) as Uint8Array<ArrayBuffer>;
-  const blobUrl = URL.createObjectURL(new Blob([inflated], { type: persisted.mimeType }));
-  return { ...persisted, blobUrl };
-};
-
-export const makeRuntimeImages = (images: Map<string, ImagePoolImagePersisted>): Map<string, ImagePoolImage> => {
-  const runtime = new Map<string, ImagePoolImage>();
-  images.forEach((image, id) => runtime.set(id, hydrateImage(image)));
-  return runtime;
-};
-
-const createImagePoolImage = (bytes: Uint8Array, mimeType: ImageMimeType): ImagePoolImage => {
+const createPersistedImage = (bytes: Uint8Array, mimeType: ImageMimeType): ImagePoolImage => {
   const deflatedBuffer = gzipDeflate(bytes);
-  const blobUrl = URL.createObjectURL(new Blob([bytes as Uint8Array<ArrayBuffer>], { type: mimeType }));
-  return { mimeType, deflatedBuffer, blobUrl };
+  return { mimeType, deflatedBuffer };
 };
-
-export const [runtimeImages, setRuntimeImages] = createSignal<Map<string, ImagePoolImage>>(new Map());
 
 const setImageForEntry = (entryId: string, image: ImagePoolImage) => {
-  const images = new Map(runtimeImages());
-  const prev = images.get(entryId);
-  if (prev) {
-    URL.revokeObjectURL(prev.blobUrl);
-  }
-  images.set(entryId, image);
-  setRuntimeImages(images);
+  removeImagePoolBlobUrl(entryId);
+  setImagePoolImage(entryId, image);
 };
 
 const removeImageForEntry = (entryId: string) => {
-  const images = new Map(runtimeImages());
-  const prev = images.get(entryId);
-  if (prev) {
-    URL.revokeObjectURL(prev.blobUrl);
-  }
-  images.delete(entryId);
-  setRuntimeImages(images);
+  removeImagePoolBlobUrl(entryId);
+  removeImagePoolImage(entryId);
 };
 
 const createEntryBase = (width: number, height: number, forceFit?: boolean): ImagePoolEntry => {
@@ -123,7 +86,7 @@ const createEntryWithImage = (
   forceFit?: boolean
 ): { entry: ImagePoolEntry; image: ImagePoolImage } => {
   const entry = createEntryBase(width, height, forceFit);
-  const image = createImagePoolImage(bytes, mimeType);
+  const image = createPersistedImage(bytes, mimeType);
   return { entry, image };
 };
 
@@ -131,23 +94,19 @@ export const getEntry = (id: string): ImagePoolEntry | undefined => projectStore
 
 // Insert entry with a given id (used for undo/redo to keep id stable)
 export function insertEntry(entry: ImagePoolEntry, image: ImagePoolImage, noDiff?: boolean) {
-  const oldEntries = cloneEntries(projectStore.imagePool.entries);
-  const oldImages = clonePersistedImages(toPersistedImages(runtimeImages()));
-
   const newEntries = [...projectStore.imagePool.entries.filter((e) => e.id !== entry.id), entry];
 
   setProjectStore('imagePool', 'entries', newEntries);
   setImageForEntry(entry.id, image);
-  const newImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
   if (!noDiff) {
+    const index = newEntries.findIndex((e) => e.id === entry.id);
     projectHistoryController.addAction(
       new ImagePoolHistoryAction({
         kind: 'add',
-        oldEntries,
-        newEntries: cloneEntries(newEntries),
-        oldImages,
-        newImages,
+        entry: cloneEntry(entry),
+        image,
+        index,
         context: { from: 'ImagePoolController.insertEntry' },
       })
     );
@@ -162,20 +121,20 @@ export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>) {
 }
 
 export function removeEntry(id: string, noDiff?: boolean) {
-  const oldEntries = cloneEntries(projectStore.imagePool.entries);
-  const oldImages = clonePersistedImages(toPersistedImages(runtimeImages()));
+  const oldEntries = projectStore.imagePool.entries;
   const entry = getEntry(id);
   if (!entry) {
     logUserWarn(`ImagePool entry ${id} not found.`, { label: 'ImagePool' });
     return;
   }
+  const entryIndex = oldEntries.findIndex((e) => e.id === id);
+  const image = getImagePoolImage(id);
 
   if (projectStore.imagePool.entries.some((e) => e.id === id)) {
     const newEntries = projectStore.imagePool.entries.filter((e) => e.id !== id);
 
     setProjectStore('imagePool', 'entries', newEntries);
     removeImageForEntry(id);
-    const newImages = clonePersistedImages(toPersistedImages(runtimeImages()));
 
     if (projectStore.imagePool.state.selectedEntryId === id) {
       const index = oldEntries.findIndex((e) => e.id === id);
@@ -190,10 +149,9 @@ export function removeEntry(id: string, noDiff?: boolean) {
       projectHistoryController.addAction(
         new ImagePoolHistoryAction({
           kind: 'remove',
-          oldEntries,
-          newEntries: cloneEntries(newEntries),
-          oldImages,
-          newImages,
+          entry: cloneEntry(entry),
+          image,
+          index: entryIndex,
           context: { from: 'ImagePoolController.removeEntry' },
         })
       );
@@ -251,7 +209,7 @@ export async function transferToCurrentLayer(entryId: string, removeAfter: boole
 
 async function transferToLayer(layerId: string, entryId: string) {
   const entry = getEntry(entryId);
-  const image = runtimeImages().get(entryId);
+  const image = getImagePoolImage(entryId);
   const layer = getLayer(layerId);
   const layerW = layer.getWidth();
   const layerH = layer.getHeight();

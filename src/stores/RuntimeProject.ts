@@ -3,11 +3,13 @@ import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
 import { HistoryStacks } from 'node_modules/@sledge-pdm/core/dist/src/project/adapters/parts/History';
 import { unwrap } from 'solid-js/store';
 import { projectHistoryController } from '~/features/history';
-import { ImagePoolImagePersisted } from '~/features/image_pool';
-import { makeRuntimeImages, runtimeImages, setRuntimeImages, toPersistedImages } from '~/features/image_pool/service';
+import { ImagePoolImage } from '~/features/image_pool';
+import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
+import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/imageStore';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getAllFullSnapshots, RuntimeProjectSnapshot } from '~/features/snapshot';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
@@ -25,6 +27,7 @@ export async function initRuntimeProject(project: ProjectBase) {
   setIOStore('loadProjectVersion', { sledge: versions?.sledge ?? undefined, project: versions?.project ?? undefined });
 
   const canvasInfo = adapter.getCanvasInfo();
+  selectionManager.resizeSelectionMask(canvasInfo.size);
 
   const layers = adapter.getLayers() ?? [];
   Promise.all(
@@ -49,14 +52,13 @@ export async function initRuntimeProject(project: ProjectBase) {
 
   const entries = adapter.getImagePoolEntries();
   // const imagePoolState = adapter.getImagePoolState();
-  const existingRuntimeImages = runtimeImages() ?? [];
-  existingRuntimeImages.forEach((image) => URL.revokeObjectURL(image.blobUrl));
-  const persistedImages = new Map<string, ImagePoolImagePersisted>();
+  clearImagePoolBlobUrls();
+  const persistedImages = new Map<string, ImagePoolImage>();
   entries.forEach((entry) => {
     const image = adapter.getImagePoolImageOf(entry.id);
     if (image) persistedImages.set(entry.id, image);
   });
-  setRuntimeImages(makeRuntimeImages(persistedImages));
+  setImagePoolImages(persistedImages);
 
   // TODO: convert snapshots into lightweight runtime structures
   const runtimeSnapshots = (await adapter.getSnapshots()).map((fullSnapshot) => {
@@ -134,7 +136,7 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
       layers: clonedProjectStore.layers.layers,
       state: clonedProjectStore.layers.state,
     },
-    imagePool: { images: toPersistedImages(runtimeImages()), ...clonedProjectStore.imagePool },
+    imagePool: { images: new Map(imagePoolImages()), ...clonedProjectStore.imagePool },
     snapshots: runtimeSnapshots,
   };
 

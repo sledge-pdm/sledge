@@ -4,7 +4,6 @@ import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer, updateEntryPartial } from '~/features/image_pool';
-import { runtimeImages } from '~/features/image_pool/service';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -59,7 +58,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
   let svgRef: SVGSVGElement;
   let entryInteract: OnCanvasFrameInteract | undefined;
 
-  const imageSrc = useImageBlobUrl(() => runtimeImages().get(entry.id));
+  const imageSrc = useImageBlobUrl(() => entry.id);
 
   const viewWidth = createMemo(() => Math.abs(entry.base.width * entry.transform.scaleX));
   const viewHeight = createMemo(() => Math.abs(entry.base.height * entry.transform.scaleY));

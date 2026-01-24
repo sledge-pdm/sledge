@@ -1,14 +1,14 @@
-import { ImagePoolEntry, ImagePoolImagePersisted } from '~/features/image_pool';
-import { makeRuntimeImages, runtimeImages, setRuntimeImages } from '~/features/image_pool/service';
-import { setProjectStore } from '~/stores/RuntimeProjectStore';
+import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool';
+import { removeImagePoolBlobUrl } from '~/features/image_pool/blobManager';
+import { removeImagePoolImage, setImagePoolImage } from '~/features/image_pool/imageStore';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface ImagePoolHistoryActionProps extends BaseHistoryActionProps {
   kind: 'add' | 'remove';
-  oldEntries: ImagePoolEntry[];
-  newEntries: ImagePoolEntry[];
-  oldImages?: Map<string, ImagePoolImagePersisted>;
-  newImages?: Map<string, ImagePoolImagePersisted>;
+  entry: ImagePoolEntry;
+  image?: ImagePoolImage;
+  index: number;
 }
 
 // history action for changes in image pool
@@ -16,30 +16,32 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
   readonly type = 'image_pool' as const;
 
   kind: 'add' | 'remove';
-  oldEntries: ImagePoolEntry[];
-  newEntries: ImagePoolEntry[];
-  oldImages: Map<string, ImagePoolImagePersisted>;
-  newImages: Map<string, ImagePoolImagePersisted>;
+  entry: ImagePoolEntry;
+  image?: ImagePoolImage;
+  index: number;
 
   constructor(public readonly props: ImagePoolHistoryActionProps) {
     super(props);
     this.kind = props.kind;
-    this.oldEntries = props.oldEntries;
-    this.newEntries = props.newEntries;
-    this.oldImages = props.oldImages ?? new Map();
-    this.newImages = props.newImages ?? new Map();
+    this.entry = props.entry;
+    this.image = props.image;
+    this.index = props.index;
   }
 
   undo(): void {
-    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
-    setProjectStore('imagePool', 'entries', [...this.oldEntries]);
-    setRuntimeImages(makeRuntimeImages(this.oldImages));
+    if (this.kind === 'add') {
+      this.removeEntry();
+      return;
+    }
+    this.insertEntry();
   }
 
   redo(): void {
-    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
-    setProjectStore('imagePool', 'entries', [...this.newEntries]);
-    setRuntimeImages(makeRuntimeImages(this.newImages));
+    if (this.kind === 'add') {
+      this.insertEntry();
+      return;
+    }
+    this.removeEntry();
   }
 
   serialize(): SerializedHistoryAction {
@@ -49,11 +51,32 @@ export class ImagePoolHistoryAction extends BaseHistoryAction {
         context: this.context,
         label: this.label,
         kind: this.kind,
-        oldEntries: this.props.oldEntries,
-        newEntries: this.props.newEntries,
-        oldImages: this.oldImages,
-        newImages: this.newImages,
+        entry: this.entry,
+        image: this.image,
+        index: this.index,
       } as ImagePoolHistoryActionProps,
     };
+  }
+
+  private insertEntry() {
+    const current = projectStore.imagePool.entries;
+    const next = [...current.filter((e) => e.id !== this.entry.id)];
+    const index = Math.min(Math.max(this.index, 0), next.length);
+    next.splice(index, 0, this.entry);
+    removeImagePoolBlobUrl(this.entry.id);
+    setProjectStore('imagePool', 'entries', next);
+    if (this.image) {
+      setImagePoolImage(this.entry.id, this.image);
+    }
+  }
+
+  private removeEntry() {
+    removeImagePoolBlobUrl(this.entry.id);
+    setProjectStore(
+      'imagePool',
+      'entries',
+      projectStore.imagePool.entries.filter((e) => e.id !== this.entry.id)
+    );
+    removeImagePoolImage(this.entry.id);
   }
 }

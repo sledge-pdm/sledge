@@ -2,19 +2,19 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export const mask_to_path: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const auto_select_region_mask: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const create_opacity_mask: (a: number, b: number, c: number, d: number) => [number, number];
+export const scanline_flood_fill: (a: number, b: number, c: any, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number) => number;
+export const scanline_flood_fill_with_mask: (a: number, b: number, c: any, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number) => number;
 export const fill_lasso_selection: (a: number, b: number, c: any, d: number, e: number, f: number, g: number, h: number, i: number) => number;
 export const apply_mask_offset: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const combine_masks_add: (a: number, b: number, c: number, d: number) => [number, number];
 export const combine_masks_replace: (a: number, b: number) => [number, number];
 export const combine_masks_subtract: (a: number, b: number, c: number, d: number) => [number, number];
-export const create_opacity_mask: (a: number, b: number, c: number, d: number) => [number, number];
 export const fill_mask_area: (a: number, b: number, c: any, d: number, e: number, f: number, g: number, h: number, i: number) => number;
 export const fill_rect_mask: (a: number, b: number, c: any, d: number, e: number, f: number, g: number, h: number, i: number) => void;
 export const trim_mask_with_box: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
-export const auto_select_region_mask: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
 export const flip_pixels_vertically: (a: number, b: number, c: any, d: number, e: number) => void;
-export const scanline_flood_fill: (a: number, b: number, c: any, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number) => number;
-export const scanline_flood_fill_with_mask: (a: number, b: number, c: any, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number) => number;
 export const __wbindgen_externrefs: WebAssembly.Table;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_free: (a: number, b: number, c: number) => void;

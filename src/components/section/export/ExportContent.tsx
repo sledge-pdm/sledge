@@ -362,6 +362,7 @@ const ExportContent: Component = () => {
                     left: `${menuAnchor().x + 8}px`,
                     transform: 'translateX(-100%)',
                     width: 'fit-content',
+                    'max-width': '480px',
                   }}
                 />
               </Show>

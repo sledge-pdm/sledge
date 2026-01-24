@@ -9,6 +9,7 @@ import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/image
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { getAllFullSnapshots, RuntimeProjectSnapshot } from '~/features/snapshot';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
@@ -26,6 +27,7 @@ export async function initRuntimeProject(project: ProjectBase) {
   setIOStore('loadProjectVersion', { sledge: versions?.sledge ?? undefined, project: versions?.project ?? undefined });
 
   const canvasInfo = adapter.getCanvasInfo();
+  selectionManager.resizeSelectionMask(canvasInfo.size);
 
   const layers = adapter.getLayers() ?? [];
   Promise.all(

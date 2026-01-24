@@ -308,7 +308,7 @@ Unsaved changes will be discarded!`);
   return (
     <div class={topMenuBarRoot}>
       <div class={menuListLeft}>
-        <TopMenuBarItem {...FilesMenuItem()} />
+        <TopMenuBarItem {...FilesMenuItem()} menuStyleOverride={{ 'max-width': '400px' }} />
         <TopMenuBarItem {...ViewMenuItem()} />
         <Show when={!ioStore.isInInitialLoading}>
           <TopMenuBarItem {...EditMenuItem()} />

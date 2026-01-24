@@ -38,6 +38,7 @@ const menuItemBackground = css`
 export interface TopMenuBarItemProps {
   label: string;
   labelStyleOverride?: JSX.CSSProperties;
+  menuStyleOverride?: JSX.CSSProperties;
   title?: string;
   action: ((e: MouseEvent) => void) | ((e: MouseEvent) => Promise<void>);
   menu?: () => MenuListOption[];
@@ -65,6 +66,7 @@ export const TopMenuBarItem: Component<TopMenuBarItemProps> = (props) => {
           options={props.menu?.()!}
           onClose={() => setMenuOpen(false)}
           style={{
+            ...(props.menuStyleOverride ?? {}),
             'margin-top': '4px',
           }}
         />

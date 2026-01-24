@@ -80,8 +80,7 @@ const TopMenuBar: Component = () => {
   const recentFileItems = createMemo<MenuListOption[]>(() => {
     if (ioStore.recentFiles.length > 0) {
       return [
-        { type: 'divider', label: 'recent' } as MenuListOption,
-        { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 } as MenuListOption,
+        { type: 'label', label: 'recent files.', fontFamily: fonts.ZFB03 },
         ...ioStore.recentFiles
           .toReversed()
           .map<MenuListOption | undefined>((loc) => {
@@ -171,6 +170,7 @@ Unsaved changes will be discarded!`);
               openNewProjectWithClipboard();
             },
           },
+          { type: 'divider', label: 'recent' },
           ...recentFileItems(),
         ] as MenuListOption[],
     };
@@ -203,6 +203,7 @@ Unsaved changes will be discarded!`);
           },
           retainAfterSelect: true,
         },
+        { type: 'divider', label: 'tab' },
         {
           type: 'label',
           label: 'tab',
@@ -262,6 +263,7 @@ Unsaved changes will be discarded!`);
           icon: '/assets/icons/context_menu/paste.png',
           onSelect: async () => await clipboardPaste(),
         },
+        { type: 'divider', label: 'canvas' },
         {
           type: 'label',
           label: 'canvas',

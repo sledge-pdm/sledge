@@ -1,4 +1,4 @@
-import { Vec2 } from '@sledge-pdm/core';
+﻿import { Vec2 } from '@sledge-pdm/core';
 import { logSystemWarn } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -88,6 +88,24 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   private cachedNoZoomMatrix: DOMMatrix | null = null;
   private cachedNoZoomInverse: DOMMatrix | null = null;
   private lastNoZoomHash = '';
+
+  private canUseSimpleTransform(): boolean {
+    const { rotation, horizontalFlipped, verticalFlipped, zoom } = interactStore;
+    return rotation === 0 && !horizontalFlipped && !verticalFlipped && zoom > 0;
+  }
+
+  private canUseSimpleNoZoomTransform(): boolean {
+    const { rotation, horizontalFlipped, verticalFlipped } = interactStore;
+    return rotation === 0 && !horizontalFlipped && !verticalFlipped;
+  }
+
+  private getTotalOffset(): { x: number; y: number } {
+    const { offset, offsetOrigin } = interactStore;
+    return {
+      x: offsetOrigin.x + offset.x,
+      y: offsetOrigin.y + offset.y,
+    };
+  }
 
   /**
    * NoZoom変換行列を計算（回転・反転・パンのみ）
@@ -200,6 +218,13 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    * ペンやインタラクション処理で使用
    */
   canvasToWindow(pos: CanvasPos): WindowPos {
+    if (this.canUseSimpleTransform()) {
+      const { zoom } = interactStore;
+      const { x: offsetX, y: offsetY } = this.getTotalOffset();
+      const result = { x: pos.x * zoom + offsetX, y: pos.y * zoom + offsetY };
+      const pageCoords = this.canvasAreaToPageCoords(result);
+      return WindowPos.from(pageCoords);
+    }
     const result = this.applyMatrix(this.computeTransformMatrix(), pos);
     // canvas-area相対座標からページ絶対座標に変換
     const pageCoords = this.canvasAreaToPageCoords(result);
@@ -211,6 +236,13 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    * ペンやインタラクション処理で使用
    */
   windowToCanvas(pos: WindowPos): CanvasPos {
+    if (this.canUseSimpleTransform()) {
+      const { zoom } = interactStore;
+      const { x: offsetX, y: offsetY } = this.getTotalOffset();
+      const areaCoords = this.pageToCanvasAreaCoords(pos);
+      const result = { x: (areaCoords.x - offsetX) / zoom, y: (areaCoords.y - offsetY) / zoom };
+      return CanvasPos.from(result);
+    }
     // ページ絶対座標をcanvas-area相対座標に変換
     const areaCoords = this.pageToCanvasAreaCoords(pos);
     const result = this.applyMatrix(this.computeInverseMatrix(), areaCoords);
@@ -247,6 +279,12 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    * 選択範囲メニューやその他のオーバーレイで使用
    */
   canvasToWindowForOverlay(pos: CanvasPos): WindowPos {
+    if (this.canUseSimpleTransform()) {
+      const { zoom } = interactStore;
+      const { x: offsetX, y: offsetY } = this.getTotalOffset();
+      const result = { x: pos.x * zoom + offsetX, y: pos.y * zoom + offsetY };
+      return WindowPos.from(result);
+    }
     const result = this.applyMatrix(this.computeTransformMatrix(), pos);
     // オーバーレイはページ絶対座標のままで配置される
     return WindowPos.from(result);
@@ -257,17 +295,35 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    * 選択範囲メニューやその他のオーバーレイで使用
    */
   windowToCanvasForOverlay(pos: WindowPos): CanvasPos {
+    if (this.canUseSimpleTransform()) {
+      const { zoom } = interactStore;
+      const { x: offsetX, y: offsetY } = this.getTotalOffset();
+      const result = { x: (pos.x - offsetX) / zoom, y: (pos.y - offsetY) / zoom };
+      return CanvasPos.from(result);
+    }
     const result = this.applyMatrix(this.computeInverseMatrix(), pos);
     return CanvasPos.from(result);
   }
 
   canvasToWindowNoZoom(pos: CanvasPos): WindowPos {
+    if (this.canUseSimpleNoZoomTransform()) {
+      const { x: offsetX, y: offsetY } = this.getTotalOffset();
+      const result = { x: pos.x + offsetX, y: pos.y + offsetY };
+      const pageCoords = this.canvasAreaToPageCoords(result);
+      return WindowPos.from(pageCoords);
+    }
     const result = this.applyMatrix(this.computeNoZoomMatrix(), pos);
     const pageCoords = this.canvasAreaToPageCoords(result);
     return WindowPos.from(pageCoords);
   }
 
   windowToCanvasNoZoom(pos: WindowPos): CanvasPos {
+    if (this.canUseSimpleNoZoomTransform()) {
+      const { x: offsetX, y: offsetY } = this.getTotalOffset();
+      const areaCoords = this.pageToCanvasAreaCoords(pos);
+      const result = { x: areaCoords.x - offsetX, y: areaCoords.y - offsetY };
+      return CanvasPos.from(result);
+    }
     const areaCoords = this.pageToCanvasAreaCoords(pos);
     const result = this.applyMatrix(this.computeNoZoomInverseMatrix(), areaCoords);
     return CanvasPos.from(result);

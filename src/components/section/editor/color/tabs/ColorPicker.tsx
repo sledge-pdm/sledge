@@ -9,6 +9,20 @@ const ColorPicker: Component<{ width: number }> = (props) => {
   let colorPicker: IroColorPicker;
 
   const [colorOnPointerDown, setColorOnPointerDown] = createSignal<RGBA | undefined>(undefined);
+  const [lastHue, setLastHue] = createSignal(0);
+
+  const toHsva = (rgba: RGBA, hueOverride?: number) => {
+    const [r, g, b, a] = rgba;
+    const hsv = iro.Color.rgbToHsv({ r, g, b });
+    return {
+      h: hueOverride ?? hsv.h ?? 0,
+      s: hsv.s ?? 0,
+      v: hsv.v ?? 0,
+      a: a / 255,
+    };
+  };
+
+  const isGray = (rgba: RGBA) => rgba[0] === rgba[1] && rgba[1] === rgba[2];
 
   const handlePointerUp = () => {
     const oldColor = colorOnPointerDown();
@@ -25,7 +39,12 @@ const ColorPicker: Component<{ width: number }> = (props) => {
 
   createEffect(() => {
     const palette = colorStore.currentPalette;
-    const paletteHex = RGBAToHex(colorStore.palettes[palette], {
+    const paletteColor = colorStore.palettes[palette];
+    if (isGray(paletteColor)) {
+      colorPicker.setColors([toHsva(paletteColor, lastHue())]);
+      return;
+    }
+    const paletteHex = RGBAToHex(paletteColor, {
       excludeAlpha: false,
       withSharp: true,
     });
@@ -49,22 +68,20 @@ const ColorPicker: Component<{ width: number }> = (props) => {
               component: iro.ui.Box,
               options: {},
             },
-            // {
-            //   component: iro.ui.Slider,
-            //   options: {
-            //     // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
-            //     sliderType: 'value',
-            //   },
-            // },
             {
               component: iro.ui.Slider,
               options: {
+                // can also be 'saturation', 'value', 'red', 'green', 'blue', 'alpha' or 'kelvin'
                 sliderType: 'hue',
               },
             },
           ],
         });
-        colorPicker.on('color:change', (color: any) => {
+        setLastHue(colorPicker.color.hsv.h ?? 0);
+        colorPicker.on('color:change', (color: any, changes?: { h?: boolean }) => {
+          if (changes?.h) {
+            setLastHue(color.hsv.h);
+          }
           const rgba = hexWithSharpToRGBA(color.hexString);
           setCurrentColor(rgba);
         });

@@ -7,11 +7,7 @@ export type ImagePoolEntry = {
   descriptionName?: string;
 };
 
-export type ImagePoolImagePersisted = { mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; deflatedBuffer: Uint8Array };
-
-export type ImagePoolImage = ImagePoolImagePersisted & {
-  blobUrl: string;
-};
+export type ImagePoolImage = { mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; deflatedBuffer: Uint8Array };
 
 export type ImagePoolState = {
   selectedEntryId: string | undefined;

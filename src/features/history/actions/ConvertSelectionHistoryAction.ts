@@ -1,5 +1,6 @@
-import { ImagePoolEntry, ImagePoolImagePersisted } from '~/features/image_pool';
-import { makeRuntimeImages, runtimeImages, setRuntimeImages } from '~/features/image_pool/service';
+import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool';
+import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
+import { setImagePoolImages } from '~/features/image_pool/imageStore';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
@@ -20,8 +21,8 @@ export interface ConvertSelectionHistoryActionProps extends BaseHistoryActionPro
   afterSnapshot?: PackedLayerSnapshot;
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
-  oldImages?: Map<string, ImagePoolImagePersisted>;
-  newImages?: Map<string, ImagePoolImagePersisted>;
+  oldImages?: Map<string, ImagePoolImage>;
+  newImages?: Map<string, ImagePoolImage>;
 }
 
 export class ConvertSelectionHistoryAction extends BaseHistoryAction {
@@ -31,8 +32,8 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
 
   oldEntries: ImagePoolEntry[];
   newEntries: ImagePoolEntry[];
-  oldImages?: Map<string, ImagePoolImagePersisted>;
-  newImages?: Map<string, ImagePoolImagePersisted>;
+  oldImages?: Map<string, ImagePoolImage>;
+  newImages?: Map<string, ImagePoolImage>;
   beforeSnapshot?: PackedLayerSnapshot;
   afterSnapshot?: PackedLayerSnapshot;
 
@@ -49,9 +50,9 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
   }
 
   undo(): void {
-    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    clearImagePoolBlobUrls();
     setProjectStore('imagePool', 'entries', [...this.oldEntries]);
-    if (this.oldImages) setRuntimeImages(makeRuntimeImages(this.oldImages));
+    if (this.oldImages) setImagePoolImages(this.oldImages);
 
     if (this.beforeSnapshot) {
       if (floatingMoveManager.isMoving()) {
@@ -67,9 +68,9 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
   }
 
   redo(): void {
-    runtimeImages().forEach((image) => URL.revokeObjectURL(image.blobUrl));
+    clearImagePoolBlobUrls();
     setProjectStore('imagePool', 'entries', [...this.newEntries]);
-    if (this.newImages) setRuntimeImages(makeRuntimeImages(this.newImages));
+    if (this.newImages) setImagePoolImages(this.newImages);
 
     if (this.afterSnapshot) {
       if (floatingMoveManager.isMoving()) {

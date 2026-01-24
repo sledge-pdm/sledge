@@ -16,7 +16,7 @@ import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
-import { clonePersistedImages, runtimeImages, toPersistedImages } from '../image_pool/service';
+import { imagePoolImages } from '../image_pool/imageStore';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -281,7 +281,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   const { buffer, bbox } = selectionData;
 
   const oldEntries = projectStore.imagePool.entries.slice();
-  const oldImages = clonePersistedImages(toPersistedImages(runtimeImages()));
+  const oldImages = new Map(imagePoolImages());
 
   const { entry, image } = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
   entry.descriptionName = '[ from selection ]';
@@ -294,7 +294,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   selectEntry(entry.id);
 
   const newEntries = projectStore.imagePool.entries.slice();
-  const newImages = clonePersistedImages(toPersistedImages(runtimeImages()));
+  const newImages = new Map(imagePoolImages());
 
   let beforeSnapshot = undefined;
   let afterSnapshot = undefined;

@@ -49,7 +49,7 @@ const Project: Component = () => {
     } else if (bytes > order ** 1) {
       return `${(bytes / order ** 1).toFixed(1)} KB`; // KB
     } else {
-      return `${bytes.toFixed(1)} B`; // < 1KB
+      return `${bytes.toFixed(1)} Byte`; // < 1KB
     }
   };
 

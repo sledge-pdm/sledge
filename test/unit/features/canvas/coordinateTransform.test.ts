@@ -2,8 +2,8 @@
 import { rotateInCenter, zoomTowardWindowPos } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { UnifiedCoordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
-import { setInteractStore } from '~/stores/EditorStores';
 import { defaultInteractStore, InteractStore } from '~/stores/editor/InteractStore';
+import { setInteractStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { WindowPos } from '~/types/CoordinateTypes';
 
@@ -281,6 +281,3 @@ describe('UnifiedCoordinateTransform (unit)', () => {
     expect(afterCanvas.y).toBeCloseTo(canvasPos.y, 6);
   });
 });
-
-
-

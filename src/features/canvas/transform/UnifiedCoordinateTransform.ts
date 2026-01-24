@@ -364,4 +364,3 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
 
 // シングルトンインスタンス
 export const coordinateTransform = new UnifiedCoordinateTransform();
-

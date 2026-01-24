@@ -1,7 +1,7 @@
 ﻿import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
-import { setInteractStore } from '~/stores/EditorStores';
 import { defaultInteractStore, InteractStore } from '~/stores/editor/InteractStore';
+import { setInteractStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 
 const buildInteract = (partial: Partial<InteractStore> = {}): InteractStore => ({
@@ -83,5 +83,3 @@ describe('UnifiedCoordinateTransform (e2e)', () => {
     expect(windowPos.y).toBeCloseTo(80, 6);
   });
 });
-
-

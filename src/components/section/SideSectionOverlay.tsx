@@ -3,7 +3,7 @@ import { Component, onMount, Show } from 'solid-js';
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
 import interact from 'interactjs';
-import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
+import ScrollFadeContainer from '~/components/global/common/ScrollFadeContainer';
 import { getTabContent } from '~/features/config/TabContentController';
 import { appearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';

@@ -4,7 +4,7 @@ import { createEffect, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import BottomBar from '~/components/global/BottomBar';
-import Loading from '~/components/global/Loading';
+import Loading from '~/components/global/common/Loading';
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
 import SideSectionControls from '~/components/section/SideSectionControls';
 import { adjustZoomToFit } from '~/features/canvas';

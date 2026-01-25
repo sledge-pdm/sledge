@@ -77,6 +77,7 @@ const textContent = css`
   width: 100%;
   flex-grow: 1;
   padding-left: 6px;
+  padding-right: 24px;
   justify-content: center;
   gap: 1px;
   overflow: hidden;
@@ -101,11 +102,9 @@ const name = css`
   font-family: ZFB03B, k8x12;
   font-size: 16px;
   margin-left: 18px;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 const nameInput = css`
@@ -370,6 +369,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                   setOriginalName(props.layer.name);
                   inputRef?.focus();
                 }}
+                title={props.layer.name}
               >
                 {props.layer.name}
               </p>

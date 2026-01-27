@@ -2,15 +2,8 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import LayerListIconButton from '~/components/section/editor/layer/row/LayerListIconButton';
-import { addLayer, findLayerById } from '~/features/layer';
-import {
-  clearLayersFromUser,
-  duplicateLayers,
-  getSelectedLayers,
-  mergeToBelowLayer,
-  removeLayersFromUser,
-  toggleLayerVisibility,
-} from '~/features/layer/service';
+import { addLayer, findLayerById, toggleLayerVisibility } from '~/features/layer';
+import { clearLayersFromUser, duplicateLayers, getSelectedLayers, mergeToBelowLayer, removeLayersFromUser } from '~/features/layer/service';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { errorButton, flexRow } from '~/styles/styles';
 

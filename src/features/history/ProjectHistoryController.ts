@@ -15,6 +15,9 @@ import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { BaseHistoryAction, SerializedHistoryAction } from './base';
 
+/**
+ * @deprecated use HistoryManager
+ */
 export class ProjectHistoryController {
   private undoStack: BaseHistoryAction[] = [];
   private redoStack: BaseHistoryAction[] = [];
@@ -142,4 +145,7 @@ export class ProjectHistoryController {
     setIOStore('isProjectChangedAfterSave', true);
   }
 }
+/**
+ * @deprecated use historyManager
+ */
 export const projectHistoryController = new ProjectHistoryController();

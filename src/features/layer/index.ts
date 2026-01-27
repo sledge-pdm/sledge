@@ -3,7 +3,7 @@
 // Types
 export type { BaseLayer, BaseLayerColorMode, Layer } from './types';
 
-export { BlendMode, LayerType } from './types';
+export { LayerType } from './types';
 
 // Model functions (pure utilities)
 export {
@@ -19,13 +19,9 @@ export {
   getBlendModeName,
 } from './model';
 
-// Service functions (stateful operations)
 export {
   activeIndex,
   activeLayer,
-  // Layer list management
-  addLayer,
-  addLayerTo,
   allLayers,
   clearLayer,
   duplicateLayer,
@@ -33,14 +29,10 @@ export {
   getActiveLayerIndex,
   getLayerIndex,
   mergeToBelowLayer,
-  moveLayer,
-  removeLayer,
   resetAllLayers,
   setActiveLayerId,
-  // BaseLayer operations
   setBaseLayerColorMode,
   setBaseLayerCustomColor,
-  // Layer properties
-  setLayerName,
-  setLayerProp,
 } from './service';
+
+export { addLayer, addLayerTo, removeLayer, reorderLayer, setLayerProp, toggleLayerVisibility } from './actions';

@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
-import { projectHistoryController } from '~/features/history';
+import { historyManager } from '~/features/history';
 
 import { css } from '@acab/ecsstatic';
 import FrameResizeMenu from '~/components/canvas/overlays/resize_frame/FrameResizeMenu';
@@ -61,11 +61,11 @@ const bottomRightNav = css`
 `;
 
 const CanvasControls: Component = () => {
-  const [activeCanUndo, setActiveCanUndo] = createSignal(projectHistoryController.canUndo());
-  const [activeCanRedo, setActiveCanRedo] = createSignal(projectHistoryController.canRedo());
+  const [activeCanUndo, setActiveCanUndo] = createSignal(historyManager.canUndo());
+  const [activeCanRedo, setActiveCanRedo] = createSignal(historyManager.canRedo());
 
   onMount(() => {
-    const dispose = projectHistoryController.onChange((state) => {
+    const dispose = historyManager.onChange((state) => {
       setActiveCanUndo(state.canUndo);
       setActiveCanRedo(state.canRedo);
     });
@@ -76,8 +76,8 @@ const CanvasControls: Component = () => {
     projectStore.layers.state.activeLayerId;
 
     // keep effect to refresh when active layer changes, but values come from projectHistory
-    setActiveCanUndo(projectHistoryController.canUndo());
-    setActiveCanRedo(projectHistoryController.canRedo());
+    setActiveCanUndo(historyManager.canUndo());
+    setActiveCanRedo(historyManager.canRedo());
   });
   return (
     <>
@@ -112,7 +112,7 @@ const CanvasControls: Component = () => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            projectHistoryController.undo();
+            historyManager.undo();
           }}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -136,7 +136,7 @@ const CanvasControls: Component = () => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            projectHistoryController.redo();
+            historyManager.redo();
           }}
           onContextMenu={(e) => {
             e.preventDefault();

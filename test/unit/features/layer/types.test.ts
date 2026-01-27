@@ -1,5 +1,6 @@
+import { BlendMode } from '@sledge-pdm/frasco';
 import { describe, expect, it } from 'vitest';
-import { BlendMode, LayerType } from '~/features/layer/types';
+import { LayerType } from '~/features/layer/types';
 
 describe('layer types', () => {
   it('keeps BlendMode labels stable', () => {

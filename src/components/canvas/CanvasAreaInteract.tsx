@@ -1,7 +1,7 @@
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
-import { projectHistoryController } from '~/features/history';
+import { historyManager } from '~/features/history';
 import { logSystemInfo, logSystemWarn } from '~/features/log';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
@@ -132,13 +132,13 @@ class CanvasAreaInteract {
   private handleMouseDown(e: MouseEvent) {
     if (e.button === 3) {
       e.preventDefault();
-      if (projectHistoryController.canUndo()) {
-        projectHistoryController.undo();
+      if (historyManager.canUndo()) {
+        historyManager.undo();
       }
     } else if (e.button === 4) {
       e.preventDefault();
-      if (projectHistoryController.canRedo()) {
-        projectHistoryController.redo();
+      if (historyManager.canRedo()) {
+        historyManager.redo();
       }
     }
   }
@@ -185,15 +185,15 @@ class CanvasAreaInteract {
         if (e.button === 3) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          if (projectHistoryController.canUndo()) {
-            projectHistoryController.undo();
+          if (historyManager.canUndo()) {
+            historyManager.undo();
           }
           return;
         } else if (e.button === 4) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          if (projectHistoryController.canRedo()) {
-            projectHistoryController.redo();
+          if (historyManager.canRedo()) {
+            historyManager.redo();
           }
           return;
         }

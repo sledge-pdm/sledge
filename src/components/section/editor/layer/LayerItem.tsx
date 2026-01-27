@@ -4,7 +4,16 @@ import { clsx } from '@sledge-pdm/core';
 import { Checkbox, color, Icon, Light, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { allLayers, findLayerById, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
+import {
+  allLayers,
+  findLayerById,
+  Layer,
+  mergeToBelowLayer,
+  reorderLayer,
+  setActiveLayerId,
+  setLayerProp,
+  toggleLayerVisibility,
+} from '~/features/layer';
 import {
   clearLayersFromUser,
   deselectLayer,
@@ -14,8 +23,8 @@ import {
   removeLayersFromUser,
   selectLayer,
   summarizeLayerNames,
-  toggleLayerVisibility,
 } from '~/features/layer/service';
+import { logUserWarn } from '~/features/log';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
@@ -186,13 +195,13 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   const handleMoveUp = (e: MouseEvent) => {
     e.stopPropagation();
-    moveLayer(props.index, props.index - 1);
+    reorderLayer(props.index, props.index - 1);
     highlightLayer();
   };
 
   const handleMoveDown = (e: MouseEvent) => {
     e.stopPropagation();
-    moveLayer(props.index, props.index + 1);
+    reorderLayer(props.index, props.index + 1);
     highlightLayer();
   };
 
@@ -230,6 +239,14 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
     return () => cleanDraggable();
   });
+
+  const setLayerName = (layerId: string, newName: string) => {
+    if (!newName || newName.trim() === '') {
+      logUserWarn('Layer name cannot be empty', { label: 'LayerItem' });
+      return false;
+    }
+    setLayerProp(layerId, 'name', newName);
+  };
 
   return (
     <>

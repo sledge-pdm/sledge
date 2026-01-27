@@ -1,9 +1,8 @@
 import { toUint8Array } from '@sledge-pdm/core';
-import { projectHistoryController } from '~/features/history';
-import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
-import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
+import { doCommands } from '~/features/history';
+import { CUT_PASTE_CONTEXT, CutPasteCommands } from '~/features/history/command/snippet/CutPasteCommands';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
-import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
+import { activeIndex, addLayerTo, findLayerById, setLayerProp } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
@@ -81,41 +80,19 @@ export async function clipboardPaste(e?: ClipboardEvent) {
           logUserError('layer buffer not found.', { label: LOG_LABEL });
           return;
         }
-        const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.readPixels());
+        const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.readPixels({ flipY: true }));
         const isCut = srcLayer.cutFreeze;
-        // 蛻・ｊ蜿悶ｊ縺ｨ蛻・°縺｣縺滓凾轤ｹ縺ｧcutFreeze縺ｯ蜿悶ｊ荳九￡繧・
         setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });
-        const unfreezedSourceLayer = findLayerById(textData);
-        if (unfreezedSourceLayer && isCut) {
-          const activeLayerIdBefore = activeLayer().id;
-          const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
-          const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
+        if (srcLayer && isCut) {
+          // const activeLayerIdBefore = activeLayer().id;
+          // const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
+          // const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
 
-          const insertionIndex = activeIndex();
-          const inserted = addLayerTo(
-            insertionIndex,
-            { ...unfreezedSourceLayer, cutFreeze: false },
-            { initImage: srcBuffer, noDiff: true, uniqueName: false }
-          );
-
-          removeLayer(unfreezedSourceLayer.id, { noDiff: true });
-
-          const targetPackedSnapshot = getPackedLayerSnapshot(inserted.id);
-          const targetIndex = getLayerIndex(inserted.id);
-          setActiveLayerId(inserted.id);
-
-          const activeLayerIdAfter = activeLayer().id;
-          if (sourcePackedSnapshot && targetPackedSnapshot) {
-            const action = new LayerListCutPasteHistoryAction({
-              sourcePackedSnapshot,
-              sourceIndex, // 謖ｿ蜈･蜑阪↓蜿門ｾ励＠縺・index
-              targetPackedSnapshot,
-              targetIndex, // 蜑企勁蠕後・謖ｿ蜈･繝ｬ繧､繝､繝ｼ index
-              activeLayerIdBefore,
-              activeLayerIdAfter,
-            });
-            projectHistoryController.addAction(action);
-          }
+          const insertIndex = activeIndex();
+          doCommands(CutPasteCommands(insertIndex, srcLayer, srcBuffer), {
+            context: CUT_PASTE_CONTEXT,
+          });
+          // removeLayer(unfreezedSourceLayer.id, { noDiff: true });
         } else {
           addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, noDiff: false, uniqueName: false });
         }

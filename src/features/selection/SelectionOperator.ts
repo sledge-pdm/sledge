@@ -1,7 +1,8 @@
 import { Vec2 } from '@sledge-pdm/core';
-import { projectHistoryController } from '~/features/history';
-import { ConvertSelectionHistoryAction } from '~/features/history/actions/ConvertSelectionHistoryAction';
+import { historyManager } from '~/features/history';
 import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
+import { ConvertSelectionCommand } from '~/features/history/command/selection/ConvertSelectionCommand';
+import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
@@ -305,16 +306,19 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   }
   cancelSelection();
 
-  const action = new ConvertSelectionHistoryAction({
-    layerId: projectStore.layers.state.activeLayerId,
-    oldEntries,
-    newEntries,
-    oldImages,
-    newImages,
-    beforeSnapshot,
-    afterSnapshot,
-  });
-  projectHistoryController.addAction(action);
+  historyManager.addEntry(
+    new CommandsHistoryEntry(
+      new ConvertSelectionCommand({
+        layerId: projectStore.layers.state.activeLayerId,
+        oldEntries,
+        newEntries,
+        oldImages,
+        newImages,
+        beforeSnapshot,
+        afterSnapshot,
+      })
+    )
+  );
 
   selectionManager.setState(isSelectionAvailable() ? 'selected' : 'idle');
 

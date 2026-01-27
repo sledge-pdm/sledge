@@ -1,7 +1,9 @@
-﻿import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
-import { projectHistoryController } from '~/features/history';
-import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
-import { activeLayer, BlendMode, getLayerIndex, Layer } from '~/features/layer';
+﻿import { BlendMode } from '@sledge-pdm/frasco';
+import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+import { historyManager } from '~/features/history';
+import { LayerMergeCommand } from '~/features/history/command/layer/LayerMergeCommand';
+import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
+import { activeLayer, getLayerIndex, Layer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { FrascoRenderer } from '~/webgl/FrascoRenderer';
@@ -22,7 +24,7 @@ class LayerMergeRenderer {
     const oIdx = getLayerIndex(this.originLayer.id);
     if (tIdx < 0 || oIdx < 0) return;
 
-    const action = new LayerMergeHistoryAction({ originIndex: oIdx, targetIndex: tIdx, activeLayerId: activeLayer().id });
+    const command = new LayerMergeCommand({ originIndex: oIdx, targetIndex: tIdx, activeLayerId: activeLayer().id });
 
     const renderer = this.getRenderer();
     if (!renderer) return;
@@ -47,7 +49,7 @@ class LayerMergeRenderer {
     updateLayerPreview(this.targetLayer.id);
     updateLayerPreview(this.originLayer.id);
 
-    projectHistoryController.addAction(action);
+    historyManager.addEntry(new CommandsHistoryEntry(command));
   }
 }
 

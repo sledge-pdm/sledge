@@ -2,6 +2,7 @@ import { ProjectBase, RawPixelData } from '@sledge-pdm/core';
 import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
+import { historyManager } from '~/features/history';
 import { addLayer } from '~/features/layer';
 import { logSystemError, logUserError } from '~/features/log/service';
 import { setIOStore } from '~/stores/EditorStores';
@@ -148,6 +149,7 @@ export class ProjectLoader<T extends LoadOption> {
 
 async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLoadResult> {
   try {
+    historyManager.clearHistory();
     const { width, height } = options;
     setIOStore('openAs', 'new_project');
     setIOStore('loadProjectVersion', {
@@ -286,6 +288,7 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
 async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadResult> {
   const { name, width, height, buffer } = options;
   try {
+    historyManager.clearHistory();
     setIOStore('openAs', 'image');
     const size = { width, height };
     changeCanvasSize(size, {
@@ -312,6 +315,7 @@ async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadRes
 
 async function loadFromClipboard(options: ClipboardLoadOptions): Promise<InternalLoadResult> {
   try {
+    historyManager.clearHistory();
     const imgData = await tryGetImageFromClipboard();
     if (!imgData) {
       throw new Error('failed to load image.');

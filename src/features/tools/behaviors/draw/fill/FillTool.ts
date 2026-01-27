@@ -1,6 +1,5 @@
 ﻿import { RGBA, Vec2 } from '@sledge-pdm/core';
 import { Layer } from '@sledge-pdm/frasco';
-import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -135,13 +134,7 @@ function fillArea(args: { layerId: string; layer: Layer; color: RGBA; mask: Uint
   const result = fill_mask_area(buf, mask, ...color);
 
   if (result) {
-    layer.commitHistory(undefined, { silent: true });
+    layer.commitHistory(undefined, { context: { tool: TOOL_CATEGORIES.FILL } });
     layerManager.replaceLayerBuffer(layerId, buf, width, height, { inputSpace: 'canvas' });
-    projectHistoryController.addAction(
-      new LayerHistoryAction({
-        layerId: layerId,
-        context: { tool: TOOL_CATEGORIES.FILL },
-      })
-    );
   }
 }

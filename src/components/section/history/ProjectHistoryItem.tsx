@@ -1,16 +1,7 @@
 import { css } from '@acab/ecsstatic';
-import { RGBAToHex } from '@sledge-pdm/core';
 import { Icon } from '@sledge-pdm/ui';
-import { Accessor, Component, Show } from 'solid-js';
-import { BaseHistoryAction, LayerHistoryAction } from '~/features/history';
-import { CanvasSizeHistoryAction } from '~/features/history/actions/CanvasSizeHistoryAction';
-import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
-import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
-import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
-import { LayerMergeHistoryAction } from '~/features/history/actions/LayerMergeHistoryAction';
-import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { findLayerById } from '~/features/layer';
-import { toolCategories } from '~/features/tools/Tools';
+import { Accessor, Component } from 'solid-js';
+import { HistoryEntry } from '~/features/history/entry/HistoryEntry';
 
 const historyRowStyle = css`
   display: flex;
@@ -18,13 +9,6 @@ const historyRowStyle = css`
   height: auto;
   gap: 8px;
   align-items: center;
-  overflow: hidden;
-`;
-
-const colorIconStyle = css`
-  width: 8px;
-  height: 8px;
-  position: relative;
   overflow: hidden;
 `;
 
@@ -39,115 +23,18 @@ const descriptionStyle = css`
   overflow: visible;
 `;
 
-function getIconForTool(tool?: string) {
-  if (!tool) return '';
-
-  if (tool in toolCategories) {
-    const categoryId = tool as keyof typeof toolCategories;
-    return toolCategories[categoryId].iconSrc;
-  }
-  switch (tool) {
-    case 'clear':
-      return '/assets/icons/actions/clear.png';
-    case 'fx':
-      return '/assets/icons/actions/fx.png';
-  }
-
-  return '';
-}
-
-const HistoryItemRow: Component<{ undo?: boolean; action: BaseHistoryAction; index?: Accessor<number> | number }> = ({ action, index }) => {
-  action = action ?? {};
-  const { context } = action ?? { context: {} };
-  let colorIcon:
-    | {
-        old: string;
-        new: string;
-      }
-    | undefined = undefined;
-  let icon: string | undefined;
-  let description: string | undefined;
-  let getActionIconSrc = (fileName: string) => `/assets/icons/actions/${fileName}`;
-
-  switch (action?.type) {
-    case 'canvas_size':
-      const csaction = action as CanvasSizeHistoryAction;
-      if (!context.action || context.action === 'resize') {
-        const bigger = csaction.afterSize.width * csaction.afterSize.height >= csaction.beforeSize.width * csaction.beforeSize.height;
-        icon = getActionIconSrc(bigger ? 'canvas_size_bigger.png' : 'canvas_size_smaller.png');
-        description = `${csaction.beforeSize.width}x${csaction.beforeSize.height} -> ${csaction.afterSize.width}x${csaction.afterSize.height}`;
-      }
-      if (context.action === 'rotate') {
-        const layerDirection = context.layerDirection ?? 'cw';
-        // use opposite icon because it's layer direction
-        icon = getActionIconSrc(layerDirection === 'cw' ? 'canvas_rotate_counterclockwise.png' : 'canvas_rotate_clockwise.png');
-        description = `rotate canvas`;
-      }
-      break;
-    case 'image_pool':
-      icon = getActionIconSrc('image.png');
-      const ipaction = action as ImagePoolHistoryAction;
-      description = `${ipaction.kind} image`;
-      break;
-    case 'color':
-      const claction = action as ColorHistoryAction;
-      const oldHex = `#${RGBAToHex(claction.oldColor)}`;
-      const newHex = `#${RGBAToHex(claction.newColor)}`;
-      description = `${oldHex} -> ${newHex}`;
-      colorIcon = {
-        old: oldHex,
-        new: newHex,
-      };
-      break;
-    case 'convert_selection':
-      icon = getActionIconSrc('image.png');
-      description = `convert selection to image`;
-      break;
-    case 'layer_list':
-      icon = getActionIconSrc('layer.png');
-      const llaction = action as LayerListHistoryAction;
-      description = `${llaction.kind} / ${llaction.packedSnapshot?.layer.name}`;
-      break;
-    case 'layer_merge':
-      icon = getActionIconSrc('layer.png');
-      const lmaction = action as LayerMergeHistoryAction;
-      description = `Merge / ${lmaction.originPackedSnapshot?.layer.name} > ${lmaction.targetPackedSnapshot?.layer.name}`;
-      break;
-    case 'layer_buffer': {
-      const lhAction = action as LayerHistoryAction;
-      if (context.tool) {
-        icon = getIconForTool(context.tool);
-        if (context.tool === 'fx') {
-          description = `${findLayerById(lhAction.layerId)?.name}/${context.fxName || 'unknown effect'}`;
-        } else {
-          description = `${findLayerById(lhAction.layerId)?.name} / ${context?.tool}`;
-        }
-      }
-      break;
-    }
-    case 'layer_props':
-      icon = getActionIconSrc('layer.png');
-      const lpaction = action as LayerPropsHistoryAction;
-      description = `${findLayerById(lpaction.layerId)?.name} ${context.propName}: ${context.before} > ${context.after}`;
-      break;
-  }
-
-  if (!icon) icon = getActionIconSrc('unknown.png');
-  if (!description) description = '<unknown>';
+const HistoryItemRow: Component<{ undo?: boolean; action: HistoryEntry; index?: Accessor<number> | number }> = ({ action, index }) => {
+  const contexts = action?.getContext?.() ?? [];
+  const primary = contexts[0];
+  const icon = primary?.icon ?? '/assets/icons/actions/unknown.png';
+  const description = contexts.length > 0 ? contexts.map((c) => c.description).join('\n') : '<unknown>';
 
   return (
-    <div class={historyRowStyle} title={`${action.label ?? 'no label.'}\n${JSON.stringify(action.context)}`}>
+    <div class={historyRowStyle} title={description}>
       <p class={indexStyle}>{typeof index === 'function' ? index() : index}</p>
-      <Show
-        when={colorIcon}
-        fallback={
-          <div>
-            <Icon src={icon || ''} color={'var(--color-on-background)'} base={8} scale={1} />
-          </div>
-        }
-      >
-        <div class={colorIconStyle} style={{ 'background-color': colorIcon!.new }}></div>
-      </Show>
+      <div>
+        <Icon src={icon} color={'var(--color-on-background)'} base={8} scale={1} />
+      </div>
       <p class={descriptionStyle}>{description}</p>
     </div>
   );

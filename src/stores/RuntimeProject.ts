@@ -2,7 +2,7 @@ import { getProjectAdapter, gzipDeflate, gzipInflate, ProjectBase } from '@sledg
 import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
 import { HistoryStacks } from 'node_modules/@sledge-pdm/core/dist/src/project/adapters/parts/History';
 import { unwrap } from 'solid-js/store';
-import { projectHistoryController } from '~/features/history';
+import { historyManager, projectHistoryController } from '~/features/history';
 import { ImagePoolImage } from '~/features/image_pool';
 import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
 import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/imageStore';
@@ -22,6 +22,8 @@ export async function initRuntimeProject(project: ProjectBase) {
   if (!adapter) {
     throw new Error('Failed to load project to runtime');
   }
+
+  historyManager.clearHistory();
 
   const versions = adapter.getVersions();
   setIOStore('loadProjectVersion', { sledge: versions?.sledge ?? undefined, project: versions?.project ?? undefined });

@@ -1,9 +1,10 @@
 ﻿import { gzipDeflate, gzipInflate, type RawPixelData } from '@sledge-pdm/core';
 import { v4 } from 'uuid';
 import { normalizeRotation } from '~/features/canvas';
-import { projectHistoryController } from '~/features/history';
-import { ImagePoolHistoryAction } from '~/features/history/actions/ImagePoolHistoryAction';
-import { LayerHistoryAction } from '~/features/history/actions/LayerHistoryAction';
+import { historyManager } from '~/features/history';
+import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
+import { ImagePoolEntryCommand } from '~/features/history/command/image_pool/ImagePoolEntryCommand';
+import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool/model';
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
@@ -101,14 +102,15 @@ export function insertEntry(entry: ImagePoolEntry, image: ImagePoolImage, noDiff
 
   if (!noDiff) {
     const index = newEntries.findIndex((e) => e.id === entry.id);
-    projectHistoryController.addAction(
-      new ImagePoolHistoryAction({
-        kind: 'add',
-        entry: cloneEntry(entry),
-        image,
-        index,
-        context: { from: 'ImagePoolController.insertEntry' },
-      })
+    historyManager.addEntry(
+      new CommandsHistoryEntry(
+        new ImagePoolEntryCommand({
+          kind: 'add',
+          entry: cloneEntry(entry),
+          image,
+          index,
+        })
+      )
     );
   }
 }
@@ -146,14 +148,15 @@ export function removeEntry(id: string, noDiff?: boolean) {
       }
     }
     if (!noDiff)
-      projectHistoryController.addAction(
-        new ImagePoolHistoryAction({
-          kind: 'remove',
-          entry: cloneEntry(entry),
-          image,
-          index: entryIndex,
-          context: { from: 'ImagePoolController.removeEntry' },
-        })
+      historyManager.addEntry(
+        new CommandsHistoryEntry(
+          new ImagePoolEntryCommand({
+            kind: 'remove',
+            entry: cloneEntry(entry),
+            image,
+            index: entryIndex,
+          })
+        )
       );
   }
 }
@@ -256,11 +259,13 @@ async function transferToLayer(layerId: string, entryId: string) {
     { u_patch: entryTexture }
   );
   deleteTexture(layer.getGLContext(), entryTexture);
-  projectHistoryController.addAction(
-    new LayerHistoryAction({
-      layerId,
-      context: { tool: 'image' },
-    })
+  historyManager.addEntry(
+    new CommandsHistoryEntry(
+      new FrascoLayerCommand({
+        layerId,
+        context: { tool: 'image' },
+      })
+    )
   );
   updateWebGLCanvas(`Image Transfer to Layer(${layerId})`);
   updateLayerPreview(layerId);

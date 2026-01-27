@@ -1,8 +1,9 @@
 // Side-effectful operations / state interactions for color feature
 import { colorMatch, RGBA } from '@sledge-pdm/core';
 import { Consts } from '~/Consts';
-import { projectHistoryController } from '~/features/history';
-import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
+import { historyManager } from '~/features/history';
+import { ColorChangeCommand } from '~/features/history/command/color/ColorChangeCommand';
+import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 import { PaletteType } from './palette';
@@ -60,16 +61,12 @@ interface RegisterColorChangeOptions {
 export const registerColorChange = (oldColor: RGBA, newColor: RGBA, options?: RegisterColorChangeOptions) => {
   if (oldColor === newColor) return;
 
-  // add project history
-  const action = new ColorHistoryAction({
+  const command = new ColorChangeCommand({
     palette: colorStore.currentPalette,
     oldColor,
     newColor,
-    context: {
-      from: 'registerColorChange',
-    },
   });
-  projectHistoryController.addAction(action);
+  historyManager.addEntry(new CommandsHistoryEntry(command));
 
   // add color history
   addColorHistory(newColor, options);

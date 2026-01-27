@@ -2,7 +2,10 @@ import { Size2D, Vec2 } from '@sledge-pdm/core';
 import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
-import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
+import { historyManager } from '~/features/history';
+import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
+import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
+import { HistoryContext } from '~/features/history/types';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
@@ -72,10 +75,9 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
     return false;
   const layerIds = allLayers().map((l) => l.id);
-  const act = new CanvasSizeHistoryAction({
+  const command = new CanvasSizeCommand({
     beforeSize: oldSize,
     afterSize: newSize,
-    context: { action: 'resize', from: 'changeCanvasSize' },
     historyMode: 'layer',
     layerIds,
   });
@@ -86,7 +88,7 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
         frascoLayer.commitHistory(undefined, { silent: true });
       }
     }
-    act.registerBefore();
+    command.registerBefore();
   }
 
   setProjectStore('canvas', 'size', newSize);
@@ -107,8 +109,15 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
   selectionManager.resizeSelectionMask(newSize);
 
   if (!skipHistory) {
-    act.registerAfter();
-    projectHistoryController.addAction(act);
+    command.registerAfter();
+    const context: HistoryContext = {
+      icon:
+        newSize.width * newSize.height >= oldSize.width * oldSize.height
+          ? '/assets/icons/actions/canvas_size_bigger.png'
+          : '/assets/icons/actions/canvas_size_smaller.png',
+      description: `${oldSize.width}x${oldSize.height} -> ${newSize.width}x${newSize.height}`,
+    };
+    historyManager.addEntry(new CommandsHistoryEntry(command, context));
   }
   setInteractStore('isCanvasSizeFrameMode', false);
   setInteractStore('canvasSizeFrameOffset', { x: 0, y: 0 });

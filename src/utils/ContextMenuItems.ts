@@ -1,5 +1,5 @@
 import { MenuListOption } from '@sledge-pdm/ui';
-import { projectHistoryController } from '~/features/history';
+import { historyManager } from '~/features/history';
 import { saveProject } from '~/features/io/project/save';
 import { webview } from '~/utils/platform';
 import { openDevTools } from '~/utils/WindowUtils';
@@ -26,7 +26,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
     label: 'Undo',
     icon: '/assets/icons/context_menu/undo.png',
     onSelect: () => {
-      projectHistoryController.undo();
+      historyManager.undo();
     },
   },
   Redo: {
@@ -34,7 +34,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
     label: 'Redo',
     icon: '/assets/icons/context_menu/redo.png',
     onSelect: () => {
-      projectHistoryController.redo();
+      historyManager.redo();
     },
   },
   Save: {

@@ -1,5 +1,7 @@
 // Layer domain types - Core types used across the layer system
 
+import { BlendMode } from '@sledge-pdm/frasco';
+
 export enum LayerType {
   Base,
   Dot,
@@ -7,22 +9,10 @@ export enum LayerType {
   Automate,
 }
 
-export enum BlendMode {
-  normal = 'Normal',
-  multiply = 'Multiply',
-  screen = 'Screen',
-  overlay = 'Overlay',
-  softLight = 'Soft Light',
-  hardLight = 'Hard Light',
-  linearLight = 'Linear Light',
-  vividLight = 'Vivid Light',
-}
-
 export interface Layer {
   id: string;
   name: string;
   type: LayerType;
-  typeDescription: string;
   opacity: number;
   mode: BlendMode;
   enabled: boolean;

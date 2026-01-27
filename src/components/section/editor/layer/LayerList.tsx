@@ -5,7 +5,7 @@ import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } 
 import LayerListButtonsRow from '~/components/section/editor/layer/row/LayerListButtonsRow';
 import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';
 import SectionItem from '~/components/section/SectionItem';
-import { allLayers, moveLayer } from '~/features/layer';
+import { allLayers, reorderLayer } from '~/features/layer';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { ensureDropLine, getDropCandidates, getDropIndex, hideDropLine, updateDropLine } from '~/utils/dndUtils';
 import { sectionContent } from '../../SectionStyles';
@@ -68,7 +68,7 @@ const LayerList: Component = () => {
         if (fromIndex < 0) return;
         const toIndex = getDropIndexForLayer(data.id, location.current.input.clientY);
         if (toIndex < 0 || toIndex === fromIndex) return;
-        moveLayer(fromIndex, toIndex);
+        reorderLayer(fromIndex, toIndex);
         hideDropLine(dropLineEl);
       },
       onDrag: ({ source, location }) => {

@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { adjustZoomToFit } from '~/features/canvas';
+import { PackedLayerSnapshot } from '~/features/history';
 import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateWebGLCanvas } from '~/webgl/service';
+import { buildLayer } from '../helpers';
 
 vi.mock('~/features/canvas', () => ({
   adjustZoomToFit: vi.fn(),
@@ -45,8 +47,12 @@ describe('CanvasSizeCommand', () => {
   });
 
   it('applies snapshot-based resize forward/backward', () => {
-    const beforeSnapshots = [{ layer: { id: 'layer-1' }, image: { packedBuffer: new Uint8Array([1]), width: 1, height: 1 } }];
-    const afterSnapshots = [{ layer: { id: 'layer-1' }, image: { packedBuffer: new Uint8Array([2]), width: 2, height: 2 } }];
+    const beforeSnapshots: PackedLayerSnapshot[] = [
+      { layer: buildLayer('layer-1'), image: { packedBuffer: new Uint8Array([1]), width: 1, height: 1 } },
+    ];
+    const afterSnapshots: PackedLayerSnapshot[] = [
+      { layer: buildLayer('layer-1'), image: { packedBuffer: new Uint8Array([2]), width: 2, height: 2 } },
+    ];
 
     const command = new CanvasSizeCommand({
       beforeSize: { width: 1, height: 1 },

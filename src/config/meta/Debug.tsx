@@ -17,21 +17,6 @@ export const debugMetas: FieldMeta[] = [
     component: 'ToggleSwitch',
     tips: `show performance monitor.`,
   },
-  { section: ConfigSections.Debug, kind: 'header', header: 'pen/eraser (experimental)' },
-  {
-    section: ConfigSections.Debug,
-    path: 'debug/useRawMove',
-    label: 'use raw pointer update',
-    component: 'ToggleSwitch',
-    tips: 'use pointerrawupdate for pen/eraser instead of pointermove.',
-  },
-  {
-    section: ConfigSections.Debug,
-    path: 'debug/disableCompletionLine',
-    label: 'disable completion line',
-    component: 'ToggleSwitch',
-    tips: 'disable line completion between samples for pen/eraser.',
-  },
   { section: ConfigSections.Debug, kind: 'header', header: 'updates' },
   {
     section: ConfigSections.Debug,

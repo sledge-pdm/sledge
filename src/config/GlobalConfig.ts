@@ -25,6 +25,7 @@ export type GlobalConfig = {
     maxHistoryItemsCount: number;
     touchRotationZeroSnapThreshold: number;
     rulerMarkDirection: 'outward' | 'inward';
+    useRawMove: boolean;
   };
   performance: {
     targetFPS: FPS;
@@ -33,8 +34,6 @@ export type GlobalConfig = {
   debug: {
     showPerformanceMonitor: boolean;
     showDirtyTiles: boolean;
-    useRawMove: boolean;
-    disableCompletionLine: boolean;
     updateChannel: string;
   };
   keyConfig: KeyConfigStore;
@@ -60,6 +59,7 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
     maxHistoryItemsCount: 50,
     touchRotationZeroSnapThreshold: 5,
     rulerMarkDirection: 'inward',
+    useRawMove: false,
   },
   performance: {
     canvasRenderingMode: 'adaptive',
@@ -68,8 +68,6 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
   debug: {
     showPerformanceMonitor: false,
     showDirtyTiles: false,
-    useRawMove: false,
-    disableCompletionLine: false,
     updateChannel: 'stable',
   },
   keyConfig: makeDefaultKeyConfigStore(),

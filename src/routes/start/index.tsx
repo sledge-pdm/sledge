@@ -1,6 +1,6 @@
 import { onMount } from 'solid-js';
+import ScrollFadeContainer from '~/components/global/common/ScrollFadeContainer';
 import RecentFileList from '~/components/global/RecentFileList';
-import ScrollFadeContainer from '~/components/global/ScrollFadeContainer';
 import ThemeToggle from '~/components/global/ThemeToggle';
 import { loadGlobalConfig } from '~/features/io/config/load';
 import { ErrorTypes } from '~/features/io/project/ProjectLoader';

@@ -14,6 +14,7 @@ import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+import { globalConfig } from '~/stores/GlobalStores';
 
 export class PenTool implements ToolBehavior {
   allowRightClick = true;
@@ -68,11 +69,20 @@ export class PenTool implements ToolBehavior {
   }
 
   onMove(args: ToolArgs): ToolResult {
-    return this.handleDraw(args);
+    if (!globalConfig.editor.useRawMove) return this.handleDraw(args);
+    console.log('yea');
+    return {
+      shouldUpdate: false,
+    };
   }
 
   onRawMove(args: ToolArgs): ToolResult {
-    return this.handleDraw(args);
+    if (globalConfig.editor.useRawMove) return this.handleDraw(args);
+    console.log('wee');
+
+    return {
+      shouldUpdate: false,
+    };
   }
 
   handleDraw(args: ToolArgs): ToolResult {

@@ -18,7 +18,7 @@ const buildImage = (): ImagePoolImage => ({
   deflatedBuffer: new Uint8Array([1, 2, 3]),
 });
 
-describe('ImagePoolEntryCommand', () => {
+describe('ImagePoolEntryCommand (e2e)', () => {
   beforeEach(() => {
     setProjectStore('imagePool', 'entries', []);
     setImagePoolImages(new Map());

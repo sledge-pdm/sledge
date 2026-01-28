@@ -4,7 +4,7 @@ import { HistoryContext } from '~/features/history/types';
 import { findLayerById } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
 
 export interface LayerRemoveCommandProps {
@@ -47,7 +47,7 @@ export class LayerRemoveCommand extends HistoryCommand {
     }
 
     layerManager.removeLayer(this.layerId);
-    updateWebGLCanvas(`Layer(${this.layerId}) removed`);
+    updateFrascoCanvas(`Layer(${this.layerId}) removed`);
   }
 
   backward(): void {
@@ -64,8 +64,7 @@ export class LayerRemoveCommand extends HistoryCommand {
     const buffer = inflated.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
     layerManager.registerLayer(inflated.layer.id, buffer, width, height, { inputSpace: 'layer' });
 
-    updateWebGLCanvas(`Layer(${inflated.layer.id}) inserted`);
-    updateLayerPreview(inflated.layer.id);
+    updateFrascoCanvas(`Layer(${inflated.layer.id}) inserted`);
   }
 
   getContext(): HistoryContext {

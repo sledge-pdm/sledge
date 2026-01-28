@@ -6,7 +6,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { PackedLayerSnapshot } from '../../actions/types';
 import { inflateLayerSnapshot } from '../../actions/utils';
 import { HistoryContext } from '../../types';
@@ -144,7 +144,7 @@ export class CanvasSizeCommand extends HistoryCommand {
         layerManager.registerLayer(snap.layer.id, buffer, width, height, { inputSpace: 'layer' });
       }
     }
-    updateWebGLCanvas(`canvas resize restore`);
+    updateFrascoCanvas(`canvas resize restore`);
   }
 
   private applyLayerHistory(mode: 'undo' | 'redo') {
@@ -158,14 +158,13 @@ export class CanvasSizeCommand extends HistoryCommand {
         } else {
           layer.redo();
         }
-        updateLayerPreview(layerId);
         updated = true;
       } catch {
         // ignore layer failures to keep canvas size state consistent
       }
     }
     if (updated) {
-      updateWebGLCanvas(`canvas resize ${mode}`);
+      updateFrascoCanvas(`canvas resize ${mode}`);
     }
   }
 }

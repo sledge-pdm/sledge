@@ -3,7 +3,7 @@ import { StrokeCanvas } from './StrokeCanvas';
 
 import { css } from '@acab/ecsstatic';
 import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
-import WebGLCanvas, { notifyCanvasLayoutReady } from './WebGLCanvas';
+import FrascoCanvas, { notifyCanvasLayoutReady } from './FrascoCanvas';
 
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -63,7 +63,7 @@ const CanvasStack: Component = () => {
           'background-position': `0 0, ${gridSize()}px ${gridSize()}px`,
         }}
       >
-        <WebGLCanvas />
+        <FrascoCanvas />
         <StrokeCanvas />
         <ImagePool />
       </div>

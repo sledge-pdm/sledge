@@ -16,7 +16,7 @@ import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { imagePoolImages } from '../image_pool/imageStore';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
@@ -123,8 +123,7 @@ export function cancelSelection() {
   }
   selectionManager.clear();
 
-  updateWebGLCanvas('selection cancelled');
-  updateLayerPreview(layerId);
+  updateFrascoCanvas('selection cancelled');
 
   if (wasMoving || hadSelection) {
     logUserInfo('Selection cancelled.');
@@ -144,8 +143,7 @@ export function cancelMove() {
   const wasMoving = floatingMoveManager.isMoving();
   floatingMoveManager.cancel();
 
-  updateWebGLCanvas('move cancelled');
-  updateLayerPreview(layerId);
+  updateFrascoCanvas('move cancelled');
 
   if (wasMoving) {
     logUserInfo('Selection move cancelled.');
@@ -189,8 +187,7 @@ export function deleteSelectedArea(props?: { layerId?: string; noAction?: boolea
   layer.applyEffectWithTextures({ fragmentSrc: CLEAR_WITH_MASK_300ES }, { u_mask: maskTexture }, glBounds);
   deleteTexture(layer.getGLContext(), maskTexture);
 
-  updateWebGLCanvas('delete selected area');
-  updateLayerPreview(lid);
+  updateFrascoCanvas('delete selected area');
   logUserInfo('Selected area cleared.');
 
   return layerManager.exportRawCanvas(lid);
@@ -326,8 +323,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
 
   if (deleteAfter) {
-    updateWebGLCanvas('delete selected area');
-    updateLayerPreview(projectStore.layers.state.activeLayerId);
+    updateFrascoCanvas('delete selected area');
   }
 }
 

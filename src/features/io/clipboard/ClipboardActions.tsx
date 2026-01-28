@@ -1,6 +1,6 @@
 import { toUint8Array } from '@sledge-pdm/core';
 import { doCommands } from '~/features/history';
-import { CUT_PASTE_CONTEXT, CutPasteCommands } from '~/features/history/command/snippet/CutPasteCommands';
+import { cutPasteSnippet } from '~/features/history/command/snippet/CutPasteCommands';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeIndex, addLayerTo, findLayerById, setLayerProp } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
@@ -89,9 +89,8 @@ export async function clipboardPaste(e?: ClipboardEvent) {
           // const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
 
           const insertIndex = activeIndex();
-          doCommands(CutPasteCommands(insertIndex, srcLayer, srcBuffer), {
-            context: CUT_PASTE_CONTEXT,
-          });
+          const { commands, context } = cutPasteSnippet(insertIndex, srcLayer, srcBuffer);
+          doCommands(commands, { context });
           // removeLayer(unfreezedSourceLayer.id, { noDiff: true });
         } else {
           addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, noDiff: false, uniqueName: false });

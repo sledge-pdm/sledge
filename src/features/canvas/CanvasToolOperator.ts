@@ -7,7 +7,7 @@ import { ToolArgs, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPrevActiveToolCategoryId, isToolAllowedInCurrentLayer, setActiveToolCategory } from '~/features/tools/ToolController';
 import { ToolCategory } from '~/features/tools/Tools';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 
 export enum DrawState {
   start,
@@ -73,8 +73,7 @@ export default class CanvasToolOperator {
       }
 
       if (result.shouldUpdate) {
-        updateWebGLCanvas('CanvasToolOperator (action: ' + DrawState[state] + ')');
-        updateLayerPreview(layer.id);
+        updateFrascoCanvas('CanvasToolOperator (action: ' + DrawState[state] + ')');
       }
 
       if (result.shouldReturnToPrevTool) {

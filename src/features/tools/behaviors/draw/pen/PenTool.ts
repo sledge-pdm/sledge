@@ -78,7 +78,6 @@ export class PenTool implements ToolBehavior {
 
   onRawMove(args: ToolArgs): ToolResult {
     if (globalConfig.editor.useRawMove) return this.handleDraw(args);
-    console.log('wee');
 
     return {
       shouldUpdate: false,

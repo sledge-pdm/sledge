@@ -3,7 +3,7 @@ import { SurfaceBounds } from '@sledge-pdm/frasco';
 import { getLayerIndex } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
 import { inflateLayerSnapshot } from './utils';
@@ -61,7 +61,6 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
         }
       }
     }
-    updateLayerPreview(snapshot.layer.id);
   }
 
   swapSnapshots() {
@@ -82,7 +81,7 @@ export class LayerMergeHistoryAction extends BaseHistoryAction {
     this.applySnapshot(inflateLayerSnapshot(this.originPackedSnapshot));
     this.applySnapshot(inflateLayerSnapshot(this.targetPackedSnapshot));
 
-    updateWebGLCanvas('Layer merge undo/redo');
+    updateFrascoCanvas('Layer merge undo/redo');
 
     // swap
     this.originPackedSnapshot = swapOriginPackedSnapshot;

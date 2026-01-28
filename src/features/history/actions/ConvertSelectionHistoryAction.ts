@@ -5,7 +5,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
 import { inflateLayerSnapshot } from './utils';
@@ -63,8 +63,7 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
       if (inflated) this.applySnapshot(inflated);
     }
 
-    updateWebGLCanvas(`Anvil(${this.layerId}) undo`);
-    updateLayerPreview(this.layerId);
+    updateFrascoCanvas(`Anvil(${this.layerId}) undo`);
   }
 
   redo(): void {
@@ -81,8 +80,7 @@ export class ConvertSelectionHistoryAction extends BaseHistoryAction {
       if (inflated) this.applySnapshot(inflated);
     }
 
-    updateWebGLCanvas(`Anvil(${this.layerId}) redo`);
-    updateLayerPreview(this.layerId);
+    updateFrascoCanvas(`Anvil(${this.layerId}) redo`);
   }
 
   serialize(): SerializedHistoryAction {

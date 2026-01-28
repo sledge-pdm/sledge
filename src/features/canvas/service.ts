@@ -1,5 +1,4 @@
 import { Size2D, Vec2 } from '@sledge-pdm/core';
-import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Consts } from '~/Consts';
 import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { historyManager } from '~/features/history';
@@ -14,7 +13,8 @@ import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { WindowPos } from '~/types/CoordinateTypes';
 import { eventBus } from '~/utils/EventBus';
 import { dialog } from '~/utils/platform';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { frascoRenderer } from '~/webgl/FrascoRenderer';
+import { updateFrascoCanvas } from '~/webgl/service';
 
 export function isValidCanvasSize(size: Size2D): boolean {
   if (size.width < Consts.minCanvasWidth || Consts.maxCanvasWidth < size.width) return false;
@@ -103,9 +103,8 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
       const resized = resizeBufferWithOrigins(baseBuffer, oldSize, newSize, src, dest);
       layerManager.replaceLayerBuffer(l.id, resized, newSize.width, newSize.height, { inputSpace: 'canvas' });
     }
-    updateLayerPreview(l.id);
   }
-  updateWebGLCanvas('changeCanvasSize');
+  updateFrascoCanvas('changeCanvasSize');
   selectionManager.resizeSelectionMask(newSize);
 
   if (!skipHistory) {

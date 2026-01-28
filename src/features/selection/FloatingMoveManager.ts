@@ -7,7 +7,7 @@ import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 
 export type MoveMode = 'selection' | 'layer' | 'pasted';
 
@@ -114,8 +114,7 @@ class FloatingMoveManager {
 
   private requestFrame(immediate?: boolean, layerIdOverride?: string) {
     const layerId = layerIdOverride ?? this.targetLayerId;
-    updateWebGLCanvas('floating-move');
-    updateLayerPreview(layerId);
+    updateFrascoCanvas('floating-move');
     const payload = immediate ? { immediate: true } : {};
     eventBus.emit('selection:updateSelectionMenu', payload);
     eventBus.emit('selection:updateSelectionPath', payload);

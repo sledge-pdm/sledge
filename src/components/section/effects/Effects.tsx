@@ -68,7 +68,6 @@ const Effects: Component = () => {
             referenceSize={250}
             maxHeight={160}
             fitMode='contain'
-            updateInterval={20}
           />
         </div>
         <div class={layerSelectContainer}>

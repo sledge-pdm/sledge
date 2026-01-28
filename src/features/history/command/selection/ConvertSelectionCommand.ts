@@ -5,7 +5,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { LayerSnapshot, PackedLayerSnapshot } from '../../actions/types';
 import { inflateLayerSnapshot } from '../../actions/utils';
 import { HistoryContext } from '../../types';
@@ -22,7 +22,7 @@ export interface ConvertSelectionCommandProps {
 }
 
 /**
- * @deprecated this should be replaced with ImagePool+Selection snippet after adding SelectionCommand
+ * @deprecated this should be replaced with ImagePool+Selection+FrascoLayer snippet after adding SelectionCommand
  */
 export class ConvertSelectionCommand extends HistoryCommand {
   private layerId: string;
@@ -71,8 +71,7 @@ export class ConvertSelectionCommand extends HistoryCommand {
       if (inflated) this.applySnapshot(inflated);
     }
 
-    updateWebGLCanvas(`Anvil(${this.layerId}) undo`);
-    updateLayerPreview(this.layerId);
+    updateFrascoCanvas(`Anvil(${this.layerId}) undo`);
   }
 
   private applyNew() {
@@ -89,8 +88,7 @@ export class ConvertSelectionCommand extends HistoryCommand {
       if (inflated) this.applySnapshot(inflated);
     }
 
-    updateWebGLCanvas(`Anvil(${this.layerId}) redo`);
-    updateLayerPreview(this.layerId);
+    updateFrascoCanvas(`Anvil(${this.layerId}) redo`);
   }
 
   private applySnapshot(snapshot: LayerSnapshot) {

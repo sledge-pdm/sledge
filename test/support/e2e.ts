@@ -1,7 +1,35 @@
+import { layerManager } from '~/features/layer/frasco/LayerManager';
+
 export type E2EImage = {
   data: Uint8Array;
   width: number;
   height: number;
+};
+
+export type WebGLCanvasHandle = {
+  canvas: HTMLCanvasElement;
+  gl: WebGL2RenderingContext;
+};
+
+export type WebGLCanvasOptions = {
+  width?: number;
+  height?: number;
+  appendToBody?: boolean;
+  setLayerManagerContext?: boolean;
+};
+
+export const createWebGLCanvas = (options: WebGLCanvasOptions = {}): WebGLCanvasHandle => {
+  const { width, height, appendToBody = true, setLayerManagerContext = true } = options;
+  const canvas = document.createElement('canvas');
+  if (width !== undefined) canvas.width = width;
+  if (height !== undefined) canvas.height = height;
+  if (appendToBody) document.body.appendChild(canvas);
+  const gl = canvas.getContext('webgl2');
+  if (!gl) throw new Error('WebGL2 is not supported in this browser');
+  if (setLayerManagerContext) {
+    layerManager.setContext(gl);
+  }
+  return { canvas, gl };
 };
 
 export async function loadImageData(path: URL): Promise<E2EImage> {

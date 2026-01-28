@@ -1,7 +1,7 @@
 import { removeLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
 import { inflateLayerSnapshot } from './utils';
@@ -88,6 +88,5 @@ function insertAt(index: number, snapshot: LayerSnapshot) {
   const height = snapshot.image?.height ?? projectStore.canvas.size.height;
   const buffer = snapshot.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
   layerManager.registerLayer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
-  updateWebGLCanvas(`Layer(${snapshot.layer.id}) inserted`);
-  updateLayerPreview(snapshot.layer.id);
+  updateFrascoCanvas(`Layer(${snapshot.layer.id}) inserted`);
 }

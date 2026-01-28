@@ -1,12 +1,12 @@
 import { css } from '@acab/ecsstatic';
+import { Size2D } from '@sledge-pdm/core';
+import { LayerThumbnail } from '@sledge-pdm/frasco';
 import { color } from '@sledge-pdm/ui';
-import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { Layer } from '~/features/layer';
-import { layerThumbnailGenerator } from '~/features/layer/LayerThumbnailGenerator';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus, Events } from '~/utils/EventBus';
-import { calcPreviewSize } from '~/utils/ThumbnailUtils';
+import { calcPreviewSize, calcThumbnailScale } from '~/utils/ThumbnailUtils';
 
 const canvas = css`
   width: 100%;
@@ -16,23 +16,16 @@ const canvas = css`
 
 interface Props {
   layer: Layer;
-
   // どちらを基準にするかを明示的に指定
   sizingMode: 'width-based' | 'height-based';
-
   // 基準となる値
   referenceSize: number;
-
   // 最大値制限（オプション）
   maxWidth?: number;
   maxHeight?: number;
-
   // maxに抵触した際の挙動
   fitMode?: 'contain' | 'cover'; // default: 'contain'
-
   withBorder?: boolean;
-
-  updateInterval?: number; // ms, default: on demand
   onClick?: (e: MouseEvent) => void;
 }
 
@@ -40,84 +33,96 @@ const LayerPreview: Component<Props> = (props: Props) => {
   let canvasRef: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
-  const thumbnailGen = layerThumbnailGenerator;
-
-  // RAF and update state management
-  const [needsUpdate, setNeedsUpdate] = createSignal<boolean>(false);
-  const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
-    targetFPS((timeStamp) => {
-      if (needsUpdate()) {
-        performUpdate();
-        setNeedsUpdate(false);
-      }
-    }, props.updateInterval ?? 10)
-  );
-
-  const requestUpdate = () => {
-    if (!isRunning()) {
-      startRenderLoop();
-    }
-    setNeedsUpdate(true);
-  };
-
-  const handleUpdateReqEvent = (e: Events['preview:requestUpdate']) => {
-    if (e.layerId === props.layer.id) {
-      requestUpdate();
-    }
-  };
-
-  createEffect(() => {
-    projectStore.canvas.size;
-    performUpdate();
-  });
-
-  onMount(() => {
-    performUpdate();
-    eventBus.on('preview:requestUpdate', handleUpdateReqEvent);
-  });
-
-  onCleanup(() => {
-    stopRenderLoop();
-    eventBus.off('preview:requestUpdate', handleUpdateReqEvent);
-  });
-
-  createEffect(() => {
-    props.layer;
-    performUpdate();
-  });
-
-  const performUpdate = async () => {
-    if (!canvasRef || !ctx) return;
-
-    const previewSize = calcPreviewSize({
-      canvasSize: projectStore.canvas.size,
+  let thumbnail: LayerThumbnail | undefined = undefined;
+  let currentLayerId: string | undefined;
+  let currentScale = 0;
+  const size = createMemo<Size2D>(() => {
+    const canvasSize = {
+      width: projectStore.canvas.size.width,
+      height: projectStore.canvas.size.height,
+    };
+    return calcPreviewSize({
+      canvasSize,
       sizingMode: props.sizingMode,
       referenceSize: props.referenceSize,
       fitMode: props.fitMode,
       maxWidth: props.maxWidth,
       maxHeight: props.maxHeight,
     });
+  });
 
-    const previewWidth = Math.round(previewSize.width);
-    const previewHeight = Math.round(previewSize.height);
+  const disposeThumbnail = () => {
+    if (thumbnail) {
+      thumbnail.dispose();
+      thumbnail = undefined;
+    }
+    currentLayerId = undefined;
+    currentScale = 0;
+  };
+
+  const setupThumbnail = () => {
+    if (!canvasRef || !ctx) return;
+    const { width, height } = projectStore.canvas.size;
+    const nextScale = calcThumbnailScale(width, height);
+    if (thumbnail && currentLayerId === props.layer.id && currentScale === nextScale) {
+      return;
+    }
+
+    disposeThumbnail();
+    const frascoLayer = layerManager.getLayerOptional(props.layer.id);
+    if (!frascoLayer) return () => {};
+    thumbnail = new LayerThumbnail(frascoLayer, { scale: nextScale });
+    const removeUpdateListener = thumbnail.onUpdate(() => {
+      performUpdate();
+    });
+    currentLayerId = props.layer.id;
+    currentScale = nextScale;
+    performUpdate();
+
+    return () => {
+      removeUpdateListener();
+    };
+  };
+
+  onMount(() => {
+    const cleanup = setupThumbnail();
+    return () => {
+      cleanup?.();
+      disposeThumbnail();
+    };
+  });
+
+  createEffect(() => {
+    projectStore.canvas.size.width;
+    projectStore.canvas.size.height;
+    props.layer.id;
+    const cleanup = setupThumbnail();
+    if (!cleanup) return;
+    return () => cleanup();
+  });
+
+  createEffect(() => {
+    size();
+    performUpdate();
+  });
+
+  const performUpdate = () => {
+    const previewWidth = Math.round(size().width);
+    const previewHeight = Math.round(size().height);
     if (previewWidth === 0 || previewHeight === 0) return;
-
     if (canvasRef.width !== previewWidth || canvasRef.height !== previewHeight) {
       canvasRef.width = previewWidth;
       canvasRef.height = previewHeight;
       canvasRef.style.width = `${previewWidth}px`;
       canvasRef.style.height = `${previewHeight}px`;
     }
-
-    const preview = thumbnailGen.generateLayerThumbnail(props.layer.id, previewWidth, previewHeight);
+    const preview = thumbnail?.getImageData(previewWidth, previewHeight);
     if (preview) {
-      // ctx.imageSmoothingEnabled = true;
-      // ctx.imageSmoothingQuality = 'high';
       ctx.putImageData(preview, 0, 0);
     }
   };
 
-  const transparent_bg_color = '#00000020';
+  // const transparent_bg_color = '#00000020';
   const gridSize = () => 8;
 
   return (

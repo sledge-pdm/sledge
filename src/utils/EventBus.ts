@@ -18,8 +18,6 @@ export type Events = {
   'webgl:requestResume': {};
   'webgl:renderPaused': {};
 
-  'preview:requestUpdate': { layerId?: string };
-
   'window:sideSectionSideChanged': {};
 
   'export:requestExportPath': { newPath: string };

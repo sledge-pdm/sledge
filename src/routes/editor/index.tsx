@@ -2,7 +2,6 @@ import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
 import { createEffect, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/common/Loading';
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
@@ -27,6 +26,7 @@ import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import { isFirstStartup, showMainWindow } from '~/utils/WindowUtils';
+import { disposeFrascoRenderer } from '~/webgl/FrascoRenderer';
 
 const mainContainer = css`
   display: flex;
@@ -136,7 +136,7 @@ export default function Editor() {
 
     return () => {
       unlisten();
-      frascoRenderer?.dispose();
+      disposeFrascoRenderer();
       AutoSnapshotManager.getInstance().stop();
       if (import.meta.hot) {
         window.location.reload();

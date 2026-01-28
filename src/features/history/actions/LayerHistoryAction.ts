@@ -1,5 +1,5 @@
 import { getLayer } from '~/features/layer/frasco/LayerManager';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface LayerHistoryActionProps extends BaseHistoryActionProps {
@@ -21,8 +21,7 @@ export class LayerHistoryAction extends BaseHistoryAction {
     } catch {
       return;
     }
-    updateWebGLCanvas(`Layer(${this.layerId}) undo`);
-    updateLayerPreview(this.layerId);
+    updateFrascoCanvas(`Layer(${this.layerId}) undo`);
   }
 
   redo(): void {
@@ -31,8 +30,7 @@ export class LayerHistoryAction extends BaseHistoryAction {
     } catch {
       return;
     }
-    updateWebGLCanvas(`Layer(${this.layerId}) redo`);
-    updateLayerPreview(this.layerId);
+    updateFrascoCanvas(`Layer(${this.layerId}) redo`);
   }
 
   serialize(): SerializedHistoryAction {

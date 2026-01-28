@@ -2,7 +2,7 @@ import { HistoryContext } from '~/features/history/types';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { findLayerById } from '~/features/layer/service';
 import { toolCategories } from '~/features/tools/Tools';
-import { updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
 
 export interface FrascoLayerCommandProps {
@@ -29,13 +29,14 @@ export class FrascoLayerCommand extends HistoryCommand {
   forward(): void {
     const frascoLayer = getLayer(this.layerId);
     if (frascoLayer) frascoLayer.redo();
-    updateWebGLCanvas();
+    updateFrascoCanvas();
+    updateFrascoCanvas();
   }
 
   backward(): void {
     const frascoLayer = getLayer(this.layerId);
     if (frascoLayer) frascoLayer.undo();
-    updateWebGLCanvas();
+    updateFrascoCanvas();
   }
 
   getContext(): HistoryContext {

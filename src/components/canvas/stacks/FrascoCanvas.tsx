@@ -12,17 +12,15 @@ export const notifyCanvasLayoutReady = (size: { width: number; height: number })
   eventBus.emit('canvas:layoutReady', { newSize: size });
 };
 
-import { FrascoRenderer } from '~/webgl/FrascoRenderer';
+import { disposeFrascoRenderer, frascoRenderer, initFrascoRenderer } from '~/webgl/FrascoRenderer';
 
-const webglCanvasStyle = css`
+const FrascoCanvasStyle = css`
   position: absolute;
   z-index: var(--zindex-webgl-canvas);
 `;
 
-export let frascoRenderer: FrascoRenderer | undefined;
-
-const WebGLCanvas: Component = () => {
-  const LOG_LABEL = 'WebGLCanvas';
+const FrascoCanvas: Component = () => {
+  const LOG_LABEL = 'FrascoCanvas';
   let canvasEl!: HTMLCanvasElement;
 
   const [updateRender, setUpdateRender] = createSignal(false);
@@ -73,7 +71,7 @@ const WebGLCanvas: Component = () => {
   };
 
   const handleUpdateReqEvent = (e: Events['webgl:requestUpdate']) => {
-    /* console.log('[WebGLCanvas] Requesting update:', e.context); */
+    /* console.log('[FrascoCanvas] Requesting update:', e.context); */
     setUpdateRender(true);
   };
 
@@ -84,16 +82,9 @@ const WebGLCanvas: Component = () => {
   };
 
   const init = () => {
-    if (frascoRenderer) {
-      frascoRenderer.dispose();
-      frascoRenderer = undefined;
-    }
-
     const { width, height } = projectStore.canvas.size;
     try {
-      frascoRenderer = new FrascoRenderer(canvasEl);
-      frascoRenderer?.setLayers(allLayers());
-      frascoRenderer.resize(width, height);
+      initFrascoRenderer(canvasEl, { width, height, layers: allLayers() });
       setUpdateRender(true); // rise flag for init render
 
       startRenderLoop();
@@ -101,7 +92,7 @@ const WebGLCanvas: Component = () => {
       logSystemInfo('Starting render loop', { label: LOG_LABEL, debugOnly: true });
     } catch (error) {
       logSystemError('Failed to initialize WebGLRenderer', { label: LOG_LABEL, details: [error] });
-      frascoRenderer = undefined;
+      disposeFrascoRenderer();
     }
   };
 
@@ -113,8 +104,7 @@ const WebGLCanvas: Component = () => {
     eventBus.on('webgl:requestResume', handleResumeRequest);
 
     return () => {
-      frascoRenderer?.dispose();
-      frascoRenderer = undefined;
+      disposeFrascoRenderer();
       stopRenderLoop();
       // eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
       eventBus.off('canvas:layoutReady', handleCanvasLayoutReady);
@@ -144,7 +134,7 @@ const WebGLCanvas: Component = () => {
   return (
     <canvas
       ref={(el) => (canvasEl = el!)}
-      class={webglCanvasStyle}
+      class={FrascoCanvasStyle}
       style={{
         'image-rendering': imageRendering(),
       }}
@@ -152,4 +142,4 @@ const WebGLCanvas: Component = () => {
   );
 };
 
-export default WebGLCanvas;
+export default FrascoCanvas;

@@ -28,7 +28,7 @@ import { logUserWarn } from '~/features/log';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 
 const root = css`
   width: 100%;
@@ -178,7 +178,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     if (props.index !== -1) {
       setProjectStore('layers', 'layers', props.index, 'enabled', (v: boolean) => !v);
     }
-    updateWebGLCanvas('layer deactivated from layeritem');
+    updateFrascoCanvas('layer deactivated from layeritem');
   };
 
   const handlePointerDown = (e: PointerEvent) => {

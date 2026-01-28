@@ -2,7 +2,7 @@ import { HistoryContext } from '~/features/history/types';
 import { findLayerById } from '~/features/layer';
 import { type Layer } from '~/features/layer/types';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
 
 export interface LayerPropsCommandProps {
@@ -73,12 +73,12 @@ export class LayerPropsCommand extends HistoryCommand {
     const idx = this.getLayerIndex();
     if (idx < 0) return;
     setProjectStore('layers', 'layers', idx, { id: this.layerId, ...props });
-    if (this.shouldUpdateWebGL()) {
-      updateWebGLCanvas('Layer props changed');
+    if (this.shouldUpdate()) {
+      updateFrascoCanvas('Layer props changed');
     }
   }
 
-  private shouldUpdateWebGL(): boolean {
+  private shouldUpdate(): boolean {
     if (!this.oldLayerProps || !this.newLayerProps) return true;
     return propNamesToUpdate.some((key) => this.oldLayerProps?.[key] !== this.newLayerProps?.[key]);
   }

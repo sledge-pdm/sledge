@@ -1,7 +1,7 @@
 import { HistoryContext } from '~/features/history/types';
 import type { Layer } from '~/features/layer';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
 
 export interface LayerReorderCommandProps {
@@ -38,7 +38,7 @@ export class LayerReorderCommand extends HistoryCommand {
       if (!order.includes(l.id)) next.push(l);
     }
     setProjectStore('layers', 'layers', next);
-    updateWebGLCanvas('Layer order changed');
+    updateFrascoCanvas('Layer order changed');
   }
 
   getContext(): HistoryContext {

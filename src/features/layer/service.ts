@@ -4,7 +4,9 @@ import { BlendMode, FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
 import { historyManager } from '~/features/history';
 import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
+import { layerMergeSnippet } from '~/features/history/command/snippet/LayerMergeCommands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
+import { doCommands } from '~/features/history/service';
 import { HistoryContext } from '~/features/history/types';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
@@ -14,8 +16,7 @@ import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { dialog } from '~/utils/platform';
-import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { selectionManager } from '../selection/SelectionAreaManager';
 import { addLayer, removeLayer, RemoveLayerOptions } from './actions';
 import { changeBaseLayerColor } from './model';
@@ -46,7 +47,7 @@ export function duplicateLayer(layerId: string) {
     },
     { initImage: buffer }
   );
-  updateWebGLCanvas(`Layer(${layerId}) duplicated`);
+  updateFrascoCanvas(`Layer(${layerId}) duplicated`);
   logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }
 
@@ -63,9 +64,8 @@ export async function mergeToBelowLayer(layerId: string) {
 
   const originLayer = projectStore.layers.layers[originLayerIndex];
   const targetLayer = projectStore.layers.layers[targetLayerIndex];
-
-  const mergeRenderer = new LayerMergeRenderer(originLayer, targetLayer);
-  await mergeRenderer.mergeLayer();
+  const { commands, context } = layerMergeSnippet(originLayer.id, targetLayer.id, { contextTool: 'merge' });
+  doCommands(commands, { context });
   logUserInfo(`Layer "${originLayer.name}" merged into "${targetLayer.name}".`, { label: LOG_LABEL });
 }
 
@@ -155,7 +155,7 @@ export const resetAllLayers = () => {
       layer.clear([0, 0, 0, 0]);
     }
   });
-  updateWebGLCanvas(`Reset all layers`);
+  updateFrascoCanvas(`Reset all layers`);
 
   adjustZoomToFit();
 };
@@ -222,8 +222,7 @@ export function clearLayer(layerId: string) {
   const layer = getLayer(layerId);
   layer.commitHistory(undefined, { context: { tool: 'clear' } });
   layer.clear([0, 0, 0, 0]);
-  updateWebGLCanvas(`Layer(${layerId}) cleared`);
-  updateLayerPreview(layerId);
+  updateFrascoCanvas(`Layer(${layerId}) cleared`);
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
 }
 
@@ -235,14 +234,14 @@ export const activeIndex = () => allLayers().findIndex((layer) => layer.id === p
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, colorMode, customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(`BaseLayer color mode changed to ${colorMode}`);
+  updateFrascoCanvas(`BaseLayer color mode changed to ${colorMode}`);
   setIOStore('isProjectChangedAfterSave', true);
 }
 
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, 'custom', customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(`BaseLayer custom color changed to ${customColor}`);
+  updateFrascoCanvas(`BaseLayer custom color changed to ${customColor}`);
   setIOStore('isProjectChangedAfterSave', true);
 }
 
@@ -276,7 +275,7 @@ export const flipLayer = (
   const layer = getLayer(layerId);
   if (!layer) return;
   FlipEffect.apply(layer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
-  updateWebGLCanvas();
+  updateFrascoCanvas();
 };
 
 export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => {
@@ -284,7 +283,7 @@ export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => 
     const frascoLayer = getLayer(layer.id);
     if (frascoLayer) FlipEffect.apply(frascoLayer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
   });
-  updateWebGLCanvas();
+  updateFrascoCanvas();
 };
 
 /**
@@ -311,7 +310,6 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
   allLayers().forEach((layer) => {
     const frascoLayer = getLayer(layer.id);
     if (frascoLayer) Rotate90Effect.apply(frascoLayer, { direction: layerDirection, silentHistory: true });
-    updateLayerPreview(layer.id);
   });
 
   setProjectStore('canvas', 'size', afterSize);
@@ -324,5 +322,5 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
     description: 'rotate canvas',
   };
   historyManager.addEntry(new CommandsHistoryEntry(command, context));
-  updateWebGLCanvas();
+  updateFrascoCanvas();
 };

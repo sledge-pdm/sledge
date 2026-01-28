@@ -1,8 +1,8 @@
 import { encode as encodeWebp } from '@jsquash/webp';
-import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
 import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
+import { frascoRenderer } from '~/webgl/FrascoRenderer';
 
 export class LosslessWebPExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {

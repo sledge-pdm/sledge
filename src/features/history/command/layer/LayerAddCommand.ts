@@ -8,7 +8,7 @@ import { createLayer } from '~/features/layer/model';
 import { NEW_LAYER_PROPS } from '~/features/layer/service';
 import { LayerType, type Layer } from '~/features/layer/types';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
 
 export interface LayerAddCommandProps {
@@ -72,8 +72,7 @@ export class LayerAddCommand extends HistoryCommand {
     setProjectStore('layers', 'layers', layers);
     setProjectStore('layers', 'state', 'activeLayerId', newLayer.id);
 
-    updateLayerPreview(newLayer.id);
-    updateWebGLCanvas(`Layer(${newLayer.id}) added`);
+    updateFrascoCanvas(`Layer(${newLayer.id}) added`);
 
     this.createdLayer = newLayer;
     this.packedSnapshot = getPackedLayerSnapshot(newLayer.id);
@@ -98,8 +97,7 @@ export class LayerAddCommand extends HistoryCommand {
     const buffer = inflated.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
     layerManager.registerLayer(inflated.layer.id, buffer, width, height, { inputSpace: 'layer' });
 
-    updateWebGLCanvas(`Layer(${inflated.layer.id}) inserted`);
-    updateLayerPreview(inflated.layer.id);
+    updateFrascoCanvas(`Layer(${inflated.layer.id}) inserted`);
 
     return inflated.layer;
   }
@@ -119,7 +117,7 @@ export class LayerAddCommand extends HistoryCommand {
     }
 
     layerManager.removeLayer(layerId);
-    updateWebGLCanvas(`Layer(${layerId}) removed`);
+    updateFrascoCanvas(`Layer(${layerId}) removed`);
   }
 
   getContext(): HistoryContext {

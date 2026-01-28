@@ -1,7 +1,7 @@
 import { findLayerById, removeLayer, setActiveLayerId } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 import { LayerSnapshot, PackedLayerSnapshot } from './types';
 import { inflateLayerSnapshot } from './utils';
@@ -45,7 +45,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const inflated = inflateLayerSnapshot(this.sourcePackedSnapshot);
     if (inflated) this.reinsert(this.sourceIndex, inflated);
     setActiveLayerId(this.activeLayerIdBefore);
-    updateWebGLCanvas('CutPaste undo');
+    updateFrascoCanvas('CutPaste undo');
   }
 
   redo(): void {
@@ -56,7 +56,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const inflated = inflateLayerSnapshot(this.targetPackedSnapshot);
     if (inflated) this.reinsert(this.targetIndex, inflated);
     setActiveLayerId(this.activeLayerIdAfter);
-    updateWebGLCanvas('CutPaste redo');
+    updateFrascoCanvas('CutPaste redo');
   }
 
   private reinsert(index: number, packed: LayerSnapshot) {
@@ -70,8 +70,7 @@ export class LayerListCutPasteHistoryAction extends BaseHistoryAction {
     const buffer = packed.image?.buffer ?? new Uint8ClampedArray(width * height * 4);
     layerManager.registerLayer(packed.layer.id, buffer, width, height, { inputSpace: 'layer' });
 
-    updateWebGLCanvas(`CutPaste reinsert (${packed.layer.id})`);
-    updateLayerPreview(packed.layer.id);
+    updateFrascoCanvas(`CutPaste reinsert (${packed.layer.id})`);
   }
 
   serialize(): SerializedHistoryAction {

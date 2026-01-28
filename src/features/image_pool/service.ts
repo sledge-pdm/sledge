@@ -15,7 +15,7 @@ import { pathToFileLocation } from '~/utils/FileUtils';
 import { fs } from '~/utils/platform';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { flip_pixels_vertically } from '~/utils/wasm';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { removeImagePoolBlobUrl } from './blobManager';
 import { getImagePoolImage, removeImagePoolImage, setImagePoolImage } from './imageStore';
 
@@ -267,8 +267,7 @@ async function transferToLayer(layerId: string, entryId: string) {
       })
     )
   );
-  updateWebGLCanvas(`Image Transfer to Layer(${layerId})`);
-  updateLayerPreview(layerId);
+  updateFrascoCanvas(`Image Transfer to Layer(${layerId})`);
 }
 
 export async function createEntryFromLocalImage(imagePath: string, forceFit?: boolean) {

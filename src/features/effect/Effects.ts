@@ -1,6 +1,6 @@
 import type { Layer } from '@sledge-pdm/frasco';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 
 export type LayerEffectMutator = (layer: Layer) => void;
 
@@ -11,6 +11,5 @@ export function applyEffect(layerId: string | undefined, fxName: string, mutator
 
   mutator(layer);
 
-  updateWebGLCanvas(`Apply FX for ${layerId}`);
-  updateLayerPreview(layerId);
+  updateFrascoCanvas(`Apply FX for ${layerId}`);
 }

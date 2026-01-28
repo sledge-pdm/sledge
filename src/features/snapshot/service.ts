@@ -10,7 +10,7 @@ import { normalizeJoin } from '~/utils/FileUtils';
 import { unpackFromPath } from '~/utils/msgpackr';
 import { dialog } from '~/utils/platform';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
-import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { ProjectLoader } from '../io/project/ProjectLoader';
 import { ProjectSnapshot, RuntimeProjectSnapshot } from './types';
 
@@ -168,8 +168,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
   setIOStore('isProjectChangedAfterSave', false);
 
   setProjectStore('snapshots', savedSnapshotStore);
-  updateWebGLCanvas('snapshot loaded');
-  updateLayerPreviewAll();
+  updateFrascoCanvas('snapshot loaded');
 }
 
 export function escapeCurrentAutosave() {

@@ -10,6 +10,27 @@ import { flip_pixels_vertically } from '~/utils/wasm';
 
 const MAX_LAYERS = 16;
 
+export let frascoRenderer: FrascoRenderer | undefined;
+
+export function initFrascoRenderer(canvas: HTMLCanvasElement, options: { width?: number; height?: number; layers?: Layer[] } = {}): FrascoRenderer {
+  if (frascoRenderer) {
+    frascoRenderer.dispose();
+    frascoRenderer = undefined;
+  }
+
+  const width = options.width ?? 0;
+  const height = options.height ?? 0;
+  const layers = options.layers ?? [];
+  frascoRenderer = new FrascoRenderer(canvas, width, height, layers);
+  return frascoRenderer;
+}
+
+export function disposeFrascoRenderer(): void {
+  if (!frascoRenderer) return;
+  frascoRenderer.dispose();
+  frascoRenderer = undefined;
+}
+
 export class FrascoRenderer {
   private gl: WebGL2RenderingContext;
   private frasco: Frasco;
@@ -130,6 +151,30 @@ export class FrascoRenderer {
     const composite = this.buildCompositeLayers(layers.toReversed().slice(0, MAX_LAYERS));
     this.frasco.compose(composite, { size: { width: this.width, height: this.height }, baseColor: baseColor ?? transparent });
     return this.readPixelsRaw();
+  }
+
+  public renderLayersToTexture(layers: Layer[], target: WebGLTexture, baseColor?: RGBA): void {
+    this.checkDisposed();
+    if (this.width === 0 || this.height === 0) return;
+
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, MAX_LAYERS));
+    this.frasco.compose(composite, {
+      size: { width: this.width, height: this.height },
+      baseColor: baseColor ?? transparent,
+      target,
+    });
+  }
+
+  public renderLayersToLayer(layers: Layer[], targetLayer: ReturnType<typeof layerManager.getLayerOptional>, baseColor?: RGBA): void {
+    this.checkDisposed();
+    if (this.width === 0 || this.height === 0) return;
+    if (!targetLayer) return;
+
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, MAX_LAYERS));
+    this.frasco.composeToLayer(composite, targetLayer, {
+      size: { width: this.width, height: this.height },
+      baseColor: baseColor ?? transparent,
+    });
   }
 
   public readPixelsFlipped(options?: { skipRender?: boolean }): Uint8ClampedArray {

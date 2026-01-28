@@ -5,12 +5,14 @@ import { HistoryContext } from '~/features/history/types';
 import { Layer } from '~/features/layer';
 import { CommandLine } from '../../entry/CommandsHistoryEntry';
 
-export const CUT_PASTE_CONTEXT: HistoryContext = {
-  icon: '/assets/icons/context_menu/cut.png',
-  description: 'cut & paste layer',
-};
-
-export function CutPasteCommands(insertIndex: number, srcLayer: Layer, srcBuffer: RawPixelData): CommandLine[] {
+export function cutPasteSnippet(
+  insertIndex: number,
+  srcLayer: Layer,
+  srcBuffer: RawPixelData
+): {
+  commands: CommandLine[];
+  context: HistoryContext;
+} {
   const removeCommand = new LayerRemoveCommand({
     layerId: srcLayer.id,
     preserveActive: true,
@@ -24,8 +26,16 @@ export function CutPasteCommands(insertIndex: number, srcLayer: Layer, srcBuffer
     overrideLayerId: srcLayer.id,
   });
 
-  return [
-    { command: removeCommand, redoOrder: 0, undoOrder: 1 },
-    { command: addCommand, redoOrder: 1, undoOrder: 0 },
-  ];
+  const context: HistoryContext = {
+    icon: '/assets/icons/context_menu/cut.png',
+    description: `paste cut layer / ${srcLayer.name}`,
+  };
+
+  return {
+    commands: [
+      { command: removeCommand, redoOrder: 0, undoOrder: 1 },
+      { command: addCommand, redoOrder: 1, undoOrder: 0 },
+    ],
+    context,
+  };
 }

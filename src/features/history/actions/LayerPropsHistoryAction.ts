@@ -1,6 +1,6 @@
 import { findLayerById, getLayerIndex, Layer } from '~/features/layer';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
-import { updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { BaseHistoryAction, BaseHistoryActionProps, SerializedHistoryAction } from '../base';
 
 export interface LayerPropsHistoryActionProps extends BaseHistoryActionProps {
@@ -61,14 +61,14 @@ export class LayerPropsHistoryAction extends BaseHistoryAction {
     if (!this.oldLayerProps) return;
     const idx = getLayerIndex(this.layerId);
     setProjectStore('layers', 'layers', idx, { id: this.layerId, ...this.oldLayerProps });
-    updateWebGLCanvas(this.context);
+    updateFrascoCanvas(this.context);
   }
 
   redo(): void {
     if (!this.newLayerProps) return;
     const idx = getLayerIndex(this.layerId);
     setProjectStore('layers', 'layers', idx, { id: this.layerId, ...this.newLayerProps });
-    updateWebGLCanvas(this.context);
+    updateFrascoCanvas(this.context);
   }
 
   serialize(): SerializedHistoryAction {

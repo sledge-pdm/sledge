@@ -1,7 +1,7 @@
 import { gzipDeflate } from '@sledge-pdm/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PackedLayerSnapshot } from '~/features/history';
 import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
+import { PackedLayerSnapshot } from '~/features/history/snapshot';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { buildLayer, resetStore, setupWebGL } from '../helpers';

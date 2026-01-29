@@ -2,7 +2,7 @@
 
 import { HistoryContext } from '~/features/history/types';
 
-type HistoryCommandTypes =
+export type HistoryCommandType =
   | 'canvas_size'
   | 'color'
   | 'convert_selection'
@@ -16,9 +16,10 @@ type HistoryCommandTypes =
   | 'set_active_layer';
 
 export abstract class HistoryCommand {
-  constructor(public readonly type: HistoryCommandTypes) {}
+  constructor(public readonly type: HistoryCommandType) {}
 
   abstract forward(): void;
   abstract backward(): void;
   abstract getContext(): HistoryContext;
+  abstract serializeProps(): unknown;
 }

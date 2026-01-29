@@ -1,7 +1,6 @@
 import { type RawPixelData } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
-import { type PackedLayerSnapshot } from '~/features/history/actions/types';
-import { getPackedLayerSnapshot, inflateLayerSnapshot } from '~/features/history/actions/utils';
+import { getPackedLayerSnapshot, inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
 import { HistoryContext } from '~/features/history/types';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { createLayer } from '~/features/layer/model';
@@ -10,6 +9,7 @@ import { LayerType, type Layer } from '~/features/layer/types';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 export interface LayerAddCommandProps {
   index: number;
@@ -24,9 +24,11 @@ export interface LayerAddCommandProps {
   initImage?: RawPixelData;
   uniqueName?: boolean;
   overrideLayerId?: string;
+  packedSnapshot?: PackedLayerSnapshot;
 }
 
 export class LayerAddCommand extends HistoryCommand {
+  private readonly props: LayerAddCommandProps;
   private index: number;
   private layerProps: LayerAddCommandProps['layer'];
   private initImage?: RawPixelData;
@@ -37,11 +39,16 @@ export class LayerAddCommand extends HistoryCommand {
 
   constructor(props: LayerAddCommandProps) {
     super('layer_add');
+    this.props = props;
     this.index = props.index;
     this.layerProps = props.layer;
     this.initImage = props.initImage;
     this.uniqueName = props.uniqueName ?? true;
     this.overrideLayerId = props.overrideLayerId;
+    this.packedSnapshot = props.packedSnapshot;
+    if (this.packedSnapshot) {
+      this.createdLayer = this.packedSnapshot.layer;
+    }
   }
 
   forward(): void {
@@ -121,6 +128,21 @@ export class LayerAddCommand extends HistoryCommand {
   }
 
   getContext(): HistoryContext {
-    return { icon: '/assets/icons/actions/layer.png', description: `add layer / ${this.createdLayer?.name ?? 'unknown'}` };
+    const name = this.createdLayer?.name ?? this.packedSnapshot?.layer.name ?? 'unknown';
+    return { icon: '/assets/icons/actions/layer.png', description: `add layer / ${name}` };
+  }
+
+  serializeProps(): LayerAddCommandProps {
+    return {
+      ...this.props,
+      index: this.index,
+      layer: this.layerProps,
+      initImage: this.initImage,
+      uniqueName: this.uniqueName,
+      overrideLayerId: this.overrideLayerId,
+      packedSnapshot: this.packedSnapshot,
+    };
   }
 }
+
+registerHistoryCommand('layer_add', (props) => new LayerAddCommand(props as LayerAddCommandProps));

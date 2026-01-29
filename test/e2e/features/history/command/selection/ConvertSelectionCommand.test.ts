@@ -1,7 +1,7 @@
 import { gzipDeflate } from '@sledge-pdm/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { type PackedLayerSnapshot } from '~/features/history/actions/types';
 import { ConvertSelectionCommand } from '~/features/history/command/selection/ConvertSelectionCommand';
+import { PackedLayerSnapshot } from '~/features/history/snapshot';
 import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool';
 import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/imageStore';
 import { layerManager } from '~/features/layer/frasco/LayerManager';

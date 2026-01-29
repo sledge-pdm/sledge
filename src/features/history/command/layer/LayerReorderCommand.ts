@@ -3,6 +3,7 @@ import type { Layer } from '~/features/layer';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 export interface LayerReorderCommandProps {
   beforeOrder: string[];
@@ -10,11 +11,13 @@ export interface LayerReorderCommandProps {
 }
 
 export class LayerReorderCommand extends HistoryCommand {
+  private readonly props: LayerReorderCommandProps;
   private beforeOrder: string[];
   private afterOrder: string[];
 
   constructor(props: LayerReorderCommandProps) {
     super('layer_reorder');
+    this.props = props;
     this.beforeOrder = props.beforeOrder;
     this.afterOrder = props.afterOrder;
   }
@@ -44,4 +47,10 @@ export class LayerReorderCommand extends HistoryCommand {
   getContext(): HistoryContext {
     return { icon: '/assets/icons/actions/layer.png', description: `reorder layer` };
   }
+
+  serializeProps(): LayerReorderCommandProps {
+    return { ...this.props, beforeOrder: this.beforeOrder, afterOrder: this.afterOrder };
+  }
 }
+
+registerHistoryCommand('layer_reorder', (props) => new LayerReorderCommand(props as LayerReorderCommandProps));

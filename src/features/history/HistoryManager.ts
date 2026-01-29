@@ -63,10 +63,19 @@ export class HistoryManager {
     this.emitChange();
   }
 
-  private emitChange() {
+  setStacks(undoStack: HistoryEntry[], redoStack: HistoryEntry[], options?: { emit?: boolean; markDirty?: boolean }): void {
+    this.undoStack = undoStack;
+    this.redoStack = redoStack;
+    const emit = options?.emit ?? true;
+    if (emit) {
+      this.emitChange(options?.markDirty ?? true);
+    }
+  }
+
+  private emitChange(markDirty = true) {
     const snap = { canUndo: this.canUndo(), canRedo: this.canRedo() };
     this.listeners.forEach((l) => l(snap));
-    setIOStore('isProjectChangedAfterSave', true);
+    if (markDirty) setIOStore('isProjectChangedAfterSave', true);
   }
 }
 

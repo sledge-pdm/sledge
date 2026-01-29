@@ -1,18 +1,22 @@
-import { type PackedLayerSnapshot } from '~/features/history/actions/types';
-import { getPackedLayerSnapshot, inflateLayerSnapshot } from '~/features/history/actions/utils';
+import { getPackedLayerSnapshot, inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
 import { HistoryContext } from '~/features/history/types';
 import { findLayerById } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 export interface LayerRemoveCommandProps {
   layerId: string;
   preserveActive?: boolean;
+  index?: number | null;
+  packedSnapshot?: PackedLayerSnapshot;
+  layerName?: string;
 }
 
 export class LayerRemoveCommand extends HistoryCommand {
+  private readonly props: LayerRemoveCommandProps;
   private layerId: string;
   private preserveActive: boolean;
   private layerName: string;
@@ -21,9 +25,12 @@ export class LayerRemoveCommand extends HistoryCommand {
 
   constructor(props: LayerRemoveCommandProps) {
     super('layer_remove');
+    this.props = props;
     this.layerId = props.layerId;
-    this.layerName = findLayerById(this.layerId)?.name ?? 'unknown';
+    this.layerName = props.layerName ?? findLayerById(this.layerId)?.name ?? props.packedSnapshot?.layer.name ?? 'unknown';
     this.preserveActive = props.preserveActive ?? false;
+    this.index = props.index ?? null;
+    this.packedSnapshot = props.packedSnapshot;
   }
 
   forward(): void {
@@ -68,6 +75,20 @@ export class LayerRemoveCommand extends HistoryCommand {
   }
 
   getContext(): HistoryContext {
-    return { icon: '/assets/icons/actions/layer.png', description: `remove layer / ${this.layerName ?? 'unknown'}` };
+    const name = this.layerName ?? this.packedSnapshot?.layer.name ?? 'unknown';
+    return { icon: '/assets/icons/actions/layer.png', description: `remove layer / ${name}` };
+  }
+
+  serializeProps(): LayerRemoveCommandProps {
+    return {
+      ...this.props,
+      layerId: this.layerId,
+      preserveActive: this.preserveActive,
+      index: this.index,
+      packedSnapshot: this.packedSnapshot,
+      layerName: this.layerName,
+    };
   }
 }
+
+registerHistoryCommand('layer_remove', (props) => new LayerRemoveCommand(props as LayerRemoveCommandProps));

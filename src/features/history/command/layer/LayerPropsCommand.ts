@@ -4,6 +4,7 @@ import { type Layer } from '~/features/layer/types';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 export interface LayerPropsCommandProps {
   layerId: string;
@@ -29,12 +30,14 @@ function shallowEqual(a?: Omit<Layer, 'id'>, b?: Omit<Layer, 'id'>): boolean {
 }
 
 export class LayerPropsCommand extends HistoryCommand {
+  private readonly props: LayerPropsCommandProps;
   private layerId: string;
   private oldLayerProps?: Omit<Layer, 'id'>;
   private newLayerProps?: Omit<Layer, 'id'>;
 
   constructor(props: LayerPropsCommandProps) {
     super('layer_props');
+    this.props = props;
     this.layerId = props.layerId;
     this.oldLayerProps = props.oldLayerProps;
     this.newLayerProps = props.newLayerProps;
@@ -92,4 +95,15 @@ export class LayerPropsCommand extends HistoryCommand {
     // more detailed props change
     return { icon: '/assets/icons/actions/layer.png', description: `${layerName} / props change` };
   }
+
+  serializeProps(): LayerPropsCommandProps {
+    return {
+      ...this.props,
+      layerId: this.layerId,
+      oldLayerProps: this.oldLayerProps,
+      newLayerProps: this.newLayerProps,
+    };
+  }
 }
+
+registerHistoryCommand('layer_props', (props) => new LayerPropsCommand(props as LayerPropsCommandProps));

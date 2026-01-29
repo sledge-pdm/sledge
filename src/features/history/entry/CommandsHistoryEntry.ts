@@ -24,15 +24,16 @@ const isCommandLine = (value: HistoryCommand | CommandLine): value is CommandLin
 export class CommandsHistoryEntry extends HistoryEntry {
   private readonly undoCommands: HistoryCommand[];
   private readonly redoCommands: HistoryCommand[];
+  private readonly normalizedCommands: OrderedCommand[];
 
   constructor(
     input: CommandInput,
     private context?: HistoryContext
   ) {
     super();
-    const normalized = this.normalizeCommands(input);
-    this.undoCommands = this.sortByOrder(normalized, 'undoOrder');
-    this.redoCommands = this.sortByOrder(normalized, 'redoOrder');
+    this.normalizedCommands = this.normalizeCommands(input);
+    this.undoCommands = this.sortByOrder(this.normalizedCommands, 'undoOrder');
+    this.redoCommands = this.sortByOrder(this.normalizedCommands, 'redoOrder');
   }
 
   undo(): void {
@@ -53,6 +54,18 @@ export class CommandsHistoryEntry extends HistoryEntry {
     } else {
       return this.undoCommands.map((command) => command.getContext());
     }
+  }
+
+  getContextOverride(): HistoryContext | undefined {
+    return this.context;
+  }
+
+  getCommandLines(): CommandLine[] {
+    return this.normalizedCommands.map((item) => ({
+      command: item.command,
+      undoOrder: item.undoOrder,
+      redoOrder: item.redoOrder,
+    }));
   }
 
   private normalizeCommands(input: CommandInput): OrderedCommand[] {

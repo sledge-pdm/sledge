@@ -4,15 +4,18 @@ import { findLayerById } from '~/features/layer/service';
 import { toolCategories } from '~/features/tools/Tools';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 export interface FrascoLayerCommandProps {
   layerId: string;
   context?: {
     tool?: string;
   };
+  layerName?: string;
 }
 
 export class FrascoLayerCommand extends HistoryCommand {
+  private readonly props: FrascoLayerCommandProps;
   layerId: string;
   layerName: string;
   context?: {
@@ -21,8 +24,9 @@ export class FrascoLayerCommand extends HistoryCommand {
 
   constructor(props: FrascoLayerCommandProps) {
     super('frasco_layer');
+    this.props = props;
     this.layerId = props.layerId;
-    this.layerName = findLayerById(props.layerId)?.name ?? 'unknown';
+    this.layerName = props.layerName ?? findLayerById(props.layerId)?.name ?? 'unknown';
     this.context = props.context;
   }
 
@@ -42,6 +46,10 @@ export class FrascoLayerCommand extends HistoryCommand {
   getContext(): HistoryContext {
     return { icon: getIconForTool(this.context?.tool), description: `${this.layerName ?? 'unknown'} / ${this.context?.tool ?? 'unknown'}` };
   }
+
+  serializeProps(): FrascoLayerCommandProps {
+    return { ...this.props, layerName: this.layerName, context: this.context };
+  }
 }
 
 function getIconForTool(tool?: string): string {
@@ -60,3 +68,5 @@ function getIconForTool(tool?: string): string {
 
   return '/assets/icons/actions/unknown.png';
 }
+
+registerHistoryCommand('frasco_layer', (props) => new FrascoLayerCommand(props as FrascoLayerCommandProps));

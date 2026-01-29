@@ -1,8 +1,8 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { historyManager } from '~/features/history';
-import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
 import { ConvertSelectionCommand } from '~/features/history/command/selection/ConvertSelectionCommand';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
+import { getPackedLayerSnapshot } from '~/features/history/snapshot';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';

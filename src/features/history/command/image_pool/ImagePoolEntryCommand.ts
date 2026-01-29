@@ -4,6 +4,7 @@ import { removeImagePoolBlobUrl } from '~/features/image_pool/blobManager';
 import { removeImagePoolImage, setImagePoolImage } from '~/features/image_pool/imageStore';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 export interface ImagePoolEntryCommandProps {
   kind: 'add' | 'remove';
@@ -13,6 +14,7 @@ export interface ImagePoolEntryCommandProps {
 }
 
 export class ImagePoolEntryCommand extends HistoryCommand {
+  private readonly props: ImagePoolEntryCommandProps;
   private kind: 'add' | 'remove';
   private entry: ImagePoolEntry;
   private image?: ImagePoolImage;
@@ -20,6 +22,7 @@ export class ImagePoolEntryCommand extends HistoryCommand {
 
   constructor(props: ImagePoolEntryCommandProps) {
     super('image_pool');
+    this.props = props;
     this.kind = props.kind;
     this.entry = props.entry;
     this.image = props.image;
@@ -47,6 +50,10 @@ export class ImagePoolEntryCommand extends HistoryCommand {
     return { icon: '/assets/icons/actions/image.png', description: `${this.kind} image / ${label}` };
   }
 
+  serializeProps(): ImagePoolEntryCommandProps {
+    return { ...this.props, kind: this.kind, entry: this.entry, image: this.image, index: this.index };
+  }
+
   private insertEntry() {
     const current = projectStore.imagePool.entries;
     const next = [...current.filter((e) => e.id !== this.entry.id)];
@@ -69,3 +76,5 @@ export class ImagePoolEntryCommand extends HistoryCommand {
     removeImagePoolImage(this.entry.id);
   }
 }
+
+registerHistoryCommand('image_pool', (props) => new ImagePoolEntryCommand(props as ImagePoolEntryCommandProps));

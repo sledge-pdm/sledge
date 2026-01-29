@@ -1,8 +1,8 @@
 import { getProjectAdapter, gzipDeflate, gzipInflate, ProjectBase } from '@sledge-pdm/core';
 import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
-import { HistoryStacks } from 'node_modules/@sledge-pdm/core/dist/src/project/adapters/parts/History';
 import { unwrap } from 'solid-js/store';
-import { historyManager, projectHistoryController } from '~/features/history';
+import { historyManager } from '~/features/history';
+import { inflateHistoryStacks, serializeHistoryStacks } from '~/features/history/serialization';
 import { ImagePoolImage } from '~/features/image_pool';
 import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
 import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/imageStore';
@@ -42,11 +42,12 @@ export async function initRuntimeProject(project: ProjectBase) {
     })
   );
 
-  let history: HistoryStacks | null = adapter.getHistory();
-  if (history.undoStack && history.redoStack) {
-    projectHistoryController.setSerialized(history.undoStack, history.redoStack);
+  const history = adapter.getHistory();
+  if (history?.undoStack && history?.redoStack) {
+    const inflated = inflateHistoryStacks({ undoStack: history.undoStack, redoStack: history.redoStack });
+    historyManager.setStacks(inflated.undo, inflated.redo, { emit: true, markDirty: false });
   }
-  if (history.layerHistories) {
+  if (history?.layerHistories) {
     for (const [layerId, stacks] of Object.entries(history.layerHistories)) {
       layerManager.importHistoryRaw(layerId, inflateLayerHistory(stacks.undoStack ?? []), inflateLayerHistory(stacks.redoStack ?? []));
     }
@@ -110,7 +111,7 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
     });
   });
 
-  const serializedHistory = projectHistoryController.getSerialized();
+  const serializedHistory = serializeHistoryStacks(historyManager.getUndoStack(), historyManager.getRedoStack());
   const layerHistories: Record<string, { undoStack: PackedHistorySnapshot[]; redoStack: PackedHistorySnapshot[] }> = {};
   allLayers().forEach((l) => {
     const layer = layerManager.getLayerOptional(l.id);
@@ -132,7 +133,7 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
     projectVersion: CURRENT_PROJECT_VERSION,
     ...{ ...clonedProjectStore },
 
-    history: { ...serializedHistory, layerHistories },
+    history: { ...(serializedHistory as unknown as CurrentProject['history']), layerHistories },
     layers: {
       buffers,
       layers: clonedProjectStore.layers.layers,

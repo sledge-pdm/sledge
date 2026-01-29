@@ -1,5 +1,6 @@
 import { gzipDeflate, Size2D } from '@sledge-pdm/core';
 import { adjustZoomToFit } from '~/features/canvas';
+import { inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
@@ -7,10 +8,9 @@ import { logSystemWarn } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionAreaManager';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
-import { PackedLayerSnapshot } from '../../actions/types';
-import { inflateLayerSnapshot } from '../../actions/utils';
 import { HistoryContext } from '../../types';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 type CanvasSizeHistoryMode = 'snapshot' | 'layer';
 
@@ -24,6 +24,7 @@ export interface CanvasSizeCommandProps {
 }
 
 export class CanvasSizeCommand extends HistoryCommand {
+  private readonly props: CanvasSizeCommandProps;
   private beforeSize: Size2D;
   private afterSize: Size2D;
   private historyMode: CanvasSizeHistoryMode;
@@ -33,6 +34,7 @@ export class CanvasSizeCommand extends HistoryCommand {
 
   constructor(props: CanvasSizeCommandProps) {
     super('canvas_size');
+    this.props = props;
     this.beforeSize = props.beforeSize;
     this.afterSize = props.afterSize;
     this.beforeSnapshots = props.beforeSnapshots;
@@ -74,6 +76,16 @@ export class CanvasSizeCommand extends HistoryCommand {
     const icon = bigger ? '/assets/icons/actions/canvas_size_bigger.png' : '/assets/icons/actions/canvas_size_smaller.png';
     const description = `${this.beforeSize.width}x${this.beforeSize.height} -> ${this.afterSize.width}x${this.afterSize.height}`;
     return { icon, description };
+  }
+
+  serializeProps(): CanvasSizeCommandProps {
+    return {
+      ...this.props,
+      beforeSnapshots: this.beforeSnapshots,
+      afterSnapshots: this.afterSnapshots,
+      historyMode: this.historyMode,
+      layerIds: this.layerIds,
+    };
   }
 
   createSnapshots(): PackedLayerSnapshot[] {
@@ -168,3 +180,5 @@ export class CanvasSizeCommand extends HistoryCommand {
     }
   }
 }
+
+registerHistoryCommand('canvas_size', (props) => new CanvasSizeCommand(props as CanvasSizeCommandProps));

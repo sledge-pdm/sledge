@@ -1,3 +1,4 @@
+import { inflateLayerSnapshot, LayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
 import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool';
 import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
 import { setImagePoolImages } from '~/features/image_pool/imageStore';
@@ -6,10 +7,9 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove } from '~/features/selection/SelectionOperator';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
-import { LayerSnapshot, PackedLayerSnapshot } from '../../actions/types';
-import { inflateLayerSnapshot } from '../../actions/utils';
 import { HistoryContext } from '../../types';
 import { HistoryCommand } from '../HistoryCommand';
+import { registerHistoryCommand } from '../registry';
 
 export interface ConvertSelectionCommandProps {
   layerId: string;
@@ -25,6 +25,7 @@ export interface ConvertSelectionCommandProps {
  * @deprecated this should be replaced with ImagePool+Selection+FrascoLayer snippet after adding SelectionCommand
  */
 export class ConvertSelectionCommand extends HistoryCommand {
+  private readonly props: ConvertSelectionCommandProps;
   private layerId: string;
   private oldEntries: ImagePoolEntry[];
   private newEntries: ImagePoolEntry[];
@@ -35,6 +36,7 @@ export class ConvertSelectionCommand extends HistoryCommand {
 
   constructor(props: ConvertSelectionCommandProps) {
     super('convert_selection');
+    this.props = props;
     this.layerId = props.layerId;
     this.oldEntries = props.oldEntries;
     this.newEntries = props.newEntries;
@@ -55,6 +57,19 @@ export class ConvertSelectionCommand extends HistoryCommand {
   getContext(): HistoryContext {
     const cut = this.beforeSnapshot && this.afterSnapshot;
     return { icon: '/assets/icons/actions/image.png', description: cut ? 'convert selection (cut)' : 'convert selection' };
+  }
+
+  serializeProps(): ConvertSelectionCommandProps {
+    return {
+      ...this.props,
+      layerId: this.layerId,
+      oldEntries: this.oldEntries,
+      newEntries: this.newEntries,
+      oldImages: this.oldImages,
+      newImages: this.newImages,
+      beforeSnapshot: this.beforeSnapshot,
+      afterSnapshot: this.afterSnapshot,
+    };
   }
 
   private applyOld() {
@@ -99,3 +114,5 @@ export class ConvertSelectionCommand extends HistoryCommand {
     layerManager.replaceLayerBuffer(snapshot.layer.id, buffer, width, height, { inputSpace: 'layer' });
   }
 }
+
+registerHistoryCommand('convert_selection', (props) => new ConvertSelectionCommand(props as ConvertSelectionCommandProps));

@@ -14,8 +14,7 @@
     "prettier": "prettier --write . --config .prettierrc",
     "lint": "eslint .",
     "cargo:format": "cd wasm && cargo fmt && cd ../src-tauri && cargo fmt",
-    "format": "pnpm prettier && pnpm cargo:format",
-    "prepare": ""
+    "format": "pnpm prettier && pnpm cargo:format"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",

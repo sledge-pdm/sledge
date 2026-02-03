@@ -108,6 +108,7 @@ export interface OnCanvasFrameInteractOptions {
   onStart?: (start: FrameRect) => void;
   onChange?: (changed: FrameRect, start: FrameRect) => void;
   onCommit?: (start: FrameRect, end: FrameRect, e: PointerEvent) => void;
+  onCancel?: (start: FrameRect, e: PointerEvent) => void;
 }
 
 const defaultInteractOptions: OnCanvasFrameInteractOptions = {
@@ -202,6 +203,7 @@ export class OnCanvasFrameInteract {
     if (this.startRect) {
       // request revert to startRect on cancel
       this.options.onChange?.(this.startRect, this.startRect);
+      this.options.onCancel?.(this.startRect, e);
     }
     this.resetState();
   };

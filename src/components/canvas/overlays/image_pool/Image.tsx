@@ -128,6 +128,9 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
           }
           entryOnDragStart = undefined;
         },
+        onCancel: (start, e) => {
+          entryOnDragStart = undefined;
+        },
       }
     );
     entryInteract.setInteractListeners();

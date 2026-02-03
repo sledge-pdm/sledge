@@ -1,7 +1,7 @@
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
-import { historyManager } from '~/features/history';
+import { tryRedo, tryUndo } from '~/features/history';
 import { logSystemInfo, logSystemWarn } from '~/features/log';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
@@ -132,14 +132,10 @@ class CanvasAreaInteract {
   private handleMouseDown(e: MouseEvent) {
     if (e.button === 3) {
       e.preventDefault();
-      if (historyManager.canUndo()) {
-        historyManager.undo();
-      }
+      tryUndo();
     } else if (e.button === 4) {
       e.preventDefault();
-      if (historyManager.canRedo()) {
-        historyManager.redo();
-      }
+      tryRedo();
     }
   }
 
@@ -185,16 +181,12 @@ class CanvasAreaInteract {
         if (e.button === 3) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          if (historyManager.canUndo()) {
-            historyManager.undo();
-          }
+          tryUndo();
           return;
         } else if (e.button === 4) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          if (historyManager.canRedo()) {
-            historyManager.redo();
-          }
+          tryRedo();
           return;
         }
       }

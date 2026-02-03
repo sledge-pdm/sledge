@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
-import { historyManager } from '~/features/history';
+import { historyManager, tryRedo, tryUndo } from '~/features/history';
 
 import { css } from '@acab/ecsstatic';
 import FrameResizeMenu from '~/components/canvas/overlays/resize_frame/FrameResizeMenu';
@@ -112,7 +112,7 @@ const CanvasControls: Component = () => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            historyManager.undo();
+            tryUndo();
           }}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -136,7 +136,7 @@ const CanvasControls: Component = () => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            historyManager.redo();
+            tryRedo();
           }}
           onContextMenu={(e) => {
             e.preventDefault();

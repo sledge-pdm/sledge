@@ -1,7 +1,7 @@
 import { Component, onMount } from 'solid-js';
 import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
-import { historyManager } from '~/features/history';
+import { tryRedo, tryUndo } from '~/features/history';
 import { saveProject } from '~/features/io/project/save';
 import { toggleLayerVisibility } from '~/features/layer';
 import { clearLayersFromUser, duplicateLayers, removeLayersFromUser } from '~/features/layer/service';
@@ -53,11 +53,11 @@ const KeyListener: Component = () => {
 
     if (isKeyMatchesToEntry(e, keyConfigStore()['undo'])) {
       e.preventDefault(); // prevent conflict with input undo/redo
-      historyManager.undo();
+      tryUndo();
     }
     if (isKeyMatchesToEntry(e, keyConfigStore()['redo'])) {
       e.preventDefault(); // prevent conflict with input undo/redo
-      historyManager.redo();
+      tryRedo();
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore()['sizeIncrease'])) {

@@ -1,4 +1,5 @@
 import { HistoryContext } from '~/features/history/types';
+import { logUserWarn } from '../log';
 import { HistoryCommand } from './command/HistoryCommand';
 import { CommandLine, CommandsHistoryEntry } from './entry/CommandsHistoryEntry';
 import { historyManager } from './HistoryManager';
@@ -26,4 +27,20 @@ export function doCommands(commands: CommandInput, options?: DoCommandsOption) {
   const { register = true, context = undefined } = options ?? {};
   executeCommands(commands);
   if (register) historyManager.addEntry(new CommandsHistoryEntry(commands, context));
+}
+
+export function tryUndo() {
+  if (historyManager.canUndo()) {
+    historyManager.undo();
+  } else {
+    logUserWarn('Nothing to undo.');
+  }
+}
+
+export function tryRedo() {
+  if (historyManager.canRedo()) {
+    historyManager.redo();
+  } else {
+    logUserWarn('Nothing to redo.');
+  }
 }

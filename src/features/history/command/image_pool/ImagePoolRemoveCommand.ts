@@ -6,52 +6,41 @@ import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { HistoryCommand } from '../HistoryCommand';
 import { registerHistoryCommand } from '../registry';
 
-export interface ImagePoolEntryCommandProps {
-  kind: 'add' | 'remove';
+export interface ImagePoolRemoveCommandProps {
   entry: ImagePoolEntry;
   image?: ImagePoolImage;
   index: number;
 }
 
-export class ImagePoolEntryCommand extends HistoryCommand {
-  private readonly props: ImagePoolEntryCommandProps;
-  private kind: 'add' | 'remove';
+export class ImagePoolRemoveCommand extends HistoryCommand {
+  private readonly props: ImagePoolRemoveCommandProps;
   private entry: ImagePoolEntry;
   private image?: ImagePoolImage;
   private index: number;
 
-  constructor(props: ImagePoolEntryCommandProps) {
-    super('image_pool');
+  constructor(props: ImagePoolRemoveCommandProps) {
+    super('image_pool_remove');
     this.props = props;
-    this.kind = props.kind;
     this.entry = props.entry;
     this.image = props.image;
     this.index = props.index;
   }
 
   forward(): void {
-    if (this.kind === 'add') {
-      this.insertEntry();
-      return;
-    }
     this.removeEntry();
   }
 
   backward(): void {
-    if (this.kind === 'add') {
-      this.removeEntry();
-      return;
-    }
     this.insertEntry();
   }
 
   getContext(): HistoryContext {
     const label = this.entry.descriptionName ?? this.entry.id;
-    return { icon: '/assets/icons/actions/image.png', description: `${this.kind} image / ${label}` };
+    return { icon: '/assets/icons/actions/image.png', description: `remove image / ${label}` };
   }
 
-  serializeProps(): ImagePoolEntryCommandProps {
-    return { ...this.props, kind: this.kind, entry: this.entry, image: this.image, index: this.index };
+  serializeProps(): ImagePoolRemoveCommandProps {
+    return { ...this.props, entry: this.entry, image: this.image, index: this.index };
   }
 
   private insertEntry() {
@@ -77,4 +66,4 @@ export class ImagePoolEntryCommand extends HistoryCommand {
   }
 }
 
-registerHistoryCommand('image_pool', (props) => new ImagePoolEntryCommand(props as ImagePoolEntryCommandProps));
+registerHistoryCommand('image_pool_remove', (props) => new ImagePoolRemoveCommand(props as ImagePoolRemoveCommandProps));

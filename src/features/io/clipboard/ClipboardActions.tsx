@@ -52,8 +52,8 @@ export async function clipboardCut(e?: ClipboardEvent) {
   if (copyMode === 'layer') {
     // this literally delete original layer to copy so cannot paste after.
     // this should be like an "archive" operation, that freezes layer but not delete from list and anvilManager. like below.
-    setLayerProp(projectStore.layers.state.activeLayerId, 'cutFreeze', true, { noDiff: true }); // history added
-    // removeLayer(projectStore.layers.state.activeLayerId, { noDiff: false }); // history added
+    setLayerProp(projectStore.layers.state.activeLayerId, 'cutFreeze', true, { register: false }); // history suppressed
+    // removeLayer(projectStore.layers.state.activeLayerId, { register: true }); // history added
   } else {
     deleteSelectedArea({
       layerId: projectStore.layers.state.activeLayerId,
@@ -82,7 +82,7 @@ export async function clipboardPaste(e?: ClipboardEvent) {
         }
         const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.readPixels({ flipY: true }));
         const isCut = srcLayer.cutFreeze;
-        setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });
+        setLayerProp(srcLayer.id, 'cutFreeze', false, { register: false });
         if (srcLayer && isCut) {
           // const activeLayerIdBefore = activeLayer().id;
           // const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
@@ -91,9 +91,9 @@ export async function clipboardPaste(e?: ClipboardEvent) {
           const insertIndex = activeIndex();
           const { commands, context } = cutPasteSnippet(insertIndex, srcLayer, srcBuffer);
           doCommands(commands, { context });
-          // removeLayer(unfreezedSourceLayer.id, { noDiff: true });
+          // removeLayer(unfreezedSourceLayer.id, { register: false });
         } else {
-          addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, noDiff: false, uniqueName: false });
+          addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, register: false, uniqueName: false });
         }
       }
     } else {

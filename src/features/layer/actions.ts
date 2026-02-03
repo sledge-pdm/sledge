@@ -14,7 +14,7 @@ const LOG_LABEL = 'LayerActions';
 
 export interface AddLayerOptions {
   initImage?: RawPixelData;
-  noDiff?: boolean;
+  register?: boolean;
   uniqueName?: boolean;
 }
 
@@ -43,7 +43,7 @@ export function addLayerTo(
   },
   options?: AddLayerOptions
 ) {
-  const { noDiff = false } = options ?? {};
+  const { register = true } = options ?? {};
   const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
 
   const command = new LayerAddCommand({
@@ -52,30 +52,30 @@ export function addLayerTo(
     initImage: options?.initImage,
     uniqueName,
   });
-  doCommands(command, { register: !noDiff });
+  doCommands(command, { register });
 }
 
 export interface RemoveLayerOptions {
-  noDiff?: boolean;
+  register?: boolean;
 }
 
 export function removeLayer(layerId?: string, options?: RemoveLayerOptions) {
-  const { noDiff = false } = options ?? {};
+  const { register = true } = options ?? {};
 
   if (layerId === undefined) return;
   const toRemove = findLayerById(layerId);
   if (!toRemove) return;
 
   const command = new LayerRemoveCommand({ layerId: toRemove.id });
-  doCommands(command, { register: !noDiff });
+  doCommands(command, { register });
 }
 
 export interface ReorderLayerOptions {
-  noDiff?: boolean;
+  register?: boolean;
 }
 
 export function reorderLayer(fromIndex: number, targetIndex: number, options?: ReorderLayerOptions) {
-  const { noDiff = false } = options ?? {};
+  const { register = true } = options ?? {};
 
   const beforeOrder = projectStore.layers.layers.map((l) => l.id);
   const updated = [...projectStore.layers.layers];
@@ -84,15 +84,15 @@ export function reorderLayer(fromIndex: number, targetIndex: number, options?: R
   const afterOrder = updated.map((l) => l.id);
 
   const command = new LayerReorderCommand({ beforeOrder, afterOrder });
-  doCommands(command, { register: !noDiff });
+  doCommands(command, { register });
 }
 
 interface SetLayerPropOptions {
-  noDiff?: boolean;
+  register?: boolean;
 }
 
 export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K], options?: SetLayerPropOptions) {
-  const { noDiff = false } = options ?? {};
+  const { register = true } = options ?? {};
   if (propName === 'id') {
     return;
   }
@@ -110,7 +110,7 @@ export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K
     oldLayerProps: before as Omit<Layer, 'id'>,
     newLayerProps: after as Omit<Layer, 'id'>,
   });
-  doCommands(command, { register: !noDiff });
+  doCommands(command, { register });
 }
 
 export function toggleLayerVisibility(layerIds?: string[]) {

@@ -159,12 +159,12 @@ async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLo
     applyProjectLocation(undefined, 'new_project');
     const size = { width, height };
     changeCanvasSize(size, {
-      skipHistory: true,
+      register: false,
     });
     addLayer(
       { name: 'layer 1' },
       {
-        noDiff: true,
+        register: false,
         uniqueName: false,
       }
     );
@@ -292,12 +292,12 @@ async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadRes
     setIOStore('openAs', 'image');
     const size = { width, height };
     changeCanvasSize(size, {
-      skipHistory: true,
+      register: false,
     });
     addLayer(
       { name },
       {
-        noDiff: true,
+        register: false,
         uniqueName: false,
         initImage: buffer,
       }
@@ -326,12 +326,12 @@ async function loadFromClipboard(options: ClipboardLoadOptions): Promise<Interna
     setIOStore('openAs', 'image');
     const size = { width, height };
     changeCanvasSize(size, {
-      skipHistory: true,
+      register: false,
     });
     addLayer(
       { name: options.name ?? 'clipboard image' },
       {
-        noDiff: true,
+        register: false,
         uniqueName: false,
         initImage: buffer,
       }

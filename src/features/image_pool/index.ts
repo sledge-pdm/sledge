@@ -6,15 +6,12 @@ export {
   addImagesFromFiles,
   addImagesFromLocal,
   addImagesFromRawBuffer,
-  createEntryFromFile,
-  createEntryFromLocalImage,
-  createEntryFromRawBuffer,
-  getEntry,
   hideEntry,
   insertEntry,
   removeEntry,
-  selectEntry,
   showEntry,
   transferToCurrentLayer,
   updateEntryPartial,
-} from './service';
+} from './actions';
+
+export { createEntryFromFile, createEntryFromLocalImage, createEntryFromRawBuffer, getEntry, selectEntry } from './service';

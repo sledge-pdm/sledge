@@ -2,11 +2,11 @@ import { Component, createEffect, createMemo, onCleanup } from 'solid-js';
 import { StrokeCanvas } from './StrokeCanvas';
 
 import { css } from '@acab/ecsstatic';
-import { ImagePool } from '~/components/canvas/stacks/image_pool/ImagePool';
 import FrascoCanvas, { notifyCanvasLayoutReady } from './FrascoCanvas';
 
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
+import { ImagePool } from '../overlays/image_pool/ImagePool';
 import CheckerboardPattern from '/assets/patterns/CheckerboardPattern.svg';
 
 const canvasStackContainer = css`

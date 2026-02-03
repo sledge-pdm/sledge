@@ -79,7 +79,7 @@ const LayerListPropsRow: Component = () => {
           onChange={(newValue) => {
             if (opacityTargetLayerId) {
               setLayerProp(opacityTargetLayerId, 'opacity', newValue, {
-                noDiff: true, // Don't record per-change: commit a single history entry after debounce
+                register: false, // Don't record per-change: commit a single history entry after debounce
               });
               // 更新後の値を記録
               pendingAction?.registerAfter();

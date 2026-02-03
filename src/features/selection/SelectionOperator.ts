@@ -288,7 +288,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   entry.transform.scaleX = 1;
   entry.transform.scaleY = 1;
 
-  insertEntry(entry, image, true);
+  insertEntry(entry, image, { register: false });
   selectEntry(entry.id);
 
   const newEntries = projectStore.imagePool.entries.slice();

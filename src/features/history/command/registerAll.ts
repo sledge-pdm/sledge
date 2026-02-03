@@ -1,7 +1,9 @@
 import './canvas/CanvasSizeCommand';
 import './color/ColorChangeCommand';
 import './frasco/FrascoLayerCommand';
-import './image_pool/ImagePoolEntryCommand';
+import './image_pool/ImagePoolAddCommand';
+import './image_pool/ImagePoolPropsCommand';
+import './image_pool/ImagePoolRemoveCommand';
 import './layer/LayerAddCommand';
 import './layer/LayerPropsCommand';
 import './layer/LayerRemoveCommand';

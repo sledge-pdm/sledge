@@ -1,8 +1,8 @@
 import { Component, createMemo, Match, Show, Switch } from 'solid-js';
-import CrossCursor from '~/components/canvas/overlays/cursors/CrossCursor';
-import PipetteCursor from '~/components/canvas/overlays/cursors/PipetteCursor';
-import PipetteDetail from '~/components/canvas/overlays/cursors/PipetteDetail';
-import PixelCursor from '~/components/canvas/overlays/cursors/PixelCursor';
+import CrossCursor from '~/components/canvas/hud/cursors/CrossCursor';
+import PipetteCursor from '~/components/canvas/hud/cursors/PipetteCursor';
+import PipetteDetail from '~/components/canvas/hud/cursors/PipetteDetail';
+import PixelCursor from '~/components/canvas/hud/cursors/PixelCursor';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { getActiveToolCategory, isToolAllowedInCurrentLayer } from '~/features/tools/ToolController';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';

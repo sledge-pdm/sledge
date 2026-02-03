@@ -111,7 +111,7 @@ const CanvasSettings: Component = () => {
     const newSize = { width, height };
 
     const result = changeCanvasSize(newSize, {
-      skipHistory: false,
+      register: true,
     });
     if (result) adjustZoomToFit();
   };

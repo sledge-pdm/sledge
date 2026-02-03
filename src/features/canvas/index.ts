@@ -2,4 +2,5 @@ export type { Canvas, CanvasRenderingMode, ImageRenderingAttribute } from './mod
 
 export { canvasSizePresets, canvasSizePresetsDropdownOptions } from './model';
 
+export * from './actions';
 export * from './service';

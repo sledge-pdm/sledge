@@ -20,7 +20,7 @@ import { getImagePoolImage, removeImagePoolImage, setImagePoolImage } from './im
 import type { ImagePoolEntry, ImagePoolImage } from './model';
 import { createEntryFromFile, createEntryFromLocalImage, createEntryFromRawBuffer, getEntry } from './service';
 
-const cloneEntry = (entry: ImagePoolEntry): ImagePoolEntry => ({
+export const cloneEntry = (entry: ImagePoolEntry): ImagePoolEntry => ({
   ...entry,
   base: { ...entry.base },
   transform: { ...entry.transform },

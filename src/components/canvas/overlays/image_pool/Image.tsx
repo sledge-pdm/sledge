@@ -4,7 +4,7 @@ import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer, updateEntryPartial } from '~/features/image_pool';
-import { registerEntryUpdate } from '~/features/image_pool/actions';
+import { cloneEntry, registerEntryUpdate } from '~/features/image_pool/actions';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -63,8 +63,6 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
 
   const viewWidth = createMemo(() => Math.abs(entry.base.width * entry.transform.scaleX));
   const viewHeight = createMemo(() => Math.abs(entry.base.height * entry.transform.scaleY));
-  let startFlipX = entry.transform.flipX;
-  let startFlipY = entry.transform.flipY;
 
   let entryOnDragStart: ImagePoolEntry | undefined;
 
@@ -89,23 +87,23 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         snapToPixel: false,
         allowInvert: true,
         onStart: (startRect: FrameRect) => {
-          entryOnDragStart = { ...entry };
+          entryOnDragStart = cloneEntry(entry);
         },
         onChange: (r: FrameRect) => {
           // resize entry based on change
           const newScaleX = Math.abs(r.width / entry.base.width);
           const newScaleY = Math.abs(r.height / entry.base.height);
-          let flipX = startFlipX;
-          let flipY = startFlipY;
+          let flipX = entryOnDragStart?.transform.flipX ?? false;
+          let flipY = entryOnDragStart?.transform.flipY ?? false;
           if (r.width < 0) {
             r.width = Math.abs(r.width);
             r.x -= r.width;
-            flipX = !startFlipX;
+            flipX = !entryOnDragStart?.transform.flipX;
           }
           if (r.height < 0) {
             r.height = Math.abs(r.height);
             r.y -= r.height;
-            flipY = !startFlipY;
+            flipY = !entryOnDragStart?.transform.flipY;
           }
           const newTransform = {
             ...r,
@@ -128,6 +126,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
               context: { icon: '/assets/icons/actions/image.png', description: `update image / ${entry.descriptionName ?? entry.id}` },
             });
           }
+          entryOnDragStart = undefined;
         },
       }
     );
@@ -145,9 +144,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         selectEntry(entry.id);
       }
     };
+
     document.addEventListener('click', handleImageSelection);
 
-    () => {
+    return () => {
       document.removeEventListener('click', handleImageSelection);
       entryInteract?.removeInteractListeners();
     };

@@ -94,7 +94,7 @@ export function updateEntryPartial(id: string, patch: Partial<ImagePoolEntry>, o
 }
 
 export function registerEntryUpdate(id: string, before: ImagePoolEntry, after: ImagePoolEntry, options?: { context?: HistoryContext }) {
-  if (isSameEntryProps(before, after)) console.log('what');
+  if (isSameEntryProps(before, after)) return;
 
   historyManager.addEntry(
     new CommandsHistoryEntry(
